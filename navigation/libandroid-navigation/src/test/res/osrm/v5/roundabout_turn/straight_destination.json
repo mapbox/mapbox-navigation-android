@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "roundabout turn",
+            "modifier": "straight"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2"
+    },
+    "instructions": {
+        "de": "Am Kreisverkehr geradeaus weiterfahren Richtung Destination 1",
+        "en": "At the roundabout continue straight towards Destination 1",
+        "fr": "Au rond-point, continuer tout droit en direction de Destination 1",
+        "nl": "Rechtdoor op de rotonde richting Destination 1",
+        "ru": "На круговом перекрёстке продолжайте движение в направлении Destination 1",
+        "sv": "Vid rondellen fortsätt rakt fram mot Destination 1",
+        "vi": "Chạy thẳng tại vòng xuyến để đi Destination 1",
+        "zh-Hans": "在环岛继续直行，前往Destination 1"
+    }
+}

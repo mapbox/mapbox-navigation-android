@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "continue",
+            "modifier": "right"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2"
+    },
+    "instructions": {
+        "de": "Rechts weiterfahren Richtung Destination 1",
+        "en": "Continue right towards Destination 1",
+        "fr": "Continuer à droite en direction de Destination 1",
+        "nl": "Ga rechts richting Destination 1",
+        "ru": "Продолжайте движение направо в направлении Destination 1",
+        "sv": "Fortsätt höger mot Destination 1",
+        "vi": "Chạy tiếp bên phải đến Destination 1",
+        "zh-Hans": "继续向右行驶，前往Destination 1"
+    }
+}

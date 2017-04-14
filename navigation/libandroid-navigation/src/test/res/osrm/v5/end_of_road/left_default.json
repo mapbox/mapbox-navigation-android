@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "end of road",
+            "modifier": "left"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Links abbiegen",
+        "en": "Turn left",
+        "fr": "Tourner à gauche",
+        "nl": "Ga links",
+        "ru": "Поверните налево",
+        "sv": "Sväng vänster",
+        "vi": "Quẹo trái",
+        "zh-Hans": "向左行驶"
+    }
+}

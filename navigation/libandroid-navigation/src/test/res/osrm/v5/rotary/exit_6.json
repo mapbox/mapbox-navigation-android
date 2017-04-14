@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "left",
+            "type": "rotary",
+            "exit": 6
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "In den Kreisverkehr fahren und sechste Ausfahrt nehmen",
+        "en": "Enter the rotary and take the 6th exit",
+        "fr": "Entrer dans le rond-point et prendre la sixième sortie",
+        "nl": "Ga het knooppunt op en neem afslag zesde",
+        "ru": "На кольцевой развязке используйте шестой съезд",
+        "sv": "Kör in i rondellen och ta avfart 6:e",
+        "vi": "Đi vào bùng binh và ra tại đường thú 6",
+        "zh-Hans": "进入环岛并从第六出口驶出"
+    }
+}

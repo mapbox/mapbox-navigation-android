@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "left",
+            "type": "rotary"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "In den Kreisverkehr fahren",
+        "en": "Enter the rotary",
+        "fr": "Entrer dans le rond-point",
+        "nl": "Ga het knooppunt op",
+        "ru": "Въезд на кольцевую развязку",
+        "sv": "Kör in i rondellen",
+        "vi": "Đi vào bùng binh",
+        "zh-Hans": "进入环岛"
+    }
+}

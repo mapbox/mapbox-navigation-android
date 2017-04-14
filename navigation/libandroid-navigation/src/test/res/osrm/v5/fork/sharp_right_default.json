@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "fork",
+            "modifier": "sharp right"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Scharf rechts abbiegen an der Gabelung",
+        "en": "Take a sharp right at the fork",
+        "fr": "Prendre à droite à l'embranchement",
+        "nl": "Rechtsaf op de splitsing",
+        "ru": "На развилке поверните резко направо",
+        "sv": "Gör en skarp högersväng där vägen delar sig",
+        "vi": "Quẹo gắt bên phải ở ngã ba",
+        "zh-Hans": "在岔道保持向右"
+    }
+}

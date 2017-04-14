@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "fork",
+            "modifier": "right"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Rechts halten an der Gabelung auf Way Name",
+        "en": "Keep right at the fork onto Way Name",
+        "fr": "Rester à droite à l'embranchement sur Way Name",
+        "nl": "Ga rechts op de splitsing naar Way Name",
+        "ru": "На развилке поверните направо на Way Name",
+        "sv": "Håll till höger in på Way Name",
+        "vi": "Đi bên phải ở ngã ba vào Way Name",
+        "zh-Hans": "在岔道保持向右，上Way Name"
+    }
+}

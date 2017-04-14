@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "continue",
+            "modifier": "sharp right"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Scharf rechts weiterfahren",
+        "en": "Continue sharp right",
+        "fr": "Continuer franchement à droite",
+        "nl": "Ga rechtsaf",
+        "ru": "Продолжайте движение резко направо",
+        "sv": "Fortsätt skarp höger",
+        "vi": "Chạy tiếp bên phải gắt",
+        "zh-Hans": "继续向右"
+    }
+}

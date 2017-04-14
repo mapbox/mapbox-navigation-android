@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "off ramp",
+            "modifier": "uturn"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Rampe nehmen auf Way Name",
+        "en": "Take the ramp onto Way Name",
+        "fr": "Prendre la sortie sur Way Name",
+        "nl": "Neem de afrit naar Way Name",
+        "ru": "Используйте съезд на Way Name",
+        "sv": "Ta avfartsrampen in på Way Name",
+        "vi": "Đi đường nhánh Way Name",
+        "zh-Hans": "通过匝道驶入Way Name"
+    }
+}

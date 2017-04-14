@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "end of road",
+            "modifier": "straight"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Geradeaus weiterfahren",
+        "en": "Continue straight",
+        "fr": "Continuer tout droit",
+        "nl": "Ga in de aangegeven richting",
+        "ru": "Продолжайте движение прямо",
+        "sv": "Fortsätt rakt fram",
+        "vi": "Chạy thẳng",
+        "zh-Hans": "继续直行"
+    }
+}

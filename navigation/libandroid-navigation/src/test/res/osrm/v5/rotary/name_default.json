@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "left",
+            "type": "rotary"
+        },
+        "name": "",
+        "rotary_name": "Rotary Name"
+    },
+    "instructions": {
+        "de": "In Rotary Name fahren",
+        "en": "Enter Rotary Name",
+        "fr": "Entrer dans le rond-point Rotary Name",
+        "nl": "Ga het knooppunt Rotary Name op",
+        "ru": "Въезд на площадь Rotary Name с круговым движением",
+        "sv": "Kör in i Rotary Name",
+        "vi": "Đi vào Rotary Name",
+        "zh-Hans": "进入Rotary Name环岛"
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "new name",
+            "modifier": "right"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Rechts weiterfahren auf Way Name",
+        "en": "Continue right onto Way Name",
+        "fr": "Continuer à droite sur Way Name",
+        "nl": "Ga rechts naar Way Name",
+        "ru": "Поверните направо на Way Name",
+        "sv": "Fortsätt höger på Way Name",
+        "vi": "Chạy tiếp bên phải trên Way Name",
+        "zh-Hans": "继续向右，上Way Name"
+    }
+}

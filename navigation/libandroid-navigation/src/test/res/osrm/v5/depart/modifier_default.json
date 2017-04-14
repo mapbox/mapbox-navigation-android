@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "bearing_after": 0,
+            "type": "depart",
+            "modifier": "left"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Fahren Sie Richtung Norden",
+        "en": "Head north",
+        "fr": "Rouler vers le nord",
+        "nl": "Vertrek in noordelijke richting",
+        "ru": "Двигайтесь в северном направлении",
+        "sv": "Kör åt norr",
+        "vi": "Đi về hướng bắc",
+        "zh-Hans": "出发向北"
+    }
+}

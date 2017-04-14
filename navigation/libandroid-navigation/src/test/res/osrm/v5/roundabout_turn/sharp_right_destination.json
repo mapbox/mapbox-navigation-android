@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "roundabout turn",
+            "modifier": "sharp right"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2"
+    },
+    "instructions": {
+        "de": "Am Kreisverkehr scharf rechts Richtung Destination 1",
+        "en": "At the roundabout make a sharp right towards Destination 1",
+        "fr": "Au rond-point, tourner franchement à droite en direction de Destination 1",
+        "nl": "Ga rechtsaf op de rotonde richting Destination 1",
+        "ru": "На круговом перекрёстке резко направо в направлении Destination 1",
+        "sv": "Vid rondellen sväng skarp höger mot Destination 1",
+        "vi": "Đi bên phải gắt tại vòng xuyến để đi Destination 1",
+        "zh-Hans": "在环岛向右行驶，前往Destination 1"
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "merge",
+            "modifier": "sharp left"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2"
+    },
+    "instructions": {
+        "de": "Scharf links auffahren Richtung Destination 1",
+        "en": "Merge left towards Destination 1",
+        "fr": "Rejoindre par la gauche la route en direction de Destination 1",
+        "nl": "Bij de splitsing linksaf richting Destination 1",
+        "ru": "Слияние полосы налево в направлении Destination 1",
+        "sv": "Körfältsbyte åt vänster mot Destination 1",
+        "vi": "Nhập sang trái đến Destination 1",
+        "zh-Hans": "向左并道，前往Destination 1"
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "arrive",
+            "modifier": "sharp right"
+        },
+        "name": "Street Name"
+    },
+    "instructions": {
+        "de": "Sie haben Ihr Ziel erreicht, es befindet sich rechts von Ihnen",
+        "en": "You have arrived at your destination, on the right",
+        "fr": "Vous êtes arrivés à votre destination, sur la droite",
+        "nl": "Je bent gearriveerd. De bestemming bevindt zich rechts.",
+        "ru": "Вы прибыли в пункт назначения, который находится справа",
+        "sv": "Du är framme vid din destination, skarpt till höger",
+        "vi": "Đến nơi ở bên phải",
+        "zh-Hans": "您已经到达您的个目的地，在道路右侧"
+    }
+}

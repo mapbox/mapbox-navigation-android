@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "fork",
+            "modifier": "uturn"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "180°-Wendung",
+        "en": "Make a U-turn",
+        "fr": "Faire demi-tour",
+        "nl": "Keer om",
+        "ru": "На развилке сделайте разворот",
+        "sv": "Gör en U-sväng",
+        "vi": "Quẹo ngược lại",
+        "zh-Hans": "调头"
+    }
+}

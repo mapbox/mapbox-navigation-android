@@ -1,0 +1,21 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "left",
+            "type": "rotary",
+            "exit": 2
+        },
+        "name": "Way Name",
+        "rotary_name": "Rotary Name"
+    },
+    "instructions": {
+        "de": "In den Kreisverkehr fahren und zweite Ausfahrt nehmen auf Way Name",
+        "en": "Enter Rotary Name and take the 2nd exit onto Way Name",
+        "fr": "Entrer dans le rond-point Rotary Name et prendre la seconde sortie sur Way Name",
+        "nl": "Ga het knooppunt Rotary Name op en neem afslag tweede naar Way Name",
+        "ru": "На площади Rotary Name с круговым движением используйте второй съезд на Way Name",
+        "sv": "Kör in i Rotary Name och ta avfart 2:a mot Way Name",
+        "vi": "Đi vào Rotary Name và ra tại đường thứ 2 tức Way Name",
+        "zh-Hans": "进入Rotary Name环岛后从第二出口驶出进入Way Name"
+    }
+}

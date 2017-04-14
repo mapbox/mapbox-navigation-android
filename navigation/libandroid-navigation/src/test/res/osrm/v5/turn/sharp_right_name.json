@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "turn",
+            "modifier": "sharp right"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Scharf rechts abbiegen auf Way Name",
+        "en": "Make a sharp right onto Way Name",
+        "fr": "Tourner franchement à droite sur Way Name",
+        "nl": "Ga rechtsaf naar Way Name",
+        "ru": "Поверните резко направо на Way Name",
+        "sv": "Sväng åt skarp höger in på Way Name",
+        "vi": "Quẹo phải gắt vào Way Name",
+        "zh-Hans": "向右转弯，上Way Name"
+    }
+}

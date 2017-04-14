@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "new name",
+            "modifier": "sharp right"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2"
+    },
+    "instructions": {
+        "de": "Scharf rechts Richtung Destination 1",
+        "en": "Take a sharp right towards Destination 1",
+        "fr": "Prendre à droite en direction de Destination 1",
+        "nl": "Rechtsaf richting Destination 1",
+        "ru": "Поверните резко направо и продолжайте движение в направлении Destination 1",
+        "sv": "Gör en skarp högersväng mot Destination 1",
+        "vi": "Quẹo gắt bên phải đến Destination 1",
+        "zh-Hans": "继续向右，前往Destination 1"
+    }
+}

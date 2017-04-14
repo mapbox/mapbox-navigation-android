@@ -12,18 +12,43 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
+    // Mapbox Android Services
+    compile 'com.mapbox.mapboxsdk:mapbox-android-services:2.0.0'
+
+    // Logging
+    compile 'com.jakewharton.timber:timber:4.5.1'
+
     // Testing
     testCompile 'junit:junit:4.12'
+    testCompile 'org.hamcrest:hamcrest-junit:2.0.0.0'
+    testCompile 'commons-io:commons-io:2.5'
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+}
+
+// You need to run ./gradlew :libandroid-navigation:copyResourcesToClasses
+// for the tests to be able to see the fixtures in the resources folder
+// https://issuetracker.google.com/issues/37020423
+task copyResourcesToClasses(type: Copy) {
+    from "${projectDir}/src/test/res"
+    into "${buildDir}/intermediates/classes/test/debug/res"
 }

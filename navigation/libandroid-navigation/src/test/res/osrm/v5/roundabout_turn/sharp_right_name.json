@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "roundabout turn",
+            "modifier": "sharp right"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Am Kreisverkehr scharf rechts auf Way Name",
+        "en": "At the roundabout make a sharp right onto Way Name",
+        "fr": "Au rond-point, tourner franchement à droite sur Way Name",
+        "nl": "Ga rechtsaf op de rotonde naar Way Name",
+        "ru": "На круговом перекрёстке резко направо на Way Name",
+        "sv": "Vid rondellen sväng skarp höger in på Way Name",
+        "vi": "Đi bên phải gắt tại vòng xuyến để vào Way Name",
+        "zh-Hans": "在环岛向右行驶，上Way Name"
+    }
+}

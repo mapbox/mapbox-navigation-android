@@ -1,0 +1,45 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "straight",
+            "type": "use lane"
+        },
+        "intersections": [
+            {
+                "location": [
+                    13.39677,
+                    52.54366
+                ],
+                "in": 1,
+                "out": 2,
+                "bearings": [
+                    10,
+                    20
+                ],
+                "entry": [
+                    true,
+                    false
+                ],
+                "lanes": [
+                    {
+                        "indications": [
+                            "straight"
+                        ],
+                        "valid": true
+                    }
+                ]
+            }
+        ],
+        "name": ""
+    },
+    "instructions": {
+        "de": "Geradeaus weiterfahren",
+        "en": "Continue straight",
+        "fr": "Continuer tout droit",
+        "nl": "Rechtdoor",
+        "ru": "Продолжайте движение прямо",
+        "sv": "Fortsätt rakt fram",
+        "vi": "Chạy thẳng",
+        "zh-Hans": "继续直行"
+    }
+}
