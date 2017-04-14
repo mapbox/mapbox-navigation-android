@@ -28,11 +28,19 @@ android {
 
 dependencies {
     // Mapbox Navigation SDK
-    compile project (':libandroid-navigation')
+    //compile project (':libandroid-navigation')
 
     // Support libraries
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+
+    // Logging
+    compile 'com.jakewharton.timber:timber:4.5.1'
+
+    // Leak Canary
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
 
     // Testing
     testCompile 'junit:junit:4.12'
