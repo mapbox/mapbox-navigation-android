@@ -46,6 +46,10 @@
                 android:value=".MainActivity"/>
         </activity>
 
+        <application>
+            <service android:name="com.mapbox.services.android.navigation.v5.NavigationService"/>
+        </application>
+
     </application>
 
 </manifest>
