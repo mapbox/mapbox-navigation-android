@@ -12,7 +12,7 @@ import com.mapbox.services.android.navigation.v5.RouteProgress;
  * This is an experimental API. Experimental APIs are quickly evolving and might change or be removed in minor versions.
  *
  * @see <a href="https://www.mapbox.com/mapbox-java/#alertlevelchange">AlertLevelChange documentation</a>
- * @since 2.0.0
+ * @since 0.1.0
  */
 @Experimental
 public interface AlertLevelChangeListener {
@@ -24,7 +24,7 @@ public interface AlertLevelChangeListener {
    * @param routeProgress Provides a {@link RouteProgress} object which will contain information about the users
    *                      current position along the route.
    * @see <a href="https://www.mapbox.com/mapbox-java/#alertlevelchange">AlertLevelChange documentation</a>
-   * @since 2.0.0
+   * @since 0.1.0
    */
   void onAlertLevelChange(int alertLevel, RouteProgress routeProgress);
 }

@@ -22,7 +22,7 @@ public class RouteStepProgress {
    *
    * @param routeLeg            the current leg the user is on.
    * @param userSnappedPosition the users snapped location when routeProgress was last updated.
-   * @since 2.1.0
+   * @since 0.1.0
    */
   public RouteStepProgress(RouteLeg routeLeg, int stepIndex, Position userSnappedPosition) {
     this.userSnappedPosition = userSnappedPosition;
@@ -43,7 +43,7 @@ public class RouteStepProgress {
    *
    * @return double value representing the distance the user has traveled so far along the current step. Uses unit
    * meters.
-   * @since 2.1.0
+   * @since 0.1.0
    */
   public double getDistanceTraveled() {
     return stepDistance - getDistanceRemaining();
@@ -54,7 +54,7 @@ public class RouteStepProgress {
    *
    * @return double value representing the distance the user has remaining till they reach the end of the current step.
    * Uses unit meters.
-   * @since 2.1.0
+   * @since 0.1.0
    */
   public double getDistanceRemaining() {
     return RouteUtils.getDistanceToNextStep(userSnappedPosition, routeLeg, stepIndex, TurfConstants.UNIT_METERS);
@@ -65,7 +65,7 @@ public class RouteStepProgress {
    * reach 1 before the user reaches the next step (if another step exist in route).
    *
    * @return a float value between 0 and 1 representing the fraction the user has traveled along the current step.
-   * @since 2.1.0
+   * @since 0.1.0
    */
   public float getFractionTraveled() {
     return (float) (getDistanceTraveled() / stepDistance);
@@ -75,7 +75,7 @@ public class RouteStepProgress {
    * Provides the duration remaining in seconds till the user reaches the end of the current step.
    *
    * @return {@code long} value representing the duration remaining till end of step, in unit seconds.
-   * @since 2.1.0
+   * @since 0.1.0
    */
   public long getDurationRemaining() {
     return (long) ((1 - getFractionTraveled()) * step.getDuration());

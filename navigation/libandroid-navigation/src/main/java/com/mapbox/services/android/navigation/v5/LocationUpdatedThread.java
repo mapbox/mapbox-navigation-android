@@ -252,7 +252,7 @@ class LocationUpdatedThread extends HandlerThread {
    * @param location The users current location.
    * @param routeLeg The route leg the user is currently on.
    * @return true if the user is found to be off route, otherwise false.
-   * @since 2.1.0
+   * @since 0.1.0
    */
   private boolean userIsOnRoute(Location location, RouteLeg routeLeg) {
     Position locationToPosition = Position.fromCoordinates(location.getLongitude(), location.getLatitude());

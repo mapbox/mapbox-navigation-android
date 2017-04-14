@@ -26,7 +26,7 @@ import java.util.Locale;
  * This is an experimental API. Experimental APIs are quickly evolving and
  * might change or be removed in minor versions.
  *
- * @since 1.3.0
+ * @since 0.1.0
  */
 @Experimental
 public class RouteUtils {
@@ -39,7 +39,7 @@ public class RouteUtils {
   /**
    * RouteUtils constructor using default threshold of 100 meters.
    *
-   * @since 1.3.0
+   * @since 0.1.0
    * @deprecated All methods in RouteUtils are now static.
    */
   @Deprecated
@@ -52,7 +52,7 @@ public class RouteUtils {
    *
    * @param offRouteThresholdKm Double value using unit kilometers. This value determines the
    *                            distance till you are notified.
-   * @since 1.3.0
+   * @since 0.1.0
    * @deprecated All methods in RouteUtils are now static.
    */
   @Deprecated
@@ -62,7 +62,7 @@ public class RouteUtils {
 
   /**
    * @return the RouteUtils threshold as a double value; defaults 100 meters.
-   * @since 1.3.0
+   * @since 0.1.0
    * @deprecated All methods in RouteUtils are now static.
    */
   @Deprecated
@@ -81,7 +81,7 @@ public class RouteUtils {
    * @return true if the position is outside the OffRoute threshold.
    * @throws ServicesException if error occurs Mapbox API related.
    * @throws TurfException     signals that a Turf exception of some sort has occurred.
-   * @since 1.3.0
+   * @since 0.1.0
    * @deprecated use the static equivalent of this method.
    */
   @Deprecated
@@ -99,7 +99,7 @@ public class RouteUtils {
    * @param routeLeg  a directions routeLeg.
    * @param stepIndex integer index for step in routeLeg.
    * @return true if the position is outside the OffRoute threshold.
-   * @since 2.0.1
+   * @since 0.1.0
    */
   public static boolean isInStep(Position position, RouteLeg routeLeg, int stepIndex, double threshold) {
     double distance = getDistanceToStep(position, routeLeg, stepIndex);
@@ -116,7 +116,7 @@ public class RouteUtils {
    * @return double value giving distance in kilometers.
    * @throws ServicesException if error occurs Mapbox API related.
    * @throws TurfException     signals that a Turf exception of some sort has occurred.
-   * @since 1.3.0
+   * @since 0.1.0
    */
   public static double getDistanceToStep(Position position, RouteLeg routeLeg, int stepIndex) throws ServicesException,
     TurfException {
@@ -139,7 +139,7 @@ public class RouteUtils {
    * @return double value giving distance in kilometers.
    * @throws ServicesException if error occurs Mapbox API related.
    * @throws TurfException     signals that a Turf exception of some sort has occurred.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public static double getDistanceToNextStep(Position position, RouteLeg routeLeg, int stepIndex)
     throws ServicesException,
@@ -158,7 +158,7 @@ public class RouteUtils {
    * @return double value giving distance in kilometers.
    * @throws ServicesException if error occurs Mapbox API related.
    * @throws TurfException     signals that a Turf exception of some sort has occurred.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public static double getDistanceToNextStep(Position position, RouteLeg routeLeg, int stepIndex, String units)
     throws ServicesException, TurfException {
@@ -177,7 +177,7 @@ public class RouteUtils {
    * @return double value giving distance in kilometers.
    * @throws ServicesException if error occurs Mapbox API related.
    * @throws TurfException     signals that a Turf exception of some sort has occurred.
-   * @since 2.1.0
+   * @since 0.1.0
    */
   public static double getDistanceToNextStep(Position position, RouteLeg routeLeg, int stepIndex, String units,
                                              int geometryPrecision)
@@ -227,7 +227,7 @@ public class RouteUtils {
    * @param route    a {@link DirectionsRoute}.
    * @param units    pass in the measurement units.
    * @return double value giving distance in kilometers.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public static double getDistanceToEndOfRoute(Position position, DirectionsRoute route, String units) {
     return getDistanceToEndOfRoute(position, route, Constants.PRECISION_6, units);
@@ -243,7 +243,7 @@ public class RouteUtils {
    * @param units             pass in the measurement units.
    * @param geometryPrecision either {@link Constants#PRECISION_5} or {@link Constants#PRECISION_6}
    * @return double value giving distance your specified unit of measurement.
-   * @since 2.1.0
+   * @since 0.1.0
    */
   public static double getDistanceToEndOfRoute(Position position, DirectionsRoute route, int geometryPrecision,
                                                String units) {
@@ -268,7 +268,7 @@ public class RouteUtils {
    * @return your position snapped to the route.
    * @throws ServicesException if error occurs Mapbox API related.
    * @throws TurfException     signals that a Turf exception of some sort has occurred.
-   * @since 1.3.0
+   * @since 0.1.0
    */
   public static Position getSnapToRoute(Position position, RouteLeg routeLeg, int stepIndex)
     throws ServicesException, TurfException {
@@ -286,7 +286,7 @@ public class RouteUtils {
    * @return your position snapped to the route.
    * @throws ServicesException if error occurs Mapbox API related.
    * @throws TurfException     signals that a Turf exception of some sort has occurred.
-   * @since 2.1.0
+   * @since 0.1.0
    */
   public static Position getSnapToRoute(Position position, RouteLeg routeLeg, int stepIndex, int geometryPrecision)
     throws ServicesException, TurfException {
@@ -315,7 +315,7 @@ public class RouteUtils {
    * @return true if the position is beyond the threshold limit from the routeLeg.
    * @throws ServicesException if error occurs Mapbox API related.
    * @throws TurfException     signals that a Turf exception of some sort has occurred.
-   * @since 1.3.0
+   * @since 0.1.0
    * @deprecated Use the new static {@code isOffRoute()} method.
    */
   @Deprecated
@@ -337,7 +337,7 @@ public class RouteUtils {
    * @param routeLeg  a directions routeLeg.
    * @param threshold double value used to determine if position is outside the range.
    * @return true if the position is beyond the threshold limit from the routeLeg.
-   * @since 2.1.0
+   * @since 0.1.0
    */
   public static boolean isOffRoute(Position position, RouteLeg routeLeg, double threshold) {
     for (int stepIndex = 0; stepIndex < routeLeg.getSteps().size(); stepIndex++) {
@@ -358,7 +358,7 @@ public class RouteUtils {
    * @return integer step index in routeLeg.
    * @throws ServicesException if error occurs Mapbox API related.
    * @throws TurfException     signals that a Turf exception of some sort has occurred.
-   * @since 1.3.0
+   * @since 0.1.0
    */
   public static int getClosestStep(Position position, RouteLeg routeLeg) throws TurfException, ServicesException {
     double minDistance = Double.MAX_VALUE;
@@ -385,7 +385,7 @@ public class RouteUtils {
    * @param route    a Directions route.
    * @return the {@link LineString} representing the new route geometry.
    * @throws TurfException signals that a Turf exception of some sort has occurred.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public static LineString getGeometryRemainingOnRoute(Position position, DirectionsRoute route) throws TurfException {
     return getGeometryRemainingOnRoute(position, route, Constants.PRECISION_6);
@@ -401,7 +401,7 @@ public class RouteUtils {
    * @param geometryPrecision either {@link Constants#PRECISION_5} or {@link Constants#PRECISION_6}
    * @return the {@link LineString} representing the new route geometry.
    * @throws TurfException signals that a Turf exception of some sort has occurred.
-   * @since 2.1.0
+   * @since 0.1.0
    */
   public static LineString getGeometryRemainingOnRoute(Position position, DirectionsRoute route, int geometryPrecision)
     throws TurfException {

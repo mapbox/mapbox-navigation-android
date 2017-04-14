@@ -34,6 +34,8 @@ import static com.mapbox.services.android.telemetry.location.LocationEnginePrior
 /**
  * This is an experimental API. Experimental APIs are quickly evolving and
  * might change or be removed in minor versions.
+ *
+ * @since 0.1.0
  */
 @Experimental
 public class NavigationService extends Service implements LocationEngineListener, ProgressChangeListener {

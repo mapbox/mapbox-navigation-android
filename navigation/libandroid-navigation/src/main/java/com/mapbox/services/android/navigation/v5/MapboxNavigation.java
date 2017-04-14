@@ -33,7 +33,7 @@ import timber.log.Timber;
  * This is an experimental API. Experimental APIs are quickly evolving and
  * might change or be removed in minor versions.
  *
- * @since 2.0.0
+ * @since 0.1.0
  */
 @Experimental
 public class MapboxNavigation {
@@ -86,7 +86,7 @@ public class MapboxNavigation {
    * It's required to include both the {@code onStop} and {@code onStart} inside your navigation activities identically
    * named lifecycle methods.
    *
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public void onStart() {
     Timber.d("MapboxNavigation onStart.");
@@ -101,7 +101,7 @@ public class MapboxNavigation {
    * It's required to include both the {@code onStop} and {@code onStart} inside your navigation activities identically
    * named lifecycle methods.
    *
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public void onStop() {
     Timber.d("MapboxNavigation onStop.");
@@ -136,7 +136,7 @@ public class MapboxNavigation {
    *
    * @param navigationEventListener a new {@link NavigationEventListener} which will be notified when navigation events
    *                                occur.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public void addNavigationEventListener(NavigationEventListener navigationEventListener) {
     if (!this.navigationEventListeners.contains(navigationEventListener)) {
@@ -153,7 +153,7 @@ public class MapboxNavigation {
    * route. This listener is good for notifying your user they need to perform a new action.
    *
    * @param alertLevelChangeListener a new {@link AlertLevelChangeListener} which will be notified when event occurs.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public void addAlertLevelChangeListener(AlertLevelChangeListener alertLevelChangeListener) {
     if (!this.alertLevelChangeListeners.contains(alertLevelChangeListener)) {
@@ -170,7 +170,7 @@ public class MapboxNavigation {
    * details see {@link ProgressChangeListener}.
    *
    * @param progressChangeListener a new {@link ProgressChangeListener} which will be notified when event occurs.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public void addProgressChangeListener(ProgressChangeListener progressChangeListener) {
     if (!this.progressChangeListeners.contains(progressChangeListener)) {
@@ -199,7 +199,7 @@ public class MapboxNavigation {
    * Navigation will be the actual GPS location which will typically be noisy and not follow the route.
    *
    * @param snapToRoute {@code boolean} true if you'd like snap to route be enabled, else false; defaults true.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public void setSnapToRoute(boolean snapToRoute) {
     this.snapToRoute = snapToRoute;
@@ -211,7 +211,7 @@ public class MapboxNavigation {
    * session.
    *
    * @param route A {@link DirectionsRoute} that makes up the path your user will traverse along.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public void startNavigation(DirectionsRoute route) {
     if (!isServiceAvailable()) {
@@ -231,7 +231,7 @@ public class MapboxNavigation {
    * {@link MapboxNavigation#addAlertLevelChangeListener(AlertLevelChangeListener)} to be notified when the user
    * arrives at their location.
    *
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public void endNavigation() {
     if (isServiceAvailable()) {
@@ -247,7 +247,7 @@ public class MapboxNavigation {
    * notifications.
    *
    * @param activity The activity being used for the navigation session.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public void setupNotification(Activity activity) {
     if (isServiceAvailable()) {
@@ -267,7 +267,7 @@ public class MapboxNavigation {
    *
    * @param callback A callback of type {@link DirectionsResponse} which allows you to handle the Directions API
    *                 response.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public void getRoute(Position origin, Position destination, Callback<DirectionsResponse> callback)
     throws ServicesException {
@@ -332,7 +332,7 @@ public class MapboxNavigation {
    * {@link MapboxNavigation#getRoute(Position, Position, Callback)} method.
    *
    * @return A {@link Position} object representing the origin of your route.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public Position getOrigin() {
     return origin;
@@ -344,7 +344,7 @@ public class MapboxNavigation {
    * {@link MapboxNavigation#getRoute(Position, Position, Callback)} method.
    *
    * @return A {@link Position} object representing the destination of your route.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public Position getDestination() {
     return destination;
@@ -355,7 +355,7 @@ public class MapboxNavigation {
    * headed in. This will help prevent routing the user to begin the route by performing an illegal U-turn.
    *
    * @param userBearing {@code int} between 0 and 260 representing the users current bearing.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public void setUserOriginBearing(@IntRange(from = 0, to = 360) int userBearing) {
     this.userBearing = userBearing;
@@ -367,7 +367,7 @@ public class MapboxNavigation {
    * be {@code null}.
    *
    * @return A value between 0 and 360 or null if the userOriginBearing hasn't been set.
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public int getUserOriginBearing() {
     return userBearing;
@@ -379,7 +379,7 @@ public class MapboxNavigation {
    * recommend to disable traffic. It is good if you are looking to reproduce the same route over and over for testing
    * for example.
    *
-   * @since 2.0.0
+   * @since 0.1.0
    */
   public void setConsiderTraffic(boolean disableTraffic) {
     if (disableTraffic) {
