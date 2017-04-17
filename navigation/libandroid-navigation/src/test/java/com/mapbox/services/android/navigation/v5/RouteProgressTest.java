@@ -33,7 +33,7 @@ public class RouteProgressTest extends BaseTest {
   }
 
   @Test
-  public void routeProgressTest() {
+  public void routeProgressTest() throws IOException {
     assertEquals(routeProgress.getCurrentLeg(), route.getLegs().get(0));
     assertEquals(routeProgress.getAlertUserLevel(), NONE_ALERT_LEVEL);
     assertEquals(routeProgress.getLegIndex(), 0);
@@ -62,7 +62,6 @@ public class RouteProgressTest extends BaseTest {
     assertEquals(routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceTraveled(), 0, DELTA);
     assertEquals(routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining(), 69, DELTA);
   }
-
 
   @Test
   public void nextRouteStepProgressTest() {

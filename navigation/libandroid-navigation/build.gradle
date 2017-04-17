@@ -45,9 +45,14 @@ dependencies {
     })
 }
 
-// You need to run ./gradlew :libandroid-navigation:copyResourcesToClasses
-// for the tests to be able to see the fixtures in the resources folder
-// https://issuetracker.google.com/issues/37020423
+// To run the unit tests from the command line you need to execute the following commands:
+//
+//   $ ./gradlew :libandroid-navigation:copyResourcesToClasses
+//   $ ./gradlew :libandroid-navigation:testDebugUnitTest
+//
+// The first one is necessary to copy the fixtures into the resources folder, this
+// is a known issue: https://issuetracker.google.com/issues/37020423
+// The second one guarantees the fixtures are looked for inside the right folder.
 task copyResourcesToClasses(type: Copy) {
     from "${projectDir}/src/test/res"
     into "${buildDir}/intermediates/classes/test/debug/res"
