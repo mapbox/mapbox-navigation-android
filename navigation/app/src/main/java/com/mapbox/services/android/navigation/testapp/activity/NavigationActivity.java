@@ -24,7 +24,10 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.Constants;
+import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.RouteProgress;
 import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListener;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
@@ -32,10 +35,8 @@ import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListene
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.permissions.PermissionsManager;
-import com.mapbox.services.android.testapp.R;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.navigation.v5.RouteProgress;
 import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.models.Position;
 
@@ -47,15 +48,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
-import static com.mapbox.mapboxsdk.maps.MapboxMap.OnMapClickListener;
-import static com.mapbox.services.android.Constants.ARRIVE_ALERT_LEVEL;
-import static com.mapbox.services.android.Constants.DEPART_ALERT_LEVEL;
-import static com.mapbox.services.android.Constants.HIGH_ALERT_LEVEL;
-import static com.mapbox.services.android.Constants.LOW_ALERT_LEVEL;
-import static com.mapbox.services.android.Constants.MEDIUM_ALERT_LEVEL;
-import static com.mapbox.services.android.Constants.NONE_ALERT_LEVEL;
-
-public class NavigationActivity extends AppCompatActivity implements OnMapReadyCallback, OnMapClickListener,
+public class NavigationActivity extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener,
   ProgressChangeListener, NavigationEventListener, AlertLevelChangeListener, OffRouteListener {
 
   // Map variables
@@ -83,7 +76,6 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
     locationEngine = LocationSource.getLocationEngine(this);
 
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
-
 
     startRouteButton = (Button) findViewById(R.id.startRouteButton);
     startRouteButton.setOnClickListener(new View.OnClickListener() {
@@ -204,23 +196,23 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
   public void onAlertLevelChange(int alertLevel, RouteProgress routeProgress) {
 
     switch (alertLevel) {
-      case HIGH_ALERT_LEVEL:
+      case NavigationConstants.HIGH_ALERT_LEVEL:
         Toast.makeText(NavigationActivity.this, "HIGH", Toast.LENGTH_LONG).show();
         break;
-      case MEDIUM_ALERT_LEVEL:
+      case NavigationConstants.MEDIUM_ALERT_LEVEL:
         Toast.makeText(NavigationActivity.this, "MEDIUM", Toast.LENGTH_LONG).show();
         break;
-      case LOW_ALERT_LEVEL:
+      case NavigationConstants.LOW_ALERT_LEVEL:
         Toast.makeText(NavigationActivity.this, "LOW", Toast.LENGTH_LONG).show();
         break;
-      case ARRIVE_ALERT_LEVEL:
+      case NavigationConstants.ARRIVE_ALERT_LEVEL:
         Toast.makeText(NavigationActivity.this, "ARRIVE", Toast.LENGTH_LONG).show();
         break;
-      case DEPART_ALERT_LEVEL:
+      case NavigationConstants.DEPART_ALERT_LEVEL:
         Toast.makeText(NavigationActivity.this, "DEPART", Toast.LENGTH_LONG).show();
         break;
       default:
-      case NONE_ALERT_LEVEL:
+      case NavigationConstants.NONE_ALERT_LEVEL:
         Toast.makeText(NavigationActivity.this, "NONE", Toast.LENGTH_LONG).show();
         break;
     }

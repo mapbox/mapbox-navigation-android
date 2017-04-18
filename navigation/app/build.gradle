@@ -28,7 +28,7 @@ android {
 
 dependencies {
     // Mapbox Navigation SDK
-    //compile project (':libandroid-navigation')
+    compile project (':libandroid-navigation')
 
     // Support libraries
     compile 'com.android.support:appcompat-v7:25.3.1'

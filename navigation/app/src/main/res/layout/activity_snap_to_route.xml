@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.mapbox.services.android.navigation.testapp.activity.SnapToRouteActivity">
+    tools:context=".activity.SnapToRouteActivity">
 
     <com.mapbox.mapboxsdk.maps.MapView
         android:id="@+id/mapview"
@@ -30,7 +30,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignStart="@+id/fab_forward_a_step"
             android:layout_gravity="end|bottom"
-            android:src="@drawable/ic_expand_more_24dp"/>
+            android:src="@drawable/ic_expand_more_black_24dp"/>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab_forward_a_step"
@@ -41,7 +41,7 @@
             android:layout_alignParentStart="true"
             android:layout_gravity="end|bottom"
             android:layout_marginBottom="16dp"
-            android:src="@drawable/ic_expand_less_24dp"/>
+            android:src="@drawable/ic_expand_less_black_24dp"/>
 
     </RelativeLayout>
 

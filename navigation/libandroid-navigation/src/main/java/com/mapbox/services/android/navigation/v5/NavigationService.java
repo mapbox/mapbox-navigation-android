@@ -13,8 +13,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 
 import com.mapbox.services.Experimental;
-import com.mapbox.services.android.Constants;
-import com.mapbox.services.android.R;
 import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListener;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
@@ -82,7 +80,7 @@ public class NavigationService extends Service implements LocationEngineListener
       .setContentTitle("Mapbox Navigation")
       .setContentText("Distance: " + routeProgress.getCurrentLegProgress().getCurrentStepProgress()
         .getDistanceRemaining())
-      .setSmallIcon(R.drawable.ic_navigation_black)
+      .setSmallIcon(com.mapbox.services.android.navigation.R.drawable.ic_navigation_black_24dp)
       .setContentIntent(PendingIntent.getActivity(this, 0,
         new Intent(this, activity.getClass()), 0));
 
@@ -148,7 +146,7 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     NavigationService.this.routeProgress = routeProgress;
     // If the user arrives at the final destination, end the navigation session.
-    if (routeProgress.getAlertUserLevel() == Constants.ARRIVE_ALERT_LEVEL) {
+    if (routeProgress.getAlertUserLevel() == NavigationConstants.ARRIVE_ALERT_LEVEL) {
       endNavigation();
     }
   }
@@ -245,7 +243,7 @@ public class NavigationService extends Service implements LocationEngineListener
         directionsRoute,
         Position.fromCoordinates(lastLocation.getLongitude(), lastLocation.getLatitude()),
         0, 0,
-        Constants.NONE_ALERT_LEVEL
+        NavigationConstants.NONE_ALERT_LEVEL
       );
     }
     if (locationUpdatedThread != null && lastLocation != null) {
@@ -262,7 +260,7 @@ public class NavigationService extends Service implements LocationEngineListener
         directionsRoute,
         Position.fromCoordinates(location.getLongitude(), location.getLatitude()),
         0, 0,
-        Constants.NONE_ALERT_LEVEL
+        NavigationConstants.NONE_ALERT_LEVEL
       );
     }
     if (locationUpdatedThread != null && location != null) {

@@ -31,7 +31,7 @@ android {
 
 dependencies {
     // Mapbox Android Services
-    compile 'com.mapbox.mapboxsdk:mapbox-android-services:2.0.0'
+    compile 'com.mapbox.mapboxsdk:mapbox-android-services:2.1.0'
 
     // Logging
     compile 'com.jakewharton.timber:timber:4.5.1'

@@ -139,8 +139,8 @@ class LocationUpdatedThread extends HandlerThread {
     int currentLegIndex = routeProgress.getLegIndex();
 
     // Force an announcement when the user begins a route
-    int alertLevel = routeProgress.getAlertUserLevel() == Constants.NONE_ALERT_LEVEL
-      ? Constants.DEPART_ALERT_LEVEL : routeProgress.getAlertUserLevel();
+    int alertLevel = routeProgress.getAlertUserLevel() == NavigationConstants.NONE_ALERT_LEVEL
+      ? NavigationConstants.DEPART_ALERT_LEVEL : routeProgress.getAlertUserLevel();
 
     Position truePosition = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
     double userSnapToStepDistanceFromManeuver = RouteUtils.getDistanceToNextStep(
@@ -153,8 +153,8 @@ class LocationUpdatedThread extends HandlerThread {
     boolean courseMatchesManeuverFinalHeading = false;
 
     // TODO set to eventually adjust for different direction profiles.
-    int minimumDistanceForHighAlert = Constants.MINIMUM_DISTANCE_FOR_HIGH_ALERT;
-    int minimumDistanceForMediumAlert = Constants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT;
+    int minimumDistanceForHighAlert = NavigationConstants.MINIMUM_DISTANCE_FOR_HIGH_ALERT;
+    int minimumDistanceForMediumAlert = NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT;
 
     // Bearings need to be normalized so when the bearingAfter is 359 and the user heading is 1, we count this as
     // within the MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION.
@@ -164,19 +164,19 @@ class LocationUpdatedThread extends HandlerThread {
       double userHeadingNormalized = MathUtils.wrap(location.getBearing(), 0, 360);
       courseMatchesManeuverFinalHeading = MathUtils.differenceBetweenAngles(
         finalHeadingNormalized, userHeadingNormalized
-      ) <= Constants.MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION;
+      ) <= NavigationConstants.MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION;
     }
 
     // When departing, userSnapToStepDistanceFromManeuver is most often less than RouteControllerManeuverZoneRadius
     // since the user will most often be at the beginning of the route, in the maneuver zone
-    if (alertLevel == Constants.DEPART_ALERT_LEVEL && userSnapToStepDistanceFromManeuver
-      <= Constants.MANEUVER_ZONE_RADIUS) {
+    if (alertLevel == NavigationConstants.DEPART_ALERT_LEVEL && userSnapToStepDistanceFromManeuver
+      <= NavigationConstants.MANEUVER_ZONE_RADIUS) {
       // If the user is close to the maneuver location, don't give a departure instruction, instead, give a high alert.
-      if (secondsToEndOfStep <= Constants.HIGH_ALERT_INTERVAL) {
-        alertLevel = Constants.HIGH_ALERT_LEVEL;
+      if (secondsToEndOfStep <= NavigationConstants.HIGH_ALERT_INTERVAL) {
+        alertLevel = NavigationConstants.HIGH_ALERT_LEVEL;
       }
 
-    } else if (userSnapToStepDistanceFromManeuver <= Constants.MANEUVER_ZONE_RADIUS) {
+    } else if (userSnapToStepDistanceFromManeuver <= NavigationConstants.MANEUVER_ZONE_RADIUS) {
 
       // Use the currentStep if there is not a next step, this occurs when arriving.
       if (routeProgress.getCurrentLegProgress().getUpComingStep() != null) {
@@ -189,7 +189,7 @@ class LocationUpdatedThread extends HandlerThread {
         // userAbsoluteDistanceToManeuverLocation is set to nil by default
         // If it's set to nil, we know the user has never entered the maneuver radius
         if (userDistanceToManeuverLocation == 0.0) {
-          userDistanceToManeuverLocation = Constants.MANEUVER_ZONE_RADIUS;
+          userDistanceToManeuverLocation = NavigationConstants.MANEUVER_ZONE_RADIUS;
         }
 
         double lastKnownUserAbsoluteDistance = userDistanceToManeuverLocation;
@@ -201,7 +201,7 @@ class LocationUpdatedThread extends HandlerThread {
         }
 
         if (routeProgress.getCurrentLegProgress().getUpComingStep().getManeuver().getType().equals("arrive")) {
-          alertLevel = Constants.ARRIVE_ALERT_LEVEL;
+          alertLevel = NavigationConstants.ARRIVE_ALERT_LEVEL;
         } else if (courseMatchesManeuverFinalHeading) {
 
           // Check if we are in the last step in the current routeLeg and iterate it if needed.
@@ -218,17 +218,17 @@ class LocationUpdatedThread extends HandlerThread {
             routeProgress.getCurrentLegProgress().getStepIndex()
           );
           secondsToEndOfStep = userSnapToStepDistanceFromManeuver / location.getSpeed();
-          alertLevel = secondsToEndOfStep <= Constants.MEDIUM_ALERT_INTERVAL
-            ? Constants.MEDIUM_ALERT_LEVEL : Constants.LOW_ALERT_LEVEL;
+          alertLevel = secondsToEndOfStep <= NavigationConstants.MEDIUM_ALERT_INTERVAL
+            ? NavigationConstants.MEDIUM_ALERT_LEVEL : NavigationConstants.LOW_ALERT_LEVEL;
         }
-      } else if (secondsToEndOfStep <= Constants.HIGH_ALERT_INTERVAL
+      } else if (secondsToEndOfStep <= NavigationConstants.HIGH_ALERT_INTERVAL
         && routeProgress.getCurrentLegProgress().getCurrentStep().getDistance() > minimumDistanceForHighAlert) {
-        alertLevel = Constants.HIGH_ALERT_LEVEL;
+        alertLevel = NavigationConstants.HIGH_ALERT_LEVEL;
         // Don't alert if the route segment is shorter than X however, if it's the beginning of the route There needs to
         // be an alert
-      } else if (secondsToEndOfStep <= Constants.MEDIUM_ALERT_INTERVAL
+      } else if (secondsToEndOfStep <= NavigationConstants.MEDIUM_ALERT_INTERVAL
         && routeProgress.getCurrentLegProgress().getCurrentStep().getDistance() > minimumDistanceForMediumAlert) {
-        alertLevel = Constants.MEDIUM_ALERT_LEVEL;
+        alertLevel = NavigationConstants.MEDIUM_ALERT_LEVEL;
       }
     }
 
@@ -246,7 +246,7 @@ class LocationUpdatedThread extends HandlerThread {
 
   /**
    * Determine if the user is off route or not using the value set in
-   * {@link Constants#MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE}. We first calculate the users next predicted location one
+   * {@link NavigationConstants#MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE}. We first calculate the users next predicted location one
    * second from the current time.
    *
    * @param location The users current location.
@@ -257,13 +257,13 @@ class LocationUpdatedThread extends HandlerThread {
   private boolean userIsOnRoute(Location location, RouteLeg routeLeg) {
     Position locationToPosition = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
     // Find future location of user
-    double metersInFrontOfUser = location.getSpeed() * Constants.DEAD_RECKONING_TIME_INTERVAL;
+    double metersInFrontOfUser = location.getSpeed() * NavigationConstants.DEAD_RECKONING_TIME_INTERVAL;
 
     Position locationInFrontOfUser = TurfMeasurement.destination(
       locationToPosition, metersInFrontOfUser, location.getBearing(), TurfConstants.UNIT_METERS
     );
 
-    return RouteUtils.isOffRoute(locationInFrontOfUser, routeLeg, Constants.MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE);
+    return RouteUtils.isOffRoute(locationInFrontOfUser, routeLeg, NavigationConstants.MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE);
   }
 
   private float snapUserBearing(RouteProgress routeProgress) {
@@ -278,7 +278,7 @@ class LocationUpdatedThread extends HandlerThread {
       newCoordinate = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
     }
 
-    double userDistanceBuffer = location.getSpeed() * Constants.DEAD_RECKONING_TIME_INTERVAL;
+    double userDistanceBuffer = location.getSpeed() * NavigationConstants.DEAD_RECKONING_TIME_INTERVAL;
 
     if (routeProgress.getDistanceTraveled() + userDistanceBuffer
       > RouteUtils.getDistanceToEndOfRoute(
@@ -309,11 +309,11 @@ class LocationUpdatedThread extends HandlerThread {
 
     double absoluteBearing = MathUtils.wrap(wrappedCurrentBearing + averageRelativeAngle, 0, 360);
 
-    if (MathUtils.differenceBetweenAngles(absoluteBearing, location.getBearing()) > Constants.MAX_MANIPULATED_COURSE_ANGLE) {
+    if (MathUtils.differenceBetweenAngles(absoluteBearing, location.getBearing()) > NavigationConstants.MAX_MANIPULATED_COURSE_ANGLE) {
       return location.getBearing();
     }
 
-    return averageRelativeAngle <= Constants.MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION ? (float) absoluteBearing
+    return averageRelativeAngle <= NavigationConstants.MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION ? (float) absoluteBearing
       : location.getBearing();
   }
 

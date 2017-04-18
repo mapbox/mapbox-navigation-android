@@ -6,7 +6,7 @@ import com.mapbox.services.Experimental;
  * Navigation constants
  */
 
-public class Constants {
+public class NavigationConstants {
   @Experimental public static final int NONE_ALERT_LEVEL = 0;
   @Experimental public static final int DEPART_ALERT_LEVEL = 1;
   @Experimental public static final int LOW_ALERT_LEVEL = 2;
