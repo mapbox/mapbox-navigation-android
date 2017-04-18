@@ -3,9 +3,9 @@
           package="com.mapbox.services.android.navigation.testapp">
 
     <application
+        android:name=".NavigationApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:name=".NavigationApplication"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
@@ -45,10 +45,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
-
-        <application>
-            <service android:name="com.mapbox.services.android.navigation.v5.NavigationService"/>
-        </application>
 
     </application>
 
