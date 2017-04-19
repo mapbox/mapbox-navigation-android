@@ -11,7 +11,7 @@ The Mapbox Navigation SDK is built on top of [our Directions API](https://github
 Keep adding text...
 -->
 
-[Our full documentation on Mapbox Navigation](https://www.mapbox.com/mapbox-navigation/2.1.0/navigation/)
+[Our full documentation on Mapbox Navigation](https://www.mapbox.com/android-docs/mapbox-navigation/2.1.0/navigation/)
 
 
 
@@ -22,7 +22,6 @@ Keep adding text...
 <!---
 Keep adding text...
 
-Make sure that you include the `compile 'com.mapbox.mapboxsdk:mapbox-android-ui:2.0.0'` line in your projects gradle file to gain full access to the navigation APIs.
 
 -->
 
