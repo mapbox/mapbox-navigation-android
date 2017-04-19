@@ -45,17 +45,28 @@ dependencies {
     })
 }
 
-// To run the unit tests from the command line you need to execute the following commands:
+// To run the unit tests from the command line you need to execute the following command:
 //
-//   $ ./gradlew :libandroid-navigation:copyResourcesToClasses
-//   $ ./gradlew :libandroid-navigation:testDebugUnitTest
+//   $ ./gradlew test
 //
-// The first one is necessary to copy the fixtures into the resources folder, this
+// This is necessary to copy the fixtures into the resources folder, this
 // is a known issue: https://issuetracker.google.com/issues/37020423
-// The second one guarantees the fixtures are looked for inside the right folder.
-task copyResourcesToClasses(type: Copy) {
+// guaranteeing the fixtures are looked for inside the right folders.
+task copyResourcesToClassesDebug(type: Copy) {
     from "${projectDir}/src/test/res"
     into "${buildDir}/intermediates/classes/test/debug/res"
+}
+
+task copyResourcesToClassesRelease(type: Copy) {
+    from "${projectDir}/src/test/res"
+    into "${buildDir}/intermediates/classes/test/release/res"
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == "compileDebugUnitTestSources")
+        task.dependsOn('copyResourcesToClassesDebug')
+    if (task.name == "compileReleaseUnitTestSources")
+        task.dependsOn('copyResourcesToClassesRelease')
 }
 
 apply from: '../checkstyle.gradle'
