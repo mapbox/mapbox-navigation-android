@@ -57,3 +57,5 @@ task copyResourcesToClasses(type: Copy) {
     from "${projectDir}/src/test/res"
     into "${buildDir}/intermediates/classes/test/debug/res"
 }
+
+apply from: '../checkstyle.gradle'

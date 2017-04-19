@@ -11,7 +11,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -146,7 +145,7 @@ public class TextInstructionsTest extends BaseTest {
 
   @Test
   public void testFixturesMatchGeneratedInstructions() throws IOException {
-    for (String fixture: TextInstructionsFixtures.FIXTURES) {
+    for (String fixture : TextInstructionsFixtures.FIXTURES) {
       String body = readPath(fixture);
       FixtureModel model = new Gson().fromJson(body, FixtureModel.class);
       for (Object entry : model.getInstructions().entrySet()) {

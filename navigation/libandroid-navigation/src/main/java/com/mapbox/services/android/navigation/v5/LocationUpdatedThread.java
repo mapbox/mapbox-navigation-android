@@ -246,8 +246,8 @@ class LocationUpdatedThread extends HandlerThread {
 
   /**
    * Determine if the user is off route or not using the value set in
-   * {@link NavigationConstants#MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE}. We first calculate the users next predicted location one
-   * second from the current time.
+   * {@link NavigationConstants#MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE}. We first calculate the users next predicted
+   * location one second from the current time.
    *
    * @param location The users current location.
    * @param routeLeg The route leg the user is currently on.
@@ -263,7 +263,8 @@ class LocationUpdatedThread extends HandlerThread {
       locationToPosition, metersInFrontOfUser, location.getBearing(), TurfConstants.UNIT_METERS
     );
 
-    return RouteUtils.isOffRoute(locationInFrontOfUser, routeLeg, NavigationConstants.MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE);
+    return RouteUtils.isOffRoute(locationInFrontOfUser, routeLeg,
+      NavigationConstants.MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE);
   }
 
   private float snapUserBearing(RouteProgress routeProgress) {
@@ -309,12 +310,13 @@ class LocationUpdatedThread extends HandlerThread {
 
     double absoluteBearing = MathUtils.wrap(wrappedCurrentBearing + averageRelativeAngle, 0, 360);
 
-    if (MathUtils.differenceBetweenAngles(absoluteBearing, location.getBearing()) > NavigationConstants.MAX_MANIPULATED_COURSE_ANGLE) {
+    if (MathUtils.differenceBetweenAngles(absoluteBearing, location.getBearing())
+      > NavigationConstants.MAX_MANIPULATED_COURSE_ANGLE) {
       return location.getBearing();
     }
 
-    return averageRelativeAngle <= NavigationConstants.MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION ? (float) absoluteBearing
-      : location.getBearing();
+    return averageRelativeAngle <= NavigationConstants.MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION ? (float)
+      absoluteBearing : location.getBearing();
   }
 
   /**

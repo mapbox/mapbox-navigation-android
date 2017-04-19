@@ -17,13 +17,15 @@ public class BaseTest {
   protected String readPath(String path) {
     try {
       InputStream is = getClass().getResourceAsStream(BASE_PATH + path);
-      if (is == null) throw new IOException("Resource not found: " + path);
+      if (is == null) {
+        throw new IOException("Resource not found: " + path);
+      }
       String content = IOUtils.toString(is, Charset.forName("utf-8"));
       IOUtils.closeQuietly(is);
       return content;
-    } catch (IOException e) {
-      Log.e(LOG_TAG, String.format("Failed to read fixture (%s): %s", path, e.getMessage()));
-      e.printStackTrace();
+    } catch (IOException exception) {
+      Log.e(LOG_TAG, String.format("Failed to read fixture (%s): %s", path, exception.getMessage()));
+      exception.printStackTrace();
     }
 
     return null;
