@@ -12,8 +12,7 @@ checkstyle:
 
 test:
 	# See navigation/libandroid-navigation/build.gradle for details
-	cd navigation; ./gradlew :libandroid-navigation:copyResourcesToClasses
-	cd navigation; ./gradlew :libandroid-navigation:testDebugUnitTest
+	cd navigation; ./gradlew :libandroid-navigation:test
 
 build-release:
 	cd navigation; ./gradlew :libandroid-navigation:assembleRelease

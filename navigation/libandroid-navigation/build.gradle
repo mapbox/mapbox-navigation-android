@@ -69,4 +69,6 @@ tasks.whenTaskAdded { task ->
         task.dependsOn('copyResourcesToClassesRelease')
 }
 
+apply from: 'javadoc.gradle'
+apply from: '../mvn-push-android.gradle'
 apply from: '../checkstyle.gradle'
