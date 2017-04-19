@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "turn",
+            "modifier": "uturn"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "180°-Wendung abbiegen",
+        "en": "Make a U-turn",
+        "fr": "Tourner demi-tour",
+        "nl": "Ga omkeren",
+        "ru": "Поверните разворот",
+        "sv": "Sväng åt U-sväng",
+        "vi": "Quẹo ngược",
+        "zh-Hans": "调头转弯"
+    }
+}

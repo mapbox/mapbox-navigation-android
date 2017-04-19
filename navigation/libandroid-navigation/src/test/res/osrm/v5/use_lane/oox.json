@@ -1,0 +1,57 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "straight",
+            "type": "use lane"
+        },
+        "intersections": [
+            {
+                "location": [
+                    13.39677,
+                    52.54366
+                ],
+                "in": 1,
+                "out": 2,
+                "bearings": [
+                    10,
+                    20
+                ],
+                "entry": [
+                    true,
+                    false
+                ],
+                "lanes": [
+                    {
+                        "indications": [
+                            "straight"
+                        ],
+                        "valid": true
+                    },
+                    {
+                        "indications": [
+                            "straight"
+                        ],
+                        "valid": true
+                    },
+                    {
+                        "indications": [
+                            "straight"
+                        ],
+                        "valid": false
+                    }
+                ]
+            }
+        ],
+        "name": ""
+    },
+    "instructions": {
+        "de": "Links halten",
+        "en": "Keep left",
+        "fr": "Serrer à gauche",
+        "nl": "Links aanhouden",
+        "ru": "Держитесь левой стороны",
+        "sv": "Håll till vänster",
+        "vi": "Đi bên trái",
+        "zh-Hans": "靠左直行"
+    }
+}

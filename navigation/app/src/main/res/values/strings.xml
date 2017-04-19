@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Mapbox Navigation SDK</string>
+
+    <string name="title_route_utils_v5">Route Utilities</string>
+    <string name="description_route_utils">Used for testing the RouteUtils class.</string>
+
+    <string name="title_navigation">Navigation</string>
+    <string name="description_navigation">Use the Navigation service.</string>
+
+    <string name="title_snap_to_route">Snap to route</string>
+    <string name="description_snap_to_route">Move forward or backwards between route steps and snap a point to the line.</string>
+
+    <string name="title_off_route_detection">Off route detection</string>
+    <string name="description_off_route_detection">Uses the Route Utils class to determine if a users off route.</string>
+</resources>

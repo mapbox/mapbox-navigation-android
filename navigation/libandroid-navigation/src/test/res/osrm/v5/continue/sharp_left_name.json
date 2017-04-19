@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "continue",
+            "modifier": "sharp left"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Scharf links weiterfahren auf Way Name",
+        "en": "Continue sharp left onto Way Name",
+        "fr": "Continuer franchement à gauche sur Way Name",
+        "nl": "Ga linksaf naar Way Name",
+        "ru": "Продолжайте движение резко налево по Way Name",
+        "sv": "Fortsätt skarp vänster in på Way Name",
+        "vi": "Chạy tiếp bên trái gắt trên Way Name",
+        "zh-Hans": "继续向左，上Way Name"
+    }
+}

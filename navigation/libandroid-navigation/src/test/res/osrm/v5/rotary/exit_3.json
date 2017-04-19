@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "left",
+            "type": "rotary",
+            "exit": 3
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "In den Kreisverkehr fahren und dritte Ausfahrt nehmen",
+        "en": "Enter the rotary and take the 3rd exit",
+        "fr": "Entrer dans le rond-point et prendre la troisième sortie",
+        "nl": "Ga het knooppunt op en neem afslag derde",
+        "ru": "На кольцевой развязке используйте третий съезд",
+        "sv": "Kör in i rondellen och ta avfart 3:e",
+        "vi": "Đi vào bùng binh và ra tại đường thứ 3",
+        "zh-Hans": "进入环岛并从第三出口驶出"
+    }
+}

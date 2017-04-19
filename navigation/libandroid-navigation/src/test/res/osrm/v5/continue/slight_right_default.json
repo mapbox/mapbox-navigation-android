@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "continue",
+            "modifier": "slight right"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Leicht rechts weiter",
+        "en": "Continue slightly right",
+        "fr": "Continuer légèrement à droite",
+        "nl": "Rechts aanhouden",
+        "ru": "Плавный поворот направо",
+        "sv": "Fortsätt med lätt högersväng",
+        "vi": "Nghiêng về bên phải",
+        "zh-Hans": "继续向右"
+    }
+}

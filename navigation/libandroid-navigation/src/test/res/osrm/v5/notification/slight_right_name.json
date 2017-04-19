@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "notification",
+            "modifier": "slight right"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Leicht rechts weiterfahren auf Way Name",
+        "en": "Continue slight right onto Way Name",
+        "fr": "Continuer légèrement à droite sur Way Name",
+        "nl": "Ga rechts naar Way Name",
+        "ru": "Продолжайте движение плавно направо по Way Name",
+        "sv": "Fortsätt lätt höger på Way Name",
+        "vi": "Chạy tiếp bên phải nghiêng trên Way Name",
+        "zh-Hans": "继续向右，上Way Name"
+    }
+}

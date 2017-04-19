@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "notification",
+            "modifier": "left"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Links weiterfahren",
+        "en": "Continue left",
+        "fr": "Continuer à gauche",
+        "nl": "Ga links",
+        "ru": "Продолжайте движение налево",
+        "sv": "Fortsätt vänster",
+        "vi": "Chạy tiếp bên trái",
+        "zh-Hans": "继续向左"
+    }
+}

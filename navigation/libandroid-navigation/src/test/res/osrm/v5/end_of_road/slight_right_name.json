@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "end of road",
+            "modifier": "slight right"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Leicht rechts abbiegen auf Way Name",
+        "en": "Turn slight right onto Way Name",
+        "fr": "Tourner légèrement à droite sur Way Name",
+        "nl": "Ga rechts naar Way Name",
+        "ru": "Поверните плавно направо на Way Name",
+        "sv": "Sväng lätt höger in på Way Name",
+        "vi": "Quẹo phải nghiêng vào Way Name",
+        "zh-Hans": "向右行驶，上Way Name"
+    }
+}

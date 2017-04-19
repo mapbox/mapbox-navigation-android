@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "fork",
+            "modifier": "sharp left"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Scharf links abbiegen an der Gabelung auf Way Name",
+        "en": "Take a sharp left at the fork onto Way Name",
+        "fr": "Prendre à gauche à l'embranchement sur Way Name",
+        "nl": "Linksaf op de splitsing naar Way Name",
+        "ru": "На развилке поверните резко налево на Way Name",
+        "sv": "Gör en skarp vänstersväng in på Way Name",
+        "vi": "Quẹo gắt bên trái ở ngã ba vào Way Name",
+        "zh-Hans": "在岔道保持向左，上Way Name"
+    }
+}

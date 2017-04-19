@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.mapbox.services.android.navigation">
+
+    <application>
+        <service android:name="com.mapbox.services.android.navigation.v5.NavigationService"/>
+    </application>
+
+</manifest>

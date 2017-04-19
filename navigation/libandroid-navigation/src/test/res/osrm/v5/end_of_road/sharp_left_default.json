@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "end of road",
+            "modifier": "sharp left"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Scharf links abbiegen",
+        "en": "Turn sharp left",
+        "fr": "Tourner franchement à gauche",
+        "nl": "Ga linksaf",
+        "ru": "Поверните резко налево",
+        "sv": "Sväng skarp vänster",
+        "vi": "Quẹo trái gắt",
+        "zh-Hans": "向左行驶"
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "merge",
+            "modifier": "slight left"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Leicht links auffahren auf Way Name",
+        "en": "Merge left onto Way Name",
+        "fr": "Rejoindre Way Name légèrement par la gauche",
+        "nl": "Bij de splitsing links aanhouden naar Way Name",
+        "ru": "Слияние полосы налево на Way Name",
+        "sv": "Körfältsbyte åt vänster in på Way Name",
+        "vi": "Nhập sang trái vào Way Name",
+        "zh-Hans": "向左并道，上Way Name"
+    }
+}

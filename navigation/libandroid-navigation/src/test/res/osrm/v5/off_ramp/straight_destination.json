@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "off ramp",
+            "modifier": "straight"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2"
+    },
+    "instructions": {
+        "de": "Rampe nehmen Richtung Destination 1",
+        "en": "Take the ramp towards Destination 1",
+        "fr": "Prendre la sortie en direction de Destination 1",
+        "nl": "Neem de afrit richting Destination 1",
+        "ru": "Используйте съезд в направлении Destination 1",
+        "sv": "Ta avfartsrampen mot Destination 1",
+        "vi": "Đi đường nhánh đến Destination 1",
+        "zh-Hans": "通过匝道前往Destination 1"
+    }
+}

@@ -1,0 +1,397 @@
+{
+    "meta": {
+        "capitalizeFirstLetter": true
+    },
+    "v5": {
+        "constants": {
+            "ordinalize": {
+                "1": "erste",
+                "2": "zweite",
+                "3": "dritte",
+                "4": "vierte",
+                "5": "fünfte",
+                "6": "sechste",
+                "7": "siebente",
+                "8": "achte",
+                "9": "neunte",
+                "10": "zehnte"
+            },
+            "direction": {
+                "north": "Norden",
+                "northeast": "Nordosten",
+                "east": "Osten",
+                "southeast": "Südosten",
+                "south": "Süden",
+                "southwest": "Südwesten",
+                "west": "Westen",
+                "northwest": "Nordwesten"
+            },
+            "modifier": {
+                "left": "links",
+                "right": "rechts",
+                "sharp left": "scharf links",
+                "sharp right": "scharf rechts",
+                "slight left": "leicht links",
+                "slight right": "leicht rechts",
+                "straight": "geradeaus",
+                "uturn": "180°-Wendung"
+            },
+            "lanes": {
+                "xo": "Rechts halten",
+                "ox": "Links halten",
+                "xox": "Mittlere Spur nutzen",
+                "oxo": "Rechts oder links halten"
+            }
+        },
+        "modes": {
+            "ferry": {
+                "default": "Fähre nehmen",
+                "name": "Fähre nehmen {way_name}",
+                "destination": "Fähre nehmen Richtung {destination}"
+            }
+        },
+        "arrive": {
+            "default": {
+                "default": "Sie haben Ihr {nth} Ziel erreicht"
+            },
+            "left": {
+                "default": "Sie haben Ihr {nth} Ziel erreicht, es befindet sich links von Ihnen"
+            },
+            "right": {
+                "default": "Sie haben Ihr {nth} Ziel erreicht, es befindet sich rechts von Ihnen"
+            },
+            "sharp left": {
+                "default": "Sie haben Ihr {nth} Ziel erreicht, es befindet sich links von Ihnen"
+            },
+            "sharp right": {
+                "default": "Sie haben Ihr {nth} Ziel erreicht, es befindet sich rechts von Ihnen"
+            },
+            "slight right": {
+                "default": "Sie haben Ihr {nth} Ziel erreicht, es befindet sich rechts von Ihnen"
+            },
+            "slight left": {
+                "default": "Sie haben Ihr {nth} Ziel erreicht, es befindet sich links von Ihnen"
+            },
+            "straight": {
+                "default": "Sie haben Ihr {nth} Ziel erreicht, es befindet sich direkt vor Ihnen"
+            }
+        },
+        "continue": {
+            "default": {
+                "default": "{modifier} weiterfahren",
+                "name": "{modifier} weiterfahren auf {way_name}",
+                "destination": "{modifier} weiterfahren Richtung {destination}"
+            },
+            "slight left": {
+                "default": "Leicht links weiter",
+                "name": "Leicht links weiter auf {way_name}",
+                "destination": "Leicht links weiter Richtung {destination}"
+            },
+            "slight right": {
+                "default": "Leicht rechts weiter",
+                "name": "Leicht rechts weiter auf {way_name}",
+                "destination": "Leicht rechts weiter Richtung {destination}"
+            },
+            "uturn": {
+                "default": "180°-Wendung",
+                "name": "180°-Wendung auf {way_name}",
+                "destination": "180°-Wendung Richtung {destination}"
+            }
+        },
+        "depart": {
+            "default": {
+                "default": "Fahren Sie Richtung {direction}",
+                "name": "Fahren Sie Richtung {direction} auf {way_name}"
+            }
+        },
+        "end of road": {
+            "default": {
+                "default": "{modifier} abbiegen",
+                "name": "{modifier} abbiegen auf {way_name}",
+                "destination": "{modifier} abbiegen Richtung {destination}"
+            },
+            "straight": {
+                "default": "Geradeaus weiterfahren",
+                "name": "Geradeaus weiterfahren auf {way_name}",
+                "destination": "Geradeaus weiterfahren Richtung {destination}"
+            },
+            "uturn": {
+                "default": "180°-Wendung am Ende der Straße",
+                "name": "180°-Wendung auf {way_name} am Ende der Straße",
+                "destination": "180°-Wendung Richtung {destination} am Ende der Straße"
+            }
+        },
+        "fork": {
+            "default": {
+                "default": "{modifier} halten an der Gabelung",
+                "name": "{modifier} halten an der Gabelung auf {way_name}",
+                "destination": "{modifier}  halten an der Gabelung Richtung {destination}"
+            },
+            "slight left": {
+                "default": "Links halten an der Gabelung",
+                "name": "Links halten an der Gabelung auf {way_name}",
+                "destination": "Links halten an der Gabelung Richtung {destination}"
+            },
+            "slight right": {
+                "default": "Rechts halten an der Gabelung",
+                "name": "Rechts halten an der Gabelung auf {way_name}",
+                "destination": "Rechts halten an der Gabelung Richtung {destination}"
+            },
+            "sharp left": {
+                "default": "Scharf links abbiegen an der Gabelung",
+                "name": "Scharf links abbiegen an der Gabelung auf {way_name}",
+                "destination": "Scharf links abbiegen an der Gabelung Richtung {destination}"
+            },
+            "sharp right": {
+                "default": "Scharf rechts abbiegen an der Gabelung",
+                "name": "Scharf rechts abbiegen an der Gabelung auf {way_name}",
+                "destination": "Scharf rechts abbiegen an der Gabelung Richtung {destination}"
+            },
+            "uturn": {
+                "default": "180°-Wendung",
+                "name": "180°-Wendung auf {way_name}",
+                "destination": "180°-Wendung Richtung {destination}"
+            }
+        },
+        "merge": {
+            "default": {
+                "default": "{modifier} auffahren",
+                "name": "{modifier} auffahren auf {way_name}",
+                "destination": "{modifier} auffahren Richtung {destination}"
+            },
+            "slight left": {
+                "default": "Leicht links auffahren",
+                "name": "Leicht links auffahren auf {way_name}",
+                "destination": "Leicht links auffahren Richtung {destination}"
+            },
+            "slight right": {
+                "default": "Leicht rechts auffahren",
+                "name": "Leicht rechts auffahren auf {way_name}",
+                "destination": "Leicht rechts auffahren Richtung {destination}"
+            },
+            "sharp left": {
+                "default": "Scharf links auffahren",
+                "name": "Scharf links auffahren auf {way_name}",
+                "destination": "Scharf links auffahren Richtung {destination}"
+            },
+            "sharp right": {
+                "default": "Scharf rechts auffahren",
+                "name": "Scharf rechts auffahren auf {way_name}",
+                "destination": "Scharf rechts auffahren Richtung {destination}"
+            },
+            "uturn": {
+                "default": "180°-Wendung",
+                "name": "180°-Wendung auf {way_name}",
+                "destination": "180°-Wendung Richtung {destination}"
+            }
+        },
+        "new name": {
+            "default": {
+                "default": "{modifier} weiterfahren",
+                "name": "{modifier} weiterfahren auf {way_name}",
+                "destination": "{modifier} weiterfahren Richtung {destination}"
+            },
+            "sharp left": {
+                "default": "Scharf links",
+                "name": "Scharf links auf {way_name}",
+                "destination": "Scharf links Richtung {destination}"
+            },
+            "sharp right": {
+                "default": "Scharf rechts",
+                "name": "Scharf rechts auf {way_name}",
+                "destination": "Scharf rechts Richtung {destination}"
+            },
+            "slight left": {
+                "default": "Leicht links weiter",
+                "name": "Leicht links weiter auf {way_name}",
+                "destination": "Leicht links weiter Richtung {destination}"
+            },
+            "slight right": {
+                "default": "Leicht rechts weiter",
+                "name": "Leicht rechts weiter auf {way_name}",
+                "destination": "Leicht rechts weiter Richtung {destination}"
+            },
+            "uturn": {
+                "default": "180°-Wendung",
+                "name": "180°-Wendung auf {way_name}",
+                "destination": "180°-Wendung Richtung {destination}"
+            }
+        },
+        "notification": {
+            "default": {
+                "default": "{modifier} weiterfahren",
+                "name": "{modifier} weiterfahren auf {way_name}",
+                "destination": "{modifier} weiterfahren Richtung {destination}"
+            },
+            "uturn": {
+                "default": "180°-Wendung",
+                "name": "180°-Wendung auf {way_name}",
+                "destination": "180°-Wendung Richtung {destination}"
+            }
+        },
+        "off ramp": {
+            "default": {
+                "default": "Rampe nehmen",
+                "name": "Rampe nehmen auf {way_name}",
+                "destination": "Rampe nehmen Richtung {destination}"
+            },
+            "left": {
+                "default": "Rampe auf der linken Seite nehmen",
+                "name": "Rampe auf der linken Seite nehmen auf {way_name}",
+                "destination": "Rampe auf der linken Seite nehmen Richtung {destination}"
+            },
+            "right": {
+                "default": "Rampe auf der rechten Seite nehmen",
+                "name": "Rampe auf der rechten Seite nehmen auf {way_name}",
+                "destination": "Rampe auf der rechten Seite nehmen Richtung {destination}"
+            },
+            "sharp left": {
+                "default": "Rampe auf der linken Seite nehmen",
+                "name": "Rampe auf der linken Seite nehmen auf {way_name}",
+                "destination": "Rampe auf der linken Seite nehmen Richtung {destination}"
+            },
+            "sharp right": {
+                "default": "Rampe auf der rechten Seite nehmen",
+                "name": "Rampe auf der rechten Seite nehmen auf {way_name}",
+                "destination": "Rampe auf der rechten Seite nehmen Richtung {destination}"
+            },
+            "slight left": {
+                "default": "Rampe auf der linken Seite nehmen",
+                "name": "Rampe auf der linken Seite nehmen auf {way_name}",
+                "destination": "Rampe auf der linken Seite nehmen Richtung {destination}"
+            },
+            "slight right": {
+                "default": "Rampe auf der rechten Seite nehmen",
+                "name": "Rampe auf der rechten Seite nehmen auf {way_name}",
+                "destination": "Rampe auf der rechten Seite nehmen Richtung {destination}"
+            }
+        },
+        "on ramp": {
+            "default": {
+                "default": "Rampe nehmen",
+                "name": "Rampe nehmen auf {way_name}",
+                "destination": "Rampe nehmen Richtung {destination}"
+            },
+            "left": {
+                "default": "Rampe auf der linken Seite nehmen",
+                "name": "Rampe auf der linken Seite nehmen auf {way_name}",
+                "destination": "Rampe auf der linken Seite nehmen Richtung {destination}"
+            },
+            "right": {
+                "default": "Rampe auf der rechten Seite nehmen",
+                "name": "Rampe auf der rechten Seite nehmen auf {way_name}",
+                "destination": "Rampe auf der rechten Seite nehmen Richtung {destination}"
+            },
+            "sharp left": {
+                "default": "Rampe auf der linken Seite nehmen",
+                "name": "Rampe auf der linken Seite nehmen auf {way_name}",
+                "destination": "Rampe auf der linken Seite nehmen Richtung {destination}"
+            },
+            "sharp right": {
+                "default": "Rampe auf der rechten Seite nehmen",
+                "name": "Rampe auf der rechten Seite nehmen auf {way_name}",
+                "destination": "Rampe auf der rechten Seite nehmen Richtung {destination}"
+            },
+            "slight left": {
+                "default": "Rampe auf der linken Seite nehmen",
+                "name": "Rampe auf der linken Seite nehmen auf {way_name}",
+                "destination": "Rampe auf der linken Seite nehmen Richtung {destination}"
+            },
+            "slight right": {
+                "default": "Rampe auf der rechten Seite nehmen",
+                "name": "Rampe auf der rechten Seite nehmen auf {way_name}",
+                "destination": "Rampe auf der rechten Seite nehmen Richtung {destination}"
+            }
+        },
+        "rotary": {
+            "default": {
+                "default": {
+                    "default": "In den Kreisverkehr fahren",
+                    "name": "In den Kreisverkehr fahren und auf {way_name} verlassen",
+                    "destination": "In den Kreisverkehr fahren und Richtung {destination} verlassen"
+                },
+                "name": {
+                    "default": "In {rotary_name} fahren",
+                    "name": "In {rotary_name} fahren und auf {way_name} verlassen",
+                    "destination": "In {rotary_name} fahren und Richtung {destination} verlassen"
+                },
+                "exit": {
+                    "default": "In den Kreisverkehr fahren und {exit_number} Ausfahrt nehmen",
+                    "name": "In den Kreisverkehr fahren und {exit_number} Ausfahrt nehmen auf {way_name}",
+                    "destination": "In den Kreisverkehr fahren und {exit_number} Ausfahrt nehmen Richtung {destination}"
+                },
+                "name_exit": {
+                    "default": "In den Kreisverkehr fahren und {exit_number} Ausfahrt nehmen",
+                    "name": "In den Kreisverkehr fahren und {exit_number} Ausfahrt nehmen auf {way_name}",
+                    "destination": "In den Kreisverkehr fahren und {exit_number} Ausfahrt nehmen Richtung {destination}"
+                }
+            }
+        },
+        "roundabout": {
+            "default": {
+                "exit": {
+                    "default": "In den Kreisverkehr fahren und {exit_number} Ausfahrt nehmen",
+                    "name": "In den Kreisverkehr fahren und {exit_number} Ausfahrt nehmen auf {way_name}",
+                    "destination": "In den Kreisverkehr fahren und {exit_number} Ausfahrt nehmen Richtung {destination}"
+                },
+                "default": {
+                    "default": "In den Kreisverkehr fahren",
+                    "name": "In den Kreisverkehr fahren und auf {way_name} verlassen",
+                    "destination": "In den Kreisverkehr fahren und Richtung {destination} verlassen"
+                }
+            }
+        },
+        "roundabout turn": {
+            "default": {
+                "default": "Am Kreisverkehr {modifier}",
+                "name": "Am Kreisverkehr {modifier} auf {way_name}",
+                "destination": "Am Kreisverkehr {modifier} Richtung {destination}"
+            },
+            "left": {
+                "default": "Am Kreisverkehr links",
+                "name": "Am Kreisverkehr links auf {way_name}",
+                "destination": "Am Kreisverkehr links Richtung {destination}"
+            },
+            "right": {
+                "default": "Am Kreisverkehr rechts",
+                "name": "Am Kreisverkehr rechts auf {way_name}",
+                "destination": "Am Kreisverkehr rechts Richtung {destination}"
+            },
+            "straight": {
+                "default": "Am Kreisverkehr geradeaus weiterfahren",
+                "name": "Am Kreisverkehr geradeaus weiterfahren auf {way_name}",
+                "destination": "Am Kreisverkehr geradeaus weiterfahren Richtung {destination}"
+            }
+        },
+        "turn": {
+            "default": {
+                "default": "{modifier} abbiegen",
+                "name": "{modifier} abbiegen auf {way_name}",
+                "destination": "{modifier} abbiegen Richtung {destination}"
+            },
+            "left": {
+                "default": "Links abbiegen",
+                "name": "Links abbiegen auf {way_name}",
+                "destination": "Links abbiegen Richtung {destination}"
+            },
+            "right": {
+                "default": "Rechts abbiegen",
+                "name": "Rechts abbiegen auf {way_name}",
+                "destination": "Rechts abbiegen Richtung {destination}"
+            },
+            "straight": {
+                "default": "Geradeaus weiterfahren",
+                "name": "Geradeaus weiterfahren auf {way_name}",
+                "destination": "Geradeaus weiterfahren Richtung {destination}"
+            }
+        },
+        "use lane": {
+            "no_lanes": {
+                "default": "Geradeaus weiterfahren"
+            },
+            "default": {
+                "default": "{lane_instruction}"
+            }
+        }
+    }
+}

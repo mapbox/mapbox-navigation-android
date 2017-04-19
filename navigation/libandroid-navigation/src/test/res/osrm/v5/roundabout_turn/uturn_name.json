@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "roundabout turn",
+            "modifier": "uturn"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Am Kreisverkehr 180°-Wendung auf Way Name",
+        "en": "At the roundabout make a U-turn onto Way Name",
+        "fr": "Au rond-point, tourner demi-tour sur Way Name",
+        "nl": "Ga omkeren op de rotonde naar Way Name",
+        "ru": "На круговом перекрёстке разворот на Way Name",
+        "sv": "Vid rondellen sväng U-sväng in på Way Name",
+        "vi": "Đi bên ngược tại vòng xuyến để vào Way Name",
+        "zh-Hans": "在环岛调头行驶，上Way Name"
+    }
+}

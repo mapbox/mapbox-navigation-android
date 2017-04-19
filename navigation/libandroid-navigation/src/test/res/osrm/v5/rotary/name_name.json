@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "left",
+            "type": "rotary"
+        },
+        "name": "Way Name",
+        "rotary_name": "Rotary Name"
+    },
+    "instructions": {
+        "de": "In Rotary Name fahren und auf Way Name verlassen",
+        "en": "Enter Rotary Name and exit onto Way Name",
+        "fr": "Entrer dans le rond-point Rotary Name et sortir par Way Name",
+        "nl": "Verlaat het knooppunt Rotary Name naar Way Name",
+        "ru": "На площади Rotary Name с круговым движением используйте съезд на Way Name",
+        "sv": "Kör in i Rotary Name och ta av mot Way Name",
+        "vi": "Đi vào Rotary Name và ra tại Way Name",
+        "zh-Hans": "通过Rotary Name环岛后驶入Way Name"
+    }
+}

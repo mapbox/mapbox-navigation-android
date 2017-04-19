@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "on ramp",
+            "modifier": "left"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2"
+    },
+    "instructions": {
+        "de": "Rampe auf der linken Seite nehmen Richtung Destination 1",
+        "en": "Take the ramp on the left towards Destination 1",
+        "fr": "Prendre la sortie à gauche en direction de Destination 1",
+        "nl": "Neem de oprit links richting Destination 1",
+        "ru": "Используйте въезд на автомагистраль слева и продолжайте движение в направлении Destination 1",
+        "sv": "Ta påfartsrampen till vänster mot Destination 1",
+        "vi": "Đi đường nhánh bên trái đến Destination 1",
+        "zh-Hans": "通过左边的匝道前往Destination 1"
+    }
+}

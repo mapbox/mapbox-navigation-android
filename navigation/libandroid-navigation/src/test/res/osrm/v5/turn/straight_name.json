@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "turn",
+            "modifier": "straight"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Geradeaus weiterfahren auf Way Name",
+        "en": "Go straight onto Way Name",
+        "fr": "Aller tout droit sur Way Name",
+        "nl": "Ga rechtdoor naar Way Name",
+        "ru": "Продолжайте движение прямо по Way Name",
+        "sv": "Kör rakt fram in på Way Name",
+        "vi": "Chạy thẳng vào Way Name",
+        "zh-Hans": "直行，上Way Name"
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "left",
+            "type": "roundabout",
+            "exit": 1
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "In den Kreisverkehr fahren und erste Ausfahrt nehmen",
+        "en": "Enter the roundabout and take the 1st exit",
+        "fr": "Entrer dans le rond-point et prendre la première sortie",
+        "nl": "Ga de rotonde op en neem afslag eerste",
+        "ru": "На круговом перекрёстке используйте первый съезд",
+        "sv": "Kör in i rondellen och ta avfart 1:a",
+        "vi": "Đi vào vòng xuyến và ra tại đường đầu tiên",
+        "zh-Hans": "进入环岛后从第一出口驶出"
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "fork",
+            "modifier": "straight"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Geradeaus halten an der Gabelung",
+        "en": "Keep straight at the fork",
+        "fr": "Rester tout droit à l'embranchement",
+        "nl": "Ga rechtdoor op de splitsing",
+        "ru": "На развилке поверните прямо",
+        "sv": "Håll till rakt fram där vägen delar sig",
+        "vi": "Đi bên thẳng ở ngã ba",
+        "zh-Hans": "在岔道保持直行"
+    }
+}
