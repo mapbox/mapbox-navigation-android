@@ -32,13 +32,9 @@ workflows:
             echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
             curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
             sudo apt-get update && sudo apt-get install -y google-cloud-sdk
-    - script:
-            title: Build apk from app module
+    - gradle-runner@1.5.4:
             inputs:
-            - content: |-
-                #!/bin/bash
-                echo "Downloading Mapbox accesstoken for running tests:"
-                wget -O navigation/app/src/main/res/values/developer-config.xml "$BITRISEIO_DEVELOPER_CONFIG_URL"
+            - gradle_task: "$DEVELOPER_CONFIG_TASK"
     - gradle-runner@1.5.4:
             inputs:
             - gradle_task: "$GRADLE_TASK"
@@ -77,6 +73,9 @@ app:
   - opts:
       is_expand: false
     GRADLE_TASK: assembleDebug
+  - opts:
+      is_expand: false
+    DEVELOPER_CONFIG_TASK: accessToken
   - opts:
       is_expand: false
     CHECKSTYLE_TASK: checkstyle

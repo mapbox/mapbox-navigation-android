@@ -54,4 +54,5 @@ dependencies {
     })
 }
 
+apply from: 'developer-config.gradle'
 apply from: '../checkstyle.gradle'
