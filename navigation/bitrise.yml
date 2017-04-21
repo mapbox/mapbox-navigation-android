@@ -2,15 +2,15 @@
 format_version: 1.3.1
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 trigger_map:
-- push_branch: "*"
+- is_pull_request_allowed: false
+  pattern: scheduled
+  workflow: scheduled
+- is_pull_request_allowed: true
+  pattern: "*"
   workflow: primary
 workflows:
   primary:
     steps:
-    - activate-ssh-key@3.1.1:
-        run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-    - git-clone@3.4.2: {}
-    - install-missing-android-tools@1.0.1: {}
     - gradle-runner@1.5.4:
         inputs:
         - gradle_task: "$CHECKSTYLE_TASK"
@@ -65,6 +65,53 @@ workflows:
             by ${GIT_CLONE_COMMIT_COMMITER_NAME} failed"
         - icon_url: https://bitrise-public-content-production.s3.amazonaws.com/slack/bitrise-slack-icon-128.png
         - icon_url_on_error: https://bitrise-public-content-production.s3.amazonaws.com/slack/bitrise-slack-error-icon-128.png
+  scheduled:
+    steps:
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            apt-get install -y pkg-config python-pip python-dev build-essential
+            pip install awscli
+        title: Install Linux Dependencies
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            aws s3 cp s3://mapbox/android/signing-credentials/secring.gpg secring.gpg
+          opts:
+            is_expand: true
+        title: Fetch GPG Secring For SDK Signing
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            echo "NEXUS_USERNAME=$PUBLISH_NEXUS_USERNAME
+            NEXUS_PASSWORD=$PUBLISH_NEXUS_PASSWORD
+            signing.keyId=$SIGNING_KEYID
+            signing.password=$SIGNING_PASSWORD
+            signing.secretKeyRingFile=../../secring.gpg" >> navigation/gradle.properties
+          opts:
+            is_expand: true
+        title: Inject Signing And Publishing Credentials
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            make build-release
+        title: Build Navigation SDK
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            make test
+        title: Run Navigation SDK Unit Tests
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            make publish
+        title: Publish Navigation SDK To Maven Central
 app:
   envs:
   - opts:
