@@ -45,13 +45,9 @@ dependencies {
     })
 }
 
-// To run the unit tests from the command line you need to execute the following command:
-//
-//   $ ./gradlew test
-//
-// This is necessary to copy the fixtures into the resources folder, this
-// is a known issue: https://issuetracker.google.com/issues/37020423
-// guaranteeing the fixtures are looked for inside the right folders.
+// The following is necessary to copy the fixtures into the resources folder,
+// guaranteeing that the fixtures are looked for inside the right folders.
+// (This is a known issue: https://issuetracker.google.com/issues/37020423.)
 task copyResourcesToClassesDebug(type: Copy) {
     from "${projectDir}/src/test/res"
     into "${buildDir}/intermediates/classes/test/debug/res"
