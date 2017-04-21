@@ -1,6 +1,3 @@
-# mapbox-navigation-android
-
-
 ### About the Mapbox Navigation SDK for Android
 
 When your users want to get from one location to another, don’t push them out of your application into a generic map application. Instead, keep them engaged with your application 100% of the time with in-app turn-by-turn navigation.
