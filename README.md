@@ -8,7 +8,6 @@ The Mapbox Navigation SDK for Android is built on top of [the Mapbox Directions 
 The Mapbox Navigation SDK is a precise and flexible platform which enables your users to explore the world's streets. We are designing new maps specifically for navigation that highlight traffic conditions and helpful landmarks. The calculations use the user's current location and compare it to the current route that the user's traversing to provide critical information at any given moment. _You control the entire experience, from the time your user chooses a destination to when they arrive._
 
 
-
 ## Getting Started
 
 If you are looking to include this inside your project, please take a look at [the detailed instructions](https://www.mapbox.com/android-docs/mapbox-navigation/0.1/navigation/) found in our docs. If you are interested in building from source, read the contributing guide inside this project.
