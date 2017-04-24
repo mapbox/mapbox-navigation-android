@@ -1,6 +1,6 @@
 
 
-[![](https://github.com/mapbox/mapbox-navigation-android/blob/master/.github/splash-img.png)](https://www.mapbox.com/android-docs/mapbox-navigation/0.1/navigation/)
+[![](https://github.com/mapbox/mapbox-navigation-android/blob/master/.github/splash-img.png?raw=true)](https://www.mapbox.com/android-docs/mapbox-navigation/0.1/navigation/)
 
 [![Build Status](https://www.bitrise.io/app/82d6356fb9d86849.svg?token=RDyQEIAejyjilyK4PkZThA&branch=master)](https://www.bitrise.io/app/82d6356fb9d86849) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation)
 
