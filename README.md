@@ -1,4 +1,8 @@
 
+<!---
+SPLASH IMAGE TO GO HERE SHORTLY!:  [![](https://raw.githubusercontent.com/mapbox/mapbox-java/master/.github/splash-img.png)](https://www.mapbox.com/android-docs/mapbox-navigation/0.1/navigation/)
+-->
+
 [![Build Status](https://www.bitrise.io/app/82d6356fb9d86849.svg?token=RDyQEIAejyjilyK4PkZThA&branch=master)](https://www.bitrise.io/app/82d6356fb9d86849) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation)
 
 When your users want to get from one location to another, don’t push them out of your application into a generic map application. Instead, keep them engaged with your application 100% of the time with in-app turn-by-turn navigation.
@@ -16,7 +20,9 @@ The snippet to add to your `build.gradle` file to use this SDK is the following:
 
 ```
 // Mapbox Navigation SDK for Android
+
 compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.1.0'
+
 ```
 
 ## Documentation
