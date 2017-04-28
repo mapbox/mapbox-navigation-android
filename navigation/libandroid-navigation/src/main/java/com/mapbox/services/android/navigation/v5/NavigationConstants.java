@@ -13,8 +13,6 @@ public class NavigationConstants {
   @Experimental public static final int MEDIUM_ALERT_LEVEL = 3;
   @Experimental public static final int HIGH_ALERT_LEVEL = 4;
   @Experimental public static final int ARRIVE_ALERT_LEVEL = 5;
-  @Experimental public static final int METERS_TO_INTERSECTION = 50;
-  @Experimental public static final int DEFAULT_ANGLE_TOLERANCE = 45;
 
   /**
    * Threshold user must be in within to count as completing a step. One of two heuristics used to know when a user
@@ -65,5 +63,5 @@ public class NavigationConstants {
   /**
    *  Maximum angle the user puck will be rotated when snapping the user's course to the route line.
    */
-  @Experimental public static final double MAX_MANIPULATED_COURSE_ANGLE = 25;
+  @Experimental public static final int MAX_MANIPULATED_COURSE_ANGLE = 25;
 }
