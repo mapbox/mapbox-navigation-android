@@ -5,18 +5,18 @@ import android.support.annotation.FloatRange;
 
 public class MapboxNavigationOptions {
 
-  private double maxTurnCompletionOffset = NavigationConstants.MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION;
-  private double maneuverZoneRadius = NavigationConstants.MANEUVER_ZONE_RADIUS;
+  private double maxTurnCompletionOffset;
+  private double maneuverZoneRadius;
 
-  private int mediumAlertInterval = NavigationConstants.MEDIUM_ALERT_INTERVAL;
-  private int highAlertInterval = NavigationConstants.HIGH_ALERT_INTERVAL;
+  private int mediumAlertInterval;
+  private int highAlertInterval;
 
-  private double minimumMediumAlertDistance = NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT;
-  private double minimumHighAlertDistance = NavigationConstants.MINIMUM_DISTANCE_FOR_HIGH_ALERT;
+  private double minimumMediumAlertDistance;
+  private double minimumHighAlertDistance;
 
-  private double maximumDistanceOffRoute = NavigationConstants.MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE;
-  private double deadReckoningTimeInterval = NavigationConstants.DEAD_RECKONING_TIME_INTERVAL;
-  private double maxManipulatedCourseAngle = NavigationConstants.MAX_MANIPULATED_COURSE_ANGLE;
+  private double maximumDistanceOffRoute;
+  private double deadReckoningTimeInterval;
+  private double maxManipulatedCourseAngle;
 
   /**
    * Creates a new MapboxNavigationOptions object.
@@ -24,6 +24,16 @@ public class MapboxNavigationOptions {
    * @since 0.2.0
    */
   public MapboxNavigationOptions() {
+    // Set the initial variables to equal the default.
+    maxTurnCompletionOffset = NavigationConstants.MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION;
+    maneuverZoneRadius = NavigationConstants.MANEUVER_ZONE_RADIUS;
+    mediumAlertInterval = NavigationConstants.MEDIUM_ALERT_INTERVAL;
+    highAlertInterval = NavigationConstants.HIGH_ALERT_INTERVAL;
+    minimumMediumAlertDistance = NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT;
+    minimumHighAlertDistance = NavigationConstants.MINIMUM_DISTANCE_FOR_HIGH_ALERT;
+    maximumDistanceOffRoute = NavigationConstants.MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE;
+    deadReckoningTimeInterval = NavigationConstants.DEAD_RECKONING_TIME_INTERVAL;
+    maxManipulatedCourseAngle = NavigationConstants.MAX_MANIPULATED_COURSE_ANGLE;
   }
 
   /**
