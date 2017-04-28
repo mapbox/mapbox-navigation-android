@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
 
 import com.mapbox.services.Experimental;
 import com.mapbox.services.android.location.LostLocationEngine;
@@ -41,6 +42,7 @@ public class MapboxNavigation {
   // Navigation service variables
   private NavigationServiceConnection connection;
   private NavigationService navigationService;
+  private MapboxNavigationOptions options;
   private Context context;
   private boolean isBound;
 
@@ -53,7 +55,7 @@ public class MapboxNavigation {
   private boolean snapToRoute;
 
   // Requesting route variables
-  private String profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
+  private String profile;
   private DirectionsRoute route;
   private Position destination;
   private Integer userBearing;
@@ -64,14 +66,36 @@ public class MapboxNavigation {
    * Constructor
    */
 
-  public MapboxNavigation(Context context, String accessToken) {
+  /**
+   *
+   *
+   * @param context
+   * @param accessToken
+   * @since 0.1.0
+   */
+  public MapboxNavigation(@NonNull Context context, @NonNull String accessToken) {
+    this(context, accessToken, new MapboxNavigationOptions());
+  }
+
+  /**
+   *
+   *
+   * @param context
+   * @param accessToken
+   * @param options
+   * @since 0.2.0
+   */
+  public MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
+                          @NonNull MapboxNavigationOptions options) {
     Timber.d("MapboxNavigation initiated.");
     this.context = context;
     this.accessToken = accessToken;
+    this.options = options;
     connection = new NavigationServiceConnection();
     isBound = false;
     navigationService = null;
     snapToRoute = true;
+    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
     alertLevelChangeListeners = new CopyOnWriteArrayList<>();
     navigationEventListeners = new CopyOnWriteArrayList<>();
     progressChangeListeners = new CopyOnWriteArrayList<>();
@@ -415,6 +439,7 @@ public class MapboxNavigation {
       NavigationService.LocalBinder binder = (NavigationService.LocalBinder) service;
       navigationService = binder.getService();
       navigationService.setLocationEngine(getLocationEngine());
+      navigationService.setOptions(options);
       navigationService.setNavigationEventListeners(navigationEventListeners);
 
       if (alertLevelChangeListeners != null) {

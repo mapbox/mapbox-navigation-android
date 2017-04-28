@@ -48,6 +48,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private NotificationCompat.Builder notifyBuilder;
   private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
   private LocationUpdatedThread locationUpdatedThread;
+  private MapboxNavigationOptions options;
   private Handler responseHandler;
 
   private RouteProgress routeProgress;
@@ -127,6 +128,10 @@ public class NavigationService extends Service implements LocationEngineListener
     locationUpdatedThread.setSnapToRoute(snapToRoute);
   }
 
+  public void setOptions(MapboxNavigationOptions options) {
+    this.options = options;
+  }
+
   private void startNavigation() {
     Timber.d("Navigation session started.");
     if (navigationEventListeners != null) {
@@ -136,7 +141,7 @@ public class NavigationService extends Service implements LocationEngineListener
     }
 
     responseHandler = new Handler();
-    locationUpdatedThread = new LocationUpdatedThread(responseHandler);
+    locationUpdatedThread = new LocationUpdatedThread(responseHandler, options);
     locationUpdatedThread.start();
     locationUpdatedThread.getLooper();
     Timber.d("Background thread started");
