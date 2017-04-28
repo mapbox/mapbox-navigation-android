@@ -67,10 +67,10 @@ public class MapboxNavigation {
    */
 
   /**
+   * Creates a new MapboxNavigation object.
    *
-   *
-   * @param context
-   * @param accessToken
+   * @param context     {@link Context} used for various things internally, cannot be null.
+   * @param accessToken A valid Mapbox access token.
    * @since 0.1.0
    */
   public MapboxNavigation(@NonNull Context context, @NonNull String accessToken) {
@@ -78,11 +78,11 @@ public class MapboxNavigation {
   }
 
   /**
+   * Creates a new MapboxNavigation object.
    *
-   *
-   * @param context
-   * @param accessToken
-   * @param options
+   * @param context     {@link Context} used for various things internally, cannot be null.
+   * @param accessToken A valid Mapbox access token.
+   * @param options     a {@link MapboxNavigationOptions} with your customized options.
    * @since 0.2.0
    */
   public MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
