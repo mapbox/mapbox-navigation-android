@@ -47,9 +47,8 @@ public class NavigationService extends Service implements LocationEngineListener
   private CopyOnWriteArrayList<NavigationEventListener> navigationEventListeners;
   private NotificationCompat.Builder notifyBuilder;
   private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
-  private LocationUpdatedThread locationUpdatedThread;
+  private RouteController routeController;
   private MapboxNavigationOptions options;
-  private Handler responseHandler;
 
   private RouteProgress routeProgress;
   private DirectionsRoute directionsRoute;
@@ -125,7 +124,9 @@ public class NavigationService extends Service implements LocationEngineListener
    */
 
   public void setSnapToRoute(boolean snapToRoute) {
-    locationUpdatedThread.setSnapToRoute(snapToRoute);
+    if(routeController != null) {
+      routeController.setSnapToRoute(snapToRoute);
+    }
   }
 
   public void setOptions(MapboxNavigationOptions options) {
@@ -139,12 +140,7 @@ public class NavigationService extends Service implements LocationEngineListener
         navigationEventListener.onRunning(true);
       }
     }
-
-    responseHandler = new Handler();
-    locationUpdatedThread = new LocationUpdatedThread(responseHandler, options);
-    locationUpdatedThread.start();
-    locationUpdatedThread.getLooper();
-    Timber.d("Background thread started");
+    routeController = new RouteController(options);
   }
 
   @Override
@@ -193,14 +189,6 @@ public class NavigationService extends Service implements LocationEngineListener
     // Remove the this navigation service progress change listener
     progressChangeListeners.remove(this);
 
-    responseHandler.removeCallbacksAndMessages(null);
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-      locationUpdatedThread.quitSafely();
-    } else {
-      locationUpdatedThread.quit();
-    }
-
     // Lower accuracy to minimize battery usage while not in navigation mode.
     // TODO restore accuracy state to what user had before nav session
     locationEngine.setPriority(BALANCED_POWER_ACCURACY);
@@ -220,18 +208,18 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   public void setAlertLevelChangeListeners(CopyOnWriteArrayList<AlertLevelChangeListener> alertLevelChangeListeners) {
-    locationUpdatedThread.setAlertLevelChangeListener(alertLevelChangeListeners);
+    routeController.setAlertLevelChangeListener(alertLevelChangeListeners);
   }
 
   public void setProgressChangeListeners(CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners) {
     // Add a progress listener so this service is notified when the user arrives at their destination.
     progressChangeListeners.add(this);
-    locationUpdatedThread.setProgressChangeListener(progressChangeListeners);
+    routeController.setProgressChangeListener(progressChangeListeners);
     this.progressChangeListeners = progressChangeListeners;
   }
 
   public void setOffRouteListeners(CopyOnWriteArrayList<OffRouteListener> offRouteListeners) {
-    locationUpdatedThread.setOffRouteListener(offRouteListeners);
+    routeController.setOffRouteListener(offRouteListeners);
   }
 
   public void setLocationEngine(LocationEngine locationEngine) {
@@ -251,8 +239,8 @@ public class NavigationService extends Service implements LocationEngineListener
         NavigationConstants.NONE_ALERT_LEVEL
       );
     }
-    if (locationUpdatedThread != null && lastLocation != null) {
-      locationUpdatedThread.updateLocation(directionsRoute, routeProgress, lastLocation);
+    if (routeController != null && lastLocation != null) {
+      routeController.updateLocation(lastLocation, directionsRoute, routeProgress);
     }
   }
 
@@ -268,8 +256,8 @@ public class NavigationService extends Service implements LocationEngineListener
         NavigationConstants.NONE_ALERT_LEVEL
       );
     }
-    if (locationUpdatedThread != null && location != null) {
-      locationUpdatedThread.updateLocation(directionsRoute, routeProgress, location);
+    if (routeController != null && location != null) {
+      routeController.updateLocation(location, directionsRoute, routeProgress);
     }
   }
 }

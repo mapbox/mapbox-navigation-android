@@ -1,12 +1,8 @@
 package com.mapbox.services.android.navigation.v5;
 
 import android.location.Location;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Message;
 import android.support.annotation.NonNull;
 
-import com.mapbox.services.Experimental;
 import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListener;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
@@ -19,24 +15,11 @@ import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
 
-import java.lang.ref.WeakReference;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import timber.log.Timber;
 
-/**
- * This is an experimental API. Experimental APIs are quickly evolving and
- * might change or be removed in minor versions.
- */
-@Experimental
-class LocationUpdatedThread extends HandlerThread {
-
-  private static final String TAG = "LocationUpdatedThread";
-  private static final int MESSAGE_LOCATION_UPDATED = 0;
-
-  // Handlers
-  private Handler requestHandler;
-  private Handler responseHandler;
+public class RouteController {
 
   // Navigation Variables
   private CopyOnWriteArrayList<AlertLevelChangeListener> alertLevelChangeListeners;
@@ -50,9 +33,7 @@ class LocationUpdatedThread extends HandlerThread {
   private MapboxNavigationOptions options;
   private Location location;
 
-  LocationUpdatedThread(Handler responseHandler, MapboxNavigationOptions options) {
-    super(TAG);
-    this.responseHandler = responseHandler;
+  public RouteController(MapboxNavigationOptions options) {
     this.options = options;
     // By default we snap to route when possible.
     snapToRoute = true;
@@ -74,21 +55,10 @@ class LocationUpdatedThread extends HandlerThread {
     this.snapToRoute = snapToRoute;
   }
 
-  @Override
-  protected void onLooperPrepared() {
-    requestHandler = new RequestHandler(this);
-  }
-
-  void updateLocation(DirectionsRoute directionsRoute, RouteProgress previousRouteProgress, Location location) {
-    Timber.d("updateLocation called");
+  public void updateLocation(Location location, DirectionsRoute directionsRoute, RouteProgress previousRouteProgress) {
     this.location = location;
     this.directionsRoute = directionsRoute;
 
-    requestHandler.obtainMessage(MESSAGE_LOCATION_UPDATED, previousRouteProgress).sendToTarget();
-  }
-
-  private void handleRequest(final DirectionsRoute directionsRoute, final RouteProgress previousRouteProgress,
-                             final Location location) {
     if (location == null || directionsRoute == null) {
       return;
     }
@@ -110,32 +80,26 @@ class LocationUpdatedThread extends HandlerThread {
 
     this.location = location;
 
-    // Post back to the UI Thread.
-    responseHandler.post(new Runnable() {
-      public void run() {
-
-        // Only report user off route once.
-        if (userOffRoute && (userOffRoute != previousUserOffRoute)) {
-          for (OffRouteListener offRouteListener : offRouteListeners) {
-            offRouteListener.userOffRoute(location);
-          }
-          previousUserOffRoute = userOffRoute;
-        }
-
-        if (previousRouteProgress.getAlertUserLevel() != routeProgress.getAlertUserLevel()) {
-
-          for (AlertLevelChangeListener alertLevelChangeListener : alertLevelChangeListeners) {
-            alertLevelChangeListener.onAlertLevelChange(routeProgress.getAlertUserLevel(), routeProgress);
-          }
-        }
-
-        for (ProgressChangeListener progressChangeListener : progressChangeListeners) {
-          progressChangeListener.onProgressChange(LocationUpdatedThread.this.location, routeProgress);
-        }
+    // Only report user off route once.
+    if (userOffRoute && (userOffRoute != previousUserOffRoute)) {
+      for (OffRouteListener offRouteListener : offRouteListeners) {
+        offRouteListener.userOffRoute(location);
       }
-    });
-  }
+      previousUserOffRoute = userOffRoute;
+    }
 
+    if (previousRouteProgress.getAlertUserLevel() != routeProgress.getAlertUserLevel()) {
+
+      for (AlertLevelChangeListener alertLevelChangeListener : alertLevelChangeListeners) {
+        alertLevelChangeListener.onAlertLevelChange(routeProgress.getAlertUserLevel(), routeProgress);
+      }
+    }
+
+    for (ProgressChangeListener progressChangeListener : progressChangeListeners) {
+      progressChangeListener.onProgressChange(RouteController.this.location, routeProgress);
+    }
+  }
+  
   private RouteProgress monitorStepProgress(@NonNull RouteProgress routeProgress, Location location) {
     int currentStepIndex = routeProgress.getCurrentLegProgress().getStepIndex();
     int currentLegIndex = routeProgress.getLegIndex();
@@ -319,31 +283,5 @@ class LocationUpdatedThread extends HandlerThread {
 
     return averageRelativeAngle <= options.getMaxTurnCompletionOffset() ? (float)
       absoluteBearing : location.getBearing();
-  }
-
-  /**
-   * Prevents having a reference to our NavigationService class. Allows for garbage collected and reduces chance of
-   * memory leak.
-   */
-  private static class RequestHandler extends Handler {
-    //Using a weak reference means you won't prevent garbage collection
-    private final WeakReference<LocationUpdatedThread> locationUpdatedHandler;
-
-    RequestHandler(LocationUpdatedThread locationUpdatedThread) {
-      locationUpdatedHandler = new WeakReference<>(locationUpdatedThread);
-    }
-
-    @Override
-    public void handleMessage(Message msg) {
-      LocationUpdatedThread locationUpdatedThread = this.locationUpdatedHandler.get();
-      if (locationUpdatedThread != null) {
-        if (msg.what == MESSAGE_LOCATION_UPDATED) {
-          RouteProgress previousRouteProgress = (RouteProgress) msg.obj;
-          Timber.d("Received request to calculate new location information");
-          locationUpdatedThread.handleRequest(locationUpdatedThread.directionsRoute, previousRouteProgress,
-            locationUpdatedThread.location);
-        }
-      }
-    }
   }
 }
