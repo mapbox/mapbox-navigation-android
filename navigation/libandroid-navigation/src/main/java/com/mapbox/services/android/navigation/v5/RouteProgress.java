@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5;
 
+import android.location.Location;
+
 import com.mapbox.services.Experimental;
 import com.mapbox.services.android.navigation.v5.models.RouteLegProgress;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
@@ -32,19 +34,23 @@ public class RouteProgress {
   /**
    * Constructor for the route routeProgress information.
    *
-   * @param route               the {@link DirectionsRoute} being used for the navigation session. When a user is
-   *                            rerouted this route is updated.
-   * @param userSnappedPosition the users location snapped to the closest point along the route geometry.
-   * @param currentStepIndex    an {@code integer} representing the current step index the user is on.
-   * @param alertUserLevel      the most recently calculated alert level.
+   * @param route            the {@link DirectionsRoute} being used for the navigation session. When a user is
+   *                         rerouted this route is updated.
+   * @param location         the users location most recently used when creating this object.
+   * @param currentStepIndex an {@code integer} representing the current step index the user is on.
+   * @param alertUserLevel   the most recently calculated alert level.
    * @since 0.1.0
    */
-  public RouteProgress(DirectionsRoute route, Position userSnappedPosition, int currentLegIndex,
+  public RouteProgress(DirectionsRoute route, Location location, int currentLegIndex,
                        int currentStepIndex, int alertUserLevel) {
     this.route = route;
     this.alertUserLevel = alertUserLevel;
     this.currentLegIndex = currentLegIndex;
-    this.userSnappedPosition = userSnappedPosition;
+    userSnappedPosition = RouteUtils.getSnapToRoute(
+      Position.fromCoordinates(location.getLongitude(), location.getLatitude()),
+      route.getLegs().get(currentLegIndex),
+      currentStepIndex
+    );
     currentLegProgress = new RouteLegProgress(getCurrentLeg(), currentStepIndex, userSnappedPosition);
 
     // Measure route from beginning to end. This is done since the directions API gives a different distance then the
