@@ -1,10 +1,9 @@
 package com.mapbox.services.android.navigation.v5;
 
 import android.location.Location;
+import android.support.annotation.NonNull;
 
-import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListener;
-import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
-import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
+import com.mapbox.services.android.Constants;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;
@@ -14,124 +13,119 @@ import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
 
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import timber.log.Timber;
-
 public class RouteController {
 
-  // Navigation Variables
-  private CopyOnWriteArrayList<AlertLevelChangeListener> alertLevelChangeListeners;
-  private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
-  private CopyOnWriteArrayList<OffRouteListener> offRouteListeners;
-  private boolean previousUserOffRoute;
-  private boolean userOffRoute;
-  private boolean snapToRoute;
-  private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
-
-  private boolean departed;
 
   private int currentLegIndex;
   private int currentStepIndex;
 
-  public RouteController(MapboxNavigationOptions options) {
+  public RouteController(@NonNull MapboxNavigationOptions options) {
     this.options = options;
-    // By default we snap to route when possible.
-    snapToRoute = true;
   }
 
-  void setAlertLevelChangeListener(CopyOnWriteArrayList<AlertLevelChangeListener> alertLevelChangeListeners) {
-    this.alertLevelChangeListeners = alertLevelChangeListeners;
-  }
+  /**
+   * Method's in charge of calculating the alert level using the latest user location and then creating a new
+   * {@link RouteProgress} object with updated information.
+   *
+   * @param userLocation          A {@link Location} object representing the users most recent location.
+   * @param previousRouteProgress The most recent {@link RouteProgress} object created, used for getting the last
+   *                              navigation state.
+   * @return a new {@link RouteProgress} object containing the most recent user progress along the route.
+   * @since 0.2.0
+   */
+   RouteProgress createNewRouteProgress(Location userLocation, RouteProgress previousRouteProgress, DirectionsRoute directionsRoute) {
+    double userSnapToStepDistanceFromManeuver = calculateSnappedDistanceToNextStep(userLocation, previousRouteProgress);
+    int alertLevel = isUserDeparting(previousRouteProgress.getAlertUserLevel(), userSnapToStepDistanceFromManeuver, options.getManeuverZoneRadius());
+    double durationRemainingOnStep = userSnapToStepDistanceFromManeuver / userLocation.getSpeed();
 
-  void setProgressChangeListener(CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners) {
-    this.progressChangeListeners = progressChangeListeners;
-  }
-
-  void setOffRouteListener(CopyOnWriteArrayList<OffRouteListener> offRouteListeners) {
-    this.offRouteListeners = offRouteListeners;
-  }
-
-  void setSnapToRoute(boolean snapToRoute) {
-    this.snapToRoute = snapToRoute;
-  }
-
-  public void updateLocation(Location userLocation, DirectionsRoute directionsRoute, RouteProgress previousRouteProgress) {
-    this.directionsRoute = directionsRoute;
-
-    if (userLocation == null || directionsRoute == null) {
-      return;
-    }
-
-    Timber.d("Previous route alert level: %d", previousRouteProgress.getAlertUserLevel());
-
-    // With a new location update, we create a new RouteProgress object.
-    RouteProgress routeProgress = monitorStepProgress(userLocation, previousRouteProgress);
-
-    userOffRoute = userIsOnRoute(userLocation, routeProgress.getCurrentLeg());
-
-    if (snapToRoute && !userOffRoute) {
-      // Pass in the snapped location with all the other location data remaining intact for their use.
-      userLocation.setLatitude(routeProgress.usersCurrentSnappedPosition().getLatitude());
-      userLocation.setLongitude(routeProgress.usersCurrentSnappedPosition().getLongitude());
-
-      userLocation.setBearing(snapUserBearing(userLocation, routeProgress));
-    }
-
-    // Only report user off route once.
-    if (userOffRoute && (userOffRoute != previousUserOffRoute)) {
-      for (OffRouteListener offRouteListener : offRouteListeners) {
-        offRouteListener.userOffRoute(userLocation);
+    // The user is near the next steps maneuver.
+    if (userSnapToStepDistanceFromManeuver <= options.getManeuverZoneRadius()) {
+      alertLevel = isUserArriving(alertLevel, previousRouteProgress);
+      // Did the user reach the next steps maneuver?
+      if (bearingMatchesManeuverFinalHeading(userLocation, previousRouteProgress, options.getMaxTurnCompletionOffset())) {
+        increaseIndex(previousRouteProgress);
+        alertLevel = nextStepAlert(userLocation, previousRouteProgress);
       }
-      previousUserOffRoute = userOffRoute;
+      // If the users not in the maneuver zone, the alert level could potentially be medium or high.
+    } else if (durationRemainingOnStep <= NavigationConstants.HIGH_ALERT_INTERVAL
+      && previousRouteProgress.getCurrentLegProgress().getCurrentStep().getDistance()
+      > NavigationConstants.MINIMUM_DISTANCE_FOR_HIGH_ALERT) {
+      alertLevel = NavigationConstants.HIGH_ALERT_LEVEL;
+    } else if (durationRemainingOnStep <= NavigationConstants.MEDIUM_ALERT_INTERVAL
+      && previousRouteProgress.getCurrentLegProgress().getCurrentStep().getDistance()
+      > NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT) {
+      alertLevel = NavigationConstants.MEDIUM_ALERT_LEVEL;
     }
 
-    if (previousRouteProgress.getAlertUserLevel() != routeProgress.getAlertUserLevel()) {
+    return new RouteProgress(directionsRoute, userLocation, currentLegIndex, currentStepIndex, alertLevel);
+  }
 
-      for (AlertLevelChangeListener alertLevelChangeListener : alertLevelChangeListeners) {
-        alertLevelChangeListener.onAlertLevelChange(routeProgress.getAlertUserLevel(), routeProgress);
+  /**
+   * Checks whether the user is departing or not and whether the alert level needs to be
+   * {@link NavigationConstants#HIGH_ALERT_LEVEL} or {@link NavigationConstants#DEPART_ALERT_LEVEL} depending on if the
+   * user location is within the {@link MapboxNavigationOptions#getManeuverZoneRadius()}.
+   *
+   * @param alertLevel The currently calculated alert level.
+   * @param distance   From the users snapped location to the next steps maneuver.
+   * @return either the original alert level (if the user's not departing) or an updated alert level value either
+   * representing {@link NavigationConstants#HIGH_ALERT_LEVEL} or {@link NavigationConstants#DEPART_ALERT_LEVEL}
+   * @since 0.2.0
+   */
+  static int isUserDeparting(int alertLevel, double distance, double maneuverZoneRadius) {
+    if (alertLevel == NavigationConstants.NONE_ALERT_LEVEL) {
+      if (distance > maneuverZoneRadius) {
+        alertLevel = NavigationConstants.DEPART_ALERT_LEVEL;
+      } else {
+        alertLevel = NavigationConstants.HIGH_ALERT_LEVEL;
       }
     }
+    return alertLevel;
+  }
 
-    for (ProgressChangeListener progressChangeListener : progressChangeListeners) {
-      progressChangeListener.onProgressChange(userLocation, routeProgress);
+  /**
+   * Checks whether the user is arriving to their final destination or not.
+   *
+   * @param alertLevel The currently calculated alert level.
+   * @param routeProgress The most recent {@link RouteProgress} object that was created.
+   * @return either the original alert level (if the user's not arriving) or an updated alert level value.
+   * @since 0.2.0
+   */
+  static int isUserArriving(int alertLevel, RouteProgress routeProgress) {
+    if (routeProgress.getCurrentLegProgress().getUpComingStep().getManeuver().getType().equals(Constants.STEP_MANEUVER_TYPE_ARRIVE)) {
+      return NavigationConstants.ARRIVE_ALERT_LEVEL;
     }
+    return alertLevel;
   }
 
-
-
-
-
-
-
-
-
-  private boolean userDidDepart(RouteProgress routeProgress) {
-
-    return routeProgress.getAlertUserLevel() == NavigationConstants.NONE_ALERT_LEVEL
-      && routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining()
-      > options.getManeuverZoneRadius();
-  }
-
-  private boolean courseMatchesManeuverFinalHeading(Location userLocation, RouteProgress routeProgress) {
-    if (routeProgress.getCurrentLegProgress().getUpComingStep() != null) {
+  /**
+   * Checks whether the user's bearing matches the next step's maneuver provided bearingAfter variable. This is one of
+   * the criteria's required for the user location to be recognized as being on the next step or potentially arriving.
+   *
+   * @param userLocation
+   * @param routeProgress
+   * @return
+   * @since 0.2.0
+   */
+  static boolean bearingMatchesManeuverFinalHeading(Location userLocation, RouteProgress routeProgress, double maxTurnCompletionOffset) {
+    if (routeProgress.getCurrentLegProgress().getUpComingStep() == null) {
       return false;
     }
+
     // Bearings need to be normalized so when the bearingAfter is 359 and the user heading is 1, we count this as
     // within the MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION.
     double finalHeading = routeProgress.getCurrentLegProgress().getUpComingStep().getManeuver().getBearingAfter();
     double finalHeadingNormalized = MathUtils.wrap(finalHeading, 0, 360);
     double userHeadingNormalized = MathUtils.wrap(userLocation.getBearing(), 0, 360);
     return MathUtils.differenceBetweenAngles(finalHeadingNormalized, userHeadingNormalized)
-      <= options.getMaxTurnCompletionOffset();
+      <= maxTurnCompletionOffset;
 
   }
 
   private void increaseIndex(RouteProgress routeProgress) {
     // Check if we are in the last step in the current routeLeg and iterate it if needed.
-    if (currentStepIndex >= directionsRoute.getLegs().get(routeProgress.getLegIndex()).getSteps().size() - 1
-      && currentLegIndex < directionsRoute.getLegs().size()) {
+    if (currentStepIndex >= routeProgress.getRoute().getLegs().get(routeProgress.getLegIndex()).getSteps().size() - 1
+      && currentLegIndex < routeProgress.getRoute().getLegs().size()) {
       currentLegIndex += 1;
       currentStepIndex = 0;
     } else {
@@ -139,13 +133,13 @@ public class RouteController {
     }
   }
 
-  private boolean isAlertLevelLow(Location userLocation, RouteProgress routeProgress) {
+  private int nextStepAlert(Location userLocation, RouteProgress routeProgress) {
     double secondsToEndOfNewStep = RouteUtils.getDistanceToNextStep(
       Position.fromCoordinates(userLocation.getLongitude(), userLocation.getLatitude()),
       routeProgress.getRoute().getLegs().get(currentLegIndex),
       currentStepIndex
     ) / userLocation.getSpeed();
-    return secondsToEndOfNewStep > options.getMediumAlertInterval();
+    return secondsToEndOfNewStep <= NavigationConstants.MEDIUM_ALERT_INTERVAL ? NavigationConstants.MEDIUM_ALERT_LEVEL : NavigationConstants.LOW_ALERT_LEVEL;
   }
 
   private double calculateSnappedDistanceToNextStep(Location location, RouteProgress routeProgress) {
@@ -154,101 +148,28 @@ public class RouteController {
     return RouteUtils.getDistanceToNextStep(
       truePosition,
       routeProgress.getRoute().getLegs().get(currentLegIndex),
-      currentStepIndex
+      currentStepIndex,
+      TurfConstants.UNIT_METERS
     );
   }
 
-
-
-
-
-  private RouteProgress monitorStepProgress(Location userLocation, RouteProgress previousRouteProgress) {
-    int alertLevel = previousRouteProgress.getAlertUserLevel();
-
-    if (!departed) {
-      departed = true;
-      if (userDidDepart(previousRouteProgress)) {
-        alertLevel = NavigationConstants.DEPART_ALERT_LEVEL;
-      } else {
-        alertLevel = NavigationConstants.HIGH_ALERT_LEVEL;
-      }
-    }
-
-    double distanceToNextStep = calculateSnappedDistanceToNextStep(userLocation, previousRouteProgress);
-    double secondsToEndOfStep = distanceToNextStep / userLocation.getSpeed();
-
-    // Checks if the user has completed the current step
-    if (distanceToNextStep <= options.getManeuverZoneRadius()) {
-      if (previousRouteProgress.getCurrentLegProgress().getUpComingStep().getManeuver().getType().equals("arrive")) {
-        alertLevel = NavigationConstants.ARRIVE_ALERT_LEVEL;
-      } else if (courseMatchesManeuverFinalHeading(userLocation, previousRouteProgress)) {
-        increaseIndex(previousRouteProgress);
-        alertLevel = isAlertLevelLow(userLocation, previousRouteProgress) ? NavigationConstants.LOW_ALERT_LEVEL : NavigationConstants.MEDIUM_ALERT_LEVEL;
-      }
-    }
-
-    if (secondsToEndOfStep <= options.getHighAlertInterval() && distanceToNextStep > options.getMinimumHighAlertDistance()) {
-      alertLevel = NavigationConstants.HIGH_ALERT_LEVEL;
-    } else if (secondsToEndOfStep <= options.getMediumAlertInterval() && distanceToNextStep > options.getMinimumMediumAlertDistance()) {
-      alertLevel = NavigationConstants.MEDIUM_ALERT_LEVEL;
-    }
-
-    return new RouteProgress(directionsRoute, userLocation, currentLegIndex, currentStepIndex, alertLevel);
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  //      double userAbsoluteDistance = TurfMeasurement.distance(
+//        truePosition, routeProgress.getCurrentLegProgress().getUpComingStep().getManeuver().asPosition(), TurfConstants.UNIT_METERS
+//      );
+//
+//      // userAbsoluteDistanceToManeuverLocation is set to nil by default
+//      // If it's set to nil, we know the user has never entered the maneuver radius
+//      if (userDistanceToManeuverLocation == 0.0) {
+//        userDistanceToManeuverLocation = NavigationConstants.MANEUVER_ZONE_RADIUS;
+//      }
+//
+//      double lastKnownUserAbsoluteDistance = userDistanceToManeuverLocation;
+//
+//      // The objective here is to make sure the user is moving away from the maneuver location
+//      // This helps on maneuvers where the difference between the exit and enter heading are similar
+//      if (userAbsoluteDistance <= lastKnownUserAbsoluteDistance) {
+//        userDistanceToManeuverLocation = userAbsoluteDistance;
+//      }
 
 
   /**
@@ -261,7 +182,7 @@ public class RouteController {
    * @return true if the user is found to be off route, otherwise false.
    * @since 0.1.0
    */
-  private boolean userIsOnRoute(Location location, RouteLeg routeLeg) {
+  boolean userIsOnRoute(Location location, RouteLeg routeLeg) {
     Position locationToPosition = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
     // Find future location of user
     double metersInFrontOfUser = location.getSpeed() * options.getDeadReckoningTimeInterval();
@@ -274,7 +195,7 @@ public class RouteController {
       options.getMaximumDistanceOffRoute());
   }
 
-  private float snapUserBearing(Location userLocation, RouteProgress routeProgress) {
+   float snapUserBearing(Location userLocation, RouteProgress routeProgress, boolean snapToRoute) {
 
     LineString lineString = LineString.fromPolyline(routeProgress.getRoute().getGeometry(),
       com.mapbox.services.Constants.PRECISION_6);
