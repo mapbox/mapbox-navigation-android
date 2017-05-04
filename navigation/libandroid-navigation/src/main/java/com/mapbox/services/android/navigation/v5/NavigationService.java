@@ -84,8 +84,7 @@ public class NavigationService extends Service implements LocationEngineListener
     // Sets up the top bar notification
     notifyBuilder = new NotificationCompat.Builder(this)
       .setContentTitle("Mapbox Navigation")
-      .setContentText("Distance: " + routeProgress.getCurrentLegProgress().getCurrentStepProgress()
-        .getDistanceRemaining())
+      .setContentText("navigating")
       .setSmallIcon(com.mapbox.services.android.navigation.R.drawable.ic_navigation_black_24dp)
       .setContentIntent(PendingIntent.getActivity(this, 0,
         new Intent(this, activity.getClass()), 0));
@@ -274,7 +273,7 @@ public class NavigationService extends Service implements LocationEngineListener
     }
 
     // With a new location update, we create a new RouteProgress object.
-    RouteProgress routeProgress = routeController.createNewRouteProgress(userLocation, previousRouteProgress, directionsRoute);
+    RouteProgress routeProgress = RouteProgress.buildUpdatedRouteProgress(routeController, userLocation, previousRouteProgress, directionsRoute);
 
     userOffRoute = routeController.userIsOnRoute(userLocation, routeProgress.getCurrentLeg());
 
@@ -282,7 +281,6 @@ public class NavigationService extends Service implements LocationEngineListener
       // Pass in the snapped location with all the other location data remaining intact for their use.
       userLocation.setLatitude(routeProgress.usersCurrentSnappedPosition().getLatitude());
       userLocation.setLongitude(routeProgress.usersCurrentSnappedPosition().getLongitude());
-
       userLocation.setBearing(routeController.snapUserBearing(userLocation, routeProgress, snapToRoute));
     }
 

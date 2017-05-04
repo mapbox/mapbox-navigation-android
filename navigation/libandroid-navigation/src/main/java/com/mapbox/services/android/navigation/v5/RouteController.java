@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 
 import com.mapbox.services.android.Constants;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
@@ -13,37 +12,36 @@ import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
 
-public class RouteController {
+class RouteController {
 
   private MapboxNavigationOptions options;
 
   private int currentLegIndex;
   private int currentStepIndex;
 
-  public RouteController(@NonNull MapboxNavigationOptions options) {
+  RouteController(@NonNull MapboxNavigationOptions options) {
     this.options = options;
   }
 
-  /**
-   * Method's in charge of calculating the alert level using the latest user location and then creating a new
-   * {@link RouteProgress} object with updated information.
-   *
-   * @param userLocation          A {@link Location} object representing the users most recent location.
-   * @param previousRouteProgress The most recent {@link RouteProgress} object created, used for getting the last
-   *                              navigation state.
-   * @return a new {@link RouteProgress} object containing the most recent user progress along the route.
-   * @since 0.2.0
-   */
-   RouteProgress createNewRouteProgress(Location userLocation, RouteProgress previousRouteProgress, DirectionsRoute directionsRoute) {
-    double userSnapToStepDistanceFromManeuver = calculateSnappedDistanceToNextStep(userLocation, previousRouteProgress);
-    int alertLevel = isUserDeparting(previousRouteProgress.getAlertUserLevel(), userSnapToStepDistanceFromManeuver, options.getManeuverZoneRadius());
-    double durationRemainingOnStep = userSnapToStepDistanceFromManeuver / userLocation.getSpeed();
+  int getCurrentLegIndex() {
+    return currentLegIndex;
+  }
+
+  int getCurrentStepIndex() {
+    return currentStepIndex;
+  }
+
+  int computeAlertLevel(Location userLocation, RouteProgress previousRouteProgress,
+                        double userSnapToStepDistanceFromManeuver, double durationRemainingOnStep) {
+    int alertLevel = isUserDeparting(previousRouteProgress.getAlertUserLevel(),
+      userSnapToStepDistanceFromManeuver, options.getManeuverZoneRadius());
 
     // The user is near the next steps maneuver.
     if (userSnapToStepDistanceFromManeuver <= options.getManeuverZoneRadius()) {
       alertLevel = isUserArriving(alertLevel, previousRouteProgress);
       // Did the user reach the next steps maneuver?
-      if (bearingMatchesManeuverFinalHeading(userLocation, previousRouteProgress, options.getMaxTurnCompletionOffset())) {
+      if (bearingMatchesManeuverFinalHeading(
+        userLocation, previousRouteProgress, options.getMaxTurnCompletionOffset())) {
         increaseIndex(previousRouteProgress);
         alertLevel = nextStepAlert(userLocation, previousRouteProgress);
       }
@@ -58,7 +56,7 @@ public class RouteController {
       alertLevel = NavigationConstants.MEDIUM_ALERT_LEVEL;
     }
 
-    return new RouteProgress(directionsRoute, userLocation, currentLegIndex, currentStepIndex, alertLevel);
+    return alertLevel;
   }
 
   /**
@@ -86,13 +84,14 @@ public class RouteController {
   /**
    * Checks whether the user is arriving to their final destination or not.
    *
-   * @param alertLevel The currently calculated alert level.
+   * @param alertLevel    The currently calculated alert level.
    * @param routeProgress The most recent {@link RouteProgress} object that was created.
    * @return either the original alert level (if the user's not arriving) or an updated alert level value.
    * @since 0.2.0
    */
   static int isUserArriving(int alertLevel, RouteProgress routeProgress) {
-    if (routeProgress.getCurrentLegProgress().getUpComingStep().getManeuver().getType().equals(Constants.STEP_MANEUVER_TYPE_ARRIVE)) {
+    if (routeProgress.getCurrentLegProgress().getUpComingStep().getManeuver().getType()
+      .equals(Constants.STEP_MANEUVER_TYPE_ARRIVE)) {
       return NavigationConstants.ARRIVE_ALERT_LEVEL;
     }
     return alertLevel;
@@ -107,7 +106,8 @@ public class RouteController {
    * @return
    * @since 0.2.0
    */
-  static boolean bearingMatchesManeuverFinalHeading(Location userLocation, RouteProgress routeProgress, double maxTurnCompletionOffset) {
+  static boolean bearingMatchesManeuverFinalHeading(Location userLocation, RouteProgress routeProgress,
+                                                    double maxTurnCompletionOffset) {
     if (routeProgress.getCurrentLegProgress().getUpComingStep() == null) {
       return false;
     }
@@ -122,7 +122,7 @@ public class RouteController {
 
   }
 
-  private void increaseIndex(RouteProgress routeProgress) {
+  void increaseIndex(RouteProgress routeProgress) {
     // Check if we are in the last step in the current routeLeg and iterate it if needed.
     if (currentStepIndex >= routeProgress.getRoute().getLegs().get(routeProgress.getLegIndex()).getSteps().size() - 1
       && currentLegIndex < routeProgress.getRoute().getLegs().size()) {
@@ -133,16 +133,17 @@ public class RouteController {
     }
   }
 
-  private int nextStepAlert(Location userLocation, RouteProgress routeProgress) {
+   int nextStepAlert(Location userLocation, RouteProgress routeProgress) {
     double secondsToEndOfNewStep = RouteUtils.getDistanceToNextStep(
       Position.fromCoordinates(userLocation.getLongitude(), userLocation.getLatitude()),
       routeProgress.getRoute().getLegs().get(currentLegIndex),
       currentStepIndex
     ) / userLocation.getSpeed();
-    return secondsToEndOfNewStep <= NavigationConstants.MEDIUM_ALERT_INTERVAL ? NavigationConstants.MEDIUM_ALERT_LEVEL : NavigationConstants.LOW_ALERT_LEVEL;
+    return secondsToEndOfNewStep <= NavigationConstants.MEDIUM_ALERT_INTERVAL ? NavigationConstants.MEDIUM_ALERT_LEVEL
+      : NavigationConstants.LOW_ALERT_LEVEL;
   }
 
-  private double calculateSnappedDistanceToNextStep(Location location, RouteProgress routeProgress) {
+  double calculateSnappedDistanceToNextStep(Location location, RouteProgress routeProgress) {
     // TODO prevent this distance increasing if on same step
     Position truePosition = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
     return RouteUtils.getDistanceToNextStep(
@@ -195,7 +196,7 @@ public class RouteController {
       options.getMaximumDistanceOffRoute());
   }
 
-   float snapUserBearing(Location userLocation, RouteProgress routeProgress, boolean snapToRoute) {
+  float snapUserBearing(Location userLocation, RouteProgress routeProgress, boolean snapToRoute) {
 
     LineString lineString = LineString.fromPolyline(routeProgress.getRoute().getGeometry(),
       com.mapbox.services.Constants.PRECISION_6);

@@ -41,8 +41,8 @@ public class RouteProgress {
    * @param alertUserLevel   the most recently calculated alert level.
    * @since 0.1.0
    */
-  public RouteProgress(DirectionsRoute route, Location location, int currentLegIndex,
-                       int currentStepIndex, int alertUserLevel) {
+  RouteProgress(DirectionsRoute route, Location location, int currentLegIndex,
+                int currentStepIndex, int alertUserLevel) {
     this.route = route;
     this.alertUserLevel = alertUserLevel;
     this.currentLegIndex = currentLegIndex;
@@ -60,6 +60,24 @@ public class RouteProgress {
       route,
       TurfConstants.UNIT_METERS
     );
+  }
+
+  /**
+   * Method's in charge of calculating the alert level using the latest user location and then creating a new
+   * {@link RouteProgress} object with updated information.
+   *
+   * @param userLocation          A {@link Location} object representing the users most recent location.
+   * @param previousRouteProgress The most recent {@link RouteProgress} object created, used for getting the last
+   *                              navigation state.
+   * @return a new {@link RouteProgress} object containing the most recent user progress along the route.
+   * @since 0.2.0
+   */
+  static RouteProgress buildUpdatedRouteProgress(RouteController routeController, Location userLocation, RouteProgress previousRouteProgress, DirectionsRoute directionsRoute) {
+    double userSnapToStepDistanceFromManeuver = routeController.calculateSnappedDistanceToNextStep(userLocation, previousRouteProgress);
+    double durationRemainingOnStep = userSnapToStepDistanceFromManeuver / userLocation.getSpeed();
+    int alertLevel = routeController.computeAlertLevel(userLocation, previousRouteProgress, userSnapToStepDistanceFromManeuver, durationRemainingOnStep);
+    return new RouteProgress(directionsRoute, userLocation,
+      routeController.getCurrentLegIndex(), routeController.getCurrentStepIndex(), alertLevel);
   }
 
   /**
