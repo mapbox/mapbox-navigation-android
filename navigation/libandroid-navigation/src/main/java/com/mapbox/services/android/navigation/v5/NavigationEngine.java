@@ -10,7 +10,7 @@ import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 
 import java.util.List;
 
-public class NavigationEngine {
+class NavigationEngine {
 
   private DirectionsRoute directionsRoute;
   private RouteProgress previousRouteProgress;
@@ -30,7 +30,8 @@ public class NavigationEngine {
     legIndex = 0;
   }
 
-  public void onLocationChanged(Location location) {
+  void onLocationChanged(DirectionsRoute directionsRoute, Location location) {
+    this.directionsRoute = directionsRoute;
     // if the previousRouteProgress is null, the route has just begun and one needs to be created
     if (previousRouteProgress == null) {
       previousRouteProgress = new RouteProgress(directionsRoute, location, 0, 0, NavigationConstants.NONE_ALERT_LEVEL);
@@ -40,7 +41,7 @@ public class NavigationEngine {
     AlertLevelState alertLevelState = new AlertLevelState(location, previousRouteProgress, stepIndex, legIndex, options);
     int alertLevel = alertLevelState.getNewAlertLevel();
     stepIndex = alertLevelState.getStepIndex();
-    stepIndex = alertLevelState.getLegIndex();
+    legIndex = alertLevelState.getLegIndex();
 
     // Create a new RouteProgress object using the latest user location
     RouteProgress routeProgress = new RouteProgress(directionsRoute, location, legIndex, stepIndex, alertLevel);
@@ -89,11 +90,11 @@ public class NavigationEngine {
     }
   }
 
-  public DirectionsRoute getDirectionsRoute() {
+  DirectionsRoute getDirectionsRoute() {
     return directionsRoute;
   }
 
-  public void setDirectionsRoute(DirectionsRoute directionsRoute) {
+  void setDirectionsRoute(DirectionsRoute directionsRoute) {
     this.directionsRoute = directionsRoute;
   }
 
@@ -101,7 +102,7 @@ public class NavigationEngine {
     return isSnapEnabled;
   }
 
-  public void setSnapEnabled(boolean snapEnabled) {
+  void setSnapEnabled(boolean snapEnabled) {
     isSnapEnabled = snapEnabled;
   }
 
@@ -113,15 +114,15 @@ public class NavigationEngine {
     this.options = options;
   }
 
-  public void setAlertLevelChangeListeners(List<AlertLevelChangeListener> alertLevelChangeListeners) {
+  void setAlertLevelChangeListeners(List<AlertLevelChangeListener> alertLevelChangeListeners) {
     this.alertLevelChangeListeners = alertLevelChangeListeners;
   }
 
-  public void setProgressChangeListeners(List<ProgressChangeListener> progressChangeListeners) {
+  void setProgressChangeListeners(List<ProgressChangeListener> progressChangeListeners) {
     this.progressChangeListeners = progressChangeListeners;
   }
 
-  public void setOffRouteListeners(List<OffRouteListener> offRouteListeners) {
+  void setOffRouteListeners(List<OffRouteListener> offRouteListeners) {
     this.offRouteListeners = offRouteListeners;
   }
 

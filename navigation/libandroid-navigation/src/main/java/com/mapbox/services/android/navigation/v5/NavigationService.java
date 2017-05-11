@@ -48,12 +48,14 @@ public class NavigationService extends Service implements LocationEngineListener
   private MapboxNavigationOptions options;
   private boolean snapToRoute;
   private NavigationEngine navigationEngine;
-
-  private RouteProgress routeProgress;
+  private DirectionsRoute directionsRoute;
 
   @Override
   public void onCreate() {
     super.onCreate();
+    if (options == null) {
+      options = new MapboxNavigationOptions();
+    }
     navigationEngine = new NavigationEngine(options, snapToRoute);
   }
 
@@ -136,7 +138,6 @@ public class NavigationService extends Service implements LocationEngineListener
   // TODO use this to update notification
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    NavigationService.this.routeProgress = routeProgress;
     // If the user arrives at the final destination, end the navigation session.
     if (routeProgress.getAlertUserLevel() == NavigationConstants.ARRIVE_ALERT_LEVEL) {
       endNavigation();
@@ -144,6 +145,7 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   public void startRoute(DirectionsRoute directionsRoute) {
+    this.directionsRoute = directionsRoute;
     Timber.d("Start route called.");
 
     if (locationEngine != null) {
@@ -157,8 +159,9 @@ public class NavigationService extends Service implements LocationEngineListener
           navigationEventListener.onRunning(true);
         }
       }
-      navigationEngine.setDirectionsRoute(directionsRoute);
-      navigationEngine.onLocationChanged(locationEngine.getLastLocation());
+      if (locationEngine.getLastLocation() != null) {
+        navigationEngine.onLocationChanged(directionsRoute, locationEngine.getLastLocation());
+      }
     } else {
       // TODO throw exception here
       Timber.d("locationEngine null in NavigationService");
@@ -209,6 +212,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
   public void setProgressChangeListeners(List<ProgressChangeListener> progressChangeListeners) {
     // Add a progress listener so this service is notified when the user arrives at their destination.
+    this.progressChangeListeners = progressChangeListeners;
     progressChangeListeners.add(this);
     if (navigationEngine != null) {
       navigationEngine.setProgressChangeListeners(progressChangeListeners);
@@ -234,9 +238,9 @@ public class NavigationService extends Service implements LocationEngineListener
 
   @Override
   public void onLocationChanged(Location location) {
-    if (location != null && navigationEngine.getDirectionsRoute() != null && routeProgress != null) {
+    if (location != null) {
       Timber.d("LocationChange occurred");
-      navigationEngine.onLocationChanged(location);
+      navigationEngine.onLocationChanged(directionsRoute, location);
     }
   }
 }

@@ -33,6 +33,7 @@ class AlertLevelState {
   int getNewAlertLevel() {
     double userSnapToStepDistanceFromManeuver =  calculateSnappedDistanceToNextStep(location, previousRouteProgress);
     double durationRemainingOnStep = userSnapToStepDistanceFromManeuver / location.getSpeed();
+    double stepDistance = previousRouteProgress.getCurrentLegProgress().getCurrentStep().getDistance();
 
     int alertLevel = isUserDeparting(previousRouteProgress.getAlertUserLevel(), userSnapToStepDistanceFromManeuver, options.getManeuverZoneRadius());
 
@@ -45,8 +46,12 @@ class AlertLevelState {
         alertLevel = nextStepAlert(durationRemainingOnStep);
       }
       // If the users not in the maneuver zone, the alert level could potentially be medium or high.
-    } else {
-      mediumHighLevelCheck(alertLevel, durationRemainingOnStep);
+    } else if (durationRemainingOnStep <= options.getHighAlertInterval()
+      && stepDistance > options.getMinimumHighAlertDistance()) {
+      alertLevel = NavigationConstants.HIGH_ALERT_LEVEL;
+    } else if (durationRemainingOnStep <= options.getMediumAlertInterval()
+      && stepDistance > options.getMinimumMediumAlertDistance()) {
+      alertLevel = NavigationConstants.MEDIUM_ALERT_LEVEL;
     }
     return alertLevel;
   }
@@ -57,19 +62,6 @@ class AlertLevelState {
 
   int getLegIndex() {
     return legIndex;
-  }
-
-  private int mediumHighLevelCheck(int alertLevel, double durationRemainingOnStep) {
-    boolean durationWithinHighInterval = durationRemainingOnStep <= options.getMinimumHighAlertDistance();
-    boolean durationWithinMediumInterval = durationRemainingOnStep <= options.getMinimumMediumAlertDistance();
-    double stepDistance = previousRouteProgress.getRoute().getLegs().get(legIndex).getSteps().get(stepIndex).getDistance();
-
-    if (durationWithinHighInterval && stepDistance > options.getMinimumHighAlertDistance()) {
-      alertLevel = NavigationConstants.HIGH_ALERT_LEVEL;
-    } else if (durationWithinMediumInterval && stepDistance > options.getMinimumMediumAlertDistance()) {
-      alertLevel = NavigationConstants.MEDIUM_ALERT_LEVEL;
-    }
-    return alertLevel;
   }
 
   /**
@@ -112,7 +104,7 @@ class AlertLevelState {
 
 
 
-  int nextStepAlert(double secondsToEndOfNewStep) {
+  private int nextStepAlert(double secondsToEndOfNewStep) {
     return secondsToEndOfNewStep <= NavigationConstants.MEDIUM_ALERT_INTERVAL ? NavigationConstants.MEDIUM_ALERT_LEVEL
       : NavigationConstants.LOW_ALERT_LEVEL;
   }

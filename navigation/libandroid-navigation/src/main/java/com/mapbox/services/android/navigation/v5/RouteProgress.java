@@ -37,6 +37,7 @@ public class RouteProgress {
   private int LegIndex;
   private int alertUserLevel;
   private double routeDistance;
+  private int stepIndex;
 
   /**
    * Constructor for the route routeProgress information.
@@ -51,7 +52,9 @@ public class RouteProgress {
   RouteProgress(DirectionsRoute route, Location location, int legIndex, int stepIndex, int alertUserLevel) {
     this.route = route;
     this.alertUserLevel = alertUserLevel;
+    this.location = location;
     this.LegIndex = legIndex;
+    this.stepIndex = stepIndex;
     currentLegProgress = new RouteLegProgress(getCurrentLeg(), stepIndex, getUsersCurrentSnappedPosition());
     initialize();
   }
@@ -164,7 +167,7 @@ public class RouteProgress {
    */
   public Position getUsersCurrentSnappedPosition() {
     Point locationToPoint = Point.fromCoordinates(new double[] {location.getLongitude(), location.getLatitude()});
-    String stepGeometry = getCurrentLegProgress().getCurrentStep().getGeometry();
+    String stepGeometry = route.getLegs().get(getLegIndex()).getSteps().get(stepIndex).getGeometry();
 
     // Decode the geometry
     List<Position> coords = PolylineUtils.decode(stepGeometry, Constants.PRECISION_6);

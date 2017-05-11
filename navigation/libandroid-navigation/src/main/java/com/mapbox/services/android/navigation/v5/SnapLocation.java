@@ -18,6 +18,7 @@ public class SnapLocation {
   SnapLocation(Location location, RouteProgress routeProgress, MapboxNavigationOptions options) {
     this.location = location;
     this.routeProgress = routeProgress;
+    this.options = options;
   }
 
   Location getSnappedLocation() {
