@@ -35,7 +35,7 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
 
     // Mapbox Maps SDK
-    compile ('com.mapbox.mapboxsdk:mapbox-android-sdk:5.0.2@aar') {
+    compile ('com.mapbox.mapboxsdk:mapbox-android-sdk:5.1.0-beta.1@aar') {
         transitive = true
     }
 
