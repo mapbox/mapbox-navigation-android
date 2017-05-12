@@ -14,6 +14,11 @@ import com.mapbox.services.commons.utils.PolylineUtils;
 
 import java.util.List;
 
+/**
+ * Class is solely for calculating a new alert level using the latest location provided.
+ *
+ * @since 0.2.0
+ */
 class AlertLevelState {
 
   private RouteProgress previousRouteProgress;
@@ -22,20 +27,39 @@ class AlertLevelState {
   private int stepIndex;
   private int legIndex;
 
-  AlertLevelState(Location location, RouteProgress previousRouteProgress, int stepIndex, int legIndex, MapboxNavigationOptions options) {
+  /**
+   * Constructs a new AlertLevelState instance.
+   *
+   * @param location              the user location used to determine the alert level
+   * @param previousRouteProgress the previous route state
+   * @param stepIndex             the current directions step index
+   * @param legIndex              the current directions leg index
+   * @param options               a {@link MapboxNavigationOptions} object containing custom parameters
+   * @since 0.2.0
+   */
+  AlertLevelState(Location location, RouteProgress previousRouteProgress, int stepIndex, int legIndex,
+                  MapboxNavigationOptions options) {
     this.location = location;
-    this.previousRouteProgress= previousRouteProgress;
+    this.previousRouteProgress = previousRouteProgress;
     this.stepIndex = stepIndex;
     this.legIndex = legIndex;
     this.options = options;
   }
 
+  /**
+   * Returns updated alert level as an integer, this might be the same as the previous alert level or it might be new
+   * depending on the users new location.
+   *
+   * @return an integer representing one of the alert levels found inside {@link NavigationConstants}
+   * @since 0.2.0
+   */
   int getNewAlertLevel() {
-    double userSnapToStepDistanceFromManeuver =  calculateSnappedDistanceToNextStep(location, previousRouteProgress);
+    double userSnapToStepDistanceFromManeuver = calculateSnappedDistanceToNextStep(location, previousRouteProgress);
     double durationRemainingOnStep = userSnapToStepDistanceFromManeuver / location.getSpeed();
     double stepDistance = previousRouteProgress.getCurrentLegProgress().getCurrentStep().getDistance();
 
-    int alertLevel = isUserDeparting(previousRouteProgress.getAlertUserLevel(), userSnapToStepDistanceFromManeuver, options.getManeuverZoneRadius());
+    int alertLevel = isUserDeparting(previousRouteProgress.getAlertUserLevel(), userSnapToStepDistanceFromManeuver,
+      options.getManeuverZoneRadius());
 
     if (userSnapToStepDistanceFromManeuver <= options.getManeuverZoneRadius()) {
       alertLevel = isUserArriving(alertLevel, previousRouteProgress);
@@ -56,10 +80,22 @@ class AlertLevelState {
     return alertLevel;
   }
 
+  /**
+   * Returns the step index that might have been incremented while calculating the alert level.
+   *
+   * @return the current step index
+   * @since 0.2.0
+   */
   int getStepIndex() {
     return stepIndex;
   }
 
+  /**
+   * Returns the leg index that might have been incremented while calculating the alert level.
+   *
+   * @return the current leg index
+   * @since 0.2.0
+   */
   int getLegIndex() {
     return legIndex;
   }
@@ -102,13 +138,28 @@ class AlertLevelState {
     return alertLevel;
   }
 
-
-
+  /**
+   * Determines what alert level should be provided when the user has just completed the previous maneuver and they
+   * begin traversing along a new route step.
+   *
+   * @param secondsToEndOfNewStep used in determining if a {@link NavigationConstants#MEDIUM_ALERT_LEVEL} or
+   *                              {@link NavigationConstants#LOW_ALERT_LEVEL} will occur.
+   * @return the alert level
+   * @since 0.2.0
+   */
   private int nextStepAlert(double secondsToEndOfNewStep) {
     return secondsToEndOfNewStep <= NavigationConstants.MEDIUM_ALERT_INTERVAL ? NavigationConstants.MEDIUM_ALERT_LEVEL
       : NavigationConstants.LOW_ALERT_LEVEL;
   }
 
+  /**
+   * Provides the distance from the users snapped location to the next maneuver location.
+   *
+   * @param location      the users location
+   * @param routeProgress used to get the steps geometry
+   * @return distance in meters (by default)
+   * @since 0.2.0
+   */
   private double calculateSnappedDistanceToNextStep(Location location, RouteProgress routeProgress) {
     Position truePosition = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
     String stepGeometry = routeProgress.getRoute().getLegs().get(legIndex).getSteps().get(stepIndex).getGeometry();
@@ -135,13 +186,13 @@ class AlertLevelState {
    * Checks whether the user's bearing matches the next step's maneuver provided bearingAfter variable. This is one of
    * the criteria's required for the user location to be recognized as being on the next step or potentially arriving.
    *
-   * @param userLocation
-   * @param routeProgress
-   * @return
+   * @param userLocation  the location of the user
+   * @param routeProgress used for getting route information
+   * @return boolean true if the user location matches (using a tolerance) the final heading
    * @since 0.2.0
    */
   private static boolean bearingMatchesManeuverFinalHeading(Location userLocation, RouteProgress routeProgress,
-                                                    double maxTurnCompletionOffset) {
+                                                            double maxTurnCompletionOffset) {
     if (routeProgress.getCurrentLegProgress().getUpComingStep() == null) {
       return false;
     }
@@ -155,6 +206,13 @@ class AlertLevelState {
       <= maxTurnCompletionOffset;
   }
 
+  /**
+   * When the user proceeds to a new step (or leg) the index needs to be increased. We determine the amount of legs
+   * and steps and increase accordingly till the last step's reached.
+   *
+   * @param routeProgress used for getting the route index sizes
+   * @since 0.2.0
+   */
   private void increaseIndex(RouteProgress routeProgress) {
     // Check if we are in the last step in the current routeLeg and iterate it if needed.
     if (stepIndex >= routeProgress.getRoute().getLegs().get(routeProgress.getLegIndex()).getSteps().size() - 1

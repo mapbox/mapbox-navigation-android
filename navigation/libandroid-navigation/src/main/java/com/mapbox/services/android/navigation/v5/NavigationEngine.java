@@ -10,19 +10,35 @@ import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 
 import java.util.List;
 
+/**
+ * The navigation engine makes use of {@link UserOffRouteState}, {@link AlertLevelState}, etc. to first create a new
+ * route progress object and then to invoke the appropriate callbacks depending on the navigation state.
+ *
+ * @since 0.2.0
+ */
 class NavigationEngine {
 
-  private DirectionsRoute directionsRoute;
-  private RouteProgress previousRouteProgress;
-  private int stepIndex;
-  private int legIndex;
-  private MapboxNavigationOptions options;
-  private boolean isSnapEnabled;
-  private boolean previousUserOffRoute;
+  // Listeners
   private List<AlertLevelChangeListener> alertLevelChangeListeners;
   private List<ProgressChangeListener> progressChangeListeners;
   private List<OffRouteListener> offRouteListeners;
 
+  // Navigation state information
+  private RouteProgress previousRouteProgress;
+  private DirectionsRoute directionsRoute;
+  private MapboxNavigationOptions options;
+  private boolean previousUserOffRoute;
+  private boolean isSnapEnabled;
+  private int stepIndex;
+  private int legIndex;
+
+  /**
+   * Constructs a new navigation engine instance.
+   *
+   * @param options       the initial {@link MapboxNavigationOptions} to be used (this can be updated using the setter)
+   * @param isSnapEnabled boolean true if the snapping to route features enabled, otherwise false
+   * @since 0.2.0
+   */
   NavigationEngine(MapboxNavigationOptions options, boolean isSnapEnabled) {
     this.isSnapEnabled = isSnapEnabled;
     this.options = options;
@@ -30,6 +46,14 @@ class NavigationEngine {
     legIndex = 0;
   }
 
+  /**
+   * When the {@link NavigationService} recieves a new location update, this methods called which coordinates the
+   * updating of events and creating the new {@link RouteProgress} object.
+   *
+   * @param directionsRoute takes in the directions route which ensures if a reroute occurs we are using it
+   * @param location        the user location
+   * @since 0.2.0
+   */
   void onLocationChanged(DirectionsRoute directionsRoute, Location location) {
     this.directionsRoute = directionsRoute;
     // if the previousRouteProgress is null, the route has just begun and one needs to be created
@@ -38,7 +62,8 @@ class NavigationEngine {
     }
 
     // Get the new alert level
-    AlertLevelState alertLevelState = new AlertLevelState(location, previousRouteProgress, stepIndex, legIndex, options);
+    AlertLevelState alertLevelState
+      = new AlertLevelState(location, previousRouteProgress, stepIndex, legIndex, options);
     int alertLevel = alertLevelState.getNewAlertLevel();
     stepIndex = alertLevelState.getStepIndex();
     legIndex = alertLevelState.getLegIndex();
