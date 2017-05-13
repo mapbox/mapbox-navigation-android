@@ -9,10 +9,6 @@ import com.squareup.leakcanary.LeakCanary;
 
 import timber.log.Timber;
 
-/**
- * Created by antonio on 4/14/17.
- */
-
 public class NavigationApplication extends Application {
 
   private static final String LOG_TAG = NavigationApplication.class.getSimpleName();

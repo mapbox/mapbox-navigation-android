@@ -7,7 +7,7 @@ import org.mockito.Mockito;
 
 import static junit.framework.Assert.assertNotNull;
 
-public class MapboxNavigationTest extends BaseTest{
+public class MapboxNavigationTest extends BaseTest {
 
   @Test
   public void sanityTest() {

@@ -19,7 +19,6 @@ import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.constants.MyLocationTracking;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.location.LocationSource;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -73,8 +72,6 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
 
-    locationEngine = LocationSource.getLocationEngine(this);
-
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
 
     startRouteButton = (Button) findViewById(R.id.startRouteButton);
@@ -95,10 +92,11 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
           // better navigation experience for users. The updating only occurs if the user moves 3 meters or further
           // from the last update.
           locationEngine.setInterval(0);
-          locationEngine.setSmallestDisplacement(3.0f);
           locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
           locationEngine.setFastestInterval(1000);
+          locationEngine.activate();
 
+          ((MockLocationEngine)locationEngine).setRoute(route);
           navigation.setLocationEngine(locationEngine);
           navigation.startNavigation(route);
         }
@@ -109,14 +107,19 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
+
     mapboxMap.setOnMapClickListener(this);
     Snackbar.make(mapView, "Tap map to place destination", BaseTransientBottomBar.LENGTH_LONG).show();
 
     mapboxMap.moveCamera(CameraUpdateFactory.zoomBy(12));
 
+    locationEngine = new MockLocationEngine();
+    mapboxMap.setLocationSource(locationEngine);
+
     if (PermissionsManager.areLocationPermissionsGranted(this)) {
       mapboxMap.setMyLocationEnabled(true);
       mapboxMap.getTrackingSettings().setMyLocationTrackingMode(MyLocationTracking.TRACKING_FOLLOW);
+      mapboxMap.getTrackingSettings().setDismissAllTrackingOnGesture(false);
     }
   }
 
