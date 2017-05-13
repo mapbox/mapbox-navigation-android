@@ -31,7 +31,6 @@ public class SnapLocation {
     return location;
   }
 
-  // TODO split this method
   private float snapUserBearing() {
     LineString lineString = LineString.fromPolyline(routeProgress.getRoute().getGeometry(),
       com.mapbox.services.Constants.PRECISION_6);

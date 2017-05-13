@@ -187,7 +187,6 @@ public class NavigationService extends Service implements LocationEngineListener
     progressChangeListeners.remove(this);
 
     // Lower accuracy to minimize battery usage while not in navigation mode.
-    // TODO restore accuracy state to what user had before nav session
     locationEngine.setPriority(BALANCED_POWER_ACCURACY);
     locationEngine.removeLocationEngineListener(this);
     locationEngine.removeLocationUpdates();
