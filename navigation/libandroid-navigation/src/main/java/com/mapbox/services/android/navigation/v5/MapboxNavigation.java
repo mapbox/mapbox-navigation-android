@@ -23,8 +23,6 @@ import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.models.Position;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import retrofit2.Call;
@@ -49,10 +47,10 @@ public class MapboxNavigation {
   private boolean isBound;
 
   // Navigation variables
-  private List<AlertLevelChangeListener> alertLevelChangeListeners;
-  private List<NavigationEventListener> navigationEventListeners;
-  private List<ProgressChangeListener> progressChangeListeners;
-  private List<OffRouteListener> offRouteListeners;
+  private CopyOnWriteArrayList<AlertLevelChangeListener> alertLevelChangeListeners;
+  private CopyOnWriteArrayList<NavigationEventListener> navigationEventListeners;
+  private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
+  private CopyOnWriteArrayList<OffRouteListener> offRouteListeners;
   private LocationEngine locationEngine;
   private boolean snapToRoute;
 
@@ -98,10 +96,10 @@ public class MapboxNavigation {
     navigationService = null;
     snapToRoute = true;
     profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
-    alertLevelChangeListeners = new ArrayList<>();
-    navigationEventListeners = new ArrayList<>();
-    progressChangeListeners = new ArrayList<>();
-    offRouteListeners = new ArrayList<>();
+    alertLevelChangeListeners = new CopyOnWriteArrayList<>();
+    navigationEventListeners = new CopyOnWriteArrayList<>();
+    progressChangeListeners = new CopyOnWriteArrayList<>();
+    offRouteListeners = new CopyOnWriteArrayList<>();
   }
 
   /*

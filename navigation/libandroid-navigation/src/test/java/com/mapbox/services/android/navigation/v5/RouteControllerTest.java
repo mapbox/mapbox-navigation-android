@@ -35,13 +35,13 @@ public class RouteControllerTest extends BaseTest {
 
   @Test
   public void isUserDeparting_userOutsideManeuverRadius() throws Exception {
-    int alertLevel = RouteController.isUserDeparting(NavigationConstants.NONE_ALERT_LEVEL, 15, 10);
+    int alertLevel = LocationUpdateManager.isUserDeparting(NavigationConstants.NONE_ALERT_LEVEL, 15, 10);
     Assert.assertEquals(NavigationConstants.DEPART_ALERT_LEVEL, alertLevel);
   }
 
   @Test
   public void isUserDeparting_userInsideManeuverRadius() throws Exception {
-    int alertLevel = RouteController.isUserDeparting(NavigationConstants.NONE_ALERT_LEVEL, 5, 10);
+    int alertLevel = LocationUpdateManager.isUserDeparting(NavigationConstants.NONE_ALERT_LEVEL, 5, 10);
     Assert.assertEquals(NavigationConstants.HIGH_ALERT_LEVEL, alertLevel);
   }
 
@@ -49,7 +49,7 @@ public class RouteControllerTest extends BaseTest {
   public void isUserArriving_alertLevelShouldBeArrive() throws Exception {
     RouteProgress routeProgress
       = new RouteProgress(route, Mockito.mock(Location.class), 0, 11, NavigationConstants.MEDIUM_ALERT_LEVEL);
-    int alertLevel = RouteController.isUserArriving(NavigationConstants.MEDIUM_ALERT_LEVEL, routeProgress);
+    int alertLevel = LocationUpdateManager.isUserArriving(NavigationConstants.MEDIUM_ALERT_LEVEL, routeProgress);
     Assert.assertEquals(NavigationConstants.ARRIVE_ALERT_LEVEL, alertLevel);
   }
 
@@ -57,7 +57,7 @@ public class RouteControllerTest extends BaseTest {
   public void isUserArriving_alertLevelShouldBeMedium() throws Exception {
     RouteProgress routeProgress
       = new RouteProgress(route, Mockito.mock(Location.class), 0, 10, NavigationConstants.MEDIUM_ALERT_LEVEL);
-    int alertLevel = RouteController.isUserArriving(NavigationConstants.MEDIUM_ALERT_LEVEL, routeProgress);
+    int alertLevel = LocationUpdateManager.isUserArriving(NavigationConstants.MEDIUM_ALERT_LEVEL, routeProgress);
     Assert.assertEquals(NavigationConstants.MEDIUM_ALERT_LEVEL, alertLevel);
   }
 
@@ -65,20 +65,20 @@ public class RouteControllerTest extends BaseTest {
   @Test
   public void increaseIndex_stepIndexShouldIncreaseByOne() throws Exception {
     MapboxNavigationOptions options = new MapboxNavigationOptions();
-    RouteController routeController = new RouteController(options);
+    LocationUpdateManager locationUpdateManager = new LocationUpdateManager(options);
     RouteProgress routeProgress
       = new RouteProgress(route, Mockito.mock(Location.class), 0, 0, NavigationConstants.HIGH_ALERT_LEVEL);
-    routeController.increaseIndex(routeProgress);
-    Assert.assertEquals(1, routeController.getCurrentStepIndex());
+    locationUpdateManager.increaseIndex(routeProgress);
+    Assert.assertEquals(1, locationUpdateManager.getCurrentStepIndex());
   }
 
   @Test
   public void nextStepAlert_shouldReturnLowAlert() throws Exception {
     MapboxNavigationOptions options = new MapboxNavigationOptions();
-    RouteController routeController = new RouteController(options);
+    LocationUpdateManager locationUpdateManager = new LocationUpdateManager(options);
     RouteProgress routeProgress
       = new RouteProgress(route, Mockito.mock(Location.class), 0, 1, NavigationConstants.HIGH_ALERT_LEVEL);
-    int alertLevel = routeController.nextStepAlert(mock(Location.class), routeProgress);
+    int alertLevel = locationUpdateManager.nextStepAlert(mock(Location.class), routeProgress);
     Assert.assertEquals(NavigationConstants.LOW_ALERT_LEVEL, alertLevel);
   }
 }

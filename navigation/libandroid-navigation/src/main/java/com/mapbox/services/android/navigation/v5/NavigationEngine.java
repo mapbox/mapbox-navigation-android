@@ -8,7 +8,7 @@ import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * The navigation engine makes use of {@link UserOffRouteState}, {@link AlertLevelState}, etc. to first create a new
@@ -19,9 +19,9 @@ import java.util.List;
 class NavigationEngine {
 
   // Listeners
-  private List<AlertLevelChangeListener> alertLevelChangeListeners;
-  private List<ProgressChangeListener> progressChangeListeners;
-  private List<OffRouteListener> offRouteListeners;
+  private CopyOnWriteArrayList<AlertLevelChangeListener> alertLevelChangeListeners;
+  private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
+  private CopyOnWriteArrayList<OffRouteListener> offRouteListeners;
 
   // Navigation state information
   private RouteProgress previousRouteProgress;
@@ -139,15 +139,15 @@ class NavigationEngine {
     this.options = options;
   }
 
-  void setAlertLevelChangeListeners(List<AlertLevelChangeListener> alertLevelChangeListeners) {
+  void setAlertLevelChangeListeners(CopyOnWriteArrayList<AlertLevelChangeListener> alertLevelChangeListeners) {
     this.alertLevelChangeListeners = alertLevelChangeListeners;
   }
 
-  void setProgressChangeListeners(List<ProgressChangeListener> progressChangeListeners) {
+  void setProgressChangeListeners(CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners) {
     this.progressChangeListeners = progressChangeListeners;
   }
 
-  void setOffRouteListeners(List<OffRouteListener> offRouteListeners) {
+  void setOffRouteListeners(CopyOnWriteArrayList<OffRouteListener> offRouteListeners) {
     this.offRouteListeners = offRouteListeners;
   }
 

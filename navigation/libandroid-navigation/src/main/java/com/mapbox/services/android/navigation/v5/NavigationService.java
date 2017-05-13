@@ -19,7 +19,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import timber.log.Timber;
 
@@ -33,7 +33,6 @@ import static com.mapbox.services.android.telemetry.location.LocationEnginePrior
  * @since 0.1.0
  */
 @Experimental
-@SuppressWarnings( {"MissingPermission"})
 public class NavigationService extends Service implements LocationEngineListener, ProgressChangeListener {
   private static final int ONGOING_NOTIFICATION_ID = 1;
 
@@ -42,8 +41,8 @@ public class NavigationService extends Service implements LocationEngineListener
   private final IBinder localBinder = new LocalBinder();
 
   private LocationEngine locationEngine;
-  private List<NavigationEventListener> navigationEventListeners;
-  private List<ProgressChangeListener> progressChangeListeners;
+  private CopyOnWriteArrayList<NavigationEventListener> navigationEventListeners;
+  private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
   private NotificationCompat.Builder notifyBuilder;
   private MapboxNavigationOptions options;
   private boolean snapToRoute;
@@ -144,6 +143,7 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
+  @SuppressWarnings( {"MissingPermission"})
   public void startRoute(DirectionsRoute directionsRoute) {
     this.directionsRoute = directionsRoute;
     Timber.d("Start route called.");
@@ -200,17 +200,17 @@ public class NavigationService extends Service implements LocationEngineListener
     stopSelf(startId);
   }
 
-  public void setNavigationEventListeners(List<NavigationEventListener> navigationEventListeners) {
+  public void setNavigationEventListeners(CopyOnWriteArrayList<NavigationEventListener> navigationEventListeners) {
     this.navigationEventListeners = navigationEventListeners;
   }
 
-  public void setAlertLevelChangeListeners(List<AlertLevelChangeListener> alertLevelChangeListeners) {
+  public void setAlertLevelChangeListeners(CopyOnWriteArrayList<AlertLevelChangeListener> alertLevelChangeListeners) {
     if (navigationEngine != null) {
       navigationEngine.setAlertLevelChangeListeners(alertLevelChangeListeners);
     }
   }
 
-  public void setProgressChangeListeners(List<ProgressChangeListener> progressChangeListeners) {
+  public void setProgressChangeListeners(CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners) {
     // Add a progress listener so this service is notified when the user arrives at their destination.
     this.progressChangeListeners = progressChangeListeners;
     progressChangeListeners.add(this);
@@ -219,7 +219,7 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
-  public void setOffRouteListeners(List<OffRouteListener> offRouteListeners) {
+  public void setOffRouteListeners(CopyOnWriteArrayList<OffRouteListener> offRouteListeners) {
     if (navigationEngine != null) {
       navigationEngine.setOffRouteListeners(offRouteListeners);
     }
@@ -229,6 +229,7 @@ public class NavigationService extends Service implements LocationEngineListener
     this.locationEngine = locationEngine;
   }
 
+  @SuppressWarnings( {"MissingPermission"})
   @Override
   public void onConnected() {
     Timber.d("NavigationService now connected to location listener");
