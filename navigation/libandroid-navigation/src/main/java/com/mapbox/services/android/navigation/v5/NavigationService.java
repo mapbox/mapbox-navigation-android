@@ -17,6 +17,7 @@ import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
+import com.mapbox.services.api.ServicesException;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -134,7 +135,6 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
-  // TODO use this to update notification
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     // If the user arrives at the final destination, end the navigation session.
@@ -163,8 +163,8 @@ public class NavigationService extends Service implements LocationEngineListener
         navigationEngine.onLocationChanged(directionsRoute, locationEngine.getLastLocation());
       }
     } else {
-      // TODO throw exception here
-      Timber.d("locationEngine null in NavigationService");
+      throw new NavigationException("LocationEngine must be passed to the MapboxNavigation before a navigation session"
+        + "begins, also check that the locationEngine isn't null.");
     }
   }
 
