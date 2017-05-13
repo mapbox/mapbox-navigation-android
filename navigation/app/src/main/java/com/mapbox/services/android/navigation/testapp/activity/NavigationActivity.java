@@ -36,6 +36,8 @@ import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.permissions.PermissionsManager;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.api.utils.turf.TurfConstants;
+import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.models.Position;
 
@@ -162,6 +164,12 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     Position origin = (Position.fromCoordinates(userLocation.getLongitude(), userLocation.getLatitude()));
+    if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) < 50) {
+      mapboxMap.removeMarker(destinationMarker);
+      startRouteButton.setVisibility(View.GONE);
+      return;
+    }
+
     navigation.getRoute(origin, destination, new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
