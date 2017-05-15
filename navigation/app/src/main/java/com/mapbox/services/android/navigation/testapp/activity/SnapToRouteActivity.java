@@ -138,7 +138,7 @@ public class SnapToRouteActivity extends AppCompatActivity implements OnMapReady
 
     // Decode the geometry and draw the route from current position to start of next step.
     List<Position> coords = PolylineUtils.decode(currentRoute.getLegs().get(0).getSteps().get(stepCount).getGeometry(),
-      Constants.OSRM_PRECISION_V5);
+      Constants.PRECISION_6);
 
     // remove old line
     if (distancePolyline != null) {

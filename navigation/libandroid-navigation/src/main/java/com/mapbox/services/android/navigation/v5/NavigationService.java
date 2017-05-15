@@ -6,8 +6,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
-import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -20,7 +18,6 @@ import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListene
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.models.Position;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -45,19 +42,20 @@ public class NavigationService extends Service implements LocationEngineListener
 
   private LocationEngine locationEngine;
   private CopyOnWriteArrayList<NavigationEventListener> navigationEventListeners;
-  private NotificationCompat.Builder notifyBuilder;
   private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
-  private LocationUpdatedThread locationUpdatedThread;
+  private NotificationCompat.Builder notifyBuilder;
   private MapboxNavigationOptions options;
-  private Handler responseHandler;
-
-  private RouteProgress routeProgress;
+  private boolean snapToRoute;
+  private NavigationEngine navigationEngine;
   private DirectionsRoute directionsRoute;
 
   @Override
   public void onCreate() {
     super.onCreate();
-    Timber.d("Navigation service created.");
+    if (options == null) {
+      options = new MapboxNavigationOptions();
+    }
+    navigationEngine = new NavigationEngine(options, snapToRoute);
   }
 
   @Override
@@ -69,7 +67,6 @@ public class NavigationService extends Service implements LocationEngineListener
         navigationEventListener.onRunning(false);
       }
     }
-    startNavigation();
     return Service.START_NOT_STICKY;
   }
 
@@ -79,8 +76,7 @@ public class NavigationService extends Service implements LocationEngineListener
     // Sets up the top bar notification
     notifyBuilder = new NotificationCompat.Builder(this)
       .setContentTitle("Mapbox Navigation")
-      .setContentText("Distance: " + routeProgress.getCurrentLegProgress().getCurrentStepProgress()
-        .getDistanceRemaining())
+      .setContentText("navigating")
       .setSmallIcon(com.mapbox.services.android.navigation.R.drawable.ic_navigation_black_24dp)
       .setContentIntent(PendingIntent.getActivity(this, 0,
         new Intent(this, activity.getClass()), 0));
@@ -125,61 +121,57 @@ public class NavigationService extends Service implements LocationEngineListener
    */
 
   public void setSnapToRoute(boolean snapToRoute) {
-    locationUpdatedThread.setSnapToRoute(snapToRoute);
+    this.snapToRoute = snapToRoute;
+    if (navigationEngine != null) {
+      navigationEngine.setSnapEnabled(snapToRoute);
+    }
   }
 
   public void setOptions(MapboxNavigationOptions options) {
     this.options = options;
-  }
-
-  private void startNavigation() {
-    Timber.d("Navigation session started.");
-    if (navigationEventListeners != null) {
-      for (NavigationEventListener navigationEventListener : navigationEventListeners) {
-        navigationEventListener.onRunning(true);
-      }
+    if (navigationEngine != null) {
+      navigationEngine.setOptions(options);
     }
-
-    responseHandler = new Handler();
-    locationUpdatedThread = new LocationUpdatedThread(responseHandler, options);
-    locationUpdatedThread.start();
-    locationUpdatedThread.getLooper();
-    Timber.d("Background thread started");
   }
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    NavigationService.this.routeProgress = routeProgress;
     // If the user arrives at the final destination, end the navigation session.
     if (routeProgress.getAlertUserLevel() == NavigationConstants.ARRIVE_ALERT_LEVEL) {
       endNavigation();
     }
   }
 
+  @SuppressWarnings( {"MissingPermission"})
   public void startRoute(DirectionsRoute directionsRoute) {
-    Timber.d("Start route called.");
     this.directionsRoute = directionsRoute;
+    Timber.d("Start route called.");
 
     if (locationEngine != null) {
       // Begin listening into location at its highest accuracy and add navigation location listener
       locationEngine.setPriority(HIGH_ACCURACY);
-      locationEngine.requestLocationUpdates();
       locationEngine.addLocationEngineListener(this);
+      locationEngine.activate();
 
       if (navigationEventListeners != null) {
         for (NavigationEventListener navigationEventListener : navigationEventListeners) {
           navigationEventListener.onRunning(true);
         }
       }
-
+      if (locationEngine.getLastLocation() != null) {
+        navigationEngine.onLocationChanged(directionsRoute, locationEngine.getLastLocation());
+      }
     } else {
-      Timber.d("locationEngine null in NavigationService");
+      throw new NavigationException("LocationEngine must be passed to the MapboxNavigation before a navigation session"
+        + "begins, also check that the locationEngine isn't null.");
     }
   }
 
   public void updateRoute(DirectionsRoute directionsRoute) {
     Timber.d("Updating route");
-    this.directionsRoute = directionsRoute;
+    if (navigationEngine != null) {
+      navigationEngine.setDirectionsRoute(directionsRoute);
+    }
   }
 
   public void endNavigation() {
@@ -193,16 +185,7 @@ public class NavigationService extends Service implements LocationEngineListener
     // Remove the this navigation service progress change listener
     progressChangeListeners.remove(this);
 
-    responseHandler.removeCallbacksAndMessages(null);
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-      locationUpdatedThread.quitSafely();
-    } else {
-      locationUpdatedThread.quit();
-    }
-
     // Lower accuracy to minimize battery usage while not in navigation mode.
-    // TODO restore accuracy state to what user had before nav session
     locationEngine.setPriority(BALANCED_POWER_ACCURACY);
     locationEngine.removeLocationEngineListener(this);
     locationEngine.removeLocationUpdates();
@@ -220,56 +203,43 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   public void setAlertLevelChangeListeners(CopyOnWriteArrayList<AlertLevelChangeListener> alertLevelChangeListeners) {
-    locationUpdatedThread.setAlertLevelChangeListener(alertLevelChangeListeners);
+    if (navigationEngine != null) {
+      navigationEngine.setAlertLevelChangeListeners(alertLevelChangeListeners);
+    }
   }
 
   public void setProgressChangeListeners(CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners) {
     // Add a progress listener so this service is notified when the user arrives at their destination.
-    progressChangeListeners.add(this);
-    locationUpdatedThread.setProgressChangeListener(progressChangeListeners);
     this.progressChangeListeners = progressChangeListeners;
+    progressChangeListeners.add(this);
+    if (navigationEngine != null) {
+      navigationEngine.setProgressChangeListeners(progressChangeListeners);
+    }
   }
 
   public void setOffRouteListeners(CopyOnWriteArrayList<OffRouteListener> offRouteListeners) {
-    locationUpdatedThread.setOffRouteListener(offRouteListeners);
+    if (navigationEngine != null) {
+      navigationEngine.setOffRouteListeners(offRouteListeners);
+    }
   }
 
   public void setLocationEngine(LocationEngine locationEngine) {
     this.locationEngine = locationEngine;
   }
 
+  @SuppressWarnings( {"MissingPermission"})
   @Override
   public void onConnected() {
     Timber.d("NavigationService now connected to location listener");
-    Location lastLocation = locationEngine.getLastLocation();
-    if (routeProgress == null) {
-      Timber.d("Create new routeProgress object");
-      routeProgress = new RouteProgress(
-        directionsRoute,
-        Position.fromCoordinates(lastLocation.getLongitude(), lastLocation.getLatitude()),
-        0, 0,
-        NavigationConstants.NONE_ALERT_LEVEL
-      );
-    }
-    if (locationUpdatedThread != null && lastLocation != null) {
-      locationUpdatedThread.updateLocation(directionsRoute, routeProgress, lastLocation);
-    }
+    // Update location update request with newest settings.
+    locationEngine.requestLocationUpdates();
   }
 
   @Override
   public void onLocationChanged(Location location) {
-    Timber.d("LocationChange occurred");
-    if (routeProgress == null && location != null) {
-      Timber.d("Create new routeProgress object");
-      routeProgress = new RouteProgress(
-        directionsRoute,
-        Position.fromCoordinates(location.getLongitude(), location.getLatitude()),
-        0, 0,
-        NavigationConstants.NONE_ALERT_LEVEL
-      );
-    }
-    if (locationUpdatedThread != null && location != null) {
-      locationUpdatedThread.updateLocation(directionsRoute, routeProgress, location);
+    if (location != null) {
+      Timber.d("LocationChange occurred");
+      navigationEngine.onLocationChanged(directionsRoute, location);
     }
   }
 }
