@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.annotations.Polyline;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -45,6 +46,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   private MapboxNavigation navigation;
   private MapboxMap mapboxMap;
   private boolean running;
+  private Polyline polyline;
 
   Position origin = Position.fromCoordinates(-87.6900, 41.8529);
   Position destination = Position.fromCoordinates(-87.8921, 41.9794);
@@ -58,6 +60,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
 
+    // Initialize MapboxNavigation and add listeners
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
     navigation.addNavigationEventListener(this);
   }
@@ -67,13 +70,15 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     this.mapboxMap = mapboxMap;
     mapboxMap.setOnMapClickListener(this);
 
-    locationEngine = new MockLocationEngine();
+    // Use the mockLocationEngine
+    locationEngine = new MockLocationEngine(1000, 30, false);
     locationEngine.addLocationEngineListener(this);
 
     mapboxMap.setLocationSource(locationEngine);
     mapboxMap.setMyLocationEnabled(true);
-
     navigation.setLocationEngine(locationEngine);
+
+    // Acquire the navigation's route
     navigation.getRoute(origin, destination, this);
   }
 
@@ -100,8 +105,8 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void userOffRoute(Location location) {
-//    Position newOrigin = Position.fromLngLat(location.getLongitude(), location.getLatitude());
-//    navigation.updateRoute(newOrigin, destination, this);
+    Position newOrigin = Position.fromLngLat(location.getLongitude(), location.getLatitude());
+    navigation.getRoute(newOrigin, destination, location.getBearing(), this);
     Timber.d("offRoute");
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
   }
@@ -114,15 +119,19 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
       return;
     }
 
+    // First run
     drawRoute(route);
-    ((MockLocationEngine) locationEngine).setRoute(route);
-    navigation.startNavigation(route);
-
+    if (!running) {
+      ((MockLocationEngine) locationEngine).setRoute(route);
+      navigation.startNavigation(route);
+    } else {
+      navigation.updateRoute(route);
+    }
   }
 
   @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable t) {
-
+  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+    Timber.e("Getting directions failed: ", throwable);
   }
 
   private void drawRoute(DirectionsRoute route) {
@@ -135,13 +144,16 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
     if (points.size() > 0) {
 
+      if (polyline != null) {
+        mapboxMap.removePolyline(polyline);
+      }
+
       // Draw polyline on map
-      mapboxMap.addPolyline(new PolylineOptions()
+      polyline = mapboxMap.addPolyline(new PolylineOptions()
         .addAll(points)
         .color(Color.parseColor("#4264fb"))
         .width(5));
     }
-
   }
 
   @Override
@@ -174,6 +186,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
     if (locationEngine != null) {
       locationEngine.removeLocationEngineListener(this);
+      locationEngine.removeLocationUpdates();
       locationEngine.deactivate();
     }
 

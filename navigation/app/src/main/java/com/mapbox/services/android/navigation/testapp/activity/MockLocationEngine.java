@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.testapp.activity;
 
 import android.location.Location;
 import android.os.Handler;
+import android.os.SystemClock;
 
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
@@ -319,6 +320,9 @@ public class MockLocationEngine extends LocationEngine {
       Timber.v("Bearing value %f", bearing);
       lastLocation.setBearing((float) bearing);
     }
+
+    lastLocation.setAccuracy(40f);
+    lastLocation.setTime(SystemClock.elapsedRealtime());
 
     return lastLocation;
   }

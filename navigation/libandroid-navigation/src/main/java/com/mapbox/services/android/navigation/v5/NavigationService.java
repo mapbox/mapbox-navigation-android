@@ -158,9 +158,6 @@ public class NavigationService extends Service implements LocationEngineListener
           navigationEventListener.onRunning(true);
         }
       }
-      if (locationEngine.getLastLocation() != null) {
-        navigationEngine.onLocationChanged(directionsRoute, locationEngine.getLastLocation());
-      }
     } else {
       throw new NavigationException("LocationEngine must be passed to the MapboxNavigation before a navigation session"
         + "begins, also check that the locationEngine isn't null.");
@@ -168,10 +165,8 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   public void updateRoute(DirectionsRoute directionsRoute) {
+    this.directionsRoute = directionsRoute;
     Timber.d("Updating route");
-    if (navigationEngine != null) {
-      navigationEngine.setDirectionsRoute(directionsRoute);
-    }
   }
 
   public void endNavigation() {
