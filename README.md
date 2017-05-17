@@ -1,6 +1,6 @@
 
 
-[![](https://github.com/mapbox/mapbox-navigation-android/blob/master/.github/splash-img.png?raw=true)](https://www.mapbox.com/android-docs/mapbox-navigation/0.1/navigation/)
+[![](https://github.com/mapbox/mapbox-navigation-android/blob/master/.github/splash-img.png?raw=true)](https://www.mapbox.com/android-docs/navigation/latest/getting-started/)
 
 [![Build Status](https://www.bitrise.io/app/82d6356fb9d86849.svg?token=RDyQEIAejyjilyK4PkZThA&branch=master)](https://www.bitrise.io/app/82d6356fb9d86849) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation)
 
@@ -13,20 +13,20 @@ The Mapbox Navigation SDK is a precise and flexible platform which enables your 
 
 ## Getting Started
 
-If you are looking to include this inside your project, please take a look at [the detailed instructions](https://www.mapbox.com/android-docs/mapbox-navigation/0.1/navigation/) found in our docs. If you are interested in building from source, read the contributing guide inside this project.
+If you are looking to include this inside your project, please take a look at [the detailed instructions](https://www.mapbox.com/android-docs/navigation/latest/getting-started/) found in our docs. If you are interested in building from source, read the contributing guide inside this project.
 
 The snippet to add to your `build.gradle` file to use this SDK is the following:
 
 ```
 // Mapbox Navigation SDK for Android
 
-compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.1.0'
+compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.2.0'
 
 ```
 
 ## Documentation
 
-You'll find all of the documentation for this SDK on [our Mapbox Navigation page](https://www.mapbox.com/android-docs/mapbox-navigation/0.1/navigation/). This includes information on installation, using the API, and links to the API reference.
+You'll find all of the documentation for this SDK on [our Mapbox Navigation page](https://www.mapbox.com/android-docs/navigation/latest/getting-started/). This includes information on installation, using the API, and links to the API reference.
 
 ## Getting Help
 
@@ -45,7 +45,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.2.0-SNAPSHOT'
+    compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.3.0-SNAPSHOT'
 }
 ```
 
