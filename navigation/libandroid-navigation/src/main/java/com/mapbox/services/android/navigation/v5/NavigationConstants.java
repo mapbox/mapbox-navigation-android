@@ -55,6 +55,16 @@ public class NavigationConstants {
   @Experimental public static final double MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE = 50;
 
   /**
+   * Seconds used before a reroute occurs.
+   */
+  public static final int SECONDS_BEFORE_REROUTE = 3;
+
+  /**
+ Accepted deviation excluding horizontal accuracy before the user is considered to be off route.
+ */
+  public static final double  USER_LOCATION_SNAPPING_DISTANCE = 10;
+
+  /**
    * When calculating whether or not the user is on the route, we look where the user will be given their speed and
    * this variable.
    */

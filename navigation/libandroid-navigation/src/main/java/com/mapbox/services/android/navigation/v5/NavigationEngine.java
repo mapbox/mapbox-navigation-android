@@ -9,6 +9,7 @@ import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListene
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The navigation engine makes use of {@link UserOffRouteState}, {@link AlertLevelState}, etc. to first create a new
@@ -27,7 +28,8 @@ class NavigationEngine {
   private RouteProgress previousRouteProgress;
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
-  private boolean previousUserOffRoute;
+  private long timeIntervalSinceLastOffRoute;
+  private Location previousLocation;
   private boolean isSnapEnabled;
   private int stepIndex;
   private int legIndex;
@@ -60,6 +62,13 @@ class NavigationEngine {
     if (previousRouteProgress == null) {
       previousRouteProgress = new RouteProgress(directionsRoute, location, 0, 0, NavigationConstants.NONE_ALERT_LEVEL);
     }
+
+    // If the locations the same as previous, no need to recalculate things
+    if (location.equals(previousLocation)) {
+      return;
+    }
+
+    previousLocation = location;
 
     // Get the new alert level
     AlertLevelState alertLevelState
@@ -101,26 +110,24 @@ class NavigationEngine {
 
   private void notifyOffRouteChange(boolean isUserOffRoute, Location location) {
     // Only report user off route once.
-    if (isUserOffRoute && !previousUserOffRoute) {
-      for (OffRouteListener offRouteListener : offRouteListeners) {
-        offRouteListener.userOffRoute(location);
+
+    if (isUserOffRoute) {
+      if (location.getTime() > timeIntervalSinceLastOffRoute
+        + TimeUnit.SECONDS.toMillis(NavigationConstants.SECONDS_BEFORE_REROUTE)) {
+        for (OffRouteListener offRouteListener : offRouteListeners) {
+          offRouteListener.userOffRoute(location);
+        }
+        timeIntervalSinceLastOffRoute = location.getTime();
       }
+    } else {
+      timeIntervalSinceLastOffRoute = location.getTime();
     }
-    previousUserOffRoute = isUserOffRoute;
   }
 
   private void notifyProgressChange(Location location, RouteProgress routeProgress) {
     for (ProgressChangeListener progressChangeListener : progressChangeListeners) {
       progressChangeListener.onProgressChange(location, routeProgress);
     }
-  }
-
-  DirectionsRoute getDirectionsRoute() {
-    return directionsRoute;
-  }
-
-  void setDirectionsRoute(DirectionsRoute directionsRoute) {
-    this.directionsRoute = directionsRoute;
   }
 
   public boolean isSnapEnabled() {

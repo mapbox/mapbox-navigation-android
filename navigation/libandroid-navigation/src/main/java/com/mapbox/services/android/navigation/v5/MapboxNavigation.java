@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.support.annotation.IntRange;
+import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 
 import com.mapbox.services.Experimental;
@@ -16,7 +16,6 @@ import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListen
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.api.ServicesException;
 import com.mapbox.services.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.api.directions.v5.MapboxDirections;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
@@ -25,9 +24,7 @@ import com.mapbox.services.commons.models.Position;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Response;
 import timber.log.Timber;
 
 /**
@@ -58,7 +55,7 @@ public class MapboxNavigation {
   private String profile;
   private DirectionsRoute route;
   private Position destination;
-  private Integer userBearing;
+  private Float userBearing;
   private String accessToken;
   private Position origin;
 
@@ -250,6 +247,18 @@ public class MapboxNavigation {
   }
 
   /**
+   * When a reroute's performed, use this API to pass in the new directions route.
+   *
+   * @param directionsRoute the new {@link DirectionsRoute}
+   * @since 0.3.0
+   */
+  public void updateRoute(DirectionsRoute directionsRoute) {
+    if (isServiceAvailable()) {
+      navigationService.updateRoute(directionsRoute);
+    }
+  }
+
+  /**
    * Call this method to end a navigation session before the user reaches their destination. There isn't a need to call
    * this once the user reaches their destination. You can use the
    * {@link MapboxNavigation#addAlertLevelChangeListener(AlertLevelChangeListener)} to be notified when the user
@@ -286,23 +295,44 @@ public class MapboxNavigation {
 
   /**
    * Request navigation to acquire a route and notify your callback when a response comes in. A
-   * {@link ServicesException} will be thrown if you haven't set your access token, origin or destination before
-   * calling {@code getRoute}.
+   * {@link NavigationException} will be thrown if you haven't set your access token, origin or destination before
+   * calling {@code getRoute}. It's advised to pass in the users bearing whenever possible for a more accurate
+   * directions route.
+   * <p>
+   * If you'd like navigation to reroute when the user goes off-route, call this method with the updated information.
    *
-   * @param callback A callback of type {@link DirectionsResponse} which allows you to handle the Directions API
-   *                 response.
+   * @param callback    A callback of type {@link DirectionsResponse} which allows you to handle the Directions API
+   *                    response.
+   * @param origin      the starting position for the navigation session
+   * @param destination the arrival position for the navigation session
    * @since 0.1.0
    */
-  public void getRoute(Position origin, Position destination, Callback<DirectionsResponse> callback)
-    throws ServicesException {
+  public void getRoute(Position origin, Position destination, Callback<DirectionsResponse> callback) {
+    getRoute(origin, destination, null, callback);
+  }
+
+  /**
+   * Request navigation to acquire a route and notify your callback when a response comes in. A
+   * {@link NavigationException} will be thrown if you haven't set your access token, origin or destination before
+   * calling {@code getRoute}.
+   *
+   * @param callback    A callback of type {@link DirectionsResponse} which allows you to handle the Directions API
+   *                    response.
+   * @param origin      the starting position for the navigation session
+   * @param destination the arrival position for the navigation session
+   * @param userBearing provide the users bearing to continue the route in the users direction
+   * @since 0.3.0
+   */
+  public void getRoute(Position origin, Position destination, Float userBearing, Callback<DirectionsResponse> callback)
+    throws NavigationException {
     this.origin = origin;
     this.destination = destination;
     if (accessToken == null) {
-      throw new ServicesException("A Mapbox access token must be passed into your MapboxNavigation instance before"
+      throw new NavigationException("A Mapbox access token must be passed into your MapboxNavigation instance before"
         + "calling getRoute");
     } else if (origin == null || destination == null) {
-      throw new ServicesException("A origin and destination Position must be passed into your MapboxNavigation instance"
-        + "before calling getRoute");
+      throw new NavigationException("A origin and destination Position must be passed into your MapboxNavigation"
+        + "instance before calling getRoute");
     }
 
     MapboxDirections.Builder directionsBuilder = new MapboxDirections.Builder()
@@ -316,38 +346,9 @@ public class MapboxNavigation {
     // Optionally set the bearing and radiuses if the developer provider the user bearing. A tolerance of 90 degrees
     // is given.
     if (userBearing != null) {
-      directionsBuilder.setBearings(new double[] {getUserOriginBearing(), 90}, new double[] {});
+      directionsBuilder.setBearings(new double[] {(double) userBearing, 90}, new double[] {});
     }
     directionsBuilder.build().enqueueCall(callback);
-  }
-
-  public void updateRoute(Position origin, Position destination, final Callback<DirectionsResponse> callback) {
-    getRoute(origin, destination, new Callback<DirectionsResponse>() {
-      @Override
-      public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-        if (response.body() == null) {
-          Timber.e("No routes found, make sure you set the right user and access token.");
-          return;
-        } else if (response.body().getRoutes().size() < 1) {
-          Timber.e("No routes found");
-          return;
-        }
-
-        call.enqueue(callback);
-
-        DirectionsRoute route = response.body().getRoutes().get(0);
-        MapboxNavigation.this.route = route;
-
-        if (isServiceAvailable()) {
-          navigationService.updateRoute(route);
-        }
-      }
-
-      @Override
-      public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-        Timber.e("The request for reroute failed with error: ", throwable);
-      }
-    });
   }
 
   /**
@@ -381,7 +382,7 @@ public class MapboxNavigation {
    * @param userBearing {@code int} between 0 and 260 representing the users current bearing.
    * @since 0.1.0
    */
-  public void setUserOriginBearing(@IntRange(from = 0, to = 360) int userBearing) {
+  public void setUserOriginBearing(@FloatRange(from = 0, to = 360) float userBearing) {
     this.userBearing = userBearing;
   }
 
@@ -393,7 +394,7 @@ public class MapboxNavigation {
    * @return A value between 0 and 360 or null if the userOriginBearing hasn't been set.
    * @since 0.1.0
    */
-  public int getUserOriginBearing() {
+  public float getUserOriginBearing() {
     return userBearing;
   }
 
