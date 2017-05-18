@@ -98,7 +98,7 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
           locationEngine.setFastestInterval(1000);
           locationEngine.activate();
 
-          ((MockLocationEngine)locationEngine).setRoute(route);
+          ((MockLocationEngine) locationEngine).setRoute(route);
           navigation.setLocationEngine(locationEngine);
           navigation.startNavigation(route);
         }
@@ -232,14 +232,16 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
   @Override
   public void userOffRoute(Location location) {
     Position newOrigin = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
-    navigation.updateRoute(newOrigin, destination, new Callback<DirectionsResponse>() {
+    navigation.getRoute(newOrigin, destination, location.getBearing(), new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
         DirectionsRoute route = response.body().getRoutes().get(0);
         NavigationActivity.this.route = route;
 
         // Remove old route line from map and draw the new one.
-        mapboxMap.removePolyline(routeLine);
+        if (routeLine != null) {
+          mapboxMap.removePolyline(routeLine);
+        }
         drawRouteLine(route);
       }
 

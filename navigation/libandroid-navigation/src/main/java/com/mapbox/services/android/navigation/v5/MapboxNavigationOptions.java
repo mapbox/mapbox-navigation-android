@@ -18,6 +18,9 @@ public class MapboxNavigationOptions {
   private double deadReckoningTimeInterval;
   private double maxManipulatedCourseAngle;
 
+  private double userLocationSnapDistance;
+  private int secondsBeforeReroute;
+
   /**
    * Creates a new MapboxNavigationOptions object.
    *
@@ -34,6 +37,8 @@ public class MapboxNavigationOptions {
     maximumDistanceOffRoute = NavigationConstants.MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE;
     deadReckoningTimeInterval = NavigationConstants.DEAD_RECKONING_TIME_INTERVAL;
     maxManipulatedCourseAngle = NavigationConstants.MAX_MANIPULATED_COURSE_ANGLE;
+    userLocationSnapDistance = NavigationConstants.USER_LOCATION_SNAPPING_DISTANCE;
+    secondsBeforeReroute = NavigationConstants.SECONDS_BEFORE_REROUTE;
   }
 
   /**
@@ -269,5 +274,47 @@ public class MapboxNavigationOptions {
    */
   public double getMaxManipulatedCourseAngle() {
     return maxManipulatedCourseAngle;
+  }
+
+  /**
+   * Determines the distance the user must stay within for snapping to route to occur.
+   *
+   * @return the distance in unit meters.
+   * @since 0.3.0
+   */
+  public double getUserLocationSnapDistance() {
+    return userLocationSnapDistance;
+  }
+
+  /**
+   * set the distance the user must stay within for snapping to route to occur.
+   *
+   * @param userLocationSnapDistance distance value in unit meters
+   * @since 0.3.0
+   */
+  public void setUserLocationSnapDistance(double userLocationSnapDistance) {
+    this.userLocationSnapDistance = userLocationSnapDistance;
+  }
+
+  /**
+   * The seconds before off-route happens, initially when the user goes off-route, a timer is started and waits till it
+   * reaches this value and then notifies the off-route listener.
+   *
+   * @return seconds value before rerouting
+   * @since 0.3.0
+   */
+  public int getSecondsBeforeReroute() {
+    return secondsBeforeReroute;
+  }
+
+  /**
+   * The seconds before off-route happens, initially when the user goes off-route, a timer is started and waits till it
+   * reaches this value and then notifies the off-route listener.
+   *
+   * @param secondsBeforeReroute seconds value before rerouting
+   * @since 0.3.0
+   */
+  public void setSecondsBeforeReroute(int secondsBeforeReroute) {
+    this.secondsBeforeReroute = secondsBeforeReroute;
   }
 }

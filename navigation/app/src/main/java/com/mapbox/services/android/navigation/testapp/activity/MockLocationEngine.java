@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.testapp.activity;
 
 import android.location.Location;
 import android.os.Handler;
+import android.os.SystemClock;
 
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
@@ -131,8 +132,8 @@ public class MockLocationEngine extends LocationEngine {
     if (lastLocation.getLongitude() != 0 && lastLocation.getLatitude() != 0) {
       return lastLocation;
     } else {
-      lastLocation.setLatitude(38.91318);
-      lastLocation.setLongitude(-77.03254);
+      lastLocation.setLatitude(41.8529);
+      lastLocation.setLongitude(-87.6900);
       return lastLocation;
     }
   }
@@ -221,6 +222,33 @@ public class MockLocationEngine extends LocationEngine {
     return speed * time;
   }
 
+  public void moveToLocation(Position position) {
+    List<Position> positionList = new ArrayList<>();
+    positionList.add(Position.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude()));
+    positionList.add(position);
+
+    LineString route = LineString.fromCoordinates(positionList);
+
+    if (handler != null && runnable != null) {
+      handler.removeCallbacks(runnable);
+    }
+    // Reset all variables
+    handler = new Handler();
+    positions = new ArrayList<>();
+    currentLeg = 0;
+    currentStep = 0;
+
+    // Calculate the distance which will always be consistent throughout the route.
+    distance = calculateDistancePerSec();
+
+    sliceRoute(route, distance);
+    if (noisyGps) {
+      addNoiseToRoute(distance);
+    }
+
+    handler.postDelayed(runnable = new LocationUpdateRunnable(), delay);
+  }
+
   /**
    * Use this method to pass in a route and start the mocking immediately.
    *
@@ -242,11 +270,7 @@ public class MockLocationEngine extends LocationEngine {
     // Calculate the distance which will always be consistent throughout the route.
     distance = calculateDistancePerSec();
 
-    try {
-      calculateStepPoints();
-    } catch (TurfException turfException) {
-      turfException.printStackTrace();
-    }
+    calculateStepPoints();
 
     handler.postDelayed(runnable = new LocationUpdateRunnable(), delay);
   }
@@ -258,7 +282,7 @@ public class MockLocationEngine extends LocationEngine {
    * @throws TurfException occurs when turf fails to calculate either bearing or distance.
    * @since 2.0.0
    */
-  private void calculateStepPoints() throws TurfException {
+  private void calculateStepPoints() {
     LineString line = LineString.fromPolyline(
       route.getLegs().get(currentLeg)
         .getSteps().get(currentStep).getGeometry(), PRECISION_6);
@@ -297,6 +321,9 @@ public class MockLocationEngine extends LocationEngine {
       lastLocation.setBearing((float) bearing);
     }
 
+    lastLocation.setAccuracy(40f);
+    lastLocation.setTime(SystemClock.elapsedRealtime());
+
     return lastLocation;
   }
 
@@ -305,6 +332,7 @@ public class MockLocationEngine extends LocationEngine {
    *
    * @since 2.0.0
    */
+  @SuppressWarnings( {"MissingPermission"})
   private class LocationUpdateRunnable implements Runnable {
     @Override
     public void run() {
