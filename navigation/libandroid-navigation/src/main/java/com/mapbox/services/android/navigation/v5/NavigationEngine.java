@@ -2,6 +2,8 @@ package com.mapbox.services.android.navigation.v5;
 
 
 import android.location.Location;
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListener;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
@@ -26,7 +28,6 @@ class NavigationEngine {
 
   // Navigation state information
   private RouteProgress previousRouteProgress;
-  private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
   private long timeIntervalSinceLastOffRoute;
   private Location previousLocation;
@@ -41,7 +42,7 @@ class NavigationEngine {
    * @param isSnapEnabled boolean true if the snapping to route features enabled, otherwise false
    * @since 0.2.0
    */
-  NavigationEngine(MapboxNavigationOptions options, boolean isSnapEnabled) {
+  NavigationEngine(@NonNull MapboxNavigationOptions options, boolean isSnapEnabled) {
     this.isSnapEnabled = isSnapEnabled;
     this.options = options;
     stepIndex = 0;
@@ -57,10 +58,13 @@ class NavigationEngine {
    * @since 0.2.0
    */
   void onLocationChanged(DirectionsRoute directionsRoute, Location location) {
-    this.directionsRoute = directionsRoute;
     // if the previousRouteProgress is null, the route has just begun and one needs to be created
     if (previousRouteProgress == null) {
       previousRouteProgress = new RouteProgress(directionsRoute, location, 0, 0, NavigationConstants.NONE_ALERT_LEVEL);
+    }
+
+    if (TextUtils.equals(directionsRoute.getGeometry(), previousRouteProgress.getRoute().getGeometry())) {
+      resetRouteProgress();
     }
 
     // If the locations the same as previous, no need to recalculate things
@@ -130,6 +134,11 @@ class NavigationEngine {
     }
   }
 
+  void resetRouteProgress() {
+    legIndex = 0;
+    stepIndex = 0;
+  }
+
   public boolean isSnapEnabled() {
     return isSnapEnabled;
   }
@@ -157,5 +166,4 @@ class NavigationEngine {
   void setOffRouteListeners(CopyOnWriteArrayList<OffRouteListener> offRouteListeners) {
     this.offRouteListeners = offRouteListeners;
   }
-
 }

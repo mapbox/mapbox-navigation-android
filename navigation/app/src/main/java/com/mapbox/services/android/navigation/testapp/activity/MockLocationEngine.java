@@ -321,7 +321,7 @@ public class MockLocationEngine extends LocationEngine {
       lastLocation.setBearing((float) bearing);
     }
 
-    lastLocation.setAccuracy(40f);
+    lastLocation.setAccuracy(3f);
     lastLocation.setTime(SystemClock.elapsedRealtime());
 
     return lastLocation;
