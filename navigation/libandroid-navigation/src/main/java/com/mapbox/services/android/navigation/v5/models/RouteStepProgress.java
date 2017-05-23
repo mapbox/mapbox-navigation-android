@@ -1,9 +1,10 @@
 package com.mapbox.services.android.navigation.v5.models;
 
 
+import android.support.annotation.NonNull;
+
 import com.mapbox.services.Constants;
 import com.mapbox.services.Experimental;
-import com.mapbox.services.android.navigation.v5.RouteUtils;
 import com.mapbox.services.api.directions.v5.models.LegStep;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.api.utils.turf.TurfConstants;
@@ -20,8 +21,6 @@ import java.util.List;
 public class RouteStepProgress {
 
   private LegStep step;
-  private RouteLeg routeLeg;
-  private int stepIndex;
   private Position userSnappedPosition;
   private double stepDistance;
 
@@ -32,18 +31,19 @@ public class RouteStepProgress {
    * @param userSnappedPosition the users snapped location when routeProgress was last updated.
    * @since 0.1.0
    */
-  public RouteStepProgress(RouteLeg routeLeg, int stepIndex, Position userSnappedPosition) {
+  RouteStepProgress(@NonNull RouteLeg routeLeg, int stepIndex, @NonNull Position userSnappedPosition) {
     this.userSnappedPosition = userSnappedPosition;
     this.step = routeLeg.getSteps().get(stepIndex);
-    this.stepIndex = stepIndex;
-    this.routeLeg = routeLeg;
 
-    stepDistance = RouteUtils.getDistanceToNextStep(
-      routeLeg.getSteps().get(stepIndex).getManeuver().asPosition(),
-      routeLeg,
-      stepIndex,
-      TurfConstants.UNIT_METERS
+    // Decode the geometry
+    List<Position> coords = PolylineUtils.decode(step.getGeometry(), Constants.PRECISION_6);
+
+    LineString slicedLine = TurfMisc.lineSlice(
+      Point.fromCoordinates(step.getManeuver().asPosition()),
+      Point.fromCoordinates(coords.get(coords.size() - 1)),
+      LineString.fromCoordinates(coords)
     );
+    stepDistance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
   }
 
   /**
