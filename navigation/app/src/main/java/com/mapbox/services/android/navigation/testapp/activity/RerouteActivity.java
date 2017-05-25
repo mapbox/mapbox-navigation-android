@@ -17,8 +17,10 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.RouteProgress;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
+import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
@@ -37,7 +39,8 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class RerouteActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener,
-  Callback<DirectionsResponse>, MapboxMap.OnMapClickListener, NavigationEventListener, OffRouteListener {
+  Callback<DirectionsResponse>, MapboxMap.OnMapClickListener, NavigationEventListener, OffRouteListener,
+  ProgressChangeListener {
 
   @BindView(R.id.mapView)
   MapView mapView;
@@ -63,6 +66,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     // Initialize MapboxNavigation and add listeners
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
     navigation.addNavigationEventListener(this);
+
   }
 
   @Override
@@ -100,6 +104,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     this.running = running;
     if (running) {
       navigation.addOffRouteListener(this);
+      navigation.addProgressChangeListener(this);
     }
   }
 
@@ -109,6 +114,12 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     navigation.getRoute(newOrigin, destination, location.getBearing(), this);
     Timber.d("offRoute");
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
+  }
+
+
+  @Override
+  public void onProgressChange(Location location, RouteProgress routeProgress) {
+    System.out.println(routeProgress.getCurrentLegProgress().getStepIndex());
   }
 
   @Override

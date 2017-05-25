@@ -63,7 +63,7 @@ class NavigationEngine {
       previousRouteProgress = new RouteProgress(directionsRoute, location, 0, 0, NavigationConstants.NONE_ALERT_LEVEL);
     }
 
-    if (TextUtils.equals(directionsRoute.getGeometry(), previousRouteProgress.getRoute().getGeometry())) {
+    if (!TextUtils.equals(directionsRoute.getGeometry(), previousRouteProgress.getRoute().getGeometry())) {
       resetRouteProgress();
     }
 
