@@ -39,7 +39,8 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class RerouteActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener,
-  Callback<DirectionsResponse>, MapboxMap.OnMapClickListener, NavigationEventListener, OffRouteListener, ProgressChangeListener {
+  Callback<DirectionsResponse>, MapboxMap.OnMapClickListener, NavigationEventListener, OffRouteListener,
+  ProgressChangeListener {
 
   @BindView(R.id.mapView)
   MapView mapView;
