@@ -8,6 +8,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringDef;
 
 import com.mapbox.services.Experimental;
 import com.mapbox.services.android.location.LostLocationEngine;
@@ -52,6 +53,7 @@ public class MapboxNavigation {
   private boolean snapToRoute;
 
   // Requesting route variables
+  @NavigationProfiles.Profile
   private String profile;
   private DirectionsRoute route;
   private Position destination;
@@ -399,19 +401,13 @@ public class MapboxNavigation {
   }
 
   /**
-   * Calling this passing in true will change the default profile used when requesting your route to not consider
-   * traffic when routing. For more accurate timing and ensuring the quickest routes provided to the user, it isn't
-   * recommend to disable traffic. It is good if you are looking to reproduce the same route over and over for testing
-   * for example.
+   * Set the directions profile which will be used when requesting the route. It will also determine variables used to
+   * determine alert levels.
    *
-   * @since 0.1.0
+   * @param profile one of the profiles defined in {@link NavigationProfiles}
    */
-  public void setConsiderTraffic(boolean disableTraffic) {
-    if (disableTraffic) {
-      profile = DirectionsCriteria.PROFILE_DRIVING;
-    } else {
-      profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
-    }
+  public void setDirectionsProfile(@NavigationProfiles.Profile String profile) {
+    this.profile = profile;
   }
 
   /**
