@@ -93,6 +93,7 @@ public class MapboxNavigation {
     connection = new NavigationServiceConnection();
     isBound = false;
     navigationService = null;
+    profile = DirectionsCriteria.PROFILE_DRIVING;
     snapToRoute = true;
     profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
     alertLevelChangeListeners = new CopyOnWriteArrayList<>();
@@ -408,6 +409,17 @@ public class MapboxNavigation {
    */
   public void setDirectionsProfile(@NavigationProfiles.Profile String profile) {
     this.profile = profile;
+  }
+
+  /**
+   * Get the directions profile which will be used when requesting the route. It will also determine variables used to
+   * determine alert levels.
+   *
+   * @return one of the profiles defined in {@link NavigationProfiles}
+   * @since 0.3.0
+   */
+  public String getDirectionsProfile() {
+    return profile;
   }
 
   /**
