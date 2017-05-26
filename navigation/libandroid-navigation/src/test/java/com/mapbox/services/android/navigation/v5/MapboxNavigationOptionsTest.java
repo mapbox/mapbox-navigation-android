@@ -55,14 +55,42 @@ public class MapboxNavigationOptionsTest extends BaseTest {
   }
 
   @Test
-  public void testMinimumMediumAlertDistance() {
+  public void testMinimumMediumAlertDistanceDriving() {
     assertEquals(
-      new MapboxNavigationOptions().getMinimumMediumAlertDistance(),
-      NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT,
+      new MapboxNavigationOptions().getMinimumMediumAlertDistanceDriving(),
+      NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT_DRIVING,
       DELTA
     );
     assertEquals(
-      new MapboxNavigationOptions().setMinimumMediumAlertDistance(100).getMinimumMediumAlertDistance(),
+      new MapboxNavigationOptions().setMinimumMediumAlertDistanceDriving(100).getMinimumMediumAlertDistanceDriving(),
+      100,
+      DELTA
+    );
+  }
+
+  @Test
+  public void testMinimumMediumAlertDistanceCycling() {
+    assertEquals(
+      new MapboxNavigationOptions().getMinimumMediumAlertDistanceCycling(),
+      NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT_CYCLING,
+      DELTA
+    );
+    assertEquals(
+      new MapboxNavigationOptions().setMinimumMediumAlertDistanceCycling(100).getMinimumMediumAlertDistanceCycling(),
+      100,
+      DELTA
+    );
+  }
+
+  @Test
+  public void testMinimumMediumAlertDistanceWalking() {
+    assertEquals(
+      new MapboxNavigationOptions().getMinimumMediumAlertDistanceWalking(),
+      NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT_WALKING,
+      DELTA
+    );
+    assertEquals(
+      new MapboxNavigationOptions().setMinimumMediumAlertDistanceWalking(100).getMinimumMediumAlertDistanceWalking(),
       100,
       DELTA
     );

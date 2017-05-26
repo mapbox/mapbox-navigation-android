@@ -74,7 +74,7 @@ class AlertLevelState {
       && stepDistance > options.getMinimumHighAlertDistance()) {
       alertLevel = NavigationConstants.HIGH_ALERT_LEVEL;
     } else if (durationRemainingOnStep <= options.getMediumAlertInterval()
-      && stepDistance > options.getMinimumMediumAlertDistance()) {
+      && stepDistance > options.getMinimumMediumAlertDistanceDriving()) {
       alertLevel = NavigationConstants.MEDIUM_ALERT_LEVEL;
     }
     return alertLevel;

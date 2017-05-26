@@ -11,7 +11,9 @@ public class MapboxNavigationOptions {
   private int mediumAlertInterval;
   private int highAlertInterval;
 
-  private double minimumMediumAlertDistance;
+  private double minimumMediumAlertDistanceDriving;
+  private double minimumMediumAlertDistanceCycling;
+  private double minimumMediumAlertDistanceWalking;
   private double minimumHighAlertDistance;
 
   private double maximumDistanceOffRoute;
@@ -32,7 +34,9 @@ public class MapboxNavigationOptions {
     maneuverZoneRadius = NavigationConstants.MANEUVER_ZONE_RADIUS;
     mediumAlertInterval = NavigationConstants.MEDIUM_ALERT_INTERVAL;
     highAlertInterval = NavigationConstants.HIGH_ALERT_INTERVAL;
-    minimumMediumAlertDistance = NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT;
+    minimumMediumAlertDistanceDriving = NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT_DRIVING;
+    minimumMediumAlertDistanceCycling = NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT_CYCLING;
+    minimumMediumAlertDistanceWalking = NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT_WALKING;
     minimumHighAlertDistance = NavigationConstants.MINIMUM_DISTANCE_FOR_HIGH_ALERT;
     maximumDistanceOffRoute = NavigationConstants.MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE;
     deadReckoningTimeInterval = NavigationConstants.DEAD_RECKONING_TIME_INTERVAL;
@@ -103,15 +107,43 @@ public class MapboxNavigationOptions {
 
   /**
    * Distance in meters representing the minimum length of a step for a {@link NavigationConstants#MEDIUM_ALERT_LEVEL}
-   * to occur.
+   * to occur while driving.
    *
-   * @param minimumMediumAlertDistance double value in unit meters representing the minimum step length for a
-   *                                   {@code medium} alert to occur.
+   * @param minimumMediumAlertDistanceDriving double value in unit meters representing the minimum step length for a
+   *                                          {@code medium} alert to occur.
    * @return this.
    * @since 0.2.0
    */
-  public MapboxNavigationOptions setMinimumMediumAlertDistance(double minimumMediumAlertDistance) {
-    this.minimumMediumAlertDistance = minimumMediumAlertDistance;
+  public MapboxNavigationOptions setMinimumMediumAlertDistanceDriving(double minimumMediumAlertDistanceDriving) {
+    this.minimumMediumAlertDistanceDriving = minimumMediumAlertDistanceDriving;
+    return this;
+  }
+
+  /**
+   * Distance in meters representing the minimum length of a step for a {@link NavigationConstants#MEDIUM_ALERT_LEVEL}
+   * to occur while cycling.
+   *
+   * @param minimumMediumAlertDistanceCycling double value in unit meters representing the minimum step length for a
+   *                                          {@code medium} alert to occur.
+   * @return this.
+   * @since 0.3.0
+   */
+  public MapboxNavigationOptions setMinimumMediumAlertDistanceCycling(double minimumMediumAlertDistanceCycling) {
+    this.minimumMediumAlertDistanceCycling = minimumMediumAlertDistanceCycling;
+    return this;
+  }
+
+  /**
+   * Distance in meters representing the minimum length of a step for a {@link NavigationConstants#MEDIUM_ALERT_LEVEL}
+   * to occur while walking.
+   *
+   * @param minimumMediumAlertDistanceWalking double value in unit meters representing the minimum step length for a
+   *                                          {@code medium} alert to occur.
+   * @return this.
+   * @since 0.3.0
+   */
+  public MapboxNavigationOptions setMinimumMediumAlertDistanceWalking(double minimumMediumAlertDistanceWalking) {
+    this.minimumMediumAlertDistanceWalking = minimumMediumAlertDistanceWalking;
     return this;
   }
 
@@ -224,13 +256,35 @@ public class MapboxNavigationOptions {
 
   /**
    * Get the current required distance in meters representing the minimum length of a step for a
-   * {@link NavigationConstants#MEDIUM_ALERT_LEVEL} to occur.
+   * {@link NavigationConstants#MEDIUM_ALERT_LEVEL} to occur while driving.
    *
    * @return double value in unit meters representing the minimum step length for a {@code medium} alert to occur.
    * @since 0.2.0
    */
-  public double getMinimumMediumAlertDistance() {
-    return minimumMediumAlertDistance;
+  public double getMinimumMediumAlertDistanceDriving() {
+    return minimumMediumAlertDistanceDriving;
+  }
+
+  /**
+   * Get the current required distance in meters representing the minimum length of a step for a
+   * {@link NavigationConstants#MEDIUM_ALERT_LEVEL} to occur while cycling.
+   *
+   * @return double value in unit meters representing the minimum step length for a {@code medium} alert to occur.
+   * @since 0.2.0
+   */
+  public double getMinimumMediumAlertDistanceCycling() {
+    return minimumMediumAlertDistanceCycling;
+  }
+
+  /**
+   * Get the current required distance in meters representing the minimum length of a step for a
+   * {@link NavigationConstants#MEDIUM_ALERT_LEVEL} to occur while walking.
+   *
+   * @return double value in unit meters representing the minimum step length for a {@code medium} alert to occur.
+   * @since 0.2.0
+   */
+  public double getMinimumMediumAlertDistanceWalking() {
+    return minimumMediumAlertDistanceWalking;
   }
 
   /**
