@@ -41,7 +41,17 @@ public class NavigationConstants {
   /**
    * Distance in meters for the minimum length of a step for giving a `high` alert.
    */
-  @Experimental public static final int MINIMUM_DISTANCE_FOR_HIGH_ALERT = 100;
+  @Experimental public static final int MINIMUM_DISTANCE_FOR_HIGH_ALERT_DRIVING = 100;
+
+  /**
+   * Distance in meters for the minimum length of a step for giving a `high` alert.
+   */
+  @Experimental public static final int MINIMUM_DISTANCE_FOR_HIGH_ALERT_CYCLING = 60;
+
+  /**
+   * Distance in meters for the minimum length of a step for giving a `high` alert.
+   */
+  @Experimental public static final int MINIMUM_DISTANCE_FOR_HIGH_ALERT_WALKING = 20;
 
   /**
    * Distance in meters for the minimum length of a step for giving a `medium` alert while driving.

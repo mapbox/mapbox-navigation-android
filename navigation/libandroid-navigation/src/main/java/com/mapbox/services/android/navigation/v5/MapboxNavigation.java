@@ -8,7 +8,6 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringDef;
 
 import com.mapbox.services.Experimental;
 import com.mapbox.services.android.location.LostLocationEngine;
@@ -53,8 +52,6 @@ public class MapboxNavigation {
   private boolean snapToRoute;
 
   // Requesting route variables
-  @NavigationProfiles.Profile
-  private String profile;
   private DirectionsRoute route;
   private Position destination;
   private Float userBearing;
@@ -93,9 +90,7 @@ public class MapboxNavigation {
     connection = new NavigationServiceConnection();
     isBound = false;
     navigationService = null;
-    profile = DirectionsCriteria.PROFILE_DRIVING;
     snapToRoute = true;
-    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
     alertLevelChangeListeners = new CopyOnWriteArrayList<>();
     navigationEventListeners = new CopyOnWriteArrayList<>();
     progressChangeListeners = new CopyOnWriteArrayList<>();
@@ -339,7 +334,7 @@ public class MapboxNavigation {
     }
 
     MapboxDirections.Builder directionsBuilder = new MapboxDirections.Builder()
-      .setProfile(profile)
+      .setProfile(options.getDirectionsProfile())
       .setAccessToken(accessToken)
       .setOverview(DirectionsCriteria.OVERVIEW_FULL)
       .setOrigin(origin)
@@ -399,27 +394,6 @@ public class MapboxNavigation {
    */
   public float getUserOriginBearing() {
     return userBearing;
-  }
-
-  /**
-   * Set the directions profile which will be used when requesting the route. It will also determine variables used to
-   * determine alert levels.
-   *
-   * @param profile one of the profiles defined in {@link NavigationProfiles}
-   */
-  public void setDirectionsProfile(@NavigationProfiles.Profile String profile) {
-    this.profile = profile;
-  }
-
-  /**
-   * Get the directions profile which will be used when requesting the route. It will also determine variables used to
-   * determine alert levels.
-   *
-   * @return one of the profiles defined in {@link NavigationProfiles}
-   * @since 0.3.0
-   */
-  public String getDirectionsProfile() {
-    return profile;
   }
 
   /**
