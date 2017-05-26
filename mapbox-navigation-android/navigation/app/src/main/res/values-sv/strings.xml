@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Mapbox Navigation SDK</string>
+
+    <string name="title_route_utils_v5">Ruttverktyg</string>
+    <string name="description_route_utils">Används för att testa RouteUtils</string>
+
+    <string name="title_navigation">Navigation</string>
+    <string name="description_navigation">Använd navigationstjänsterna.</string>
+
+    <string name="title_snap_to_route">Justera till väg</string>
+    <string name="description_snap_to_route">Flytta fram och tillbaka mellan stegen och justera punkt till linjen.</string>
+
+    <string name="title_off_route_detection">Avvägsdetektering</string>
+    <string name="description_off_route_detection">Använder RouteUtils-klassen för att kontrollera om en användare är på angiven rutt.</string>
+</resources>

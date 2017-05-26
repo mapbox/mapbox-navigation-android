@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">SDK Điều hướng của Mapbox</string>
+
+    <string name="title_route_utils_v5">Tiện ích Tuyến đường</string>
+    <string name="description_route_utils">Dùng để thử lớp RouteUtils.</string>
+
+    <string name="title_navigation">Điều hướng</string>
+    <string name="description_navigation">Sử dụng dịch vụ Navigation.</string>
+
+    <string name="title_snap_to_route">Lắp vào tuyến đường</string>
+    <string name="description_snap_to_route">Chuyển tới lui giữa các bước tuyến đường và lắp địa điểm vào tuyến đường.</string>
+
+    <string name="title_off_route_detection">Nhận ra lạc đường</string>
+    <string name="description_off_route_detection">Sử dụng lớp RouteUtils để xác định người dùng bị lạc đường.</string>
+</resources>
