@@ -414,6 +414,16 @@ public class MapboxNavigation {
     }
   }
 
+  /**
+   * Get the currently used {@link MapboxNavigationOptions}, if one isn't set, the default values will be used.
+   *
+   * @return the set MapboxNavigationOptions object
+   * @since 0.3.0
+   */
+  public MapboxNavigationOptions getMapboxNavigationOptions() {
+    return options;
+  }
+
   /*
    * Service methods
    */
