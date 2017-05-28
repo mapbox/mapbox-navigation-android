@@ -22,6 +22,8 @@ import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.models.Position;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import retrofit2.Callback;
@@ -306,7 +308,25 @@ public class MapboxNavigation {
    * @since 0.1.0
    */
   public void getRoute(Position origin, Position destination, Callback<DirectionsResponse> callback) {
-    getRoute(origin, destination, null, callback);
+    getRoute(Arrays.asList(origin, destination), null, callback);
+  }
+
+  /**
+   * Request navigation to acquire a route and notify your callback when a response comes in. A
+   * {@link NavigationException} will be thrown if you haven't set your access token, origin or destination before
+   * calling {@code getRoute}. It's advised to pass in the users bearing whenever possible for a more accurate
+   * directions route.
+   * <p>
+   * If you'd like navigation to reroute when the user goes off-route, call this method with the updated information.
+   *
+   * @param callback    A callback of type {@link DirectionsResponse} which allows you to handle the Directions API
+   *                    response.
+   * @param origin      the starting position for the navigation session
+   * @param destination the arrival position for the navigation session
+   * @since 0.1.0
+   */
+  public void getRoute(Position origin, Position destination, Float userBearing, Callback<DirectionsResponse> callback) {
+    getRoute(Arrays.asList(origin, destination), userBearing, callback);
   }
 
   /**
@@ -314,17 +334,16 @@ public class MapboxNavigation {
    * {@link NavigationException} will be thrown if you haven't set your access token, origin or destination before
    * calling {@code getRoute}.
    *
+   * @param coordinates
+   * @param userBearing provide the users bearing to continue the route in the users direction
    * @param callback    A callback of type {@link DirectionsResponse} which allows you to handle the Directions API
    *                    response.
-   * @param origin      the starting position for the navigation session
-   * @param destination the arrival position for the navigation session
-   * @param userBearing provide the users bearing to continue the route in the users direction
    * @since 0.3.0
    */
-  public void getRoute(Position origin, Position destination, Float userBearing, Callback<DirectionsResponse> callback)
+  public void getRoute(List<Position> coordinates, Float userBearing, Callback<DirectionsResponse> callback)
     throws NavigationException {
-    this.origin = origin;
-    this.destination = destination;
+    this.origin = coordinates.get(0);
+    this.destination = coordinates.get(coordinates.size() - 1);
     if (accessToken == null) {
       throw new NavigationException("A Mapbox access token must be passed into your MapboxNavigation instance before"
         + "calling getRoute");
@@ -337,9 +356,8 @@ public class MapboxNavigation {
       .setProfile(options.getDirectionsProfile())
       .setAccessToken(accessToken)
       .setOverview(DirectionsCriteria.OVERVIEW_FULL)
-      .setOrigin(origin)
-      .setDestination(destination)
-      .setSteps(true);
+      .setSteps(true)
+      .setCoordinates(coordinates);
 
     // Optionally set the bearing and radiuses if the developer provider the user bearing. A tolerance of 90 degrees
     // is given.
