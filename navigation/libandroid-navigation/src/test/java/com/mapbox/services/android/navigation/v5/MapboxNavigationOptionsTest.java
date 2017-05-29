@@ -55,28 +55,84 @@ public class MapboxNavigationOptionsTest extends BaseTest {
   }
 
   @Test
-  public void testMinimumMediumAlertDistance() {
+  public void testMinimumMediumAlertDistanceDriving() {
     assertEquals(
-      new MapboxNavigationOptions().getMinimumMediumAlertDistance(),
-      NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT,
+      new MapboxNavigationOptions().getMinimumMediumAlertDistanceDriving(),
+      NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT_DRIVING,
       DELTA
     );
     assertEquals(
-      new MapboxNavigationOptions().setMinimumMediumAlertDistance(100).getMinimumMediumAlertDistance(),
+      new MapboxNavigationOptions().setMinimumMediumAlertDistanceDriving(100).getMinimumMediumAlertDistanceDriving(),
       100,
       DELTA
     );
   }
 
   @Test
-  public void testMinimumHighAlertDistance() {
+  public void testMinimumMediumAlertDistanceCycling() {
     assertEquals(
-      new MapboxNavigationOptions().getMinimumHighAlertDistance(),
-      NavigationConstants.MINIMUM_DISTANCE_FOR_HIGH_ALERT,
+      new MapboxNavigationOptions().getMinimumMediumAlertDistanceCycling(),
+      NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT_CYCLING,
       DELTA
     );
     assertEquals(
-      new MapboxNavigationOptions().setMinimumHighAlertDistance(100).getMinimumHighAlertDistance(),
+      new MapboxNavigationOptions().setMinimumMediumAlertDistanceCycling(100).getMinimumMediumAlertDistanceCycling(),
+      100,
+      DELTA
+    );
+  }
+
+  @Test
+  public void testMinimumMediumAlertDistanceWalking() {
+    assertEquals(
+      new MapboxNavigationOptions().getMinimumMediumAlertDistanceWalking(),
+      NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT_WALKING,
+      DELTA
+    );
+    assertEquals(
+      new MapboxNavigationOptions().setMinimumMediumAlertDistanceWalking(100).getMinimumMediumAlertDistanceWalking(),
+      100,
+      DELTA
+    );
+  }
+
+  @Test
+  public void testMinimumHighAlertDistanceDriving() {
+    assertEquals(
+      new MapboxNavigationOptions().getMinimumHighAlertDistanceDriving(),
+      NavigationConstants.MINIMUM_DISTANCE_FOR_HIGH_ALERT_DRIVING,
+      DELTA
+    );
+    assertEquals(
+      new MapboxNavigationOptions().setMinimumHighAlertDistanceDriving(100).getMinimumHighAlertDistanceDriving(),
+      100,
+      DELTA
+    );
+  }
+
+  @Test
+  public void testMinimumHighAlertDistanceCycling() {
+    assertEquals(
+      new MapboxNavigationOptions().getMinimumHighAlertDistanceCycling(),
+      NavigationConstants.MINIMUM_DISTANCE_FOR_HIGH_ALERT_CYCLING,
+      DELTA
+    );
+    assertEquals(
+      new MapboxNavigationOptions().setMinimumHighAlertDistanceCycling(100).getMinimumHighAlertDistanceCycling(),
+      100,
+      DELTA
+    );
+  }
+
+  @Test
+  public void testMinimumHighAlertDistanceWalking() {
+    assertEquals(
+      new MapboxNavigationOptions().getMinimumHighAlertDistanceWalking(),
+      NavigationConstants.MINIMUM_DISTANCE_FOR_HIGH_ALERT_WALKING,
+      DELTA
+    );
+    assertEquals(
+      new MapboxNavigationOptions().setMinimumHighAlertDistanceWalking(100).getMinimumHighAlertDistanceWalking(),
       100,
       DELTA
     );

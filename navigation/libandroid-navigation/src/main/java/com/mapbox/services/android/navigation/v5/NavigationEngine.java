@@ -134,7 +134,7 @@ class NavigationEngine {
     }
   }
 
-  void resetRouteProgress() {
+  private void resetRouteProgress() {
     legIndex = 0;
     stepIndex = 0;
   }

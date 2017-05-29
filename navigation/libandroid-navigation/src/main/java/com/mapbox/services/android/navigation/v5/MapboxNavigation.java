@@ -52,7 +52,6 @@ public class MapboxNavigation {
   private boolean snapToRoute;
 
   // Requesting route variables
-  private String profile;
   private DirectionsRoute route;
   private Position destination;
   private Float userBearing;
@@ -92,7 +91,6 @@ public class MapboxNavigation {
     isBound = false;
     navigationService = null;
     snapToRoute = true;
-    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
     alertLevelChangeListeners = new CopyOnWriteArrayList<>();
     navigationEventListeners = new CopyOnWriteArrayList<>();
     progressChangeListeners = new CopyOnWriteArrayList<>();
@@ -336,7 +334,7 @@ public class MapboxNavigation {
     }
 
     MapboxDirections.Builder directionsBuilder = new MapboxDirections.Builder()
-      .setProfile(profile)
+      .setProfile(options.getDirectionsProfile())
       .setAccessToken(accessToken)
       .setOverview(DirectionsCriteria.OVERVIEW_FULL)
       .setOrigin(origin)
@@ -396,22 +394,6 @@ public class MapboxNavigation {
    */
   public float getUserOriginBearing() {
     return userBearing;
-  }
-
-  /**
-   * Calling this passing in true will change the default profile used when requesting your route to not consider
-   * traffic when routing. For more accurate timing and ensuring the quickest routes provided to the user, it isn't
-   * recommend to disable traffic. It is good if you are looking to reproduce the same route over and over for testing
-   * for example.
-   *
-   * @since 0.1.0
-   */
-  public void setConsiderTraffic(boolean disableTraffic) {
-    if (disableTraffic) {
-      profile = DirectionsCriteria.PROFILE_DRIVING;
-    } else {
-      profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
-    }
   }
 
   /**
