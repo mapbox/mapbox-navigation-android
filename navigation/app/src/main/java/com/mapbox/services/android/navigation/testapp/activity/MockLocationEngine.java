@@ -291,6 +291,7 @@ public class MockLocationEngine extends LocationEngine {
       currentStep++;
     } else if (currentLeg < route.getLegs().size() - 1) {
       currentLeg++;
+      currentStep = 0;
     }
 
     sliceRoute(line, distance);
