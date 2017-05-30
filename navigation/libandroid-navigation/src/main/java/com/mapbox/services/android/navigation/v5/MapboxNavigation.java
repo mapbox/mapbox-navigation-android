@@ -362,7 +362,9 @@ public class MapboxNavigation {
     // Optionally set the bearing and radiuses if the developer provider the user bearing. A tolerance of 90 degrees
     // is given.
     if (userBearing != null) {
-      directionsBuilder.setBearings(new double[] {(double) userBearing, 90}, new double[] {});
+      double[][] bearings = new double[coordinates.size()][0];
+      bearings[0] = new double[] {(double) userBearing, 90};
+      directionsBuilder.setBearings(bearings);
     }
     directionsBuilder.build().enqueueCall(callback);
   }
