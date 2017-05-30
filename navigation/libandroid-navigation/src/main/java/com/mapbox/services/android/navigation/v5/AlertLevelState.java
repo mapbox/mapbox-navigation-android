@@ -60,10 +60,20 @@ class AlertLevelState {
     double stepDistance = previousRouteProgress.getCurrentLegProgress().getCurrentStep().getDistance();
 
     int alertLevel = isUserDeparting(previousRouteProgress.getAlertUserLevel(), userSnapToStepDistanceFromManeuver,
-      options.getManeuverZoneRadius());
+      options.getManeuverZoneRadius()) ? NavigationConstants.DEPART_ALERT_LEVEL : NavigationConstants.HIGH_ALERT_LEVEL;
 
     if (userSnapToStepDistanceFromManeuver <= options.getManeuverZoneRadius()) {
-      alertLevel = isUserArriving(alertLevel, previousRouteProgress);
+      // If user is arriving
+      if (isUserArriving(previousRouteProgress)) {
+        // but it's not the last leg
+        if (previousRouteProgress.getLegIndex() < previousRouteProgress.getRoute().getLegs().size() - 1) {
+          alertLevel = NavigationConstants.WAYPOINT_ALERT_LEVEL;
+          increaseIndex(previousRouteProgress);
+        } else {
+          alertLevel = NavigationConstants.ARRIVE_ALERT_LEVEL;
+        }
+      }
+
       // Did the user reach the next steps maneuver?
       if (bearingMatchesManeuverFinalHeading(
         location, previousRouteProgress, options.getMaxTurnCompletionOffset())) {
