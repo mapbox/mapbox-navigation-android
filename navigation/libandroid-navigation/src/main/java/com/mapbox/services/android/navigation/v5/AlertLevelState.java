@@ -108,35 +108,23 @@ class AlertLevelState {
    *
    * @param alertLevel The currently calculated alert level.
    * @param distance   From the users snapped location to the next steps maneuver.
-   * @return either the original alert level (if the user's not departing) or an updated alert level value either
-   * representing {@link NavigationConstants#HIGH_ALERT_LEVEL} or {@link NavigationConstants#DEPART_ALERT_LEVEL}
+   * @return if the user is departing or not.
    * @since 0.2.0
    */
-  private static int isUserDeparting(int alertLevel, double distance, double maneuverZoneRadius) {
-    if (alertLevel == NavigationConstants.NONE_ALERT_LEVEL) {
-      if (distance > maneuverZoneRadius) {
-        alertLevel = NavigationConstants.DEPART_ALERT_LEVEL;
-      } else {
-        alertLevel = NavigationConstants.HIGH_ALERT_LEVEL;
-      }
-    }
-    return alertLevel;
+  private static boolean isUserDeparting(int alertLevel, double distance, double maneuverZoneRadius) {
+    return (alertLevel == NavigationConstants.NONE_ALERT_LEVEL) && (distance > maneuverZoneRadius);
   }
 
   /**
    * Checks whether the user is arriving to their final destination or not.
    *
-   * @param alertLevel    The currently calculated alert level.
    * @param routeProgress The most recent {@link RouteProgress} object that was created.
-   * @return either the original alert level (if the user's not arriving) or an updated alert level value.
+   * @return if the user is arriving or not.
    * @since 0.2.0
    */
-  private static int isUserArriving(int alertLevel, RouteProgress routeProgress) {
-    if (routeProgress.getCurrentLegProgress().getUpComingStep().getManeuver().getType()
-      .equals(com.mapbox.services.android.Constants.STEP_MANEUVER_TYPE_ARRIVE)) {
-      return NavigationConstants.ARRIVE_ALERT_LEVEL;
-    }
-    return alertLevel;
+  private static boolean isUserArriving(RouteProgress routeProgress) {
+    return routeProgress.getCurrentLegProgress().getUpComingStep().getManeuver().getType()
+      .equals(com.mapbox.services.android.Constants.STEP_MANEUVER_TYPE_ARRIVE);
   }
 
   /**
