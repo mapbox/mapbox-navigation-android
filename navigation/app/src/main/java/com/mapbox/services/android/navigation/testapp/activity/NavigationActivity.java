@@ -42,6 +42,7 @@ import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.models.Position;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -56,14 +57,13 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
   private MapView mapView;
   private Polyline routeLine;
   private MapboxMap mapboxMap;
-  private Marker destinationMarker;
+  private List<Marker> pathMarkers = new ArrayList<>();
 
   // Navigation related variables
   private LocationEngine locationEngine;
   private MapboxNavigation navigation;
   private Button startRouteButton;
   private DirectionsRoute route;
-  private Position destination;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +111,7 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
     this.mapboxMap = mapboxMap;
 
     mapboxMap.setOnMapClickListener(this);
-    Snackbar.make(mapView, "Tap map to place destination", BaseTransientBottomBar.LENGTH_LONG).show();
+    Snackbar.make(mapView, "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
 
     mapboxMap.moveCamera(CameraUpdateFactory.zoomBy(12));
 
@@ -127,14 +127,16 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
 
   @Override
   public void onMapClick(@NonNull LatLng point) {
-    if (destinationMarker != null) {
-      mapboxMap.removeMarker(destinationMarker);
+    if (pathMarkers.size() >= 2) {
+      Toast.makeText(NavigationActivity.this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show();
+      return;
     }
-    destinationMarker = mapboxMap.addMarker(new MarkerOptions().position(point));
+
+    Marker marker = mapboxMap.addMarker(new MarkerOptions().position(point));
+    pathMarkers.add(marker);
 
     startRouteButton.setVisibility(View.VISIBLE);
 
-    this.destination = Position.fromCoordinates(point.getLongitude(), point.getLatitude());
     calculateRoute();
   }
 
@@ -163,14 +165,27 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
       return;
     }
 
-    Position origin = (Position.fromCoordinates(userLocation.getLongitude(), userLocation.getLatitude()));
+    Position origin = Position.fromCoordinates(userLocation.getLongitude(), userLocation.getLatitude());
+    Position destination = Position.fromLngLat(
+      pathMarkers.get(pathMarkers.size() - 1).getPosition().getLongitude(),
+      pathMarkers.get(pathMarkers.size() - 1).getPosition().getLatitude()
+    );
     if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) < 50) {
-      mapboxMap.removeMarker(destinationMarker);
+      for (Marker marker : pathMarkers) {
+        mapboxMap.removeMarker(marker);
+      }
       startRouteButton.setVisibility(View.GONE);
       return;
     }
 
-    navigation.getRoute(origin, destination, new Callback<DirectionsResponse>() {
+    List<Position> coordinates = new ArrayList<>();
+    coordinates.add(origin);
+
+    for (Marker marker : pathMarkers) {
+      coordinates.add(Position.fromLngLat(marker.getPosition().getLongitude(), marker.getPosition().getLatitude()));
+    }
+
+    navigation.getRoute(coordinates, null, new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
         DirectionsRoute route = response.body().getRoutes().get(0);
@@ -232,7 +247,13 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
   @Override
   public void userOffRoute(Location location) {
     Position newOrigin = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
-    navigation.getRoute(newOrigin, destination, location.getBearing(), new Callback<DirectionsResponse>() {
+    List<Position> coordinates = new ArrayList<>();
+    coordinates.add(newOrigin);
+
+    for (Marker marker : pathMarkers) {
+      coordinates.add(Position.fromLngLat(marker.getPosition().getLongitude(), marker.getPosition().getLatitude()));
+    }
+    navigation.getRoute(coordinates, location.getBearing(), new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
         DirectionsRoute route = response.body().getRoutes().get(0);
