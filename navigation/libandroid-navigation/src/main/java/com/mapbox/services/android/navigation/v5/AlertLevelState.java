@@ -4,6 +4,7 @@ import android.location.Location;
 
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
+import com.mapbox.services.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.api.utils.turf.TurfMisc;
@@ -71,10 +72,10 @@ class AlertLevelState {
       }
       // If the users not in the maneuver zone, the alert level could potentially be medium or high.
     } else if (durationRemainingOnStep <= options.getHighAlertInterval()
-      && stepDistance > options.getMinimumHighAlertDistance()) {
+      && stepDistance > getMinimumHighAlertDistance()) {
       alertLevel = NavigationConstants.HIGH_ALERT_LEVEL;
     } else if (durationRemainingOnStep <= options.getMediumAlertInterval()
-      && stepDistance > options.getMinimumMediumAlertDistance()) {
+      && stepDistance > getMinimumMediumAlertDistance()) {
       alertLevel = NavigationConstants.MEDIUM_ALERT_LEVEL;
     }
     return alertLevel;
@@ -223,4 +224,28 @@ class AlertLevelState {
       stepIndex += 1;
     }
   }
+
+  private double getMinimumHighAlertDistance() {
+    switch (options.getDirectionsProfile()) {
+      case DirectionsCriteria.PROFILE_CYCLING:
+        return options.getMinimumHighAlertDistanceCycling();
+      case DirectionsCriteria.PROFILE_WALKING:
+        return options.getMinimumHighAlertDistanceWalking();
+      default:
+        return options.getMinimumHighAlertDistanceDriving();
+    }
+  }
+
+  private double getMinimumMediumAlertDistance() {
+    switch (options.getDirectionsProfile()) {
+      case DirectionsCriteria.PROFILE_CYCLING:
+        return options.getMinimumMediumAlertDistanceCycling();
+      case DirectionsCriteria.PROFILE_WALKING:
+        return options.getMinimumMediumAlertDistanceWalking();
+      default:
+        return options.getMinimumMediumAlertDistanceDriving();
+    }
+  }
+
+
 }
