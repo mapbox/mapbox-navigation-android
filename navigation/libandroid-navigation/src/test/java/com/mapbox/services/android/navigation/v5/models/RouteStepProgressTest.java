@@ -20,11 +20,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
 
 public class RouteStepProgressTest extends BaseTest {
 
+  // Fixtures
+  private static final String DCMAPBOX_CHIPOLTLE = "dcmapbox_chipoltle.json";
+  private static final String PRECISION_6 = "directions_v5_precision_6.json";
 
   private DirectionsResponse response;
   private DirectionsRoute route;
@@ -34,7 +38,7 @@ public class RouteStepProgressTest extends BaseTest {
   @Before
   public void setup() {
     Gson gson = new Gson();
-    String body = readPath("directions_v5_precision_6.json");
+    String body = readPath(PRECISION_6);
     response = gson.fromJson(body, DirectionsResponse.class);
     route = response.getRoutes().get(0);
     firstStep = route.getLegs().get(0).getSteps().get(0);
@@ -46,6 +50,24 @@ public class RouteStepProgressTest extends BaseTest {
     RouteStepProgress routeStepProgress
       = new RouteStepProgress(firstLeg, 0, Mockito.mock(Position.class));
     assertNotNull("should not be null", routeStepProgress);
+  }
+
+  @Test
+  public void getStepDistance_equalsZeroOnOneCoordSteps() throws Exception {
+    Gson gson = new Gson();
+    String body = readPath(DCMAPBOX_CHIPOLTLE);
+    response = gson.fromJson(body, DirectionsResponse.class);
+    DirectionsRoute route = response.getRoutes().get(0);
+    RouteLeg lastLeg = route.getLegs().get(0);
+    int totalStepCountInLeg = lastLeg.getSteps().size() - 1;
+
+    RouteStepProgress routeStepProgress =
+      new RouteStepProgress(lastLeg, totalStepCountInLeg, Mockito.mock(Position.class));
+    assertNotNull("should not be null", routeStepProgress);
+    assertEquals(1, routeStepProgress.getFractionTraveled(), DELTA);
+    assertEquals(0, routeStepProgress.getDistanceRemaining(), DELTA);
+    assertEquals(0, routeStepProgress.getDistanceTraveled(), DELTA);
+    assertEquals(0, routeStepProgress.getDurationRemaining(), DELTA);
   }
 
   @Test

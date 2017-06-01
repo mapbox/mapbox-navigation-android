@@ -38,12 +38,14 @@ public class RouteStepProgress {
     // Decode the geometry
     List<Position> coords = PolylineUtils.decode(step.getGeometry(), Constants.PRECISION_6);
 
-    LineString slicedLine = TurfMisc.lineSlice(
-      Point.fromCoordinates(step.getManeuver().asPosition()),
-      Point.fromCoordinates(coords.get(coords.size() - 1)),
-      LineString.fromCoordinates(coords)
-    );
-    stepDistance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+    if (coords.size() > 1) {
+      LineString slicedLine = TurfMisc.lineSlice(
+        Point.fromCoordinates(step.getManeuver().asPosition()),
+        Point.fromCoordinates(coords.get(coords.size() - 1)),
+        LineString.fromCoordinates(coords)
+      );
+      stepDistance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+    }
   }
 
   /**
@@ -65,16 +67,20 @@ public class RouteStepProgress {
    * @since 0.1.0
    */
   public double getDistanceRemaining() {
+    double distanceRemaining = 0;
 
     // Decode the geometry
     List<Position> coords = PolylineUtils.decode(step.getGeometry(), Constants.PRECISION_6);
 
-    LineString slicedLine = TurfMisc.lineSlice(
-      Point.fromCoordinates(userSnappedPosition),
-      Point.fromCoordinates(coords.get(coords.size() - 1)),
-      LineString.fromCoordinates(coords)
-    );
-    return TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+    if (coords.size() > 1) {
+      LineString slicedLine = TurfMisc.lineSlice(
+        Point.fromCoordinates(userSnappedPosition),
+        Point.fromCoordinates(coords.get(coords.size() - 1)),
+        LineString.fromCoordinates(coords)
+      );
+      distanceRemaining = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+    }
+    return distanceRemaining;
   }
 
   /**
@@ -85,7 +91,12 @@ public class RouteStepProgress {
    * @since 0.1.0
    */
   public float getFractionTraveled() {
-    return (float) (getDistanceTraveled() / stepDistance);
+    float fractionRemaining = 1;
+
+    if (stepDistance > 0) {
+      fractionRemaining = (float) (getDistanceTraveled() / stepDistance);
+    }
+    return fractionRemaining;
   }
 
   /**
