@@ -49,8 +49,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
-public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener,
-  ProgressChangeListener, NavigationEventListener, AlertLevelChangeListener, OffRouteListener {
+public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
+  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener, AlertLevelChangeListener,
+  OffRouteListener {
 
   // Map variables
   private MapView mapView;
