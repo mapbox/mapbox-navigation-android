@@ -2,8 +2,6 @@ package com.mapbox.services.android.navigation.v5;
 
 import android.content.Context;
 
-import com.mapbox.services.android.location.LostLocationEngine;
-import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 
 import junit.framework.Assert;
