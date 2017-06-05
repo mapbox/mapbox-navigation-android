@@ -13,20 +13,20 @@ The Mapbox Navigation SDK is a precise and flexible platform which enables your 
 
 ## Getting Started
 
-If you are looking to include this inside your project, please take a look at [the detailed instructions](https://www.mapbox.com/android-docs/navigation/latest/getting-started/) found in our docs. If you are interested in building from source, read the contributing guide inside this project.
+If you are looking to include this inside your project, please take a look at [the detailed instructions](https://www.mapbox.com/android-docs/navigation/overview/) found in our docs. If you are interested in building from source, read the contributing guide inside this project.
 
 The snippet to add to your `build.gradle` file to use this SDK is the following:
 
 ```
 // Mapbox Navigation SDK for Android
 
-compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.2.0'
+compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.3.0'
 
 ```
 
 ## Documentation
 
-You'll find all of the documentation for this SDK on [our Mapbox Navigation page](https://www.mapbox.com/android-docs/navigation/latest/getting-started/). This includes information on installation, using the API, and links to the API reference.
+You'll find all of the documentation for this SDK on [our Mapbox Navigation page](https://www.mapbox.com/android-docs/navigation/overview/). This includes information on installation, using the API, and links to the API reference.
 
 ## Getting Help
 
@@ -36,7 +36,7 @@ You'll find all of the documentation for this SDK on [our Mapbox Navigation page
 
 ## Using Snapshots
 
-If you want to test recent bugfixes or features that have not been packaged in an official release yet, you can use a `-SNAPSHOT` release of the current development version of the Mapbox Navigation SDK via Gradle, available on [Sonatype](https://oss.sonatype.org/content/repositories/snapshots/com/mapbox/mapboxsdk/).
+If you want to test recent bug fixes or features that have not been packaged in an official release yet, you can use a `-SNAPSHOT` release of the current development version of the Mapbox Navigation SDK via Gradle, available on [Sonatype](https://oss.sonatype.org/content/repositories/snapshots/com/mapbox/mapboxsdk/).
 
 ```gradle
 repositories {
@@ -45,7 +45,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.3.0-SNAPSHOT'
+    compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.4.0-SNAPSHOT'
 }
 ```
 
