@@ -111,22 +111,6 @@ public class RouteStepProgressTest extends BaseTest {
 
     Assert.assertEquals(0, routeStepProgress.getDistanceRemaining(), BaseTest.DELTA);
   }
-
-  @Test
-  public void getDistanceTraveled() {
-
-  }
-
-  @Test
-  public void getFractionTraveled() {
-
-  }
-
-  @Test
-  public void getDurationRemaining() {
-
-  }
-
 }
 
 
