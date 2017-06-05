@@ -1,0 +1,3183 @@
+{
+  "routes": [
+    {
+      "geometry": "awbagAzavnhFp`@~fGr~Ya|BhcBwcYbr\\u{C`tZ~{H~vrBsge@bdo@`kc@dqpAckUbmn@sphAjnDovu@zviDgasDpa^ixsBbmy@{ubBvou@ajy@|}\\y~q@dycAcotGnew@{lr@hoU_hC",
+      "legs": [
+        {
+          "steps": [
+            {
+              "intersections": [
+                {
+                  "out": 0,
+                  "entry": [
+                    true
+                  ],
+                  "bearings": [
+                    261
+                  ],
+                  "location": [
+                    -122.416686,
+                    37.783425
+                  ]
+                },
+                {
+                  "out": 2,
+                  "location": [
+                    -122.417548,
+                    37.783315
+                  ],
+                  "bearings": [
+                    75,
+                    165,
+                    255,
+                    345
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0
+                },
+                {
+                  "out": 2,
+                  "location": [
+                    -122.419192,
+                    37.783106
+                  ],
+                  "bearings": [
+                    75,
+                    165,
+                    255,
+                    345
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    true
+                  ],
+                  "in": 0
+                },
+                {
+                  "out": 2,
+                  "location": [
+                    -122.42076,
+                    37.782907
+                  ],
+                  "bearings": [
+                    75,
+                    165,
+                    255,
+                    345
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0
+                }
+              ],
+              "geometry": "awbagAzavnhFzEzt@`LveBlK~`Bd@jH",
+              "mode": "driving",
+              "duration": 148.8,
+              "maneuver": {
+                "bearing_after": 261,
+                "type": "depart",
+                "modifier": "left",
+                "bearing_before": 0,
+                "location": [
+                  -122.416686,
+                  37.783425
+                ],
+                "instruction": "Head west on Eddy Street"
+              },
+              "weight": 148.8,
+              "distance": 376.1,
+              "name": "Eddy Street"
+            },
+            {
+              "intersections": [
+                {
+                  "out": 1,
+                  "location": [
+                    -122.42091,
+                    37.782888
+                  ],
+                  "bearings": [
+                    75,
+                    165,
+                    255,
+                    345
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 0
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.420816,
+                    37.782423
+                  ],
+                  "bearings": [
+                    165,
+                    255,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.420722,
+                    37.781954
+                  ],
+                  "bearings": [
+                    75,
+                    165,
+                    255,
+                    345
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 3
+                },
+                {
+                  "lanes": [
+                    {
+                      "valid": false,
+                      "indications": [
+                        "left"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    }
+                  ],
+                  "out": 1,
+                  "location": [
+                    -122.420534,
+                    37.781023
+                  ],
+                  "bearings": [
+                    75,
+                    165,
+                    255,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 3
+                },
+                {
+                  "lanes": [
+                    {
+                      "valid": false,
+                      "indications": [
+                        "left"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    }
+                  ],
+                  "out": 1,
+                  "location": [
+                    -122.420342,
+                    37.780077
+                  ],
+                  "bearings": [
+                    90,
+                    165,
+                    255,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 3
+                },
+                {
+                  "lanes": [
+                    {
+                      "valid": false,
+                      "indications": [
+                        "left"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    }
+                  ],
+                  "out": 1,
+                  "location": [
+                    -122.419972,
+                    37.778242
+                  ],
+                  "bearings": [
+                    75,
+                    165,
+                    255,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 3
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.419782,
+                    37.777295
+                  ],
+                  "bearings": [
+                    75,
+                    165,
+                    255,
+                    345
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 3
+                },
+                {
+                  "lanes": [
+                    {
+                      "valid": false,
+                      "indications": [
+                        "left"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    }
+                  ],
+                  "out": 1,
+                  "location": [
+                    -122.419594,
+                    37.776367
+                  ],
+                  "bearings": [
+                    75,
+                    165,
+                    255,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 3
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.419499,
+                    37.775895
+                  ],
+                  "bearings": [
+                    165,
+                    255,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "lanes": [
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": false,
+                      "indications": [
+                        "right"
+                      ]
+                    }
+                  ],
+                  "out": 0,
+                  "location": [
+                    -122.419398,
+                    37.775431
+                  ],
+                  "bearings": [
+                    165,
+                    255,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                }
+              ],
+              "geometry": "ouaagAzi~nhF`\\{DjW{C|C_@pC]v[yDtR_CdD_@zC_@f]cEfQuBvDe@tH}@tn@sHl[wD`R{BxH}@vDe@lt@uIjb@eFrUqCn\\}D~ZcE^ExH_AxGaAh@G",
+              "mode": "driving",
+              "duration": 132.79999999999998,
+              "maneuver": {
+                "bearing_after": 170,
+                "type": "turn",
+                "modifier": "left",
+                "bearing_before": 260,
+                "location": [
+                  -122.42091,
+                  37.782888
+                ],
+                "instruction": "Turn left onto Van Ness Avenue (US 101)"
+              },
+              "ref": "US 101",
+              "weight": 132.79999999999998,
+              "distance": 876,
+              "name": "Van Ness Avenue (US 101)"
+            },
+            {
+              "intersections": [
+                {
+                  "lanes": [
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": false,
+                      "indications": [
+                        "right"
+                      ]
+                    }
+                  ],
+                  "out": 2,
+                  "location": [
+                    -122.419329,
+                    37.775112
+                  ],
+                  "bearings": [
+                    30,
+                    45,
+                    165,
+                    225,
+                    345
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 4
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.418876,
+                    37.773667
+                  ],
+                  "bearings": [
+                    165,
+                    195,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.418702,
+                    37.773081
+                  ],
+                  "bearings": [
+                    45,
+                    165,
+                    225,
+                    315,
+                    345
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 4
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.418631,
+                    37.772842
+                  ],
+                  "bearings": [
+                    30,
+                    165,
+                    210,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 3
+                },
+                {
+                  "lanes": [
+                    {
+                      "valid": true,
+                      "indications": [
+                        "left"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    }
+                  ],
+                  "out": 0,
+                  "location": [
+                    -122.418496,
+                    37.772399
+                  ],
+                  "bearings": [
+                    165,
+                    315,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "lanes": [
+                    {
+                      "valid": false,
+                      "indications": [
+                        "left"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "none"
+                      ]
+                    }
+                  ],
+                  "out": 1,
+                  "location": [
+                    -122.41845,
+                    37.772238
+                  ],
+                  "bearings": [
+                    75,
+                    165,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.418146,
+                    37.771238
+                  ],
+                  "bearings": [
+                    120,
+                    165,
+                    345
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.418096,
+                    37.771089
+                  ],
+                  "bearings": [
+                    135,
+                    165,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.418033,
+                    37.770901
+                  ],
+                  "bearings": [
+                    165,
+                    270,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.417948,
+                    37.770702
+                  ],
+                  "bearings": [
+                    150,
+                    240,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.417737,
+                    37.770243
+                  ],
+                  "bearings": [
+                    0,
+                    180,
+                    285
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.417742,
+                    37.770207
+                  ],
+                  "bearings": [
+                    0,
+                    195,
+                    210,
+                    270
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 0
+                },
+                {
+                  "out": 2,
+                  "location": [
+                    -122.417804,
+                    37.769886
+                  ],
+                  "bearings": [
+                    15,
+                    105,
+                    195,
+                    285
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0
+                },
+                {
+                  "out": 2,
+                  "location": [
+                    -122.417828,
+                    37.769759
+                  ],
+                  "bearings": [
+                    15,
+                    105,
+                    180,
+                    285
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 0
+                }
+              ],
+              "geometry": "oor`gA`g{nhFf@ItGw@fHuAbFiA~~@gTrc@{I|MmCzGuAxQwD`I{An}@_RhHcBlEcAhDy@lKiDjEgCnDyCtCgBdBk@pBGjDVfAH`SzB|Fn@bLr@vO`B",
+              "mode": "driving",
+              "duration": 99.19999999999999,
+              "maneuver": {
+                "bearing_after": 165,
+                "type": "new name",
+                "modifier": "straight",
+                "bearing_before": 170,
+                "location": [
+                  -122.419329,
+                  37.775112
+                ],
+                "instruction": "Continue straight onto South Van Ness Avenue (US 101)"
+              },
+              "ref": "US 101",
+              "weight": 99.19999999999999,
+              "distance": 669.7,
+              "name": "South Van Ness Avenue (US 101)"
+            },
+            {
+              "intersections": [
+                {
+                  "out": 2,
+                  "location": [
+                    -122.417903,
+                    37.769281
+                  ],
+                  "bearings": [
+                    15,
+                    180,
+                    210,
+                    345
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 0
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.415393,
+                    37.769522
+                  ],
+                  "bearings": [
+                    92,
+                    270,
+                    272
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 1
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.40981,
+                    37.769161
+                  ],
+                  "bearings": [
+                    102,
+                    108,
+                    282
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.405473,
+                    37.767261
+                  ],
+                  "bearings": [
+                    174,
+                    353,
+                    358
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 1
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.405244,
+                    37.766048
+                  ],
+                  "bearings": [
+                    0,
+                    180,
+                    345
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.402999,
+                    37.752554
+                  ],
+                  "bearings": [
+                    0,
+                    180,
+                    195
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0
+                },
+                {
+                  "out": 2,
+                  "location": [
+                    -122.404558,
+                    37.746941
+                  ],
+                  "bearings": [
+                    0,
+                    15,
+                    195
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.408143,
+                    37.739469
+                  ],
+                  "bearings": [
+                    5,
+                    180,
+                    187
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.406401,
+                    37.734438
+                  ],
+                  "bearings": [
+                    155,
+                    332,
+                    335
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.405674,
+                    37.733191
+                  ],
+                  "bearings": [
+                    150,
+                    180,
+                    330
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.403995,
+                    37.730114
+                  ],
+                  "bearings": [
+                    165,
+                    330,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.402483,
+                    37.726603
+                  ],
+                  "bearings": [
+                    163,
+                    341,
+                    346
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 1
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.401701,
+                    37.724557
+                  ],
+                  "bearings": [
+                    163,
+                    168,
+                    343
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.400278,
+                    37.720955
+                  ],
+                  "bearings": [
+                    165,
+                    180,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.397974,
+                    37.714805
+                  ],
+                  "bearings": [
+                    150,
+                    315,
+                    330
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.39554,
+                    37.710237
+                  ],
+                  "bearings": [
+                    165,
+                    180,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                }
+              ],
+              "geometry": "acg`gA|mxnhFfGdCnCpBbC`ChB|CjAlDt@vEN`FSpEu@fEiAlDcBpCyB`CeCzAkCx@kC^iC?gCe@aCy@wBsAcB_BgBaCqA{Cy@qD_@}DKqDDmETuErA}Ox@cJf@gHdAoPr@yMh@aMXwMPiMDeMAwq@rCc~DHoIJaJNsIRqIZgI^}I`@uHj@mIt@iJ|@uJdGwq@pJ_l@xAgKnAsKjAyLn@gJj@eKb@eLj@iL`AeLtA_LnBmK|BaJrB}G|BsGtCmHxAcD|AcDlBsDdBwCbCuDrCaEfD}D|DuDrEaDrFmCzCgAnD_A~GkAvBS|c@_DzLuA~WsEzqA}FvJ]`IAtKF`K\\dKv@vJhAvJ|A`KzBbJjCnJdDzIxD|InEvIlE~\\|QhHlDhInDnHjCbIzBdI`B`IjA~Hr@dIZpIBjIWrIq@dJqA`JgBfJqCfIcDzImEzH{EhIiGdImHbHyHdHeJpG_JfGoJtN_UfF{H`GmIlF{GxFmG|FkF~F_FvGqE`HyDtIyDjIsCjIwB~IaBfJiAdK{@dKm@vJc@pbCqK~Ni@rO]rNKdN\\lOp@pNnAzOjBvLnBnL~B`nAzWlcBp^~nAbX|_Bl]rNdDrOrEbN`FlMbG~MhH`MdIfMdJz_Apu@xFhEbFvD|MxInN`IfN`HnN|FhPjFvMlDfQlDfOjCjPnBlPtApUrA`OXlOGrOWrOm@tO}@hMyAbOwBtOqCnOkDnNuDrMgE`MqEzMqFlOiHvJiEdWgM|w@{_@pYwNjr@u\\tm@w\\zQ{IfRuIxVsKrQoHhTqIl^aNhK{DvYcKxVqIzVgHl`Ag[xHaCvdAg]|hAk[|t@oSzb@eMfYyId{Age@n^{Jhf@yLdP_E`QwDnz@sOdk@wJtKoBdvAgWxMgChNgD~NeE`N}EbUaJjOyH|MkH`NyIzNmKxN{Kjw@in@dMqIxLkHbMaHvLuG|L{FfL{E~NiFhMwDtNoDdNsCzMsB~UkDd^iF`l@_Iva@qFv_@cFvEo@",
+              "mode": "driving",
+              "duration": 437.30000000000007,
+              "maneuver": {
+                "bearing_after": 202,
+                "type": "off ramp",
+                "modifier": "straight",
+                "bearing_before": 187,
+                "location": [
+                  -122.417903,
+                  37.769281
+                ],
+                "instruction": "Take the ramp onto US 101"
+              },
+              "ref": "US 101",
+              "weight": 437.30000000000007,
+              "distance": 8418.6,
+              "name": "US 101"
+            },
+            {
+              "intersections": [
+                {
+                  "out": 0,
+                  "location": [
+                    -122.395121,
+                    37.708328
+                  ],
+                  "bearings": [
+                    165,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.393825,
+                    37.702429
+                  ],
+                  "bearings": [
+                    170,
+                    347,
+                    350
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 1
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.391826,
+                    37.693636
+                  ],
+                  "bearings": [
+                    165,
+                    180,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.3906,
+                    37.688244
+                  ],
+                  "bearings": [
+                    170,
+                    345,
+                    350
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.392891,
+                    37.669787
+                  ],
+                  "bearings": [
+                    30,
+                    210,
+                    225
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.395051,
+                    37.667539
+                  ],
+                  "bearings": [
+                    30,
+                    210,
+                    225
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0
+                },
+                {
+                  "out": 2,
+                  "location": [
+                    -122.39982,
+                    37.663398
+                  ],
+                  "bearings": [
+                    46,
+                    51,
+                    231
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1
+                },
+                {
+                  "out": 2,
+                  "location": [
+                    -122.403926,
+                    37.660623
+                  ],
+                  "bearings": [
+                    30,
+                    45,
+                    225
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.405731,
+                    37.65805
+                  ],
+                  "bearings": [
+                    15,
+                    195,
+                    210
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.406979,
+                    37.651445
+                  ],
+                  "bearings": [
+                    176,
+                    181,
+                    356
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.406419,
+                    37.64457
+                  ],
+                  "bearings": [
+                    0,
+                    180,
+                    345
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 0
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.406082,
+                    37.641332
+                  ],
+                  "bearings": [
+                    0,
+                    165,
+                    195
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.405024,
+                    37.63824
+                  ],
+                  "bearings": [
+                    150,
+                    165,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.402719,
+                    37.630324
+                  ],
+                  "bearings": [
+                    0,
+                    180,
+                    345
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.401464,
+                    37.62492
+                  ],
+                  "bearings": [
+                    166,
+                    341,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.398689,
+                    37.616736
+                  ],
+                  "bearings": [
+                    164,
+                    342,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.394473,
+                    37.611514
+                  ],
+                  "bearings": [
+                    135,
+                    300,
+                    315
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.391675,
+                    37.609715
+                  ],
+                  "bearings": [
+                    128,
+                    308,
+                    309
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 1
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.384799,
+                    37.605291
+                  ],
+                  "bearings": [
+                    129,
+                    134,
+                    309
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.378646,
+                    37.601292
+                  ],
+                  "bearings": [
+                    135,
+                    300,
+                    315
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.376557,
+                    37.599922
+                  ],
+                  "bearings": [
+                    135,
+                    300,
+                    315
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.364079,
+                    37.591793
+                  ],
+                  "bearings": [
+                    130,
+                    136,
+                    309
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.357438,
+                    37.587965
+                  ],
+                  "bearings": [
+                    105,
+                    285,
+                    300
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.325833,
+                    37.581641
+                  ],
+                  "bearings": [
+                    135,
+                    150,
+                    315
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.322934,
+                    37.578971
+                  ],
+                  "bearings": [
+                    139,
+                    314,
+                    319
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.316743,
+                    37.573261
+                  ],
+                  "bearings": [
+                    135,
+                    150,
+                    315
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.310821,
+                    37.567812
+                  ],
+                  "bearings": [
+                    139,
+                    316,
+                    319
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.302578,
+                    37.560185
+                  ],
+                  "bearings": [
+                    135,
+                    150,
+                    315
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.293655,
+                    37.550567
+                  ],
+                  "bearings": [
+                    150,
+                    315,
+                    330
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.293005,
+                    37.549875
+                  ],
+                  "bearings": [
+                    150,
+                    315,
+                    330
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 1
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.292169,
+                    37.548986
+                  ],
+                  "bearings": [
+                    150,
+                    315,
+                    330
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 1
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.291949,
+                    37.548743
+                  ],
+                  "bearings": [
+                    144,
+                    149,
+                    324
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.286169,
+                    37.542512
+                  ],
+                  "bearings": [
+                    150,
+                    315,
+                    330
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.283856,
+                    37.53998
+                  ],
+                  "bearings": [
+                    150,
+                    315,
+                    330
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.273979,
+                    37.529546
+                  ],
+                  "bearings": [
+                    135,
+                    150,
+                    315
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.262626,
+                    37.51954
+                  ],
+                  "bearings": [
+                    138,
+                    313,
+                    318
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.260906,
+                    37.518025
+                  ],
+                  "bearings": [
+                    138,
+                    141,
+                    318
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.247718,
+                    37.506343
+                  ],
+                  "bearings": [
+                    138,
+                    314,
+                    318
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.242977,
+                    37.502159
+                  ],
+                  "bearings": [
+                    138,
+                    315,
+                    318
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.239937,
+                    37.499488
+                  ],
+                  "bearings": [
+                    137,
+                    142,
+                    317
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.231907,
+                    37.495907
+                  ],
+                  "bearings": [
+                    110,
+                    284,
+                    290
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.228972,
+                    37.495072
+                  ],
+                  "bearings": [
+                    110,
+                    283,
+                    290
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.218915,
+                    37.491223
+                  ],
+                  "bearings": [
+                    120,
+                    135,
+                    300
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.205884,
+                    37.487457
+                  ],
+                  "bearings": [
+                    105,
+                    270,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.185632,
+                    37.484733
+                  ],
+                  "bearings": [
+                    106,
+                    110,
+                    286
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.179679,
+                    37.482856
+                  ],
+                  "bearings": [
+                    120,
+                    285,
+                    300
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.177095,
+                    37.481497
+                  ],
+                  "bearings": [
+                    126,
+                    302,
+                    307
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.158395,
+                    37.470605
+                  ],
+                  "bearings": [
+                    120,
+                    135,
+                    300
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.155045,
+                    37.468654
+                  ],
+                  "bearings": [
+                    126,
+                    137,
+                    297,
+                    306
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 3
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.152581,
+                    37.467179
+                  ],
+                  "bearings": [
+                    126,
+                    305,
+                    307
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 1
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.144516,
+                    37.462442
+                  ],
+                  "bearings": [
+                    120,
+                    135,
+                    300
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.136462,
+                    37.457738
+                  ],
+                  "bearings": [
+                    126,
+                    304,
+                    306
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 1
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.12693,
+                    37.452112
+                  ],
+                  "bearings": [
+                    131,
+                    141,
+                    309
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.118132,
+                    37.444081
+                  ],
+                  "bearings": [
+                    140,
+                    317,
+                    320
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.103307,
+                    37.429953
+                  ],
+                  "bearings": [
+                    135,
+                    150,
+                    315
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.101751,
+                    37.428459
+                  ],
+                  "bearings": [
+                    135,
+                    150,
+                    315
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.092643,
+                    37.42097
+                  ],
+                  "bearings": [
+                    135,
+                    300,
+                    315
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.09244,
+                    37.420823
+                  ],
+                  "bearings": [
+                    135,
+                    150,
+                    315
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.089184,
+                    37.418478
+                  ],
+                  "bearings": [
+                    133,
+                    309,
+                    312
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.081848,
+                    37.413404
+                  ],
+                  "bearings": [
+                    122,
+                    293,
+                    304
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.081263,
+                    37.413111
+                  ],
+                  "bearings": [
+                    120,
+                    135,
+                    300
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 1,
+                  "location": [
+                    -122.078361,
+                    37.411892
+                  ],
+                  "bearings": [
+                    105,
+                    120,
+                    300
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.076323,
+                    37.411054
+                  ],
+                  "bearings": [
+                    118,
+                    124,
+                    297
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.067607,
+                    37.407809
+                  ],
+                  "bearings": [
+                    106,
+                    282,
+                    286
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.067189,
+                    37.407713
+                  ],
+                  "bearings": [
+                    105,
+                    110,
+                    286
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.062594,
+                    37.406712
+                  ],
+                  "bearings": [
+                    105,
+                    281,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.056615,
+                    37.405407
+                  ],
+                  "bearings": [
+                    105,
+                    120,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.047017,
+                    37.403049
+                  ],
+                  "bearings": [
+                    105,
+                    280,
+                    286
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.036066,
+                    37.400658
+                  ],
+                  "bearings": [
+                    105,
+                    120,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.031971,
+                    37.399731
+                  ],
+                  "bearings": [
+                    105,
+                    109,
+                    282,
+                    286
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 3
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.027075,
+                    37.398693
+                  ],
+                  "bearings": [
+                    105,
+                    279,
+                    286
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.024811,
+                    37.398202
+                  ],
+                  "bearings": [
+                    105,
+                    280,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.017288,
+                    37.396552
+                  ],
+                  "bearings": [
+                    105,
+                    111,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.012976,
+                    37.395607
+                  ],
+                  "bearings": [
+                    105,
+                    270,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.012709,
+                    37.395542
+                  ],
+                  "bearings": [
+                    105,
+                    120,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.008838,
+                    37.394702
+                  ],
+                  "bearings": [
+                    107,
+                    280,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -122.000135,
+                    37.392318
+                  ],
+                  "bearings": [
+                    105,
+                    120,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.994151,
+                    37.390522
+                  ],
+                  "bearings": [
+                    111,
+                    284,
+                    291
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.991164,
+                    37.389654
+                  ],
+                  "bearings": [
+                    110,
+                    282,
+                    290
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.983628,
+                    37.387548
+                  ],
+                  "bearings": [
+                    105,
+                    120,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.974838,
+                    37.385032
+                  ],
+                  "bearings": [
+                    110,
+                    287,
+                    290
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.972437,
+                    37.384341
+                  ],
+                  "bearings": [
+                    105,
+                    270,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.968441,
+                    37.383197
+                  ],
+                  "bearings": [
+                    105,
+                    135,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.957291,
+                    37.380021
+                  ],
+                  "bearings": [
+                    110,
+                    284,
+                    290
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.945834,
+                    37.377446
+                  ],
+                  "bearings": [
+                    105,
+                    120,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.941787,
+                    37.376663
+                  ],
+                  "bearings": [
+                    105,
+                    270,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.941568,
+                    37.376623
+                  ],
+                  "bearings": [
+                    105,
+                    120,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.938604,
+                    37.376047
+                  ],
+                  "bearings": [
+                    105,
+                    270,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                }
+              ],
+              "geometry": "oap|fA`~kmhF||@mLrcBwSbmEym@pdP}{B~oIskAddKowA|i@oIpv@sLvXkE`XkDrUeCvVeBxPc@~RO`RNjSb@xSrApS~BtRxC|P|CzQrEzTzGzSlHrP|FfR~GbQxGjRvHfQjHnChAbd@lTvSpKrMbHnMfHhMvH`MxH|LdIjMvIjLhI|LbJlL|IzLlJdLfJpLzJ`L|JpNtMnkC~eCzr@zp@b`@z^vKfKnKjK`KrKpKpLtLzMlJfLvJbM`K`NvI~L~IrMxIhNpIrN|IhOfItNtIrO|oBdoDjI~NxJzOnJhNhKnNnMvOpLfMhMrLxNvL|LhJpMlIrL~G`NdH`NfGlNzFl\\bNjlArf@|NzFxNfFhOnErOxDlO|CnPrC`NdBlOzAdNbAdOx@jN\\zNRfPAfO[`Pi@taAyDlXcAjqAeFrRu@fw@{CrSy@xyFmR`vCsLhr@mFjKaA`YuDr\\_G~YiGxRkFrVoHdYsJp[qLdyAco@hWmJhSaHjT}G~QkFzPiE~RmEvSaE~RaDdTwCpSaCdTiBx]{Bty@uEnwAqKftAsHvXuBbZeD`\\uEdU{DfWqFtaAgUbl@yNhKw@fZiG`wDy~@hqAa[~gDyw@`h@qLxF{ApUiGfXwIhZwLxXmMhZmPdWmP~XyS|VkT~SoQ`VwVnSyU|SeXne@}o@loB{mDpzAiqC~[uh@fp@qgAtiBehDhuB{uDrbCuhErtAqaCpn@mgAteAwiB~u@_sAlxEslI~o@mlA~Vkd@jk@gcA~{Bg~DbRy\\xP_\\dQa^vOo_@zMk_@jM{`@bLeb@`T_gAzHsk@~Fcj@`De_@jCkc@bB}f@r@ef@Rme@tAyqB~FgmHnDcrElDmwEjEi_Fl@yr@nB}e@tBoXxEe`@nG}^fJs_@pLy^tN{\\`OyXpPiVxPwSrk@io@~wCseDzeDetDfhDqvDrzDkjEpcAwiA~nGkfHngE_xEjlEm|Ef`@ac@|Zg]rHmI|TiUfVoT`YkVlxAwlAh^_[vn@sk@ht@_q@j^y[|a@k`@lt@ms@jZcYj\\eZpbCeyBfj@sg@pv@gs@dNwLhlDy~Cb_Au|@rh@ae@jmBudBl`@_^bNaMnN_M|x@is@fc@e`@vcCsyBrcFurEhR{PpwBqnBxTaSfTiSdW}V`UqUdSaTdT}UdSuUtl@qr@|sDwmE|oDqgEtnBm}BbmBg{Bva@gf@|z@gcA|pAm{AbYw\\pc@kh@x|AciBha@me@~dBirBpjByxB~y@q`Ax{DmtE~iA}sAtlAawAxkBizBfqAc{Azn@yu@xc@aj@tPmS~O}SlO{TbOoVnMcVpM{WpCsGzBiFzEcLbM_]hJoXfIyXfIi[xGyZjGkZ`p@glDds@mvDzPq}@vGa^lHq_@~FyXbGgX~F{V|Jq`@lH}XzIw[~IsZhJgZjJiYjKk[`eBsdFvp@anBzJiZtJiZdJwZzI{ZdE{ObCgJjD{MzCmL`I_\\fGmXtGiZhHm^fEqTbGo\\pF}[lF_]|Ey\\nEy\\bEg]|Dc]hDc]`Dq]vCo]bLieBzuBa_]xB{]fCw_@`Cm]jCk]|Cy]hDc]tD_]xDi]jEy\\vEe]fEsZnFq\\rFm\\~Fo\\nGa\\tG_\\zG{[jH{[vHw[`Ia[fIwZ~I}ZlJsZ~JcZpKqYfLoYpLwXjMqXlMwWvCgDptEesJfq@}uAxxBkpEpzFijLpj@}gA|xBkpEbuAqrC`EmExiEm{If|AszCxhBuuDh~CmnGz[gp@htH{mOfGkMjPg[tOgYhSg\\dK{OfPqUpPyTbQ_TpQkS`iEksE|cByhB|}AybBbz@w|@l_EsiEhIwI`yD_bEvkHszHnG}Gx|B{bCpf@mh@xt@yv@rxBa_CjXqY~WwYlVcYzUiYtWw\\lVy\\|Zqd@h[gf@jpCafEdHuKdvAqxBjz@}pAt}B}lDhcBaiClJcObIuMjI}NlNaWzMaXjMkXnLgXzK}XlDsIjRqk@xw@ygCjs@k~Bvg@gaBx_BulFxFcSxFySxFcTzEgStEoSxE{UfDqQrDySbDiSlDmV~DcYrLm~@|o@w~Eth@}}Dzf@wuDxHgi@pImj@tJcj@fc@e`CnMev@~Hwg@lHwh@xGkf@hc@ycDpsBwuOhNkdApPioA|x@}~F`v@qdGxHmk@t]olCbfBeuM`z@olG`CuOns@}pFhUuyAzo@iqDxlA}qGd`@arBd]}`Bzo@_`DjIga@xR{bA`WqsAdNos@nTgjAf[acBtaAerFhlBg~J|n@ceDdj@auCfaAmeFfDiRfjAkgGvkAskGnm@{bDv`@cvBpUswAvb@odDpb@amDh`@wgD|o@}{FnAuL~b@gxDncAokIpL_x@`A{F",
+              "mode": "driving",
+              "duration": 2382.800000000001,
+              "maneuver": {
+                "bearing_after": 170,
+                "type": "new name",
+                "modifier": "straight",
+                "bearing_before": 168,
+                "location": [
+                  -122.395121,
+                  37.708328
+                ],
+                "instruction": "Continue straight onto Bayshore Freeway (US 101)"
+              },
+              "ref": "US 101",
+              "weight": 2481.2000000000016,
+              "distance": 61959,
+              "name": "Bayshore Freeway (US 101)"
+            },
+            {
+              "intersections": [
+                {
+                  "out": 1,
+                  "location": [
+                    -121.932246,
+                    37.374701
+                  ],
+                  "bearings": [
+                    106,
+                    111,
+                    287
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.93041,
+                    37.37413
+                  ],
+                  "bearings": [
+                    105,
+                    285
+                  ],
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1
+                }
+              ],
+              "geometry": "ymdhfAj|cqgFtb@wqBzQu_AbLy^|GgNjGcLhSeWlZoVpM_GnRwFvo@aPnXoI~NqEfS{IzGiA",
+              "mode": "driving",
+              "destinations": "CA 87: Guadalupe Parkway",
+              "duration": 41.5,
+              "maneuver": {
+                "bearing_after": 111,
+                "type": "off ramp",
+                "modifier": "slight right",
+                "bearing_before": 106,
+                "location": [
+                  -121.932246,
+                  37.374701
+                ],
+                "instruction": "Take the ramp on the right towards CA 87: Guadalupe Parkway"
+              },
+              "weight": 41.5,
+              "distance": 769.6,
+              "name": ""
+            },
+            {
+              "intersections": [
+                {
+                  "lanes": [
+                    {
+                      "valid": true,
+                      "indications": [
+                        "straight"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "straight"
+                      ]
+                    }
+                  ],
+                  "out": 0,
+                  "location": [
+                    -121.92664,
+                    37.370122
+                  ],
+                  "bearings": [
+                    150,
+                    330,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.923722,
+                    37.367884
+                  ],
+                  "bearings": [
+                    128,
+                    138,
+                    308
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.91516,
+                    37.359204
+                  ],
+                  "bearings": [
+                    149,
+                    327,
+                    329
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.908322,
+                    37.349121
+                  ],
+                  "bearings": [
+                    135,
+                    150,
+                    330
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "out": 0,
+                  "location": [
+                    -121.901482,
+                    37.342813
+                  ],
+                  "bearings": [
+                    150,
+                    330,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 1
+                }
+              ],
+              "geometry": "so{gfA~}xpgFzOyNnRoOdVqXzLmQbDiGhKqQ|Vie@`X{g@dkAw{B~NcXhPoWlRmXfSeW|UcXpTcTtYmVf[oUnWmQjlGogEfeBekAnbAiq@htAq~@lf@{Zzp@y`@ne@_Ujo@uYpfB}v@r[iPj`@gWj`@m\\ra@}f@`We`@j_@c{@zSsh@nT_g@hPkZ~PuVxNmRrNwPfO}NjO{Mra@}Zp_Aab@f}@q]~g@uWhbCcyAxH}E",
+              "mode": "driving",
+              "duration": 162.7,
+              "maneuver": {
+                "bearing_after": 142,
+                "type": "new name",
+                "modifier": "slight left",
+                "bearing_before": 168,
+                "location": [
+                  -121.92664,
+                  37.370122
+                ],
+                "instruction": "Continue slightly left onto Guadalupe Parkway (CA 87)"
+              },
+              "ref": "CA 87",
+              "weight": 162.7,
+              "distance": 4197,
+              "name": "Guadalupe Parkway (CA 87)"
+            },
+            {
+              "intersections": [
+                {
+                  "out": 1,
+                  "location": [
+                    -121.899534,
+                    37.339899
+                  ],
+                  "bearings": [
+                    150,
+                    165,
+                    330
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                },
+                {
+                  "lanes": [
+                    {
+                      "valid": true,
+                      "indications": [
+                        "left"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "straight",
+                        "left"
+                      ]
+                    },
+                    {
+                      "valid": false,
+                      "indications": [
+                        "right"
+                      ]
+                    }
+                  ],
+                  "out": 1,
+                  "location": [
+                    -121.898785,
+                    37.336552
+                  ],
+                  "bearings": [
+                    60,
+                    150,
+                    240,
+                    345
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 3
+                },
+                {
+                  "lanes": [
+                    {
+                      "valid": false,
+                      "indications": [
+                        "left"
+                      ]
+                    },
+                    {
+                      "valid": true,
+                      "indications": [
+                        "straight",
+                        "left"
+                      ]
+                    },
+                    {
+                      "valid": false,
+                      "indications": [
+                        "right"
+                      ]
+                    }
+                  ],
+                  "out": 1,
+                  "location": [
+                    -121.898691,
+                    37.336402
+                  ],
+                  "bearings": [
+                    60,
+                    150,
+                    240,
+                    330
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 3
+                }
+              ],
+              "geometry": "un`ffAz_dogFz`Aq^hF{B|GaB|HcAxKKlIp@lOzC|Dh@hKtAzFh@`FDvHy@bG{AjKaEfFuBvEiBjH{DtEkB~s@ci@|D}E",
+              "mode": "driving",
+              "duration": 68.7,
+              "maneuver": {
+                "bearing_after": 158,
+                "type": "off ramp",
+                "modifier": "slight right",
+                "bearing_before": 150,
+                "location": [
+                  -121.899534,
+                  37.339899
+                ],
+                "instruction": "Take the ramp on the right"
+              },
+              "weight": 68.7,
+              "distance": 545.7,
+              "name": ""
+            },
+            {
+              "intersections": [
+                {
+                  "out": 1,
+                  "location": [
+                    -121.897852,
+                    37.335352
+                  ],
+                  "bearings": [
+                    105,
+                    240,
+                    315
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2
+                }
+              ],
+              "geometry": "orwefAvv`ogFjUhk@vDzJtFlOv@`CdJrWlCvIfWpp@",
+              "mode": "driving",
+              "duration": 46.8,
+              "maneuver": {
+                "bearing_after": 236,
+                "type": "turn",
+                "modifier": "right",
+                "bearing_before": 136,
+                "location": [
+                  -121.897852,
+                  37.335352
+                ],
+                "instruction": "Turn right onto West Saint John Street"
+              },
+              "weight": 46.8,
+              "distance": 267.1,
+              "name": "West Saint John Street"
+            },
+            {
+              "intersections": [
+                {
+                  "out": 1,
+                  "location": [
+                    -121.900438,
+                    37.334113
+                  ],
+                  "bearings": [
+                    60,
+                    165,
+                    240,
+                    315
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    true
+                  ],
+                  "in": 0
+                }
+              ],
+              "geometry": "aeuefAjxeogFhNoBla@sA",
+              "mode": "driving",
+              "duration": 14.6,
+              "maneuver": {
+                "bearing_after": 168,
+                "type": "turn",
+                "modifier": "left",
+                "bearing_before": 237,
+                "location": [
+                  -121.900438,
+                  37.334113
+                ],
+                "instruction": "Turn left onto North Autumn Street"
+              },
+              "weight": 14.6,
+              "distance": 89.1,
+              "name": "North Autumn Street"
+            },
+            {
+              "intersections": [
+                {
+                  "in": 0,
+                  "entry": [
+                    true
+                  ],
+                  "bearings": [
+                    357
+                  ],
+                  "location": [
+                    -121.90034,
+                    37.333317
+                  ]
+                }
+              ],
+              "geometry": "issefAfreogF",
+              "mode": "driving",
+              "duration": 0,
+              "maneuver": {
+                "bearing_after": 0,
+                "type": "arrive",
+                "modifier": "left",
+                "bearing_before": 177,
+                "location": [
+                  -121.90034,
+                  37.333317
+                ],
+                "instruction": "You have arrived at your destination, on the left"
+              },
+              "weight": 0,
+              "distance": 0,
+              "name": "North Autumn Street"
+            }
+          ],
+          "distance": 78167.9,
+          "duration": 3535.2,
+          "summary": "Bayshore Freeway, Bayshore Freeway",
+          "weight": 3633.6
+        }
+      ],
+      "distance": 78167.9,
+      "duration": 3535.2,
+      "weight_name": "routability",
+      "weight": 3633.6
+    }
+  ],
+  "waypoints": [
+    {
+      "name": "Eddy Street",
+      "location": [
+        -122.416686,
+        37.783425
+      ]
+    },
+    {
+      "name": "North Autumn Street",
+      "location": [
+        -121.90034,
+        37.333317
+      ]
+    }
+  ],
+  "code": "Ok"
+}
