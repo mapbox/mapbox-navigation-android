@@ -37,6 +37,4 @@ public class MapboxNavigationTest extends BaseTest {
     options.setManeuverZoneRadius(100.9);
     Assert.assertEquals(100.9, navigation.getMapboxNavigationOptions().getManeuverZoneRadius(), DELTA);
   }
-
-
 }

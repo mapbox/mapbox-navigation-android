@@ -134,10 +134,8 @@ public class MapboxNavigation implements ProgressChangeListener {
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-
     // If the user arrives at the final destination, end the navigation session.
     if (routeProgress.getAlertUserLevel() == NavigationConstants.ARRIVE_ALERT_LEVEL) {
-      System.out.println("working");
       endNavigation();
     }
   }
@@ -420,7 +418,7 @@ public class MapboxNavigation implements ProgressChangeListener {
    * @since 0.3.0
    */
   public MapboxNavigationOptions getMapboxNavigationOptions() {
-    return isServiceAvailable() ? navigationService.getMapboxNavigationOptions() : options;
+    return options;
   }
 
   /*
@@ -451,19 +449,12 @@ public class MapboxNavigation implements ProgressChangeListener {
       navigationService.setLocationEngine(getLocationEngine());
       navigationService.setOptions(options);
       navigationService.setNavigationEventListeners(navigationEventListeners);
+      navigationService.setAlertLevelChangeListeners(alertLevelChangeListeners);
 
-      if (alertLevelChangeListeners != null) {
-        navigationService.setAlertLevelChangeListeners(alertLevelChangeListeners);
-      }
       progressChangeListeners.add(MapboxNavigation.this);
-      if (progressChangeListeners != null) {
-        navigationService.setProgressChangeListeners(progressChangeListeners);
-      }
 
-      if (offRouteListeners != null) {
-        navigationService.setOffRouteListeners(offRouteListeners);
-      }
-
+      navigationService.setProgressChangeListeners(progressChangeListeners);
+      navigationService.setOffRouteListeners(offRouteListeners);
       navigationService.setSnapToRoute(snapToRoute);
       navigationService.startRoute(route);
     }

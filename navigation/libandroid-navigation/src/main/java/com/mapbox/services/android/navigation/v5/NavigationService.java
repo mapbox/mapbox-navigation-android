@@ -134,10 +134,6 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
-  public MapboxNavigationOptions getMapboxNavigationOptions() {
-    return options;
-  }
-
   @SuppressWarnings( {"MissingPermission"})
   public void startRoute(DirectionsRoute directionsRoute) {
     this.directionsRoute = directionsRoute;
