@@ -1,40 +1,5 @@
 '''
-Utility to schedule Navigation SDK builds in Bitrise.
-
-Examples:
-
-- Publish a snapshot from master (release.py uses the current branch)
-
-	$ git branch
-	* master
-	  1234-fix-crash
-	$ python release.py --stage snapshot
-
-- Publish a snapshot from a feature branch (same as before, just switch branchs with git):
-
-	$ git branch
-	  master
-	* 1234-fix-crash
-	$ python release.py --stage snapshot
-
-- Publish a beta from a pre-release branch:
-
-	$ git branch
-	  master
-	* release-android-420-beta1
-	$ python release.py --stage beta --version 2.0.0-beta.1
-
-- Publish a beta from a release branch:
-
-	$ git branch
-	  master
-	* release-android-420
-	$ python release.py --stage final --version 2.0.0
-
-TODO:
-
-- Add a flag to wait until the release has been built (Bitrise) and published (Maven).
-
+Utility to build and generate a new branch in android-docs containing the javadoc for this project.
 '''
 
 import click
