@@ -50,8 +50,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
-public class NavigationActivity extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener,
-  ProgressChangeListener, NavigationEventListener, AlertLevelChangeListener, OffRouteListener {
+public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
+  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener, AlertLevelChangeListener,
+  OffRouteListener {
 
   // Map variables
   private MapView mapView;
@@ -86,9 +87,9 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
           startRouteButton.setVisibility(View.INVISIBLE);
 
           // Attach all of our navigation listeners.
-          navigation.addNavigationEventListener(NavigationActivity.this);
-          navigation.addProgressChangeListener(NavigationActivity.this);
-          navigation.addAlertLevelChangeListener(NavigationActivity.this);
+          navigation.addNavigationEventListener(MockNavigationActivity.this);
+          navigation.addProgressChangeListener(MockNavigationActivity.this);
+          navigation.addAlertLevelChangeListener(MockNavigationActivity.this);
 
           // Adjust location engine to force a gps reading every second. This isn't required but gives an overall
           // better navigation experience for users. The updating only occurs if the user moves 3 meters or further
@@ -189,7 +190,7 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
         DirectionsRoute route = response.body().getRoutes().get(0);
-        NavigationActivity.this.route = route;
+        MockNavigationActivity.this.route = route;
         drawRouteLine(route);
       }
 
@@ -223,23 +224,23 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
 
     switch (alertLevel) {
       case NavigationConstants.HIGH_ALERT_LEVEL:
-        Toast.makeText(NavigationActivity.this, "HIGH", Toast.LENGTH_LONG).show();
+        Toast.makeText(MockNavigationActivity.this, "HIGH", Toast.LENGTH_LONG).show();
         break;
       case NavigationConstants.MEDIUM_ALERT_LEVEL:
-        Toast.makeText(NavigationActivity.this, "MEDIUM", Toast.LENGTH_LONG).show();
+        Toast.makeText(MockNavigationActivity.this, "MEDIUM", Toast.LENGTH_LONG).show();
         break;
       case NavigationConstants.LOW_ALERT_LEVEL:
-        Toast.makeText(NavigationActivity.this, "LOW", Toast.LENGTH_LONG).show();
+        Toast.makeText(MockNavigationActivity.this, "LOW", Toast.LENGTH_LONG).show();
         break;
       case NavigationConstants.ARRIVE_ALERT_LEVEL:
-        Toast.makeText(NavigationActivity.this, "ARRIVE", Toast.LENGTH_LONG).show();
+        Toast.makeText(MockNavigationActivity.this, "ARRIVE", Toast.LENGTH_LONG).show();
         break;
       case NavigationConstants.DEPART_ALERT_LEVEL:
-        Toast.makeText(NavigationActivity.this, "DEPART", Toast.LENGTH_LONG).show();
+        Toast.makeText(MockNavigationActivity.this, "DEPART", Toast.LENGTH_LONG).show();
         break;
       default:
       case NavigationConstants.NONE_ALERT_LEVEL:
-        Toast.makeText(NavigationActivity.this, "NONE", Toast.LENGTH_LONG).show();
+        Toast.makeText(MockNavigationActivity.this, "NONE", Toast.LENGTH_LONG).show();
         break;
     }
   }
@@ -257,7 +258,7 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
         DirectionsRoute route = response.body().getRoutes().get(0);
-        NavigationActivity.this.route = route;
+        MockNavigationActivity.this.route = route;
 
         // Remove old route line from map and draw the new one.
         if (routeLine != null) {

@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.location.Location;
 import android.os.IBinder;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
@@ -36,7 +37,7 @@ import timber.log.Timber;
  * @since 0.1.0
  */
 @Experimental
-public class MapboxNavigation {
+public class MapboxNavigation implements ProgressChangeListener {
 
   // Navigation service variables
   private NavigationServiceConnection connection;
@@ -129,6 +130,15 @@ public class MapboxNavigation {
     if (isBound) {
       Timber.d("unbindService called");
       context.unbindService(connection);
+      isBound = false;
+    }
+  }
+
+  @Override
+  public void onProgressChange(Location location, RouteProgress routeProgress) {
+    // If the user arrives at the final destination, end the navigation session.
+    if (routeProgress.getAlertUserLevel() == NavigationConstants.ARRIVE_ALERT_LEVEL) {
+      endNavigation();
     }
   }
 
@@ -149,6 +159,9 @@ public class MapboxNavigation {
    */
   public void setLocationEngine(LocationEngine locationEngine) {
     this.locationEngine = locationEngine;
+    if (isServiceAvailable()) {
+      navigationService.setLocationEngine(getLocationEngine());
+    }
   }
 
   /**
@@ -235,9 +248,9 @@ public class MapboxNavigation {
    * @since 0.1.0
    */
   public void startNavigation(DirectionsRoute route) {
+    this.route = route;
     if (!isServiceAvailable()) {
       Timber.d("MapboxNavigation startNavigation called.");
-      this.route = route;
       if (!isBound) {
         context.bindService(getServiceIntent(), connection, 0);
         isBound = true;
@@ -270,6 +283,8 @@ public class MapboxNavigation {
     if (isServiceAvailable()) {
       Timber.d("MapboxNavigation endNavigation called");
       navigationService.endNavigation();
+      onStop();
+      navigationService = null;
     }
   }
 
@@ -454,19 +469,12 @@ public class MapboxNavigation {
       navigationService.setLocationEngine(getLocationEngine());
       navigationService.setOptions(options);
       navigationService.setNavigationEventListeners(navigationEventListeners);
+      navigationService.setAlertLevelChangeListeners(alertLevelChangeListeners);
 
-      if (alertLevelChangeListeners != null) {
-        navigationService.setAlertLevelChangeListeners(alertLevelChangeListeners);
-      }
+      progressChangeListeners.add(MapboxNavigation.this);
 
-      if (progressChangeListeners != null) {
-        navigationService.setProgressChangeListeners(progressChangeListeners);
-      }
-
-      if (offRouteListeners != null) {
-        navigationService.setOffRouteListeners(offRouteListeners);
-      }
-
+      navigationService.setProgressChangeListeners(progressChangeListeners);
+      navigationService.setOffRouteListeners(offRouteListeners);
       navigationService.setSnapToRoute(snapToRoute);
       navigationService.startRoute(route);
     }

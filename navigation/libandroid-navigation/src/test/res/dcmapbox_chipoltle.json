@@ -1,0 +1,660 @@
+{
+  "waypoints": [
+    {
+      "location": [
+        -77.036112,
+        38.910057
+      ],
+      "name": ""
+    },
+    {
+      "location": [
+        -77.044601,
+        38.911872
+      ],
+      "name": ""
+    }
+  ],
+  "routes": [
+    {
+      "legs": [
+        {
+          "steps": [
+            {
+              "intersections": [
+                {
+                  "out": 0,
+                  "entry": [
+                    true
+                  ],
+                  "location": [
+                    -77.036112,
+                    38.910057
+                  ],
+                  "bearings": [
+                    270
+                  ]
+                }
+              ],
+              "geometry": "qe{eiA~c||qC?|Q?jE",
+              "duration": 21.1,
+              "distance": 35.1,
+              "name": "",
+              "weight": 68.3,
+              "mode": "driving",
+              "maneuver": {
+                "bearing_after": 270,
+                "location": [
+                  -77.036112,
+                  38.910057
+                ],
+                "type": "depart",
+                "bearing_before": 0,
+                "modifier": "left",
+                "instruction": "Head west"
+              }
+            },
+            {
+              "intersections": [
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "location": [
+                    -77.036517,
+                    38.910057
+                  ],
+                  "bearings": [
+                    0,
+                    90,
+                    180
+                  ]
+                }
+              ],
+              "geometry": "qe{eiAh}||qChS?vC@",
+              "duration": 10.4,
+              "distance": 44.6,
+              "name": "16th Street Northwest",
+              "weight": 10.4,
+              "mode": "driving",
+              "maneuver": {
+                "bearing_after": 180,
+                "location": [
+                  -77.036517,
+                  38.910057
+                ],
+                "type": "turn",
+                "bearing_before": 268,
+                "modifier": "left",
+                "instruction": "Turn left onto 16th Street Northwest"
+              }
+            },
+            {
+              "intersections": [
+                {
+                  "out": 3,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    true
+                  ],
+                  "location": [
+                    -77.036518,
+                    38.909656
+                  ],
+                  "bearings": [
+                    0,
+                    90,
+                    180,
+                    270
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "location": [
+                    -77.037208,
+                    38.909655
+                  ],
+                  "bearings": [
+                    0,
+                    90,
+                    270
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "location": [
+                    -77.037272,
+                    38.909655
+                  ],
+                  "bearings": [
+                    90,
+                    180,
+                    270
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "location": [
+                    -77.037813,
+                    38.909654
+                  ],
+                  "bearings": [
+                    90,
+                    180,
+                    270
+                  ]
+                },
+                {
+                  "out": 3,
+                  "in": 1,
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    true
+                  ],
+                  "location": [
+                    -77.038498,
+                    38.909652
+                  ],
+                  "bearings": [
+                    0,
+                    90,
+                    180,
+                    270
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "location": [
+                    -77.039563,
+                    38.90965
+                  ],
+                  "bearings": [
+                    90,
+                    180,
+                    270
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "location": [
+                    -77.040241,
+                    38.909649
+                  ],
+                  "bearings": [
+                    90,
+                    180,
+                    270
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "location": [
+                    -77.040781,
+                    38.909648
+                  ],
+                  "bearings": [
+                    90,
+                    180,
+                    270
+                  ]
+                }
+              ],
+              "geometry": "olzeiAj}||qCAlGBta@?~B@x`@?lb@BjF?dA?~CBjz@@ji@@v`@Bfq@?vD",
+              "duration": 96.30000000000001,
+              "distance": 446.5,
+              "name": "P Street Northwest",
+              "weight": 96.30000000000001,
+              "mode": "driving",
+              "maneuver": {
+                "bearing_after": 268,
+                "location": [
+                  -77.036518,
+                  38.909656
+                ],
+                "type": "turn",
+                "bearing_before": 180,
+                "modifier": "right",
+                "instruction": "Turn right onto P Street Northwest"
+              }
+            },
+            {
+              "intersections": [
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    false,
+                    false,
+                    true,
+                    true
+                  ],
+                  "location": [
+                    -77.041677,
+                    38.909646
+                  ],
+                  "bearings": [
+                    0,
+                    90,
+                    180,
+                    270
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "location": [
+                    -77.041676,
+                    38.909264
+                  ],
+                  "bearings": [
+                    0,
+                    120,
+                    180
+                  ]
+                }
+              ],
+              "geometry": "{kzeiAx_g}qCzVArM?",
+              "duration": 31.7,
+              "distance": 68.5,
+              "name": "18th Street Northwest",
+              "weight": 31.7,
+              "mode": "driving",
+              "maneuver": {
+                "bearing_after": 178,
+                "location": [
+                  -77.041677,
+                  38.909646
+                ],
+                "type": "turn",
+                "bearing_before": 268,
+                "modifier": "left",
+                "instruction": "Turn left onto 18th Street Northwest"
+              }
+            },
+            {
+              "intersections": [
+                {
+                  "out": 3,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    true
+                  ],
+                  "location": [
+                    -77.041676,
+                    38.90903
+                  ],
+                  "bearings": [
+                    0,
+                    120,
+                    180,
+                    300
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "location": [
+                    -77.041946,
+                    38.909128
+                  ],
+                  "bearings": [
+                    15,
+                    120,
+                    300
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "location": [
+                    -77.042302,
+                    38.909257
+                  ],
+                  "bearings": [
+                    30,
+                    120,
+                    300
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ],
+                  "location": [
+                    -77.042422,
+                    38.909299
+                  ],
+                  "bearings": [
+                    120,
+                    270,
+                    315
+                  ]
+                }
+              ],
+              "geometry": "keyeiAv_g}qCmAtEuBdIaGfUsAnFgBfD{AvBwAbByBhB",
+              "duration": 22.599999999999998,
+              "distance": 102.5,
+              "name": "Massachusetts Avenue Northwest",
+              "weight": 22.599999999999998,
+              "mode": "driving",
+              "maneuver": {
+                "bearing_after": 293,
+                "location": [
+                  -77.041676,
+                  38.90903
+                ],
+                "type": "turn",
+                "bearing_before": 180,
+                "modifier": "right",
+                "instruction": "Turn right onto Massachusetts Avenue Northwest"
+              }
+            },
+            {
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    false,
+                    true
+                  ],
+                  "location": [
+                    -77.042669,
+                    38.909502
+                  ],
+                  "bearings": [
+                    15,
+                    45,
+                    135,
+                    195,
+                    345
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ],
+                  "location": [
+                    -77.042667,
+                    38.909778
+                  ],
+                  "bearings": [
+                    150,
+                    165,
+                    345
+                  ]
+                },
+                {
+                  "out": 1,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "location": [
+                    -77.042819,
+                    38.910027
+                  ],
+                  "bearings": [
+                    150,
+                    315,
+                    345
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ],
+                  "location": [
+                    -77.043141,
+                    38.910215
+                  ],
+                  "bearings": [
+                    90,
+                    120,
+                    285
+                  ]
+                },
+                {
+                  "out": 1,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "location": [
+                    -77.043232,
+                    38.910239
+                  ],
+                  "bearings": [
+                    105,
+                    285,
+                    300
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "location": [
+                    -77.043398,
+                    38.91026
+                  ],
+                  "bearings": [
+                    90,
+                    270,
+                    285
+                  ]
+                },
+                {
+                  "out": 3,
+                  "in": 1,
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "location": [
+                    -77.043573,
+                    38.910299
+                  ],
+                  "bearings": [
+                    45,
+                    105,
+                    225,
+                    315
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ],
+                  "location": [
+                    -77.043726,
+                    38.910395
+                  ],
+                  "bearings": [
+                    135,
+                    255,
+                    330
+                  ]
+                },
+                {
+                  "out": 3,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    true
+                  ],
+                  "location": [
+                    -77.044162,
+                    38.91113
+                  ],
+                  "bearings": [
+                    90,
+                    150,
+                    270,
+                    330
+                  ]
+                }
+              ],
+              "geometry": "{bzeiAx}h}qCmASmAMoAGoA?mADoAJmARaATaAXaA^_Ab@}@f@{@l@y@n@w@t@_AdA{@hAw@nAq@tAi@lAg@pAa@tA]vAYxAUzASlBMlBGnBg@`Ee@zCa@z@y@lBOZsAjB}l@fZkm@lZ",
+              "duration": 90.9,
+              "distance": 333.7,
+              "name": "",
+              "weight": 105.10000000000001,
+              "mode": "driving",
+              "maneuver": {
+                "exit": 3,
+                "bearing_after": 12,
+                "location": [
+                  -77.042669,
+                  38.909502
+                ],
+                "type": "roundabout",
+                "bearing_before": 316,
+                "modifier": "right",
+                "instruction": "Enter the roundabout and take the 3rd exit"
+              }
+            },
+            {
+              "intersections": [
+                {
+                  "in": 0,
+                  "entry": [
+                    true
+                  ],
+                  "location": [
+                    -77.044601,
+                    38.911872
+                  ],
+                  "bearings": [
+                    155
+                  ]
+                }
+              ],
+              "geometry": "_w~eiApvl}qC",
+              "duration": 0,
+              "distance": 0,
+              "name": "",
+              "weight": 0,
+              "mode": "driving",
+              "maneuver": {
+                "bearing_after": 0,
+                "location": [
+                  -77.044601,
+                  38.911872
+                ],
+                "type": "arrive",
+                "bearing_before": 335,
+                "modifier": "right",
+                "instruction": "You have arrived at your destination, on the right"
+              }
+            }
+          ],
+          "weight": 334.4,
+          "distance": 1030.9,
+          "summary": "P Street Northwest, Dupont Circle Northwest",
+          "duration": 273
+        }
+      ],
+      "weight_name": "routability",
+      "geometry": "qe{eiA~c||qC?|Q?jEhS?vC@AlGBta@?~B@x`@?lb@BjF?dA?~CBjz@@ji@@v`@Bfq@?vDzVArM?mAtEuBdIaGfUsAnFgBfD{AvBwAbByBhBmASmAMoAGoA?mADoAJmARaATaAXaA^_Ab@}@f@{@l@y@n@w@t@_AdA{@hAw@nAq@tAi@lAg@pAa@tA]vAYxAUzASlBMlBGnBg@`Ee@zCa@z@y@lBOZsAjB}l@fZkm@lZ",
+      "weight": 334.4,
+      "distance": 1030.9,
+      "duration": 273
+    }
+  ],
+  "code": "Ok"
+}

@@ -13,7 +13,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mapbox.services.android.navigation.testapp.activity.LocationInfoActivity;
-import com.mapbox.services.android.navigation.testapp.activity.NavigationActivity;
+
+import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.OffRouteDetectionActivity;
 import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.RouteUtilsV5Activity;
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
       new SampleItem(
         getString(R.string.title_navigation),
         getString(R.string.description_navigation),
-        NavigationActivity.class
+        MockNavigationActivity.class
       ),
       new SampleItem(
         getString(R.string.title_snap_to_route),

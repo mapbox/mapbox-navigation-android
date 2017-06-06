@@ -33,7 +33,7 @@ import static com.mapbox.services.android.telemetry.location.LocationEnginePrior
  * @since 0.1.0
  */
 @Experimental
-public class NavigationService extends Service implements LocationEngineListener, ProgressChangeListener {
+public class NavigationService extends Service implements LocationEngineListener {
   private static final int ONGOING_NOTIFICATION_ID = 1;
 
   private int startId;
@@ -134,14 +134,6 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
-  @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    // If the user arrives at the final destination, end the navigation session.
-    if (routeProgress.getAlertUserLevel() == NavigationConstants.ARRIVE_ALERT_LEVEL) {
-      endNavigation();
-    }
-  }
-
   @SuppressWarnings( {"MissingPermission"})
   public void startRoute(DirectionsRoute directionsRoute) {
     this.directionsRoute = directionsRoute;
@@ -206,7 +198,6 @@ public class NavigationService extends Service implements LocationEngineListener
   public void setProgressChangeListeners(CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners) {
     // Add a progress listener so this service is notified when the user arrives at their destination.
     this.progressChangeListeners = progressChangeListeners;
-    progressChangeListeners.add(this);
     if (navigationEngine != null) {
       navigationEngine.setProgressChangeListeners(progressChangeListeners);
     }
