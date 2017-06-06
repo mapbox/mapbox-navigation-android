@@ -17,7 +17,9 @@ import com.mapbox.services.commons.models.Position;
 import junit.framework.Assert;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import static junit.framework.Assert.assertEquals;
@@ -53,7 +55,7 @@ public class RouteStepProgressTest extends BaseTest {
   }
 
   @Test
-  public void getStepDistance_equalsZeroOnOneCoordSteps() throws Exception {
+  public void getStepDistance_equalsZeroOnOneCoordSteps() {
     Gson gson = new Gson();
     String body = readPath(DCMAPBOX_CHIPOLTLE);
     response = gson.fromJson(body, DirectionsResponse.class);
@@ -111,6 +113,125 @@ public class RouteStepProgressTest extends BaseTest {
 
     Assert.assertEquals(0, routeStepProgress.getDistanceRemaining(), BaseTest.DELTA);
   }
+
+  @Test
+  public void getDistanceTraveled_equalsZeroAtBeginning() {
+    RouteStepProgress routeStepProgress
+      = new RouteStepProgress(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
+    Assert.assertEquals(0, routeStepProgress.getDistanceTraveled(), BaseTest.DELTA);
+  }
+
+  @Test
+  public void getDistanceTraveled_equalsCorrectValueAtIntervals() {
+    LineString lineString
+      = LineString.fromPolyline(firstStep.getGeometry(), Constants.PRECISION_6);
+    double stepDistance = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_METERS);
+
+    double stepSegments = 5; // meters
+
+    // Chop the line in small pieces
+    for (double i = 0; i < stepDistance; i += stepSegments) {
+      Position position = TurfMeasurement.along(lineString, i, TurfConstants.UNIT_METERS).getCoordinates();
+
+      LineString slicedLine = TurfMisc.lineSlice(Point.fromCoordinates(position),
+        Point.fromCoordinates(route.getLegs().get(0).getSteps().get(1).getManeuver().asPosition()), lineString);
+
+      double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+      distance = stepDistance - distance;
+
+      RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 0, position);
+      Assert.assertEquals(distance, routeStepProgress.getDistanceTraveled(), BaseTest.DELTA);
+    }
+  }
+
+  @Test
+  public void getDistanceTraveled_equalsStepDistanceAtEndOfStep() {
+    LineString lineString
+      = LineString.fromPolyline(firstLeg.getSteps().get(3).getGeometry(), Constants.PRECISION_6);
+    double stepDistance = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_METERS);
+
+    RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 3,
+      firstLeg.getSteps().get(4).getManeuver().asPosition());
+
+    Assert.assertEquals(stepDistance, routeStepProgress.getDistanceTraveled(), BaseTest.DELTA);
+  }
+
+  @Test
+  public void getFractionTraveled_equalsZeroAtBeginning() {
+    RouteStepProgress routeStepProgress
+      = new RouteStepProgress(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
+
+    Assert.assertEquals(0, routeStepProgress.getFractionTraveled(), BaseTest.DELTA);
+  }
+
+  @Test
+  public void getFractionTraveled_equalsCorrectValueAtIntervals() {
+    LineString lineString
+      = LineString.fromPolyline(firstStep.getGeometry(), Constants.PRECISION_6);
+    double stepDistance = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_METERS);
+
+    double stepSegments = 5; // meters
+
+    // Chop the line in small pieces
+    for (double i = 0; i < stepDistance; i += stepSegments) {
+      Position position = TurfMeasurement.along(lineString, i, TurfConstants.UNIT_METERS).getCoordinates();
+
+      LineString slicedLine = TurfMisc.lineSlice(Point.fromCoordinates(position),
+        Point.fromCoordinates(route.getLegs().get(0).getSteps().get(1).getManeuver().asPosition()), lineString);
+
+      double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+
+      RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 0, position);
+      float fractionRemaining = (float) ((stepDistance - distance) / stepDistance);
+      Assert.assertEquals(fractionRemaining, routeStepProgress.getFractionTraveled(), BaseTest.DELTA);
+    }
+  }
+
+  @Test
+  public void getFractionTraveled_equalsOneAtEndOfStep() {
+    RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 3,
+      firstLeg.getSteps().get(4).getManeuver().asPosition());
+
+    Assert.assertEquals(1.0, routeStepProgress.getFractionTraveled(), BaseTest.DELTA);
+  }
+
+  @Test
+  public void getDurationRemaining_equalsStepDurationAtBeginning() {
+    RouteStepProgress routeStepProgress
+      = new RouteStepProgress(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
+
+    Assert.assertEquals(41, routeStepProgress.getDurationRemaining(), BaseTest.DELTA);
+  }
+
+  @Test
+  public void getDurationRemaining_equalsCorrectValueAtIntervals() {
+    LineString lineString
+      = LineString.fromPolyline(firstStep.getGeometry(), Constants.PRECISION_6);
+    double stepDistance = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_METERS);
+
+    double stepSegments = 5; // meters
+
+    // Chop the line in small pieces
+    for (double i = 0; i < stepDistance; i += stepSegments) {
+      Position position = TurfMeasurement.along(lineString, i, TurfConstants.UNIT_METERS).getCoordinates();
+
+      LineString slicedLine = TurfMisc.lineSlice(Point.fromCoordinates(position),
+        Point.fromCoordinates(route.getLegs().get(0).getSteps().get(1).getManeuver().asPosition()), lineString);
+
+      double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+
+      RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 0, position);
+      float fractionRemaining = (float) ((stepDistance - distance) / stepDistance);
+      Assert.assertEquals((1 - fractionRemaining) * firstStep.getDistance(), routeStepProgress.getDurationRemaining(),
+        BaseTest.DELTA);
+    }
+  }
+
+  @Test
+  public void getDurationRemaining_equalsZeroAtEndOfStep() {
+    RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 3,
+      firstLeg.getSteps().get(4).getManeuver().asPosition());
+
+    Assert.assertEquals(0, routeStepProgress.getDurationRemaining(), BaseTest.DELTA);
+  }
 }
-
-
