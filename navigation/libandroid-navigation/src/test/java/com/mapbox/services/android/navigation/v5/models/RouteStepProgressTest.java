@@ -17,9 +17,7 @@ import com.mapbox.services.commons.models.Position;
 import junit.framework.Assert;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import static junit.framework.Assert.assertEquals;
@@ -200,7 +198,7 @@ public class RouteStepProgressTest extends BaseTest {
     RouteStepProgress routeStepProgress
       = new RouteStepProgress(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
 
-    Assert.assertEquals(41, routeStepProgress.getDurationRemaining(), BaseTest.DELTA);
+    Assert.assertEquals(41.5, routeStepProgress.getDurationRemaining(), BaseTest.DELTA);
   }
 
   @Test
@@ -222,7 +220,7 @@ public class RouteStepProgressTest extends BaseTest {
 
       RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 0, position);
       float fractionRemaining = (float) ((stepDistance - distance) / stepDistance);
-      Assert.assertEquals((1 - fractionRemaining) * firstStep.getDistance(), routeStepProgress.getDurationRemaining(),
+      Assert.assertEquals((1 - fractionRemaining) * firstStep.getDuration(), routeStepProgress.getDurationRemaining(),
         BaseTest.DELTA);
     }
   }

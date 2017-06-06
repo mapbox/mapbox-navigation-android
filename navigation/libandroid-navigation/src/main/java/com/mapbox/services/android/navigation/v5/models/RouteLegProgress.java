@@ -7,7 +7,15 @@ import com.mapbox.services.api.ServicesException;
 import com.mapbox.services.api.directions.v5.models.LegStep;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.api.utils.turf.TurfConstants;
+import com.mapbox.services.api.utils.turf.TurfMeasurement;
+import com.mapbox.services.api.utils.turf.TurfMisc;
+import com.mapbox.services.commons.geojson.LineString;
+import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
+import com.mapbox.services.commons.utils.PolylineUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Experimental
 public class RouteLegProgress {
@@ -32,12 +40,19 @@ public class RouteLegProgress {
     this.userSnappedPosition = userSnappedPosition;
     currentStepProgress = new RouteStepProgress(routeLeg, stepIndex, userSnappedPosition);
 
-    legDistance = RouteUtils.getDistanceToNextLeg(
-      routeLeg.getSteps().get(0).getManeuver().asPosition(),
-      routeLeg,
-      TurfConstants.UNIT_METERS,
-      Constants.PRECISION_6
-    );
+    // Decode the geometry
+    List<Position> coords = new ArrayList<>();
+    for (LegStep step : routeLeg.getSteps()) {
+      coords.addAll(PolylineUtils.decode(step.getGeometry(), Constants.PRECISION_6));
+    }
+    if (coords.size() > 1) {
+      LineString slicedLine = TurfMisc.lineSlice(
+        Point.fromCoordinates(routeLeg.getSteps().get(0).getManeuver().asPosition()),
+        Point.fromCoordinates(coords.get(coords.size() - 1)),
+        LineString.fromCoordinates(coords)
+      );
+      legDistance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+    }
   }
 
   /**
@@ -81,9 +96,23 @@ public class RouteLegProgress {
    * @since 0.1.0
    */
   public double getDistanceRemaining() {
-    return RouteUtils.getDistanceToNextLeg(
-      userSnappedPosition, routeLeg, TurfConstants.UNIT_METERS, Constants.PRECISION_6
-    );
+    double distanceRemaining = 0;
+
+    List<Position> coords = new ArrayList<>();
+    for (LegStep step : routeLeg.getSteps()) {
+      coords.addAll(PolylineUtils.decode(step.getGeometry(), Constants.PRECISION_6));
+    }
+
+
+    if (coords.size() > 1) {
+      LineString slicedLine = TurfMisc.lineSlice(
+        Point.fromCoordinates(userSnappedPosition),
+        Point.fromCoordinates(coords.get(coords.size() - 1)),
+        LineString.fromCoordinates(coords)
+      );
+      distanceRemaining = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+    }
+    return distanceRemaining;
   }
 
   /**
@@ -92,8 +121,8 @@ public class RouteLegProgress {
    * @return {@code long} value representing the duration remaining till end of step, in unit seconds.
    * @since 0.1.0
    */
-  public long getDurationRemaining() {
-    return (long) ((1 - getFractionTraveled()) * routeLeg.getDuration());
+  public double getDurationRemaining() {
+    return (1 - getFractionTraveled()) * routeLeg.getDuration();
   }
 
   /**
@@ -104,7 +133,12 @@ public class RouteLegProgress {
    * @since 0.1.0
    */
   public float getFractionTraveled() {
-    return (float) (getDistanceTraveled() / legDistance);
+    float fractionRemaining = 1;
+
+    if (legDistance > 0) {
+      fractionRemaining = (float) (getDistanceTraveled() / legDistance);
+    }
+    return fractionRemaining;
   }
 
   /**
@@ -139,7 +173,7 @@ public class RouteLegProgress {
    * @since 0.1.0
    */
   public LegStep getUpComingStep() {
-    if (routeLeg.getSteps().size() > getStepIndex()) {
+    if (routeLeg.getSteps().size() - 1 > getStepIndex()) {
       return routeLeg.getSteps().get(getStepIndex() + 1);
     }
     return null;

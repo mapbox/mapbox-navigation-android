@@ -105,8 +105,8 @@ public class RouteStepProgress {
    * @return {@code long} value representing the duration remaining till end of step, in unit seconds.
    * @since 0.1.0
    */
-  public long getDurationRemaining() {
-    return (long) ((1 - getFractionTraveled()) * step.getDuration());
+  public double getDurationRemaining() {
+    return (1 - getFractionTraveled()) * step.getDuration();
   }
 
 
