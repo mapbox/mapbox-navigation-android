@@ -34,7 +34,10 @@ public class RouteStepProgress {
   RouteStepProgress(@NonNull RouteLeg routeLeg, int stepIndex, @NonNull Position userSnappedPosition) {
     this.userSnappedPosition = userSnappedPosition;
     this.step = routeLeg.getSteps().get(stepIndex);
+    initialize();
+  }
 
+  private void initialize() {
     // Decode the geometry
     List<Position> coords = PolylineUtils.decode(step.getGeometry(), Constants.PRECISION_6);
 

@@ -2,7 +2,6 @@ package com.mapbox.services.android.navigation.v5.models;
 
 import com.mapbox.services.Constants;
 import com.mapbox.services.Experimental;
-import com.mapbox.services.android.navigation.v5.RouteUtils;
 import com.mapbox.services.api.ServicesException;
 import com.mapbox.services.api.directions.v5.models.LegStep;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;
@@ -39,7 +38,10 @@ public class RouteLegProgress {
     this.stepIndex = stepIndex;
     this.userSnappedPosition = userSnappedPosition;
     currentStepProgress = new RouteStepProgress(routeLeg, stepIndex, userSnappedPosition);
+    initialize();
+  }
 
+  private void initialize() {
     // Decode the geometry
     List<Position> coords = new ArrayList<>();
     for (LegStep step : routeLeg.getSteps()) {

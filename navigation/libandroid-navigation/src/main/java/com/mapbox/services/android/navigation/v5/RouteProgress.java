@@ -8,8 +8,10 @@ import com.mapbox.services.android.navigation.v5.models.RouteLegProgress;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.api.utils.turf.TurfConstants;
+import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.api.utils.turf.TurfMisc;
 import com.mapbox.services.commons.geojson.Feature;
+import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
 import com.mapbox.services.commons.utils.PolylineUtils;
@@ -62,11 +64,14 @@ public class RouteProgress {
   private void initialize() {
     // Measure route from beginning to end. This is done since the directions API gives a different distance then the
     // one we measure using turf.
-    routeDistance = RouteUtils.getDistanceToEndOfRoute(
-      route.getLegs().get(0).getSteps().get(0).getManeuver().asPosition(),
-      route,
-      TurfConstants.UNIT_METERS
+    List<Position> coords = PolylineUtils.decode(route.getGeometry(), Constants.PRECISION_6);
+
+    LineString slicedLine = TurfMisc.lineSlice(
+      Point.fromCoordinates(route.getLegs().get(0).getSteps().get(0).getManeuver().asPosition()),
+      Point.fromCoordinates(coords.get(coords.size() - 1)),
+      LineString.fromCoordinates(coords)
     );
+    routeDistance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
   }
 
   /**
