@@ -1,7 +1,5 @@
 package com.mapbox.services.android.navigation.v5;
 
-import android.location.Location;
-
 import com.mapbox.services.Constants;
 import com.mapbox.services.Experimental;
 import com.mapbox.services.android.navigation.v5.models.RouteLegProgress;
@@ -10,7 +8,6 @@ import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.api.utils.turf.TurfMisc;
-import com.mapbox.services.commons.geojson.Feature;
 import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
@@ -35,29 +32,27 @@ public class RouteProgress {
 
   private RouteLegProgress currentLegProgress;
   private DirectionsRoute route;
-  private Location location;
-  private int LegIndex;
+  private Position userSnappedPosition;
+  private int legIndex;
   private int alertUserLevel;
   private double routeDistance;
-  private int stepIndex;
 
   /**
    * Constructor for the route routeProgress information.
    *
-   * @param route          the {@link DirectionsRoute} being used for the navigation session. When a user is
-   *                       rerouted this route is updated.
-   * @param location       the users location most recently used when creating this object.
-   * @param stepIndex      an {@code integer} representing the current step index the user is on.
-   * @param alertUserLevel the most recently calculated alert level.
+   * @param route               the {@link DirectionsRoute} being used for the navigation session. When a user is
+   *                            rerouted this route is updated.
+   * @param userSnappedPosition the users position most recently used when creating this object.
+   * @param stepIndex           an {@code integer} representing the current step index the user is on.
+   * @param alertUserLevel      the most recently calculated alert level.
    * @since 0.1.0
    */
-  RouteProgress(DirectionsRoute route, Location location, int legIndex, int stepIndex, int alertUserLevel) {
+  RouteProgress(DirectionsRoute route, Position userSnappedPosition, int legIndex, int stepIndex, int alertUserLevel) {
     this.route = route;
     this.alertUserLevel = alertUserLevel;
-    this.location = location;
-    this.LegIndex = legIndex;
-    this.stepIndex = stepIndex;
-    currentLegProgress = new RouteLegProgress(getCurrentLeg(), stepIndex, getUsersCurrentSnappedPosition());
+    this.userSnappedPosition = userSnappedPosition;
+    this.legIndex = legIndex;
+    currentLegProgress = new RouteLegProgress(getCurrentLeg(), stepIndex, userSnappedPosition);
     initialize();
   }
 
@@ -91,7 +86,7 @@ public class RouteProgress {
    * @since 0.1.0
    */
   public int getLegIndex() {
-    return LegIndex;
+    return legIndex;
   }
 
   /**
@@ -119,8 +114,8 @@ public class RouteProgress {
    * @return {@code long} value representing the duration remaining till end of route, in unit seconds.
    * @since 0.1.0
    */
-  public long getDurationRemaining() {
-    return (long) ((1 - getFractionTraveled()) * route.getDuration());
+  public double getDurationRemaining() {
+    return (1 - getFractionTraveled()) * route.getDuration();
   }
 
   /**
@@ -131,7 +126,12 @@ public class RouteProgress {
    * @since 0.1.0
    */
   public float getFractionTraveled() {
-    return (float) (getDistanceTraveled() / routeDistance);
+    float fractionRemaining = 1;
+
+    if (routeDistance > 0) {
+      fractionRemaining = (float) (getDistanceTraveled() / routeDistance);
+    }
+    return fractionRemaining;
   }
 
   /**
@@ -141,7 +141,21 @@ public class RouteProgress {
    * @since 0.1.0
    */
   public double getDistanceRemaining() {
-    return RouteUtils.getDistanceToEndOfRoute(getUsersCurrentSnappedPosition(), route, TurfConstants.UNIT_METERS);
+    double distanceRemaining = 0;
+
+    LineString lineString = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6);
+    Position lastCoordinate
+      = route.getLegs().get(0).getSteps().get(route.getLegs().get(0).getSteps().size() - 1).getManeuver().asPosition();
+
+    if (routeDistance > 1) {
+      LineString slicedLine = TurfMisc.lineSlice(
+        Point.fromCoordinates(userSnappedPosition),
+        Point.fromCoordinates(lastCoordinate),
+        lineString
+      );
+      distanceRemaining = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+    }
+    return distanceRemaining;
   }
 
   /**
@@ -162,24 +176,5 @@ public class RouteProgress {
    */
   public DirectionsRoute getRoute() {
     return route;
-  }
-
-  /**
-   * Provides the users location snapped to the current route they are navigating on.
-   *
-   * @return {@link Position} object with coordinates snapping the user to the route.
-   * @since 0.1.0
-   */
-  public Position getUsersCurrentSnappedPosition() {
-    Point locationToPoint = Point.fromCoordinates(new double[] {location.getLongitude(), location.getLatitude()});
-    String stepGeometry = route.getLegs().get(getLegIndex()).getSteps().get(stepIndex).getGeometry();
-
-    // Decode the geometry
-    List<Position> coords = PolylineUtils.decode(stepGeometry, Constants.PRECISION_6);
-
-    // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
-    // Point on the LineString.
-    Feature feature = TurfMisc.pointOnLine(locationToPoint, coords);
-    return ((Point) feature.getGeometry()).getCoordinates();
   }
 }
