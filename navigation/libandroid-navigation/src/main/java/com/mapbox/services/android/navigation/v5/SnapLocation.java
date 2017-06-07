@@ -65,10 +65,7 @@ public class SnapLocation {
     double userDistanceBuffer = location.getSpeed() * options.getDeadReckoningTimeInterval();
 
     if (routeProgress.getDistanceTraveled() + userDistanceBuffer
-      > RouteUtils.getDistanceToEndOfRoute(
-      routeProgress.getRoute().getLegs().get(0).getSteps().get(0).getManeuver().asPosition(),
-      routeProgress.getRoute(),
-      TurfConstants.UNIT_METERS)) {
+      > routeProgress.getRoute().getDistance()) {
       // If the user is near the end of the route, take the remaining distance and divide by two
       userDistanceBuffer = routeProgress.getDistanceRemaining() / 2;
     }
