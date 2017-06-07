@@ -22,7 +22,6 @@ public class RouteStepProgress {
 
   private LegStep step;
   private Position userSnappedPosition;
-  private double stepDistance;
 
   /**
    * Constructor for the step progress.
@@ -34,21 +33,6 @@ public class RouteStepProgress {
   RouteStepProgress(@NonNull RouteLeg routeLeg, int stepIndex, @NonNull Position userSnappedPosition) {
     this.userSnappedPosition = userSnappedPosition;
     this.step = routeLeg.getSteps().get(stepIndex);
-    initialize();
-  }
-
-  private void initialize() {
-    // Decode the geometry
-    List<Position> coords = PolylineUtils.decode(step.getGeometry(), Constants.PRECISION_6);
-
-    if (coords.size() > 1) {
-      LineString slicedLine = TurfMisc.lineSlice(
-        Point.fromCoordinates(step.getManeuver().asPosition()),
-        Point.fromCoordinates(coords.get(coords.size() - 1)),
-        LineString.fromCoordinates(coords)
-      );
-      stepDistance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
-    }
   }
 
   /**
@@ -59,7 +43,11 @@ public class RouteStepProgress {
    * @since 0.1.0
    */
   public double getDistanceTraveled() {
-    return stepDistance - getDistanceRemaining();
+    double distanceTraveled = step.getDistance() - getDistanceRemaining();
+    if (distanceTraveled < 0) {
+      distanceTraveled = 0;
+    }
+    return distanceTraveled;
   }
 
   /**
@@ -94,12 +82,15 @@ public class RouteStepProgress {
    * @since 0.1.0
    */
   public float getFractionTraveled() {
-    float fractionRemaining = 1;
+    float fractionTraveled = 1;
 
-    if (stepDistance > 0) {
-      fractionRemaining = (float) (getDistanceTraveled() / stepDistance);
+    if (step.getDistance() > 0) {
+      fractionTraveled = (float) (getDistanceTraveled() / step.getDistance());
+      if (fractionTraveled < 0) {
+        fractionTraveled = 0;
+      }
     }
-    return fractionRemaining;
+    return fractionTraveled;
   }
 
   /**

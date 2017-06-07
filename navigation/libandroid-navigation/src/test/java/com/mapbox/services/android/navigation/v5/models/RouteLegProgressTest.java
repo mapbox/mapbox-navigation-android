@@ -5,7 +5,6 @@ import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.directions.v5.models.LegStep;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
@@ -50,7 +49,6 @@ public class RouteLegProgressTest extends BaseTest {
     // TODO replace with equalsTo once https://github.com/mapbox/mapbox-java/pull/450 merged
     Assert.assertTrue(routeLegProgress.getUpComingStep().getGeometry()
       .startsWith("so{gfA~}xpgFzOyNnRoOdVqXzLmQbDiGhKqQ|Vie@`X{g@dkAw{B~NcXhPoWlRmXfSeW|U"));
-
   }
 
   @Test
@@ -104,27 +102,20 @@ public class RouteLegProgressTest extends BaseTest {
     RouteLegProgress routeLegProgress
       = new RouteLegProgress(firstLeg, 0, firstLeg.getSteps().get(0).getManeuver().asPosition());
 
-    Assert.assertEquals(0, routeLegProgress.getFractionTraveled(), BaseTest.DELTA);
+    Assert.assertEquals(0.0, routeLegProgress.getFractionTraveled(), BaseTest.DELTA);
   }
 
   @Test
   public void getFractionTraveled_equalsCorrectValueAtIntervals() {
-    double legDistance = 0;
-    for (LegStep step : firstLeg.getSteps()) {
-      LineString lineString
-        = LineString.fromPolyline(step.getGeometry(), Constants.PRECISION_6);
-      legDistance += TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_METERS);
-    }
-
     double stepSegments = 5000; // meters
 
     // Chop the line in small pieces
     LineString lineString = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6);
-    for (double i = 0; i < legDistance; i += stepSegments) {
+    for (double i = 0; i < firstLeg.getDistance(); i += stepSegments) {
       Position position = TurfMeasurement.along(lineString, i, TurfConstants.UNIT_METERS).getCoordinates();
 
       RouteLegProgress routeLegProgress = new RouteLegProgress(firstLeg, 0, position);
-      float fractionRemaining = (float) (routeLegProgress.getDistanceTraveled() / legDistance);
+      float fractionRemaining = (float) (routeLegProgress.getDistanceTraveled() / firstLeg.getDistance());
       Assert.assertEquals(fractionRemaining, routeLegProgress.getFractionTraveled(), BaseTest.DELTA);
     }
   }
@@ -139,17 +130,10 @@ public class RouteLegProgressTest extends BaseTest {
 
   @Test
   public void getDistanceRemaining_equalsLegDistanceAtBeginning() {
-    double legDistance = 0;
-    for (LegStep step : firstLeg.getSteps()) {
-      LineString lineString
-        = LineString.fromPolyline(step.getGeometry(), Constants.PRECISION_6);
-      legDistance += TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_METERS);
-    }
-
     RouteLegProgress routeLegProgress
       = new RouteLegProgress(firstLeg, 0, firstLeg.getSteps().get(0).getManeuver().asPosition());
 
-    Assert.assertEquals(legDistance, routeLegProgress.getDistanceRemaining(), BaseTest.DELTA);
+    Assert.assertEquals(firstLeg.getDistance(), routeLegProgress.getDistanceRemaining(), BaseTest.LARGE_DELTA);
   }
 
   @Test
@@ -169,17 +153,10 @@ public class RouteLegProgressTest extends BaseTest {
 
   @Test
   public void getDistanceTraveled_equalsLegDistanceAtEndOfLeg() {
-    double traveledLegDistance = 0;
-    for (int i = 0; i < 3; i++) {
-      LineString traveledLineString
-        = LineString.fromPolyline(firstLeg.getSteps().get(i).getGeometry(), Constants.PRECISION_6);
-      traveledLegDistance += TurfMeasurement.lineDistance(traveledLineString, TurfConstants.UNIT_METERS);
-    }
+    RouteLegProgress routeLegProgress = new RouteLegProgress(firstLeg, firstLeg.getSteps().size() - 1,
+      firstLeg.getSteps().get(firstLeg.getSteps().size() - 1).getManeuver().asPosition());
 
-    RouteLegProgress routeLegProgress = new RouteLegProgress(firstLeg, 4,
-      firstLeg.getSteps().get(3).getManeuver().asPosition());
-
-    Assert.assertEquals(traveledLegDistance, routeLegProgress.getDistanceTraveled(), BaseTest.DELTA);
+    Assert.assertEquals(firstLeg.getDistance(), routeLegProgress.getDistanceTraveled(), BaseTest.DELTA);
   }
 
   @Test

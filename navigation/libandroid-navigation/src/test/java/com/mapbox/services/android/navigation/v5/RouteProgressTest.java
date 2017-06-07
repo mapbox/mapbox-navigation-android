@@ -71,15 +71,12 @@ public class RouteProgressTest extends BaseTest {
 
   @Test
   public void getDistanceRemaining_equalsRouteDistanceAtBeginning() {
-    LineString lineString = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6);
-    double routeDistance = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_METERS);
-
     RouteProgress routeProgress
       = new RouteProgress(
       route, firstLeg.getSteps().get(0).getManeuver().asPosition(),
       0, 0, NavigationConstants.LOW_ALERT_LEVEL);
 
-    Assert.assertEquals(routeDistance, routeProgress.getDistanceRemaining(), DELTA);
+    Assert.assertEquals(route.getDistance(), routeProgress.getDistanceRemaining(), LARGE_DELTA);
   }
 
   @Test
@@ -88,22 +85,21 @@ public class RouteProgressTest extends BaseTest {
       = new RouteProgress(route, firstLeg.getSteps().get(0).getManeuver().asPosition(),
       0, 0, NavigationConstants.DEPART_ALERT_LEVEL);
 
-    Assert.assertEquals(0, routeProgress.getFractionTraveled(), DELTA);
+    Assert.assertEquals(0, routeProgress.getFractionTraveled(), BaseTest.LARGE_DELTA);
   }
 
   @Test
   public void getFractionTraveled_equalsCorrectValueAtIntervals() {
     LineString lineString = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6);
-    double routeDistance = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_METERS);
 
     double stepSegments = 500; // meters
 
     // Chop the line in small pieces
-    for (double i = 0; i < routeDistance; i += stepSegments) {
+    for (double i = 0; i < route.getDistance(); i += stepSegments) {
       Position position = TurfMeasurement.along(lineString, i, TurfConstants.UNIT_METERS).getCoordinates();
 
       RouteProgress routeProgress = new RouteProgress(route, position, 0, 0, NavigationConstants.DEPART_ALERT_LEVEL);
-      float fractionRemaining = (float) (routeProgress.getDistanceTraveled() / routeDistance);
+      float fractionRemaining = (float) (routeProgress.getDistanceTraveled() / route.getDistance());
       Assert.assertEquals(fractionRemaining, routeProgress.getFractionTraveled(), BaseTest.DELTA);
     }
   }
@@ -149,16 +145,13 @@ public class RouteProgressTest extends BaseTest {
 
   @Test
   public void getDistanceTraveled_equalsRouteDistanceAtEndOfRoute() {
-    LineString lineString = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6);
-    double traveledRouteDistance = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_METERS);
-
     Position lastCoordinate
       = route.getLegs().get(0).getSteps().get(route.getLegs().get(0).getSteps().size() - 1).getManeuver().asPosition();
 
     RouteProgress routeProgress = new RouteProgress(route, lastCoordinate,
       route.getLegs().size() - 1, firstLeg.getSteps().size() - 1, NavigationConstants.ARRIVE_ALERT_LEVEL);
 
-    Assert.assertEquals(traveledRouteDistance, routeProgress.getDistanceTraveled(), BaseTest.DELTA);
+    Assert.assertEquals(route.getDistance(), routeProgress.getDistanceTraveled(), BaseTest.DELTA);
   }
 
   @Test

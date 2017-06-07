@@ -35,7 +35,6 @@ public class RouteProgress {
   private Position userSnappedPosition;
   private int legIndex;
   private int alertUserLevel;
-  private double routeDistance;
 
   /**
    * Constructor for the route routeProgress information.
@@ -53,20 +52,6 @@ public class RouteProgress {
     this.userSnappedPosition = userSnappedPosition;
     this.legIndex = legIndex;
     currentLegProgress = new RouteLegProgress(getCurrentLeg(), stepIndex, userSnappedPosition);
-    initialize();
-  }
-
-  private void initialize() {
-    // Measure route from beginning to end. This is done since the directions API gives a different distance then the
-    // one we measure using turf.
-    List<Position> coords = PolylineUtils.decode(route.getGeometry(), Constants.PRECISION_6);
-
-    LineString slicedLine = TurfMisc.lineSlice(
-      Point.fromCoordinates(route.getLegs().get(0).getSteps().get(0).getManeuver().asPosition()),
-      Point.fromCoordinates(coords.get(coords.size() - 1)),
-      LineString.fromCoordinates(coords)
-    );
-    routeDistance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
   }
 
   /**
@@ -105,7 +90,11 @@ public class RouteProgress {
    * @since 0.1.0
    */
   public double getDistanceTraveled() {
-    return routeDistance - getDistanceRemaining();
+    double distanceTraveled = route.getDistance() - getDistanceRemaining();
+    if (distanceTraveled < 0) {
+      distanceTraveled = 0;
+    }
+    return distanceTraveled;
   }
 
   /**
@@ -128,8 +117,8 @@ public class RouteProgress {
   public float getFractionTraveled() {
     float fractionRemaining = 1;
 
-    if (routeDistance > 0) {
-      fractionRemaining = (float) (getDistanceTraveled() / routeDistance);
+    if (route.getDistance() > 0) {
+      fractionRemaining = (float) (getDistanceTraveled() / route.getDistance());
     }
     return fractionRemaining;
   }
@@ -143,17 +132,18 @@ public class RouteProgress {
   public double getDistanceRemaining() {
     double distanceRemaining = 0;
 
-    LineString lineString = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6);
-    Position lastCoordinate
-      = route.getLegs().get(0).getSteps().get(route.getLegs().get(0).getSteps().size() - 1).getManeuver().asPosition();
-
-    if (routeDistance > 1) {
+    List<Position> coords = PolylineUtils.decode(currentLegProgress.getCurrentStep().getGeometry(),
+      Constants.PRECISION_6);
+    if (coords.size() > 1) {
       LineString slicedLine = TurfMisc.lineSlice(
         Point.fromCoordinates(userSnappedPosition),
-        Point.fromCoordinates(lastCoordinate),
-        lineString
+        Point.fromCoordinates(coords.get(coords.size() - 1)),
+        LineString.fromCoordinates(coords)
       );
-      distanceRemaining = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+      distanceRemaining += TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+    }
+    for (int i = currentLegProgress.getStepIndex() + 1; i < getCurrentLeg().getSteps().size(); i++) {
+      distanceRemaining += getCurrentLeg().getSteps().get(i).getDistance();
     }
     return distanceRemaining;
   }

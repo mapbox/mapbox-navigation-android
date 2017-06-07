@@ -25,7 +25,6 @@ public class RouteLegProgress {
   private int stepIndex;
   private Position userSnappedPosition;
   private RouteStepProgress currentStepProgress;
-  private double legDistance;
 
   /**
    * Constructor for the route leg routeProgress information.
@@ -40,23 +39,6 @@ public class RouteLegProgress {
     this.stepIndex = stepIndex;
     this.userSnappedPosition = userSnappedPosition;
     currentStepProgress = new RouteStepProgress(routeLeg, stepIndex, userSnappedPosition);
-    initialize();
-  }
-
-  private void initialize() {
-    // Decode the geometry
-    List<Position> coords = new ArrayList<>();
-    for (LegStep step : routeLeg.getSteps()) {
-      coords.addAll(PolylineUtils.decode(step.getGeometry(), Constants.PRECISION_6));
-    }
-    if (coords.size() > 1) {
-      LineString slicedLine = TurfMisc.lineSlice(
-        Point.fromCoordinates(routeLeg.getSteps().get(0).getManeuver().asPosition()),
-        Point.fromCoordinates(coords.get(coords.size() - 1)),
-        LineString.fromCoordinates(coords)
-      );
-      legDistance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
-    }
   }
 
   /**
@@ -90,7 +72,11 @@ public class RouteLegProgress {
    * @since 0.1.0
    */
   public double getDistanceTraveled() {
-    return legDistance - getDistanceRemaining();
+    double distanceTraveled = routeLeg.getDistance() - getDistanceRemaining();
+    if (distanceTraveled < 0) {
+      distanceTraveled = 0;
+    }
+    return distanceTraveled;
   }
 
   /**
@@ -102,20 +88,19 @@ public class RouteLegProgress {
   public double getDistanceRemaining() {
     double distanceRemaining = 0;
 
-    List<Position> coords = new ArrayList<>();
-    for (LegStep step : routeLeg.getSteps()) {
-      coords.addAll(PolylineUtils.decode(step.getGeometry(), Constants.PRECISION_6));
-    }
-
-
+    List<Position> coords = PolylineUtils.decode(getCurrentStep().getGeometry(), Constants.PRECISION_6);
     if (coords.size() > 1) {
       LineString slicedLine = TurfMisc.lineSlice(
         Point.fromCoordinates(userSnappedPosition),
         Point.fromCoordinates(coords.get(coords.size() - 1)),
         LineString.fromCoordinates(coords)
       );
-      distanceRemaining = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+      distanceRemaining += TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
     }
+    for (int i = stepIndex + 1; i < routeLeg.getSteps().size(); i++) {
+      distanceRemaining += routeLeg.getSteps().get(i).getDistance();
+    }
+
     return distanceRemaining;
   }
 
@@ -137,12 +122,15 @@ public class RouteLegProgress {
    * @since 0.1.0
    */
   public float getFractionTraveled() {
-    float fractionRemaining = 1;
+    float fractionTraveled = 1;
 
-    if (legDistance > 0) {
-      fractionRemaining = (float) (getDistanceTraveled() / legDistance);
+    if (routeLeg.getDistance() > 0) {
+      fractionTraveled = (float) (getDistanceTraveled() / routeLeg.getDistance());
+      if (fractionTraveled < 0) {
+        fractionTraveled = 0;
+      }
     }
-    return fractionRemaining;
+    return fractionTraveled;
   }
 
   /**
