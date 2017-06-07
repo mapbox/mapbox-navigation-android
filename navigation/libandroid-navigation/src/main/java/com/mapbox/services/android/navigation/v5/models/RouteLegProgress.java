@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.models;
 
+import android.support.annotation.NonNull;
+
 import com.mapbox.services.Constants;
 import com.mapbox.services.Experimental;
 import com.mapbox.services.api.ServicesException;
@@ -33,7 +35,7 @@ public class RouteLegProgress {
    * @param userSnappedPosition the users snapped location when routeProgress was last updated.
    * @since 0.1.0
    */
-  public RouteLegProgress(RouteLeg routeLeg, int stepIndex, Position userSnappedPosition) {
+  public RouteLegProgress(@NonNull RouteLeg routeLeg, int stepIndex, @NonNull Position userSnappedPosition) {
     this.routeLeg = routeLeg;
     this.stepIndex = stepIndex;
     this.userSnappedPosition = userSnappedPosition;
