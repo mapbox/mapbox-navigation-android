@@ -2,6 +2,10 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.3.1 - June 8, 2017
+* Use AutoValue inside RouteProgress objects.
+* Directly use direction distance measurements instead of calculating them.
+
 ### v0.3 - June 5, 2017
 * Support for [other direction profiles](https://github.com/mapbox/mapbox-navigation-android/pull/63) (cycling and walking) added.
 * Fixed [issue with step and leg indexes](https://github.com/mapbox/mapbox-navigation-android/pull/52) not getting restarted when reroute occurred.
