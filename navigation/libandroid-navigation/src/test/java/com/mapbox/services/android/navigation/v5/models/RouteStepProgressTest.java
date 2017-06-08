@@ -48,7 +48,7 @@ public class RouteStepProgressTest extends BaseTest {
   @Test
   public void sanityTest() {
     RouteStepProgress routeStepProgress
-      = new RouteStepProgress(firstLeg, 0, Mockito.mock(Position.class));
+      = RouteStepProgress.create(firstLeg, 0, Mockito.mock(Position.class));
     assertNotNull("should not be null", routeStepProgress);
   }
 
@@ -62,7 +62,7 @@ public class RouteStepProgressTest extends BaseTest {
     int totalStepCountInLeg = lastLeg.getSteps().size() - 1;
 
     RouteStepProgress routeStepProgress =
-      new RouteStepProgress(lastLeg, totalStepCountInLeg, Mockito.mock(Position.class));
+      RouteStepProgress.create(lastLeg, totalStepCountInLeg, Mockito.mock(Position.class));
     assertNotNull("should not be null", routeStepProgress);
     assertEquals(1, routeStepProgress.getFractionTraveled(), DELTA);
     assertEquals(0, routeStepProgress.getDistanceRemaining(), DELTA);
@@ -77,7 +77,7 @@ public class RouteStepProgressTest extends BaseTest {
     double stepDistance = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_METERS);
 
     RouteStepProgress routeStepProgress
-      = new RouteStepProgress(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
+      = RouteStepProgress.create(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
 
     Assert.assertEquals(stepDistance, routeStepProgress.getDistanceRemaining(), BaseTest.DELTA);
   }
@@ -99,14 +99,14 @@ public class RouteStepProgressTest extends BaseTest {
 
       double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
 
-      RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 0, position);
+      RouteStepProgress routeStepProgress = RouteStepProgress.create(firstLeg, 0, position);
       Assert.assertEquals(distance, routeStepProgress.getDistanceRemaining(), BaseTest.DELTA);
     }
   }
 
   @Test
   public void getDistanceRemaining_equalsZeroAtEndOfStep() {
-    RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 3,
+    RouteStepProgress routeStepProgress = RouteStepProgress.create(firstLeg, 3,
       firstLeg.getSteps().get(4).getManeuver().asPosition());
 
     Assert.assertEquals(0, routeStepProgress.getDistanceRemaining(), BaseTest.DELTA);
@@ -115,7 +115,7 @@ public class RouteStepProgressTest extends BaseTest {
   @Test
   public void getDistanceTraveled_equalsZeroAtBeginning() {
     RouteStepProgress routeStepProgress
-      = new RouteStepProgress(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
+      = RouteStepProgress.create(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
     Assert.assertEquals(0, routeStepProgress.getDistanceTraveled(), BaseTest.DELTA);
   }
 
@@ -138,14 +138,14 @@ public class RouteStepProgressTest extends BaseTest {
         distance = 0;
       }
 
-      RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 0, position);
+      RouteStepProgress routeStepProgress = RouteStepProgress.create(firstLeg, 0, position);
       Assert.assertEquals(distance, routeStepProgress.getDistanceTraveled(), BaseTest.DELTA);
     }
   }
 
   @Test
   public void getDistanceTraveled_equalsStepDistanceAtEndOfStep() {
-    RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 3,
+    RouteStepProgress routeStepProgress = RouteStepProgress.create(firstLeg, 3,
       firstLeg.getSteps().get(4).getManeuver().asPosition());
 
     Assert.assertEquals(firstLeg.getSteps().get(3).getDistance(),
@@ -155,7 +155,7 @@ public class RouteStepProgressTest extends BaseTest {
   @Test
   public void getFractionTraveled_equalsZeroAtBeginning() {
     RouteStepProgress routeStepProgress
-      = new RouteStepProgress(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
+      = RouteStepProgress.create(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
 
     Assert.assertEquals(0, routeStepProgress.getFractionTraveled(), BaseTest.DELTA);
   }
@@ -176,7 +176,7 @@ public class RouteStepProgressTest extends BaseTest {
 
       double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
 
-      RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 0, position);
+      RouteStepProgress routeStepProgress = RouteStepProgress.create(firstLeg, 0, position);
       float fractionRemaining = (float) ((firstStep.getDistance() - distance) / firstStep.getDistance());
       if (fractionRemaining < 0) {
         fractionRemaining = 0;
@@ -187,7 +187,7 @@ public class RouteStepProgressTest extends BaseTest {
 
   @Test
   public void getFractionTraveled_equalsOneAtEndOfStep() {
-    RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 3,
+    RouteStepProgress routeStepProgress = RouteStepProgress.create(firstLeg, 3,
       firstLeg.getSteps().get(4).getManeuver().asPosition());
 
     Assert.assertEquals(1.0, routeStepProgress.getFractionTraveled(), BaseTest.DELTA);
@@ -196,7 +196,7 @@ public class RouteStepProgressTest extends BaseTest {
   @Test
   public void getDurationRemaining_equalsStepDurationAtBeginning() {
     RouteStepProgress routeStepProgress
-      = new RouteStepProgress(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
+      = RouteStepProgress.create(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
 
     Assert.assertEquals(41.5, routeStepProgress.getDurationRemaining(), BaseTest.DELTA);
   }
@@ -217,7 +217,7 @@ public class RouteStepProgressTest extends BaseTest {
 
       double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
 
-      RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 0, position);
+      RouteStepProgress routeStepProgress = RouteStepProgress.create(firstLeg, 0, position);
       double fractionRemaining = (firstStep.getDistance() - distance) / firstStep.getDistance();
       Assert.assertEquals((1.0 - fractionRemaining) * firstStep.getDuration(),
         routeStepProgress.getDurationRemaining(), BaseTest.LARGE_DELTA);
@@ -226,7 +226,7 @@ public class RouteStepProgressTest extends BaseTest {
 
   @Test
   public void getDurationRemaining_equalsZeroAtEndOfStep() {
-    RouteStepProgress routeStepProgress = new RouteStepProgress(firstLeg, 3,
+    RouteStepProgress routeStepProgress = RouteStepProgress.create(firstLeg, 3,
       firstLeg.getSteps().get(4).getManeuver().asPosition());
 
     Assert.assertEquals(0, routeStepProgress.getDurationRemaining(), BaseTest.DELTA);

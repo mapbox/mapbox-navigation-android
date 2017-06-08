@@ -87,7 +87,7 @@ class NavigationEngine {
     SnapLocation snapLocation = new SnapLocation(location,
       previousRouteProgress.getCurrentLegProgress().getCurrentStep(), options);
 
-    // Create a new RouteProgress object using the latest user location
+    // Create a RouteProgress.create object using the latest user location
     RouteProgress routeProgress = RouteProgress.create(directionsRoute, snapLocation.getUsersCurrentSnappedPosition(),
       legIndex, stepIndex, alertLevel);
 
