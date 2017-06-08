@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.neenbedankt.android-apt'
 
 android {
     compileSdkVersion 25
@@ -35,6 +36,10 @@ dependencies {
 
     // Logging
     compile 'com.jakewharton.timber:timber:4.5.1'
+
+    // AutoValues
+    provided 'com.google.auto.value:auto-value:1.4.1'
+    apt 'com.google.auto.value:auto-value:1.4.1'
 
     // Testing
     testCompile 'junit:junit:4.12'

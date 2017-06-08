@@ -9,6 +9,7 @@ import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListe
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.commons.models.Position;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -60,7 +61,9 @@ class NavigationEngine {
   void onLocationChanged(DirectionsRoute directionsRoute, Location location) {
     // if the previousRouteProgress is null, the route has just begun and one needs to be created
     if (previousRouteProgress == null) {
-      previousRouteProgress = new RouteProgress(directionsRoute, location, 0, 0, NavigationConstants.NONE_ALERT_LEVEL);
+      Position currentPosition = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
+      previousRouteProgress = RouteProgress.create(directionsRoute, currentPosition,
+        0, 0, NavigationConstants.NONE_ALERT_LEVEL);
     }
 
     if (!TextUtils.equals(directionsRoute.getGeometry(), previousRouteProgress.getRoute().getGeometry())) {
@@ -81,8 +84,12 @@ class NavigationEngine {
     stepIndex = alertLevelState.getStepIndex();
     legIndex = alertLevelState.getLegIndex();
 
-    // Create a new RouteProgress object using the latest user location
-    RouteProgress routeProgress = new RouteProgress(directionsRoute, location, legIndex, stepIndex, alertLevel);
+    SnapLocation snapLocation = new SnapLocation(location,
+      previousRouteProgress.getCurrentLegProgress().getCurrentStep(), options);
+
+    // Create a RouteProgress.create object using the latest user location
+    RouteProgress routeProgress = RouteProgress.create(directionsRoute, snapLocation.getUsersCurrentSnappedPosition(),
+      legIndex, stepIndex, alertLevel);
 
     // Determine if the user is off route or not
     UserOffRouteState userOffRouteState = new UserOffRouteState(location, routeProgress, options);
@@ -90,8 +97,8 @@ class NavigationEngine {
 
     // Snap location to the route if they aren't off route and return the location object
     if (isSnapEnabled && !isUserOffRoute) {
-      SnapLocation snapLocation = new SnapLocation(location, routeProgress, options);
       location = snapLocation.getSnappedLocation();
+      location.setBearing(snapLocation.snapUserBearing(routeProgress));
     }
 
     notifyAlertLevelChange(routeProgress);
