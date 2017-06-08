@@ -13,6 +13,7 @@ public class NavigationConstants {
   @Experimental public static final int MEDIUM_ALERT_LEVEL = 3;
   @Experimental public static final int HIGH_ALERT_LEVEL = 4;
   @Experimental public static final int ARRIVE_ALERT_LEVEL = 5;
+  @Experimental public static final int WAYPOINT_ALERT_LEVEL = 6;
 
   /**
    * Threshold user must be in within to count as completing a step. One of two heuristics used to know when a user

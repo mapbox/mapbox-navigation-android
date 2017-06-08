@@ -395,7 +395,7 @@ public class RouteUtils {
    * Get the remaining route geometry from the position provided to the end of the directions route. This is useful
    * when the user location is traversing along the route and you don't want the past route geometry to show on the map.
    *
-   * @param position          the new starting postion of the route geometry. If using for navigation, this would
+   * @param position          the new starting position of the route geometry. If using for navigation, this would
    *                          typically be the users current location.
    * @param route             a Directions route.
    * @param geometryPrecision either {@link Constants#PRECISION_5} or {@link Constants#PRECISION_6}
