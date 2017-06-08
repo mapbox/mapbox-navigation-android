@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.models;
 
 import android.support.annotation.NonNull;
 
+import com.google.auto.value.AutoValue;
 import com.mapbox.services.Constants;
 import com.mapbox.services.Experimental;
 import com.mapbox.services.api.ServicesException;
@@ -18,12 +19,16 @@ import com.mapbox.services.commons.utils.PolylineUtils;
 import java.util.List;
 
 @Experimental
-public class RouteLegProgress {
+@AutoValue
+public abstract class RouteLegProgress {
 
-  private RouteLeg routeLeg;
-  private int stepIndex;
-  private Position userSnappedPosition;
-  private RouteStepProgress currentStepProgress;
+  public abstract RouteLeg routeLeg();
+
+  public abstract int stepIndex();
+
+  public abstract Position userSnappedPosition();
+
+  public abstract RouteStepProgress currentStepProgress();
 
   /**
    * Constructor for the route leg routeProgress information.
@@ -33,11 +38,10 @@ public class RouteLegProgress {
    * @param userSnappedPosition the users snapped location when routeProgress was last updated.
    * @since 0.1.0
    */
-  public RouteLegProgress(@NonNull RouteLeg routeLeg, int stepIndex, @NonNull Position userSnappedPosition) {
-    this.routeLeg = routeLeg;
-    this.stepIndex = stepIndex;
-    this.userSnappedPosition = userSnappedPosition;
-    currentStepProgress = new RouteStepProgress(routeLeg, stepIndex, userSnappedPosition);
+  public static RouteLegProgress create(
+    @NonNull RouteLeg routeLeg, int stepIndex, @NonNull Position userSnappedPosition) {
+    RouteStepProgress routeStepProgress = RouteStepProgress.create(routeLeg, stepIndex, userSnappedPosition);
+    return new AutoValue_RouteLegProgress(routeLeg, stepIndex, userSnappedPosition, routeStepProgress);
   }
 
   /**
@@ -47,7 +51,7 @@ public class RouteLegProgress {
    * @since 0.1.0
    */
   public RouteStepProgress getCurrentStepProgress() {
-    return currentStepProgress;
+    return currentStepProgress();
   }
 
   /**
@@ -57,10 +61,10 @@ public class RouteLegProgress {
    * @since 0.1.0
    */
   public int getStepIndex() {
-    if (stepIndex < 0 || stepIndex > routeLeg.getSteps().size() - 1) {
+    if (stepIndex() < 0 || stepIndex() > routeLeg().getSteps().size() - 1) {
       throw new ServicesException("RouteProgress step index is outside its index limit.");
     }
-    return stepIndex;
+    return stepIndex();
   }
 
   /**
@@ -71,7 +75,7 @@ public class RouteLegProgress {
    * @since 0.1.0
    */
   public double getDistanceTraveled() {
-    double distanceTraveled = routeLeg.getDistance() - getDistanceRemaining();
+    double distanceTraveled = routeLeg().getDistance() - getDistanceRemaining();
     if (distanceTraveled < 0) {
       distanceTraveled = 0;
     }
@@ -90,14 +94,14 @@ public class RouteLegProgress {
     List<Position> coords = PolylineUtils.decode(getCurrentStep().getGeometry(), Constants.PRECISION_6);
     if (coords.size() > 1) {
       LineString slicedLine = TurfMisc.lineSlice(
-        Point.fromCoordinates(userSnappedPosition),
+        Point.fromCoordinates(userSnappedPosition()),
         Point.fromCoordinates(coords.get(coords.size() - 1)),
         LineString.fromCoordinates(coords)
       );
       distanceRemaining += TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
     }
-    for (int i = stepIndex + 1; i < routeLeg.getSteps().size(); i++) {
-      distanceRemaining += routeLeg.getSteps().get(i).getDistance();
+    for (int i = stepIndex() + 1; i < routeLeg().getSteps().size(); i++) {
+      distanceRemaining += routeLeg().getSteps().get(i).getDistance();
     }
 
     return distanceRemaining;
@@ -110,7 +114,7 @@ public class RouteLegProgress {
    * @since 0.1.0
    */
   public double getDurationRemaining() {
-    return (1 - getFractionTraveled()) * routeLeg.getDuration();
+    return (1 - getFractionTraveled()) * routeLeg().getDuration();
   }
 
   /**
@@ -123,8 +127,8 @@ public class RouteLegProgress {
   public float getFractionTraveled() {
     float fractionTraveled = 1;
 
-    if (routeLeg.getDistance() > 0) {
-      fractionTraveled = (float) (getDistanceTraveled() / routeLeg.getDistance());
+    if (routeLeg().getDistance() > 0) {
+      fractionTraveled = (float) (getDistanceTraveled() / routeLeg().getDistance());
       if (fractionTraveled < 0) {
         fractionTraveled = 0;
       }
@@ -143,7 +147,7 @@ public class RouteLegProgress {
     if (getStepIndex() == 0) {
       return null;
     }
-    return routeLeg.getSteps().get(getStepIndex() - 1);
+    return routeLeg().getSteps().get(getStepIndex() - 1);
   }
 
   /**
@@ -153,7 +157,7 @@ public class RouteLegProgress {
    * @since 0.1.0
    */
   public LegStep getCurrentStep() {
-    return routeLeg.getSteps().get(getStepIndex());
+    return routeLeg().getSteps().get(getStepIndex());
   }
 
   /**
@@ -164,8 +168,8 @@ public class RouteLegProgress {
    * @since 0.1.0
    */
   public LegStep getUpComingStep() {
-    if (routeLeg.getSteps().size() - 1 > getStepIndex()) {
-      return routeLeg.getSteps().get(getStepIndex() + 1);
+    if (routeLeg().getSteps().size() - 1 > getStepIndex()) {
+      return routeLeg().getSteps().get(getStepIndex() + 1);
     }
     return null;
   }
