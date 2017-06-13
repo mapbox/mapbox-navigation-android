@@ -31,6 +31,8 @@ import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListe
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.milestone.NavigationMilestone;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.permissions.PermissionsManager;
@@ -51,7 +53,9 @@ import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
   MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener, AlertLevelChangeListener,
-  OffRouteListener {
+  OffRouteListener, MilestoneEventListener {
+
+  private static final int ON_NEW_STEP_MILESTONE = 1;
 
   // Map variables
   private MapView mapView;
@@ -98,6 +102,14 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
           locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
           locationEngine.setFastestInterval(1000);
           locationEngine.activate();
+
+          NavigationMilestone newStepMilestone = new NavigationMilestone.Builder()
+            .triggerOnNewStep(true)
+            .setIdentifier(ON_NEW_STEP_MILESTONE)
+            .build();
+
+          navigation.addMilestone(newStepMilestone);
+          navigation.addMileStoneEventListener(MockNavigationActivity.this);
 
           ((MockLocationEngine) locationEngine).setRoute(route);
           navigation.setLocationEngine(locationEngine);
@@ -308,5 +320,10 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
+  }
+
+  @Override
+  public void onMilestoneEvent(RouteProgress routeProgress, NavigationMilestone milestone) {
+    Timber.d("MileStone Event Occurred");
   }
 }

@@ -16,6 +16,8 @@ import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListe
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.milestone.NavigationMilestone;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.api.directions.v5.MapboxDirections;
@@ -49,6 +51,8 @@ public class MapboxNavigation implements ProgressChangeListener {
   private CopyOnWriteArrayList<NavigationEventListener> navigationEventListeners;
   private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
   private CopyOnWriteArrayList<OffRouteListener> offRouteListeners;
+  private CopyOnWriteArrayList<MilestoneEventListener> milestoneEventListeners;
+  private CopyOnWriteArrayList<NavigationMilestone> milestones;
   private LocationEngine locationEngine;
   private boolean snapToRoute;
 
@@ -96,6 +100,8 @@ public class MapboxNavigation implements ProgressChangeListener {
     navigationEventListeners = new CopyOnWriteArrayList<>();
     progressChangeListeners = new CopyOnWriteArrayList<>();
     offRouteListeners = new CopyOnWriteArrayList<>();
+    milestoneEventListeners = new CopyOnWriteArrayList<>();
+    milestones = new CopyOnWriteArrayList<>();
   }
 
   /*
@@ -145,6 +151,10 @@ public class MapboxNavigation implements ProgressChangeListener {
     context.stopService(getServiceIntent());
   }
 
+  public void addMilestone(NavigationMilestone milestone) {
+    milestones.add(milestone);
+  }
+
   /*
    * Navigation setup methods
    */
@@ -161,6 +171,12 @@ public class MapboxNavigation implements ProgressChangeListener {
       navigationService.setLocationEngine(getLocationEngine());
     }
   }
+
+  public void addMileStoneEventListener(MilestoneEventListener milestoneEventListener) {
+    milestoneEventListeners.add(milestoneEventListener);
+  }
+
+  // TODO add remove method for listener
 
   /**
    * Optionally listen into when a new navigation event occurs. This listener can be used to listen into when the
@@ -450,6 +466,8 @@ public class MapboxNavigation implements ProgressChangeListener {
       navigationService.setOptions(options);
       navigationService.setNavigationEventListeners(navigationEventListeners);
       navigationService.setAlertLevelChangeListeners(alertLevelChangeListeners);
+      navigationService.setMilestones(milestones);
+      navigationService.setMilestoneEventListeners(milestoneEventListeners);
 
       progressChangeListeners.add(MapboxNavigation.this);
 

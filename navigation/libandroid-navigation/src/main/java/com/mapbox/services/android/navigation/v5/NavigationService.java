@@ -15,6 +15,8 @@ import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListe
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.milestone.NavigationMilestone;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
@@ -207,6 +209,14 @@ public class NavigationService extends Service implements LocationEngineListener
     if (navigationEngine != null) {
       navigationEngine.setOffRouteListeners(offRouteListeners);
     }
+  }
+
+  public void setMilestones(CopyOnWriteArrayList<NavigationMilestone> milestones) {
+    navigationEngine.setMilestones(milestones);
+  }
+
+  public void setMilestoneEventListeners(CopyOnWriteArrayList<MilestoneEventListener> milestoneEventListeners) {
+    navigationEngine.setMilestoneEventListeners(milestoneEventListeners);
   }
 
   public void setLocationEngine(LocationEngine locationEngine) {

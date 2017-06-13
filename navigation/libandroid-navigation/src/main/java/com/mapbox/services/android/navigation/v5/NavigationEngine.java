@@ -8,6 +8,8 @@ import android.text.TextUtils;
 import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListener;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.milestone.NavigationMilestone;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.models.Position;
 
@@ -26,6 +28,8 @@ class NavigationEngine {
   private CopyOnWriteArrayList<AlertLevelChangeListener> alertLevelChangeListeners;
   private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
   private CopyOnWriteArrayList<OffRouteListener> offRouteListeners;
+  private CopyOnWriteArrayList<MilestoneEventListener> milestoneEventListeners;
+  private CopyOnWriteArrayList<NavigationMilestone> milestones;
 
   // Navigation state information
   private RouteProgress previousRouteProgress;
@@ -90,6 +94,14 @@ class NavigationEngine {
     // Create a RouteProgress.create object using the latest user location
     RouteProgress routeProgress = RouteProgress.create(directionsRoute, snapLocation.getUsersCurrentSnappedPosition(),
       legIndex, stepIndex, alertLevel);
+
+    for (NavigationMilestone milestone : milestones) {
+      if (milestone.onNextStep(previousRouteProgress.getCurrentLegProgress().stepIndex(), routeProgress.getCurrentLegProgress().stepIndex())) {
+        for (MilestoneEventListener listener : milestoneEventListeners) {
+          listener.onMilestoneEvent(routeProgress, milestone);
+        }
+      }
+    }
 
     // Determine if the user is off route or not
     UserOffRouteState userOffRouteState = new UserOffRouteState(location, routeProgress, options);
@@ -172,5 +184,13 @@ class NavigationEngine {
 
   void setOffRouteListeners(CopyOnWriteArrayList<OffRouteListener> offRouteListeners) {
     this.offRouteListeners = offRouteListeners;
+  }
+
+  void setMilestoneEventListeners(CopyOnWriteArrayList<MilestoneEventListener> milestoneEventListeners) {
+    this.milestoneEventListeners = milestoneEventListeners;
+  }
+
+  void setMilestones(CopyOnWriteArrayList<NavigationMilestone> milestones) {
+    this.milestones = milestones;
   }
 }
