@@ -10,16 +10,6 @@ public class MapboxNavigationOptions {
   private double maxTurnCompletionOffset;
   private double maneuverZoneRadius;
 
-  private int mediumAlertInterval;
-  private int highAlertInterval;
-
-  private double minimumMediumAlertDistanceDriving;
-  private double minimumMediumAlertDistanceCycling;
-  private double minimumMediumAlertDistanceWalking;
-  private double minimumHighAlertDistanceDriving;
-  private double minimumHighAlertDistanceCycling;
-  private double minimumHighAlertDistanceWalking;
-
   private double maximumDistanceOffRoute;
   private double deadReckoningTimeInterval;
   private double maxManipulatedCourseAngle;
@@ -39,14 +29,6 @@ public class MapboxNavigationOptions {
     // Set the initial variables to equal the default.
     maxTurnCompletionOffset = NavigationConstants.MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION;
     maneuverZoneRadius = NavigationConstants.MANEUVER_ZONE_RADIUS;
-    mediumAlertInterval = NavigationConstants.MEDIUM_ALERT_INTERVAL;
-    highAlertInterval = NavigationConstants.HIGH_ALERT_INTERVAL;
-    minimumMediumAlertDistanceDriving = NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT_DRIVING;
-    minimumMediumAlertDistanceCycling = NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT_CYCLING;
-    minimumMediumAlertDistanceWalking = NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT_WALKING;
-    minimumHighAlertDistanceDriving = NavigationConstants.MINIMUM_DISTANCE_FOR_HIGH_ALERT_DRIVING;
-    minimumHighAlertDistanceCycling = NavigationConstants.MINIMUM_DISTANCE_FOR_HIGH_ALERT_CYCLING;
-    minimumHighAlertDistanceWalking = NavigationConstants.MINIMUM_DISTANCE_FOR_HIGH_ALERT_WALKING;
     maximumDistanceOffRoute = NavigationConstants.MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE;
     deadReckoningTimeInterval = NavigationConstants.DEAD_RECKONING_TIME_INTERVAL;
     maxManipulatedCourseAngle = NavigationConstants.MAX_MANIPULATED_COURSE_ANGLE;
@@ -86,116 +68,6 @@ public class MapboxNavigationOptions {
    */
   public MapboxNavigationOptions setManeuverZoneRadius(double maneuverZoneRadius) {
     this.maneuverZoneRadius = maneuverZoneRadius;
-    return this;
-  }
-
-  /**
-   * Number of seconds left on step when a {@link NavigationConstants#MEDIUM_ALERT_LEVEL} alert occurs.
-   *
-   * @param mediumAlertInterval integer value in unit seconds representing the seconds left till a {@code medium} alert
-   *                            level occurs.
-   * @return this;
-   * @since 0.2.0
-   */
-  public MapboxNavigationOptions setMediumAlertInterval(int mediumAlertInterval) {
-    this.mediumAlertInterval = mediumAlertInterval;
-    return this;
-  }
-
-  /**
-   * Number of seconds left on step when a {@link NavigationConstants#HIGH_ALERT_LEVEL} alert occurs.
-   *
-   * @param highAlertInterval integer value in unit seconds representing the seconds left till a {@code high} alert
-   *                          level occurs.
-   * @return this.
-   * @since 0.2.0
-   */
-  public MapboxNavigationOptions setHighAlertInterval(int highAlertInterval) {
-    this.highAlertInterval = highAlertInterval;
-    return this;
-  }
-
-  /**
-   * Distance in meters representing the minimum length of a step for a {@link NavigationConstants#MEDIUM_ALERT_LEVEL}
-   * to occur while driving.
-   *
-   * @param minimumMediumAlertDistanceDriving double value in unit meters representing the minimum step length for a
-   *                                          {@code medium} alert to occur.
-   * @return this.
-   * @since 0.2.0
-   */
-  public MapboxNavigationOptions setMinimumMediumAlertDistanceDriving(double minimumMediumAlertDistanceDriving) {
-    this.minimumMediumAlertDistanceDriving = minimumMediumAlertDistanceDriving;
-    return this;
-  }
-
-  /**
-   * Distance in meters representing the minimum length of a step for a {@link NavigationConstants#MEDIUM_ALERT_LEVEL}
-   * to occur while cycling.
-   *
-   * @param minimumMediumAlertDistanceCycling double value in unit meters representing the minimum step length for a
-   *                                          {@code medium} alert to occur.
-   * @return this.
-   * @since 0.3.0
-   */
-  public MapboxNavigationOptions setMinimumMediumAlertDistanceCycling(double minimumMediumAlertDistanceCycling) {
-    this.minimumMediumAlertDistanceCycling = minimumMediumAlertDistanceCycling;
-    return this;
-  }
-
-  /**
-   * Distance in meters representing the minimum length of a step for a {@link NavigationConstants#MEDIUM_ALERT_LEVEL}
-   * to occur while walking.
-   *
-   * @param minimumMediumAlertDistanceWalking double value in unit meters representing the minimum step length for a
-   *                                          {@code medium} alert to occur.
-   * @return this.
-   * @since 0.3.0
-   */
-  public MapboxNavigationOptions setMinimumMediumAlertDistanceWalking(double minimumMediumAlertDistanceWalking) {
-    this.minimumMediumAlertDistanceWalking = minimumMediumAlertDistanceWalking;
-    return this;
-  }
-
-  /**
-   * Distance in meters representing the minimum length of a step for a {@link NavigationConstants#HIGH_ALERT_LEVEL}
-   * to occur while driving.
-   *
-   * @param minimumHighAlertDistanceDriving double value in unit meters representing the minimum step length for a
-   *                                        {@code high} alert to occur.
-   * @return this.
-   * @since 0.3.0
-   */
-  public MapboxNavigationOptions setMinimumHighAlertDistanceDriving(double minimumHighAlertDistanceDriving) {
-    this.minimumHighAlertDistanceDriving = minimumHighAlertDistanceDriving;
-    return this;
-  }
-
-  /**
-   * Distance in meters representing the minimum length of a step for a {@link NavigationConstants#HIGH_ALERT_LEVEL}
-   * to occur while cycling.
-   *
-   * @param minimumHighAlertDistanceCycling double value in unit meters representing the minimum step length for a
-   *                                        {@code high} alert to occur.
-   * @return this.
-   * @since 0.3.0
-   */
-  public MapboxNavigationOptions setMinimumHighAlertDistanceCycling(double minimumHighAlertDistanceCycling) {
-    this.minimumHighAlertDistanceCycling = minimumHighAlertDistanceCycling;
-    return this;
-  }
-
-  /**
-   * Distance in meters representing the minimum length of a step for a {@link NavigationConstants#HIGH_ALERT_LEVEL}
-   * to occur while walking.
-   *
-   * @param minimumHighAlertDistanceWalking double value in unit meters representing the minimum step length for a
-   *                                        {@code high} alert to occur.
-   * @return this.
-   * @since 0.3.0
-   */
-  public MapboxNavigationOptions setMinimumHighAlertDistanceWalking(double minimumHighAlertDistanceWalking) {
-    this.minimumHighAlertDistanceWalking = minimumHighAlertDistanceWalking;
     return this;
   }
 
@@ -270,92 +142,6 @@ public class MapboxNavigationOptions {
    */
   public double getManeuverZoneRadius() {
     return maneuverZoneRadius;
-  }
-
-  /**
-   * Get the current number of seconds required for a {@link NavigationConstants#MEDIUM_ALERT_LEVEL} alert to occur.
-   *
-   * @return integer value in unit seconds representing the seconds left till a {@code medium} alert level occurs.
-   * @since 0.2.0
-   */
-  public int getMediumAlertInterval() {
-    return mediumAlertInterval;
-  }
-
-  /**
-   * Get the current number of seconds required for a {@link NavigationConstants#HIGH_ALERT_LEVEL} alert to occurs.
-   *
-   * @return integer value in unit seconds representing the seconds left till a {@code high} alert level occurs.
-   * @since 0.2.0
-   */
-  public int getHighAlertInterval() {
-    return highAlertInterval;
-  }
-
-  /**
-   * Get the current required distance in meters representing the minimum length of a step for a
-   * {@link NavigationConstants#MEDIUM_ALERT_LEVEL} to occur while driving.
-   *
-   * @return double value in unit meters representing the minimum step length for a {@code medium} alert to occur.
-   * @since 0.2.0
-   */
-  public double getMinimumMediumAlertDistanceDriving() {
-    return minimumMediumAlertDistanceDriving;
-  }
-
-  /**
-   * Get the current required distance in meters representing the minimum length of a step for a
-   * {@link NavigationConstants#MEDIUM_ALERT_LEVEL} to occur while cycling.
-   *
-   * @return double value in unit meters representing the minimum step length for a {@code medium} alert to occur.
-   * @since 0.2.0
-   */
-  public double getMinimumMediumAlertDistanceCycling() {
-    return minimumMediumAlertDistanceCycling;
-  }
-
-  /**
-   * Get the current required distance in meters representing the minimum length of a step for a
-   * {@link NavigationConstants#MEDIUM_ALERT_LEVEL} to occur while walking.
-   *
-   * @return double value in unit meters representing the minimum step length for a {@code medium} alert to occur.
-   * @since 0.2.0
-   */
-  public double getMinimumMediumAlertDistanceWalking() {
-    return minimumMediumAlertDistanceWalking;
-  }
-
-  /**
-   * Get the current required distance in meters representing the minimum length of a step for a
-   * {@link NavigationConstants#HIGH_ALERT_LEVEL} to occur.
-   *
-   * @return double value in unit meters representing the minimum step length for a {@code high} alert to occur.
-   * @since 0.3.0
-   */
-  public double getMinimumHighAlertDistanceDriving() {
-    return minimumHighAlertDistanceDriving;
-  }
-
-  /**
-   * Get the current required distance in meters representing the minimum length of a step for a
-   * {@link NavigationConstants#HIGH_ALERT_LEVEL} to occur.
-   *
-   * @return double value in unit meters representing the minimum step length for a {@code high} alert to occur.
-   * @since 0.3.0
-   */
-  public double getMinimumHighAlertDistanceCycling() {
-    return minimumHighAlertDistanceCycling;
-  }
-
-  /**
-   * Get the current required distance in meters representing the minimum length of a step for a
-   * {@link NavigationConstants#HIGH_ALERT_LEVEL} to occur.
-   *
-   * @return double value in unit meters representing the minimum step length for a {@code high} alert to occur.
-   * @since 0.3.0
-   */
-  public double getMinimumHighAlertDistanceWalking() {
-    return minimumHighAlertDistanceWalking;
   }
 
   /**

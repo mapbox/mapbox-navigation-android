@@ -40,8 +40,6 @@ public abstract class RouteProgress {
 
   public abstract int legIndex();
 
-  public abstract int alertUserLevel();
-
   /**
    * Constructor for the route routeProgress information.
    *
@@ -49,15 +47,14 @@ public abstract class RouteProgress {
    *                            rerouted this route is updated.
    * @param userSnappedPosition the users position most recently used when creating this object.
    * @param stepIndex           an {@code integer} representing the current step index the user is on.
-   * @param alertUserLevel      the most recently calculated alert level.
    * @since 0.1.0
    */
   public static RouteProgress create(
-    DirectionsRoute route, Position userSnappedPosition, int legIndex, int stepIndex, int alertUserLevel) {
+    DirectionsRoute route, Position userSnappedPosition, int legIndex, int stepIndex) {
     RouteLegProgress routeLegProgress
       = RouteLegProgress.create(route.getLegs().get(legIndex), stepIndex, userSnappedPosition);
     return new AutoValue_RouteProgress(
-      routeLegProgress, route, userSnappedPosition, legIndex, alertUserLevel);
+      routeLegProgress, route, userSnappedPosition, legIndex);
   }
 
   /**
@@ -152,16 +149,6 @@ public abstract class RouteProgress {
       distanceRemaining += getCurrentLeg().getSteps().get(i).getDistance();
     }
     return distanceRemaining;
-  }
-
-  /**
-   * Get the most recently provided alert level, this can and will only be one of the alert constants.
-   *
-   * @return an {@code integer} representing the most recent user alert level.
-   * @since 0.1.0
-   */
-  public int getAlertUserLevel() {
-    return alertUserLevel();
   }
 
   /**

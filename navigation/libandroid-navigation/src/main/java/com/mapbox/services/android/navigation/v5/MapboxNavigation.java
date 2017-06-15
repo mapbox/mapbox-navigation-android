@@ -5,19 +5,20 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.location.Location;
 import android.os.IBinder;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 
 import com.mapbox.services.Experimental;
 import com.mapbox.services.android.location.LostLocationEngine;
-import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListener;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.milestone.NavigationMilestone;
+import com.mapbox.services.android.navigation.v5.milestone.StepMilestone;
+import com.mapbox.services.android.navigation.v5.milestone.Trigger;
+import com.mapbox.services.android.navigation.v5.milestone.TriggerValue;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.api.directions.v5.MapboxDirections;
@@ -37,7 +38,7 @@ import timber.log.Timber;
  * @since 0.1.0
  */
 @Experimental
-public class MapboxNavigation implements ProgressChangeListener {
+public class MapboxNavigation implements MilestoneEventListener {
 
   // Navigation service variables
   private NavigationServiceConnection connection;
@@ -47,12 +48,11 @@ public class MapboxNavigation implements ProgressChangeListener {
   private boolean isBound;
 
   // Navigation variables
-  private CopyOnWriteArrayList<AlertLevelChangeListener> alertLevelChangeListeners;
   private CopyOnWriteArrayList<NavigationEventListener> navigationEventListeners;
   private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
   private CopyOnWriteArrayList<OffRouteListener> offRouteListeners;
   private CopyOnWriteArrayList<MilestoneEventListener> milestoneEventListeners;
-  private CopyOnWriteArrayList<NavigationMilestone> milestones;
+  private CopyOnWriteArrayList<Milestone> milestones;
   private LocationEngine locationEngine;
   private boolean snapToRoute;
 
@@ -96,12 +96,72 @@ public class MapboxNavigation implements ProgressChangeListener {
     isBound = false;
     navigationService = null;
     snapToRoute = true;
-    alertLevelChangeListeners = new CopyOnWriteArrayList<>();
     navigationEventListeners = new CopyOnWriteArrayList<>();
     progressChangeListeners = new CopyOnWriteArrayList<>();
     offRouteListeners = new CopyOnWriteArrayList<>();
     milestoneEventListeners = new CopyOnWriteArrayList<>();
     milestones = new CopyOnWriteArrayList<>();
+    addDefaultMilestones();
+  }
+
+  private void addDefaultMilestones() {
+    // High milestone
+    addMilestone(new StepMilestone.Builder()
+      .setIdentifier(NavigationConstants.URGENT_MILESTONE)
+      .setTrigger(
+        Trigger.all(
+          Trigger.gt(TriggerValue.STEP_DISTANCE, 100d),
+          Trigger.lt(TriggerValue.DURATION, 15d),
+          Trigger.neq(TriggerValue.STEP_INDEX, 0)
+        )
+      )
+      .build()
+    );
+
+    // Medium milestone
+    addMilestone(new StepMilestone.Builder()
+      .setIdentifier(NavigationConstants.IMMINENT_MILESTONE)
+      .setTrigger(
+        Trigger.all(
+          Trigger.gt(TriggerValue.STEP_DISTANCE, 400d),
+          Trigger.gt(TriggerValue.STEP_DURATION, 80d),
+          Trigger.lt(TriggerValue.DURATION, 70d)
+        )
+      )
+      .build()
+    );
+
+    // New step milestone
+    addMilestone(new StepMilestone.Builder()
+      .setIdentifier(NavigationConstants.NEW_STEP_MILESTONE)
+      .setTrigger(
+        Trigger.all(
+          Trigger.neq(TriggerValue.NEW_STEP, TriggerValue.FALSE),
+          Trigger.neq(TriggerValue.STEP_INDEX, 0),
+          Trigger.gt(TriggerValue.STEP_DISTANCE, 100d)
+        )
+      ).build());
+
+    // Depart milestone
+    addMilestone(new StepMilestone.Builder()
+      .setIdentifier(NavigationConstants.DEPARTURE_MILESTONE)
+      .setTrigger(
+        Trigger.eq(TriggerValue.STEP_INDEX, 0))
+      .build());
+
+    // Arrival milestone
+    addMilestone(new StepMilestone.Builder()
+      .setIdentifier(NavigationConstants.ARRIVAL_MILESTONE)
+      .setTrigger(
+        Trigger.eq(TriggerValue.LAST_STEP, TriggerValue.TRUE))
+      .build());
+  }
+
+  @Override
+  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
+    if (identifier == NavigationConstants.ARRIVAL_MILESTONE) {
+      endNavigation();
+    }
   }
 
   /*
@@ -138,20 +198,12 @@ public class MapboxNavigation implements ProgressChangeListener {
     }
   }
 
-  @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    // If the user arrives at the final destination, end the navigation session.
-    if (routeProgress.getAlertUserLevel() == NavigationConstants.ARRIVE_ALERT_LEVEL) {
-      endNavigation();
-    }
-  }
-
   public void onDestroy() {
     Timber.d("MapboxNavigation onDestroy.");
     context.stopService(getServiceIntent());
   }
 
-  public void addMilestone(NavigationMilestone milestone) {
+  public void addMilestone(Milestone milestone) {
     milestones.add(milestone);
   }
 
@@ -172,11 +224,13 @@ public class MapboxNavigation implements ProgressChangeListener {
     }
   }
 
-  public void addMileStoneEventListener(MilestoneEventListener milestoneEventListener) {
+  public void addMilestoneEventListener(MilestoneEventListener milestoneEventListener) {
     milestoneEventListeners.add(milestoneEventListener);
   }
 
-  // TODO add remove method for listener
+  public void removeMilestoneEventListener(MilestoneEventListener milestoneEventListeners) {
+    this.milestoneEventListeners.remove(milestoneEventListeners);
+  }
 
   /**
    * Optionally listen into when a new navigation event occurs. This listener can be used to listen into when the
@@ -194,23 +248,6 @@ public class MapboxNavigation implements ProgressChangeListener {
 
   public void removeNavigationEventListener(NavigationEventListener navigationEventListener) {
     this.navigationEventListeners.remove(navigationEventListener);
-  }
-
-  /**
-   * Optionally, setup a alert change listener which will be notified when the user reaches a particular part of the
-   * route. This listener is good for notifying your user they need to perform a new action.
-   *
-   * @param alertLevelChangeListener a new {@link AlertLevelChangeListener} which will be notified when event occurs.
-   * @since 0.1.0
-   */
-  public void addAlertLevelChangeListener(AlertLevelChangeListener alertLevelChangeListener) {
-    if (!this.alertLevelChangeListeners.contains(alertLevelChangeListener)) {
-      this.alertLevelChangeListeners.add(alertLevelChangeListener);
-    }
-  }
-
-  public void removeAlertLevelChangeListener(AlertLevelChangeListener alertLevelChangeListener) {
-    this.alertLevelChangeListeners.remove(alertLevelChangeListener);
   }
 
   /**
@@ -287,9 +324,7 @@ public class MapboxNavigation implements ProgressChangeListener {
 
   /**
    * Call this method to end a navigation session before the user reaches their destination. There isn't a need to call
-   * this once the user reaches their destination. You can use the
-   * {@link MapboxNavigation#addAlertLevelChangeListener(AlertLevelChangeListener)} to be notified when the user
-   * arrives at their location.
+   * this once the user reaches their destination.
    *
    * @since 0.1.0
    */
@@ -303,11 +338,6 @@ public class MapboxNavigation implements ProgressChangeListener {
   }
 
   /**
-   * Optionally, set up navigation notification using the default builder provided in the SDK. Alternatively, you can
-   * create your own notifications by using the
-   * {@link MapboxNavigation#addAlertLevelChangeListener(AlertLevelChangeListener)} to correctly time your
-   * notifications.
-   *
    * @param activity The activity being used for the navigation session.
    * @since 0.1.0
    */
@@ -465,11 +495,10 @@ public class MapboxNavigation implements ProgressChangeListener {
       navigationService.setLocationEngine(getLocationEngine());
       navigationService.setOptions(options);
       navigationService.setNavigationEventListeners(navigationEventListeners);
-      navigationService.setAlertLevelChangeListeners(alertLevelChangeListeners);
       navigationService.setMilestones(milestones);
       navigationService.setMilestoneEventListeners(milestoneEventListeners);
 
-      progressChangeListeners.add(MapboxNavigation.this);
+      milestoneEventListeners.add(MapboxNavigation.this);
 
       navigationService.setProgressChangeListeners(progressChangeListeners);
       navigationService.setOffRouteListeners(offRouteListeners);

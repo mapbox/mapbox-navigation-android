@@ -5,11 +5,11 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListener;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.milestone.NavigationMilestone;
+import com.mapbox.services.android.telemetry.utils.MathUtils;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.models.Position;
 
@@ -17,19 +17,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 /**
- * The navigation engine makes use of {@link UserOffRouteState}, {@link AlertLevelState}, etc. to first create a new
- * route progress object and then to invoke the appropriate callbacks depending on the navigation state.
- *
  * @since 0.2.0
  */
 class NavigationEngine {
 
   // Listeners
-  private CopyOnWriteArrayList<AlertLevelChangeListener> alertLevelChangeListeners;
   private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
   private CopyOnWriteArrayList<OffRouteListener> offRouteListeners;
   private CopyOnWriteArrayList<MilestoneEventListener> milestoneEventListeners;
-  private CopyOnWriteArrayList<NavigationMilestone> milestones;
+  private CopyOnWriteArrayList<Milestone> milestones;
 
   // Navigation state information
   private RouteProgress previousRouteProgress;
@@ -67,7 +63,7 @@ class NavigationEngine {
     if (previousRouteProgress == null) {
       Position currentPosition = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
       previousRouteProgress = RouteProgress.create(directionsRoute, currentPosition,
-        0, 0, NavigationConstants.NONE_ALERT_LEVEL);
+        0, 0);
     }
 
     if (!TextUtils.equals(directionsRoute.getGeometry(), previousRouteProgress.getRoute().getGeometry())) {
@@ -81,24 +77,23 @@ class NavigationEngine {
 
     previousLocation = location;
 
-    // Get the new alert level
-    AlertLevelState alertLevelState
-      = new AlertLevelState(location, previousRouteProgress, stepIndex, legIndex, options);
-    int alertLevel = alertLevelState.getNewAlertLevel();
-    stepIndex = alertLevelState.getStepIndex();
-    legIndex = alertLevelState.getLegIndex();
+    if (bearingMatchesManeuverFinalHeading(
+      location, previousRouteProgress, options.getMaxTurnCompletionOffset())) {
+      increaseIndex(previousRouteProgress);
+    }
 
     SnapLocation snapLocation = new SnapLocation(location,
       previousRouteProgress.getCurrentLegProgress().getCurrentStep(), options);
 
     // Create a RouteProgress.create object using the latest user location
     RouteProgress routeProgress = RouteProgress.create(directionsRoute, snapLocation.getUsersCurrentSnappedPosition(),
-      legIndex, stepIndex, alertLevel);
+      legIndex, stepIndex);
 
-    for (NavigationMilestone milestone : milestones) {
-      if (milestone.onNextStep(previousRouteProgress.getCurrentLegProgress().stepIndex(), routeProgress.getCurrentLegProgress().stepIndex())) {
+
+    for (Milestone milestone : milestones) {
+      if (milestone.validate(previousRouteProgress, routeProgress)) {
         for (MilestoneEventListener listener : milestoneEventListeners) {
-          listener.onMilestoneEvent(routeProgress, milestone);
+          listener.onMilestoneEvent(routeProgress, "instruction", milestone.getIdentifier());
         }
       }
     }
@@ -113,22 +108,10 @@ class NavigationEngine {
       location.setBearing(snapLocation.snapUserBearing(routeProgress));
     }
 
-    notifyAlertLevelChange(routeProgress);
     notifyOffRouteChange(isUserOffRoute, location);
     notifyProgressChange(location, routeProgress);
 
     previousRouteProgress = routeProgress;
-  }
-
-  private void notifyAlertLevelChange(RouteProgress routeProgress) {
-    if (routeProgress.getCurrentLegProgress().getStepIndex()
-      != previousRouteProgress.getCurrentLegProgress().getStepIndex()
-      || previousRouteProgress.getAlertUserLevel() != routeProgress.getAlertUserLevel()) {
-
-      for (AlertLevelChangeListener alertLevelChangeListener : alertLevelChangeListeners) {
-        alertLevelChangeListener.onAlertLevelChange(routeProgress.getAlertUserLevel(), routeProgress);
-      }
-    }
   }
 
   private void notifyOffRouteChange(boolean isUserOffRoute, Location location) {
@@ -153,6 +136,48 @@ class NavigationEngine {
     }
   }
 
+  /**
+   * Checks whether the user's bearing matches the next step's maneuver provided bearingAfter variable. This is one of
+   * the criteria's required for the user location to be recognized as being on the next step or potentially arriving.
+   *
+   * @param userLocation  the location of the user
+   * @param routeProgress used for getting route information
+   * @return boolean true if the user location matches (using a tolerance) the final heading
+   * @since 0.2.0
+   */
+  private static boolean bearingMatchesManeuverFinalHeading(Location userLocation, RouteProgress routeProgress,
+                                                            double maxTurnCompletionOffset) {
+    if (routeProgress.getCurrentLegProgress().getUpComingStep() == null) {
+      return false;
+    }
+
+    // Bearings need to be normalized so when the bearingAfter is 359 and the user heading is 1, we count this as
+    // within the MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION.
+    double finalHeading = routeProgress.getCurrentLegProgress().getUpComingStep().getManeuver().getBearingAfter();
+    double finalHeadingNormalized = MathUtils.wrap(finalHeading, 0, 360);
+    double userHeadingNormalized = MathUtils.wrap(userLocation.getBearing(), 0, 360);
+    return MathUtils.differenceBetweenAngles(finalHeadingNormalized, userHeadingNormalized)
+      <= maxTurnCompletionOffset;
+  }
+
+  /**
+   * When the user proceeds to a new step (or leg) the index needs to be increased. We determine the amount of legs
+   * and steps and increase accordingly till the last step's reached.
+   *
+   * @param routeProgress used for getting the route index sizes
+   * @since 0.2.0
+   */
+  private void increaseIndex(RouteProgress routeProgress) {
+    // Check if we are in the last step in the current routeLeg and iterate it if needed.
+    if (stepIndex >= routeProgress.getRoute().getLegs().get(routeProgress.getLegIndex()).getSteps().size() - 1
+      && legIndex < routeProgress.getRoute().getLegs().size()) {
+      legIndex += 1;
+      stepIndex = 0;
+    } else {
+      stepIndex += 1;
+    }
+  }
+
   private void resetRouteProgress() {
     legIndex = 0;
     stepIndex = 0;
@@ -174,10 +199,6 @@ class NavigationEngine {
     this.options = options;
   }
 
-  void setAlertLevelChangeListeners(CopyOnWriteArrayList<AlertLevelChangeListener> alertLevelChangeListeners) {
-    this.alertLevelChangeListeners = alertLevelChangeListeners;
-  }
-
   void setProgressChangeListeners(CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners) {
     this.progressChangeListeners = progressChangeListeners;
   }
@@ -190,7 +211,7 @@ class NavigationEngine {
     this.milestoneEventListeners = milestoneEventListeners;
   }
 
-  void setMilestones(CopyOnWriteArrayList<NavigationMilestone> milestones) {
+  void setMilestones(CopyOnWriteArrayList<Milestone> milestones) {
     this.milestones = milestones;
   }
 }

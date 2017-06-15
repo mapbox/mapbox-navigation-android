@@ -27,12 +27,10 @@ import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.RouteProgress;
-import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListener;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.milestone.NavigationMilestone;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.permissions.PermissionsManager;
@@ -52,10 +50,8 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener, AlertLevelChangeListener,
+  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener,
   OffRouteListener, MilestoneEventListener {
-
-  private static final int ON_NEW_STEP_MILESTONE = 1;
 
   // Map variables
   private MapView mapView;
@@ -93,7 +89,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
           // Attach all of our navigation listeners.
           navigation.addNavigationEventListener(MockNavigationActivity.this);
           navigation.addProgressChangeListener(MockNavigationActivity.this);
-          navigation.addAlertLevelChangeListener(MockNavigationActivity.this);
+          navigation.addMilestoneEventListener(MockNavigationActivity.this);
 
           // Adjust location engine to force a gps reading every second. This isn't required but gives an overall
           // better navigation experience for users. The updating only occurs if the user moves 3 meters or further
@@ -102,14 +98,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
           locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
           locationEngine.setFastestInterval(1000);
           locationEngine.activate();
-
-          NavigationMilestone newStepMilestone = new NavigationMilestone.Builder()
-            .triggerOnNewStep(true)
-            .setIdentifier(ON_NEW_STEP_MILESTONE)
-            .build();
-
-          navigation.addMilestone(newStepMilestone);
-          navigation.addMileStoneEventListener(MockNavigationActivity.this);
 
           ((MockLocationEngine) locationEngine).setRoute(route);
           navigation.setLocationEngine(locationEngine);
@@ -203,6 +191,28 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
    */
 
   @Override
+  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
+    Timber.d("Milestone Event Occurred with id: %d", identifier);
+    switch (identifier) {
+      case NavigationConstants.URGENT_MILESTONE:
+        Toast.makeText(this, "High Milestone", Toast.LENGTH_LONG).show();
+        break;
+      case NavigationConstants.IMMINENT_MILESTONE:
+        Toast.makeText(this, "Medium Milestone", Toast.LENGTH_LONG).show();
+        break;
+      case NavigationConstants.NEW_STEP_MILESTONE:
+        Toast.makeText(this, "New Step", Toast.LENGTH_LONG).show();
+        break;
+      case NavigationConstants.DEPARTURE_MILESTONE:
+        Toast.makeText(this, "Depart", Toast.LENGTH_LONG).show();
+        break;
+      case NavigationConstants.ARRIVAL_MILESTONE:
+        Toast.makeText(this, "Arrival", Toast.LENGTH_LONG).show();
+        break;
+    }
+  }
+
+  @Override
   public void onRunning(boolean running) {
     if (running) {
       Timber.d("onRunning: Started");
@@ -214,32 +224,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     Timber.d("onProgressChange: fraction of route traveled: %f", routeProgress.getFractionTraveled());
-  }
-
-  @Override
-  public void onAlertLevelChange(int alertLevel, RouteProgress routeProgress) {
-
-    switch (alertLevel) {
-      case NavigationConstants.HIGH_ALERT_LEVEL:
-        Toast.makeText(MockNavigationActivity.this, "HIGH", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.MEDIUM_ALERT_LEVEL:
-        Toast.makeText(MockNavigationActivity.this, "MEDIUM", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.LOW_ALERT_LEVEL:
-        Toast.makeText(MockNavigationActivity.this, "LOW", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.ARRIVE_ALERT_LEVEL:
-        Toast.makeText(MockNavigationActivity.this, "ARRIVE", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.DEPART_ALERT_LEVEL:
-        Toast.makeText(MockNavigationActivity.this, "DEPART", Toast.LENGTH_LONG).show();
-        break;
-      default:
-      case NavigationConstants.NONE_ALERT_LEVEL:
-        Toast.makeText(MockNavigationActivity.this, "NONE", Toast.LENGTH_LONG).show();
-        break;
-    }
   }
 
   @Override
@@ -307,10 +291,12 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapView.onDestroy();
 
     // Remove all navigation listeners
-    navigation.removeAlertLevelChangeListener(this);
     navigation.removeNavigationEventListener(this);
     navigation.removeProgressChangeListener(this);
     navigation.removeOffRouteListener(this);
+    navigation.removeMilestoneEventListener(this);
+
+    navigation.onDestroy();
 
     // End the navigation session
     navigation.endNavigation();
@@ -320,10 +306,5 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
-  }
-
-  @Override
-  public void onMilestoneEvent(RouteProgress routeProgress, NavigationMilestone milestone) {
-    Timber.d("MileStone Event Occurred");
   }
 }
