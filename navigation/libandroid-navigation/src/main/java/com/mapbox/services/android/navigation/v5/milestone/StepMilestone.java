@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
+import com.mapbox.services.android.navigation.v5.NavigationException;
 import com.mapbox.services.android.navigation.v5.RouteProgress;
 
 import java.util.HashMap;
@@ -10,7 +11,6 @@ public class StepMilestone extends Milestone {
   private Builder builder;
   private boolean called;
 
-
   private StepMilestone(Builder builder) {
     super(builder);
     this.builder = builder;
@@ -18,18 +18,20 @@ public class StepMilestone extends Milestone {
 
   @Override
   public boolean validate(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-    Map<Integer, Number[]> factors = new HashMap<>();
-    factors.put(TriggerValue.STEP_DISTANCE, new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDistance()});
-    factors.put(TriggerValue.STEP_DURATION, new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDuration()});
-    factors.put(TriggerValue.DURATION, new Number[] {routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining()});
-    factors.put(TriggerValue.STEP_INDEX, new Number[] {routeProgress.getCurrentLegProgress().getStepIndex()});
-    factors.put(TriggerValue.NEW_STEP, new Number[] {previousRouteProgress.getCurrentLegProgress().getStepIndex(), routeProgress.getCurrentLegProgress().getStepIndex()});
-    factors.put(TriggerValue.LAST_STEP, new Number[] {routeProgress.getCurrentLegProgress().getStepIndex(), (routeProgress.getCurrentLeg().getSteps().size() - 1)});
+    Map<Integer, Number[]> statementObjects = new HashMap<>();
+    statementObjects.put(TriggerProperty.STEP_DISTANCE_TOTAL, new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDistance()});
+    statementObjects.put(TriggerProperty.STEP_DURATION_TOTAL, new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDuration()});
+    statementObjects.put(TriggerProperty.STEP_DISTANCE_REMAINING, new Number[] {routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining()});
+    statementObjects.put(TriggerProperty.STEP_DURATION_REMAINING, new Number[] {routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining()});
+    statementObjects.put(TriggerProperty.STEP_INDEX, new Number[] {routeProgress.getCurrentLegProgress().getStepIndex()});
+    statementObjects.put(TriggerProperty.NEW_STEP, new Number[] {previousRouteProgress.getCurrentLegProgress().getStepIndex(), routeProgress.getCurrentLegProgress().getStepIndex()});
+    statementObjects.put(TriggerProperty.LAST_STEP, new Number[] {routeProgress.getCurrentLegProgress().getStepIndex(), (routeProgress.getCurrentLeg().getSteps().size() - 1)});
+
 
     if (previousRouteProgress.getCurrentLegProgress().getStepIndex() != routeProgress.getCurrentLegProgress().getStepIndex()) {
       called = false;
     }
-    if (builder.getTrigger().check(factors) && !called) {
+    if (builder.getTrigger().validate(statementObjects) && !called) {
       called = true;
       return true;
     }
@@ -56,7 +58,8 @@ public class StepMilestone extends Milestone {
     }
 
     @Override
-    public StepMilestone build() {
+    public StepMilestone build() throws NavigationException {
+
       return new StepMilestone(this);
     }
   }
