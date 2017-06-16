@@ -18,6 +18,8 @@ public class StepMilestone extends Milestone {
 
   @Override
   public boolean validate(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
+
+    // TODO fix to only put properties set in 'setTrigger'
     Map<Integer, Number[]> statementObjects = new HashMap<>();
     statementObjects.put(TriggerProperty.STEP_DISTANCE_TOTAL, new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDistance()});
     statementObjects.put(TriggerProperty.STEP_DURATION_TOTAL, new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDuration()});

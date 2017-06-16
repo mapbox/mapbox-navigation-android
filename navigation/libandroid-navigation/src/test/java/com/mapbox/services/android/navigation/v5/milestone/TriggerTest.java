@@ -1,6 +1,8 @@
-package com.mapbox.services.android.navigation.v5;
+package com.mapbox.services.android.navigation.v5.milestone;
 
 import com.google.gson.Gson;
+import com.mapbox.services.android.navigation.v5.BaseTest;
+import com.mapbox.services.android.navigation.v5.RouteProgress;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.StepMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Trigger;
