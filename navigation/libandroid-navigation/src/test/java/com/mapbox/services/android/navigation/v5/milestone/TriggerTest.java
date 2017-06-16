@@ -196,7 +196,8 @@ public class TriggerTest extends BaseTest {
   public void greaterThanEqual_equalStillValidatesToTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.gte(TriggerProperty.STEP_DISTANCE_TOTAL, routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
+        Trigger.gte(TriggerProperty.STEP_DISTANCE_TOTAL,
+          routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
       )
       .build();
 
@@ -256,7 +257,8 @@ public class TriggerTest extends BaseTest {
   public void lessThanEqual_equalStillValidatesToTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.lte(TriggerProperty.STEP_DISTANCE_TOTAL, routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
+        Trigger.lte(TriggerProperty.STEP_DISTANCE_TOTAL,
+          routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
       )
       .build();
 
@@ -292,7 +294,8 @@ public class TriggerTest extends BaseTest {
   public void equal_validatesToTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.eq(TriggerProperty.STEP_DISTANCE_TOTAL, routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
+        Trigger.eq(TriggerProperty.STEP_DISTANCE_TOTAL,
+          routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
       )
       .build();
 
@@ -304,7 +307,8 @@ public class TriggerTest extends BaseTest {
   public void notEqual_validatesToFalse() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.neq(TriggerProperty.STEP_DISTANCE_TOTAL, routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
+        Trigger.neq(TriggerProperty.STEP_DISTANCE_TOTAL,
+          routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
       )
       .build();
 

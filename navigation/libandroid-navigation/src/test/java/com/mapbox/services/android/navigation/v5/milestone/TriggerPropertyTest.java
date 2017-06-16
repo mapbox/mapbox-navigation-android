@@ -126,36 +126,4 @@ public class TriggerPropertyTest extends BaseTest {
       }
     }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//  @Test
-//  public void newStepProperty_onlyPassesValidationWhenEqual() {
-//    int newStep = routeProgress.getCurrentLegProgress().getStepIndex();
-//
-//    for (int i = 10; i > 0; i--) {
-//      Milestone milestone = new StepMilestone.Builder()
-//        .setTrigger(
-//          Trigger.eq(TriggerProperty.NEW_STEP, Math.abs(newStep - i))
-//        ).build();
-//
-//      boolean result = milestone.validate(routeProgress, routeProgress);
-//      if (Math.abs(newStep - i) == newStep) {
-//        Assert.assertTrue(result);
-//      } else {
-//        Assert.assertFalse(result);
-//      }
-//    }
-//  }
 }

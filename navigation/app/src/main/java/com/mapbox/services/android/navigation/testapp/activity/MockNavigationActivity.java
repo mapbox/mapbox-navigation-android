@@ -209,6 +209,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       case NavigationConstants.ARRIVAL_MILESTONE:
         Toast.makeText(this, "Arrival", Toast.LENGTH_LONG).show();
         break;
+      default:
+        break;
     }
   }
 
