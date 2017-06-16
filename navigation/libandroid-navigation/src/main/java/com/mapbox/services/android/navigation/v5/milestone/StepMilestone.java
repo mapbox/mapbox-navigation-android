@@ -6,6 +6,12 @@ import com.mapbox.services.android.navigation.v5.RouteProgress;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Using a Step Milestone will result in {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
+ * being invoked every step if the condition validation returns true.
+ *
+ * @since 0.4.0
+ */
 public class StepMilestone extends Milestone {
 
   private Builder builder;
@@ -19,18 +25,34 @@ public class StepMilestone extends Milestone {
   @Override
   public boolean validate(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
 
-    // TODO fix to only put properties set in 'setTrigger'
+    // Build hashMap matching the trigger properties to their corresponding current values.
     Map<Integer, Number[]> statementObjects = new HashMap<>();
-    statementObjects.put(TriggerProperty.STEP_DISTANCE_TOTAL, new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDistance()});
-    statementObjects.put(TriggerProperty.STEP_DURATION_TOTAL, new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDuration()});
-    statementObjects.put(TriggerProperty.STEP_DISTANCE_REMAINING, new Number[] {routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining()});
-    statementObjects.put(TriggerProperty.STEP_DURATION_REMAINING, new Number[] {routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining()});
-    statementObjects.put(TriggerProperty.STEP_INDEX, new Number[] {routeProgress.getCurrentLegProgress().getStepIndex()});
-    statementObjects.put(TriggerProperty.NEW_STEP, new Number[] {previousRouteProgress.getCurrentLegProgress().getStepIndex(), routeProgress.getCurrentLegProgress().getStepIndex()});
-    statementObjects.put(TriggerProperty.LAST_STEP, new Number[] {routeProgress.getCurrentLegProgress().getStepIndex(), (routeProgress.getCurrentLeg().getSteps().size() - 1)});
+    statementObjects.put(TriggerProperty.STEP_DISTANCE_TOTAL,
+      new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDistance()});
+    statementObjects.put(TriggerProperty.STEP_DURATION_TOTAL,
+      new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDuration()});
+    statementObjects.put(TriggerProperty.STEP_DISTANCE_REMAINING,
+      new Number[] {routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining()});
+    statementObjects.put(TriggerProperty.STEP_DURATION_REMAINING,
+      new Number[] {routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining()});
+    statementObjects.put(TriggerProperty.STEP_INDEX,
+      new Number[] {routeProgress.getCurrentLegProgress().getStepIndex()});
+    statementObjects.put(TriggerProperty.NEW_STEP,
+      new Number[] {
+        previousRouteProgress.getCurrentLegProgress().getStepIndex(),
+        routeProgress.getCurrentLegProgress().getStepIndex()});
+    statementObjects.put(TriggerProperty.LAST_STEP,
+      new Number[] {routeProgress.getCurrentLegProgress().getStepIndex(),
+        (routeProgress.getCurrentLeg().getSteps().size() - 1)});
+    statementObjects.put(TriggerProperty.NEXT_STEP_DISTANCE,
+      new Number[] {
+        routeProgress.getCurrentLegProgress().getUpComingStep() != null
+          ? routeProgress.getCurrentLegProgress().getUpComingStep().getDistance() : 0});
 
-
-    if (previousRouteProgress.getCurrentLegProgress().getStepIndex() != routeProgress.getCurrentLegProgress().getStepIndex()) {
+    // Determine if the step index has changed and set called accordingly. This prevents multiple calls to
+    // onMilestoneEvent per Step.
+    if (previousRouteProgress.getCurrentLegProgress().getStepIndex()
+      != routeProgress.getCurrentLegProgress().getStepIndex()) {
       called = false;
     }
     if (builder.getTrigger().validate(statementObjects) && !called) {
@@ -40,6 +62,11 @@ public class StepMilestone extends Milestone {
     return false;
   }
 
+  /**
+   * Build a new {@link StepMilestone}
+   *
+   * @since 0.4.0
+   */
   public static final class Builder extends Milestone.Builder {
 
     private Trigger.Statement trigger;
@@ -61,9 +88,7 @@ public class StepMilestone extends Milestone {
 
     @Override
     public StepMilestone build() throws NavigationException {
-
       return new StepMilestone(this);
     }
   }
-
 }

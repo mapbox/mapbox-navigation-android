@@ -112,7 +112,8 @@ public class MapboxNavigation implements MilestoneEventListener {
         Trigger.all(
           Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL, 100d),
           Trigger.lt(TriggerProperty.STEP_DURATION_REMAINING, 15d),
-          Trigger.neq(TriggerProperty.STEP_INDEX, 0)
+          Trigger.neq(TriggerProperty.STEP_INDEX, 0),
+          Trigger.gt(TriggerProperty.NEXT_STEP_DISTANCE, 15d)
         )
       )
       .build()

@@ -3,6 +3,8 @@ package com.mapbox.services.android.navigation.v5.milestone;
 import com.mapbox.services.android.navigation.v5.NavigationException;
 import com.mapbox.services.android.navigation.v5.RouteProgress;
 
+import java.util.Map;
+
 /**
  * Base Milestone statement. Subclassed to provide concrete statements.
  *

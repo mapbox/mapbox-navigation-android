@@ -9,10 +9,13 @@ import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.models.Position;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -88,7 +91,6 @@ class NavigationEngine {
     // Create a RouteProgress.create object using the latest user location
     RouteProgress routeProgress = RouteProgress.create(directionsRoute, snapLocation.getUsersCurrentSnappedPosition(),
       legIndex, stepIndex);
-
 
     for (Milestone milestone : milestones) {
       if (milestone.validate(previousRouteProgress, routeProgress)) {
