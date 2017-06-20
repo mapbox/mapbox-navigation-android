@@ -105,52 +105,47 @@ public class MapboxNavigation implements MilestoneEventListener {
   }
 
   private void addDefaultMilestones() {
-    // High milestone
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.URGENT_MILESTONE)
       .setTrigger(
         Trigger.all(
-          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL, 100d),
-          Trigger.lt(TriggerProperty.STEP_DURATION_REMAINING, 15d),
-          Trigger.neq(TriggerProperty.STEP_INDEX, 0),
-          Trigger.gt(TriggerProperty.NEXT_STEP_DISTANCE, 15d)
+          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d),
+          Trigger.lt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 15d),
+          Trigger.neq(TriggerProperty.FIRST_STEP, TriggerProperty.TRUE),
+          Trigger.gt(TriggerProperty.NEXT_STEP_DISTANCE_METERS, 15d)
         )
       )
       .build()
     );
 
-    // Medium milestone
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.IMMINENT_MILESTONE)
       .setTrigger(
         Trigger.all(
-          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL, 400d),
-          Trigger.gt(TriggerProperty.STEP_DURATION_TOTAL, 80d),
-          Trigger.lt(TriggerProperty.STEP_DURATION_REMAINING, 70d)
+          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 400d),
+          Trigger.gt(TriggerProperty.STEP_DURATION_TOTAL_SECONDS, 80d),
+          Trigger.lt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 70d)
         )
       )
       .build()
     );
 
-    // New step milestone
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.NEW_STEP_MILESTONE)
       .setTrigger(
         Trigger.all(
           Trigger.neq(TriggerProperty.NEW_STEP, TriggerProperty.FALSE),
-          Trigger.neq(TriggerProperty.STEP_INDEX, 0),
-          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL, 100d)
+          Trigger.neq(TriggerProperty.FIRST_STEP, TriggerProperty.TRUE),
+          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
         )
       ).build());
 
-    // Depart milestone
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.DEPARTURE_MILESTONE)
       .setTrigger(
-        Trigger.eq(TriggerProperty.STEP_INDEX, 0))
+        Trigger.eq(TriggerProperty.FIRST_STEP, TriggerProperty.TRUE))
       .build());
 
-    // Arrival milestone
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.ARRIVAL_MILESTONE)
       .setTrigger(

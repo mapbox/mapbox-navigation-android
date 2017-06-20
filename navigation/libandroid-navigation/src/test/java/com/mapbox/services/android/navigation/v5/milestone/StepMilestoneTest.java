@@ -38,13 +38,13 @@ public class StepMilestoneTest extends BaseTest {
   public void sanity() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL, 100d)
+        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       )
       .setIdentifier(101)
       .build();
 
     Assert.assertNotNull(milestone);
-    Assert.assertTrue(milestone.validate(previousRouteProgress, routeProgress));
+    Assert.assertTrue(milestone.isOccurring(previousRouteProgress, routeProgress));
   }
 
   @Test

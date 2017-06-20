@@ -42,7 +42,7 @@ public class TriggerTest extends BaseTest {
       .setTrigger(Trigger.all())
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertTrue(result);
   }
 
@@ -50,12 +50,12 @@ public class TriggerTest extends BaseTest {
   public void triggerAll_validatesAllStatements() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(Trigger.all(
-        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL, 100d),
+        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d),
         Trigger.eq(TriggerProperty.STEP_INDEX, 1)
       ))
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertTrue(result);
   }
 
@@ -63,12 +63,12 @@ public class TriggerTest extends BaseTest {
   public void triggerAll_oneConditionsFalse() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(Trigger.all(
-        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL, 100d),
+        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d),
         Trigger.eq(TriggerProperty.NEW_STEP, TriggerProperty.FALSE)
       ))
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertFalse(result);
   }
 
@@ -76,12 +76,12 @@ public class TriggerTest extends BaseTest {
   public void triggerAny_noConditionsAreTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(Trigger.any(
-        Trigger.gt(TriggerProperty.STEP_DURATION_REMAINING, 100d),
-        Trigger.lt(TriggerProperty.STEP_DISTANCE_TOTAL, 100d)
+        Trigger.gt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 100d),
+        Trigger.lt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       ))
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertFalse(result);
   }
 
@@ -90,12 +90,12 @@ public class TriggerTest extends BaseTest {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(Trigger.any(
         Trigger.eq(TriggerProperty.STEP_INDEX, 1),
-        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL, 100d),
-        Trigger.eq(TriggerProperty.STEP_DISTANCE_TOTAL, 100d)
+        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d),
+        Trigger.eq(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       ))
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertTrue(result);
   }
 
@@ -103,12 +103,12 @@ public class TriggerTest extends BaseTest {
   public void triggerAny_onoConditionsTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(Trigger.any(
-        Trigger.gt(TriggerProperty.STEP_DURATION_REMAINING, 100d),
-        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL, 100d)
+        Trigger.gt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 100d),
+        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       ))
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertTrue(result);
   }
 
@@ -117,12 +117,12 @@ public class TriggerTest extends BaseTest {
   public void triggerNone_noConditionsAreTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(Trigger.none(
-        Trigger.gt(TriggerProperty.STEP_DURATION_REMAINING, 100d),
-        Trigger.lt(TriggerProperty.STEP_DISTANCE_TOTAL, 100d)
+        Trigger.gt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 100d),
+        Trigger.lt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       ))
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertTrue(result);
   }
 
@@ -131,11 +131,11 @@ public class TriggerTest extends BaseTest {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(Trigger.none(
         Trigger.neq(TriggerProperty.STEP_INDEX, 1),
-        Trigger.lt(TriggerProperty.STEP_DISTANCE_TOTAL, 100d)
+        Trigger.lt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       ))
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertTrue(result);
   }
 
@@ -143,12 +143,12 @@ public class TriggerTest extends BaseTest {
   public void triggerNone_onoConditionsTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(Trigger.none(
-        Trigger.gt(TriggerProperty.STEP_DURATION_REMAINING, 100d),
-        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL, 100d)
+        Trigger.gt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 100d),
+        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       ))
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertFalse(result);
   }
 
@@ -160,11 +160,11 @@ public class TriggerTest extends BaseTest {
   public void greaterThan_validatesToTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL, 100d)
+        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       )
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertTrue(result);
   }
 
@@ -172,11 +172,11 @@ public class TriggerTest extends BaseTest {
   public void greaterThan_validatesToFalse() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL, 10000d)
+        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 10000d)
       )
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertFalse(result);
   }
 
@@ -184,11 +184,11 @@ public class TriggerTest extends BaseTest {
   public void greaterThanEqual_validatesToTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.gte(TriggerProperty.STEP_DISTANCE_TOTAL, 100d)
+        Trigger.gte(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       )
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertTrue(result);
   }
 
@@ -196,12 +196,12 @@ public class TriggerTest extends BaseTest {
   public void greaterThanEqual_equalStillValidatesToTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.gte(TriggerProperty.STEP_DISTANCE_TOTAL,
+        Trigger.gte(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
           routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
       )
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertTrue(result);
   }
 
@@ -209,11 +209,11 @@ public class TriggerTest extends BaseTest {
   public void greaterThanEqual_validatesToFalse() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.gte(TriggerProperty.STEP_DISTANCE_TOTAL, 10000d)
+        Trigger.gte(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 10000d)
       )
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertFalse(result);
   }
 
@@ -221,11 +221,11 @@ public class TriggerTest extends BaseTest {
   public void lessThan_validatesToTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.lt(TriggerProperty.STEP_DISTANCE_TOTAL, 10000d)
+        Trigger.lt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 10000d)
       )
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertTrue(result);
   }
 
@@ -233,11 +233,11 @@ public class TriggerTest extends BaseTest {
   public void lessThan_validatesToFalse() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.lt(TriggerProperty.STEP_DISTANCE_TOTAL, 100d)
+        Trigger.lt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       )
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertFalse(result);
   }
 
@@ -245,11 +245,11 @@ public class TriggerTest extends BaseTest {
   public void lessThanEqual_validatesToTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.lte(TriggerProperty.STEP_DISTANCE_TOTAL, 10000d)
+        Trigger.lte(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 10000d)
       )
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertTrue(result);
   }
 
@@ -257,12 +257,12 @@ public class TriggerTest extends BaseTest {
   public void lessThanEqual_equalStillValidatesToTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.lte(TriggerProperty.STEP_DISTANCE_TOTAL,
+        Trigger.lte(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
           routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
       )
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertTrue(result);
   }
 
@@ -270,11 +270,11 @@ public class TriggerTest extends BaseTest {
   public void lessThanEqual_validatesToFalse() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.lte(TriggerProperty.STEP_DISTANCE_TOTAL, 100d)
+        Trigger.lte(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       )
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertFalse(result);
   }
 
@@ -282,11 +282,11 @@ public class TriggerTest extends BaseTest {
   public void equal_validatesToFalse() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.eq(TriggerProperty.STEP_DISTANCE_TOTAL, 100d)
+        Trigger.eq(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       )
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertFalse(result);
   }
 
@@ -294,12 +294,12 @@ public class TriggerTest extends BaseTest {
   public void equal_validatesToTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.eq(TriggerProperty.STEP_DISTANCE_TOTAL,
+        Trigger.eq(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
           routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
       )
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertTrue(result);
   }
 
@@ -307,12 +307,12 @@ public class TriggerTest extends BaseTest {
   public void notEqual_validatesToFalse() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.neq(TriggerProperty.STEP_DISTANCE_TOTAL,
+        Trigger.neq(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
           routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
       )
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertFalse(result);
   }
 
@@ -320,11 +320,11 @@ public class TriggerTest extends BaseTest {
   public void notEqual_validatesToTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
-        Trigger.neq(TriggerProperty.STEP_DISTANCE_TOTAL, 100d)
+        Trigger.neq(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       )
       .build();
 
-    boolean result = milestone.validate(routeProgress, routeProgress);
+    boolean result = milestone.isOccurring(routeProgress, routeProgress);
     Assert.assertTrue(result);
   }
 }

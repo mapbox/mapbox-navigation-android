@@ -38,7 +38,7 @@ public abstract class Milestone {
    * @return true if the milestone trigger's valid, else false
    * @since 0.4.0
    */
-  public abstract boolean validate(RouteProgress previousRouteProgress, RouteProgress routeProgress);
+  public abstract boolean isOccurring(RouteProgress previousRouteProgress, RouteProgress routeProgress);
 
   /**
    * Build a new {@link Milestone}
@@ -77,7 +77,7 @@ public abstract class Milestone {
     }
 
     /**
-     * The list of triggers that are used to validate whether this milestone should invoke
+     * The list of triggers that are used to determine whether this milestone should invoke
      * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
      *
      * @param trigger a single simple statement or compound statement found in {@link Trigger}

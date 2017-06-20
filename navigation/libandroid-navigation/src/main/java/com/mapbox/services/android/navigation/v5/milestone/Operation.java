@@ -26,7 +26,6 @@ class Operation {
   }
 
   static boolean notEqual(Number[] valueOne, Number valueTwo) {
-
     if (valueOne.length > 1) {
       if (valueTwo.equals(TriggerProperty.TRUE)) {
         return !valueOne[0].equals(valueOne[1]);

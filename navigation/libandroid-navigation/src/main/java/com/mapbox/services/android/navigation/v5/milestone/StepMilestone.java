@@ -23,17 +23,16 @@ public class StepMilestone extends Milestone {
   }
 
   @Override
-  public boolean validate(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-
+  public boolean isOccurring(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
     // Build hashMap matching the trigger properties to their corresponding current values.
     Map<Integer, Number[]> statementObjects = new HashMap<>();
-    statementObjects.put(TriggerProperty.STEP_DISTANCE_TOTAL,
+    statementObjects.put(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
       new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDistance()});
-    statementObjects.put(TriggerProperty.STEP_DURATION_TOTAL,
+    statementObjects.put(TriggerProperty.STEP_DURATION_TOTAL_SECONDS,
       new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDuration()});
-    statementObjects.put(TriggerProperty.STEP_DISTANCE_REMAINING,
+    statementObjects.put(TriggerProperty.STEP_DISTANCE_REMAINING_METERS,
       new Number[] {routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining()});
-    statementObjects.put(TriggerProperty.STEP_DURATION_REMAINING,
+    statementObjects.put(TriggerProperty.STEP_DURATION_REMAINING_SECONDS,
       new Number[] {routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining()});
     statementObjects.put(TriggerProperty.STEP_INDEX,
       new Number[] {routeProgress.getCurrentLegProgress().getStepIndex()});
@@ -44,7 +43,9 @@ public class StepMilestone extends Milestone {
     statementObjects.put(TriggerProperty.LAST_STEP,
       new Number[] {routeProgress.getCurrentLegProgress().getStepIndex(),
         (routeProgress.getCurrentLeg().getSteps().size() - 1)});
-    statementObjects.put(TriggerProperty.NEXT_STEP_DISTANCE,
+    statementObjects.put(TriggerProperty.FIRST_STEP,
+      new Number[] {routeProgress.getCurrentLegProgress().getStepIndex(), 0});
+    statementObjects.put(TriggerProperty.NEXT_STEP_DISTANCE_METERS,
       new Number[] {
         routeProgress.getCurrentLegProgress().getUpComingStep() != null
           ? routeProgress.getCurrentLegProgress().getUpComingStep().getDistance() : 0});
@@ -55,7 +56,7 @@ public class StepMilestone extends Milestone {
       != routeProgress.getCurrentLegProgress().getStepIndex()) {
       called = false;
     }
-    if (builder.getTrigger().validate(statementObjects) && !called) {
+    if (builder.getTrigger().isOccurring(statementObjects) && !called) {
       called = true;
       return true;
     }

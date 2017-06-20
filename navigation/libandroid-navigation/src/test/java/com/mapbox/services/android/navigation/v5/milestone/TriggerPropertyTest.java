@@ -39,10 +39,10 @@ public class TriggerPropertyTest extends BaseTest {
     for (int i = 10; i > 0; i--) {
       Milestone milestone = new StepMilestone.Builder()
         .setTrigger(
-          Trigger.eq(TriggerProperty.STEP_DURATION_REMAINING, (stepDuration / i))
+          Trigger.eq(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, (stepDuration / i))
         ).build();
 
-      boolean result = milestone.validate(routeProgress, routeProgress);
+      boolean result = milestone.isOccurring(routeProgress, routeProgress);
       if ((stepDuration / i) == stepDuration) {
         Assert.assertTrue(result);
       } else {
@@ -58,10 +58,10 @@ public class TriggerPropertyTest extends BaseTest {
     for (int i = 10; i > 0; i--) {
       Milestone milestone = new StepMilestone.Builder()
         .setTrigger(
-          Trigger.eq(TriggerProperty.STEP_DISTANCE_REMAINING, (stepDistance / i))
+          Trigger.eq(TriggerProperty.STEP_DISTANCE_REMAINING_METERS, (stepDistance / i))
         ).build();
 
-      boolean result = milestone.validate(routeProgress, routeProgress);
+      boolean result = milestone.isOccurring(routeProgress, routeProgress);
       if ((stepDistance / i) == stepDistance) {
         Assert.assertTrue(result);
       } else {
@@ -77,10 +77,10 @@ public class TriggerPropertyTest extends BaseTest {
     for (int i = 10; i > 0; i--) {
       Milestone milestone = new StepMilestone.Builder()
         .setTrigger(
-          Trigger.eq(TriggerProperty.STEP_DISTANCE_TOTAL, (stepDistanceTotal / i))
+          Trigger.eq(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, (stepDistanceTotal / i))
         ).build();
 
-      boolean result = milestone.validate(routeProgress, routeProgress);
+      boolean result = milestone.isOccurring(routeProgress, routeProgress);
       if ((stepDistanceTotal / i) == stepDistanceTotal) {
         Assert.assertTrue(result);
       } else {
@@ -96,10 +96,10 @@ public class TriggerPropertyTest extends BaseTest {
     for (int i = 10; i > 0; i--) {
       Milestone milestone = new StepMilestone.Builder()
         .setTrigger(
-          Trigger.eq(TriggerProperty.STEP_DURATION_TOTAL, (stepDurationTotal / i))
+          Trigger.eq(TriggerProperty.STEP_DURATION_TOTAL_SECONDS, (stepDurationTotal / i))
         ).build();
 
-      boolean result = milestone.validate(routeProgress, routeProgress);
+      boolean result = milestone.isOccurring(routeProgress, routeProgress);
       if ((stepDurationTotal / i) == stepDurationTotal) {
         Assert.assertTrue(result);
       } else {
@@ -118,7 +118,7 @@ public class TriggerPropertyTest extends BaseTest {
           Trigger.eq(TriggerProperty.STEP_INDEX, Math.abs(stepIndex - i))
         ).build();
 
-      boolean result = milestone.validate(routeProgress, routeProgress);
+      boolean result = milestone.isOccurring(routeProgress, routeProgress);
       if (Math.abs(stepIndex - i) == stepIndex) {
         Assert.assertTrue(result);
       } else {

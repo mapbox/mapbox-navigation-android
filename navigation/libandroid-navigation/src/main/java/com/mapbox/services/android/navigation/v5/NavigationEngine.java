@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
  */
 class NavigationEngine {
 
+  private static final String INSTRUCTION_STRING = "instruction";
+
   // Listeners
   private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
   private CopyOnWriteArrayList<OffRouteListener> offRouteListeners;
@@ -90,9 +92,9 @@ class NavigationEngine {
       legIndex, stepIndex);
 
     for (Milestone milestone : milestones) {
-      if (milestone.validate(previousRouteProgress, routeProgress)) {
+      if (milestone.isOccurring(previousRouteProgress, routeProgress)) {
         for (MilestoneEventListener listener : milestoneEventListeners) {
-          listener.onMilestoneEvent(routeProgress, "instruction", milestone.getIdentifier());
+          listener.onMilestoneEvent(routeProgress, INSTRUCTION_STRING, milestone.getIdentifier());
         }
       }
     }

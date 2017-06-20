@@ -2,6 +2,11 @@ package com.mapbox.services.android.navigation.v5.milestone;
 
 import java.util.Map;
 
+/**
+ * Utility to build Trigger expressions more easily.
+ *
+ * @since 0.4.0
+ */
 public class Trigger {
 
   /**
@@ -18,11 +23,11 @@ public class Trigger {
     /**
      * Validates whether the statement meets the specified trigger criteria.
      *
-     * @param statementObjects a {@link Map} that contains all the trigger statements to validate
+     * @param statementObjects a {@link Map} that contains all the trigger statements to isOccurring
      * @return true if the statement is valid, otherwise false
      * @since 0.4.0
      */
-    public abstract boolean validate(Map<Integer, Number[]> statementObjects);
+    public abstract boolean isOccurring(Map<Integer, Number[]> statementObjects);
   }
 
   /*
@@ -30,7 +35,7 @@ public class Trigger {
    */
 
   /**
-   * All class used to validate that all of the statements are valid.
+   * All class used to isOccurring that all of the statements are valid.
    *
    * @since 0.4.0
    */
@@ -42,10 +47,10 @@ public class Trigger {
     }
 
     @Override
-    public boolean validate(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
       boolean all = true;
       for (Statement statement : statements) {
-        if (!statement.validate(statementObjects)) {
+        if (!statement.isOccurring(statementObjects)) {
           all = false;
         }
       }
@@ -54,7 +59,7 @@ public class Trigger {
   }
 
   /**
-   * None class used to validate that none of the statements are valid.
+   * None class used to isOccurring that none of the statements are valid.
    *
    * @since 0.4.0
    */
@@ -66,9 +71,9 @@ public class Trigger {
     }
 
     @Override
-    public boolean validate(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
       for (Statement statement : statements) {
-        if (statement.validate(statementObjects)) {
+        if (statement.isOccurring(statementObjects)) {
           return false;
         }
       }
@@ -77,7 +82,7 @@ public class Trigger {
   }
 
   /**
-   * Any class used to validate that any of the statements are valid.
+   * Any class used to isOccurring that any of the statements are valid.
    *
    * @since 0.4.0
    */
@@ -89,9 +94,9 @@ public class Trigger {
     }
 
     @Override
-    public boolean validate(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
       for (Statement statement : statements) {
-        if (statement.validate(statementObjects)) {
+        if (statement.isOccurring(statementObjects)) {
           return true;
         }
       }
@@ -104,7 +109,7 @@ public class Trigger {
    */
 
   /**
-   * Greater than class used to validate that the {@code RouteProgress} key property is greater than the specified
+   * Greater than class used to isOccurring that the {@code RouteProgress} key property is greater than the specified
    * value.
    *
    * @since 0.4.0
@@ -119,13 +124,13 @@ public class Trigger {
     }
 
     @Override
-    public boolean validate(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
       return Operation.greaterThan(statementObjects.get(key), (Number) value);
     }
   }
 
   /**
-   * Greater than equal class used to validate that the {@code RouteProgress} key property is greater than or equal to
+   * Greater than equal class used to isOccurring that the {@code RouteProgress} key property is greater than or equal to
    * the specified value.
    *
    * @since 0.4.0
@@ -140,13 +145,13 @@ public class Trigger {
     }
 
     @Override
-    public boolean validate(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
       return Operation.greaterThanEqual(statementObjects.get(key), (Number) value);
     }
   }
 
   /**
-   * Less than class used to validate that the {@code RouteProgress} key property is less than the specified value.
+   * Less than class used to isOccurring that the {@code RouteProgress} key property is less than the specified value.
    *
    * @since 0.4.0
    */
@@ -160,13 +165,13 @@ public class Trigger {
     }
 
     @Override
-    public boolean validate(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
       return Operation.lessThan(statementObjects.get(key), (Number) value);
     }
   }
 
   /**
-   * Less than equal class used to validate that the {@code RouteProgress} key property is less than or equal to the
+   * Less than equal class used to isOccurring that the {@code RouteProgress} key property is less than or equal to the
    * specified value.
    *
    * @since 0.4.0
@@ -181,13 +186,13 @@ public class Trigger {
     }
 
     @Override
-    public boolean validate(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
       return Operation.lessThanEqual(statementObjects.get(key), (Number) value);
     }
   }
 
   /**
-   * Not equals class used to validate that the {@code RouteProgress} key property does not equal the specified value.
+   * Not equals class used to isOccurring that the {@code RouteProgress} key property does not equal the specified value.
    *
    * @since 0.4.0
    */
@@ -201,13 +206,13 @@ public class Trigger {
     }
 
     @Override
-    public boolean validate(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
       return Operation.notEqual(statementObjects.get(key), (Number) values[0]);
     }
   }
 
   /**
-   * Equals class used to validate that the {@code RouteProgress} key property equals the specified value.
+   * Equals class used to isOccurring that the {@code RouteProgress} key property equals the specified value.
    *
    * @since 0.4.0
    */
@@ -221,7 +226,7 @@ public class Trigger {
     }
 
     @Override
-    public boolean validate(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
       return Operation.equal(statementObjects.get(key), (Number) value);
     }
   }
@@ -330,6 +335,4 @@ public class Trigger {
   public static Statement gte(int key, Object value) {
     return new GreaterThanEqualStatement(key, value);
   }
-
-
 }

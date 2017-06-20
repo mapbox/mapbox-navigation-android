@@ -195,10 +195,10 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     Timber.d("Milestone Event Occurred with id: %d", identifier);
     switch (identifier) {
       case NavigationConstants.URGENT_MILESTONE:
-        Toast.makeText(this, "High Milestone", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Urgent Milestone", Toast.LENGTH_LONG).show();
         break;
       case NavigationConstants.IMMINENT_MILESTONE:
-        Toast.makeText(this, "Medium Milestone", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Imminent Milestone", Toast.LENGTH_LONG).show();
         break;
       case NavigationConstants.NEW_STEP_MILESTONE:
         Toast.makeText(this, "New Step", Toast.LENGTH_LONG).show();
@@ -210,6 +210,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
         Toast.makeText(this, "Arrival", Toast.LENGTH_LONG).show();
         break;
       default:
+        Toast.makeText(this, "Undefined milestone event occurred", Toast.LENGTH_LONG).show();
         break;
     }
   }
