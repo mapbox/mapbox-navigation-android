@@ -11,10 +11,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 
 import com.mapbox.services.Experimental;
-import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListener;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
@@ -189,12 +190,6 @@ public class NavigationService extends Service implements LocationEngineListener
     this.navigationEventListeners = navigationEventListeners;
   }
 
-  public void setAlertLevelChangeListeners(CopyOnWriteArrayList<AlertLevelChangeListener> alertLevelChangeListeners) {
-    if (navigationEngine != null) {
-      navigationEngine.setAlertLevelChangeListeners(alertLevelChangeListeners);
-    }
-  }
-
   public void setProgressChangeListeners(CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners) {
     // Add a progress listener so this service is notified when the user arrives at their destination.
     this.progressChangeListeners = progressChangeListeners;
@@ -207,6 +202,14 @@ public class NavigationService extends Service implements LocationEngineListener
     if (navigationEngine != null) {
       navigationEngine.setOffRouteListeners(offRouteListeners);
     }
+  }
+
+  public void setMilestones(CopyOnWriteArrayList<Milestone> milestones) {
+    navigationEngine.setMilestones(milestones);
+  }
+
+  public void setMilestoneEventListeners(CopyOnWriteArrayList<MilestoneEventListener> milestoneEventListeners) {
+    navigationEngine.setMilestoneEventListeners(milestoneEventListeners);
   }
 
   public void setLocationEngine(LocationEngine locationEngine) {
