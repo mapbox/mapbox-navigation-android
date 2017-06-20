@@ -23,7 +23,7 @@ public class Trigger {
     /**
      * Validates whether the statement meets the specified trigger criteria.
      *
-     * @param statementObjects a {@link Map} that contains all the trigger statements to isOccurring
+     * @param statementObjects a {@link Map} that contains all the trigger statements to determine
      * @return true if the statement is valid, otherwise false
      * @since 0.4.0
      */
@@ -35,7 +35,7 @@ public class Trigger {
    */
 
   /**
-   * All class used to isOccurring that all of the statements are valid.
+   * All class used to determine that all of the statements are valid.
    *
    * @since 0.4.0
    */
@@ -59,7 +59,7 @@ public class Trigger {
   }
 
   /**
-   * None class used to isOccurring that none of the statements are valid.
+   * None class used to determine that none of the statements are valid.
    *
    * @since 0.4.0
    */
@@ -82,7 +82,7 @@ public class Trigger {
   }
 
   /**
-   * Any class used to isOccurring that any of the statements are valid.
+   * Any class used to determine that any of the statements are valid.
    *
    * @since 0.4.0
    */
@@ -109,7 +109,7 @@ public class Trigger {
    */
 
   /**
-   * Greater than class used to isOccurring that the {@code RouteProgress} key property is greater than the specified
+   * Greater than class used to determine that the {@code RouteProgress} key property is greater than the specified
    * value.
    *
    * @since 0.4.0
@@ -130,8 +130,8 @@ public class Trigger {
   }
 
   /**
-   * Greater than equal class used to isOccurring that the {@code RouteProgress} key property is greater than or equal to
-   * the specified value.
+   * Greater than equal class used to determine that the {@code RouteProgress} key property is greater than or equal
+   * to the specified value.
    *
    * @since 0.4.0
    */
@@ -151,7 +151,7 @@ public class Trigger {
   }
 
   /**
-   * Less than class used to isOccurring that the {@code RouteProgress} key property is less than the specified value.
+   * Less than class used to determine that the {@code RouteProgress} key property is less than the specified value.
    *
    * @since 0.4.0
    */
@@ -171,7 +171,7 @@ public class Trigger {
   }
 
   /**
-   * Less than equal class used to isOccurring that the {@code RouteProgress} key property is less than or equal to the
+   * Less than equal class used to determine that the {@code RouteProgress} key property is less than or equal to the
    * specified value.
    *
    * @since 0.4.0
@@ -192,7 +192,7 @@ public class Trigger {
   }
 
   /**
-   * Not equals class used to isOccurring that the {@code RouteProgress} key property does not equal the specified value.
+   * Not equals class used to determine that the {@code RouteProgress} key property does not equal the specified value.
    *
    * @since 0.4.0
    */
@@ -212,7 +212,7 @@ public class Trigger {
   }
 
   /**
-   * Equals class used to isOccurring that the {@code RouteProgress} key property equals the specified value.
+   * Equals class used to determine that the {@code RouteProgress} key property equals the specified value.
    *
    * @since 0.4.0
    */
