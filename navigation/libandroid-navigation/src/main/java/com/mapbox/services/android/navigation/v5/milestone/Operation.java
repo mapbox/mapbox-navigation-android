@@ -1,6 +1,10 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-
+/**
+ * Extracted operation methods are found in this class and are fundamental to how Triggers work.
+ *
+ * @since 0.4.0
+ */
 class Operation {
 
   static boolean greaterThan(Number[] valueOne, Number valueTwo) {
