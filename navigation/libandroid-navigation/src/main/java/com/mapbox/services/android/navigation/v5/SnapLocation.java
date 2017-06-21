@@ -2,49 +2,70 @@ package com.mapbox.services.android.navigation.v5;
 
 import android.location.Location;
 
+import com.mapbox.services.Constants;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
+import com.mapbox.services.api.directions.v5.models.LegStep;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
+import com.mapbox.services.api.utils.turf.TurfMisc;
+import com.mapbox.services.commons.geojson.Feature;
 import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
+import com.mapbox.services.commons.utils.PolylineUtils;
+
+import java.util.List;
 
 public class SnapLocation {
 
   private MapboxNavigationOptions options;
-  private RouteProgress routeProgress;
+  private LegStep currentStep;
+
   private Location location;
 
-  SnapLocation(Location location, RouteProgress routeProgress, MapboxNavigationOptions options) {
+  SnapLocation(Location location, LegStep currentStep, MapboxNavigationOptions options) {
     this.location = location;
-    this.routeProgress = routeProgress;
+    this.currentStep = currentStep;
     this.options = options;
   }
 
   Location getSnappedLocation() {
     // Pass in the snapped location with all the other location data remaining intact for their use.
-    location.setLatitude(routeProgress.getUsersCurrentSnappedPosition().getLatitude());
-    location.setLongitude(routeProgress.getUsersCurrentSnappedPosition().getLongitude());
-
-    location.setBearing(snapUserBearing());
-
+    location.setLatitude(getUsersCurrentSnappedPosition().getLatitude());
+    location.setLongitude(getUsersCurrentSnappedPosition().getLongitude());
     return location;
   }
 
-  private float snapUserBearing() {
+  /**
+   * Provides the users location snapped to the current route they are navigating on.
+   *
+   * @return {@link Position} object with coordinates snapping the user to the route.
+   * @since 0.1.0
+   */
+  Position getUsersCurrentSnappedPosition() {
+    Point locationToPoint = Point.fromCoordinates(new double[] {location.getLongitude(), location.getLatitude()});
+    String stepGeometry = currentStep.getGeometry();
+
+    // Decode the geometry
+    List<Position> coords = PolylineUtils.decode(stepGeometry, Constants.PRECISION_6);
+
+    // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
+    // Point on the LineString.
+    Feature feature = TurfMisc.pointOnLine(locationToPoint, coords);
+    return ((Point) feature.getGeometry()).getCoordinates();
+  }
+
+  float snapUserBearing(RouteProgress routeProgress) {
     LineString lineString = LineString.fromPolyline(routeProgress.getRoute().getGeometry(),
       com.mapbox.services.Constants.PRECISION_6);
 
     Position newCoordinate;
-    newCoordinate = routeProgress.getUsersCurrentSnappedPosition();
+    newCoordinate = getUsersCurrentSnappedPosition();
 
     double userDistanceBuffer = location.getSpeed() * options.getDeadReckoningTimeInterval();
 
     if (routeProgress.getDistanceTraveled() + userDistanceBuffer
-      > RouteUtils.getDistanceToEndOfRoute(
-      routeProgress.getRoute().getLegs().get(0).getSteps().get(0).getManeuver().asPosition(),
-      routeProgress.getRoute(),
-      TurfConstants.UNIT_METERS)) {
+      > routeProgress.getRoute().getDistance()) {
       // If the user is near the end of the route, take the remaining distance and divide by two
       userDistanceBuffer = routeProgress.getDistanceRemaining() / 2;
     }

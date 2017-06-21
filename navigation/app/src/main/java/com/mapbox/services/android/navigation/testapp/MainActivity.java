@@ -1,9 +1,9 @@
 package com.mapbox.services.android.navigation.testapp;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,8 +12,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mapbox.services.android.navigation.testapp.activity.NavigationActivity;
+import com.mapbox.services.android.navigation.testapp.activity.LocationInfoActivity;
+
+import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.OffRouteDetectionActivity;
+import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.RouteUtilsV5Activity;
 import com.mapbox.services.android.navigation.testapp.activity.SnapToRouteActivity;
 import com.mapbox.services.android.telemetry.permissions.PermissionsListener;
@@ -44,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
       new SampleItem(
         getString(R.string.title_navigation),
         getString(R.string.description_navigation),
-        NavigationActivity.class
+        MockNavigationActivity.class
       ),
       new SampleItem(
         getString(R.string.title_snap_to_route),
@@ -55,6 +58,16 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         getString(R.string.title_off_route_detection),
         getString(R.string.description_off_route_detection),
         OffRouteDetectionActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_location_info),
+        getString(R.string.description_location_info),
+        LocationInfoActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_reroute),
+        getString(R.string.description_reroute),
+        RerouteActivity.class
       )
     ));
 

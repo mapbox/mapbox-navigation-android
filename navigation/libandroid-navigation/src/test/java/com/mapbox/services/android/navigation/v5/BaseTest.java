@@ -9,9 +9,10 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 
 public class BaseTest {
-  static final double DELTA = 1E-10;
-  private static final String BASE_PATH = "/res/";
+  public static final double DELTA = 1E-10;
+  public static final double LARGE_DELTA = 0.1;
 
+  private static final String BASE_PATH = "/res/";
   private static final String LOG_TAG = BaseTest.class.getSimpleName();
 
   protected String readPath(String path) {

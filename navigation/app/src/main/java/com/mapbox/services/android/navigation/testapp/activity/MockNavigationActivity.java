@@ -27,10 +27,10 @@ import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.RouteProgress;
-import com.mapbox.services.android.navigation.v5.listeners.AlertLevelChangeListener;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.permissions.PermissionsManager;
@@ -49,8 +49,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
-public class NavigationActivity extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener,
-  ProgressChangeListener, NavigationEventListener, AlertLevelChangeListener, OffRouteListener {
+public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
+  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener,
+  OffRouteListener, MilestoneEventListener {
 
   // Map variables
   private MapView mapView;
@@ -86,9 +87,9 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
           startRouteButton.setVisibility(View.INVISIBLE);
 
           // Attach all of our navigation listeners.
-          navigation.addNavigationEventListener(NavigationActivity.this);
-          navigation.addProgressChangeListener(NavigationActivity.this);
-          navigation.addAlertLevelChangeListener(NavigationActivity.this);
+          navigation.addNavigationEventListener(MockNavigationActivity.this);
+          navigation.addProgressChangeListener(MockNavigationActivity.this);
+          navigation.addMilestoneEventListener(MockNavigationActivity.this);
 
           // Adjust location engine to force a gps reading every second. This isn't required but gives an overall
           // better navigation experience for users. The updating only occurs if the user moves 3 meters or further
@@ -98,7 +99,7 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
           locationEngine.setFastestInterval(1000);
           locationEngine.activate();
 
-          ((MockLocationEngine)locationEngine).setRoute(route);
+          ((MockLocationEngine) locationEngine).setRoute(route);
           navigation.setLocationEngine(locationEngine);
           navigation.startNavigation(route);
         }
@@ -174,7 +175,7 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
         DirectionsRoute route = response.body().getRoutes().get(0);
-        NavigationActivity.this.route = route;
+        MockNavigationActivity.this.route = route;
         drawRouteLine(route);
       }
 
@@ -188,6 +189,31 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
   /*
    * Navigation listeners
    */
+
+  @Override
+  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
+    Timber.d("Milestone Event Occurred with id: %d", identifier);
+    switch (identifier) {
+      case NavigationConstants.URGENT_MILESTONE:
+        Toast.makeText(this, "Urgent Milestone", Toast.LENGTH_LONG).show();
+        break;
+      case NavigationConstants.IMMINENT_MILESTONE:
+        Toast.makeText(this, "Imminent Milestone", Toast.LENGTH_LONG).show();
+        break;
+      case NavigationConstants.NEW_STEP_MILESTONE:
+        Toast.makeText(this, "New Step", Toast.LENGTH_LONG).show();
+        break;
+      case NavigationConstants.DEPARTURE_MILESTONE:
+        Toast.makeText(this, "Depart", Toast.LENGTH_LONG).show();
+        break;
+      case NavigationConstants.ARRIVAL_MILESTONE:
+        Toast.makeText(this, "Arrival", Toast.LENGTH_LONG).show();
+        break;
+      default:
+        Toast.makeText(this, "Undefined milestone event occurred", Toast.LENGTH_LONG).show();
+        break;
+    }
+  }
 
   @Override
   public void onRunning(boolean running) {
@@ -204,42 +230,18 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
   }
 
   @Override
-  public void onAlertLevelChange(int alertLevel, RouteProgress routeProgress) {
-
-    switch (alertLevel) {
-      case NavigationConstants.HIGH_ALERT_LEVEL:
-        Toast.makeText(NavigationActivity.this, "HIGH", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.MEDIUM_ALERT_LEVEL:
-        Toast.makeText(NavigationActivity.this, "MEDIUM", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.LOW_ALERT_LEVEL:
-        Toast.makeText(NavigationActivity.this, "LOW", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.ARRIVE_ALERT_LEVEL:
-        Toast.makeText(NavigationActivity.this, "ARRIVE", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.DEPART_ALERT_LEVEL:
-        Toast.makeText(NavigationActivity.this, "DEPART", Toast.LENGTH_LONG).show();
-        break;
-      default:
-      case NavigationConstants.NONE_ALERT_LEVEL:
-        Toast.makeText(NavigationActivity.this, "NONE", Toast.LENGTH_LONG).show();
-        break;
-    }
-  }
-
-  @Override
   public void userOffRoute(Location location) {
     Position newOrigin = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
-    navigation.updateRoute(newOrigin, destination, new Callback<DirectionsResponse>() {
+    navigation.getRoute(newOrigin, destination, location.getBearing(), new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
         DirectionsRoute route = response.body().getRoutes().get(0);
-        NavigationActivity.this.route = route;
+        MockNavigationActivity.this.route = route;
 
         // Remove old route line from map and draw the new one.
-        mapboxMap.removePolyline(routeLine);
+        if (routeLine != null) {
+          mapboxMap.removePolyline(routeLine);
+        }
         drawRouteLine(route);
       }
 
@@ -292,10 +294,12 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
     mapView.onDestroy();
 
     // Remove all navigation listeners
-    navigation.removeAlertLevelChangeListener(this);
     navigation.removeNavigationEventListener(this);
     navigation.removeProgressChangeListener(this);
     navigation.removeOffRouteListener(this);
+    navigation.removeMilestoneEventListener(this);
+
+    navigation.onDestroy();
 
     // End the navigation session
     navigation.endNavigation();

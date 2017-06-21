@@ -3,20 +3,22 @@ package com.mapbox.services.android.navigation.v5;
 import android.location.Location;
 import android.support.annotation.FloatRange;
 
+import com.mapbox.services.api.directions.v5.DirectionsCriteria;
+
 public class MapboxNavigationOptions {
 
   private double maxTurnCompletionOffset;
   private double maneuverZoneRadius;
 
-  private int mediumAlertInterval;
-  private int highAlertInterval;
-
-  private double minimumMediumAlertDistance;
-  private double minimumHighAlertDistance;
-
   private double maximumDistanceOffRoute;
   private double deadReckoningTimeInterval;
   private double maxManipulatedCourseAngle;
+
+  private double userLocationSnapDistance;
+  private int secondsBeforeReroute;
+
+  @NavigationProfiles.Profile
+  private String profile;
 
   /**
    * Creates a new MapboxNavigationOptions object.
@@ -27,13 +29,12 @@ public class MapboxNavigationOptions {
     // Set the initial variables to equal the default.
     maxTurnCompletionOffset = NavigationConstants.MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION;
     maneuverZoneRadius = NavigationConstants.MANEUVER_ZONE_RADIUS;
-    mediumAlertInterval = NavigationConstants.MEDIUM_ALERT_INTERVAL;
-    highAlertInterval = NavigationConstants.HIGH_ALERT_INTERVAL;
-    minimumMediumAlertDistance = NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT;
-    minimumHighAlertDistance = NavigationConstants.MINIMUM_DISTANCE_FOR_HIGH_ALERT;
     maximumDistanceOffRoute = NavigationConstants.MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE;
     deadReckoningTimeInterval = NavigationConstants.DEAD_RECKONING_TIME_INTERVAL;
     maxManipulatedCourseAngle = NavigationConstants.MAX_MANIPULATED_COURSE_ANGLE;
+    userLocationSnapDistance = NavigationConstants.USER_LOCATION_SNAPPING_DISTANCE;
+    secondsBeforeReroute = NavigationConstants.SECONDS_BEFORE_REROUTE;
+    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
   }
 
   /**
@@ -67,60 +68,6 @@ public class MapboxNavigationOptions {
    */
   public MapboxNavigationOptions setManeuverZoneRadius(double maneuverZoneRadius) {
     this.maneuverZoneRadius = maneuverZoneRadius;
-    return this;
-  }
-
-  /**
-   * Number of seconds left on step when a {@link NavigationConstants#MEDIUM_ALERT_LEVEL} alert occurs.
-   *
-   * @param mediumAlertInterval integer value in unit seconds representing the seconds left till a {@code medium} alert
-   *                            level occurs.
-   * @return this;
-   * @since 0.2.0
-   */
-  public MapboxNavigationOptions setMediumAlertInterval(int mediumAlertInterval) {
-    this.mediumAlertInterval = mediumAlertInterval;
-    return this;
-  }
-
-  /**
-   * Number of seconds left on step when a {@link NavigationConstants#HIGH_ALERT_LEVEL} alert occurs.
-   *
-   * @param highAlertInterval integer value in unit seconds representing the seconds left till a {@code high} alert
-   *                          level occurs.
-   * @return this.
-   * @since 0.2.0
-   */
-  public MapboxNavigationOptions setHighAlertInterval(int highAlertInterval) {
-    this.highAlertInterval = highAlertInterval;
-    return this;
-  }
-
-  /**
-   * Distance in meters representing the minimum length of a step for a {@link NavigationConstants#MEDIUM_ALERT_LEVEL}
-   * to occur.
-   *
-   * @param minimumMediumAlertDistance double value in unit meters representing the minimum step length for a
-   *                                   {@code medium} alert to occur.
-   * @return this.
-   * @since 0.2.0
-   */
-  public MapboxNavigationOptions setMinimumMediumAlertDistance(double minimumMediumAlertDistance) {
-    this.minimumMediumAlertDistance = minimumMediumAlertDistance;
-    return this;
-  }
-
-  /**
-   * Distance in meters representing the minimum length of a step for a {@link NavigationConstants#HIGH_ALERT_LEVEL}
-   * to occur.
-   *
-   * @param minimumHighAlertDistance double value in unit meters representing the minimum step length for a
-   *                                 {@code high} alert to occur.
-   * @return this.
-   * @since 0.2.0
-   */
-  public MapboxNavigationOptions setMinimumHighAlertDistance(double minimumHighAlertDistance) {
-    this.minimumHighAlertDistance = minimumHighAlertDistance;
     return this;
   }
 
@@ -198,48 +145,6 @@ public class MapboxNavigationOptions {
   }
 
   /**
-   * Get the current number of seconds required for a {@link NavigationConstants#MEDIUM_ALERT_LEVEL} alert to occur.
-   *
-   * @return integer value in unit seconds representing the seconds left till a {@code medium} alert level occurs.
-   * @since 0.2.0
-   */
-  public int getMediumAlertInterval() {
-    return mediumAlertInterval;
-  }
-
-  /**
-   * Get the current number of seconds required for a {@link NavigationConstants#HIGH_ALERT_LEVEL} alert to occurs.
-   *
-   * @return integer value in unit seconds representing the seconds left till a {@code high} alert level occurs.
-   * @since 0.2.0
-   */
-  public int getHighAlertInterval() {
-    return highAlertInterval;
-  }
-
-  /**
-   * Get the current required distance in meters representing the minimum length of a step for a
-   * {@link NavigationConstants#MEDIUM_ALERT_LEVEL} to occur.
-   *
-   * @return double value in unit meters representing the minimum step length for a {@code medium} alert to occur.
-   * @since 0.2.0
-   */
-  public double getMinimumMediumAlertDistance() {
-    return minimumMediumAlertDistance;
-  }
-
-  /**
-   * Get the current required distance in meters representing the minimum length of a step for a
-   * {@link NavigationConstants#HIGH_ALERT_LEVEL} to occur.
-   *
-   * @return double value in unit meters representing the minimum step length for a {@code high} alert to occur.
-   * @since 0.2.0
-   */
-  public double getMinimumHighAlertDistance() {
-    return minimumHighAlertDistance;
-  }
-
-  /**
    * Get the current required maximum distance in meters a user can travel away from the step geometry before the
    * {@link com.mapbox.services.android.navigation.v5.listeners.OffRouteListener}'s called.
    *
@@ -269,5 +174,69 @@ public class MapboxNavigationOptions {
    */
   public double getMaxManipulatedCourseAngle() {
     return maxManipulatedCourseAngle;
+  }
+
+  /**
+   * Determines the distance the user must stay within for snapping to route to occur.
+   *
+   * @return the distance in unit meters.
+   * @since 0.3.0
+   */
+  public double getUserLocationSnapDistance() {
+    return userLocationSnapDistance;
+  }
+
+  /**
+   * set the distance the user must stay within for snapping to route to occur.
+   *
+   * @param userLocationSnapDistance distance value in unit meters
+   * @since 0.3.0
+   */
+  public void setUserLocationSnapDistance(double userLocationSnapDistance) {
+    this.userLocationSnapDistance = userLocationSnapDistance;
+  }
+
+  /**
+   * The seconds before off-route happens, initially when the user goes off-route, a timer is started and waits till it
+   * reaches this value and then notifies the off-route listener.
+   *
+   * @return seconds value before rerouting
+   * @since 0.3.0
+   */
+  public int getSecondsBeforeReroute() {
+    return secondsBeforeReroute;
+  }
+
+  /**
+   * The seconds before off-route happens, initially when the user goes off-route, a timer is started and waits till it
+   * reaches this value and then notifies the off-route listener.
+   *
+   * @param secondsBeforeReroute seconds value before rerouting
+   * @since 0.3.0
+   */
+  public void setSecondsBeforeReroute(int secondsBeforeReroute) {
+    this.secondsBeforeReroute = secondsBeforeReroute;
+  }
+
+
+  /**
+   * Set the directions profile which will be used when requesting the route. It will also determine variables used to
+   * determine alert levels.
+   *
+   * @param profile one of the profiles defined in {@link NavigationProfiles}
+   */
+  public void setDirectionsProfile(@NavigationProfiles.Profile String profile) {
+    this.profile = profile;
+  }
+
+  /**
+   * Get the directions profile which will be used when requesting the route. It will also determine variables used to
+   * determine alert levels.
+   *
+   * @return one of the profiles defined in {@link NavigationProfiles}
+   * @since 0.3.0
+   */
+  public String getDirectionsProfile() {
+    return profile;
   }
 }

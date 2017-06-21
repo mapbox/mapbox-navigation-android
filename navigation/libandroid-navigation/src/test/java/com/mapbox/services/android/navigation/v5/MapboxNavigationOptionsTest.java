@@ -33,56 +33,6 @@ public class MapboxNavigationOptionsTest extends BaseTest {
   }
 
   @Test
-  public void testMediumAlertInterval() {
-    assertEquals(
-      new MapboxNavigationOptions().getMediumAlertInterval(), NavigationConstants.MEDIUM_ALERT_INTERVAL, DELTA
-    );
-    assertEquals(new MapboxNavigationOptions().setMediumAlertInterval(100).getMediumAlertInterval(), 100, DELTA);
-  }
-
-  @Test
-  public void testHighAlertInterval() {
-    assertEquals(
-      new MapboxNavigationOptions().getHighAlertInterval(),
-      NavigationConstants.HIGH_ALERT_INTERVAL,
-      DELTA
-    );
-    assertEquals(
-      new MapboxNavigationOptions().setHighAlertInterval(100).getHighAlertInterval(),
-      100,
-      DELTA
-    );
-  }
-
-  @Test
-  public void testMinimumMediumAlertDistance() {
-    assertEquals(
-      new MapboxNavigationOptions().getMinimumMediumAlertDistance(),
-      NavigationConstants.MINIMUM_DISTANCE_FOR_MEDIUM_ALERT,
-      DELTA
-    );
-    assertEquals(
-      new MapboxNavigationOptions().setMinimumMediumAlertDistance(100).getMinimumMediumAlertDistance(),
-      100,
-      DELTA
-    );
-  }
-
-  @Test
-  public void testMinimumHighAlertDistance() {
-    assertEquals(
-      new MapboxNavigationOptions().getMinimumHighAlertDistance(),
-      NavigationConstants.MINIMUM_DISTANCE_FOR_HIGH_ALERT,
-      DELTA
-    );
-    assertEquals(
-      new MapboxNavigationOptions().setMinimumHighAlertDistance(100).getMinimumHighAlertDistance(),
-      100,
-      DELTA
-    );
-  }
-
-  @Test
   public void testMaximumDistanceOffRoute() {
     assertEquals(
       new MapboxNavigationOptions().getMaximumDistanceOffRoute(),
