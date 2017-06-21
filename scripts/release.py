@@ -77,6 +77,10 @@ def release(stage, version, javadoc):
 	final_branch = validate_branch(stage=final_stage)
 	final_version = validate_version(stage=final_stage, branch=final_branch, version=version)
 
+	if javadoc:
+		generate_javadoc(version=final_version);
+		exit();
+
 	# Get user confirmation
 	click.echo('\n===== Build information =====')
 	click.echo('- Stage: %s' % final_stage)
@@ -93,10 +97,8 @@ def release(stage, version, javadoc):
 	elif (final_stage == 'final'):
 		publish_final(branch=final_branch, version=final_version)
 
-	if javadoc:
-		javadoc(version=final_version);
-
-def javadoc(version):
+# Generate Javadoc
+def generate_javadoc(version):
 	click.echo('Version being used for Javadoc: %s' % version)
 	dirty_gradle = update_current_version(file_path=GRADLE_PROPERTIES_PATH, file_var=GRADLE_TOKEN, version=version)
 	subprocess.Popen(['./gradlew', 'javadocrelease'], cwd=NAVIGATION_ROOT_PATH).wait()
