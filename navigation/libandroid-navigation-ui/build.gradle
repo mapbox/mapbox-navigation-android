@@ -1,0 +1,51 @@
+apply plugin: 'com.android.library'
+
+android {
+  compileSdkVersion rootProject.ext.compileSdkVersion
+  buildToolsVersion rootProject.ext.buildToolsVersion
+
+  defaultConfig {
+    minSdkVersion rootProject.ext.minSdkVersion
+    targetSdkVersion rootProject.ext.targetSdkVersion
+    versionCode 1
+    versionName "0.3.1"
+
+    configurations {
+      javadocDeps
+    }
+  }
+}
+
+dependencies {
+  // Navigation SDK
+  compile project (':libandroid-navigation')
+
+  // Mapbox Map SDK
+  compile(rootProject.ext.dep.mapboxMapSdk + '@aar') {
+    transitive = true
+    exclude module: 'lost'
+    exclude module: 'mapbox-java-geojson'
+    exclude module: 'mapbox-android-telemetry'
+  }
+
+  // Support libraries
+  compile rootProject.ext.dep.supportAppcompatV7
+
+  // Logging
+  compile rootProject.ext.dep.timber
+
+  javadocDeps rootProject.ext.dep.mapboxMapSdk
+
+  // Unit testing
+  testCompile rootProject.ext.dep.junit
+  testCompile rootProject.ext.dep.mockito
+
+
+  androidTestCompile(rootProject.ext.dep.testEspressoCore, {
+    exclude group: 'com.android.support', module: 'support-annotations'
+  })
+}
+
+apply from: 'javadoc.gradle'
+apply from: '../mvn-push-android.gradle'
+apply from: '../checkstyle.gradle'
