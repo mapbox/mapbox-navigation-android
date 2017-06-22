@@ -16,4 +16,6 @@
     <string name="description_location_info">Get information every location update event</string>
     <string name="title_reroute">Reroute</string>
     <string name="description_reroute">Test the reroute function inside the navigation SDK</string>
+    <string name="title_navigation_route_ui">Navigation Map Route</string>
+    <string name="description_navigation_route_ui">Draws a route on the map</string>
 </resources>
