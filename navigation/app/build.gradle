@@ -1,64 +1,68 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+  compileSdkVersion rootProject.ext.compileSdkVersion
+  buildToolsVersion rootProject.ext.buildToolsVersion
 
-    defaultConfig {
-        applicationId "com.mapbox.services.android.navigation.testapp"
-        minSdkVersion 15
-        targetSdkVersion 25
-        versionCode 1
-        versionName "0.1"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
+  defaultConfig {
+    applicationId "com.mapbox.services.android.navigation.testapp"
+    minSdkVersion rootProject.ext.minSdkVersion
+    targetSdkVersion rootProject.ext.targetSdkVersion
+    versionCode 1
+    versionName "0.1"
+    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+  }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-    }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_7
+    targetCompatibility JavaVersion.VERSION_1_7
+  }
 
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+  buildTypes {
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
+  }
 }
 
 dependencies {
-    // Mapbox Navigation SDK
-    compile project (':libandroid-navigation')
+  // Mapbox Navigation SDK
+  compile project(':libandroid-navigation')
+  compile project(':libandroid-navigation-ui')
 
-    // Support libraries
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+  // Support libraries
+  compile rootProject.ext.dep.supportAppcompatV7
+  compile rootProject.ext.dep.supportConstraintLayout
 
-    // Mapbox Maps SDK
-    compile ('com.mapbox.mapboxsdk:mapbox-android-sdk:5.1.0-beta.2@aar') {
-        transitive = true
-        exclude module: 'lost'
-        exclude module: 'mapbox-java-geojson'
-        exclude module: 'mapbox-android-telemetry'
-    }
+  // Mapbox Maps SDK
+  compile(rootProject.ext.dep.mapboxMapSdk + '@aar') {
+    transitive = true
+    exclude module: 'lost'
+    exclude module: 'mapbox-java-geojson'
+    exclude module: 'mapbox-android-telemetry'
+  }
 
-    // Logging
-    compile 'com.jakewharton.timber:timber:4.5.1'
+  // Logging
+  compile rootProject.ext.dep.timber
 
-    // Butter Knife
-    compile 'com.jakewharton:butterknife:8.5.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+  // Butter Knife
+  compile rootProject.ext.dep.butterKnife
+  annotationProcessor rootProject.ext.dep.butterKnifeProcessor
 
-    // Leak Canary
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+  // Leak Canary
+  debugCompile rootProject.ext.dep.leakCanaryDebug
+  releaseCompile rootProject.ext.dep.leakCanaryRelease
+  testCompile rootProject.ext.dep.leakCanaryTest
 
-    // Testing
-    testCompile 'junit:junit:4.12'
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
+  // Unit Testing
+  testCompile rootProject.ext.dep.junit
+  testCompile rootProject.ext.dep.mockito
+
+  // Instrumentation testing
+  androidTestCompile(rootProject.ext.dep.testEspressoCore, {
+    exclude group: 'com.android.support', module: 'support-annotations'
+  })
 }
 
 apply from: 'developer-config.gradle'

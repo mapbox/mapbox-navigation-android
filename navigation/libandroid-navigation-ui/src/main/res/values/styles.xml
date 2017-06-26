@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="NavigationMapRoute">
+
+        <!-- Colors -->
+        <item name="routeColor">@color/mapbox_navigation_route_layer_blue</item>
+        <item name="routeModerateCongestionColor">@color/mapbox_navigation_route_layer_blue</item>
+        <item name="routeSevereCongestionColor">@color/mapbox_navigation_route_layer_blue</item>
+        <item name="routeShieldColor">@color/mapbox_navigation_route_shield_layer_color</item>
+
+        <!-- Scales -->
+        <item name="routeScale">1.0</item>
+    </style>
+</resources>
