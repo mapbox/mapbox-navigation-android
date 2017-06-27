@@ -122,10 +122,12 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   private void newOrigin() {
     if (mapboxMap != null) {
-      LatLng latLng = Utils.getRandomLatLng(this);
+      LatLng latLng = Utils.getRandomLatLng(new double[] {-77.1825, 38.7825, -76.9790, 39.0157});
       ((MockLocationEngine) locationEngine).setLastLocation(
         Position.fromLngLat(latLng.getLongitude(), latLng.getLatitude())
       );
+      mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
+      mapboxMap.setMyLocationEnabled(true);
       mapboxMap.getTrackingSettings().setMyLocationTrackingMode(MyLocationTracking.TRACKING_FOLLOW);
     }
   }
@@ -143,13 +145,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     Snackbar.make(mapView, "Tap map to place destination", BaseTransientBottomBar.LENGTH_LONG).show();
 
     locationEngine = new MockLocationEngine();
+    mapboxMap.setLocationSource(locationEngine);
+
     newOrigin();
-    mapboxMap.setLocationSource(locationEngine);
-
-    mapboxMap.setLocationSource(locationEngine);
-    mapboxMap.setMyLocationEnabled(true);
-
-    mapboxMap.moveCamera(CameraUpdateFactory.zoomBy(12));
   }
 
   @Override
