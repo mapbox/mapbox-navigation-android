@@ -65,13 +65,15 @@ public class SnapToRoute extends Snap {
     return location;
   }
 
-  // TODO test when user is near end of route
-  private static float snapLocationBearing(Location location, RouteProgress routeProgress, MapboxNavigationOptions options) {
+  private static float snapLocationBearing(Location location, RouteProgress routeProgress,
+                                           MapboxNavigationOptions options) {
     LineString lineString = LineString.fromPolyline(routeProgress.getRoute().getGeometry(), PRECISION_6);
     double userDistanceBuffer = location.getSpeed() * options.getDeadReckoningTimeInterval();
 
-    Point currentPoint = TurfMeasurement.along(lineString, routeProgress.getDistanceTraveled(), TurfConstants.UNIT_METERS);
-    Point futurePoint = TurfMeasurement.along(lineString, routeProgress.getDistanceTraveled() + userDistanceBuffer, TurfConstants.UNIT_METERS);
+    Point currentPoint = TurfMeasurement.along(lineString, routeProgress.getDistanceTraveled(),
+      TurfConstants.UNIT_METERS);
+    Point futurePoint = TurfMeasurement.along(lineString, routeProgress.getDistanceTraveled() + userDistanceBuffer,
+      TurfConstants.UNIT_METERS);
 
     double azimuth = TurfMeasurement.bearing(currentPoint, futurePoint);
 
