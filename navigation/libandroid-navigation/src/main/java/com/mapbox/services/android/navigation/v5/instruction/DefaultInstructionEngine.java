@@ -60,6 +60,12 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
     });
   }
 
+  /**
+   * If the next step is greater than 15 meters long, use continue format instruction.
+   * Otherwise, use then in format for instruction
+   * @param progress {@link RouteProgress} created by the location change
+   * @return {@link String} to be announced on departure milestone
+   */
   private String buildDepartureInstruction(RouteProgress progress) {
     if (progress.getCurrentLegProgress().getUpComingStep().getDistance() > MINIMUM_UPCOMING_STEP_DISTANCE) {
       return buildContinueFormatInstruction(progress);
@@ -68,14 +74,29 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
     }
   }
 
+  /**
+   * Create default format instruction for new step milestone
+   * @param progress {@link RouteProgress} created by the location change
+   * @return {@link String} to be announced on new step milestone
+   */
   private String buildNewStepInstruction(RouteProgress progress) {
     return buildDefaultFormatInstruction(progress);
   }
 
+  /**
+   * @param progress {@link RouteProgress} created by the location change
+   * @return {@link String} to be announced on imminent milestone
+   */
   private String buildImminentInstruction(RouteProgress progress) {
     return buildContinueFormatInstruction(progress);
   }
 
+  /**
+   * If the next step is greater than 15 meters long, use then format instruction.
+   * Otherwise, just use the upcoming step instruction
+   * @param progress {@link RouteProgress} created by the location change
+   * @return {@link String} to be announced on urgent milestone
+   */
   private String buildUrgentInstruction(RouteProgress progress) {
     if (progress.getCurrentLegProgress().getUpComingStep().getDistance() > MINIMUM_UPCOMING_STEP_DISTANCE) {
       return buildThenFormatInstruction(progress);
@@ -84,6 +105,12 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
     }
   }
 
+  /**
+   * On arrival, use the upcoming step instruction.
+   * If empty, use the current step instruction as a fallback
+   * @param progress {@link RouteProgress} created by the location change
+   * @return {@link String} to be announced on departure milestone
+   */
   private String buildArrivalInstruction(RouteProgress progress) {
     if (progress.getCurrentLegProgress().getUpComingStep() != null) {
       String instruction = progress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction();
@@ -96,6 +123,12 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
     return "";
   }
 
+  /**
+   * Creates a {@link String} with the current step name and distance remaining
+   * Example: "Continue on Main St. for 3.2 miles"
+   * @param progress {@link RouteProgress} created by the location change
+   * @return {@link String} with format "Continue on %s for %s"
+   */
   private String buildContinueFormatInstruction(RouteProgress progress) {
     double userDistance = progress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
     return String.format(
@@ -105,6 +138,12 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
       distanceFormatter(userDistance));
   }
 
+  /**
+   * Creates a {@link String} with the current step distance remaining upcoming step instruction
+   * Example: "In 3.2 miles turn left onto Main St."
+   * @param progress {@link RouteProgress} created by the location change
+   * @return {@link String} with format "In %s %s"
+   */
   private String buildDefaultFormatInstruction(RouteProgress progress) {
     double userDistance = progress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
     return String.format(
@@ -116,6 +155,13 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
     );
   }
 
+  /**
+   * Creates a {@link String} with the current step maneuver instruction, current step distance remaining,
+   * and upcoming step instruction
+   * Example: "Turn left onto Main St. then in 3.2 miles turn right onto Second St."
+   * @param progress {@link RouteProgress} created by the location change
+   * @return {@link String} with format "%s then in %s %s"
+   */
   private String buildThenInFormatInstruction(RouteProgress progress) {
     double userDistance = progress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
     StepManeuver currentStepManeuver = progress.getCurrentLegProgress().getCurrentStep().getManeuver();
@@ -129,6 +175,12 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
     );
   }
 
+  /**
+   * Creates a {@link String} with the upcoming step instruction and follow up step instruction
+   * Example: "Turn right onto Main St. then turn left onto Second St."
+   * @param progress {@link RouteProgress} created by the location change
+   * @return {@link String} with format "%s then %s"
+   */
   private String buildThenFormatInstruction(RouteProgress progress) {
     int legIndex = progress.getLegIndex();
     int followUpStepIndex = progress.getCurrentLegProgress().getStepIndex() + 2;
@@ -145,6 +197,11 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
     return instruction.substring(0,1).toLowerCase() + instruction.substring(1);
   }
 
+  /**
+   * If over 1099 feet, use miles format.  If less, use feet in intervals of 100
+   * @param distance given distance extracted from {@link RouteProgress}
+   * @return {@link String} in either feet (int) or miles (decimal) format
+   */
   private static String distanceFormatter(double distance) {
     String formattedString;
     if (TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET) > 1099) {
