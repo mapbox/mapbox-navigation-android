@@ -4,12 +4,12 @@ import com.mapbox.services.android.navigation.v5.RouteProgress;
 
 public class DefaultInstruction extends Instruction {
 
-  private InstructionEngine instructionEngine;
+  private DefaultInstructionEngine defaultInstructionEngine;
   private String instruction;
 
   public DefaultInstruction(RouteProgress routeProgress, int identifier) {
-    super(routeProgress);
-    instructionEngine = new InstructionEngine();
+    super(routeProgress, identifier);
+    defaultInstructionEngine = new DefaultInstructionEngine();
     instruction = createInstruction(routeProgress, identifier);
   }
 
@@ -19,6 +19,6 @@ public class DefaultInstruction extends Instruction {
   }
 
   private String createInstruction(RouteProgress routeProgress, int identifier) {
-    return instructionEngine.get(identifier).build(routeProgress);
+    return defaultInstructionEngine.get(identifier).build(routeProgress);
   }
 }

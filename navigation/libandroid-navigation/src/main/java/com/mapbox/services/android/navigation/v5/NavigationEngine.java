@@ -7,6 +7,7 @@ import android.text.TextUtils;
 
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.v5.instruction.DefaultInstruction;
+import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -105,7 +106,7 @@ class NavigationEngine {
       if (milestone.isOccurring(previousRouteProgress, routeProgress)) {
         for (MilestoneEventListener listener : milestoneEventListeners) {
           // Create a new DefaultInstruction based on the current RouteProgress and Milestone identifier
-          DefaultInstruction instruction = new DefaultInstruction(routeProgress, milestone.getIdentifier());
+          Instruction instruction = new DefaultInstruction(routeProgress, milestone.getIdentifier());
           listener.onMilestoneEvent(routeProgress, instruction.getInstruction(), milestone.getIdentifier());
         }
       }

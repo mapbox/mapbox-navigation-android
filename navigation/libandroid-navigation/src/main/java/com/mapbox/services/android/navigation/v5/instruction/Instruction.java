@@ -4,8 +4,7 @@ import com.mapbox.services.android.navigation.v5.RouteProgress;
 
 public abstract class Instruction {
 
-  Instruction(RouteProgress routeProgress) {
-
+  Instruction(RouteProgress routeProgress, int identifier) {
   }
 
   public abstract String getInstruction();
