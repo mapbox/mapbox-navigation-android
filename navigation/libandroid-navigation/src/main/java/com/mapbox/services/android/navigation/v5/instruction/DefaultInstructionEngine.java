@@ -16,8 +16,8 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
 
   private static final double MINIMUM_UPCOMING_STEP_DISTANCE = 15d;
   private static final String DECIMAL_FORMAT = "###.#";
-  private static final String MILES_STRING_FORMAT = "%s Miles";
-  private static final String FEET_STRING_FORMAT = "%s Feet";
+  private static final String MILES_STRING_FORMAT = "%s miles";
+  private static final String FEET_STRING_FORMAT = "%s feet";
   private static final String IN_STRING_FORMAT = "In %s %s";
   private static final String THEN_STRING_FORMAT = "%s then %s";
   private static final String THEN_IN_STRING_FORMAT = "%s then in %s %s";
@@ -31,29 +31,25 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
     this.put(NavigationConstants.DEPARTURE_MILESTONE, new InstructionBuilder() {
       @Override
       public String build(RouteProgress routeProgress) {
-        buildDepartureInstruction(routeProgress);
-        return null;
+        return buildDepartureInstruction(routeProgress);
       }
     });
     this.put(NavigationConstants.NEW_STEP_MILESTONE, new InstructionBuilder() {
       @Override
       public String build(RouteProgress routeProgress) {
-        buildNewStepInstruction(routeProgress);
-        return null;
+        return buildNewStepInstruction(routeProgress);
       }
     });
     this.put(NavigationConstants.IMMINENT_MILESTONE, new InstructionBuilder() {
       @Override
       public String build(RouteProgress routeProgress) {
-        buildImminentInstruction(routeProgress);
-        return null;
+        return buildImminentInstruction(routeProgress);
       }
     });
     this.put(NavigationConstants.URGENT_MILESTONE, new InstructionBuilder() {
       @Override
       public String build(RouteProgress routeProgress) {
-        buildUrgentInstruction(routeProgress);
-        return null;
+        return buildUrgentInstruction(routeProgress);
       }
     });
     this.put(NavigationConstants.ARRIVAL_MILESTONE, new InstructionBuilder() {
@@ -81,22 +77,23 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
   }
 
   private String buildUrgentInstruction(RouteProgress progress) {
-    String urgentInstruction = buildThenFormatInstruction(progress);
-
-    if (!TextUtils.isEmpty(urgentInstruction)) {
-      return urgentInstruction;
+    if (progress.getCurrentLegProgress().getUpComingStep().getDistance() > MINIMUM_UPCOMING_STEP_DISTANCE) {
+      return buildThenFormatInstruction(progress);
     } else {
-      return buildDefaultFormatInstruction(progress);
+      return progress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction();
     }
   }
 
   private String buildArrivalInstruction(RouteProgress progress) {
-    String instruction = progress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction();
-    if (!TextUtils.isEmpty(instruction)) {
-      return instruction;
+    if (progress.getCurrentLegProgress().getUpComingStep() != null) {
+      String instruction = progress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction();
+      if (!TextUtils.isEmpty(instruction)) {
+        return instruction;
+      }
     } else {
-      return buildDefaultFormatInstruction(progress);
+      return progress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction();
     }
+    return "";
   }
 
   private String buildContinueFormatInstruction(RouteProgress progress) {
@@ -114,7 +111,8 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
       Locale.US,
       IN_STRING_FORMAT,
       distanceFormatter(userDistance),
-      progress.getCurrentLegProgress().getCurrentStep().getManeuver().getInstruction()
+      convertFirstCharLowercase(progress.getCurrentLegProgress()
+        .getCurrentStep().getManeuver().getInstruction())
     );
   }
 
@@ -126,25 +124,30 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
       THEN_IN_STRING_FORMAT,
       currentStepManeuver.getInstruction(),
       distanceFormatter(userDistance),
-      progress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction()
+      convertFirstCharLowercase(progress.getCurrentLegProgress()
+        .getUpComingStep().getManeuver().getInstruction())
     );
   }
 
   private String buildThenFormatInstruction(RouteProgress progress) {
     int legIndex = progress.getLegIndex();
     int followUpStepIndex = progress.getCurrentLegProgress().getStepIndex() + 2;
-
     return String.format(
       Locale.US,
       THEN_STRING_FORMAT,
       progress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction(),
-      progress.getRoute().getLegs().get(legIndex).getSteps().get(followUpStepIndex).getManeuver().getInstruction()
+      convertFirstCharLowercase(progress.getRoute().getLegs().get(legIndex)
+        .getSteps().get(followUpStepIndex).getManeuver().getInstruction())
     );
+  }
+
+  private static String convertFirstCharLowercase(String instruction) {
+    return instruction.substring(0,1).toLowerCase() + instruction.substring(1);
   }
 
   private static String distanceFormatter(double distance) {
     String formattedString;
-    if (TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET) > 1999) {
+    if (TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET) > 1099) {
       distance = TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES);
       DecimalFormat df = new DecimalFormat(DECIMAL_FORMAT);
       double roundedNumber = (distance / 100 * 100);

@@ -4,6 +4,8 @@ import com.mapbox.services.android.navigation.v5.RouteProgress;
 
 public class DefaultInstruction extends Instruction {
 
+  private static final String EMPTY_STRING = "";
+
   private DefaultInstructionEngine defaultInstructionEngine;
   private String instruction;
 
@@ -19,6 +21,10 @@ public class DefaultInstruction extends Instruction {
   }
 
   private String createInstruction(RouteProgress routeProgress, int identifier) {
-    return defaultInstructionEngine.get(identifier).build(routeProgress);
+    if (defaultInstructionEngine.get(identifier) != null) {
+      return defaultInstructionEngine.get(identifier).build(routeProgress);
+    } else {
+      return EMPTY_STRING;
+    }
   }
 }
