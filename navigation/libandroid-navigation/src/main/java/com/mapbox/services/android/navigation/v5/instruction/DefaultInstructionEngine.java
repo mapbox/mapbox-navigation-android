@@ -91,7 +91,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
         return instruction;
       }
     } else {
-      return progress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction();
+      return progress.getCurrentLegProgress().getCurrentStep().getManeuver().getInstruction();
     }
     return "";
   }
@@ -112,7 +112,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
       IN_STRING_FORMAT,
       distanceFormatter(userDistance),
       convertFirstCharLowercase(progress.getCurrentLegProgress()
-        .getCurrentStep().getManeuver().getInstruction())
+        .getUpComingStep().getManeuver().getInstruction())
     );
   }
 
