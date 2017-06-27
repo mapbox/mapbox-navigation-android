@@ -5,14 +5,24 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.snap.Snap;
+import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.api.utils.turf.TurfConstants;
+import com.mapbox.services.api.utils.turf.TurfMeasurement;
+import com.mapbox.services.api.utils.turf.TurfMisc;
+import com.mapbox.services.commons.geojson.LineString;
+import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
+import com.mapbox.services.commons.utils.PolylineUtils;
 
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -80,16 +90,17 @@ class NavigationEngine {
     previousLocation = location;
 
     if (bearingMatchesManeuverFinalHeading(
-      location, previousRouteProgress, options.getMaxTurnCompletionOffset())) {
+      location, previousRouteProgress, options.getMaxTurnCompletionOffset())
+      && calculateSnappedDistanceToNextStep(location, previousRouteProgress) < options.getManeuverZoneRadius()) {
       increaseIndex(previousRouteProgress);
     }
 
-    SnapLocation snapLocation = new SnapLocation(location,
-      previousRouteProgress.getCurrentLegProgress().getCurrentStep(), options);
+    Snap snapToRoute = new SnapToRoute(previousRouteProgress, options);
+    Location snappedLocation = snapToRoute.getSnappedLocation(location);
 
     // Create a RouteProgress.create object using the latest user location
-    RouteProgress routeProgress = RouteProgress.create(directionsRoute, snapLocation.getUsersCurrentSnappedPosition(),
-      legIndex, stepIndex);
+    RouteProgress routeProgress = RouteProgress.create(directionsRoute,
+      Position.fromCoordinates(snappedLocation.getLongitude(), snappedLocation.getLatitude()), legIndex, stepIndex);
 
     for (Milestone milestone : milestones) {
       if (milestone.isOccurring(previousRouteProgress, routeProgress)) {
@@ -105,8 +116,7 @@ class NavigationEngine {
 
     // Snap location to the route if they aren't off route and return the location object
     if (isSnapEnabled && !isUserOffRoute) {
-      location = snapLocation.getSnappedLocation();
-      location.setBearing(snapLocation.snapUserBearing(routeProgress));
+      location = snappedLocation;
     }
 
     notifyOffRouteChange(isUserOffRoute, location);
@@ -177,6 +187,36 @@ class NavigationEngine {
     } else {
       stepIndex += 1;
     }
+  }
+
+  /**
+   * Provides the distance from the users snapped location to the next maneuver location.
+   *
+   * @param location      the users location
+   * @param routeProgress used to get the steps geometry
+   * @return distance in meters (by default)
+   * @since 0.2.0
+   */
+  private double calculateSnappedDistanceToNextStep(Location location, RouteProgress routeProgress) {
+    Position truePosition = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
+    String stepGeometry = routeProgress.getRoute().getLegs().get(legIndex).getSteps().get(stepIndex).getGeometry();
+
+    // Decode the geometry
+    List<Position> coords = PolylineUtils.decode(stepGeometry, Constants.PRECISION_6);
+
+    LineString slicedLine = TurfMisc.lineSlice(
+      Point.fromCoordinates(truePosition),
+      Point.fromCoordinates(coords.get(coords.size() - 1)),
+      LineString.fromCoordinates(coords)
+    );
+
+    double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+
+    // Prevents the distance to next step from increasing causing a previous alert level to occur again.
+    if (distance > routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining()) {
+      return routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
+    }
+    return distance;
   }
 
   private void resetRouteProgress() {

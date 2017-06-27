@@ -1,10 +1,10 @@
 package com.mapbox.services.android.navigation.testapp.activity;
 
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BaseTransientBottomBar;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -14,116 +14,140 @@ import android.widget.Toast;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
-import com.mapbox.mapboxsdk.annotations.Polyline;
-import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.constants.MyLocationTracking;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.services.Constants;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
+import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.testapp.Utils;
+import com.mapbox.services.android.navigation.ui.v5.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.RouteProgress;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
-import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.milestone.StepMilestone;
+import com.mapbox.services.android.navigation.v5.milestone.Trigger;
+import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
-import com.mapbox.services.android.telemetry.permissions.PermissionsManager;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
-import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.models.Position;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener,
-  OffRouteListener, MilestoneEventListener {
+  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener, MilestoneEventListener {
+
+  private static final int BEGIN_ROUTE_MILESTONE = 1001;
 
   // Map variables
-  private MapView mapView;
-  private Polyline routeLine;
+  @BindView(R.id.mapView)
+  MapView mapView;
+
+  @BindView(R.id.newLocationFab)
+  FloatingActionButton newLocationFab;
+
+  @BindView(R.id.startRouteButton)
+  Button startRouteButton;
+
   private MapboxMap mapboxMap;
   private Marker destinationMarker;
 
   // Navigation related variables
   private LocationEngine locationEngine;
   private MapboxNavigation navigation;
-  private Button startRouteButton;
   private DirectionsRoute route;
   private Position destination;
+  private NavigationMapRoute navigationMapRoute;
+  private LocationLayerPlugin locationLayerPlugin;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_navigation_activity);
+    setContentView(R.layout.activity_mock_navigation);
+    ButterKnife.bind(this);
 
-    mapView = (MapView) findViewById(R.id.mapView);
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
 
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
 
-    startRouteButton = (Button) findViewById(R.id.startRouteButton);
-    startRouteButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        if (navigation != null && route != null) {
+    navigation.addMilestone(new StepMilestone.Builder()
+      .setIdentifier(BEGIN_ROUTE_MILESTONE)
+      .setTrigger(
+        Trigger.all(
+          Trigger.lt(TriggerProperty.STEP_INDEX, 3),
+          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 200)
+        )
+      ).build());
+  }
 
-          // Hide the start button
-          startRouteButton.setVisibility(View.INVISIBLE);
+  @OnClick(R.id.startRouteButton)
+  public void onStartRouteClick() {
+    if (navigation != null && route != null) {
 
-          // Attach all of our navigation listeners.
-          navigation.addNavigationEventListener(MockNavigationActivity.this);
-          navigation.addProgressChangeListener(MockNavigationActivity.this);
-          navigation.addMilestoneEventListener(MockNavigationActivity.this);
+      // Hide the start button
+      startRouteButton.setVisibility(View.INVISIBLE);
 
-          // Adjust location engine to force a gps reading every second. This isn't required but gives an overall
-          // better navigation experience for users. The updating only occurs if the user moves 3 meters or further
-          // from the last update.
-          locationEngine.setInterval(0);
-          locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
-          locationEngine.setFastestInterval(1000);
-          locationEngine.activate();
+      // Attach all of our navigation listeners.
+      navigation.addNavigationEventListener(MockNavigationActivity.this);
+      navigation.addProgressChangeListener(MockNavigationActivity.this);
+      navigation.addMilestoneEventListener(MockNavigationActivity.this);
 
-          ((MockLocationEngine) locationEngine).setRoute(route);
-          navigation.setLocationEngine(locationEngine);
-          navigation.startNavigation(route);
-        }
-      }
-    });
+      ((MockLocationEngine) locationEngine).setRoute(route);
+      navigation.setLocationEngine(locationEngine);
+      navigation.startNavigation(route);
+    }
+  }
+
+  @OnClick(R.id.newLocationFab)
+  public void onNewLocationClick() {
+    newOrigin();
+  }
+
+  private void newOrigin() {
+    if (mapboxMap != null) {
+      LatLng latLng = Utils.getRandomLatLng(new double[] {-77.1825, 38.7825, -76.9790, 39.0157});
+      ((MockLocationEngine) locationEngine).setLastLocation(
+        Position.fromLngLat(latLng.getLongitude(), latLng.getLatitude())
+      );
+      mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
+      mapboxMap.setMyLocationEnabled(true);
+      mapboxMap.getTrackingSettings().setMyLocationTrackingMode(MyLocationTracking.TRACKING_FOLLOW);
+    }
   }
 
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
 
+    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, true);
+    locationLayerPlugin.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
+
+    navigationMapRoute = new NavigationMapRoute(navigation, mapView, mapboxMap);
+
     mapboxMap.setOnMapClickListener(this);
     Snackbar.make(mapView, "Tap map to place destination", BaseTransientBottomBar.LENGTH_LONG).show();
-
-    mapboxMap.moveCamera(CameraUpdateFactory.zoomBy(12));
 
     locationEngine = new MockLocationEngine();
     mapboxMap.setLocationSource(locationEngine);
 
-    if (PermissionsManager.areLocationPermissionsGranted(this)) {
-      mapboxMap.setMyLocationEnabled(true);
-      mapboxMap.getTrackingSettings().setMyLocationTrackingMode(MyLocationTracking.TRACKING_FOLLOW);
-      mapboxMap.getTrackingSettings().setDismissAllTrackingOnGesture(false);
-    }
+    newOrigin();
   }
 
   @Override
@@ -137,24 +161,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
     this.destination = Position.fromCoordinates(point.getLongitude(), point.getLatitude());
     calculateRoute();
-  }
-
-  private void drawRouteLine(DirectionsRoute route) {
-    List<Position> positions = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6).getCoordinates();
-    List<LatLng> latLngs = new ArrayList<>();
-    for (Position position : positions) {
-      latLngs.add(new LatLng(position.getLatitude(), position.getLongitude()));
-    }
-
-    // Remove old route if currently being shown on map.
-    if (routeLine != null) {
-      mapboxMap.removePolyline(routeLine);
-    }
-
-    routeLine = mapboxMap.addPolyline(new PolylineOptions()
-      .addAll(latLngs)
-      .color(Color.parseColor("#56b881"))
-      .width(5f));
   }
 
   private void calculateRoute() {
@@ -174,9 +180,18 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     navigation.getRoute(origin, destination, new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-        DirectionsRoute route = response.body().getRoutes().get(0);
-        MockNavigationActivity.this.route = route;
-        drawRouteLine(route);
+        if (response.body() != null) {
+          if (response.body().getRoutes().size() > 0) {
+            DirectionsRoute route = response.body().getRoutes().get(0);
+            MockNavigationActivity.this.route = route;
+            navigationMapRoute.addRoute(route);
+
+            /*for (LegStep step: route.getLegs().get(0).getSteps()) {
+              mapboxMap.addMarker(new MarkerOptions().position(new LatLng(
+                  step.getManeuver().asPosition().getLatitude(), step.getManeuver().asPosition().getLongitude())));
+             }*/
+          }
+        }
       }
 
       @Override
@@ -209,6 +224,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       case NavigationConstants.ARRIVAL_MILESTONE:
         Toast.makeText(this, "Arrival", Toast.LENGTH_LONG).show();
         break;
+      case BEGIN_ROUTE_MILESTONE:
+        Toast.makeText(this, "you should reach your destination by", Toast.LENGTH_LONG).show();
+        break;
       default:
         Toast.makeText(this, "Undefined milestone event occurred", Toast.LENGTH_LONG).show();
         break;
@@ -226,30 +244,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
+    locationLayerPlugin.forceLocationUpdate(location);
     Timber.d("onProgressChange: fraction of route traveled: %f", routeProgress.getFractionTraveled());
-  }
-
-  @Override
-  public void userOffRoute(Location location) {
-    Position newOrigin = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
-    navigation.getRoute(newOrigin, destination, location.getBearing(), new Callback<DirectionsResponse>() {
-      @Override
-      public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-        DirectionsRoute route = response.body().getRoutes().get(0);
-        MockNavigationActivity.this.route = route;
-
-        // Remove old route line from map and draw the new one.
-        if (routeLine != null) {
-          mapboxMap.removePolyline(routeLine);
-        }
-        drawRouteLine(route);
-      }
-
-      @Override
-      public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-        Timber.e("onFailure: navigation.getRoute()", throwable);
-      }
-    });
   }
 
   /*
@@ -273,6 +269,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     super.onStart();
     navigation.onStart();
     mapView.onStart();
+    if (locationLayerPlugin != null) {
+      locationLayerPlugin.onStart();
+    }
   }
 
   @Override
@@ -280,6 +279,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     super.onStop();
     navigation.onStop();
     mapView.onStop();
+    locationLayerPlugin.onStop();
   }
 
   @Override
@@ -296,7 +296,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     // Remove all navigation listeners
     navigation.removeNavigationEventListener(this);
     navigation.removeProgressChangeListener(this);
-    navigation.removeOffRouteListener(this);
     navigation.removeMilestoneEventListener(this);
 
     navigation.onDestroy();

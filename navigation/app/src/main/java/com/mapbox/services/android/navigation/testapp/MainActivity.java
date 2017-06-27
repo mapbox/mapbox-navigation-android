@@ -14,11 +14,10 @@ import android.widget.Toast;
 
 import com.mapbox.services.android.navigation.testapp.activity.LocationInfoActivity;
 import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.OffRouteDetectionActivity;
 import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
-import com.mapbox.services.android.navigation.testapp.activity.RouteUtilsV5Activity;
 import com.mapbox.services.android.navigation.testapp.activity.SnapToRouteActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
 import com.mapbox.services.android.telemetry.permissions.PermissionsListener;
 import com.mapbox.services.android.telemetry.permissions.PermissionsManager;
 
@@ -27,8 +26,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements PermissionsListener {
-
-  private static final String LOG_TAG = "MainActivity";
 
   private RecyclerView recyclerView;
   private PermissionsManager permissionsManager;
@@ -40,13 +37,8 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
 
     final List<SampleItem> samples = new ArrayList<>(Arrays.asList(
       new SampleItem(
-        getString(R.string.title_route_utils_v5),
-        getString(R.string.description_route_utils),
-        RouteUtilsV5Activity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_navigation),
-        getString(R.string.description_navigation),
+        getString(R.string.title_mock_navigation),
+        getString(R.string.description_mock_navigation),
         MockNavigationActivity.class
       ),
       new SampleItem(
