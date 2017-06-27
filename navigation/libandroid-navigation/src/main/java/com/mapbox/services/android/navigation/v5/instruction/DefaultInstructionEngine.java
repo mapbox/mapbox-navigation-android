@@ -75,7 +75,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
   }
 
   /**
-   * Create default format instruction for new step milestone
+   * Create default string format instruction for new step milestone
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} to be announced on new step milestone
    */
@@ -92,13 +92,13 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
   }
 
   /**
-   * If the next step is greater than 15 meters long, use then format instruction.
+   * If the next step is less than 15 meters long, use then string format instruction.
    * Otherwise, just use the upcoming step instruction
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} to be announced on urgent milestone
    */
   private String buildUrgentInstruction(RouteProgress progress) {
-    if (progress.getCurrentLegProgress().getUpComingStep().getDistance() > MINIMUM_UPCOMING_STEP_DISTANCE) {
+    if (progress.getCurrentLegProgress().getUpComingStep().getDistance() < MINIMUM_UPCOMING_STEP_DISTANCE) {
       return buildThenFormatInstruction(progress);
     } else {
       return progress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction();
