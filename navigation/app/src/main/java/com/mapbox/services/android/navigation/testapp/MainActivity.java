@@ -13,12 +13,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mapbox.services.android.navigation.testapp.activity.LocationInfoActivity;
-import com.mapbox.services.android.navigation.testapp.activity.LostNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.OffRouteDetectionActivity;
 import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.SnapToRouteActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
 import com.mapbox.services.android.telemetry.permissions.PermissionsListener;
 import com.mapbox.services.android.telemetry.permissions.PermissionsManager;
 
@@ -41,11 +40,6 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         getString(R.string.title_mock_navigation),
         getString(R.string.description_mock_navigation),
         MockNavigationActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_true_navigation),
-        getString(R.string.description_true_navigation),
-        LostNavigationActivity.class
       ),
       new SampleItem(
         getString(R.string.title_snap_to_route),

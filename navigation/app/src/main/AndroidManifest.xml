@@ -27,14 +27,6 @@
         </activity>
 
         <activity
-            android:name=".activity.LostNavigationActivity"
-            android:label="@string/title_true_navigation">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
             android:name=".activity.SnapToRouteActivity"
             android:label="@string/title_snap_to_route">
             <meta-data
