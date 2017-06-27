@@ -43,6 +43,9 @@ dependencies {
     exclude module: 'mapbox-android-telemetry'
   }
 
+  // Mapbox plugins
+  compile rootProject.ext.dep.locationLayerPlugin
+
   // Logging
   compile rootProject.ext.dep.timber
 

@@ -7,10 +7,29 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.res.ResourcesCompat;
+import android.util.Log;
 
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.services.api.utils.turf.TurfGrids;
+import com.mapbox.services.api.utils.turf.TurfJoins;
+import com.mapbox.services.api.utils.turf.TurfMeasurement;
+import com.mapbox.services.commons.geojson.Feature;
+import com.mapbox.services.commons.geojson.FeatureCollection;
+import com.mapbox.services.commons.geojson.Geometry;
+import com.mapbox.services.commons.geojson.MultiPolygon;
+import com.mapbox.services.commons.geojson.Point;
+import com.mapbox.services.commons.geojson.Polygon;
+import com.mapbox.services.commons.models.Position;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Locale;
+import java.util.Random;
+
+import timber.log.Timber;
 
 public class Utils {
 
@@ -52,5 +71,42 @@ public class Utils {
     vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
     vectorDrawable.draw(canvas);
     return IconFactory.getInstance(context).fromBitmap(bitmap);
+  }
+
+  public static LatLng getRandomLatLng(Context context) {
+    FeatureCollection cities = FeatureCollection.fromJson(loadJsonFromAsset("urban.json", context));
+
+    Random random = new Random();
+
+    Feature feature = cities.getFeatures().get(random.nextInt(cities.getFeatures().size()));
+    Geometry geometry = feature.getGeometry();
+    boolean isPolygon = geometry instanceof Polygon;
+
+    double[] bbox = isPolygon ? TurfMeasurement.bbox((Polygon) geometry)
+      : TurfMeasurement.bbox((MultiPolygon) geometry);
+
+    double randomLat = bbox[1] + (bbox[3] - bbox[1]) * random.nextDouble();
+    double randomLon = bbox[0] + (bbox[2] - bbox[0]) * random.nextDouble();
+
+    LatLng latLng = new LatLng(randomLat, randomLon);
+    Timber.d("getRandomLatLng: %s", latLng.toString());
+    return latLng;
+  }
+
+  private static String loadJsonFromAsset(String filename, Context context) {
+    // Using this method to load in GeoJSON files from the assets folder.
+
+    try {
+      InputStream is = context.getAssets().open(filename);
+      int size = is.available();
+      byte[] buffer = new byte[size];
+      is.read(buffer);
+      is.close();
+      return new String(buffer, "UTF-8");
+
+    } catch (IOException ex) {
+      ex.printStackTrace();
+      return null;
+    }
   }
 }

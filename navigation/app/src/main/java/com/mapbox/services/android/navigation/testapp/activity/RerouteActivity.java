@@ -15,6 +15,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.Constants;
+import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.RouteProgress;
@@ -119,7 +120,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    System.out.println(routeProgress.getCurrentLegProgress().getStepIndex());
+    Timber.d("onRouteProgressChange: %s", routeProgress.getCurrentLegProgress().getStepIndex());
   }
 
   @Override
