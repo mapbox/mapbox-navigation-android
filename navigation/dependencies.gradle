@@ -18,6 +18,7 @@ ext {
     // mapbox
     mapboxMapSdk           : 'com.mapbox.mapboxsdk:mapbox-android-sdk:5.1.0-beta.5',
     mapboxServices         : 'com.mapbox.mapboxsdk:mapbox-android-services:2.1.2',
+    locationLayerPlugin    : 'com.mapbox.mapboxsdk:mapbox-android-locationlayer-plugin:0.1.0-SNAPSHOT',
 
     // unit test
     junit                  : 'junit:junit:4.12',
@@ -41,8 +42,8 @@ ext {
     supportConstraintLayout: "com.android.support.constraint:constraint-layout:1.0.2",
 
     // butterknife
-    butterKnife            : "com.jakewharton:butterknife:8.5.1",
-    butterKnifeProcessor   : "com.jakewharton:butterknife-compiler:8.5.1",
+    butterKnife            : "com.jakewharton:butterknife:8.6.0",
+    butterKnifeProcessor   : "com.jakewharton:butterknife-compiler:8.6.0",
 
     // wear
     wearCompile            : "com.google.android.support:wearable:${wearableVersion}",

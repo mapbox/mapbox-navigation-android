@@ -19,16 +19,8 @@
         </activity>
 
         <activity
-            android:name=".activity.RouteUtilsV5Activity"
-            android:label="@string/title_route_utils_v5">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
             android:name=".activity.MockNavigationActivity"
-            android:label="@string/title_navigation">
+            android:label="@string/title_mock_navigation">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>

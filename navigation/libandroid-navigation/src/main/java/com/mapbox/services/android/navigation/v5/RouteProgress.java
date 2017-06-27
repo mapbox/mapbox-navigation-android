@@ -19,9 +19,10 @@ import java.util.List;
 /**
  * The {@code routeProgress} class contains all progress information of user along the route, leg and step.
  * <p>
- * You can use this together with MapboxNavigation to obtain this object from the AlertLevelChangeListener
- * or the ProgressChangeListener. This object is immutable and a new, updated routeProgress object will be provided with
- * each new location update.
+ * You can use this together with MapboxNavigation to obtain this object from the
+ * {@link com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener}
+ * or the {@link com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener}. This object is immutable
+ * and a new, updated routeProgress object will be provided with each new location update.
  * <p>
  * This is an experimental API. Experimental APIs are quickly evolving and
  * might change or be removed in minor versions.
