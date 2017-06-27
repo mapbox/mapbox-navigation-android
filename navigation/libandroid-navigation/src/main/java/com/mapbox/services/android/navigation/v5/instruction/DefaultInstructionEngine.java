@@ -5,6 +5,7 @@ import android.util.SparseArray;
 
 import com.mapbox.services.android.navigation.v5.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.RouteProgress;
+import com.mapbox.services.api.directions.v5.models.StepManeuver;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfHelpers;
 
@@ -13,11 +14,13 @@ import java.util.Locale;
 
 class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.InstructionBuilder> {
 
+  private static final double MINIMUM_UPCOMING_STEP_DISTANCE = 15d;
   private static final String DECIMAL_FORMAT = "###.#";
   private static final String MILES_STRING_FORMAT = "%s Miles";
   private static final String FEET_STRING_FORMAT = "%s Feet";
   private static final String IN_STRING_FORMAT = "In %s %s";
   private static final String THEN_STRING_FORMAT = "%s then %s";
+  private static final String THEN_IN_STRING_FORMAT = "%s then in %s %s";
   private static final String CONTINUE_STRING_FORMAT = "Continue on %s for %s";
 
   DefaultInstructionEngine() {
@@ -62,7 +65,11 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
   }
 
   private String buildDepartureInstruction(RouteProgress progress) {
-    return buildContinueFormatInstruction(progress);
+    if (progress.getCurrentLegProgress().getUpComingStep().getDistance() > MINIMUM_UPCOMING_STEP_DISTANCE) {
+      return buildContinueFormatInstruction(progress);
+    } else {
+      return buildThenInFormatInstruction(progress);
+    }
   }
 
   private String buildNewStepInstruction(RouteProgress progress) {
@@ -108,6 +115,18 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
       IN_STRING_FORMAT,
       distanceFormatter(userDistance),
       progress.getCurrentLegProgress().getCurrentStep().getManeuver().getInstruction()
+    );
+  }
+
+  private String buildThenInFormatInstruction(RouteProgress progress) {
+    double userDistance = progress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
+    StepManeuver currentStepManeuver = progress.getCurrentLegProgress().getCurrentStep().getManeuver();
+    return String.format(
+      Locale.US,
+      THEN_IN_STRING_FORMAT,
+      currentStepManeuver.getInstruction(),
+      distanceFormatter(userDistance),
+      progress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction()
     );
   }
 
