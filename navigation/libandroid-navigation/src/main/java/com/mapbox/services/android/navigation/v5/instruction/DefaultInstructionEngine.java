@@ -5,13 +5,18 @@ import android.util.SparseArray;
 
 import com.mapbox.services.android.navigation.v5.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.RouteProgress;
-import com.mapbox.services.api.directions.v5.models.StepManeuver;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfHelpers;
 
 import java.text.DecimalFormat;
 import java.util.Locale;
 
+/**
+ * Creates voice instructions based on the default milestones
+ * provided by {@link com.mapbox.services.android.navigation.v5.MapboxNavigation}
+ *
+ * @since 0.4.0
+ */
 class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.InstructionBuilder> {
 
   private static final double MINIMUM_UPCOMING_STEP_DISTANCE = 15d;
@@ -24,6 +29,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
   private static final String CONTINUE_STRING_FORMAT = "Continue on %s for %s";
 
   DefaultInstructionEngine() {
+    super(5);
     initDefaultBuilders();
   }
 
@@ -65,6 +71,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
    * Otherwise, use then in format for instruction
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} to be announced on departure milestone
+   * @since 0.4.0
    */
   private String buildDepartureInstruction(RouteProgress progress) {
     if (progress.getCurrentLegProgress().getUpComingStep().getDistance() > MINIMUM_UPCOMING_STEP_DISTANCE) {
@@ -78,6 +85,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
    * Create default string format instruction for new step milestone
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} to be announced on new step milestone
+   * @since 0.4.0
    */
   private String buildNewStepInstruction(RouteProgress progress) {
     return buildDefaultFormatInstruction(progress);
@@ -96,6 +104,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
    * Otherwise, just use the upcoming step instruction
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} to be announced on urgent milestone
+   * @since 0.4.0
    */
   private String buildUrgentInstruction(RouteProgress progress) {
     if (progress.getCurrentLegProgress().getUpComingStep().getDistance() < MINIMUM_UPCOMING_STEP_DISTANCE) {
@@ -110,6 +119,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
    * If empty, use the current step instruction as a fallback
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} to be announced on departure milestone
+   * @since 0.4.0
    */
   private String buildArrivalInstruction(RouteProgress progress) {
     if (progress.getCurrentLegProgress().getUpComingStep() != null) {
@@ -128,6 +138,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
    * Example: "Continue on Main St. for 3.2 miles"
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} with format "Continue on %s for %s"
+   * @since 0.4.0
    */
   private String buildContinueFormatInstruction(RouteProgress progress) {
     double userDistance = progress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
@@ -143,6 +154,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
    * Example: "In 3.2 miles turn left onto Main St."
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} with format "In %s %s"
+   * @since 0.4.0
    */
   private String buildDefaultFormatInstruction(RouteProgress progress) {
     double userDistance = progress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
@@ -161,14 +173,16 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
    * Example: "Turn left onto Main St. then in 3.2 miles turn right onto Second St."
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} with format "%s then in %s %s"
+   * @since 0.4.0
    */
   private String buildThenInFormatInstruction(RouteProgress progress) {
     double userDistance = progress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
-    StepManeuver currentStepManeuver = progress.getCurrentLegProgress().getCurrentStep().getManeuver();
+    String currentStepInstruction = progress.getCurrentLegProgress().getCurrentStep()
+      .getManeuver().getInstruction();
     return String.format(
       Locale.US,
       THEN_IN_STRING_FORMAT,
-      currentStepManeuver.getInstruction(),
+      currentStepInstruction,
       distanceFormatter(userDistance),
       convertFirstCharLowercase(progress.getCurrentLegProgress()
         .getUpComingStep().getManeuver().getInstruction())
@@ -180,6 +194,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
    * Example: "Turn right onto Main St. then turn left onto Second St."
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} with format "%s then %s"
+   * @since 0.4.0
    */
   private String buildThenFormatInstruction(RouteProgress progress) {
     int legIndex = progress.getLegIndex();
@@ -194,13 +209,18 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
   }
 
   private static String convertFirstCharLowercase(String instruction) {
-    return instruction.substring(0,1).toLowerCase() + instruction.substring(1);
+    if (TextUtils.isEmpty(instruction)) {
+      return instruction;
+    } else {
+      return instruction.substring(0,1).toLowerCase() + instruction.substring(1);
+    }
   }
 
   /**
    * If over 1099 feet, use miles format.  If less, use feet in intervals of 100
    * @param distance given distance extracted from {@link RouteProgress}
    * @return {@link String} in either feet (int) or miles (decimal) format
+   * @since 0.4.0
    */
   private static String distanceFormatter(double distance) {
     String formattedString;
