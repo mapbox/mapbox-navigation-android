@@ -36,6 +36,8 @@ public final class TriggerProperty {
    */
   public static final int STEP_DURATION_TOTAL_SECONDS = 0x00000003;
 
+  public static final int STEP_DISTANCE_TRAVELED_METERS = 0x00000009;
+
   /**
    * The Milestone will be triggered based on the current step index.
    *

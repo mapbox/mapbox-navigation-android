@@ -1,23 +1,24 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
 import com.mapbox.services.android.navigation.v5.NavigationException;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.RouteProgress;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Using a Step Milestone will result in {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
- * being invoked every step if the condition validation returns true.
+ * Using a Route Milestone will result in {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
+ * being invoked only once during a navigation session.
  *
  * @since 0.4.0
  */
-public class StepMilestone extends Milestone {
+public class RouteMilestone extends Milestone {
+
 
   private Builder builder;
   private boolean called;
 
-  private StepMilestone(Builder builder) {
+  private RouteMilestone(Builder builder) {
     super(builder);
     this.builder = builder;
   }
@@ -52,12 +53,6 @@ public class StepMilestone extends Milestone {
         routeProgress.getCurrentLegProgress().getUpComingStep() != null
           ? routeProgress.getCurrentLegProgress().getUpComingStep().getDistance() : 0});
 
-    // Determine if the step index has changed and set called accordingly. This prevents multiple calls to
-    // onMilestoneEvent per Step.
-    if (previousRouteProgress.getCurrentLegProgress().getStepIndex()
-      != routeProgress.getCurrentLegProgress().getStepIndex()) {
-      called = false;
-    }
     if (builder.getTrigger().isOccurring(statementObjects) && !called) {
       called = true;
       return true;
@@ -90,8 +85,8 @@ public class StepMilestone extends Milestone {
     }
 
     @Override
-    public StepMilestone build() throws NavigationException {
-      return new StepMilestone(this);
+    public RouteMilestone build() throws NavigationException {
+      return new RouteMilestone(this);
     }
   }
 }
