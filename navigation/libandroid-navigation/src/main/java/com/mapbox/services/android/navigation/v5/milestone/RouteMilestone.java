@@ -32,7 +32,7 @@ public class RouteMilestone extends Milestone {
   }
 
   /**
-   * Build a new {@link StepMilestone}
+   * Build a new {@link RouteMilestone}
    *
    * @since 0.4.0
    */
