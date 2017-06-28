@@ -1,7 +1,14 @@
 package com.mapbox.services.android.navigation.v5.instruction;
 
 import com.mapbox.services.android.navigation.v5.RouteProgress;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 
+/**
+ * Used to provide the {@link String} instruction in
+ * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
+ *
+ * @since 0.4.0
+ */
 public class DefaultInstruction extends Instruction {
 
   private static final String EMPTY_STRING = "";
@@ -10,10 +17,11 @@ public class DefaultInstruction extends Instruction {
   private String instruction;
 
   /**
-   * Uses the {@link DefaultInstructionEngine} to create an instruction based on the
+   * Creates a {@link DefaultInstructionEngine} to generate an instruction based on the
    * passed {@link RouteProgress} and milestone identifier
+   *
    * @param routeProgress for current route data / distance
-   * @param identifier for what type of instruction we want to build
+   * @param identifier    for what type of instruction we want to build
    * @since 0.4.0
    */
   public DefaultInstruction(RouteProgress routeProgress, int identifier) {
@@ -30,8 +38,9 @@ public class DefaultInstruction extends Instruction {
    * Provides the {@link RouteProgress} and milestone identifier to the {@link DefaultInstructionEngine}
    * which returns the appropriate instruction.  Will return an empty {@link String} if the
    * milestone identifier provided is not one of the default identifiers
+   *
    * @param routeProgress for current route data / distance
-   * @param identifier for what type of instruction we want to build
+   * @param identifier    for what type of instruction we want to build
    * @return {@link String} instruction that has been created by the engine
    * @since 0.4.0
    */

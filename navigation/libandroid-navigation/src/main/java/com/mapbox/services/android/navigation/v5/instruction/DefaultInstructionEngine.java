@@ -69,6 +69,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
   /**
    * If the next step is greater than 15 meters long, use continue format instruction.
    * Otherwise, use then in format for instruction
+   *
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} to be announced on departure milestone
    * @since 0.4.0
@@ -83,6 +84,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
 
   /**
    * Create default string format instruction for new step milestone
+   *
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} to be announced on new step milestone
    * @since 0.4.0
@@ -102,6 +104,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
   /**
    * If the next step is less than 15 meters long, use then string format instruction.
    * Otherwise, just use the upcoming step instruction
+   *
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} to be announced on urgent milestone
    * @since 0.4.0
@@ -117,6 +120,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
   /**
    * On arrival, use the upcoming step instruction.
    * If empty, use the current step instruction as a fallback
+   *
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} to be announced on departure milestone
    * @since 0.4.0
@@ -136,22 +140,28 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
   /**
    * Creates a {@link String} with the current step name and distance remaining
    * Example: "Continue on Main St. for 3.2 miles"
+   *
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} with format "Continue on %s for %s"
    * @since 0.4.0
    */
   private String buildContinueFormatInstruction(RouteProgress progress) {
     double userDistance = progress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
-    return String.format(
-      Locale.US,
-      CONTINUE_STRING_FORMAT,
-      progress.getCurrentLegProgress().getCurrentStep().getName(),
-      distanceFormatter(userDistance));
+    if (TextUtils.isEmpty(progress.getCurrentLegProgress().getCurrentStep().getName()) || userDistance == 0) {
+      return "";
+    } else {
+      return String.format(
+        Locale.US,
+        CONTINUE_STRING_FORMAT,
+        progress.getCurrentLegProgress().getCurrentStep().getName(),
+        distanceFormatter(userDistance));
+    }
   }
 
   /**
    * Creates a {@link String} with the current step distance remaining upcoming step instruction
    * Example: "In 3.2 miles turn left onto Main St."
+   *
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} with format "In %s %s"
    * @since 0.4.0
@@ -171,6 +181,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
    * Creates a {@link String} with the current step maneuver instruction, current step distance remaining,
    * and upcoming step instruction
    * Example: "Turn left onto Main St. then in 3.2 miles turn right onto Second St."
+   *
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} with format "%s then in %s %s"
    * @since 0.4.0
@@ -192,6 +203,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
   /**
    * Creates a {@link String} with the upcoming step instruction and follow up step instruction
    * Example: "Turn right onto Main St. then turn left onto Second St."
+   *
    * @param progress {@link RouteProgress} created by the location change
    * @return {@link String} with format "%s then %s"
    * @since 0.4.0
@@ -212,12 +224,13 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
     if (TextUtils.isEmpty(instruction)) {
       return instruction;
     } else {
-      return instruction.substring(0,1).toLowerCase() + instruction.substring(1);
+      return instruction.substring(0, 1).toLowerCase() + instruction.substring(1);
     }
   }
 
   /**
    * If over 1099 feet, use miles format.  If less, use feet in intervals of 100
+   *
    * @param distance given distance extracted from {@link RouteProgress}
    * @return {@link String} in either feet (int) or miles (decimal) format
    * @since 0.4.0
