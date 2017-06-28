@@ -1,5 +1,9 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
+import android.util.SparseArray;
+
+import com.mapbox.services.android.navigation.v5.RouteProgress;
+
 /**
  * The currently support properties used for triggering a milestone.
  *
@@ -57,4 +61,35 @@ public final class TriggerProperty {
   public static final int TRUE = 0x00000124;
 
   public static final int FALSE = 0x00000100;
+
+  static SparseArray<Number[]> getSparseArray(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
+    // Build hashMap matching the trigger properties to their corresponding current values.
+    SparseArray<Number[]> statementObjects = new SparseArray<>();
+    statementObjects.put(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
+      new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDistance()});
+    statementObjects.put(TriggerProperty.STEP_DURATION_TOTAL_SECONDS,
+      new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDuration()});
+    statementObjects.put(TriggerProperty.STEP_DISTANCE_REMAINING_METERS,
+      new Number[] {routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining()});
+    statementObjects.put(TriggerProperty.STEP_DURATION_REMAINING_SECONDS,
+      new Number[] {routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining()});
+    statementObjects.put(TriggerProperty.STEP_DISTANCE_TRAVELED_METERS,
+      new Number[] {routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceTraveled()});
+    statementObjects.put(TriggerProperty.STEP_INDEX,
+      new Number[] {routeProgress.getCurrentLegProgress().getStepIndex()});
+    statementObjects.put(TriggerProperty.NEW_STEP,
+      new Number[] {
+        previousRouteProgress.getCurrentLegProgress().getStepIndex(),
+        routeProgress.getCurrentLegProgress().getStepIndex()});
+    statementObjects.put(TriggerProperty.LAST_STEP,
+      new Number[] {routeProgress.getCurrentLegProgress().getStepIndex(),
+        (routeProgress.getCurrentLeg().getSteps().size() - 1)});
+    statementObjects.put(TriggerProperty.FIRST_STEP,
+      new Number[] {routeProgress.getCurrentLegProgress().getStepIndex(), 0});
+    statementObjects.put(TriggerProperty.NEXT_STEP_DISTANCE_METERS,
+      new Number[] {
+        routeProgress.getCurrentLegProgress().getUpComingStep() != null
+          ? routeProgress.getCurrentLegProgress().getUpComingStep().getDistance() : 0});
+    return statementObjects;
+  }
 }
