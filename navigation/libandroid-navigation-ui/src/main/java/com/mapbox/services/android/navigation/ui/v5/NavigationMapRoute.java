@@ -23,6 +23,7 @@ import com.mapbox.services.android.navigation.v5.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.RouteProgress;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.commons.geojson.Feature;
 import com.mapbox.services.commons.geojson.FeatureCollection;
 import com.mapbox.services.commons.geojson.LineString;
@@ -50,6 +51,7 @@ import static com.mapbox.mapboxsdk.style.functions.stops.Stops.exponential;
  */
 public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMapChangedListener {
 
+  private static final String CONGESTION_KEY = "congestion";
   @StyleRes
   private int styleRes;
   @ColorInt
@@ -264,36 +266,27 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    */
   private FeatureCollection addTrafficToSource(DirectionsRoute route) {
     List<Feature> features = new ArrayList<>();
+    LineString originalGeometry = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6);
+    features.add(Feature.fromGeometry(originalGeometry));
 
     LineString lineString = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6);
-    if (route.getLegs().get(0).getAnnotation() != null) {
-      if (route.getLegs().get(0).getAnnotation().getCongestion() != null) {
-        for (int i = 0; i < route.getLegs().get(0).getAnnotation().getCongestion().length; i++) {
-          double[] startCoord = lineString.getCoordinates().get(i).getCoordinates();
-          double[] endCoord = lineString.getCoordinates().get(i + 1).getCoordinates();
+    for (RouteLeg leg : route.getLegs()) {
+      if (leg.getAnnotation() != null) {
+        if (leg.getAnnotation().getCongestion() != null) {
+          for (int i = 0; i < leg.getAnnotation().getCongestion().length; i++) {
+            double[] startCoord = lineString.getCoordinates().get(i).getCoordinates();
+            double[] endCoord = lineString.getCoordinates().get(i + 1).getCoordinates();
 
-          LineString congestionLineString = LineString.fromCoordinates(new double[][] {startCoord, endCoord});
-          Feature feature = Feature.fromGeometry(congestionLineString);
-
-          feature.addStringProperty("congestion", route.getLegs().get(0).getAnnotation().getCongestion()[i]);
-          features.add(feature);
+            LineString congestionLineString = LineString.fromCoordinates(new double[][] {startCoord, endCoord});
+            Feature feature = Feature.fromGeometry(congestionLineString);
+            feature.addStringProperty(CONGESTION_KEY, leg.getAnnotation().getCongestion()[i]);
+            features.add(feature);
+          }
         }
-
-        // Add function to route line
-        Layer routeLayer = mapboxMap.getLayer(NavigationMapLayers.NAVIGATION_ROUTE_LAYER);
-        if (routeLayer != null) {
-          routeLayer.setProperties(PropertyFactory.lineColor(
-            Function.property("congestion", categorical(
-              stop("moderate", PropertyFactory.lineColor(routeModerateColor)),
-              stop("heavy", PropertyFactory.lineColor(routeSevereColor)),
-              stop("severe", PropertyFactory.lineColor(routeSevereColor))
-            )).withDefaultValue(PropertyFactory.lineColor(routeDefaultColor))
-          ));
-        }
+      } else {
+        Feature feature = Feature.fromGeometry(lineString);
+        features.add(feature);
       }
-    } else {
-      Feature feature = Feature.fromGeometry(lineString);
-      features.add(feature);
     }
     return FeatureCollection.fromFeatures(features);
   }
@@ -302,9 +295,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    * Iterate through map style layers backwards till the first not-symbol layer is found.
    */
   private String placeRouteBelow() {
-    for (int i = mapboxMap.getLayers().size() - 1; i >= 0; i--) {
-      if (!(mapboxMap.getLayers().get(i) instanceof SymbolLayer)) {
-        return mapboxMap.getLayers().get(i).getId();
+    List<Layer> styleLayers = mapboxMap.getLayers();
+    for (int i = styleLayers.size() - 1; i >= 0; i--) {
+      if (!(styleLayers.get(i) instanceof SymbolLayer)) {
+        return styleLayers.get(i).getId();
       }
     }
     return null;
@@ -329,7 +323,12 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
           stop(22f, PropertyFactory.lineWidth(18f * scale))
         ).withBase(1.5f))
       ),
-      PropertyFactory.lineColor(routeDefaultColor)
+      PropertyFactory.lineColor(
+        Function.property(CONGESTION_KEY, categorical(
+          stop("moderate", PropertyFactory.lineColor(routeModerateColor)),
+          stop("heavy", PropertyFactory.lineColor(routeSevereColor)),
+          stop("severe", PropertyFactory.lineColor(routeSevereColor))
+        )).withDefaultValue(PropertyFactory.lineColor(routeDefaultColor)))
     );
     addLayerToMap(routeLayer, placeRouteBelow());
   }
@@ -360,7 +359,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    * Layer id constants.
    */
   private static class NavigationMapLayers {
-    private static final String NAVIGATION_ROUTE_SHIELD_LAYER = "mapbox-plugin-navigation-route-casing-layer";
+    private static final String NAVIGATION_ROUTE_SHIELD_LAYER = "mapbox-plugin-navigation-route-shield-layer";
     private static final String NAVIGATION_ROUTE_LAYER = "mapbox-plugin-navigation-route-layer";
   }
 

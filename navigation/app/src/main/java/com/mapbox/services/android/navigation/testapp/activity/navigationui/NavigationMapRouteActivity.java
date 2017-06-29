@@ -91,8 +91,9 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       .setOrigin(originPosition)
       .setDestination(destinationPosition)
       .setAccessToken(Mapbox.getAccessToken())
-      .setProfile(DirectionsCriteria.PROFILE_DRIVING)
+      .setProfile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
       .setOverview(DirectionsCriteria.OVERVIEW_FULL)
+      .setAnnotation(DirectionsCriteria.ANNOTATION_CONGESTION)
       .setSteps(true)
       .build();
 
