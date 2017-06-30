@@ -9,16 +9,16 @@ android {
     targetSdkVersion rootProject.ext.targetSdkVersion
     versionCode 1
     versionName "0.3.1"
-
-    configurations {
-      javadocDeps
-    }
+    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+  }
+  configurations {
+    javadocDeps
   }
 }
 
 dependencies {
   // Navigation SDK
-  compile project (':libandroid-navigation')
+  compile project(':libandroid-navigation')
 
   // Mapbox Map SDK
   compile(rootProject.ext.dep.mapboxMapSdk + '@aar') {

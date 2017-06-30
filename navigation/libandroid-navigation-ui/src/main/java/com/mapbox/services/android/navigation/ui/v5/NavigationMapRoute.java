@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import android.content.Context;
 import android.content.res.TypedArray;
 import android.location.Location;
 import android.support.annotation.ColorInt;
@@ -62,7 +61,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private int routeSevereColor;
 
   private List<String> layerIds;
-  private final Context context;
   private final MapView mapView;
   private final MapboxMap mapboxMap;
   private final MapboxNavigation navigation;
@@ -96,7 +94,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
                             @NonNull MapboxMap mapboxMap, @StyleRes int styleRes) {
     this.styleRes = styleRes;
     this.mapView = mapView;
-    this.context = mapView.getContext();
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
     addListeners();
@@ -109,18 +106,18 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private void initialize() {
     layerIds = new ArrayList<>();
 
-    addSource(route == null ? null : route);
+    addSource(route);
 
-    TypedArray typedArray = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute);
+    TypedArray typedArray = mapView.getContext().obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute);
 
     routeDefaultColor = typedArray.getColor(R.styleable.NavigationMapRoute_routeColor,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_route_layer_blue));
+      ContextCompat.getColor(mapView.getContext(), R.color.mapbox_navigation_route_layer_blue));
     routeModerateColor = typedArray.getColor(R.styleable.NavigationMapRoute_routeModerateCongestionColor,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_route_layer_congestion_yellow));
+      ContextCompat.getColor(mapView.getContext(), R.color.mapbox_navigation_route_layer_congestion_yellow));
     routeSevereColor = typedArray.getColor(R.styleable.NavigationMapRoute_routeSevereCongestionColor,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_route_layer_congestion_red));
+      ContextCompat.getColor(mapView.getContext(), R.color.mapbox_navigation_route_layer_congestion_red));
     @ColorInt int routeShieldColor = typedArray.getColor(R.styleable.NavigationMapRoute_routeShieldColor,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_route_shield_layer_color));
+      ContextCompat.getColor(mapView.getContext(), R.color.mapbox_navigation_route_shield_layer_color));
     float routeScale = typedArray.getFloat(R.styleable.NavigationMapRoute_routeScale, 1.0f);
 
     addNavigationRouteLayer(routeScale);

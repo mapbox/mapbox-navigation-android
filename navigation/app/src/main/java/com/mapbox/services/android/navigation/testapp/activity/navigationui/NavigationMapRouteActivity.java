@@ -34,7 +34,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   MapView mapView;
 
   private MapboxMap mapboxMap;
-  private NavigationMapRoute route;
+  private NavigationMapRoute navigationMapRoute;
   private StyleCycle styleCycle = new StyleCycle();
 
   private Marker originMarker;
@@ -61,7 +61,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    route = new NavigationMapRoute(null, mapView, mapboxMap);
+    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap);
     mapboxMap.setOnMapClickListener(this);
   }
 
@@ -77,7 +77,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       mapboxMap.removeMarker(destinationMarker);
       originMarker = null;
       destinationMarker = null;
-      route.removeRoute();
+      navigationMapRoute.removeRoute();
     }
   }
 
@@ -104,7 +104,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (response.body() != null) {
       if (response.body().getRoutes().size() > 0) {
-        route.addRoute(response.body().getRoutes().get(0));
+        navigationMapRoute.addRoute(response.body().getRoutes().get(0));
       }
     }
   }
@@ -154,6 +154,10 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
+  }
+
+  public NavigationMapRoute getNavigationMapRoute() {
+    return navigationMapRoute;
   }
 
   private static class StyleCycle {
