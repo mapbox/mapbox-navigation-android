@@ -150,9 +150,14 @@ public abstract class RouteProgress {
       );
       distanceRemaining += TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
     }
-    for (RouteLeg leg : route().getLegs()) {
-      for (int i = currentLegProgress().getStepIndex() + 1; i < leg.getSteps().size(); i++) {
-        distanceRemaining += leg.getSteps().get(i).getDistance();
+    for (int i = currentLegProgress().getStepIndex() + 1; i < getCurrentLeg().getSteps().size(); i++) {
+      distanceRemaining += getCurrentLeg().getSteps().get(i).getDistance();
+    }
+
+    // Add any additional leg distances the user hasn't navigated to yet.
+    if (route().getLegs().size() - 1 > legIndex()) {
+      for (int i = legIndex() + 1; i < route().getLegs().size(); i++) {
+        distanceRemaining += route().getLegs().get(i).getDistance();
       }
     }
     return distanceRemaining;
