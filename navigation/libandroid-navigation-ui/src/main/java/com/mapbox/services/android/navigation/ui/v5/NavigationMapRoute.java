@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import android.content.Context;
 import android.content.res.TypedArray;
 import android.location.Location;
 import android.support.annotation.ColorInt;
@@ -23,6 +22,7 @@ import com.mapbox.services.android.navigation.v5.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.RouteProgress;
 import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.commons.geojson.Feature;
 import com.mapbox.services.commons.geojson.FeatureCollection;
 import com.mapbox.services.commons.geojson.LineString;
@@ -50,6 +50,7 @@ import static com.mapbox.mapboxsdk.style.functions.stops.Stops.exponential;
  */
 public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMapChangedListener {
 
+  private static final String CONGESTION_KEY = "congestion";
   @StyleRes
   private int styleRes;
   @ColorInt
@@ -60,7 +61,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private int routeSevereColor;
 
   private List<String> layerIds;
-  private final Context context;
   private final MapView mapView;
   private final MapboxMap mapboxMap;
   private final MapboxNavigation navigation;
@@ -94,7 +94,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
                             @NonNull MapboxMap mapboxMap, @StyleRes int styleRes) {
     this.styleRes = styleRes;
     this.mapView = mapView;
-    this.context = mapView.getContext();
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
     addListeners();
@@ -107,18 +106,18 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private void initialize() {
     layerIds = new ArrayList<>();
 
-    addSource(route == null ? null : route);
+    addSource(route);
 
-    TypedArray typedArray = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute);
+    TypedArray typedArray = mapView.getContext().obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute);
 
     routeDefaultColor = typedArray.getColor(R.styleable.NavigationMapRoute_routeColor,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_route_layer_blue));
+      ContextCompat.getColor(mapView.getContext(), R.color.mapbox_navigation_route_layer_blue));
     routeModerateColor = typedArray.getColor(R.styleable.NavigationMapRoute_routeModerateCongestionColor,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_route_layer_congestion_yellow));
+      ContextCompat.getColor(mapView.getContext(), R.color.mapbox_navigation_route_layer_congestion_yellow));
     routeSevereColor = typedArray.getColor(R.styleable.NavigationMapRoute_routeSevereCongestionColor,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_route_layer_congestion_red));
+      ContextCompat.getColor(mapView.getContext(), R.color.mapbox_navigation_route_layer_congestion_red));
     @ColorInt int routeShieldColor = typedArray.getColor(R.styleable.NavigationMapRoute_routeShieldColor,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_route_shield_layer_color));
+      ContextCompat.getColor(mapView.getContext(), R.color.mapbox_navigation_route_shield_layer_color));
     float routeScale = typedArray.getFloat(R.styleable.NavigationMapRoute_routeScale, 1.0f);
 
     addNavigationRouteLayer(routeScale);
@@ -264,36 +263,27 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    */
   private FeatureCollection addTrafficToSource(DirectionsRoute route) {
     List<Feature> features = new ArrayList<>();
+    LineString originalGeometry = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6);
+    features.add(Feature.fromGeometry(originalGeometry));
 
     LineString lineString = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6);
-    if (route.getLegs().get(0).getAnnotation() != null) {
-      if (route.getLegs().get(0).getAnnotation().getCongestion() != null) {
-        for (int i = 0; i < route.getLegs().get(0).getAnnotation().getCongestion().length; i++) {
-          double[] startCoord = lineString.getCoordinates().get(i).getCoordinates();
-          double[] endCoord = lineString.getCoordinates().get(i + 1).getCoordinates();
+    for (RouteLeg leg : route.getLegs()) {
+      if (leg.getAnnotation() != null) {
+        if (leg.getAnnotation().getCongestion() != null) {
+          for (int i = 0; i < leg.getAnnotation().getCongestion().length; i++) {
+            double[] startCoord = lineString.getCoordinates().get(i).getCoordinates();
+            double[] endCoord = lineString.getCoordinates().get(i + 1).getCoordinates();
 
-          LineString congestionLineString = LineString.fromCoordinates(new double[][] {startCoord, endCoord});
-          Feature feature = Feature.fromGeometry(congestionLineString);
-
-          feature.addStringProperty("congestion", route.getLegs().get(0).getAnnotation().getCongestion()[i]);
-          features.add(feature);
+            LineString congestionLineString = LineString.fromCoordinates(new double[][] {startCoord, endCoord});
+            Feature feature = Feature.fromGeometry(congestionLineString);
+            feature.addStringProperty(CONGESTION_KEY, leg.getAnnotation().getCongestion()[i]);
+            features.add(feature);
+          }
         }
-
-        // Add function to route line
-        Layer routeLayer = mapboxMap.getLayer(NavigationMapLayers.NAVIGATION_ROUTE_LAYER);
-        if (routeLayer != null) {
-          routeLayer.setProperties(PropertyFactory.lineColor(
-            Function.property("congestion", categorical(
-              stop("moderate", PropertyFactory.lineColor(routeModerateColor)),
-              stop("heavy", PropertyFactory.lineColor(routeSevereColor)),
-              stop("severe", PropertyFactory.lineColor(routeSevereColor))
-            )).withDefaultValue(PropertyFactory.lineColor(routeDefaultColor))
-          ));
-        }
+      } else {
+        Feature feature = Feature.fromGeometry(lineString);
+        features.add(feature);
       }
-    } else {
-      Feature feature = Feature.fromGeometry(lineString);
-      features.add(feature);
     }
     return FeatureCollection.fromFeatures(features);
   }
@@ -302,9 +292,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    * Iterate through map style layers backwards till the first not-symbol layer is found.
    */
   private String placeRouteBelow() {
-    for (int i = mapboxMap.getLayers().size() - 1; i >= 0; i--) {
-      if (!(mapboxMap.getLayers().get(i) instanceof SymbolLayer)) {
-        return mapboxMap.getLayers().get(i).getId();
+    List<Layer> styleLayers = mapboxMap.getLayers();
+    for (int i = styleLayers.size() - 1; i >= 0; i--) {
+      if (!(styleLayers.get(i) instanceof SymbolLayer)) {
+        return styleLayers.get(i).getId();
       }
     }
     return null;
@@ -329,7 +320,12 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
           stop(22f, PropertyFactory.lineWidth(18f * scale))
         ).withBase(1.5f))
       ),
-      PropertyFactory.lineColor(routeDefaultColor)
+      PropertyFactory.lineColor(
+        Function.property(CONGESTION_KEY, categorical(
+          stop("moderate", PropertyFactory.lineColor(routeModerateColor)),
+          stop("heavy", PropertyFactory.lineColor(routeSevereColor)),
+          stop("severe", PropertyFactory.lineColor(routeSevereColor))
+        )).withDefaultValue(PropertyFactory.lineColor(routeDefaultColor)))
     );
     addLayerToMap(routeLayer, placeRouteBelow());
   }
@@ -359,15 +355,15 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   /**
    * Layer id constants.
    */
-  private static class NavigationMapLayers {
-    private static final String NAVIGATION_ROUTE_SHIELD_LAYER = "mapbox-plugin-navigation-route-casing-layer";
-    private static final String NAVIGATION_ROUTE_LAYER = "mapbox-plugin-navigation-route-layer";
+  static class NavigationMapLayers {
+    static final String NAVIGATION_ROUTE_SHIELD_LAYER = "mapbox-plugin-navigation-route-shield-layer";
+    static final String NAVIGATION_ROUTE_LAYER = "mapbox-plugin-navigation-route-layer";
   }
 
   /**
    * Source id constants.
    */
-  private static class NavigationMapSources {
-    private static final String NAVIGATION_ROUTE_SOURCE = "mapbox-plugin-navigation-route-source";
+  static class NavigationMapSources {
+    static final String NAVIGATION_ROUTE_SOURCE = "mapbox-plugin-navigation-route-source";
   }
 }

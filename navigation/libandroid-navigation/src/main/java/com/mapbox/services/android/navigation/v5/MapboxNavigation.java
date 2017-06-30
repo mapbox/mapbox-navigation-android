@@ -395,6 +395,7 @@ public class MapboxNavigation implements MilestoneEventListener {
       .setAccessToken(accessToken)
       .setOverview(DirectionsCriteria.OVERVIEW_FULL)
       .setOrigin(origin)
+      .setAnnotation(DirectionsCriteria.ANNOTATION_CONGESTION)
       .setDestination(destination)
       .setSteps(true);
 
