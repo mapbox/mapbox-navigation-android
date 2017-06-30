@@ -132,15 +132,14 @@ public abstract class RouteProgress {
   }
 
   /**
-   * Provides the duration remaining in seconds till the user reaches the end of the route.
+   * Provides the distance remaining in meters till the user reaches the end of the route.
    *
-   * @return {@code long} value representing the duration remaining till end of route, in unit seconds.
+   * @return {@code long} value representing the distance remaining till end of route, in unit meters.
    * @since 0.1.0
    */
   public double getDistanceRemaining() {
     double distanceRemaining = 0;
-
-    List<Position> coords = PolylineUtils.decode(currentLegProgress().getCurrentStep().getGeometry(),
+    List<Position> coords = PolylineUtils.decode(getCurrentLegProgress().getCurrentStep().getGeometry(),
       Constants.PRECISION_6);
     if (coords.size() > 1) {
       LineString slicedLine = TurfMisc.lineSlice(
@@ -151,8 +150,10 @@ public abstract class RouteProgress {
       );
       distanceRemaining += TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
     }
-    for (int i = currentLegProgress().getStepIndex() + 1; i < getCurrentLeg().getSteps().size(); i++) {
-      distanceRemaining += getCurrentLeg().getSteps().get(i).getDistance();
+    for (RouteLeg leg : route().getLegs()) {
+      for (int i = currentLegProgress().getStepIndex() + 1; i < leg.getSteps().size(); i++) {
+        distanceRemaining += leg.getSteps().get(i).getDistance();
+      }
     }
     return distanceRemaining;
   }

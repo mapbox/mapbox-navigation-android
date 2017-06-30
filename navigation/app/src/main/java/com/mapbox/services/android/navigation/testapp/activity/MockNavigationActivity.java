@@ -42,6 +42,9 @@ import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.commons.models.Position;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -66,13 +69,12 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   Button startRouteButton;
 
   private MapboxMap mapboxMap;
-  private Marker destinationMarker;
+  private List<Marker> pathMarkers = new ArrayList<>();
 
   // Navigation related variables
   private LocationEngine locationEngine;
   private MapboxNavigation navigation;
   private DirectionsRoute route;
-  private Position destination;
   private NavigationMapRoute navigationMapRoute;
   private LocationLayerPlugin locationLayerPlugin;
 
@@ -143,7 +145,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     navigationMapRoute = new NavigationMapRoute(navigation, mapView, mapboxMap);
 
     mapboxMap.setOnMapClickListener(this);
-    Snackbar.make(mapView, "Tap map to place destination", BaseTransientBottomBar.LENGTH_LONG).show();
+    Snackbar.make(mapView, "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
 
     locationEngine = new MockLocationEngine();
     mapboxMap.setLocationSource(locationEngine);
@@ -153,14 +155,14 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onMapClick(@NonNull LatLng point) {
-    if (destinationMarker != null) {
-      mapboxMap.removeMarker(destinationMarker);
+    if (pathMarkers.size() >= 2) {
+      Toast.makeText(this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show();
+      return;
     }
-    destinationMarker = mapboxMap.addMarker(new MarkerOptions().position(point));
+    Marker marker = mapboxMap.addMarker(new MarkerOptions().position(point));
+    pathMarkers.add(marker);
 
     startRouteButton.setVisibility(View.VISIBLE);
-
-    this.destination = Position.fromCoordinates(point.getLongitude(), point.getLatitude());
     calculateRoute();
   }
 
@@ -171,14 +173,27 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       return;
     }
 
-    Position origin = (Position.fromCoordinates(userLocation.getLongitude(), userLocation.getLatitude()));
+    Position origin = Position.fromCoordinates(userLocation.getLongitude(), userLocation.getLatitude());
+    Position destination = Position.fromLngLat(
+      pathMarkers.get(pathMarkers.size() - 1).getPosition().getLongitude(),
+      pathMarkers.get(pathMarkers.size() - 1).getPosition().getLatitude()
+    );
     if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) < 50) {
-      mapboxMap.removeMarker(destinationMarker);
+      for (Marker marker : pathMarkers) {
+        mapboxMap.removeMarker(marker);
+      }
       startRouteButton.setVisibility(View.GONE);
       return;
     }
 
-    navigation.getRoute(origin, destination, new Callback<DirectionsResponse>() {
+    List<Position> coordinates = new ArrayList<>();
+    coordinates.add(origin);
+
+    for (Marker marker : pathMarkers) {
+      coordinates.add(Position.fromLngLat(marker.getPosition().getLongitude(), marker.getPosition().getLatitude()));
+    }
+
+    navigation.getRoute(coordinates, null, new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
         if (response.body() != null) {
