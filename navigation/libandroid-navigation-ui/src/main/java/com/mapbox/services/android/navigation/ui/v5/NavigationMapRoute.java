@@ -355,15 +355,15 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   /**
    * Layer id constants.
    */
-  private static class NavigationMapLayers {
-    private static final String NAVIGATION_ROUTE_SHIELD_LAYER = "mapbox-plugin-navigation-route-shield-layer";
-    private static final String NAVIGATION_ROUTE_LAYER = "mapbox-plugin-navigation-route-layer";
+  static class NavigationMapLayers {
+    static final String NAVIGATION_ROUTE_SHIELD_LAYER = "mapbox-plugin-navigation-route-shield-layer";
+    static final String NAVIGATION_ROUTE_LAYER = "mapbox-plugin-navigation-route-layer";
   }
 
   /**
    * Source id constants.
    */
-  private static class NavigationMapSources {
-    private static final String NAVIGATION_ROUTE_SOURCE = "mapbox-plugin-navigation-route-source";
+  static class NavigationMapSources {
+    static final String NAVIGATION_ROUTE_SOURCE = "mapbox-plugin-navigation-route-source";
   }
 }

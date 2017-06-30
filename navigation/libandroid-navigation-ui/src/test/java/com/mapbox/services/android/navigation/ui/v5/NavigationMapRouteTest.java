@@ -4,10 +4,10 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 
 import org.junit.Rule;
-import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
 
 public class NavigationMapRouteTest {
 
@@ -17,14 +17,13 @@ public class NavigationMapRouteTest {
   @Mock
   MapboxMap mapboxMap;
 
-
   @Rule
   public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-  @Test
-  public void testSanity() {
-    new NavigationMapRoute(null, mapView, mapboxMap);
-  }
+//  @Test
+//  public void testSanity() {
+//    new NavigationMapRoute(null, mapView, mapboxMap);
+//  }
 
 
 }

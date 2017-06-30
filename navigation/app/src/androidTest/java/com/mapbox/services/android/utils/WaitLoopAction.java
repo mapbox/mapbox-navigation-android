@@ -1,4 +1,4 @@
-package com.mapbox.services.utils;
+package com.mapbox.services.android.utils;
 
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;

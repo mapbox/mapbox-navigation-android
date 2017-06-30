@@ -1,11 +1,10 @@
-package com.mapbox.services.navigation.ui;
+package com.mapbox.services.android.navigation.ui.v5;
 
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
 import android.view.View;
 
 import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.services.android.navigation.ui.v5.NavigationMapRoute;
 
 import org.hamcrest.Matcher;
 
