@@ -144,14 +144,20 @@ public class MapboxNavigation implements MilestoneEventListener {
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.DEPARTURE_MILESTONE)
       .setTrigger(
-        Trigger.eq(TriggerProperty.FIRST_STEP, TriggerProperty.TRUE))
-      .build());
+        Trigger.all(
+          Trigger.eq(TriggerProperty.FIRST_STEP, TriggerProperty.TRUE),
+          Trigger.eq(TriggerProperty.FIRST_LEG, TriggerProperty.TRUE)
+        )
+      ).build());
 
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.ARRIVAL_MILESTONE)
       .setTrigger(
-        Trigger.eq(TriggerProperty.LAST_STEP, TriggerProperty.TRUE))
-      .build());
+        Trigger.all(
+          Trigger.eq(TriggerProperty.LAST_STEP, TriggerProperty.TRUE),
+          Trigger.eq(TriggerProperty.LAST_LEG, TriggerProperty.TRUE)
+        )
+      ).build());
   }
 
   @Override
