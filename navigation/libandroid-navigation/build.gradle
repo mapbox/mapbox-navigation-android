@@ -45,6 +45,7 @@ dependencies {
   testCompile rootProject.ext.dep.mockito
   testCompile rootProject.ext.dep.hamcrest
   testCompile rootProject.ext.dep.commonsIO
+  testCompile rootProject.ext.dep.robolectric
 
   // Instrument testing
   androidTestCompile(rootProject.ext.dep.testEspressoCore, {
