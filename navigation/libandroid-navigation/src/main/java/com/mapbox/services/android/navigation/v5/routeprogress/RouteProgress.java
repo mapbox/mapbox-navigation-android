@@ -1,14 +1,16 @@
-package com.mapbox.services.android.navigation.v5;
+package com.mapbox.services.android.navigation.v5.routeprogress;
+
+import android.location.Location;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.Constants;
 import com.mapbox.services.Experimental;
-import com.mapbox.services.android.navigation.v5.models.RouteLegProgress;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.api.utils.turf.TurfMisc;
+import com.mapbox.services.commons.geojson.Feature;
 import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
@@ -16,12 +18,14 @@ import com.mapbox.services.commons.utils.PolylineUtils;
 
 import java.util.List;
 
+import static com.mapbox.services.Constants.PRECISION_6;
+
 /**
  * The {@code routeProgress} class contains all progress information of user along the route, leg and step.
  * <p>
  * You can use this together with MapboxNavigation to obtain this object from the
  * {@link com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener}
- * or the {@link com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener}. This object is immutable
+ * or the {@link ProgressChangeListener}. This object is immutable
  * and a new, updated routeProgress object will be provided with each new location update.
  * <p>
  * This is an experimental API. Experimental APIs are quickly evolving and
@@ -37,25 +41,24 @@ public abstract class RouteProgress {
 
   public abstract DirectionsRoute route();
 
-  public abstract Position userSnappedPosition();
+  public abstract Location location();
 
   public abstract int legIndex();
 
   /**
    * Constructor for the route routeProgress information.
    *
-   * @param route               the {@link DirectionsRoute} being used for the navigation session. When a user is
-   *                            rerouted this route is updated.
-   * @param userSnappedPosition the users position most recently used when creating this object.
-   * @param stepIndex           an {@code integer} representing the current step index the user is on.
+   * @param route     the {@link DirectionsRoute} being used for the navigation session. When a user is
+   *                  rerouted this route is updated
+   * @param location  the users raw location not adjusted for snapping
+   * @param stepIndex an {@code integer} representing the current step index the user is on
    * @since 0.1.0
    */
   public static RouteProgress create(
-    DirectionsRoute route, Position userSnappedPosition, int legIndex, int stepIndex) {
+    DirectionsRoute route, Location location, int legIndex, int stepIndex) {
     RouteLegProgress routeLegProgress
-      = RouteLegProgress.create(route.getLegs().get(legIndex), stepIndex, userSnappedPosition);
-    return new AutoValue_RouteProgress(
-      routeLegProgress, route, userSnappedPosition, legIndex);
+      = RouteLegProgress.create(route.getLegs().get(legIndex), stepIndex, userSnappedToRoutePosition(location, route));
+    return new AutoValue_RouteProgress(routeLegProgress, route, location, legIndex);
   }
 
   /**
@@ -140,7 +143,7 @@ public abstract class RouteProgress {
       Constants.PRECISION_6);
     if (coords.size() > 1) {
       LineString slicedLine = TurfMisc.lineSlice(
-        Point.fromCoordinates(userSnappedPosition()),
+        Point.fromCoordinates(userSnappedToRoutePosition(location(), route())),
         Point.fromCoordinates(coords.get(coords.size() - 1)),
         LineString.fromCoordinates(coords)
       );
@@ -160,5 +163,21 @@ public abstract class RouteProgress {
    */
   public DirectionsRoute getRoute() {
     return route();
+  }
+
+  // Always get the closest position on the route to the actual
+  // raw location so that can accurately calculate values.
+  private static Position userSnappedToRoutePosition(Location location, DirectionsRoute route) {
+    Point locationToPoint = Point.fromCoordinates(
+      new double[] {location.getLongitude(), location.getLatitude()}
+    );
+
+    // Decode the geometry
+    List<Position> coords = PolylineUtils.decode(route.getGeometry(), PRECISION_6);
+
+    // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
+    // Point on the LineString.
+    Feature feature = TurfMisc.pointOnLine(locationToPoint, coords);
+    return ((Point) feature.getGeometry()).getCoordinates();
   }
 }

@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.models;
+package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import com.google.gson.Gson;
 import com.mapbox.services.Constants;

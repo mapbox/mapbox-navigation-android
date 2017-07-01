@@ -4,7 +4,7 @@ import android.text.TextUtils;
 import android.util.SparseArray;
 
 import com.mapbox.services.android.navigation.v5.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.RouteProgress;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfHelpers;
 

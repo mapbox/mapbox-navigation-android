@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5;
 import android.location.Location;
 import android.support.annotation.FloatRange;
 
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.api.directions.v5.DirectionsCriteria;
 
 public class MapboxNavigationOptions {
@@ -73,7 +74,7 @@ public class MapboxNavigationOptions {
 
   /**
    * Maximum distance in meters a user can travel away from the step geometry before the
-   * {@link com.mapbox.services.android.navigation.v5.listeners.OffRouteListener}'s called.
+   * {@link OffRouteListener}'s called.
    *
    * @param maximumDistanceOffRoute double value in unit meters representing the maximum distance a user can travel
    *                                before the {@code OffRouteListener} gets called.
@@ -146,7 +147,7 @@ public class MapboxNavigationOptions {
 
   /**
    * Get the current required maximum distance in meters a user can travel away from the step geometry before the
-   * {@link com.mapbox.services.android.navigation.v5.listeners.OffRouteListener}'s called.
+   * {@link OffRouteListener}'s called.
    *
    * @return double value in unit meters representing the maximum distance a user can travel before the
    * {@code OffRouteListener} gets called.

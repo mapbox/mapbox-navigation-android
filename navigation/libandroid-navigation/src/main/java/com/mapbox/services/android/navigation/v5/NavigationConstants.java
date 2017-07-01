@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5;
 
 import com.mapbox.services.Experimental;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 
 /**
  * Navigation constants
@@ -37,7 +38,7 @@ public class NavigationConstants {
 
   /**
    * Maximum number of meters the user can travel away from step before the
-   * {@link com.mapbox.services.android.navigation.v5.listeners.OffRouteListener}'s called.
+   * {@link OffRouteListener}'s called.
    */
   @Experimental
   static final double MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE = 50;

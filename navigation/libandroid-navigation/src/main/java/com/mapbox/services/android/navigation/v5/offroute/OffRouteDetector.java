@@ -1,8 +1,10 @@
-package com.mapbox.services.android.navigation.v5;
+package com.mapbox.services.android.navigation.v5.offroute;
 
 import android.location.Location;
 
 import com.mapbox.services.Constants;
+import com.mapbox.services.android.navigation.v5.MapboxNavigationOptions;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.api.utils.turf.TurfMisc;
@@ -11,22 +13,12 @@ import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
 
-class UserOffRouteState {
+public class OffRouteDetector extends OffRoute {
 
-  private MapboxNavigationOptions options;
   private RouteProgress routeProgress;
-  private Location location;
+  private MapboxNavigationOptions options;
 
-  /**
-   * Constructor taking in all the needed parameters for detecting if the users off-route.
-   *
-   * @param location      users current location
-   * @param routeProgress a {@link RouteProgress} object
-   * @param options       the {@link MapboxNavigationOptions} options set
-   * @since 0.2.0
-   */
-  UserOffRouteState(Location location, RouteProgress routeProgress, MapboxNavigationOptions options) {
-    this.location = location;
+  public OffRouteDetector(RouteProgress routeProgress, MapboxNavigationOptions options) {
     this.routeProgress = routeProgress;
     this.options = options;
   }
@@ -37,12 +29,13 @@ class UserOffRouteState {
    * @return true if the users off-route, else false.
    * @since 0.2.0
    */
-  boolean isUserOffRoute() {
-    Position futurePosition = getFuturePosition();
+  @Override
+  public boolean isUserOffRoute() {
+    Position futurePosition = getFuturePosition(routeProgress.location(), options);
     double radius = Math.min(options.getMaximumDistanceOffRoute(),
-      location.getAccuracy() + options.getUserLocationSnapDistance());
+      routeProgress.location().getAccuracy() + options.getUserLocationSnapDistance());
 
-    boolean isOffRoute = userTrueDistanceFromRoute(futurePosition) > radius;
+    boolean isOffRoute = userTrueDistanceFromRoute(futurePosition, routeProgress) > radius;
 
     // If the user is moving away from the maneuver location and they are close to the next step we can safely say they
     // have completed the maneuver. This is intended to be a fallback case when we do find that the users course matches
@@ -50,7 +43,7 @@ class UserOffRouteState {
     boolean isCloseToUpcomingStep;
 
     if (routeProgress.getCurrentLegProgress().getUpComingStep() != null) {
-      isCloseToUpcomingStep = userTrueDistanceFromRoute(futurePosition) < radius;
+      isCloseToUpcomingStep = userTrueDistanceFromRoute(futurePosition, routeProgress) < radius;
       if (isOffRoute && isCloseToUpcomingStep) {
         return false;
       }
@@ -64,7 +57,7 @@ class UserOffRouteState {
    * @return a {@link Position}
    * @since 0.2.0
    */
-  private Position getFuturePosition() {
+  private static Position getFuturePosition(Location location, MapboxNavigationOptions options) {
     // Find future location of user
     Position locationToPosition = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
     double metersInFrontOfUser = location.getSpeed() * options.getDeadReckoningTimeInterval();
@@ -80,7 +73,7 @@ class UserOffRouteState {
    * @return double distance in meters
    * @since 0.2.0
    */
-  private double userTrueDistanceFromRoute(Position futurePosition) {
+  private double userTrueDistanceFromRoute(Position futurePosition, RouteProgress routeProgress) {
     LineString lineString = LineString.fromPolyline(
       routeProgress.getCurrentLegProgress().getCurrentStep().getGeometry(), Constants.PRECISION_6);
     Feature feature = TurfMisc.pointOnLine(Point.fromCoordinates(futurePosition), lineString.getCoordinates());

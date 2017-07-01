@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5;
 
 import com.google.gson.Gson;
 import com.mapbox.services.Constants;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;

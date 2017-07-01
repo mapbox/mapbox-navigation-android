@@ -12,8 +12,8 @@ import android.support.v4.app.NotificationCompat;
 
 import com.mapbox.services.Experimental;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
-import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
-import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.telemetry.location.LocationEngine;

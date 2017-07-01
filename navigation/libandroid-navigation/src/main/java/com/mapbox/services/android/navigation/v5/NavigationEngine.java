@@ -8,10 +8,13 @@ import android.text.TextUtils;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.v5.instruction.DefaultInstruction;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
-import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
-import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
@@ -73,11 +76,10 @@ class NavigationEngine {
   void onLocationChanged(DirectionsRoute directionsRoute, Location location) {
     // if the previousRouteProgress is null, the route has just begun and one needs to be created
     if (previousRouteProgress == null) {
-      Position currentPosition = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
-      previousRouteProgress = RouteProgress.create(directionsRoute, currentPosition,
-        0, 0);
+      previousRouteProgress = RouteProgress.create(directionsRoute, location, 0, 0);
     }
 
+    // TODO Check if the full route information's the same.
     if (!TextUtils.equals(directionsRoute.getGeometry(), previousRouteProgress.getRoute().getGeometry())) {
       resetRouteProgress();
     }
@@ -95,12 +97,8 @@ class NavigationEngine {
       increaseIndex(previousRouteProgress);
     }
 
-    Snap snapToRoute = new SnapToRoute(previousRouteProgress, options);
-    Location snappedLocation = snapToRoute.getSnappedLocation(location);
-
     // Create a RouteProgress.create object using the latest user location
-    RouteProgress routeProgress = RouteProgress.create(directionsRoute,
-      Position.fromCoordinates(snappedLocation.getLongitude(), snappedLocation.getLatitude()), legIndex, stepIndex);
+    RouteProgress routeProgress = RouteProgress.create(directionsRoute, location, legIndex, stepIndex);
 
     for (Milestone milestone : milestones) {
       if (milestone.isOccurring(previousRouteProgress, routeProgress)) {
@@ -113,12 +111,13 @@ class NavigationEngine {
     }
 
     // Determine if the user is off route or not
-    UserOffRouteState userOffRouteState = new UserOffRouteState(location, routeProgress, options);
-    boolean isUserOffRoute = userOffRouteState.isUserOffRoute();
+    OffRoute offRoute = new OffRouteDetector(routeProgress, options);
+    boolean isUserOffRoute = offRoute.isUserOffRoute();
 
     // Snap location to the route if they aren't off route and return the location object
     if (isSnapEnabled && !isUserOffRoute) {
-      location = snappedLocation;
+      Snap snapToRoute = new SnapToRoute(previousRouteProgress, options);
+      location = snapToRoute.getSnappedLocation(location);
     }
 
     notifyOffRouteChange(isUserOffRoute, location);
