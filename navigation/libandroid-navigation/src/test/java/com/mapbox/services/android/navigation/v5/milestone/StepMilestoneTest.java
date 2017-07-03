@@ -1,17 +1,18 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
+import android.location.Location;
+
 import com.google.gson.Gson;
 import com.mapbox.services.android.navigation.v5.BaseTest;
-import com.mapbox.services.android.navigation.v5.RouteProgress;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.directions.v5.models.RouteLeg;
-import com.mapbox.services.commons.models.Position;
 
 import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class StepMilestoneTest extends BaseTest {
 
@@ -27,11 +28,9 @@ public class StepMilestoneTest extends BaseTest {
     String body = readPath(PRECISION_6);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     DirectionsRoute route = response.getRoutes().get(0);
-    RouteLeg firstLeg = route.getLegs().get(0);
-    Position userSnappedPosition = firstLeg.getSteps().get(4).getManeuver().asPosition();
 
-    previousRouteProgress = RouteProgress.create(route, userSnappedPosition, 0, 1);
-    routeProgress = RouteProgress.create(route, userSnappedPosition, 0, 1);
+    previousRouteProgress = RouteProgress.create(route, Mockito.mock(Location.class), 0, 1);
+    routeProgress = RouteProgress.create(route, Mockito.mock(Location.class), 0, 1);
   }
 
   @Test

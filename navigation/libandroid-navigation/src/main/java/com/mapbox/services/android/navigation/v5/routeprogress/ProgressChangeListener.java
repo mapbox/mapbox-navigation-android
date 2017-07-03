@@ -1,9 +1,8 @@
-package com.mapbox.services.android.navigation.v5.listeners;
+package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import android.location.Location;
 
 import com.mapbox.services.Experimental;
-import com.mapbox.services.android.navigation.v5.RouteProgress;
 
 /**
  * This is an experimental API. Experimental APIs are quickly evolving and

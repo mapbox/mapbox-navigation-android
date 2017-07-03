@@ -18,10 +18,10 @@ import com.mapbox.services.Constants;
 import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.RouteProgress;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
-import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
-import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
@@ -125,6 +125,11 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+    if (response.body() != null) {
+      Timber.d("response is null");
+      return;
+    }
+
     DirectionsRoute route = response.body().getRoutes().get(0);
     if (route == null) {
       Timber.d("route is null");
@@ -188,12 +193,14 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   protected void onStart() {
     super.onStart();
+    navigation.onStart();
     mapView.onStart();
   }
 
   @Override
   protected void onStop() {
     super.onStop();
+    navigation.onStop();
     mapView.onStop();
 
     if (locationEngine != null) {
@@ -224,6 +231,15 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
+
+    // Remove all navigation listeners
+    navigation.removeNavigationEventListener(this);
+    navigation.removeProgressChangeListener(this);
+
+    navigation.onDestroy();
+
+    // End the navigation session
+    navigation.endNavigation();
   }
 
   @Override

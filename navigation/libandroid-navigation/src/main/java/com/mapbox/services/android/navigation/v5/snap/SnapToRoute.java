@@ -3,7 +3,7 @@ package com.mapbox.services.android.navigation.v5.snap;
 import android.location.Location;
 
 import com.mapbox.services.android.navigation.v5.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.RouteProgress;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
@@ -30,12 +30,7 @@ public class SnapToRoute extends Snap {
 
   @Override
   public Location getSnappedLocation(Location location) {
-    if (validLocationToSnap(location)) {
-      location = snapLocationLatLng(location, routeProgress.getCurrentLegProgress().getCurrentStep().getGeometry());
-    } else {
-      location.setLatitude(routeProgress.userSnappedPosition().getLatitude());
-      location.setLongitude(routeProgress.userSnappedPosition().getLongitude());
-    }
+    location = snapLocationLatLng(location, routeProgress.getCurrentLegProgress().getCurrentStep().getGeometry());
     location.setBearing(snapLocationBearing(location, routeProgress, options));
     return location;
   }

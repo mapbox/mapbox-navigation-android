@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.v5.instruction;
 
-import com.mapbox.services.android.navigation.v5.RouteProgress;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 
 /**
