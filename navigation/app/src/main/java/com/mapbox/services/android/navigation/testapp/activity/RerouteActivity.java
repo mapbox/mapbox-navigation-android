@@ -125,8 +125,8 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-    if (response.body().getRoutes() == null) {
-      Timber.d("route is null");
+    if (response.body() != null) {
+      Timber.d("response is null");
       return;
     }
 
