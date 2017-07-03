@@ -188,12 +188,14 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   protected void onStart() {
     super.onStart();
+    navigation.onStart();
     mapView.onStart();
   }
 
   @Override
   protected void onStop() {
     super.onStop();
+    navigation.onStop();
     mapView.onStop();
 
     if (locationEngine != null) {
@@ -224,6 +226,15 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
+
+    // Remove all navigation listeners
+    navigation.removeNavigationEventListener(this);
+    navigation.removeProgressChangeListener(this);
+
+    navigation.onDestroy();
+
+    // End the navigation session
+    navigation.endNavigation();
   }
 
   @Override
