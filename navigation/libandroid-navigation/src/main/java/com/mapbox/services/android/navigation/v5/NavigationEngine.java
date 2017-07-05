@@ -8,12 +8,12 @@ import android.text.TextUtils;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.v5.instruction.DefaultInstruction;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
-import com.mapbox.services.android.navigation.v5.milestone.Milestone;
-import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
@@ -85,7 +85,7 @@ class NavigationEngine {
     }
 
     // If the locations the same as previous, no need to recalculate things
-    if (location.equals(previousLocation)) {
+    if (location.equals(previousLocation) || location.getSpeed() <= 0) {
       return;
     }
 
@@ -116,12 +116,8 @@ class NavigationEngine {
 
     // Snap location to the route if they aren't off route and return the location object
     if (isSnapEnabled && !isUserOffRoute) {
-      if (location.getSpeed() > 0) {
-        Snap snapToRoute = new SnapToRoute(previousRouteProgress, options);
-        location = snapToRoute.getSnappedLocation(location);
-      } else {
-        location = previousLocation;
-      }
+      Snap snapToRoute = new SnapToRoute(previousRouteProgress, options);
+      location = snapToRoute.getSnappedLocation(location);
     }
 
     notifyOffRouteChange(isUserOffRoute, location);
