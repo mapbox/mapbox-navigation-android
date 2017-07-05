@@ -126,23 +126,17 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (response.body() != null) {
-      Timber.d("response is null");
-      return;
-    }
-
-    DirectionsRoute route = response.body().getRoutes().get(0);
-    if (route == null) {
-      Timber.d("route is null");
-      return;
-    }
-
-    // First run
-    drawRoute(route);
-    if (!running) {
-      ((MockLocationEngine) locationEngine).setRoute(route);
-      navigation.startNavigation(route);
-    } else {
-      navigation.updateRoute(route);
+      if (response.body().getRoutes().size() > 0) {
+        DirectionsRoute route = response.body().getRoutes().get(0);
+        // First run
+        drawRoute(route);
+        if (!running) {
+          ((MockLocationEngine) locationEngine).setRoute(route);
+          navigation.startNavigation(route);
+        } else {
+          navigation.updateRoute(route);
+        }
+      }
     }
   }
 
