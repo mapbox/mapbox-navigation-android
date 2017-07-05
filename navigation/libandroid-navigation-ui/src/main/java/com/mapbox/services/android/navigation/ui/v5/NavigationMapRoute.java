@@ -307,8 +307,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private void addNavigationRouteLayer(float scale) {
     Layer routeLayer = new LineLayer(NavigationMapLayers.NAVIGATION_ROUTE_LAYER,
       NavigationMapSources.NAVIGATION_ROUTE_SOURCE).withProperties(
-      PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
-      PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+      PropertyFactory.lineCap(Property.LINE_CAP_SQUARE),
+      PropertyFactory.lineJoin(Property.LINE_CAP_SQUARE),
       PropertyFactory.visibility(Property.NONE),
       PropertyFactory.lineWidth(Function.zoom(
         exponential(
