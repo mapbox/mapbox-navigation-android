@@ -404,6 +404,7 @@ public class MapboxNavigation implements MilestoneEventListener {
     // is given.
     if (userBearing != null) {
       directionsBuilder.setBearings(new double[] {(double) userBearing, 90}, new double[] {});
+      directionsBuilder.setRadiuses(new double[] {(double) 50, Double.POSITIVE_INFINITY});
     }
     directionsBuilder.build().enqueueCall(callback);
   }
