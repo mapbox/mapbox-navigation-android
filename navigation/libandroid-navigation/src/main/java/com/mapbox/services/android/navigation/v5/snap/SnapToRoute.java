@@ -63,7 +63,8 @@ public class SnapToRoute extends Snap {
     Point currentPoint = TurfMeasurement.along(lineString, routeProgress.getDistanceTraveled(),
       TurfConstants.UNIT_METERS);
     // Measure 1 meter ahead of the users current location
-    Point futurePoint = TurfMeasurement.along(lineString, 1, TurfConstants.UNIT_METERS);
+    Point futurePoint = TurfMeasurement.along(lineString, routeProgress.getDistanceTraveled() + 1,
+      TurfConstants.UNIT_METERS);
 
     double azimuth = TurfMeasurement.bearing(currentPoint, futurePoint);
 
