@@ -2,7 +2,6 @@ package com.mapbox.services.android.navigation.v5.snap;
 
 import android.location.Location;
 
-import com.mapbox.services.android.navigation.v5.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
 import com.mapbox.services.api.utils.turf.TurfConstants;
@@ -21,17 +20,15 @@ import static com.mapbox.services.Constants.PRECISION_6;
 public class SnapToRoute extends Snap {
 
   private RouteProgress routeProgress;
-  private MapboxNavigationOptions options;
 
-  public SnapToRoute(RouteProgress routeProgress, MapboxNavigationOptions options) {
+  public SnapToRoute(RouteProgress routeProgress) {
     this.routeProgress = routeProgress;
-    this.options = options;
   }
 
   @Override
   public Location getSnappedLocation(Location location) {
     location = snapLocationLatLng(location, routeProgress.getCurrentLegProgress().getCurrentStep().getGeometry());
-    location.setBearing(snapLocationBearing(location, routeProgress, options));
+    location.setBearing(snapLocationBearing(routeProgress));
     return location;
   }
 
@@ -60,16 +57,13 @@ public class SnapToRoute extends Snap {
     return location;
   }
 
-  private static float snapLocationBearing(Location location, RouteProgress routeProgress,
-                                           MapboxNavigationOptions options) {
+  private static float snapLocationBearing(RouteProgress routeProgress) {
     LineString lineString = LineString.fromPolyline(routeProgress.getRoute().getGeometry(), PRECISION_6);
-    double userDistanceBuffer = location.getSpeed() * options.getDeadReckoningTimeInterval();
 
     Point currentPoint = TurfMeasurement.along(lineString, routeProgress.getDistanceTraveled(),
       TurfConstants.UNIT_METERS);
-    Point futurePoint = TurfMeasurement.along(lineString, location.getSpeed() == 0.0 ? 1
-        : (routeProgress.getDistanceTraveled() + userDistanceBuffer),
-      TurfConstants.UNIT_METERS);
+    // Measure 1 meter ahead of the users current location
+    Point futurePoint = TurfMeasurement.along(lineString, 1, TurfConstants.UNIT_METERS);
 
     double azimuth = TurfMeasurement.bearing(currentPoint, futurePoint);
 

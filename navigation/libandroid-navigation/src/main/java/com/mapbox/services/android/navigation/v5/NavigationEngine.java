@@ -116,7 +116,7 @@ class NavigationEngine {
 
     // Snap location to the route if they aren't off route and return the location object
     if (isSnapEnabled && !isUserOffRoute) {
-      Snap snapToRoute = new SnapToRoute(previousRouteProgress, options);
+      Snap snapToRoute = new SnapToRoute(previousRouteProgress);
       location = snapToRoute.getSnappedLocation(location);
     }
 
