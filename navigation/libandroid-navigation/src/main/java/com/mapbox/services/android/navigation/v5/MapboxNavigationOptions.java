@@ -18,6 +18,8 @@ public class MapboxNavigationOptions {
   private double userLocationSnapDistance;
   private int secondsBeforeReroute;
 
+  private boolean defaultInstructionsDisabled = false;
+
   @NavigationProfiles.Profile
   private String profile;
 
@@ -113,6 +115,10 @@ public class MapboxNavigationOptions {
     return this;
   }
 
+  public void disableDefaultInstructions(boolean disabled) {
+    this.defaultInstructionsDisabled = disabled;
+  }
+
   /*
    * Getters
    */
@@ -185,6 +191,10 @@ public class MapboxNavigationOptions {
    */
   public double getUserLocationSnapDistance() {
     return userLocationSnapDistance;
+  }
+
+  public boolean defaultInstructionsDisabled() {
+    return defaultInstructionsDisabled;
   }
 
   /**

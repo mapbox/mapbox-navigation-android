@@ -110,7 +110,10 @@ public class MapboxNavigation implements MilestoneEventListener {
     offRouteListeners = new CopyOnWriteArrayList<>();
     milestoneEventListeners = new CopyOnWriteArrayList<>();
     milestones = new CopyOnWriteArrayList<>();
-    addDefaultMilestones();
+
+    if (!options.defaultInstructionsDisabled()) {
+      addDefaultMilestones();
+    }
   }
 
   private void addDefaultMilestones() {
