@@ -115,7 +115,7 @@ public class MapboxNavigationOptions {
     return this;
   }
 
-  public void disableDefaultInstructions(boolean disabled) {
+  public void setDefaultInstructionsDisabled(boolean disabled) {
     this.defaultInstructionsDisabled = disabled;
   }
 
