@@ -6,8 +6,6 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.mapbox.services.Constants;
-import com.mapbox.services.android.navigation.v5.instruction.DefaultInstruction;
-import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
@@ -103,9 +101,8 @@ class NavigationEngine {
     for (Milestone milestone : milestones) {
       if (milestone.isOccurring(previousRouteProgress, routeProgress)) {
         for (MilestoneEventListener listener : milestoneEventListeners) {
-          // Create a new DefaultInstruction based on the current RouteProgress and Milestone identifier
-          Instruction instruction = new DefaultInstruction(routeProgress, milestone.getIdentifier());
-          listener.onMilestoneEvent(routeProgress, instruction.getInstruction(), milestone.getIdentifier());
+          String instruction = buildInstructionString(routeProgress, milestone);
+          listener.onMilestoneEvent(routeProgress, instruction, milestone.getIdentifier());
         }
       }
     }
@@ -124,6 +121,15 @@ class NavigationEngine {
     notifyProgressChange(location, routeProgress);
 
     previousRouteProgress = routeProgress;
+  }
+
+  private String buildInstructionString(RouteProgress routeProgress, Milestone milestone) {
+    if (milestone.getInstruction() != null) {
+      // Create a new custom instruction based on the Instruction packaged with the Milestone
+      return milestone.getInstruction().buildInstruction(routeProgress);
+    } else {
+      return "";
+    }
   }
 
   private void notifyOffRouteChange(boolean isUserOffRoute, Location location) {

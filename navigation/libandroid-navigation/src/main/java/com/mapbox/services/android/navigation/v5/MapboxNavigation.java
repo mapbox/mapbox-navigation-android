@@ -12,6 +12,11 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.services.Experimental;
 import com.mapbox.services.android.location.LostLocationEngine;
+import com.mapbox.services.android.navigation.v5.instruction.defaultinstructions.ArrivalInstruction;
+import com.mapbox.services.android.navigation.v5.instruction.defaultinstructions.DepartureInstruction;
+import com.mapbox.services.android.navigation.v5.instruction.defaultinstructions.ImminentInstruction;
+import com.mapbox.services.android.navigation.v5.instruction.defaultinstructions.NewStepInstruction;
+import com.mapbox.services.android.navigation.v5.instruction.defaultinstructions.UrgentInstruction;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -111,6 +116,7 @@ public class MapboxNavigation implements MilestoneEventListener {
   private void addDefaultMilestones() {
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.URGENT_MILESTONE)
+      .setInstruction(new UrgentInstruction())
       .setTrigger(
         Trigger.all(
           Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d),
@@ -124,6 +130,7 @@ public class MapboxNavigation implements MilestoneEventListener {
 
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.IMMINENT_MILESTONE)
+      .setInstruction(new ImminentInstruction())
       .setTrigger(
         Trigger.all(
           Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 400d),
@@ -136,6 +143,7 @@ public class MapboxNavigation implements MilestoneEventListener {
 
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.NEW_STEP_MILESTONE)
+      .setInstruction(new NewStepInstruction())
       .setTrigger(
         Trigger.all(
           Trigger.neq(TriggerProperty.NEW_STEP, TriggerProperty.FALSE),
@@ -146,6 +154,7 @@ public class MapboxNavigation implements MilestoneEventListener {
 
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.DEPARTURE_MILESTONE)
+      .setInstruction(new DepartureInstruction())
       .setTrigger(
         Trigger.all(
           Trigger.eq(TriggerProperty.FIRST_STEP, TriggerProperty.TRUE),
@@ -155,6 +164,7 @@ public class MapboxNavigation implements MilestoneEventListener {
 
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.ARRIVAL_MILESTONE)
+      .setInstruction(new ArrivalInstruction())
       .setTrigger(
         Trigger.all(
           Trigger.eq(TriggerProperty.LAST_STEP, TriggerProperty.TRUE),

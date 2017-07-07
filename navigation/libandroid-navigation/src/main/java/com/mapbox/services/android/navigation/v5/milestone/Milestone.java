@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
 import com.mapbox.services.android.navigation.v5.NavigationException;
+import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 /**
@@ -28,6 +29,10 @@ public abstract class Milestone {
     return builder.getIdentifier();
   }
 
+  public Instruction getInstruction() {
+    return builder.getInstruction();
+  }
+
   /**
    * A milestone can either be passed in to the {@link com.mapbox.services.android.navigation.v5.MapboxNavigation}
    * object (recommended) or validated directly inside your activity.
@@ -48,6 +53,7 @@ public abstract class Milestone {
   public abstract static class Builder {
 
     private int identifier;
+    private Instruction instruction;
 
     public Builder() {
     }
@@ -73,6 +79,15 @@ public abstract class Milestone {
      */
     public Builder setIdentifier(int identifier) {
       this.identifier = identifier;
+      return this;
+    }
+
+    public Instruction getInstruction() {
+      return instruction;
+    }
+
+    public Builder setInstruction(Instruction instruction) {
+      this.instruction = instruction;
       return this;
     }
 

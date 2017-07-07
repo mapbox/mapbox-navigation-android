@@ -28,6 +28,7 @@ import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.ui.v5.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.RouteMilestone;
@@ -91,6 +92,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
     navigation.addMilestone(new RouteMilestone.Builder()
       .setIdentifier(BEGIN_ROUTE_MILESTONE)
+      .setInstruction(new BeginRouteInstruction())
       .setTrigger(
         Trigger.all(
           Trigger.lt(TriggerProperty.STEP_INDEX, 3),
@@ -325,5 +327,13 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
+  }
+
+  private class BeginRouteInstruction extends Instruction {
+
+    @Override
+    public String buildInstruction(RouteProgress routeProgress) {
+      return "Have a safe trip!";
+    }
   }
 }
