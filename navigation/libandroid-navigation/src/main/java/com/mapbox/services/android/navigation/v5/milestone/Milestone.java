@@ -29,6 +29,14 @@ public abstract class Milestone {
     return builder.getIdentifier();
   }
 
+  /**
+   * Milestone specific {@link Instruction}, which can be used to build a {@link String}
+   * instruction specified by the superclass
+   *
+   * @return {@link Instruction} to be used to build the {@link String} passed to
+   * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
+   * @since 0.4.0
+   */
   public Instruction getInstruction() {
     return builder.getInstruction();
   }
@@ -82,6 +90,13 @@ public abstract class Milestone {
       return this;
     }
 
+    /**
+     * Milestone specific {@link Instruction}, which can be used to build a {@link String}
+     * instruction specified by the superclass
+     *
+     * @return this builder
+     * @since 0.4.0
+     */
     public Instruction getInstruction() {
       return instruction;
     }
