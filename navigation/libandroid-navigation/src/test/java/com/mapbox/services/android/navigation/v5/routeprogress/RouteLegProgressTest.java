@@ -20,7 +20,7 @@ import org.mockito.Mockito;
 public class RouteLegProgressTest extends BaseTest {
 
   // Fixtures
-  private static final String PRECISION_6 = "directions_v5_precision_6.json";
+  private static final String DIRECTIONS_PRECISION_6 = "directions_v5_precision_6.json";
 
   private DirectionsRoute route;
   private RouteLeg firstLeg;
@@ -28,7 +28,7 @@ public class RouteLegProgressTest extends BaseTest {
   @Before
   public void setup() {
     Gson gson = new Gson();
-    String body = readPath(PRECISION_6);
+    String body = readPath(DIRECTIONS_PRECISION_6);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     route = response.getRoutes().get(0);
     firstLeg = route.getLegs().get(0);

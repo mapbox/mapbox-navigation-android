@@ -28,13 +28,13 @@ import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.ui.v5.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.RouteMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Trigger;
 import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
@@ -196,6 +196,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     navigation.getRoute(coordinates, null, new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+        Timber.d("Url: %s", call.request().url().toString());
         if (response.body() != null) {
           if (response.body().getRoutes().size() > 0) {
             DirectionsRoute route = response.body().getRoutes().get(0);
