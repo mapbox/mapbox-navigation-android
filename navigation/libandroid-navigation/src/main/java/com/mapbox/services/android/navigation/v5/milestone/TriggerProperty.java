@@ -64,7 +64,7 @@ public final class TriggerProperty {
 
   static SparseArray<Number[]> getSparseArray(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
     // Build hashMap matching the trigger properties to their corresponding current values.
-    SparseArray<Number[]> statementObjects = new SparseArray<>();
+    SparseArray<Number[]> statementObjects = new SparseArray<>(10);
     statementObjects.put(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
       new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDistance()});
     statementObjects.put(TriggerProperty.STEP_DURATION_TOTAL_SECONDS,
