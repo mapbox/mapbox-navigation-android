@@ -163,7 +163,8 @@ public class RouteProgressTest extends BaseTest {
   @Test
   public void multiLeg_getDistanceRemaining_equalsZeroAtEndOfRoute() {
     Position lastCoordinate
-      = multiLegRoute.getLegs().get(0).getSteps().get(multiLegRoute.getLegs().get(0).getSteps().size() - 1)
+      = multiLegRoute.getLegs().get(multiLegRoute.getLegs().size() - 1)
+      .getSteps().get(multiLegRoute.getLegs().get(multiLegRoute.getLegs().size() - 1).getSteps().size() - 1)
       .getManeuver().asPosition();
     RouteProgress routeProgress
       = RouteProgress.create(multiLegRoute, buildTestLocation(lastCoordinate), multiLegRoute.getLegs().size() - 1,
@@ -194,8 +195,9 @@ public class RouteProgressTest extends BaseTest {
   @Test
   public void multiLeg_getFractionTraveled_equalsOneAtEndOfRoute() {
     Position lastCoordinate
-      = multiLegRoute.getLegs().get(0).getSteps().get(multiLegRoute.getLegs().get(0).getSteps().size() - 1)
-      .getManeuver().asPosition();
+      = multiLegRoute.getLegs().get(multiLegRoute.getLegs().size() - 1)
+      .getSteps().get(multiLegRoute.getLegs().get(multiLegRoute.getLegs().size() - 1)
+        .getSteps().size() - 1).getManeuver().asPosition();
     RouteProgress routeProgress = RouteProgress.create(
       multiLegRoute, buildTestLocation(lastCoordinate), multiLegRoute.getLegs().size() - 1,
       multiLegRoute.getLegs().get(multiLegRoute.getLegs().size() - 1).getSteps().size() - 1);
@@ -230,7 +232,8 @@ public class RouteProgressTest extends BaseTest {
   @Test
   public void multiLeg_getDistanceTraveled_equalsRouteDistanceAtEndOfRoute() {
     Position lastCoordinate
-      = multiLegRoute.getLegs().get(0).getSteps().get(multiLegRoute.getLegs().get(0).getSteps().size() - 1)
+      = multiLegRoute.getLegs().get(multiLegRoute.getLegs().size() - 1)
+      .getSteps().get(multiLegRoute.getLegs().get(multiLegRoute.getLegs().size() - 1).getSteps().size() - 1)
       .getManeuver().asPosition();
     RouteProgress routeProgress = RouteProgress.create(multiLegRoute, buildTestLocation(lastCoordinate),
       multiLegRoute.getLegs().size() - 1, multiLegRoute.getLegs().get(multiLegRoute.getLegs().size() - 1)
