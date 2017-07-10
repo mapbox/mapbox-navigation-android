@@ -3,20 +3,24 @@ package com.mapbox.services.android.navigation.v5.milestone;
 import android.location.Location;
 
 import com.google.gson.Gson;
+import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.commons.models.Position;
+import com.mapbox.services.commons.utils.PolylineUtils;
 
 import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
+import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
@@ -33,7 +37,12 @@ public class TriggerTest extends BaseTest {
     String body = readPath(PRECISION_6);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     DirectionsRoute route = response.getRoutes().get(0);
-    routeProgress = RouteProgress.create(route, Mockito.mock(Location.class), 0, 1);
+    Location location = new Location("test");
+    List<Position> coords = PolylineUtils.decode(route.getLegs().get(0).getSteps().get(1).getGeometry(),
+      Constants.PRECISION_6);
+    location.setLatitude(coords.get(0).getLatitude());
+    location.setLongitude(coords.get(0).getLongitude());
+    routeProgress = RouteProgress.create(route, location, 0, 1);
   }
 
   /*
@@ -80,7 +89,7 @@ public class TriggerTest extends BaseTest {
   public void triggerAny_noConditionsAreTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(Trigger.any(
-        Trigger.gt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 100d),
+        Trigger.gt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 200d),
         Trigger.lt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       ))
       .build();
@@ -104,7 +113,7 @@ public class TriggerTest extends BaseTest {
   }
 
   @Test
-  public void triggerAny_onoConditionsTrue() {
+  public void triggerAny_oneConditionsTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(Trigger.any(
         Trigger.gt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 100d),
@@ -121,7 +130,7 @@ public class TriggerTest extends BaseTest {
   public void triggerNone_noConditionsAreTrue() {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(Trigger.none(
-        Trigger.gt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 100d),
+        Trigger.gt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 200d),
         Trigger.lt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
       ))
       .build();
