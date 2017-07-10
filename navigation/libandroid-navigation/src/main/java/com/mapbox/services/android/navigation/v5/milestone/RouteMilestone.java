@@ -1,7 +1,7 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
 import com.mapbox.services.android.navigation.v5.NavigationException;
-import com.mapbox.services.android.navigation.v5.RouteProgress;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 /**
  * Using a Route Milestone will result in {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
