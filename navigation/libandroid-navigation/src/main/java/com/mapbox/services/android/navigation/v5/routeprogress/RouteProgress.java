@@ -57,7 +57,8 @@ public abstract class RouteProgress {
   public static RouteProgress create(
     DirectionsRoute route, Location location, int legIndex, int stepIndex) {
     RouteLegProgress routeLegProgress
-      = RouteLegProgress.create(route.getLegs().get(legIndex), stepIndex, userSnappedToRoutePosition(location, route));
+      = RouteLegProgress.create(route.getLegs().get(legIndex), stepIndex, userSnappedToRoutePosition(location,
+      legIndex, stepIndex, route));
     return new AutoValue_RouteProgress(routeLegProgress, route, location, legIndex);
   }
 
@@ -143,7 +144,8 @@ public abstract class RouteProgress {
       Constants.PRECISION_6);
     if (coords.size() > 1) {
       LineString slicedLine = TurfMisc.lineSlice(
-        Point.fromCoordinates(userSnappedToRoutePosition(location(), route())),
+        Point.fromCoordinates(userSnappedToRoutePosition(location(), legIndex(), currentLegProgress().stepIndex(),
+          route())),
         Point.fromCoordinates(coords.get(coords.size() - 1)),
         LineString.fromCoordinates(coords)
       );
@@ -167,13 +169,15 @@ public abstract class RouteProgress {
 
   // Always get the closest position on the route to the actual
   // raw location so that can accurately calculate values.
-  private static Position userSnappedToRoutePosition(Location location, DirectionsRoute route) {
+  private static Position userSnappedToRoutePosition(Location location, int legIndex, int stepIndex,
+                                                     DirectionsRoute route) {
     Point locationToPoint = Point.fromCoordinates(
       new double[] {location.getLongitude(), location.getLatitude()}
     );
 
     // Decode the geometry
-    List<Position> coords = PolylineUtils.decode(route.getGeometry(), PRECISION_6);
+    List<Position> coords = PolylineUtils.decode(route.getLegs().get(legIndex).getSteps().get(stepIndex).getGeometry(),
+      PRECISION_6);
 
     // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
     // Point on the LineString.
