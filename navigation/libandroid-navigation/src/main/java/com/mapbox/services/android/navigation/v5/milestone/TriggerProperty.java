@@ -57,6 +57,10 @@ public final class TriggerProperty {
 
   public static final int NEXT_STEP_DISTANCE_METERS = 0x00000007;
 
+  public static final int FIRST_LEG = 0x00000009;
+
+  public static final int LAST_LEG = 0x000000010;
+
 
   public static final int TRUE = 0x00000124;
 
@@ -64,7 +68,7 @@ public final class TriggerProperty {
 
   static SparseArray<Number[]> getSparseArray(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
     // Build hashMap matching the trigger properties to their corresponding current values.
-    SparseArray<Number[]> statementObjects = new SparseArray<>(10);
+    SparseArray<Number[]> statementObjects = new SparseArray<>(12);
     statementObjects.put(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
       new Number[] {routeProgress.getCurrentLegProgress().getCurrentStep().getDistance()});
     statementObjects.put(TriggerProperty.STEP_DURATION_TOTAL_SECONDS,
@@ -90,6 +94,9 @@ public final class TriggerProperty {
       new Number[] {
         routeProgress.getCurrentLegProgress().getUpComingStep() != null
           ? routeProgress.getCurrentLegProgress().getUpComingStep().getDistance() : 0});
+    statementObjects.put(TriggerProperty.FIRST_LEG, new Number[] {routeProgress.getLegIndex(), 0});
+    statementObjects.put(TriggerProperty.LAST_LEG, new Number[] {routeProgress.getLegIndex(),
+      (routeProgress.getRoute().getLegs().size() - 1)});
     return statementObjects;
   }
 }
