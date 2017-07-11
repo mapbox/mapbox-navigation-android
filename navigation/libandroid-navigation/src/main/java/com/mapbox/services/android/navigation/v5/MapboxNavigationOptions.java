@@ -18,7 +18,7 @@ public class MapboxNavigationOptions {
   private double userLocationSnapDistance;
   private int secondsBeforeReroute;
 
-  private boolean defaultInstructionsDisabled = false;
+  private boolean defaultMilestonesEnabled = true;
 
   @NavigationProfiles.Profile
   private String profile;
@@ -115,8 +115,14 @@ public class MapboxNavigationOptions {
     return this;
   }
 
-  public void setDefaultInstructionsDisabled(boolean disabled) {
-    this.defaultInstructionsDisabled = disabled;
+  /**
+   * Will create a set of pre-defined Milestones for basic updates while navigating along a route.
+   *
+   * @param enabled - will create default milestones (default)
+   * @since 0.4.0
+   */
+  public void setDefaultMilestonesEnabled(boolean enabled) {
+    this.defaultMilestonesEnabled = enabled;
   }
 
   /*
@@ -193,8 +199,8 @@ public class MapboxNavigationOptions {
     return userLocationSnapDistance;
   }
 
-  public boolean defaultInstructionsDisabled() {
-    return defaultInstructionsDisabled;
+  public boolean defaultMilestonesEnabled() {
+    return defaultMilestonesEnabled;
   }
 
   /**

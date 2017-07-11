@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.instruction.defaultinstructions;
+package com.mapbox.services.android.navigation.v5.instruction;
 
 import android.text.TextUtils;
 import android.util.SparseArray;
@@ -17,7 +17,7 @@ import java.util.Locale;
  *
  * @since 0.4.0
  */
-class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.InstructionBuilder> {
+public class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.InstructionBuilder> {
 
   private static final double MINIMUM_UPCOMING_STEP_DISTANCE = 15d;
   private static final String DECIMAL_FORMAT = "###.#";
@@ -44,7 +44,7 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
    * @return {@link String} instruction that has been created by the engine
    * @since 0.4.0
    */
-  static String createInstruction(RouteProgress routeProgress, int identifier) {
+  public static String createInstruction(RouteProgress routeProgress, int identifier) {
     DefaultInstructionEngine defaultInstructionEngine = new DefaultInstructionEngine();
     if (defaultInstructionEngine.get(identifier) != null) {
       return defaultInstructionEngine.get(identifier).build(routeProgress);
