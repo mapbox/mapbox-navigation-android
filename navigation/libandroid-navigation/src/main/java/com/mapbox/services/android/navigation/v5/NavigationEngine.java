@@ -131,7 +131,7 @@ class NavigationEngine {
 
     if (isUserOffRoute) {
       if (location.getTime() > timeIntervalSinceLastOffRoute
-        + TimeUnit.SECONDS.toMillis(NavigationConstants.SECONDS_BEFORE_REROUTE)) {
+        + TimeUnit.SECONDS.toMillis(options.getSecondsBeforeReroute())) {
         for (OffRouteListener offRouteListener : offRouteListeners) {
           offRouteListener.userOffRoute(location);
         }
