@@ -181,8 +181,8 @@ class NavigationEngine {
    */
   private void increaseIndex(RouteProgress routeProgress) {
     // Check if we are in the last step in the current routeLeg and iterate it if needed.
-    if (stepIndex >= routeProgress.getRoute().getLegs().get(routeProgress.getLegIndex()).getSteps().size() - 1
-      && legIndex < routeProgress.getRoute().getLegs().size()) {
+    if (stepIndex >= routeProgress.getRoute().getLegs().get(routeProgress.getLegIndex()).getSteps().size() - 2
+      && legIndex < routeProgress.getRoute().getLegs().size() - 1) {
       legIndex += 1;
       stepIndex = 0;
     } else {
