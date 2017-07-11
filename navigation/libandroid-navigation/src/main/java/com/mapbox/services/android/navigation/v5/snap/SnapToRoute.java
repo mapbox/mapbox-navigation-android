@@ -58,12 +58,16 @@ public class SnapToRoute extends Snap {
   }
 
   private static float snapLocationBearing(RouteProgress routeProgress) {
-    LineString lineString = LineString.fromPolyline(routeProgress.getRoute().getGeometry(), PRECISION_6);
+    LineString lineString = LineString.fromPolyline(
+      routeProgress.getCurrentLegProgress().getCurrentStep().getGeometry(), PRECISION_6);
 
-    Point currentPoint = TurfMeasurement.along(lineString, routeProgress.getDistanceTraveled(),
+    Point currentPoint = TurfMeasurement.along(
+      lineString, routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceTraveled(),
       TurfConstants.UNIT_METERS);
     // Measure 1 meter ahead of the users current location
-    Point futurePoint = TurfMeasurement.along(lineString, 1, TurfConstants.UNIT_METERS);
+    Point futurePoint = TurfMeasurement.along(
+      lineString, routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceTraveled() + 1,
+      TurfConstants.UNIT_METERS);
 
     double azimuth = TurfMeasurement.bearing(currentPoint, futurePoint);
 

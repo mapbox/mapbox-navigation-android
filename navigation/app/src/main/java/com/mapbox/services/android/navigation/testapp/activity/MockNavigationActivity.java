@@ -32,7 +32,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.milestone.StepMilestone;
+import com.mapbox.services.android.navigation.v5.milestone.RouteMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Trigger;
 import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -87,12 +87,13 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
 
-    navigation.addMilestone(new StepMilestone.Builder()
+    navigation.addMilestone(new RouteMilestone.Builder()
       .setIdentifier(BEGIN_ROUTE_MILESTONE)
       .setTrigger(
         Trigger.all(
           Trigger.lt(TriggerProperty.STEP_INDEX, 3),
-          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 200)
+          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 200),
+          Trigger.gte(TriggerProperty.STEP_DISTANCE_TRAVELED_METERS, 75)
         )
       ).build());
   }
