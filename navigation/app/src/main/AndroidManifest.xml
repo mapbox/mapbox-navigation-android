@@ -35,14 +35,6 @@
         </activity>
 
         <activity
-            android:name=".activity.OffRouteDetectionActivity"
-            android:label="@string/title_off_route_detection">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
             android:name=".activity.LocationInfoActivity"
             android:label="@string/title_location_info">
             <meta-data
