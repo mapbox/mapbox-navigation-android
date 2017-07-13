@@ -17,7 +17,7 @@ import java.util.Locale;
  *
  * @since 0.4.0
  */
-class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.InstructionBuilder> {
+public class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.InstructionBuilder> {
 
   private static final double MINIMUM_UPCOMING_STEP_DISTANCE = 15d;
   private static final String DECIMAL_FORMAT = "###.#";
@@ -27,10 +27,30 @@ class DefaultInstructionEngine extends SparseArray<DefaultInstructionEngine.Inst
   private static final String THEN_STRING_FORMAT = "%s then %s";
   private static final String THEN_IN_STRING_FORMAT = "%s then in %s %s";
   private static final String CONTINUE_STRING_FORMAT = "Continue on %s for %s";
+  private static final String EMPTY_STRING = "";
 
-  DefaultInstructionEngine() {
+  private DefaultInstructionEngine() {
     super(5);
     initDefaultBuilders();
+  }
+
+  /**
+   * Provides the {@link RouteProgress} and milestone identifier to the {@link DefaultInstructionEngine}
+   * which returns the appropriate instruction.  Will return an empty {@link String} if the
+   * milestone identifier provided is not one of the default identifiers
+   *
+   * @param routeProgress for current route data / distance
+   * @param identifier    for what type of instruction we want to build
+   * @return {@link String} instruction that has been created by the engine
+   * @since 0.4.0
+   */
+  public static String createInstruction(RouteProgress routeProgress, int identifier) {
+    DefaultInstructionEngine defaultInstructionEngine = new DefaultInstructionEngine();
+    if (defaultInstructionEngine.get(identifier) != null) {
+      return defaultInstructionEngine.get(identifier).build(routeProgress);
+    } else {
+      return EMPTY_STRING;
+    }
   }
 
   private void initDefaultBuilders() {

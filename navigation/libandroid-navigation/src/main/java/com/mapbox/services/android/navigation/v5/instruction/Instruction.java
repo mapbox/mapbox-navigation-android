@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.instruction;
 
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+
 /**
  * Base Instruction. Subclassed to provide concrete instructions.
  *
@@ -13,5 +15,5 @@ public abstract class Instruction {
    * @return {@link String} instruction that will be voiced on the client
    * @since 0.4.0
    */
-  public abstract String getInstruction();
+  public abstract String buildInstruction(RouteProgress routeProgress);
 }

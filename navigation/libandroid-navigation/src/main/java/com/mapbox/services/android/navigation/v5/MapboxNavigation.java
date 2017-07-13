@@ -12,6 +12,8 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.services.Experimental;
 import com.mapbox.services.android.location.LostLocationEngine;
+import com.mapbox.services.android.navigation.v5.instruction.Instruction;
+import com.mapbox.services.android.navigation.v5.instruction.DefaultInstructionEngine;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -105,12 +107,16 @@ public class MapboxNavigation implements MilestoneEventListener {
     offRouteListeners = new CopyOnWriteArrayList<>();
     milestoneEventListeners = new CopyOnWriteArrayList<>();
     milestones = new CopyOnWriteArrayList<>();
-    addDefaultMilestones();
+
+    if (options.defaultMilestonesEnabled()) {
+      addDefaultMilestones();
+    }
   }
 
   private void addDefaultMilestones() {
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.URGENT_MILESTONE)
+      .setInstruction(new UrgentInstruction())
       .setTrigger(
         Trigger.all(
           Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d),
@@ -124,6 +130,7 @@ public class MapboxNavigation implements MilestoneEventListener {
 
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.IMMINENT_MILESTONE)
+      .setInstruction(new ImminentInstruction())
       .setTrigger(
         Trigger.all(
           Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 400d),
@@ -136,6 +143,7 @@ public class MapboxNavigation implements MilestoneEventListener {
 
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.NEW_STEP_MILESTONE)
+      .setInstruction(new NewStepInstruction())
       .setTrigger(
         Trigger.all(
           Trigger.neq(TriggerProperty.NEW_STEP, TriggerProperty.FALSE),
@@ -146,6 +154,7 @@ public class MapboxNavigation implements MilestoneEventListener {
 
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.DEPARTURE_MILESTONE)
+      .setInstruction(new DepartureInstruction())
       .setTrigger(
         Trigger.all(
           Trigger.eq(TriggerProperty.FIRST_STEP, TriggerProperty.TRUE),
@@ -155,12 +164,89 @@ public class MapboxNavigation implements MilestoneEventListener {
 
     addMilestone(new StepMilestone.Builder()
       .setIdentifier(NavigationConstants.ARRIVAL_MILESTONE)
+      .setInstruction(new ArrivalInstruction())
       .setTrigger(
         Trigger.all(
           Trigger.eq(TriggerProperty.LAST_STEP, TriggerProperty.TRUE),
           Trigger.eq(TriggerProperty.LAST_LEG, TriggerProperty.TRUE)
         )
       ).build());
+  }
+
+  /**
+   * Used to provide the {@link String} instruction in
+   * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
+   * for Arrival Milestones
+   *
+   * @since 0.4.0
+   */
+  private class ArrivalInstruction extends Instruction {
+
+    @Override
+    public String buildInstruction(RouteProgress routeProgress) {
+      return DefaultInstructionEngine.createInstruction(routeProgress, NavigationConstants.ARRIVAL_MILESTONE);
+    }
+  }
+
+  /**
+   * Used to provide the {@link String} instruction in
+   * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
+   * for Departure Milestones
+   *
+   * @since 0.4.0
+   */
+  private class DepartureInstruction extends Instruction {
+
+    @Override
+    public String buildInstruction(RouteProgress routeProgress) {
+      return DefaultInstructionEngine.createInstruction(routeProgress, NavigationConstants.DEPARTURE_MILESTONE);
+    }
+  }
+
+  /**
+   * Used to provide the {@link String} instruction in
+   * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
+   * for Imminent Milestones
+   *
+   * @since 0.4.0
+   */
+  private class ImminentInstruction extends Instruction {
+
+    @Override
+    public String buildInstruction(RouteProgress routeProgress) {
+      return DefaultInstructionEngine.createInstruction(routeProgress, NavigationConstants.IMMINENT_MILESTONE);
+    }
+  }
+
+  /**
+   * Used to provide the {@link String} instruction in
+   * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
+   * for New Step Milestones
+   *
+   * @since 0.4.0
+   */
+  private class NewStepInstruction extends Instruction {
+
+    @Override
+    public String buildInstruction(RouteProgress routeProgress) {
+      return DefaultInstructionEngine.createInstruction(routeProgress, NavigationConstants.NEW_STEP_MILESTONE);
+    }
+  }
+
+  /**
+   * Used to provide the {@link String} instruction in
+   * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
+   * for Urgent Milestones
+   *
+   * @since 0.4.0
+   */
+  private class UrgentInstruction extends Instruction {
+
+    @Override
+    public String buildInstruction(RouteProgress routeProgress) {
+      return DefaultInstructionEngine.createInstruction(routeProgress, NavigationConstants.URGENT_MILESTONE);
+    }
+
   }
 
   @Override
