@@ -71,8 +71,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   /**
    * Construct an instance of {@link NavigationMapRoute}.
    *
-   * @param mapView   the MapView to apply the traffic plugin to
-   * @param mapboxMap the MapboxMap to apply traffic plugin with
+   * @param mapView   the MapView to apply the route to
+   * @param mapboxMap the MapboxMap to apply route with
    * @since 0.4.0
    */
   public NavigationMapRoute(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap) {
@@ -82,8 +82,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   /**
    * Construct an instance of {@link NavigationMapRoute}.
    *
-   * @param mapView    the MapView to apply the traffic plugin to
-   * @param mapboxMap  the MapboxMap to apply traffic plugin with
+   * @param mapView    the MapView to apply the route to
+   * @param mapboxMap  the MapboxMap to apply route with
    * @param belowLayer optionally pass in a layer id to place the route line below
    * @since 0.4.0
    */
@@ -96,8 +96,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    *
    * @param navigation an instance of the {@link MapboxNavigation} object. Passing in null means your route won't
    *                   consider rerouting during a navigation session.
-   * @param mapView    the MapView to apply the traffic plugin to
-   * @param mapboxMap  the MapboxMap to apply traffic plugin with
+   * @param mapView    the MapView to apply the route to
+   * @param mapboxMap  the MapboxMap to apply route with
    * @since 0.4.0
    */
   public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
@@ -110,8 +110,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    *
    * @param navigation an instance of the {@link MapboxNavigation} object. Passing in null means your route won't
    *                   consider rerouting during a navigation session.
-   * @param mapView    the MapView to apply the traffic plugin to
-   * @param mapboxMap  the MapboxMap to apply traffic plugin with
+   * @param mapView    the MapView to apply the route to
+   * @param mapboxMap  the MapboxMap to apply route with
    * @param belowLayer optionally pass in a layer id to place the route line below
    * @since 0.4.0
    */
@@ -125,8 +125,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    *
    * @param navigation an instance of the {@link MapboxNavigation} object. Passing in null means your route won't
    *                   consider rerouting during a navigation session.
-   * @param mapView    the MapView to apply the traffic plugin to
-   * @param mapboxMap  the MapboxMap to apply traffic plugin with
+   * @param mapView    the MapView to apply the route to
+   * @param mapboxMap  the MapboxMap to apply route with
    * @param styleRes   a style resource with custom route colors, scale, etc.
    */
   public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
@@ -139,8 +139,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    *
    * @param navigation an instance of the {@link MapboxNavigation} object. Passing in null means your route won't
    *                   consider rerouting during a navigation session.
-   * @param mapView    the MapView to apply the traffic plugin to
-   * @param mapboxMap  the MapboxMap to apply traffic plugin with
+   * @param mapView    the MapView to apply the route to
+   * @param mapboxMap  the MapboxMap to apply route with
    * @param styleRes   a style resource with custom route colors, scale, etc.
    * @param belowLayer optionally pass in a layer id to place the route line below
    */
