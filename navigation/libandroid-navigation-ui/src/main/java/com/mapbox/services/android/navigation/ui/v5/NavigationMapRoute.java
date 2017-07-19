@@ -19,8 +19,8 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.v5.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.commons.geojson.Feature;
@@ -66,14 +66,38 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private final MapboxNavigation navigation;
   private DirectionsRoute route;
   private boolean visible;
+  private String belowLayer;
+
+  /**
+   * Construct an instance of {@link NavigationMapRoute}.
+   *
+   * @param mapView   the MapView to apply the route to
+   * @param mapboxMap the MapboxMap to apply route with
+   * @since 0.4.0
+   */
+  public NavigationMapRoute(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap) {
+    this(null, mapView, mapboxMap, R.style.NavigationMapRoute);
+  }
+
+  /**
+   * Construct an instance of {@link NavigationMapRoute}.
+   *
+   * @param mapView    the MapView to apply the route to
+   * @param mapboxMap  the MapboxMap to apply route with
+   * @param belowLayer optionally pass in a layer id to place the route line below
+   * @since 0.4.0
+   */
+  public NavigationMapRoute(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap, @Nullable String belowLayer) {
+    this(null, mapView, mapboxMap, R.style.NavigationMapRoute, belowLayer);
+  }
 
   /**
    * Construct an instance of {@link NavigationMapRoute}.
    *
    * @param navigation an instance of the {@link MapboxNavigation} object. Passing in null means your route won't
    *                   consider rerouting during a navigation session.
-   * @param mapView    the MapView to apply the traffic plugin to
-   * @param mapboxMap  the MapboxMap to apply traffic plugin with
+   * @param mapView    the MapView to apply the route to
+   * @param mapboxMap  the MapboxMap to apply route with
    * @since 0.4.0
    */
   public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
@@ -86,16 +110,47 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    *
    * @param navigation an instance of the {@link MapboxNavigation} object. Passing in null means your route won't
    *                   consider rerouting during a navigation session.
-   * @param mapView    the MapView to apply the traffic plugin to
-   * @param mapboxMap  the MapboxMap to apply traffic plugin with
+   * @param mapView    the MapView to apply the route to
+   * @param mapboxMap  the MapboxMap to apply route with
+   * @param belowLayer optionally pass in a layer id to place the route line below
+   * @since 0.4.0
+   */
+  public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
+                            @NonNull MapboxMap mapboxMap, @Nullable String belowLayer) {
+    this(navigation, mapView, mapboxMap, R.style.NavigationMapRoute);
+  }
+
+  /**
+   * Construct an instance of {@link NavigationMapRoute}.
+   *
+   * @param navigation an instance of the {@link MapboxNavigation} object. Passing in null means your route won't
+   *                   consider rerouting during a navigation session.
+   * @param mapView    the MapView to apply the route to
+   * @param mapboxMap  the MapboxMap to apply route with
    * @param styleRes   a style resource with custom route colors, scale, etc.
    */
   public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
                             @NonNull MapboxMap mapboxMap, @StyleRes int styleRes) {
+    this(navigation, mapView, mapboxMap, styleRes, null);
+  }
+
+  /**
+   * Construct an instance of {@link NavigationMapRoute}.
+   *
+   * @param navigation an instance of the {@link MapboxNavigation} object. Passing in null means your route won't
+   *                   consider rerouting during a navigation session.
+   * @param mapView    the MapView to apply the route to
+   * @param mapboxMap  the MapboxMap to apply route with
+   * @param styleRes   a style resource with custom route colors, scale, etc.
+   * @param belowLayer optionally pass in a layer id to place the route line below
+   */
+  public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
+                            @NonNull MapboxMap mapboxMap, @StyleRes int styleRes, @Nullable String belowLayer) {
     this.styleRes = styleRes;
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
+    this.belowLayer = belowLayer;
     addListeners();
     initialize();
   }
@@ -292,13 +347,15 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    * Iterate through map style layers backwards till the first not-symbol layer is found.
    */
   private String placeRouteBelow() {
-    List<Layer> styleLayers = mapboxMap.getLayers();
-    for (int i = styleLayers.size() - 1; i >= 0; i--) {
-      if (!(styleLayers.get(i) instanceof SymbolLayer)) {
-        return styleLayers.get(i).getId();
+    if (belowLayer == null || belowLayer.isEmpty()) {
+      List<Layer> styleLayers = mapboxMap.getLayers();
+      for (int i = styleLayers.size() - 1; i >= 0; i--) {
+        if (!(styleLayers.get(i) instanceof SymbolLayer)) {
+          return styleLayers.get(i).getId();
+        }
       }
     }
-    return null;
+    return belowLayer;
   }
 
   /**
