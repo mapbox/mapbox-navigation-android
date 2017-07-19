@@ -87,7 +87,7 @@ public final class TriggerProperty {
         routeProgress.getCurrentLegProgress().getStepIndex()});
     statementObjects.put(TriggerProperty.LAST_STEP,
       new Number[] {routeProgress.getCurrentLegProgress().getStepIndex(),
-        (routeProgress.getCurrentLeg().getSteps().size() - 1)});
+        (routeProgress.getCurrentLeg().getSteps().size() - 2)});
     statementObjects.put(TriggerProperty.FIRST_STEP,
       new Number[] {routeProgress.getCurrentLegProgress().getStepIndex(), 0});
     statementObjects.put(TriggerProperty.NEXT_STEP_DISTANCE_METERS,
