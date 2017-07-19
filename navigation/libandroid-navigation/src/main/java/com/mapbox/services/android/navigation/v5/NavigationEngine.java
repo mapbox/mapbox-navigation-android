@@ -75,8 +75,6 @@ class NavigationEngine {
     // if the previousRouteProgress is null, the navigation session has just begun and one needs to be created
     if (previousRouteProgress == null) {
       previousRouteProgress = RouteProgress.create(directionsRoute, location, 0, 0);
-      notifyProgressChange(location, previousRouteProgress);
-      return;
     }
 
     // TODO Check if the full route information's the same.
