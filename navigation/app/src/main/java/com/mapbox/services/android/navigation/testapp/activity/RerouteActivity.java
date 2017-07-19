@@ -195,6 +195,9 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     super.onStart();
     navigation.onStart();
     mapView.onStart();
+    if (locationLayerPlugin != null) {
+      locationLayerPlugin.onStart();
+    }
   }
 
   @Override
@@ -207,6 +210,10 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
       locationEngine.removeLocationEngineListener(this);
       locationEngine.removeLocationUpdates();
       locationEngine.deactivate();
+    }
+
+    if (locationLayerPlugin != null) {
+      locationLayerPlugin.onStop();
     }
 
     if (navigation != null) {
