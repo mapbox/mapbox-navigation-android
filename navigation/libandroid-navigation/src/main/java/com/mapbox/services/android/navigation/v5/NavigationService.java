@@ -151,9 +151,21 @@ public class NavigationService extends Service implements LocationEngineListener
           navigationEventListener.onRunning(true);
         }
       }
+
+      // Used to force onProgressChange at the very beginning if last location isn't null.
+      forceLocationUpdate();
+
     } else {
       throw new NavigationException("LocationEngine must be passed to the MapboxNavigation before a navigation session"
         + "begins, also check that the locationEngine isn't null.");
+    }
+  }
+
+  @SuppressWarnings( {"MissingPermission"})
+  private void forceLocationUpdate() {
+    Location lastLocation = locationEngine.getLastLocation();
+    if (lastLocation != null) {
+      navigationEngine.onLocationChanged(directionsRoute, lastLocation);
     }
   }
 

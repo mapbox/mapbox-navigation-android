@@ -14,6 +14,8 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.testapp.R;
@@ -46,6 +48,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @BindView(R.id.mapView)
   MapView mapView;
 
+  private LocationLayerPlugin locationLayerPlugin;
   private LocationEngine locationEngine;
   private MapboxNavigation navigation;
   private MapboxMap mapboxMap;
@@ -67,13 +70,15 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     // Initialize MapboxNavigation and add listeners
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
     navigation.addNavigationEventListener(this);
-
   }
 
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     mapboxMap.setOnMapClickListener(this);
+
+    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, null);
+    locationLayerPlugin.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
 
     // Use the mockLocationEngine
     locationEngine = new MockLocationEngine(1000, 30, false);
@@ -120,6 +125,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
+    locationLayerPlugin.forceLocationUpdate(location);
     Timber.d("onRouteProgressChange: %s", routeProgress.getCurrentLegProgress().getStepIndex());
   }
 
@@ -189,6 +195,9 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     super.onStart();
     navigation.onStart();
     mapView.onStart();
+    if (locationLayerPlugin != null) {
+      locationLayerPlugin.onStart();
+    }
   }
 
   @Override
@@ -201,6 +210,10 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
       locationEngine.removeLocationEngineListener(this);
       locationEngine.removeLocationUpdates();
       locationEngine.deactivate();
+    }
+
+    if (locationLayerPlugin != null) {
+      locationLayerPlugin.onStop();
     }
 
     if (navigation != null) {

@@ -141,7 +141,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
 
-    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, true);
+    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, null);
     locationLayerPlugin.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
 
     navigationMapRoute = new NavigationMapRoute(navigation, mapView, mapboxMap);
@@ -149,7 +149,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapboxMap.setOnMapClickListener(this);
     Snackbar.make(mapView, "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
 
-    locationEngine = new MockLocationEngine();
+    locationEngine = new MockLocationEngine(1000, 30, true);
     mapboxMap.setLocationSource(locationEngine);
 
     newOrigin();

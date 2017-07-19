@@ -72,7 +72,7 @@ class NavigationEngine {
    * @since 0.2.0
    */
   void onLocationChanged(DirectionsRoute directionsRoute, Location location) {
-    // if the previousRouteProgress is null, the route has just begun and one needs to be created
+    // if the previousRouteProgress is null, the navigation session has just begun and one needs to be created
     if (previousRouteProgress == null) {
       previousRouteProgress = RouteProgress.create(directionsRoute, location, 0, 0);
     }
@@ -113,7 +113,7 @@ class NavigationEngine {
 
     // Snap location to the route if they aren't off route and return the location object
     if (isSnapEnabled && !isUserOffRoute) {
-      Snap snapToRoute = new SnapToRoute(previousRouteProgress);
+      Snap snapToRoute = new SnapToRoute(routeProgress);
       location = snapToRoute.getSnappedLocation(location);
     }
 
