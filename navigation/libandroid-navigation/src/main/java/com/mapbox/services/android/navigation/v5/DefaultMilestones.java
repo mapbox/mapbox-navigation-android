@@ -41,11 +41,14 @@ class DefaultMilestones {
         }
       })
       .setTrigger(
-        Trigger.all(
-          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 30d),
-          Trigger.lt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 10d),
-          Trigger.neq(TriggerProperty.FIRST_STEP, TriggerProperty.TRUE),
-          Trigger.gt(TriggerProperty.NEXT_STEP_DISTANCE_METERS, 15d)
+        Trigger.any(
+          Trigger.all(
+            Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 30d),
+            Trigger.lt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 10d),
+            Trigger.neq(TriggerProperty.FIRST_STEP, TriggerProperty.TRUE),
+            Trigger.gt(TriggerProperty.NEXT_STEP_DISTANCE_METERS, 15d)
+          ),
+          Trigger.lte(TriggerProperty.STEP_DISTANCE_REMAINING_METERS, 10d)
         )
       )
       .build()
@@ -66,12 +69,15 @@ class DefaultMilestones {
         }
       })
       .setTrigger(
-        Trigger.all(
-          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 30d),
-          Trigger.lt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 10d),
-          Trigger.neq(TriggerProperty.FIRST_STEP, TriggerProperty.TRUE),
-          Trigger.neq(TriggerProperty.LAST_STEP, TriggerProperty.TRUE),
-          Trigger.lte(TriggerProperty.NEXT_STEP_DISTANCE_METERS, 15d)
+        Trigger.any(
+          Trigger.all(
+            Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 30d),
+            Trigger.lt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 10d),
+            Trigger.neq(TriggerProperty.FIRST_STEP, TriggerProperty.TRUE),
+            Trigger.neq(TriggerProperty.LAST_STEP, TriggerProperty.TRUE),
+            Trigger.lte(TriggerProperty.NEXT_STEP_DISTANCE_METERS, 15d)
+          ),
+          Trigger.lte(TriggerProperty.STEP_DISTANCE_REMAINING_METERS, 10d)
         )
       )
       .build()
