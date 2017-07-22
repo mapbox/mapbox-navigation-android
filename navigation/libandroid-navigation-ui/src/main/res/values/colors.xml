@@ -4,5 +4,9 @@
     <color name="mapbox_navigation_route_layer_congestion_yellow">#FFAB65</color>
     <color name="mapbox_navigation_route_layer_congestion_red">#E85552</color>
     <color name="mapbox_navigation_route_shield_layer_color">#2C5F99</color>
+
+    <color name="mapbox_navigation_bottom_sheet_navy">#263D57</color>
+    <color name="mapbox_navigation_bottom_sheet_navy_alpha_45">#73263D57</color>
+    <color name="mapbox_navigation_bottom_sheet_navy_alpha_10">#1A263D57</color>
 </resources>
 

@@ -58,6 +58,14 @@
                 android:value=".MainActivity"/>
         </activity>
 
+        <activity
+            android:name=".activity.navigationui.SearchDetailsViewActivity"
+            android:label="@string/title_search_details_view">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
     </application>
 
 </manifest>
