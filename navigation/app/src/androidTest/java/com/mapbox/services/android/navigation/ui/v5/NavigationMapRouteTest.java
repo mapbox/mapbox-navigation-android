@@ -10,6 +10,7 @@ import com.mapbox.mapboxsdk.constants.Style;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
+import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.utils.OnMapReadyIdlingResource;
 
 import org.junit.After;
@@ -24,9 +25,9 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static com.mapbox.services.android.navigation.ui.v5.NavigationMapRoute.NavigationMapLayers.NAVIGATION_ROUTE_LAYER;
-import static com.mapbox.services.android.navigation.ui.v5.NavigationMapRoute.NavigationMapLayers.NAVIGATION_ROUTE_SHIELD_LAYER;
-import static com.mapbox.services.android.navigation.ui.v5.NavigationMapRoute.NavigationMapSources.NAVIGATION_ROUTE_SOURCE;
+import static com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute.NavigationMapLayers.NAVIGATION_ROUTE_LAYER;
+import static com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute.NavigationMapLayers.NAVIGATION_ROUTE_SHIELD_LAYER;
+import static com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute.NavigationMapSources.NAVIGATION_ROUTE_SOURCE;
 import static junit.framework.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)

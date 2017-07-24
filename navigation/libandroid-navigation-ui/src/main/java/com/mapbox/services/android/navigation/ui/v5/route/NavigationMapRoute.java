@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.ui.v5;
+package com.mapbox.services.android.navigation.ui.v5.route;
 
 import android.content.res.TypedArray;
 import android.location.Location;
@@ -18,6 +18,7 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.services.Constants;
+import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
