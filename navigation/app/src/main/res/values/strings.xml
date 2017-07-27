@@ -19,4 +19,5 @@
 
     <string name="title_navigation_route_ui">Navigation Map Route</string>
     <string name="description_navigation_route_ui">Draws a route on the map</string>
+    <string name="title_activity_service_test">ServiceTestActivity</string>
 </resources>
