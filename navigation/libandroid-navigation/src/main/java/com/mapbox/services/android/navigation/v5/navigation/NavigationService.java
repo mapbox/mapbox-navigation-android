@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -52,6 +53,17 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   @Override
+  public void onDestroy() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+      thread.quitSafely();
+    } else {
+      thread.quit();
+    }
+    stopSelf();
+    super.onDestroy();
+  }
+
+  @Override
   public boolean handleMessage(Message msg) {
     System.out.println("message: " + msg.what);
     return false;
@@ -67,7 +79,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
   @Override
   public void onConnected() {
-g
+
   }
 
   @Override
