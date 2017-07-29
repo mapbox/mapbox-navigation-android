@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5;
+package com.mapbox.services.android.navigation.v5.navigation;
 
 import com.mapbox.services.Experimental;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;

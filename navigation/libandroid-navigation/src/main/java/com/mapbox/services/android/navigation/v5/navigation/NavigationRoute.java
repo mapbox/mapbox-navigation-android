@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import com.google.auto.value.AutoValue;
+import com.mapbox.services.Constants;
 import com.mapbox.services.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.api.directions.v5.MapboxDirections;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
@@ -11,9 +12,12 @@ import java.util.List;
 
 import retrofit2.Callback;
 
-//@AutoValue
+@AutoValue
 public abstract class NavigationRoute {
 
+  /**
+   * @inheritDoc MapboxDirections#user
+   */
   abstract String user();
 
   abstract String profile();
@@ -24,9 +28,9 @@ public abstract class NavigationRoute {
 
   abstract boolean alternatives();
 
-  abstract double[][] bearings();
+//  abstract double[][] bearings();
 
-  abstract double[] radiuses();
+//  abstract double[] radiuses();
 
   abstract boolean congestion();
 
@@ -45,11 +49,13 @@ public abstract class NavigationRoute {
       .setCoordinates(coordinates())
       .setAccessToken(accessToken())
       .setAlternatives(alternatives())
-      .setBearings(bearings())
-      .setRadiuses(radiuses())
+//      .setBearings(bearings())
+//      .setRadiuses(radiuses())
       .setAnnotation(congestion() ? DirectionsCriteria.ANNOTATION_CONGESTION : null)
-//      .setLanguage(language())
-      .setGeometry(DirectionsCriteria.OVERVIEW_FULL)
+      .setLanguage(language())
+      .setGeometry(DirectionsCriteria.GEOMETRY_POLYLINE6)
+      .setOverview(DirectionsCriteria.OVERVIEW_FULL)
+      .setSteps(true)
       .build();
 
     for (Callback<DirectionsResponse> callback : callbacks) {
@@ -57,7 +63,7 @@ public abstract class NavigationRoute {
     }
   }
 
-//  @AutoValue.Builder
+  @AutoValue.Builder
   public abstract static class Builder {
 
     public abstract Builder user(String user);
@@ -66,17 +72,17 @@ public abstract class NavigationRoute {
 
     public abstract Builder coordinates(List<Position> coordinates);
 
-    public abstract Builder origin(Position origin);
+//    public abstract Builder origin(Position origin);
 
-    public abstract Builder destination(Position destination);
+//    public abstract Builder destination(Position destination);
 
     public abstract Builder accessToken(String accessToken);
 
     public abstract Builder alternatives(boolean alternatives);
 
-    public abstract Builder bearings(double[]... bearings);
+//    public abstract Builder bearings(double[]... bearings);
 
-    public abstract Builder radiuses(double... radiuses);
+//    public abstract Builder radiuses(double... radiuses);
 
     public abstract Builder congestion(boolean congestion);
 
@@ -85,7 +91,7 @@ public abstract class NavigationRoute {
     public abstract NavigationRoute build();
   }
 
-//  public static Builder builder() {
-//    return new AutoValue_NavigationRoute.Builder();
-//  }
+  public static Builder builder() {
+    return new AutoValue_NavigationRoute.Builder();
+  }
 }

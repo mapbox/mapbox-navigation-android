@@ -21,7 +21,9 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteStepProgress;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 import com.mapbox.services.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.api.directions.v5.MapboxDirections;
@@ -124,9 +126,24 @@ public class SnapToRouteActivity extends AppCompatActivity implements OnMapReady
     location.setLatitude(point.getLatitude());
     location.setLongitude(point.getLongitude());
 
-    RouteProgress routeProgress = RouteProgress.create(currentRoute, location, 0, stepCount);
-    SnapToRoute snapToRoute = new SnapToRoute(routeProgress);
-    Location snappedLocation = snapToRoute.getSnappedLocation(location);
+    RouteLegProgress routeLegProgress = RouteLegProgress.builder()
+      .stepIndex(stepCount)
+      .routeLeg(currentRoute.getLegs().get(0))
+      .legDistanceRemaining(currentRoute.getLegs().get(0).getDistance())
+      .currentStepProgress(RouteStepProgress.create(currentRoute.getLegs().get(0).getSteps().get(stepCount),
+        currentRoute.getLegs().get(0).getSteps().get(stepCount).getDistance()))
+      .build();
+
+    RouteProgress routeProgress = RouteProgress.builder()
+      .directionsRoute(currentRoute)
+      .location(location)
+      .legIndex(0)
+      .distanceRemaining(currentRoute.getDistance())
+      .currentLegProgress(routeLegProgress)
+      .build();
+
+    SnapToRoute snapToRoute = new SnapToRoute();
+    Location snappedLocation = snapToRoute.getSnappedLocation(location, routeProgress);
 
     if (snappedLocation == null) {
       Log.i(TAG, "snappedLocation is null");

@@ -19,13 +19,15 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.testapp.R;
-import com.mapbox.services.android.navigation.v5.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
+import com.mapbox.services.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.geojson.LineString;
@@ -33,6 +35,7 @@ import com.mapbox.services.commons.models.Position;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -68,7 +71,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     mapView.getMapAsync(this);
 
     // Initialize MapboxNavigation and add listeners
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
+    navigation = new MapboxNavigation(this);
     navigation.addNavigationEventListener(this);
   }
 
@@ -89,7 +92,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     navigation.setLocationEngine(locationEngine);
 
     // Acquire the navigation's route
-    navigation.getRoute(origin, destination, this);
+    getRoute(origin, destination);
   }
 
   @Override
@@ -117,7 +120,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   public void userOffRoute(Location location) {
     Position newOrigin = Position.fromLngLat(location.getLongitude(), location.getLatitude());
-    navigation.getRoute(newOrigin, destination, location.getBearing(), this);
+    getRoute(newOrigin, destination);
     Timber.d("offRoute");
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
   }
@@ -126,7 +129,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     locationLayerPlugin.forceLocationUpdate(location);
-    Timber.d("onRouteProgressChange: %s", routeProgress.getCurrentLegProgress().getStepIndex());
+    Timber.d("onRouteProgressChange: %s", routeProgress.currentLegProgress().getStepIndex());
   }
 
   @Override
@@ -138,12 +141,28 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
         drawRoute(route);
         if (!running) {
           ((MockLocationEngine) locationEngine).setRoute(route);
-          navigation.startNavigation(route);
-        } else {
-          navigation.updateRoute(route);
         }
+        navigation.startNavigation(route);
       }
     }
+  }
+
+  private void getRoute(Position origin, Position destination) {
+    List<Position> positions = new ArrayList<>();
+    positions.add(origin);
+    positions.add(destination);
+
+    NavigationRoute navigationRoute = NavigationRoute.builder()
+      .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+      .coordinates(positions)
+      .accessToken(Mapbox.getAccessToken())
+      .user(DirectionsCriteria.PROFILE_DEFAULT_USER)
+      .alternatives(false)
+      .congestion(true)
+      .language(Locale.US.toString())
+      .build();
+
+    navigationRoute.getRoute(this);
   }
 
   @Override
@@ -193,7 +212,6 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   protected void onStart() {
     super.onStart();
-    navigation.onStart();
     mapView.onStart();
     if (locationLayerPlugin != null) {
       locationLayerPlugin.onStart();
@@ -203,7 +221,6 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   protected void onStop() {
     super.onStop();
-    navigation.onStop();
     mapView.onStop();
 
     if (locationEngine != null) {

@@ -8,6 +8,12 @@
     android:fitsSystemWindows="true"
     tools:context=".activity.MockNavigationActivity">
 
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:id="@+id/progressBar"/>
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/toggleServiceFab"
         android:layout_width="wrap_content"

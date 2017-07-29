@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5;
+package com.mapbox.services.android.navigation.v5.exception;
 
 /**
  * Generic Exception for all things Mapbox Navigation.

@@ -2,7 +2,6 @@
           package="com.mapbox.services.android.navigation">
 
     <application>
-        <service android:name="com.mapbox.services.android.navigation.v5.NavigationService"/>
         <service android:name="com.mapbox.services.android.navigation.v5.navigation.NavigationService"/>
     </application>
 

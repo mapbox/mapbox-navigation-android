@@ -16,7 +16,7 @@ ext {
 
   dep = [
     // mapbox
-    mapboxMapSdk           : 'com.mapbox.mapboxsdk:mapbox-android-sdk:5.1.1',
+    mapboxMapSdk           : 'com.mapbox.mapboxsdk:mapbox-android-sdk:5.1.0',
     mapboxServices         : 'com.mapbox.mapboxsdk:mapbox-android-services:2.2.0-SNAPSHOT',
     locationLayerPlugin    : 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.1.0',
 

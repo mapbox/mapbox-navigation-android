@@ -6,10 +6,21 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.api.directions.v5.models.LegStep;
+import com.mapbox.services.api.directions.v5.models.RouteLeg;
+import com.mapbox.services.api.utils.turf.TurfConstants;
+import com.mapbox.services.api.utils.turf.TurfMeasurement;
+import com.mapbox.services.commons.geojson.LineString;
+import com.mapbox.services.commons.models.Position;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,16 +47,17 @@ public class ServiceTestActivity extends AppCompatActivity {
         System.out.println(instruction);
       }
     });
+
   }
 
   @OnClick(R.id.toggleServiceFab)
   public void onToggleServiceFabClick(View view) {
     isRunning = !isRunning;
     Snackbar.make(view, "Service running? " + isRunning, Snackbar.LENGTH_LONG).show();
-    if (isRunning) {
-      mapboxNavigation.startNavigation();
-    } else {
-      mapboxNavigation.stop();
-    }
+//    if (isRunning) {
+//      mapboxNavigation.startNavigation();
+//    } else {
+//      mapboxNavigation.endNavigation();
+//    }
   }
 }
