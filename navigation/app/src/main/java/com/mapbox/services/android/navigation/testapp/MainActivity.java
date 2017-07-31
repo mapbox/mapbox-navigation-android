@@ -16,7 +16,6 @@ import com.mapbox.services.android.navigation.testapp.activity.LocationInfoActiv
 import com.mapbox.services.android.navigation.testapp.activity.LongStepTestActivity;
 import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
-import com.mapbox.services.android.navigation.testapp.activity.ServiceTestActivity;
 import com.mapbox.services.android.navigation.testapp.activity.SnapToRouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
 import com.mapbox.services.android.telemetry.permissions.PermissionsListener;
@@ -61,11 +60,6 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         getString(R.string.title_navigation_route_ui),
         getString(R.string.description_navigation_route_ui),
         NavigationMapRouteActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_navigation_route_ui),
-        getString(R.string.description_navigation_route_ui),
-        ServiceTestActivity.class
       ),
       new SampleItem(
         getString(R.string.title_long_step),
