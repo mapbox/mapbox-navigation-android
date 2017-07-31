@@ -160,7 +160,8 @@ class DefaultMilestones {
         @Override
         public String buildInstruction(RouteProgress routeProgress) {
           double userDistance = routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
-          return String.format(Locale.US, "%s then in %s %s", getInstructionString(routeProgress), distanceFormatter(userDistance),
+          return String.format(Locale.US, "%s then in %s %s", getInstructionString(routeProgress),
+            distanceFormatter(userDistance),
             convertFirstCharLowercase(getInstructionString(routeProgress))
           );
         }
