@@ -37,7 +37,7 @@ class DefaultMilestones {
       .setInstruction(new Instruction() {
         @Override
         public String buildInstruction(RouteProgress routeProgress) {
-          return routeProgress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction();
+          return getInstructionString(routeProgress);
         }
       })
       .setTrigger(
@@ -58,10 +58,10 @@ class DefaultMilestones {
           int legIndex = routeProgress.getLegIndex();
           int followUpStepIndex = routeProgress.getCurrentLegProgress().getStepIndex() + 2;
           return String.format(Locale.US, "%s then %s",
-            routeProgress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction(),
+            getInstructionString(routeProgress),
             convertFirstCharLowercase(routeProgress.getRoute().getLegs().get(legIndex)
               .getSteps().get(followUpStepIndex).getManeuver().getInstruction())
-          );
+          );// TODO fix this
         }
       })
       .setTrigger(
@@ -89,8 +89,7 @@ class DefaultMilestones {
             return "";
           } else {
             return String.format(Locale.US, "In %s, %s", distanceFormatter(userDistance),
-              convertFirstCharLowercase(routeProgress.getCurrentLegProgress()
-                .getUpComingStep().getManeuver().getInstruction()));
+              convertFirstCharLowercase(getInstructionString(routeProgress)));
           }
         }
       })
@@ -143,7 +142,7 @@ class DefaultMilestones {
           } else {
             return String.format(Locale.US, "Continue on %s for %s and then %s",
               routeProgress.getCurrentLegProgress().getCurrentStep().getName(), distanceFormatter(userDistance),
-              routeProgress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction());
+              getInstructionString(routeProgress));
           }
         }
       })
@@ -161,11 +160,8 @@ class DefaultMilestones {
         @Override
         public String buildInstruction(RouteProgress routeProgress) {
           double userDistance = routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
-          String currentStepInstruction = routeProgress.getCurrentLegProgress().getCurrentStep()
-            .getManeuver().getInstruction();
-          return String.format(Locale.US, "%s then in %s %s", currentStepInstruction, distanceFormatter(userDistance),
-            convertFirstCharLowercase(routeProgress.getCurrentLegProgress()
-              .getUpComingStep().getManeuver().getInstruction())
+          return String.format(Locale.US, "%s then in %s %s", getInstructionString(routeProgress), distanceFormatter(userDistance),
+            convertFirstCharLowercase(getInstructionString(routeProgress))
           );
         }
       })
@@ -186,7 +182,7 @@ class DefaultMilestones {
       .setInstruction(new Instruction() {
         @Override
         public String buildInstruction(RouteProgress routeProgress) {
-          return routeProgress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction();
+          return getInstructionString(routeProgress);
         }
       })
       .setTrigger(
@@ -196,6 +192,12 @@ class DefaultMilestones {
           Trigger.lte(TriggerProperty.STEP_DISTANCE_REMAINING_METERS, 25)
         )
       ).build());
+  }
+
+  private String getInstructionString(RouteProgress routeProgress) {
+    return routeProgress.getCurrentLegProgress().getUpComingStep() != null
+      ? routeProgress.getCurrentLegProgress().getUpComingStep().getManeuver().getInstruction() :
+      routeProgress.getCurrentLegProgress().getCurrentStep().getManeuver().getInstruction();
   }
 
   private static String convertFirstCharLowercase(String instruction) {
