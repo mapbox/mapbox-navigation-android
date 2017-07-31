@@ -22,7 +22,14 @@ import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
-public class NavigationService extends Service implements LocationEngineListener, NavigationEngine.Callback {
+/**
+ * Internal usage only
+ *
+ * This service runs in the background during a navigation session and controls the navigation
+ * engine and notifies any attached listeners.
+ */
+public class NavigationService extends Service implements LocationEngineListener,
+  NavigationEngine.Callback {
 
   private static final int ONGOING_NOTIFICATION_ID = 1;
   private static final int MSG_LOCATION_UPDATED = 1001;
@@ -31,7 +38,6 @@ public class NavigationService extends Service implements LocationEngineListener
   private long timeIntervalSinceLastOffRoute;
   private MapboxNavigation mapboxNavigation;
   private LocationEngine locationEngine;
-  private Notification notifyBuilder;
   private NavigationEngine thread;
 
   @Nullable
@@ -47,7 +53,7 @@ public class NavigationService extends Service implements LocationEngineListener
     thread.prepareHandler();
 
     NotificationManager notificationManager = new NotificationManager(this);
-    notifyBuilder = notificationManager.buildPersistentNotification();
+    Notification notifyBuilder = notificationManager.buildPersistentNotification();
     startForeground(ONGOING_NOTIFICATION_ID, notifyBuilder);
   }
 
@@ -106,7 +112,9 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onLocationChanged(Location location) {
     Timber.d("onLocationChanged");
-    thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation));
+    if (location != null) {
+      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation));
+    }
   }
 
   @Override

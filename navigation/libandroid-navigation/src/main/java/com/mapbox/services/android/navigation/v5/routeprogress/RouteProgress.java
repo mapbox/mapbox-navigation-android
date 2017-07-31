@@ -7,12 +7,13 @@ import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;
 
 /**
- * The {@code routeProgress} class contains all progress information of user along the route, leg and step.
+ * The {@code routeProgress} class contains all progress information of user along the route, leg
+ * and step.
  * <p>
  * You can use this together with MapboxNavigation to obtain this object from the
  * {@link com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener}
- * or the {@link ProgressChangeListener}. This object is immutable
- * and a new, updated routeProgress object will be provided with each new location update.
+ * or the {@link ProgressChangeListener}. This object is immutable and a new, updated routeProgress
+ * object will be provided with each new location update.
  * <p>
  * This is an experimental API. Experimental APIs are quickly evolving and
  * might change or be removed in minor versions.
@@ -23,8 +24,6 @@ import com.mapbox.services.api.directions.v5.models.RouteLeg;
 public abstract class RouteProgress {
 
   abstract Location location();
-
-  public abstract int legIndex();
 
   /**
    * Gives a {@link RouteLegProgress} object with information about the particular leg the user is currently on.
@@ -40,17 +39,15 @@ public abstract class RouteProgress {
    * @return an {@code integer} representing the current leg the user is on.
    * @since 0.1.0
    */
-  public int getLegIndex() {
-    return legIndex();
-  }
+  public abstract int legIndex();
 
   /**
    * Provides the current {@link RouteLeg} the user is on.
    *
    * @return a {@link RouteLeg} the user is currently on.
    */
-  public RouteLeg getCurrentLeg() {
-    return directionsRoute().getLegs().get(getLegIndex());
+  public RouteLeg currentLeg() {
+    return directionsRoute().getLegs().get(legIndex());
   }
 
   /**
@@ -59,7 +56,7 @@ public abstract class RouteProgress {
    * @return a double value representing the total distance the user has traveled along the route, using unit meters.
    * @since 0.1.0
    */
-  public double getDistanceTraveled() {
+  public double distanceTraveled() {
     double distanceTraveled = directionsRoute().getDistance() - distanceRemaining();
     if (distanceTraveled < 0) {
       distanceTraveled = 0;
@@ -73,8 +70,8 @@ public abstract class RouteProgress {
    * @return {@code long} value representing the duration remaining till end of route, in unit seconds.
    * @since 0.1.0
    */
-  public double getDurationRemaining() {
-    return (1 - getFractionTraveled()) * directionsRoute().getDuration();
+  public double durationRemaining() {
+    return (1 - fractionTraveled()) * directionsRoute().getDuration();
   }
 
   /**
@@ -84,11 +81,11 @@ public abstract class RouteProgress {
    * @return a float value between 0 and 1 representing the fraction the user has traveled along the route.
    * @since 0.1.0
    */
-  public float getFractionTraveled() {
+  public float fractionTraveled() {
     float fractionRemaining = 1;
 
     if (directionsRoute().getDistance() > 0) {
-      fractionRemaining = (float) (getDistanceTraveled() / directionsRoute().getDistance());
+      fractionRemaining = (float) (distanceTraveled() / directionsRoute().getDistance());
     }
     return fractionRemaining;
   }
@@ -112,6 +109,10 @@ public abstract class RouteProgress {
   @AutoValue.Builder
   public abstract static class Builder {
 
+    private int stepIndex;
+    private double legDistanceRemaining;
+    private double stepDistanceRemaining;
+
     public abstract Builder directionsRoute(DirectionsRoute directionsRoute);
 
     public abstract Builder location(Location location);
@@ -120,9 +121,39 @@ public abstract class RouteProgress {
 
     public abstract Builder distanceRemaining(double distanceRemaining);
 
-    public abstract Builder currentLegProgress(RouteLegProgress routeLegProgress);
+    public Builder stepIndex(int stepIndex) {
+      this.stepIndex = stepIndex;
+      return this;
+    }
 
-    public abstract RouteProgress build();
+    public Builder legDistanceRemaining(double legDistanceRemaining) {
+      this.legDistanceRemaining = legDistanceRemaining;
+      return this;
+    }
+
+    public Builder stepDistanceRemaining(double stepDistanceRemaining) {
+      this.stepDistanceRemaining = stepDistanceRemaining;
+      return this;
+    }
+
+    abstract Builder currentLegProgress(RouteLegProgress routeLegProgress);
+
+    abstract DirectionsRoute directionsRoute();
+
+    abstract int legIndex();
+
+    abstract RouteProgress autoBuild(); // not public
+
+    public RouteProgress build() {
+      RouteLegProgress legProgress = RouteLegProgress.builder()
+        .distanceRemaining(legDistanceRemaining)
+        .stepIndex(stepIndex)
+        .stepDistanceRemaining(stepDistanceRemaining)
+        .routeLeg(directionsRoute().getLegs().get(legIndex()))
+        .build();
+      currentLegProgress(legProgress);
+      return autoBuild();
+    }
   }
 
   public static Builder builder() {

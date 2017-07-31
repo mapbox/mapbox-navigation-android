@@ -8,7 +8,6 @@ import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.api.utils.turf.TurfMisc;
 import com.mapbox.services.commons.geojson.Feature;
-import com.mapbox.services.commons.geojson.Geometry;
 import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
@@ -22,7 +21,7 @@ public class SnapToRoute extends Snap {
 
   @Override
   public Location getSnappedLocation(Location location, RouteProgress routeProgress) {
-    location = snapLocationLatLng(location, routeProgress.currentLegProgress().getCurrentStep().getGeometry());
+    location = snapLocationLatLng(location, routeProgress.currentLegProgress().currentStep().getGeometry());
     location.setBearing(snapLocationBearing(routeProgress));
     return location;
   }
@@ -56,14 +55,14 @@ public class SnapToRoute extends Snap {
 
   private static float snapLocationBearing(RouteProgress routeProgress) {
     LineString lineString = LineString.fromPolyline(
-      routeProgress.currentLegProgress().getCurrentStep().getGeometry(), PRECISION_6);
+      routeProgress.currentLegProgress().currentStep().getGeometry(), PRECISION_6);
 
     Point currentPoint = TurfMeasurement.along(
-      lineString, routeProgress.currentLegProgress().getCurrentStepProgress().getDistanceTraveled(),
+      lineString, routeProgress.currentLegProgress().currentStepProgress().distanceTraveled(),
       TurfConstants.UNIT_METERS);
     // Measure 1 meter ahead of the users current location
     Point futurePoint = TurfMeasurement.along(
-      lineString, routeProgress.currentLegProgress().getCurrentStepProgress().getDistanceTraveled() + 1,
+      lineString, routeProgress.currentLegProgress().currentStepProgress().distanceTraveled() + 1,
       TurfConstants.UNIT_METERS);
 
     double azimuth = TurfMeasurement.bearing(currentPoint, futurePoint);

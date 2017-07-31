@@ -24,8 +24,8 @@ public class StepMilestone extends Milestone {
 
     // Determine if the step index has changed and set called accordingly. This prevents multiple calls to
     // onMilestoneEvent per Step.
-    if (previousRouteProgress.currentLegProgress().getStepIndex()
-      != routeProgress.currentLegProgress().getStepIndex()) {
+    if (previousRouteProgress.currentLegProgress().stepIndex()
+      != routeProgress.currentLegProgress().stepIndex()) {
       called = false;
     }
     if (builder.getTrigger().isOccurring(

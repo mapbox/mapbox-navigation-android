@@ -135,11 +135,17 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   /**
    * Critical to place inside your navigation activity so that when your application gets destroyed
-   * the navigation service unbinds and gets destroyed, preventing any memory leaks.
+   * the navigation service unbinds and gets destroyed, preventing any memory leaks. Calling this
+   * also removes all listeners that have been attached.
    */
   public void onDestroy() {
     Timber.d("MapboxNavigation onDestroy.");
     endNavigation();
+    // TODO add removal of all listeners in javadoc
+    removeNavigationEventListener(null);
+    removeProgressChangeListener(null);
+    removeMilestoneEventListener(null);
+    removeOffRouteListener(null);
   }
 
   // Public APIs

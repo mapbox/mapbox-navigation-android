@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.api.directions.v5.models.LegStep;
-import com.mapbox.services.commons.models.Position;
 
 @AutoValue
 public abstract class RouteStepProgress {
@@ -21,8 +20,8 @@ public abstract class RouteStepProgress {
    * meters.
    * @since 0.1.0
    */
-  public double getDistanceTraveled() {
-    double distanceTraveled = step().getDistance() - getDistanceRemaining();
+  public double distanceTraveled() {
+    double distanceTraveled = step().getDistance() - distanceRemaining();
     if (distanceTraveled < 0) {
       distanceTraveled = 0;
     }
@@ -36,7 +35,7 @@ public abstract class RouteStepProgress {
    * Uses unit meters.
    * @since 0.1.0
    */
-  public abstract double getDistanceRemaining();
+  public abstract double distanceRemaining();
 
   /**
    * Get the fraction traveled along the current step, this is a float value between 0 and 1 and isn't guaranteed to
@@ -45,11 +44,11 @@ public abstract class RouteStepProgress {
    * @return a float value between 0 and 1 representing the fraction the user has traveled along the current step.
    * @since 0.1.0
    */
-  public float getFractionTraveled() {
+  public float fractionTraveled() {
     float fractionTraveled = 1;
 
     if (step().getDistance() > 0) {
-      fractionTraveled = (float) (getDistanceTraveled() / step().getDistance());
+      fractionTraveled = (float) (distanceTraveled() / step().getDistance());
       if (fractionTraveled < 0) {
         fractionTraveled = 0;
       }
@@ -63,8 +62,8 @@ public abstract class RouteStepProgress {
    * @return {@code long} value representing the duration remaining till end of step, in unit seconds.
    * @since 0.1.0
    */
-  public double getDurationRemaining() {
-    return (1 - getFractionTraveled()) * step().getDuration();
+  public double durationRemaining() {
+    return (1 - fractionTraveled()) * step().getDuration();
   }
 
 

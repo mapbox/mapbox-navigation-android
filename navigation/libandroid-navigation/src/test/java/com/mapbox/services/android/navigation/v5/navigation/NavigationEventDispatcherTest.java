@@ -226,7 +226,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
   @Test
   public void setInternalProgressChangeListener_didGetSet() throws Exception {
     navigationEventDispatcher.setInternalProgressChangeListener(progressChangeListener);
-    when(routeProgress.getFractionTraveled())
+    when(routeProgress.fractionTraveled())
       .thenReturn(1f);
     navigationEventDispatcher.onProgressChange(location, routeProgress);
     verify(progressChangeListener, times(1)).onProgressChange(location, routeProgress);
@@ -235,7 +235,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
   @Test
   public void setInternalProgressChangeListener_didNotGetTriggeredUntilArrival() throws Exception {
     navigationEventDispatcher.setInternalProgressChangeListener(progressChangeListener);
-    when(routeProgress.getFractionTraveled())
+    when(routeProgress.fractionTraveled())
       .thenReturn(0.5f)
       .thenReturn(1f);
 

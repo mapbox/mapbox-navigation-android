@@ -129,7 +129,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     locationLayerPlugin.forceLocationUpdate(location);
-    Timber.d("onRouteProgressChange: %s", routeProgress.currentLegProgress().getStepIndex());
+    Timber.d("onRouteProgressChange: %s", routeProgress.currentLegProgress().stepIndex());
   }
 
   @Override

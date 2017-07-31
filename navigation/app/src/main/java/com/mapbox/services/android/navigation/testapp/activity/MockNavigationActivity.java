@@ -27,6 +27,7 @@ import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.ui.v5.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
+import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.RouteMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Trigger;
@@ -57,7 +58,7 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapClickListener, MilestoneEventListener, ProgressChangeListener {
+  MapboxMap.OnMapClickListener, MilestoneEventListener, ProgressChangeListener, NavigationEventListener {
 
   private static final int BEGIN_ROUTE_MILESTONE = 1001;
 
@@ -65,7 +66,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @BindView(R.id.mapView)
   MapView mapView;
 
-  @BindView(R.id.newLocationFab)
+  @BindView(R.id.startNavigationFab)
   FloatingActionButton newLocationFab;
 
   @BindView(R.id.startRouteButton)
@@ -112,16 +113,18 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       startRouteButton.setVisibility(View.INVISIBLE);
 
       // Attach all of our navigation listeners.
+      navigation.addNavigationEventListener(this);
       navigation.addMilestoneEventListener(this);
       navigation.addProgressChangeListener(this);
 
       ((MockLocationEngine) locationEngine).setRoute(route);
       navigation.setLocationEngine(locationEngine);
       navigation.startNavigation(route);
+      mapboxMap.setOnMapClickListener(null);
     }
   }
 
-  @OnClick(R.id.newLocationFab)
+  @OnClick(R.id.startNavigationFab)
   public void onNewLocationClick() {
     newOrigin();
   }
@@ -150,7 +153,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapboxMap.setOnMapClickListener(this);
     Snackbar.make(mapView, "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
 
-    locationEngine = new MockLocationEngine(1000, 200, true);
+    locationEngine = new MockLocationEngine(1000,50, false);
     mapboxMap.setLocationSource(locationEngine);
 
     newOrigin();
@@ -266,20 +269,20 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
-//  @Override
-//  public void onRunning(boolean running) {
-//    if (running) {
-//      Timber.d("onRunning: Started");
-//    } else {
-//      Timber.d("onRunning: Stopped");
-//    }
-//  }
-//
+  @Override
+  public void onRunning(boolean running) {
+    if (running) {
+      Timber.d("onRunning: Started");
+    } else {
+      Timber.d("onRunning: Stopped");
+    }
+  }
+
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     locationLayerPlugin.forceLocationUpdate(location);
-    System.out.println(routeProgress.distanceRemaining());
-    Timber.d("onProgressChange: fraction of route traveled: %f", routeProgress.getFractionTraveled());
+    System.out.println(routeProgress.currentLegProgress().stepIndex());
+    Timber.d("onProgressChange: fraction of route traveled: %f", routeProgress.fractionTraveled());
   }
 
   /*
@@ -301,7 +304,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   protected void onStart() {
     super.onStart();
-//    navigation.onStart();
     mapView.onStart();
     if (locationLayerPlugin != null) {
       locationLayerPlugin.onStart();
@@ -311,7 +313,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   protected void onStop() {
     super.onStop();
-//    navigation.onStop();
     mapView.onStop();
     if (locationLayerPlugin != null) {
       locationLayerPlugin.onStop();
@@ -327,16 +328,10 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    mapView.onDestroy();
-
-    // Remove all navigation listeners
-    navigation.removeProgressChangeListener(this);
-    navigation.removeMilestoneEventListener(this);
-
     navigation.onDestroy();
-
-    // End the navigation session
-    navigation.endNavigation();
+    locationEngine.removeLocationUpdates();
+    locationEngine.deactivate();
+    mapView.onDestroy();
   }
 
   @Override

@@ -23,24 +23,25 @@ public class OffRouteDetector extends OffRoute {
    */
   @Override
   public boolean isUserOffRoute(Location location, RouteProgress routeProgress, MapboxNavigationOptions options) {
-    Position futurePosition = getFuturePosition(location, options);
-    double radius = Math.min(options.maximumDistanceOffRoute(),
-      location.getAccuracy() + options.userLocationSnapDistance());
-
-    boolean isOffRoute = userTrueDistanceFromRoute(futurePosition, routeProgress) > radius;
-
-    // If the user is moving away from the maneuver location and they are close to the next step we can safely say they
-    // have completed the maneuver. This is intended to be a fallback case when we do find that the users course matches
-    // the exit bearing.
-    boolean isCloseToUpcomingStep;
-
-    if (routeProgress.currentLegProgress().getUpComingStep() != null) {
-      isCloseToUpcomingStep = userTrueDistanceFromRoute(futurePosition, routeProgress) < radius;
-      if (isOffRoute && isCloseToUpcomingStep) {
-        return false;
-      }
-    }
-    return isOffRoute;
+//    Position futurePosition = getFuturePosition(location, options);
+//    double radius = Math.min(options.maximumDistanceOffRoute(),
+//      location.getAccuracy() + options.userLocationSnapDistance());
+//
+//    boolean isOffRoute = userTrueDistanceFromRoute(futurePosition, routeProgress) > radius;
+//
+//    // If the user is moving away from the maneuver location and they are close to the next step we can safely say they
+//    // have completed the maneuver. This is intended to be a fallback case when we do find that the users course matches
+//    // the exit bearing.
+//    boolean isCloseToUpcomingStep;
+//
+//    if (routeProgress.currentLegProgress().upComingStep() != null) {
+//      isCloseToUpcomingStep = userTrueDistanceFromRoute(futurePosition, routeProgress) < radius;
+//      if (isOffRoute && isCloseToUpcomingStep) {
+//        return false;
+//      }
+//    }
+//    return isOffRoute;
+    return false;
   }
 
   /**
@@ -67,7 +68,7 @@ public class OffRouteDetector extends OffRoute {
    */
   private double userTrueDistanceFromRoute(Position futurePosition, RouteProgress routeProgress) {
     LineString lineString = LineString.fromPolyline(
-      routeProgress.currentLegProgress().getCurrentStep().getGeometry(), Constants.PRECISION_6);
+      routeProgress.currentLegProgress().currentStep().getGeometry(), Constants.PRECISION_6);
     Feature feature = TurfMisc.pointOnLine(Point.fromCoordinates(futurePosition), lineString.getCoordinates());
 
     Point snappedPoint = (Point) feature.getGeometry();

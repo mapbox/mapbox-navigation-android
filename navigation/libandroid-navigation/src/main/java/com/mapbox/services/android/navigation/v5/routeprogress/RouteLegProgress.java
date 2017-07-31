@@ -2,7 +2,6 @@ package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.Experimental;
-import com.mapbox.services.api.ServicesException;
 import com.mapbox.services.api.directions.v5.models.LegStep;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;
 
@@ -12,19 +11,13 @@ public abstract class RouteLegProgress {
 
   public abstract RouteLeg routeLeg();
 
-  public abstract int stepIndex();
-
-  public abstract RouteStepProgress currentStepProgress();
-
   /**
    * Gives a {@link RouteStepProgress} object with information about the particular step the user is currently on.
    *
    * @return a {@link RouteStepProgress} object.
    * @since 0.1.0
    */
-  public RouteStepProgress getCurrentStepProgress() {
-    return currentStepProgress();
-  }
+  public abstract RouteStepProgress currentStepProgress();
 
   /**
    * Index representing the current step.
@@ -32,12 +25,7 @@ public abstract class RouteLegProgress {
    * @return an {@code integer} representing the current step the user is on.
    * @since 0.1.0
    */
-  public int getStepIndex() {
-    if (stepIndex() < 0 || stepIndex() > routeLeg().getSteps().size() - 1) {
-      throw new ServicesException("RouteProgress step index is outside its index limit.");
-    }
-    return stepIndex();
-  }
+  public abstract int stepIndex();
 
   /**
    * Total distance traveled in meters along current leg.
@@ -46,8 +34,8 @@ public abstract class RouteLegProgress {
    * meters.
    * @since 0.1.0
    */
-  public double getDistanceTraveled() {
-    double distanceTraveled = routeLeg().getDistance() - legDistanceRemaining();
+  public double distanceTraveled() {
+    double distanceTraveled = routeLeg().getDistance() - distanceRemaining();
     if (distanceTraveled < 0) {
       distanceTraveled = 0;
     }
@@ -60,7 +48,7 @@ public abstract class RouteLegProgress {
    * @return {@code long} value representing the duration remaining till end of route, in unit seconds.
    * @since 0.1.0
    */
-  public abstract double legDistanceRemaining();
+  public abstract double distanceRemaining();
 
   /**
    * Provides the duration remaining in seconds till the user reaches the end of the current step.
@@ -68,8 +56,8 @@ public abstract class RouteLegProgress {
    * @return {@code long} value representing the duration remaining till end of step, in unit seconds.
    * @since 0.1.0
    */
-  public double getDurationRemaining() {
-    return (1 - getFractionTraveled()) * routeLeg().getDuration();
+  public double durationRemaining() {
+    return (1 - fractionTraveled()) * routeLeg().getDuration();
   }
 
   /**
@@ -79,11 +67,11 @@ public abstract class RouteLegProgress {
    * @return a float value between 0 and 1 representing the fraction the user has traveled along the current leg.
    * @since 0.1.0
    */
-  public float getFractionTraveled() {
+  public float fractionTraveled() {
     float fractionTraveled = 1;
 
     if (routeLeg().getDistance() > 0) {
-      fractionTraveled = (float) (getDistanceTraveled() / routeLeg().getDistance());
+      fractionTraveled = (float) (distanceTraveled() / routeLeg().getDistance());
       if (fractionTraveled < 0) {
         fractionTraveled = 0;
       }
@@ -98,11 +86,11 @@ public abstract class RouteLegProgress {
    * null.
    * @since 0.1.0
    */
-  public LegStep getPreviousStep() {
-    if (getStepIndex() == 0) {
+  public LegStep previousStep() {
+    if (stepIndex() == 0) {
       return null;
     }
-    return routeLeg().getSteps().get(getStepIndex() - 1);
+    return routeLeg().getSteps().get(stepIndex() - 1);
   }
 
   /**
@@ -111,8 +99,8 @@ public abstract class RouteLegProgress {
    * @return a {@link LegStep} representing the step the user is currently on.
    * @since 0.1.0
    */
-  public LegStep getCurrentStep() {
-    return routeLeg().getSteps().get(getStepIndex());
+  public LegStep currentStep() {
+    return routeLeg().getSteps().get(stepIndex());
   }
 
   /**
@@ -122,26 +110,42 @@ public abstract class RouteLegProgress {
    * @return a {@link LegStep} representing the next step the user will be on.
    * @since 0.1.0
    */
-  public LegStep getUpComingStep() {
-    if (routeLeg().getSteps().size() - 1 > getStepIndex()) {
-      return routeLeg().getSteps().get(getStepIndex() + 1);
+  public LegStep upComingStep() {
+    if (routeLeg().getSteps().size() - 1 > stepIndex()) {
+      return routeLeg().getSteps().get(stepIndex() + 1);
     }
     return null;
   }
 
   @AutoValue.Builder
-  public abstract static class Builder {
+  abstract static class Builder {
 
-    public abstract Builder routeLeg(RouteLeg routeLeg);
+    private double stepDistanceRemaining;
 
-    public abstract Builder stepIndex(int stepIndex);
+    abstract Builder routeLeg(RouteLeg routeLeg);
 
-    public abstract Builder currentStepProgress(RouteStepProgress routeStepProgress);
+    abstract Builder stepIndex(int stepIndex);
 
-    public abstract Builder legDistanceRemaining(double legDistanceRemaining);
+    abstract Builder distanceRemaining(double legDistanceRemaining);
 
-    public abstract RouteLegProgress build();
+    Builder stepDistanceRemaining(double stepDistanceRemaining) {
+      this.stepDistanceRemaining = stepDistanceRemaining;
+      return this;
+    }
 
+    abstract Builder currentStepProgress(RouteStepProgress routeStepProgress);
+
+    abstract int stepIndex();
+
+    abstract RouteLeg routeLeg();
+
+    abstract RouteLegProgress autoBuild(); // not public
+
+    public RouteLegProgress build() {
+      RouteStepProgress stepProgress = RouteStepProgress.create(routeLeg().getSteps().get(stepIndex()), stepDistanceRemaining);
+      currentStepProgress(stepProgress);
+      return autoBuild();
+    }
   }
 
   public static Builder builder() {

@@ -55,8 +55,8 @@ class DefaultMilestones {
       .setInstruction(new Instruction() {
         @Override
         public String buildInstruction(RouteProgress routeProgress) {
-          int legIndex = routeProgress.getLegIndex();
-          int followUpStepIndex = routeProgress.currentLegProgress().getStepIndex() + 2;
+          int legIndex = routeProgress.legIndex();
+          int followUpStepIndex = routeProgress.currentLegProgress().stepIndex() + 2;
           return String.format(Locale.US, "%s then %s",
             getInstructionString(routeProgress),
             convertFirstCharLowercase(routeProgress.directionsRoute().getLegs().get(legIndex)
@@ -83,8 +83,8 @@ class DefaultMilestones {
       .setInstruction(new Instruction() {
         @Override
         public String buildInstruction(RouteProgress routeProgress) {
-          double userDistance = routeProgress.currentLegProgress().getCurrentStepProgress().getDistanceRemaining();
-          if (TextUtils.isEmpty(routeProgress.currentLegProgress().getCurrentStep().getName())
+          double userDistance = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+          if (TextUtils.isEmpty(routeProgress.currentLegProgress().currentStep().getName())
             || userDistance == 0) {
             return "";
           } else {
@@ -112,9 +112,9 @@ class DefaultMilestones {
       .setInstruction(new Instruction() {
         @Override
         public String buildInstruction(RouteProgress routeProgress) {
-          double userDistance = routeProgress.currentLegProgress().getCurrentStepProgress().getDistanceRemaining();
+          double userDistance = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
           return String.format(Locale.US, "Continue on %s for %s",
-            routeProgress.currentLegProgress().getCurrentStep().getName(), distanceFormatter(userDistance)
+            routeProgress.currentLegProgress().currentStep().getName(), distanceFormatter(userDistance)
           );
         }
       })
@@ -135,13 +135,13 @@ class DefaultMilestones {
       .setInstruction(new Instruction() {
         @Override
         public String buildInstruction(RouteProgress routeProgress) {
-          double userDistance = routeProgress.currentLegProgress().getCurrentStepProgress().getDistanceRemaining();
-          if (TextUtils.isEmpty(routeProgress.currentLegProgress().getCurrentStep().getName())
+          double userDistance = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+          if (TextUtils.isEmpty(routeProgress.currentLegProgress().currentStep().getName())
             || userDistance == 0) {
             return "";
           } else {
             return String.format(Locale.US, "Continue on %s for %s and then %s",
-              routeProgress.currentLegProgress().getCurrentStep().getName(), distanceFormatter(userDistance),
+              routeProgress.currentLegProgress().currentStep().getName(), distanceFormatter(userDistance),
               getInstructionString(routeProgress));
           }
         }
@@ -159,7 +159,7 @@ class DefaultMilestones {
       .setInstruction(new Instruction() {
         @Override
         public String buildInstruction(RouteProgress routeProgress) {
-          double userDistance = routeProgress.currentLegProgress().getCurrentStepProgress().getDistanceRemaining();
+          double userDistance = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
           return String.format(Locale.US, "%s then in %s %s", getInstructionString(routeProgress),
             distanceFormatter(userDistance),
             convertFirstCharLowercase(getInstructionString(routeProgress))
@@ -196,9 +196,9 @@ class DefaultMilestones {
   }
 
   private String getInstructionString(RouteProgress routeProgress) {
-    return routeProgress.currentLegProgress().getUpComingStep() != null
-      ? routeProgress.currentLegProgress().getUpComingStep().getManeuver().getInstruction() :
-      routeProgress.currentLegProgress().getCurrentStep().getManeuver().getInstruction();
+    return routeProgress.currentLegProgress().upComingStep() != null
+      ? routeProgress.currentLegProgress().upComingStep().getManeuver().getInstruction() :
+      routeProgress.currentLegProgress().upComingStep().getManeuver().getInstruction();
   }
 
   private static String convertFirstCharLowercase(String instruction) {
