@@ -58,7 +58,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
 
   private void handleRequest(final NewLocationModel newLocationModel) {
 
-
     final RouteProgress routeProgress = generateNewRouteProgress(newLocationModel.mapboxNavigation(), newLocationModel.location());
     final List<Milestone> milestones = checkMilestones(routeProgress, newLocationModel.mapboxNavigation());
     final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress);

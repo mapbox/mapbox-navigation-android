@@ -58,7 +58,7 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapClickListener, MilestoneEventListener, NavigationEventListener, ProgressChangeListener {
+  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener, MilestoneEventListener {
 
   private static final int BEGIN_ROUTE_MILESTONE = 1001;
 
@@ -208,7 +208,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       .congestion(true)
       .language(Locale.US.toString())
       .build();
-
 
     navigationRoute.getRoute(new Callback<DirectionsResponse>() {
       @Override

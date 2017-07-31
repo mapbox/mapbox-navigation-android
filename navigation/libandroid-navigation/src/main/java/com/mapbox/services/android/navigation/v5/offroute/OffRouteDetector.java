@@ -23,25 +23,24 @@ public class OffRouteDetector extends OffRoute {
    */
   @Override
   public boolean isUserOffRoute(Location location, RouteProgress routeProgress, MapboxNavigationOptions options) {
-//    Position futurePosition = getFuturePosition(location, options);
-//    double radius = Math.min(options.maximumDistanceOffRoute(),
-//      location.getAccuracy() + options.userLocationSnapDistance());
-//
-//    boolean isOffRoute = userTrueDistanceFromRoute(futurePosition, routeProgress) > radius;
-//
-//    // If the user is moving away from the maneuver location and they are close to the next step we can safely say they
-//    // have completed the maneuver. This is intended to be a fallback case when we do find that the users course matches
-//    // the exit bearing.
-//    boolean isCloseToUpcomingStep;
-//
-//    if (routeProgress.currentLegProgress().upComingStep() != null) {
-//      isCloseToUpcomingStep = userTrueDistanceFromRoute(futurePosition, routeProgress) < radius;
-//      if (isOffRoute && isCloseToUpcomingStep) {
-//        return false;
-//      }
-//    }
-//    return isOffRoute;
-    return false;
+    Position futurePosition = getFuturePosition(location, options);
+    double radius = Math.min(options.maximumDistanceOffRoute(),
+      location.getAccuracy() + options.userLocationSnapDistance());
+
+    boolean isOffRoute = userTrueDistanceFromRoute(futurePosition, routeProgress) > radius;
+
+    // If the user is moving away from the maneuver location and they are close to the next step we can safely say they
+    // have completed the maneuver. This is intended to be a fallback case when we do find that the users course matches
+    // the exit bearing.
+    boolean isCloseToUpcomingStep;
+
+    if (routeProgress.currentLegProgress().upComingStep() != null) {
+      isCloseToUpcomingStep = userTrueDistanceFromRoute(futurePosition, routeProgress) < radius;
+      if (isOffRoute && isCloseToUpcomingStep) {
+        return false;
+      }
+    }
+    return isOffRoute;
   }
 
   /**
