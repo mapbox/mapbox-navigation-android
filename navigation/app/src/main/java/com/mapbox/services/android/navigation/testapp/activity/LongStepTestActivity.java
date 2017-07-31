@@ -15,8 +15,8 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
+import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.testapp.R;
-import com.mapbox.services.android.navigation.testapp.activity.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -41,7 +41,7 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
 
   private LocationLayerPlugin locationLayerPlugin;
   private LocationEngine locationEngine;
-//  private MapboxNavigation navigation;
+  private MapboxNavigation navigation;
   private DirectionsRoute route;
   private MapboxMap mapboxMap;
 
@@ -62,9 +62,9 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
       .defaultMilestonesEnabled(false)
       .snapToRoute(false)
       .build();
-//    navigation = new MapboxNavigation(this, options);
-//    navigation.addProgressChangeListener(this);
-    locationEngine = new MockLocationEngine(50);
+    navigation = new MapboxNavigation(this, options);
+    navigation.addProgressChangeListener(this);
+    locationEngine = new MockLocationEngine();
     locationEngine.addLocationEngineListener(this);
     locationEngine.activate();
   }
@@ -87,9 +87,9 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
   @OnClick(R.id.startNavigationFab)
   public void onFabClick(View view) {
     ((MockLocationEngine) locationEngine).setRoute(route);
-//    navigation.setLocationEngine(locationEngine);
+    navigation.setLocationEngine(locationEngine);
     mapboxMap.setLocationSource(locationEngine);
-//    navigation.startNavigation(route);
+    navigation.startNavigation(route);
   }
 
   @Override
@@ -138,8 +138,7 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
     super.onDestroy();
     locationEngine.removeLocationUpdates();
     locationEngine.deactivate();
-//    navigation.removeProgressChangeListener(this);
-//    navigation.onDestroy();
+    navigation.onDestroy();
     mapView.onDestroy();
   }
 

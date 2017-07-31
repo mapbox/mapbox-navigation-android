@@ -58,7 +58,7 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapClickListener, MilestoneEventListener, ProgressChangeListener, NavigationEventListener {
+  MapboxMap.OnMapClickListener, MilestoneEventListener, NavigationEventListener, ProgressChangeListener {
 
   private static final int BEGIN_ROUTE_MILESTONE = 1001;
 
@@ -66,7 +66,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @BindView(R.id.mapView)
   MapView mapView;
 
-  @BindView(R.id.startNavigationFab)
+  @BindView(R.id.newLocationFab)
   FloatingActionButton newLocationFab;
 
   @BindView(R.id.startRouteButton)
@@ -114,8 +114,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
       // Attach all of our navigation listeners.
       navigation.addNavigationEventListener(this);
-      navigation.addMilestoneEventListener(this);
       navigation.addProgressChangeListener(this);
+      navigation.addMilestoneEventListener(this);
 
       ((MockLocationEngine) locationEngine).setRoute(route);
       navigation.setLocationEngine(locationEngine);
@@ -124,7 +124,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
-  @OnClick(R.id.startNavigationFab)
+  @OnClick(R.id.newLocationFab)
   public void onNewLocationClick() {
     newOrigin();
   }
@@ -148,12 +148,12 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, null);
     locationLayerPlugin.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
 
-    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap);
+    navigationMapRoute = new NavigationMapRoute(navigation, mapView, mapboxMap);
 
     mapboxMap.setOnMapClickListener(this);
     Snackbar.make(mapView, "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
 
-    locationEngine = new MockLocationEngine(1000,50, false);
+    locationEngine = new MockLocationEngine(1000, 50, false);
     mapboxMap.setLocationSource(locationEngine);
 
     newOrigin();
@@ -205,11 +205,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       .accessToken(Mapbox.getAccessToken())
       .user(DirectionsCriteria.PROFILE_DEFAULT_USER)
       .alternatives(false)
-//      .radiuses()
       .congestion(true)
       .language(Locale.US.toString())
       .build();
-
 
 
     navigationRoute.getRoute(new Callback<DirectionsResponse>() {
@@ -281,7 +279,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     locationLayerPlugin.forceLocationUpdate(location);
-    System.out.println(routeProgress.currentLegProgress().stepIndex());
     Timber.d("onProgressChange: fraction of route traveled: %f", routeProgress.fractionTraveled());
   }
 

@@ -38,7 +38,7 @@
     <!--app:layout_anchorGravity="top"/>-->
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/startNavigationFab"
+        android:id="@+id/newLocationFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"

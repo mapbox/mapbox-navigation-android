@@ -10,12 +10,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
         <activity
             android:name=".activity.MockNavigationActivity"
             android:label="@string/title_mock_navigation">
@@ -23,6 +25,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
+
         <activity
             android:name=".activity.SnapToRouteActivity"
             android:label="@string/title_snap_to_route">
@@ -30,6 +33,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
+
         <activity
             android:name=".activity.LocationInfoActivity"
             android:label="@string/title_location_info">
@@ -37,6 +41,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
+
         <activity
             android:name=".activity.RerouteActivity"
             android:label="@string/title_reroute">
@@ -44,6 +49,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
+
         <activity
             android:name=".activity.navigationui.NavigationMapRouteActivity"
             android:label="@string/title_navigation_route_ui">
@@ -51,6 +57,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
+
         <activity
             android:name=".activity.LongStepTestActivity"
             android:label="@string/title_long_step">
@@ -59,5 +66,4 @@
                 android:value=".MainActivity"/>
         </activity>
     </application>
-
 </manifest>
