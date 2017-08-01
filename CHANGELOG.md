@@ -17,8 +17,8 @@ Mapbox welcomes participation and contributions from everyone.
 * Upgrade to MAS 2.2.0 [#153](https://github.com/mapbox/mapbox-navigation-android/pull/153)
 
 ### v0.3.1 - June 8, 2017
-* Use AutoValue inside RouteProgress objects.
-* Directly use direction distance measurements instead of calculating them.
+* Use AutoValue inside RouteProgress objects [#74](https://github.com/mapbox/mapbox-navigation-android/pull/74)
+* Directly use direction distance measurements instead of calculating them. [#125](https://github.com/mapbox/mapbox-navigation-android/pull/125)
 
 ### v0.3 - June 5, 2017
 * Support for [other direction profiles](https://github.com/mapbox/mapbox-navigation-android/pull/63) (cycling and walking) added.
