@@ -13,28 +13,28 @@ checkstyle:
 test:
 	# See navigation/libandroid-navigation/build.gradle for details
 	cd navigation; ./gradlew :libandroid-navigation:test
-	cd navigation; ./gradlew :libandroid-navigation-ui:test
+	# cd navigation; ./gradlew :libandroid-navigation-ui:test
 
 build-release:
 	cd navigation; ./gradlew :libandroid-navigation:assembleRelease
-	cd navigation; ./gradlew :libandroid-navigation-ui:assembleRelease
+	# cd navigation; ./gradlew :libandroid-navigation-ui:assembleRelease
 
 javadoc:
 	cd navigation; ./gradlew :libandroid-navigation:javadocrelease
-	cd navigation; ./gradlew :libandroid-navigation-ui:javadocrelease
+	# cd navigation; ./gradlew :libandroid-navigation-ui:javadocrelease
 
 publish:
 	cd navigation; export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation:uploadArchives
-	cd navigation; export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation-ui:uploadArchives
+	# cd navigation; export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation-ui:uploadArchives
 
 publish-local:
 	# This publishes to ~/.m2/repository/com/mapbox/mapboxsdk
 	cd navigation; export IS_LOCAL_DEVELOPMENT=true; ./gradlew :libandroid-navigation:uploadArchives
-	cd navigation; export IS_LOCAL_DEVELOPMENT=true; ./gradlew :libandroid-navigation-ui:uploadArchives
+	# cd navigation; export IS_LOCAL_DEVELOPMENT=true; ./gradlew :libandroid-navigation-ui:uploadArchives
 
 dex-count:
 	cd navigation; ./gradlew countDebugDexMethods
-	cd navigation; ./gradlew countReleaseDexMethods
+	# cd navigation; ./gradlew countReleaseDexMethods
 
 navigation-fixtures:
 	# Navigation: Taylor street to Page street
