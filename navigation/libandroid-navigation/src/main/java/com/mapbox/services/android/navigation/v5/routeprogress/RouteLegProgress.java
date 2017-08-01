@@ -92,7 +92,7 @@ public abstract class RouteLegProgress {
     double distanceRemaining = 0;
 
     List<Position> coords = PolylineUtils.decode(getCurrentStep().getGeometry(), Constants.PRECISION_6);
-    if (coords.size() > 1) {
+    if (coords.size() > 1 && !userSnappedPosition().equals(coords.get(coords.size() - 1))) {
       LineString slicedLine = TurfMisc.lineSlice(
         Point.fromCoordinates(userSnappedPosition()),
         Point.fromCoordinates(coords.get(coords.size() - 1)),
