@@ -100,7 +100,7 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
   @Override
   public void onLocationChanged(Location location) {
     System.out.println(location.toString());
-    locationLayerPlugin.forceLocationUpdate(location);
+//    locationLayerPlugin.forceLocationUpdate(location);
   }
 
   @Override

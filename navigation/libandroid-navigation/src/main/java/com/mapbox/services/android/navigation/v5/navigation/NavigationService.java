@@ -9,7 +9,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Process;
 import android.support.annotation.Nullable;
 
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -48,7 +47,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
   @Override
   public void onCreate() {
-    thread = new NavigationEngine("NavThread", Process.THREAD_PRIORITY_BACKGROUND, new Handler(), this);
+    thread = new NavigationEngine(new Handler(), this);
     thread.start();
     thread.prepareHandler();
 
@@ -113,8 +112,24 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onLocationChanged(Location location) {
     Timber.d("onLocationChanged");
     if (location != null) {
+      if (validLocationUpdate(location))
       thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation));
     }
+  }
+
+  private boolean validLocationUpdate(Location location) {
+    if (locationEngine.getLastLocation() == null) {
+      return true;
+    }
+    // TODO check that the location has speed
+    // TODO fix mock location engine last location
+    // If the locations the same as previous, no need to recalculate things
+//    if (location.equals(locationEngine.getLastLocation())
+//      || (location.getSpeed() <= 0 /*&& location.hasSpeed()*/)) {
+//      return false;
+//    }
+    // TODO filter out terrible location accuracy
+    return true;
   }
 
   @Override

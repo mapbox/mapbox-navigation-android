@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import android.location.Location;
+import android.os.Parcelable;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
@@ -20,6 +21,7 @@ import com.mapbox.services.api.directions.v5.models.RouteLeg;
  *
  * @since 0.1.0
  */
+// TODO make class parcelable
 @AutoValue
 public abstract class RouteProgress {
 

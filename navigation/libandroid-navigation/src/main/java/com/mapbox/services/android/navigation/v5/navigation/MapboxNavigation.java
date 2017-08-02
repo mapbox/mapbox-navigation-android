@@ -352,6 +352,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    * @see MilestoneEventListener
    * @since 0.4.0
    */
+  @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
   public void removeMilestoneEventListener(@Nullable MilestoneEventListener milestoneEventListener) {
     navigationEventDispatcher.removeMilestoneEventListener(milestoneEventListener);
   }

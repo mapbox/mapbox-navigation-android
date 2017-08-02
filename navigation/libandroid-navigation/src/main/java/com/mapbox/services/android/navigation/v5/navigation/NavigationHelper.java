@@ -3,7 +3,10 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.location.Location;
 
 import com.mapbox.services.Constants;
+import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.snap.Snap;
+import com.mapbox.services.android.telemetry.utils.MathUtils;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.directions.v5.models.LegStep;
 import com.mapbox.services.api.utils.turf.TurfConstants;
@@ -104,4 +107,48 @@ class NavigationHelper {
     return indexes;
   }
 
+
+  /**
+   * Checks whether the user's bearing matches the next step's maneuver provided bearingAfter variable. This is one of
+   * the criteria's required for the user location to be recognized as being on the next step or potentially arriving.
+   *
+   * @param userLocation  the location of the user
+   * @param routeProgress used for getting route information
+   * @return boolean true if the user location matches (using a tolerance) the final heading
+   * @since 0.2.0
+   */
+  static boolean bearingMatchesManeuverFinalHeading(Location userLocation, RouteProgress routeProgress,
+                                                    double maxTurnCompletionOffset) {
+    if (routeProgress.currentLegProgress().upComingStep() == null) {
+      return false;
+    }
+
+    // Bearings need to be normalized so when the bearingAfter is 359 and the user heading is 1, we count this as
+    // within the MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION.
+    double finalHeading = routeProgress.currentLegProgress().upComingStep().getManeuver().getBearingAfter();
+    double finalHeadingNormalized = MathUtils.wrap(finalHeading, 0, 360);
+    double userHeadingNormalized = MathUtils.wrap(userLocation.getBearing(), 0, 360);
+    return MathUtils.differenceBetweenAngles(finalHeadingNormalized, userHeadingNormalized)
+      <= maxTurnCompletionOffset;
+  }
+
+  static NavigationIndices increaseIndex(RouteProgress routeProgress, NavigationIndices previousIndices) {
+    // Check if we are in the last step in the current routeLeg and iterate it if needed.
+    if (previousIndices.stepIndex() >= routeProgress.directionsRoute().getLegs().get(routeProgress.legIndex()).getSteps().size() - 2
+      && previousIndices.legIndex() < routeProgress.directionsRoute().getLegs().size() - 1) {
+      return NavigationIndices.create((previousIndices.legIndex() + 1), 0);
+    }
+    return NavigationIndices.create(previousIndices.legIndex(), (previousIndices.stepIndex() + 1));
+  }
+
+  static boolean isUserOffRoute(NewLocationModel newLocationModel, RouteProgress routeProgress) {
+    OffRoute offRoute = newLocationModel.mapboxNavigation().getOffRouteEngine();
+    return offRoute.isUserOffRoute(newLocationModel.location(), routeProgress,
+      newLocationModel.mapboxNavigation().options());
+  }
+
+  static Location getSnappedLocation(MapboxNavigation mapboxNavigation, Location location, RouteProgress routeProgress) {
+    Snap snap = mapboxNavigation.getSnapEngine();
+    return snap.getSnappedLocation(location, routeProgress);
+  }
 }
