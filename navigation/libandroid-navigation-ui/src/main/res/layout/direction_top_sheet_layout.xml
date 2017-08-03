@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipToPadding="false"
+    android:keepScreenOn="true">
+
+    <include layout="@layout/direction_top_sheet_content_layout"/>
+
+</RelativeLayout>

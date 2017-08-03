@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.testapp.activity;
+package com.mapbox.services.android.navigation.testapp.activity.navigationui;
 
 import android.location.Location;
 import android.os.Bundle;
@@ -25,15 +25,9 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.Utils;
+import com.mapbox.services.android.navigation.ui.v5.directions.DirectionsTopSheet;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.instruction.Instruction;
-import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
-import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.milestone.RouteMilestone;
-import com.mapbox.services.android.navigation.v5.milestone.Trigger;
-import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -54,8 +48,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
-public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener, MilestoneEventListener {
+public class NavigationUIActivity extends AppCompatActivity implements OnMapReadyCallback,
+  MapboxMap.OnMapClickListener, ProgressChangeListener {
 
   private static final int BEGIN_ROUTE_MILESTONE = 1001;
 
@@ -63,11 +57,14 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @BindView(R.id.mapView)
   MapView mapView;
 
-  @BindView(R.id.newLocationFab)
-  FloatingActionButton newLocationFab;
+  @BindView(R.id.cancelNavFab)
+  FloatingActionButton cancelNavFab;
 
   @BindView(R.id.startRouteButton)
   Button startRouteButton;
+
+  @BindView(R.id.directionsTopSheet)
+  DirectionsTopSheet directionsTopSheet;
 
   private MapboxMap mapboxMap;
   private List<Marker> pathMarkers = new ArrayList<>();
@@ -82,59 +79,46 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_mock_navigation);
+    setContentView(R.layout.activity_navigation_ui_layout);
     ButterKnife.bind(this);
 
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
 
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
-
-    navigation.addMilestone(new RouteMilestone.Builder()
-      .setIdentifier(BEGIN_ROUTE_MILESTONE)
-      .setInstruction(new BeginRouteInstruction())
-      .setTrigger(
-        Trigger.all(
-          Trigger.lt(TriggerProperty.STEP_INDEX, 3),
-          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 200),
-          Trigger.gte(TriggerProperty.STEP_DISTANCE_TRAVELED_METERS, 75)
-        )
-      ).build());
   }
 
   @OnClick(R.id.startRouteButton)
   public void onStartRouteClick() {
     if (navigation != null && route != null) {
+      // Set the LocationLayerPlugin to Navigation mode
+      locationLayerPlugin.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
 
       // Hide the start button
       startRouteButton.setVisibility(View.INVISIBLE);
 
-      // Attach all of our navigation listeners.
-      navigation.addNavigationEventListener(MockNavigationActivity.this);
-      navigation.addProgressChangeListener(MockNavigationActivity.this);
-      navigation.addMilestoneEventListener(MockNavigationActivity.this);
+      // Attach our navigation listeners
+      navigation.addProgressChangeListener(NavigationUIActivity.this);
+      navigation.addProgressChangeListener(directionsTopSheet);
 
       ((MockLocationEngine) locationEngine).setRoute(route);
       navigation.setLocationEngine(locationEngine);
       navigation.startNavigation(route);
+
+      // Show Views
+      cancelNavFab.show();
+      directionsTopSheet.show();
     }
   }
 
-  @OnClick(R.id.newLocationFab)
-  public void onNewLocationClick() {
-    newOrigin();
-  }
-
-  private void newOrigin() {
-    if (mapboxMap != null) {
-      LatLng latLng = Utils.getRandomLatLng(new double[] {-77.1825, 38.7825, -76.9790, 39.0157});
-      ((MockLocationEngine) locationEngine).setLastLocation(
-        Position.fromLngLat(latLng.getLongitude(), latLng.getLatitude())
-      );
-      mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
-      mapboxMap.setMyLocationEnabled(true);
-      mapboxMap.getTrackingSettings().setMyLocationTrackingMode(MyLocationTracking.TRACKING_FOLLOW);
+  @OnClick(R.id.cancelNavFab)
+  public void onCancelNavClick() {
+    if (directionsTopSheet.getVisibility() == View.VISIBLE) {
+      directionsTopSheet.hide();
     }
+    resetNavigation();
+    Snackbar.make(mapView, "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
+    cancelNavFab.hide();
   }
 
   @Override
@@ -142,8 +126,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     this.mapboxMap = mapboxMap;
 
     locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, null);
-    locationLayerPlugin.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
-
     navigationMapRoute = new NavigationMapRoute(navigation, mapView, mapboxMap);
 
     mapboxMap.setOnMapClickListener(this);
@@ -166,6 +148,18 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
     startRouteButton.setVisibility(View.VISIBLE);
     calculateRoute();
+  }
+
+  private void newOrigin() {
+    if (mapboxMap != null) {
+      LatLng latLng = Utils.getRandomLatLng(new double[] {-77.1825, 38.7825, -76.9790, 39.0157});
+      ((MockLocationEngine) locationEngine).setLastLocation(
+        Position.fromLngLat(latLng.getLongitude(), latLng.getLatitude())
+      );
+      mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
+      mapboxMap.setMyLocationEnabled(true);
+      mapboxMap.getTrackingSettings().setMyLocationTrackingMode(MyLocationTracking.TRACKING_FOLLOW);
+    }
   }
 
   private void calculateRoute() {
@@ -202,13 +196,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
         if (response.body() != null) {
           if (response.body().getRoutes().size() > 0) {
             DirectionsRoute route = response.body().getRoutes().get(0);
-            MockNavigationActivity.this.route = route;
+            NavigationUIActivity.this.route = route;
             navigationMapRoute.addRoute(route);
-
-            /*for (LegStep step: route.getLegs().get(0).getSteps()) {
-              mapboxMap.addMarker(new MarkerOptions().position(new LatLng(
-                  step.getManeuver().asPosition().getLatitude(), step.getManeuver().asPosition().getLongitude())));
-             }*/
           }
         }
       }
@@ -220,45 +209,16 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     });
   }
 
-  /*
-   * Navigation listeners
-   */
-
-  @Override
-  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
-    Timber.d("Milestone Event Occurred with id: %d", identifier);
-    switch (identifier) {
-      case NavigationConstants.URGENT_MILESTONE:
-        Toast.makeText(this, "Urgent Milestone", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.IMMINENT_MILESTONE:
-        Toast.makeText(this, "Imminent Milestone", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.NEW_STEP_MILESTONE:
-        Toast.makeText(this, "New Step", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.DEPARTURE_MILESTONE:
-        Toast.makeText(this, "Depart", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.ARRIVAL_MILESTONE:
-        Toast.makeText(this, "Arrival", Toast.LENGTH_LONG).show();
-        break;
-      case BEGIN_ROUTE_MILESTONE:
-        Toast.makeText(this, "you should reach your destination by", Toast.LENGTH_LONG).show();
-        break;
-      default:
-        Toast.makeText(this, "Undefined milestone event occurred", Toast.LENGTH_LONG).show();
-        break;
+  private void resetNavigation() {
+    locationEngine.deactivate();
+    locationEngine.removeLocationUpdates();
+    navigationMapRoute.removeRoute();
+    navigation.endNavigation();
+    for (Marker marker : pathMarkers) {
+      mapboxMap.removeMarker(marker);
     }
-  }
-
-  @Override
-  public void onRunning(boolean running) {
-    if (running) {
-      Timber.d("onRunning: Started");
-    } else {
-      Timber.d("onRunning: Stopped");
-    }
+    pathMarkers.clear();
+    locationLayerPlugin.setLocationLayerEnabled(LocationLayerMode.TRACKING);
   }
 
   @Override
@@ -313,10 +273,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapView.onDestroy();
 
     // Remove all navigation listeners
-    navigation.removeNavigationEventListener(this);
     navigation.removeProgressChangeListener(this);
-    navigation.removeMilestoneEventListener(this);
-
+    navigation.removeProgressChangeListener(directionsTopSheet);
     navigation.onDestroy();
 
     // End the navigation session
@@ -327,13 +285,5 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
-  }
-
-  private class BeginRouteInstruction extends Instruction {
-
-    @Override
-    public String buildInstruction(RouteProgress routeProgress) {
-      return "Have a safe trip!";
-    }
   }
 }
