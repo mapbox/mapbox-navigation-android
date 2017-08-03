@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottomSheetContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipChildren="false">
+
+    <View
+        android:id="@+id/shadow"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_gravity="top"
+        android:background="@drawable/gradient_shadow_up"
+        app:layout_anchor="@+id/bottomSheet"
+        app:layout_anchorGravity="top"/>
+
+    <FrameLayout
+        android:id="@+id/bottomSheet"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:background="#ffffff"
+        android:clipChildren="false"
+        app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fabStartNavigation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="-28dp"
+            android:clickable="true"
+            android:visibility="invisible"
+            app:backgroundTint="@color/mapbox_navigation_bottom_sheet_navy"
+            app:elevation="6dp"
+            app:layout_anchor="@id/bottomSheet"
+            app:srcCompat="@drawable/ic_car"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        <include
+            android:id="@+id/contentSearchDetail"
+            layout="@layout/layout_search_detail_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@drawable/recycler_view_decorator"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/searchDetailsRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@drawable/recycler_view_decorator"/>
+        </LinearLayout>
+    </FrameLayout>
+
+</android.support.design.widget.CoordinatorLayout>

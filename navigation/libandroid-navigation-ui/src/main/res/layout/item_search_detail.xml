@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerHorizontal="true"
+    android:paddingBottom="10dp"
+    android:orientation="vertical"
+    android:paddingTop="10dp"
+    android:paddingLeft="16dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingRight="16dp">
+
+        <TextView
+            android:id="@+id/menuItemTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="2dp"
+            android:textColor="@color/mapbox_navigation_bottom_sheet_navy_alpha_45"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/menuItemDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="2dp"
+            android:text="Medium Text"
+            android:textColor="@color/mapbox_navigation_bottom_sheet_navy"
+            android:textIsSelectable="true"
+            android:textSize="14sp"/>
+    </LinearLayout>
