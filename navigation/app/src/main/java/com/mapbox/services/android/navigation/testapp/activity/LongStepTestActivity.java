@@ -61,6 +61,7 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
     MapboxNavigationOptions options = MapboxNavigationOptions.builder()
       .defaultMilestonesEnabled(false)
       .snapToRoute(false)
+      .enableOffRouteDetection(false)
       .build();
     navigation = new MapboxNavigation(this, options);
     navigation.addProgressChangeListener(this);

@@ -6,18 +6,14 @@ import com.mapbox.services.android.navigation.v5.milestone.StepMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Trigger;
 import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.api.utils.turf.TurfConstants;
-import com.mapbox.services.api.utils.turf.TurfHelpers;
 import com.mapbox.services.commons.utils.TextUtils;
 
-import java.text.DecimalFormat;
 import java.util.Locale;
 
-class DefaultMilestones {
+import static com.mapbox.services.android.navigation.v5.utils.StringUtils.convertFirstCharLowercase;
+import static com.mapbox.services.android.navigation.v5.utils.StringUtils.distanceFormatter;
 
-  private static final String DECIMAL_FORMAT = "###.#";
-  private static final String MILES_STRING_FORMAT = "%s miles";
-  private static final String FEET_STRING_FORMAT = "%s feet";
+class DefaultMilestones {
 
   private MapboxNavigation navigation;
 
@@ -198,36 +194,6 @@ class DefaultMilestones {
   private String getInstructionString(RouteProgress routeProgress) {
     return routeProgress.currentLegProgress().upComingStep() != null
       ? routeProgress.currentLegProgress().upComingStep().getManeuver().getInstruction() :
-      routeProgress.currentLegProgress().upComingStep().getManeuver().getInstruction();
-  }
-
-  private static String convertFirstCharLowercase(String instruction) {
-    if (TextUtils.isEmpty(instruction)) {
-      return instruction;
-    } else {
-      return instruction.substring(0, 1).toLowerCase() + instruction.substring(1);
-    }
-  }
-
-  /**
-   * If over 1099 feet, use miles format.  If less, use feet in intervals of 100
-   *
-   * @param distance given distance extracted from {@link RouteProgress}
-   * @return {@link String} in either feet (int) or miles (decimal) format
-   * @since 0.4.0
-   */
-  private static String distanceFormatter(double distance) {
-    String formattedString;
-    if (TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET) > 1099) {
-      distance = TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES);
-      DecimalFormat df = new DecimalFormat(DECIMAL_FORMAT);
-      double roundedNumber = (distance / 100 * 100);
-      formattedString = String.format(Locale.US, MILES_STRING_FORMAT, df.format(roundedNumber));
-    } else {
-      distance = TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET);
-      int roundedNumber = ((int) Math.round(distance)) / 100 * 100;
-      formattedString = String.format(Locale.US, FEET_STRING_FORMAT, roundedNumber);
-    }
-    return formattedString;
+      routeProgress.currentLegProgress().currentStep().getManeuver().getInstruction();
   }
 }

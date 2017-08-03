@@ -12,10 +12,17 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.models.Position;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.*;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.bearingMatchesManeuverFinalHeading;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getLegDistanceRemaining;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getRouteDistanceRemaining;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getSnappedLocation;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getStepDistanceRemaining;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.increaseIndex;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.isUserOffRoute;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.userSnappedToRoutePosition;
 
 /**
  * This class extends handler thread to run most of the navigation calculations on a separate
@@ -35,11 +42,11 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     super(THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
     this.responseHandler = responseHandler;
     this.callback = callback;
+    indices = NavigationIndices.create(0, 0);
   }
 
   void queueTask(int msgIdentifier, NewLocationModel newLocationModel) {
-    workerHandler.obtainMessage(msgIdentifier, newLocationModel)
-      .sendToTarget();
+    workerHandler.obtainMessage(msgIdentifier, newLocationModel).sendToTarget();
   }
 
   void prepareHandler() {
@@ -50,17 +57,18 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
   public boolean handleMessage(Message msg) {
     NewLocationModel newLocationModel = (NewLocationModel) msg.obj;
     handleRequest(newLocationModel);
-//        msg.recycle();
     return true;
   }
 
   private void handleRequest(final NewLocationModel newLocationModel) {
     final RouteProgress routeProgress = generateNewRouteProgress(newLocationModel.mapboxNavigation(), newLocationModel.location());
-    final List<Milestone> milestones = checkMilestones(routeProgress, newLocationModel.mapboxNavigation());
+    final List<Milestone> milestones = checkMilestones(previousRouteProgress, routeProgress, newLocationModel.mapboxNavigation());
     final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress);
-    final Location location = !userOffRoute && newLocationModel.mapboxNavigation().options().snapToRoute() ?
-      getSnappedLocation(newLocationModel.mapboxNavigation(), newLocationModel.location(), routeProgress)
+    final Location location = !userOffRoute && newLocationModel.mapboxNavigation().options().snapToRoute()
+      ? getSnappedLocation(newLocationModel.mapboxNavigation(), newLocationModel.location(), routeProgress)
       : newLocationModel.location();
+
+    previousRouteProgress = routeProgress;
 
     responseHandler.post(new Runnable() {
       @Override
@@ -92,7 +100,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     }
 
     if (!TextUtils.equals(directionsRoute.getGeometry(), previousRouteProgress.directionsRoute().getGeometry())) {
-      resetRouteProgress();
+      indices = NavigationIndices.create(0, 0);
     }
 
     Position snappedPosition = userSnappedToRoutePosition(location, indices.legIndex(), indices.stepIndex(), directionsRoute);
@@ -106,7 +114,8 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     }
 
     // Create a RouteProgress.create object using the latest user location
-    RouteProgress routeProgress = RouteProgress.builder()
+
+    return RouteProgress.builder()
       .stepDistanceRemaining(stepDistanceRemaining)
       .legDistanceRemaining(legDistanceRemaining)
       .distanceRemaining(routeDistanceRemaining)
@@ -115,26 +124,14 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       .legIndex(indices.legIndex())
       .location(location)
       .build();
-
-
-    previousRouteProgress = routeProgress;
-    return routeProgress;
   }
 
-  private List<Milestone> checkMilestones(RouteProgress routeProgress, MapboxNavigation mapboxNavigation) {
-    List<Milestone> milestones = new ArrayList<>();
-    for (Milestone milestone : mapboxNavigation.getMilestones()) {
-      if (milestone.isOccurring(previousRouteProgress, routeProgress)) {
-        milestones.add(milestone);
-      }
-    }
-    return milestones;
-  }
-
-  private void resetRouteProgress() {
-    indices = NavigationIndices.create(0, 0);
-  }
-
+  /**
+   * Callbacks for posting back to the Navigation Service once the thread finishes calculations.
+   * No matter what, with each new message added to the queue, these callbacks get invoked once
+   * finished and within Navigation Service it is determined if the public corresponding listeners
+   * need invoking or not; the Navigation event dispatcher class handles those callbacks.
+   */
   interface Callback {
     void onNewRouteProgress(Location location, RouteProgress routeProgress);
 

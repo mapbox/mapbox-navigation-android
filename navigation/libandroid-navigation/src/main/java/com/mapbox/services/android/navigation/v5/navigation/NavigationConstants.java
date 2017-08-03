@@ -14,6 +14,8 @@ public class NavigationConstants {
   public static final int URGENT_MILESTONE = 4;
   public static final int ARRIVAL_MILESTONE = 5;
 
+  static final int NAVIGATION_NOTIFICATION_ID = 5678;
+
   /**
    * Threshold user must be in within to count as completing a step. One of two heuristics used to know when a user
    * completes a step, see `RouteControllerManeuverZoneRadius`. The users `heading` and the `finalHeading` are

@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -21,16 +22,12 @@ import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
-/**
- * Internal usage only
- *
- * This service runs in the background during a navigation session and controls the navigation
- * engine and notifies any attached listeners.
- */
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
+
 public class NavigationService extends Service implements LocationEngineListener,
   NavigationEngine.Callback {
 
-  private static final int ONGOING_NOTIFICATION_ID = 1;
   private static final int MSG_LOCATION_UPDATED = 1001;
 
   private final IBinder localBinder = new LocalBinder();
@@ -38,6 +35,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private MapboxNavigation mapboxNavigation;
   private LocationEngine locationEngine;
   private NavigationEngine thread;
+  private NavigationNotification notificationManager;
 
   @Nullable
   @Override
@@ -50,12 +48,12 @@ public class NavigationService extends Service implements LocationEngineListener
     thread = new NavigationEngine(new Handler(), this);
     thread.start();
     thread.prepareHandler();
-
-    NotificationManager notificationManager = new NotificationManager(this);
-    Notification notifyBuilder = notificationManager.buildPersistentNotification();
-    startForeground(ONGOING_NOTIFICATION_ID, notifyBuilder);
   }
 
+  /**
+   * Only should be called once since we want the service to continue running until the navigation
+   * session ends.
+   */
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
     return START_STICKY;
@@ -69,8 +67,16 @@ public class NavigationService extends Service implements LocationEngineListener
 
   void startNavigation(MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
+    initializeNotification();
     acquireLocationEngine();
     forceLocationUpdate();
+  }
+
+  private void initializeNotification() {
+    notificationManager = new NavigationNotification(this);
+    // TODO support custom notification layouts
+    Notification notifyBuilder = notificationManager.buildPersistentNotification(R.layout.layout_notification_default);
+    startForeground(NAVIGATION_NOTIFICATION_ID, notifyBuilder);
   }
 
   void endNavigation() {
@@ -112,8 +118,9 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onLocationChanged(Location location) {
     Timber.d("onLocationChanged");
     if (location != null) {
-      if (validLocationUpdate(location))
-      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation));
+      if (validLocationUpdate(location)) {
+        thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation));
+      }
     }
   }
 
@@ -134,6 +141,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
   @Override
   public void onNewRouteProgress(Location location, RouteProgress routeProgress) {
+    notificationManager.updateDefaultNotification(routeProgress);
     mapboxNavigation.getEventDispatcher().onProgressChange(location, routeProgress);
   }
 
@@ -155,15 +163,6 @@ public class NavigationService extends Service implements LocationEngineListener
       }
     } else {
       timeIntervalSinceLastOffRoute = location.getTime();
-    }
-  }
-
-  private String buildInstructionString(RouteProgress routeProgress, Milestone milestone) {
-    if (milestone.getInstruction() != null) {
-      // Create a new custom instruction based on the Instruction packaged with the Milestone
-      return milestone.getInstruction().buildInstruction(routeProgress);
-    } else {
-      return "";
     }
   }
 

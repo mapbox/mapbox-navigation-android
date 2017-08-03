@@ -6,10 +6,13 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.Location;
 import android.os.IBinder;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.widget.RemoteViews;
 
 import com.mapbox.services.android.location.LostLocationEngine;
+import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -50,6 +53,9 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   private Snap snapEngine;
   private Context context;
   private boolean isBound;
+
+  @LayoutRes
+  private int notificationLayout;
 
   /**
    * Constructs a new instance of this class using the default options. This should be used over
@@ -115,7 +121,12 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     if (options.snapToRoute()) {
       snapEngine = new SnapToRoute();
     }
-    offRouteEngine = new OffRouteDetector();
+    if (options.enableOffRouteDetection()) {
+      offRouteEngine = new OffRouteDetector();
+    }
+
+    // TODO allow disabling
+    notificationLayout = R.layout.layout_notification_default;
   }
 
   /**
@@ -315,6 +326,11 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
       isBound = false;
       navigationEventDispatcher.onNavigationEvent(false);
     }
+  }
+
+  // TODO
+  public void notification(@LayoutRes int notificationLayout) {
+    this.notificationLayout = notificationLayout;
   }
 
   // Listeners
@@ -544,6 +560,10 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   List<Milestone> getMilestones() {
     return milestones;
+  }
+
+  int getNotificationLayout() {
+    return notificationLayout;
   }
 
   MapboxNavigationOptions options() {

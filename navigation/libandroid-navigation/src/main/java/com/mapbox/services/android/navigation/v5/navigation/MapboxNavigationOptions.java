@@ -9,7 +9,6 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class MapboxNavigationOptions {
 
-
   public abstract double maxTurnCompletionOffset();
 
   public abstract double maneuverZoneRadius();
@@ -26,8 +25,9 @@ public abstract class MapboxNavigationOptions {
 
   public abstract boolean defaultMilestonesEnabled();
 
-
   public abstract boolean snapToRoute();
+
+  public abstract boolean enableOffRouteDetection();
 
   public abstract boolean manuallyEndNavigationUponCompletion();
 
@@ -50,7 +50,9 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder defaultMilestonesEnabled(boolean defaultMilestonesEnabled);
 
-    public abstract Builder snapToRoute(boolean snapToRoute);
+    public abstract Builder  snapToRoute(boolean snapToRoute);
+
+    public abstract Builder enableOffRouteDetection(boolean enableOffRouteDetection);
 
     public abstract Builder manuallyEndNavigationUponCompletion(boolean manuallyEndNavigation);
 
@@ -66,6 +68,7 @@ public abstract class MapboxNavigationOptions {
       .maxManipulatedCourseAngle(NavigationConstants.MAX_MANIPULATED_COURSE_ANGLE)
       .userLocationSnapDistance(NavigationConstants.USER_LOCATION_SNAPPING_DISTANCE)
       .secondsBeforeReroute(NavigationConstants.SECONDS_BEFORE_REROUTE)
+      .enableOffRouteDetection(true)
       .snapToRoute(true)
       .manuallyEndNavigationUponCompletion(false)
       .defaultMilestonesEnabled(true);

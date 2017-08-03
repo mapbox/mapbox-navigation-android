@@ -9,6 +9,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mapbox.mapboxsdk.Mapbox;
@@ -92,6 +93,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapView.getMapAsync(this);
 
     navigation = new MapboxNavigation(this);
+//    navigation.notification(R.layout.layout_notification_custom);
 
     navigation.addMilestone(new RouteMilestone.Builder()
       .setIdentifier(BEGIN_ROUTE_MILESTONE)
@@ -165,6 +167,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       Toast.makeText(this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show();
       return;
     }
+
     Marker marker = mapboxMap.addMarker(new MarkerOptions().position(point));
     pathMarkers.add(marker);
 

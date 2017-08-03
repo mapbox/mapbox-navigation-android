@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.location.Location;
 
 import com.mapbox.services.Constants;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
@@ -18,6 +19,7 @@ import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
 import com.mapbox.services.commons.utils.PolylineUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.mapbox.services.Constants.PRECISION_6;
@@ -40,6 +42,16 @@ class NavigationHelper {
     // Point on the LineString.
     Feature feature = TurfMisc.pointOnLine(locationToPoint, coords);
     return ((Point) feature.getGeometry()).getCoordinates();
+  }
+
+
+  static String buildInstructionString(RouteProgress routeProgress, Milestone milestone) {
+    if (milestone.getInstruction() != null) {
+      // Create a new custom instruction based on the Instruction packaged with the Milestone
+      return milestone.getInstruction().buildInstruction(routeProgress);
+    } else {
+      return "";
+    }
   }
 
   static double getStepDistanceRemaining(Position snappedPosition, int legIndex,
@@ -94,20 +106,6 @@ class NavigationHelper {
     return coords.size() > 1 ? coords.get(coords.size() - 1) : coords.get(coords.size());
   }
 
-  static int[] increaseIndex(RouteProgress routeProgress, int legIndex, int stepIndex) {
-    int[] indexes = new int[2];
-    // Check if we are in the last step in the current routeLeg and iterate it if needed.
-    if (stepIndex >= routeProgress.directionsRoute().getLegs().get(routeProgress.legIndex()).getSteps().size() - 2
-      && legIndex < routeProgress.directionsRoute().getLegs().size() - 1) {
-      indexes[0] += 1;
-      indexes[1] = 0;
-    } else {
-      indexes[1] += 1;
-    }
-    return indexes;
-  }
-
-
   /**
    * Checks whether the user's bearing matches the next step's maneuver provided bearingAfter variable. This is one of
    * the criteria's required for the user location to be recognized as being on the next step or potentially arriving.
@@ -132,6 +130,20 @@ class NavigationHelper {
       <= maxTurnCompletionOffset;
   }
 
+  /**
+   * This is used when a user has completed a step maneuver and the indices need to be incremented.
+   * The main purpose of this class is to determine if an additional leg exist and the step index
+   * has met the first legs total size, a leg index needs to occur and step index should be reset.
+   * Otherwise, the step index is incremented while the leg index remains the same.
+   * <p>
+   * Rather than returning an int array, a new instance of Navigation Indices gets returned. This
+   * provides type safety and making the code a bit more readable.
+   * </p>
+   *
+   * @param routeProgress   need a routeProgress in order to get the directions route leg list size
+   * @param previousIndices used for adjusting the indices
+   * @return a {@link NavigationIndices} object which contains the new leg and step indices
+   */
   static NavigationIndices increaseIndex(RouteProgress routeProgress, NavigationIndices previousIndices) {
     // Check if we are in the last step in the current routeLeg and iterate it if needed.
     if (previousIndices.stepIndex() >= routeProgress.directionsRoute().getLegs().get(routeProgress.legIndex()).getSteps().size() - 2
@@ -141,8 +153,23 @@ class NavigationHelper {
     return NavigationIndices.create(previousIndices.legIndex(), (previousIndices.stepIndex() + 1));
   }
 
+  // TODO needs work
+  static List<Milestone> checkMilestones(RouteProgress previousRouteProgress,
+                                         RouteProgress routeProgress, MapboxNavigation mapboxNavigation) {
+    List<Milestone> milestones = new ArrayList<>();
+    for (Milestone milestone : mapboxNavigation.getMilestones()) {
+      if (milestone.isOccurring(previousRouteProgress, routeProgress)) {
+        milestones.add(milestone);
+      }
+    }
+    return milestones;
+  }
+
   static boolean isUserOffRoute(NewLocationModel newLocationModel, RouteProgress routeProgress) {
     OffRoute offRoute = newLocationModel.mapboxNavigation().getOffRouteEngine();
+    if (offRoute == null) {
+      return false;
+    }
     return offRoute.isUserOffRoute(newLocationModel.location(), routeProgress,
       newLocationModel.mapboxNavigation().options());
   }
