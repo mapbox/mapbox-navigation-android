@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Mapbox Navigációs SDK</string>
+
+    <string name="title_route_utils_v5">Útvonal segédek</string>
+    <string name="description_route_utils">A RouteUtils osztály tesztelésére használt.</string>
+
+    <string name="title_navigation">Navigáció</string>
+    <string name="description_navigation">A navigációs szolgáltatás használata.</string>
+
+    <string name="title_snap_to_route">Útvonalhoz igazítás</string>
+    <string name="description_snap_to_route">Mozogj előre/hátra az útvonal lépései között és igazíts egy pontot a vonalhoz.</string>
+
+    <string name="title_off_route_detection">Letérés felismerése</string>
+    <string name="description_off_route_detection">A RouteUtils osztály segítségével felismeri, ha a felhasználó letért az útvonalról.</string>
+</resources>

@@ -1,14 +1,14 @@
 <resources>
-    <string name="app_name">Mapbox Navigation SDK</string>
+    <string name="app_name">SDK de navigation Mapbox</string>
 
-    <string name="title_route_utils_v5">Route Utilities</string>
+    <string name="title_route_utils_v5">Utilitaires d\'itinéraire</string>
     <string name="description_route_utils">Utilisé pour tester la classe RouteUtils</string>
 
     <string name="title_navigation">Navigation</string>
     <string name="description_navigation">Utiliser le service Navigation.</string>
 
     <string name="title_snap_to_route">Aimanter à la route</string>
-    <string name="description_snap_to_route">Avancer ou revenir en arrière entre les étapes, et aimanter un point à la route.</string>
+    <string name="description_snap_to_route">Avancer ou revenir en arrière entre les étapes et aimanter un point à la route.</string>
 
     <string name="title_off_route_detection">Détection de détour</string>
     <string name="description_off_route_detection">Utilise la classe RouteUtils pour déterminer si un utilisateur fait un détour.</string>
