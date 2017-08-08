@@ -84,7 +84,9 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   void startNavigation(MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
-    initializeNotification();
+    if (mapboxNavigation.options().enableNotification()) {
+      initializeNotification();
+    }
     acquireLocationEngine();
     forceLocationUpdate();
   }
@@ -178,7 +180,9 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @Override
   public void onNewRouteProgress(Location location, RouteProgress routeProgress) {
-    notificationManager.updateDefaultNotification(routeProgress);
+    if (mapboxNavigation.options().enableNotification()) {
+      notificationManager.updateDefaultNotification(routeProgress);
+    }
     mapboxNavigation.getEventDispatcher().onProgressChange(location, routeProgress);
   }
 

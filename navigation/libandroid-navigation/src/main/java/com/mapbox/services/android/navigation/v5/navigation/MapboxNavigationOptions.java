@@ -31,7 +31,7 @@ public abstract class MapboxNavigationOptions {
 
   public abstract boolean manuallyEndNavigationUponCompletion();
 
-  // TODO add setting for disabling the notification.
+  public abstract boolean enableNotification();
 
   @AutoValue.Builder
   public abstract static class Builder {
@@ -58,6 +58,8 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder manuallyEndNavigationUponCompletion(boolean manuallyEndNavigation);
 
+    public abstract Builder enableNotification(boolean enableNotification);
+
     public abstract MapboxNavigationOptions build();
   }
 
@@ -73,6 +75,7 @@ public abstract class MapboxNavigationOptions {
       .enableOffRouteDetection(true)
       .snapToRoute(true)
       .manuallyEndNavigationUponCompletion(false)
-      .defaultMilestonesEnabled(true);
+      .defaultMilestonesEnabled(true)
+      .enableNotification(true);
   }
 }
