@@ -58,6 +58,12 @@
                 android:value=".MainActivity"/>
         </activity>
 
+        <activity
+            android:name=".activity.LongStepTestActivity"
+            android:label="@string/title_long_step">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
     </application>
-
 </manifest>

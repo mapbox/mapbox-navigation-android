@@ -15,7 +15,6 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 public class RouteLegProgressTest extends BaseTest {
 
@@ -36,77 +35,120 @@ public class RouteLegProgressTest extends BaseTest {
 
   @Test
   public void sanityTest() {
-    RouteLegProgress routeLegProgress
-      = RouteLegProgress.create(firstLeg, 0, Mockito.mock(Position.class));
-    Assert.assertNotNull("should not be null", routeLegProgress);
+    RouteProgress routeProgress = RouteProgress.builder()
+      .location(buildTestLocation(firstLeg.getSteps().get(0).getManeuver().asPosition()))
+      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+      .legDistanceRemaining(route.getLegs().get(0).getDistance())
+      .distanceRemaining(route.getDistance())
+      .directionsRoute(route)
+      .stepIndex(0)
+      .legIndex(0)
+      .build();
+    Assert.assertNotNull("should not be null", routeProgress.currentLegProgress());
   }
 
   @Test
-  public void getUpComingStep_returnsNextStepInLeg() {
-    RouteLegProgress routeLegProgress
-      = RouteLegProgress.create(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
-
-    // TODO replace with equalsTo once https://github.com/mapbox/mapbox-java/pull/450 merged
-    Assert.assertTrue(routeLegProgress.getUpComingStep().getGeometry()
+  public void upComingStep_returnsNextStepInLeg() {
+    RouteProgress routeProgress = RouteProgress.builder()
+      .location(buildTestLocation(firstLeg.getSteps().get(4).getManeuver().asPosition()))
+      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+      .legDistanceRemaining(route.getLegs().get(0).getDistance())
+      .distanceRemaining(route.getDistance())
+      .directionsRoute(route)
+      .stepIndex(5)
+      .legIndex(0)
+      .build();
+    Assert.assertTrue(routeProgress.currentLegProgress().upComingStep().getGeometry()
       .startsWith("so{gfA~}xpgFzOyNnRoOdVqXzLmQbDiGhKqQ|Vie@`X{g@dkAw{B~NcXhPoWlRmXfSeW|U"));
   }
 
   @Test
-  public void getUpComingStep_returnsNull() {
+  public void upComingStep_returnsNull() {
     int lastStepIndex = firstLeg.getSteps().size() - 1;
-    RouteLegProgress routeLegProgress
-      = RouteLegProgress.create(firstLeg, lastStepIndex,
-      firstLeg.getSteps().get(lastStepIndex - 2).getManeuver().asPosition());
-
-    Assert.assertNull(routeLegProgress.getUpComingStep());
+    RouteProgress routeProgress = RouteProgress.builder()
+      .location(buildTestLocation(firstLeg.getSteps().get(lastStepIndex - 2).getManeuver().asPosition()))
+      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+      .legDistanceRemaining(route.getLegs().get(0).getDistance())
+      .distanceRemaining(route.getDistance())
+      .directionsRoute(route)
+      .stepIndex(lastStepIndex)
+      .legIndex(0)
+      .build();
+    Assert.assertNull(routeProgress.currentLegProgress().upComingStep());
   }
 
   @Test
-  public void getCurrentStep_returnsCurrentStep() {
-    RouteLegProgress routeLegProgress
-      = RouteLegProgress.create(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
+  public void currentStep_returnsCurrentStep() {
+    RouteProgress routeProgress = RouteProgress.builder()
+      .location(buildTestLocation(firstLeg.getSteps().get(4).getManeuver().asPosition()))
+      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+      .legDistanceRemaining(route.getLegs().get(0).getDistance())
+      .distanceRemaining(route.getDistance())
+      .directionsRoute(route)
+      .stepIndex(5)
+      .legIndex(0)
+      .build();
+    Assert.assertEquals(
+      firstLeg.getSteps().get(5).getGeometry(), routeProgress.currentLegProgress().currentStep().getGeometry()
+    );
+    Assert.assertNotSame(
+      firstLeg.getSteps().get(6).getGeometry(), routeProgress.currentLegProgress().currentStep().getGeometry()
+    );
+  }
+
+  @Test
+  public void previousStep_returnsPreviousStep() {
+    RouteProgress routeProgress = RouteProgress.builder()
+      .location(buildTestLocation(firstLeg.getSteps().get(4).getManeuver().asPosition()))
+      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+      .legDistanceRemaining(route.getLegs().get(0).getDistance())
+      .distanceRemaining(route.getDistance())
+      .directionsRoute(route)
+      .stepIndex(5)
+      .legIndex(0)
+      .build();
 
     // TODO replace with equalsTo once https://github.com/mapbox/mapbox-java/pull/450 merged
     Assert.assertEquals(
-      firstLeg.getSteps().get(5).getGeometry(), routeLegProgress.getCurrentStep().getGeometry()
+      firstLeg.getSteps().get(4).getGeometry(), routeProgress.currentLegProgress().previousStep().getGeometry()
     );
     Assert.assertNotSame(
-      firstLeg.getSteps().get(6).getGeometry(), routeLegProgress.getCurrentStep().getGeometry()
+      firstLeg.getSteps().get(5).getGeometry(), routeProgress.currentLegProgress().previousStep().getGeometry()
     );
   }
 
   @Test
-  public void getPreviousStep_returnsPreviousStep() {
-    RouteLegProgress routeLegProgress
-      = RouteLegProgress.create(firstLeg, 5, firstLeg.getSteps().get(4).getManeuver().asPosition());
+  public void stepIndex_returnsCurrentStepIndex() {
+    RouteProgress routeProgress = RouteProgress.builder()
+      .location(buildTestLocation(firstLeg.getSteps().get(4).getManeuver().asPosition()))
+      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+      .legDistanceRemaining(route.getLegs().get(0).getDistance())
+      .distanceRemaining(route.getDistance())
+      .directionsRoute(route)
+      .stepIndex(3)
+      .legIndex(0)
+      .build();
 
-    // TODO replace with equalsTo once https://github.com/mapbox/mapbox-java/pull/450 merged
-    Assert.assertEquals(
-      firstLeg.getSteps().get(4).getGeometry(), routeLegProgress.getPreviousStep().getGeometry()
-    );
-    Assert.assertNotSame(
-      firstLeg.getSteps().get(5).getGeometry(), routeLegProgress.getPreviousStep().getGeometry()
-    );
+    Assert.assertEquals(3, routeProgress.currentLegProgress().stepIndex(), BaseTest.DELTA);
   }
 
   @Test
-  public void getStepIndex_returnsCurrentStepIndex() {
-    RouteLegProgress routeLegProgress = RouteLegProgress.create(firstLeg, 3,
-      firstLeg.getSteps().get(4).getManeuver().asPosition());
+  public void fractionTraveled_equalsZeroAtBeginning() {
+    RouteProgress routeProgress = RouteProgress.builder()
+      .location(buildTestLocation(firstLeg.getSteps().get(0).getManeuver().asPosition()))
+      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+      .legDistanceRemaining(route.getLegs().get(0).getDistance())
+      .distanceRemaining(route.getDistance())
+      .directionsRoute(route)
+      .stepIndex(0)
+      .legIndex(0)
+      .build();
 
-    Assert.assertEquals(3, routeLegProgress.getStepIndex(), BaseTest.DELTA);
+    Assert.assertEquals(0.0, routeProgress.currentLegProgress().fractionTraveled(), BaseTest.DELTA);
   }
 
   @Test
-  public void getFractionTraveled_equalsZeroAtBeginning() {
-    RouteLegProgress routeLegProgress
-      = RouteLegProgress.create(firstLeg, 0, firstLeg.getSteps().get(0).getManeuver().asPosition());
-
-    Assert.assertEquals(0.0, routeLegProgress.getFractionTraveled(), BaseTest.DELTA);
-  }
-
-  @Test
-  public void getFractionTraveled_equalsCorrectValueAtIntervals() {
+  public void fractionTraveled_equalsCorrectValueAtIntervals() {
     double stepSegments = 5000; // meters
 
     // Chop the line in small pieces
@@ -114,64 +156,121 @@ public class RouteLegProgressTest extends BaseTest {
     for (double i = 0; i < firstLeg.getDistance(); i += stepSegments) {
       Position position = TurfMeasurement.along(lineString, i, TurfConstants.UNIT_METERS).getCoordinates();
 
-      RouteLegProgress routeLegProgress = RouteLegProgress.create(firstLeg, 0, position);
-      float fractionRemaining = (float) (routeLegProgress.getDistanceTraveled() / firstLeg.getDistance());
-      Assert.assertEquals(fractionRemaining, routeLegProgress.getFractionTraveled(), BaseTest.DELTA);
+      RouteProgress routeProgress = RouteProgress.builder()
+        .location(buildTestLocation(position))
+        .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+        .legDistanceRemaining(route.getLegs().get(0).getDistance())
+        .distanceRemaining(route.getDistance())
+        .directionsRoute(route)
+        .stepIndex(0)
+        .legIndex(0)
+        .build();
+
+      float fractionRemaining = (float) (routeProgress.currentLegProgress().distanceTraveled()
+        / firstLeg.getDistance());
+      Assert.assertEquals(fractionRemaining, routeProgress.currentLegProgress().fractionTraveled(), BaseTest.DELTA);
     }
   }
 
   @Test
-  public void getFractionTraveled_equalsOneAtEndOfLeg() {
-    RouteLegProgress routeLegProgress = RouteLegProgress.create(firstLeg, firstLeg.getSteps().size() - 1,
-      firstLeg.getSteps().get(firstLeg.getSteps().size() - 1).getManeuver().asPosition());
+  public void fractionTraveled_equalsOneAtEndOfLeg() {
+    RouteProgress routeProgress = RouteProgress.builder()
+      .location(buildTestLocation(firstLeg.getSteps().get(firstLeg.getSteps().size() - 1).getManeuver().asPosition()))
+      .stepDistanceRemaining(0)
+      .legDistanceRemaining(0)
+      .distanceRemaining(0)
+      .directionsRoute(route)
+      .stepIndex(firstLeg.getSteps().size() - 1)
+      .legIndex(0)
+      .build();
 
-    Assert.assertEquals(1.0, routeLegProgress.getFractionTraveled(), BaseTest.DELTA);
+    Assert.assertEquals(1.0, routeProgress.currentLegProgress().fractionTraveled(), BaseTest.DELTA);
   }
 
   @Test
-  public void getDistanceRemaining_equalsLegDistanceAtBeginning() {
-    RouteLegProgress routeLegProgress
-      = RouteLegProgress.create(firstLeg, 0, firstLeg.getSteps().get(0).getManeuver().asPosition());
+  public void distanceRemaining_equalsLegDistanceAtBeginning() {
+    RouteProgress routeProgress = RouteProgress.builder()
+      .location(buildTestLocation(firstLeg.getSteps().get(0).getManeuver().asPosition()))
+      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+      .legDistanceRemaining(route.getLegs().get(0).getDistance())
+      .distanceRemaining(route.getDistance())
+      .directionsRoute(route)
+      .stepIndex(0)
+      .legIndex(0)
+      .build();
 
-    Assert.assertEquals(firstLeg.getDistance(), routeLegProgress.getDistanceRemaining(), BaseTest.LARGE_DELTA);
+    Assert.assertEquals(firstLeg.getDistance(), routeProgress.currentLegProgress().distanceRemaining(),
+      BaseTest.LARGE_DELTA);
   }
 
   @Test
-  public void getDistanceRemaining_equalsZeroAtEndOfLeg() {
-    RouteLegProgress routeLegProgress = RouteLegProgress.create(firstLeg, firstLeg.getSteps().size() - 1,
-      firstLeg.getSteps().get(firstLeg.getSteps().size() - 1).getManeuver().asPosition());
+  public void distanceRemaining_equalsZeroAtEndOfLeg() {
+    RouteProgress routeProgress = RouteProgress.builder()
+      .location(buildTestLocation(firstLeg.getSteps().get(firstLeg.getSteps().size() - 1).getManeuver().asPosition()))
+      .stepDistanceRemaining(0)
+      .legDistanceRemaining(0)
+      .distanceRemaining(0)
+      .directionsRoute(route)
+      .stepIndex(firstLeg.getSteps().size() - 1)
+      .legIndex(0)
+      .build();
 
-    Assert.assertEquals(0, routeLegProgress.getDistanceRemaining(), BaseTest.DELTA);
+    Assert.assertEquals(0, routeProgress.currentLegProgress().distanceRemaining(), BaseTest.DELTA);
   }
 
   @Test
-  public void getDistanceTraveled_equalsZeroAtBeginning() {
-    RouteLegProgress routeLegProgress
-      = RouteLegProgress.create(firstLeg, 0, firstLeg.getSteps().get(0).getManeuver().asPosition());
-    Assert.assertEquals(0, routeLegProgress.getDistanceTraveled(), BaseTest.DELTA);
+  public void distanceTraveled_equalsZeroAtBeginning() {
+    RouteProgress routeProgress = RouteProgress.builder()
+      .location(buildTestLocation(firstLeg.getSteps().get(0).getManeuver().asPosition()))
+      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+      .legDistanceRemaining(route.getLegs().get(0).getDistance())
+      .distanceRemaining(route.getDistance())
+      .directionsRoute(route)
+      .stepIndex(0)
+      .legIndex(0)
+      .build();
+    Assert.assertEquals(0, routeProgress.currentLegProgress().distanceTraveled(), BaseTest.DELTA);
   }
 
   @Test
   public void getDistanceTraveled_equalsLegDistanceAtEndOfLeg() {
-    RouteLegProgress routeLegProgress = RouteLegProgress.create(firstLeg, firstLeg.getSteps().size() - 1,
-      firstLeg.getSteps().get(firstLeg.getSteps().size() - 1).getManeuver().asPosition());
-
-    Assert.assertEquals(firstLeg.getDistance(), routeLegProgress.getDistanceTraveled(), BaseTest.DELTA);
+    RouteProgress routeProgress = RouteProgress.builder()
+      .location(buildTestLocation(firstLeg.getSteps().get(firstLeg.getSteps().size() - 1).getManeuver().asPosition()))
+      .stepDistanceRemaining(0)
+      .legDistanceRemaining(0)
+      .distanceRemaining(0)
+      .directionsRoute(route)
+      .stepIndex(firstLeg.getSteps().size() - 1)
+      .legIndex(0)
+      .build();
+    Assert.assertEquals(firstLeg.getDistance(), routeProgress.currentLegProgress().distanceTraveled(), BaseTest.DELTA);
   }
 
   @Test
   public void getDurationRemaining_equalsLegDurationAtBeginning() {
-    RouteLegProgress routeLegProgress
-      = RouteLegProgress.create(firstLeg, 0, firstLeg.getSteps().get(0).getManeuver().asPosition());
-
-    Assert.assertEquals(3535.2, routeLegProgress.getDurationRemaining(), BaseTest.DELTA);
+    RouteProgress routeProgress = RouteProgress.builder()
+      .location(buildTestLocation(firstLeg.getSteps().get(0).getManeuver().asPosition()))
+      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+      .legDistanceRemaining(route.getLegs().get(0).getDistance())
+      .distanceRemaining(route.getDistance())
+      .directionsRoute(route)
+      .stepIndex(0)
+      .legIndex(0)
+      .build();
+    Assert.assertEquals(3535.2, routeProgress.currentLegProgress().durationRemaining(), BaseTest.DELTA);
   }
 
   @Test
   public void getDurationRemaining_equalsZeroAtEndOfLeg() {
-    RouteLegProgress routeLegProgress = RouteLegProgress.create(firstLeg, firstLeg.getSteps().size() - 1,
-      firstLeg.getSteps().get(firstLeg.getSteps().size() - 1).getManeuver().asPosition());
-
-    Assert.assertEquals(0, routeLegProgress.getDurationRemaining(), BaseTest.DELTA);
+    RouteProgress routeProgress = RouteProgress.builder()
+      .location(buildTestLocation(firstLeg.getSteps().get(firstLeg.getSteps().size() - 1).getManeuver().asPosition()))
+      .stepDistanceRemaining(0)
+      .legDistanceRemaining(0)
+      .distanceRemaining(0)
+      .directionsRoute(route)
+      .stepIndex(firstLeg.getSteps().size() - 1)
+      .legIndex(0)
+      .build();
+    Assert.assertEquals(0, routeProgress.currentLegProgress().durationRemaining(), BaseTest.DELTA);
   }
 }

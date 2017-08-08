@@ -11,11 +11,14 @@
     <string name="title_off_route_detection">Off route detection</string>
     <string name="description_off_route_detection">Uses the Route Utils class to determine if a users off route.</string>
 
-    <string name="title_location_info">Location Information</string>
+    <string name="title_location_info">Location information</string>
     <string name="description_location_info">Get information every location update event</string>
 
     <string name="title_reroute">Reroute</string>
     <string name="description_reroute">Test the reroute function inside the navigation SDK</string>
+
+    <string name="title_long_step">Route with single long step</string>
+    <string name="description_long_step">Test the navigation engine against a step with a long linestring.</string>
 
     <string name="title_navigation_route_ui">Navigation Map Route</string>
     <string name="description_navigation_route_ui">Draws a route on the map</string>

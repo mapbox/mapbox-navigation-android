@@ -18,7 +18,7 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.services.Constants;
-import com.mapbox.services.android.navigation.v5.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
@@ -250,8 +250,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     // TODO they'll probably never be equal till https://github.com/mapbox/mapbox-java/issues/440 gets resolved
     // Check if the route's the same as the route currently drawn
-    if (!routeProgress.getRoute().equals(route)) {
-      route = routeProgress.getRoute();
+    if (!routeProgress.directionsRoute().equals(route)) {
+      route = routeProgress.directionsRoute();
       addSource(route);
     }
   }
