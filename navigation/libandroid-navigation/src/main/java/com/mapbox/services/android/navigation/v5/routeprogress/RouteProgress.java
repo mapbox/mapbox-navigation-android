@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import android.location.Location;
-import android.os.Parcelable;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
@@ -115,9 +114,13 @@ public abstract class RouteProgress {
     private double legDistanceRemaining;
     private double stepDistanceRemaining;
 
+    abstract DirectionsRoute directionsRoute();
+
     public abstract Builder directionsRoute(DirectionsRoute directionsRoute);
 
     public abstract Builder location(Location location);
+
+    abstract int legIndex();
 
     public abstract Builder legIndex(int legIndex);
 
@@ -139,10 +142,6 @@ public abstract class RouteProgress {
     }
 
     abstract Builder currentLegProgress(RouteLegProgress routeLegProgress);
-
-    abstract DirectionsRoute directionsRoute();
-
-    abstract int legIndex();
 
     abstract RouteProgress autoBuild(); // not public
 

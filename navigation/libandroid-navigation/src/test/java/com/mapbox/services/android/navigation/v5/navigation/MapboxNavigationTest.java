@@ -149,14 +149,13 @@ public class MapboxNavigationTest extends BaseTest {
     assertEquals(locationEngine, navigation.getLocationEngine());
   }
 
-//  @Test
-//  public void endNavigation_doesSendFalseToNavigationEvent() throws Exception {
-//    NavigationEventListener navigationEventListener = mock(NavigationEventListener.class);
-//    navigation.addNavigationEventListener(navigationEventListener);
-//    navigation.startNavigation(mock(DirectionsRoute.class));
-//    navigation.endNavigation();
-//    verify(navigationEventListener, times(1)).onRunning(false);
-//  }
+  //  @Test
+  //  public void endNavigation_doesSendFalseToNavigationEvent() throws Exception {
+  //    NavigationEventListener navigationEventListener = mock(NavigationEventListener.class);
+  //    navigation.addNavigationEventListener(navigationEventListener);
+  //    navigation.startNavigation(mock(DirectionsRoute.class));
+  //    navigation.endNavigation();
+  //    verify(navigationEventListener, times(1)).onRunning(false);}
 
   @Test
   public void startNavigation_doesSendTrueToNavigationEvent() throws Exception {

@@ -183,7 +183,8 @@ class NavigationHelper {
       newLocationModel.mapboxNavigation().options());
   }
 
-  static Location getSnappedLocation(MapboxNavigation mapboxNavigation, Location location, RouteProgress routeProgress) {
+  static Location getSnappedLocation(MapboxNavigation mapboxNavigation, Location location,
+                                     RouteProgress routeProgress) {
     Snap snap = mapboxNavigation.getSnapEngine();
     return snap.getSnappedLocation(location, routeProgress);
   }

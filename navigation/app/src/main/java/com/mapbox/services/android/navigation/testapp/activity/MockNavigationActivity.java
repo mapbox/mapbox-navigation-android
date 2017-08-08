@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.constants.MyLocationTracking;
@@ -27,28 +26,22 @@ import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.ui.v5.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.RouteMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Trigger;
 import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationService;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.commons.models.Position;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -74,7 +67,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   Button startRouteButton;
 
   private MapboxMap mapboxMap;
-  private List<Marker> pathMarkers = new ArrayList<>();
 
   // Navigation related variables
   private LocationEngine locationEngine;
@@ -82,6 +74,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   private DirectionsRoute route;
   private NavigationMapRoute navigationMapRoute;
   private LocationLayerPlugin locationLayerPlugin;
+  private Position destination;
+  private Position waypoint;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +87,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapView.getMapAsync(this);
 
     navigation = new MapboxNavigation(this);
-//    navigation.notification(R.layout.layout_notification_custom);
 
     navigation.addMilestone(new RouteMilestone.Builder()
       .setIdentifier(BEGIN_ROUTE_MILESTONE)
@@ -163,13 +156,14 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onMapClick(@NonNull LatLng point) {
-    if (pathMarkers.size() >= 2) {
+    if (destination == null) {
+      destination = Position.fromLngLat(point.getLongitude(), point.getLatitude());
+    } else if (waypoint == null) {
+      waypoint = Position.fromLngLat(point.getLongitude(), point.getLatitude());
+    } else {
       Toast.makeText(this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show();
-      return;
     }
-
-    Marker marker = mapboxMap.addMarker(new MarkerOptions().position(point));
-    pathMarkers.add(marker);
+    mapboxMap.addMarker(new MarkerOptions().position(point));
 
     startRouteButton.setVisibility(View.VISIBLE);
     calculateRoute();
@@ -183,36 +177,20 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     }
 
     Position origin = Position.fromCoordinates(userLocation.getLongitude(), userLocation.getLatitude());
-    Position destination = Position.fromLngLat(
-      pathMarkers.get(pathMarkers.size() - 1).getPosition().getLongitude(),
-      pathMarkers.get(pathMarkers.size() - 1).getPosition().getLatitude()
-    );
     if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) < 50) {
-      for (Marker marker : pathMarkers) {
-        mapboxMap.removeMarker(marker);
-      }
       startRouteButton.setVisibility(View.GONE);
       return;
     }
 
-    List<Position> coordinates = new ArrayList<>();
-    coordinates.add(origin);
-
-    for (Marker marker : pathMarkers) {
-      coordinates.add(Position.fromLngLat(marker.getPosition().getLongitude(), marker.getPosition().getLatitude()));
+    NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder()
+      .accessToken(Mapbox.getAccessToken());
+    navigationRouteBuilder.origin(origin);
+    navigationRouteBuilder.destination(destination);
+    if (waypoint != null) {
+      navigationRouteBuilder.addWaypoint(waypoint);
     }
 
-    NavigationRoute navigationRoute = NavigationRoute.builder()
-      .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-      .coordinates(coordinates)
-      .accessToken(Mapbox.getAccessToken())
-      .user(DirectionsCriteria.PROFILE_DEFAULT_USER)
-      .alternatives(false)
-      .congestion(true)
-      .language(Locale.US.toString())
-      .build();
-
-    navigationRoute.getRoute(new Callback<DirectionsResponse>() {
+    navigationRouteBuilder.build().getRoute(new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
         Timber.d("Url: %s", call.request().url().toString());

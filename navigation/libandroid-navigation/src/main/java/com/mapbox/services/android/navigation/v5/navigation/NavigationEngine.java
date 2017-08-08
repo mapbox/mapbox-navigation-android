@@ -16,12 +16,12 @@ import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.bearingMatchesManeuverFinalHeading;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.legDistanceRemaining;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.routeDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getSnappedLocation;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.stepDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.increaseIndex;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.isUserOffRoute;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.legDistanceRemaining;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.routeDistanceRemaining;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.stepDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.userSnappedToRoutePosition;
 
 /**
@@ -61,8 +61,10 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
   }
 
   private void handleRequest(final NewLocationModel newLocationModel) {
-    final RouteProgress routeProgress = generateNewRouteProgress(newLocationModel.mapboxNavigation(), newLocationModel.location());
-    final List<Milestone> milestones = checkMilestones(previousRouteProgress, routeProgress, newLocationModel.mapboxNavigation());
+    final RouteProgress routeProgress = generateNewRouteProgress(
+      newLocationModel.mapboxNavigation(), newLocationModel.location());
+    final List<Milestone> milestones = checkMilestones(
+      previousRouteProgress, routeProgress, newLocationModel.mapboxNavigation());
     final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress);
     final Location location = !userOffRoute && newLocationModel.mapboxNavigation().options().snapToRoute()
       ? getSnappedLocation(newLocationModel.mapboxNavigation(), newLocationModel.location(), routeProgress)
@@ -103,10 +105,14 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       indices = NavigationIndices.create(0, 0);
     }
 
-    Position snappedPosition = userSnappedToRoutePosition(location, indices.legIndex(), indices.stepIndex(), directionsRoute);
-    double stepDistanceRemaining = stepDistanceRemaining(snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute);
-    double legDistanceRemaining = legDistanceRemaining(stepDistanceRemaining, indices.legIndex(), indices.stepIndex(), directionsRoute);
-    double routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, indices.legIndex(), directionsRoute);
+    Position snappedPosition = userSnappedToRoutePosition(
+      location, indices.legIndex(), indices.stepIndex(), directionsRoute);
+    double stepDistanceRemaining = stepDistanceRemaining(
+      snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute);
+    double legDistanceRemaining = legDistanceRemaining(
+      stepDistanceRemaining, indices.legIndex(), indices.stepIndex(), directionsRoute);
+    double routeDistanceRemaining = routeDistanceRemaining(
+      legDistanceRemaining, indices.legIndex(), directionsRoute);
 
     if (bearingMatchesManeuverFinalHeading(location, previousRouteProgress, options.maxTurnCompletionOffset())
       && stepDistanceRemaining < options.maneuverZoneRadius()) {

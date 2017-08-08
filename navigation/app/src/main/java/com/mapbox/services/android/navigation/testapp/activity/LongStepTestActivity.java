@@ -22,7 +22,6 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOpti
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 
@@ -34,7 +33,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class LongStepTestActivity extends AppCompatActivity implements ProgressChangeListener,
-  OnMapReadyCallback, LocationEngineListener {
+  OnMapReadyCallback {
 
   @BindView(R.id.mapView)
   MapView mapView;
@@ -66,7 +65,6 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
     navigation = new MapboxNavigation(this, options);
     navigation.addProgressChangeListener(this);
     locationEngine = new MockLocationEngine();
-    locationEngine.addLocationEngineListener(this);
     locationEngine.activate();
   }
 
@@ -91,17 +89,6 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
     navigation.setLocationEngine(locationEngine);
     mapboxMap.setLocationSource(locationEngine);
     navigation.startNavigation(route);
-  }
-
-  @Override
-  public void onConnected() {
-    locationEngine.requestLocationUpdates();
-  }
-
-  @Override
-  public void onLocationChanged(Location location) {
-    System.out.println(location.toString());
-//    locationLayerPlugin.forceLocationUpdate(location);
   }
 
   @Override

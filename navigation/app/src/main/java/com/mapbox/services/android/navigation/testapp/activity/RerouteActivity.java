@@ -20,14 +20,13 @@ import com.mapbox.services.Constants;
 import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
-import com.mapbox.services.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.geojson.LineString;
@@ -35,7 +34,6 @@ import com.mapbox.services.commons.models.Position;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -148,18 +146,10 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   }
 
   private void getRoute(Position origin, Position destination) {
-    List<Position> positions = new ArrayList<>();
-    positions.add(origin);
-    positions.add(destination);
-
     NavigationRoute navigationRoute = NavigationRoute.builder()
-      .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-      .coordinates(positions)
+      .origin(origin)
+      .destination(destination)
       .accessToken(Mapbox.getAccessToken())
-      .user(DirectionsCriteria.PROFILE_DEFAULT_USER)
-      .alternatives(false)
-      .congestion(true)
-      .language(Locale.US.toString())
       .build();
 
     navigationRoute.getRoute(this);

@@ -34,9 +34,6 @@ class NavigationNotification {
     notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
   }
 
-  /**
-   *
-   */
   Notification buildPersistentNotification(@LayoutRes int layout) {
     remoteViews = new RemoteViews(context.getPackageName(), layout);
 
@@ -50,7 +47,7 @@ class NavigationNotification {
     return notificationBuilder.build();
   }
 
-  public void updateDefaultNotification(RouteProgress routeProgress) {
+  void updateDefaultNotification(RouteProgress routeProgress) {
     remoteViews.setTextViewText(
       R.id.notificationStreetNameTextView,
       routeProgress.currentLegProgress().currentStep().getName()
@@ -59,7 +56,7 @@ class NavigationNotification {
       R.id.notificationStepDistanceTextView,
       StringUtils.distanceFormatter(routeProgress.currentLegProgress().currentStepProgress().distanceRemaining())
     );
-//    remoteViews.setImageViewResource();
-    notificationManager.notify( NAVIGATION_NOTIFICATION_ID, notificationBuilder.build());
+    //    remoteViews.setImageViewResource();
+    notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notificationBuilder.build());
   }
 }

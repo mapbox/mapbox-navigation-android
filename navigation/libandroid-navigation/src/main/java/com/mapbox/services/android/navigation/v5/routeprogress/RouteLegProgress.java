@@ -122,7 +122,11 @@ public abstract class RouteLegProgress {
 
     private double stepDistanceRemaining;
 
+    abstract RouteLeg routeLeg();
+
     abstract Builder routeLeg(RouteLeg routeLeg);
+
+    abstract int stepIndex();
 
     abstract Builder stepIndex(int stepIndex);
 
@@ -135,14 +139,11 @@ public abstract class RouteLegProgress {
 
     abstract Builder currentStepProgress(RouteStepProgress routeStepProgress);
 
-    abstract int stepIndex();
-
-    abstract RouteLeg routeLeg();
-
     abstract RouteLegProgress autoBuild(); // not public
 
     public RouteLegProgress build() {
-      RouteStepProgress stepProgress = RouteStepProgress.create(routeLeg().getSteps().get(stepIndex()), stepDistanceRemaining);
+      RouteStepProgress stepProgress = RouteStepProgress.create(routeLeg().getSteps().get(stepIndex()),
+        stepDistanceRemaining);
       currentStepProgress(stepProgress);
       return autoBuild();
     }

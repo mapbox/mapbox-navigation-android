@@ -166,7 +166,8 @@ public class RouteLegProgressTest extends BaseTest {
         .legIndex(0)
         .build();
 
-      float fractionRemaining = (float) (routeProgress.currentLegProgress().distanceTraveled() / firstLeg.getDistance());
+      float fractionRemaining = (float) (routeProgress.currentLegProgress().distanceTraveled()
+        / firstLeg.getDistance());
       Assert.assertEquals(fractionRemaining, routeProgress.currentLegProgress().fractionTraveled(), BaseTest.DELTA);
     }
   }
@@ -198,7 +199,8 @@ public class RouteLegProgressTest extends BaseTest {
       .legIndex(0)
       .build();
 
-    Assert.assertEquals(firstLeg.getDistance(), routeProgress.currentLegProgress().distanceRemaining(), BaseTest.LARGE_DELTA);
+    Assert.assertEquals(firstLeg.getDistance(), routeProgress.currentLegProgress().distanceRemaining(),
+      BaseTest.LARGE_DELTA);
   }
 
   @Test
