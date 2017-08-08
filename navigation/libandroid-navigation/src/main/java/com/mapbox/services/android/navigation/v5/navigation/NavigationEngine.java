@@ -16,10 +16,10 @@ import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.bearingMatchesManeuverFinalHeading;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getLegDistanceRemaining;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getRouteDistanceRemaining;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.legDistanceRemaining;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.routeDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getSnappedLocation;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getStepDistanceRemaining;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.stepDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.increaseIndex;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.isUserOffRoute;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.userSnappedToRoutePosition;
@@ -104,9 +104,9 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     }
 
     Position snappedPosition = userSnappedToRoutePosition(location, indices.legIndex(), indices.stepIndex(), directionsRoute);
-    double stepDistanceRemaining = getStepDistanceRemaining(snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute);
-    double legDistanceRemaining = getLegDistanceRemaining(stepDistanceRemaining, indices.legIndex(), indices.stepIndex(), directionsRoute);
-    double routeDistanceRemaining = getRouteDistanceRemaining(legDistanceRemaining, indices.legIndex(), directionsRoute);
+    double stepDistanceRemaining = stepDistanceRemaining(snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute);
+    double legDistanceRemaining = legDistanceRemaining(stepDistanceRemaining, indices.legIndex(), indices.stepIndex(), directionsRoute);
+    double routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, indices.legIndex(), directionsRoute);
 
     if (bearingMatchesManeuverFinalHeading(location, previousRouteProgress, options.maxTurnCompletionOffset())
       && stepDistanceRemaining < options.maneuverZoneRadius()) {

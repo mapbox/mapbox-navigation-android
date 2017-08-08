@@ -31,6 +31,8 @@ public abstract class MapboxNavigationOptions {
 
   public abstract boolean manuallyEndNavigationUponCompletion();
 
+  // TODO add setting for disabling the notification.
+
   @AutoValue.Builder
   public abstract static class Builder {
 

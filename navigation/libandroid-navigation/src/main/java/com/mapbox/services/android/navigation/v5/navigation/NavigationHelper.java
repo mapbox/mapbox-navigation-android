@@ -24,10 +24,17 @@ import java.util.List;
 
 import static com.mapbox.services.Constants.PRECISION_6;
 
+/**
+ * This contains several single purpose methods that help out when a new location update occurs and
+ * calculations need to be performed on it.
+ */
 class NavigationHelper {
 
-  // Always get the closest position on the route to the actual
-  // raw location so that can accurately calculate values.
+  /**
+   * Takes in a raw location, converts it to a point, and snaps it to the closest point along the
+   * route. This is isolated as separate logic from the snap logic provided because we will always
+   * need to snap to the route in order to get the most accurate information.
+   */
   static Position userSnappedToRoutePosition(Location location, int legIndex, int stepIndex,
                                              DirectionsRoute route) {
     Point locationToPoint = Point.fromCoordinates(
@@ -35,43 +42,53 @@ class NavigationHelper {
     );
 
     // Decode the geometry
-    List<Position> coords = PolylineUtils.decode(route.getLegs().get(legIndex).getSteps().get(stepIndex).getGeometry(),
-      PRECISION_6);
+    List<Position> coordinates = PolylineUtils.decode(
+      route.getLegs().get(legIndex).getSteps().get(stepIndex).getGeometry(), PRECISION_6);
 
     // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
     // Point on the LineString.
-    Feature feature = TurfMisc.pointOnLine(locationToPoint, coords);
+    Feature feature = TurfMisc.pointOnLine(locationToPoint, coordinates);
     return ((Point) feature.getGeometry()).getCoordinates();
   }
 
-
+  /**
+   * When a milestones triggered, it's instruction needs to be built either using the provided
+   * string or an empty string.
+   */
   static String buildInstructionString(RouteProgress routeProgress, Milestone milestone) {
     if (milestone.getInstruction() != null) {
       // Create a new custom instruction based on the Instruction packaged with the Milestone
       return milestone.getInstruction().buildInstruction(routeProgress);
-    } else {
-      return "";
     }
+    return "";
   }
 
-  static double getStepDistanceRemaining(Position snappedPosition, int legIndex,
-                                         int stepIndex, DirectionsRoute directionsRoute) {
+  /**
+   * Calculates the distance remaining in the step from the current users snapped position, to the
+   * next maneuver position.
+   */
+  static double stepDistanceRemaining(Position snappedPosition, int legIndex, int stepIndex,
+                                      DirectionsRoute directionsRoute) {
     List<LegStep> steps = directionsRoute.getLegs().get(legIndex).getSteps();
-    Position nextManeuverPosition = getNextManeuverPosition(stepIndex, steps);
-    // If the users snapped position equals the next maneuver position, the distance remaining is zero.
-    if (snappedPosition.equals(nextManeuverPosition)) {
+    Position nextManeuverPosition = nextManeuverPosition(stepIndex, steps);
+
+    LineString lineString = LineString.fromPolyline(steps.get(stepIndex).getGeometry(), PRECISION_6);
+    // If the users snapped position equals the next maneuver
+    // position or the linestring coordinate size is less than 2,the distance remaining is zero.
+    if (snappedPosition.equals(nextManeuverPosition) || lineString.getCoordinates().size() < 2) {
       return 0;
     }
-    LineString slicedLine = TurfMisc.lineSlice(
-      Point.fromCoordinates(snappedPosition),
-      Point.fromCoordinates(nextManeuverPosition),
-      LineString.fromPolyline(steps.get(stepIndex).getGeometry(), PRECISION_6)
-    );
+    LineString slicedLine = TurfMisc.lineSlice(Point.fromCoordinates(snappedPosition),
+      Point.fromCoordinates(nextManeuverPosition), lineString);
     return TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
   }
 
-  static double getLegDistanceRemaining(double stepDistanceRemaining, int legIndex,
-                                        int stepIndex, DirectionsRoute directionsRoute) {
+  /**
+   * Takes in the already calculated step distance and iterates through the step list from the
+   * step index value plus one till the end of the leg.
+   */
+  static double legDistanceRemaining(double stepDistanceRemaining, int legIndex, int stepIndex,
+                                     DirectionsRoute directionsRoute) {
     List<LegStep> steps = directionsRoute.getLegs().get(legIndex).getSteps();
     if ((steps.size() < stepIndex + 1)) {
       return stepDistanceRemaining;
@@ -82,8 +99,14 @@ class NavigationHelper {
     return stepDistanceRemaining;
   }
 
-  static double getRouteDistanceRemaining(double legDistanceRemaining, int legIndex,
-                                          DirectionsRoute directionsRoute) {
+  /**
+   * Takes in the leg distance remaining value already calculated and if additional legs need to be
+   * traversed along after the current one, adds those distances and returns the new distance.
+   * Otherwise, if the route only contains one leg or the users on the last leg, this value will
+   * equal the leg distance remaining.
+   */
+  static double routeDistanceRemaining(double legDistanceRemaining, int legIndex,
+                                       DirectionsRoute directionsRoute) {
     if (directionsRoute.getLegs().size() < 2) {
       return legDistanceRemaining;
     }
@@ -94,21 +117,10 @@ class NavigationHelper {
     return legDistanceRemaining;
   }
 
-  static Position getNextManeuverPosition(int stepIndex, List<LegStep> steps) {
-    // If there is an upcoming step, use it's maneuver as the position.
-    if (steps.size() > (stepIndex + 1)) {
-      return steps.get(stepIndex + 1).getManeuver().asPosition();
-    }
-    // TODO does the last step in directions response always a single point representing the maneuver?
-    // Decode the geometry
-    List<Position> coords
-      = PolylineUtils.decode(steps.get(stepIndex).getGeometry(), Constants.PRECISION_6);
-    return coords.size() > 1 ? coords.get(coords.size() - 1) : coords.get(coords.size());
-  }
-
   /**
-   * Checks whether the user's bearing matches the next step's maneuver provided bearingAfter variable. This is one of
-   * the criteria's required for the user location to be recognized as being on the next step or potentially arriving.
+   * Checks whether the user's bearing matches the next step's maneuver provided bearingAfter
+   * variable. This is one of the criteria's required for the user location to be recognized as
+   * being on the next step or potentially arriving.
    *
    * @param userLocation  the location of the user
    * @param routeProgress used for getting route information
@@ -121,8 +133,8 @@ class NavigationHelper {
       return false;
     }
 
-    // Bearings need to be normalized so when the bearingAfter is 359 and the user heading is 1, we count this as
-    // within the MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION.
+    // Bearings need to be normalized so when the bearingAfter is 359 and the user heading is 1, we
+    // count this as within the MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION.
     double finalHeading = routeProgress.currentLegProgress().upComingStep().getManeuver().getBearingAfter();
     double finalHeadingNormalized = MathUtils.wrap(finalHeading, 0, 360);
     double userHeadingNormalized = MathUtils.wrap(userLocation.getBearing(), 0, 360);
@@ -146,14 +158,14 @@ class NavigationHelper {
    */
   static NavigationIndices increaseIndex(RouteProgress routeProgress, NavigationIndices previousIndices) {
     // Check if we are in the last step in the current routeLeg and iterate it if needed.
-    if (previousIndices.stepIndex() >= routeProgress.directionsRoute().getLegs().get(routeProgress.legIndex()).getSteps().size() - 2
+    if (previousIndices.stepIndex()
+      >= routeProgress.directionsRoute().getLegs().get(routeProgress.legIndex()).getSteps().size() - 2
       && previousIndices.legIndex() < routeProgress.directionsRoute().getLegs().size() - 1) {
       return NavigationIndices.create((previousIndices.legIndex() + 1), 0);
     }
     return NavigationIndices.create(previousIndices.legIndex(), (previousIndices.stepIndex() + 1));
   }
 
-  // TODO needs work
   static List<Milestone> checkMilestones(RouteProgress previousRouteProgress,
                                          RouteProgress routeProgress, MapboxNavigation mapboxNavigation) {
     List<Milestone> milestones = new ArrayList<>();
@@ -167,9 +179,6 @@ class NavigationHelper {
 
   static boolean isUserOffRoute(NewLocationModel newLocationModel, RouteProgress routeProgress) {
     OffRoute offRoute = newLocationModel.mapboxNavigation().getOffRouteEngine();
-    if (offRoute == null) {
-      return false;
-    }
     return offRoute.isUserOffRoute(newLocationModel.location(), routeProgress,
       newLocationModel.mapboxNavigation().options());
   }
@@ -177,5 +186,16 @@ class NavigationHelper {
   static Location getSnappedLocation(MapboxNavigation mapboxNavigation, Location location, RouteProgress routeProgress) {
     Snap snap = mapboxNavigation.getSnapEngine();
     return snap.getSnappedLocation(location, routeProgress);
+  }
+
+  private static Position nextManeuverPosition(int stepIndex, List<LegStep> steps) {
+    // If there is an upcoming step, use it's maneuver as the position.
+    if (steps.size() > (stepIndex + 1)) {
+      return steps.get(stepIndex + 1).getManeuver().asPosition();
+    }
+    // Decode the geometry
+    List<Position> coords
+      = PolylineUtils.decode(steps.get(stepIndex).getGeometry(), Constants.PRECISION_6);
+    return coords.size() > 1 ? coords.get(coords.size() - 1) : coords.get(coords.size());
   }
 }

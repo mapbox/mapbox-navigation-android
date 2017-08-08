@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.listeners;
+package com.mapbox.services.android.navigation.v5.navigation;
 
 import com.mapbox.services.Experimental;
 

@@ -6,14 +6,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.Location;
 import android.os.IBinder;
-import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.widget.RemoteViews;
 
 import com.mapbox.services.android.location.LostLocationEngine;
-import com.mapbox.services.android.navigation.R;
-import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
@@ -53,9 +49,6 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   private Snap snapEngine;
   private Context context;
   private boolean isBound;
-
-  @LayoutRes
-  private int notificationLayout;
 
   /**
    * Constructs a new instance of this class using the default options. This should be used over
@@ -117,16 +110,12 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
     initializeDefaultLocationEngine();
 
-    // TODO allow setting engines to null as a means to disable them
     if (options.snapToRoute()) {
       snapEngine = new SnapToRoute();
     }
     if (options.enableOffRouteDetection()) {
       offRouteEngine = new OffRouteDetector();
     }
-
-    // TODO allow disabling
-    notificationLayout = R.layout.layout_notification_default;
   }
 
   /**
@@ -138,9 +127,19 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
     locationEngine.setFastestInterval(1000);
     locationEngine.setInterval(0);
-    locationEngine.activate(); // TODO don't activate engine here
+    locationEngine.activate();
   }
-  //TODO remove location engine properly once onDestroy gets called.
+
+  /**
+   * When onDestroy gets called, it is safe to remove location updates and deactivate the engine.
+   */
+  private void disableLocationEngine() {
+    if (locationEngine != null) {
+      locationEngine.removeLocationEngineListener(null);
+      locationEngine.removeLocationUpdates();
+      locationEngine.deactivate();
+    }
+  }
 
   // Lifecycle
 
@@ -152,7 +151,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   public void onDestroy() {
     Timber.d("MapboxNavigation onDestroy.");
     endNavigation();
-    // TODO add removal of all listeners in javadoc
+    disableLocationEngine();
     removeNavigationEventListener(null);
     removeProgressChangeListener(null);
     removeMilestoneEventListener(null);
@@ -294,7 +293,6 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    */
   public void startNavigation(@NonNull DirectionsRoute directionsRoute) {
     this.directionsRoute = directionsRoute;
-    // TODO verify that the directions route being passed in is valid.
     Timber.d("MapboxNavigation startNavigation called.");
     if (!isBound) {
       Intent intent = getServiceIntent();
@@ -328,11 +326,6 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     }
   }
 
-  // TODO
-  public void notification(@LayoutRes int notificationLayout) {
-    this.notificationLayout = notificationLayout;
-  }
-
   // Listeners
 
   /**
@@ -357,7 +350,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   /**
    * This removes a specific milestone event listener by passing in the instance of it or you can
-   * pass in null to remove all the listeners.
+   * pass in null to remove all the listeners. When {@link #onDestroy()} is called, all listeners
+   * get removed automatically, removing the requirement for developers to manually handle this.
    * <p>
    * If the listener you are trying to remove does not exist in the list, a warning will be printed
    * in the log.
@@ -392,7 +386,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   /**
    * This removes a specific progress change listener by passing in the instance of it or you can
-   * pass in null to remove all the listeners.
+   * pass in null to remove all the listeners. When {@link #onDestroy()} is called, all listeners
+   * get removed automatically, removing the requirement for developers to manually handle this.
    * <p>
    * If the listener you are trying to remove does not exist in the list, a warning will be printed
    * in the log.
@@ -429,7 +424,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   /**
    * This removes a specific off route listener by passing in the instance of it or you can pass in
-   * null to remove all the listeners.
+   * null to remove all the listeners. When {@link #onDestroy()} is called, all listeners
+   * get removed automatically, removing the requirement for developers to manually handle this.
    * <p>
    * If the listener you are trying to remove does not exist in the list, a warning will be printed
    * in the log.
@@ -464,7 +460,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   /**
    * This removes a specific navigation event listener by passing in the instance of it or you can
-   * pass in null to remove all the listeners.
+   * pass in null to remove all the listeners. When {@link #onDestroy()} is called, all listeners
+   * get removed automatically, removing the requirement for developers to manually handle this.
    * <p>
    * If the listener you are trying to remove does not exist in the list, a warning will be printed
    * in the log.
@@ -560,10 +557,6 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   List<Milestone> getMilestones() {
     return milestones;
-  }
-
-  int getNotificationLayout() {
-    return notificationLayout;
   }
 
   MapboxNavigationOptions options() {

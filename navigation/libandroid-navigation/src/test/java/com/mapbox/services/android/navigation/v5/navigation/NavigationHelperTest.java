@@ -53,8 +53,6 @@ public class NavigationHelperTest extends BaseTest {
     location.setLatitude(coords.get(0).getLatitude());
     location.setLongitude(coords.get(0).getLongitude());
 
-
-
     routeProgressBuilder = RouteProgress.builder()
       .directionsRoute(route)
       .distanceRemaining(1000)
@@ -119,10 +117,10 @@ public class NavigationHelperTest extends BaseTest {
     assertNotSame(1002, triggeredMilestones.get(0).getIdentifier());
   }
 
-
-
-
-
-
-
+  @Test
+  public void stepDistanceRemaining_returnsZeroWhenPositionsEqualEachOther() throws Exception {
+    Position snappedPosition = Position.fromCoordinates(new double[] {-77.062996, 38.798405});
+    double distance = NavigationHelper.stepDistanceRemaining(snappedPosition, 0, 1, route);
+    assertEquals(0.0, distance);
+  }
 }

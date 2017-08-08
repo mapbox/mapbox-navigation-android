@@ -4,7 +4,6 @@ import android.content.Context;
 import android.location.Location;
 
 import com.mapbox.services.android.navigation.v5.BaseTest;
-import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;

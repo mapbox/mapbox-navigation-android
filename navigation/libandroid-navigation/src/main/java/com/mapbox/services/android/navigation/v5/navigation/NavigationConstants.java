@@ -5,7 +5,6 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 /**
  * Navigation constants
  */
-
 public class NavigationConstants {
 
   public static final int DEPARTURE_MILESTONE = 1;
@@ -14,6 +13,9 @@ public class NavigationConstants {
   public static final int URGENT_MILESTONE = 4;
   public static final int ARRIVAL_MILESTONE = 5;
 
+  /**
+   * Random integer value used for identifying the navigation notification.
+   */
   static final int NAVIGATION_NOTIFICATION_ID = 5678;
 
   /**
