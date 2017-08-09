@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="NavigationMapRoute">
+        <!-- Colors -->
+        <attr name="routeColor" format="color"/>
+        <attr name="routeModerateCongestionColor" format="color"/>
+        <attr name="routeSevereCongestionColor" format="color"/>
+        <attr name="routeShieldColor" format="color"/>
+
+        <!-- Scales -->
+        <attr name="routeScale" format="float"/>
+
+    </declare-styleable>
+</resources>

@@ -14,13 +14,17 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.Constants;
+import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.testapp.R;
-import com.mapbox.services.android.navigation.v5.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.RouteProgress;
-import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
-import com.mapbox.services.android.navigation.v5.listeners.OffRouteListener;
-import com.mapbox.services.android.navigation.v5.listeners.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
@@ -45,6 +49,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @BindView(R.id.mapView)
   MapView mapView;
 
+  private LocationLayerPlugin locationLayerPlugin;
   private LocationEngine locationEngine;
   private MapboxNavigation navigation;
   private MapboxMap mapboxMap;
@@ -64,15 +69,17 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     mapView.getMapAsync(this);
 
     // Initialize MapboxNavigation and add listeners
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
+    navigation = new MapboxNavigation(this);
     navigation.addNavigationEventListener(this);
-
   }
 
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     mapboxMap.setOnMapClickListener(this);
+
+    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, null);
+    locationLayerPlugin.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
 
     // Use the mockLocationEngine
     locationEngine = new MockLocationEngine(1000, 30, false);
@@ -83,7 +90,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     navigation.setLocationEngine(locationEngine);
 
     // Acquire the navigation's route
-    navigation.getRoute(origin, destination, this);
+    getRoute(origin, destination);
   }
 
   @Override
@@ -111,7 +118,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   public void userOffRoute(Location location) {
     Position newOrigin = Position.fromLngLat(location.getLongitude(), location.getLatitude());
-    navigation.getRoute(newOrigin, destination, location.getBearing(), this);
+    getRoute(newOrigin, destination);
     Timber.d("offRoute");
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
   }
@@ -119,25 +126,33 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    System.out.println(routeProgress.getCurrentLegProgress().getStepIndex());
+    locationLayerPlugin.forceLocationUpdate(location);
+    Timber.d("onRouteProgressChange: %s", routeProgress.currentLegProgress().stepIndex());
   }
 
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-    DirectionsRoute route = response.body().getRoutes().get(0);
-    if (route == null) {
-      Timber.d("route is null");
-      return;
+    if (response.body() != null) {
+      if (response.body().getRoutes().size() > 0) {
+        DirectionsRoute route = response.body().getRoutes().get(0);
+        // First run
+        drawRoute(route);
+        if (!running) {
+          ((MockLocationEngine) locationEngine).setRoute(route);
+        }
+        navigation.startNavigation(route);
+      }
     }
+  }
 
-    // First run
-    drawRoute(route);
-    if (!running) {
-      ((MockLocationEngine) locationEngine).setRoute(route);
-      navigation.startNavigation(route);
-    } else {
-      navigation.updateRoute(route);
-    }
+  private void getRoute(Position origin, Position destination) {
+    NavigationRoute navigationRoute = NavigationRoute.builder()
+      .origin(origin)
+      .destination(destination)
+      .accessToken(Mapbox.getAccessToken())
+      .build();
+
+    navigationRoute.getRoute(this);
   }
 
   @Override
@@ -188,6 +203,9 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   protected void onStart() {
     super.onStart();
     mapView.onStart();
+    if (locationLayerPlugin != null) {
+      locationLayerPlugin.onStart();
+    }
   }
 
   @Override
@@ -199,6 +217,10 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
       locationEngine.removeLocationEngineListener(this);
       locationEngine.removeLocationUpdates();
       locationEngine.deactivate();
+    }
+
+    if (locationLayerPlugin != null) {
+      locationLayerPlugin.onStop();
     }
 
     if (navigation != null) {
@@ -223,6 +245,15 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
+
+    // Remove all navigation listeners
+    navigation.removeNavigationEventListener(this);
+    navigation.removeProgressChangeListener(this);
+
+    navigation.onDestroy();
+
+    // End the navigation session
+    navigation.endNavigation();
   }
 
   @Override

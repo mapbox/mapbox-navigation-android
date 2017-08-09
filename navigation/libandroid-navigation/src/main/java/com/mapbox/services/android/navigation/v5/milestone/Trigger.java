@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
+import android.util.SparseArray;
+
 import java.util.Map;
 
 /**
@@ -27,7 +29,7 @@ public class Trigger {
      * @return true if the statement is valid, otherwise false
      * @since 0.4.0
      */
-    public abstract boolean isOccurring(Map<Integer, Number[]> statementObjects);
+    public abstract boolean isOccurring(SparseArray<Number[]> statementObjects);
   }
 
   /*
@@ -47,7 +49,7 @@ public class Trigger {
     }
 
     @Override
-    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(SparseArray<Number[]> statementObjects) {
       boolean all = true;
       for (Statement statement : statements) {
         if (!statement.isOccurring(statementObjects)) {
@@ -71,7 +73,7 @@ public class Trigger {
     }
 
     @Override
-    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(SparseArray<Number[]> statementObjects) {
       for (Statement statement : statements) {
         if (statement.isOccurring(statementObjects)) {
           return false;
@@ -94,7 +96,7 @@ public class Trigger {
     }
 
     @Override
-    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(SparseArray<Number[]> statementObjects) {
       for (Statement statement : statements) {
         if (statement.isOccurring(statementObjects)) {
           return true;
@@ -124,7 +126,7 @@ public class Trigger {
     }
 
     @Override
-    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(SparseArray<Number[]> statementObjects) {
       return Operation.greaterThan(statementObjects.get(key), (Number) value);
     }
   }
@@ -145,7 +147,7 @@ public class Trigger {
     }
 
     @Override
-    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(SparseArray<Number[]> statementObjects) {
       return Operation.greaterThanEqual(statementObjects.get(key), (Number) value);
     }
   }
@@ -165,7 +167,7 @@ public class Trigger {
     }
 
     @Override
-    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(SparseArray<Number[]> statementObjects) {
       return Operation.lessThan(statementObjects.get(key), (Number) value);
     }
   }
@@ -186,7 +188,7 @@ public class Trigger {
     }
 
     @Override
-    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(SparseArray<Number[]> statementObjects) {
       return Operation.lessThanEqual(statementObjects.get(key), (Number) value);
     }
   }
@@ -206,7 +208,7 @@ public class Trigger {
     }
 
     @Override
-    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(SparseArray<Number[]> statementObjects) {
       return Operation.notEqual(statementObjects.get(key), (Number) values[0]);
     }
   }
@@ -226,7 +228,7 @@ public class Trigger {
     }
 
     @Override
-    public boolean isOccurring(Map<Integer, Number[]> statementObjects) {
+    public boolean isOccurring(SparseArray<Number[]> statementObjects) {
       return Operation.equal(statementObjects.get(key), (Number) value);
     }
   }

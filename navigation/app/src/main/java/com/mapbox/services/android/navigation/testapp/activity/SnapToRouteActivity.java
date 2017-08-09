@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.testapp.activity;
 
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -20,7 +21,8 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.testapp.R;
-import com.mapbox.services.android.navigation.v5.RouteUtils;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 import com.mapbox.services.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.api.directions.v5.MapboxDirections;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
@@ -50,7 +52,7 @@ public class SnapToRouteActivity extends AppCompatActivity implements OnMapReady
   private DirectionsRoute currentRoute;
 
   private Marker userLocation;
-  private Marker snappedLocation;
+  private Marker snappedMarker;
   private int stepCount = 0;
   private Polyline stepPolyline;
   private Polyline distancePolyline;
@@ -110,30 +112,41 @@ public class SnapToRouteActivity extends AppCompatActivity implements OnMapReady
     if (userLocation != null) {
       mapboxMap.removeMarker(userLocation);
     }
-    if (snappedLocation != null) {
-      mapboxMap.removeMarker(snappedLocation);
+    if (snappedMarker != null) {
+      mapboxMap.removeMarker(snappedMarker);
     }
 
     userLocation = mapboxMap.addMarker(new MarkerOptions()
       .position(point)
     );
 
-    Position snappedPosition = RouteUtils.getSnapToRoute(
-      Position.fromCoordinates(point.getLongitude(), point.getLatitude()),
-      currentRoute.getLegs().get(0),
-      stepCount
-    );
+    Location location = new Location("fake-location");
+    location.setLatitude(point.getLatitude());
+    location.setLongitude(point.getLongitude());
 
-    if (snappedPosition == null) {
-      Log.i(TAG, "snapPosition is null");
+    RouteProgress routeProgress = RouteProgress.builder()
+      .directionsRoute(currentRoute)
+      .location(location)
+      .legIndex(0)
+      .stepIndex(stepCount)
+      .distanceRemaining(currentRoute.getDistance())
+      .legDistanceRemaining(currentRoute.getLegs().get(0).getDistance())
+      .stepDistanceRemaining(currentRoute.getLegs().get(0).getSteps().get(stepCount).getDistance())
+      .build();
+
+    SnapToRoute snapToRoute = new SnapToRoute();
+    Location snappedLocation = snapToRoute.getSnappedLocation(location, routeProgress);
+
+    if (snappedLocation == null) {
+      Log.i(TAG, "snappedLocation is null");
       return;
     }
 
-    snappedLocation = mapboxMap.addMarker(new MarkerOptions()
-      .position(new LatLng(snappedPosition.getLatitude(), snappedPosition.getLongitude()))
+    snappedMarker = mapboxMap.addMarker(new MarkerOptions()
+      .position(new LatLng(snappedLocation.getLatitude(), snappedLocation.getLongitude()))
     );
 
-    drawDistanceRoutePolyline(snappedPosition);
+    drawDistanceRoutePolyline(Position.fromCoordinates(snappedLocation.getLongitude(), snappedLocation.getLatitude()));
 
 
     // Decode the geometry and draw the route from current position to start of next step.
@@ -146,7 +159,7 @@ public class SnapToRouteActivity extends AppCompatActivity implements OnMapReady
     }
 
     LineString slicedLine = TurfMisc.lineSlice(
-      Point.fromCoordinates(snappedPosition),
+      Point.fromCoordinates(Position.fromCoordinates(snappedLocation.getLongitude(), snappedLocation.getLatitude())),
       Point.fromCoordinates(coords.get(coords.size() - 1)),
       LineString.fromCoordinates(coords)
     );

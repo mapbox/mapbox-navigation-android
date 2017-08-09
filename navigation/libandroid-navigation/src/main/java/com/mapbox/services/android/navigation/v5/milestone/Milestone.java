@@ -1,7 +1,8 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-import com.mapbox.services.android.navigation.v5.NavigationException;
-import com.mapbox.services.android.navigation.v5.RouteProgress;
+import com.mapbox.services.android.navigation.v5.exception.NavigationException;
+import com.mapbox.services.android.navigation.v5.instruction.Instruction;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 /**
  * Base Milestone statement. Subclassed to provide concrete statements.
@@ -29,8 +30,21 @@ public abstract class Milestone {
   }
 
   /**
-   * A milestone can either be passed in to the {@link com.mapbox.services.android.navigation.v5.MapboxNavigation}
-   * object (recommended) or validated directly inside your activity.
+   * Milestone specific {@link Instruction}, which can be used to build a {@link String}
+   * instruction specified by the superclass
+   *
+   * @return {@link Instruction} to be used to build the {@link String} passed to
+   * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
+   * @since 0.4.0
+   */
+  public Instruction getInstruction() {
+    return builder.getInstruction();
+  }
+
+  /**
+   * A milestone can either be passed in to the
+   * {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation} object
+   * (recommended) or validated directly inside your activity.
    *
    * @param previousRouteProgress last locations generated {@link RouteProgress} object used to determine certain
    *                              {@link TriggerProperty}s
@@ -48,6 +62,7 @@ public abstract class Milestone {
   public abstract static class Builder {
 
     private int identifier;
+    private Instruction instruction;
 
     public Builder() {
     }
@@ -73,6 +88,22 @@ public abstract class Milestone {
      */
     public Builder setIdentifier(int identifier) {
       this.identifier = identifier;
+      return this;
+    }
+
+    /**
+     * Milestone specific {@link Instruction}, which can be used to build a {@link String}
+     * instruction specified by the superclass
+     *
+     * @return this builder
+     * @since 0.4.0
+     */
+    public Instruction getInstruction() {
+      return instruction;
+    }
+
+    public Builder setInstruction(Instruction instruction) {
+      this.instruction = instruction;
       return this;
     }
 
