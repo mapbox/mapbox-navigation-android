@@ -59,8 +59,7 @@ public class NavigationHelperTest extends BaseTest {
       .stepDistanceRemaining(1000)
       .legDistanceRemaining(1000)
       .stepIndex(0)
-      .legIndex(0)
-      .location(location);
+      .legIndex(0);
   }
 
   @Test

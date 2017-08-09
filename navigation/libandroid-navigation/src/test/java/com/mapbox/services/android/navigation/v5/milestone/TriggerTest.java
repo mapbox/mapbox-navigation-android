@@ -51,7 +51,6 @@ public class TriggerTest extends BaseTest {
       .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
       .legIndex(0)
       .stepIndex(1)
-      .location(mock(Location.class))
       .build();
   }
 
