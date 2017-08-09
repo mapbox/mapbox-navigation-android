@@ -22,8 +22,6 @@ import org.robolectric.annotation.Config;
 
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
-
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
 public class TriggerTest extends BaseTest {
