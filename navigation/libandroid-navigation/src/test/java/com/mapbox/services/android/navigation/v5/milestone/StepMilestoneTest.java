@@ -14,9 +14,10 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
+import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
@@ -26,7 +27,6 @@ public class StepMilestoneTest extends BaseTest {
   private static final String PRECISION_6 = "directions_v5_precision_6.json";
 
   private RouteProgress routeProgress;
-  private RouteProgress previousRouteProgress;
 
   @Before
   public void setup() {
@@ -35,8 +35,15 @@ public class StepMilestoneTest extends BaseTest {
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     DirectionsRoute route = response.getRoutes().get(0);
 
-    previousRouteProgress = RouteProgress.create(route, Mockito.mock(Location.class), 0, 1);
-    routeProgress = RouteProgress.create(route, Mockito.mock(Location.class), 0, 1);
+    routeProgress = RouteProgress.builder()
+      .directionsRoute(route)
+      .distanceRemaining(route.getDistance())
+      .legDistanceRemaining(route.getLegs().get(0).getDistance())
+      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+      .legIndex(0)
+      .stepIndex(1)
+      .location(mock(Location.class))
+      .build();
   }
 
   @Test
@@ -49,7 +56,7 @@ public class StepMilestoneTest extends BaseTest {
       .build();
 
     Assert.assertNotNull(milestone);
-    Assert.assertTrue(milestone.isOccurring(previousRouteProgress, routeProgress));
+    Assert.assertTrue(milestone.isOccurring(routeProgress, routeProgress));
   }
 
   @Test

@@ -1,6 +1,9 @@
 package com.mapbox.services.android.navigation.v5;
 
+import android.location.Location;
 import android.util.Log;
+
+import com.mapbox.services.commons.models.Position;
 
 import org.apache.commons.io.IOUtils;
 
@@ -30,5 +33,12 @@ public class BaseTest {
     }
 
     return null;
+  }
+
+  public Location buildTestLocation(Position position) {
+    Location location = new Location("test");
+    location.setLatitude(position.getLatitude());
+    location.setLongitude(position.getLongitude());
+    return location;
   }
 }

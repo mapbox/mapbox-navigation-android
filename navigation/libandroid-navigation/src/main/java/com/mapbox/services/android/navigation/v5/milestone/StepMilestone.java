@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-import com.mapbox.services.android.navigation.v5.NavigationException;
+import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 /**
@@ -24,12 +24,16 @@ public class StepMilestone extends Milestone {
 
     // Determine if the step index has changed and set called accordingly. This prevents multiple calls to
     // onMilestoneEvent per Step.
-    if (previousRouteProgress.getCurrentLegProgress().getStepIndex()
-      != routeProgress.getCurrentLegProgress().getStepIndex()) {
+    if (previousRouteProgress.currentLegProgress().stepIndex()
+      != routeProgress.currentLegProgress().stepIndex()) {
       called = false;
     }
+    // If milestone's been called already on current step, no need to check triggers.
+    if (called) {
+      return false;
+    }
     if (builder.getTrigger().isOccurring(
-      TriggerProperty.getSparseArray(previousRouteProgress, routeProgress)) && !called) {
+      TriggerProperty.getSparseArray(previousRouteProgress, routeProgress))) {
       called = true;
       return true;
     }

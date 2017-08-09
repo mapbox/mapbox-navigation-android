@@ -19,15 +19,9 @@ import static com.mapbox.services.Constants.PRECISION_6;
 
 public class SnapToRoute extends Snap {
 
-  private RouteProgress routeProgress;
-
-  public SnapToRoute(RouteProgress routeProgress) {
-    this.routeProgress = routeProgress;
-  }
-
   @Override
-  public Location getSnappedLocation(Location location) {
-    location = snapLocationLatLng(location, routeProgress.getCurrentLegProgress().getCurrentStep().getGeometry());
+  public Location getSnappedLocation(Location location, RouteProgress routeProgress) {
+    location = snapLocationLatLng(location, routeProgress.currentLegProgress().currentStep().getGeometry());
     location.setBearing(snapLocationBearing(routeProgress));
     return location;
   }
@@ -61,14 +55,14 @@ public class SnapToRoute extends Snap {
 
   private static float snapLocationBearing(RouteProgress routeProgress) {
     LineString lineString = LineString.fromPolyline(
-      routeProgress.getCurrentLegProgress().getCurrentStep().getGeometry(), PRECISION_6);
+      routeProgress.currentLegProgress().currentStep().getGeometry(), PRECISION_6);
 
     Point currentPoint = TurfMeasurement.along(
-      lineString, routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceTraveled(),
+      lineString, routeProgress.currentLegProgress().currentStepProgress().distanceTraveled(),
       TurfConstants.UNIT_METERS);
     // Measure 1 meter ahead of the users current location
     Point futurePoint = TurfMeasurement.along(
-      lineString, routeProgress.getCurrentLegProgress().getCurrentStepProgress().getDistanceTraveled() + 1,
+      lineString, routeProgress.currentLegProgress().currentStepProgress().distanceTraveled() + 1,
       TurfConstants.UNIT_METERS);
 
     double azimuth = TurfMeasurement.bearing(currentPoint, futurePoint);
