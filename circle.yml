@@ -1,11 +1,13 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/code
+    working_directory: /src
     docker:
       - image: circleci/android:api-25-alpha
     environment:
       JVM_OPTS: -Xmx3200m
+      BUILDTYPE: Debug
+      IS_LOCAL_DEVELOPMENT: false
     steps:
       - checkout
       - restore_cache:
@@ -28,8 +30,6 @@ jobs:
           command: |
             echo "${MAPBOX_DEVELOPER_CONFIG_XML}" > navigation/app/src/main/res/values/developer-config.xml
             cd navigation && ./gradlew app:assembleDebug
-      - *show-ccache-stats
-      - *save-cache
       - run:
           name: Log in to Google Cloud Platform
           shell: /bin/bash -euo pipefail
