@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/code
+    docker:
+      - image: circleci/android:api-25-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - checkout
+      - restore_cache:
+          key: jars-{{ checksum "osrm-text-instructions/build.gradle" }}-{{ checksum  "osrm-text-instructions/app/build.gradle" }}
+      - run:
+          name: Download Dependencies
+          command: cd osrm-text-instructions && ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "osrm-text-instructions/build.gradle" }}-{{ checksum  "osrm-text-instructions/app/build.gradle" }}
+      - run:
+          name: Check Java code style
+          command: cd osrm-text-instructions && ./gradlew checkstyle
+      - run:
+          name: Run Tests
+          command: cd osrm-text-instructions && ./gradlew :libjava-osrm-instructions:test
+      - store_artifacts:
+          path: osrm-text-instructions/app/build/reports
+          destination: reports
+      - store_test_results:
+          path: osrm-text-instructions/app/build/test-results
