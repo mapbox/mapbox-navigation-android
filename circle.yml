@@ -9,22 +9,54 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "osrm-text-instructions/build.gradle" }}-{{ checksum  "osrm-text-instructions/app/build.gradle" }}
+          key: jars-{{ checksum "navigation/build.gradle" }}-{{ checksum  "navigation/app/build.gradle" }}
       - run:
           name: Download Dependencies
-          command: cd osrm-text-instructions && ./gradlew androidDependencies
+          command: cd navigation && ./gradlew androidDependencies
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "osrm-text-instructions/build.gradle" }}-{{ checksum  "osrm-text-instructions/app/build.gradle" }}
+          key: jars-{{ checksum "navigation/build.gradle" }}-{{ checksum  "navigation/app/build.gradle" }}
       - run:
           name: Check Java code style
-          command: cd osrm-text-instructions && ./gradlew checkstyle
+          command: make checkstyle
       - run:
-          name: Run Tests
-          command: cd osrm-text-instructions && ./gradlew :libjava-osrm-instructions:test
+          name: Run unit-test in both libraries
+          command: make test
+      - run:
+          name: Build testapp APK
+          command: |
+            echo "${MAPBOX_DEVELOPER_CONFIG_XML}" > navigation/app/src/main/res/values/developer-config.xml
+            cd navigation && ./gradlew app:assembleDebug
+      - *show-ccache-stats
+      - *save-cache
+      - run:
+          name: Log in to Google Cloud Platform
+          shell: /bin/bash -euo pipefail
+          command: |
+            echo "${GCLOUD_SERVICE_ACCOUNT_JSON}" > secret.json
+            gcloud auth activate-service-account --key-file google-services.json --project mapbox-navigation-android
+            rm google-services.json
+      - run:
+          name: Run instrumentation tests on Firebase
+          no_output_timeout: 1200
+          shell: /bin/bash -euo pipefail
+          command: |
+            gcloud firebase test android models list
+            (gcloud firebase test android run --type instrumentation \
+              --app navigation/app/build/outputs/apk/app-debug.apk \
+              --test navigation/app/build/outputs/apk/app-debug-androidTest.apk \
+              --device-ids shamu --os-version-ids 22 --locales en --orientations portrait --timeout 15m \
+
+            FIREBASE_TEST_BUCKET=$(sed -n 's|^.*\[https://console.developers.google.com/storage/browser/\([^]]*\).*|gs://\1|p' firebase.log)
+            echo "Downloading from: ${FIREBASE_TEST_BUCKET}"
+            gsutil -m cp -n -R -Z "$FIREBASE_TEST_BUCKET*" navigation/app/build/outputs/apk
+
+            exit ${EXIT_CODE:-0}
       - store_artifacts:
-          path: osrm-text-instructions/app/build/reports
+          path: navigation/app/build/reports
           destination: reports
       - store_test_results:
-          path: osrm-text-instructions/app/build/test-results
+          path: navigation/app/build/test-results
+
+# ------------------------------------------------------------------------------
