@@ -32,7 +32,7 @@ jobs:
       - run:
           name: Build testapp APK
           command: |
-            echo "${MAPBOX_DEVELOPER_CONFIG_XML}" > navigation/app/src/main/res/values/developer-config.xml
+            cd navigation && ./gradlew accessToken
             cd navigation && ./gradlew app:assembleDebug
       - run:
           name: Log in to Google Cloud Platform
