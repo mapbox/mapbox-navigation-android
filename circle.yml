@@ -96,12 +96,13 @@ jobs:
             signing.secretKeyRingFile=../../secring.gpg" >> navigation/gradle.properties
       - run:
         name: Build Navigation SDK
-        make build-release
+        command: make build-release
       - deploy:
         name: Publish Navigation SDK To Maven Central
-        if [ "${CIRCLE_BRANCH}" == "master" ]; then
-        make publish ;
-        fi
+        command: |
+          if [ "${CIRCLE_BRANCH}" == "master" ]; then
+          make publish ;
+          fi
       - store_artifacts:
           path: navigation/app/build/reports
           destination: reports
