@@ -85,6 +85,10 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Accept Android license
+          command: |
+           echo y | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;26.0.1"
+      - run:
           name: Generate Maven credentials
           shell: /bin/bash -euo pipefail
           command: |
