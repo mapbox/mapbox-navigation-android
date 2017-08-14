@@ -16,7 +16,7 @@ jobs:
           name: Update Transifex
           command: |
               pip install transifex-client
-              echo $'[https://www.transifex.com]\nhostname = https://www.transifex.com\nusername = '"${TRANSIFEX_USER}"$'\ntoken = '"${TRANSIFEX_API_TOKEN}"$'\n' > ~/.transifexrc
+              echo $'[https://www.transifex.com]\nhostname = https://www.transifex.com\nusername = '"${TRANSIFEX_USER}"$'\npassword = '"${TRANSIFEX_API_TOKEN}"$'\ntoken = '""$'\n' > ~/.transifexrc
               tx push -s
       - run:
           name: Accept Android license
