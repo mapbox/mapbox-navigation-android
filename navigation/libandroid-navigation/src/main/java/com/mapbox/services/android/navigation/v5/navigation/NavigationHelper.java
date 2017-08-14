@@ -197,6 +197,6 @@ class NavigationHelper {
     // Decode the geometry
     List<Position> coords
       = PolylineUtils.decode(steps.get(stepIndex).getGeometry(), Constants.PRECISION_6);
-    return coords.size() > 1 ? coords.get(coords.size() - 1) : coords.get(coords.size());
+    return coords.size() >= 1 ? coords.get(coords.size() - 1) : coords.get(coords.size());
   }
 }
