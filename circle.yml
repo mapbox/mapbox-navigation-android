@@ -33,7 +33,7 @@ jobs:
           name: Build testapp APK
           command: |
             cd navigation && ./gradlew accessToken
-            cd navigation && ./gradlew app:assembleDebug
+            ./gradlew app:assembleDebug
       - run:
           name: Log in to Google Cloud Platform
           shell: /bin/bash -euo pipefail
