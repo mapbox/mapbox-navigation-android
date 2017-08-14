@@ -15,6 +15,7 @@ jobs:
       - run:
           name: Accept Android license
           command: |
+           echo y | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;26.0.0"
            echo y | $ANDROID_HOME/tools/bin/sdkmanager --licenses
       - run:
           name: Download Dependencies
