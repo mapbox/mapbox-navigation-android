@@ -64,7 +64,8 @@ class DefaultMilestones {
         Trigger.all(
           Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 15d),
           Trigger.lte(TriggerProperty.STEP_DISTANCE_REMAINING_METERS, 15d),
-          Trigger.lte(TriggerProperty.NEXT_STEP_DISTANCE_METERS, 15d)
+          Trigger.lte(TriggerProperty.NEXT_STEP_DISTANCE_METERS, 15d),
+          Trigger.neq(TriggerProperty.LAST_STEP, TriggerProperty.TRUE)// TODO fix this to support multi legs routes
         )
       )
       .build()
