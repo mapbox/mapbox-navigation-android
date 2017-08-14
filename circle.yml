@@ -13,6 +13,12 @@ jobs:
       - restore_cache:
           key: jars-{{ checksum "navigation/build.gradle" }}-{{ checksum  "navigation/app/build.gradle" }}
       - run:
+          name: Update Transifex
+          command: |
+              pip install transifex-client
+              echo $'[https://www.transifex.com]\nhostname = https://www.transifex.com\nusername = '"${TRANSIFEX_USER}"$'\ntoken = '"${TRANSIFEX_API_TOKEN}"$'\n' > ~/.transifexrc
+              tx push -s
+      - run:
           name: Accept Android license
           command: |
            echo y | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;26.0.1"
