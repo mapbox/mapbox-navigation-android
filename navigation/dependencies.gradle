@@ -52,6 +52,8 @@ ext {
 
     // auto values
     autoValues             : 'com.google.auto.value:auto-value:1.4.1',
+    autoValuesParcel       : 'com.ryanharter.auto.value:auto-value-parcel:0.2.5',
+    autoValuesParcelAdapter: 'com.ryanharter.auto.value:auto-value-parcel-adapter:0.2.5',
 
     // square crew
     timber                 : 'com.jakewharton.timber:timber:4.5.1',
