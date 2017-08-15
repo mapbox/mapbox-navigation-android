@@ -1,0 +1,81 @@
+package com.mapbox.services.android.navigation.v5.navigation;
+
+import com.google.auto.value.AutoValue;
+
+/**
+ *
+ * Immutable and can't be changed after passing into {@link MapboxNavigation}.
+ */
+@AutoValue
+public abstract class MapboxNavigationOptions {
+
+  public abstract double maxTurnCompletionOffset();
+
+  public abstract double maneuverZoneRadius();
+
+  public abstract double maximumDistanceOffRoute();
+
+  public abstract double deadReckoningTimeInterval();
+
+  public abstract double maxManipulatedCourseAngle();
+
+  public abstract double userLocationSnapDistance();
+
+  public abstract int secondsBeforeReroute();
+
+  public abstract boolean defaultMilestonesEnabled();
+
+  public abstract boolean snapToRoute();
+
+  public abstract boolean enableOffRouteDetection();
+
+  public abstract boolean manuallyEndNavigationUponCompletion();
+
+  public abstract boolean enableNotification();
+
+  @AutoValue.Builder
+  public abstract static class Builder {
+
+    public abstract Builder maxTurnCompletionOffset(double maxTurnCompletionOffset);
+
+    public abstract Builder maneuverZoneRadius(double maneuverZoneRadius);
+
+    public abstract Builder maximumDistanceOffRoute(double maximumDistanceOffRoute);
+
+    public abstract Builder deadReckoningTimeInterval(double deadReckoningTimeInterval);
+
+    public abstract Builder maxManipulatedCourseAngle(double maxManipulatedCourseAngle);
+
+    public abstract Builder userLocationSnapDistance(double userLocationSnapDistance);
+
+    public abstract Builder secondsBeforeReroute(int secondsBeforeReroute);
+
+    public abstract Builder defaultMilestonesEnabled(boolean defaultMilestonesEnabled);
+
+    public abstract Builder  snapToRoute(boolean snapToRoute);
+
+    public abstract Builder enableOffRouteDetection(boolean enableOffRouteDetection);
+
+    public abstract Builder manuallyEndNavigationUponCompletion(boolean manuallyEndNavigation);
+
+    public abstract Builder enableNotification(boolean enableNotification);
+
+    public abstract MapboxNavigationOptions build();
+  }
+
+  public static Builder builder() {
+    return new AutoValue_MapboxNavigationOptions.Builder()
+      .maxTurnCompletionOffset(NavigationConstants.MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION)
+      .maneuverZoneRadius(NavigationConstants.MANEUVER_ZONE_RADIUS)
+      .maximumDistanceOffRoute(NavigationConstants.MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE)
+      .deadReckoningTimeInterval(NavigationConstants.DEAD_RECKONING_TIME_INTERVAL)
+      .maxManipulatedCourseAngle(NavigationConstants.MAX_MANIPULATED_COURSE_ANGLE)
+      .userLocationSnapDistance(NavigationConstants.USER_LOCATION_SNAPPING_DISTANCE)
+      .secondsBeforeReroute(NavigationConstants.SECONDS_BEFORE_REROUTE)
+      .enableOffRouteDetection(true)
+      .snapToRoute(true)
+      .manuallyEndNavigationUponCompletion(false)
+      .defaultMilestonesEnabled(true)
+      .enableNotification(true);
+  }
+}
