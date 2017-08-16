@@ -18,7 +18,6 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -48,7 +47,6 @@ public class RouteStepProgressTest extends BaseTest {
   @Test
   public void sanityTest() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .location(buildTestLocation(firstLeg.getSteps().get(0).getManeuver().asPosition()))
       .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
       .legDistanceRemaining(route.getLegs().get(0).getDistance())
       .distanceRemaining(route.getDistance())
@@ -67,7 +65,6 @@ public class RouteStepProgressTest extends BaseTest {
     DirectionsRoute route = response.getRoutes().get(0);
 
     RouteProgress routeProgress = RouteProgress.builder()
-      .location(buildTestLocation(Mockito.mock(Position.class)))
       .stepDistanceRemaining(0)
       .legDistanceRemaining(0)
       .distanceRemaining(0)
@@ -75,7 +72,6 @@ public class RouteStepProgressTest extends BaseTest {
       .stepIndex(route.getLegs().get(0).getSteps().size() - 1)
       .legIndex(0)
       .build();
-
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
 
     assertNotNull("should not be null", routeStepProgress);
@@ -92,7 +88,6 @@ public class RouteStepProgressTest extends BaseTest {
     double stepDistance = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_METERS);
 
     RouteProgress routeProgress = RouteProgress.builder()
-      .location(buildTestLocation(firstLeg.getSteps().get(4).getManeuver().asPosition()))
       .stepDistanceRemaining(firstLeg.getSteps().get(5).getDistance())
       .legDistanceRemaining(firstLeg.getDistance())
       .distanceRemaining(route.getDistance())
@@ -100,7 +95,6 @@ public class RouteStepProgressTest extends BaseTest {
       .stepIndex(4)
       .legIndex(0)
       .build();
-
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
 
     Assert.assertEquals(stepDistance, routeStepProgress.distanceRemaining(), BaseTest.LARGE_DELTA);
@@ -123,7 +117,6 @@ public class RouteStepProgressTest extends BaseTest {
 
       double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
       RouteProgress routeProgress = RouteProgress.builder()
-        .location(buildTestLocation(position))
         .stepDistanceRemaining(distance)
         .legDistanceRemaining(firstLeg.getDistance())
         .distanceRemaining(route.getDistance())
@@ -140,7 +133,6 @@ public class RouteStepProgressTest extends BaseTest {
   public void distanceRemaining_equalsZeroAtEndOfStep() {
 
     RouteProgress routeProgress = RouteProgress.builder()
-      .location(buildTestLocation(firstLeg.getSteps().get(4).getManeuver().asPosition()))
       .stepDistanceRemaining(0)
       .legDistanceRemaining(0)
       .distanceRemaining(0)
@@ -148,7 +140,6 @@ public class RouteStepProgressTest extends BaseTest {
       .stepIndex(3)
       .legIndex(0)
       .build();
-
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
 
     Assert.assertEquals(0, routeStepProgress.distanceRemaining(), BaseTest.DELTA);
@@ -157,7 +148,6 @@ public class RouteStepProgressTest extends BaseTest {
   @Test
   public void distanceTraveled_equalsZeroAtBeginning() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .location(buildTestLocation(firstLeg.getSteps().get(4).getManeuver().asPosition()))
       .stepDistanceRemaining(firstLeg.getSteps().get(5).getDistance())
       .legDistanceRemaining(firstLeg.getDistance())
       .distanceRemaining(route.getDistance())
@@ -190,7 +180,6 @@ public class RouteStepProgressTest extends BaseTest {
       }
 
       RouteProgress routeProgress = RouteProgress.builder()
-        .location(buildTestLocation(position))
         .stepDistanceRemaining(firstLeg.getSteps().get(0).getDistance() - distance)
         .legDistanceRemaining(firstLeg.getDistance())
         .distanceRemaining(route.getDistance())
@@ -208,7 +197,6 @@ public class RouteStepProgressTest extends BaseTest {
   public void distanceTraveled_equalsStepDistanceAtEndOfStep() {
 
     RouteProgress routeProgress = RouteProgress.builder()
-      .location(buildTestLocation(firstLeg.getSteps().get(4).getManeuver().asPosition()))
       .stepDistanceRemaining(0)
       .legDistanceRemaining(firstLeg.getDistance())
       .distanceRemaining(route.getDistance())
@@ -224,7 +212,6 @@ public class RouteStepProgressTest extends BaseTest {
   @Test
   public void fractionTraveled_equalsZeroAtBeginning() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .location(buildTestLocation(firstLeg.getSteps().get(4).getManeuver().asPosition()))
       .stepDistanceRemaining(firstLeg.getSteps().get(4).getDistance())
       .legDistanceRemaining(firstLeg.getDistance())
       .distanceRemaining(route.getDistance())
@@ -254,7 +241,6 @@ public class RouteStepProgressTest extends BaseTest {
       double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
 
       RouteProgress routeProgress = RouteProgress.builder()
-        .location(buildTestLocation(position))
         .stepDistanceRemaining(distance)
         .legDistanceRemaining(firstLeg.getDistance())
         .distanceRemaining(route.getDistance())
@@ -277,7 +263,6 @@ public class RouteStepProgressTest extends BaseTest {
   public void fractionTraveled_equalsOneAtEndOfStep() {
 
     RouteProgress routeProgress = RouteProgress.builder()
-      .location(buildTestLocation(firstLeg.getSteps().get(4).getManeuver().asPosition()))
       .stepDistanceRemaining(0)
       .legDistanceRemaining(firstLeg.getDistance())
       .distanceRemaining(route.getDistance())
@@ -293,7 +278,6 @@ public class RouteStepProgressTest extends BaseTest {
   @Test
   public void getDurationRemaining_equalsStepDurationAtBeginning() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .location(buildTestLocation(firstLeg.getSteps().get(4).getManeuver().asPosition()))
       .stepDistanceRemaining(firstLeg.getSteps().get(5).getDistance())
       .legDistanceRemaining(firstLeg.getDistance())
       .distanceRemaining(route.getDistance())
@@ -323,7 +307,6 @@ public class RouteStepProgressTest extends BaseTest {
       double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
 
       RouteProgress routeProgress = RouteProgress.builder()
-        .location(buildTestLocation(position))
         .stepDistanceRemaining(distance)
         .legDistanceRemaining(firstLeg.getDistance())
         .distanceRemaining(route.getDistance())
@@ -342,7 +325,6 @@ public class RouteStepProgressTest extends BaseTest {
   @Test
   public void getDurationRemaining_equalsZeroAtEndOfStep() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .location(buildTestLocation(firstLeg.getSteps().get(4).getManeuver().asPosition()))
       .stepDistanceRemaining(0)
       .legDistanceRemaining(firstLeg.getDistance())
       .distanceRemaining(route.getDistance())

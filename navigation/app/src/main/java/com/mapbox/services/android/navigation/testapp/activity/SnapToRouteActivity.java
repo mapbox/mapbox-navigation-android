@@ -126,7 +126,6 @@ public class SnapToRouteActivity extends AppCompatActivity implements OnMapReady
 
     RouteProgress routeProgress = RouteProgress.builder()
       .directionsRoute(currentRoute)
-      .location(location)
       .legIndex(0)
       .stepIndex(stepCount)
       .distanceRemaining(currentRoute.getDistance())

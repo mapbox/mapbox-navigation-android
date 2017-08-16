@@ -95,7 +95,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
         .directionsRoute(directionsRoute)
         .stepIndex(0)
         .legIndex(0)
-        .location(location)
         .build();
 
       indices = NavigationIndices.create(0, 0);
@@ -128,7 +127,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       .directionsRoute(directionsRoute)
       .stepIndex(indices.stepIndex())
       .legIndex(indices.legIndex())
-      .location(location)
       .build();
   }
 
