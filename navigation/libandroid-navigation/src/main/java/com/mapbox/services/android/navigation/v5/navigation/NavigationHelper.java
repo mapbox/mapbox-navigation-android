@@ -189,6 +189,10 @@ class NavigationHelper {
     return snap.getSnappedLocation(location, routeProgress);
   }
 
+  /**
+   * Retrieves the next steps maneuver position if one exist, otherwise it decodes the current steps
+   * geometry and uses the last coordinate in the position list.
+   */
   static Position nextManeuverPosition(int stepIndex, List<LegStep> steps) {
     // If there is an upcoming step, use it's maneuver as the position.
     if (steps.size() > (stepIndex + 1)) {
