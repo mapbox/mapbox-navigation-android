@@ -189,7 +189,7 @@ class NavigationHelper {
     return snap.getSnappedLocation(location, routeProgress);
   }
 
-  private static Position nextManeuverPosition(int stepIndex, List<LegStep> steps) {
+  static Position nextManeuverPosition(int stepIndex, List<LegStep> steps) {
     // If there is an upcoming step, use it's maneuver as the position.
     if (steps.size() > (stepIndex + 1)) {
       return steps.get(stepIndex + 1).getManeuver().asPosition();
@@ -197,6 +197,6 @@ class NavigationHelper {
     // Decode the geometry
     List<Position> coords
       = PolylineUtils.decode(steps.get(stepIndex).getGeometry(), Constants.PRECISION_6);
-    return coords.size() > 1 ? coords.get(coords.size() - 1) : coords.get(coords.size());
+    return coords.size() >= 1 ? coords.get(coords.size() - 1) : coords.get(coords.size());
   }
 }

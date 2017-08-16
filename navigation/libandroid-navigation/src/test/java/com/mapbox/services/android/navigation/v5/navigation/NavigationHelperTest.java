@@ -14,6 +14,7 @@ import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.models.Position;
 import com.mapbox.services.commons.utils.PolylineUtils;
 
@@ -28,6 +29,7 @@ import java.util.List;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotSame;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
@@ -121,5 +123,29 @@ public class NavigationHelperTest extends BaseTest {
     Position snappedPosition = Position.fromCoordinates(new double[] {-77.062996, 38.798405});
     double distance = NavigationHelper.stepDistanceRemaining(snappedPosition, 0, 1, route);
     assertEquals(0.0, distance);
+  }
+
+  @Test
+  public void nextManeuverPosition_correctlyReturnsNextManeuverPosition() throws Exception {
+    Position nextManeuver = NavigationHelper.nextManeuverPosition(0, route.getLegs().get(0).getSteps());
+    assertTrue(nextManeuver.equals(route.getLegs().get(0).getSteps().get(1).getManeuver().asPosition()));
+  }
+
+  @Test
+  public void nextManeuverPosition_correctlyReturnsNextManeuverPositionInNextLeg() throws Exception {
+    int stepIndex = route.getLegs().get(0).getSteps().size() - 1;
+    Position nextManeuver = NavigationHelper.nextManeuverPosition(stepIndex, route.getLegs().get(0).getSteps());
+    assertTrue(nextManeuver.equals(route.getLegs().get(1).getSteps().get(0).getManeuver().asPosition()));
+  }
+
+  @Test
+  public void nextManeuverPosition_acquireNextManeuverPositionByDecodingGeometry() throws Exception {
+    Position nextManeuver = NavigationHelper.nextManeuverPosition(
+      route.getLegs().get(1).getSteps().size() - 1, route.getLegs().get(1).getSteps());
+
+    String geometry = route.getLegs().get(1).getSteps().get(route.getLegs().get(1).getSteps().size() - 1).getGeometry();
+    List<Position> positions = PolylineUtils.decode(geometry, Constants.PRECISION_6);
+    Position lastPosition = positions.get(positions.size() - 1);
+    assertTrue(nextManeuver.equals(lastPosition));
   }
 }
