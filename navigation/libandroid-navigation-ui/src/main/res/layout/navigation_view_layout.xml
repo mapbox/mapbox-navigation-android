@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/navigationLayout"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <com.mapbox.mapboxsdk.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:mapbox_cameraTargetLat="40.246"
+        app:mapbox_cameraTargetLng="-96.899"
+        app:mapbox_cameraZoom="3.5"
+        app:mapbox_styleUrl="@string/mapbox_style_mapbox_streets"
+        app:mapbox_uiCompass="false"/>
+
     <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView
+        android:id="@+id/instructionView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="invisible"/>

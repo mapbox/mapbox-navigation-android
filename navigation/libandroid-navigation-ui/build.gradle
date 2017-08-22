@@ -35,6 +35,9 @@ dependencies {
   compile rootProject.ext.dep.supportRecyclerView
   compile rootProject.ext.dep.supportConstraintLayout
 
+  // Mapbox plugins
+  compile rootProject.ext.dep.locationLayerPlugin
+
   // Logging
   compile rootProject.ext.dep.timber
 
