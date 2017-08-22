@@ -65,4 +65,41 @@ public class NavigationConstants {
    */
   @Experimental
   static final int MAX_MANIPULATED_COURSE_ANGLE = 25;
+
+  // Step Maneuver Types
+  public static final String STEP_MANEUVER_TYPE_TURN = "turn";
+  public static final String STEP_MANEUVER_TYPE_NEW_NAME = "new name";
+  public static final String STEP_MANEUVER_TYPE_DEPART = "depart";
+  public static final String STEP_MANEUVER_TYPE_ARRIVE = "arrive";
+  public static final String STEP_MANEUVER_TYPE_MERGE = "merge";
+  public static final String STEP_MANEUVER_TYPE_ON_RAMP = "on ramp";
+  public static final String STEP_MANEUVER_TYPE_OFF_RAMP = "off ramp";
+  public static final String STEP_MANEUVER_TYPE_FORK = "fork";
+  public static final String STEP_MANEUVER_TYPE_END_OF_ROAD = "end of road";
+  public static final String STEP_MANEUVER_TYPE_CONTINUE = "continue";
+  public static final String STEP_MANEUVER_TYPE_ROUNDABOUT = "roundabout";
+  public static final String STEP_MANEUVER_TYPE_ROTARY = "rotary";
+  public static final String STEP_MANEUVER_TYPE_ROUNDABOUT_TURN = "roundabout turn";
+  public static final String STEP_MANEUVER_TYPE_NOTIFICATION = "notification";
+
+  // Step Maneuver Modifiers
+  public static final String STEP_MANEUVER_MODIFIER_UTURN = "uturn";
+  public static final String STEP_MANEUVER_MODIFIER_SHARP_RIGHT = "sharp right";
+  public static final String STEP_MANEUVER_MODIFIER_RIGHT = "right";
+  public static final String STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT = "slight right";
+  public static final String STEP_MANEUVER_MODIFIER_STRAIGHT = "straight";
+  public static final String STEP_MANEUVER_MODIFIER_SLIGHT_LEFT = "slight left";
+  public static final String STEP_MANEUVER_MODIFIER_LEFT = "left";
+  public static final String STEP_MANEUVER_MODIFIER_SHARP_LEFT = "sharp left";
+
+  // Turn Lane Indication
+  public static final String TURN_LANE_INDICATION_LEFT = "left";
+  public static final String TURN_LANE_INDICATION_SHARP_LEFT = "sharp left";
+  public static final String TURN_LANE_INDICATION_SLIGHT_LEFT = "slight left";
+  public static final String TURN_LANE_INDICATION_STRAIGHT = "straight";
+  public static final String TURN_LANE_INDICATION_NONE = "none";
+  public static final String TURN_LANE_INDICATION_RIGHT = "right";
+  public static final String TURN_LANE_INDICATION_SHARP_RIGHT = "sharp right";
+  public static final String TURN_LANE_INDICATION_SLIGHT_RIGHT = "slight right";
+  public static final String TURN_LANE_INDICATION_UTURN = "uturn";
 }

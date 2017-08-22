@@ -11,4 +11,11 @@
         <!-- Scales -->
         <item name="routeScale">1.0</item>
     </style>
+
+    <style name="NavigationView" parent="Theme.AppCompat">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
 </resources>
