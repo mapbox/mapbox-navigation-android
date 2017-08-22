@@ -12,7 +12,7 @@ import com.mapbox.services.commons.utils.TextUtils;
 
 import static com.mapbox.services.android.navigation.v5.utils.ManeuverUtils.getManeuverResource;
 
-public class InstructionModel {
+class InstructionModel {
 
   private SpannableStringBuilder stepDistanceRemaining;
   private String textInstruction;
@@ -20,45 +20,53 @@ public class InstructionModel {
   private String maneuverModifier;
   private IntersectionLanes[] turnLanes;
 
-  public InstructionModel(RouteProgress progress) {
-    buildCurrentRouteProgress(progress);
+  InstructionModel(RouteProgress progress) {
+    buildInstructionModel(progress);
   }
 
-  public SpannableStringBuilder getStepDistanceRemaining() {
+  SpannableStringBuilder getStepDistanceRemaining() {
     return stepDistanceRemaining;
   }
 
-  public String getTextInstruction() {
+  String getTextInstruction() {
     return textInstruction;
   }
 
-  public int getManeuverImage() {
+  int getManeuverImage() {
     return maneuverImage;
   }
 
-  public IntersectionLanes[] getTurnLanes() {
+  IntersectionLanes[] getTurnLanes() {
     return turnLanes;
   }
 
-  public String getManeuverModifier() {
+  String getManeuverModifier() {
     return maneuverModifier;
   }
 
-  private void buildCurrentRouteProgress(RouteProgress progress) {
-    this.stepDistanceRemaining = DistanceUtils.distanceFormatterBold(progress.currentLegProgress()
-      .currentStepProgress().distanceRemaining());
+  private void buildInstructionModel(RouteProgress progress) {
+    formatStepDistance(progress);
 
     LegStep upComingStep = progress.currentLegProgress().upComingStep();
     if (upComingStep != null) {
-      maneuverImage = getManeuverResource(upComingStep);
-      if (hasManeuver(upComingStep)) {
-        buildTextInstruction(upComingStep);
-        maneuverModifier = upComingStep.getManeuver().getModifier();
-      }
-      if (hasIntersections(upComingStep)) {
-        intersectionTurnLanes(upComingStep);
-      }
+      extractStepResources(upComingStep);
     }
+  }
+
+  private void extractStepResources(LegStep upComingStep) {
+    maneuverImage = getManeuverResource(upComingStep);
+    if (hasManeuver(upComingStep)) {
+      buildTextInstruction(upComingStep);
+      maneuverModifier = upComingStep.getManeuver().getModifier();
+    }
+    if (hasIntersections(upComingStep)) {
+      intersectionTurnLanes(upComingStep);
+    }
+  }
+
+  private void formatStepDistance(RouteProgress progress) {
+    stepDistanceRemaining = DistanceUtils.distanceFormatterBold(progress.currentLegProgress()
+      .currentStepProgress().distanceRemaining());
   }
 
   private boolean hasManeuver(LegStep upComingStep) {

@@ -20,6 +20,8 @@ import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 
 
 public class InstructionView extends RelativeLayout {
@@ -65,11 +67,21 @@ public class InstructionView extends RelativeLayout {
     initAnimations();
   }
 
-  public void setSoundFabOff() {
+  public void update(RouteProgress routeProgress) {
+    if (routeProgress != null && !showingRerouteState) {
+      InstructionModel model = new InstructionModel(routeProgress);
+      maneuverImage.setImageResource(model.getManeuverImage());
+      distanceText.setText(model.getStepDistanceRemaining());
+      instructionText.setText(StringAbbreviator.abbreviate(model.getTextInstruction()));
+      addTurnLanes(model);
+    }
+  }
+
+  public void soundFabOff() {
     soundFab.setImageResource(R.drawable.ic_sound_off);
   }
 
-  public void setSoundFabOn() {
+  public void soundFabOn() {
     soundFab.setImageResource(R.drawable.ic_sound_on);
   }
 
@@ -101,6 +113,11 @@ public class InstructionView extends RelativeLayout {
     rerouteLayout.startAnimation(rerouteSlideDownTop);
   }
 
+  public void hideRerouteState() {
+    showingRerouteState = false;
+    rerouteLayout.startAnimation(rerouteSlideUpTop);
+  }
+
   private void init() {
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
@@ -114,6 +131,16 @@ public class InstructionView extends RelativeLayout {
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
     rvTurnLanes = (RecyclerView) findViewById(R.id.rvTurnLanes);
+    addListeners();
+  }
+
+  private void addListeners() {
+    soundFab.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        // TODO Polly stuff
+      }
+    });
   }
 
   private void initTurnLaneRecyclerView() {
@@ -142,11 +169,6 @@ public class InstructionView extends RelativeLayout {
     fadeInSlowOut = new AnimationSet(false);
     fadeInSlowOut.addAnimation(fadeIn);
     fadeInSlowOut.addAnimation(fadeOut);
-  }
-
-  private void hideRerouteState() {
-    showingRerouteState = false;
-    rerouteLayout.startAnimation(rerouteSlideUpTop);
   }
 
   private void addTurnLanes(InstructionModel model) {
