@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-import com.mapbox.services.android.navigation.v5.NavigationException;
+import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -42,8 +42,9 @@ public abstract class Milestone {
   }
 
   /**
-   * A milestone can either be passed in to the {@link com.mapbox.services.android.navigation.v5.MapboxNavigation}
-   * object (recommended) or validated directly inside your activity.
+   * A milestone can either be passed in to the
+   * {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation} object
+   * (recommended) or validated directly inside your activity.
    *
    * @param previousRouteProgress last locations generated {@link RouteProgress} object used to determine certain
    *                              {@link TriggerProperty}s

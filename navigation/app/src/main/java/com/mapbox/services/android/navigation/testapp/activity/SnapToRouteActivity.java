@@ -124,9 +124,17 @@ public class SnapToRouteActivity extends AppCompatActivity implements OnMapReady
     location.setLatitude(point.getLatitude());
     location.setLongitude(point.getLongitude());
 
-    RouteProgress routeProgress = RouteProgress.create(currentRoute, location, 0, stepCount);
-    SnapToRoute snapToRoute = new SnapToRoute(routeProgress);
-    Location snappedLocation = snapToRoute.getSnappedLocation(location);
+    RouteProgress routeProgress = RouteProgress.builder()
+      .directionsRoute(currentRoute)
+      .legIndex(0)
+      .stepIndex(stepCount)
+      .distanceRemaining(currentRoute.getDistance())
+      .legDistanceRemaining(currentRoute.getLegs().get(0).getDistance())
+      .stepDistanceRemaining(currentRoute.getLegs().get(0).getSteps().get(stepCount).getDistance())
+      .build();
+
+    SnapToRoute snapToRoute = new SnapToRoute();
+    Location snappedLocation = snapToRoute.getSnappedLocation(location, routeProgress);
 
     if (snappedLocation == null) {
       Log.i(TAG, "snappedLocation is null");

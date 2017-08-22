@@ -19,7 +19,7 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.v5.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
@@ -251,8 +251,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     // TODO they'll probably never be equal till https://github.com/mapbox/mapbox-java/issues/440 gets resolved
     // Check if the route's the same as the route currently drawn
-    if (!routeProgress.getRoute().equals(route)) {
-      route = routeProgress.getRoute();
+    if (!routeProgress.directionsRoute().equals(route)) {
+      route = routeProgress.directionsRoute();
       addSource(route);
     }
   }
@@ -366,7 +366,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     Layer routeLayer = new LineLayer(NavigationMapLayers.NAVIGATION_ROUTE_LAYER,
       NavigationMapSources.NAVIGATION_ROUTE_SOURCE).withProperties(
       PropertyFactory.lineCap(Property.LINE_CAP_SQUARE),
-      PropertyFactory.lineJoin(Property.LINE_CAP_SQUARE),
+      PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
       PropertyFactory.visibility(Property.NONE),
       PropertyFactory.lineWidth(Function.zoom(
         exponential(

@@ -42,7 +42,14 @@ public class TriggerTest extends BaseTest {
       Constants.PRECISION_6);
     location.setLatitude(coords.get(0).getLatitude());
     location.setLongitude(coords.get(0).getLongitude());
-    routeProgress = RouteProgress.create(route, location, 0, 1);
+    routeProgress = RouteProgress.builder()
+      .directionsRoute(route)
+      .distanceRemaining(route.getDistance())
+      .legDistanceRemaining(route.getLegs().get(0).getDistance())
+      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+      .legIndex(0)
+      .stepIndex(1)
+      .build();
   }
 
   /*
@@ -210,7 +217,7 @@ public class TriggerTest extends BaseTest {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
         Trigger.gte(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
-          routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
+          routeProgress.currentLegProgress().currentStep().getDistance())
       )
       .build();
 
@@ -271,7 +278,7 @@ public class TriggerTest extends BaseTest {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
         Trigger.lte(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
-          routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
+          routeProgress.currentLegProgress().currentStep().getDistance())
       )
       .build();
 
@@ -308,7 +315,7 @@ public class TriggerTest extends BaseTest {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
         Trigger.eq(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
-          routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
+          routeProgress.currentLegProgress().currentStep().getDistance())
       )
       .build();
 
@@ -321,7 +328,7 @@ public class TriggerTest extends BaseTest {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
         Trigger.neq(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
-          routeProgress.getCurrentLegProgress().getCurrentStep().getDistance())
+          routeProgress.currentLegProgress().currentStep().getDistance())
       )
       .build();
 

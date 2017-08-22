@@ -2,7 +2,7 @@
 
 [![](https://github.com/mapbox/mapbox-navigation-android/blob/master/.github/splash-img.png?raw=true)](https://www.mapbox.com/android-docs/navigation/latest/getting-started/)
 
-[![Build Status](https://www.bitrise.io/app/82d6356fb9d86849.svg?token=RDyQEIAejyjilyK4PkZThA&branch=master)](https://www.bitrise.io/app/82d6356fb9d86849) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation)
+[![CircleCI](https://circleci.com/gh/mapbox/mapbox-navigation-android/tree/master.svg?style=svg)](https://circleci.com/gh/mapbox/mapbox-navigation-android/tree/master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation)
 
 When your users want to get from one location to another, don’t push them out of your application into a generic map application. Instead, keep them engaged with your application 100% of the time with in-app turn-by-turn navigation.
 
@@ -20,7 +20,7 @@ The snippet to add to your `build.gradle` file to use this SDK is the following:
 ```
 // Mapbox Navigation SDK for Android
 
-compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.3.0'
+compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.4.0'
 
 ```
 
@@ -45,10 +45,14 @@ repositories {
 }
 
 dependencies {
-    compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.4.0-SNAPSHOT'
+    compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.5.0-SNAPSHOT'
 }
 ```
 
 ## Sample code
 
 [We've added several navigation examples to this repo's test app](https://github.com/mapbox/mapbox-navigation-android/tree/master/navigation/app/src/main/java/com/mapbox/services/android/navigation/testapp/activity) to help you get started with the SDK and to inspire you.
+
+## Translations
+
+This project uses Transifex for translating the SDKs `string.xml` files. To help contribute or add support for a new language, visit the [Transifex project page](https://www.transifex.com/mapbox/mapbox-navigation-sdk-for-android/).

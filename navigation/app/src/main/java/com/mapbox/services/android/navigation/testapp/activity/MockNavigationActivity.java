@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.constants.MyLocationTracking;
@@ -26,14 +25,15 @@ import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
-import com.mapbox.services.android.navigation.v5.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
-import com.mapbox.services.android.navigation.v5.listeners.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.RouteMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Trigger;
 import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -42,9 +42,6 @@ import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.commons.models.Position;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -70,7 +67,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   Button startRouteButton;
 
   private MapboxMap mapboxMap;
-  private List<Marker> pathMarkers = new ArrayList<>();
 
   // Navigation related variables
   private LocationEngine locationEngine;
@@ -78,6 +74,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   private DirectionsRoute route;
   private NavigationMapRoute navigationMapRoute;
   private LocationLayerPlugin locationLayerPlugin;
+  private Position destination;
+  private Position waypoint;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +86,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
 
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
+    navigation = new MapboxNavigation(this);
 
     navigation.addMilestone(new RouteMilestone.Builder()
       .setIdentifier(BEGIN_ROUTE_MILESTONE)
@@ -110,13 +108,14 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       startRouteButton.setVisibility(View.INVISIBLE);
 
       // Attach all of our navigation listeners.
-      navigation.addNavigationEventListener(MockNavigationActivity.this);
-      navigation.addProgressChangeListener(MockNavigationActivity.this);
-      navigation.addMilestoneEventListener(MockNavigationActivity.this);
+      navigation.addNavigationEventListener(this);
+      navigation.addProgressChangeListener(this);
+      navigation.addMilestoneEventListener(this);
 
       ((MockLocationEngine) locationEngine).setRoute(route);
       navigation.setLocationEngine(locationEngine);
       navigation.startNavigation(route);
+      mapboxMap.setOnMapClickListener(null);
     }
   }
 
@@ -149,7 +148,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapboxMap.setOnMapClickListener(this);
     Snackbar.make(mapView, "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
 
-    locationEngine = new MockLocationEngine(1000, 30, true);
+    locationEngine = new MockLocationEngine(1000, 50, false);
     mapboxMap.setLocationSource(locationEngine);
 
     newOrigin();
@@ -157,12 +156,14 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onMapClick(@NonNull LatLng point) {
-    if (pathMarkers.size() >= 2) {
+    if (destination == null) {
+      destination = Position.fromLngLat(point.getLongitude(), point.getLatitude());
+    } else if (waypoint == null) {
+      waypoint = Position.fromLngLat(point.getLongitude(), point.getLatitude());
+    } else {
       Toast.makeText(this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show();
-      return;
     }
-    Marker marker = mapboxMap.addMarker(new MarkerOptions().position(point));
-    pathMarkers.add(marker);
+    mapboxMap.addMarker(new MarkerOptions().position(point));
 
     startRouteButton.setVisibility(View.VISIBLE);
     calculateRoute();
@@ -176,26 +177,20 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     }
 
     Position origin = Position.fromCoordinates(userLocation.getLongitude(), userLocation.getLatitude());
-    Position destination = Position.fromLngLat(
-      pathMarkers.get(pathMarkers.size() - 1).getPosition().getLongitude(),
-      pathMarkers.get(pathMarkers.size() - 1).getPosition().getLatitude()
-    );
     if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) < 50) {
-      for (Marker marker : pathMarkers) {
-        mapboxMap.removeMarker(marker);
-      }
       startRouteButton.setVisibility(View.GONE);
       return;
     }
 
-    List<Position> coordinates = new ArrayList<>();
-    coordinates.add(origin);
-
-    for (Marker marker : pathMarkers) {
-      coordinates.add(Position.fromLngLat(marker.getPosition().getLongitude(), marker.getPosition().getLatitude()));
+    NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder()
+      .accessToken(Mapbox.getAccessToken());
+    navigationRouteBuilder.origin(origin);
+    navigationRouteBuilder.destination(destination);
+    if (waypoint != null) {
+      navigationRouteBuilder.addWaypoint(waypoint);
     }
 
-    navigation.getRoute(coordinates, null, new Callback<DirectionsResponse>() {
+    navigationRouteBuilder.build().getRoute(new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
         Timber.d("Url: %s", call.request().url().toString());
@@ -264,7 +259,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     locationLayerPlugin.forceLocationUpdate(location);
-    Timber.d("onProgressChange: fraction of route traveled: %f", routeProgress.getFractionTraveled());
+    Timber.d("onProgressChange: fraction of route traveled: %f", routeProgress.fractionTraveled());
   }
 
   /*
@@ -286,7 +281,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   protected void onStart() {
     super.onStart();
-    navigation.onStart();
     mapView.onStart();
     if (locationLayerPlugin != null) {
       locationLayerPlugin.onStart();
@@ -296,9 +290,10 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   protected void onStop() {
     super.onStop();
-    navigation.onStop();
     mapView.onStop();
-    locationLayerPlugin.onStop();
+    if (locationLayerPlugin != null) {
+      locationLayerPlugin.onStop();
+    }
   }
 
   @Override
@@ -310,17 +305,10 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    mapView.onDestroy();
-
-    // Remove all navigation listeners
-    navigation.removeNavigationEventListener(this);
-    navigation.removeProgressChangeListener(this);
-    navigation.removeMilestoneEventListener(this);
-
     navigation.onDestroy();
-
-    // End the navigation session
-    navigation.endNavigation();
+    locationEngine.removeLocationUpdates();
+    locationEngine.deactivate();
+    mapView.onDestroy();
   }
 
   @Override

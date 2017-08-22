@@ -59,6 +59,14 @@
         </activity>
 
         <activity
+            android:name=".activity.LongStepTestActivity"
+            android:label="@string/title_long_step">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
+        <activity
             android:name="com.mapbox.services.android.navigation.ui.v5.NavigationView"
             android:label="@string/title_navigation_view_ui">
             <meta-data
@@ -67,5 +75,4 @@
         </activity>
 
     </application>
-
 </manifest>

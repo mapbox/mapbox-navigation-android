@@ -13,12 +13,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.TURN_LANE_INDICATION_LEFT;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.TURN_LANE_INDICATION_NONE;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.TURN_LANE_INDICATION_STRAIGHT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_LEFT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_NONE;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_STRAIGHT;
 
 public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
 

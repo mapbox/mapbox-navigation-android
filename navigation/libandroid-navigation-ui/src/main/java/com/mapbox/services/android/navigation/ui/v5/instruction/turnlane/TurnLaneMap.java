@@ -5,18 +5,18 @@ import com.mapbox.services.android.navigation.ui.v5.R;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.TURN_LANE_INDICATION_LEFT;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.TURN_LANE_INDICATION_NONE;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.TURN_LANE_INDICATION_RIGHT;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.TURN_LANE_INDICATION_SHARP_LEFT;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.TURN_LANE_INDICATION_SHARP_RIGHT;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.TURN_LANE_INDICATION_SLIGHT_LEFT;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.TURN_LANE_INDICATION_SLIGHT_RIGHT;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.TURN_LANE_INDICATION_STRAIGHT;
-import static com.mapbox.services.android.navigation.v5.NavigationConstants.TURN_LANE_INDICATION_UTURN;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_LEFT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_NONE;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_RIGHT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_SHARP_LEFT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_SHARP_RIGHT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_SLIGHT_LEFT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_SLIGHT_RIGHT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_STRAIGHT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_UTURN;
 
 public class TurnLaneMap {
 
