@@ -30,7 +30,6 @@ dependencies {
 
   // Support libraries
   compile rootProject.ext.dep.supportAppcompatV7
-  compile rootProject.ext.dep.supportV4
   compile rootProject.ext.dep.supportDesign
   compile rootProject.ext.dep.supportRecyclerView
   compile rootProject.ext.dep.supportConstraintLayout
