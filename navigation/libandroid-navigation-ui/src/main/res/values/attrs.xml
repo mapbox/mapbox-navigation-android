@@ -11,4 +11,12 @@
         <attr name="routeScale" format="float"/>
 
     </declare-styleable>
+
+    <declare-styleable name="NavigationView">
+        <!-- Colors -->
+        <attr name="navigationViewPrimary" format="color"/>
+        <attr name="navigationViewSecondary" format="color"/>
+        <attr name="navigationViewAccent" format="color"/>
+
+    </declare-styleable>
 </resources>

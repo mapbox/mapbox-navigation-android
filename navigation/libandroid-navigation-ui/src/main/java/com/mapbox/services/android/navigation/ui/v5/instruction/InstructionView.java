@@ -1,12 +1,15 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.content.Context;
+import android.location.Location;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -20,31 +23,34 @@ import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 
+public class InstructionView extends RelativeLayout implements ProgressChangeListener, OffRouteListener {
 
-public class InstructionView extends RelativeLayout {
+  private static final String UNMUTED = "Unmuted";
+  private static final String MUTED = "Muted";
 
   private ImageView maneuverImage;
-  private TextView distanceText;
-  private TextView instructionText;
+  private TextView stepDistanceText;
+  private TextView stepInstructionText;
   private TextView soundChipText;
   private FloatingActionButton soundFab;
   private View rerouteLayout;
   private View turnLaneLayout;
   private RecyclerView rvTurnLanes;
-
   private TurnLaneAdapter turnLaneAdapter;
 
-  private Animation slideUpTop;
   private Animation slideDownTop;
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
   private AnimationSet fadeInSlowOut;
 
   private boolean showingRerouteState;
-  private boolean turnLanesHidden = false;
+  private boolean turnLanesHidden;
+  public boolean isMuted;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -67,14 +73,14 @@ public class InstructionView extends RelativeLayout {
     initAnimations();
   }
 
-  public void update(RouteProgress routeProgress) {
-    if (routeProgress != null && !showingRerouteState) {
-      InstructionModel model = new InstructionModel(routeProgress);
-      maneuverImage.setImageResource(model.getManeuverImage());
-      distanceText.setText(model.getStepDistanceRemaining());
-      instructionText.setText(StringAbbreviator.abbreviate(model.getTextInstruction()));
-      addTurnLanes(model);
-    }
+  @Override
+  public void onProgressChange(Location location, RouteProgress routeProgress) {
+    update(routeProgress);
+  }
+
+  @Override
+  public void userOffRoute(Location location) {
+    showRerouteState();
   }
 
   public void soundFabOff() {
@@ -96,15 +102,7 @@ public class InstructionView extends RelativeLayout {
   public void show() {
     if (this.getVisibility() == INVISIBLE) {
       this.setVisibility(VISIBLE);
-      this.bringToFront();
       this.startAnimation(slideDownTop);
-    }
-  }
-
-  public void hide() {
-    if (this.getVisibility() == VISIBLE) {
-      this.startAnimation(slideUpTop);
-      this.setVisibility(INVISIBLE);
     }
   }
 
@@ -123,36 +121,48 @@ public class InstructionView extends RelativeLayout {
   }
 
   private void bind() {
-    maneuverImage = (ImageView) findViewById(R.id.maneuverImageView);
-    distanceText = (TextView) findViewById(R.id.distanceText);
-    instructionText = (TextView) findViewById(R.id.instructionText);
-    soundChipText = (TextView) findViewById(R.id.soundText);
-    soundFab = (FloatingActionButton) findViewById(R.id.soundFab);
+    maneuverImage = findViewById(R.id.maneuverImageView);
+    stepDistanceText = findViewById(R.id.stepDistanceText);
+    stepInstructionText = findViewById(R.id.stepInstructionText);
+    soundChipText = findViewById(R.id.soundText);
+    soundFab = findViewById(R.id.soundFab);
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
-    rvTurnLanes = (RecyclerView) findViewById(R.id.rvTurnLanes);
-    addListeners();
+    rvTurnLanes = findViewById(R.id.rvTurnLanes);
+    initInstructionAutoSize();
   }
 
-  private void addListeners() {
-    soundFab.setOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        // TODO Polly stuff
-      }
-    });
+  private boolean mute() {
+    isMuted = true;
+    setSoundChipText(MUTED);
+    showSoundChip();
+    soundFabOff();
+    return isMuted;
+  }
+
+  private boolean unmute() {
+    isMuted = false;
+    setSoundChipText(UNMUTED);
+    showSoundChip();
+    soundFabOn();
+    return isMuted;
+  }
+
+  private void initInstructionAutoSize() {
+    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepInstructionText,
+      16, 28, 2, TypedValue.COMPLEX_UNIT_SP);
   }
 
   private void initTurnLaneRecyclerView() {
     turnLaneAdapter = new TurnLaneAdapter();
     rvTurnLanes.setAdapter(turnLaneAdapter);
     rvTurnLanes.setHasFixedSize(true);
-    rvTurnLanes.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+    rvTurnLanes.setLayoutManager(new LinearLayoutManager(getContext(),
+      LinearLayoutManager.HORIZONTAL, false));
   }
 
   private void initAnimations() {
     Context context = getContext();
-    slideUpTop = AnimationUtils.loadAnimation(context, R.anim.slide_up_top);
     slideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
     rerouteSlideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
     rerouteSlideUpTop = AnimationUtils.loadAnimation(context, R.anim.slide_up_top);
@@ -169,6 +179,16 @@ public class InstructionView extends RelativeLayout {
     fadeInSlowOut = new AnimationSet(false);
     fadeInSlowOut.addAnimation(fadeIn);
     fadeInSlowOut.addAnimation(fadeOut);
+  }
+
+  private void update(RouteProgress routeProgress) {
+    if (routeProgress != null && !showingRerouteState) {
+      InstructionModel model = new InstructionModel(routeProgress);
+      maneuverImage.setImageResource(model.getManeuverImage());
+      stepDistanceText.setText(model.getStepDistanceRemaining());
+      stepInstructionText.setText(StringAbbreviator.abbreviate(model.getTextInstruction()));
+      addTurnLanes(model);
+    }
   }
 
   private void addTurnLanes(InstructionModel model) {
@@ -193,5 +213,9 @@ public class InstructionView extends RelativeLayout {
       turnLanesHidden = true;
       turnLaneLayout.setVisibility(GONE);
     }
+  }
+
+  public boolean toggleMute() {
+    return isMuted ? unmute() : mute();
   }
 }

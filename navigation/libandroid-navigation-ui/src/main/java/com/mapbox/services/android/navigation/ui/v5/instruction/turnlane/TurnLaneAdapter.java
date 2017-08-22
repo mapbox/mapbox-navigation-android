@@ -17,7 +17,6 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_LEFT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_NONE;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_STRAIGHT;
 
 public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
@@ -55,22 +54,24 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
     notifyDataSetChanged();
   }
 
-  private void setLaneImage(TurnLaneViewHolder holder, IntersectionLanes lane) {
+  private void setLaneImage(TurnLaneViewHolder holder, IntersectionLanes lanes) {
     StringBuilder builder = new StringBuilder();
 
     // Indications
-    if (lane.getIndications() != null) {
-      for (String indication : lane.getIndications()) {
+    if (lanes.getIndications() != null) {
+      for (String indication : lanes.getIndications()) {
         builder.append(indication);
       }
-
-      if (builder.toString().contains(TURN_LANE_INDICATION_STRAIGHT)
-        || (builder.toString().contains(TURN_LANE_INDICATION_NONE) && lane.getValid())) {
+      if (builder.toString().contains(TURN_LANE_INDICATION_STRAIGHT) && lanes.getValid()) {
         appendModifier(builder);
       }
     }
 
-    if (!lane.getValid()) {
+    if (retrieveTurnLaneResource(builder.toString()) > 0) {
+      holder.turnImage.setImageResource(retrieveTurnLaneResource(builder.toString()));
+    }
+
+    if (!lanes.getValid()) {
       holder.turnImage.setAlpha(0.4f);
     } else {
       holder.turnImage.setAlpha(1.0f);
@@ -81,10 +82,6 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
       holder.turnImage.setScaleX(-1);
     } else {
       holder.turnImage.setScaleX(1);
-    }
-
-    if (retrieveTurnLaneResource(builder.toString()) > 0) {
-      holder.turnImage.setImageResource(retrieveTurnLaneResource(builder.toString()));
     }
   }
 

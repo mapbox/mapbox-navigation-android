@@ -75,7 +75,29 @@ class InstructionModel {
 
   private void intersectionTurnLanes(LegStep upComingStep) {
     StepIntersection intersection = upComingStep.getIntersections().get(0);
+    IntersectionLanes[] lanes = intersection.getLanes();
+    if (checkForNoneIndications(lanes)) {
+      turnLanes = null;
+      return;
+    }
     turnLanes = intersection.getLanes();
+  }
+
+  private boolean checkForNoneIndications(IntersectionLanes[] lanes) {
+    if (lanes == null) {
+      return true;
+    }
+    for (IntersectionLanes lane : lanes) {
+      if (lane.getIndications() != null) {
+        return true;
+      }
+      for (String indication : lane.getIndications()) {
+        if (indication.contains("none")) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   private boolean hasIntersections(LegStep upComingStep) {

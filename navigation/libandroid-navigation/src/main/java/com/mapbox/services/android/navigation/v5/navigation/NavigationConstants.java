@@ -59,6 +59,19 @@ public class NavigationConstants {
    */
   static final int MAX_MANIPULATED_COURSE_ANGLE = 25;
 
+  // Bundle variable keys
+  public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat";
+  public static final String NAVIGATION_VIEW_ORIGIN_LNG_KEY = "origin_long";
+  public static final String NAVIGATION_VIEW_ORIGIN = "origin";
+  public static final String NAVIGATION_VIEW_DESTINATION_LAT_KEY = "destination_lat";
+  public static final String NAVIGATION_VIEW_DESTINATION_LNG_KEY = "destination_long";
+  public static final String NAVIGATION_VIEW_DESTINATION = "destination";
+  public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
+  public static final String NAVIGATION_VIEW_LAUNCH_ROUTE = "launch_with_route";
+  public static final String NAVIGATION_VIEW_AUDIO_MUTED = "navigation_audio_muted";
+  public static final String NAVIGATION_VIEW_AWS_POOL_ID = "navigation_view_aws_pool_id";
+  public static final String NAVIGATION_VIEW_REROUTING = "Rerouting";
+
   // Step Maneuver Types
   public static final String STEP_MANEUVER_TYPE_TURN = "turn";
   public static final String STEP_MANEUVER_TYPE_NEW_NAME = "new name";
@@ -95,4 +108,5 @@ public class NavigationConstants {
   public static final String TURN_LANE_INDICATION_SHARP_RIGHT = "sharp right";
   public static final String TURN_LANE_INDICATION_SLIGHT_RIGHT = "slight right";
   public static final String TURN_LANE_INDICATION_UTURN = "uturn";
+  public static final String NAVIGATION_VIEW_SIMULATE_ROUTE = "navigation_view_simulate_route";
 }
