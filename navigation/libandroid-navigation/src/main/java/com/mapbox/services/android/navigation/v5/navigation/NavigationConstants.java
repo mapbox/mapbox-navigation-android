@@ -62,8 +62,12 @@ public class NavigationConstants {
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat";
   public static final String NAVIGATION_VIEW_ORIGIN_LNG_KEY = "origin_long";
+  public static final String NAVIGATION_VIEW_ORIGIN = "origin";
   public static final String NAVIGATION_VIEW_DESTINATION_LAT_KEY = "destination_lat";
   public static final String NAVIGATION_VIEW_DESTINATION_LNG_KEY = "destination_long";
+  public static final String NAVIGATION_VIEW_DESTINATION = "destination";
+  public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
+  public static final String NAVIGATION_VIEW_LAUNCH_ROUTE = "launch_with_route";
 
   // Step Maneuver Types
   public static final String STEP_MANEUVER_TYPE_TURN = "turn";
