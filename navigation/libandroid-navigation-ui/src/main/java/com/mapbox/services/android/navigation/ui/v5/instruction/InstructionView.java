@@ -3,10 +3,12 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -96,7 +98,6 @@ public class InstructionView extends RelativeLayout {
   public void show() {
     if (this.getVisibility() == INVISIBLE) {
       this.setVisibility(VISIBLE);
-      this.bringToFront();
       this.startAnimation(slideDownTop);
     }
   }
@@ -123,14 +124,15 @@ public class InstructionView extends RelativeLayout {
   }
 
   private void bind() {
-    maneuverImage = (ImageView) findViewById(R.id.maneuverImageView);
-    distanceText = (TextView) findViewById(R.id.distanceText);
-    instructionText = (TextView) findViewById(R.id.instructionText);
-    soundChipText = (TextView) findViewById(R.id.soundText);
-    soundFab = (FloatingActionButton) findViewById(R.id.soundFab);
+    maneuverImage = findViewById(R.id.maneuverImageView);
+    distanceText = findViewById(R.id.distanceText);
+    instructionText = findViewById(R.id.instructionText);
+    soundChipText = findViewById(R.id.soundText);
+    soundFab = findViewById(R.id.soundFab);
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
-    rvTurnLanes = (RecyclerView) findViewById(R.id.rvTurnLanes);
+    rvTurnLanes = findViewById(R.id.rvTurnLanes);
+    initInstructionAutoSize();
     addListeners();
   }
 
@@ -141,6 +143,11 @@ public class InstructionView extends RelativeLayout {
         // TODO Polly stuff
       }
     });
+  }
+
+  private void initInstructionAutoSize() {
+    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(instructionText,
+      16, 28, 2, TypedValue.COMPLEX_UNIT_SP);
   }
 
   private void initTurnLaneRecyclerView() {
