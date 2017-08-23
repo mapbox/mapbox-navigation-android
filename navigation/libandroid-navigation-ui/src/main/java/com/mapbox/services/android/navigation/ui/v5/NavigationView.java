@@ -13,6 +13,7 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.location.MockLocationEngine;
+import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
@@ -40,6 +41,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private MapboxMap map;
   private MapboxNavigation navigation;
   private NavigationMapRoute mapRoute;
+  private NavigationCamera camera;
   private LocationEngine locationEngine;
   private LocationLayerPlugin locationLayer;
 
@@ -107,6 +109,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     initLocation();
     initLocationLayer();
     initRoute();
+    initCamera();
   }
 
   @SuppressWarnings({"MissingPermission"})
@@ -183,6 +186,10 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     mapRoute = new NavigationMapRoute(mapView, map);
   }
 
+  private void initCamera() {
+    camera = new NavigationCamera(this, map, navigation);
+  }
+
   private void initLocationLayer() {
     locationLayer = new LocationLayerPlugin(mapView, map, null);
   }
@@ -229,8 +236,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private void startNavigation(DirectionsRoute route) {
     activateMockLocationEngine(route);
     mapRoute.addRoute(route);
-    navigation.startNavigation(route);
+    camera.start(route);
     navigation.setLocationEngine(locationEngine);
+    navigation.startNavigation(route);
     locationLayer.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
     instructionView.show();
   }
