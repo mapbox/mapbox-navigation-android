@@ -11,9 +11,6 @@
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:mapbox_cameraTargetLat="40.246"
-        app:mapbox_cameraTargetLng="-96.899"
-        app:mapbox_cameraZoom="2.5"
         app:mapbox_styleUrl="@string/mapbox_style_mapbox_streets"
         app:mapbox_uiCompass="false"/>
 
@@ -22,5 +19,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="invisible"/>
+
+    <com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet
+        android:id="@+id/summaryBottomSheet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
+        app:behavior_peekHeight="82dp"/>
 
 </android.support.design.widget.CoordinatorLayout>

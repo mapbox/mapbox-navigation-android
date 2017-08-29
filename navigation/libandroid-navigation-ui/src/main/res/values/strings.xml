@@ -2,4 +2,5 @@
 <resources>
     <string name="rerouting">Rerouting…</string>
     <string name="muted">Muted</string>
+    <string name="directions">Directions</string>
 </resources>

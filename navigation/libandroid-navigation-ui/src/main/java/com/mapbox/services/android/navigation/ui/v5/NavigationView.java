@@ -3,8 +3,12 @@ package com.mapbox.services.android.navigation.ui.v5;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.ImageButton;
 
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -16,6 +20,7 @@ import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
@@ -39,6 +44,14 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   private MapView mapView;
   private InstructionView instructionView;
+  private SummaryBottomSheet summaryBottomSheet;
+  private BottomSheetBehavior summaryBehavior;
+  private ImageButton cancelBtn;
+  private ImageButton expandArrow;
+  private View summaryDirections;
+  private View summaryOptions;
+  private View directionsOptionLayout;
+  private View sheetShadow;
 
   private MapboxMap map;
   private MapboxNavigation navigation;
@@ -50,6 +63,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private Location location;
   private Position destination;
   private boolean checkLaunchData;
+  private boolean navigationRunning;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,15 +71,21 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     setContentView(R.layout.navigation_view_layout);
     checkLaunchData = savedInstanceState == null;
     bind();
+    initClickListeners();
 
     initMap(savedInstanceState);
+    initSummaryBottomSheet();
     initNavigation();
   }
 
+  @SuppressWarnings({"MissingPermission"})
   @Override
   protected void onStart() {
     super.onStart();
     mapView.onStart();
+    if (locationLayer != null) {
+      locationLayer.onStart();
+    }
   }
 
   @Override
@@ -90,6 +110,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   protected void onStop() {
     super.onStop();
     mapView.onStop();
+    if (locationLayer != null) {
+      locationLayer.onStop();
+    }
   }
 
 
@@ -97,6 +120,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
+    if (navigation != null) {
+      navigation.onDestroy();
+    }
   }
 
   @Override
@@ -130,7 +156,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     locationLayer.forceLocationUpdate(location);
-    instructionView.update(routeProgress);
   }
 
   @Override
@@ -142,18 +167,60 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (validRouteResponse(response)) {
-      startNavigation(response.body().getRoutes().get(0));
+      if (navigationRunning) {
+        updateNavigation(response.body().getRoutes().get(0));
+        instructionView.hideRerouteState();
+        summaryBottomSheet.hideRerouteState();
+      } else {
+        startNavigation(response.body().getRoutes().get(0));
+      }
     }
   }
 
   @Override
   public void onFailure(Call<DirectionsResponse> call, Throwable t) {
-    // TODO Send alertview message
+    // TODO Send message
   }
 
   private void bind() {
     mapView = findViewById(R.id.mapView);
     instructionView = findViewById(R.id.instructionView);
+    summaryBottomSheet = findViewById(R.id.summaryBottomSheet);
+    cancelBtn = findViewById(R.id.cancelBtn);
+    expandArrow = findViewById(R.id.expandArrow);
+    summaryOptions = findViewById(R.id.summaryOptions);
+    summaryDirections = findViewById(R.id.summaryDirections);
+    directionsOptionLayout = findViewById(R.id.directionsOptionLayout);
+    sheetShadow = findViewById(R.id.sheetShadow);
+  }
+
+  private void initClickListeners() {
+    directionsOptionLayout.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        instructionView.hide();
+        sheetShadow.setVisibility(View.GONE);
+        summaryOptions.setVisibility(View.GONE);
+        summaryDirections.setVisibility(View.VISIBLE);
+      }
+    });
+    cancelBtn.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        // TODO Finish with cancelled result code
+        finish();
+      }
+    });
+    expandArrow.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        if (summaryBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+          summaryBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        } else {
+          summaryBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+      }
+    });
   }
 
   private void initMap(Bundle savedInstanceState) {
@@ -161,10 +228,48 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     mapView.getMapAsync(this);
   }
 
+  private void initSummaryBottomSheet() {
+    summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
+    summaryBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+      @Override
+      public void onStateChanged(@NonNull View bottomSheet, int newState) {
+        switch (newState) {
+          case BottomSheetBehavior.STATE_EXPANDED:
+            cancelBtn.setClickable(false);
+            if (summaryDirections.getVisibility() == View.VISIBLE) {
+              sheetShadow.setVisibility(View.GONE);
+            }
+            break;
+          case BottomSheetBehavior.STATE_COLLAPSED:
+            instructionView.show();
+            cancelBtn.setClickable(true);
+            summaryOptions.setVisibility(View.VISIBLE);
+            summaryDirections.setVisibility(View.GONE);
+            break;
+          default:
+            break;
+        }
+      }
+
+      @Override
+      public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+        if (slideOffset < 1f && sheetShadow.getVisibility() != View.VISIBLE) {
+          sheetShadow.setVisibility(View.VISIBLE);
+        }
+        cancelBtn.animate().alpha(1 - slideOffset).setDuration(0).start();
+        expandArrow.animate().rotation(180 * slideOffset).setDuration(0).start();
+      }
+    });
+  }
+
   private void initNavigation() {
     navigation = new MapboxNavigation(this);
     navigation.addProgressChangeListener(this);
-
+    navigation.addProgressChangeListener(instructionView);
+    navigation.addMilestoneEventListener(instructionView);
+    navigation.addProgressChangeListener(summaryBottomSheet);
+    navigation.addOffRouteListener(summaryBottomSheet);
   }
 
   @SuppressWarnings({"MissingPermission"})
@@ -254,6 +359,12 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     navigation.startNavigation(route);
     locationLayer.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
     instructionView.show();
+    navigationRunning = true;
+  }
+
+  private void updateNavigation(DirectionsRoute route) {
+    mapRoute.addRoute(route);
+    navigation.startNavigation(route);
   }
 
   private boolean locationHasBearing() {
