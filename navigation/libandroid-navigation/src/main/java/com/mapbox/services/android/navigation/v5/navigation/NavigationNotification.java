@@ -76,7 +76,7 @@ class NavigationNotification {
   void onDestroy() {
     try {
       context.unregisterReceiver(receiver);
-    } catch (Exception e) {
+    } catch (Exception exception) {
       // Empty
     }
   }

@@ -43,7 +43,8 @@ public class DistanceUtils {
     distance = TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES);
     DecimalFormat df = new DecimalFormat(DECIMAL_FORMAT);
     double roundedNumber = (distance / 100 * 100);
-    SpannableStringBuilder formattedString = new SpannableStringBuilder(String.format(Locale.US, MILE_FORMAT, df.format(roundedNumber)));
+    SpannableStringBuilder formattedString = new SpannableStringBuilder(String.format(Locale.US,
+      MILE_FORMAT, df.format(roundedNumber)));
     formattedString.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
       0, df.format(roundedNumber).length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     return formattedString;
