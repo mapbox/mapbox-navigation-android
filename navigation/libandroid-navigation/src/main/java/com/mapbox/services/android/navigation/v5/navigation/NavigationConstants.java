@@ -58,4 +58,14 @@ public class NavigationConstants {
    * Maximum angle the user puck will be rotated when snapping the user's course to the route line.
    */
   static final int MAX_MANIPULATED_COURSE_ANGLE = 25;
+
+  // Step Maneuver Modifiers
+  public static final String STEP_MANEUVER_MODIFIER_UTURN = "uturn";
+  public static final String STEP_MANEUVER_MODIFIER_SHARP_RIGHT = "sharp right";
+  public static final String STEP_MANEUVER_MODIFIER_RIGHT = "right";
+  public static final String STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT = "slight right";
+  public static final String STEP_MANEUVER_MODIFIER_STRAIGHT = "straight";
+  public static final String STEP_MANEUVER_MODIFIER_SLIGHT_LEFT = "slight left";
+  public static final String STEP_MANEUVER_MODIFIER_LEFT = "left";
+  public static final String STEP_MANEUVER_MODIFIER_SHARP_LEFT = "sharp left";
 }
