@@ -53,11 +53,21 @@ class DefaultMilestones {
         public String buildInstruction(RouteProgress routeProgress) {
           int legIndex = routeProgress.legIndex();
           int followUpStepIndex = routeProgress.currentLegProgress().stepIndex() + 2;
+
+          if(routeProgress.directionsRoute()
+                  .getLegs()
+                  .get(legIndex)
+                  .getSteps()
+                  .size() >= followUpStepIndex)
+          {
+              return getInstructionString(routeProgress);
+          }
+
           return String.format(Locale.US, "%s then %s",
             getInstructionString(routeProgress),
             convertFirstCharLowercase(routeProgress.directionsRoute().getLegs().get(legIndex)
               .getSteps().get(followUpStepIndex).getManeuver().getInstruction())
-          );// TODO fix this
+          );
         }
       })
       .setTrigger(
