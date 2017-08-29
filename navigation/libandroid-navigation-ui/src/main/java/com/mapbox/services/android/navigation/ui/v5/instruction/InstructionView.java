@@ -24,13 +24,14 @@ import android.widget.TextView;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 
 
 public class InstructionView extends RelativeLayout implements ProgressChangeListener,
-  MilestoneEventListener {
+  MilestoneEventListener, OffRouteListener {
 
   private ImageView maneuverImage;
   private TextView stepDistanceText;
@@ -75,12 +76,17 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
 
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
-
+    // TODO Instructions stuff
   }
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     update(routeProgress);
+  }
+
+  @Override
+  public void userOffRoute(Location location) {
+    showRerouteState();
   }
 
   public void soundFabOff() {

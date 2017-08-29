@@ -198,7 +198,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     directionsOptionLayout.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        instructionView.hide();
         sheetShadow.setVisibility(View.GONE);
         summaryOptions.setVisibility(View.GONE);
         summaryDirections.setVisibility(View.VISIBLE);
@@ -242,7 +241,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
             }
             break;
           case BottomSheetBehavior.STATE_COLLAPSED:
-            instructionView.show();
             cancelBtn.setClickable(true);
             summaryOptions.setVisibility(View.VISIBLE);
             summaryDirections.setVisibility(View.GONE);
@@ -257,6 +255,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
         if (slideOffset < 1f && sheetShadow.getVisibility() != View.VISIBLE) {
           sheetShadow.setVisibility(View.VISIBLE);
         }
+        if (summaryDirections.getVisibility() == View.VISIBLE) {
+          instructionView.animate().alpha(1 - slideOffset).setDuration(0).start();
+        }
         cancelBtn.animate().alpha(1 - slideOffset).setDuration(0).start();
         expandArrow.animate().rotation(180 * slideOffset).setDuration(0).start();
       }
@@ -267,9 +268,11 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     navigation = new MapboxNavigation(this);
     navigation.addProgressChangeListener(this);
     navigation.addProgressChangeListener(instructionView);
-    navigation.addMilestoneEventListener(instructionView);
     navigation.addProgressChangeListener(summaryBottomSheet);
+    navigation.addMilestoneEventListener(instructionView);
+    navigation.addOffRouteListener(this);
     navigation.addOffRouteListener(summaryBottomSheet);
+    navigation.addOffRouteListener(instructionView);
   }
 
   @SuppressWarnings({"MissingPermission"})

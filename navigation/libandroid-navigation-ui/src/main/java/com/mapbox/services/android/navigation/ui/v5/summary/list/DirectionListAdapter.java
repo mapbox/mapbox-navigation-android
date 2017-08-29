@@ -6,8 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
+import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 import com.mapbox.services.api.directions.v5.models.LegStep;
 
 import java.util.ArrayList;
@@ -16,6 +18,9 @@ import java.util.List;
 public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHolder> {
 
   private List<LegStep> legSteps;
+
+  private int currentLegIndex = -1;
+  private int currentStepIndex = -1;
 
   public DirectionListAdapter() {
     this.legSteps = new ArrayList<>();
@@ -33,7 +38,7 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
   public void onBindViewHolder(DirectionViewHolder holder, int position) {
     LegStep legStep = legSteps.get(position);
 
-    holder.instructionText.setText(legStep.getManeuver().getInstruction());
+    holder.instructionText.setText(StringAbbreviator.abbreviate(legStep.getManeuver().getInstruction()));
     holder.directionIcon.setImageResource(ManeuverUtils.getManeuverResource(legStep));
 
     if (legStep.getDistance() > 0) {
@@ -48,9 +53,55 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
     return legSteps.size();
   }
 
-  public void addLegSteps(List<LegStep> steps) {
+  @Override
+  public void onViewAttachedToWindow(DirectionViewHolder holder) {
+    super.onViewAttachedToWindow(holder);
+    if (holder.getAdapterPosition() != 0) {
+      holder.resetViewSizes();
+    }
+  }
+
+  public void updateSteps(RouteProgress routeProgress) {
+    addLegSteps(routeProgress);
+    updateStepList(routeProgress);
+  }
+
+  private void addLegSteps(RouteProgress routeProgress) {
+    if (newLeg(routeProgress) && legHasSteps(routeProgress)) {
+      List<LegStep> steps = routeProgress.directionsRoute().getLegs().get(0).getSteps();
+      addStepsNotifyAdapter(steps);
+      currentLegIndex = routeProgress.legIndex();
+    }
+  }
+
+  private void updateStepList(RouteProgress routeProgress) {
+    int currentStepIndex = routeProgress.currentLegProgress().stepIndex();
+    if (newStep(currentStepIndex)) {
+      removeFirstStep();
+      this.currentStepIndex = currentStepIndex;
+    }
+  }
+
+  private void addStepsNotifyAdapter(List<LegStep> steps) {
     legSteps.clear();
     legSteps.addAll(steps);
     notifyDataSetChanged();
+  }
+
+  private void removeFirstStep() {
+    legSteps.remove(0);
+    notifyItemRemoved(0);
+  }
+
+  private boolean legHasSteps(RouteProgress routeProgress) {
+    return routeProgress.directionsRoute() != null && routeProgress.directionsRoute().getLegs().size() > 0;
+  }
+
+  private boolean newLeg(RouteProgress routeProgress) {
+    return this.currentLegIndex != routeProgress.legIndex();
+  }
+
+  private boolean newStep(int currentStepIndex) {
+    return this.currentStepIndex != currentStepIndex && legSteps.size() > 0;
   }
 }

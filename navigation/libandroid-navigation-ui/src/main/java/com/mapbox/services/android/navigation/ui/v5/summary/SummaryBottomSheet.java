@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.summary;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.location.Location;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -14,15 +15,10 @@ import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.DirectionListAdapter;
+import com.mapbox.services.android.navigation.ui.v5.summary.list.DirectionViewHolder;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.directions.v5.models.LegStep;
-import com.mapbox.services.api.directions.v5.models.RouteLeg;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SummaryBottomSheet extends FrameLayout implements ProgressChangeListener,
   OffRouteListener {
@@ -37,7 +33,6 @@ public class SummaryBottomSheet extends FrameLayout implements ProgressChangeLis
   private ProgressBar rerouteProgressBar;
   private RecyclerView rvDirections;
   private View rvShadow;
-  private View summaryPeekLayout;
 
   private DirectionListAdapter directionListAdapter;
   private boolean rerouting;
@@ -101,7 +96,6 @@ public class SummaryBottomSheet extends FrameLayout implements ProgressChangeLis
     rerouteProgressBar = findViewById(R.id.rerouteProgressBar);
     rvDirections = findViewById(R.id.rvDirections);
     rvShadow = findViewById(R.id.rvShadow);
-    summaryPeekLayout = findViewById(R.id.summaryPeekLayout);
   }
 
   private void initDirectionsRecyclerView() {
@@ -109,6 +103,7 @@ public class SummaryBottomSheet extends FrameLayout implements ProgressChangeLis
     rvDirections.setAdapter(directionListAdapter);
     rvDirections.setHasFixedSize(true);
     rvDirections.setNestedScrollingEnabled(true);
+    rvDirections.setItemAnimator(new DefaultItemAnimator());
     rvDirections.setLayoutManager(new LinearLayoutManager(getContext()));
     rvDirections.addOnScrollListener(new RecyclerView.OnScrollListener() {
       @Override
@@ -130,7 +125,8 @@ public class SummaryBottomSheet extends FrameLayout implements ProgressChangeLis
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());
       setProgressBar(model.getStepFractionTraveled());
-      addLegSteps(progress.directionsRoute());
+      updateSteps(progress);
+      updateFirstViewHolder();
     }
   }
 
@@ -148,14 +144,13 @@ public class SummaryBottomSheet extends FrameLayout implements ProgressChangeLis
     distanceRemainingText.setText(EMPTY_STRING);
   }
 
-  private void addLegSteps(DirectionsRoute directionsRoute) {
-    List<LegStep> steps = new ArrayList<>();
-    if (directionsRoute != null) {
-      for (RouteLeg leg : directionsRoute.getLegs()) {
-        steps.addAll(leg.getSteps());
-      }
+  private void updateSteps(RouteProgress routeProgress) {
+    directionListAdapter.updateSteps(routeProgress);
+  }
+
+  private void updateFirstViewHolder() {
+    if (rvDirections.findViewHolderForAdapterPosition(0) != null) {
+      ((DirectionViewHolder) rvDirections.findViewHolderForAdapterPosition(0)).updateFirstViewHolder();
     }
-    directionListAdapter.addLegSteps(steps);
-    directionListAdapter.notifyDataSetChanged();
   }
 }
