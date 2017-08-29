@@ -17,6 +17,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
+import com.mapbox.services.api.directions.v5.models.LegStep;
 
 import java.util.Calendar;
 import java.util.Locale;
@@ -111,10 +112,11 @@ class NavigationNotification {
     remoteViews.setTextViewText(R.id.estimatedArrivalTimeTextView, arrivalTime);
     remoteViewsBig.setTextViewText(R.id.estimatedArrivalTimeTextView, arrivalTime);
 
-    remoteViews.setImageViewResource(R.id.maneuverSignal,
-      ManeuverUtils.getManeuverResource(routeProgress.currentLegProgress().currentStep()));
-    remoteViewsBig.setImageViewResource(R.id.maneuverSignal,
-      ManeuverUtils.getManeuverResource(routeProgress.currentLegProgress().currentStep()));
+    LegStep step = routeProgress.currentLegProgress().upComingStep() == null
+      ? routeProgress.currentLegProgress().currentStep() : routeProgress.currentLegProgress().upComingStep();
+
+    remoteViews.setImageViewResource(R.id.maneuverSignal, ManeuverUtils.getManeuverResource(step));
+    remoteViewsBig.setImageViewResource(R.id.maneuverSignal, ManeuverUtils.getManeuverResource(step));
     notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notificationBuilder.build());
   }
 
