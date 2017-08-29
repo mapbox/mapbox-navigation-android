@@ -29,8 +29,6 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  */
 class NavigationNotification {
 
-  // TODO support different units
-  // TODO support 24hour time
   private static final String ROUTE_PROGRESS_STRING_FORMAT = "%tl:%tM %tp%n";
   private static final String END_NAVIGATION_BUTTON_TAG = "endNavigationButtonTag";
 
@@ -56,7 +54,8 @@ class NavigationNotification {
     remoteViewsBig = new RemoteViews(context.getPackageName(), bigLayout);
     remoteViews = new RemoteViews(context.getPackageName(), layout);
 
-    remoteViewsBig.setOnClickPendingIntent(R.id.endNavigationButton, getPendingSelfIntent(context, END_NAVIGATION_BUTTON_TAG));
+    remoteViewsBig.setOnClickPendingIntent(R.id.endNavigationButton,
+      getPendingSelfIntent(context, END_NAVIGATION_BUTTON_TAG));
 
     // Sets up the top bar notification
     notificationBuilder = new NotificationCompat.Builder(context)
@@ -86,11 +85,13 @@ class NavigationNotification {
     // Street name
     remoteViews.setTextViewText(
       R.id.notificationStreetNameTextView,
-      StringAbbreviator.deliminator(StringAbbreviator.abbreviate(routeProgress.currentLegProgress().currentStep().getName()))
+      StringAbbreviator.deliminator(
+        StringAbbreviator.abbreviate(routeProgress.currentLegProgress().currentStep().getName()))
     );
     remoteViewsBig.setTextViewText(
       R.id.notificationStreetNameTextView,
-      StringAbbreviator.deliminator(StringAbbreviator.abbreviate(routeProgress.currentLegProgress().currentStep().getName()))
+      StringAbbreviator.deliminator(
+        StringAbbreviator.abbreviate(routeProgress.currentLegProgress().currentStep().getName()))
     );
 
     // Distance
@@ -108,7 +109,8 @@ class NavigationNotification {
     }
     remoteViews.setTextViewText(R.id.notificationStepDistanceTextView, distanceSpannableStringBuilder);
 
-    String arrivalTime = String.format(Locale.US, "Arrive at %s", formatArrivalTime(routeProgress.durationRemaining()));
+    String arrivalTime = String.format(Locale.US, "Arrive at %s",
+      formatArrivalTime(routeProgress.durationRemaining()));
     remoteViews.setTextViewText(R.id.estimatedArrivalTimeTextView, arrivalTime);
     remoteViewsBig.setTextViewText(R.id.estimatedArrivalTimeTextView, arrivalTime);
 
