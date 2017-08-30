@@ -51,13 +51,14 @@ class DefaultMilestones {
       .setInstruction(new Instruction() {
         @Override
         public String buildInstruction(RouteProgress routeProgress) {
-          int legIndex = routeProgress.legIndex();
-          int followUpStepIndex = routeProgress.currentLegProgress().stepIndex() + 2;
+          if (routeProgress.currentLegProgress().followOnStep() == null) {
+            return getInstructionString(routeProgress);
+          }
           return String.format(Locale.US, "%s then %s",
             getInstructionString(routeProgress),
-            convertFirstCharLowercase(routeProgress.directionsRoute().getLegs().get(legIndex)
-              .getSteps().get(followUpStepIndex).getManeuver().getInstruction())
-          );// TODO fix this
+            convertFirstCharLowercase(routeProgress.currentLegProgress()
+              .followOnStep().getManeuver().getInstruction())
+          );
         }
       })
       .setTrigger(
