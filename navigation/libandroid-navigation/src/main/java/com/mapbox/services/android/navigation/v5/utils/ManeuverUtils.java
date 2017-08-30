@@ -17,6 +17,6 @@ public class ManeuverUtils {
         return maneuverMap.getManeuverResource(maneuver.getType());
       }
     }
-    return R.drawable.ic_maneuver_starting;
+    return R.drawable.ic_maneuver_turn_0;
   }
 }
