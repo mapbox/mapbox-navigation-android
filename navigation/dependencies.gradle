@@ -60,6 +60,12 @@ ext {
     okhttp3                : 'com.squareup.okhttp3:okhttp:3.6.0',
     leakCanaryDebug        : "com.squareup.leakcanary:leakcanary-android:${leakCanaryVersion}",
     leakCanaryRelease      : "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}",
-    leakCanaryTest         : "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}"
+    leakCanaryTest         : "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}",
+
+    // exoplayer
+    exoplayerCore          : 'com.google.android.exoplayer:exoplayer-core:r2.5.1',
+
+    // aws polly
+    polly                  : 'com.amazonaws:aws-android-sdk-polly:2.3.8'
   ]
 }
