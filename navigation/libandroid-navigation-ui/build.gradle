@@ -41,9 +41,6 @@ dependencies {
   // Logging
   compile rootProject.ext.dep.timber
 
-  // ExoPlayer
-  compile rootProject.ext.dep.exoplayerCore
-
   // AWS Polly
   compile rootProject.ext.dep.polly
 

@@ -23,15 +23,20 @@ import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
+import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 
-
 public class InstructionView extends RelativeLayout implements ProgressChangeListener,
   MilestoneEventListener, OffRouteListener {
+
+  private static final String UNMUTED = "Unmuted";
+  private static final String MUTED = "Muted";
+
+  private NavigationInstructionPlayer instructionPlayer;
 
   private ImageView maneuverImage;
   private TextView stepDistanceText;
@@ -41,7 +46,6 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   private View rerouteLayout;
   private View turnLaneLayout;
   private RecyclerView rvTurnLanes;
-
   private TurnLaneAdapter turnLaneAdapter;
 
   private Animation slideUpTop;
@@ -51,7 +55,8 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   private AnimationSet fadeInSlowOut;
 
   private boolean showingRerouteState;
-  private boolean turnLanesHidden = false;
+  private boolean isMuted;
+  private boolean turnLanesHidden;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -70,13 +75,14 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   protected void onFinishInflate() {
     super.onFinishInflate();
     bind();
+    initVoiceInstructions();
     initTurnLaneRecyclerView();
     initAnimations();
   }
 
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
-    // TODO Instructions stuff
+    instructionPlayer.play(instruction);
   }
 
   @Override
@@ -150,9 +156,25 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     soundFab.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
-        // TODO Polly stuff
+        instructionPlayer.setMuted(isMuted ? unmute() : mute());
       }
     });
+  }
+
+  private boolean mute() {
+    isMuted = true;
+    setSoundChipText(MUTED);
+    showSoundChip();
+    soundFabOff();
+    return isMuted;
+  }
+
+  private boolean unmute() {
+    isMuted = false;
+    setSoundChipText(UNMUTED);
+    showSoundChip();
+    soundFabOn();
+    return isMuted;
   }
 
   private void initInstructionAutoSize() {
@@ -160,11 +182,17 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
       16, 28, 2, TypedValue.COMPLEX_UNIT_SP);
   }
 
+  private void initVoiceInstructions() {
+    // TODO init with aws pool id from launch, default to null
+    instructionPlayer = new NavigationInstructionPlayer(getContext(), null);
+  }
+
   private void initTurnLaneRecyclerView() {
     turnLaneAdapter = new TurnLaneAdapter();
     rvTurnLanes.setAdapter(turnLaneAdapter);
     rvTurnLanes.setHasFixedSize(true);
-    rvTurnLanes.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+    rvTurnLanes.setLayoutManager(new LinearLayoutManager(getContext(),
+      LinearLayoutManager.HORIZONTAL, false));
   }
 
   private void initAnimations() {
