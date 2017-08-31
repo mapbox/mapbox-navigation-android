@@ -64,6 +64,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   protected void onStart() {
     super.onStart();
     mapView.onStart();
+    if (locationLayer != null) {
+      locationLayer.onStop();
+    }
   }
 
   @Override
@@ -88,6 +91,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   protected void onStop() {
     super.onStop();
     mapView.onStop();
+    if (locationLayer != null) {
+      locationLayer.onStop();
+    }
   }
 
 
@@ -95,6 +101,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
+    if (navigation != null) {
+      navigation.onDestroy();
+    }
   }
 
   @Override
