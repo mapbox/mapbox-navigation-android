@@ -184,7 +184,7 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
 
   private void initVoiceInstructions() {
     // TODO init with aws pool id from launch, default to null
-    instructionPlayer = new NavigationInstructionPlayer(getContext(), null);
+    instructionPlayer = new NavigationInstructionPlayer(getContext(), "us-east-1:9f5d6efc-9dd0-4b94-997d-938a1f6cb9cf");
   }
 
   private void initTurnLaneRecyclerView() {

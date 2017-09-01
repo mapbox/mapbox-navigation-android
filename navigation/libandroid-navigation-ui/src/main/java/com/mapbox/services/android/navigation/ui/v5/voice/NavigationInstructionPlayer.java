@@ -33,4 +33,9 @@ public class NavigationInstructionPlayer implements InstructionPlayer {
   public boolean isMuted() {
     return instructionPlayer.isMuted();
   }
+
+  @Override
+  public void onDestroy() {
+    instructionPlayer.onDestroy();
+  }
 }

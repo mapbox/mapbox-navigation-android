@@ -51,6 +51,18 @@ public class PollyPlayer implements InstructionPlayer {
     return isMuted;
   }
 
+  @Override
+  public void onDestroy() {
+    if (pollyMediaPlayer != null) {
+      try {
+        pollyMediaPlayer.stop();
+        pollyMediaPlayer.release();
+      } catch (IllegalStateException exception) {
+        Timber.d(exception);
+      }
+    }
+  }
+
   private void initPollyClient(Context context, String awsPoolId) {
     CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
       context,

@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.ImageButton;
 
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.location.LocationSource;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -38,6 +39,8 @@ import java.util.HashMap;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static com.mapbox.services.android.telemetry.location.LocationEnginePriority.HIGH_ACCURACY;
 
 public class NavigationView extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnScrollListener,
   LocationEngineListener, ProgressChangeListener, OffRouteListener, Callback<DirectionsResponse> {
@@ -297,17 +300,16 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   @SuppressWarnings({"MissingPermission"})
   private void initLocation() {
-    //    locationEngine = new LocationSource(this);
-    //    locationEngine.setPriority(HIGH_ACCURACY);
-    //    locationEngine.setInterval(0);
-    //    locationEngine.setFastestInterval(1000);
-    //    locationEngine.addLocationEngineListener(this);
-    //    locationEngine.activate();
-    //
-    //    if (locationEngine.getLastLocation() != null) {
-    //      onLocationChanged(locationEngine.getLastLocation());
-    //    }
-    onLocationChanged(null);
+    locationEngine = new LocationSource(this);
+    locationEngine.setPriority(HIGH_ACCURACY);
+    locationEngine.setInterval(0);
+    locationEngine.setFastestInterval(1000);
+    locationEngine.addLocationEngineListener(this);
+    locationEngine.activate();
+
+    if (locationEngine.getLastLocation() != null) {
+      onLocationChanged(locationEngine.getLastLocation());
+    }
   }
 
   private void initRoute() {
@@ -375,7 +377,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   @SuppressWarnings({"MissingPermission"})
   private void startNavigation(DirectionsRoute route) {
-    activateMockLocationEngine(route);
+    //    activateMockLocationEngine(route);
     mapRoute.addRoute(route);
     camera.start(route);
     navigation.setLocationEngine(locationEngine);

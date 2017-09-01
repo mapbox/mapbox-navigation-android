@@ -3,8 +3,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
-        <activity android:name=".NavigationView"
-            android:theme="@style/Theme.Design.NoActionBar"/>
+        <activity
+            android:name=".NavigationView"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Design.Light.NoActionBar"/>
     </application>
 
 </manifest>

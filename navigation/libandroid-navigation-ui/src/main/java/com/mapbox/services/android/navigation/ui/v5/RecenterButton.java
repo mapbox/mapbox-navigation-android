@@ -5,14 +5,14 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateInterpolator;
+import android.widget.LinearLayout;
 
-public class RecenterButton extends CardView {
+public class RecenterButton extends LinearLayout {
 
   public RecenterButton(Context context) {
     this(context, null);
@@ -53,6 +53,8 @@ public class RecenterButton extends CardView {
     float initialRadius = (float) Math.hypot(cx, cy);
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
       startHideAnimation(view, motionEvent, initialRadius);
+    } else {
+      setVisibility(INVISIBLE);
     }
   }
 

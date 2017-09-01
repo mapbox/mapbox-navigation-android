@@ -36,6 +36,14 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
   }
 
   @Override
+  public void onDestroy() {
+    if (textToSpeech != null) {
+      textToSpeech.stop();
+      textToSpeech.shutdown();
+    }
+  }
+
+  @Override
   public void onInit(int status) {
     if (status != TextToSpeech.ERROR) {
       textToSpeech.setLanguage(Locale.getDefault());
