@@ -39,8 +39,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NavigationView extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener,
-  ProgressChangeListener, OffRouteListener, Callback<DirectionsResponse> {
+public class NavigationView extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnScrollListener,
+  LocationEngineListener, ProgressChangeListener, OffRouteListener, Callback<DirectionsResponse> {
 
   private MapView mapView;
   private InstructionView instructionView;
@@ -52,6 +52,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private View summaryOptions;
   private View directionsOptionLayout;
   private View sheetShadow;
+  private RecenterButton recenterBtn;
 
   private MapboxMap map;
   private MapboxNavigation navigation;
@@ -134,11 +135,20 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
+    map.setOnScrollListener(this);
     initRoute();
     initCamera();
     initLocationLayer();
     initLocation();
     checkLaunchData(getIntent());
+  }
+
+  @Override
+  public void onScroll() {
+    summaryBehavior.setHideable(true);
+    summaryBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    recenterBtn.setVisibility(View.VISIBLE);
+    camera.setCameraTrackingLocation(false);
   }
 
   @SuppressWarnings({"MissingPermission"})
@@ -192,6 +202,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     summaryDirections = findViewById(R.id.summaryDirections);
     directionsOptionLayout = findViewById(R.id.directionsOptionLayout);
     sheetShadow = findViewById(R.id.sheetShadow);
+    recenterBtn = findViewById(R.id.recenterBtn);
   }
 
   private void initClickListeners() {
@@ -220,6 +231,14 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
         }
       }
     });
+    recenterBtn.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        summaryBehavior.setHideable(false);
+        summaryBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        camera.resetCameraPosition();
+      }
+    });
   }
 
   private void initMap(Bundle savedInstanceState) {
@@ -229,6 +248,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   private void initSummaryBottomSheet() {
     summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
+    summaryBehavior.setHideable(false);
     summaryBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
       @Override

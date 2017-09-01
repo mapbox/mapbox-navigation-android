@@ -97,14 +97,23 @@ public class NavigationCamera implements ProgressChangeListener {
   public void resetCameraPosition() {
     this.trackingEnabled = true;
     if (location != null) {
-      LatLng target = new LatLng(location.getLatitude(), location.getLongitude());
+      Position targetPosition = TurfMeasurement.destination(
+        Position.fromCoordinates(location.getLongitude(), location.getLatitude()),
+        targetDistance, location.getBearing(), TurfConstants.UNIT_METERS
+      );
+
+      LatLng target = new LatLng(
+        targetPosition.getLatitude(),
+        targetPosition.getLongitude()
+      );
+
       CameraPosition cameraPosition = new CameraPosition.Builder()
         .tilt(CAMERA_TILT)
         .zoom(CAMERA_ZOOM)
         .target(target)
         .bearing(location.getBearing())
         .build();
-      mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 750, false);
+      mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 750, true);
     }
   }
 

@@ -3,4 +3,5 @@
     <string name="rerouting">Rerouting…</string>
     <string name="muted">Muted</string>
     <string name="directions">Directions</string>
+    <string name="re_center">Re-Center</string>
 </resources>
