@@ -216,7 +216,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private void launchNavigationWithCoordinates() {
     if (currentPosition != null) {
-      NavigationLauncher.startNavigation(this, currentPosition, destination);
+      NavigationLauncher.startNavigation(this, currentPosition, destination,
+        "us-east-1:9f5d6efc-9dd0-4b94-997d-938a1f6cb9cf", true);
     }
   }
 

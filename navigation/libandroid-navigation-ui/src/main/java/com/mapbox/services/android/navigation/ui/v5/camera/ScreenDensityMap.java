@@ -37,6 +37,10 @@ class ScreenDensityMap extends SparseArray<Double> {
   }
 
   double getTargetDistance(int density) {
-    return get(density);
+    if (get(density) == null) {
+      return 101d;
+    } else {
+      return get(density);
+    }
   }
 }

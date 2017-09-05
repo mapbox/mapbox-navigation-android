@@ -36,6 +36,11 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
   }
 
   @Override
+  public void onOffRoute() {
+    muteTts();
+  }
+
+  @Override
   public void onDestroy() {
     if (textToSpeech != null) {
       textToSpeech.stop();

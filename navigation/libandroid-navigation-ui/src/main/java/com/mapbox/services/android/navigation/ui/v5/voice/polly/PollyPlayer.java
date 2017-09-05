@@ -19,7 +19,7 @@ import timber.log.Timber;
 
 public class PollyPlayer implements InstructionPlayer {
 
-  private static final int STREAM_TYPE = AudioManager.USE_DEFAULT_STREAM_TYPE;
+  private static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
   private static final String DATA_SOURCE_EXCEPTION = "Unable to set data source for the media pollyMediaPlayer! %s";
 
   private AmazonPollyPresigningClient pollyClient;
@@ -52,15 +52,14 @@ public class PollyPlayer implements InstructionPlayer {
   }
 
   @Override
+  public void onOffRoute() {
+    pauseInstruction();
+    clearInstructionUrls();
+  }
+
+  @Override
   public void onDestroy() {
-    if (pollyMediaPlayer != null) {
-      try {
-        pollyMediaPlayer.stop();
-        pollyMediaPlayer.release();
-      } catch (IllegalStateException exception) {
-        Timber.d(exception);
-      }
-    }
+    stopPollyMediaPlayerPlaying();
   }
 
   private void initPollyClient(Context context, String awsPoolId) {
@@ -123,6 +122,16 @@ public class PollyPlayer implements InstructionPlayer {
     setDataSource(instruction);
     pollyMediaPlayer.prepareAsync();
     setListeners();
+  }
+
+  private void pauseInstruction() {
+    try {
+      if (pollyMediaPlayer != null && pollyMediaPlayer.isPlaying()) {
+        pollyMediaPlayer.stop();
+      }
+    } catch (IllegalStateException exception) {
+      Timber.e(exception.getMessage());
+    }
   }
 
   private void setDataSource(String instruction) {

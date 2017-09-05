@@ -94,6 +94,10 @@ public class NavigationCamera implements ProgressChangeListener {
     this.trackingEnabled = trackingEnabled;
   }
 
+  public boolean isTrackingEnabled() {
+    return trackingEnabled;
+  }
+
   public void resetCameraPosition() {
     this.trackingEnabled = true;
     if (location != null) {
