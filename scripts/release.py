@@ -61,7 +61,7 @@ GRADLE_PROPERTIES_PATH = '%s/gradle.properties' % MAPBOX_GL_ANDROID_SDK_PATH
 GRADLE_TOKEN = 'VERSION_NAME='
 
 # Bitrise
-+# Triggers a new build, returns a summary of the build
+# Triggers a new build, returns a summary of the build
 URL_CIRCLECI = 'https://circleci.com/api/v1.1/project/github/mapbox/mapbox-gl-native/tree/'  # + :branch
 
 # We support three parameters: stage, branch, and version
