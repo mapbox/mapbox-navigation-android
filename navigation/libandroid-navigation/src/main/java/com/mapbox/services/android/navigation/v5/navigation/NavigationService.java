@@ -75,7 +75,9 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onDestroy() {
     endNavigation();
-    notificationManager.onDestroy();
+    if (notificationManager != null) {
+      notificationManager.onDestroy();
+    }
     super.onDestroy();
   }
 
