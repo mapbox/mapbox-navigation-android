@@ -191,7 +191,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   private void initRoute() {
-    mapRoute = new NavigationMapRoute(mapView, map);
+    mapRoute = new NavigationMapRoute(mapView, map, NavigationConstants.ROUTE_BELOW_LAYER);
   }
 
   private void initCamera() {

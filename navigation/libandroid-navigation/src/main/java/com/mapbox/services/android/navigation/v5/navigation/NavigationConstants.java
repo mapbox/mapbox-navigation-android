@@ -64,6 +64,7 @@ public class NavigationConstants {
   public static final String NAVIGATION_VIEW_ORIGIN_LNG_KEY = "origin_long";
   public static final String NAVIGATION_VIEW_DESTINATION_LAT_KEY = "destination_lat";
   public static final String NAVIGATION_VIEW_DESTINATION_LNG_KEY = "destination_long";
+  public static final String ROUTE_BELOW_LAYER = "admin-3-4-boundaries-bg";
 
   // Step Maneuver Types
   public static final String STEP_MANEUVER_TYPE_TURN = "turn";
