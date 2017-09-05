@@ -331,9 +331,8 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   private void initVoiceInstructions() {
-    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     instructionPlayer = new NavigationInstructionPlayer(this,
-      sharedPreferences.getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
+      preferences.getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
   }
 
   @SuppressWarnings({"MissingPermission"})

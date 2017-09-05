@@ -43,7 +43,6 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   private RecyclerView rvTurnLanes;
   private TurnLaneAdapter turnLaneAdapter;
 
-  private Animation slideUpTop;
   private Animation slideDownTop;
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
@@ -107,13 +106,6 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     }
   }
 
-  public void hide() {
-    if (this.getVisibility() == VISIBLE) {
-      this.startAnimation(slideUpTop);
-      this.setVisibility(INVISIBLE);
-    }
-  }
-
   public void showRerouteState() {
     showingRerouteState = true;
     rerouteLayout.startAnimation(rerouteSlideDownTop);
@@ -171,7 +163,6 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
 
   private void initAnimations() {
     Context context = getContext();
-    slideUpTop = AnimationUtils.loadAnimation(context, R.anim.slide_up_top);
     slideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
     rerouteSlideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
     rerouteSlideUpTop = AnimationUtils.loadAnimation(context, R.anim.slide_up_top);
