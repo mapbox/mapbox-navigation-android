@@ -11,14 +11,20 @@ import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class NavigationViewActivity extends AppCompatActivity {
+
+  @BindView(R.id.launchBtn)
+  Button launchNavigationBtn;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_navigation_view);
+    ButterKnife.bind(this);
 
-    Button launchNavigationBtn = (Button) findViewById(R.id.launchBtn);
     launchNavigationBtn.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {

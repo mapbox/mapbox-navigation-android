@@ -25,7 +25,6 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLan
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 
-
 public class InstructionView extends RelativeLayout {
 
   private ImageView maneuverImage;
@@ -36,9 +35,7 @@ public class InstructionView extends RelativeLayout {
   private View rerouteLayout;
   private View turnLaneLayout;
   private RecyclerView rvTurnLanes;
-
   private TurnLaneAdapter turnLaneAdapter;
-
   private Animation slideUpTop;
   private Animation slideDownTop;
   private Animation rerouteSlideUpTop;
@@ -46,7 +43,7 @@ public class InstructionView extends RelativeLayout {
   private AnimationSet fadeInSlowOut;
 
   private boolean showingRerouteState;
-  private boolean turnLanesHidden = false;
+  private boolean turnLanesHidden;
 
   public InstructionView(Context context) {
     this(context, null);

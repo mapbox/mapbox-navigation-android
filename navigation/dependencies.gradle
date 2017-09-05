@@ -7,7 +7,7 @@ ext {
   versionCode = 2
   versionName = "0.2.0"
 
-  supportLibVersion = "26.0.0"
+  supportLibVersion = "26.0.2"
   leakCanaryVersion = '1.5.1'
   wearableVersion = '2.0.0'
 

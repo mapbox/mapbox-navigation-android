@@ -157,12 +157,11 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   @Override
   public void onFailure(Call<DirectionsResponse> call, Throwable t) {
-    // TODO Send alertview message
   }
 
   private void bind() {
-    mapView = (MapView) findViewById(R.id.mapView);
-    instructionView = (InstructionView) findViewById(R.id.instructionView);
+    mapView = findViewById(R.id.mapView);
+    instructionView = findViewById(R.id.instructionView);
   }
 
   private void initMap(Bundle savedInstanceState) {

@@ -53,7 +53,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginTop="16dp"
-            android:backgroundTint="@color/mapboxWhite"
+            android:backgroundTint="@android:color/white"
             android:tint="@color/mapboxNavy"
             app:borderWidth="0dp"
             app:fabSize="mini"
