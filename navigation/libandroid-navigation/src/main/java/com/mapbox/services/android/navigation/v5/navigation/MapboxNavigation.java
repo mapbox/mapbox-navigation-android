@@ -245,7 +245,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    * a guaranteed to match this value exactly and is only an estimate.</li>
    * <li>Setting the location engine interval to 0 will result in location updates occurring as
    * quickly as possible within the fastest interval limit placed on it.</li>
-   * </ul></p>
+   * </ul>
    *
    * @param locationEngine a {@link LocationEngine} used for the navigation session
    * @since 0.1.0
