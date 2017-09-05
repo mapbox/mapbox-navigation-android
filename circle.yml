@@ -79,7 +79,6 @@ jobs:
       - image: mbgl/ci@sha256:c34e221294d81da80918d3e9a9df5de795b067e88f86d7c9a5e262763332536e
     working_directory: ~/code
     environment:
-    environment:
       BUILDTYPE: Release
       IS_LOCAL_DEVELOPMENT: false
     steps:
