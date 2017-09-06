@@ -13,7 +13,6 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_gravity="center"
-        android:tint="@color/colorPrimary"
         app:srcCompat="@drawable/lane_straight"/>
 
 </RelativeLayout>

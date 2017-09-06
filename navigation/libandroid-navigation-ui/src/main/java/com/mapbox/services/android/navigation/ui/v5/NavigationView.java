@@ -66,6 +66,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   protected void onStart() {
     super.onStart();
     mapView.onStart();
+    if (locationLayer != null) {
+      locationLayer.onStop();
+    }
   }
 
   @Override
@@ -90,6 +93,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   protected void onStop() {
     super.onStop();
     mapView.onStop();
+    if (locationLayer != null) {
+      locationLayer.onStop();
+    }
   }
 
 
@@ -97,6 +103,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
+    if (navigation != null) {
+      navigation.onDestroy();
+    }
   }
 
   @Override
@@ -148,7 +157,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   @Override
   public void onFailure(Call<DirectionsResponse> call, Throwable t) {
-    // TODO Send alertview message
   }
 
   private void bind() {
@@ -183,7 +191,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   private void initRoute() {
-    mapRoute = new NavigationMapRoute(mapView, map);
+    mapRoute = new NavigationMapRoute(mapView, map, NavigationConstants.ROUTE_BELOW_LAYER);
   }
 
   private void initCamera() {

@@ -2,6 +2,13 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.5.0 - August 30, 2017
+* use followonstep inside routeprogress for instruction - [#188](https://github.com/mapbox/mapbox-navigation-android/pull/188)
+* Persistent notification [#177](https://github.com/mapbox/mapbox-navigation-android/pull/177)
+* Fixes crash occurring ocasionally at end of route - [#175](https://github.com/mapbox/mapbox-navigation-android/pull/175)
+* Cleaned up RouteProgress object to use AutoValue builders - [#164](https://github.com/mapbox/mapbox-navigation-android/pull/164)
+* Run calculations and cleaned up `MapboxNavigation` class - [#151](https://github.com/mapbox/mapbox-navigation-android/pull/151)
+
 ### v0.4.0 - August 1, 2017
 * Add new alert level concept called, milestones [#84](https://github.com/mapbox/mapbox-navigation-android/pull/84)
 * Multiple way point support added [#76](https://github.com/mapbox/mapbox-navigation-android/pull/76)
