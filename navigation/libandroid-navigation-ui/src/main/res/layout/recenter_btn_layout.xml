@@ -14,14 +14,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/ic_navigation"
-        android:tint="@color/mapbox_plugin_navigation_route_default_blue"/>
+        android:tint="?attr/navigationViewAccent"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:textAllCaps="true"
-        android:textColor="@color/mapbox_plugin_navigation_route_default_blue"
+        android:textColor="?attr/navigationViewAccent"
         android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
         android:text="@string/re_center"/>

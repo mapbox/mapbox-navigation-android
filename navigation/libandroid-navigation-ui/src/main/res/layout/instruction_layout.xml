@@ -22,7 +22,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:tint="@color/mapboxNavy"
+        android:tint="?attr/navigationViewSecondary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
@@ -57,7 +57,7 @@
             android:gravity="center_vertical"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textColor="@color/mapboxNavy"
+            android:textColor="?attr/navigationViewSecondary"
             android:textSize="28sp"
             android:textStyle="bold"
             tools:text="Fulton St. test is really long text"/>
@@ -89,7 +89,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:text="@string/rerouting"
-            android:textColor="@android:color/white"
+            android:textColor="?attr/navigationViewPrimary"
             android:textSize="20sp"
             android:textStyle="bold"/>
 

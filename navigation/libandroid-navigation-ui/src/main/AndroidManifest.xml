@@ -6,7 +6,7 @@
         <activity
             android:name=".NavigationView"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Design.Light.NoActionBar"/>
+            android:theme="@style/NavigationView"/>
     </application>
 
 </manifest>
