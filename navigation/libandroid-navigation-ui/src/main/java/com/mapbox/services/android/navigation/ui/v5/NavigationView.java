@@ -28,6 +28,8 @@ import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.models.Position;
 
+import java.util.HashMap;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,13 +49,13 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   private Location location;
   private Position destination;
-  private boolean unpackBundle;
+  private boolean checkLaunchData;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.navigation_view_layout);
-    unpackBundle = savedInstanceState == null;
+    checkLaunchData = savedInstanceState == null;
     bind();
 
     initMap(savedInstanceState);
@@ -115,10 +117,11 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
-    initLocation();
-    initLocationLayer();
     initRoute();
     initCamera();
+    initLocationLayer();
+    initLocation();
+    checkLaunchData(getIntent());
   }
 
   @SuppressWarnings({"MissingPermission"})
@@ -130,10 +133,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onLocationChanged(Location location) {
     this.location = location;
-    if (unpackBundle) {
-      unpackBundle(getIntent());
-      unpackBundle = false;
-    }
+    checkLaunchData(getIntent());
   }
 
   @Override
@@ -202,14 +202,14 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     locationLayer = new LocationLayerPlugin(mapView, map, null);
   }
 
-  private void unpackBundle(Intent intent) {
-    double originLng = intent.getDoubleExtra(NavigationConstants.NAVIGATION_VIEW_ORIGIN_LNG_KEY, 0);
-    double originLat = intent.getDoubleExtra(NavigationConstants.NAVIGATION_VIEW_ORIGIN_LAT_KEY, 0);
-    double destinationLng = intent.getDoubleExtra(NavigationConstants.NAVIGATION_VIEW_DESTINATION_LNG_KEY, 0);
-    double destinationLat = intent.getDoubleExtra(NavigationConstants.NAVIGATION_VIEW_DESTINATION_LAT_KEY, 0);
-    Position origin = Position.fromLngLat(originLng, originLat);
-    destination = Position.fromLngLat(destinationLng, destinationLat);
-    fetchRoute(origin, destination);
+  private void checkLaunchData(Intent intent) {
+    if (checkLaunchData) {
+      if (launchWithRoute(intent)) {
+        startRouteNavigation();
+      } else {
+        startCoordinateNavigation();
+      }
+    }
   }
 
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
@@ -231,13 +231,26 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     }
   }
 
-  private boolean locationHasBearing() {
-    return location != null && location.hasBearing();
+  private boolean launchWithRoute(Intent intent) {
+    return intent.getBooleanExtra(NavigationConstants.NAVIGATION_VIEW_LAUNCH_ROUTE, false);
   }
 
-  private void fetchRouteWithBearing(NavigationRoute.Builder routeBuilder) {
-    routeBuilder.addBearing(location.getBearing(), 90);
-    routeBuilder.build().getRoute(this);
+  private void startRouteNavigation() {
+    DirectionsRoute route = NavigationLauncher.extractRoute(this);
+    if (route != null) {
+      startNavigation(route);
+      checkLaunchData = false;
+    }
+  }
+
+  private void startCoordinateNavigation() {
+    HashMap<String, Position> coordinates = NavigationLauncher.extractCoordinates(this);
+    if (coordinates.size() > 0) {
+      Position origin = coordinates.get(NavigationConstants.NAVIGATION_VIEW_ORIGIN);
+      destination = coordinates.get(NavigationConstants.NAVIGATION_VIEW_DESTINATION);
+      fetchRoute(origin, destination);
+      checkLaunchData = false;
+    }
   }
 
   @SuppressWarnings({"MissingPermission"})
@@ -249,6 +262,15 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     navigation.startNavigation(route);
     locationLayer.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
     instructionView.show();
+  }
+
+  private boolean locationHasBearing() {
+    return location != null && location.hasBearing();
+  }
+
+  private void fetchRouteWithBearing(NavigationRoute.Builder routeBuilder) {
+    routeBuilder.addBearing(location.getBearing(), 90);
+    routeBuilder.build().getRoute(this);
   }
 
   private void activateMockLocationEngine(DirectionsRoute route) {

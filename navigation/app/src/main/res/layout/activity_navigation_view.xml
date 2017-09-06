@@ -6,11 +6,28 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/launchBtn"
+        android:id="@+id/launchCoordinatesBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="32dp"
-        android:text="Launch Navigation"
+        android:text="Launch Navigation with Coordinates"
         android:layout_gravity="center_horizontal"/>
+
+    <Button
+        android:id="@+id/launchRouteBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="32dp"
+        android:enabled="false"
+        android:text="Launch Navigation with Route"
+        android:layout_gravity="center_horizontal"/>
+
+    <ProgressBar
+        android:id="@+id/routeLoading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:indeterminate="true"
+        android:visibility="visible"/>
 
 </LinearLayout>
