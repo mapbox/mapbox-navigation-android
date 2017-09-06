@@ -116,10 +116,17 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     if (bearingMatchesManeuverFinalHeading(location, previousRouteProgress, options.maxTurnCompletionOffset())
       && stepDistanceRemaining < options.maneuverZoneRadius()) {
       indices = increaseIndex(previousRouteProgress, indices);
+      snappedPosition = userSnappedToRoutePosition(
+        location, indices.legIndex(), indices.stepIndex(), directionsRoute);
+      stepDistanceRemaining = stepDistanceRemaining(
+        snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute);
+      legDistanceRemaining = legDistanceRemaining(
+        stepDistanceRemaining, indices.legIndex(), indices.stepIndex(), directionsRoute);
+      routeDistanceRemaining = routeDistanceRemaining(
+        legDistanceRemaining, indices.legIndex(), directionsRoute);
     }
 
     // Create a RouteProgress.create object using the latest user location
-
     return RouteProgress.builder()
       .stepDistanceRemaining(stepDistanceRemaining)
       .legDistanceRemaining(legDistanceRemaining)
