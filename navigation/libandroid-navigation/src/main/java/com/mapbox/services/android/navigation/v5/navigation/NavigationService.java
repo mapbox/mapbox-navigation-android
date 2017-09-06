@@ -75,6 +75,9 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onDestroy() {
     endNavigation();
+    if (notificationManager != null) {
+      notificationManager.onDestroy();
+    }
     super.onDestroy();
   }
 
@@ -95,9 +98,10 @@ public class NavigationService extends Service implements LocationEngineListener
    * builds a new navigation notification instance and attaches it to this service.
    */
   private void initializeNotification() {
-    notificationManager = new NavigationNotification(this);
+    notificationManager = new NavigationNotification(this, mapboxNavigation);
     Notification notifyBuilder
-      = notificationManager.buildPersistentNotification(R.layout.layout_notification_default);
+      = notificationManager.buildPersistentNotification(R.layout.layout_notification_default,
+      R.layout.layout_notification_default_big);
     startForeground(NAVIGATION_NOTIFICATION_ID, notifyBuilder);
   }
 

@@ -178,9 +178,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable t) {
-    // TODO Send message
-  }
+  public void onFailure(Call<DirectionsResponse> call, Throwable t) {}
 
   private void bind() {
     mapView = findViewById(R.id.mapView);
@@ -291,7 +289,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   private void initRoute() {
-    mapRoute = new NavigationMapRoute(mapView, map);
+    mapRoute = new NavigationMapRoute(mapView, map, NavigationConstants.ROUTE_BELOW_LAYER);
   }
 
   private void initCamera() {

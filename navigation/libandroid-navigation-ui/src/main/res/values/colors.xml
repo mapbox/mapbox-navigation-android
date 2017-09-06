@@ -9,10 +9,8 @@
     <color name="colorPrimaryDark">@color/mapboxVoyageBlue</color>
     <color name="colorAccent">@color/mapboxBlue</color>
 
-    <color name="mapboxWhite">#ffffff</color>
     <color name="mapboxBlue">#4264fb</color>
     <color name="mapboxNavy">#28353D</color>
-    <color name="mapboxSearchBackground">#263D57</color>
     <color name="mapboxVoyageBlue">#4882C6</color>
     <color name="mapbox_plugin_navigation_route_default_blue">#4882C6</color>
 

@@ -68,6 +68,7 @@ public class NavigationConstants {
   public static final String NAVIGATION_VIEW_DESTINATION = "destination";
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
   public static final String NAVIGATION_VIEW_LAUNCH_ROUTE = "launch_with_route";
+  public static final String ROUTE_BELOW_LAYER = "admin-3-4-boundaries-bg";
 
   // Step Maneuver Types
   public static final String STEP_MANEUVER_TYPE_TURN = "turn";

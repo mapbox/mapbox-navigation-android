@@ -29,7 +29,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 
-
 public class InstructionView extends RelativeLayout implements ProgressChangeListener,
   MilestoneEventListener, OffRouteListener {
 
@@ -41,9 +40,7 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   private View rerouteLayout;
   private View turnLaneLayout;
   private RecyclerView rvTurnLanes;
-
   private TurnLaneAdapter turnLaneAdapter;
-
   private Animation slideUpTop;
   private Animation slideDownTop;
   private Animation rerouteSlideUpTop;
@@ -51,7 +48,7 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   private AnimationSet fadeInSlowOut;
 
   private boolean showingRerouteState;
-  private boolean turnLanesHidden = false;
+  private boolean turnLanesHidden;
 
   public InstructionView(Context context) {
     this(context, null);
