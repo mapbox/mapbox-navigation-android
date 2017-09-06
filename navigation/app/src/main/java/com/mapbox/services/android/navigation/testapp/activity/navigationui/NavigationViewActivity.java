@@ -18,6 +18,7 @@ import com.mapbox.services.commons.models.Position;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,19 +48,16 @@ public class NavigationViewActivity extends AppCompatActivity implements Callbac
     ButterKnife.bind(this);
 
     fetchRoute();
+  }
 
-    launchCoordinatesBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        launchNavigationWithCoordinates();
-      }
-    });
-    launchRouteBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        launchNavigationWithRoute();
-      }
-    });
+  @OnClick(R.id.launchRouteBtn)
+  public void onRouteLaunchClick() {
+    launchNavigationWithRoute();
+  }
+
+  @OnClick(R.id.launchCoordinatesBtn)
+  public void onCoordinateLaunchClick() {
+    launchNavigationWithCoordinates();
   }
 
   @Override
