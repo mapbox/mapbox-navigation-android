@@ -204,18 +204,14 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     cancelBtn.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        // TODO Finish with cancelled result code
         finish();
       }
     });
     expandArrow.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        if (summaryBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-          summaryBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        } else {
-          summaryBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        }
+        summaryBehavior.setState(summaryBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED
+          ? BottomSheetBehavior.STATE_EXPANDED : BottomSheetBehavior.STATE_COLLAPSED);
       }
     });
   }

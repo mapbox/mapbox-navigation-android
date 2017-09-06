@@ -6,13 +6,12 @@ import java.util.concurrent.TimeUnit;
 
 public class TimeUtils {
 
-  private static final String DURATION_ILLEGAL_ARGUMENT = "Duration must be greater than zero.";
   private static final String ARRIVAL_TIME_STRING_FORMAT = "%tl:%tM %tp%n";
   private static final int STRING_BUILDER_CAPACITY = 64;
   private static final String DAYS = " days ";
   private static final String HOUR = " hr ";
   private static final String MINUTE = " min ";
-  private static final String SECONDS = " seconds";
+  private static final String ONE_MINUTE = "1 Minute";
 
   public static String formatArrivalTime(double routeDuration) {
     Calendar calendar = Calendar.getInstance();
@@ -26,7 +25,7 @@ public class TimeUtils {
     long seconds = (long) routeDuration;
 
     if (seconds < 0) {
-      throw new IllegalArgumentException(DURATION_ILLEGAL_ARGUMENT);
+      throw new IllegalArgumentException("Duration must be greater than zero.");
     }
 
     long days = TimeUnit.SECONDS.toDays(seconds);
@@ -35,7 +34,6 @@ public class TimeUtils {
     seconds -= TimeUnit.HOURS.toSeconds(hours);
     long minutes = TimeUnit.SECONDS.toMinutes(seconds);
     seconds -= TimeUnit.MINUTES.toSeconds(minutes);
-    long sec = TimeUnit.SECONDS.toSeconds(seconds);
 
     if (seconds >= 30) {
       minutes = minutes + 1;
@@ -55,8 +53,7 @@ public class TimeUtils {
       sb.append(MINUTE);
     }
     if (days == 0 && hours == 0 && minutes == 0) {
-      sb.append(sec);
-      sb.append(SECONDS);
+      sb.append(ONE_MINUTE);
     }
 
     return (sb.toString());

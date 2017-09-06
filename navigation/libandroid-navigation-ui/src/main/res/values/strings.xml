@@ -3,5 +3,6 @@
     <string name="rerouting">Rerouting…</string>
     <string name="muted">Muted</string>
     <string name="directions">Directions</string>
-    <string name="navigation_guidance_day_v2">mapbox://styles/mapbox/navigation-guidance-day-v2</string>
+    <string name="navigation_guidance_day_v2"
+            translatable="false">mapbox://styles/mapbox/navigation-guidance-day-v2</string>
 </resources>
