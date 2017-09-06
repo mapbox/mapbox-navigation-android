@@ -38,9 +38,9 @@ class DefaultMilestones {
       })
       .setTrigger(
         Trigger.all(
-          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 15d),
-          Trigger.lte(TriggerProperty.STEP_DISTANCE_REMAINING_METERS, 15d),
-          Trigger.gt(TriggerProperty.NEXT_STEP_DISTANCE_METERS, 15d)
+          Trigger.gt(TriggerProperty.STEP_DURATION_TOTAL_SECONDS, 15d),
+          Trigger.lte(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 15d),
+          Trigger.gt(TriggerProperty.NEXT_STEP_DURATION_SECONDS, 15d)
         )
       )
       .build()
@@ -63,9 +63,9 @@ class DefaultMilestones {
       })
       .setTrigger(
         Trigger.all(
-          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 15d),
-          Trigger.lte(TriggerProperty.STEP_DISTANCE_REMAINING_METERS, 15d),
-          Trigger.lte(TriggerProperty.NEXT_STEP_DISTANCE_METERS, 15d)
+          Trigger.gt(TriggerProperty.STEP_DURATION_TOTAL_SECONDS, 15d),
+          Trigger.lte(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 15d),
+          Trigger.lte(TriggerProperty.NEXT_STEP_DURATION_SECONDS, 15d)
         )
       )
       .build()
@@ -92,9 +92,8 @@ class DefaultMilestones {
       })
       .setTrigger(
         Trigger.all(
-          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 400d),
           Trigger.gt(TriggerProperty.STEP_DURATION_TOTAL_SECONDS, 80d),
-          Trigger.lt(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 70d)
+          Trigger.lte(TriggerProperty.STEP_DURATION_REMAINING_SECONDS, 70d)
         )
       )
       .build()
@@ -117,9 +116,9 @@ class DefaultMilestones {
       })
       .setTrigger(
         Trigger.all(
-          Trigger.neq(TriggerProperty.NEW_STEP, TriggerProperty.FALSE),
-          Trigger.neq(TriggerProperty.FIRST_STEP, TriggerProperty.TRUE),
-          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 100d)
+          Trigger.eq(TriggerProperty.NEW_STEP, TriggerProperty.TRUE),
+          Trigger.eq(TriggerProperty.FIRST_STEP, TriggerProperty.FALSE),
+          Trigger.gt(TriggerProperty.STEP_DURATION_TOTAL_SECONDS, 20d)
         )
       ).build());
 
@@ -147,7 +146,7 @@ class DefaultMilestones {
         Trigger.all(
           Trigger.eq(TriggerProperty.FIRST_STEP, TriggerProperty.TRUE),
           Trigger.eq(TriggerProperty.FIRST_LEG, TriggerProperty.TRUE),
-          Trigger.gt(TriggerProperty.NEXT_STEP_DISTANCE_METERS, 15)
+          Trigger.gt(TriggerProperty.NEXT_STEP_DURATION_SECONDS, 15d)
         )
       ).build());
 
@@ -167,7 +166,7 @@ class DefaultMilestones {
         Trigger.all(
           Trigger.eq(TriggerProperty.FIRST_STEP, TriggerProperty.TRUE),
           Trigger.eq(TriggerProperty.FIRST_LEG, TriggerProperty.TRUE),
-          Trigger.lte(TriggerProperty.NEXT_STEP_DISTANCE_METERS, 15)
+          Trigger.lte(TriggerProperty.NEXT_STEP_DURATION_SECONDS, 15d)
         )
       ).build());
 
@@ -195,6 +194,6 @@ class DefaultMilestones {
   private String getInstructionString(RouteProgress routeProgress) {
     return routeProgress.currentLegProgress().upComingStep() != null
       ? routeProgress.currentLegProgress().upComingStep().getManeuver().getInstruction() :
-      routeProgress.currentLegProgress().currentStep().getManeuver().getInstruction();
+      "Arrived at your destination";
   }
 }
