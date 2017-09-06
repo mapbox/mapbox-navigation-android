@@ -14,6 +14,10 @@ import android.view.View;
 import android.widget.ImageButton;
 
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Icon;
+import com.mapbox.mapboxsdk.annotations.IconFactory;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationSource;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -38,6 +42,8 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.api.directions.v5.models.LegStep;
+import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.commons.models.Position;
 
 import java.util.HashMap;
@@ -405,6 +411,10 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private void startRouteNavigation() {
     DirectionsRoute route = NavigationLauncher.extractRoute(this);
     if (route != null) {
+      RouteLeg lastLeg = route.getLegs().get(route.getLegs().size() - 1);
+      LegStep lastStep = lastLeg.getSteps().get(lastLeg.getSteps().size() - 1);
+      destination = lastStep.getManeuver().asPosition();
+      addDestinationMarker(destination);
       startNavigation(route);
       checkLaunchData = false;
     }
@@ -415,6 +425,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     if (coordinates.size() > 0) {
       Position origin = coordinates.get(NavigationConstants.NAVIGATION_VIEW_ORIGIN);
       destination = coordinates.get(NavigationConstants.NAVIGATION_VIEW_DESTINATION);
+      addDestinationMarker(destination);
       fetchRoute(origin, destination);
       checkLaunchData = false;
     }
@@ -437,6 +448,16 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private void updateNavigation(DirectionsRoute route) {
     mapRoute.addRoute(route);
     navigation.startNavigation(route);
+  }
+
+  private void addDestinationMarker(Position destination) {
+    IconFactory iconFactory = IconFactory.getInstance(this);
+    Icon icon = iconFactory.fromResource(R.drawable.map_marker);
+    LatLng markerPosition = new LatLng(destination.getLatitude(),
+      destination.getLongitude());
+    map.addMarker(new MarkerOptions()
+      .position(markerPosition)
+      .icon(icon));
   }
 
   private boolean locationHasBearing() {
