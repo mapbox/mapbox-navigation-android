@@ -9,6 +9,9 @@
     <color name="mapbox_navigation_view_color_secondary">#28353D</color>
     <color name="mapbox_navigation_view_color_accent">#4882C6</color>
 
+    <color name="mapbox_navigation_feedback_red">#EC7521</color>
+    <color name="mapbox_navigation_feedback_orange">#FAA826</color>
+
     <color name="mapboxNavy">#28353D</color>
     <color name="mapboxSearchBackground">#263D57</color>
     <color name="mapboxVoyageBlue">#4882C6</color>
