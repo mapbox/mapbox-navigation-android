@@ -118,7 +118,6 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
-
   @Override
   protected void onDestroy() {
     super.onDestroy();
