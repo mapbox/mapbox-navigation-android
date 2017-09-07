@@ -47,7 +47,6 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   private View turnLaneLayout;
   private RecyclerView rvTurnLanes;
   private TurnLaneAdapter turnLaneAdapter;
-
   private Animation slideUpTop;
   private Animation slideDownTop;
   private Animation rerouteSlideUpTop;

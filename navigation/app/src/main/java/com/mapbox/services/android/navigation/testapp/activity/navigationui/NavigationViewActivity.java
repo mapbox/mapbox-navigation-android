@@ -16,6 +16,9 @@ import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.models.Position;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -23,8 +26,10 @@ import timber.log.Timber;
 
 public class NavigationViewActivity extends AppCompatActivity implements Callback<DirectionsResponse> {
 
-  private Button launchRouteBtn;
-  private ProgressBar routeLoading;
+  @BindView(R.id.launchRouteBtn)
+  Button launchRouteBtn;
+  @BindView(R.id.routeLoading)
+  ProgressBar routeLoading;
 
   // Washington, D.C.
   private Position origin = Position.fromCoordinates(-77.009003, 38.889931);
@@ -38,24 +43,19 @@ public class NavigationViewActivity extends AppCompatActivity implements Callbac
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_navigation_view);
+    ButterKnife.bind(this);
+
     fetchRoute();
+  }
 
-    routeLoading = findViewById(R.id.routeLoading);
-    Button launchCoordinatesBtn = findViewById(R.id.launchCoordinatesBtn);
-    launchCoordinatesBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        launchNavigationWithCoordinates();
-      }
-    });
+  @OnClick(R.id.launchRouteBtn)
+  public void onRouteLaunchClick() {
+    launchNavigationWithRoute();
+  }
 
-    launchRouteBtn = findViewById(R.id.launchRouteBtn);
-    launchRouteBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        launchNavigationWithRoute();
-      }
-    });
+  @OnClick(R.id.launchCoordinatesBtn)
+  public void onCoordinateLaunchClick() {
+    launchNavigationWithCoordinates();
   }
 
   @Override

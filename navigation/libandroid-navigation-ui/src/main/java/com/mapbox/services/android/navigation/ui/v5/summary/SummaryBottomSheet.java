@@ -109,11 +109,7 @@ public class SummaryBottomSheet extends FrameLayout implements ProgressChangeLis
       @Override
       public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);
-        if (rvDirections.canScrollVertically(SCROLL_DIRECTION_UP)) {
-          rvShadow.setVisibility(VISIBLE);
-        } else {
-          rvShadow.setVisibility(INVISIBLE);
-        }
+        rvShadow.setVisibility(rvDirections.canScrollVertically(SCROLL_DIRECTION_UP) ? View.VISIBLE : View.INVISIBLE);
       }
     });
   }

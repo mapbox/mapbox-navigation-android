@@ -178,9 +178,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable t) {
-    // TODO Send message
-  }
+  public void onFailure(Call<DirectionsResponse> call, Throwable t) {}
 
   private void bind() {
     mapView = findViewById(R.id.mapView);
@@ -206,18 +204,14 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     cancelBtn.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        // TODO Finish with cancelled result code
         finish();
       }
     });
     expandArrow.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        if (summaryBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-          summaryBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        } else {
-          summaryBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        }
+        summaryBehavior.setState(summaryBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED
+          ? BottomSheetBehavior.STATE_EXPANDED : BottomSheetBehavior.STATE_COLLAPSED);
       }
     });
   }
@@ -291,7 +285,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   private void initRoute() {
-    mapRoute = new NavigationMapRoute(mapView, map);
+    mapRoute = new NavigationMapRoute(mapView, map, NavigationConstants.ROUTE_BELOW_LAYER);
   }
 
   private void initCamera() {
