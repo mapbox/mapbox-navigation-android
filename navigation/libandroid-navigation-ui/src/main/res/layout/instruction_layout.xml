@@ -43,7 +43,7 @@
         app:layout_constraintVertical_bias="0.0">
 
         <TextView
-            android:id="@+id/distanceText"
+            android:id="@+id/stepDistanceText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/md_grey_800"
@@ -51,7 +51,7 @@
             tools:text="3.2 miles"/>
 
         <TextView
-            android:id="@+id/instructionText"
+            android:id="@+id/stepInstructionText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"

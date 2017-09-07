@@ -28,8 +28,6 @@ public class NavigationViewActivity extends AppCompatActivity implements Callbac
 
   @BindView(R.id.launchRouteBtn)
   Button launchRouteBtn;
-  @BindView(R.id.launchCoordinatesBtn)
-  Button launchCoordinatesBtn;
   @BindView(R.id.routeLoading)
   ProgressBar routeLoading;
 
