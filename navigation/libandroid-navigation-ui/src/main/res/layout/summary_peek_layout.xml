@@ -10,7 +10,7 @@
     <ProgressBar
         android:id="@+id/rerouteProgressBar"
         style="@style/Widget.AppCompat.ProgressBar"
-        android:indeterminateTint="@color/mapbox_plugin_navigation_route_default_blue"
+        android:indeterminateTint="?attr/navigationViewAccent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:indeterminate="true"

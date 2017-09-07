@@ -14,13 +14,14 @@
         android:gravity="center_vertical"
         android:clickable="true"
         android:focusable="true"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="?attr/navigationViewPrimary"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
         android:orientation="horizontal">
 
         <ImageView
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:tint="@color/md_grey_700"
+            android:tint="@color/md_grey_800"
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             app:srcCompat="@drawable/ic_list"/>
@@ -28,7 +29,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/md_grey_700"
+            android:textColor="@color/md_grey_800"
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             android:text="@string/directions"

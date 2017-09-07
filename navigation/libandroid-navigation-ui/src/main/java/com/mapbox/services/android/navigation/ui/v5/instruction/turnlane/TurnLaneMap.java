@@ -18,11 +18,11 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_STRAIGHT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_UTURN;
 
-public class TurnLaneMap {
+class TurnLaneMap {
 
   private Map<String, Integer> turnLaneMap;
 
-  public TurnLaneMap() {
+  TurnLaneMap() {
     turnLaneMap = new HashMap<>();
 
     // Left

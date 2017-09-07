@@ -7,4 +7,8 @@ public interface InstructionPlayer {
   void setMuted(boolean isMuted);
 
   boolean isMuted();
+
+  void onOffRoute();
+
+  void onDestroy();
 }

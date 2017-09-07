@@ -12,7 +12,7 @@
         android:id="@+id/timeRemainingText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/mapboxNavy"
+        android:textColor="?attr/navigationViewSecondary"
         android:includeFontPadding="false"
         android:textSize="26sp"
         android:textStyle="bold"

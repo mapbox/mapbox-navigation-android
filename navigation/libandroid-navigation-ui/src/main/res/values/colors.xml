@@ -5,13 +5,10 @@
     <color name="mapbox_navigation_route_layer_congestion_red">#E85552</color>
     <color name="mapbox_navigation_route_shield_layer_color">#2C5F99</color>
 
-    <color name="colorPrimary">@color/mapboxNavy</color>
-    <color name="colorPrimaryDark">@color/mapboxVoyageBlue</color>
-    <color name="colorAccent">@color/mapboxBlue</color>
+    <color name="mapbox_navigation_view_color_primary">#FFFFFF</color>
+    <color name="mapbox_navigation_view_color_secondary">#28353D</color>
+    <color name="mapbox_navigation_view_color_accent">#4882C6</color>
 
-    <color name="mapboxBlue">#4264fb</color>
-    <color name="mapboxNavy">#28353D</color>
-    <color name="mapboxVoyageBlue">#4882C6</color>
     <color name="mapbox_plugin_navigation_route_default_blue">#4882C6</color>
 
     <!--grey-->

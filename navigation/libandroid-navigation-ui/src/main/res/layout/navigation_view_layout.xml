@@ -12,12 +12,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:mapbox_styleUrl="@string/navigation_guidance_day_v2"
-        app:mapbox_uiCompass="false"/>
+        app:mapbox_uiCompass="false"
+        app:mapbox_uiAttribution="false"
+        app:mapbox_uiLogo="false"/>
 
     <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView
         android:id="@+id/instructionView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="invisible"/>
+
+    <com.mapbox.services.android.navigation.ui.v5.RecenterButton
+        android:id="@+id/recenterBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
         android:visibility="invisible"/>
 
     <com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet

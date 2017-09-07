@@ -19,7 +19,7 @@ import timber.log.Timber;
 
 public class PollyPlayer implements InstructionPlayer {
 
-  private static final int STREAM_TYPE = AudioManager.USE_DEFAULT_STREAM_TYPE;
+  private static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
 
   private AmazonPollyPresigningClient pollyClient;
   private AudioManager pollyAudioManager;
@@ -48,6 +48,17 @@ public class PollyPlayer implements InstructionPlayer {
   @Override
   public boolean isMuted() {
     return isMuted;
+  }
+
+  @Override
+  public void onOffRoute() {
+    pauseInstruction();
+    clearInstructionUrls();
+  }
+
+  @Override
+  public void onDestroy() {
+    stopPollyMediaPlayerPlaying();
   }
 
   private void initPollyClient(Context context, String awsPoolId) {
@@ -110,6 +121,16 @@ public class PollyPlayer implements InstructionPlayer {
     setDataSource(instruction);
     pollyMediaPlayer.prepareAsync();
     setListeners();
+  }
+
+  private void pauseInstruction() {
+    try {
+      if (pollyMediaPlayer != null && pollyMediaPlayer.isPlaying()) {
+        pollyMediaPlayer.stop();
+      }
+    } catch (IllegalStateException exception) {
+      Timber.e(exception.getMessage());
+    }
   }
 
   private void setDataSource(String instruction) {

@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.mapbox.services.android.navigation.ui.v5.voice.polly.PollyPlayer;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
 public class NavigationInstructionPlayer implements InstructionPlayer {
 
@@ -32,5 +33,16 @@ public class NavigationInstructionPlayer implements InstructionPlayer {
   @Override
   public boolean isMuted() {
     return instructionPlayer.isMuted();
+  }
+
+  @Override
+  public void onOffRoute() {
+    instructionPlayer.onOffRoute();
+    play(NavigationConstants.NAVIGATION_VIEW_REROUTING);
+  }
+
+  @Override
+  public void onDestroy() {
+    instructionPlayer.onDestroy();
   }
 }

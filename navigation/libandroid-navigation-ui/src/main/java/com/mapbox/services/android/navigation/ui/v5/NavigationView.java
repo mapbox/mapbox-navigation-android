@@ -1,16 +1,23 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
 
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Icon;
+import com.mapbox.mapboxsdk.annotations.IconFactory;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -21,6 +28,9 @@ import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
+import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
+import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
@@ -31,6 +41,8 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.api.directions.v5.models.LegStep;
+import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.commons.models.Position;
 
 import java.util.HashMap;
@@ -39,8 +51,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NavigationView extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener,
-  ProgressChangeListener, OffRouteListener, Callback<DirectionsResponse> {
+public class NavigationView extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnScrollListener,
+  LocationEngineListener, ProgressChangeListener, OffRouteListener,
+  MilestoneEventListener, Callback<DirectionsResponse> {
 
   private MapView mapView;
   private InstructionView instructionView;
@@ -52,13 +65,17 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private View summaryOptions;
   private View directionsOptionLayout;
   private View sheetShadow;
+  private RecenterButton recenterBtn;
+  private FloatingActionButton soundFab;
 
   private MapboxMap map;
   private MapboxNavigation navigation;
+  private InstructionPlayer instructionPlayer;
   private NavigationMapRoute mapRoute;
   private NavigationCamera camera;
   private LocationEngine locationEngine;
   private LocationLayerPlugin locationLayer;
+  private SharedPreferences preferences;
 
   private Location location;
   private Position destination;
@@ -72,10 +89,12 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     checkLaunchData = savedInstanceState == null;
     bind();
     initClickListeners();
+    preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
     initMap(savedInstanceState);
     initSummaryBottomSheet();
     initNavigation();
+    initVoiceInstructions();
   }
 
   @SuppressWarnings({"MissingPermission"})
@@ -123,6 +142,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     if (navigation != null) {
       navigation.onDestroy();
     }
+    if (instructionPlayer != null) {
+      instructionPlayer.onDestroy();
+    }
   }
 
   @Override
@@ -134,11 +156,19 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
+    map.setOnScrollListener(this);
     initRoute();
     initCamera();
     initLocationLayer();
     initLocation();
     checkLaunchData(getIntent());
+  }
+
+  @Override
+  public void onScroll() {
+    summaryBehavior.setHideable(true);
+    summaryBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    camera.setCameraTrackingLocation(false);
   }
 
   @SuppressWarnings({"MissingPermission"})
@@ -162,6 +192,11 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   public void userOffRoute(Location location) {
     Position newOrigin = Position.fromLngLat(location.getLongitude(), location.getLatitude());
     fetchRoute(newOrigin, destination);
+  }
+
+  @Override
+  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
+    instructionPlayer.play(instruction);
   }
 
   @Override
@@ -190,6 +225,8 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     summaryDirections = findViewById(R.id.summaryDirections);
     directionsOptionLayout = findViewById(R.id.directionsOptionLayout);
     sheetShadow = findViewById(R.id.sheetShadow);
+    recenterBtn = findViewById(R.id.recenterBtn);
+    soundFab = findViewById(R.id.soundFab);
   }
 
   private void initClickListeners() {
@@ -214,6 +251,21 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
           ? BottomSheetBehavior.STATE_EXPANDED : BottomSheetBehavior.STATE_COLLAPSED);
       }
     });
+    recenterBtn.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        summaryBehavior.setHideable(false);
+        summaryBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        camera.resetCameraPosition();
+        recenterBtn.hide();
+      }
+    });
+    soundFab.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        instructionPlayer.setMuted(instructionView.toggleMute());
+      }
+    });
   }
 
   private void initMap(Bundle savedInstanceState) {
@@ -223,6 +275,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   private void initSummaryBottomSheet() {
     summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
+    summaryBehavior.setHideable(false);
     summaryBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
       @Override
@@ -238,6 +291,11 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
             cancelBtn.setClickable(true);
             summaryOptions.setVisibility(View.VISIBLE);
             summaryDirections.setVisibility(View.GONE);
+            break;
+          case BottomSheetBehavior.STATE_HIDDEN:
+            if (!camera.isTrackingEnabled()) {
+              recenterBtn.show();
+            }
             break;
           default:
             break;
@@ -263,25 +321,30 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     navigation.addProgressChangeListener(this);
     navigation.addProgressChangeListener(instructionView);
     navigation.addProgressChangeListener(summaryBottomSheet);
-    navigation.addMilestoneEventListener(instructionView);
+    navigation.addMilestoneEventListener(this);
     navigation.addOffRouteListener(this);
     navigation.addOffRouteListener(summaryBottomSheet);
     navigation.addOffRouteListener(instructionView);
   }
 
+  private void initVoiceInstructions() {
+    instructionPlayer = new NavigationInstructionPlayer(this,
+      preferences.getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
+  }
+
   @SuppressWarnings({"MissingPermission"})
   private void initLocation() {
-    //    locationEngine = new LocationSource(this);
-    //    locationEngine.setPriority(HIGH_ACCURACY);
-    //    locationEngine.setInterval(0);
-    //    locationEngine.setFastestInterval(1000);
-    //    locationEngine.addLocationEngineListener(this);
-    //    locationEngine.activate();
-    //
-    //    if (locationEngine.getLastLocation() != null) {
-    //      onLocationChanged(locationEngine.getLastLocation());
-    //    }
-    onLocationChanged(null);
+    if (!shouldSimulateRoute()) {
+      locationEngine = navigation.getLocationEngine();
+      locationEngine.addLocationEngineListener(this);
+      locationEngine.activate();
+
+      if (locationEngine.getLastLocation() != null) {
+        onLocationChanged(locationEngine.getLastLocation());
+      }
+    } else {
+      onLocationChanged(null);
+    }
   }
 
   private void initRoute() {
@@ -329,9 +392,17 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     return intent.getBooleanExtra(NavigationConstants.NAVIGATION_VIEW_LAUNCH_ROUTE, false);
   }
 
+  private boolean shouldSimulateRoute() {
+    return preferences.getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false);
+  }
+
   private void startRouteNavigation() {
     DirectionsRoute route = NavigationLauncher.extractRoute(this);
     if (route != null) {
+      RouteLeg lastLeg = route.getLegs().get(route.getLegs().size() - 1);
+      LegStep lastStep = lastLeg.getSteps().get(lastLeg.getSteps().size() - 1);
+      destination = lastStep.getManeuver().asPosition();
+      addDestinationMarker(destination);
       startNavigation(route);
       checkLaunchData = false;
     }
@@ -342,6 +413,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     if (coordinates.size() > 0) {
       Position origin = coordinates.get(NavigationConstants.NAVIGATION_VIEW_ORIGIN);
       destination = coordinates.get(NavigationConstants.NAVIGATION_VIEW_DESTINATION);
+      addDestinationMarker(destination);
       fetchRoute(origin, destination);
       checkLaunchData = false;
     }
@@ -349,7 +421,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   @SuppressWarnings({"MissingPermission"})
   private void startNavigation(DirectionsRoute route) {
-    activateMockLocationEngine(route);
+    if (shouldSimulateRoute()) {
+      activateMockLocationEngine(route);
+    }
     mapRoute.addRoute(route);
     camera.start(route);
     navigation.setLocationEngine(locationEngine);
@@ -362,6 +436,16 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private void updateNavigation(DirectionsRoute route) {
     mapRoute.addRoute(route);
     navigation.startNavigation(route);
+  }
+
+  private void addDestinationMarker(Position destination) {
+    IconFactory iconFactory = IconFactory.getInstance(this);
+    Icon icon = iconFactory.fromResource(R.drawable.map_marker);
+    LatLng markerPosition = new LatLng(destination.getLatitude(),
+      destination.getLongitude());
+    map.addMarker(new MarkerOptions()
+      .position(markerPosition)
+      .icon(icon));
   }
 
   private boolean locationHasBearing() {

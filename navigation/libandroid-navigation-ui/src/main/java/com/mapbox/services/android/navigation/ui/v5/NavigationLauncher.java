@@ -16,10 +16,14 @@ import java.util.HashMap;
 
 public class NavigationLauncher {
 
-  public static void startNavigation(Activity activity, DirectionsRoute route) {
+  public static void startNavigation(Activity activity, DirectionsRoute route,
+                                     String awsPoolId, boolean simulateRoute) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
     SharedPreferences.Editor editor = preferences.edit();
     editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, new Gson().toJson(route));
+
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, awsPoolId);
+    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, simulateRoute);
     editor.apply();
 
     Intent navigationView = new Intent(activity, NavigationView.class);
@@ -29,9 +33,11 @@ public class NavigationLauncher {
     activity.startActivity(navigationView);
   }
 
-  public static void startNavigation(Activity activity, Position origin, Position destination) {
+  public static void startNavigation(Activity activity, Position origin, Position destination,
+                                     String awsPoolId, boolean simulateRoute) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
     SharedPreferences.Editor editor = preferences.edit();
+
     editor.putLong(NavigationConstants.NAVIGATION_VIEW_ORIGIN_LAT_KEY,
       Double.doubleToRawLongBits(origin.getLatitude()));
     editor.putLong(NavigationConstants.NAVIGATION_VIEW_ORIGIN_LNG_KEY,
@@ -40,6 +46,9 @@ public class NavigationLauncher {
       Double.doubleToRawLongBits(destination.getLatitude()));
     editor.putLong(NavigationConstants.NAVIGATION_VIEW_DESTINATION_LNG_KEY,
       Double.doubleToRawLongBits(destination.getLongitude()));
+
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, awsPoolId);
+    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, simulateRoute);
     editor.apply();
 
     Intent navigationView = new Intent(activity, NavigationView.class);

@@ -25,6 +25,9 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
   @Override
   public void setMuted(boolean isMuted) {
     this.isMuted = isMuted;
+    if (isMuted) {
+      muteTts();
+    }
   }
 
   @Override
@@ -33,9 +36,28 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
   }
 
   @Override
+  public void onOffRoute() {
+    muteTts();
+  }
+
+  @Override
+  public void onDestroy() {
+    if (textToSpeech != null) {
+      textToSpeech.stop();
+      textToSpeech.shutdown();
+    }
+  }
+
+  @Override
   public void onInit(int status) {
     if (status != TextToSpeech.ERROR) {
       textToSpeech.setLanguage(Locale.getDefault());
+    }
+  }
+
+  private void muteTts() {
+    if (textToSpeech.isSpeaking()) {
+      textToSpeech.stop();
     }
   }
 }

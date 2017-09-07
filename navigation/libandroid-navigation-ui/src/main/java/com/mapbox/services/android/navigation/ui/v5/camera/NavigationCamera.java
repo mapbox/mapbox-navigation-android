@@ -47,18 +47,7 @@ public class NavigationCamera implements ProgressChangeListener {
   public void start(DirectionsRoute route) {
     if (route != null) {
       CameraPosition cameraPosition = buildCameraPositionFromRoute(route);
-      mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000,
-        new MapboxMap.CancelableCallback() {
-          @Override
-          public void onCancel() {
-
-          }
-
-          @Override
-          public void onFinish() {
-            navigation.addProgressChangeListener(NavigationCamera.this);
-          }
-        });
+      animateCameraToPosition(cameraPosition);
     } else {
       navigation.addProgressChangeListener(NavigationCamera.this);
     }
@@ -67,18 +56,7 @@ public class NavigationCamera implements ProgressChangeListener {
   public void resume(Location location) {
     if (location != null) {
       CameraPosition position = buildCameraPositionFromLocation(location);
-      mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000,
-        new MapboxMap.CancelableCallback() {
-          @Override
-          public void onCancel() {
-
-          }
-
-          @Override
-          public void onFinish() {
-            navigation.addProgressChangeListener(NavigationCamera.this);
-          }
-        });
+      animateCameraToPosition(position);
     } else {
       navigation.addProgressChangeListener(NavigationCamera.this);
     }
@@ -94,18 +72,46 @@ public class NavigationCamera implements ProgressChangeListener {
     this.trackingEnabled = trackingEnabled;
   }
 
+  public boolean isTrackingEnabled() {
+    return trackingEnabled;
+  }
+
   public void resetCameraPosition() {
     this.trackingEnabled = true;
     if (location != null) {
-      LatLng target = new LatLng(location.getLatitude(), location.getLongitude());
+      Position targetPosition = TurfMeasurement.destination(
+        Position.fromCoordinates(location.getLongitude(), location.getLatitude()),
+        targetDistance, location.getBearing(), TurfConstants.UNIT_METERS
+      );
+
+      LatLng target = new LatLng(
+        targetPosition.getLatitude(),
+        targetPosition.getLongitude()
+      );
+
       CameraPosition cameraPosition = new CameraPosition.Builder()
         .tilt(CAMERA_TILT)
         .zoom(CAMERA_ZOOM)
         .target(target)
         .bearing(location.getBearing())
         .build();
-      mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 750, false);
+      mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 750, true);
     }
+  }
+
+  private void animateCameraToPosition(CameraPosition position) {
+    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000,
+      new MapboxMap.CancelableCallback() {
+        @Override
+        public void onCancel() {
+          navigation.addProgressChangeListener(NavigationCamera.this);
+        }
+
+        @Override
+        public void onFinish() {
+          navigation.addProgressChangeListener(NavigationCamera.this);
+        }
+      });
   }
 
   private void easeCameraToLocation(Location location) {

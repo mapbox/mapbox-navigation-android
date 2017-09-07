@@ -23,17 +23,12 @@ import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
-import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
-import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 
-public class InstructionView extends RelativeLayout implements ProgressChangeListener,
-  MilestoneEventListener, OffRouteListener {
-
-  private NavigationInstructionPlayer instructionPlayer;
+public class InstructionView extends RelativeLayout implements ProgressChangeListener, OffRouteListener {
 
   private ImageView maneuverImage;
   private TextView stepDistanceText;
@@ -44,15 +39,15 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   private View turnLaneLayout;
   private RecyclerView rvTurnLanes;
   private TurnLaneAdapter turnLaneAdapter;
-  private Animation slideUpTop;
+
   private Animation slideDownTop;
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
   private AnimationSet fadeInSlowOut;
 
   private boolean showingRerouteState;
-  private boolean isMuted;
   private boolean turnLanesHidden;
+  public boolean isMuted;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -71,14 +66,8 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   protected void onFinishInflate() {
     super.onFinishInflate();
     bind();
-    initVoiceInstructions();
     initTurnLaneRecyclerView();
     initAnimations();
-  }
-
-  @Override
-  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
-    instructionPlayer.play(instruction);
   }
 
   @Override
@@ -114,13 +103,6 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     }
   }
 
-  public void hide() {
-    if (this.getVisibility() == VISIBLE) {
-      this.startAnimation(slideUpTop);
-      this.setVisibility(INVISIBLE);
-    }
-  }
-
   public void showRerouteState() {
     showingRerouteState = true;
     rerouteLayout.startAnimation(rerouteSlideDownTop);
@@ -145,16 +127,6 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
     initInstructionAutoSize();
-    addListeners();
-  }
-
-  private void addListeners() {
-    soundFab.setOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        instructionPlayer.setMuted(isMuted ? unmute() : mute());
-      }
-    });
   }
 
   private boolean mute() {
@@ -178,10 +150,6 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
       16, 28, 2, TypedValue.COMPLEX_UNIT_SP);
   }
 
-  private void initVoiceInstructions() {
-    instructionPlayer = new NavigationInstructionPlayer(getContext(), null);
-  }
-
   private void initTurnLaneRecyclerView() {
     turnLaneAdapter = new TurnLaneAdapter();
     rvTurnLanes.setAdapter(turnLaneAdapter);
@@ -192,7 +160,6 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
 
   private void initAnimations() {
     Context context = getContext();
-    slideUpTop = AnimationUtils.loadAnimation(context, R.anim.slide_up_top);
     slideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
     rerouteSlideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
     rerouteSlideUpTop = AnimationUtils.loadAnimation(context, R.anim.slide_up_top);
@@ -243,5 +210,9 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
       turnLanesHidden = true;
       turnLaneLayout.setVisibility(GONE);
     }
+  }
+
+  public boolean toggleMute() {
+    return isMuted ? unmute() : mute();
   }
 }
