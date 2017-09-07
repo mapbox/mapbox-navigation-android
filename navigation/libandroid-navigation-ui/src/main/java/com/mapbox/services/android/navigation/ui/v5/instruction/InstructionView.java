@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
+import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -31,6 +32,8 @@ import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbrev
 
 public class InstructionView extends RelativeLayout implements ProgressChangeListener,
   MilestoneEventListener, OffRouteListener {
+
+  private NavigationInstructionPlayer instructionPlayer;
 
   private ImageView maneuverImage;
   private TextView stepDistanceText;
@@ -48,6 +51,7 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   private AnimationSet fadeInSlowOut;
 
   private boolean showingRerouteState;
+  private boolean isMuted;
   private boolean turnLanesHidden;
 
   public InstructionView(Context context) {
@@ -67,13 +71,14 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   protected void onFinishInflate() {
     super.onFinishInflate();
     bind();
+    initVoiceInstructions();
     initTurnLaneRecyclerView();
     initAnimations();
   }
 
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
-    // TODO Instructions stuff
+    instructionPlayer.play(instruction);
   }
 
   @Override
@@ -147,9 +152,25 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     soundFab.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
-        // TODO Polly stuff
+        instructionPlayer.setMuted(isMuted ? unmute() : mute());
       }
     });
+  }
+
+  private boolean mute() {
+    isMuted = true;
+    setSoundChipText(getContext().getString(R.string.muted));
+    showSoundChip();
+    soundFabOff();
+    return isMuted;
+  }
+
+  private boolean unmute() {
+    isMuted = false;
+    setSoundChipText(getContext().getString(R.string.unmuted));
+    showSoundChip();
+    soundFabOn();
+    return isMuted;
   }
 
   private void initInstructionAutoSize() {
@@ -157,11 +178,16 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
       16, 28, 2, TypedValue.COMPLEX_UNIT_SP);
   }
 
+  private void initVoiceInstructions() {
+    instructionPlayer = new NavigationInstructionPlayer(getContext(), null);
+  }
+
   private void initTurnLaneRecyclerView() {
     turnLaneAdapter = new TurnLaneAdapter();
     rvTurnLanes.setAdapter(turnLaneAdapter);
     rvTurnLanes.setHasFixedSize(true);
-    rvTurnLanes.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+    rvTurnLanes.setLayoutManager(new LinearLayoutManager(getContext(),
+      LinearLayoutManager.HORIZONTAL, false));
   }
 
   private void initAnimations() {
