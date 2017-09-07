@@ -15,6 +15,7 @@
         android:clickable="true"
         android:focusable="true"
         android:background="?attr/navigationViewPrimary"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
         android:orientation="horizontal">
 
         <ImageView

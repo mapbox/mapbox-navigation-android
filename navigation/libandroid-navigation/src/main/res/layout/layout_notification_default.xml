@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,54 +6,59 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#4882C6"
-    android:orientation="vertical">
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/maneuverSignal"
+        android:layout_width="64dp"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/ic_maneuver_arrive"
+        android:tint="#ffffff"/>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp">
-
-        <ImageView
-            android:id="@+id/imagenotileft"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_margin="16dp"
-            android:contentDescription="@string/app_name"
-            android:src="@drawable/ic_maneuver_starting"
-            android:tint="#ffffff"/>
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingBottom="8dp"
+        android:paddingEnd="8dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingStart="8dp"
+        android:paddingTop="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="16dp"
-            android:layout_marginStart="16dp"
-            android:gravity="center_vertical"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/notificationStepDistanceTextView"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="250 ft"
-                android:textColor="#ffffff"/>
+                android:lines="1"
+                android:textColor="#ffffff"
+                android:textSize="16sp"
+                tools:text="250 ft - "/>
 
             <TextView
                 android:id="@+id/notificationStreetNameTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="Sherman Ave NW"
+                android:lines="1"
                 android:textColor="#ffffff"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:text="11:13 AM ETA"
-                android:textColor="#ffffff"
-                android:textSize="12sp"/>
+                android:textSize="16sp"
+                tools:text="Sherman Ave NW"/>
         </LinearLayout>
-    </LinearLayout>
 
+        <TextView
+            android:id="@+id/estimatedArrivalTimeTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lines="1"
+            android:textColor="#ffffff"
+            android:textSize="14sp"
+            tools:text="11:13 AM ETA"/>
+    </LinearLayout>
 </LinearLayout>
