@@ -20,7 +20,6 @@ import timber.log.Timber;
 public class PollyPlayer implements InstructionPlayer {
 
   private static final int STREAM_TYPE = AudioManager.USE_DEFAULT_STREAM_TYPE;
-  private static final String DATA_SOURCE_EXCEPTION = "Unable to set data source for the media pollyMediaPlayer! %s";
 
   private AmazonPollyPresigningClient pollyClient;
   private AudioManager pollyAudioManager;
@@ -117,7 +116,8 @@ public class PollyPlayer implements InstructionPlayer {
     try {
       pollyMediaPlayer.setDataSource(instruction);
     } catch (IOException ioException) {
-      Timber.e(DATA_SOURCE_EXCEPTION, ioException.getMessage());
+      Timber.e("Unable to set data source for the media pollyMediaPlayer! %s",
+        ioException.getMessage());
     }
   }
 
