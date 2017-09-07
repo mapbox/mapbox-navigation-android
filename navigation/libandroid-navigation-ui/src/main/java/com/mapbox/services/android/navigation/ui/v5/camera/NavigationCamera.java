@@ -47,18 +47,7 @@ public class NavigationCamera implements ProgressChangeListener {
   public void start(DirectionsRoute route) {
     if (route != null) {
       CameraPosition cameraPosition = buildCameraPositionFromRoute(route);
-      mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000,
-        new MapboxMap.CancelableCallback() {
-          @Override
-          public void onCancel() {
-
-          }
-
-          @Override
-          public void onFinish() {
-            navigation.addProgressChangeListener(NavigationCamera.this);
-          }
-        });
+      animateCameraToPosition(cameraPosition);
     } else {
       navigation.addProgressChangeListener(NavigationCamera.this);
     }
@@ -67,18 +56,7 @@ public class NavigationCamera implements ProgressChangeListener {
   public void resume(Location location) {
     if (location != null) {
       CameraPosition position = buildCameraPositionFromLocation(location);
-      mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000,
-        new MapboxMap.CancelableCallback() {
-          @Override
-          public void onCancel() {
-
-          }
-
-          @Override
-          public void onFinish() {
-            navigation.addProgressChangeListener(NavigationCamera.this);
-          }
-        });
+      animateCameraToPosition(position);
     } else {
       navigation.addProgressChangeListener(NavigationCamera.this);
     }
@@ -119,6 +97,21 @@ public class NavigationCamera implements ProgressChangeListener {
         .build();
       mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 750, true);
     }
+  }
+
+  private void animateCameraToPosition(CameraPosition position) {
+    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 2000,
+      new MapboxMap.CancelableCallback() {
+        @Override
+        public void onCancel() {
+          navigation.addProgressChangeListener(NavigationCamera.this);
+        }
+
+        @Override
+        public void onFinish() {
+          navigation.addProgressChangeListener(NavigationCamera.this);
+        }
+      });
   }
 
   private void easeCameraToLocation(Location location) {

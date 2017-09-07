@@ -18,7 +18,6 @@ import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.location.LocationSource;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -51,8 +50,6 @@ import java.util.HashMap;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static com.mapbox.services.android.telemetry.location.LocationEnginePriority.HIGH_ACCURACY;
 
 public class NavigationView extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnScrollListener,
   LocationEngineListener, ProgressChangeListener, OffRouteListener,
@@ -325,7 +322,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     navigation.addProgressChangeListener(instructionView);
     navigation.addProgressChangeListener(summaryBottomSheet);
     navigation.addMilestoneEventListener(this);
-    navigation.addMilestoneEventListener(instructionView);
     navigation.addOffRouteListener(this);
     navigation.addOffRouteListener(summaryBottomSheet);
     navigation.addOffRouteListener(instructionView);
@@ -339,10 +335,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @SuppressWarnings({"MissingPermission"})
   private void initLocation() {
     if (!shouldSimulateRoute()) {
-      locationEngine = new LocationSource(this);
-      locationEngine.setPriority(HIGH_ACCURACY);
-      locationEngine.setInterval(0);
-      locationEngine.setFastestInterval(1000);
+      locationEngine = navigation.getLocationEngine();
       locationEngine.addLocationEngineListener(this);
       locationEngine.activate();
 

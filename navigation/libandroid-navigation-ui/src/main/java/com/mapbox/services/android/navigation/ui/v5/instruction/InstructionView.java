@@ -23,17 +23,12 @@ import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
-import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
-import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 
-public class InstructionView extends RelativeLayout implements ProgressChangeListener,
-  MilestoneEventListener, OffRouteListener {
-
-  private NavigationInstructionPlayer instructionPlayer;
+public class InstructionView extends RelativeLayout implements ProgressChangeListener, OffRouteListener {
 
   private ImageView maneuverImage;
   private TextView stepDistanceText;
@@ -71,15 +66,8 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   protected void onFinishInflate() {
     super.onFinishInflate();
     bind();
-    initListeners();
-    initVoiceInstructions();
     initTurnLaneRecyclerView();
     initAnimations();
-  }
-
-  @Override
-  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
-    instructionPlayer.play(instruction);
   }
 
   @Override
@@ -141,15 +129,6 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     initInstructionAutoSize();
   }
 
-  private void initListeners() {
-    soundFab.setOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        instructionPlayer.setMuted(isMuted ? unmute() : mute());
-      }
-    });
-  }
-
   private boolean mute() {
     isMuted = true;
     setSoundChipText(getContext().getString(R.string.muted));
@@ -169,10 +148,6 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   private void initInstructionAutoSize() {
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepInstructionText,
       16, 28, 2, TypedValue.COMPLEX_UNIT_SP);
-  }
-
-  private void initVoiceInstructions() {
-    instructionPlayer = new NavigationInstructionPlayer(getContext(), null);
   }
 
   private void initTurnLaneRecyclerView() {
