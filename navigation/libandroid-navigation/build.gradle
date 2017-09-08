@@ -17,6 +17,10 @@ android {
     targetCompatibility JavaVersion.VERSION_1_7
   }
 
+  configurations {
+    javadocDeps
+  }
+
   buildTypes {
     release {
       minifyEnabled false
