@@ -139,12 +139,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
-    if (navigation != null) {
-      navigation.onDestroy();
-    }
-    if (instructionPlayer != null) {
-      instructionPlayer.onDestroy();
-    }
+    shutdownNavigation();
   }
 
   @Override
@@ -197,6 +192,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
     instructionPlayer.play(instruction);
+    if (identifier == NavigationConstants.ARRIVAL_MILESTONE) {
+      finish();
+    }
   }
 
   @Override
@@ -461,5 +459,31 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     locationEngine = new MockLocationEngine(1000, 30, false);
     ((MockLocationEngine) locationEngine).setRoute(route);
     locationEngine.activate();
+  }
+
+  private void shutdownNavigation() {
+    deactivateNavigation();
+    deactivateLocationEngine();
+    deactivateInstructionPlayer();
+  }
+
+  private void deactivateInstructionPlayer() {
+    if (instructionPlayer != null) {
+      instructionPlayer.onDestroy();
+    }
+  }
+
+  private void deactivateNavigation() {
+    if (navigation != null) {
+      navigation.onDestroy();
+    }
+  }
+
+  private void deactivateLocationEngine() {
+    if (locationEngine != null) {
+      locationEngine.removeLocationUpdates();
+      locationEngine.removeLocationEngineListener(this);
+      locationEngine.deactivate();
+    }
   }
 }
