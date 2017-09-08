@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Scharf links abbiegen an der Gabelung",
         "en": "Take a sharp left at the fork",
+        "es": "Gire a la izquierda en el cruce",
         "fr": "Prendre à gauche à l'embranchement",
+        "id": "Belok kiri pada pertigaan",
+        "it": "Svolta a sinistra al bivio",
         "nl": "Linksaf op de splitsing",
-        "ru": "На развилке поверните резко налево",
-        "sv": "Gör en skarp vänstersväng där vägen delar sig",
+        "pl": "Na rozwidleniu skręć ostro w lewo",
+        "pt-BR": "Vire acentuadamente à esquerda na bifurcação",
+        "ru": "На развилке резко поверните налево",
+        "sv": "Sväng vänster där vägen delar sig",
+        "uk": "На роздоріжжі різко поверніть ліворуч",
         "vi": "Quẹo gắt bên trái ở ngã ba",
         "zh-Hans": "在岔道保持向左"
     }

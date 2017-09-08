@@ -10,10 +10,16 @@
     "instructions": {
         "de": "In Rotary Name fahren",
         "en": "Enter Rotary Name",
+        "es": "Entra en Rotary Name",
         "fr": "Entrer dans le rond-point Rotary Name",
+        "id": "Masuk Rotary Name",
+        "it": "Immettiti in Rotary Name",
         "nl": "Ga het knooppunt Rotary Name op",
-        "ru": "Въезд на площадь Rotary Name с круговым движением",
+        "pl": "Wjedź na Rotary Name",
+        "pt-BR": "Entre em Rotary Name",
+        "ru": "Продолжите движение по Rotary Name с круговым движением",
         "sv": "Kör in i Rotary Name",
+        "uk": "Рухайтесь по Rotary Name",
         "vi": "Đi vào Rotary Name",
         "zh-Hans": "进入Rotary Name环岛"
     }

@@ -9,12 +9,18 @@
         "destinations": "Destination 1,Destination 2"
     },
     "instructions": {
-        "de": "In Rotary Name fahren und Richtung Destination 1 verlassen",
+        "de": "In Rotary Name die Ausfahrt Richtung Destination 1 nehmen",
         "en": "Enter Rotary Name and exit towards Destination 1",
+        "es": "Entra en Rotary Name y sal hacia Destination 1",
         "fr": "Entrer dans le rond-point Rotary Name et sortir en direction de Destination 1",
+        "id": "Masuk Rotary Name dan keluar menuju Destination 1",
+        "it": "Immettiti in Rotary Name ed esci verso Destination 1",
         "nl": "Verlaat het knooppunt Rotary Name richting Destination 1",
-        "ru": "На площади Rotary Name с круговым движением используйте съезд в направлении Destination 1",
-        "sv": "Kör in i Rotary Name och ta av mot Destination 1",
+        "pl": "Wjedź na Rotary Name i skręć w kierunku Destination 1",
+        "pt-BR": "Entre em Rotary Name e saia sentido Destination 1",
+        "ru": "На Rotary Name с круговым движением сверните в направлении Destination 1",
+        "sv": "I Rotary Name ta av mot Destination 1",
+        "uk": "Рухайтесь по Rotary Name та поверніть в напрямку Destination 1",
         "vi": "Đi và Rotary Name và ra để đi Destination 1",
         "zh-Hans": "通过Rotary Name环岛后前往Destination 1"
     }

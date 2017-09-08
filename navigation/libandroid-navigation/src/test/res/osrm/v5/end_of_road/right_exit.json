@@ -1,0 +1,26 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "end of road",
+            "modifier": "right"
+        },
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Rechts abbiegen auf Way Name",
+        "en": "Turn right onto Way Name",
+        "es": "Gire a derecha en Way Name",
+        "fr": "Tourner à droite sur Way Name",
+        "id": "Belok kanan ke Way Name",
+        "it": "Gira a destra in Way Name",
+        "nl": "Ga rechts naar Way Name",
+        "pl": "Skręć prawo na Way Name",
+        "pt-BR": "Vire à direita em Way Name",
+        "ru": "Поверните направо на Way Name",
+        "sv": "Sväng höger in på Way Name",
+        "uk": "Поверніть праворуч на Way Name",
+        "vi": "Quẹo phải vào Way Name",
+        "zh-Hans": "向右行驶，上Way Name"
+    }
+}

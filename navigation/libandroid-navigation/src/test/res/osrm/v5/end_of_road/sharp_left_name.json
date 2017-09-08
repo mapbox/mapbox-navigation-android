@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Scharf links abbiegen auf Way Name",
         "en": "Turn sharp left onto Way Name",
+        "es": "Gire a cerrada a la izquierda en Way Name",
         "fr": "Tourner franchement à gauche sur Way Name",
+        "id": "Belok tajam kiri ke Way Name",
+        "it": "Gira a sinistra in Way Name",
         "nl": "Ga linksaf naar Way Name",
-        "ru": "Поверните резко налево на Way Name",
-        "sv": "Sväng skarp vänster in på Way Name",
+        "pl": "Skręć ostro w lewo na Way Name",
+        "pt-BR": "Vire acentuadamente à esquerda em Way Name",
+        "ru": "Поверните налево на Way Name",
+        "sv": "Sväng vänster in på Way Name",
+        "uk": "Поверніть різко ліворуч на Way Name",
         "vi": "Quẹo trái gắt vào Way Name",
         "zh-Hans": "向左行驶，上Way Name"
     }

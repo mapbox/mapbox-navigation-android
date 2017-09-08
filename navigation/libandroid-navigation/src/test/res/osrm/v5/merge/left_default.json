@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Links auffahren",
         "en": "Merge left",
+        "es": "Gire a izquierda",
         "fr": "Rejoindre à gauche",
+        "id": "Bergabung kiri",
+        "it": "Immettiti a sinistra",
         "nl": "Bij de splitsing links",
-        "ru": "Слияние полосы налево",
-        "sv": "Körfältsbyte åt vänster",
+        "pl": "Włącz się lewo",
+        "pt-BR": "Entre à esquerda",
+        "ru": "Перестройтесь налево",
+        "sv": "Byt till vänster körfält",
+        "uk": "Приєднайтеся до потоку ліворуч",
         "vi": "Nhập sang trái",
         "zh-Hans": "向左并道"
     }

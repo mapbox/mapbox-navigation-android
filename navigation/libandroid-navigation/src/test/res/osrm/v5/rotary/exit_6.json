@@ -8,12 +8,18 @@
         "name": ""
     },
     "instructions": {
-        "de": "In den Kreisverkehr fahren und sechste Ausfahrt nehmen",
+        "de": "Im Kreisverkehr die sechste Ausfahrt nehmen",
         "en": "Enter the rotary and take the 6th exit",
+        "es": "Entra en la rotonda y toma la 6ª salida",
         "fr": "Entrer dans le rond-point et prendre la sixième sortie",
-        "nl": "Ga het knooppunt op en neem afslag zesde",
-        "ru": "На кольцевой развязке используйте шестой съезд",
-        "sv": "Kör in i rondellen och ta avfart 6:e",
+        "id": "Masuk bundaran dan ambil jalan keluar 6",
+        "it": "Immettiti nella rotonda e prendi la 6ª uscita",
+        "nl": "Ga het knooppunt op en neem afslag 6e",
+        "pl": "Wjedź na rondo i wyjedź 6. zjazdem",
+        "pt-BR": "Entre na rotatória e saia na 6º saída",
+        "ru": "На круговой развязке сверните на шестой съезд",
+        "sv": "I rondellen ta 6:e avfarten",
+        "uk": "Рухайтесь по колу та повереніть у 6й з'їзд",
         "vi": "Đi vào bùng binh và ra tại đường thú 6",
         "zh-Hans": "进入环岛并从第六出口驶出"
     }

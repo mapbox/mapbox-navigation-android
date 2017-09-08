@@ -7,12 +7,18 @@
         "name": ""
     },
     "instructions": {
-        "de": "Rampe auf der linken Seite nehmen",
+        "de": "Auffahrt links Seite nehmen",
         "en": "Take the ramp on the left",
+        "es": "Ve cuesta abajo en la izquierda",
         "fr": "Prendre la sortie à gauche",
+        "id": "Ambil jalan yang melandai di sebelah kiri",
+        "it": "Prendi la rampa a sinistra",
         "nl": "Neem de oprit links",
-        "ru": "Используйте въезд на автомагистраль слева",
-        "sv": "Ta påfartsrampen till vänster",
+        "pl": "Weź zjazd po lewej",
+        "pt-BR": "Pegue a rampa à esquerda",
+        "ru": "Перестройтесь левее на въезд на автомагистраль",
+        "sv": "Ta påfarten till vänster",
+        "uk": "Рухайтесь на вʼїзд ліворуч",
         "vi": "Đi đường nhánh bên trái",
         "zh-Hans": "通过匝道"
     }

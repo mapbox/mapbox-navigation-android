@@ -1,0 +1,26 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "off ramp",
+            "modifier": "slight left"
+        },
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Ausfahrt 4A nehmen",
+        "en": "Take exit 4A on the left",
+        "es": "Tome la salida 4A en la izquierda",
+        "fr": "Prendre la sortie à gauche sur Way Name",
+        "id": "Ambil jalan melandai di sebelah kiri ke arah Way Name",
+        "it": "Prendi l'uscita 4A a sinistra",
+        "nl": "Neem de afrit links naar Way Name",
+        "pl": "Take exit 4A on the left",
+        "pt-BR": "Pegue a saída 4A à esquerda",
+        "ru": "Перестройтесь левее на 4A",
+        "sv": "Ta avfart 4A till vänster",
+        "uk": "Оберіть з'їзд 4A ліворуч",
+        "vi": "Đi theo lối ra 4A bên trái",
+        "zh-Hans": "通过匝道驶入Way Name"
+    }
+}

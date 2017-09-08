@@ -8,12 +8,18 @@
         "name": ""
     },
     "instructions": {
-        "de": "In den Kreisverkehr fahren und siebente Ausfahrt nehmen",
+        "de": "Im Kreisverkehr die siebente Ausfahrt nehmen",
         "en": "Enter the rotary and take the 7th exit",
+        "es": "Entra en la rotonda y toma la 7ª salida",
         "fr": "Entrer dans le rond-point et prendre la setpième sortie",
-        "nl": "Ga het knooppunt op en neem afslag zevende",
-        "ru": "На кольцевой развязке используйте седьмой съезд",
-        "sv": "Kör in i rondellen och ta avfart 7:e",
+        "id": "Masuk bundaran dan ambil jalan keluar 7",
+        "it": "Immettiti nella rotonda e prendi la 7ª uscita",
+        "nl": "Ga het knooppunt op en neem afslag 7e",
+        "pl": "Wjedź na rondo i wyjedź 7. zjazdem",
+        "pt-BR": "Entre na rotatória e saia na 7º saída",
+        "ru": "На круговой развязке сверните на седьмой съезд",
+        "sv": "I rondellen ta 7:e avfarten",
+        "uk": "Рухайтесь по колу та повереніть у 7й з'їзд",
         "vi": "Đi vào bùng binh và ra tại đường thứ 7",
         "zh-Hans": "进入环岛并从第七出口驶出"
     }

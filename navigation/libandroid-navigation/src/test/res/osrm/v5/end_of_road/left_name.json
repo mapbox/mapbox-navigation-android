@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Links abbiegen auf Way Name",
         "en": "Turn left onto Way Name",
+        "es": "Gire a izquierda en Way Name",
         "fr": "Tourner à gauche sur Way Name",
+        "id": "Belok kiri ke Way Name",
+        "it": "Gira a sinistra in Way Name",
         "nl": "Ga links naar Way Name",
+        "pl": "Skręć lewo na Way Name",
+        "pt-BR": "Vire à esquerda em Way Name",
         "ru": "Поверните налево на Way Name",
         "sv": "Sväng vänster in på Way Name",
+        "uk": "Поверніть ліворуч на Way Name",
         "vi": "Quẹo trái vào Way Name",
         "zh-Hans": "向左行驶，上Way Name"
     }

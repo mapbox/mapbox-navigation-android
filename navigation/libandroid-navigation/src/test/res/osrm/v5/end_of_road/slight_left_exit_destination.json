@@ -1,0 +1,27 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "end of road",
+            "modifier": "slight left"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Leicht links abbiegen Richtung Destination 1",
+        "en": "Turn slight left towards Destination 1",
+        "es": "Gire a ligeramente a la izquierda hacia Destination 1",
+        "fr": "Tourner légèrement à gauche en direction de Destination 1",
+        "id": "Belok agak ke kiri menuju Destination 1",
+        "it": "Gira a sinistra leggermente verso Destination 1",
+        "nl": "Ga links richting Destination 1",
+        "pl": "Skręć łagodnie w lewo w kierunku Destination 1",
+        "pt-BR": "Vire ligeiramente à esquerda sentido Destination 1",
+        "ru": "Поверните левее в направлении Destination 1",
+        "sv": "Sväng vänster mot Destination 1",
+        "uk": "Поверніть плавно ліворуч у напрямку Destination 1",
+        "vi": "Quẹo trái nghiêng đến Destination 1",
+        "zh-Hans": "向左行驶，前往Destination 1"
+    }
+}

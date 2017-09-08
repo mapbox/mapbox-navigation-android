@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Leicht links weiter",
         "en": "Continue slightly left",
+        "es": "Continúe ligeramente a la izquierda",
         "fr": "Continuer légèrement à gauche",
+        "id": "Lanjut dengan agak ke kiri",
+        "it": "Continua leggermente a sinistra",
         "nl": "Links aanhouden",
-        "ru": "Плавный поворот налево",
+        "pl": "Kontynuuj łagodnie w lewo",
+        "pt-BR": "Continue ligeiramente à esquerda",
+        "ru": "Плавно поверните налево",
         "sv": "Fortsätt med lätt vänstersväng",
+        "uk": "Прийміть плавно ліворуч",
         "vi": "Nghiêng về bên trái",
         "zh-Hans": "继续向左"
     }

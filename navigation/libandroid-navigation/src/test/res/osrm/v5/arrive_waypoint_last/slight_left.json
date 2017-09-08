@@ -1,0 +1,29 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "arrive",
+            "modifier": "slight left"
+        },
+        "name": "Street Name"
+    },
+    "instructions": {
+        "de": "Sie haben Ihr Ziel erreicht, es befindet sich links",
+        "en": "You have arrived at your destination, on the left",
+        "es": "Has llegado a tu destino, a la izquierda",
+        "fr": "Vous êtes arrivés à votre destination, sur la gauche",
+        "id": "Anda telah tiba di tujuan ke-, di sebelah kiri",
+        "it": "Sei arrivato alla tua destinazione, sulla sinistra",
+        "nl": "Je bent gearriveerd. De bestemming bevindt zich links.",
+        "pl": "Dojechano do miejsca docelowego , po lewej stronie",
+        "pt-BR": "Você chegou ao seu destino, à esquerda",
+        "ru": "Вы прибыли в пункт назначения, он находится слева",
+        "sv": "Du är framme vid din destination, till vänster",
+        "uk": "Ви прибули у ваш пункт призначення, він – ліворуч",
+        "vi": "Đến nơi ở bên trái",
+        "zh-Hans": "您已经到达您的个目的地，在道路左侧"
+    },
+    "options": {
+        "legIndex": 1,
+        "legCount": 2
+    }
+}

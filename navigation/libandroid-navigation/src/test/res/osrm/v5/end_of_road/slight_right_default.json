@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Leicht rechts abbiegen",
         "en": "Turn slight right",
+        "es": "Gire a ligeramente a la derecha",
         "fr": "Tourner légèrement à droite",
+        "id": "Belok agak ke kanan",
+        "it": "Gira a destra leggermente",
         "nl": "Ga rechts",
-        "ru": "Поверните плавно направо",
-        "sv": "Sväng lätt höger",
+        "pl": "Skręć łagodnie w prawo",
+        "pt-BR": "Vire ligeiramente à direita",
+        "ru": "Поверните правее",
+        "sv": "Sväng höger",
+        "uk": "Поверніть плавно праворуч",
         "vi": "Quẹo phải nghiêng",
         "zh-Hans": "向右行驶"
     }

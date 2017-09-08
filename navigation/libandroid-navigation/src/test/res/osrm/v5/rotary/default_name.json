@@ -7,12 +7,18 @@
         "name": "Way Name"
     },
     "instructions": {
-        "de": "In den Kreisverkehr fahren und auf Way Name verlassen",
+        "de": "Im Kreisverkehr die Ausfahrt auf Way Name nehmen",
         "en": "Enter the rotary and exit onto Way Name",
+        "es": "Entra en la rotonda y sal en Way Name",
         "fr": "Entrer dans le rond-point et sortir par Way Name",
+        "id": "Masuk bundaran dan keluar arah Way Name",
+        "it": "Immettiti nella ritonda ed esci in Way Name",
         "nl": "Verlaat het knooppunt naar Way Name",
-        "ru": "На кольцевой развязке используйте съезд на Way Name",
-        "sv": "Kör in i rondellen och ta av mot Way Name",
+        "pl": "Wjedź na rondo i skręć na Way Name",
+        "pt-BR": "Entre na rotatória e saia em Way Name",
+        "ru": "На круговой развязке сверните на Way Name",
+        "sv": "I rondellen ta av in på Way Name",
+        "uk": "Рухайтесь по колу до Way Name",
         "vi": "Đi vào bùng binh và ra tại Way Name",
         "zh-Hans": "通过环岛后驶入Way Name"
     }

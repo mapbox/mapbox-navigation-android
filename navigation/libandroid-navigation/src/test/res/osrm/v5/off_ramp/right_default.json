@@ -7,12 +7,18 @@
         "name": ""
     },
     "instructions": {
-        "de": "Rampe auf der rechten Seite nehmen",
+        "de": "Ausfahrt rechts nehmen",
         "en": "Take the ramp on the right",
+        "es": "Ve cuesta abajo en la derecha",
         "fr": "Prendre la sortie à droite",
+        "id": "Ambil jalan melandai di sebelah kanan",
+        "it": "Prendi la rampa a destra",
         "nl": "Neem de afrit rechts",
-        "ru": "Используйте съезд справа",
-        "sv": "Ta avfartsrampen till höger",
+        "pl": "Weź zjazd po prawej",
+        "pt-BR": "Pegue a rampa à direita",
+        "ru": "Сверните на правый съезд",
+        "sv": "Ta avfarten till höger",
+        "uk": "Рухайтесь на зʼїзд праворуч",
         "vi": "Đi đường nhánh bên phải",
         "zh-Hans": "通过右边的匝道"
     }

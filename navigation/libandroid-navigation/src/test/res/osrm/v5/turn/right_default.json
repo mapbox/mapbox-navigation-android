@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Rechts abbiegen",
         "en": "Turn right",
+        "es": "Gire a la derecha",
         "fr": "Tourner à droite",
+        "id": "Belok kanan",
+        "it": "Gira a destra",
         "nl": "Ga rechtsaf",
+        "pl": "Skręć w prawo",
+        "pt-BR": "Vire à direita",
         "ru": "Поверните направо",
         "sv": "Sväng höger",
+        "uk": "Поверніть праворуч",
         "vi": "Quẹo phải",
         "zh-Hans": "右转"
     }

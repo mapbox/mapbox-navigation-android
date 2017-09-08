@@ -9,10 +9,16 @@
     "instructions": {
         "de": "180°-Wendung am Ende der Straße",
         "en": "Make a U-turn at the end of the road",
+        "es": "Haz un cambio de sentido al final de la via",
         "fr": "Faire demi-tour à la fin de la route",
+        "id": "Putar balik di akhir jalan",
+        "it": "Fai un'inversione a U alla fine della strada",
         "nl": "Keer om",
-        "ru": "Сделайте разворот в конце дороги",
+        "pl": "Zawróć na końcu ulicy",
+        "pt-BR": "Faça o retorno no fim da rua",
+        "ru": "В конце дороги развернитесь",
         "sv": "Gör en U-sväng i slutet av vägen",
+        "uk": "Здійсніть розворот в кінці дороги",
         "vi": "Quẹo ngược lại tại cuối đường",
         "zh-Hans": "在道路尽头调头"
     }

@@ -10,10 +10,16 @@
     "instructions": {
         "de": "Leicht links weiterfahren Richtung Destination 1",
         "en": "Continue slight left towards Destination 1",
+        "es": "Continúe ligeramente a la izquierda hacia Destination 1",
         "fr": "Continuer légèrement à gauche en direction de Destination 1",
+        "id": "Lanjutkan agak ke kiri menuju Destination 1",
+        "it": "Continua a sinistra leggermente verso Destination 1",
         "nl": "Ga links richting Destination 1",
-        "ru": "Продолжайте движение плавно налево в направлении Destination 1",
-        "sv": "Fortsätt lätt vänster mot Destination 1",
+        "pl": "Kontynuuj łagodnie w lewo w kierunku Destination 1",
+        "pt-BR": "Continue ligeiramente à esquerda sentido Destination 1",
+        "ru": "Двигайтесь левее в направлении Destination 1",
+        "sv": "Fortsätt vänster mot Destination 1",
+        "uk": "Рухайтесь плавно ліворуч у напрямку Destination 1",
         "vi": "Chạy tiếp bên trái nghiêng đến Destination 1",
         "zh-Hans": "继续向左，前往Destination 1"
     }

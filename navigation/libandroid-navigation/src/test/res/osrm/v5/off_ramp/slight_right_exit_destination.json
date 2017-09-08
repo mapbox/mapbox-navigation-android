@@ -1,0 +1,27 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "off ramp",
+            "modifier": "slight right"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Ausfahrt 4A nehmen Richtung Destination 1",
+        "en": "Take exit 4A on the right towards Destination 1",
+        "es": "Tome la salida 4A en la derecha hacia Destination 1",
+        "fr": "Prendre la sortie à droite en direction de Destination 1",
+        "id": "Ambil jalan melandai di sebelah kanan menuju Destination 1",
+        "it": "Prendi la 4A uscita a destra verso Destination 1",
+        "nl": "Neem de afrit rechts richting Destination 1",
+        "pl": "Take exit 4A on the right towards Destination 1",
+        "pt-BR": "Pegue a saída 4A à direita em direção à Destination 1",
+        "ru": "Перестройтесь правее на съезд 4A в направлении Destination 1",
+        "sv": "Ta avfart 4A till höger mot Destination 1",
+        "uk": "Оберіть з'їзд 4A праворуч у напрямку Destination 1",
+        "vi": "Đi theo lối ra 4A bên phải về hướng Destination 1",
+        "zh-Hans": "通过匝道前往Destination 1"
+    }
+}

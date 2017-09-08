@@ -10,10 +10,16 @@
     "instructions": {
         "de": "Am Kreisverkehr 180°-Wendung Richtung Destination 1",
         "en": "At the roundabout make a U-turn towards Destination 1",
+        "es": "En la rotonda siga cambio de sentido hacia Destination 1",
         "fr": "Au rond-point, tourner demi-tour en direction de Destination 1",
+        "id": "Di bundaran, lakukan putar balik menuju Destination 1",
+        "it": "Alla rotonda fai una inversione a U verso Destination 1",
         "nl": "Ga omkeren op de rotonde richting Destination 1",
-        "ru": "На круговом перекрёстке разворот в направлении Destination 1",
-        "sv": "Vid rondellen sväng U-sväng mot Destination 1",
+        "pl": "Na rondzie weź zawróć w kierunku Destination 1",
+        "pt-BR": "Na rotatória, vire retorno em direção à Destination 1",
+        "ru": "На круговой развязке двигайтесь на разворот в направлении Destination 1",
+        "sv": "I rondellen sväng U-sväng mot Destination 1",
+        "uk": "На кільці розворот в напрямку Destination 1",
         "vi": "Đi bên ngược tại vòng xuyến để đi Destination 1",
         "zh-Hans": "在环岛调头行驶，前往Destination 1"
     }

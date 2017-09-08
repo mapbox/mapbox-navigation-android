@@ -1,0 +1,26 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "roundabout turn",
+            "modifier": "straight"
+        },
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Am Kreisverkehr geradeaus weiterfahren auf Way Name",
+        "en": "At the roundabout continue straight onto Way Name",
+        "es": "En la rotonda continúe recto en Way Name",
+        "fr": "Au rond-point, continuer tout droit sur Way Name",
+        "id": "Di bundaran tetap lurus ke arah Way Name",
+        "it": "Alla rotonda prosegui dritto in Way Name",
+        "nl": "Rechtdoor op de rotonde naar Way Name",
+        "pl": "Na rondzie kontynuuj prosto na Way Name",
+        "pt-BR": "Na rotatória siga reto em Way Name",
+        "ru": "На круговой развязке двигайтесь по Way Name",
+        "sv": "I rondellen fortsätt rakt fram in på Way Name",
+        "uk": "На кільці продовжуйте рухатись прямо на Way Name",
+        "vi": "Chạy thẳng tại vòng xuyến để chạy tiếp trên Way Name",
+        "zh-Hans": "在环岛继续直行，上Way Name"
+    }
+}

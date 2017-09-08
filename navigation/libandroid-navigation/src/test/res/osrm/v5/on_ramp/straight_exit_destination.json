@@ -1,0 +1,27 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "on ramp",
+            "modifier": "straight"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Auffahrt nehmen Richtung Destination 1",
+        "en": "Take the ramp towards Destination 1",
+        "es": "Ve cuesta abajo hacia Destination 1",
+        "fr": "Prendre la sortie en direction de Destination 1",
+        "id": "Ambil jalan melandai menuju Destination 1",
+        "it": "Prendi la rampa verso Destination 1",
+        "nl": "Neem de oprit richting Destination 1",
+        "pl": "Weź zjazd w kierunku Destination 1",
+        "pt-BR": "Pegue a rampa sentido Destination 1",
+        "ru": "Сверните на въезд на автомагистраль в направлении Destination 1",
+        "sv": "Ta påfarten mot Destination 1",
+        "uk": "Рухайтесь на вʼїзд у напрямку Destination 1",
+        "vi": "Đi đường nhánh đến Destination 1",
+        "zh-Hans": "通过匝道前往Destination 1"
+    }
+}

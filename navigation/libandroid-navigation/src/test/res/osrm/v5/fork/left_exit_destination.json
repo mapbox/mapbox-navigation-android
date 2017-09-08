@@ -1,0 +1,27 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "fork",
+            "modifier": "left"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Links halten an der Gabelung Richtung Destination 1",
+        "en": "Keep left at the fork towards Destination 1",
+        "es": "Mantengase izquierda en el cruce hacia Destination 1",
+        "fr": "Rester à gauche à l'embranchement en direction de Destination 1",
+        "id": "Tetap kiri di pertigaan menuju Destination 1",
+        "it": "Mantieni la sinistra al bivio verso Destination 1",
+        "nl": "Ga links op de splitsing richting Destination 1",
+        "pl": "Na rozwidleniu trzymaj się lewo w kierunku Destination 1",
+        "pt-BR": "Mantenha-se à esquerda na bifurcação sentido Destination 1",
+        "ru": "На развилке двигайтесь налево в направлении Destination 1",
+        "sv": "Håll till vänster mot Destination 1",
+        "uk": "На роздоріжжі тримайтеся ліворуч у напрямку Destination 1",
+        "vi": "Đi bên trái ở ngã ba đến Destination 1",
+        "zh-Hans": "在岔道保持向左，前往Destination 1"
+    }
+}

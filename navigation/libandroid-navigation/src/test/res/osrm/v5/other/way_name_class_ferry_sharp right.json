@@ -1,0 +1,31 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "continue",
+            "modifier": "sharp right"
+        },
+        "name": "Cool highway",
+        "ref": "Ref1;Ref2"
+    },
+    "instructions": {
+        "de": "Scharf rechts weiterfahren auf Cool highway (Ref1)",
+        "en": "Make a sharp right to stay on Cool highway (Ref1)",
+        "es": "Continúe cerrada a la derecha en Cool highway (Ref1)",
+        "fr": "Continuer franchement à droite sur Cool highway (Ref1)",
+        "id": "Terus tajam kanan ke Cool highway (Ref1)",
+        "it": "Continua a destra per stare su Cool highway (Ref1)",
+        "nl": "Ga rechtsaf naar Cool highway (Ref1)",
+        "pl": "Kontynuuj ostro w prawo na Cool highway (Ref1)",
+        "pt-BR": "Continue acentuadamente à direita em Cool highway (Ref1)",
+        "ru": "Двигайтесь направо по Cool highway (Ref1)",
+        "sv": "Fortsätt höger in på Cool highway (Ref1)",
+        "uk": "Рухайтесь різко праворуч на Cool highway (Ref1)",
+        "vi": "Chạy tiếp bên phải gắt trên Cool highway (Ref1)",
+        "zh-Hans": "继续向右，上Cool highway (Ref1)"
+    },
+    "options": {
+        "classes": [
+            "ferry"
+        ]
+    }
+}

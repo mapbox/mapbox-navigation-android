@@ -1,0 +1,26 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "on ramp",
+            "modifier": "straight"
+        },
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Auffahrt nehmen auf Way Name",
+        "en": "Take the ramp onto Way Name",
+        "es": "Ve cuesta abajo en Way Name",
+        "fr": "Prendre la sortie sur Way Name",
+        "id": "Ambil jalan melandai ke Way Name",
+        "it": "Prendi la rampa in Way Name",
+        "nl": "Neem de oprit naar Way Name",
+        "pl": "Weź zjazd na Way Name",
+        "pt-BR": "Pegue a rampa em Way Name",
+        "ru": "Сверните на въезд на Way Name",
+        "sv": "Ta påfarten in på Way Name",
+        "uk": "Рухайтесь на вʼїзд на Way Name",
+        "vi": "Đi đường nhánh Way Name",
+        "zh-Hans": "通过匝道驶入Way Name"
+    }
+}

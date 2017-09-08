@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Fahren Sie Richtung Norden",
         "en": "Head north",
+        "es": "Ve a norte",
         "fr": "Rouler vers le nord",
+        "id": "Arah utara",
+        "it": "Continua verso nord",
         "nl": "Vertrek in noordelijke richting",
+        "pl": "Kieruj się północ",
+        "pt-BR": "Siga norte",
         "ru": "Двигайтесь в северном направлении",
         "sv": "Kör åt norr",
+        "uk": "Прямуйте на північ",
         "vi": "Đi về hướng bắc",
         "zh-Hans": "出发向北"
     }

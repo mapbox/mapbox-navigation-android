@@ -8,12 +8,18 @@
         "name": ""
     },
     "instructions": {
-        "de": "In den Kreisverkehr fahren und fünfte Ausfahrt nehmen",
+        "de": "Im Kreisverkehr die fünfte Ausfahrt nehmen",
         "en": "Enter the rotary and take the 5th exit",
+        "es": "Entra en la rotonda y toma la 5ª salida",
         "fr": "Entrer dans le rond-point et prendre la cinquième sortie",
-        "nl": "Ga het knooppunt op en neem afslag vijfde",
-        "ru": "На кольцевой развязке используйте пятый съезд",
-        "sv": "Kör in i rondellen och ta avfart 5:e",
+        "id": "Masuk bundaran dan ambil jalan keluar 5",
+        "it": "Immettiti nella rotonda e prendi la 5ª uscita",
+        "nl": "Ga het knooppunt op en neem afslag 5e",
+        "pl": "Wjedź na rondo i wyjedź 5. zjazdem",
+        "pt-BR": "Entre na rotatória e saia na 5º saída",
+        "ru": "На круговой развязке сверните на пятый съезд",
+        "sv": "I rondellen ta 5:e avfarten",
+        "uk": "Рухайтесь по колу та повереніть у 5й з'їзд",
         "vi": "Đi vào bùng binh và ra tại đường thứ 5",
         "zh-Hans": "进入环岛并从第五出口驶出"
     }

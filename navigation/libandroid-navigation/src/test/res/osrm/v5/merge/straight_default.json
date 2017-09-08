@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Geradeaus auffahren",
         "en": "Merge straight",
+        "es": "Gire a recto",
         "fr": "Rejoindre tout droit",
+        "id": "Bergabung lurus",
+        "it": "Immettiti a dritto",
         "nl": "Bij de splitsing rechtdoor",
-        "ru": "Слияние полосы прямо",
-        "sv": "Körfältsbyte åt rakt fram",
+        "pl": "Włącz się prosto",
+        "pt-BR": "Entre reto",
+        "ru": "Перестройтесь прямо",
+        "sv": "Byt till rakt fram körfält",
+        "uk": "Приєднайтеся до потоку прямо",
         "vi": "Nhập sang thẳng",
         "zh-Hans": "直行并道"
     }

@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Links weiterfahren",
         "en": "Continue left",
+        "es": "Continúe izquierda",
         "fr": "Continuer à gauche",
+        "id": "Lanjutkan kiri",
+        "it": "Continua a sinistra",
         "nl": "Ga links",
-        "ru": "Продолжайте движение налево",
+        "pl": "Kontynuuj lewo",
+        "pt-BR": "Continue à esquerda",
+        "ru": "Двигайтесь налево",
         "sv": "Fortsätt vänster",
+        "uk": "Рухайтесь ліворуч",
         "vi": "Chạy tiếp bên trái",
         "zh-Hans": "继续向左"
     }

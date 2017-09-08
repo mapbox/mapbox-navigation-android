@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Links halten an der Gabelung",
         "en": "Keep left at the fork",
+        "es": "Mantengase a la izquierda en el cruce",
         "fr": "Rester à gauche à l'embranchement",
+        "id": "Tetap di kiri pada pertigaan",
+        "it": "Mantieni la sinistra al bivio",
         "nl": "Links aanhouden op de splitsing",
-        "ru": "Держитесь левее на развилке",
+        "pl": "Na rozwidleniu trzymaj się lewej strony",
+        "pt-BR": "Mantenha-se à esquerda na bifurcação",
+        "ru": "На развилке держитесь левее",
         "sv": "Håll till vänster där vägen delar sig",
+        "uk": "На роздоріжжі тримайтеся ліворуч",
         "vi": "Nghiêng về bên trái ở ngã ba",
         "zh-Hans": "在岔道保持向左"
     }

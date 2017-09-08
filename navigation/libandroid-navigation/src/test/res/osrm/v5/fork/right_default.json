@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Rechts halten an der Gabelung",
         "en": "Keep right at the fork",
+        "es": "Mantengase derecha en el cruce",
         "fr": "Rester à droite à l'embranchement",
+        "id": "Tetap kanan di pertigaan",
+        "it": "Mantieni la destra al bivio",
         "nl": "Ga rechts op de splitsing",
-        "ru": "На развилке поверните направо",
+        "pl": "Na rozwidleniu trzymaj się prawo",
+        "pt-BR": "Mantenha-se à direita na bifurcação",
+        "ru": "На развилке двигайтесь направо",
         "sv": "Håll till höger där vägen delar sig",
+        "uk": "На роздоріжжі тримайтеся праворуч",
         "vi": "Đi bên phải ở ngã ba",
         "zh-Hans": "在岔道保持向右"
     }

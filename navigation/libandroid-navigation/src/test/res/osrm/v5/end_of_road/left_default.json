@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Links abbiegen",
         "en": "Turn left",
+        "es": "Gire a izquierda",
         "fr": "Tourner à gauche",
+        "id": "Belok kiri",
+        "it": "Gira a sinistra",
         "nl": "Ga links",
+        "pl": "Skręć lewo",
+        "pt-BR": "Vire à esquerda",
         "ru": "Поверните налево",
         "sv": "Sväng vänster",
+        "uk": "Поверніть ліворуч",
         "vi": "Quẹo trái",
         "zh-Hans": "向左行驶"
     }

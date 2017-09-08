@@ -8,11 +8,17 @@
     },
     "instructions": {
         "de": "Scharf rechts weiterfahren",
-        "en": "Continue sharp right",
+        "en": "Make a sharp right",
+        "es": "Continúe cerrada a la derecha",
         "fr": "Continuer franchement à droite",
+        "id": "Terus tajam kanan",
+        "it": "Continua a destra",
         "nl": "Ga rechtsaf",
-        "ru": "Продолжайте движение резко направо",
-        "sv": "Fortsätt skarp höger",
+        "pl": "Kontynuuj ostro w prawo",
+        "pt-BR": "Continue acentuadamente à direita",
+        "ru": "Двигайтесь направо",
+        "sv": "Fortsätt höger",
+        "uk": "Рухайтесь різко праворуч",
         "vi": "Chạy tiếp bên phải gắt",
         "zh-Hans": "继续向右"
     }

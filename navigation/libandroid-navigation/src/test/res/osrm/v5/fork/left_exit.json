@@ -1,0 +1,26 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "fork",
+            "modifier": "left"
+        },
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Links halten an der Gabelung auf Way Name",
+        "en": "Keep left at the fork onto Way Name",
+        "es": "Mantengase izquierda en el cruce en Way Name",
+        "fr": "Rester à gauche à l'embranchement sur Way Name",
+        "id": "Tetap kiri di pertigaan ke Way Name",
+        "it": "Mantieni la sinistra al bivio in Way Name",
+        "nl": "Ga links op de splitsing naar Way Name",
+        "pl": "Na rozwidleniu trzymaj się lewo na Way Name",
+        "pt-BR": "Mantenha-se à esquerda na bifurcação em Way Name",
+        "ru": "На развилке двигайтесь налево на Way Name",
+        "sv": "Håll till vänster in på Way Name",
+        "uk": "На роздоріжжі тримайтеся ліворуч і виїжджайте на Way Name",
+        "vi": "Đi bên trái ở ngã ba vào Way Name",
+        "zh-Hans": "在岔道保持向左，上Way Name"
+    }
+}

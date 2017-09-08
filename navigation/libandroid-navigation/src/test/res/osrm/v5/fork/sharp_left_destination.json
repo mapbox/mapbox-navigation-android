@@ -10,10 +10,16 @@
     "instructions": {
         "de": "Scharf links abbiegen an der Gabelung Richtung Destination 1",
         "en": "Take a sharp left at the fork towards Destination 1",
+        "es": "Gire a la izquierda en el cruce hacia Destination 1",
         "fr": "Prendre à gauche à l'embranchement en direction de Destination 1",
+        "id": "Belok kiri pada pertigaan menuju Destination 1",
+        "it": "Svolta a sinistra al bivio verso Destination 1",
         "nl": "Linksaf op de splitsing richting Destination 1",
-        "ru": "На развилке поверните резко налево и продолжайте движение в направлении Destination 1",
-        "sv": "Gör en skarp vänstersväng mot Destination 1",
+        "pl": "Na rozwidleniu skręć ostro w lewo w kierunku Destination 1",
+        "pt-BR": "Vire acentuadamente à esquerda na bifurcação sentido Destination 1",
+        "ru": "На развилке резко поверните налево и продолжите движение в направлении Destination 1",
+        "sv": "Sväng vänster mot Destination 1",
+        "uk": "На роздоріжжі різко поверніть ліворуч в напрямку Destination 1",
         "vi": "Quẹo gắt bên trái ở ngã ba đến Destination 1",
         "zh-Hans": "在岔道保持向左，前往Destination 1"
     }

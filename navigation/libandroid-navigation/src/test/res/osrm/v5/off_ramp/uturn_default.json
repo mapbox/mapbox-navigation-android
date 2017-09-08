@@ -7,12 +7,18 @@
         "name": ""
     },
     "instructions": {
-        "de": "Rampe nehmen",
+        "de": "Ausfahrt nehmen",
         "en": "Take the ramp",
+        "es": "Ve cuesta abajo",
         "fr": "Prendre la sortie",
+        "id": "Ambil jalan melandai",
+        "it": "Prendi la rampa",
         "nl": "Neem de afrit",
-        "ru": "Используйте съезд",
-        "sv": "Ta avfartrampen",
+        "pl": "Zjedź",
+        "pt-BR": "Pegue a rampa",
+        "ru": "Сверните на съезд",
+        "sv": "Ta avfarten",
+        "uk": "Рухайтесь на зʼїзд",
         "vi": "Đi đường nhánh",
         "zh-Hans": "上匝道"
     }

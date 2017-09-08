@@ -1,0 +1,27 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "continue",
+            "modifier": "straight"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Geradeaus weiterfahren Richtung Destination 1",
+        "en": "Continue towards Destination 1",
+        "es": "Continúe hacia Destination 1",
+        "fr": "Continuer tout droit en direction de Destination 1",
+        "id": "Terus menuju Destination 1",
+        "it": "Continua verso Destination 1",
+        "nl": "Ga rechtdoor richting Destination 1",
+        "pl": "Kontynuuj w kierunku Destination 1",
+        "pt-BR": "Continue até Destination 1",
+        "ru": "Продолжите движение в направлении Destination 1",
+        "sv": "Fortsätt mot Destination 1",
+        "uk": "Рухайтесь у напрямку Destination 1",
+        "vi": "Chạy tiếp đến Destination 1",
+        "zh-Hans": "继续直行行驶，前往Destination 1"
+    }
+}

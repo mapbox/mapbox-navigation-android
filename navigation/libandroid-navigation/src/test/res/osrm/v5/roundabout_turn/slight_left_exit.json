@@ -1,0 +1,26 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "roundabout turn",
+            "modifier": "slight left"
+        },
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Am Kreisverkehr leicht links auf Way Name",
+        "en": "At the roundabout make a slight left onto Way Name",
+        "es": "En la rotonda siga ligeramente a la izquierda en Way Name",
+        "fr": "Au rond-point, tourner légèrement à gauche sur Way Name",
+        "id": "Di bundaran, lakukan agak ke kiri ke arah Way Name",
+        "it": "Alla rotonda fai una sinistra leggermente in Way Name",
+        "nl": "Ga links op de rotonde naar Way Name",
+        "pl": "Na rondzie weź łagodnie w lewo na Way Name",
+        "pt-BR": "Na rotatória, vire ligeiramente à esquerda na Way Name",
+        "ru": "На круговой развязке двигайтесь левее на Way Name",
+        "sv": "I rondellen sväng vänster in på Way Name",
+        "uk": "На кільці плавно ліворуч на Way Name",
+        "vi": "Đi bên trái nghiêng tại vòng xuyến để vào Way Name",
+        "zh-Hans": "在环岛向左行驶，上Way Name"
+    }
+}

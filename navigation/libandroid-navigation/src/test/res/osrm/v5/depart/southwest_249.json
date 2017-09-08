@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Fahren Sie Richtung Südwesten",
         "en": "Head southwest",
+        "es": "Ve a suroeste",
         "fr": "Rouler vers le sud-ouest",
+        "id": "Arah barat daya",
+        "it": "Continua verso sud-ovest",
         "nl": "Vertrek in zuidwestelijke richting",
+        "pl": "Kieruj się południowy zachód",
+        "pt-BR": "Siga sudoeste",
         "ru": "Двигайтесь в юго-западном направлении",
         "sv": "Kör åt sydväst",
+        "uk": "Прямуйте на південний захід",
         "vi": "Đi về hướng tây nam",
         "zh-Hans": "出发向西南"
     }

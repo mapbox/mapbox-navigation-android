@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Geradeaus weiterfahren",
         "en": "Continue straight",
+        "es": "Continúe recto",
         "fr": "Continuer tout droit",
+        "id": "Lanjutkan lurus",
+        "it": "Continua a dritto",
         "nl": "Ga rechtdoor",
-        "ru": "Продолжайте движение прямо",
+        "pl": "Kontynuuj prosto",
+        "pt-BR": "Continue reto",
+        "ru": "Двигайтесь прямо",
         "sv": "Fortsätt rakt fram",
+        "uk": "Рухайтесь прямо",
         "vi": "Chạy tiếp bên thẳng",
         "zh-Hans": "继续直行"
     }

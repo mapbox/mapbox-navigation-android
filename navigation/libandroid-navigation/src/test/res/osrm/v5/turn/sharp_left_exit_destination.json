@@ -1,0 +1,27 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "turn",
+            "modifier": "sharp left"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Scharf links abbiegen Richtung Destination 1",
+        "en": "Make a sharp left towards Destination 1",
+        "es": "Siga cerrada a la izquierda hacia Destination 1",
+        "fr": "Tourner franchement à gauche en direction de Destination 1",
+        "id": "Lakukan tajam kiri menuju Destination 1",
+        "it": "Fai una sinistra verso Destination 1",
+        "nl": "Ga linksaf richting Destination 1",
+        "pl": "Ostro w lewo w kierunku Destination 1",
+        "pt-BR": "Siga acentuadamente à esquerda sentido Destination 1",
+        "ru": "Двигайтесь налево в направлении Destination 1",
+        "sv": "Sväng vänster mot Destination 1",
+        "uk": "Рухайтесь різко ліворуч в напрямку Destination 1",
+        "vi": "Quẹo trái gắt đến Destination 1",
+        "zh-Hans": "向左转弯，前往Destination 1"
+    }
+}

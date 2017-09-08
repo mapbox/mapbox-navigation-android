@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Scharf rechts abbiegen an der Gabelung auf Way Name",
         "en": "Take a sharp right at the fork onto Way Name",
+        "es": "Gire a la derecha en el cruce en Way Name",
         "fr": "Prendre à droite à l'embranchement sur Way Name",
+        "id": "Belok kanan pada pertigaan ke arah Way Name",
+        "it": "Svolta a destra al bivio in Way Name",
         "nl": "Rechtsaf op de splitsing naar Way Name",
-        "ru": "На развилке поверните резко направо на Way Name",
-        "sv": "Gör en skarp högersväng in på Way Name",
+        "pl": "Na rozwidleniu skręć ostro w prawo na Way Name",
+        "pt-BR": "Vire acentuadamente à direita na bifurcação em Way Name",
+        "ru": "На развилке резко поверните направо на Way Name",
+        "sv": "Sväng höger in på Way Name",
+        "uk": "На роздоріжжі різко поверніть праворуч на Way Name",
         "vi": "Quẹo gắt bên phải ở ngã ba vào Way Name",
         "zh-Hans": "在岔道保持向右，上Way Name"
     }

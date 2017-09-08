@@ -1,0 +1,31 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "continue",
+            "modifier": "right"
+        },
+        "name": "Cool highway",
+        "ref": "Ref1;Ref2"
+    },
+    "instructions": {
+        "de": "Rechts weiterfahren auf Ref1",
+        "en": "Turn right to stay on Ref1",
+        "es": "Continúe derecha en Ref1",
+        "fr": "Continuer à droite sur Ref1",
+        "id": "Terus kanan ke Ref1",
+        "it": "Continua a destra per stare su Ref1",
+        "nl": "Ga rechts naar Ref1",
+        "pl": "Kontynuuj prawo na Ref1",
+        "pt-BR": "Continue à direita em Ref1",
+        "ru": "Двигайтесь направо по Ref1",
+        "sv": "Fortsätt höger in på Ref1",
+        "uk": "Рухайтесь праворуч на Ref1",
+        "vi": "Chạy tiếp bên phải trên Ref1",
+        "zh-Hans": "继续向右，上Ref1"
+    },
+    "options": {
+        "classes": [
+            "motorway"
+        ]
+    }
+}

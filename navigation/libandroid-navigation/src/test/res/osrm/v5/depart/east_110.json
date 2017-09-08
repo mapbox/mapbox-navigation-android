@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Fahren Sie Richtung Osten",
         "en": "Head east",
+        "es": "Ve a este",
         "fr": "Rouler vers l'est",
+        "id": "Arah timur",
+        "it": "Continua verso est",
         "nl": "Vertrek in oostelijke richting",
+        "pl": "Kieruj się wschód",
+        "pt-BR": "Siga leste",
         "ru": "Двигайтесь в восточном направлении",
         "sv": "Kör åt öster",
+        "uk": "Прямуйте на схід",
         "vi": "Đi về hướng đông",
         "zh-Hans": "出发向东"
     }

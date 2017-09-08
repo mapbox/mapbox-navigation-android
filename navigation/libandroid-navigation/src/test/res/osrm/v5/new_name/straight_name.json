@@ -7,13 +7,19 @@
         "name": "Way Name"
     },
     "instructions": {
-        "de": "Geradeaus weiterfahren auf Way Name",
-        "en": "Continue straight onto Way Name",
+        "de": "Weiterfahren auf Way Name",
+        "en": "Continue onto Way Name",
+        "es": "Continúe en Way Name",
         "fr": "Continuer tout droit sur Way Name",
+        "id": "Lanjutkan lurus menuju Way Name",
+        "it": "Continua in Way Name",
         "nl": "Ga rechtdoor naar Way Name",
-        "ru": "Поверните прямо на Way Name",
-        "sv": "Fortsätt rakt fram på Way Name",
-        "vi": "Chạy tiếp bên thẳng trên Way Name",
+        "pl": "Kontynuuj prosto na Way Name",
+        "pt-BR": "Continue em Way Name",
+        "ru": "Продолжите движение по Way Name",
+        "sv": "Fortsätt in på Way Name",
+        "uk": "Продовжуйте рух по Way Name",
+        "vi": "Chạy tiếp trên Way Name",
         "zh-Hans": "继续直行，上Way Name"
     }
 }

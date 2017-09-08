@@ -1,0 +1,28 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "arrive"
+        },
+        "name": "Street Name"
+    },
+    "instructions": {
+        "de": "Sie haben Ihr erste Ziel erreicht",
+        "en": "You have arrived at your 1st destination",
+        "es": "Has llegado a tu 1ª destino",
+        "fr": "Vous êtes arrivés à votre première destination",
+        "id": "Anda telah tiba di tujuan ke-1",
+        "it": "Sei arrivato alla tua 1ª destinazione",
+        "nl": "Je bent gearriveerd op de 1e bestemming.",
+        "pl": "Dojechano do miejsca docelowego 1.",
+        "pt-BR": "Você chegou ao seu 1º destino",
+        "ru": "Вы прибыли в первый пункт назначения",
+        "sv": "Du är framme vid din 1:a destination",
+        "uk": "Ви прибули у ваш 1й пункт призначення",
+        "vi": "Đến nơi đầu tiên",
+        "zh-Hans": "您已经到达您的第一个目的地"
+    },
+    "options": {
+        "legIndex": 0,
+        "legCount": 2
+    }
+}

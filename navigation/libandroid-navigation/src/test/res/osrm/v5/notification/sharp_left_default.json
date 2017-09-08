@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Scharf links weiterfahren",
         "en": "Continue sharp left",
+        "es": "Continúe cerrada a la izquierda",
         "fr": "Continuer franchement à gauche",
+        "id": "Lanjutkan tajam kiri",
+        "it": "Continua a sinistra",
         "nl": "Ga linksaf",
-        "ru": "Продолжайте движение резко налево",
-        "sv": "Fortsätt skarp vänster",
+        "pl": "Kontynuuj ostro w lewo",
+        "pt-BR": "Continue acentuadamente à esquerda",
+        "ru": "Двигайтесь налево",
+        "sv": "Fortsätt vänster",
+        "uk": "Рухайтесь різко ліворуч",
         "vi": "Chạy tiếp bên trái gắt",
         "zh-Hans": "继续向左"
     }

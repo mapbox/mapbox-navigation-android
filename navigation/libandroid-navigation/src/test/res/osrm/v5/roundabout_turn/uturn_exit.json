@@ -1,0 +1,26 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "roundabout turn",
+            "modifier": "uturn"
+        },
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Am Kreisverkehr 180°-Wendung auf Way Name",
+        "en": "At the roundabout make a U-turn onto Way Name",
+        "es": "En la rotonda siga cambio de sentido en Way Name",
+        "fr": "Au rond-point, tourner demi-tour sur Way Name",
+        "id": "Di bundaran, lakukan putar balik ke arah Way Name",
+        "it": "Alla rotonda fai una inversione a U in Way Name",
+        "nl": "Ga omkeren op de rotonde naar Way Name",
+        "pl": "Na rondzie weź zawróć na Way Name",
+        "pt-BR": "Na rotatória, vire retorno na Way Name",
+        "ru": "На круговой развязке двигайтесь на разворот на Way Name",
+        "sv": "I rondellen sväng U-sväng in på Way Name",
+        "uk": "На кільці розворот на Way Name",
+        "vi": "Đi bên ngược tại vòng xuyến để vào Way Name",
+        "zh-Hans": "在环岛调头行驶，上Way Name"
+    }
+}

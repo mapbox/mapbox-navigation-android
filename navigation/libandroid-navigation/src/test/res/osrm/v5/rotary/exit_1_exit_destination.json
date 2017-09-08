@@ -1,0 +1,28 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "left",
+            "type": "rotary",
+            "exit": 1
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Im Kreisverkehr die erste Ausfahrt nehmen Richtung Destination 1",
+        "en": "Enter the rotary and take the 1st exit towards Destination 1",
+        "es": "Entra en la rotonda y toma la 1ª salida hacia Destination 1",
+        "fr": "Entrer dans le rond-point et prendre la première sortie en direction de Destination 1",
+        "id": "Masuk bundaran dan ambil jalan keluar 1 menuju Destination 1",
+        "it": "Immettiti nella rotonda e prendi la 1ª uscita verso  Destination 1",
+        "nl": "Ga het knooppunt op en neem afslag 1e richting Destination 1",
+        "pl": "Wjedź na rondo i wyjedź 1. zjazdem w kierunku Destination 1",
+        "pt-BR": "Entre na rotatória e saia na 1º saída sentido Destination 1",
+        "ru": "На круговой развязке сверните на первый съезд в направлении Destination 1",
+        "sv": "I rondellen ta 1:a avfarten mot Destination 1",
+        "uk": "Рухайтесь по колу та поверніть у 1й з'їзд у напрямку Destination 1",
+        "vi": "Đi vào bùng binh và ra tại đường đầu tiên đến Destination 1",
+        "zh-Hans": "进入环岛后从第一出口驶出前往Destination 1"
+    }
+}

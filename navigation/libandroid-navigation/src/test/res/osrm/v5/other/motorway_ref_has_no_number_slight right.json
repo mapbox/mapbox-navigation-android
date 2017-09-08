@@ -1,0 +1,31 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "continue",
+            "modifier": "slight right"
+        },
+        "name": "Cool highway",
+        "ref": "Ref no number"
+    },
+    "instructions": {
+        "de": "Leicht rechts weiter auf Cool highway",
+        "en": "Make a slight right to stay on Cool highway",
+        "es": "Continúe ligeramente a la derecha en Cool highway",
+        "fr": "Continuer légèrement à droite sur Cool highway",
+        "id": "Tetap agak di kanan ke Cool highway",
+        "it": "Continua leggermente a destra per stare su Cool highway",
+        "nl": "Rechts aanhouden naar Cool highway",
+        "pl": "Kontynuuj łagodnie w prawo na Cool highway",
+        "pt-BR": "Continue ligeiramente à direita em Cool highway",
+        "ru": "Плавно поверните направо на Cool highway",
+        "sv": "Fortsätt åt höger in på Cool highway",
+        "uk": "Рухайтесь плавно праворуч на Cool highway",
+        "vi": "Nghiêng về bên phải vào Cool highway",
+        "zh-Hans": "继续向右，上Cool highway"
+    },
+    "options": {
+        "classes": [
+            "motorway"
+        ]
+    }
+}

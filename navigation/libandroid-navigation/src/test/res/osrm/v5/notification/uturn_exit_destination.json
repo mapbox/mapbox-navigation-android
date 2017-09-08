@@ -1,0 +1,27 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "notification",
+            "modifier": "uturn"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "180°-Wendung Richtung Destination 1",
+        "en": "Make a U-turn towards Destination 1",
+        "es": "Haz un cambio de sentido hacia Destination 1",
+        "fr": "Fair demi-tour en direction de Destination 1",
+        "id": "Putar balik menuju Destination 1",
+        "it": "Fai un'inversione a U verso Destination 1",
+        "nl": "Keer om richting Destination 1",
+        "pl": "Zawróć w kierunku Destination 1",
+        "pt-BR": "Faça o retorno sentido Destination 1",
+        "ru": "Развернитесь и продолжите движение в направлении Destination 1",
+        "sv": "Gör en U-sväng mot Destination 1",
+        "uk": "Здійсніть розворот у напрямку Destination 1",
+        "vi": "Quẹo ngược lại đến Destination 1",
+        "zh-Hans": "调头，前往Destination 1"
+    }
+}

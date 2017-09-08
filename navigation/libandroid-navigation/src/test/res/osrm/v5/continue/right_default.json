@@ -8,11 +8,17 @@
     },
     "instructions": {
         "de": "Rechts weiterfahren",
-        "en": "Continue right",
+        "en": "Turn right",
+        "es": "Continúe derecha",
         "fr": "Continuer à droite",
+        "id": "Terus kanan",
+        "it": "Continua a destra",
         "nl": "Ga rechts",
-        "ru": "Продолжайте движение направо",
+        "pl": "Kontynuuj prawo",
+        "pt-BR": "Continue à direita",
+        "ru": "Двигайтесь направо",
         "sv": "Fortsätt höger",
+        "uk": "Рухайтесь праворуч",
         "vi": "Chạy tiếp bên phải",
         "zh-Hans": "继续向右"
     }

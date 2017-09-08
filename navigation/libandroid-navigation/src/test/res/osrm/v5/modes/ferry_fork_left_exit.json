@@ -1,0 +1,27 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "fork",
+            "modifier": "left"
+        },
+        "mode": "ferry",
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Fähre nehmen Way Name",
+        "en": "Take the ferry Way Name",
+        "es": "Coge el ferry Way Name",
+        "fr": "Prendre le ferry Way Name",
+        "id": "Naik ferry di Way Name",
+        "it": "Prendi il traghetto Way Name",
+        "nl": "Neem het veer Way Name",
+        "pl": "Weź prom Way Name",
+        "pt-BR": "Pegue a balsa Way Name",
+        "ru": "Погрузитесь на паром Way Name",
+        "sv": "Ta färjan på Way Name",
+        "uk": "Скористайтесь поромом Way Name",
+        "vi": "Lên phà Way Name",
+        "zh-Hans": "乘坐Way Name轮渡"
+    }
+}

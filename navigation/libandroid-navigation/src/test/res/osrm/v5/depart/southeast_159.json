@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Fahren Sie Richtung Südosten",
         "en": "Head southeast",
+        "es": "Ve a sureste",
         "fr": "Rouler vers le sud-est",
+        "id": "Arah tenggara",
+        "it": "Continua verso sud-est",
         "nl": "Vertrek in zuidoostelijke richting",
+        "pl": "Kieruj się południowy wschód",
+        "pt-BR": "Siga sudeste",
         "ru": "Двигайтесь в юго-восточном направлении",
         "sv": "Kör åt sydost",
+        "uk": "Прямуйте на південний схід",
         "vi": "Đi về hướng đông nam",
         "zh-Hans": "出发向东南"
     }

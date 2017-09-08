@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Rechts weiterfahren",
         "en": "Continue right",
+        "es": "Continúe derecha",
         "fr": "Continuer à droite",
+        "id": "Lanjutkan kanan",
+        "it": "Continua a destra",
         "nl": "Ga rechts",
-        "ru": "Поверните направо",
+        "pl": "Kontynuuj prawo",
+        "pt-BR": "Continue à direita",
+        "ru": "Двигайтесь направо",
         "sv": "Fortsätt höger",
+        "uk": "Рухайтесь праворуч",
         "vi": "Chạy tiếp bên phải",
         "zh-Hans": "继续向右"
     }
