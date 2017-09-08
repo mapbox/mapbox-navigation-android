@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.ui.v5;
+package com.mapbox.services.android.navigation.ui.v5.route;
 
 import android.content.res.TypedArray;
 import android.location.Location;
@@ -18,6 +18,7 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.services.Constants;
+import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -412,15 +413,15 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   /**
    * Layer id constants.
    */
-  static class NavigationMapLayers {
-    static final String NAVIGATION_ROUTE_SHIELD_LAYER = "mapbox-plugin-navigation-route-shield-layer";
-    static final String NAVIGATION_ROUTE_LAYER = "mapbox-plugin-navigation-route-layer";
+  public static class NavigationMapLayers {
+    public static final String NAVIGATION_ROUTE_SHIELD_LAYER = "mapbox-plugin-navigation-route-shield-layer";
+    public static final String NAVIGATION_ROUTE_LAYER = "mapbox-plugin-navigation-route-layer";
   }
 
   /**
    * Source id constants.
    */
-  static class NavigationMapSources {
-    static final String NAVIGATION_ROUTE_SOURCE = "mapbox-plugin-navigation-route-source";
+  public static class NavigationMapSources {
+    public static final String NAVIGATION_ROUTE_SOURCE = "mapbox-plugin-navigation-route-source";
   }
 }

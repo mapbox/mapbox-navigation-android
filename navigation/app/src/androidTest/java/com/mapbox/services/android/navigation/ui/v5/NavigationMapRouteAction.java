@@ -5,6 +5,7 @@ import android.support.test.espresso.ViewAction;
 import android.view.View;
 
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 
 import org.hamcrest.Matcher;
 

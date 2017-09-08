@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <View
+        android:id="@+id/sheetShadow"
+        android:layout_width="wrap_content"
+        android:layout_height="6dp"
+        android:animateLayoutChanges="true"
+        android:background="@drawable/gradient_shadow_up"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/navigationViewPrimary"
+        android:layout_below="@id/sheetShadow">
+
+        <ProgressBar
+            android:id="@+id/stepProgressBar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:max="10000"
+            android:progress="0"
+            android:progressDrawable="@drawable/progress_bar_background"
+            tools:progress="6000"/>
+
+        <include
+            layout="@layout/summary_peek_layout"
+            android:id="@+id/summaryPeekLayout"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_below="@id/stepProgressBar"/>
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_marginTop="2dp"
+            android:layout_height="1dp"
+            android:background="@color/md_grey_200"
+            android:layout_below="@id/summaryPeekLayout"/>
+
+        <View
+            android:id="@+id/rvShadow"
+            android:layout_width="wrap_content"
+            android:layout_height="6dp"
+            android:layout_below="@id/divider"
+            android:visibility="gone"
+            android:background="@drawable/gradient_shadow_down"/>
+
+        <include
+            android:id="@+id/summaryOptions"
+            layout="@layout/summary_options_layout"
+            android:layout_below="@id/divider"
+            android:visibility="visible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <include
+            android:id="@+id/summaryDirections"
+            layout="@layout/summary_directions_layout"
+            android:layout_below="@id/divider"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -10,6 +10,7 @@ android {
     versionCode 1
     versionName "0.3.1"
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    vectorDrawables.useSupportLibrary = true
   }
   configurations {
     javadocDeps
@@ -30,9 +31,18 @@ dependencies {
 
   // Support libraries
   compile rootProject.ext.dep.supportAppcompatV7
+  compile rootProject.ext.dep.supportDesign
+  compile rootProject.ext.dep.supportRecyclerView
+  compile rootProject.ext.dep.supportConstraintLayout
+
+  // Mapbox plugins
+  compile rootProject.ext.dep.locationLayerPlugin
 
   // Logging
   compile rootProject.ext.dep.timber
+
+  // AWS Polly
+  compile rootProject.ext.dep.polly
 
   javadocDeps rootProject.ext.dep.mapboxMapSdk
 
