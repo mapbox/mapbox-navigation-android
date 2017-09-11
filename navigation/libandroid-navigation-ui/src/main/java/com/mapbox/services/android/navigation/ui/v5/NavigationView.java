@@ -25,6 +25,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackDialog;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
@@ -161,9 +162,11 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   @Override
   public void onScroll() {
-    summaryBehavior.setHideable(true);
-    summaryBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-    camera.setCameraTrackingLocation(false);
+    if (!summaryBehavior.isHideable()) {
+      summaryBehavior.setHideable(true);
+      summaryBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+      camera.setCameraTrackingLocation(false);
+    }
   }
 
   @SuppressWarnings({"MissingPermission"})
@@ -261,6 +264,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     soundFab.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
+        new FeedbackDialog(NavigationView.this).show();
         instructionPlayer.setMuted(instructionView.toggleMute());
       }
     });
