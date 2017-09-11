@@ -42,7 +42,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
-    navigation = new MapboxNavigation(mock(Context.class));
+    navigation = new MapboxNavigation(mock(Context.class), "PK.XXX");
     navigationEventDispatcher = navigation.getEventDispatcher();
   }
 

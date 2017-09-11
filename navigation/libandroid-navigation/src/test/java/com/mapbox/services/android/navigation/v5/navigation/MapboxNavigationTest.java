@@ -31,14 +31,15 @@ public class MapboxNavigationTest extends BaseTest {
 
   @Before
   public void setUp() throws Exception {
-    navigation = new MapboxNavigation(mock(Context.class));
+    navigation = new MapboxNavigation(mock(Context.class), "PK.XXX");
   }
 
   @Test
   public void sanityTest() {
     assertNotNull("should not be null", navigation);
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().build();
-    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class), options);
+    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
+      "PK.XXX", options);
     assertNotNull("should not be null", navigationWithOptions);
   }
 
@@ -50,7 +51,8 @@ public class MapboxNavigationTest extends BaseTest {
   @Test
   public void defaultMilestones_onInitializationDoNotGetAdded() throws Exception {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
-    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class), options);
+    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
+      "PK.XXX", options);
     assertEquals(0, navigationWithOptions.getMilestones().size());
   }
 
@@ -78,7 +80,8 @@ public class MapboxNavigationTest extends BaseTest {
   @Test
   public void addMilestone_milestoneOnlyGetsAddedOnce() throws Exception {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
-    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class), options);
+    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
+      "PK.XXX", options);
     Milestone milestone = new StepMilestone.Builder().build();
     navigationWithOptions.addMilestone(milestone);
     navigationWithOptions.addMilestone(milestone);
@@ -88,7 +91,8 @@ public class MapboxNavigationTest extends BaseTest {
   @Test
   public void removeMilestone_milestoneDidGetRemoved() throws Exception {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
-    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class), options);
+    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
+      "PK.XXX", options);
     Milestone milestone = new StepMilestone.Builder().build();
     navigationWithOptions.addMilestone(milestone);
     assertEquals(1, navigationWithOptions.getMilestones().size());
@@ -99,7 +103,8 @@ public class MapboxNavigationTest extends BaseTest {
   @Test
   public void removeMilestone_milestoneDoesNotExist() throws Exception {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
-    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class), options);
+    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
+      "PK.XXX", options);
     Milestone milestone = new StepMilestone.Builder().build();
     navigationWithOptions.addMilestone(new StepMilestone.Builder().build());
     navigationWithOptions.removeMilestone(milestone);
@@ -109,7 +114,8 @@ public class MapboxNavigationTest extends BaseTest {
   @Test
   public void removeMilestone_nullRemovesAllMilestones() throws Exception {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
-    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class), options);
+    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
+      "PK.XXX", options);
     navigationWithOptions.addMilestone(new StepMilestone.Builder().build());
     navigationWithOptions.addMilestone(new StepMilestone.Builder().build());
     navigationWithOptions.addMilestone(new StepMilestone.Builder().build());
@@ -122,7 +128,8 @@ public class MapboxNavigationTest extends BaseTest {
   @Test
   public void removeMilestone_correctMilestoneWithIdentifierGetsRemoved() throws Exception {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
-    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class), options);
+    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
+      "PK.XXX", options);
     Milestone milestone = new StepMilestone.Builder().setIdentifier(5678).build();
     navigationWithOptions.addMilestone(milestone);
     assertEquals(1, navigationWithOptions.getMilestones().size());
@@ -133,7 +140,8 @@ public class MapboxNavigationTest extends BaseTest {
   @Test
   public void removeMilestone_noMilestoneWithIdentifierFound() throws Exception {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
-    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class), options);
+    MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
+      "PK.XXX", options);
     navigationWithOptions.addMilestone(new StepMilestone.Builder().build());
     assertEquals(1, navigationWithOptions.getMilestones().size());
     navigationWithOptions.removeMilestone(5678);

@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.content.Context;
 import android.location.Location;
 
 import com.google.gson.Gson;
@@ -21,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.List;
@@ -29,10 +29,9 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class)
+@Config(constants = BuildConfig.class, sdk = 25)
 public class NavigationHelperTest extends BaseTest {
 
   // Fixtures
@@ -102,7 +101,8 @@ public class NavigationHelperTest extends BaseTest {
       .build();
     MapboxNavigationOptions options = MapboxNavigationOptions.builder()
       .defaultMilestonesEnabled(false).build();
-    MapboxNavigation mapboxNavigation = new MapboxNavigation(mock(Context.class), options);
+    MapboxNavigation mapboxNavigation = new MapboxNavigation(RuntimeEnvironment.application,
+      "pk.XXX", options);
     mapboxNavigation.addMilestone(new StepMilestone.Builder()
       .setTrigger(Trigger.eq(TriggerProperty.STEP_INDEX, 0))
       .setIdentifier(1001).build());
