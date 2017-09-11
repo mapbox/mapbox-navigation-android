@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.snap;
 
 import android.location.Location;
+import android.support.annotation.Nullable;
 
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
@@ -11,7 +12,6 @@ import com.mapbox.services.commons.geojson.Feature;
 import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
-import com.mapbox.services.commons.utils.PolylineUtils;
 
 import java.util.List;
 
@@ -28,10 +28,10 @@ import static com.mapbox.services.Constants.PRECISION_6;
 public class SnapToRoute extends Snap {
 
   @Override
-  public Location getSnappedLocation(Location location, RouteProgress routeProgress) {
+  public Location getSnappedLocation(Location location, RouteProgress routeProgress,
+                                     @Nullable List<Position> coords) {
     Location snappedLocation = new Location(String.format("%s-snapped", location.getProvider()));
-    snappedLocation = snapLocationLatLng(location, snappedLocation,
-      routeProgress.currentLegProgress().currentStep().getGeometry());
+    snappedLocation = snapLocationLatLng(location, snappedLocation, coords);
     snappedLocation.setBearing(snapLocationBearing(routeProgress));
     return snappedLocation;
   }
@@ -42,18 +42,15 @@ public class SnapToRoute extends Snap {
    *
    * @param location        the raw location
    * @param snappedLocation new Location object representing the snapped position
-   * @param stepGeometry    the navigation session's current step
+   * @param coords          the list of step geometry coordinates
    * @return the altered user location
    * @since 0.4.0
    */
   private static Location snapLocationLatLng(Location location, Location snappedLocation,
-                                             String stepGeometry) {
+                                             List<Position> coords) {
     Point locationToPoint = Point.fromCoordinates(
       new double[] {location.getLongitude(), location.getLatitude()}
     );
-
-    // Decode the geometry
-    List<Position> coords = PolylineUtils.decode(stepGeometry, PRECISION_6);
 
     // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
     // Point on the LineString.
