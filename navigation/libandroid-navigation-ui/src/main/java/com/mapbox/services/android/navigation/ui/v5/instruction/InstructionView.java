@@ -30,9 +30,6 @@ import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbrev
 
 public class InstructionView extends RelativeLayout implements ProgressChangeListener, OffRouteListener {
 
-  private static final String UNMUTED = "Unmuted";
-  private static final String MUTED = "Muted";
-
   private ImageView maneuverImage;
   private TextView stepDistanceText;
   private TextView stepInstructionText;
@@ -134,7 +131,7 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
 
   private boolean mute() {
     isMuted = true;
-    setSoundChipText(MUTED);
+    setSoundChipText(getContext().getString(R.string.muted));
     showSoundChip();
     soundFabOff();
     return isMuted;
@@ -142,7 +139,7 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
 
   private boolean unmute() {
     isMuted = false;
-    setSoundChipText(UNMUTED);
+    setSoundChipText(getContext().getString(R.string.unmuted));
     showSoundChip();
     soundFabOn();
     return isMuted;

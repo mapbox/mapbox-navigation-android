@@ -18,7 +18,6 @@ import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.location.LocationSource;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -51,8 +50,6 @@ import java.util.HashMap;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static com.mapbox.services.android.telemetry.location.LocationEnginePriority.HIGH_ACCURACY;
 
 public class NavigationView extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnScrollListener,
   LocationEngineListener, ProgressChangeListener, OffRouteListener,
@@ -142,12 +139,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
-    if (navigation != null) {
-      navigation.onDestroy();
-    }
-    if (instructionPlayer != null) {
-      instructionPlayer.onDestroy();
-    }
+    shutdownNavigation();
   }
 
   @Override
@@ -200,6 +192,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
     instructionPlayer.play(instruction);
+    if (identifier == NavigationConstants.ARRIVAL_MILESTONE) {
+      finish();
+    }
   }
 
   @Override
@@ -216,9 +211,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable t) {
-    // TODO Send message
-  }
+  public void onFailure(Call<DirectionsResponse> call, Throwable t) {}
 
   private void bind() {
     mapView = findViewById(R.id.mapView);
@@ -246,18 +239,14 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     cancelBtn.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        // TODO Finish with cancelled result code
         finish();
       }
     });
     expandArrow.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        if (summaryBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-          summaryBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        } else {
-          summaryBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        }
+        summaryBehavior.setState(summaryBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED
+          ? BottomSheetBehavior.STATE_EXPANDED : BottomSheetBehavior.STATE_COLLAPSED);
       }
     });
     recenterBtn.setOnClickListener(new View.OnClickListener() {
@@ -344,10 +333,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @SuppressWarnings({"MissingPermission"})
   private void initLocation() {
     if (!shouldSimulateRoute()) {
-      locationEngine = new LocationSource(this);
-      locationEngine.setPriority(HIGH_ACCURACY);
-      locationEngine.setInterval(0);
-      locationEngine.setFastestInterval(1000);
+      locationEngine = navigation.getLocationEngine();
       locationEngine.addLocationEngineListener(this);
       locationEngine.activate();
 
@@ -360,7 +346,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   private void initRoute() {
-    mapRoute = new NavigationMapRoute(mapView, map);
+    mapRoute = new NavigationMapRoute(mapView, map, NavigationConstants.ROUTE_BELOW_LAYER);
   }
 
   private void initCamera() {
@@ -473,5 +459,31 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     locationEngine = new MockLocationEngine(1000, 30, false);
     ((MockLocationEngine) locationEngine).setRoute(route);
     locationEngine.activate();
+  }
+
+  private void shutdownNavigation() {
+    deactivateNavigation();
+    deactivateLocationEngine();
+    deactivateInstructionPlayer();
+  }
+
+  private void deactivateInstructionPlayer() {
+    if (instructionPlayer != null) {
+      instructionPlayer.onDestroy();
+    }
+  }
+
+  private void deactivateNavigation() {
+    if (navigation != null) {
+      navigation.onDestroy();
+    }
+  }
+
+  private void deactivateLocationEngine() {
+    if (locationEngine != null) {
+      locationEngine.removeLocationUpdates();
+      locationEngine.removeLocationEngineListener(this);
+      locationEngine.deactivate();
+    }
   }
 }

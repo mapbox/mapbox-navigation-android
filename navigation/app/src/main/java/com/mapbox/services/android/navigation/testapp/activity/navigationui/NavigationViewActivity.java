@@ -36,6 +36,9 @@ import com.mapbox.services.commons.models.Position;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -53,9 +56,14 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private NavigationMapRoute mapRoute;
   private MapboxMap mapboxMap;
 
-  private MapView mapView;
-  private Button launchRouteBtn;
-  private ProgressBar loading;
+  @BindView(R.id.mapView)
+  MapView mapView;
+  @BindView(R.id.launchRouteBtn)
+  Button launchRouteBtn;
+  @BindView(R.id.loading)
+  ProgressBar loading;
+  @BindView(R.id.launchCoordinatesBtn)
+  Button launchCoordinatesBtn;
 
   private Marker currentMarker;
   private Position currentPosition;
@@ -68,17 +76,9 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_navigation_view);
-    mapView = findViewById(R.id.mapView);
+    ButterKnife.bind(this);
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
-    loading = findViewById(R.id.loading);
-    launchRouteBtn = findViewById(R.id.launchRouteBtn);
-    launchRouteBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        launchNavigationWithRoute();
-      }
-    });
   }
 
   @SuppressWarnings({"MissingPermission"})
@@ -118,7 +118,6 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
-
   @Override
   protected void onDestroy() {
     super.onDestroy();
@@ -129,6 +128,16 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
+  }
+
+  @OnClick(R.id.launchRouteBtn)
+  public void onRouteLaunchClick() {
+    launchNavigationWithRoute();
+  }
+
+  @OnClick(R.id.launchCoordinatesBtn)
+  public void onCoordinatesLaunchClick() {
+    launchNavigationWithCoordinates();
   }
 
   @Override
@@ -143,6 +152,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onMapLongClick(@NonNull LatLng point) {
     destination = Position.fromCoordinates(point.getLongitude(), point.getLatitude());
+    launchCoordinatesBtn.setEnabled(true);
     launchRouteBtn.setEnabled(false);
     loading.setVisibility(View.VISIBLE);
     setCurrentMarkerPosition(point);
@@ -217,7 +227,14 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private void launchNavigationWithRoute() {
     if (route != null) {
       NavigationLauncher.startNavigation(this, route,
-        "us-east-1:9f5d6efc-9dd0-4b94-997d-938a1f6cb9cf", true);
+        null, true);
+    }
+  }
+
+  private void launchNavigationWithCoordinates() {
+    if (currentPosition != null && destination != null) {
+      NavigationLauncher.startNavigation(this, currentPosition, destination,
+        null, true);
     }
   }
 

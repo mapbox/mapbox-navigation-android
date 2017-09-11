@@ -30,14 +30,12 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
   public DirectionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext())
       .inflate(R.layout.direction_viewholder_layout, parent, false);
-
     return new DirectionViewHolder(view);
   }
 
   @Override
   public void onBindViewHolder(DirectionViewHolder holder, int position) {
     LegStep legStep = legSteps.get(position);
-
     holder.instructionText.setText(StringAbbreviator.abbreviate(legStep.getManeuver().getInstruction()));
     holder.directionIcon.setImageResource(ManeuverUtils.getManeuverResource(legStep));
 
