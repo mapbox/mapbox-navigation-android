@@ -146,7 +146,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   private static void validateAccessToken(String accessToken) {
     if (TextUtils.isEmpty(accessToken) || (!accessToken.toLowerCase(Locale.US).startsWith("pk.")
       && !accessToken.toLowerCase(Locale.US).startsWith("sk."))) {
-      throw new NavigationException("A valid access token must be passed into the ");
+      throw new NavigationException("A valid access token must be passed in when first initializing"
+        + " MapboxNavigation");
     }
   }
 
