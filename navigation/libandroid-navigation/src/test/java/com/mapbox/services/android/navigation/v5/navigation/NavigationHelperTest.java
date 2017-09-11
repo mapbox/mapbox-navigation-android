@@ -86,29 +86,29 @@ public class NavigationHelperTest extends BaseTest {
     assertEquals(0, newIndices.stepIndex());
   }
 
-//  @Test
-//  public void checkMilestones_onlyTriggeredMilestonesGetReturned() throws Exception {
-//    RouteProgress routeProgress = routeProgressBuilder
-//      .legIndex(0)
-//      .stepIndex(0)
-//      .build();
-//    MapboxNavigationOptions options = MapboxNavigationOptions.builder()
-//      .defaultMilestonesEnabled(false).build();
-//    MapboxNavigation mapboxNavigation = new MapboxNavigation(
-//      RuntimeEnvironment.application.getApplicationContext(), "pk.XXX", options);
-//    mapboxNavigation.addMilestone(new StepMilestone.Builder()
-//      .setTrigger(Trigger.eq(TriggerProperty.STEP_INDEX, 0))
-//      .setIdentifier(1001).build());
-//    mapboxNavigation.addMilestone(new StepMilestone.Builder()
-//      .setTrigger(Trigger.eq(TriggerProperty.STEP_INDEX, 4))
-//      .setIdentifier(1002).build());
-//
-//    List<Milestone> triggeredMilestones
-//      = checkMilestones(routeProgress, routeProgress, mapboxNavigation);
-//    assertEquals(1, triggeredMilestones.size());
-//    assertEquals(1001, triggeredMilestones.get(0).getIdentifier());
-//    assertNotSame(1002, triggeredMilestones.get(0).getIdentifier());
-//  }
+  //  @Test
+  //  public void checkMilestones_onlyTriggeredMilestonesGetReturned() throws Exception {
+  //    RouteProgress routeProgress = routeProgressBuilder
+  //      .legIndex(0)
+  //      .stepIndex(0)
+  //      .build();
+  //    MapboxNavigationOptions options = MapboxNavigationOptions.builder()
+  //      .defaultMilestonesEnabled(false).build();
+  //    MapboxNavigation mapboxNavigation = new MapboxNavigation(
+  //      RuntimeEnvironment.application.getApplicationContext(), "pk.XXX", options);
+  //    mapboxNavigation.addMilestone(new StepMilestone.Builder()
+  //      .setTrigger(Trigger.eq(TriggerProperty.STEP_INDEX, 0))
+  //      .setIdentifier(1001).build());
+  //    mapboxNavigation.addMilestone(new StepMilestone.Builder()
+  //      .setTrigger(Trigger.eq(TriggerProperty.STEP_INDEX, 4))
+  //      .setIdentifier(1002).build());
+  //
+  //    List<Milestone> triggeredMilestones
+  //      = checkMilestones(routeProgress, routeProgress, mapboxNavigation);
+  //    assertEquals(1, triggeredMilestones.size());
+  //    assertEquals(1001, triggeredMilestones.get(0).getIdentifier());
+  //    assertNotSame(1002, triggeredMilestones.get(0).getIdentifier());
+  //  }
 
   @Test
   public void stepDistanceRemaining_returnsZeroWhenPositionsEqualEachOther() throws Exception {
