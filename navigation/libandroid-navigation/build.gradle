@@ -16,7 +16,7 @@ android {
 
     buildConfigField('String', 'MAPBOX_NAVIGATION_VERSION_NAME', "\"${VERSION_NAME}\"")
     buildConfigField "String", "MAPBOX_NAVIGATION_EVENTS_USER_AGENT",
-        String.format("\"MapboxEventsAndroid/%s\"", project.VERSION_NAME)
+        String.format("\"mapbox-navigation-android/%s\"", project.VERSION_NAME)
   }
 
   compileOptions {

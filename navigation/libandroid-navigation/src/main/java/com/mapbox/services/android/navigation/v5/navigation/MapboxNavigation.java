@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.services.android.location.LostLocationEngine;
+import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -24,10 +25,12 @@ import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
+import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.utils.TextUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,6 +54,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   private MapboxNavigationOptions options;
   private LocationEngine locationEngine;
   private List<Milestone> milestones;
+  private SessionState sessionState;
   private final String accessToken;
   private OffRoute offRouteEngine;
   private Snap snapEngine;
@@ -323,10 +327,26 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     this.directionsRoute = directionsRoute;
     Timber.d("MapboxNavigation startNavigation called.");
     if (!isBound) {
+      // Navigation sessions initially starting
+      sessionState = SessionState.builder()
+        .originalDirectionRoute(directionsRoute)
+        .currentDirectionRoute(directionsRoute)
+        .sessionIdentifier(TelemetryUtils.buildUUID())
+        .startTimestamp(new Date())
+        .rerouteCount(0)
+        .mockLocation(locationEngine instanceof MockLocationEngine)
+        .build();
+
       Intent intent = getServiceIntent();
       context.startService(intent);
       context.bindService(intent, this, Context.BIND_AUTO_CREATE);
       navigationEventDispatcher.onNavigationEvent(true);
+    } else {
+      // New directionRoute provided
+      sessionState = sessionState.toBuilder()
+        .currentDirectionRoute(directionsRoute)
+        .rerouteCount(sessionState.rerouteCount() + 1)
+        .build();
     }
   }
 
@@ -576,7 +596,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    NavigationMetricsWrapper.arriveEvent(routeProgress, location);
+    sessionState = sessionState.toBuilder().arrivalTimestamp(new Date()).build();
+    NavigationMetricsWrapper.arriveEvent(sessionState, routeProgress, location);
     endNavigation();
   }
 
@@ -594,6 +615,10 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   NavigationEventDispatcher getEventDispatcher() {
     return navigationEventDispatcher;
+  }
+
+  SessionState getSessionState() {
+    return sessionState;
   }
 
   private Intent getServiceIntent() {

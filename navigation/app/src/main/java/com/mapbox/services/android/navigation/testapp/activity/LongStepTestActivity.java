@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.google.gson.Gson;
+import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -62,7 +63,7 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
       .snapToRoute(false)
       .enableOffRouteDetection(false)
       .build();
-    navigation = new MapboxNavigation(this, options);
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken(), options);
     navigation.addProgressChangeListener(this);
     locationEngine = new MockLocationEngine();
     locationEngine.activate();

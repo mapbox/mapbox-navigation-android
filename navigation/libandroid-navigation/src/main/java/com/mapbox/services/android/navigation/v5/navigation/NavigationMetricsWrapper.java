@@ -6,53 +6,52 @@ import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
-import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
+
+import java.util.Date;
 
 class NavigationMetricsWrapper {
 
-  private static final String UUID = TelemetryUtils.buildUUID();
-
-  static void arriveEvent(RouteProgress routeProgress, Location location) {
+  static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildArriveEvent(
-      BuildConfig.APPLICATION_ID, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, UUID,
-      location.getLatitude(), location.getLongitude(),
-      routeProgress.directionsRoute().getGeometry(), null,
+      "mapbox-navigation-android", BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
+      sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
+      routeProgress.directionsRoute().getGeometry(), "",
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
-      -1, null, (int) routeProgress.distanceTraveled(), false,
-      null, null, null,
-      -1, -1, null, -1,
-      -1
+      sessionState.rerouteCount(), sessionState.startTimestamp(), (int) routeProgress.distanceTraveled(),
+      sessionState.mockLocation(),"null", "null",
+      sessionState.originalGeometry(), sessionState.originalDistance(),
+      sessionState.originalDuration(), "null", sessionState.currentStepCount(),
+      sessionState.originalStepCount()
     ));
   }
 
-  static void cancelEvent(RouteProgress routeProgress, Location location) {
+  static void cancelEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildCancelEvent(
-      BuildConfig.APPLICATION_ID, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, UUID,
+      BuildConfig.APPLICATION_ID, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(),
       location.getLatitude(), location.getLongitude(),
-      routeProgress.directionsRoute().getGeometry(), null,
+      routeProgress.directionsRoute().getGeometry(), "",
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
-      -1, null, (int) routeProgress.distanceTraveled(),
+      sessionState.rerouteCount(), sessionState.startTimestamp(), (int) routeProgress.distanceTraveled(),
       (int) routeProgress.distanceRemaining(), (int) routeProgress.durationRemaining(),
-      false,
-      null, null, null,
-      -1, -1, null, null,
-      -1, -1
+      sessionState.mockLocation(),
+      "null", "null", sessionState.originalGeometry(),
+      sessionState.originalDistance(), sessionState.originalDuration(), "null",
+      new Date(), sessionState.currentStepCount(), sessionState.originalStepCount()
     ));
   }
 
-  static void departEvent(RouteProgress routeProgress, Location location) {
-
+  static void departEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildDepartEvent(
-      BuildConfig.APPLICATION_ID, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, UUID,
-      location.getLatitude(), location.getLongitude(),
-      routeProgress.directionsRoute().getGeometry(), null,
+      BuildConfig.APPLICATION_ID, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
+      sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
+      routeProgress.directionsRoute().getGeometry(), "",
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
-      -1, false, null, null,
-      null, -1, -1,
-      null, -1, -1
+      sessionState.rerouteCount(), sessionState.mockLocation(), "null", "null",
+      sessionState.originalGeometry(), sessionState.originalDistance(), sessionState.originalDuration(),
+      "null", sessionState.currentStepCount(), sessionState.originalStepCount()
     ));
   }
 
