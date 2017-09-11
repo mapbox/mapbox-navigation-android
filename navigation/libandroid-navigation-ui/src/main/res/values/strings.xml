@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rerouting">Rerouting…</string>
+    <string name="directions">Directions</string>
+    <string name="navigation_guidance_day_v2"
+            translatable="false">mapbox://styles/mapbox/navigation-guidance-day-v2</string>
+    <string name="re_center">Re-Center</string>
+    <string name="muted">Muted</string>
+    <string name="unmuted">Unmuted</string>
+</resources>

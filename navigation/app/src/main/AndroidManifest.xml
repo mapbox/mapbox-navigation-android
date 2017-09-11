@@ -65,5 +65,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
+
+        <activity
+            android:name=".activity.navigationui.NavigationViewActivity"
+            android:label="@string/title_navigation_view_ui">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
     </application>
 </manifest>

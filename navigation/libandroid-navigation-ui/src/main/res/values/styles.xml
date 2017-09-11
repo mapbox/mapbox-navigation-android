@@ -11,4 +11,11 @@
         <!-- Scales -->
         <item name="routeScale">1.0</item>
     </style>
+
+    <style name="NavigationView" parent="Theme.AppCompat.NoActionBar">
+        <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary</item>
+        <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary</item>
+        <item name="navigationViewAccent">@color/mapbox_navigation_view_color_accent</item>
+    </style>
+
 </resources>

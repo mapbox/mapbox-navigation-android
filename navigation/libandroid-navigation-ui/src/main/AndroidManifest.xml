@@ -1,4 +1,13 @@
 <manifest
-    package="com.mapbox.services.android.navigation.ui.v5">
+    package="com.mapbox.services.android.navigation.ui.v5"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name=".NavigationView"
+            android:screenOrientation="portrait"
+            android:theme="@style/NavigationView"/>
+    </application>
+
 </manifest>
 

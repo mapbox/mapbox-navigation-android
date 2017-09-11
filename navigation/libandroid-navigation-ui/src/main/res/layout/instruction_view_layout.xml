@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/instructionViewLayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:keepScreenOn="true">
+
+    <include layout="@layout/instruction_layout"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:id="@+id/instructionLayout"/>
+
+    <include layout="@layout/turn_lane_layout"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:layout_marginTop="-8dp"
+             android:layout_below="@id/instructionLayout"
+             android:id="@+id/turnLaneLayout"/>
+
+    <include layout="@layout/sound_layout"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:layout_below="@id/turnLaneLayout"
+             android:id="@+id/soundLayout"/>
+
+</RelativeLayout>
