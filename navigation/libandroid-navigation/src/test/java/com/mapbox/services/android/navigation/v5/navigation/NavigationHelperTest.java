@@ -113,31 +113,29 @@ public class NavigationHelperTest extends BaseTest {
   @Test
   public void stepDistanceRemaining_returnsZeroWhenPositionsEqualEachOther() throws Exception {
     Position snappedPosition = Position.fromCoordinates(new double[] {-77.062996, 38.798405});
-    double distance = NavigationHelper.stepDistanceRemaining(snappedPosition, 0, 1, route);
+    List<Position> coordinates = PolylineUtils.decode(
+      route.getLegs().get(0).getSteps().get(1).getGeometry(), Constants.PRECISION_6);
+    double distance = NavigationHelper.stepDistanceRemaining(snappedPosition, 0,
+      1, route, coordinates);
     assertEquals(0.0, distance);
   }
 
   @Test
   public void nextManeuverPosition_correctlyReturnsNextManeuverPosition() throws Exception {
-    Position nextManeuver = NavigationHelper.nextManeuverPosition(0, route.getLegs().get(0).getSteps());
+    List<Position> coordinates = PolylineUtils.decode(
+      route.getLegs().get(0).getSteps().get(0).getGeometry(), Constants.PRECISION_6);
+    Position nextManeuver = NavigationHelper.nextManeuverPosition(0,
+      route.getLegs().get(0).getSteps(), coordinates);
     assertTrue(nextManeuver.equals(route.getLegs().get(0).getSteps().get(1).getManeuver().asPosition()));
   }
 
   @Test
   public void nextManeuverPosition_correctlyReturnsNextManeuverPositionInNextLeg() throws Exception {
     int stepIndex = route.getLegs().get(0).getSteps().size() - 1;
-    Position nextManeuver = NavigationHelper.nextManeuverPosition(stepIndex, route.getLegs().get(0).getSteps());
+    List<Position> coordinates = PolylineUtils.decode(
+      route.getLegs().get(0).getSteps().get(stepIndex).getGeometry(), Constants.PRECISION_6);
+    Position nextManeuver = NavigationHelper.nextManeuverPosition(stepIndex,
+      route.getLegs().get(0).getSteps(), coordinates);
     assertTrue(nextManeuver.equals(route.getLegs().get(1).getSteps().get(0).getManeuver().asPosition()));
-  }
-
-  @Test
-  public void nextManeuverPosition_acquireNextManeuverPositionByDecodingGeometry() throws Exception {
-    Position nextManeuver = NavigationHelper.nextManeuverPosition(
-      route.getLegs().get(1).getSteps().size() - 1, route.getLegs().get(1).getSteps());
-
-    String geometry = route.getLegs().get(1).getSteps().get(route.getLegs().get(1).getSteps().size() - 1).getGeometry();
-    List<Position> positions = PolylineUtils.decode(geometry, Constants.PRECISION_6);
-    Position lastPosition = positions.get(positions.size() - 1);
-    assertTrue(nextManeuver.equals(lastPosition));
   }
 }

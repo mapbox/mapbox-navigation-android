@@ -102,7 +102,7 @@ public class SnapToRouteActivity extends AppCompatActivity implements OnMapReady
       }
     });
 
-    mapView = (MapView) findViewById(R.id.mapview);
+    mapView = findViewById(R.id.mapview);
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
   }
@@ -133,8 +133,9 @@ public class SnapToRouteActivity extends AppCompatActivity implements OnMapReady
       .stepDistanceRemaining(currentRoute.getLegs().get(0).getSteps().get(stepCount).getDistance())
       .build();
 
+    List<Position> positions = PolylineUtils.decode(currentRoute.getGeometry(), Constants.PRECISION_6);
     SnapToRoute snapToRoute = new SnapToRoute();
-    Location snappedLocation = snapToRoute.getSnappedLocation(location, routeProgress);
+    Location snappedLocation = snapToRoute.getSnappedLocation(location, routeProgress, positions);
 
     if (snappedLocation == null) {
       Log.i(TAG, "snappedLocation is null");
