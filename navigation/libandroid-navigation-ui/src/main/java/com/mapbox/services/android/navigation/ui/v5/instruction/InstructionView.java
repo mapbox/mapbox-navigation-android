@@ -32,8 +32,6 @@ import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbrev
 
 import java.text.DecimalFormat;
 
-import timber.log.Timber;
-
 public class InstructionView extends RelativeLayout implements ProgressChangeListener, OffRouteListener {
 
   private ImageView maneuverImage;
@@ -209,7 +207,6 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
 
   private void addManeuverImage(InstructionModel model) {
     if (currentManeuverId != model.getManeuverImage()) {
-      Timber.d("Util: Maneuver Image Update");
       currentManeuverId = model.getManeuverImage();
       maneuverImage.setImageResource(model.getManeuverImage());
     }
@@ -217,10 +214,8 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
 
   private void addDistanceText(InstructionModel model) {
     if (newDistanceText(model)) {
-      Timber.d("Util: Distance Text Update");
       distanceText(model);
     } else if (currentDistanceText == null) {
-      Timber.d("Util: Distance Text Update 1st Time");
       distanceText(model);
     }
   }
@@ -237,10 +232,8 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
 
   private void addTextInstruction(InstructionModel model) {
     if (newTextInstruction(model)) {
-      Timber.d("Util: Text Instruction Update");
       textInstruction(model);
     } else if (currentInstruction == null) {
-      Timber.d("Util: Text Instruction Update 1st time");
       textInstruction(model);
     }
   }
