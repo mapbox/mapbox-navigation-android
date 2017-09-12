@@ -14,8 +14,31 @@ import com.mapbox.services.commons.models.Position;
 
 import java.util.HashMap;
 
+/**
+ * Use this class to launch the navigation UI
+ * <p>
+ * You can launch the UI with either a route you have already retrieved from
+ * {@link com.mapbox.services.android.navigation.v5.navigation.NavigationRoute} or you can pass a
+ * {@link Position} origin and {@link Position} destination and the UI will request the {@link DirectionsRoute}
+ * while initializing.
+ * </p><p>
+ * You have an option to include a AWS Cognito Pool ID, which will initialize the UI with AWS Polly Voice instructions
+ * </p><p>
+ * For testing, you can launch with simulation, in which our
+ * {@link com.mapbox.services.android.location.MockLocationEngine} will begin following the given {@link DirectionsRoute}
+ * once the UI is initialized
+ * </p>
+ */
 public class NavigationLauncher {
 
+  /**
+   * Starts the UI with a {@link DirectionsRoute} already retrieved from
+   * {@link com.mapbox.services.android.navigation.v5.navigation.NavigationRoute}
+   * @param activity must be launched from another {@link Activity}
+   * @param route initial route in which the navigation will follow
+   * @param awsPoolId used to activate AWS Polly (if null, will fall back to {@link android.speech.tts.TextToSpeech})
+   * @param simulateRoute if true, will mock location movement - if false, will use true location
+   */
   public static void startNavigation(Activity activity, DirectionsRoute route,
                                      String awsPoolId, boolean simulateRoute) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
@@ -33,6 +56,15 @@ public class NavigationLauncher {
     activity.startActivity(navigationView);
   }
 
+  /**
+   * Starts the UI with a {@link Position} origin and {@link Position} destination which will allow the UI
+   * to retrieve a {@link DirectionsRoute} upon initialization
+   * @param activity must be launched from another {@link Activity}
+   * @param origin where you want to start navigation (most likely your current location)
+   * @param destination where you want to navigate to
+   * @param awsPoolId used to activate AWS Polly (if null, will fall back to {@link android.speech.tts.TextToSpeech})
+   * @param simulateRoute if true, will mock location movement - if false, will use true location
+   */
   public static void startNavigation(Activity activity, Position origin, Position destination,
                                      String awsPoolId, boolean simulateRoute) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
