@@ -315,7 +315,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   private void initNavigation() {
-    navigation = new MapboxNavigation(this);
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
     navigation.addProgressChangeListener(this);
     navigation.addProgressChangeListener(instructionView);
     navigation.addProgressChangeListener(summaryBottomSheet);
