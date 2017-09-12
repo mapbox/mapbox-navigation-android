@@ -134,7 +134,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     }
   }
 
-
   @Override
   protected void onDestroy() {
     super.onDestroy();
