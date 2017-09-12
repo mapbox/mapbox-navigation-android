@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.support.annotation.LayoutRes;
 import android.support.v4.app.NotificationCompat;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.widget.RemoteViews;
 
 import com.mapbox.services.android.navigation.R;
@@ -17,9 +18,10 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
+import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 import com.mapbox.services.api.directions.v5.models.LegStep;
 
-import java.util.Calendar;
+import java.text.DecimalFormat;
 import java.util.Locale;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
@@ -29,7 +31,6 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  */
 class NavigationNotification {
 
-  private static final String ROUTE_PROGRESS_STRING_FORMAT = "%tl:%tM %tp%n";
   private static final String END_NAVIGATION_BUTTON_TAG = "endNavigationButtonTag";
 
   private NotificationCompat.Builder notificationBuilder;
@@ -39,6 +40,11 @@ class NavigationNotification {
   private EndNavigationReceiver receiver;
   private RemoteViews remoteViews;
   private Context context;
+  private DecimalFormat decimalFormat;
+  private String currentStepName;
+  private String currentArrivalTime;
+  private SpannableStringBuilder currentDistanceText;
+  private int currentManeuverId;
 
   NavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
     this.context = context;
@@ -48,6 +54,7 @@ class NavigationNotification {
 
   private void initialize() {
     notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
   }
 
   Notification buildPersistentNotification(@LayoutRes int layout, @LayoutRes int bigLayout) {
@@ -83,51 +90,92 @@ class NavigationNotification {
 
   void updateDefaultNotification(RouteProgress routeProgress) {
     // Street name
-    remoteViews.setTextViewText(
-      R.id.notificationStreetNameTextView,
-      StringAbbreviator.deliminator(
-        StringAbbreviator.abbreviate(routeProgress.currentLegProgress().currentStep().getName()))
-    );
-    remoteViewsBig.setTextViewText(
-      R.id.notificationStreetNameTextView,
-      StringAbbreviator.deliminator(
-        StringAbbreviator.abbreviate(routeProgress.currentLegProgress().currentStep().getName()))
-    );
+    if (newStepName(routeProgress)) {
+      addStepName(routeProgress);
+    } else if (currentStepName == null) {
+      addStepName(routeProgress);
+    }
 
     // Distance
-    SpannableStringBuilder distanceSpannableStringBuilder = DistanceUtils.distanceFormatterBold(
-      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining()
-    );
-
-    remoteViewsBig.setTextViewText(R.id.notificationStepDistanceTextView, DistanceUtils.distanceFormatterBold(
-      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining()));
-
-    if (routeProgress.currentLegProgress().currentStep().getName() != null) {
-      if (!routeProgress.currentLegProgress().currentStep().getName().isEmpty()) {
-        distanceSpannableStringBuilder.append(" - ");
-      }
+    if (newDistanceText(routeProgress)) {
+      addDistanceText(routeProgress);
+    } else if (currentDistanceText == null) {
+      addDistanceText(routeProgress);
     }
-    remoteViews.setTextViewText(R.id.notificationStepDistanceTextView, distanceSpannableStringBuilder);
 
-    String arrivalTime = String.format(Locale.US, "Arrive at %s",
-      formatArrivalTime(routeProgress.durationRemaining()));
-    remoteViews.setTextViewText(R.id.estimatedArrivalTimeTextView, arrivalTime);
-    remoteViewsBig.setTextViewText(R.id.estimatedArrivalTimeTextView, arrivalTime);
+    // Arrival Time
+    if (newArrivalTime(routeProgress)) {
+      addArrivalTime(routeProgress);
+    } else if (currentArrivalTime == null) {
+      addArrivalTime(routeProgress);
+    }
 
+    // Maneuver Image
     LegStep step = routeProgress.currentLegProgress().upComingStep() == null
       ? routeProgress.currentLegProgress().currentStep() : routeProgress.currentLegProgress().upComingStep();
+    addManeuverImage(step);
 
-    remoteViews.setImageViewResource(R.id.maneuverSignal, ManeuverUtils.getManeuverResource(step));
-    remoteViewsBig.setImageViewResource(R.id.maneuverSignal, ManeuverUtils.getManeuverResource(step));
     notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notificationBuilder.build());
   }
 
-  private static String formatArrivalTime(double routeDuration) {
-    Calendar calendar = Calendar.getInstance();
-    calendar.add(Calendar.SECOND, (int) routeDuration);
+  private boolean newStepName(RouteProgress routeProgress) {
+    return currentStepName != null
+      && !currentStepName.contentEquals(routeProgress.currentLegProgress().currentStep().getName());
+  }
 
-    return String.format(Locale.US, ROUTE_PROGRESS_STRING_FORMAT,
-      calendar, calendar, calendar);
+  private void addStepName(RouteProgress routeProgress) {
+    currentStepName = routeProgress.currentLegProgress().currentStep().getName();
+    String formattedStepName = StringAbbreviator.deliminator(StringAbbreviator.abbreviate(currentStepName));
+    remoteViews.setTextViewText(
+      R.id.notificationStreetNameTextView,
+      formattedStepName
+    );
+    remoteViewsBig.setTextViewText(
+      R.id.notificationStreetNameTextView,
+      formattedStepName
+    );
+  }
+
+  private boolean newDistanceText(RouteProgress routeProgress) {
+    return currentDistanceText != null
+      && !currentDistanceText.toString().contentEquals(DistanceUtils.distanceFormatterBold(routeProgress
+        .currentLegProgress().currentStepProgress().distanceRemaining(), decimalFormat).toString());
+  }
+
+  private void addDistanceText(RouteProgress routeProgress) {
+    currentDistanceText = DistanceUtils.distanceFormatterBold(
+      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(), decimalFormat);
+    remoteViewsBig.setTextViewText(R.id.notificationStepDistanceTextView, currentDistanceText);
+    if (!TextUtils.isEmpty(currentStepName)) {
+      currentDistanceText.append(" - ");
+    }
+    remoteViews.setTextViewText(R.id.notificationStepDistanceTextView, currentDistanceText);
+  }
+
+  private boolean newArrivalTime(RouteProgress routeProgress) {
+    return currentArrivalTime != null && currentArrivalTime.contentEquals(TimeUtils
+      .formatArrivalTime(routeProgress.durationRemaining()));
+  }
+
+  private void addArrivalTime(RouteProgress routeProgress) {
+    currentArrivalTime = TimeUtils.formatArrivalTime(routeProgress.durationRemaining());
+    remoteViews.setTextViewText(R.id.estimatedArrivalTimeTextView,
+      String.format(Locale.getDefault(), "Arrive at %s", currentArrivalTime));
+    remoteViewsBig.setTextViewText(R.id.estimatedArrivalTimeTextView,
+      String.format(Locale.getDefault(), "Arrive at %s", currentArrivalTime));
+  }
+
+  private boolean newManeuverId(LegStep step) {
+    return currentManeuverId != ManeuverUtils.getManeuverResource(step);
+  }
+
+  private void addManeuverImage(LegStep step) {
+    if (newManeuverId(step)) {
+      int maneuverResource = ManeuverUtils.getManeuverResource(step);
+      currentManeuverId = maneuverResource;
+      remoteViews.setImageViewResource(R.id.maneuverSignal, maneuverResource);
+      remoteViewsBig.setImageViewResource(R.id.maneuverSignal, maneuverResource);
+    }
   }
 
   private PendingIntent getPendingSelfIntent(Context context, String action) {
