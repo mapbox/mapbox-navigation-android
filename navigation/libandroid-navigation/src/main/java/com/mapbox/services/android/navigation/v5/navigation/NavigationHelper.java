@@ -2,7 +2,6 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
 
-import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -17,7 +16,6 @@ import com.mapbox.services.commons.geojson.Feature;
 import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
-import com.mapbox.services.commons.utils.PolylineUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,15 +33,11 @@ class NavigationHelper {
    * route. This is isolated as separate logic from the snap logic provided because we will always
    * need to snap to the route in order to get the most accurate information.
    */
-  static Position userSnappedToRoutePosition(Location location, int legIndex, int stepIndex,
-                                             DirectionsRoute route) {
+  static Position userSnappedToRoutePosition(Location location, List<Position> coordinates) {
     Point locationToPoint = Point.fromCoordinates(
       new double[] {location.getLongitude(), location.getLatitude()}
     );
 
-    // Decode the geometry
-    List<Position> coordinates = PolylineUtils.decode(
-      route.getLegs().get(legIndex).getSteps().get(stepIndex).getGeometry(), PRECISION_6);
 
     // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
     // Point on the LineString.
@@ -68,9 +62,9 @@ class NavigationHelper {
    * next maneuver position.
    */
   static double stepDistanceRemaining(Position snappedPosition, int legIndex, int stepIndex,
-                                      DirectionsRoute directionsRoute) {
+                                      DirectionsRoute directionsRoute, List<Position> coordinates) {
     List<LegStep> steps = directionsRoute.getLegs().get(legIndex).getSteps();
-    Position nextManeuverPosition = nextManeuverPosition(stepIndex, steps);
+    Position nextManeuverPosition = nextManeuverPosition(stepIndex, steps, coordinates);
 
     LineString lineString = LineString.fromPolyline(steps.get(stepIndex).getGeometry(), PRECISION_6);
     // If the users snapped position equals the next maneuver
@@ -184,23 +178,20 @@ class NavigationHelper {
   }
 
   static Location getSnappedLocation(MapboxNavigation mapboxNavigation, Location location,
-                                     RouteProgress routeProgress) {
+                                     RouteProgress routeProgress, List<Position> stepCoordinates) {
     Snap snap = mapboxNavigation.getSnapEngine();
-    return snap.getSnappedLocation(location, routeProgress);
+    return snap.getSnappedLocation(location, routeProgress, stepCoordinates);
   }
 
   /**
    * Retrieves the next steps maneuver position if one exist, otherwise it decodes the current steps
    * geometry and uses the last coordinate in the position list.
    */
-  static Position nextManeuverPosition(int stepIndex, List<LegStep> steps) {
+  static Position nextManeuverPosition(int stepIndex, List<LegStep> steps, List<Position> coords) {
     // If there is an upcoming step, use it's maneuver as the position.
     if (steps.size() > (stepIndex + 1)) {
       return steps.get(stepIndex + 1).getManeuver().asPosition();
     }
-    // Decode the geometry
-    List<Position> coords
-      = PolylineUtils.decode(steps.get(stepIndex).getGeometry(), Constants.PRECISION_6);
     return coords.size() >= 1 ? coords.get(coords.size() - 1) : coords.get(coords.size());
   }
 }

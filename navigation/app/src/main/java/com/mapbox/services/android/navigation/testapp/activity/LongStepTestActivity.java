@@ -14,6 +14,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.testapp.R;
@@ -60,11 +61,10 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
     MapboxNavigationOptions options = MapboxNavigationOptions.builder()
       .defaultMilestonesEnabled(false)
       .snapToRoute(false)
-      .enableOffRouteDetection(false)
       .build();
     navigation = new MapboxNavigation(this, options);
-    navigation.addProgressChangeListener(this);
-    locationEngine = new MockLocationEngine();
+    locationEngine = new MockLocationEngine(1000, 50, false);
+    navigation.setLocationEngine(locationEngine);
     locationEngine.activate();
   }
 
@@ -72,10 +72,11 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.42067211454105, -122.26105120655842), 10));
-    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, null);
     mapboxMap.addPolyline(new PolylineOptions()
       .add(new LatLng(37.42067211454105, -122.26105120655842))
       .add(new LatLng(38.00287907761617, -121.8483493917405)).color(Color.BLUE).width(5f));
+    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, null);
+    locationLayerPlugin.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
   }
 
   @Override
@@ -85,8 +86,8 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
 
   @OnClick(R.id.startNavigationFab)
   public void onFabClick(View view) {
+    navigation.addProgressChangeListener(this);
     ((MockLocationEngine) locationEngine).setRoute(route);
-    navigation.setLocationEngine(locationEngine);
     mapboxMap.setLocationSource(locationEngine);
     navigation.startNavigation(route);
   }
@@ -107,12 +108,18 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
   protected void onStart() {
     super.onStart();
     mapView.onStart();
+    if (locationLayerPlugin != null) {
+      locationLayerPlugin.onStart();
+    }
   }
 
   @Override
   protected void onStop() {
     super.onStop();
     mapView.onStop();
+    if (locationLayerPlugin != null) {
+      locationLayerPlugin.onStop();
+    }
   }
 
   @Override
