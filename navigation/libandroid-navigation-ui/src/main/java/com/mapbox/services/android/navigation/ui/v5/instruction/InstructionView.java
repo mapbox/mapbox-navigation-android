@@ -28,6 +28,18 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 
+/**
+ * A view that can be used to display upcoming maneuver information and control
+ * voice instruction mute / unmute.
+ *
+ * An {@link ImageView} is used to display the maneuver image on the left.
+ * Two {@link TextView}s are used to display distance to the next maneuver, as well
+ * as the name of the destination / maneuver name / instruction based on what data is available
+ *
+ * To automatically have this view update with information from
+ * {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation},
+ * add the view as a {@link ProgressChangeListener} and / or {@link OffRouteListener}
+ */
 public class InstructionView extends RelativeLayout implements ProgressChangeListener, OffRouteListener {
 
   private ImageView maneuverImage;
@@ -80,22 +92,10 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     showRerouteState();
   }
 
-  public void soundFabOff() {
-    soundFab.setImageResource(R.drawable.ic_sound_off);
-  }
-
-  public void soundFabOn() {
-    soundFab.setImageResource(R.drawable.ic_sound_on);
-  }
-
-  public void setSoundChipText(String text) {
-    soundChipText.setText(text);
-  }
-
-  public void showSoundChip() {
-    soundChipText.startAnimation(fadeInSlowOut);
-  }
-
+  /**
+   * If invisible, this method will slide the view down
+   * from the top of the screen and set the visibility to visible
+   */
   public void show() {
     if (this.getVisibility() == INVISIBLE) {
       this.setVisibility(VISIBLE);
@@ -103,14 +103,30 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     }
   }
 
+  /**
+   * Will slide the reroute view down from the top of the screen
+   * and make it visible
+   */
   public void showRerouteState() {
     showingRerouteState = true;
     rerouteLayout.startAnimation(rerouteSlideDownTop);
   }
 
+  /**
+   * Will slide the reroute view up to the top of the screen
+   * and hide it
+   */
   public void hideRerouteState() {
     showingRerouteState = false;
     rerouteLayout.startAnimation(rerouteSlideUpTop);
+  }
+
+  /**
+   * Will toggle the view between muted and unmuted states.
+   * @return boolean true if muted, false if not
+   */
+  public boolean toggleMute() {
+    return isMuted ? unmute() : mute();
   }
 
   private void init() {
@@ -143,6 +159,22 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     showSoundChip();
     soundFabOn();
     return isMuted;
+  }
+
+  private void soundFabOff() {
+    soundFab.setImageResource(R.drawable.ic_sound_off);
+  }
+
+  private void soundFabOn() {
+    soundFab.setImageResource(R.drawable.ic_sound_on);
+  }
+
+  private void setSoundChipText(String text) {
+    soundChipText.setText(text);
+  }
+
+  private void showSoundChip() {
+    soundChipText.startAnimation(fadeInSlowOut);
   }
 
   private void initInstructionAutoSize() {
@@ -210,9 +242,5 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
       turnLanesHidden = true;
       turnLaneLayout.setVisibility(GONE);
     }
-  }
-
-  public boolean toggleMute() {
-    return isMuted ? unmute() : mute();
   }
 }
