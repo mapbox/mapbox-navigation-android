@@ -161,9 +161,11 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   @Override
   public void onScroll() {
-    summaryBehavior.setHideable(true);
-    summaryBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-    camera.setCameraTrackingLocation(false);
+    if (!summaryBehavior.isHideable()) {
+      summaryBehavior.setHideable(true);
+      summaryBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+      camera.setCameraTrackingLocation(false);
+    }
   }
 
   @SuppressWarnings({"MissingPermission"})
