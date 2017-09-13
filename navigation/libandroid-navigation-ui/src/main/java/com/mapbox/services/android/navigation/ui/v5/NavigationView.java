@@ -51,6 +51,21 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Activity that creates the drop-in UI.
+ * <p>
+ * Once started, this activity will check if launched with a {@link DirectionsRoute}.
+ * Or, if not found, this activity will look for a set of {@link Position} coordinates.
+ * In the latter case, a new {@link DirectionsRoute} will be retrieved from {@link NavigationRoute}.
+ * </p><p>
+ * Once valid data is obtained, this activity will immediately begin navigation
+ * with {@link MapboxNavigation}.
+ * If launched with the simulation boolean set to true, a {@link MockLocationEngine}
+ * will be initialized and begin pushing updates.
+ *
+ * @since 0.6.0
+ * </p>
+ */
 public class NavigationView extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnScrollListener,
   LocationEngineListener, ProgressChangeListener, OffRouteListener,
   MilestoneEventListener, Callback<DirectionsResponse> {
