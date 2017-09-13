@@ -16,15 +16,18 @@ import android.widget.TextView;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.DirectionListAdapter;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.DirectionViewHolder;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.text.DecimalFormat;
+
 public class SummaryBottomSheet extends FrameLayout implements ProgressChangeListener,
   OffRouteListener {
 
+  private static final String EMPTY_STRING = "";
   private static final int SCROLL_DIRECTION_UP = -1;
-  public static final String EMPTY_STRING = "";
 
   private TextView distanceRemainingText;
   private TextView timeRemainingText;
@@ -34,6 +37,7 @@ public class SummaryBottomSheet extends FrameLayout implements ProgressChangeLis
   private RecyclerView rvDirections;
   private View rvShadow;
 
+  private DecimalFormat decimalFormat;
   private DirectionListAdapter directionListAdapter;
   private boolean rerouting;
 
@@ -55,6 +59,7 @@ public class SummaryBottomSheet extends FrameLayout implements ProgressChangeLis
     super.onFinishInflate();
     bind();
     initDirectionsRecyclerView();
+    initDecimalFormat();
   }
 
   @Override
@@ -114,9 +119,13 @@ public class SummaryBottomSheet extends FrameLayout implements ProgressChangeLis
     });
   }
 
+  private void initDecimalFormat() {
+    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
+  }
+
   private void update(RouteProgress progress) {
     if (progress != null && !rerouting) {
-      SummaryModel model = new SummaryModel(progress);
+      SummaryModel model = new SummaryModel(progress, decimalFormat);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());

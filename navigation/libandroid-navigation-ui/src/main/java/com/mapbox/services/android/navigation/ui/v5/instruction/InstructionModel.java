@@ -10,6 +10,8 @@ import com.mapbox.services.api.directions.v5.models.LegStep;
 import com.mapbox.services.api.directions.v5.models.StepIntersection;
 import com.mapbox.services.commons.utils.TextUtils;
 
+import java.text.DecimalFormat;
+
 import static com.mapbox.services.android.navigation.v5.utils.ManeuverUtils.getManeuverResource;
 
 class InstructionModel {
@@ -20,8 +22,8 @@ class InstructionModel {
   private String maneuverModifier;
   private IntersectionLanes[] turnLanes;
 
-  InstructionModel(RouteProgress progress) {
-    buildInstructionModel(progress);
+  InstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
+    buildInstructionModel(progress, decimalFormat);
   }
 
   SpannableStringBuilder getStepDistanceRemaining() {
@@ -44,9 +46,8 @@ class InstructionModel {
     return maneuverModifier;
   }
 
-  private void buildInstructionModel(RouteProgress progress) {
-    formatStepDistance(progress);
-
+  private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
+    formatStepDistance(progress, decimalFormat);
     LegStep upComingStep = progress.currentLegProgress().upComingStep();
     if (upComingStep != null) {
       extractStepResources(upComingStep);
@@ -64,9 +65,9 @@ class InstructionModel {
     }
   }
 
-  private void formatStepDistance(RouteProgress progress) {
+  private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat) {
     stepDistanceRemaining = DistanceUtils.distanceFormatterBold(progress.currentLegProgress()
-      .currentStepProgress().distanceRemaining());
+      .currentStepProgress().distanceRemaining(), decimalFormat);
   }
 
   private boolean hasManeuver(LegStep upComingStep) {
