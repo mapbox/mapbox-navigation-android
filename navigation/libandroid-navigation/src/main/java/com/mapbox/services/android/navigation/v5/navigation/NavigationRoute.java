@@ -68,7 +68,7 @@ public abstract class NavigationRoute {
       .setUser(user())
       .setProfile(profile())
       .setCoordinates(coordinates())
-      .setAccessToken(accessToken())
+      .setAccessToken(accessToken()) // TODO use access token in mapboxNavigation
       .setAlternatives(alternatives())
       .setRadiuses(radiuses())
       .setAnnotation(congestion() ? DirectionsCriteria.ANNOTATION_CONGESTION : null)
