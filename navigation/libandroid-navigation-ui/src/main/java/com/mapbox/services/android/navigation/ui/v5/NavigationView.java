@@ -178,7 +178,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     initCamera();
     initLocationLayer();
     initLocation();
-    startNavigation();
+    restartNavigation();
   }
 
   @Override
@@ -395,7 +395,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     }
   }
 
-  private void startNavigation() {
+  private void restartNavigation() {
     Timber.d("Starting navigation onMapReady...");
     if (restartNavigation) {
       Timber.d("Restarting navigation...");
