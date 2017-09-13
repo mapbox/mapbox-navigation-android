@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.google.gson.Gson;
+import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -62,16 +63,17 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
       .defaultMilestonesEnabled(false)
       .snapToRoute(false)
       .build();
-    navigation = new MapboxNavigation(this, options);
-    locationEngine = new MockLocationEngine(1000, 50, false);
-    navigation.setLocationEngine(locationEngine);
+
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken(), options);
+    navigation.addProgressChangeListener(this);
+    locationEngine = new MockLocationEngine();
     locationEngine.activate();
   }
 
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.42067211454105, -122.26105120655842), 10));
+    mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(38.00287907761617, -121.8483493917405), 10));
     mapboxMap.addPolyline(new PolylineOptions()
       .add(new LatLng(37.42067211454105, -122.26105120655842))
       .add(new LatLng(38.00287907761617, -121.8483493917405)).color(Color.BLUE).width(5f));
@@ -87,8 +89,8 @@ public class LongStepTestActivity extends AppCompatActivity implements ProgressC
   @OnClick(R.id.startNavigationFab)
   public void onFabClick(View view) {
     navigation.addProgressChangeListener(this);
+    navigation.setLocationEngine(locationEngine);
     ((MockLocationEngine) locationEngine).setRoute(route);
-    mapboxMap.setLocationSource(locationEngine);
     navigation.startNavigation(route);
   }
 

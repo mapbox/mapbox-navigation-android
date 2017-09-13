@@ -69,7 +69,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     mapView.getMapAsync(this);
 
     // Initialize MapboxNavigation and add listeners
-    navigation = new MapboxNavigation(this);
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
     navigation.addNavigationEventListener(this);
   }
 

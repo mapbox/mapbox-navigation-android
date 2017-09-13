@@ -48,7 +48,10 @@ public class NavigationService extends Service implements LocationEngineListener
   private long timeIntervalSinceLastOffRoute;
   private MapboxNavigation mapboxNavigation;
   private LocationEngine locationEngine;
+  private RouteProgress routeProgress;
+  private boolean firstProgressUpdate = true;
   private NavigationEngine thread;
+  private Location location;
 
   @Nullable
   @Override
@@ -74,6 +77,11 @@ public class NavigationService extends Service implements LocationEngineListener
 
   @Override
   public void onDestroy() {
+    // User canceled navigation session
+    if (routeProgress != null && location != null) {
+      NavigationMetricsWrapper.cancelEvent(mapboxNavigation.getSessionState(), routeProgress,
+        location);
+    }
     endNavigation();
     if (notificationManager != null) {
       notificationManager.onDestroy();
@@ -184,6 +192,13 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @Override
   public void onNewRouteProgress(Location location, RouteProgress routeProgress) {
+    this.routeProgress = routeProgress;
+    this.location = location;
+    if (firstProgressUpdate) {
+      NavigationMetricsWrapper.departEvent(mapboxNavigation.getSessionState(), routeProgress,
+        location);
+      firstProgressUpdate = false;
+    }
     if (mapboxNavigation.options().enableNotification()) {
       notificationManager.updateDefaultNotification(routeProgress);
     }

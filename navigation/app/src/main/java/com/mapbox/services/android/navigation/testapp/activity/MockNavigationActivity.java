@@ -67,6 +67,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   Button startRouteButton;
 
   private MapboxMap mapboxMap;
+  private boolean running;
 
   // Navigation related variables
   private LocationEngine locationEngine;
@@ -86,7 +87,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
 
-    navigation = new MapboxNavigation(this);
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
 
     navigation.addMilestone(new RouteMilestone.Builder()
       .setIdentifier(BEGIN_ROUTE_MILESTONE)
@@ -249,6 +250,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onRunning(boolean running) {
+    this.running = running;
     if (running) {
       Timber.d("onRunning: Started");
     } else {
