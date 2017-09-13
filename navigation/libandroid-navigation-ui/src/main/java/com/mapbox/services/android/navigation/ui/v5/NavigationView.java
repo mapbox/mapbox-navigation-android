@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
 
+import com.google.gson.Gson;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
@@ -50,6 +51,7 @@ import java.util.HashMap;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
 public class NavigationView extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnScrollListener,
   LocationEngineListener, ProgressChangeListener, OffRouteListener,
@@ -79,14 +81,18 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   private Location location;
   private Position destination;
+  private DirectionsRoute route;
   private boolean checkLaunchData;
   private boolean navigationRunning;
+  private boolean restartNavigation;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    Timber.d("onCreate()");
     setContentView(R.layout.navigation_view_layout);
     checkLaunchData = savedInstanceState == null;
+    Timber.d("checkLaunchData: " + checkLaunchData);
     bind();
     initClickListeners();
     preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -144,8 +150,24 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   @Override
   protected void onSaveInstanceState(Bundle outState) {
+    Timber.d("onSaveInstanceState()");
+    outState.putBoolean("navigation_running", navigationRunning);
+    outState.putParcelable("current_location", location);
+    outState.putString("current_route", new Gson().toJson(route));
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
+  }
+
+  @Override
+  protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
+    Timber.d("onRestoreInstanceState()");
+    restartNavigation = savedInstanceState.getBoolean("navigation_running");
+    if (restartNavigation) {
+      location = savedInstanceState.getParcelable("current_location");
+      String currentRoute = savedInstanceState.getString("current_route");
+      route = new Gson().fromJson(currentRoute, DirectionsRoute.class);
+    }
   }
 
   @Override
@@ -156,7 +178,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     initCamera();
     initLocationLayer();
     initLocation();
-    checkLaunchData(getIntent());
+    startNavigation();
   }
 
   @Override
@@ -177,7 +199,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onLocationChanged(Location location) {
     this.location = location;
-    checkLaunchData(getIntent());
   }
 
   @Override
@@ -202,12 +223,13 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (validRouteResponse(response)) {
+      route = response.body().getRoutes().get(0);
       if (navigationRunning) {
-        updateNavigation(response.body().getRoutes().get(0));
+        updateNavigation(route);
         instructionView.hideRerouteState();
         summaryBottomSheet.hideRerouteState();
       } else {
-        startNavigation(response.body().getRoutes().get(0));
+        startNavigation(route);
       }
     }
   }
@@ -332,9 +354,37 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       preferences.getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
   }
 
+  private void initRoute() {
+    mapRoute = new NavigationMapRoute(mapView, map, NavigationConstants.ROUTE_BELOW_LAYER);
+    if (route != null) {
+      Timber.d("Adding route...");
+      mapRoute.addRoute(route);
+    }
+  }
+
+  private void initCamera() {
+    camera = new NavigationCamera(this, map, navigation);
+    if (location != null) {
+      Timber.d("Camera resuming...");
+      camera.resume(location);
+    }
+  }
+
+  @SuppressWarnings({"MissingPermission"})
+  private void initLocationLayer() {
+    locationLayer = new LocationLayerPlugin(mapView, map, null);
+    if (navigationRunning) {
+      Timber.d("Location layer enabled...");
+      locationLayer.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
+    }
+  }
+
   @SuppressWarnings({"MissingPermission"})
   private void initLocation() {
-    if (!shouldSimulateRoute()) {
+    if (shouldSimulateRoute()) {
+      checkLaunchData(getIntent());
+    } else {
+      Timber.d("Starting up location engine...");
       locationEngine = navigation.getLocationEngine();
       locationEngine.addLocationEngineListener(this);
       locationEngine.activate();
@@ -342,21 +392,19 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       if (locationEngine.getLastLocation() != null) {
         onLocationChanged(locationEngine.getLastLocation());
       }
-    } else {
-      onLocationChanged(null);
     }
   }
 
-  private void initRoute() {
-    mapRoute = new NavigationMapRoute(mapView, map, NavigationConstants.ROUTE_BELOW_LAYER);
-  }
-
-  private void initCamera() {
-    camera = new NavigationCamera(this, map, navigation);
-  }
-
-  private void initLocationLayer() {
-    locationLayer = new LocationLayerPlugin(mapView, map, null);
+  private void startNavigation() {
+    Timber.d("Starting navigation onMapReady...");
+    if (restartNavigation) {
+      Timber.d("Restarting navigation...");
+      navigation.setLocationEngine(locationEngine);
+      navigation.startNavigation(route);
+      navigationRunning = true;
+    } else {
+      checkLaunchData(getIntent());
+    }
   }
 
   private void checkLaunchData(Intent intent) {
@@ -397,7 +445,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   private void startRouteNavigation() {
-    DirectionsRoute route = NavigationLauncher.extractRoute(this);
+    route = NavigationLauncher.extractRoute(this);
     if (route != null) {
       RouteLeg lastLeg = route.getLegs().get(route.getLegs().size() - 1);
       LegStep lastStep = lastLeg.getSteps().get(lastLeg.getSteps().size() - 1);
@@ -421,6 +469,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   @SuppressWarnings({"MissingPermission"})
   private void startNavigation(DirectionsRoute route) {
+    Timber.d("Starting navigation with DirectionsRoute...");
     if (shouldSimulateRoute()) {
       activateMockLocationEngine(route);
     }

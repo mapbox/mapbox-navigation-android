@@ -2,6 +2,9 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.content.Context;
 import android.location.Location;
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.TextViewCompat;
@@ -77,6 +80,21 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     initTurnLaneRecyclerView();
     initDecimalFormat();
     initAnimations();
+  }
+
+  @Override
+  public Parcelable onSaveInstanceState() {
+    super.onSaveInstanceState();
+    return createSavedState();
+  }
+
+  @Override
+  public void onRestoreInstanceState(Parcelable state) {
+    if (state instanceof Bundle) {
+      setRestoredState((Bundle) state);
+    } else {
+      super.onRestoreInstanceState(state);
+    }
   }
 
   @Override
@@ -269,5 +287,20 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
       turnLanesHidden = true;
       turnLaneLayout.setVisibility(GONE);
     }
+  }
+
+  @NonNull
+  private Parcelable createSavedState() {
+    Bundle state = new Bundle();
+    state.putParcelable("instruction_super_state", super.onSaveInstanceState());
+    state.putInt("instruction_visibility", getVisibility());
+    return state;
+  }
+
+  @SuppressWarnings("WrongConstant")
+  private void setRestoredState(Bundle state) {
+    this.setVisibility(state.getInt("instruction_visibility", getVisibility()));
+    Parcelable superState = state.getParcelable("super_state");
+    super.onRestoreInstanceState(superState);
   }
 }
