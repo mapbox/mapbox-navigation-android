@@ -6,24 +6,28 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 import com.mapbox.services.api.directions.v5.models.LegStep;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHolder> {
 
   private List<LegStep> legSteps;
+  private DecimalFormat decimalFormat;
 
   private int currentLegIndex = -1;
   private int currentStepIndex = -1;
 
   public DirectionListAdapter() {
-    this.legSteps = new ArrayList<>();
+    legSteps = new ArrayList<>();
+    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
   }
 
   @Override
@@ -40,7 +44,7 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
     holder.directionIcon.setImageResource(ManeuverUtils.getManeuverResource(legStep));
 
     if (legStep.getDistance() > 0) {
-      holder.distanceText.setText(DistanceUtils.distanceFormatterBold(legStep.getDistance()));
+      holder.distanceText.setText(DistanceUtils.distanceFormatterBold(legStep.getDistance(), decimalFormat));
     } else {
       holder.distanceDivider.setVisibility(View.GONE);
     }

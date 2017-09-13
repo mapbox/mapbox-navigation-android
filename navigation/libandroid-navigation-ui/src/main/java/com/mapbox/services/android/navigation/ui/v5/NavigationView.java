@@ -175,9 +175,11 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   @Override
   public void onScroll() {
-    summaryBehavior.setHideable(true);
-    summaryBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-    camera.setCameraTrackingLocation(false);
+    if (!summaryBehavior.isHideable()) {
+      summaryBehavior.setHideable(true);
+      summaryBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+      camera.setCameraTrackingLocation(false);
+    }
   }
 
   @SuppressWarnings({"MissingPermission"})
@@ -329,7 +331,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   private void initNavigation() {
-    navigation = new MapboxNavigation(this);
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
     navigation.addProgressChangeListener(this);
     navigation.addProgressChangeListener(instructionView);
     navigation.addProgressChangeListener(summaryBottomSheet);

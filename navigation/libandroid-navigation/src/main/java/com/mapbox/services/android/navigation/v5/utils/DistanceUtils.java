@@ -11,16 +11,15 @@ import java.util.Locale;
 
 public class DistanceUtils {
 
-  private static final String DECIMAL_FORMAT = "#.#";
   private static final String MILE_FORMAT = "%s mi";
   private static final String FEET_FORMAT = "%s ft";
 
-  public static SpannableStringBuilder distanceFormatterBold(double distance) {
+  public static SpannableStringBuilder distanceFormatterBold(double distance, DecimalFormat decimalFormat) {
     SpannableStringBuilder formattedString;
     if (longDistance(distance)) {
       formattedString = roundToNearestMile(distance);
     } else if (mediumDistance(distance)) {
-      formattedString = roundOneDecimalPlace(distance);
+      formattedString = roundOneDecimalPlace(distance, decimalFormat);
     } else {
       formattedString = roundByFiftyFeet(distance);
     }
@@ -39,14 +38,13 @@ public class DistanceUtils {
     return formattedString;
   }
 
-  private static SpannableStringBuilder roundOneDecimalPlace(double distance) {
+  private static SpannableStringBuilder roundOneDecimalPlace(double distance, DecimalFormat decimalFormat) {
     distance = TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES);
-    DecimalFormat df = new DecimalFormat(DECIMAL_FORMAT);
     double roundedNumber = (distance / 100 * 100);
     SpannableStringBuilder formattedString = new SpannableStringBuilder(String.format(Locale.getDefault(),
-      MILE_FORMAT, df.format(roundedNumber)));
+      MILE_FORMAT, decimalFormat.format(roundedNumber)));
     formattedString.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
-      0, df.format(roundedNumber).length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+      0, decimalFormat.format(roundedNumber).length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     return formattedString;
   }
 

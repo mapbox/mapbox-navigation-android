@@ -11,7 +11,7 @@ public class TimeUtils {
   private static final String DAYS = " days ";
   private static final String HOUR = " hr ";
   private static final String MINUTE = " min ";
-  private static final String ONE_MINUTE = "1 Minute";
+  private static final String ONE_MINUTE = "1 min";
 
   public static String formatArrivalTime(double routeDuration) {
     Calendar calendar = Calendar.getInstance();

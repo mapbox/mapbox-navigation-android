@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -23,10 +24,13 @@ import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
+
+import java.text.DecimalFormat;
 
 /**
  * A view that can be used to display upcoming maneuver information and control
@@ -59,6 +63,10 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   private Animation rerouteSlideDownTop;
   private AnimationSet fadeInSlowOut;
 
+  private DecimalFormat decimalFormat;
+  private String currentInstruction;
+  private int currentManeuverId;
+  private SpannableStringBuilder currentDistanceText;
   private boolean showingRerouteState;
   private boolean turnLanesHidden;
   public boolean isMuted;
@@ -87,6 +95,7 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     super.onFinishInflate();
     bind();
     initTurnLaneRecyclerView();
+    initDecimalFormat();
     initAnimations();
   }
 
@@ -278,6 +287,14 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
   }
 
   /**
+   * Initializes decimal format to be used to populate views with
+   * distance remaining.
+   */
+  private void initDecimalFormat() {
+    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
+  }
+
+  /**
    * Initializes all animations needed to show / hide views.
    */
   private void initAnimations() {
@@ -308,12 +325,92 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
    */
   private void update(RouteProgress routeProgress) {
     if (routeProgress != null && !showingRerouteState) {
-      InstructionModel model = new InstructionModel(routeProgress);
-      maneuverImage.setImageResource(model.getManeuverImage());
-      stepDistanceText.setText(model.getStepDistanceRemaining());
-      stepInstructionText.setText(StringAbbreviator.abbreviate(model.getTextInstruction()));
+      InstructionModel model = new InstructionModel(routeProgress, decimalFormat);
+      addManeuverImage(model);
+      addDistanceText(model);
+      addTextInstruction(model);
       addTurnLanes(model);
     }
+  }
+
+  /**
+   * Looks to see if we have a new image id.
+   * Sets new image resource if one is found.
+   *
+   * @param model provides maneuver image id
+   */
+  private void addManeuverImage(InstructionModel model) {
+    if (currentManeuverId != model.getManeuverImage()) {
+      currentManeuverId = model.getManeuverImage();
+      maneuverImage.setImageResource(model.getManeuverImage());
+    }
+  }
+
+  /**
+   * Looks to see if we have a new distance text.
+   * Sets new distance text if found.
+   *
+   * @param model provides distance text
+   */
+  private void addDistanceText(InstructionModel model) {
+    if (newDistanceText(model)) {
+      distanceText(model);
+    } else if (currentDistanceText == null) {
+      distanceText(model);
+    }
+  }
+
+  /**
+   * Looks to see if we have a new distance text.
+   *
+   * @param model provides distance text
+   */
+  private boolean newDistanceText(InstructionModel model) {
+    return currentDistanceText != null && !currentDistanceText.toString()
+      .contentEquals(model.getStepDistanceRemaining().toString());
+  }
+
+  /**
+   * Sets current distance text.
+   *
+   * @param model provides distance text
+   */
+  private void distanceText(InstructionModel model) {
+    currentDistanceText = model.getStepDistanceRemaining();
+    stepDistanceText.setText(model.getStepDistanceRemaining());
+  }
+
+  /**
+   * Looks to see if we have a new instruction text.
+   * Sets new instruction text if found.
+   *
+   * @param model provides instruction text
+   */
+  private void addTextInstruction(InstructionModel model) {
+    if (newTextInstruction(model)) {
+      textInstruction(model);
+    } else if (currentInstruction == null) {
+      textInstruction(model);
+    }
+  }
+
+  /**
+   * Looks to see if we have a new instruction text.
+   *
+   * @param model provides instruction text
+   */
+  private boolean newTextInstruction(InstructionModel model) {
+    return currentInstruction != null && !currentInstruction.contentEquals(model.getTextInstruction());
+  }
+
+  /**
+   * Sets current instruction text.
+   *
+   * @param model provides instruction text
+   */
+  private void textInstruction(InstructionModel model) {
+    currentInstruction = model.getTextInstruction();
+    stepInstructionText.setText(StringAbbreviator.abbreviate(model.getTextInstruction()));
   }
 
   /**
