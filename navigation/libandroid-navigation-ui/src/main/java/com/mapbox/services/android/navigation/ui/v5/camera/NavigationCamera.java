@@ -27,7 +27,7 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 public class NavigationCamera implements ProgressChangeListener {
 
-  private static final int CAMERA_TILT = 57;
+  private static final int CAMERA_TILT = 50;
   private static int CAMERA_ZOOM = 17;
 
   private MapboxMap mapboxMap;
