@@ -592,7 +592,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    * tracking, giving {@link MapboxNavigation} a location engine,
    * enabling the {@link LocationLayerPlugin}, and showing the {@link InstructionView}.
    *
-   * @param route
+   * @param route used to start navigation for the first time
    */
   @SuppressWarnings( {"MissingPermission"})
   private void startNavigation(DirectionsRoute route) {
