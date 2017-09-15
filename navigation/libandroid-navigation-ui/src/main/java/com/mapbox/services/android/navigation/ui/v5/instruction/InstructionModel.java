@@ -81,7 +81,7 @@ class InstructionModel {
       turnLanes = null;
       return;
     }
-    turnLanes = intersection.getLanes();
+    turnLanes = lanes;
   }
 
   private boolean checkForNoneIndications(IntersectionLanes[] lanes) {
@@ -89,9 +89,6 @@ class InstructionModel {
       return true;
     }
     for (IntersectionLanes lane : lanes) {
-      if (lane.getIndications() != null) {
-        return true;
-      }
       for (String indication : lane.getIndications()) {
         if (indication.contains("none")) {
           return true;
