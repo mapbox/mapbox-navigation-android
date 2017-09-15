@@ -37,7 +37,7 @@ public class NavigationLauncher {
    *
    * @param activity      must be launched from another {@link Activity}
    * @param route         initial route in which the navigation will follow
-   * @param awsPoolId     used to activate AWS Polly (if null, will fall back to {@link android.speech.tts.TextToSpeech})
+   * @param awsPoolId     used to activate AWS Polly (if null, will use to {@link android.speech.tts.TextToSpeech})
    * @param simulateRoute if true, will mock location movement - if false, will use true location
    */
   public static void startNavigation(Activity activity, DirectionsRoute route,
@@ -64,7 +64,7 @@ public class NavigationLauncher {
    * @param activity      must be launched from another {@link Activity}
    * @param origin        where you want to start navigation (most likely your current location)
    * @param destination   where you want to navigate to
-   * @param awsPoolId     used to activate AWS Polly (if null, will fall back to {@link android.speech.tts.TextToSpeech})
+   * @param awsPoolId     used to activate AWS Polly (if null, will use to {@link android.speech.tts.TextToSpeech})
    * @param simulateRoute if true, will mock location movement - if false, will use true location
    */
   public static void startNavigation(Activity activity, Position origin, Position destination,
