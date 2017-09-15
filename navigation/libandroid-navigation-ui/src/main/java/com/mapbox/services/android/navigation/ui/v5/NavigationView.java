@@ -194,9 +194,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
     instructionPlayer.play(instruction);
-    if (identifier == NavigationConstants.ARRIVAL_MILESTONE) {
-      finish();
-    }
   }
 
   @Override
