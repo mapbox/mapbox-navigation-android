@@ -1,5 +1,11 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
+/**
+ * Defines a contract for instruction players
+ * used in {@link com.mapbox.services.android.navigation.ui.v5.NavigationView}.
+ *
+ * @since 0.6.0
+ */
 public interface InstructionPlayer {
 
   /**
@@ -12,31 +18,32 @@ public interface InstructionPlayer {
   void play(String instruction);
 
   /**
-   * Will determine if voice instructions will be played or not.  If called while
-   * an instruction is currently playing, the instruction should end immediately and any
+   * Will determine if voice instructions will be played or not.
+   *
+   * If called while an instruction is currently playing, the instruction should end immediately and any
    * instructions queued should be cleared.
    *
-   * @param isMuted true if should be muted, false if should not.
+   * @param isMuted true if should be muted, false if should not
    * @since 0.6.0
    */
   void setMuted(boolean isMuted);
 
   /**
-   * @return true if currently muted, false if not.
+   * @return true if currently muted, false if not
    * @since 0.6.0
    */
   boolean isMuted();
 
   /**
    * Used in off-route scenarios to stop current
-   * instruction (if playing) and voice a rerouting cue
+   * instruction (if playing) and voice a rerouting cue.
    *
    * @since 0.6.0
    */
   void onOffRoute();
 
   /**
-   * Used to stop and release the media (if needed)
+   * Used to stop and release the media (if needed).
    *
    * @since 0.6.0
    */
