@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="68dp"
+    android:orientation="vertical">
+
+    <ViewFlipper
+        android:id="@+id/alertFlipper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp">
+
+        <LinearLayout
+            android:id="@+id/loadingLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:background="@drawable/alert_loading_background"
+            android:elevation="4dp"
+            android:gravity="center_horizontal"
+            android:padding="4dp">
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:indeterminate="true"
+                android:indeterminateTint="@android:color/white"/>
+
+            <TextView
+                android:id="@+id/loadingText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                tools:text="Acquiring GPS..."/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/successLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:background="@drawable/alert_success_background"
+            android:elevation="4dp"
+            android:gravity="center_horizontal"
+            android:padding="4dp">
+
+            <TextView
+                android:id="@+id/successText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                tools:text="GPS signal acquired"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/warningLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:background="@drawable/alert_warning_background"
+            android:elevation="4dp"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/warningText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                tools:text="Warning Text"/>
+
+        </LinearLayout>
+
+    </ViewFlipper>
+
+</LinearLayout>

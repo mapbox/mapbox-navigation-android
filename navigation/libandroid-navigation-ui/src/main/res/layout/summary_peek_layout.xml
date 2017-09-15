@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="72dp"
@@ -10,29 +10,29 @@
     <ProgressBar
         android:id="@+id/rerouteProgressBar"
         style="@style/Widget.AppCompat.ProgressBar"
-        android:indeterminateTint="?attr/navigationViewAccent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
         android:indeterminate="true"
-        android:visibility="invisible"
-        android:layout_centerInParent="true"/>
+        android:indeterminateTint="?attr/navigationViewAccent"
+        android:visibility="invisible"/>
 
     <LinearLayout
         android:id="@+id/cancelBtnLayout"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
-        android:focusable="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true">
+        android:focusable="true">
 
         <ImageButton
             android:id="@+id/cancelBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
             android:layout_gravity="center"
+            android:background="@android:color/transparent"
             android:padding="16dp"
             android:tint="@color/md_grey_700"
             app:srcCompat="@drawable/ic_clear"/>
@@ -43,18 +43,18 @@
         android:id="@+id/expandArrowLayout"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
-        android:focusable="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true">
+        android:focusable="true">
 
         <ImageButton
             android:id="@+id/expandArrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
             android:layout_gravity="center"
+            android:background="@android:color/transparent"
             android:padding="16dp"
             android:tint="@color/md_grey_800"
             app:srcCompat="@drawable/ic_arrow_up"/>
@@ -66,9 +66,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_toRightOf="@id/cancelBtnLayout"
         android:layout_toEndOf="@id/cancelBtnLayout"
         android:layout_toLeftOf="@id/expandArrowLayout"
+        android:layout_toRightOf="@id/cancelBtnLayout"
         android:layout_toStartOf="@id/expandArrowLayout"/>
 
 </RelativeLayout>
