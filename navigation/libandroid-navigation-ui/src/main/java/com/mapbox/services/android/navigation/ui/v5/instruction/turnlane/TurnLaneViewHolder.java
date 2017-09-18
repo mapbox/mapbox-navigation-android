@@ -12,6 +12,6 @@ class TurnLaneViewHolder extends RecyclerView.ViewHolder {
 
   TurnLaneViewHolder(View itemView) {
     super(itemView);
-    turnImage = (ImageView) itemView.findViewById(R.id.turnImage);
+    turnImage = itemView.findViewById(R.id.turnImage);
   }
 }
