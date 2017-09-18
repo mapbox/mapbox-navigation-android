@@ -173,6 +173,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     Timber.d("onSaveInstanceState()");
     outState.putBoolean("navigation_running", navigationRunning);
     outState.putParcelable("current_location", location);
+    outState.putParcelable("current_destination", locationFromDestination(destination));
     outState.putString("current_route", new Gson().toJson(route));
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
@@ -185,6 +186,10 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     restartNavigation = savedInstanceState.getBoolean("navigation_running");
     if (restartNavigation) {
       location = savedInstanceState.getParcelable("current_location");
+      Location destinationLocation = savedInstanceState.getParcelable("current_destination");
+      if (destinationLocation != null) {
+        destination = Position.fromCoordinates(destinationLocation.getLongitude(), destinationLocation.getLatitude());
+      }
       String currentRoute = savedInstanceState.getString("current_route");
       route = new Gson().fromJson(currentRoute, DirectionsRoute.class);
     }
@@ -730,6 +735,19 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     deactivateNavigation();
     deactivateLocationEngine();
     deactivateInstructionPlayer();
+  }
+
+  /**
+   * Converts the destination {@link Position} to a {@link android.os.Parcelable} {@link Location}.
+   *
+   * @param destination as a {@link Position}
+   * @return destination to be stored in SavedInstanceState
+   */
+  private Location locationFromDestination(Position destination) {
+    Location destinationLocation = new Location(NavigationView.class.getSimpleName());
+    destinationLocation.setLongitude(destination.getLongitude());
+    destinationLocation.setLatitude(destination.getLatitude());
+    return destinationLocation;
   }
 
   /**
