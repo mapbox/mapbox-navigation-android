@@ -14,6 +14,8 @@ import java.util.List;
 
 import timber.log.Timber;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.METERS_REMAINING_TILL_ARRIVAL;
+
 class NavigationEventDispatcher {
 
   private List<NavigationEventListener> navigationEventListeners;
@@ -113,7 +115,7 @@ class NavigationEventDispatcher {
 
   void onProgressChange(Location location, RouteProgress routeProgress) {
     // Check if user has arrived and notify internal progress change listener if so.
-    if (routeProgress.distanceRemaining() <= 20) {
+    if (routeProgress.distanceRemaining() <= METERS_REMAINING_TILL_ARRIVAL) {
       internalProgressChangeListener.onProgressChange(location, routeProgress);
     }
 

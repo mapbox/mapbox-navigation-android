@@ -33,6 +33,8 @@ public abstract class MapboxNavigationOptions {
 
   public abstract boolean enableNotification();
 
+  public abstract double metersRemainingTillArrival();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -60,6 +62,8 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder enableNotification(boolean enableNotification);
 
+    public abstract Builder metersRemainingTillArrival(double metersRemainingTillArrival);
+
     public abstract MapboxNavigationOptions build();
   }
 
@@ -76,6 +80,7 @@ public abstract class MapboxNavigationOptions {
       .snapToRoute(true)
       .manuallyEndNavigationUponCompletion(false)
       .defaultMilestonesEnabled(true)
+      .metersRemainingTillArrival(NavigationConstants.METERS_REMAINING_TILL_ARRIVAL)
       .enableNotification(true);
   }
 }
