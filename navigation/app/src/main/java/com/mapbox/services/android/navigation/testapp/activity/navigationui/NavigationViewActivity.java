@@ -227,14 +227,14 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private void launchNavigationWithRoute() {
     if (route != null) {
       NavigationLauncher.startNavigation(this, route,
-        null, false);
+        null, true);
     }
   }
 
   private void launchNavigationWithCoordinates() {
     if (currentPosition != null && destination != null) {
       NavigationLauncher.startNavigation(this, currentPosition, destination,
-        null, false);
+        null, true);
     }
   }
 

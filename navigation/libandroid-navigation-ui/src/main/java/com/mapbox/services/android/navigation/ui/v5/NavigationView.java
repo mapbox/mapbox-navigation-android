@@ -485,7 +485,11 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     }
   }
 
-  // TODO Doc
+  /**
+   * First checks to restart navigation after configuration change.
+   * <p>
+   * If restart isn't needed, checks for launch data (launching for the first time).
+   */
   private void restartNavigation() {
     Timber.d("Starting navigation onMapReady...");
     if (restartNavigation) {
