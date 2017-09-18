@@ -2,6 +2,8 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -473,11 +475,15 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   /**
    * Initializes the {@link LocationEngine} based on whether or not
    * simulation is enabled.
+   * <p>
+   * If simulation is enabled, the screen is locked to current orientation.
+   * This is due to current limitations of {@link MockLocationEngine}.
    */
   @SuppressWarnings( {"MissingPermission"})
   private void initLocation() {
     if (shouldSimulateRoute()) {
       checkLaunchData(getIntent());
+      lockOrientation();
     } else {
       Timber.d("Starting up location engine...");
       locationEngine = navigation.getLocationEngine();
@@ -556,6 +562,18 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       } else {
         startCoordinateNavigation();
       }
+    }
+  }
+
+  /**
+   * Locks the screen to the current orientation.
+   */
+  private void lockOrientation() {
+    int orientation = getResources().getConfiguration().orientation;
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+      setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+    } else {
+      setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
     }
   }
 
