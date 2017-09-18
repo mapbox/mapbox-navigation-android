@@ -227,7 +227,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private void launchNavigationWithRoute() {
     if (route != null) {
       NavigationLauncher.startNavigation(this, route,
-        null, true);
+        null, false);
     }
   }
 

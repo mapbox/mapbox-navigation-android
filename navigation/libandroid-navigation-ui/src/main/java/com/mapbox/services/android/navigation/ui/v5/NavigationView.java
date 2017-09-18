@@ -424,15 +424,17 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   private void fetchRoute(Position origin, Position destination) {
-    NavigationRoute.Builder routeBuilder = NavigationRoute.builder()
-      .accessToken(Mapbox.getAccessToken())
-      .origin(origin)
-      .destination(destination);
+    if (origin != null && destination != null) {
+      NavigationRoute.Builder routeBuilder = NavigationRoute.builder()
+        .accessToken(Mapbox.getAccessToken())
+        .origin(origin)
+        .destination(destination);
 
-    if (locationHasBearing()) {
-      fetchRouteWithBearing(routeBuilder);
-    } else {
-      routeBuilder.build().getRoute(this);
+      if (locationHasBearing()) {
+        fetchRouteWithBearing(routeBuilder);
+      } else {
+        routeBuilder.build().getRoute(this);
+      }
     }
   }
 
