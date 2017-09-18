@@ -64,6 +64,8 @@ public abstract class NavigationRoute {
   }
 
   MapboxDirections getDirectionsRequest() {
+
+
     MapboxDirections.Builder builder = new MapboxDirections.Builder()
       .setUser(user())
       .setProfile(profile())

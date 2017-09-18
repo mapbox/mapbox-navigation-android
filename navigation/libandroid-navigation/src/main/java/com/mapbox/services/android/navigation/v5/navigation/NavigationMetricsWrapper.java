@@ -6,7 +6,6 @@ import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
-import com.mapbox.services.commons.utils.PolylineUtils;
 
 import java.util.Date;
 
@@ -19,7 +18,8 @@ class NavigationMetricsWrapper {
       sessionState.currentGeometry(), "",
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
-      sessionState.rerouteCount(), sessionState.startTimestamp(), (int) routeProgress.distanceTraveled(),
+      sessionState.rerouteCount(), sessionState.startTimestamp(),
+      (int) (sessionState.previousRouteDistancesCompleted() + routeProgress.distanceTraveled()),
       sessionState.mockLocation(),"null", "null",
       sessionState.originalGeometry(), sessionState.originalDistance(),
       sessionState.originalDuration(), "null", sessionState.currentStepCount(),
@@ -34,7 +34,8 @@ class NavigationMetricsWrapper {
       sessionState.currentGeometry(), "",
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
-      sessionState.rerouteCount(), sessionState.startTimestamp(), (int) routeProgress.distanceTraveled(),
+      sessionState.rerouteCount(), sessionState.startTimestamp(),
+      (int) (sessionState.previousRouteDistancesCompleted() + routeProgress.distanceTraveled()),
       (int) routeProgress.distanceRemaining(), (int) routeProgress.durationRemaining(),
       sessionState.mockLocation(),
       "null", "null", sessionState.originalGeometry(),

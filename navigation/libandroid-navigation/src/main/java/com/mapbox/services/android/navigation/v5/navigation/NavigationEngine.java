@@ -111,6 +111,11 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     }
 
     if (!TextUtils.equals(directionsRoute.getGeometry(), previousRouteProgress.directionsRoute().getGeometry())) {
+      // Need to keep track of total distance traveled even when reroute occurs.
+      mapboxNavigation.getSessionState().toBuilder().previousRouteDistancesCompleted(
+        mapboxNavigation.getSessionState().previousRouteDistancesCompleted()
+          + previousRouteProgress.distanceTraveled()
+      );
       indices = NavigationIndices.create(0, 0);
     }
 

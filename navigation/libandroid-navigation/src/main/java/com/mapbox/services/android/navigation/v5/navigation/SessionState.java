@@ -73,6 +73,8 @@ abstract class SessionState {
 
   abstract int rerouteCount();
 
+  abstract double previousRouteDistancesCompleted();
+
   abstract Builder toBuilder();
 
   static Builder builder() {
@@ -100,6 +102,8 @@ abstract class SessionState {
     abstract Builder startTimestamp(@NonNull Date startTimeStamp);
 
     abstract Builder arrivalTimestamp(@Nullable Date arrivalTimestamp);
+
+    abstract Builder previousRouteDistancesCompleted(double previousRouteDistancesCompleted);
 
     abstract SessionState build();
 
