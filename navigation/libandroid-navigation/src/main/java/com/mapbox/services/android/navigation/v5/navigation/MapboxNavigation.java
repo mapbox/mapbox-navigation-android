@@ -333,6 +333,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
         .originalDirectionRoute(directionsRoute)
         .currentDirectionRoute(directionsRoute)
         .sessionIdentifier(TelemetryUtils.buildUUID())
+        .previousRouteDistancesCompleted(0)
         .startTimestamp(new Date())
         .rerouteCount(0)
         .mockLocation(locationEngine instanceof MockLocationEngine)
