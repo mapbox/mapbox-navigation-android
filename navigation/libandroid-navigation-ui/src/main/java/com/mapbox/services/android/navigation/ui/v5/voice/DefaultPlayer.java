@@ -6,15 +6,33 @@ import android.text.TextUtils;
 
 import java.util.Locale;
 
+/**
+ * Default player used to play voice instructions when
+ * {@link com.mapbox.services.android.navigation.ui.v5.NavigationView} is launched without an AWS Cognito Pool ID.
+ * <p>
+ * This instruction player uses {@link TextToSpeech} to play voice instructions.
+ *
+ * @since 0.6.0
+ */
 public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitListener {
 
   private TextToSpeech textToSpeech;
   private boolean isMuted;
 
+  /**
+   * Creates an instance of {@link DefaultPlayer}.
+   *
+   * @param context used to create an instance of {@link TextToSpeech}
+   * @since 0.6.0
+   */
   DefaultPlayer(Context context) {
     textToSpeech = new TextToSpeech(context, this);
   }
 
+  /**
+   * @param instruction voice instruction to be synthesized and played
+   * @inheritDoc
+   */
   @Override
   public void play(String instruction) {
     if (!isMuted && !TextUtils.isEmpty(instruction)) {
@@ -22,6 +40,10 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
     }
   }
 
+  /**
+   * @param isMuted true if should be muted, false if should not
+   * @inheritDoc
+   */
   @Override
   public void setMuted(boolean isMuted) {
     this.isMuted = isMuted;
@@ -30,16 +52,26 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
     }
   }
 
+  /**
+   * @return true if muted, false if not
+   * @inheritDoc
+   */
   @Override
   public boolean isMuted() {
     return isMuted;
   }
 
+  /**
+   * @inheritDoc
+   */
   @Override
   public void onOffRoute() {
     muteTts();
   }
 
+  /**
+   * @inheritDoc
+   */
   @Override
   public void onDestroy() {
     if (textToSpeech != null) {
@@ -48,6 +80,9 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
     }
   }
 
+  /**
+   * @inheritDoc
+   */
   @Override
   public void onInit(int status) {
     if (status != TextToSpeech.ERROR) {
@@ -55,6 +90,10 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
     }
   }
 
+  /**
+   * Called when setting muted mid-instruction.
+   * Mutes TTS only if currently speaking.
+   */
   private void muteTts() {
     if (textToSpeech.isSpeaking()) {
       textToSpeech.stop();
