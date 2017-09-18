@@ -35,6 +35,20 @@ import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbrev
 
 import java.text.DecimalFormat;
 
+/**
+ * A view that can be used to display upcoming maneuver information and control
+ * voice instruction mute / unmute.
+ * <p>
+ * An {@link ImageView} is used to display the maneuver image on the left.
+ * Two {@link TextView}s are used to display distance to the next maneuver, as well
+ * as the name of the destination / maneuver name / instruction based on what data is available
+ * <p>
+ * To automatically have this view update with information from
+ * {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation},
+ * add the view as a {@link ProgressChangeListener} and / or {@link OffRouteListener}
+ *
+ * @since 0.6.0
+ */
 public class InstructionView extends RelativeLayout implements ProgressChangeListener, OffRouteListener {
 
   private ImageView maneuverImage;
@@ -73,6 +87,12 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     init();
   }
 
+  /**
+   * Once this view has finished inflating, it will bind the views.
+   * <p>
+   * It will also initialize the {@link RecyclerView} used to display the turn lanes
+   * and animations used to show / hide views.
+   */
   @Override
   protected void onFinishInflate() {
     super.onFinishInflate();
@@ -82,6 +102,15 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     initAnimations();
   }
 
+  /**
+   * Listener used to update the views with navigation data.
+   * <p>
+   * Can be added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
+   *
+   * @param location      ignored in this scenario
+   * @param routeProgress holds all route / progress data needed to update the views
+   * @since 0.6.0
+   */
   @Override
   public Parcelable onSaveInstanceState() {
     super.onSaveInstanceState();
@@ -102,27 +131,28 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     update(routeProgress);
   }
 
+  /**
+   * Listener used to update the views in off-route scenario.
+   * This view will show a view indicating a new route is being retrieved.
+   * This same view will be hidden when the new route is received from
+   * {@link com.mapbox.services.android.navigation.v5.navigation.NavigationRoute}.
+   * <p>
+   * Can be added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
+   *
+   * @param location ignored in this scenario
+   * @since 0.6.0
+   */
   @Override
   public void userOffRoute(Location location) {
     showRerouteState();
   }
 
-  public void soundFabOff() {
-    soundFab.setImageResource(R.drawable.ic_sound_off);
-  }
-
-  public void soundFabOn() {
-    soundFab.setImageResource(R.drawable.ic_sound_on);
-  }
-
-  public void setSoundChipText(String text) {
-    soundChipText.setText(text);
-  }
-
-  public void showSoundChip() {
-    soundChipText.startAnimation(fadeInSlowOut);
-  }
-
+  /**
+   * If invisible, this method will slide the view down
+   * from the top of the screen and set the visibility to visible
+   *
+   * @since 0.6.0
+   */
   public void show() {
     if (this.getVisibility() == INVISIBLE) {
       this.setVisibility(VISIBLE);
@@ -130,24 +160,48 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     }
   }
 
+  /**
+   * Will slide the reroute view down from the top of the screen
+   * and make it visible
+   *
+   * @since 0.6.0
+   */
   public void showRerouteState() {
     showingRerouteState = true;
     rerouteLayout.startAnimation(rerouteSlideDownTop);
   }
 
+  /**
+   * Will slide the reroute view up to the top of the screen
+   * and hide it
+   *
+   * @since 0.6.0
+   */
   public void hideRerouteState() {
     showingRerouteState = false;
     rerouteLayout.startAnimation(rerouteSlideUpTop);
   }
 
+  /**
+   * Will toggle the view between muted and unmuted states.
+   *
+   * @return boolean true if muted, false if not
+   * @since 0.6.0
+   */
   public boolean toggleMute() {
     return isMuted ? unmute() : mute();
   }
 
+  /**
+   * Inflates this layout needed for this view.
+   */
   private void init() {
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
 
+  /**
+   * Finds and binds all necessary views
+   */
   private void bind() {
     maneuverImage = findViewById(R.id.maneuverImageView);
     stepDistanceText = findViewById(R.id.stepDistanceText);
@@ -160,6 +214,17 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     initInstructionAutoSize();
   }
 
+  /**
+   * Sets up mute UI event.
+   * <p>
+   * Shows chip with "Muted" text.
+   * Changes sound {@link FloatingActionButton}
+   * {@link android.graphics.drawable.Drawable} to denote sound is off.
+   * <p>
+   * Sets private state variable to true (muted)
+   *
+   * @return true, view is in muted state
+   */
   private boolean mute() {
     isMuted = true;
     setSoundChipText(getContext().getString(R.string.muted));
@@ -168,6 +233,17 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     return isMuted;
   }
 
+  /**
+   * Sets up unmuted UI event.
+   * <p>
+   * Shows chip with "Unmuted" text.
+   * Changes sound {@link FloatingActionButton}
+   * {@link android.graphics.drawable.Drawable} to denote sound is on.
+   * <p>
+   * Sets private state variable to false (unmuted)
+   *
+   * @return false, view is in unmuted state
+   */
   private boolean unmute() {
     isMuted = false;
     setSoundChipText(getContext().getString(R.string.unmuted));
@@ -176,15 +252,50 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     return isMuted;
   }
 
+  /**
+   * Changes sound {@link FloatingActionButton}
+   * {@link android.graphics.drawable.Drawable} to denote sound is off.
+   */
+  private void soundFabOff() {
+    soundFab.setImageResource(R.drawable.ic_sound_off);
+  }
+
+  /**
+   * Changes sound {@link FloatingActionButton}
+   * {@link android.graphics.drawable.Drawable} to denote sound is on.
+   */
+  private void soundFabOn() {
+    soundFab.setImageResource(R.drawable.ic_sound_on);
+  }
+
+  /**
+   * Sets {@link TextView} inside of chip view.
+   *
+   * @param text to be displayed in chip view ("Muted"/"Umuted")
+   */
+  private void setSoundChipText(String text) {
+    soundChipText.setText(text);
+  }
+
+  /**
+   * Shows and then hides the sound chip using {@link AnimationSet}
+   */
+  private void showSoundChip() {
+    soundChipText.startAnimation(fadeInSlowOut);
+  }
+
+  /**
+   * Called after we bind the views, this will allow the step instruction {@link TextView}
+   * to automatically re-size based on the length of the text.
+   */
   private void initInstructionAutoSize() {
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepInstructionText,
       16, 28, 2, TypedValue.COMPLEX_UNIT_SP);
   }
 
-  private void initDecimalFormat() {
-    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
-  }
-
+  /**
+   * Sets up the {@link RecyclerView} that is used to display the turn lanes.
+   */
   private void initTurnLaneRecyclerView() {
     turnLaneAdapter = new TurnLaneAdapter();
     rvTurnLanes.setAdapter(turnLaneAdapter);
@@ -193,6 +304,17 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
       LinearLayoutManager.HORIZONTAL, false));
   }
 
+  /**
+   * Initializes decimal format to be used to populate views with
+   * distance remaining.
+   */
+  private void initDecimalFormat() {
+    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
+  }
+
+  /**
+   * Initializes all animations needed to show / hide views.
+   */
   private void initAnimations() {
     Context context = getContext();
     slideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
@@ -213,6 +335,12 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     fadeInSlowOut.addAnimation(fadeOut);
   }
 
+  /**
+   * Called in {@link ProgressChangeListener}, creates a new model and then
+   * uses it to update the views.
+   *
+   * @param routeProgress used to provide navigation / progress data
+   */
   private void update(RouteProgress routeProgress) {
     if (routeProgress != null && !showingRerouteState) {
       InstructionModel model = new InstructionModel(routeProgress, decimalFormat);
@@ -223,6 +351,12 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     }
   }
 
+  /**
+   * Looks to see if we have a new image id.
+   * Sets new image resource if one is found.
+   *
+   * @param model provides maneuver image id
+   */
   private void addManeuverImage(InstructionModel model) {
     if (currentManeuverId != model.getManeuverImage()) {
       currentManeuverId = model.getManeuverImage();
@@ -230,6 +364,12 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     }
   }
 
+  /**
+   * Looks to see if we have a new distance text.
+   * Sets new distance text if found.
+   *
+   * @param model provides distance text
+   */
   private void addDistanceText(InstructionModel model) {
     if (newDistanceText(model)) {
       distanceText(model);
@@ -238,16 +378,32 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     }
   }
 
+  /**
+   * Looks to see if we have a new distance text.
+   *
+   * @param model provides distance text
+   */
   private boolean newDistanceText(InstructionModel model) {
     return currentDistanceText != null && !currentDistanceText.toString()
       .contentEquals(model.getStepDistanceRemaining().toString());
   }
 
+  /**
+   * Sets current distance text.
+   *
+   * @param model provides distance text
+   */
   private void distanceText(InstructionModel model) {
     currentDistanceText = model.getStepDistanceRemaining();
     stepDistanceText.setText(model.getStepDistanceRemaining());
   }
 
+  /**
+   * Looks to see if we have a new instruction text.
+   * Sets new instruction text if found.
+   *
+   * @param model provides instruction text
+   */
   private void addTextInstruction(InstructionModel model) {
     if (newTextInstruction(model)) {
       textInstruction(model);
@@ -256,15 +412,31 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     }
   }
 
+  /**
+   * Looks to see if we have a new instruction text.
+   *
+   * @param model provides instruction text
+   */
   private boolean newTextInstruction(InstructionModel model) {
     return currentInstruction != null && !currentInstruction.contentEquals(model.getTextInstruction());
   }
 
+  /**
+   * Sets current instruction text.
+   *
+   * @param model provides instruction text
+   */
   private void textInstruction(InstructionModel model) {
     currentInstruction = model.getTextInstruction();
     stepInstructionText.setText(StringAbbreviator.abbreviate(model.getTextInstruction()));
   }
 
+  /**
+   * Looks for turn lane data and populates / shows the turn lane view if found.
+   * If not, hides the turn lane view.
+   *
+   * @param model created with new {@link RouteProgress} holding turn lane data
+   */
   private void addTurnLanes(InstructionModel model) {
     if (model.getTurnLanes() != null
       && !TextUtils.isEmpty(model.getManeuverModifier())) {
@@ -275,6 +447,9 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     }
   }
 
+  /**
+   * Shows turn lane view
+   */
   private void showTurnLanes() {
     if (turnLanesHidden) {
       turnLanesHidden = false;
@@ -282,6 +457,9 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     }
   }
 
+  /**
+   * Hides turn lane view
+   */
   private void hideTurnLanes() {
     if (!turnLanesHidden) {
       turnLanesHidden = true;

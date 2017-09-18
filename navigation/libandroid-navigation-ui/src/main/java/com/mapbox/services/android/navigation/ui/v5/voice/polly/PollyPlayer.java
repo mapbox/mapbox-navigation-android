@@ -17,6 +17,15 @@ import java.util.List;
 
 import timber.log.Timber;
 
+/**
+ * <p>
+ * Will retrieve synthesized speech mp3s from Amazon's AWS Polly Service
+ * (Requires a valid AWS Cognito Pool ID)
+ * </p><p>
+ * Will queue each instruction and play them
+ * sequentially up until the queue is empty.
+ * </p>
+ */
 public class PollyPlayer implements InstructionPlayer {
 
   private static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -27,11 +36,20 @@ public class PollyPlayer implements InstructionPlayer {
   private List<String> instructionUrls = new ArrayList<>();
   private boolean isMuted;
 
+  /**
+   * Construct an instance of {@link PollyPlayer}
+   * @param context to initialize {@link CognitoCachingCredentialsProvider} and {@link AudioManager}
+   * @param awsPoolId to initialize {@link CognitoCachingCredentialsProvider}
+   */
   public PollyPlayer(Context context, String awsPoolId) {
     initPollyClient(context, awsPoolId);
     initAudioManager(context);
   }
 
+  /**
+   *
+   * @param instruction voice instruction to be synthesized and played.
+   */
   @Override
   public void play(String instruction) {
     if (!isMuted && !TextUtils.isEmpty(instruction)) {
