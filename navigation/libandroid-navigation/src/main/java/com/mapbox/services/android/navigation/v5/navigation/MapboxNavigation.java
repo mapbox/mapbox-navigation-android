@@ -597,6 +597,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
+    Timber.v("Arrived event occurred");
     sessionState = sessionState.toBuilder().arrivalTimestamp(new Date()).build();
     NavigationMetricsWrapper.arriveEvent(sessionState, routeProgress, location);
     endNavigation();

@@ -6,6 +6,7 @@ import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
+import com.mapbox.services.commons.utils.PolylineUtils;
 
 import java.util.Date;
 
@@ -15,7 +16,7 @@ class NavigationMetricsWrapper {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildArriveEvent(
       "mapbox-navigation-android", BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
-      routeProgress.directionsRoute().getGeometry(), "",
+      sessionState.currentGeometry(), "",
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
       sessionState.rerouteCount(), sessionState.startTimestamp(), (int) routeProgress.distanceTraveled(),
@@ -30,7 +31,7 @@ class NavigationMetricsWrapper {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildCancelEvent(
       BuildConfig.APPLICATION_ID, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(),
       location.getLatitude(), location.getLongitude(),
-      routeProgress.directionsRoute().getGeometry(), "",
+      sessionState.currentGeometry(), "",
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
       sessionState.rerouteCount(), sessionState.startTimestamp(), (int) routeProgress.distanceTraveled(),
@@ -46,7 +47,7 @@ class NavigationMetricsWrapper {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildDepartEvent(
       BuildConfig.APPLICATION_ID, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
-      routeProgress.directionsRoute().getGeometry(), "",
+      sessionState.currentGeometry(), "",
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
       sessionState.rerouteCount(), sessionState.mockLocation(), "null", "null",
