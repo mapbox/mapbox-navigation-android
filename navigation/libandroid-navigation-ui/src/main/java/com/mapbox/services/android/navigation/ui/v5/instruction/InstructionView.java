@@ -366,8 +366,9 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
    * @param model provides distance text
    */
   private boolean newDistanceText(InstructionModel model) {
-    return currentDistanceText != null && !currentDistanceText.toString()
-      .contentEquals(model.getStepDistanceRemaining().toString());
+    return currentDistanceText != null
+      && !TextUtils.isEmpty(model.getStepDistanceRemaining())
+      && !currentDistanceText.toString().contentEquals(model.getStepDistanceRemaining().toString());
   }
 
   /**
@@ -400,7 +401,9 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
    * @param model provides instruction text
    */
   private boolean newTextInstruction(InstructionModel model) {
-    return currentInstruction != null && !currentInstruction.contentEquals(model.getTextInstruction());
+    return currentInstruction != null
+      && !TextUtils.isEmpty(model.getTextInstruction())
+      && !currentInstruction.contentEquals(model.getTextInstruction());
   }
 
   /**
