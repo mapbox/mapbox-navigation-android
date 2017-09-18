@@ -113,7 +113,7 @@ class NavigationEventDispatcher {
 
   void onProgressChange(Location location, RouteProgress routeProgress) {
     // Check if user has arrived and notify internal progress change listener if so.
-    if (routeProgress.fractionTraveled() >= 0.99) {
+    if (routeProgress.distanceRemaining() <= 20) {
       internalProgressChangeListener.onProgressChange(location, routeProgress);
     }
 
