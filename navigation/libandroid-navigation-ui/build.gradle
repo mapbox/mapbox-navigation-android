@@ -7,8 +7,8 @@ android {
   defaultConfig {
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.targetSdkVersion
-    versionCode 1
-    versionName "0.3.1"
+    versionCode rootProject.ext.versionCode
+    versionName rootProject.ext.versionName
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true
   }
@@ -44,6 +44,7 @@ dependencies {
   // AWS Polly
   compile rootProject.ext.dep.polly
 
+  // Mapbox Map SDK Javadoc
   javadocDeps rootProject.ext.dep.mapboxMapSdk
 
   // Unit testing
