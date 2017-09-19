@@ -153,8 +153,9 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
    * or a new route is found, false otherwise
    */
   private boolean newRoute(DirectionsRoute directionsRoute) {
-    return previousRouteProgress == null ||
-      !TextUtils.equals(directionsRoute.getGeometry(), previousRouteProgress.directionsRoute().getGeometry());
+    return previousRouteProgress == null
+      || !TextUtils.equals(directionsRoute.getGeometry(),
+      previousRouteProgress.directionsRoute().getGeometry());
   }
 
   /**
