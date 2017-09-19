@@ -333,6 +333,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
         .originalDirectionRoute(directionsRoute)
         .currentDirectionRoute(directionsRoute)
         .sessionIdentifier(TelemetryUtils.buildUUID())
+        .previousRouteDistancesCompleted(0)
         .startTimestamp(new Date())
         .rerouteCount(0)
         .mockLocation(locationEngine instanceof MockLocationEngine)
@@ -597,6 +598,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
+    Timber.v("Arrived event occurred");
     sessionState = sessionState.toBuilder().arrivalTimestamp(new Date()).build();
     NavigationMetricsWrapper.arriveEvent(sessionState, routeProgress, location);
     endNavigation();
