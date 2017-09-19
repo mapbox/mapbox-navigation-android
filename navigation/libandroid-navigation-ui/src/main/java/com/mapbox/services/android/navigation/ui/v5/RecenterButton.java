@@ -8,6 +8,18 @@ import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout;
 
+/**
+ * Button used to re-activate following user location during navigation.
+ * <p>
+ * If a user scrolls the map while navigating, the
+ * {@link com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet}
+ * is set to hidden and this button is shown.
+ * <p>
+ * This button uses a custom {@link TranslateAnimation} with {@link OvershootInterpolator}
+ * to be shown.
+ *
+ * @since 0.6.0
+ */
 public class RecenterButton extends LinearLayout {
 
   private Animation slideUpBottom;
@@ -25,25 +37,45 @@ public class RecenterButton extends LinearLayout {
     init();
   }
 
+  /**
+   * Sets visibility to VISIBLE and starts custom animation.
+   *
+   * @since 0.6.0
+   */
   public void show() {
     setVisibility(VISIBLE);
     startAnimation(slideUpBottom);
   }
 
+  /**
+   * Sets visibility to INVISIBLE.
+   *
+   * @since 0.6.0
+   */
   public void hide() {
     setVisibility(INVISIBLE);
   }
 
+  /**
+   * Once inflation of the view has finished,
+   * create the custom animation.
+   */
   @Override
   protected void onFinishInflate() {
     super.onFinishInflate();
     initAnimation();
   }
 
+  /**
+   * Inflates the layout.
+   */
   private void init() {
     inflate(getContext(), R.layout.recenter_btn_layout, this);
   }
 
+  /**
+   * Creates the custom animation used to show this button.
+   */
   private void initAnimation() {
     slideUpBottom = new TranslateAnimation(0f, 0f, 125f, 0f);
     slideUpBottom.setDuration(300);

@@ -51,6 +51,26 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Activity that creates the drop-in UI.
+ * <p>
+ * Once started, this activity will check if launched with a {@link DirectionsRoute}.
+ * Or, if not found, this activity will look for a set of {@link Position} coordinates.
+ * In the latter case, a new {@link DirectionsRoute} will be retrieved from {@link NavigationRoute}.
+ * </p><p>
+ * Once valid data is obtained, this activity will immediately begin navigation
+ * with {@link MapboxNavigation}.
+ * If launched with the simulation boolean set to true, a {@link MockLocationEngine}
+ * will be initialized and begin pushing updates.
+ * <p>
+ * This activity requires user permissions ACCESS_FINE_LOCATION
+ * and ACCESS_COARSE_LOCATION have already been granted.
+ * <p>
+ * A Mapbox access token must also be set by the developer (to initialize navigation).
+ *
+ * @since 0.6.0
+ * </p>
+ */
 public class NavigationView extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnScrollListener,
   LocationEngineListener, ProgressChangeListener, OffRouteListener,
   MilestoneEventListener, Callback<DirectionsResponse> {
@@ -97,7 +117,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     initVoiceInstructions();
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  @SuppressWarnings( {"MissingPermission"})
   @Override
   protected void onStart() {
     super.onStart();
@@ -134,7 +154,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     }
   }
 
-
   @Override
   protected void onDestroy() {
     super.onDestroy();
@@ -148,6 +167,15 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     mapView.onSaveInstanceState(outState);
   }
 
+  /**
+   * Fired after the map is ready, this is our cue to finish
+   * setting up the rest of the plugins / location engine.
+   * <p>
+   * Also, we check for launch data (coordinates or route).
+   *
+   * @param mapboxMap used for route, camera, and location UI
+   * @since 0.6.0
+   */
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
@@ -159,6 +187,14 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     checkLaunchData(getIntent());
   }
 
+  /**
+   * Listener this activity sets on the {@link MapboxMap}.
+   * <p>
+   * Used as a cue to hide the {@link SummaryBottomSheet} and stop the
+   * camera from following location updates.
+   *
+   * @since 0.6.0
+   */
   @Override
   public void onScroll() {
     if (!summaryBehavior.isHideable()) {
@@ -168,34 +204,87 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     }
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  /**
+   * Called after the {@link LocationEngine} is activated.
+   * Good to request location updates at this point.
+   *
+   * @since 0.6.0
+   */
+  @SuppressWarnings( {"MissingPermission"})
   @Override
   public void onConnected() {
     locationEngine.requestLocationUpdates();
   }
 
+  /**
+   * Fired when the {@link LocationEngine} updates.
+   * <p>
+   * This activity will check launch data here (if we didn't have a location when the map was ready).
+   * Once the first location update is received, a new route can be retrieved from {@link NavigationRoute}.
+   *
+   * @param location used to retrieve route with bearing
+   */
   @Override
   public void onLocationChanged(Location location) {
     this.location = location;
     checkLaunchData(getIntent());
   }
 
+  /**
+   * Listener used to update the {@link LocationLayerPlugin}.
+   * <p>
+   * Added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
+   *
+   * @param location      given to the {@link LocationLayerPlugin} to show our current location
+   * @param routeProgress ignored in this scenario
+   * @since 0.6.0
+   */
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     locationLayer.forceLocationUpdate(location);
   }
 
+  /**
+   * Listener used to update the {@link LocationLayerPlugin}.
+   * <p>
+   * Added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
+   *
+   * @param location given to the {@link LocationLayerPlugin} to show our current location
+   * @since 0.6.0
+   */
   @Override
   public void userOffRoute(Location location) {
     Position newOrigin = Position.fromLngLat(location.getLongitude(), location.getLatitude());
     fetchRoute(newOrigin, destination);
   }
 
+  /**
+   * Listener used to play instructions and finish this activity
+   * when the arrival milestone is triggered.
+   * <p>
+   * Added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
+   *
+   * @param routeProgress ignored in this scenario
+   * @param instruction   to be voiced by the {@link InstructionPlayer}
+   * @param identifier    used to determine the type of milestone
+   * @since 0.6.0
+   */
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
     instructionPlayer.play(instruction);
   }
 
+  /**
+   * A new directions response has been received.
+   * <p>
+   * The {@link DirectionsResponse} is validated.
+   * If navigation is running, {@link MapboxNavigation} is updated and reroute state is dismissed.
+   * If not, navigation is started.
+   *
+   * @param call     used to request the new {@link DirectionsRoute}
+   * @param response contains the new {@link DirectionsRoute}
+   * @since 0.6.0
+   */
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (validRouteResponse(response)) {
@@ -210,8 +299,12 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable t) {}
+  public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+  }
 
+  /**
+   * Binds all necessary views.
+   */
   private void bind() {
     mapView = findViewById(R.id.mapView);
     instructionView = findViewById(R.id.instructionView);
@@ -226,6 +319,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     soundFab = findViewById(R.id.soundFab);
   }
 
+  /**
+   * Sets click listeners to all views that need them.
+   */
   private void initClickListeners() {
     directionsOptionLayout.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -265,11 +361,19 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     });
   }
 
+  /**
+   * Sets up the {@link MapboxMap}.
+   *
+   * @param savedInstanceState from onCreate()
+   */
   private void initMap(Bundle savedInstanceState) {
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
   }
 
+  /**
+   * Initializes the {@link BottomSheetBehavior} for {@link SummaryBottomSheet}.
+   */
   private void initSummaryBottomSheet() {
     summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
     summaryBehavior.setHideable(false);
@@ -313,6 +417,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     });
   }
 
+  /**
+   * Initializes {@link MapboxNavigation} and adds all views that implement listeners.
+   */
   private void initNavigation() {
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
     navigation.addProgressChangeListener(this);
@@ -324,12 +431,19 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     navigation.addOffRouteListener(instructionView);
   }
 
+  /**
+   * Initializes the {@link InstructionPlayer}.
+   */
   private void initVoiceInstructions() {
     instructionPlayer = new NavigationInstructionPlayer(this,
       preferences.getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  /**
+   * Initializes the {@link LocationEngine} based on whether or not
+   * simulation is enabled.
+   */
+  @SuppressWarnings( {"MissingPermission"})
   private void initLocation() {
     if (!shouldSimulateRoute()) {
       locationEngine = navigation.getLocationEngine();
@@ -344,18 +458,36 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     }
   }
 
+  /**
+   * Initializes the {@link NavigationMapRoute} to be used to draw the
+   * route.
+   */
   private void initRoute() {
     mapRoute = new NavigationMapRoute(mapView, map, NavigationConstants.ROUTE_BELOW_LAYER);
   }
 
+  /**
+   * Initializes the {@link NavigationCamera} that will be used to follow
+   * the {@link Location} updates from {@link MapboxNavigation}.
+   */
   private void initCamera() {
     camera = new NavigationCamera(this, map, navigation);
   }
 
+  /**
+   * Initializes the {@link LocationLayerPlugin} to be used to draw the current
+   * location.
+   */
   private void initLocationLayer() {
     locationLayer = new LocationLayerPlugin(mapView, map, null);
   }
 
+  /**
+   * Checks the intent used to launch this activity.
+   * Will start navigation based on the data found in the {@link Intent}
+   *
+   * @param intent holds either a set of {@link Position} coordinates or a {@link DirectionsRoute}
+   */
   private void checkLaunchData(Intent intent) {
     if (checkLaunchData) {
       if (launchWithRoute(intent)) {
@@ -366,12 +498,27 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     }
   }
 
+  /**
+   * Checks if we have at least one {@link DirectionsRoute} in the given
+   * {@link DirectionsResponse}.
+   *
+   * @param response to be checked
+   * @return true if valid, false if not
+   */
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
     return response.body() != null
       && response.body().getRoutes() != null
       && response.body().getRoutes().size() > 0;
   }
 
+  /**
+   * Requests a new {@link DirectionsRoute}.
+   * <p>
+   * Will use {@link Location} bearing if we have a location with bearing.
+   *
+   * @param origin      start point
+   * @param destination end point
+   */
   private void fetchRoute(Position origin, Position destination) {
     NavigationRoute.Builder routeBuilder = NavigationRoute.builder()
       .accessToken(Mapbox.getAccessToken())
@@ -385,14 +532,29 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     }
   }
 
+  /**
+   * Check if the given {@link Intent} has been launched with a {@link DirectionsRoute}.
+   *
+   * @param intent possibly containing route
+   * @return true if route found, false if not
+   */
   private boolean launchWithRoute(Intent intent) {
     return intent.getBooleanExtra(NavigationConstants.NAVIGATION_VIEW_LAUNCH_ROUTE, false);
   }
 
+  /**
+   * Checks if the route should be simualted with a {@link MockLocationEngine}.
+   *
+   * @return true if simulation enabled, false if not
+   */
   private boolean shouldSimulateRoute() {
     return preferences.getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false);
   }
 
+  /**
+   * Extracts the {@link DirectionsRoute}, adds a destination marker,
+   * and starts navigation.
+   */
   private void startRouteNavigation() {
     DirectionsRoute route = NavigationLauncher.extractRoute(this);
     if (route != null) {
@@ -405,6 +567,10 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     }
   }
 
+  /**
+   * Extracts the {@link Position} coordinates, adds a destination marker,
+   * and fetches a route with the coordinates.
+   */
   private void startCoordinateNavigation() {
     HashMap<String, Position> coordinates = NavigationLauncher.extractCoordinates(this);
     if (coordinates.size() > 0) {
@@ -416,7 +582,16 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     }
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  /**
+   * Sets up everything needed to begin navigation.
+   * <p>
+   * This includes drawing the route on the map, starting camera
+   * tracking, giving {@link MapboxNavigation} a location engine,
+   * enabling the {@link LocationLayerPlugin}, and showing the {@link InstructionView}.
+   *
+   * @param route used to start navigation for the first time
+   */
+  @SuppressWarnings( {"MissingPermission"})
   private void startNavigation(DirectionsRoute route) {
     if (shouldSimulateRoute()) {
       activateMockLocationEngine(route);
@@ -430,11 +605,23 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     navigationRunning = true;
   }
 
+  /**
+   * Updates the {@link NavigationMapRoute} and {@link MapboxNavigation} with
+   * a new {@link DirectionsRoute}.
+   *
+   * @param route new route
+   */
   private void updateNavigation(DirectionsRoute route) {
     mapRoute.addRoute(route);
     navigation.startNavigation(route);
   }
 
+  /**
+   * Creates the destination marker based on the
+   * {@link Position} destination coordinate.
+   *
+   * @param destination where the marker should be placed
+   */
   private void addDestinationMarker(Position destination) {
     IconFactory iconFactory = IconFactory.getInstance(this);
     Icon icon = iconFactory.fromResource(R.drawable.map_marker);
@@ -445,39 +632,69 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       .icon(icon));
   }
 
+  /**
+   * Used to determine if a location has a bearing.
+   *
+   * @return true if bearing exists, false if not
+   */
   private boolean locationHasBearing() {
     return location != null && location.hasBearing();
   }
 
+  /**
+   * Will finish building {@link NavigationRoute} after adding a bearing
+   * and request the route.
+   *
+   * @param routeBuilder to fetch the route
+   */
   private void fetchRouteWithBearing(NavigationRoute.Builder routeBuilder) {
     routeBuilder.addBearing(location.getBearing(), 90);
     routeBuilder.build().getRoute(this);
   }
 
+  /**
+   * Activates a new {@link MockLocationEngine} with the given
+   * {@link DirectionsRoute}.
+   *
+   * @param route to be mocked
+   */
   private void activateMockLocationEngine(DirectionsRoute route) {
     locationEngine = new MockLocationEngine(1000, 30, false);
     ((MockLocationEngine) locationEngine).setRoute(route);
     locationEngine.activate();
   }
 
+  /**
+   * Shuts down anything running in onDestroy
+   */
   private void shutdownNavigation() {
     deactivateNavigation();
     deactivateLocationEngine();
     deactivateInstructionPlayer();
   }
 
+  /**
+   * Destroys the {@link InstructionPlayer} if not null
+   */
   private void deactivateInstructionPlayer() {
     if (instructionPlayer != null) {
       instructionPlayer.onDestroy();
     }
   }
 
+  /**
+   * Destroys {@link MapboxNavigation} if not null
+   */
   private void deactivateNavigation() {
     if (navigation != null) {
       navigation.onDestroy();
     }
   }
 
+  /**
+   * Deactivates and removes listeners
+   * for the {@link LocationEngine} if not null
+   */
   private void deactivateLocationEngine() {
     if (locationEngine != null) {
       locationEngine.removeLocationUpdates();
