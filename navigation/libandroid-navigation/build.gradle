@@ -4,17 +4,14 @@ android {
   compileSdkVersion rootProject.ext.compileSdkVersion
   buildToolsVersion rootProject.ext.buildToolsVersion
 
-  VERSION_NAME = "${VERSION_NAME}"
-
-
   defaultConfig {
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.targetSdkVersion
-    versionCode 1
-    versionName "0.3.1"
+    versionCode rootProject.ext.versionCode
+    versionName rootProject.ext.versionName
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-    buildConfigField('String', 'MAPBOX_NAVIGATION_VERSION_NAME', "\"${VERSION_NAME}\"")
+    buildConfigField('String', "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.VERSION_NAME))
     buildConfigField "String", "MAPBOX_NAVIGATION_EVENTS_USER_AGENT",
         String.format("\"mapbox-navigation-android/%s\"", project.VERSION_NAME)
   }

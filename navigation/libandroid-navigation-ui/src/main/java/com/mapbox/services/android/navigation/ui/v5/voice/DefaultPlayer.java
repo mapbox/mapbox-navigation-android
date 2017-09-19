@@ -31,7 +31,6 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
 
   /**
    * @param instruction voice instruction to be synthesized and played
-   * @inheritDoc
    */
   @Override
   public void play(String instruction) {
@@ -42,7 +41,6 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
 
   /**
    * @param isMuted true if should be muted, false if should not
-   * @inheritDoc
    */
   @Override
   public void setMuted(boolean isMuted) {
@@ -54,24 +52,17 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
 
   /**
    * @return true if muted, false if not
-   * @inheritDoc
    */
   @Override
   public boolean isMuted() {
     return isMuted;
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void onOffRoute() {
     muteTts();
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void onDestroy() {
     if (textToSpeech != null) {
@@ -80,9 +71,6 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
     }
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void onInit(int status) {
     if (status != TextToSpeech.ERROR) {
