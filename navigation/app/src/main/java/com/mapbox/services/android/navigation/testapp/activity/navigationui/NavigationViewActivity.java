@@ -91,16 +91,26 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
+  @SuppressWarnings({"MissingPermission"})
   @Override
   public void onResume() {
     super.onResume();
     mapView.onResume();
+    if (locationEngine != null) {
+      locationEngine.addLocationEngineListener(this);
+      if (!locationEngine.isConnected()) {
+        locationEngine.activate();
+      }
+    }
   }
 
   @Override
   public void onPause() {
     super.onPause();
     mapView.onPause();
+    if (locationEngine != null) {
+      locationEngine.removeLocationEngineListener(this);
+    }
   }
 
   @Override
@@ -122,6 +132,10 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
+    if (locationEngine != null) {
+      locationEngine.removeLocationUpdates();
+      locationEngine.deactivate();
+    }
   }
 
   @Override
