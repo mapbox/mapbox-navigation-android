@@ -90,13 +90,11 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     DirectionsRoute directionsRoute = mapboxNavigation.getRoute();
     MapboxNavigationOptions options = mapboxNavigation.options();
 
-    if (previousRouteProgress == null) {
-
+    if (newRoute(directionsRoute)) {
       // Decode the first steps geometry and hold onto the resulting Position objects till the users
       // on the next step. Indices are both 0 since the user just started on the new route.
       stepPositions = PolylineUtils.decode(
         directionsRoute.getLegs().get(0).getSteps().get(0).getGeometry(), PRECISION_6);
-
 
       previousRouteProgress = RouteProgress.builder()
         .stepDistanceRemaining(directionsRoute.getLegs().get(0).getSteps().get(0).getDistance())
@@ -107,10 +105,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
         .legIndex(0)
         .build();
 
-      indices = NavigationIndices.create(0, 0);
-    }
-
-    if (!TextUtils.equals(directionsRoute.getGeometry(), previousRouteProgress.directionsRoute().getGeometry())) {
       indices = NavigationIndices.create(0, 0);
     }
 
@@ -148,6 +142,19 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       .stepIndex(indices.stepIndex())
       .legIndex(indices.legIndex())
       .build();
+  }
+
+  /**
+   * Check used to determine if navigation is starting for the first time (previousRouteProgress is null).
+   * Or, a new route has been found (in off-route scenarios).
+   *
+   * @param directionsRoute to check against the current route
+   * @return true if starting navigation for the first time
+   * or a new route is found, false otherwise
+   */
+  private boolean newRoute(DirectionsRoute directionsRoute) {
+    return previousRouteProgress == null ||
+      !TextUtils.equals(directionsRoute.getGeometry(), previousRouteProgress.directionsRoute().getGeometry());
   }
 
   /**
