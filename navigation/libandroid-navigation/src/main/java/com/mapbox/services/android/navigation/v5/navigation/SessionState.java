@@ -4,16 +4,28 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
+import com.mapbox.services.Constants;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;
+import com.mapbox.services.commons.models.Position;
+import com.mapbox.services.commons.utils.PolylineUtils;
 
 import java.util.Date;
+import java.util.List;
 
 @AutoValue
 abstract class SessionState {
 
   String originalGeometry() {
-    return originalDirectionRoute().getGeometry();
+    List<Position> geometryPositions
+      = PolylineUtils.decode(originalDirectionRoute().getGeometry(), Constants.PRECISION_6);
+    return PolylineUtils.encode(geometryPositions, Constants.PRECISION_5);
+  }
+
+  String currentGeometry() {
+    List<Position> geometryPositions
+      = PolylineUtils.decode(currentDirectionRoute().getGeometry(), Constants.PRECISION_6);
+    return PolylineUtils.encode(geometryPositions, Constants.PRECISION_5);
   }
 
   int originalDuration() {
@@ -61,6 +73,8 @@ abstract class SessionState {
 
   abstract int rerouteCount();
 
+  abstract double previousRouteDistancesCompleted();
+
   abstract Builder toBuilder();
 
   static Builder builder() {
@@ -88,6 +102,8 @@ abstract class SessionState {
     abstract Builder startTimestamp(@NonNull Date startTimeStamp);
 
     abstract Builder arrivalTimestamp(@Nullable Date arrivalTimestamp);
+
+    abstract Builder previousRouteDistancesCompleted(double previousRouteDistancesCompleted);
 
     abstract SessionState build();
 

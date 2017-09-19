@@ -59,6 +59,8 @@ public class NavigationConstants {
    */
   static final int MAX_MANIPULATED_COURSE_ANGLE = 25;
 
+  static final double METERS_REMAINING_TILL_ARRIVAL = 40;
+
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat";
   public static final String NAVIGATION_VIEW_ORIGIN_LNG_KEY = "origin_long";

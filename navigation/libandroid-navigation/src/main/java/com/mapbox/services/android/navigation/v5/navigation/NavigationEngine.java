@@ -105,6 +105,12 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
         .legIndex(0)
         .build();
 
+      // Need to keep track of total distance traveled even when reroute occurs.
+      mapboxNavigation.getSessionState().toBuilder().previousRouteDistancesCompleted(
+        mapboxNavigation.getSessionState().previousRouteDistancesCompleted()
+          + previousRouteProgress.distanceTraveled()
+      );
+
       indices = NavigationIndices.create(0, 0);
     }
 
