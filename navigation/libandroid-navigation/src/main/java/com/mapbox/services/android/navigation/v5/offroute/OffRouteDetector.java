@@ -5,6 +5,7 @@ import android.location.Location;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.api.directions.v5.models.LegStep;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.api.utils.turf.TurfMisc;
@@ -24,19 +25,22 @@ public class OffRouteDetector extends OffRoute {
   @Override
   public boolean isUserOffRoute(Location location, RouteProgress routeProgress, MapboxNavigationOptions options) {
     Position futurePosition = getFuturePosition(location, options);
-    double radius = Math.min(options.maximumDistanceOffRoute(),
+    double radius = Math.max(options.maximumDistanceOffRoute(),
       location.getAccuracy() + options.userLocationSnapDistance());
 
-    boolean isOffRoute = userTrueDistanceFromRoute(futurePosition, routeProgress) > radius;
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    boolean isOffRoute = userTrueDistanceFromStep(futurePosition, currentStep) > radius;
 
     // If the user is moving away from the maneuver location and they are close to the next step we can safely say they
     // have completed the maneuver. This is intended to be a fallback case when we do find that the users course matches
     // the exit bearing.
     boolean isCloseToUpcomingStep;
 
-    if (routeProgress.currentLegProgress().upComingStep() != null) {
-      isCloseToUpcomingStep = userTrueDistanceFromRoute(futurePosition, routeProgress) < radius;
+    LegStep upComingStep = routeProgress.currentLegProgress().upComingStep();
+    if (upComingStep != null) {
+      isCloseToUpcomingStep = userTrueDistanceFromStep(futurePosition, upComingStep) < radius;
       if (isOffRoute && isCloseToUpcomingStep) {
+        // TODO increment step index
         return false;
       }
     }
@@ -59,15 +63,16 @@ public class OffRouteDetector extends OffRoute {
   }
 
   /**
-   * Gets the distance from the users true location to their snapped location along the route.
+   * Gets the distance from the users predicted {@link Position} to the
+   * closest point on the given {@link LegStep}.
    *
-   * @param futurePosition a {@link Position} value
-   * @return double distance in meters
+   * @param futurePosition {@link Position} where the user is predicted to be
+   * @param step           {@link LegStep} to calculate the closest point on the step to our predicted location
+   * @return double in distance meters
    * @since 0.2.0
    */
-  private double userTrueDistanceFromRoute(Position futurePosition, RouteProgress routeProgress) {
-    LineString lineString = LineString.fromPolyline(
-      routeProgress.currentLegProgress().currentStep().getGeometry(), Constants.PRECISION_6);
+  private double userTrueDistanceFromStep(Position futurePosition, LegStep step) {
+    LineString lineString = LineString.fromPolyline(step.getGeometry(), Constants.PRECISION_6);
     Feature feature = TurfMisc.pointOnLine(Point.fromCoordinates(futurePosition), lineString.getCoordinates());
 
     Point snappedPoint = (Point) feature.getGeometry();
@@ -75,7 +80,6 @@ public class OffRouteDetector extends OffRoute {
     return TurfMeasurement.distance(
       Point.fromCoordinates(futurePosition),
       snappedPoint,
-      TurfConstants.UNIT_METERS
-    );
+      TurfConstants.UNIT_METERS);
   }
 }
