@@ -13,23 +13,25 @@ class NavigationMetricsWrapper {
 
   static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildArriveEvent(
-      "mapbox-navigation-android", BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
+      BuildConfig.MAPBOX_NAVIGATION_SDK_IDENTIFIER, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
       sessionState.currentGeometry(), "",
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
       sessionState.rerouteCount(), sessionState.startTimestamp(),
       (int) (sessionState.previousRouteDistancesCompleted() + routeProgress.distanceTraveled()),
-      sessionState.mockLocation(),"null", "null",
+      (int) routeProgress.distanceRemaining(), (int) routeProgress.durationRemaining(),
+      sessionState.mockLocation(),null, null,
       sessionState.originalGeometry(), sessionState.originalDistance(),
-      sessionState.originalDuration(), "null", sessionState.currentStepCount(),
+      sessionState.originalDuration(), null, sessionState.currentStepCount(),
       sessionState.originalStepCount()
     ));
   }
 
   static void cancelEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildCancelEvent(
-      BuildConfig.APPLICATION_ID, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(),
+      BuildConfig.MAPBOX_NAVIGATION_SDK_IDENTIFIER, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
+      sessionState.sessionIdentifier(),
       location.getLatitude(), location.getLongitude(),
       sessionState.currentGeometry(), "",
       (int) routeProgress.directionsRoute().getDistance(),
@@ -38,22 +40,24 @@ class NavigationMetricsWrapper {
       (int) (sessionState.previousRouteDistancesCompleted() + routeProgress.distanceTraveled()),
       (int) routeProgress.distanceRemaining(), (int) routeProgress.durationRemaining(),
       sessionState.mockLocation(),
-      "null", "null", sessionState.originalGeometry(),
-      sessionState.originalDistance(), sessionState.originalDuration(), "null",
+      null, null, sessionState.originalGeometry(),
+      sessionState.originalDistance(), sessionState.originalDuration(), null,
       new Date(), sessionState.currentStepCount(), sessionState.originalStepCount()
     ));
   }
 
   static void departEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildDepartEvent(
-      BuildConfig.APPLICATION_ID, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
+      BuildConfig.MAPBOX_NAVIGATION_SDK_IDENTIFIER, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
       sessionState.currentGeometry(), "",
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
-      sessionState.rerouteCount(), sessionState.mockLocation(), "null", "null",
+      sessionState.rerouteCount(), sessionState.mockLocation(), null, null,
       sessionState.originalGeometry(), sessionState.originalDistance(), sessionState.originalDuration(),
-      "null", sessionState.currentStepCount(), sessionState.originalStepCount()
+      null, sessionState.currentStepCount(), sessionState.originalStepCount(),
+      (int) routeProgress.distanceTraveled(), (int) routeProgress.distanceRemaining(),
+      (int) routeProgress.durationRemaining(), sessionState.startTimestamp()
     ));
   }
 
@@ -63,6 +67,4 @@ class NavigationMetricsWrapper {
         BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
     );
   }
-
-
 }
