@@ -77,7 +77,8 @@ public abstract class NavigationRoute {
       .setLanguage(language())
       .setGeometry(DirectionsCriteria.GEOMETRY_POLYLINE6)
       .setOverview(DirectionsCriteria.OVERVIEW_FULL)
-      .setSteps(true);
+      .setSteps(true)
+      .setRoundaboutExits(true);
 
     if (!bearings().isEmpty()) {
       builder.setBearings(formatBearingValues());
