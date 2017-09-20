@@ -37,6 +37,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
@@ -422,6 +423,8 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    */
   private void initNavigation() {
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
+    MapboxTelemetry.getInstance().newUserAgent(NavigationConstants.NAVIGATION_VIEW_USER_AGENT +
+      BuildConfig.VERSION_NAME);
     navigation.addProgressChangeListener(this);
     navigation.addProgressChangeListener(instructionView);
     navigation.addProgressChangeListener(summaryBottomSheet);

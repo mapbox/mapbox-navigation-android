@@ -72,6 +72,7 @@ public class NavigationConstants {
   public static final String NAVIGATION_VIEW_LAUNCH_ROUTE = "launch_with_route";
   public static final String NAVIGATION_VIEW_AWS_POOL_ID = "navigation_view_aws_pool_id";
   public static final String NAVIGATION_VIEW_REROUTING = "Rerouting";
+  public static final String NAVIGATION_VIEW_USER_AGENT = "mapbox-navigation-ui-android/";
   public static final String ROUTE_BELOW_LAYER = "admin-3-4-boundaries-bg";
   public static final String DECIMAL_FORMAT = "#.#";
 
