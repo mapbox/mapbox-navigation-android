@@ -30,8 +30,8 @@ class ScreenDensityMap extends SparseArray<Double> {
     put(DENSITY_340, 83d);
     put(DENSITY_360, 86d);
     put(DENSITY_400, 92d);
-    put(DENSITY_420, 95d);
-    put(DENSITY_XXHIGH, 101d);
+    put(DENSITY_420, 93d);
+    put(DENSITY_XXHIGH, 95d);
     put(DENSITY_560, 113d);
     put(DENSITY_XXXHIGH, 125d);
   }
