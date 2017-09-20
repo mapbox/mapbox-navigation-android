@@ -107,6 +107,10 @@ class NavigationEventDispatcher {
     this.internalProgressChangeListener = internalProgressChangeListener;
   }
 
+  void removeInternalProgressChangeListener() {
+    internalProgressChangeListener = null;
+  }
+
   void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
     for (MilestoneEventListener milestoneEventListener : milestoneEventListeners) {
       milestoneEventListener.onMilestoneEvent(routeProgress, instruction, identifier);
@@ -115,7 +119,8 @@ class NavigationEventDispatcher {
 
   void onProgressChange(Location location, RouteProgress routeProgress) {
     // Check if user has arrived and notify internal progress change listener if so.
-    if (routeProgress.distanceRemaining() <= METERS_REMAINING_TILL_ARRIVAL) {
+    if (internalProgressChangeListener != null
+      && routeProgress.distanceRemaining() <= METERS_REMAINING_TILL_ARRIVAL) {
       internalProgressChangeListener.onProgressChange(location, routeProgress);
     }
 
