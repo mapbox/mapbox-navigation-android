@@ -39,7 +39,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
-import com.mapbox.services.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.directions.v5.models.LegStep;
@@ -521,8 +520,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    * @param destination end point
    */
   private void fetchRoute(Position origin, Position destination) {
-    NavigationRoute.Builder routeBuilder =
-      navigation.getNavigationRoute(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+    NavigationRoute.Builder routeBuilder = NavigationRoute.builder(navigation)
         .origin(origin)
         .destination(destination);
 

@@ -1,11 +1,8 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import static java.lang.annotation.RetentionPolicy.SOURCE;
-
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.api.directions.v5.DirectionsCriteria;
@@ -13,7 +10,6 @@ import com.mapbox.services.api.directions.v5.MapboxDirections;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.commons.models.Position;
 
-import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,16 +18,6 @@ import retrofit2.Callback;
 
 @AutoValue
 public abstract class NavigationRoute {
-
-  @Retention(SOURCE)
-  @StringDef( {
-    DirectionsCriteria.PROFILE_DRIVING,
-    DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
-    DirectionsCriteria.PROFILE_CYCLING,
-    DirectionsCriteria.PROFILE_WALKING
-  })
-  public @interface ProfileCriteria {
-  }
 
   /**
    * @inheritDoc MapboxDirections#user
