@@ -60,6 +60,8 @@ public abstract class NavigationRoute {
 
   abstract boolean congestion();
 
+  abstract MapboxNavigation mapboxNavigation();
+
   @Nullable
   abstract String language();
 
@@ -69,12 +71,11 @@ public abstract class NavigationRoute {
 
   MapboxDirections getDirectionsRequest() {
 
-
     MapboxDirections.Builder builder = new MapboxDirections.Builder()
       .setUser(user())
       .setProfile(profile())
       .setCoordinates(coordinates())
-      .setAccessToken(accessToken())
+      .setAccessToken(mapboxNavigation().getAccessToken())
       .setAlternatives(alternatives())
       .setRadiuses(radiuses())
       .setAnnotation(congestion() ? DirectionsCriteria.ANNOTATION_CONGESTION : null)
@@ -83,10 +84,11 @@ public abstract class NavigationRoute {
       .setOverview(DirectionsCriteria.OVERVIEW_FULL)
       .setSteps(true);
 
-    if (!bearings().isEmpty()) {
+    if (bearings() != null && !bearings().isEmpty()) {
       builder.setBearings(formatBearingValues());
     }
 
+    mapboxNavigation().setProfile(profile());
     return builder.build();
   }
 
@@ -148,6 +150,8 @@ public abstract class NavigationRoute {
 
     public abstract Builder language(String language);
 
+    abstract Builder mapboxNavigation(MapboxNavigation mapboxNavigation);
+
     abstract NavigationRoute autoBuild(); // not public
 
     public NavigationRoute build() {
@@ -164,10 +168,11 @@ public abstract class NavigationRoute {
     }
   }
 
-  static Builder builder() {
+  public static Builder builder(MapboxNavigation mapboxNavigation) {
     return new AutoValue_NavigationRoute.Builder()
-      .user(DirectionsCriteria.PROFILE_DEFAULT_USER)
       .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+      .user(DirectionsCriteria.PROFILE_DEFAULT_USER)
+      .mapboxNavigation(mapboxNavigation)
       .alternatives(false)
       .congestion(true);
   }

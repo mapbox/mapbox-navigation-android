@@ -15,7 +15,6 @@ import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute.ProfileCriteria;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -339,6 +338,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
         .previousRouteDistancesCompleted(0)
         .startTimestamp(new Date())
         .rerouteCount(0)
+        .profile(profile)
         .mockLocation(locationEngine instanceof MockLocationEngine)
         .build();
 
@@ -377,14 +377,6 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
       isBound = false;
       navigationEventDispatcher.onNavigationEvent(false);
     }
-  }
-
-  public NavigationRoute.Builder getNavigationRoute(@ProfileCriteria @NonNull String profile) {
-    this.profile = profile;
-    NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder();
-    navigationRouteBuilder.accessToken(accessToken);
-    navigationRouteBuilder.profile(profile);
-    return navigationRouteBuilder;
   }
 
   // Listeners
@@ -637,6 +629,14 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   SessionState getSessionState() {
     return sessionState;
+  }
+
+  String getAccessToken() {
+    return accessToken;
+  }
+
+  void setProfile(@NonNull String profile) {
+    this.profile = profile;
   }
 
   private Intent getServiceIntent() {
