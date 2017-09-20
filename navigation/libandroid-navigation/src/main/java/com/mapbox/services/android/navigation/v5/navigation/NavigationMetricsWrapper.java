@@ -42,7 +42,7 @@ class NavigationMetricsWrapper {
       sessionState.mockLocation(),
       null, null, sessionState.originalGeometry(),
       sessionState.originalDistance(), sessionState.originalDuration(), null,
-      new Date(), sessionState.currentStepCount(), sessionState.originalStepCount()
+      sessionState.arrivalTimestamp(), sessionState.currentStepCount(), sessionState.originalStepCount()
     ));
   }
 
