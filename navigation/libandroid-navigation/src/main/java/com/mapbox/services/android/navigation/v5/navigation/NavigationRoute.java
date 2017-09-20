@@ -46,31 +46,22 @@ public abstract class NavigationRoute {
 
   abstract boolean congestion();
 
+  abstract MapboxNavigation mapboxNavigation();
+
   @Nullable
   abstract String language();
 
   public void getRoute(@NonNull Callback<DirectionsResponse> callback) {
-    List<Callback<DirectionsResponse>> callbacks = new ArrayList<>(1);
-    callbacks.add(callback);
-    getRoute(callbacks);
-  }
-
-  public void getRoute(@NonNull List<Callback<DirectionsResponse>> callbacks) {
-
-    for (Callback<DirectionsResponse> callback : callbacks) {
-      // TODO am I making the request here multiple times?
-      getDirectionsRequest().enqueueCall(callback);
-    }
+    getDirectionsRequest().enqueueCall(callback);
   }
 
   MapboxDirections getDirectionsRequest() {
-
 
     MapboxDirections.Builder builder = new MapboxDirections.Builder()
       .setUser(user())
       .setProfile(profile())
       .setCoordinates(coordinates())
-      .setAccessToken(accessToken()) // TODO use access token in mapboxNavigation
+      .setAccessToken(mapboxNavigation().getAccessToken())
       .setAlternatives(alternatives())
       .setRadiuses(radiuses())
       .setAnnotation(congestion() ? DirectionsCriteria.ANNOTATION_CONGESTION : null)
@@ -80,10 +71,11 @@ public abstract class NavigationRoute {
       .setSteps(true)
       .setRoundaboutExits(true);
 
-    if (!bearings().isEmpty()) {
+    if (bearings() != null && !bearings().isEmpty()) {
       builder.setBearings(formatBearingValues());
     }
 
+    mapboxNavigation().setProfile(profile());
     return builder.build();
   }
 
@@ -127,7 +119,7 @@ public abstract class NavigationRoute {
 
     public abstract Builder destination(Position destination);
 
-    public abstract Builder accessToken(String accessToken);
+    abstract Builder accessToken(String accessToken);
 
     public abstract Builder alternatives(boolean alternatives);
 
@@ -145,6 +137,8 @@ public abstract class NavigationRoute {
 
     public abstract Builder language(String language);
 
+    abstract Builder mapboxNavigation(MapboxNavigation mapboxNavigation);
+
     abstract NavigationRoute autoBuild(); // not public
 
     public NavigationRoute build() {
@@ -161,10 +155,11 @@ public abstract class NavigationRoute {
     }
   }
 
-  public static Builder builder() {
+  public static Builder builder(MapboxNavigation mapboxNavigation) {
     return new AutoValue_NavigationRoute.Builder()
-      .user(DirectionsCriteria.PROFILE_DEFAULT_USER)
       .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+      .user(DirectionsCriteria.PROFILE_DEFAULT_USER)
+      .mapboxNavigation(mapboxNavigation)
       .alternatives(false)
       .congestion(true);
   }

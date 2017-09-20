@@ -60,6 +60,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   private Snap snapEngine;
   private Context context;
   private boolean isBound;
+  private String profile;
 
   /**
    * Constructs a new instance of this class using the default options. This should be used over
@@ -115,6 +116,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     MapboxTelemetry.getInstance().initialize(context, accessToken,
       BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT);
     NavigationMetricsWrapper.turnstileEvent();
+    profile = "unknown";
 
     // Initialize event dispatcher and add internal listeners
     navigationEventDispatcher = new NavigationEventDispatcher();
@@ -336,6 +338,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
         .previousRouteDistancesCompleted(0)
         .startTimestamp(new Date())
         .rerouteCount(0)
+        .profile(profile)
         .mockLocation(locationEngine instanceof MockLocationEngine)
         .build();
 
@@ -626,6 +629,14 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   SessionState getSessionState() {
     return sessionState;
+  }
+
+  String getAccessToken() {
+    return accessToken;
+  }
+
+  void setProfile(@NonNull String profile) {
+    this.profile = profile;
   }
 
   private Intent getServiceIntent() {
