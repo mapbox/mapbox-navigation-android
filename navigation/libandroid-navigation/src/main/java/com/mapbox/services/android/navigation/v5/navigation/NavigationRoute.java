@@ -99,7 +99,7 @@ public abstract class NavigationRoute {
 
     public abstract Builder user(String user);
 
-    abstract Builder profile(String profile);
+    public abstract Builder profile(String profile);
 
     abstract List<Position> coordinates();
 
