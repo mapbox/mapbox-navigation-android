@@ -66,6 +66,9 @@ abstract class SessionState {
 
   abstract Date startTimestamp();
 
+  @NonNull
+  abstract String profile();
+
   @Nullable
   abstract Date arrivalTimestamp();
 
@@ -94,6 +97,8 @@ abstract class SessionState {
     abstract Builder originalRequestIdentifier(@Nullable String originalRequestIdentifier);
 
     abstract Builder requestIdentifier(@Nullable String requestIdentifier);
+
+    abstract Builder profile(@NonNull String profile);
 
     abstract Builder mockLocation(boolean mockLocation);
 

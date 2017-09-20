@@ -15,6 +15,7 @@ import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute.ProfileCriteria;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -60,6 +61,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   private Snap snapEngine;
   private Context context;
   private boolean isBound;
+  private String profile;
 
   /**
    * Constructs a new instance of this class using the default options. This should be used over
@@ -115,6 +117,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     MapboxTelemetry.getInstance().initialize(context, accessToken,
       BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT);
     NavigationMetricsWrapper.turnstileEvent();
+    profile = "unknown";
 
     // Initialize event dispatcher and add internal listeners
     navigationEventDispatcher = new NavigationEventDispatcher();
@@ -374,6 +377,14 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
       isBound = false;
       navigationEventDispatcher.onNavigationEvent(false);
     }
+  }
+
+  public NavigationRoute.Builder getNavigationRoute(@ProfileCriteria @NonNull String profile) {
+    this.profile = profile;
+    NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder();
+    navigationRouteBuilder.accessToken(accessToken);
+    navigationRouteBuilder.profile(profile);
+    return navigationRouteBuilder;
   }
 
   // Listeners

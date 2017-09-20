@@ -1,8 +1,11 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.api.directions.v5.DirectionsCriteria;
@@ -10,6 +13,7 @@ import com.mapbox.services.api.directions.v5.MapboxDirections;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.commons.models.Position;
 
+import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +22,16 @@ import retrofit2.Callback;
 
 @AutoValue
 public abstract class NavigationRoute {
+
+  @Retention(SOURCE)
+  @StringDef( {
+    DirectionsCriteria.PROFILE_DRIVING,
+    DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+    DirectionsCriteria.PROFILE_CYCLING,
+    DirectionsCriteria.PROFILE_WALKING
+  })
+  public @interface ProfileCriteria {
+  }
 
   /**
    * @inheritDoc MapboxDirections#user
@@ -50,17 +64,7 @@ public abstract class NavigationRoute {
   abstract String language();
 
   public void getRoute(@NonNull Callback<DirectionsResponse> callback) {
-    List<Callback<DirectionsResponse>> callbacks = new ArrayList<>(1);
-    callbacks.add(callback);
-    getRoute(callbacks);
-  }
-
-  public void getRoute(@NonNull List<Callback<DirectionsResponse>> callbacks) {
-
-    for (Callback<DirectionsResponse> callback : callbacks) {
-      // TODO am I making the request here multiple times?
-      getDirectionsRequest().enqueueCall(callback);
-    }
+    getDirectionsRequest().enqueueCall(callback);
   }
 
   MapboxDirections getDirectionsRequest() {
@@ -70,7 +74,7 @@ public abstract class NavigationRoute {
       .setUser(user())
       .setProfile(profile())
       .setCoordinates(coordinates())
-      .setAccessToken(accessToken()) // TODO use access token in mapboxNavigation
+      .setAccessToken(accessToken())
       .setAlternatives(alternatives())
       .setRadiuses(radiuses())
       .setAnnotation(congestion() ? DirectionsCriteria.ANNOTATION_CONGESTION : null)
@@ -107,7 +111,7 @@ public abstract class NavigationRoute {
 
     public abstract Builder user(String user);
 
-    public abstract Builder profile(String profile);
+    abstract Builder profile(String profile);
 
     abstract List<Position> coordinates();
 
@@ -126,7 +130,7 @@ public abstract class NavigationRoute {
 
     public abstract Builder destination(Position destination);
 
-    public abstract Builder accessToken(String accessToken);
+    abstract Builder accessToken(String accessToken);
 
     public abstract Builder alternatives(boolean alternatives);
 
@@ -160,7 +164,7 @@ public abstract class NavigationRoute {
     }
   }
 
-  public static Builder builder() {
+  static Builder builder() {
     return new AutoValue_NavigationRoute.Builder()
       .user(DirectionsCriteria.PROFILE_DEFAULT_USER)
       .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)

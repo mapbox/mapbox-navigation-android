@@ -11,17 +11,21 @@ import java.util.Date;
 
 class NavigationMetricsWrapper {
 
+  private NavigationMetricsWrapper() {
+    // private constructor to prevent initializing this class
+  }
+
   static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildArriveEvent(
       BuildConfig.MAPBOX_NAVIGATION_SDK_IDENTIFIER, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
-      sessionState.currentGeometry(), "",
+      sessionState.currentGeometry(), sessionState.profile(),
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
       sessionState.rerouteCount(), sessionState.startTimestamp(),
       (int) (sessionState.previousRouteDistancesCompleted() + routeProgress.distanceTraveled()),
       (int) routeProgress.distanceRemaining(), (int) routeProgress.durationRemaining(),
-      sessionState.mockLocation(),null, null,
+      sessionState.mockLocation(), null, null,
       sessionState.originalGeometry(), sessionState.originalDistance(),
       sessionState.originalDuration(), null, sessionState.currentStepCount(),
       sessionState.originalStepCount()
@@ -33,7 +37,7 @@ class NavigationMetricsWrapper {
       BuildConfig.MAPBOX_NAVIGATION_SDK_IDENTIFIER, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(),
       location.getLatitude(), location.getLongitude(),
-      sessionState.currentGeometry(), "",
+      sessionState.currentGeometry(), sessionState.profile(),
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
       sessionState.rerouteCount(), sessionState.startTimestamp(),
@@ -50,7 +54,7 @@ class NavigationMetricsWrapper {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildDepartEvent(
       BuildConfig.MAPBOX_NAVIGATION_SDK_IDENTIFIER, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
-      sessionState.currentGeometry(), "",
+      sessionState.currentGeometry(), sessionState.profile(),
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
       sessionState.rerouteCount(), sessionState.mockLocation(), null, null,

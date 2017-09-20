@@ -37,6 +37,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
+import com.mapbox.services.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.utils.turf.TurfConstants;
@@ -183,8 +184,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       return;
     }
 
-    NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder()
-      .accessToken(Mapbox.getAccessToken());
+    NavigationRoute.Builder navigationRouteBuilder
+      = navigation.getNavigationRoute(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
+
     navigationRouteBuilder.origin(origin);
     navigationRouteBuilder.destination(destination);
     if (waypoint != null) {
