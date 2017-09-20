@@ -11,6 +11,10 @@ android {
     versionName rootProject.ext.versionName
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true
+
+    buildConfigField('String', "MAPBOX_NAVIGATION_SDK_IDENTIFIER", "mapbox-navigation-ui-android")
+    buildConfigField "String", "MAPBOX_NAVIGATION_EVENTS_USER_AGENT",
+        String.format("\"mapbox-navigation-ui-android/%s\"", project.VERSION_NAME)
   }
   configurations {
     javadocDeps
