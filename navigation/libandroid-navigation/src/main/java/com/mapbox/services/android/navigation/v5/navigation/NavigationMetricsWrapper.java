@@ -7,8 +7,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 
-import java.util.Date;
-
 class NavigationMetricsWrapper {
 
   static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
@@ -42,7 +40,7 @@ class NavigationMetricsWrapper {
       sessionState.mockLocation(),
       null, null, sessionState.originalGeometry(),
       sessionState.originalDistance(), sessionState.originalDuration(), null,
-      new Date(), sessionState.currentStepCount(), sessionState.originalStepCount()
+      sessionState.arrivalTimestamp(), sessionState.currentStepCount(), sessionState.originalStepCount()
     ));
   }
 
