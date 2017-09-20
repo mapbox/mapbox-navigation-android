@@ -372,7 +372,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   public void endNavigation() {
     Timber.d("MapboxNavigation endNavigation called");
     if (isServiceAvailable()) {
-      navigationService.onDestroy();
+      navigationService.stopSelf();
       context.unbindService(this);
       isBound = false;
       navigationEventDispatcher.onNavigationEvent(false);

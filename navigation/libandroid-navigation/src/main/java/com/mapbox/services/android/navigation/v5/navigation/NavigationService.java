@@ -77,6 +77,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
   @Override
   public void onDestroy() {
+    super.onDestroy();
     // User canceled navigation session
     if (routeProgress != null && location != null) {
       NavigationMetricsWrapper.cancelEvent(mapboxNavigation.getSessionState(), routeProgress,
@@ -86,7 +87,6 @@ public class NavigationService extends Service implements LocationEngineListener
     if (notificationManager != null) {
       notificationManager.onDestroy();
     }
-    super.onDestroy();
   }
 
   /**
@@ -124,7 +124,6 @@ public class NavigationService extends Service implements LocationEngineListener
     } else {
       thread.quit();
     }
-    stopSelf();
   }
 
   /**
