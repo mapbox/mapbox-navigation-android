@@ -423,8 +423,8 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    */
   private void initNavigation() {
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
-    MapboxTelemetry.getInstance().newUserAgent(NavigationConstants.NAVIGATION_VIEW_USER_AGENT +
-      BuildConfig.VERSION_NAME);
+    MapboxTelemetry.getInstance().newUserAgent(NavigationConstants.NAVIGATION_VIEW_USER_AGENT
+      + BuildConfig.VERSION_NAME);
     navigation.addProgressChangeListener(this);
     navigation.addProgressChangeListener(instructionView);
     navigation.addProgressChangeListener(summaryBottomSheet);
