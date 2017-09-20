@@ -601,7 +601,11 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     Timber.v("Arrived event occurred");
     sessionState = sessionState.toBuilder().arrivalTimestamp(new Date()).build();
     NavigationMetricsWrapper.arriveEvent(sessionState, routeProgress, location);
-    endNavigation();
+    // Remove all listeners except the onProgressChange by passing in null.
+    navigationEventDispatcher.removeOffRouteListener(null);
+    navigationEventDispatcher.removeMilestoneEventListener(null);
+    // Remove this listener so that the arrival event only occurs once.
+    navigationEventDispatcher.removeInternalProgressChangeListener();
   }
 
   DirectionsRoute getRoute() {
