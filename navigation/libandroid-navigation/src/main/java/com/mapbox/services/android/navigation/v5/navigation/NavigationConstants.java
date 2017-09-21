@@ -36,7 +36,7 @@ public class NavigationConstants {
    * Maximum number of meters the user can travel away from step before the
    * {@link OffRouteListener}'s called.
    */
-  static final double MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE = 50;
+  static final double MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE = 20;
 
   /**
    * Seconds used before a reroute occurs.
