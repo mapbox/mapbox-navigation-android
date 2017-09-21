@@ -38,6 +38,11 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
 
     final List<SampleItem> samples = new ArrayList<>(Arrays.asList(
       new SampleItem(
+        getString(R.string.title_navigation_view_ui),
+        getString(R.string.description_navigation_view_ui),
+        NavigationViewActivity.class
+      ),
+      new SampleItem(
         getString(R.string.title_mock_navigation),
         getString(R.string.description_mock_navigation),
         MockNavigationActivity.class
@@ -61,11 +66,6 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         getString(R.string.title_navigation_route_ui),
         getString(R.string.description_navigation_route_ui),
         NavigationMapRouteActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_navigation_view_ui),
-        getString(R.string.description_navigation_view_ui),
-        NavigationViewActivity.class
       ),
       new SampleItem(
         getString(R.string.title_long_step),
