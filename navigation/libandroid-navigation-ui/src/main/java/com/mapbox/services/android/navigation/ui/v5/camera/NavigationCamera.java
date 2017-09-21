@@ -107,8 +107,10 @@ public class NavigationCamera implements ProgressChangeListener {
    */
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    this.location = location;
-    easeCameraToLocation(location);
+    if (location.getLongitude() != 0 && location.getLatitude() != 0) {
+      this.location = location;
+      easeCameraToLocation(location);
+    }
   }
 
   /**
