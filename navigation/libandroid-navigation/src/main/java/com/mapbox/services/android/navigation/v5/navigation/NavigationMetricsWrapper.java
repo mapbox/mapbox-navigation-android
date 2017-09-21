@@ -9,11 +9,15 @@ import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 
 class NavigationMetricsWrapper {
 
+  private NavigationMetricsWrapper() {
+    // Empty private constructor for preventing initialization of this class.
+  }
+
   static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildArriveEvent(
       BuildConfig.MAPBOX_NAVIGATION_SDK_IDENTIFIER, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
-      sessionState.currentGeometry(), "",
+      sessionState.currentGeometry(), "unknown",
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
       sessionState.rerouteCount(), sessionState.startTimestamp(),
@@ -31,7 +35,7 @@ class NavigationMetricsWrapper {
       BuildConfig.MAPBOX_NAVIGATION_SDK_IDENTIFIER, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(),
       location.getLatitude(), location.getLongitude(),
-      sessionState.currentGeometry(), "",
+      sessionState.currentGeometry(), "unknown",
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
       sessionState.rerouteCount(), sessionState.startTimestamp(),
@@ -48,7 +52,7 @@ class NavigationMetricsWrapper {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildDepartEvent(
       BuildConfig.MAPBOX_NAVIGATION_SDK_IDENTIFIER, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
-      sessionState.currentGeometry(), "",
+      sessionState.currentGeometry(), "unknown",
       (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(),
       sessionState.rerouteCount(), sessionState.mockLocation(), null, null,
