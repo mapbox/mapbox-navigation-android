@@ -194,6 +194,6 @@ class DefaultMilestones {
   private String getInstructionString(RouteProgress routeProgress) {
     return routeProgress.currentLegProgress().upComingStep() != null
       ? routeProgress.currentLegProgress().upComingStep().getManeuver().getInstruction() :
-      "Arrived at your destination";
+      "You have arrived";
   }
 }

@@ -603,7 +603,6 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     NavigationMetricsWrapper.arriveEvent(sessionState, routeProgress, location);
     // Remove all listeners except the onProgressChange by passing in null.
     navigationEventDispatcher.removeOffRouteListener(null);
-    navigationEventDispatcher.removeMilestoneEventListener(null);
     // Remove this listener so that the arrival event only occurs once.
     navigationEventDispatcher.removeInternalProgressChangeListener();
   }
