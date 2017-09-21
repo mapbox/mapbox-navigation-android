@@ -103,7 +103,7 @@ jobs:
       - deploy:
           name: Publish Navigation SDK To Maven Central
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            if [ "${CIRCLE_BRANCH}" == "release-0.6" ]; then
             make publish ;
             fi
       - store_artifacts:
