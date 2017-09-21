@@ -2,6 +2,13 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.6.0 - September 21, 2017
+* First iteration of the Navigation UI
+* Optimized Navigation features which were causing slowdowns on long steps - [219](https://github.com/mapbox/mapbox-navigation-android/pull/219)
+* Only decode step geometry when needed - [215](https://github.com/mapbox/mapbox-navigation-android/pull/215)
+* Introduced metrics
+* Cleaned up code and fixed several bugs
+
 ### v0.5.0 - August 30, 2017
 * use followonstep inside routeprogress for instruction - [#188](https://github.com/mapbox/mapbox-navigation-android/pull/188)
 * Persistent notification [#177](https://github.com/mapbox/mapbox-navigation-android/pull/177)
