@@ -242,7 +242,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    */
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    locationLayer.forceLocationUpdate(location);
+    if (location.getLongitude() != 0 && location.getLatitude() != 0) {
+      locationLayer.forceLocationUpdate(location);
+    }
   }
 
   /**
