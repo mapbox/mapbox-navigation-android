@@ -21,19 +21,19 @@ class ScreenDensityMap extends SparseArray<Double> {
 
   ScreenDensityMap() {
     put(DENSITY_LOW, 50d);
-    put(DENSITY_MEDIUM, 56d);
-    put(DENSITY_HIGH, 68d);
-    put(DENSITY_260, 71d);
-    put(DENSITY_280, 74d);
-    put(DENSITY_300, 77d);
-    put(DENSITY_XHIGH, 80d);
-    put(DENSITY_340, 83d);
-    put(DENSITY_360, 86d);
-    put(DENSITY_400, 92d);
-    put(DENSITY_420, 93d);
-    put(DENSITY_XXHIGH, 95d);
-    put(DENSITY_560, 113d);
-    put(DENSITY_XXXHIGH, 125d);
+    put(DENSITY_MEDIUM, 54d);
+    put(DENSITY_HIGH, 63d);
+    put(DENSITY_260, 68d);
+    put(DENSITY_280, 72d);
+    put(DENSITY_300, 73d);
+    put(DENSITY_XHIGH, 74d);
+    put(DENSITY_340, 76d);
+    put(DENSITY_360, 78d);
+    put(DENSITY_400, 80d);
+    put(DENSITY_420, 83d);
+    put(DENSITY_XXHIGH, 87d);
+    put(DENSITY_560, 100d);
+    put(DENSITY_XXXHIGH, 111d);
   }
 
   double getTargetDistance(int density) {
