@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Geradeaus halten an der Gabelung auf Way Name",
         "en": "Keep straight at the fork onto Way Name",
+        "es": "Mantengase recto en el cruce en Way Name",
         "fr": "Rester tout droit à l'embranchement sur Way Name",
+        "id": "Tetap lurus di pertigaan ke Way Name",
+        "it": "Mantieni la dritto al bivio in Way Name",
         "nl": "Ga rechtdoor op de splitsing naar Way Name",
-        "ru": "На развилке поверните прямо на Way Name",
+        "pl": "Na rozwidleniu trzymaj się prosto na Way Name",
+        "pt-BR": "Mantenha-se reto na bifurcação em Way Name",
+        "ru": "На развилке двигайтесь прямо на Way Name",
         "sv": "Håll till rakt fram in på Way Name",
+        "uk": "На роздоріжжі тримайтеся прямо і виїжджайте на Way Name",
         "vi": "Đi bên thẳng ở ngã ba vào Way Name",
         "zh-Hans": "在岔道保持直行，上Way Name"
     }

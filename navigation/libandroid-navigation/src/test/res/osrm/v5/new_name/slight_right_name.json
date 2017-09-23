@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Leicht rechts weiter auf Way Name",
         "en": "Continue slightly right onto Way Name",
+        "es": "Continúe ligeramente a la derecha en Way Name",
         "fr": "Continuer légèrement à droite sur Way Name",
+        "id": "Tetap agak di kanan ke Way Name",
+        "it": "Continua leggermente a destra in Way Name ",
         "nl": "Rechts aanhouden naar Way Name",
-        "ru": "Плавный поворот направо на Way Name",
+        "pl": "Kontynuuj łagodnie w prawo na Way Name",
+        "pt-BR": "Continue ligeiramente à direita em Way Name",
+        "ru": "Плавно поверните направо на Way Name",
         "sv": "Fortsätt med lätt högersväng in på Way Name",
+        "uk": "Рухайтесь плавно праворуч на Way Name",
         "vi": "Nghiêng về bên phải vào Way Name",
         "zh-Hans": "继续向右，上Way Name"
     }

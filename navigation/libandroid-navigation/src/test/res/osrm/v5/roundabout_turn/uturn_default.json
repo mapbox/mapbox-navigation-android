@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Am Kreisverkehr 180°-Wendung",
         "en": "At the roundabout make a U-turn",
+        "es": "En la rotonda siga cambio de sentido",
         "fr": "Au rond-point, tourner demi-tour",
+        "id": "Di bundaran, lakukan putar balik",
+        "it": "Alla rotonda fai una inversione a U",
         "nl": "Ga omkeren op de rotonde",
-        "ru": "На круговом перекрёстке разворот",
-        "sv": "Vid rondellen sväng U-sväng",
+        "pl": "Na rondzie weź zawróć",
+        "pt-BR": "Na rotatória, vire retorno",
+        "ru": "На круговой развязке двигайтесь на разворот",
+        "sv": "I rondellen sväng U-sväng",
+        "uk": "На кільці розворот",
         "vi": "Đi bên ngược tại vòng xuyến",
         "zh-Hans": "在环岛调头行驶"
     }

@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Fahren Sie Richtung Süden",
         "en": "Head south",
+        "es": "Ve a sur",
         "fr": "Rouler vers le sud",
+        "id": "Arah selatan",
+        "it": "Continua verso sud",
         "nl": "Vertrek in zuidelijke richting",
+        "pl": "Kieruj się południe",
+        "pt-BR": "Siga sul",
         "ru": "Двигайтесь в южном направлении",
         "sv": "Kör åt söder",
+        "uk": "Прямуйте на південь",
         "vi": "Đi về hướng nam",
         "zh-Hans": "出发向南"
     }

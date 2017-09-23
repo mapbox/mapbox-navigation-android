@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Am Kreisverkehr leicht rechts auf Way Name",
         "en": "At the roundabout make a slight right onto Way Name",
+        "es": "En la rotonda siga ligeramente a la derecha en Way Name",
         "fr": "Au rond-point, tourner légèrement à droite sur Way Name",
+        "id": "Di bundaran, lakukan agak ke kanan ke arah Way Name",
+        "it": "Alla rotonda fai una destra leggermente in Way Name",
         "nl": "Ga rechts op de rotonde naar Way Name",
-        "ru": "На круговом перекрёстке плавно направо на Way Name",
-        "sv": "Vid rondellen sväng lätt höger in på Way Name",
+        "pl": "Na rondzie weź łagodnie w prawo na Way Name",
+        "pt-BR": "Na rotatória, vire ligeiramente à direita na Way Name",
+        "ru": "На круговой развязке двигайтесь правее на Way Name",
+        "sv": "I rondellen sväng höger in på Way Name",
+        "uk": "На кільці плавно праворуч на Way Name",
         "vi": "Đi bên phải nghiêng tại vòng xuyến để vào Way Name",
         "zh-Hans": "在环岛向右行驶，上Way Name"
     }

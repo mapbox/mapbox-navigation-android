@@ -1,0 +1,27 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "roundabout turn",
+            "modifier": "sharp left"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Am Kreisverkehr scharf links Richtung Destination 1",
+        "en": "At the roundabout make a sharp left towards Destination 1",
+        "es": "En la rotonda siga cerrada a la izquierda hacia Destination 1",
+        "fr": "Au rond-point, tourner franchement à gauche en direction de Destination 1",
+        "id": "Di bundaran, lakukan tajam kiri menuju Destination 1",
+        "it": "Alla rotonda fai una sinistra verso Destination 1",
+        "nl": "Ga linksaf op de rotonde richting Destination 1",
+        "pl": "Na rondzie weź ostro w lewo w kierunku Destination 1",
+        "pt-BR": "Na rotatória, vire acentuadamente à esquerda em direção à Destination 1",
+        "ru": "На круговой развязке двигайтесь налево в направлении Destination 1",
+        "sv": "I rondellen sväng vänster mot Destination 1",
+        "uk": "На кільці різко ліворуч в напрямку Destination 1",
+        "vi": "Đi bên trái gắt tại vòng xuyến để đi Destination 1",
+        "zh-Hans": "在环岛向左行驶，前往Destination 1"
+    }
+}

@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Am Kreisverkehr leicht links",
         "en": "At the roundabout make a slight left",
+        "es": "En la rotonda siga ligeramente a la izquierda",
         "fr": "Au rond-point, tourner légèrement à gauche",
+        "id": "Di bundaran, lakukan agak ke kiri",
+        "it": "Alla rotonda fai una sinistra leggermente",
         "nl": "Ga links op de rotonde",
-        "ru": "На круговом перекрёстке плавно налево",
-        "sv": "Vid rondellen sväng lätt vänster",
+        "pl": "Na rondzie weź łagodnie w lewo",
+        "pt-BR": "Na rotatória, vire ligeiramente à esquerda",
+        "ru": "На круговой развязке двигайтесь левее",
+        "sv": "I rondellen sväng vänster",
+        "uk": "На кільці плавно ліворуч",
         "vi": "Đi bên trái nghiêng tại vòng xuyến",
         "zh-Hans": "在环岛向左行驶"
     }

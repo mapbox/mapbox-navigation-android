@@ -1,0 +1,26 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "continue",
+            "modifier": "straight"
+        },
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Geradeaus weiterfahren auf Way Name",
+        "en": "Continue straight to stay on Way Name",
+        "es": "Continúe en Way Name",
+        "fr": "Continuer tout droit sur Way Name",
+        "id": "Terus ke Way Name",
+        "it": "Continua dritto per stare su Way Name",
+        "nl": "Ga rechtdoor naar Way Name",
+        "pl": "Kontynuuj na Way Name",
+        "pt-BR": "Continue em Way Name",
+        "ru": "Продолжите движение по Way Name",
+        "sv": "Fortsätt in på Way Name",
+        "uk": "Рухайтесь по Way Name",
+        "vi": "Chạy tiếp trên Way Name",
+        "zh-Hans": "继续直行，上Way Name"
+    }
+}

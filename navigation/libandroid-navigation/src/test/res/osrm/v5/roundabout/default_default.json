@@ -9,10 +9,16 @@
     "instructions": {
         "de": "In den Kreisverkehr fahren",
         "en": "Enter the roundabout",
+        "es": "Entra en la rotonda",
         "fr": "Entrer dans le rond-point",
+        "id": "Masuk bundaran",
+        "it": "Entra nella rotonda",
         "nl": "Ga de rotonde op",
-        "ru": "Въезд на круговой перекрёсток",
+        "pl": "Wjedź na rondo",
+        "pt-BR": "Entre na rotatória",
+        "ru": "Продолжите движение по круговой развязке",
         "sv": "Kör in i rondellen",
+        "uk": "Рухайтесь по кільцю",
         "vi": "Đi vào vòng xuyến",
         "zh-Hans": "进入环岛"
     }

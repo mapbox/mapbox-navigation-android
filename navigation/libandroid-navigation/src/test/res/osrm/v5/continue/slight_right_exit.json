@@ -1,0 +1,26 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "continue",
+            "modifier": "slight right"
+        },
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Leicht rechts weiter auf Way Name",
+        "en": "Make a slight right to stay on Way Name",
+        "es": "Continúe ligeramente a la derecha en Way Name",
+        "fr": "Continuer légèrement à droite sur Way Name",
+        "id": "Tetap agak di kanan ke Way Name",
+        "it": "Continua leggermente a destra per stare su Way Name",
+        "nl": "Rechts aanhouden naar Way Name",
+        "pl": "Kontynuuj łagodnie w prawo na Way Name",
+        "pt-BR": "Continue ligeiramente à direita em Way Name",
+        "ru": "Плавно поверните направо на Way Name",
+        "sv": "Fortsätt åt höger in på Way Name",
+        "uk": "Рухайтесь плавно праворуч на Way Name",
+        "vi": "Nghiêng về bên phải vào Way Name",
+        "zh-Hans": "继续向右，上Way Name"
+    }
+}

@@ -10,10 +10,16 @@
     "instructions": {
         "de": "Geradeaus weiterfahren Richtung Destination 1",
         "en": "Continue straight towards Destination 1",
+        "es": "Continúe recto hacia Destination 1",
         "fr": "Continuer tout droit en direction de Destination 1",
+        "id": "Lanjutkan lurus menuju Destination 1",
+        "it": "Continua a dritto verso Destination 1",
         "nl": "Ga rechtdoor richting Destination 1",
-        "ru": "Продолжайте движение прямо в направлении Destination 1",
+        "pl": "Kontynuuj prosto w kierunku Destination 1",
+        "pt-BR": "Continue reto sentido Destination 1",
+        "ru": "Двигайтесь прямо в направлении Destination 1",
         "sv": "Fortsätt rakt fram mot Destination 1",
+        "uk": "Рухайтесь прямо у напрямку Destination 1",
         "vi": "Chạy tiếp bên thẳng đến Destination 1",
         "zh-Hans": "继续直行，前往Destination 1"
     }

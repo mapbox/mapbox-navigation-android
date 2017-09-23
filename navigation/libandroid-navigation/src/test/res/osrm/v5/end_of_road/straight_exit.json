@@ -1,0 +1,26 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "end of road",
+            "modifier": "straight"
+        },
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Geradeaus weiterfahren auf Way Name",
+        "en": "Continue straight onto Way Name",
+        "es": "Continúe recto en Way Name",
+        "fr": "Continuer tout droit sur Way Name",
+        "id": "Tetap lurus ke Way Name ",
+        "it": "Continua dritto in Way Name",
+        "nl": "Ga naar Way Name",
+        "pl": "Kontynuuj prosto na Way Name",
+        "pt-BR": "Continue reto em Way Name",
+        "ru": "Двигайтесь прямо по Way Name",
+        "sv": "Fortsätt rakt fram in på Way Name",
+        "uk": "Продовжуйте рух прямо по Way Name",
+        "vi": "Chạy tiếp trên Way Name",
+        "zh-Hans": "继续直行，上Way Name"
+    }
+}

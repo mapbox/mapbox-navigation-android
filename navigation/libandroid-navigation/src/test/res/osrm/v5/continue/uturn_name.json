@@ -8,11 +8,17 @@
     },
     "instructions": {
         "de": "180°-Wendung auf Way Name",
-        "en": "Make a U-turn onto Way Name",
+        "en": "Make a U-turn and continue on Way Name",
+        "es": "Haz un cambio de sentido en Way Name",
         "fr": "Faire demi-tour sur Way Name",
+        "id": "Putar balik ke arah Way Name",
+        "it": "Fai un inversione ad U poi continua su Way Name",
         "nl": "Keer om naar Way Name",
-        "ru": "Сделайте разворот на Way Name",
+        "pl": "Zawróć na Way Name",
+        "pt-BR": "Faça o retorno em Way Name",
+        "ru": "Развернитесь на Way Name",
         "sv": "Gör en U-sväng in på Way Name",
+        "uk": "Здійсніть розворот на Way Name",
         "vi": "Quẹo ngược lại Way Name",
         "zh-Hans": "调头上Way Name"
     }

@@ -8,12 +8,18 @@
         "name": ""
     },
     "instructions": {
-        "de": "In den Kreisverkehr fahren und vierte Ausfahrt nehmen",
+        "de": "Im Kreisverkehr die vierte Ausfahrt nehmen",
         "en": "Enter the rotary and take the 4th exit",
+        "es": "Entra en la rotonda y toma la 4ª salida",
         "fr": "Entrer dans le rond-point et prendre la quatrième sortie",
-        "nl": "Ga het knooppunt op en neem afslag vierde",
-        "ru": "На кольцевой развязке используйте четвёртый съезд",
-        "sv": "Kör in i rondellen och ta avfart 4:e",
+        "id": "Masuk bundaran dan ambil jalan keluar 4",
+        "it": "Immettiti nella rotonda e prendi la 4ª uscita",
+        "nl": "Ga het knooppunt op en neem afslag 4e",
+        "pl": "Wjedź na rondo i wyjedź 4. zjazdem",
+        "pt-BR": "Entre na rotatória e saia na 4º saída",
+        "ru": "На круговой развязке сверните на четвёртый съезд",
+        "sv": "I rondellen ta 4:e avfarten",
+        "uk": "Рухайтесь по колу та повереніть у 4й з'їзд",
         "vi": "Đi vào bùng binh và ra tại đường thứ 4",
         "zh-Hans": "进入环岛并从第四出口驶出"
     }

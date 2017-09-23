@@ -10,10 +10,16 @@
     "instructions": {
         "de": "Rechts abbiegen Richtung Destination 1",
         "en": "Turn right towards Destination 1",
+        "es": "Gire a la derecha hacia Destination 1",
         "fr": "Tourner à droite en direction de Destination 1",
+        "id": "Belok kanan menuju Destination 1",
+        "it": "Svolta a destra verso Destination 1",
         "nl": "Ga rechtsaf richting Destination 1",
+        "pl": "Skręć w prawo w kierunku Destination 1",
+        "pt-BR": "Vire à direita sentido Destination 1",
         "ru": "Поверните направо в направлении Destination 1",
         "sv": "Sväng höger mot Destination 1",
+        "uk": "Поверніть праворуч у напрямку Destination 1",
         "vi": "Quẹo phải đến Destination 1",
         "zh-Hans": "右转，前往Destination 1"
     }

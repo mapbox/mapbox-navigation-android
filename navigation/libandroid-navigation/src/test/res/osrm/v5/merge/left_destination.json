@@ -10,10 +10,16 @@
     "instructions": {
         "de": "Links auffahren Richtung Destination 1",
         "en": "Merge left towards Destination 1",
+        "es": "Gire a izquierda hacia Destination 1",
         "fr": "Rejoindre à gauche en direction de Destination 1",
+        "id": "Bergabung kiri menuju Destination 1",
+        "it": "Immettiti sinistra verso Destination 1",
         "nl": "Bij de splitsing links richting Destination 1",
-        "ru": "Слияние полосы налево в направлении Destination 1",
-        "sv": "Körfältsbyte åt vänster mot Destination 1",
+        "pl": "Włącz się lewo w kierunku Destination 1",
+        "pt-BR": "Entre à esquerda em direção à Destination 1",
+        "ru": "Перестройтесь налево в направлении Destination 1",
+        "sv": "Byt till vänster körfält mot Destination 1",
+        "uk": "Приєднайтеся до потоку ліворуч у напрямку Destination 1",
         "vi": "Nhập sang trái đến Destination 1",
         "zh-Hans": "向左并道，前往Destination 1"
     }

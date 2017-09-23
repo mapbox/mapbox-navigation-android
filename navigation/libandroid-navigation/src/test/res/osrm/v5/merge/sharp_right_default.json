@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Scharf rechts auffahren",
         "en": "Merge right",
+        "es": "Gire a la derecha",
         "fr": "Rejoindre par la droite",
+        "id": "Bergabung di kanan",
+        "it": "Immettiti a destra",
         "nl": "Bij de splitsing rechtsaf",
-        "ru": "Слияние полосы направо",
-        "sv": "Körfältsbyte åt höger",
+        "pl": "Włącz się z prawej strony",
+        "pt-BR": "Entre à direita",
+        "ru": "Перестраивайтесь правее",
+        "sv": "Byt till högra körfältet",
+        "uk": "Приєднайтеся до потоку праворуч",
         "vi": "Nhập sang phải",
         "zh-Hans": "向右并道"
     }

@@ -7,12 +7,18 @@
         "name": "Way Name"
     },
     "instructions": {
-        "de": "Rampe auf der linken Seite nehmen auf Way Name",
+        "de": "Auffahrt links nehmen auf Way Name",
         "en": "Take the ramp on the left onto Way Name",
+        "es": "Ve cuesta abajo en la izquierda en Way Name",
         "fr": "Prendre la sortie à gauche sur Way Name",
+        "id": "Ambil jalan melandai di sebelah kiri ke arah Way Name",
+        "it": "Prendi la rampa a sinistra in Way Name",
         "nl": "Neem de oprit links naar Way Name",
-        "ru": "Используйте въезд на Way Name слева",
-        "sv": "Ta påfartsrampen till vänster in på Way Name",
+        "pl": "Weź zjazd po lewej na Way Name",
+        "pt-BR": "Pegue a rampa à esquerda em Way Name",
+        "ru": "Перестройтесь левее на Way Name",
+        "sv": "Ta påfarten till vänster in på Way Name",
+        "uk": "Рухайтесь на вʼїзд ліворуч на Way Name",
         "vi": "Đi đường nhánh Way Name bên trái",
         "zh-Hans": "通过匝道驶入Way Name"
     }

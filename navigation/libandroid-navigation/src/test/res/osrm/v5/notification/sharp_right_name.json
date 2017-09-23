@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Scharf rechts weiterfahren auf Way Name",
         "en": "Continue sharp right onto Way Name",
+        "es": "Continúe cerrada a la derecha en Way Name",
         "fr": "Continuer franchement à droite sur Way Name",
+        "id": "Lanjutkan tajam kanan menuju Way Name",
+        "it": "Continua a destra in Way Name",
         "nl": "Ga rechtsaf naar Way Name",
-        "ru": "Продолжайте движение резко направо по Way Name",
-        "sv": "Fortsätt skarp höger på Way Name",
+        "pl": "Kontynuuj ostro w prawo na Way Name",
+        "pt-BR": "Continue acentuadamente à direita em Way Name",
+        "ru": "Двигайтесь направо по Way Name",
+        "sv": "Fortsätt höger på Way Name",
+        "uk": "Рухайтесь різко праворуч на Way Name",
         "vi": "Chạy tiếp bên phải gắt trên Way Name",
         "zh-Hans": "继续向右，上Way Name"
     }

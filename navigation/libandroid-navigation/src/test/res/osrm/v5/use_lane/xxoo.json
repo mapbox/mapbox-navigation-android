@@ -53,10 +53,16 @@
     "instructions": {
         "de": "Rechts halten",
         "en": "Keep right",
+        "es": "Mantengase a la derecha",
         "fr": "Serrer à droite",
+        "id": "Tetap di kanan",
+        "it": "Mantieni la destra",
         "nl": "Rechts aanhouden",
-        "ru": "Держитесь правой стороны",
+        "pl": "Trzymaj się prawej strony",
+        "pt-BR": "Mantenha-se à direita",
+        "ru": "Держитесь правее",
         "sv": "Håll till höger",
+        "uk": "Тримайтесь праворуч",
         "vi": "Đi bên phải",
         "zh-Hans": "靠右直行"
     }

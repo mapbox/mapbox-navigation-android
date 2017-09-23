@@ -11,10 +11,16 @@
     "instructions": {
         "de": "Fahren Sie Richtung Norden auf Way Name",
         "en": "Head north on Way Name",
+        "es": "Ve a norte en Way Name",
         "fr": "Rouler vers le nord sur Way Name",
+        "id": "Arah utara di Way Name",
+        "it": "Continua verso nord in Way Name",
         "nl": "Neem Way Name in noordelijke richting",
+        "pl": "Kieruj się północ na Way Name",
+        "pt-BR": "Siga norte em Way Name",
         "ru": "Двигайтесь в северном направлении по Way Name",
         "sv": "Kör åt norr på Way Name",
+        "uk": "Прямуйте на північ по Way Name",
         "vi": "Đi về hướng bắc trên Way Name",
         "zh-Hans": "出发向北，上Way Name"
     }

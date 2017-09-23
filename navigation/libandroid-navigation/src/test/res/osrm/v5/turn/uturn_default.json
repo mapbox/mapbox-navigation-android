@@ -9,10 +9,16 @@
     "instructions": {
         "de": "180°-Wendung abbiegen",
         "en": "Make a U-turn",
+        "es": "Siga cambio de sentido",
         "fr": "Tourner demi-tour",
+        "id": "Lakukan putar balik",
+        "it": "Fai una inversione a U",
         "nl": "Ga omkeren",
-        "ru": "Поверните разворот",
-        "sv": "Sväng åt U-sväng",
+        "pl": "Zawróć",
+        "pt-BR": "Siga retorno",
+        "ru": "Двигайтесь на разворот",
+        "sv": "Sväng U-sväng",
+        "uk": "Рухайтесь розворот",
         "vi": "Quẹo ngược",
         "zh-Hans": "调头转弯"
     }

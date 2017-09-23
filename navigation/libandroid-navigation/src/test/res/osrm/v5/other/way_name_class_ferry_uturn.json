@@ -1,0 +1,31 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "continue",
+            "modifier": "uturn"
+        },
+        "name": "Cool highway",
+        "ref": "Ref1;Ref2"
+    },
+    "instructions": {
+        "de": "180°-Wendung auf Cool highway (Ref1)",
+        "en": "Make a U-turn and continue on Cool highway (Ref1)",
+        "es": "Haz un cambio de sentido en Cool highway (Ref1)",
+        "fr": "Faire demi-tour sur Cool highway (Ref1)",
+        "id": "Putar balik ke arah Cool highway (Ref1)",
+        "it": "Fai un inversione ad U poi continua su Cool highway (Ref1)",
+        "nl": "Keer om naar Cool highway (Ref1)",
+        "pl": "Zawróć na Cool highway (Ref1)",
+        "pt-BR": "Faça o retorno em Cool highway (Ref1)",
+        "ru": "Развернитесь на Cool highway (Ref1)",
+        "sv": "Gör en U-sväng in på Cool highway (Ref1)",
+        "uk": "Здійсніть розворот на Cool highway (Ref1)",
+        "vi": "Quẹo ngược lại Cool highway (Ref1)",
+        "zh-Hans": "调头上Cool highway (Ref1)"
+    },
+    "options": {
+        "classes": [
+            "ferry"
+        ]
+    }
+}

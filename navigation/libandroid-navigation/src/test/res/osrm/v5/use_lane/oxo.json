@@ -47,10 +47,16 @@
     "instructions": {
         "de": "Rechts oder links halten",
         "en": "Keep left or right",
+        "es": "Mantengase a la izquierda o derecha",
         "fr": "Rester à gauche ou à droite",
+        "id": "Tetap di kiri atau kanan",
+        "it": "Mantieni la destra o la sinistra",
         "nl": "Links of rechts blijven",
-        "ru": "Держите левой или правой стороны",
+        "pl": "Trzymaj się lewej lub prawej strony",
+        "pt-BR": "Mantenha-se à esquerda ou direita",
+        "ru": "Держитесь слева или справа",
         "sv": "Håll till vänster eller höger",
+        "uk": "Тримайтесь праворуч або ліворуч",
         "vi": "Đi bên trái hay bên phải",
         "zh-Hans": "保持在道路两侧直行"
     }

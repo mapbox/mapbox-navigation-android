@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Scharf rechts",
         "en": "Take a sharp right",
+        "es": "Gire a la derecha",
         "fr": "Prendre à droite",
+        "id": "Belok kanan tajam",
+        "it": "Svolta a destra",
         "nl": "Rechtsaf",
-        "ru": "Поверните резко направо",
+        "pl": "Skręć ostro w prawo",
+        "pt-BR": "Vire acentuadamente à direita",
+        "ru": "Резко поверните направо",
         "sv": "Gör en skarp högersväng",
+        "uk": "Прийміть різко праворуч",
         "vi": "Quẹo gắt bên phải",
         "zh-Hans": "继续向右"
     }

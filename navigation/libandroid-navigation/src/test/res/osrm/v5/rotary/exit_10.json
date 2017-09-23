@@ -8,12 +8,18 @@
         "name": ""
     },
     "instructions": {
-        "de": "In den Kreisverkehr fahren und zehnte Ausfahrt nehmen",
+        "de": "Im Kreisverkehr die zehnte Ausfahrt nehmen",
         "en": "Enter the rotary and take the 10th exit",
+        "es": "Entra en la rotonda y toma la 10ª salida",
         "fr": "Entrer dans le rond-point et prendre la dixième sortie",
-        "nl": "Ga het knooppunt op en neem afslag tiende",
-        "ru": "На кольцевой развязке используйте десятый съезд",
-        "sv": "Kör in i rondellen och ta avfart 10:e",
+        "id": "Masuk bundaran dan ambil jalan keluar 10",
+        "it": "Immettiti nella rotonda e prendi la 10ª uscita",
+        "nl": "Ga het knooppunt op en neem afslag 10e",
+        "pl": "Wjedź na rondo i wyjedź 10. zjazdem",
+        "pt-BR": "Entre na rotatória e saia na 10º saída",
+        "ru": "На круговой развязке сверните на десятый съезд",
+        "sv": "I rondellen ta 10:e avfarten",
+        "uk": "Рухайтесь по колу та повереніть у 10й з'їзд",
         "vi": "Đi vào bùng binh và ra tại đường thứ 10",
         "zh-Hans": "进入环岛并从第十出口驶出"
     }

@@ -8,12 +8,18 @@
         "name": ""
     },
     "instructions": {
-        "de": "In den Kreisverkehr fahren und neunte Ausfahrt nehmen",
+        "de": "Im Kreisverkehr die neunte Ausfahrt nehmen",
         "en": "Enter the rotary and take the 9th exit",
+        "es": "Entra en la rotonda y toma la 9ª salida",
         "fr": "Entrer dans le rond-point et prendre la neuvième sortie",
-        "nl": "Ga het knooppunt op en neem afslag negende",
-        "ru": "На кольцевой развязке используйте девятый съезд",
-        "sv": "Kör in i rondellen och ta avfart 9:e",
+        "id": "Masuk bundaran dan ambil jalan keluar 9",
+        "it": "Immettiti nella rotonda e prendi la 9ª uscita",
+        "nl": "Ga het knooppunt op en neem afslag 9e",
+        "pl": "Wjedź na rondo i wyjedź 9. zjazdem",
+        "pt-BR": "Entre na rotatória e saia na 9º saída",
+        "ru": "На круговой развязке сверните на девятый съезд",
+        "sv": "I rondellen ta 9:e avfarten",
+        "uk": "Рухайтесь по колу та повереніть у 9й з'їзд",
         "vi": "Đi vào bùng binh và ra tại đường thứ 9",
         "zh-Hans": "进入环岛并从第九出口驶出"
     }

@@ -1,0 +1,26 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "notification",
+            "modifier": "slight right"
+        },
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Leicht rechts weiterfahren auf Way Name",
+        "en": "Continue slight right onto Way Name",
+        "es": "Continúe ligeramente a la derecha en Way Name",
+        "fr": "Continuer légèrement à droite sur Way Name",
+        "id": "Lanjutkan agak ke kanan menuju Way Name",
+        "it": "Continua a destra leggermente in Way Name",
+        "nl": "Ga rechts naar Way Name",
+        "pl": "Kontynuuj łagodnie w prawo na Way Name",
+        "pt-BR": "Continue ligeiramente à direita em Way Name",
+        "ru": "Двигайтесь правее по Way Name",
+        "sv": "Fortsätt höger på Way Name",
+        "uk": "Рухайтесь плавно праворуч на Way Name",
+        "vi": "Chạy tiếp bên phải nghiêng trên Way Name",
+        "zh-Hans": "继续向右，上Way Name"
+    }
+}

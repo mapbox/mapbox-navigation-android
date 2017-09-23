@@ -1,0 +1,26 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "left",
+            "type": "roundabout"
+        },
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Im Kreisverkehr die Ausfahrt auf Way Name nehmen",
+        "en": "Enter the roundabout and exit onto Way Name",
+        "es": "Entra en la rotonda y sal en Way Name",
+        "fr": "Entrer dans le rond-point et sortir par Way Name",
+        "id": "Masuk bundaran dan keluar arah Way Name",
+        "it": "Entra nella rotonda e prendi l'uscita in Way Name",
+        "nl": "Verlaat de rotonde naar Way Name",
+        "pl": "Wjedź na rondo i wyjedź na Way Name",
+        "pt-BR": "Entre na rotatória e saia em Way Name",
+        "ru": "На круговой развязке сверните на Way Name",
+        "sv": "I rondellen ta av mot Way Name",
+        "uk": "Рухайтесь по кільцю до Way Name",
+        "vi": "Đi vào vòng xuyến và ra tại Way Name",
+        "zh-Hans": "通过环岛后驶入Way Name"
+    }
+}

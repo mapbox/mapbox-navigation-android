@@ -10,10 +10,16 @@
     "instructions": {
         "de": "Am Kreisverkehr links Richtung Destination 1",
         "en": "At the roundabout turn left towards Destination 1",
+        "es": "En la rotonda gira a la izquierda hacia Destination 1",
         "fr": "Au rond-point, tourner à gauche en direction de Destination 1",
+        "id": "Di bundaran, belok kiri menuju Destination 1",
+        "it": "Alla rotonda svolta a sinistra verso Destination 1",
         "nl": "Ga links op de rotonde richting Destination 1",
-        "ru": "На круговом перекрёстке поверните налево в направлении Destination 1",
-        "sv": "Vid rondellen sväng vänster mot Destination 1",
+        "pl": "Na rondzie skręć w lewo w kierunku Destination 1",
+        "pt-BR": "Na rotatória vire à esquerda sentido Destination 1",
+        "ru": "На круговой развязке сверните налево в направлении Destination 1",
+        "sv": "I rondellen sväng vänster mot Destination 1",
+        "uk": "На кільці поверніть ліворуч в напрямку Destination 1",
         "vi": "Quẹo trái tại vòng xuyến để đi Destination 1",
         "zh-Hans": "在环岛左转，前往Destination 1"
     }

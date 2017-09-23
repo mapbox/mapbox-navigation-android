@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Scharf links abbiegen",
         "en": "Turn sharp left",
+        "es": "Gire a cerrada a la izquierda",
         "fr": "Tourner franchement à gauche",
+        "id": "Belok tajam kiri",
+        "it": "Gira a sinistra",
         "nl": "Ga linksaf",
-        "ru": "Поверните резко налево",
-        "sv": "Sväng skarp vänster",
+        "pl": "Skręć ostro w lewo",
+        "pt-BR": "Vire acentuadamente à esquerda",
+        "ru": "Поверните налево",
+        "sv": "Sväng vänster",
+        "uk": "Поверніть різко ліворуч",
         "vi": "Quẹo trái gắt",
         "zh-Hans": "向左行驶"
     }

@@ -8,12 +8,18 @@
         "name": ""
     },
     "instructions": {
-        "de": "In den Kreisverkehr fahren und zweite Ausfahrt nehmen",
+        "de": "Im Kreisverkehr die zweite Ausfahrt nehmen",
         "en": "Enter the rotary and take the 2nd exit",
+        "es": "Entra en la rotonda y toma la 2ª salida",
         "fr": "Entrer dans le rond-point et prendre la seconde sortie",
-        "nl": "Ga het knooppunt op en neem afslag tweede",
-        "ru": "На кольцевой развязке используйте второй съезд",
-        "sv": "Kör in i rondellen och ta avfart 2:a",
+        "id": "Masuk bundaran dan ambil jalan keluar 2",
+        "it": "Immettiti nella rotonda e prendi la 2ª uscita",
+        "nl": "Ga het knooppunt op en neem afslag 2e",
+        "pl": "Wjedź na rondo i wyjedź 2. zjazdem",
+        "pt-BR": "Entre na rotatória e saia na 2º saída",
+        "ru": "На круговой развязке сверните на второй съезд",
+        "sv": "I rondellen ta 2:a avfarten",
+        "uk": "Рухайтесь по колу та повереніть у 2й з'їзд",
         "vi": "Đi vào bùng binh và ra tại đường thứ 2",
         "zh-Hans": "进入环岛并从第二出口驶出"
     }

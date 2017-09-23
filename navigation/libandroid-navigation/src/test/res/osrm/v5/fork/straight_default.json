@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Geradeaus halten an der Gabelung",
         "en": "Keep straight at the fork",
+        "es": "Mantengase recto en el cruce",
         "fr": "Rester tout droit à l'embranchement",
+        "id": "Tetap lurus di pertigaan",
+        "it": "Mantieni la dritto al bivio",
         "nl": "Ga rechtdoor op de splitsing",
-        "ru": "На развилке поверните прямо",
+        "pl": "Na rozwidleniu trzymaj się prosto",
+        "pt-BR": "Mantenha-se reto na bifurcação",
+        "ru": "На развилке двигайтесь прямо",
         "sv": "Håll till rakt fram där vägen delar sig",
+        "uk": "На роздоріжжі тримайтеся прямо",
         "vi": "Đi bên thẳng ở ngã ba",
         "zh-Hans": "在岔道保持直行"
     }

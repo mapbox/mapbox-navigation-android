@@ -9,10 +9,16 @@
     "instructions": {
         "de": "180°-Wendung abbiegen auf Way Name",
         "en": "Make a U-turn onto Way Name",
+        "es": "Siga cambio de sentido en Way Name",
         "fr": "Tourner demi-tour sur Way Name",
+        "id": "Lakukan putar balik ke arah Way Name",
+        "it": "Fai una inversione a U in Way Name",
         "nl": "Ga omkeren naar Way Name",
-        "ru": "Поверните разворот на Way Name",
-        "sv": "Sväng åt U-sväng in på Way Name",
+        "pl": "Zawróć na Way Name",
+        "pt-BR": "Siga retorno em Way Name",
+        "ru": "Двигайтесь на разворот на Way Name",
+        "sv": "Sväng U-sväng in på Way Name",
+        "uk": "Рухайтесь розворот на Way Name",
         "vi": "Quẹo ngược vào Way Name",
         "zh-Hans": "调头转弯，上Way Name"
     }

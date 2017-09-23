@@ -8,12 +8,18 @@
         "destinations": "Destination 1,Destination 2"
     },
     "instructions": {
-        "de": "Rampe auf der rechten Seite nehmen Richtung Destination 1",
+        "de": "Ausfahrt rechts nehmen Richtung Destination 1",
         "en": "Take the ramp on the right towards Destination 1",
+        "es": "Ve cuesta abajo en la derecha hacia Destination 1",
         "fr": "Prendre la sortie à droite en direction de Destination 1",
+        "id": "Ambil jalan melandai di sebelah kanan menuju Destination 1",
+        "it": "Prendi la rampa a destra verso Destination 1",
         "nl": "Neem de afrit rechts richting Destination 1",
-        "ru": "Используйте съезд справа в направлении Destination 1",
-        "sv": "Ta avfartsrampen till höger mot Destination 1",
+        "pl": "Weź zjazd po prawej w kierunku Destination 1",
+        "pt-BR": "Pegue a rampa à direita sentido Destination 1",
+        "ru": "Поверните направо на съезд в направлении Destination 1",
+        "sv": "Ta avfarten till höger mot Destination 1",
+        "uk": "Рухайтесь на зʼїзд праворуч у напрямку Destination 1",
         "vi": "Đi đường nhánh bên phải đến Destination 1",
         "zh-Hans": "通过匝道前往Destination 1"
     }

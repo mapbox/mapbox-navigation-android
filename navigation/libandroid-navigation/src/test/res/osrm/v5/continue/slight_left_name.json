@@ -8,11 +8,17 @@
     },
     "instructions": {
         "de": "Leicht links weiter auf Way Name",
-        "en": "Continue slightly left onto Way Name",
+        "en": "Make a slight left to stay on Way Name",
+        "es": "Continúe ligeramente a la izquierda en Way Name",
         "fr": "Continuer légèrement à gauche sur Way Name",
+        "id": "Tetap agak di kiri ke Way Name",
+        "it": "Continua leggermente a sinistra per stare su Way Name",
         "nl": "Links aanhouden naar Way Name",
-        "ru": "Плавный поворот налево на Way Name",
-        "sv": "Fortsätt med lätt vänstersväng in på Way Name",
+        "pl": "Kontynuuj łagodnie w lewo na Way Name",
+        "pt-BR": "Continue ligeiramente à esquerda em Way Name",
+        "ru": "Плавно поверните налево на Way Name",
+        "sv": "Fortsätt åt vänster in på Way Name",
+        "uk": "Рухайтесь плавно ліворуч на Way Name",
         "vi": "Nghiêng về bên trái vào Way Name",
         "zh-Hans": "继续向左，上Way Name"
     }

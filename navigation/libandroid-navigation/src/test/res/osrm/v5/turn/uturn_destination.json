@@ -10,10 +10,16 @@
     "instructions": {
         "de": "180°-Wendung abbiegen Richtung Destination 1",
         "en": "Make a U-turn towards Destination 1",
+        "es": "Siga cambio de sentido hacia Destination 1",
         "fr": "Tourner demi-tour en direction de Destination 1",
+        "id": "Lakukan putar balik menuju Destination 1",
+        "it": "Fai una inversione a U verso Destination 1",
         "nl": "Ga omkeren richting Destination 1",
-        "ru": "Поверните разворот в направлении Destination 1",
-        "sv": "Sväng åt U-sväng mot Destination 1",
+        "pl": "Zawróć w kierunku Destination 1",
+        "pt-BR": "Siga retorno sentido Destination 1",
+        "ru": "Двигайтесь на разворот в направлении Destination 1",
+        "sv": "Sväng U-sväng mot Destination 1",
+        "uk": "Рухайтесь розворот в напрямку Destination 1",
         "vi": "Quẹo ngược đến Destination 1",
         "zh-Hans": "调头转弯，前往Destination 1"
     }

@@ -1,0 +1,26 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "end of road",
+            "modifier": "uturn"
+        },
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "180°-Wendung auf Way Name am Ende der Straße",
+        "en": "Make a U-turn onto Way Name at the end of the road",
+        "es": "Haz un cambio de sentido en Way Name al final de la via",
+        "fr": "Faire demi-tour à la fin de la route Way Name",
+        "id": "Putar balik di Way Name di akhir jalan",
+        "it": "Fai un'inversione a U in Way Name alla fine della strada",
+        "nl": "Keer om naar Way Name",
+        "pl": "Zawróć na końcu ulicy na Way Name",
+        "pt-BR": "Faça o retorno em Way Name no fim da rua",
+        "ru": "Развернитесь в конце Way Name",
+        "sv": "Gör en U-sväng in på Way Name i slutet av vägen",
+        "uk": "Здійсніть розворот на Way Name в кінці дороги",
+        "vi": "Quẹo ngược vào Way Name tại cuối đường",
+        "zh-Hans": "在道路尽头调头上Way Name"
+    }
+}

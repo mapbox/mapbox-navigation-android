@@ -1,0 +1,26 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "turn",
+            "modifier": "sharp right"
+        },
+        "name": "Way Name",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Scharf rechts abbiegen auf Way Name",
+        "en": "Make a sharp right onto Way Name",
+        "es": "Siga cerrada a la derecha en Way Name",
+        "fr": "Tourner franchement à droite sur Way Name",
+        "id": "Lakukan tajam kanan ke arah Way Name",
+        "it": "Fai una destra in Way Name",
+        "nl": "Ga rechtsaf naar Way Name",
+        "pl": "Ostro w prawo na Way Name",
+        "pt-BR": "Siga acentuadamente à direita em Way Name",
+        "ru": "Двигайтесь направо на Way Name",
+        "sv": "Sväng höger in på Way Name",
+        "uk": "Рухайтесь різко праворуч на Way Name",
+        "vi": "Quẹo phải gắt vào Way Name",
+        "zh-Hans": "向右转弯，上Way Name"
+    }
+}

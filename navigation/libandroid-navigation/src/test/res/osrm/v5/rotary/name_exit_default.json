@@ -11,10 +11,16 @@
     "instructions": {
         "de": "In den Kreisverkehr fahren und zweite Ausfahrt nehmen",
         "en": "Enter Rotary Name and take the 2nd exit",
+        "es": "Entra en Rotary Name y coge la 2ª salida",
         "fr": "Entrer dans le rond-point Rotary Name et prendre la seconde sortie",
-        "nl": "Ga het knooppunt Rotary Name op en neem afslag tweede",
-        "ru": "На площади Rotary Name с круговым движением используйте второй съезд",
-        "sv": "Kör in i Rotary Name och ta avfart 2:a",
+        "id": "Masuk Rotary Name dan ambil jalan keluar 2",
+        "it": "Immettiti in Rotary Name e prendi la 2ª uscita",
+        "nl": "Ga het knooppunt Rotary Name op en neem afslag 2e",
+        "pl": "Wjedź na Rotary Name i wyjedź 2. zjazdem",
+        "pt-BR": "Entre em Rotary Name e saia na 2º saída",
+        "ru": "На Rotary Name с круговым движением сверните на второй съезд",
+        "sv": "I Rotary Name ta 2:a avfarten",
+        "uk": "Рухайтесь по Rotary Name та поверніть у 2й з'їзд",
         "vi": "Đi vào Rotary Name và ra tại đường thứ 2",
         "zh-Hans": "进入Rotary Name环岛后从第二出口驶出"
     }

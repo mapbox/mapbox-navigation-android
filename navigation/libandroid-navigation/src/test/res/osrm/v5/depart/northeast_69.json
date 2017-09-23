@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Fahren Sie Richtung Nordosten",
         "en": "Head northeast",
+        "es": "Ve a noreste",
         "fr": "Rouler vers le nord-est",
+        "id": "Arah timur laut",
+        "it": "Continua verso nord-est",
         "nl": "Vertrek in noordoostelijke richting",
+        "pl": "Kieruj się północny wschód",
+        "pt-BR": "Siga nordeste",
         "ru": "Двигайтесь в северо-восточном направлении",
         "sv": "Kör åt nordost",
+        "uk": "Прямуйте на північний схід",
         "vi": "Đi về hướng đông bắc",
         "zh-Hans": "出发向东北"
     }

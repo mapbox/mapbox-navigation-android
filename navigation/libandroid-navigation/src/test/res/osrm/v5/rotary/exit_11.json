@@ -8,12 +8,18 @@
         "name": ""
     },
     "instructions": {
-        "de": "In den Kreisverkehr fahren und Ausfahrt nehmen",
+        "de": "Im Kreisverkehr die Ausfahrt nehmen",
         "en": "Enter the rotary and take the exit",
+        "es": "Entra en la rotonda y toma la salida",
         "fr": "Entrer dans le rond-point et prendre la sortie",
+        "id": "Masuk bundaran dan ambil jalan keluar ",
+        "it": "Immettiti nella rotonda e prendi la uscita",
         "nl": "Ga het knooppunt op en neem afslag ",
-        "ru": "На кольцевой развязке используйте съезд",
-        "sv": "Kör in i rondellen och ta avfart ",
+        "pl": "Wjedź na rondo i wyjedź zjazdem",
+        "pt-BR": "Entre na rotatória e saia na saída",
+        "ru": "На круговой развязке сверните на съезд",
+        "sv": "I rondellen ta avfarten",
+        "uk": "Рухайтесь по колу та повереніть у з'їзд",
         "vi": "Đi vào bùng binh và ra tại đường ",
         "zh-Hans": "进入环岛并从出口驶出"
     }

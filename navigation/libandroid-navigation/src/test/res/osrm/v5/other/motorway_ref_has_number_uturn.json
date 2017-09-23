@@ -1,0 +1,31 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "continue",
+            "modifier": "uturn"
+        },
+        "name": "Cool highway",
+        "ref": "Ref1;Ref2"
+    },
+    "instructions": {
+        "de": "180°-Wendung auf Ref1",
+        "en": "Make a U-turn and continue on Ref1",
+        "es": "Haz un cambio de sentido en Ref1",
+        "fr": "Faire demi-tour sur Ref1",
+        "id": "Putar balik ke arah Ref1",
+        "it": "Fai un inversione ad U poi continua su Ref1",
+        "nl": "Keer om naar Ref1",
+        "pl": "Zawróć na Ref1",
+        "pt-BR": "Faça o retorno em Ref1",
+        "ru": "Развернитесь на Ref1",
+        "sv": "Gör en U-sväng in på Ref1",
+        "uk": "Здійсніть розворот на Ref1",
+        "vi": "Quẹo ngược lại Ref1",
+        "zh-Hans": "调头上Ref1"
+    },
+    "options": {
+        "classes": [
+            "motorway"
+        ]
+    }
+}

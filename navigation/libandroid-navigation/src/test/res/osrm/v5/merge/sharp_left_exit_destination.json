@@ -1,0 +1,27 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "merge",
+            "modifier": "sharp left"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2",
+        "exits": "4A;4B"
+    },
+    "instructions": {
+        "de": "Scharf links auffahren Richtung Destination 1",
+        "en": "Merge left towards Destination 1",
+        "es": "Gire a la izquierda hacia Destination 1",
+        "fr": "Rejoindre par la gauche la route en direction de Destination 1",
+        "id": "Bergabung di kiri menuju Destination 1",
+        "it": "Immettiti a sinistra verso Destination 1",
+        "nl": "Bij de splitsing linksaf richting Destination 1",
+        "pl": "Włącz się z lewej strony w kierunku Destination 1",
+        "pt-BR": "Entre à esquerda em direção à Destination 1",
+        "ru": "Перестраивайтесь левее в направлении Destination 1",
+        "sv": "Byt till vänstra körfältet mot Destination 1",
+        "uk": "Приєднайтеся до потоку ліворуч у напрямку Destination 1",
+        "vi": "Nhập sang trái đến Destination 1",
+        "zh-Hans": "向左并道，前往Destination 1"
+    }
+}

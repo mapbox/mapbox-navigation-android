@@ -8,12 +8,18 @@
         "name": ""
     },
     "instructions": {
-        "de": "In den Kreisverkehr fahren und achte Ausfahrt nehmen",
+        "de": "Im Kreisverkehr die achte Ausfahrt nehmen",
         "en": "Enter the rotary and take the 8th exit",
+        "es": "Entra en la rotonda y toma la 8ª salida",
         "fr": "Entrer dans le rond-point et prendre la huitième sortie",
-        "nl": "Ga het knooppunt op en neem afslag achtste",
-        "ru": "На кольцевой развязке используйте восьмой съезд",
-        "sv": "Kör in i rondellen och ta avfart 8:e",
+        "id": "Masuk bundaran dan ambil jalan keluar 8",
+        "it": "Immettiti nella rotonda e prendi la 8ª uscita",
+        "nl": "Ga het knooppunt op en neem afslag 8e",
+        "pl": "Wjedź na rondo i wyjedź 8. zjazdem",
+        "pt-BR": "Entre na rotatória e saia na 8º saída",
+        "ru": "На круговой развязке сверните на восьмой съезд",
+        "sv": "I rondellen ta 8:e avfarten",
+        "uk": "Рухайтесь по колу та повереніть у 8й з'їзд",
         "vi": "Đi vào bùng binh và ra tại đường thứ 8",
         "zh-Hans": "进入环岛并从第八出口驶出"
     }

@@ -9,10 +9,16 @@
     "instructions": {
         "de": "Am Kreisverkehr geradeaus weiterfahren",
         "en": "At the roundabout continue straight",
+        "es": "En la rotonda continúe recto",
         "fr": "Au rond-point, continuer tout droit",
+        "id": "Di bundaran tetap lurus",
+        "it": "Alla rotonda prosegui dritto",
         "nl": "Rechtdoor op de rotonde",
-        "ru": "На круговом перекрёстке продолжайте движение прямо",
-        "sv": "Vid rondellen fortsätt rakt fram",
+        "pl": "Na rondzie kontynuuj prosto",
+        "pt-BR": "Na rotatória siga reto",
+        "ru": "На круговой развязке двигайтесь прямо",
+        "sv": "I rondellen fortsätt rakt fram",
+        "uk": "На кільці продовжуйте рухатись прямо",
         "vi": "Chạy thẳng tại vòng xuyến",
         "zh-Hans": "在环岛继续直行"
     }

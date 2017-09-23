@@ -10,10 +10,16 @@
     "instructions": {
         "de": "Geradeaus auffahren Richtung Destination 1",
         "en": "Merge straight towards Destination 1",
+        "es": "Gire a recto hacia Destination 1",
         "fr": "Rejoindre tout droit en direction de Destination 1",
+        "id": "Bergabung lurus menuju Destination 1",
+        "it": "Immettiti dritto verso Destination 1",
         "nl": "Bij de splitsing rechtdoor richting Destination 1",
-        "ru": "Слияние полосы прямо в направлении Destination 1",
-        "sv": "Körfältsbyte åt rakt fram mot Destination 1",
+        "pl": "Włącz się prosto w kierunku Destination 1",
+        "pt-BR": "Entre reto em direção à Destination 1",
+        "ru": "Перестройтесь прямо в направлении Destination 1",
+        "sv": "Byt till rakt fram körfält mot Destination 1",
+        "uk": "Приєднайтеся до потоку прямо у напрямку Destination 1",
         "vi": "Nhập sang thẳng đến Destination 1",
         "zh-Hans": "直行并道，前往Destination 1"
     }

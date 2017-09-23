@@ -10,10 +10,16 @@
     "instructions": {
         "de": "Links abbiegen auf Ref0",
         "en": "Turn left onto Ref0",
+        "es": "Gire a la izquierda en Ref0",
         "fr": "Tourner à gauche sur Ref0",
+        "id": "Belok kiri ke Ref0",
+        "it": "Svolta a sinistra in Ref0",
         "nl": "Ga linksaf naar Ref0",
+        "pl": "Skręć w lewo na Ref0",
+        "pt-BR": "Vire à esquerda em Ref0",
         "ru": "Поверните налево на Ref0",
         "sv": "Sväng vänster in på Ref0",
+        "uk": "Поверніть ліворуч на Ref0",
         "vi": "Quẹo trái vào Ref0",
         "zh-Hans": "左转，上Ref0"
     }

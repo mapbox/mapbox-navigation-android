@@ -7,12 +7,18 @@
         "name": "Street Name"
     },
     "instructions": {
-        "de": "Sie haben Ihr Ziel erreicht, es befindet sich rechts von Ihnen",
+        "de": "Sie haben Ihr Ziel erreicht, es befindet sich rechts",
         "en": "You have arrived at your destination, on the right",
+        "es": "Has llegado a tu destino, a la derecha",
         "fr": "Vous êtes arrivés à votre destination, sur la droite",
+        "id": "Anda telah tiba di tujuan ke-, di sebelah kanan",
+        "it": "Sei arrivato alla tua destinazione, sulla destra",
         "nl": "Je bent gearriveerd. De bestemming bevindt zich rechts.",
-        "ru": "Вы прибыли в пункт назначения, который находится справа",
-        "sv": "Du är framme vid din destination, lätt till höger",
+        "pl": "Dojechano do miejsca docelowego , po prawej stronie",
+        "pt-BR": "Você chegou ao seu destino, à direita",
+        "ru": "Вы прибыли в пункт назначения, он находится справа",
+        "sv": "Du är framme vid din destination, till höger",
+        "uk": "Ви прибули у ваш пункт призначення, він – праворуч",
         "vi": "Đến nơi ở bên phải",
         "zh-Hans": "您已经到达您的个目的地，在道路右侧"
     }

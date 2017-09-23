@@ -1,0 +1,422 @@
+{
+    "meta": {
+        "capitalizeFirstLetter": true
+    },
+    "v5": {
+        "constants": {
+            "ordinalize": {
+                "1": "1й",
+                "2": "2й",
+                "3": "3й",
+                "4": "4й",
+                "5": "5й",
+                "6": "6й",
+                "7": "7й",
+                "8": "8й",
+                "9": "9й",
+                "10": "10й"
+            },
+            "direction": {
+                "north": "північ",
+                "northeast": "північний схід",
+                "east": "схід",
+                "southeast": "південний схід",
+                "south": "південь",
+                "southwest": "південний захід",
+                "west": "захід",
+                "northwest": "північний захід"
+            },
+            "modifier": {
+                "left": "ліворуч",
+                "right": "праворуч",
+                "sharp left": "різко ліворуч",
+                "sharp right": "різко праворуч",
+                "slight left": "плавно ліворуч",
+                "slight right": "плавно праворуч",
+                "straight": "прямо",
+                "uturn": "розворот"
+            },
+            "lanes": {
+                "xo": "Тримайтесь праворуч",
+                "ox": "Тримайтесь ліворуч",
+                "xox": "Тримайтесь в середині",
+                "oxo": "Тримайтесь праворуч або ліворуч"
+            }
+        },
+        "modes": {
+            "ferry": {
+                "default": "Скористайтесь поромом",
+                "name": "Скористайтесь поромом {way_name}",
+                "destination": "Скористайтесь поромом у напрямку {destination}"
+            }
+        },
+        "phrase": {},
+        "arrive": {
+            "default": {
+                "default": "Ви прибули у ваш {nth} пункт призначення"
+            },
+            "left": {
+                "default": "Ви прибули у ваш {nth} пункт призначення, він – ліворуч"
+            },
+            "right": {
+                "default": "Ви прибули у ваш {nth} пункт призначення, він – праворуч"
+            },
+            "sharp left": {
+                "default": "Ви прибули у ваш {nth} пункт призначення, він – ліворуч"
+            },
+            "sharp right": {
+                "default": "Ви прибули у ваш {nth} пункт призначення, він – праворуч"
+            },
+            "slight right": {
+                "default": "Ви прибули у ваш {nth} пункт призначення, він – праворуч"
+            },
+            "slight left": {
+                "default": "Ви прибули у ваш {nth} пункт призначення, він – ліворуч"
+            },
+            "straight": {
+                "default": "Ви прибули у ваш {nth} пункт призначення, він – прямо перед вами"
+            }
+        },
+        "continue": {
+            "default": {
+                "default": "Рухайтесь {modifier}",
+                "name": "Рухайтесь {modifier} на {way_name}",
+                "destination": "Рухайтесь {modifier} у напрямку {destination}"
+            },
+            "straight": {
+                "default": "Продовжуйте рух прямо",
+                "name": "Рухайтесь по {way_name}",
+                "destination": "Рухайтесь у напрямку {destination}"
+            },
+            "slight left": {
+                "default": "Прийміть плавно ліворуч",
+                "name": "Рухайтесь плавно ліворуч на {way_name}",
+                "destination": "Рухайтесь плавно ліворуч у напрямку {destination}"
+            },
+            "slight right": {
+                "default": "Прийміть плавно праворуч",
+                "name": "Рухайтесь плавно праворуч на {way_name}",
+                "destination": "Рухайтесь плавно праворуч у напрямку {destination}"
+            },
+            "uturn": {
+                "default": "Здійсніть розворот",
+                "name": "Здійсніть розворот на {way_name}",
+                "destination": "Здійсніть розворот у напрямку {destination}"
+            }
+        },
+        "depart": {
+            "default": {
+                "default": "Прямуйте на {direction}",
+                "name": "Прямуйте на {direction} по {way_name}"
+            }
+        },
+        "end of road": {
+            "default": {
+                "default": "Поверніть {modifier}",
+                "name": "Поверніть {modifier} на {way_name}",
+                "destination": "Поверніть {modifier} у напрямку {destination}"
+            },
+            "straight": {
+                "default": "Продовжуйте рух прямо",
+                "name": "Продовжуйте рух прямо по {way_name}",
+                "destination": "Продовжуйте рух прямо у напрямку {destination}"
+            },
+            "uturn": {
+                "default": "Здійсніть розворот в кінці дороги",
+                "name": "Здійсніть розворот на {way_name} в кінці дороги",
+                "destination": "Здійсніть розворот у напрямку {destination} в кінці дороги"
+            }
+        },
+        "fork": {
+            "default": {
+                "default": "На роздоріжжі тримайтеся {modifier}",
+                "name": "На роздоріжжі тримайтеся {modifier} і виїжджайте на {way_name}",
+                "destination": "На роздоріжжі тримайтеся {modifier} у напрямку {destination}"
+            },
+            "slight left": {
+                "default": "На роздоріжжі тримайтеся ліворуч",
+                "name": "На роздоріжжі тримайтеся ліворуч і виїжджайте на {way_name}",
+                "destination": "На роздоріжжі тримайтеся ліворуч у напрямку {destination}"
+            },
+            "slight right": {
+                "default": "На роздоріжжі тримайтеся праворуч",
+                "name": "На роздоріжжі тримайтеся праворуч і виїжджайте на {way_name}",
+                "destination": "На роздоріжжі тримайтеся праворуч у напрямку {destination}"
+            },
+            "sharp left": {
+                "default": "На роздоріжжі різко поверніть ліворуч",
+                "name": "На роздоріжжі різко поверніть ліворуч на {way_name}",
+                "destination": "На роздоріжжі різко поверніть ліворуч в напрямку {destination}"
+            },
+            "sharp right": {
+                "default": "На роздоріжжі різко поверніть праворуч",
+                "name": "На роздоріжжі різко поверніть праворуч на {way_name}",
+                "destination": "На роздоріжжі різко поверніть праворуч в напрямку {destination}"
+            },
+            "uturn": {
+                "default": "Здійсніть розворот",
+                "name": "Здійсніть розворот на {way_name}",
+                "destination": "Здійсніть розворот у напрямку {destination}"
+            }
+        },
+        "merge": {
+            "default": {
+                "default": "Приєднайтеся до потоку {modifier}",
+                "name": "Приєднайтеся до потоку {modifier} на {way_name}",
+                "destination": "Приєднайтеся до потоку {modifier} у напрямку {destination}"
+            },
+            "slight left": {
+                "default": "Приєднайтеся до потоку ліворуч",
+                "name": "Приєднайтеся до потоку ліворуч на {way_name}",
+                "destination": "Приєднайтеся до потоку ліворуч у напрямку {destination}"
+            },
+            "slight right": {
+                "default": "Приєднайтеся до потоку праворуч",
+                "name": "Приєднайтеся до потоку праворуч на {way_name}",
+                "destination": "Приєднайтеся до потоку праворуч у напрямку {destination}"
+            },
+            "sharp left": {
+                "default": "Приєднайтеся до потоку ліворуч",
+                "name": "Приєднайтеся до потоку ліворуч на {way_name}",
+                "destination": "Приєднайтеся до потоку ліворуч у напрямку {destination}"
+            },
+            "sharp right": {
+                "default": "Приєднайтеся до потоку праворуч",
+                "name": "Приєднайтеся до потоку праворуч на {way_name}",
+                "destination": "Приєднайтеся до потоку праворуч у напрямку {destination}"
+            },
+            "uturn": {
+                "default": "Здійсніть розворот",
+                "name": "Здійсніть розворот на {way_name}",
+                "destination": "Здійсніть розворот у напрямку {destination}"
+            }
+        },
+        "new name": {
+            "default": {
+                "default": "Рухайтесь {modifier}",
+                "name": "Рухайтесь {modifier} на {way_name}",
+                "destination": "Рухайтесь {modifier} у напрямку {destination}"
+            },
+            "straight": {
+                "default": "Продовжуйте рух прямо",
+                "name": "Продовжуйте рух по {way_name}",
+                "destination": "Продовжуйте рух у напрямку {destination}"
+            },
+            "sharp left": {
+                "default": "Прийміть різко ліворуч",
+                "name": "Прийміть різко ліворуч на {way_name}",
+                "destination": "Прийміть різко ліворуч у напрямку {destination}"
+            },
+            "sharp right": {
+                "default": "Прийміть різко праворуч",
+                "name": "Прийміть різко праворуч на {way_name}",
+                "destination": "Прийміть різко праворуч у напрямку {destination}"
+            },
+            "slight left": {
+                "default": "Прийміть плавно ліворуч",
+                "name": "Рухайтесь плавно ліворуч на {way_name}",
+                "destination": "Рухайтесь плавно ліворуч у напрямку {destination}"
+            },
+            "slight right": {
+                "default": "Прийміть плавно праворуч",
+                "name": "Рухайтесь плавно праворуч на {way_name}",
+                "destination": "Рухайтесь плавно праворуч у напрямку {destination}"
+            },
+            "uturn": {
+                "default": "Здійсніть розворот",
+                "name": "Здійсніть розворот на {way_name}",
+                "destination": "Здійсніть розворот у напрямку {destination}"
+            }
+        },
+        "notification": {
+            "default": {
+                "default": "Рухайтесь {modifier}",
+                "name": "Рухайтесь {modifier} на {way_name}",
+                "destination": "Рухайтесь {modifier} у напрямку {destination}"
+            },
+            "uturn": {
+                "default": "Здійсніть розворот",
+                "name": "Здійсніть розворот на {way_name}",
+                "destination": "Здійсніть розворот у напрямку {destination}"
+            }
+        },
+        "off ramp": {
+            "default": {
+                "default": "Рухайтесь на зʼїзд",
+                "name": "Рухайтесь на зʼїзд на {way_name}",
+                "destination": "Рухайтесь на зʼїзд у напрямку {destination}",
+                "exit": "Оберіть з'їзд {exit}",
+                "exit_destination": "Оберіть з'їзд {exit} у напрямку {destination}"
+            },
+            "left": {
+                "default": "Рухайтесь на зʼїзд ліворуч",
+                "name": "Рухайтесь на зʼїзд ліворуч на {way_name}",
+                "destination": "Рухайтесь на зʼїзд ліворуч у напрямку {destination}",
+                "exit": "Оберіть з'їзд {exit} ліворуч",
+                "exit_destination": "Оберіть з'їзд {exit} ліворуч у напрямку {destination}"
+            },
+            "right": {
+                "default": "Рухайтесь на зʼїзд праворуч",
+                "name": "Рухайтесь на зʼїзд праворуч на {way_name}",
+                "destination": "Рухайтесь на зʼїзд праворуч у напрямку {destination}",
+                "exit": "Оберіть з'їзд {exit} праворуч",
+                "exit_destination": "Оберіть з'їзд {exit} праворуч у напрямку {destination}"
+            },
+            "sharp left": {
+                "default": "Рухайтесь на зʼїзд ліворуч",
+                "name": "Рухайтесь на зʼїзд ліворуч на {way_name}",
+                "destination": "Рухайтесь на зʼїзд ліворуч у напрямку {destination}",
+                "exit": "Оберіть з'їзд {exit} ліворуч",
+                "exit_destination": "Оберіть з'їзд {exit} ліворуч у напрямку {destination}"
+            },
+            "sharp right": {
+                "default": "Рухайтесь на зʼїзд праворуч",
+                "name": "Рухайтесь на зʼїзд праворуч на {way_name}",
+                "destination": "Рухайтесь на зʼїзд праворуч у напрямку {destination}",
+                "exit": "Оберіть з'їзд {exit} праворуч",
+                "exit_destination": "Оберіть з'їзд {exit} праворуч у напрямку {destination}"
+            },
+            "slight left": {
+                "default": "Рухайтесь на зʼїзд ліворуч",
+                "name": "Рухайтесь на зʼїзд ліворуч на {way_name}",
+                "destination": "Рухайтесь на зʼїзд ліворуч у напрямку {destination}",
+                "exit": "Оберіть з'їзд {exit} ліворуч",
+                "exit_destination": "Оберіть з'їзд {exit} ліворуч у напрямку {destination}"
+            },
+            "slight right": {
+                "default": "Рухайтесь на зʼїзд праворуч",
+                "name": "Рухайтесь на зʼїзд праворуч на {way_name}",
+                "destination": "Рухайтесь на зʼїзд праворуч у напрямку {destination}",
+                "exit": "Оберіть з'їзд {exit} праворуч",
+                "exit_destination": "Оберіть з'їзд {exit} праворуч у напрямку {destination}"
+            }
+        },
+        "on ramp": {
+            "default": {
+                "default": "Рухайтесь на вʼїзд",
+                "name": "Рухайтесь на вʼїзд на {way_name}",
+                "destination": "Рухайтесь на вʼїзд у напрямку {destination}"
+            },
+            "left": {
+                "default": "Рухайтесь на вʼїзд ліворуч",
+                "name": "Рухайтесь на вʼїзд ліворуч на {way_name}",
+                "destination": "Рухайтесь на вʼїзд ліворуч у напрямку {destination}"
+            },
+            "right": {
+                "default": "Рухайтесь на вʼїзд праворуч",
+                "name": "Рухайтесь на вʼїзд праворуч на {way_name}",
+                "destination": "Рухайтесь на вʼїзд праворуч у напрямку {destination}"
+            },
+            "sharp left": {
+                "default": "Рухайтесь на вʼїзд ліворуч",
+                "name": "Рухайтесь на вʼїзд ліворуч на {way_name}",
+                "destination": "Рухайтесь на вʼїзд ліворуч у напрямку {destination}"
+            },
+            "sharp right": {
+                "default": "Рухайтесь на вʼїзд праворуч",
+                "name": "Рухайтесь на вʼїзд праворуч на {way_name}",
+                "destination": "Рухайтесь на вʼїзд праворуч у напрямку {destination}"
+            },
+            "slight left": {
+                "default": "Рухайтесь на вʼїзд ліворуч",
+                "name": "Рухайтесь на вʼїзд ліворуч на {way_name}",
+                "destination": "Рухайтесь на вʼїзд ліворуч у напрямку {destination}"
+            },
+            "slight right": {
+                "default": "Рухайтесь на вʼїзд праворуч",
+                "name": "Рухайтесь на вʼїзд праворуч на {way_name}",
+                "destination": "Рухайтесь на вʼїзд праворуч у напрямку {destination}"
+            }
+        },
+        "rotary": {
+            "default": {
+                "default": {
+                    "default": "Рухайтесь по колу",
+                    "name": "Рухайтесь по колу до {way_name}",
+                    "destination": "Рухайтесь по колу в напрямку {destination}"
+                },
+                "name": {
+                    "default": "Рухайтесь по {rotary_name}",
+                    "name": "Рухайтесь по {rotary_name} та поверніть на {way_name}",
+                    "destination": "Рухайтесь по {rotary_name} та поверніть в напрямку {destination}"
+                },
+                "exit": {
+                    "default": "Рухайтесь по колу та повереніть у {exit_number} з'їзд",
+                    "name": "Рухайтесь по колу та поверніть у {exit_number} з'їзд на {way_name}",
+                    "destination": "Рухайтесь по колу та поверніть у {exit_number} з'їзд у напрямку {destination}"
+                },
+                "name_exit": {
+                    "default": "Рухайтесь по {rotary_name} та поверніть у {exit_number} з'їзд",
+                    "name": "Рухайтесь по {rotary_name} та поверніть у {exit_number} з'їзд на {way_name}",
+                    "destination": "Рухайтесь по {rotary_name} та поверніть у {exit_number} з'їзд в напрямку {destination}"
+                }
+            }
+        },
+        "roundabout": {
+            "default": {
+                "exit": {
+                    "default": "Рухайтесь по кільцю та повереніть у {exit_number} з'їзд",
+                    "name": "Рухайтесь по кільцю та поверніть у {exit_number} з'їзд на {way_name}",
+                    "destination": "Рухайтесь по кільцю та поверніть у {exit_number} з'їзд у напрямку {destination}"
+                },
+                "default": {
+                    "default": "Рухайтесь по кільцю",
+                    "name": "Рухайтесь по кільцю до {way_name}",
+                    "destination": "Рухайтесь по кільцю в напрямку {destination}"
+                }
+            }
+        },
+        "roundabout turn": {
+            "default": {
+                "default": "На кільці {modifier}",
+                "name": "На кільці {modifier} на {way_name}",
+                "destination": "На кільці {modifier} в напрямку {destination}"
+            },
+            "left": {
+                "default": "На кільці поверніть ліворуч",
+                "name": "На кільці поверніть ліворуч на {way_name}",
+                "destination": "На кільці поверніть ліворуч в напрямку {destination}"
+            },
+            "right": {
+                "default": "На кільці поверніть праворуч",
+                "name": "На кільці поверніть праворуч на {way_name}",
+                "destination": "На кільці поверніть праворуч в напрямку {destination}"
+            },
+            "straight": {
+                "default": "На кільці продовжуйте рухатись прямо",
+                "name": "На кільці продовжуйте рухатись прямо на {way_name}",
+                "destination": "На кільці продовжуйте рухатись прямо в напрямку {destination}"
+            }
+        },
+        "turn": {
+            "default": {
+                "default": "Рухайтесь {modifier}",
+                "name": "Рухайтесь {modifier} на {way_name}",
+                "destination": "Рухайтесь {modifier} в напрямку {destination}"
+            },
+            "left": {
+                "default": "Поверніть ліворуч",
+                "name": "Поверніть ліворуч на {way_name}",
+                "destination": "Поверніть ліворуч у напрямку {destination}"
+            },
+            "right": {
+                "default": "Поверніть праворуч",
+                "name": "Поверніть праворуч на {way_name}",
+                "destination": "Поверніть праворуч у напрямку {destination}"
+            },
+            "straight": {
+                "default": "Рухайтесь прямо",
+                "name": "Рухайтесь прямо по {way_name}",
+                "destination": "Рухайтесь прямо у напрямку {destination}"
+            }
+        },
+        "use lane": {
+            "no_lanes": {
+                "default": "Продовжуйте рух прямо"
+            },
+            "default": {
+                "default": "{lane_instruction}"
+            }
+        }
+    }
+}
