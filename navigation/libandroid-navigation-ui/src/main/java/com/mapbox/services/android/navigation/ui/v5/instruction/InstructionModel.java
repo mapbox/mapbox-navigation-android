@@ -14,7 +14,7 @@ import java.text.DecimalFormat;
 
 import static com.mapbox.services.android.navigation.v5.utils.ManeuverUtils.getManeuverResource;
 
-class InstructionModel {
+public class InstructionModel {
 
   private SpannableStringBuilder stepDistanceRemaining;
   private String textInstruction;
@@ -22,7 +22,7 @@ class InstructionModel {
   private String maneuverModifier;
   private IntersectionLanes[] turnLanes;
 
-  InstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
+  public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
     buildInstructionModel(progress, decimalFormat);
   }
 

@@ -10,18 +10,24 @@ import static com.mapbox.services.android.navigation.v5.utils.DistanceUtils.dist
 import static com.mapbox.services.android.navigation.v5.utils.time.TimeUtils.formatArrivalTime;
 import static com.mapbox.services.android.navigation.v5.utils.time.TimeUtils.formatTimeRemaining;
 
-class SummaryModel {
+public class SummaryModel {
 
+  private RouteProgress progress;
   private SpannableStringBuilder distanceRemaining;
   private String timeRemaining;
   private String arrivalTime;
   private float stepFractionTraveled;
 
-  SummaryModel(RouteProgress progress, DecimalFormat decimalFormat) {
+  public SummaryModel(RouteProgress progress, DecimalFormat decimalFormat) {
+    this.progress = progress;
     distanceRemaining = distanceFormatterBold(progress.distanceRemaining(), decimalFormat);
     timeRemaining = formatTimeRemaining(progress.durationRemaining());
     arrivalTime = formatArrivalTime(progress.durationRemaining());
     stepFractionTraveled = progress.currentLegProgress().currentStepProgress().fractionTraveled();
+  }
+
+  RouteProgress getProgress() {
+    return progress;
   }
 
   SpannableStringBuilder getDistanceRemaining() {

@@ -1,8 +1,9 @@
 package com.mapbox.services.android.navigation.ui.v5.summary;
 
 import android.animation.ObjectAnimator;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
-import android.location.Location;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,11 +14,12 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.mapbox.services.android.navigation.ui.v5.NavigationView;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.DirectionListAdapter;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.DirectionViewHolder;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -32,8 +34,7 @@ import java.text.DecimalFormat;
  *
  * @since 0.6.0
  */
-public class SummaryBottomSheet extends FrameLayout implements ProgressChangeListener,
-  OffRouteListener {
+public class SummaryBottomSheet extends FrameLayout {
 
   private static final String EMPTY_STRING = "";
   private static final int SCROLL_DIRECTION_UP = -1;
@@ -76,35 +77,51 @@ public class SummaryBottomSheet extends FrameLayout implements ProgressChangeLis
     initDecimalFormat();
   }
 
-  /**
-   * Listener used to update the views with navigation data.
-   * <p>
-   * Can be added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
-   *
-   * @param location      ignored in this scenario
-   * @param routeProgress holds all route / progress data needed to update the views
-   * @since 0.6.0
-   */
-  @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    update(routeProgress);
+  public void subscribe(NavigationViewModel navigationViewModel) {
+    navigationViewModel.summaryModel.observe((NavigationView) getContext(), new Observer<SummaryModel>() {
+      @Override
+      public void onChanged(@Nullable SummaryModel summaryModel) {
+        if (summaryModel != null && !rerouting) {
+          arrivalTimeText.setText(summaryModel.getArrivalTime());
+          timeRemainingText.setText(summaryModel.getTimeRemaining());
+          distanceRemainingText.setText(summaryModel.getDistanceRemaining());
+          setProgressBar(summaryModel.getStepFractionTraveled());
+          updateSteps(summaryModel.getProgress());
+          updateFirstViewHolder();
+        }
+      }
+    });
+    navigationViewModel.isOffRoute.observe((NavigationView) getContext(), new Observer<Boolean>() {
+      @Override
+      public void onChanged(@Nullable Boolean isOffRoute) {
+        if (isOffRoute != null) {
+          rerouting = isOffRoute;
+          if (rerouting) {
+            showRerouteState();
+          } else {
+            hideRerouteState();
+          }
+        }
+      }
+    });
   }
 
-
   /**
-   * Listener used to update the views in off-route scenario.
-   * Progress bar is shown and all text is cleared.  Progress bar hides and text
-   * begins populating again when the new route is received from
-   * {@link com.mapbox.services.android.navigation.v5.navigation.NavigationRoute}.
-   * <p>
-   * Can be added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
+   * Called in {@link ProgressChangeListener}, creates a new model and then
+   * uses it to update the views.
    *
-   * @param location ignored in this scenario
-   * @since 0.6.0
+   * @param routeProgress used to provide navigation / routeProgress data
    */
-  @Override
-  public void userOffRoute(Location location) {
-    showRerouteState();
+  public void update(RouteProgress routeProgress) {
+    if (routeProgress != null && !rerouting) {
+      SummaryModel model = new SummaryModel(routeProgress, decimalFormat);
+      arrivalTimeText.setText(model.getArrivalTime());
+      timeRemainingText.setText(model.getTimeRemaining());
+      distanceRemainingText.setText(model.getDistanceRemaining());
+      setProgressBar(model.getStepFractionTraveled());
+      updateSteps(routeProgress);
+      updateFirstViewHolder();
+    }
   }
 
   /**
@@ -119,7 +136,7 @@ public class SummaryBottomSheet extends FrameLayout implements ProgressChangeLis
       rerouting = true;
       stepProgressBar.setVisibility(INVISIBLE);
       rerouteProgressBar.setVisibility(VISIBLE);
-      clearTextViews();
+      clearViews();
     }
   }
 
@@ -185,24 +202,6 @@ public class SummaryBottomSheet extends FrameLayout implements ProgressChangeLis
   }
 
   /**
-   * Called in {@link ProgressChangeListener}, creates a new model and then
-   * uses it to update the views.
-   *
-   * @param routeProgress used to provide navigation / progress data
-   */
-  private void update(RouteProgress progress) {
-    if (progress != null && !rerouting) {
-      SummaryModel model = new SummaryModel(progress, decimalFormat);
-      arrivalTimeText.setText(model.getArrivalTime());
-      timeRemainingText.setText(model.getTimeRemaining());
-      distanceRemainingText.setText(model.getDistanceRemaining());
-      setProgressBar(model.getStepFractionTraveled());
-      updateSteps(progress);
-      updateFirstViewHolder();
-    }
-  }
-
-  /**
    * Sets the current progress.
    * <p>
    * Use {@link ObjectAnimator} to provide smooth transitions between values.
@@ -218,12 +217,13 @@ public class SummaryBottomSheet extends FrameLayout implements ProgressChangeLis
   }
 
   /**
-   * Clears all {@link TextView}s with an empty string.
+   * Clears all {@link View}s.
    */
-  private void clearTextViews() {
+  private void clearViews() {
     arrivalTimeText.setText(EMPTY_STRING);
     timeRemainingText.setText(EMPTY_STRING);
     distanceRemainingText.setText(EMPTY_STRING);
+    directionListAdapter.clear();
   }
 
   /**
