@@ -37,7 +37,8 @@ public class OffRouteDetector extends OffRoute {
     boolean isCloseToUpcomingStep;
 
     LegStep upComingStep = routeProgress.currentLegProgress().upComingStep();
-    if (upComingStep != null) {
+
+    if (upComingStep != null && isOffRoute) {
       isCloseToUpcomingStep = userTrueDistanceFromStep(futurePosition, upComingStep) < radius;
       if (isOffRoute && isCloseToUpcomingStep) {
         // TODO increment step index
