@@ -42,8 +42,6 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   private NavigationInstructionPlayer instructionPlayer;
   private DecimalFormat decimalFormat;
   private SharedPreferences preferences;
-  private DirectionsRoute route;
-  private boolean hasLocationEngine;
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -120,19 +118,12 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   }
 
   void updateRoute(DirectionsRoute route) {
-    this.route = route;
-    if (hasLocationEngine) {
-      startNavigation(route);
-      isOffRoute.setValue(false);
-    }
+    startNavigation(route);
+    isOffRoute.setValue(false);
   }
 
   void updateLocationEngine(LocationEngine locationEngine) {
     navigation.setLocationEngine(locationEngine);
-    hasLocationEngine = true;
-    if (route != null) {
-      startNavigation(route);
-    }
   }
 
   /**
@@ -168,7 +159,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   }
 
   private void startNavigation(DirectionsRoute route) {
-    if (hasLocationEngine && route != null) {
+    if (route != null) {
       navigation.startNavigation(route);
       isRunning.setValue(true);
     }

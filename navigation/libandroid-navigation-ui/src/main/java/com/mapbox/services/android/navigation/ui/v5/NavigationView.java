@@ -78,11 +78,13 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private NavigationMapRoute mapRoute;
   private NavigationCamera camera;
   private LocationLayerPlugin locationLayer;
+  private boolean resumeCamera;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.navigation_view_layout);
+    resumeCamera = savedInstanceState != null;
     bind();
     initViewModels();
     initClickListeners();
@@ -231,16 +233,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   @Override
-  public void startCamera(DirectionsRoute directionsRoute) {
-    camera.start(directionsRoute);
-  }
-
-  @Override
-  public void resumeCamera(Location location) {
-    camera.resume(location);
-  }
-
-  @Override
   public void setMuted(boolean isMuted) {
     navigationViewModel.setMuted(isMuted);
   }
@@ -285,6 +277,19 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void finishNavigationView() {
     finish();
+  }
+
+  public void startCamera(DirectionsRoute directionsRoute) {
+    if (!resumeCamera) {
+      camera.start(directionsRoute);
+    }
+  }
+
+  public void resumeCamera(Location location) {
+    if (resumeCamera) {
+      camera.resume(location);
+      resumeCamera = false;
+    }
   }
 
   /**
@@ -454,6 +459,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
           navigationViewModel.updateRoute(directionsRoute);
           locationViewModel.updateRoute(directionsRoute);
           navigationPresenter.onRouteUpdate(directionsRoute);
+          startCamera(directionsRoute);
         }
       }
     });
@@ -474,7 +480,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
           if (isRunning) {
             showInstructionView();
           }
-          navigationPresenter.isRunning = isRunning;
         }
       }
     });
@@ -484,6 +489,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       public void onChanged(@Nullable Location location) {
         if (location != null && location.getLongitude() != 0 && location.getLatitude() != 0) {
           locationLayer.forceLocationUpdate(location);
+          resumeCamera(location);
         }
       }
     });

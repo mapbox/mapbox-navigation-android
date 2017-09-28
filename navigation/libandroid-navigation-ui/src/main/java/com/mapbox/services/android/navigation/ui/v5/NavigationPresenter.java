@@ -7,7 +7,6 @@ import com.mapbox.services.commons.models.Position;
 
 class NavigationPresenter {
 
-  boolean isRunning;
   private NavigationContract.View view;
 
   NavigationPresenter(NavigationContract.View view) {
@@ -77,7 +76,6 @@ class NavigationPresenter {
 
   void onRouteUpdate(DirectionsRoute directionsRoute) {
     view.drawRoute(directionsRoute);
-    view.startCamera(directionsRoute);
   }
 
   void onDestinationUpdate(Position position) {

@@ -1,7 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import android.location.Location;
-
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.models.Position;
 
@@ -32,10 +30,6 @@ public interface NavigationContract {
     void showInstructionView();
 
     void drawRoute(DirectionsRoute directionsRoute);
-
-    void startCamera(DirectionsRoute directionsRoute);
-
-    void resumeCamera(Location location);
 
     void addMarker(Position position);
 
