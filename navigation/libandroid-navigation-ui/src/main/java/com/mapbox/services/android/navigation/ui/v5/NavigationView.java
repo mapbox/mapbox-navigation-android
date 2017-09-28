@@ -493,6 +493,8 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       public void onChanged(@Nullable Position newOrigin) {
         if (newOrigin != null) {
           routeViewModel.fetchRouteNewOrigin(newOrigin);
+          // To prevent from firing on rotation
+          navigationViewModel.newOrigin.setValue(null);
         }
       }
     });
