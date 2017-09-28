@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import com.google.auto.value.AutoValue;
 
 /**
- *
  * Immutable and can't be changed after passing into {@link MapboxNavigation}.
  */
 @AutoValue
@@ -35,6 +34,8 @@ public abstract class MapboxNavigationOptions {
 
   public abstract double metersRemainingTillArrival();
 
+  public abstract boolean isFromNavigationUi();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -54,7 +55,7 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder defaultMilestonesEnabled(boolean defaultMilestonesEnabled);
 
-    public abstract Builder  snapToRoute(boolean snapToRoute);
+    public abstract Builder snapToRoute(boolean snapToRoute);
 
     public abstract Builder enableOffRouteDetection(boolean enableOffRouteDetection);
 
@@ -63,6 +64,8 @@ public abstract class MapboxNavigationOptions {
     public abstract Builder enableNotification(boolean enableNotification);
 
     public abstract Builder metersRemainingTillArrival(double metersRemainingTillArrival);
+
+    public abstract Builder isFromNavigationUi(boolean isFromNavigationUi);
 
     public abstract MapboxNavigationOptions build();
   }
@@ -81,6 +84,7 @@ public abstract class MapboxNavigationOptions {
       .manuallyEndNavigationUponCompletion(false)
       .defaultMilestonesEnabled(true)
       .metersRemainingTillArrival(NavigationConstants.METERS_REMAINING_TILL_ARRIVAL)
-      .enableNotification(true);
+      .enableNotification(true)
+      .isFromNavigationUi(false);
   }
 }

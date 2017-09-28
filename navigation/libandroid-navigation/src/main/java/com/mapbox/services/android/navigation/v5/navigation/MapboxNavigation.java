@@ -22,6 +22,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
+import com.mapbox.services.android.telemetry.MapboxEvent;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
@@ -46,7 +47,8 @@ import timber.log.Timber;
  * @since 0.1.0
  */
 public class MapboxNavigation implements ServiceConnection, ProgressChangeListener {
-
+  private static final String MAPBOX_NAVIGATION_SDK_IDENTIFIER = "mapbox-navigation-android";
+  private static final String MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER = "mapbox-navigation-ui-android";
   private NavigationEventDispatcher navigationEventDispatcher;
 
   private NavigationService navigationService;
@@ -60,6 +62,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   private Snap snapEngine;
   private Context context;
   private boolean isBound;
+  private boolean isFromNavigationUi = false;
 
   /**
    * Constructs a new instance of this class using the default options. This should be used over
@@ -102,6 +105,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     this.accessToken = accessToken;
     this.context = context;
     this.options = options;
+    this.isFromNavigationUi = options.isFromNavigationUi();
     initialize();
   }
 
@@ -111,10 +115,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    * to prevent users from removing it.
    */
   private void initialize() {
-    validateAccessToken(accessToken);
-    MapboxTelemetry.getInstance().initialize(context, accessToken,
-      BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT);
-    NavigationMetricsWrapper.turnstileEvent();
+    initializeTelemetry();
 
     // Initialize event dispatcher and add internal listeners
     navigationEventDispatcher = new NavigationEventDispatcher();
@@ -136,6 +137,24 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     if (options.enableOffRouteDetection()) {
       offRouteEngine = new OffRouteDetector();
     }
+  }
+
+  private void initializeTelemetry() {
+    validateAccessToken(accessToken);
+    String sdkIdentifier = MAPBOX_NAVIGATION_SDK_IDENTIFIER;
+    if (isFromNavigationUi) {
+      sdkIdentifier = MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER;
+    }
+    String userAgent = String.format("%s/%s", sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
+    MapboxTelemetry.getInstance().initialize(context, accessToken, userAgent, sdkIdentifier,
+      BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
+    MapboxTelemetry.getInstance().newUserAgent(userAgent);
+
+    NavigationMetricsWrapper.sdkIdentifier = sdkIdentifier;
+    NavigationMetricsWrapper.turnstileEvent();
+    // TODO This should be removed when we figure out a solution in Telemetry
+    // Force pushing a TYPE_MAP_LOAD event to ensure that the Nav turnstile event is sent
+    MapboxTelemetry.getInstance().pushEvent(MapboxEvent.buildMapLoadEvent());
   }
 
   /**
