@@ -133,7 +133,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       ((MockLocationEngine) locationEngine).setLastLocation(
         Position.fromLngLat(latLng.getLongitude(), latLng.getLatitude())
       );
-      mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
+      mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
       mapboxMap.setMyLocationEnabled(true);
       mapboxMap.getTrackingSettings().setMyLocationTrackingMode(MyLocationTracking.TRACKING_FOLLOW);
     }
@@ -162,7 +162,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     if (destination == null) {
       destination = Position.fromLngLat(point.getLongitude(), point.getLatitude());
     } else if (waypoint == null) {
-      waypoint = Position.fromLngLat(point.getLongitude(), point.getLatitude());
+      waypoint = destination;
+      destination = Position.fromLngLat(point.getLongitude(), point.getLatitude());
     } else {
       Toast.makeText(this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show();
     }
