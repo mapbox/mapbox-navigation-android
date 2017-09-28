@@ -53,6 +53,11 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
     initDecimalFormat();
   }
 
+  @OnLifecycleEvent(Lifecycle.Event.ON_START)
+  public void onStart() {
+    addNavigationListeners();
+  }
+
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
   public void onDestroy() {
     endNavigation();
@@ -116,8 +121,10 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
 
   void updateRoute(DirectionsRoute route) {
     this.route = route;
-    startNavigation(route);
-    isOffRoute.setValue(false);
+    if (hasLocationEngine) {
+      startNavigation(route);
+      isOffRoute.setValue(false);
+    }
   }
 
   void updateLocationEngine(LocationEngine locationEngine) {
@@ -134,9 +141,6 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   private void initNavigation(Application application) {
     navigation = new MapboxNavigation(application.getApplicationContext(), Mapbox.getAccessToken());
     MapboxTelemetry.getInstance().newUserAgent(BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT);
-    navigation.addProgressChangeListener(this);
-    navigation.addMilestoneEventListener(this);
-    navigation.addOffRouteListener(this);
   }
 
   /**
@@ -153,6 +157,14 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    */
   private void initDecimalFormat() {
     decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
+  }
+
+  private void addNavigationListeners() {
+    if (navigation != null) {
+      navigation.addProgressChangeListener(this);
+      navigation.addMilestoneEventListener(this);
+      navigation.addOffRouteListener(this);
+    }
   }
 
   private void startNavigation(DirectionsRoute route) {

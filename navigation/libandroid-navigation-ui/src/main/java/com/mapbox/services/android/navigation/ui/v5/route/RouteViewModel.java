@@ -24,7 +24,6 @@ import java.util.HashMap;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
 public class RouteViewModel extends ViewModel implements Callback<DirectionsResponse> {
 

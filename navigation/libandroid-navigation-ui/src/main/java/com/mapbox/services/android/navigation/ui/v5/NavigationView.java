@@ -429,6 +429,24 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     instructionView.subscribe(navigationViewModel);
     summaryBottomSheet.subscribe(navigationViewModel);
 
+    locationViewModel.rawLocation.observe(this, new Observer<Location>() {
+      @Override
+      public void onChanged(@Nullable Location location) {
+        if (location != null) {
+          routeViewModel.updateRawLocation(location);
+        }
+      }
+    });
+
+    locationViewModel.locationEngine.observe(this, new Observer<LocationEngine>() {
+      @Override
+      public void onChanged(@Nullable LocationEngine locationEngine) {
+        if (locationEngine != null) {
+          navigationViewModel.updateLocationEngine(locationEngine);
+        }
+      }
+    });
+
     routeViewModel.route.observe(this, new Observer<DirectionsRoute>() {
       @Override
       public void onChanged(@Nullable DirectionsRoute directionsRoute) {
@@ -445,24 +463,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       public void onChanged(@Nullable Position position) {
         if (position != null) {
           navigationPresenter.onDestinationUpdate(position);
-        }
-      }
-    });
-
-    locationViewModel.rawLocation.observe(this, new Observer<Location>() {
-      @Override
-      public void onChanged(@Nullable Location location) {
-        if (location != null) {
-          routeViewModel.updateRawLocation(location);
-        }
-      }
-    });
-
-    locationViewModel.locationEngine.observe(this, new Observer<LocationEngine>() {
-      @Override
-      public void onChanged(@Nullable LocationEngine locationEngine) {
-        if (locationEngine != null) {
-          navigationViewModel.updateLocationEngine(locationEngine);
         }
       }
     });
