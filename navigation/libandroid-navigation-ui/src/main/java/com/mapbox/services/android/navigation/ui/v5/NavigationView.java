@@ -305,9 +305,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   private void initViewModels() {
-    navigationViewModel = ViewModelProviders.of(this).get(NavigationViewModel.class);
-    routeViewModel = ViewModelProviders.of(this).get(RouteViewModel.class);
     locationViewModel = ViewModelProviders.of(this).get(LocationViewModel.class);
+    routeViewModel = ViewModelProviders.of(this).get(RouteViewModel.class);
+    navigationViewModel = ViewModelProviders.of(this).get(NavigationViewModel.class);
   }
 
   /**

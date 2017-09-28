@@ -59,14 +59,6 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
     deactivateInstructionPlayer();
   }
 
-  public void setMuted(boolean isMuted) {
-    instructionPlayer.setMuted(isMuted);
-  }
-
-  public MapboxNavigation getNavigation() {
-    return navigation;
-  }
-
   /**
    * Listener used to update the TODO.
    * <p>
@@ -112,6 +104,14 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
     instructionPlayer.play(instruction);
+  }
+
+  public void setMuted(boolean isMuted) {
+    instructionPlayer.setMuted(isMuted);
+  }
+
+  public MapboxNavigation getNavigation() {
+    return navigation;
   }
 
   void updateRoute(DirectionsRoute route) {

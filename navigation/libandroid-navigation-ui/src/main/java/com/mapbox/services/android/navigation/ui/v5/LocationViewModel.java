@@ -87,6 +87,9 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
       if (locationEngine.getLastLocation() != null) {
         onLocationChanged(locationEngine.getLastLocation());
       }
+    } else {
+      // Fire a null location update to fetch the route if we are launching with coordinates
+      onLocationChanged(null);
     }
   }
 

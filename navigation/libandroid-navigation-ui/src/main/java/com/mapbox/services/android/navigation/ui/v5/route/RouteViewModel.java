@@ -24,6 +24,7 @@ import java.util.HashMap;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
 public class RouteViewModel extends ViewModel implements Callback<DirectionsResponse> {
 
@@ -60,10 +61,6 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
 
   public void updateRawLocation(@NonNull Location rawLocation) {
     this.rawLocation = rawLocation;
-    if (extractLaunchData) {
-      fetchRoute(origin, destination.getValue());
-      extractLaunchData = false;
-    }
   }
 
   /**
@@ -75,9 +72,9 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
   public void extractLaunchData(Activity activity) {
     if (extractLaunchData) {
       if (launchWithRoute(activity.getIntent())) {
-        startRouteNavigation(activity);
+        extractRoute(activity);
       } else {
-        startCoordinateNavigation(activity);
+        extractCoordinates(activity);
       }
     }
   }
@@ -111,6 +108,13 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
     }
   }
 
+  private void fetchRouteFromCoordinates() {
+    if (extractLaunchData) {
+      fetchRoute(origin, destination.getValue());
+      extractLaunchData = false;
+    }
+  }
+
   /**
    * Check if the given {@link Intent} has been launched with a {@link DirectionsRoute}.
    *
@@ -125,7 +129,7 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
    * Extracts the {@link DirectionsRoute}, adds a destination marker,
    * and starts navigation.
    */
-  private void startRouteNavigation(Context context) {
+  private void extractRoute(Context context) {
     DirectionsRoute route = NavigationLauncher.extractRoute(context);
     if (route != null) {
       RouteLeg lastLeg = route.getLegs().get(route.getLegs().size() - 1);
@@ -140,11 +144,12 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
    * Extracts the {@link Position} coordinates, adds a destination marker,
    * and fetches a route with the coordinates.
    */
-  private void startCoordinateNavigation(Context context) {
+  private void extractCoordinates(Context context) {
     HashMap<String, Position> coordinates = NavigationLauncher.extractCoordinates(context);
     if (coordinates.size() > 0) {
       origin = coordinates.get(NavigationConstants.NAVIGATION_VIEW_ORIGIN);
       destination.setValue(coordinates.get(NavigationConstants.NAVIGATION_VIEW_DESTINATION));
+      fetchRouteFromCoordinates();
     }
   }
 
