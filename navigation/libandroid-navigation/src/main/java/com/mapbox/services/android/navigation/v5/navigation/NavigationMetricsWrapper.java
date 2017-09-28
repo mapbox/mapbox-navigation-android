@@ -8,6 +8,7 @@ import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 
 class NavigationMetricsWrapper {
+  static String sdkIdentifier;
 
   private NavigationMetricsWrapper() {
     // Empty private constructor for preventing initialization of this class.
@@ -15,7 +16,7 @@ class NavigationMetricsWrapper {
 
   static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildArriveEvent(
-      BuildConfig.MAPBOX_NAVIGATION_SDK_IDENTIFIER, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
+      sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
       sessionState.currentGeometry(), "unknown",
       (int) routeProgress.directionsRoute().getDistance(),
@@ -23,7 +24,7 @@ class NavigationMetricsWrapper {
       sessionState.rerouteCount(), sessionState.startTimestamp(),
       (int) (sessionState.previousRouteDistancesCompleted() + routeProgress.distanceTraveled()),
       (int) routeProgress.distanceRemaining(), (int) routeProgress.durationRemaining(),
-      sessionState.mockLocation(),null, null,
+      sessionState.mockLocation(), null, null,
       sessionState.originalGeometry(), sessionState.originalDistance(),
       sessionState.originalDuration(), null, sessionState.currentStepCount(),
       sessionState.originalStepCount()
@@ -32,7 +33,7 @@ class NavigationMetricsWrapper {
 
   static void cancelEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildCancelEvent(
-      BuildConfig.MAPBOX_NAVIGATION_SDK_IDENTIFIER, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
+      sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(),
       location.getLatitude(), location.getLongitude(),
       sessionState.currentGeometry(), "unknown",
@@ -50,7 +51,7 @@ class NavigationMetricsWrapper {
 
   static void departEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildDepartEvent(
-      BuildConfig.MAPBOX_NAVIGATION_SDK_IDENTIFIER, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
+      sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
       sessionState.currentGeometry(), "unknown",
       (int) routeProgress.directionsRoute().getDistance(),
@@ -65,8 +66,7 @@ class NavigationMetricsWrapper {
 
   static void turnstileEvent() {
     MapboxTelemetry.getInstance().setCustomTurnstileEvent(
-      MapboxNavigationEvent.buildTurnstileEvent(BuildConfig.APPLICATION_ID,
-        BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
+      MapboxNavigationEvent.buildTurnstileEvent(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
     );
   }
 }
