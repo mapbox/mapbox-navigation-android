@@ -17,11 +17,11 @@ import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.models.Position;
@@ -130,8 +130,8 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    * Initializes {@link MapboxNavigation} and adds all views that implement listeners.
    */
   private void initNavigation(Application application) {
-    navigation = new MapboxNavigation(application.getApplicationContext(), Mapbox.getAccessToken());
-    MapboxTelemetry.getInstance().newUserAgent(BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT);
+    navigation = new MapboxNavigation(application.getApplicationContext(), Mapbox.getAccessToken(),
+      MapboxNavigationOptions.builder().isFromNavigationUi(true).build());
   }
 
   /**

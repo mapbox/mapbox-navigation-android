@@ -2,6 +2,9 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.6.1 - September 28, 2017
+* Telemetry Updates
+
 ### v0.6.0 - September 21, 2017
 * First iteration of the Navigation UI
 * Optimized Navigation features which were causing slowdowns on long steps - [219](https://github.com/mapbox/mapbox-navigation-android/pull/219)
