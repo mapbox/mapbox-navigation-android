@@ -7,12 +7,16 @@ package com.mapbox.services.android.navigation.v5.milestone;
  */
 class Operation {
 
+  private Operation() {
+    // Private constructor to prevent initialization of class.
+  }
+
   static boolean greaterThan(Number[] valueOne, Number valueTwo) {
     if (valueOne.length > 1) {
       if (valueTwo.equals(TriggerProperty.TRUE)) {
         return valueOne[0].doubleValue() > valueOne[1].doubleValue();
       } else {
-        return !(valueOne[0].doubleValue() > valueOne[1].doubleValue());
+        return valueOne[0].doubleValue() <= valueOne[1].doubleValue();
       }
     }
     return valueOne[0].doubleValue() > valueTwo.doubleValue();
@@ -23,7 +27,7 @@ class Operation {
       if (valueTwo.equals(TriggerProperty.TRUE)) {
         return valueOne[0].doubleValue() < valueOne[1].doubleValue();
       } else {
-        return !(valueOne[0].doubleValue() < valueOne[1].doubleValue());
+        return valueOne[0].doubleValue() >= valueOne[1].doubleValue();
       }
     }
     return valueOne[0].doubleValue() < valueTwo.doubleValue();
@@ -56,7 +60,7 @@ class Operation {
       if (valueTwo.equals(TriggerProperty.TRUE)) {
         return valueOne[0].doubleValue() >= valueOne[1].doubleValue();
       } else {
-        return !(valueOne[0].doubleValue() >= valueOne[1].doubleValue());
+        return valueOne[0].doubleValue() < valueOne[1].doubleValue();
       }
     }
     return valueOne[0].doubleValue() >= valueTwo.doubleValue();
@@ -67,7 +71,7 @@ class Operation {
       if (valueTwo.equals(TriggerProperty.TRUE)) {
         return valueOne[0].doubleValue() <= valueOne[1].doubleValue();
       } else {
-        return !(valueOne[0].doubleValue() <= valueOne[1].doubleValue());
+        return valueOne[0].doubleValue() > valueOne[1].doubleValue();
       }
     }
     return valueOne[0].doubleValue() <= valueTwo.doubleValue();
