@@ -12,10 +12,18 @@
         <item name="routeScale">1.0</item>
     </style>
 
-    <style name="NavigationView" parent="Theme.AppCompat.NoActionBar">
+    <style name="NavigationViewLight" parent="Theme.AppCompat.NoActionBar">
         <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary</item>
         <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary</item>
         <item name="navigationViewAccent">@color/mapbox_navigation_view_color_accent</item>
+    </style>
+
+    <style name="NavigationViewDark" parent="Theme.AppCompat.NoActionBar">
+        <item name="navigationViewPrimary">@color/mapbox_navigation_route_layer_blue</item>
+        <item name="navigationViewSecondary">@color/mapbox_navigation_route_layer_congestion_red
+        </item>
+        <item name="navigationViewAccent">@color/mapbox_navigation_route_layer_congestion_yellow
+        </item>
     </style>
 
 </resources>

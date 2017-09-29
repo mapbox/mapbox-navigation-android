@@ -78,13 +78,14 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private NavigationMapRoute mapRoute;
   private NavigationCamera camera;
   private LocationLayerPlugin locationLayer;
-  private boolean resumeCamera;
+  private boolean resumeState;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
+    ThemeSwitcher.setTheme(this);
     super.onCreate(savedInstanceState);
     setContentView(R.layout.navigation_view_layout);
-    resumeCamera = savedInstanceState != null;
+    resumeState = savedInstanceState != null;
     bind();
     initViewModels();
     initClickListeners();
@@ -280,15 +281,15 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   public void startCamera(DirectionsRoute directionsRoute) {
-    if (!resumeCamera) {
+    if (!resumeState) {
       camera.start(directionsRoute);
     }
   }
 
   public void resumeCamera(Location location) {
-    if (resumeCamera) {
+    if (resumeState) {
       camera.resume(location);
-      resumeCamera = false;
+      resumeState = false;
     }
   }
 
@@ -346,6 +347,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     soundFab.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
+        ThemeSwitcher.toggleTheme(NavigationView.this);
         navigationPresenter.onMuteClick(instructionView.toggleMute());
       }
     });
@@ -359,6 +361,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private void initMap(Bundle savedInstanceState) {
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
+    ThemeSwitcher.setMapStyle(this, mapView);
   }
 
   /**
@@ -366,8 +369,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    */
   private void initSummaryBottomSheet() {
     summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
-    summaryBehavior.setHideable(false);
-    summaryBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
       @Override
       public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -477,8 +478,8 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       @Override
       public void onChanged(@Nullable Boolean isRunning) {
         if (isRunning != null) {
-          if (isRunning) {
-            showInstructionView();
+          if (isRunning && !resumeState) {
+            navigationPresenter.onNavigationRunning();
           }
         }
       }
