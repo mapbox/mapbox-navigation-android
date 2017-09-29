@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 /**
@@ -56,7 +55,7 @@ public class RouteMilestone extends Milestone {
     }
 
     @Override
-    public RouteMilestone build() throws  {
+    public RouteMilestone build() {
       return new RouteMilestone(this);
     }
   }
