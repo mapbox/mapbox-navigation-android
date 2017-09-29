@@ -28,6 +28,10 @@ import static com.mapbox.services.Constants.PRECISION_6;
  */
 class NavigationHelper {
 
+  private NavigationHelper() {
+    // Empty private constructor to prevent users creating an instance of this class.
+  }
+
   /**
    * Takes in a raw location, converts it to a point, and snaps it to the closest point along the
    * route. This is isolated as separate logic from the snap logic provided because we will always
@@ -121,7 +125,8 @@ class NavigationHelper {
    * @return boolean true if the user location matches (using a tolerance) the final heading
    * @since 0.2.0
    */
-  static boolean bearingMatchesManeuverFinalHeading(Location userLocation, RouteProgress routeProgress,
+  static boolean bearingMatchesManeuverFinalHeading(Location userLocation,
+                                                    RouteProgress routeProgress,
                                                     double maxTurnCompletionOffset) {
     if (routeProgress.currentLegProgress().upComingStep() == null) {
       return false;
@@ -129,7 +134,8 @@ class NavigationHelper {
 
     // Bearings need to be normalized so when the bearingAfter is 359 and the user heading is 1, we
     // count this as within the MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION.
-    double finalHeading = routeProgress.currentLegProgress().upComingStep().getManeuver().getBearingAfter();
+    double finalHeading = routeProgress.currentLegProgress().upComingStep().getManeuver()
+      .getBearingAfter();
     double finalHeadingNormalized = MathUtils.wrap(finalHeading, 0, 360);
     double userHeadingNormalized = MathUtils.wrap(userLocation.getBearing(), 0, 360);
     return MathUtils.differenceBetweenAngles(finalHeadingNormalized, userHeadingNormalized)
@@ -150,10 +156,12 @@ class NavigationHelper {
    * @param previousIndices used for adjusting the indices
    * @return a {@link NavigationIndices} object which contains the new leg and step indices
    */
-  static NavigationIndices increaseIndex(RouteProgress routeProgress, NavigationIndices previousIndices) {
+  static NavigationIndices increaseIndex(RouteProgress routeProgress,
+                                         NavigationIndices previousIndices) {
     // Check if we are in the last step in the current routeLeg and iterate it if needed.
     if (previousIndices.stepIndex()
-      >= routeProgress.directionsRoute().getLegs().get(routeProgress.legIndex()).getSteps().size() - 2
+      >= routeProgress.directionsRoute().getLegs().get(routeProgress.legIndex())
+      .getSteps().size() - 2
       && previousIndices.legIndex() < routeProgress.directionsRoute().getLegs().size() - 1) {
       return NavigationIndices.create((previousIndices.legIndex() + 1), 0);
     }
@@ -161,7 +169,8 @@ class NavigationHelper {
   }
 
   static List<Milestone> checkMilestones(RouteProgress previousRouteProgress,
-                                         RouteProgress routeProgress, MapboxNavigation mapboxNavigation) {
+                                         RouteProgress routeProgress,
+                                         MapboxNavigation mapboxNavigation) {
     List<Milestone> milestones = new ArrayList<>();
     for (Milestone milestone : mapboxNavigation.getMilestones()) {
       if (milestone.isOccurring(previousRouteProgress, routeProgress)) {
@@ -192,6 +201,6 @@ class NavigationHelper {
     if (steps.size() > (stepIndex + 1)) {
       return steps.get(stepIndex + 1).getManeuver().asPosition();
     }
-    return coords.size() >= 1 ? coords.get(coords.size() - 1) : coords.get(coords.size());
+    return !coords.isEmpty() ? coords.get(coords.size() - 1) : coords.get(coords.size());
   }
 }
