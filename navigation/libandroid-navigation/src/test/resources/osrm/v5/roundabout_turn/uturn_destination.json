@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "roundabout turn",
+            "modifier": "uturn"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2"
+    },
+    "instructions": {
+        "de": "Am Kreisverkehr 180°-Wendung Richtung Destination 1",
+        "en": "At the roundabout make a U-turn towards Destination 1",
+        "fr": "Au rond-point, tourner demi-tour en direction de Destination 1",
+        "nl": "Ga omkeren op de rotonde richting Destination 1",
+        "ru": "На круговом перекрёстке разворот в направлении Destination 1",
+        "sv": "Vid rondellen sväng U-sväng mot Destination 1",
+        "vi": "Đi bên ngược tại vòng xuyến để đi Destination 1",
+        "zh-Hans": "在环岛调头行驶，前往Destination 1"
+    }
+}

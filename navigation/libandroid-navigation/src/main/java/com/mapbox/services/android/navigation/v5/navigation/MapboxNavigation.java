@@ -50,7 +50,6 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   private static final String MAPBOX_NAVIGATION_SDK_IDENTIFIER = "mapbox-navigation-android";
   private static final String MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER = "mapbox-navigation-ui-android";
   private NavigationEventDispatcher navigationEventDispatcher;
-
   private NavigationService navigationService;
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;

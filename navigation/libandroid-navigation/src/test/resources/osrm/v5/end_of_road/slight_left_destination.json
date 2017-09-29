@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "end of road",
+            "modifier": "slight left"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2"
+    },
+    "instructions": {
+        "de": "Leicht links abbiegen Richtung Destination 1",
+        "en": "Turn slight left towards Destination 1",
+        "fr": "Tourner légèrement à gauche en direction de Destination 1",
+        "nl": "Ga links richting Destination 1",
+        "ru": "Поверните плавно налево в направлении Destination 1",
+        "sv": "Sväng lätt vänster mot Destination 1",
+        "vi": "Quẹo trái nghiêng đến Destination 1",
+        "zh-Hans": "向左行驶，前往Destination 1"
+    }
+}

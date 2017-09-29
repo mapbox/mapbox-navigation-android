@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "turn",
+            "modifier": "left"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Links abbiegen auf Way Name",
+        "en": "Turn left onto Way Name",
+        "fr": "Tourner à gauche sur Way Name",
+        "nl": "Ga linksaf naar Way Name",
+        "ru": "Поверните налево на Way Name",
+        "sv": "Sväng vänster in på Way Name",
+        "vi": "Quẹo trái vào Way Name",
+        "zh-Hans": "左转，上Way Name"
+    }
+}

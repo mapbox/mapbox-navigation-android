@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "bearing_after": 249,
+            "type": "depart"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Fahren Sie Richtung Südwesten",
+        "en": "Head southwest",
+        "fr": "Rouler vers le sud-ouest",
+        "nl": "Vertrek in zuidwestelijke richting",
+        "ru": "Двигайтесь в юго-западном направлении",
+        "sv": "Kör åt sydväst",
+        "vi": "Đi về hướng tây nam",
+        "zh-Hans": "出发向西南"
+    }
+}

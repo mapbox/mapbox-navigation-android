@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "end of road",
+            "modifier": "sharp right"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2"
+    },
+    "instructions": {
+        "de": "Scharf rechts abbiegen Richtung Destination 1",
+        "en": "Turn sharp right towards Destination 1",
+        "fr": "Tourner franchement à droite en direction de Destination 1",
+        "nl": "Ga rechtsaf richting Destination 1",
+        "ru": "Поверните резко направо в направлении Destination 1",
+        "sv": "Sväng skarp höger mot Destination 1",
+        "vi": "Quẹo phải gắt đến Destination 1",
+        "zh-Hans": "向右行驶，前往Destination 1"
+    }
+}

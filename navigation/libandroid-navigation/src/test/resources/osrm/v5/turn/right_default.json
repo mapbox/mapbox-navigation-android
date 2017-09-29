@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "turn",
+            "modifier": "right"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Rechts abbiegen",
+        "en": "Turn right",
+        "fr": "Tourner à droite",
+        "nl": "Ga rechtsaf",
+        "ru": "Поверните направо",
+        "sv": "Sväng höger",
+        "vi": "Quẹo phải",
+        "zh-Hans": "右转"
+    }
+}

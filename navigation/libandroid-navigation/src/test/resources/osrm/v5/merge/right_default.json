@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "merge",
+            "modifier": "right"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Rechts auffahren",
+        "en": "Merge right",
+        "fr": "Rejoindre à droite",
+        "nl": "Bij de splitsing rechts",
+        "ru": "Слияние полосы направо",
+        "sv": "Körfältsbyte åt höger",
+        "vi": "Nhập sang phải",
+        "zh-Hans": "向右并道"
+    }
+}

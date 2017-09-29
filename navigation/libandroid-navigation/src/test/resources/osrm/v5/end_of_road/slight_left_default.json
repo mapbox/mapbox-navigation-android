@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "end of road",
+            "modifier": "slight left"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Leicht links abbiegen",
+        "en": "Turn slight left",
+        "fr": "Tourner légèrement à gauche",
+        "nl": "Ga links",
+        "ru": "Поверните плавно налево",
+        "sv": "Sväng lätt vänster",
+        "vi": "Quẹo trái nghiêng",
+        "zh-Hans": "向左行驶"
+    }
+}

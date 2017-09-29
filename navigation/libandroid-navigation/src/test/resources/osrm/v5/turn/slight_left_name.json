@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "turn",
+            "modifier": "slight left"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Leicht links abbiegen auf Way Name",
+        "en": "Make a slight left onto Way Name",
+        "fr": "Tourner légèrement à gauche sur Way Name",
+        "nl": "Ga links naar Way Name",
+        "ru": "Поверните плавно налево на Way Name",
+        "sv": "Sväng åt lätt vänster in på Way Name",
+        "vi": "Quẹo trái nghiêng vào Way Name",
+        "zh-Hans": "向左转弯，上Way Name"
+    }
+}

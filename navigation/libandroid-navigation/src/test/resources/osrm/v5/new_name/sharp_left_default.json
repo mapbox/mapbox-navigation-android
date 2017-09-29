@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "new name",
+            "modifier": "sharp left"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Scharf links",
+        "en": "Take a sharp left",
+        "fr": "Prendre à gauche",
+        "nl": "Linksaf",
+        "ru": "Поверните резко налево",
+        "sv": "Gör en skarp vänstersväng",
+        "vi": "Quẹo gắt bên trái",
+        "zh-Hans": "继续向左"
+    }
+}

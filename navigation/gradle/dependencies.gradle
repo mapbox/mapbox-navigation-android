@@ -1,0 +1,107 @@
+ext {
+
+  androidVersions = [
+      minSdkVersion    : 15,
+      targetSdkVersion : 26,
+      compileSdkVersion: 26,
+      buildToolsVersion: '26.0.1'
+  ]
+
+  version = [
+      mapboxMapSdk       : '5.1.4',
+      mapboxServices     : '2.2.5',
+      locationLayerPlugin: '0.1.0',
+      autoValue          : '1.4.1',
+      autoValueGson      : '0.4.5',
+      autoValueParcel    : '0.2.5',
+      junit              : '4.12',
+      supportLibVersion  : '26.0.2',
+      constraintLayout   : '1.0.2',
+      gson               : '2.8.0',
+      retrofit           : '2.2.0',
+      okhttp3            : '3.9.0',
+      mockito            : '2.7.13',
+      hamcrest           : '2.0.0.0',
+      errorprone         : '2.0.21',
+      butterknife        : '8.6.0',
+      leakCanaryVersion  : '1.5.1',
+      timber             : '4.5.1',
+      awsPolly           : '2.3.8',
+      testRunnerVersion  : '1.0.1',
+      espressoVersion    : '3.0.1',
+      spoonRunner        : '1.6.2',
+      commonsIO          : '2.5',
+      robolectric        : '3.4.2'
+  ]
+
+  pluginVersion = [
+      checkstyle: '8.2',
+      pmd       : '5.8.1',
+      jacoco    : '0.7.9',
+      errorprone: '0.0.10',
+      coveralls : '2.8.1',
+      spotbugs  : '1.3',
+      sonarqube : '2.5',
+      gradle    : '2.3.3'
+  ]
+
+  dependenciesList = [
+      // mapbox
+      mapboxMapSdk           : "com.mapbox.mapboxsdk:mapbox-android-sdk:${version.mapboxMapSdk}",
+      mapboxServices         : "com.mapbox.mapboxsdk:mapbox-android-services:${version.mapboxServices}",
+      locationLayerPlugin    : "com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:${version.locationLayerPlugin}",
+
+      // AutoValue
+      autoValue              : "com.google.auto.value:auto-value:${version.autoValue}",
+      autoValuesParcel       : "com.ryanharter.auto.value:auto-value-parcel:${version.autoValueParcel}",
+      autoValuesParcelAdapter: "com.ryanharter.auto.value:auto-value-parcel-adapter:${version.autoValueParcel}",
+
+      // butterknife
+      butterKnife            : "com.jakewharton:butterknife:${version.butterknife}",
+      butterKnifeProcessor   : "com.jakewharton:butterknife-compiler:${version.butterknife}",
+
+      // support
+      supportAnnotation      : "com.android.support:support-annotations:${version.supportLibVersion}",
+      supportAppcompatV7     : "com.android.support:appcompat-v7:${version.supportLibVersion}",
+      supportV4              : "com.android.support:support-v4:${version.supportLibVersion}",
+      supportDesign          : "com.android.support:design:${version.supportLibVersion}",
+      supportRecyclerView    : "com.android.support:recyclerview-v7:${version.supportLibVersion}",
+      supportConstraintLayout: "com.android.support.constraint:constraint-layout:${version.constraintLayout}",
+
+      // square crew
+      timber                 : "com.jakewharton.timber:timber:${version.timber}",
+      okhttp3                : "com.squareup.okhttp3:okhttp:${version.okhttp3}",
+      leakCanaryDebug        : "com.squareup.leakcanary:leakcanary-android:${version.leakCanaryVersion}",
+      leakCanaryRelease      : "com.squareup.leakcanary:leakcanary-android-no-op:${version.leakCanaryVersion}",
+      leakCanaryTest         : "com.squareup.leakcanary:leakcanary-android-no-op:${version.leakCanaryVersion}",
+
+      // instrumentation test
+      testSpoonRunner        : "com.squareup.spoon:spoon-client:${version.spoonRunner}",
+      testRunner             : "com.android.support.test:runner:${version.testRunnerVersion}",
+      testRules              : "com.android.support.test:rules:${version.testRunnerVersion}",
+      testEspressoCore       : "com.android.support.test.espresso:espresso-core:${version.espressoVersion}",
+      testEspressoIntents    : "com.android.support.test.espresso:espresso-intents:${version.espressoVersion}",
+
+      // unit test
+      junit                  : "junit:junit:${version.junit}",
+      mockito                : "org.mockito:mockito-core:${version.mockito}",
+      hamcrest               : "org.hamcrest:hamcrest-junit:${version.hamcrest}",
+      commonsIO              : "commons-io:commons-io:${version.commonsIO}",
+      robolectric            : "org.robolectric:robolectric:${version.robolectric}",
+
+      // aws polly
+      polly                  : "com.amazonaws:aws-android-sdk-polly:${version.awsPolly}",
+
+      errorprone             : "com.google.errorprone:error_prone_core:${version.errorprone}"
+
+  ]
+
+  pluginDependencies = [
+      gradle    : "com.android.tools.build:gradle:${pluginVersion.gradle}",
+      checkstyle: "com.puppycrawl.tools:checkstyle:${pluginVersion.checkstyle}",
+      spotbugs  : "gradle.plugin.com.github.spotbugs:gradlePlugin:${pluginVersion.spotbugs}",
+      sonarqube : "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${pluginVersion.sonarqube}",
+      coveralls : "org.kt3k.gradle.plugin:coveralls-gradle-plugin:${pluginVersion.coveralls}",
+      errorprone: "net.ltgt.gradle:gradle-errorprone-plugin:${pluginVersion.errorprone}"
+  ]
+}

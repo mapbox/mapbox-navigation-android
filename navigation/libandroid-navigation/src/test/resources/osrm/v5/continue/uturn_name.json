@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "continue",
+            "modifier": "uturn"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "180°-Wendung auf Way Name",
+        "en": "Make a U-turn onto Way Name",
+        "fr": "Faire demi-tour sur Way Name",
+        "nl": "Keer om naar Way Name",
+        "ru": "Сделайте разворот на Way Name",
+        "sv": "Gör en U-sväng in på Way Name",
+        "vi": "Quẹo ngược lại Way Name",
+        "zh-Hans": "调头上Way Name"
+    }
+}

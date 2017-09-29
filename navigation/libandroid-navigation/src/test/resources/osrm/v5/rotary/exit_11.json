@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "left",
+            "type": "rotary",
+            "exit": 11
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "In den Kreisverkehr fahren und Ausfahrt nehmen",
+        "en": "Enter the rotary and take the exit",
+        "fr": "Entrer dans le rond-point et prendre la sortie",
+        "nl": "Ga het knooppunt op en neem afslag ",
+        "ru": "На кольцевой развязке используйте съезд",
+        "sv": "Kör in i rondellen och ta avfart ",
+        "vi": "Đi vào bùng binh và ra tại đường ",
+        "zh-Hans": "进入环岛并从出口驶出"
+    }
+}

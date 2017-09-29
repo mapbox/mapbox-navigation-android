@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "roundabout turn",
+            "modifier": "sharp left"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Am Kreisverkehr scharf links",
+        "en": "At the roundabout make a sharp left",
+        "fr": "Au rond-point, tourner franchement à gauche",
+        "nl": "Ga linksaf op de rotonde",
+        "ru": "На круговом перекрёстке резко налево",
+        "sv": "Vid rondellen sväng skarp vänster",
+        "vi": "Đi bên trái gắt tại vòng xuyến",
+        "zh-Hans": "在环岛向左行驶"
+    }
+}

@@ -44,8 +44,8 @@ import retrofit2.Response;
 public class SnapToRouteActivity extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener {
 
   private static final String TAG = "SnapToRouteActivity";
-  private static final Position origin = Position.fromCoordinates(-95.75188, 29.78533);
-  private static final Position destination = Position.fromCoordinates(-95.71892, 29.77516);
+  private static final Position ORIGIN = Position.fromCoordinates(-95.75188, 29.78533);
+  private static final Position DESTINATION = Position.fromCoordinates(-95.71892, 29.77516);
 
   private MapView mapView;
   private MapboxMap mapboxMap;
@@ -182,7 +182,7 @@ public class SnapToRouteActivity extends AppCompatActivity implements OnMapReady
     SnapToRouteActivity.this.mapboxMap = mapboxMap;
     mapboxMap.setOnMapClickListener(this);
 
-    getRoute(origin, destination);
+    getRoute(ORIGIN, DESTINATION);
   }
 
   private void drawDistanceRoutePolyline(Position snappedPosition) {

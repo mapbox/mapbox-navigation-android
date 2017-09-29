@@ -1,0 +1,75 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "straight",
+            "type": "use lane"
+        },
+        "intersections": [
+            {
+                "location": [
+                    13.39677,
+                    52.54366
+                ],
+                "in": 1,
+                "out": 2,
+                "bearings": [
+                    10,
+                    20
+                ],
+                "entry": [
+                    true,
+                    false
+                ],
+                "lanes": [
+                    {
+                        "indications": [
+                            "straight"
+                        ],
+                        "valid": false
+                    },
+                    {
+                        "indications": [
+                            "straight"
+                        ],
+                        "valid": false
+                    },
+                    {
+                        "indications": [
+                            "straight"
+                        ],
+                        "valid": true
+                    },
+                    {
+                        "indications": [
+                            "straight"
+                        ],
+                        "valid": true
+                    },
+                    {
+                        "indications": [
+                            "straight"
+                        ],
+                        "valid": false
+                    },
+                    {
+                        "indications": [
+                            "straight"
+                        ],
+                        "valid": false
+                    }
+                ]
+            }
+        ],
+        "name": ""
+    },
+    "instructions": {
+        "de": "Mittlere Spur nutzen",
+        "en": "Keep in the middle",
+        "fr": "Rester au milieu",
+        "nl": "In het midden blijven",
+        "ru": "Держитесь середины",
+        "sv": "Håll till mitten",
+        "vi": "Đi vào giữa",
+        "zh-Hans": "保持在道路中间直行"
+    }
+}

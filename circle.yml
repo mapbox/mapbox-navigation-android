@@ -31,6 +31,15 @@ jobs:
             - ~/.gradle
           key: jars-{{ checksum "navigation/build.gradle" }}-{{ checksum  "navigation/app/build.gradle" }}
       - run:
+          name: Sonarcloud upload
+          command: |
+            cd navigation && ./gradlew sonarqube \
+              -DskipTests=true \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.organization=mapbox \
+              -Dsonar.login=$SONARCLOUD_KEY \
+              -Dsonar.test.failure.ignore=true
+      - run:
           name: Check Java code style
           command: make checkstyle
       - run:

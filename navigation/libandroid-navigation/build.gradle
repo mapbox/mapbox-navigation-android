@@ -1,14 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-  compileSdkVersion rootProject.ext.compileSdkVersion
-  buildToolsVersion rootProject.ext.buildToolsVersion
+  compileSdkVersion androidVersions.compileSdkVersion
+  buildToolsVersion androidVersions.buildToolsVersion
 
   defaultConfig {
-    minSdkVersion rootProject.ext.minSdkVersion
-    targetSdkVersion rootProject.ext.targetSdkVersion
-    versionCode rootProject.ext.versionCode
-    versionName rootProject.ext.versionName
+    minSdkVersion androidVersions.minSdkVersion
+    targetSdkVersion androidVersions.targetSdkVersion
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     buildConfigField('String', "MAPBOX_NAVIGATION_SDK_IDENTIFIER", String.format("\"%s\"",
@@ -28,6 +26,9 @@ android {
   }
 
   buildTypes {
+    debug {
+      testCoverageEnabled = true
+    }
     release {
       minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -41,46 +42,26 @@ android {
 
 dependencies {
   // Mapbox Android Services
-  compile rootProject.ext.dep.mapboxServices
+  compile dependenciesList.mapboxServices
 
   // Logging
-  compile rootProject.ext.dep.timber
+  compile dependenciesList.timber
 
   // AutoValues
-  provided rootProject.ext.dep.autoValues
-  annotationProcessor rootProject.ext.dep.autoValues
+  provided dependenciesList.autoValue
+  annotationProcessor dependenciesList.autoValue
 
   // Unit testing
-  testCompile rootProject.ext.dep.junit
-  testCompile rootProject.ext.dep.mockito
-  testCompile rootProject.ext.dep.hamcrest
-  testCompile rootProject.ext.dep.commonsIO
-  testCompile rootProject.ext.dep.robolectric
+  testCompile dependenciesList.junit
+  testCompile dependenciesList.mockito
+  testCompile dependenciesList.hamcrest
+  testCompile dependenciesList.commonsIO
+  testCompile dependenciesList.robolectric
 
   // Instrument testing
-  androidTestCompile(rootProject.ext.dep.testEspressoCore, {
+  androidTestCompile(dependenciesList.testEspressoCore, {
     exclude group: 'com.android.support', module: 'support-annotations'
   })
-}
-
-// The following is necessary to copy the fixtures into the resources folder,
-// guaranteeing that the fixtures are looked for inside the right folders.
-// (This is a known issue: https://issuetracker.google.com/issues/37020423.)
-task copyResourcesToClassesDebug(type: Copy) {
-  from "${projectDir}/src/test/res"
-  into "${buildDir}/intermediates/classes/test/debug/res"
-}
-
-task copyResourcesToClassesRelease(type: Copy) {
-  from "${projectDir}/src/test/res"
-  into "${buildDir}/intermediates/classes/test/release/res"
-}
-
-tasks.whenTaskAdded { task ->
-  if (task.name == "compileDebugUnitTestSources")
-    task.dependsOn('copyResourcesToClassesDebug')
-  if (task.name == "compileReleaseUnitTestSources")
-    task.dependsOn('copyResourcesToClassesRelease')
 }
 
 apply from: 'javadoc.gradle'

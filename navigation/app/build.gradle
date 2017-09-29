@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-  compileSdkVersion rootProject.ext.compileSdkVersion
-  buildToolsVersion rootProject.ext.buildToolsVersion
+  compileSdkVersion androidVersions.compileSdkVersion
+  buildToolsVersion androidVersions.buildToolsVersion
 
   defaultConfig {
     applicationId "com.mapbox.services.android.navigation.testapp"
-    minSdkVersion rootProject.ext.minSdkVersion
-    targetSdkVersion rootProject.ext.targetSdkVersion
+    minSdkVersion androidVersions.minSdkVersion
+    targetSdkVersion androidVersions.targetSdkVersion
     versionCode 1
     versionName "0.1"
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -19,6 +19,9 @@ android {
   }
 
   buildTypes {
+    debug {
+      testCoverageEnabled = false
+    }
     release {
       minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -32,11 +35,11 @@ dependencies {
   compile project(':libandroid-navigation-ui')
 
   // Support libraries
-  compile rootProject.ext.dep.supportAppcompatV7
-  compile rootProject.ext.dep.supportConstraintLayout
+  compile dependenciesList.supportAppcompatV7
+  compile dependenciesList.supportConstraintLayout
 
   // Mapbox Maps SDK
-  compile(rootProject.ext.dep.mapboxMapSdk + '@aar') {
+  compile(dependenciesList.mapboxMapSdk + '@aar') {
     transitive = true
     exclude module: 'lost'
     exclude module: 'mapbox-java-geojson'
@@ -44,26 +47,26 @@ dependencies {
   }
 
   // Mapbox plugins
-  compile rootProject.ext.dep.locationLayerPlugin
+  compile dependenciesList.locationLayerPlugin
 
   // Logging
-  compile rootProject.ext.dep.timber
+  compile dependenciesList.timber
 
   // Butter Knife
-  compile rootProject.ext.dep.butterKnife
-  annotationProcessor rootProject.ext.dep.butterKnifeProcessor
+  compile dependenciesList.butterKnife
+  annotationProcessor dependenciesList.butterKnifeProcessor
 
   // Leak Canary
-  debugCompile rootProject.ext.dep.leakCanaryDebug
-  releaseCompile rootProject.ext.dep.leakCanaryRelease
-  testCompile rootProject.ext.dep.leakCanaryTest
+  debugCompile dependenciesList.leakCanaryDebug
+  releaseCompile dependenciesList.leakCanaryRelease
+  testCompile dependenciesList.leakCanaryTest
 
   // Unit Testing
-  testCompile rootProject.ext.dep.junit
-  testCompile rootProject.ext.dep.mockito
+  testCompile dependenciesList.junit
+  testCompile dependenciesList.mockito
 
   // Instrumentation testing
-  androidTestCompile(rootProject.ext.dep.testEspressoCore, {
+  androidTestCompile(dependenciesList.testEspressoCore, {
     exclude group: 'com.android.support', module: 'support-annotations'
   })
 }

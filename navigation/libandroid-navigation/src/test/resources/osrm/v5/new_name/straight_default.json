@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "new name",
+            "modifier": "straight"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Geradeaus weiterfahren",
+        "en": "Continue straight",
+        "fr": "Continuer tout droit",
+        "nl": "Ga rechtdoor",
+        "ru": "Поверните прямо",
+        "sv": "Fortsätt rakt fram",
+        "vi": "Chạy tiếp bên thẳng",
+        "zh-Hans": "继续直行"
+    }
+}

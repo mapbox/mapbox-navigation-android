@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "merge",
+            "modifier": "sharp left"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Scharf links auffahren",
+        "en": "Merge left",
+        "fr": "Rejoindre par la gauche",
+        "nl": "Bij de splitsing linksaf",
+        "ru": "Слияние полосы налево",
+        "sv": "Körfältsbyte åt vänster",
+        "vi": "Nhập sang trái",
+        "zh-Hans": "向左并道"
+    }
+}

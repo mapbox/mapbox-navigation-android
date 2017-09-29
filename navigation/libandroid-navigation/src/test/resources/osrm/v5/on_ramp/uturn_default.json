@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "on ramp",
+            "modifier": "uturn"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Rampe nehmen",
+        "en": "Take the ramp",
+        "fr": "Prendre la sortie",
+        "nl": "Neem de oprit",
+        "ru": "Используйте въезд на автомагистраль",
+        "sv": "Ta påfartsrampen",
+        "vi": "Đi đường nhánh",
+        "zh-Hans": "通过匝道"
+    }
+}

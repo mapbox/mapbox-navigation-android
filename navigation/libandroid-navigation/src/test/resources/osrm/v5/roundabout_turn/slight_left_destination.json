@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "roundabout turn",
+            "modifier": "slight left"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2"
+    },
+    "instructions": {
+        "de": "Am Kreisverkehr leicht links Richtung Destination 1",
+        "en": "At the roundabout make a slight left towards Destination 1",
+        "fr": "Au rond-point, tourner légèrement à gauche en direction de Destination 1",
+        "nl": "Ga links op de rotonde richting Destination 1",
+        "ru": "На круговом перекрёстке плавно налево в направлении Destination 1",
+        "sv": "Vid rondellen sväng lätt vänster mot Destination 1",
+        "vi": "Đi bên trái nghiêng tại vòng xuyến để đi Destination 1",
+        "zh-Hans": "在环岛向左行驶，前往Destination 1"
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "off ramp",
+            "modifier": "slight left"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Rampe auf der linken Seite nehmen",
+        "en": "Take the ramp on the left",
+        "fr": "Prendre la sortie à gauche",
+        "nl": "Neem de afrit links",
+        "ru": "Используйте съезд слева",
+        "sv": "Ta avfartsrampen till vänster",
+        "vi": "Đi đường nhánh bên trái",
+        "zh-Hans": "上匝道"
+    }
+}

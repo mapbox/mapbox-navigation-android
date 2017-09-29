@@ -1,14 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-  compileSdkVersion rootProject.ext.compileSdkVersion
-  buildToolsVersion rootProject.ext.buildToolsVersion
+  compileSdkVersion androidVersions.compileSdkVersion
+  buildToolsVersion androidVersions.buildToolsVersion
 
   defaultConfig {
-    minSdkVersion rootProject.ext.minSdkVersion
-    targetSdkVersion rootProject.ext.targetSdkVersion
-    versionCode rootProject.ext.versionCode
-    versionName rootProject.ext.versionName
+    minSdkVersion androidVersions.minSdkVersion
+    targetSdkVersion androidVersions.targetSdkVersion
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true
 
@@ -20,6 +18,12 @@ android {
   configurations {
     javadocDeps
   }
+
+  buildTypes {
+    debug {
+      testCoverageEnabled = true
+    }
+  }
 }
 
 dependencies {
@@ -27,7 +31,7 @@ dependencies {
   compile project(':libandroid-navigation')
 
   // Mapbox Map SDK
-  compile(rootProject.ext.dep.mapboxMapSdk + '@aar') {
+  compile(dependenciesList.mapboxMapSdk + '@aar') {
     transitive = true
     exclude module: 'lost'
     exclude module: 'mapbox-java-geojson'
@@ -35,29 +39,29 @@ dependencies {
   }
 
   // Support libraries
-  compile rootProject.ext.dep.supportAppcompatV7
-  compile rootProject.ext.dep.supportDesign
-  compile rootProject.ext.dep.supportRecyclerView
-  compile rootProject.ext.dep.supportConstraintLayout
+  compile dependenciesList.supportAppcompatV7
+  compile dependenciesList.supportDesign
+  compile dependenciesList.supportRecyclerView
+  compile dependenciesList.supportConstraintLayout
 
   // Mapbox plugins
-  compile rootProject.ext.dep.locationLayerPlugin
+  compile dependenciesList.locationLayerPlugin
 
   // Logging
-  compile rootProject.ext.dep.timber
+  compile dependenciesList.timber
 
   // AWS Polly
-  compile rootProject.ext.dep.polly
+  compile dependenciesList.polly
 
   // Mapbox Map SDK Javadoc
-  javadocDeps rootProject.ext.dep.mapboxMapSdk
+  javadocDeps dependenciesList.mapboxMapSdk
 
   // Unit testing
-  testCompile rootProject.ext.dep.junit
-  testCompile rootProject.ext.dep.mockito
+  testCompile dependenciesList.junit
+  testCompile dependenciesList.mockito
 
 
-  androidTestCompile(rootProject.ext.dep.testEspressoCore, {
+  androidTestCompile(dependenciesList.testEspressoCore, {
     exclude group: 'com.android.support', module: 'support-annotations'
   })
 }

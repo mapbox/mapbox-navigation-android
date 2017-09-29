@@ -51,6 +51,7 @@ import java.util.HashMap;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
 /**
  * Activity that creates the drop-in UI.
@@ -302,7 +303,8 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+    Timber.e(throwable);
   }
 
   /**

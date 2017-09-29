@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "fork",
+            "modifier": "straight"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2"
+    },
+    "instructions": {
+        "de": "Geradeaus halten an der Gabelung Richtung Destination 1",
+        "en": "Keep straight at the fork towards Destination 1",
+        "fr": "Rester tout droit à l'embranchement en direction de Destination 1",
+        "nl": "Ga rechtdoor op de splitsing richting Destination 1",
+        "ru": "На развилке поверните прямо и продолжайте движение в направлении Destination 1",
+        "sv": "Håll till rakt fram mot Destination 1",
+        "vi": "Đi bên thẳng ở ngã ba đến Destination 1",
+        "zh-Hans": "在岔道保持直行，前往Destination 1"
+    }
+}

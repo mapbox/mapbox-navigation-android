@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "left",
+            "type": "roundabout"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "In den Kreisverkehr fahren",
+        "en": "Enter the roundabout",
+        "fr": "Entrer dans le rond-point",
+        "nl": "Ga de rotonde op",
+        "ru": "Въезд на круговой перекрёсток",
+        "sv": "Kör in i rondellen",
+        "vi": "Đi vào vòng xuyến",
+        "zh-Hans": "进入环岛"
+    }
+}

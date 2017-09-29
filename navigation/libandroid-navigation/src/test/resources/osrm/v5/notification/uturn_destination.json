@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "notification",
+            "modifier": "uturn"
+        },
+        "name": "Way Name",
+        "destinations": "Destination 1,Destination 2"
+    },
+    "instructions": {
+        "de": "180°-Wendung Richtung Destination 1",
+        "en": "Make a U-turn towards Destination 1",
+        "fr": "Fair demi-tour en direction de Destination 1",
+        "nl": "Keer om richting Destination 1",
+        "ru": "Сделайте разворот и продолжайте движение в направлении Destination 1",
+        "sv": "Gör en U-sväng mot Destination 1",
+        "vi": "Quẹo ngược lại đến Destination 1",
+        "zh-Hans": "调头，前往Destination 1"
+    }
+}

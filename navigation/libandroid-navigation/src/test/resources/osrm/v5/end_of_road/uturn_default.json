@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "type": "end of road",
+            "modifier": "uturn"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "180°-Wendung am Ende der Straße",
+        "en": "Make a U-turn at the end of the road",
+        "fr": "Faire demi-tour à la fin de la route",
+        "nl": "Keer om",
+        "ru": "Сделайте разворот в конце дороги",
+        "sv": "Gör en U-sväng i slutet av vägen",
+        "vi": "Quẹo ngược lại tại cuối đường",
+        "zh-Hans": "在道路尽头调头"
+    }
+}

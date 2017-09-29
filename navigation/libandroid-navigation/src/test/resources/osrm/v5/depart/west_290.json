@@ -1,0 +1,19 @@
+{
+    "step": {
+        "maneuver": {
+            "bearing_after": 290,
+            "type": "depart"
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "Fahren Sie Richtung Westen",
+        "en": "Head west",
+        "fr": "Rouler vers l'ouest",
+        "nl": "Vertrek in westelijke richting",
+        "ru": "Двигайтесь в западном направлении",
+        "sv": "Kör åt väster",
+        "vi": "Đi về hướng tây",
+        "zh-Hans": "出发向西"
+    }
+}

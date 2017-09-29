@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "modifier": "left",
+            "type": "rotary",
+            "exit": 8
+        },
+        "name": ""
+    },
+    "instructions": {
+        "de": "In den Kreisverkehr fahren und achte Ausfahrt nehmen",
+        "en": "Enter the rotary and take the 8th exit",
+        "fr": "Entrer dans le rond-point et prendre la huitième sortie",
+        "nl": "Ga het knooppunt op en neem afslag achtste",
+        "ru": "На кольцевой развязке используйте восьмой съезд",
+        "sv": "Kör in i rondellen och ta avfart 8:e",
+        "vi": "Đi vào bùng binh và ra tại đường thứ 8",
+        "zh-Hans": "进入环岛并从第八出口驶出"
+    }
+}

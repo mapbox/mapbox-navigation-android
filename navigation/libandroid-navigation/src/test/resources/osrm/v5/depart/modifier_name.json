@@ -1,0 +1,20 @@
+{
+    "step": {
+        "maneuver": {
+            "bearing_after": 0,
+            "type": "depart",
+            "modifier": "left"
+        },
+        "name": "Way Name"
+    },
+    "instructions": {
+        "de": "Fahren Sie Richtung Norden auf Way Name",
+        "en": "Head north on Way Name",
+        "fr": "Rouler vers le nord sur Way Name",
+        "nl": "Neem Way Name in noordelijke richting",
+        "ru": "Двигайтесь в северном направлении по Way Name",
+        "sv": "Kör åt norr på Way Name",
+        "vi": "Đi về hướng bắc trên Way Name",
+        "zh-Hans": "出发向北，上Way Name"
+    }
+}
