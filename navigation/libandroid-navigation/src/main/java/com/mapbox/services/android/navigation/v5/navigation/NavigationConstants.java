@@ -135,6 +135,22 @@ public class NavigationConstants {
   public static final String ROUTE_BELOW_LAYER = "admin-3-4-boundaries-bg";
   public static final String DECIMAL_FORMAT = "#.#";
 
+  // Step Maneuver Types
+  public static final String STEP_MANEUVER_TYPE_TURN = "turn";
+  public static final String STEP_MANEUVER_TYPE_NEW_NAME = "new name";
+  public static final String STEP_MANEUVER_TYPE_DEPART = "depart";
+  public static final String STEP_MANEUVER_TYPE_ARRIVE = "arrive";
+  public static final String STEP_MANEUVER_TYPE_MERGE = "merge";
+  public static final String STEP_MANEUVER_TYPE_ON_RAMP = "on ramp";
+  public static final String STEP_MANEUVER_TYPE_OFF_RAMP = "off ramp";
+  public static final String STEP_MANEUVER_TYPE_FORK = "fork";
+  public static final String STEP_MANEUVER_TYPE_END_OF_ROAD = "end of road";
+  public static final String STEP_MANEUVER_TYPE_CONTINUE = "continue";
+  public static final String STEP_MANEUVER_TYPE_ROUNDABOUT = "roundabout";
+  public static final String STEP_MANEUVER_TYPE_ROTARY = "rotary";
+  public static final String STEP_MANEUVER_TYPE_ROUNDABOUT_TURN = "roundabout turn";
+  public static final String STEP_MANEUVER_TYPE_NOTIFICATION = "notification";
+
   // Step Maneuver Modifiers
   public static final String STEP_MANEUVER_MODIFIER_UTURN = "uturn";
   public static final String STEP_MANEUVER_MODIFIER_SHARP_RIGHT = "sharp right";
