@@ -39,7 +39,6 @@ subprojects {
   apply plugin: 'idea'
   apply plugin: 'net.ltgt.errorprone'
   apply from: "${rootDir}/gradle/dependencies.gradle"
-  apply from: "${rootDir}/gradle/code-quality.gradle"
 
   dependencies {
     errorprone dependenciesList.errorprone

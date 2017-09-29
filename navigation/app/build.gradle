@@ -71,5 +71,5 @@ dependencies {
   })
 }
 
-apply from: 'developer-config.gradle'
-apply from: '../checkstyle.gradle'
+apply from: "${rootDir}/gradle/developer-config.gradle"
+apply from: "${rootDir}/gradle/checkstyle.gradle"
