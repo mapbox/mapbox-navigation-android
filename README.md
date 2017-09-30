@@ -1,6 +1,6 @@
 <h1 align="center">
-  <br>
-  <a href="https://www.mapbox.com/android-docs/navigation/overview/"><img src="https://github.com/mapbox/mapbox-navigation-android/blob/master/.github/splash-img.png?raw=true" alt="Mapbox Service"></a>
+  <a href="https://www.mapbox.com/android-docs/navigation/overview/"><img src="https://github.com/mapbox/mapbox-navigation-android/blob/remove-language-files/.github/splash-img.png?raw=true" alt="Mapbox Service"></a>
+  <!--<a href="https://www.mapbox.com/android-docs/navigation/overview/"><img src="https://github.com/mapbox/mapbox-navigation-android/blob/master/.github/splash-img.png?raw=true" alt="Mapbox Service"></a>-->
 </h1>
 
 <p align="center">
