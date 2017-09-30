@@ -1,8 +1,8 @@
-<h1 align="center">
+<div align="center">
   <a href="https://www.mapbox.com/android-docs/navigation/overview/"><img src="https://github.com/mapbox/mapbox-navigation-android/blob/remove-language-files/.github/splash-img.png?raw=true" alt="Mapbox Service"></a>
   <!--<a href="https://www.mapbox.com/android-docs/navigation/overview/"><img src="https://github.com/mapbox/mapbox-navigation-android/blob/master/.github/splash-img.png?raw=true" alt="Mapbox Service"></a>-->
-</h1>
-
+</div>
+<br>
 <p align="center">
   <a href="https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation">
     <img src="https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation/badge.svg"
