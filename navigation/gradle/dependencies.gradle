@@ -31,7 +31,8 @@ ext {
       espressoVersion    : '3.0.1',
       spoonRunner        : '1.6.2',
       commonsIO          : '2.5',
-      robolectric        : '3.4.2'
+      robolectric        : '3.4.2',
+      lifecycle          : '1.0.0-alpha9-1'
   ]
 
   pluginVersion = [
@@ -67,6 +68,10 @@ ext {
       supportDesign          : "com.android.support:design:${version.supportLibVersion}",
       supportRecyclerView    : "com.android.support:recyclerview-v7:${version.supportLibVersion}",
       supportConstraintLayout: "com.android.support.constraint:constraint-layout:${version.constraintLayout}",
+
+      // architecture
+      lifecycleExtensions    : "android.arch.lifecycle:extensions:${version.lifecycle}",
+      lifecycleCompiler      : "android.arch.lifecycle:compiler:${version.lifecycle}",
 
       // square crew
       timber                 : "com.jakewharton.timber:timber:${version.timber}",

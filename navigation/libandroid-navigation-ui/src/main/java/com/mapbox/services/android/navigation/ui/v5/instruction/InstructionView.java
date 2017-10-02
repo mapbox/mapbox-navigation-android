@@ -1,7 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
+import android.arch.lifecycle.Observer;
 import android.content.Context;
-import android.location.Location;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.TextViewCompat;
@@ -22,6 +22,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.mapbox.services.android.navigation.ui.v5.NavigationView;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -46,7 +48,7 @@ import java.text.DecimalFormat;
  *
  * @since 0.6.0
  */
-public class InstructionView extends RelativeLayout implements ProgressChangeListener, OffRouteListener {
+public class InstructionView extends RelativeLayout {
 
   private ImageView maneuverImage;
   private TextView stepDistanceText;
@@ -99,34 +101,46 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     initAnimations();
   }
 
-  /**
-   * Listener used to update the views with navigation data.
-   * <p>
-   * Can be added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
-   *
-   * @param location      ignored in this scenario
-   * @param routeProgress holds all route / progress data needed to update the views
-   * @since 0.6.0
-   */
-  @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    update(routeProgress);
+  public void subscribe(NavigationViewModel navigationViewModel) {
+    navigationViewModel.instructionModel.observe((NavigationView) getContext(), new Observer<InstructionModel>() {
+      @Override
+      public void onChanged(@Nullable InstructionModel instructionModel) {
+        if (instructionModel != null) {
+          addManeuverImage(instructionModel);
+          addDistanceText(instructionModel);
+          addTextInstruction(instructionModel);
+          addTurnLanes(instructionModel);
+        }
+      }
+    });
+    navigationViewModel.isOffRoute.observe((NavigationView) getContext(), new Observer<Boolean>() {
+      @Override
+      public void onChanged(@Nullable Boolean isOffRoute) {
+        if (isOffRoute != null) {
+          if (isOffRoute) {
+            showRerouteState();
+          } else {
+            hideRerouteState();
+          }
+        }
+      }
+    });
   }
 
   /**
-   * Listener used to update the views in off-route scenario.
-   * This view will show a view indicating a new route is being retrieved.
-   * This same view will be hidden when the new route is received from
-   * {@link com.mapbox.services.android.navigation.v5.navigation.NavigationRoute}.
-   * <p>
-   * Can be added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
+   * Called in {@link ProgressChangeListener}, creates a new model and then
+   * uses it to update the views.
    *
-   * @param location ignored in this scenario
-   * @since 0.6.0
+   * @param routeProgress used to provide navigation / progress data
    */
-  @Override
-  public void userOffRoute(Location location) {
-    showRerouteState();
+  public void update(RouteProgress routeProgress) {
+    if (routeProgress != null && !showingRerouteState) {
+      InstructionModel model = new InstructionModel(routeProgress, decimalFormat);
+      addManeuverImage(model);
+      addDistanceText(model);
+      addTextInstruction(model);
+      addTurnLanes(model);
+    }
   }
 
   /**
@@ -315,22 +329,6 @@ public class InstructionView extends RelativeLayout implements ProgressChangeLis
     fadeInSlowOut = new AnimationSet(false);
     fadeInSlowOut.addAnimation(fadeIn);
     fadeInSlowOut.addAnimation(fadeOut);
-  }
-
-  /**
-   * Called in {@link ProgressChangeListener}, creates a new model and then
-   * uses it to update the views.
-   *
-   * @param routeProgress used to provide navigation / progress data
-   */
-  private void update(RouteProgress routeProgress) {
-    if (routeProgress != null && !showingRerouteState) {
-      InstructionModel model = new InstructionModel(routeProgress, decimalFormat);
-      addManeuverImage(model);
-      addDistanceText(model);
-      addTextInstruction(model);
-      addTurnLanes(model);
-    }
   }
 
   /**

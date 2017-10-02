@@ -44,6 +44,10 @@ dependencies {
   compile dependenciesList.supportRecyclerView
   compile dependenciesList.supportConstraintLayout
 
+  // Architecture libraries
+  compile dependenciesList.lifecycleExtensions
+  compile dependenciesList.lifecycleCompiler
+
   // Mapbox plugins
   compile dependenciesList.locationLayerPlugin
 

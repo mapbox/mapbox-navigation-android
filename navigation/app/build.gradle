@@ -31,7 +31,6 @@ android {
 
 dependencies {
   // Mapbox Navigation SDK
-  compile project(':libandroid-navigation')
   compile project(':libandroid-navigation-ui')
 
   // Support libraries
