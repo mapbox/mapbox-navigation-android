@@ -33,7 +33,7 @@ jobs:
       - run:
           name: Sonarcloud upload
           command: |
-            cd navigation && ./gradlew sonarqube \
+            ./gradlew sonarqube \
               -DskipTests=true \
               -Dsonar.host.url=https://sonarcloud.io \
               -Dsonar.organization=mapbox \
