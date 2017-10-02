@@ -28,23 +28,7 @@ android {
 
 dependencies {
   // Mapbox Navigation SDK
-  compile project(':libandroid-navigation')
   compile project(':libandroid-navigation-ui')
-
-  // Support libraries
-  compile rootProject.ext.dep.supportAppcompatV7
-  compile rootProject.ext.dep.supportConstraintLayout
-
-  // Mapbox Maps SDK
-  compile(rootProject.ext.dep.mapboxMapSdk + '@aar') {
-    transitive = true
-    exclude module: 'lost'
-    exclude module: 'mapbox-java-geojson'
-    exclude module: 'mapbox-android-telemetry'
-  }
-
-  // Mapbox plugins
-  compile rootProject.ext.dep.locationLayerPlugin
 
   // Logging
   compile rootProject.ext.dep.timber

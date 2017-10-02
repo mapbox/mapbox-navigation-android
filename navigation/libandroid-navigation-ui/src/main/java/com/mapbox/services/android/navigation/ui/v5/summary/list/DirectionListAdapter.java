@@ -68,6 +68,11 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
     updateStepList(routeProgress);
   }
 
+  public void clear() {
+    legSteps.remove(legSteps.size());
+    notifyDataSetChanged();
+  }
+
   private void addLegSteps(RouteProgress routeProgress) {
     if (newLeg(routeProgress) && legHasSteps(routeProgress)) {
       List<LegStep> steps = routeProgress.directionsRoute().getLegs().get(0).getSteps();

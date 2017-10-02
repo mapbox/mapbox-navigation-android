@@ -1,10 +1,9 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.location.Location;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
@@ -13,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
 
-import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -27,30 +25,14 @@ import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
-import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
-import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
-import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.android.telemetry.location.LocationEngineListener;
-import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.directions.v5.models.LegStep;
-import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.commons.models.Position;
-
-import java.util.HashMap;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Activity that creates the drop-in UI.
@@ -73,8 +55,7 @@ import retrofit2.Response;
  * </p>
  */
 public class NavigationView extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnScrollListener,
-  LocationEngineListener, ProgressChangeListener, OffRouteListener,
-  MilestoneEventListener, Callback<DirectionsResponse> {
+  NavigationContract.View {
 
   private MapView mapView;
   private InstructionView instructionView;
@@ -89,33 +70,26 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private RecenterButton recenterBtn;
   private FloatingActionButton soundFab;
 
+  private NavigationPresenter navigationPresenter;
+  private NavigationViewModel navigationViewModel;
+  private RouteViewModel routeViewModel;
+  private LocationViewModel locationViewModel;
   private MapboxMap map;
-  private MapboxNavigation navigation;
-  private InstructionPlayer instructionPlayer;
   private NavigationMapRoute mapRoute;
   private NavigationCamera camera;
-  private LocationEngine locationEngine;
   private LocationLayerPlugin locationLayer;
-  private SharedPreferences preferences;
-
-  private Location location;
-  private Position destination;
-  private boolean checkLaunchData;
-  private boolean navigationRunning;
+  private boolean resumeCamera;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.navigation_view_layout);
-    checkLaunchData = savedInstanceState == null;
+    resumeCamera = savedInstanceState != null;
     bind();
+    initViewModels();
     initClickListeners();
-    preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-    initMap(savedInstanceState);
     initSummaryBottomSheet();
-    initNavigation();
-    initVoiceInstructions();
+    initMap(savedInstanceState);
   }
 
   @SuppressWarnings( {"MissingPermission"})
@@ -123,9 +97,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   protected void onStart() {
     super.onStart();
     mapView.onStart();
-    if (locationLayer != null) {
-      locationLayer.onStart();
-    }
   }
 
   @Override
@@ -150,16 +121,12 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   protected void onStop() {
     super.onStop();
     mapView.onStop();
-    if (locationLayer != null) {
-      locationLayer.onStop();
-    }
   }
 
   @Override
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
-    shutdownNavigation();
   }
 
   @Override
@@ -184,8 +151,10 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     initRoute();
     initCamera();
     initLocationLayer();
-    initLocation();
-    checkLaunchData(getIntent());
+    initLifecycleObservers();
+    initNavigationPresenter();
+    subscribeViews();
+    routeViewModel.extractLaunchData(this);
   }
 
   /**
@@ -199,110 +168,128 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onScroll() {
     if (!summaryBehavior.isHideable()) {
-      summaryBehavior.setHideable(true);
-      summaryBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-      camera.setCameraTrackingLocation(false);
-    }
-  }
-
-  /**
-   * Called after the {@link LocationEngine} is activated.
-   * Good to request location updates at this point.
-   *
-   * @since 0.6.0
-   */
-  @SuppressWarnings( {"MissingPermission"})
-  @Override
-  public void onConnected() {
-    locationEngine.requestLocationUpdates();
-  }
-
-  /**
-   * Fired when the {@link LocationEngine} updates.
-   * <p>
-   * This activity will check launch data here (if we didn't have a location when the map was ready).
-   * Once the first location update is received, a new route can be retrieved from {@link NavigationRoute}.
-   *
-   * @param location used to retrieve route with bearing
-   */
-  @Override
-  public void onLocationChanged(Location location) {
-    this.location = location;
-    checkLaunchData(getIntent());
-  }
-
-  /**
-   * Listener used to update the {@link LocationLayerPlugin}.
-   * <p>
-   * Added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
-   *
-   * @param location      given to the {@link LocationLayerPlugin} to show our current location
-   * @param routeProgress ignored in this scenario
-   * @since 0.6.0
-   */
-  @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    if (location.getLongitude() != 0 && location.getLatitude() != 0) {
-      locationLayer.forceLocationUpdate(location);
-    }
-  }
-
-  /**
-   * Listener used to update the {@link LocationLayerPlugin}.
-   * <p>
-   * Added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
-   *
-   * @param location given to the {@link LocationLayerPlugin} to show our current location
-   * @since 0.6.0
-   */
-  @Override
-  public void userOffRoute(Location location) {
-    Position newOrigin = Position.fromLngLat(location.getLongitude(), location.getLatitude());
-    fetchRoute(newOrigin, destination);
-  }
-
-  /**
-   * Listener used to play instructions and finish this activity
-   * when the arrival milestone is triggered.
-   * <p>
-   * Added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
-   *
-   * @param routeProgress ignored in this scenario
-   * @param instruction   to be voiced by the {@link InstructionPlayer}
-   * @param identifier    used to determine the type of milestone
-   * @since 0.6.0
-   */
-  @Override
-  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
-    instructionPlayer.play(instruction);
-  }
-
-  /**
-   * A new directions response has been received.
-   * <p>
-   * The {@link DirectionsResponse} is validated.
-   * If navigation is running, {@link MapboxNavigation} is updated and reroute state is dismissed.
-   * If not, navigation is started.
-   *
-   * @param call     used to request the new {@link DirectionsRoute}
-   * @param response contains the new {@link DirectionsRoute}
-   * @since 0.6.0
-   */
-  @Override
-  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-    if (validRouteResponse(response)) {
-      if (navigationRunning) {
-        updateNavigation(response.body().getRoutes().get(0));
-        instructionView.hideRerouteState();
-        summaryBottomSheet.hideRerouteState();
-      } else {
-        startNavigation(response.body().getRoutes().get(0));
-      }
+      navigationPresenter.onMapScroll();
     }
   }
 
   @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+  public void setSummaryBehaviorState(int state) {
+    summaryBehavior.setState(state);
+  }
+
+  @Override
+  public void setSummaryBehaviorHideable(boolean isHideable) {
+    summaryBehavior.setHideable(isHideable);
+  }
+
+  @Override
+  public void setSummaryOptionsVisibility(boolean isVisible) {
+    summaryOptions.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+  }
+
+  @Override
+  public void setSummaryDirectionsVisibility(boolean isVisible) {
+    summaryDirections.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+  }
+
+  @Override
+  public boolean isSummaryDirectionsVisible() {
+    return summaryDirections.getVisibility() == View.VISIBLE;
+  }
+
+  @Override
+  public void setSheetShadowVisibility(boolean isVisible) {
+    sheetShadow.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+  }
+
+  @Override
+  public void setCameraTrackingEnabled(boolean isEnabled) {
+    camera.setCameraTrackingLocation(isEnabled);
+  }
+
+  @Override
+  public void resetCameraPosition() {
+    camera.resetCameraPosition();
+  }
+
+  @Override
+  public void showRecenterBtn() {
+    recenterBtn.show();
+  }
+
+  @Override
+  public void hideRecenterBtn() {
+    recenterBtn.hide();
+  }
+
+  @Override
+  public void showInstructionView() {
+    instructionView.show();
+  }
+
+  @Override
+  public void drawRoute(DirectionsRoute directionsRoute) {
+    mapRoute.addRoute(directionsRoute);
+  }
+
+  @Override
+  public void setMuted(boolean isMuted) {
+    navigationViewModel.setMuted(isMuted);
+  }
+
+  @Override
+  public void setCancelBtnClickable(boolean isClickable) {
+    cancelBtn.setClickable(isClickable);
+  }
+
+  @Override
+  public void animateCancelBtnAlpha(float value) {
+    cancelBtn.animate().alpha(value).setDuration(0).start();
+  }
+
+  @Override
+  public void animateExpandArrowRotation(float value) {
+    expandArrow.animate().rotation(value).setDuration(0).start();
+  }
+
+  @Override
+  public void animateInstructionViewAlpha(float value) {
+    instructionView.animate().alpha(value).setDuration(0).start();
+  }
+
+  /**
+   * Creates a marker based on the
+   * {@link Position} destination coordinate.
+   *
+   * @param position where the marker should be placed
+   */
+  @Override
+  public void addMarker(Position position) {
+    IconFactory iconFactory = IconFactory.getInstance(this);
+    Icon icon = iconFactory.fromResource(R.drawable.map_marker);
+    LatLng markerPosition = new LatLng(position.getLatitude(),
+      position.getLongitude());
+    map.addMarker(new MarkerOptions()
+      .position(markerPosition)
+      .icon(icon));
+  }
+
+  @Override
+  public void finishNavigationView() {
+    finish();
+  }
+
+  public void startCamera(DirectionsRoute directionsRoute) {
+    if (!resumeCamera) {
+      camera.start(directionsRoute);
+    }
+  }
+
+  public void resumeCamera(Location location) {
+    if (resumeCamera) {
+      camera.resume(location);
+      resumeCamera = false;
+    }
   }
 
   /**
@@ -322,6 +309,12 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     soundFab = findViewById(R.id.soundFab);
   }
 
+  private void initViewModels() {
+    locationViewModel = ViewModelProviders.of(this).get(LocationViewModel.class);
+    routeViewModel = ViewModelProviders.of(this).get(RouteViewModel.class);
+    navigationViewModel = ViewModelProviders.of(this).get(NavigationViewModel.class);
+  }
+
   /**
    * Sets click listeners to all views that need them.
    */
@@ -329,37 +322,31 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     directionsOptionLayout.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        sheetShadow.setVisibility(View.GONE);
-        summaryOptions.setVisibility(View.GONE);
-        summaryDirections.setVisibility(View.VISIBLE);
+        navigationPresenter.onDirectionsOptionClick();
       }
     });
     cancelBtn.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        finish();
+        navigationPresenter.onCancelBtnClick();
       }
     });
     expandArrow.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        summaryBehavior.setState(summaryBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED
-          ? BottomSheetBehavior.STATE_EXPANDED : BottomSheetBehavior.STATE_COLLAPSED);
+        navigationPresenter.onExpandArrowClick(summaryBehavior.getState());
       }
     });
     recenterBtn.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        summaryBehavior.setHideable(false);
-        summaryBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        camera.resetCameraPosition();
-        recenterBtn.hide();
+        navigationPresenter.onRecenterClick();
       }
     });
     soundFab.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        instructionPlayer.setMuted(instructionView.toggleMute());
+        navigationPresenter.onMuteClick(instructionView.toggleMute());
       }
     });
   }
@@ -386,20 +373,13 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       public void onStateChanged(@NonNull View bottomSheet, int newState) {
         switch (newState) {
           case BottomSheetBehavior.STATE_EXPANDED:
-            cancelBtn.setClickable(false);
-            if (summaryDirections.getVisibility() == View.VISIBLE) {
-              sheetShadow.setVisibility(View.GONE);
-            }
+            navigationPresenter.onSummaryBottomSheetExpanded();
             break;
           case BottomSheetBehavior.STATE_COLLAPSED:
-            cancelBtn.setClickable(true);
-            summaryOptions.setVisibility(View.VISIBLE);
-            summaryDirections.setVisibility(View.GONE);
+            navigationPresenter.onSummaryBottomSheetCollapsed();
             break;
           case BottomSheetBehavior.STATE_HIDDEN:
-            if (!camera.isTrackingEnabled()) {
-              recenterBtn.show();
-            }
+            navigationPresenter.onSummaryBottomSheetHidden();
             break;
           default:
             break;
@@ -408,58 +388,10 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
       @Override
       public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-        if (slideOffset < 1f && sheetShadow.getVisibility() != View.VISIBLE) {
-          sheetShadow.setVisibility(View.VISIBLE);
-        }
-        if (summaryDirections.getVisibility() == View.VISIBLE) {
-          instructionView.animate().alpha(1 - slideOffset).setDuration(0).start();
-        }
-        cancelBtn.animate().alpha(1 - slideOffset).setDuration(0).start();
-        expandArrow.animate().rotation(180 * slideOffset).setDuration(0).start();
+        navigationPresenter.onBottomSheetSlide(slideOffset,
+          sheetShadow.getVisibility() != View.VISIBLE);
       }
     });
-  }
-
-  /**
-   * Initializes {@link MapboxNavigation} and adds all views that implement listeners.
-   */
-  private void initNavigation() {
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken(),
-      MapboxNavigationOptions.builder().isFromNavigationUi(true).build());
-    navigation.addProgressChangeListener(this);
-    navigation.addProgressChangeListener(instructionView);
-    navigation.addProgressChangeListener(summaryBottomSheet);
-    navigation.addMilestoneEventListener(this);
-    navigation.addOffRouteListener(this);
-    navigation.addOffRouteListener(summaryBottomSheet);
-    navigation.addOffRouteListener(instructionView);
-  }
-
-  /**
-   * Initializes the {@link InstructionPlayer}.
-   */
-  private void initVoiceInstructions() {
-    instructionPlayer = new NavigationInstructionPlayer(this,
-      preferences.getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
-  }
-
-  /**
-   * Initializes the {@link LocationEngine} based on whether or not
-   * simulation is enabled.
-   */
-  @SuppressWarnings( {"MissingPermission"})
-  private void initLocation() {
-    if (!shouldSimulateRoute()) {
-      locationEngine = navigation.getLocationEngine();
-      locationEngine.addLocationEngineListener(this);
-      locationEngine.activate();
-
-      if (locationEngine.getLastLocation() != null) {
-        onLocationChanged(locationEngine.getLastLocation());
-      }
-    } else {
-      onLocationChanged(null);
-    }
   }
 
   /**
@@ -475,235 +407,102 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    * the {@link Location} updates from {@link MapboxNavigation}.
    */
   private void initCamera() {
-    camera = new NavigationCamera(this, map, navigation);
+    camera = new NavigationCamera(this, map, navigationViewModel.getNavigation());
   }
 
   /**
    * Initializes the {@link LocationLayerPlugin} to be used to draw the current
    * location.
    */
+  @SuppressWarnings( {"MissingPermission"})
   private void initLocationLayer() {
     locationLayer = new LocationLayerPlugin(mapView, map, null);
-  }
-
-  /**
-   * Checks the intent used to launch this activity.
-   * Will start navigation based on the data found in the {@link Intent}
-   *
-   * @param intent holds either a set of {@link Position} coordinates or a {@link DirectionsRoute}
-   */
-  private void checkLaunchData(Intent intent) {
-    if (checkLaunchData) {
-      if (launchWithRoute(intent)) {
-        startRouteNavigation();
-      } else {
-        startCoordinateNavigation();
-      }
-    }
-  }
-
-  /**
-   * Checks if we have at least one {@link DirectionsRoute} in the given
-   * {@link DirectionsResponse}.
-   *
-   * @param response to be checked
-   * @return true if valid, false if not
-   */
-  private boolean validRouteResponse(Response<DirectionsResponse> response) {
-    return response.body() != null
-      && response.body().getRoutes() != null
-      && response.body().getRoutes().size() > 0;
-  }
-
-  /**
-   * Requests a new {@link DirectionsRoute}.
-   * <p>
-   * Will use {@link Location} bearing if we have a location with bearing.
-   *
-   * @param origin      start point
-   * @param destination end point
-   */
-  private void fetchRoute(Position origin, Position destination) {
-    NavigationRoute.Builder routeBuilder = NavigationRoute.builder()
-      .accessToken(Mapbox.getAccessToken())
-      .origin(origin)
-      .destination(destination);
-
-    if (locationHasBearing()) {
-      fetchRouteWithBearing(routeBuilder);
-    } else {
-      routeBuilder.build().getRoute(this);
-    }
-  }
-
-  /**
-   * Check if the given {@link Intent} has been launched with a {@link DirectionsRoute}.
-   *
-   * @param intent possibly containing route
-   * @return true if route found, false if not
-   */
-  private boolean launchWithRoute(Intent intent) {
-    return intent.getBooleanExtra(NavigationConstants.NAVIGATION_VIEW_LAUNCH_ROUTE, false);
-  }
-
-  /**
-   * Checks if the route should be simualted with a {@link MockLocationEngine}.
-   *
-   * @return true if simulation enabled, false if not
-   */
-  private boolean shouldSimulateRoute() {
-    return preferences.getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false);
-  }
-
-  /**
-   * Extracts the {@link DirectionsRoute}, adds a destination marker,
-   * and starts navigation.
-   */
-  private void startRouteNavigation() {
-    DirectionsRoute route = NavigationLauncher.extractRoute(this);
-    if (route != null) {
-      RouteLeg lastLeg = route.getLegs().get(route.getLegs().size() - 1);
-      LegStep lastStep = lastLeg.getSteps().get(lastLeg.getSteps().size() - 1);
-      destination = lastStep.getManeuver().asPosition();
-      addDestinationMarker(destination);
-      startNavigation(route);
-      checkLaunchData = false;
-    }
-  }
-
-  /**
-   * Extracts the {@link Position} coordinates, adds a destination marker,
-   * and fetches a route with the coordinates.
-   */
-  private void startCoordinateNavigation() {
-    HashMap<String, Position> coordinates = NavigationLauncher.extractCoordinates(this);
-    if (coordinates.size() > 0) {
-      Position origin = coordinates.get(NavigationConstants.NAVIGATION_VIEW_ORIGIN);
-      destination = coordinates.get(NavigationConstants.NAVIGATION_VIEW_DESTINATION);
-      addDestinationMarker(destination);
-      fetchRoute(origin, destination);
-      checkLaunchData = false;
-    }
-  }
-
-  /**
-   * Sets up everything needed to begin navigation.
-   * <p>
-   * This includes drawing the route on the map, starting camera
-   * tracking, giving {@link MapboxNavigation} a location engine,
-   * enabling the {@link LocationLayerPlugin}, and showing the {@link InstructionView}.
-   *
-   * @param route used to start navigation for the first time
-   */
-  @SuppressWarnings( {"MissingPermission"})
-  private void startNavigation(DirectionsRoute route) {
-    if (shouldSimulateRoute()) {
-      activateMockLocationEngine(route);
-    }
-    mapRoute.addRoute(route);
-    camera.start(route);
-    navigation.setLocationEngine(locationEngine);
-    navigation.startNavigation(route);
     locationLayer.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
-    instructionView.show();
-    navigationRunning = true;
   }
 
-  /**
-   * Updates the {@link NavigationMapRoute} and {@link MapboxNavigation} with
-   * a new {@link DirectionsRoute}.
-   *
-   * @param route new route
-   */
-  private void updateNavigation(DirectionsRoute route) {
-    mapRoute.addRoute(route);
-    navigation.startNavigation(route);
+  private void initLifecycleObservers() {
+    getLifecycle().addObserver(locationLayer);
+    getLifecycle().addObserver(locationViewModel);
+    getLifecycle().addObserver(navigationViewModel);
   }
 
-  /**
-   * Creates the destination marker based on the
-   * {@link Position} destination coordinate.
-   *
-   * @param destination where the marker should be placed
-   */
-  private void addDestinationMarker(Position destination) {
-    IconFactory iconFactory = IconFactory.getInstance(this);
-    Icon icon = iconFactory.fromResource(R.drawable.map_marker);
-    LatLng markerPosition = new LatLng(destination.getLatitude(),
-      destination.getLongitude());
-    map.addMarker(new MarkerOptions()
-      .position(markerPosition)
-      .icon(icon));
+  private void initNavigationPresenter() {
+    navigationPresenter = new NavigationPresenter(this);
   }
 
-  /**
-   * Used to determine if a location has a bearing.
-   *
-   * @return true if bearing exists, false if not
-   */
-  private boolean locationHasBearing() {
-    return location != null && location.hasBearing();
-  }
+  private void subscribeViews() {
+    instructionView.subscribe(navigationViewModel);
+    summaryBottomSheet.subscribe(navigationViewModel);
 
-  /**
-   * Will finish building {@link NavigationRoute} after adding a bearing
-   * and request the route.
-   *
-   * @param routeBuilder to fetch the route
-   */
-  private void fetchRouteWithBearing(NavigationRoute.Builder routeBuilder) {
-    routeBuilder.addBearing(location.getBearing(), 90);
-    routeBuilder.build().getRoute(this);
-  }
+    locationViewModel.rawLocation.observe(this, new Observer<Location>() {
+      @Override
+      public void onChanged(@Nullable Location location) {
+        if (location != null) {
+          routeViewModel.updateRawLocation(location);
+        }
+      }
+    });
 
-  /**
-   * Activates a new {@link MockLocationEngine} with the given
-   * {@link DirectionsRoute}.
-   *
-   * @param route to be mocked
-   */
-  private void activateMockLocationEngine(DirectionsRoute route) {
-    locationEngine = new MockLocationEngine(1000, 30, false);
-    ((MockLocationEngine) locationEngine).setRoute(route);
-    locationEngine.activate();
-  }
+    locationViewModel.locationEngine.observe(this, new Observer<LocationEngine>() {
+      @Override
+      public void onChanged(@Nullable LocationEngine locationEngine) {
+        if (locationEngine != null) {
+          navigationViewModel.updateLocationEngine(locationEngine);
+        }
+      }
+    });
 
-  /**
-   * Shuts down anything running in onDestroy
-   */
-  private void shutdownNavigation() {
-    deactivateNavigation();
-    deactivateLocationEngine();
-    deactivateInstructionPlayer();
-  }
+    routeViewModel.route.observe(this, new Observer<DirectionsRoute>() {
+      @Override
+      public void onChanged(@Nullable DirectionsRoute directionsRoute) {
+        if (directionsRoute != null) {
+          navigationViewModel.updateRoute(directionsRoute);
+          locationViewModel.updateRoute(directionsRoute);
+          navigationPresenter.onRouteUpdate(directionsRoute);
+          startCamera(directionsRoute);
+        }
+      }
+    });
 
-  /**
-   * Destroys the {@link InstructionPlayer} if not null
-   */
-  private void deactivateInstructionPlayer() {
-    if (instructionPlayer != null) {
-      instructionPlayer.onDestroy();
-    }
-  }
+    routeViewModel.destination.observe(this, new Observer<Position>() {
+      @Override
+      public void onChanged(@Nullable Position position) {
+        if (position != null) {
+          navigationPresenter.onDestinationUpdate(position);
+        }
+      }
+    });
 
-  /**
-   * Destroys {@link MapboxNavigation} if not null
-   */
-  private void deactivateNavigation() {
-    if (navigation != null) {
-      navigation.onDestroy();
-    }
-  }
+    navigationViewModel.isRunning.observe(this, new Observer<Boolean>() {
+      @Override
+      public void onChanged(@Nullable Boolean isRunning) {
+        if (isRunning != null) {
+          if (isRunning) {
+            showInstructionView();
+          }
+        }
+      }
+    });
 
-  /**
-   * Deactivates and removes listeners
-   * for the {@link LocationEngine} if not null
-   */
-  private void deactivateLocationEngine() {
-    if (locationEngine != null) {
-      locationEngine.removeLocationUpdates();
-      locationEngine.removeLocationEngineListener(this);
-      locationEngine.deactivate();
-    }
+    navigationViewModel.navigationLocation.observe(this, new Observer<Location>() {
+      @Override
+      public void onChanged(@Nullable Location location) {
+        if (location != null && location.getLongitude() != 0 && location.getLatitude() != 0) {
+          locationLayer.forceLocationUpdate(location);
+          resumeCamera(location);
+        }
+      }
+    });
+
+    navigationViewModel.newOrigin.observe(this, new Observer<Position>() {
+      @Override
+      public void onChanged(@Nullable Position newOrigin) {
+        if (newOrigin != null) {
+          routeViewModel.fetchRouteNewOrigin(newOrigin);
+          // To prevent from firing on rotation
+          navigationViewModel.newOrigin.setValue(null);
+        }
+      }
+    });
   }
 }
