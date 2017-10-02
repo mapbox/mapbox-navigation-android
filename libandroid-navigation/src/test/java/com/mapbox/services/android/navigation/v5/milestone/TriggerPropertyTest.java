@@ -15,6 +15,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.io.IOException;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
 public class TriggerPropertyTest extends BaseTest {
@@ -25,9 +27,9 @@ public class TriggerPropertyTest extends BaseTest {
   private RouteProgress routeProgress;
 
   @Before
-  public void setup() {
+  public void setup() throws IOException {
     Gson gson = new Gson();
-    String body = readPath(PRECISION_6);
+    String body = loadJsonFixture(PRECISION_6);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     DirectionsRoute route = response.getRoutes().get(0);
 

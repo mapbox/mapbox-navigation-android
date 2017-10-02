@@ -36,7 +36,7 @@ public class NavigationHelperTest extends BaseTest {
   @Before
   public void setUp() throws Exception {
     Gson gson = new Gson();
-    String body = readPath(MULTI_LEG_ROUTE);
+    String body = loadJsonFixture(MULTI_LEG_ROUTE);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     route = response.getRoutes().get(0);
 

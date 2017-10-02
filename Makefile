@@ -1,40 +1,31 @@
-OSRM_PATH_TRANSLATIONS = navigation/libandroid-navigation/src/main/res/raw/translations
-OSRM_PATH_FIXTURES     = navigation/libandroid-navigation/src/test/res/osrm/v5
-
-prepare-osrm:
-	rm -rf $(OSRM_PATH_TRANSLATIONS) $(OSRM_PATH_FIXTURES)
-	mkdir -p $(OSRM_PATH_TRANSLATIONS) $(OSRM_PATH_FIXTURES)
-	cp -R ../osrm-text-instructions/languages/translations/* $(OSRM_PATH_TRANSLATIONS)
-	cp -R ../osrm-text-instructions/test/fixtures/v5/* $(OSRM_PATH_FIXTURES)
-
 checkstyle:
-	cd navigation; ./gradlew checkstyle
+	./gradlew checkstyle
 
 test:
 	# See navigation/libandroid-navigation/build.gradle for details
-	cd navigation; ./gradlew :libandroid-navigation:test
-	cd navigation; ./gradlew :libandroid-navigation-ui:test
+	./gradlew :libandroid-navigation:test
+	./gradlew :libandroid-navigation-ui:test
 
 build-release:
-	cd navigation; ./gradlew :libandroid-navigation:assembleRelease
-	cd navigation; ./gradlew :libandroid-navigation-ui:assembleRelease
+	./gradlew :libandroid-navigation:assembleRelease
+	./gradlew :libandroid-navigation-ui:assembleRelease
 
 javadoc:
-	cd navigation; ./gradlew :libandroid-navigation:javadocrelease
-	cd navigation; ./gradlew :libandroid-navigation-ui:javadocrelease
+	./gradlew :libandroid-navigation:javadocrelease
+	./gradlew :libandroid-navigation-ui:javadocrelease
 
 publish:
-	cd navigation; export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation:uploadArchives
-	cd navigation; export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation-ui:uploadArchives
+	export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation:uploadArchives
+	export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation-ui:uploadArchives
 
 publish-local:
 	# This publishes to ~/.m2/repository/com/mapbox/mapboxsdk
-	cd navigation; export IS_LOCAL_DEVELOPMENT=true; ./gradlew :libandroid-navigation:uploadArchives
-	cd navigation; export IS_LOCAL_DEVELOPMENT=true; ./gradlew :libandroid-navigation-ui:uploadArchives
+	export IS_LOCAL_DEVELOPMENT=true; ./gradlew :libandroid-navigation:uploadArchives
+	export IS_LOCAL_DEVELOPMENT=true; ./gradlew :libandroid-navigation-ui:uploadArchives
 
 dex-count:
-	cd navigation; ./gradlew countDebugDexMethods
-	cd navigation; ./gradlew countReleaseDexMethods
+	./gradlew countDebugDexMethods
+	./gradlew countReleaseDexMethods
 
 navigation-fixtures:
 	# Navigation: Taylor street to Page street
