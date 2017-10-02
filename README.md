@@ -1,8 +1,16 @@
-
-
-[![](https://github.com/mapbox/mapbox-navigation-android/blob/master/.github/splash-img.png?raw=true)](https://www.mapbox.com/android-docs/navigation/latest/getting-started/)
-
-[![CircleCI](https://circleci.com/gh/mapbox/mapbox-navigation-android/tree/master.svg?style=svg)](https://circleci.com/gh/mapbox/mapbox-navigation-android/tree/master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation)
+<div align="center">
+  <a href="https://www.mapbox.com/android-docs/navigation/overview/"><img src="https://github.com/mapbox/mapbox-navigation-android/blob/master/.github/splash-img.png?raw=true" alt="Mapbox Service"></a>
+</div>
+<br>
+<p align="center">
+  <a href="https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation">
+    <img src="https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation/badge.svg"
+         alt="Maven Central">
+  </a>
+  <a href="https://circleci.com/gh/mapbox/mapbox-navigation-android">
+    <img src="https://circleci.com/gh/mapbox/mapbox-navigation-android.svg?style=shield&circle-token=:circle-token">
+  </a>
+</p>
 
 When your users want to get from one location to another, don’t push them out of your application into a generic map application. Instead, keep them engaged with your application 100% of the time with in-app turn-by-turn navigation.
 

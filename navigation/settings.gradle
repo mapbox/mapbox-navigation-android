@@ -1,3 +1,0 @@
-include ':libandroid-navigation'
-include ':libandroid-navigation-ui'
-include ':app'
