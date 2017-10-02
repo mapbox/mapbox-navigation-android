@@ -4,8 +4,10 @@ import android.location.Location;
 
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.api.directions.v5.models.LegStep;
+import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.api.utils.turf.TurfMisc;
@@ -13,6 +15,8 @@ import com.mapbox.services.commons.geojson.Feature;
 import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
+
+import java.util.List;
 
 public class OffRouteDetector extends OffRoute {
 
