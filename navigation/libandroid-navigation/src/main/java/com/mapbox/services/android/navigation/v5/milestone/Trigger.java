@@ -11,6 +11,10 @@ import java.util.Map;
  */
 public class Trigger {
 
+  private Trigger() {
+    // Empty private constructor to prevent users creating an instance of this class.
+  }
+
   /**
    * Base Trigger statement. Subclassed to provide concrete statements.
    *

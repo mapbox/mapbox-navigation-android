@@ -7,58 +7,118 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
  */
 public class NavigationConstants {
 
+  private NavigationConstants() {
+    // Empty private constructor to prevent users creating an instance of this class.
+  }
+
+  /**
+   * Identifier value for the default departure milestone event. If additional milestones are added,
+   * avoid using the 1-5 integer values as identifiers.
+   *
+   * @since 0.4.0
+   */
   public static final int DEPARTURE_MILESTONE = 1;
+
+  /**
+   * Identifier value for the default new step milestone event. If additional milestones are added,
+   * avoid using the 1-5 integer values as identifiers.
+   *
+   * @since 0.4.0
+   */
   public static final int NEW_STEP_MILESTONE = 2;
+
+  /**
+   * Identifier value for the default imminent milestone event. If additional milestones are added,
+   * avoid using the 1-5 integer values as identifiers.
+   *
+   * @since 0.4.0
+   */
   public static final int IMMINENT_MILESTONE = 3;
+
+  /**
+   * Identifier value for the default urgent milestone event. If additional milestones are added,
+   * avoid using the 1-5 integer values as identifiers.
+   *
+   * @since 0.4.0
+   */
   public static final int URGENT_MILESTONE = 4;
+
+  /**
+   * Identifier value for the default arrival milestone event. If additional milestones are added,
+   * avoid using the 1-5 integer values as identifiers.
+   *
+   * @since 0.4.0
+   */
   public static final int ARRIVAL_MILESTONE = 5;
 
   /**
    * Random integer value used for identifying the navigation notification.
+   *
+   * @since 0.5.0
    */
   static final int NAVIGATION_NOTIFICATION_ID = 5678;
 
   /**
-   * Threshold user must be in within to count as completing a step. One of two heuristics used to know when a user
-   * completes a step, see `RouteControllerManeuverZoneRadius`. The users `heading` and the `finalHeading` are
-   * compared. If this number is within `RouteControllerMaximumAllowedDegreeOffsetForTurnCompletion`, the user has
+   * Threshold user must be within to count as completing a step. One of two heuristics used to know
+   * when a user completes a step, see {@link #MANEUVER_ZONE_RADIUS}. The users heading and the
+   * finalHeading are compared. If this number is within this defined constant, the user has
    * completed the step.
+   *
+   * @since 0.1.0
    */
   static final int MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION = 30;
 
   /**
-   * Radius in meters the user must enter to count as completing a step. One of two heuristics used to know when a user
-   * completes a step, see `RouteControllerMaximumAllowedDegreeOffsetForTurnCompletion`.
+   * Radius in meters the user must enter to count as completing a step. One of two heuristics used
+   * to know when a user completes a step, see
+   * {@link #MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION}.
+   *
+   * @since 0.1.0
    */
   static final int MANEUVER_ZONE_RADIUS = 40;
 
   /**
    * Maximum number of meters the user can travel away from step before the
    * {@link OffRouteListener}'s called.
+   *
+   * @since 0.2.0
    */
   static final double MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE = 20;
 
   /**
    * Seconds used before a reroute occurs.
+   *
+   * @since 0.2.0
    */
   static final int SECONDS_BEFORE_REROUTE = 3;
 
   /**
    * Accepted deviation excluding horizontal accuracy before the user is considered to be off route.
+   *
+   * @since 0.1.0
    */
   static final double USER_LOCATION_SNAPPING_DISTANCE = 10;
 
   /**
-   * When calculating whether or not the user is on the route, we look where the user will be given their speed and
-   * this variable.
+   * When calculating whether or not the user is on the route, we look where the user will be given
+   * their speed and this variable.
+   *
+   * @since 0.2.0
    */
   static final double DEAD_RECKONING_TIME_INTERVAL = 1.0;
 
   /**
    * Maximum angle the user puck will be rotated when snapping the user's course to the route line.
+   *
+   * @since 0.3.0
    */
   static final int MAX_MANIPULATED_COURSE_ANGLE = 25;
 
+  /**
+   * Meter radius which the user must be inside for an arrival milestone to be triggered and
+   * navigation to end.
+   *
+   */
   static final double METERS_REMAINING_TILL_ARRIVAL = 40;
 
   // Bundle variable keys

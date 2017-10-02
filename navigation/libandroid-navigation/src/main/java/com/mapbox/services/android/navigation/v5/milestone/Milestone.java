@@ -19,8 +19,8 @@ public abstract class Milestone {
   }
 
   /**
-   * Milestone specific identifier as an {@code int} value, useful for deciphering which milestone invoked
-   * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}.
+   * Milestone specific identifier as an {@code int} value, useful for deciphering which milestone
+   * invoked {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}.
    *
    * @return {@code int} representing the identifier
    * @since 0.4.0
@@ -31,7 +31,7 @@ public abstract class Milestone {
 
   /**
    * Milestone specific {@link Instruction}, which can be used to build a {@link String}
-   * instruction specified by the superclass
+   * instruction specified by the superclass.
    *
    * @return {@link Instruction} to be used to build the {@link String} passed to
    * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
@@ -46,13 +46,14 @@ public abstract class Milestone {
    * {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation} object
    * (recommended) or validated directly inside your activity.
    *
-   * @param previousRouteProgress last locations generated {@link RouteProgress} object used to determine certain
-   *                              {@link TriggerProperty}s
+   * @param previousRouteProgress last locations generated {@link RouteProgress} object used to
+   *                              determine certain {@link TriggerProperty}s
    * @param routeProgress         used to determine certain {@link TriggerProperty}s
    * @return true if the milestone trigger's valid, else false
    * @since 0.4.0
    */
-  public abstract boolean isOccurring(RouteProgress previousRouteProgress, RouteProgress routeProgress);
+  public abstract boolean isOccurring(RouteProgress previousRouteProgress,
+                                      RouteProgress routeProgress);
 
   /**
    * Build a new {@link Milestone}
@@ -68,8 +69,8 @@ public abstract class Milestone {
     }
 
     /**
-     * Milestone specific identifier as an {@code int} value, useful for deciphering which milestone invoked
-     * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}.
+     * Milestone specific identifier as an {@code int} value, useful for deciphering which milestone
+     * invoked {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}.
      *
      * @return {@code int} representing the identifier
      * @since 0.4.0
@@ -79,8 +80,8 @@ public abstract class Milestone {
     }
 
     /**
-     * Milestone specific identifier as an {@code int} value, useful for deciphering which milestone invoked
-     * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}.
+     * Milestone specific identifier as an {@code int} value, useful for deciphering which milestone
+     * invoked {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}.
      *
      * @param identifier an {@code int} used to identify this milestone instance
      * @return this builder
@@ -126,7 +127,6 @@ public abstract class Milestone {
      * @throws NavigationException if an invalid value has been set on the milestone
      * @since 0.4.0
      */
-    public abstract Milestone build() throws NavigationException;
+    public abstract Milestone build();
   }
-
 }
