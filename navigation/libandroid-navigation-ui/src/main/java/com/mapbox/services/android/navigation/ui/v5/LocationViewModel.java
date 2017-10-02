@@ -21,8 +21,8 @@ import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 
 public class LocationViewModel extends AndroidViewModel implements LifecycleObserver, LocationEngineListener {
 
-  MutableLiveData<LocationEngine> locationEngine = new MutableLiveData<>();
-  MutableLiveData<Location> rawLocation = new MutableLiveData<>();
+  final MutableLiveData<LocationEngine> locationEngine = new MutableLiveData<>();
+  final MutableLiveData<Location> rawLocation = new MutableLiveData<>();
   private SharedPreferences preferences;
 
   public LocationViewModel(Application application) {

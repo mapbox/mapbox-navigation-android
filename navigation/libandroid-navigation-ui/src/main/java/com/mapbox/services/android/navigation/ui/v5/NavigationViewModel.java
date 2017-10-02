@@ -31,12 +31,12 @@ import java.text.DecimalFormat;
 public class NavigationViewModel extends AndroidViewModel implements LifecycleObserver, ProgressChangeListener,
   MilestoneEventListener, OffRouteListener {
 
-  public MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
-  public MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
-  public MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
-  MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
-  MutableLiveData<Position> newOrigin = new MutableLiveData<>();
-  MutableLiveData<Boolean> isRunning = new MutableLiveData<>();
+  public final MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
+  public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
+  public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
+  final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
+  final MutableLiveData<Position> newOrigin = new MutableLiveData<>();
+  final MutableLiveData<Boolean> isRunning = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
   private NavigationInstructionPlayer instructionPlayer;
