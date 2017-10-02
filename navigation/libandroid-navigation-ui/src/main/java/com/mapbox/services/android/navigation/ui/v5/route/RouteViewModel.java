@@ -27,8 +27,8 @@ import retrofit2.Response;
 
 public class RouteViewModel extends ViewModel implements Callback<DirectionsResponse> {
 
-  public MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
-  public MutableLiveData<Position> destination = new MutableLiveData<>();
+  public final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
+  public final MutableLiveData<Position> destination = new MutableLiveData<>();
   private MutableLiveData<Boolean> isSuccessful = new MutableLiveData<>();
   private Position origin;
   private Location rawLocation;
