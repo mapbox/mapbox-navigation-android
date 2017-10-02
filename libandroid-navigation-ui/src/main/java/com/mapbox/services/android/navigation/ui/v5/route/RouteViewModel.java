@@ -54,7 +54,7 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
   }
 
   @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {g
+  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
     isSuccessful.setValue(false);
   }
 
