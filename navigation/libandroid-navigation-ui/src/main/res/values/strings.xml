@@ -7,4 +7,11 @@
     <string name="re_center">Re-Center</string>
     <string name="muted">Muted</string>
     <string name="unmuted">Unmuted</string>
+    <string name="feedback_hazard">Hazard</string>
+    <string name="feedback_accident">Accident</string>
+    <string name="feedback_not_allowed">Not Allowed</string>
+    <string name="feedback_closure">Closure</string>
+    <string name="feedback_other">Other Issue</string>
+    <string name="feedback_confusing">Confusing</string>
+    <string name="feedback_cancel">Cancel</string>
 </resources>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -11,10 +11,10 @@
         android:id="@+id/soundLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
         android:gravity="center_vertical|end">
 
         <TextView
@@ -25,6 +25,7 @@
             android:layout_marginEnd="17dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="17dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:background="@drawable/sound_chip_background"
             android:elevation="2dp"
@@ -34,17 +35,16 @@
             android:paddingStart="12dp"
             android:paddingTop="8dp"
             android:text="@string/muted"
+            android:textColor="?attr/navigationViewSecondary"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:textColor="?attr/navigationViewSecondary"
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/soundFab"
             app:layout_constraintTop_toTopOf="parent"
             tools:layout_constraintRight_creator="1"
-            tools:layout_constraintTop_creator="1"
-            android:layout_marginStart="8dp"/>
+            tools:layout_constraintTop_creator="1"/>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/soundFab"
