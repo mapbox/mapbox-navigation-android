@@ -34,6 +34,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -52,7 +53,7 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener, MilestoneEventListener {
+  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener, MilestoneEventListener, OffRouteListener {
 
   private static final int BEGIN_ROUTE_MILESTONE = 1001;
 
@@ -112,6 +113,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       navigation.addNavigationEventListener(this);
       navigation.addProgressChangeListener(this);
       navigation.addMilestoneEventListener(this);
+      navigation.addOffRouteListener(this);
 
       ((MockLocationEngine) locationEngine).setRoute(route);
       navigation.setLocationEngine(locationEngine);
@@ -131,7 +133,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       ((MockLocationEngine) locationEngine).setLastLocation(
         Position.fromLngLat(latLng.getLongitude(), latLng.getLatitude())
       );
-      mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
+      mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
       mapboxMap.setMyLocationEnabled(true);
       mapboxMap.getTrackingSettings().setMyLocationTrackingMode(MyLocationTracking.TRACKING_FOLLOW);
     }
@@ -160,7 +162,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     if (destination == null) {
       destination = Position.fromLngLat(point.getLongitude(), point.getLatitude());
     } else if (waypoint == null) {
-      waypoint = Position.fromLngLat(point.getLongitude(), point.getLatitude());
+      waypoint = destination;
+      destination = Position.fromLngLat(point.getLongitude(), point.getLatitude());
     } else {
       Toast.makeText(this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show();
     }
@@ -246,6 +249,11 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
         Toast.makeText(this, "Undefined milestone event occurred", Toast.LENGTH_LONG).show();
         break;
     }
+  }
+
+  @Override
+  public void userOffRoute(Location location) {
+    Timber.d("offRoute");
   }
 
   @Override

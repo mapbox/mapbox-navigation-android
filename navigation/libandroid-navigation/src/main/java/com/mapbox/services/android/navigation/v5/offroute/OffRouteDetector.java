@@ -37,7 +37,8 @@ public class OffRouteDetector extends OffRoute {
     boolean isCloseToUpcomingStep;
 
     LegStep upComingStep = routeProgress.currentLegProgress().upComingStep();
-    if (upComingStep != null) {
+
+    if (upComingStep != null && isOffRoute) {
       isCloseToUpcomingStep = userTrueDistanceFromStep(futurePosition, upComingStep) < radius;
       if (isOffRoute && isCloseToUpcomingStep) {
         // TODO increment step index
@@ -72,14 +73,21 @@ public class OffRouteDetector extends OffRoute {
    * @since 0.2.0
    */
   private double userTrueDistanceFromStep(Position futurePosition, LegStep step) {
-    LineString lineString = LineString.fromPolyline(step.getGeometry(), Constants.PRECISION_6);
-    Feature feature = TurfMisc.pointOnLine(Point.fromCoordinates(futurePosition), lineString.getCoordinates());
+    String geometry = step.getGeometry();
+    LineString lineString = LineString.fromPolyline(geometry, Constants.PRECISION_6);
 
-    Point snappedPoint = (Point) feature.getGeometry();
-
-    return TurfMeasurement.distance(
-      Point.fromCoordinates(futurePosition),
-      snappedPoint,
-      TurfConstants.UNIT_METERS);
+    if (lineString.getCoordinates().size() == 1) {
+      return TurfMeasurement.distance(
+        Point.fromCoordinates(futurePosition),
+        Point.fromCoordinates(lineString.getCoordinates().get(0)),
+        TurfConstants.UNIT_METERS);
+    } else {
+      Feature feature = TurfMisc.pointOnLine(Point.fromCoordinates(futurePosition), lineString.getCoordinates());
+      Point snappedPoint = (Point) feature.getGeometry();
+      return TurfMeasurement.distance(
+        Point.fromCoordinates(futurePosition),
+        snappedPoint,
+        TurfConstants.UNIT_METERS);
+    }
   }
 }
