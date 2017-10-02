@@ -2,6 +2,8 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -13,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
 
+import com.google.gson.Gson;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
@@ -51,6 +54,7 @@ import java.util.HashMap;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
 /**
  * Activity that creates the drop-in UI.
@@ -100,14 +104,18 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   private Location location;
   private Position destination;
+  private DirectionsRoute route;
   private boolean checkLaunchData;
   private boolean navigationRunning;
+  private boolean restartNavigation;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    Timber.d("onCreate()");
     setContentView(R.layout.navigation_view_layout);
     checkLaunchData = savedInstanceState == null;
+    Timber.d("checkLaunchData: " + checkLaunchData);
     bind();
     initClickListeners();
     preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -162,10 +170,32 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     shutdownNavigation();
   }
 
+  // TODO Extract constants
   @Override
   protected void onSaveInstanceState(Bundle outState) {
+    Timber.d("onSaveInstanceState()");
+    outState.putBoolean("navigation_running", navigationRunning);
+    outState.putParcelable("current_location", location);
+    outState.putParcelable("current_destination", locationFromDestination(destination));
+    outState.putString("current_route", new Gson().toJson(route));
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
+  }
+
+  @Override
+  protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
+    Timber.d("onRestoreInstanceState()");
+    restartNavigation = savedInstanceState.getBoolean("navigation_running");
+    if (restartNavigation) {
+      location = savedInstanceState.getParcelable("current_location");
+      Location destinationLocation = savedInstanceState.getParcelable("current_destination");
+      if (destinationLocation != null) {
+        destination = Position.fromCoordinates(destinationLocation.getLongitude(), destinationLocation.getLatitude());
+      }
+      String currentRoute = savedInstanceState.getString("current_route");
+      route = new Gson().fromJson(currentRoute, DirectionsRoute.class);
+    }
   }
 
   /**
@@ -185,7 +215,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     initCamera();
     initLocationLayer();
     initLocation();
-    checkLaunchData(getIntent());
+    restartNavigation();
   }
 
   /**
@@ -228,7 +258,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onLocationChanged(Location location) {
     this.location = location;
-    checkLaunchData(getIntent());
   }
 
   /**
@@ -291,12 +320,13 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (validRouteResponse(response)) {
+      route = response.body().getRoutes().get(0);
       if (navigationRunning) {
-        updateNavigation(response.body().getRoutes().get(0));
+        updateNavigation(route);
         instructionView.hideRerouteState();
         summaryBottomSheet.hideRerouteState();
       } else {
-        startNavigation(response.body().getRoutes().get(0));
+        startNavigation(route);
       }
     }
   }
@@ -446,10 +476,17 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   /**
    * Initializes the {@link LocationEngine} based on whether or not
    * simulation is enabled.
+   * <p>
+   * If simulation is enabled, the screen is locked to current orientation.
+   * This is due to current limitations of {@link MockLocationEngine}.
    */
   @SuppressWarnings( {"MissingPermission"})
   private void initLocation() {
-    if (!shouldSimulateRoute()) {
+    if (shouldSimulateRoute()) {
+      checkLaunchData(getIntent());
+      lockOrientation();
+    } else {
+      Timber.d("Starting up location engine...");
       locationEngine = navigation.getLocationEngine();
       locationEngine.addLocationEngineListener(this);
       locationEngine.activate();
@@ -457,8 +494,23 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       if (locationEngine.getLastLocation() != null) {
         onLocationChanged(locationEngine.getLastLocation());
       }
+    }
+  }
+
+  /**
+   * First checks to restart navigation after configuration change.
+   * <p>
+   * If restart isn't needed, checks for launch data (launching for the first time).
+   */
+  private void restartNavigation() {
+    Timber.d("Starting navigation onMapReady...");
+    if (restartNavigation) {
+      Timber.d("Restarting navigation...");
+      navigation.setLocationEngine(locationEngine);
+      navigation.startNavigation(route);
+      navigationRunning = true;
     } else {
-      onLocationChanged(null);
+      checkLaunchData(getIntent());
     }
   }
 
@@ -468,6 +520,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    */
   private void initRoute() {
     mapRoute = new NavigationMapRoute(mapView, map, NavigationConstants.ROUTE_BELOW_LAYER);
+    if (route != null) {
+      mapRoute.addRoute(route);
+    }
   }
 
   /**
@@ -476,14 +531,23 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    */
   private void initCamera() {
     camera = new NavigationCamera(this, map, navigation);
+    if (location != null) {
+      camera.resume(location);
+    }
   }
 
   /**
    * Initializes the {@link LocationLayerPlugin} to be used to draw the current
    * location.
+   * <p>
+   * If navigation is running (from configuration change), initialize enabled with NAVIGATION.
    */
+  @SuppressWarnings( {"MissingPermission"})
   private void initLocationLayer() {
     locationLayer = new LocationLayerPlugin(mapView, map, null);
+    if (navigationRunning) {
+      locationLayer.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
+    }
   }
 
   /**
@@ -499,6 +563,18 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       } else {
         startCoordinateNavigation();
       }
+    }
+  }
+
+  /**
+   * Locks the screen to the current orientation.
+   */
+  private void lockOrientation() {
+    int orientation = getResources().getConfiguration().orientation;
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+      setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+    } else {
+      setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
     }
   }
 
@@ -524,15 +600,17 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    * @param destination end point
    */
   private void fetchRoute(Position origin, Position destination) {
-    NavigationRoute.Builder routeBuilder = NavigationRoute.builder()
-      .accessToken(Mapbox.getAccessToken())
-      .origin(origin)
-      .destination(destination);
+    if (origin != null && destination != null) {
+      NavigationRoute.Builder routeBuilder = NavigationRoute.builder()
+        .accessToken(Mapbox.getAccessToken())
+        .origin(origin)
+        .destination(destination);
 
-    if (locationHasBearing()) {
-      fetchRouteWithBearing(routeBuilder);
-    } else {
-      routeBuilder.build().getRoute(this);
+      if (locationHasBearing()) {
+        fetchRouteWithBearing(routeBuilder);
+      } else {
+        routeBuilder.build().getRoute(this);
+      }
     }
   }
 
@@ -560,7 +638,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    * and starts navigation.
    */
   private void startRouteNavigation() {
-    DirectionsRoute route = NavigationLauncher.extractRoute(this);
+    route = NavigationLauncher.extractRoute(this);
     if (route != null) {
       RouteLeg lastLeg = route.getLegs().get(route.getLegs().size() - 1);
       LegStep lastStep = lastLeg.getSteps().get(lastLeg.getSteps().size() - 1);
@@ -597,6 +675,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    */
   @SuppressWarnings( {"MissingPermission"})
   private void startNavigation(DirectionsRoute route) {
+    Timber.d("Starting navigation with DirectionsRoute...");
     if (shouldSimulateRoute()) {
       activateMockLocationEngine(route);
     }
@@ -675,6 +754,19 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     deactivateNavigation();
     deactivateLocationEngine();
     deactivateInstructionPlayer();
+  }
+
+  /**
+   * Converts the destination {@link Position} to a {@link android.os.Parcelable} {@link Location}.
+   *
+   * @param destination as a {@link Position}
+   * @return destination to be stored in SavedInstanceState
+   */
+  private Location locationFromDestination(Position destination) {
+    Location destinationLocation = new Location(NavigationView.class.getSimpleName());
+    destinationLocation.setLongitude(destination.getLongitude());
+    destinationLocation.setLatitude(destination.getLatitude());
+    return destinationLocation;
   }
 
   /**
