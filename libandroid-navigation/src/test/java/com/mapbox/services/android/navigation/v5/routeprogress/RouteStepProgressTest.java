@@ -24,7 +24,6 @@ import static junit.framework.Assert.assertNotNull;
 
 import java.io.IOException;
 
-
 public class RouteStepProgressTest extends BaseTest {
 
   // Fixtures
