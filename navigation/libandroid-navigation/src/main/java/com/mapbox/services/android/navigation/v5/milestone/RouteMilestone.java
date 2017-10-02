@@ -1,16 +1,15 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 /**
- * Using a Route Milestone will result in {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
- * being invoked only once during a navigation session.
+ * Using a Route Milestone will result in
+ * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)} being invoked only
+ * once during a navigation session.
  *
  * @since 0.4.0
  */
 public class RouteMilestone extends Milestone {
-
 
   private Builder builder;
   private boolean called;
@@ -56,7 +55,7 @@ public class RouteMilestone extends Milestone {
     }
 
     @Override
-    public RouteMilestone build() throws NavigationException {
+    public RouteMilestone build() {
       return new RouteMilestone(this);
     }
   }
