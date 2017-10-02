@@ -15,7 +15,7 @@ ext {
       autoValueGson      : '0.4.5',
       autoValueParcel    : '0.2.5',
       junit              : '4.12',
-      supportLibVersion  : '26.0.2',
+      supportLibVersion  : '26.1.0',
       constraintLayout   : '1.0.2',
       gson               : '2.8.0',
       retrofit           : '2.2.0',
