@@ -15,6 +15,8 @@ import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
+import java.io.IOException;
+
 public class RouteLegProgressTest extends BaseTest {
 
   // Fixtures
@@ -24,9 +26,9 @@ public class RouteLegProgressTest extends BaseTest {
   private RouteLeg firstLeg;
 
   @Before
-  public void setup() {
+  public void setup() throws IOException {
     Gson gson = new Gson();
-    String body = readPath(DIRECTIONS_PRECISION_6);
+    String body = loadJsonFixture(DIRECTIONS_PRECISION_6);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     route = response.getRoutes().get(0);
     firstLeg = route.getLegs().get(0);

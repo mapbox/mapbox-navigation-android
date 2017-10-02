@@ -22,6 +22,8 @@ import org.junit.Test;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
+import java.io.IOException;
+
 
 public class RouteStepProgressTest extends BaseTest {
 
@@ -35,9 +37,9 @@ public class RouteStepProgressTest extends BaseTest {
   private RouteLeg firstLeg;
 
   @Before
-  public void setup() {
+  public void setup() throws IOException {
     Gson gson = new Gson();
-    String body = readPath(PRECISION_6);
+    String body = loadJsonFixture(PRECISION_6);
     response = gson.fromJson(body, DirectionsResponse.class);
     route = response.getRoutes().get(0);
     firstStep = route.getLegs().get(0).getSteps().get(0);
@@ -58,9 +60,9 @@ public class RouteStepProgressTest extends BaseTest {
   }
 
   @Test
-  public void stepDistance_equalsZeroOnOneCoordSteps() {
+  public void stepDistance_equalsZeroOnOneCoordSteps() throws IOException {
     Gson gson = new Gson();
-    String body = readPath(DCMAPBOX_CHIPOLTLE);
+    String body = loadJsonFixture(DCMAPBOX_CHIPOLTLE);
     response = gson.fromJson(body, DirectionsResponse.class);
     DirectionsRoute route = response.getRoutes().get(0);
 

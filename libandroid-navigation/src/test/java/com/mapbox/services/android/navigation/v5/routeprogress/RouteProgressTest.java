@@ -17,6 +17,8 @@ import org.robolectric.shadows.ShadowLocationManager;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
+import java.io.IOException;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21, shadows = {ShadowLocationManager.class})
 public class RouteProgressTest extends BaseTest {
@@ -31,15 +33,15 @@ public class RouteProgressTest extends BaseTest {
   private RouteProgress lastRouteProgress;
 
   @Before
-  public void setup() {
+  public void setup() throws IOException {
     Gson gson = new Gson();
-    String body = readPath(DIRECTIONS_PRECISION_6);
+    String body = loadJsonFixture(DIRECTIONS_PRECISION_6);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     route = response.getRoutes().get(0);
     RouteLeg firstLeg = route.getLegs().get(0);
 
     // Multiple leg route
-    body = readPath(MULTI_LEG_ROUTE);
+    body = loadJsonFixture(MULTI_LEG_ROUTE);
     response = gson.fromJson(body, DirectionsResponse.class);
     multiLegRoute = response.getRoutes().get(0);
 

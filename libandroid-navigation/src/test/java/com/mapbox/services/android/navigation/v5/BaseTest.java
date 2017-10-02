@@ -1,8 +1,12 @@
 package com.mapbox.services.android.navigation.v5;
 
+import static junit.framework.Assert.assertEquals;
+import static okhttp3.internal.Util.UTF_8;
+
 import android.location.Location;
 import android.util.Log;
 
+import com.google.gson.JsonParser;
 import com.mapbox.services.commons.models.Position;
 
 import org.apache.commons.io.IOUtils;
@@ -10,35 +14,24 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Scanner;
 
 public class BaseTest {
+
   public static final double DELTA = 1E-10;
   public static final double LARGE_DELTA = 0.1;
 
-  private static final String BASE_PATH = "/resources/";
-  private static final String LOG_TAG = BaseTest.class.getSimpleName();
+  public static final String ACCESS_TOKEN = "pk.XXX";
 
-  protected String readPath(String path) {
-    try {
-      InputStream is = getClass().getResourceAsStream(BASE_PATH + path);
-      if (is == null) {
-        throw new IOException("Resource not found: " + path);
-      }
-      String content = IOUtils.toString(is, Charset.forName("utf-8"));
-      IOUtils.closeQuietly(is);
-      return content;
-    } catch (IOException exception) {
-      Log.e(LOG_TAG, String.format("Failed to read fixture (%s): %s", path, exception.getMessage()));
-      exception.printStackTrace();
-    }
-
-    return null;
+  public void compareJson(String json1, String json2) {
+    JsonParser parser = new JsonParser();
+    assertEquals(parser.parse(json1), parser.parse(json2));
   }
 
-  public Location buildTestLocation(Position position) {
-    Location location = new Location("test");
-    location.setLatitude(position.getLatitude());
-    location.setLongitude(position.getLongitude());
-    return location;
+  protected String loadJsonFixture(String filename) throws IOException {
+    ClassLoader classLoader = getClass().getClassLoader();
+    InputStream inputStream = classLoader.getResourceAsStream(filename);
+    Scanner scanner = new Scanner(inputStream, UTF_8.name()).useDelimiter("\\A");
+    return scanner.hasNext() ? scanner.next() : "";
   }
 }
