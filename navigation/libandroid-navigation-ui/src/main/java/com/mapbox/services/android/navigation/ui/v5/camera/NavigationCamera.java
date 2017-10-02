@@ -38,8 +38,7 @@ public class NavigationCamera implements ProgressChangeListener {
 
   private MapboxMap mapboxMap;
   private MapboxNavigation navigation;
-
-  private Location location;
+  private CameraPosition currentCameraPositon;
   private double targetDistance;
   private boolean trackingEnabled = true;
 
@@ -69,8 +68,8 @@ public class NavigationCamera implements ProgressChangeListener {
    */
   public void start(DirectionsRoute route) {
     if (route != null) {
-      CameraPosition cameraPosition = buildCameraPositionFromRoute(route);
-      animateCameraToPosition(cameraPosition);
+      currentCameraPositon = buildCameraPositionFromRoute(route);
+      animateCameraToPosition(currentCameraPositon);
     } else {
       navigation.addProgressChangeListener(NavigationCamera.this);
     }
@@ -88,8 +87,8 @@ public class NavigationCamera implements ProgressChangeListener {
    */
   public void resume(Location location) {
     if (location != null) {
-      CameraPosition position = buildCameraPositionFromLocation(location);
-      animateCameraToPosition(position);
+      currentCameraPositon = buildCameraPositionFromLocation(location);
+      animateCameraToPosition(currentCameraPositon);
     } else {
       navigation.addProgressChangeListener(NavigationCamera.this);
     }
@@ -108,7 +107,6 @@ public class NavigationCamera implements ProgressChangeListener {
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     if (location.getLongitude() != 0 && location.getLatitude() != 0) {
-      this.location = location;
       easeCameraToLocation(location);
     }
   }
@@ -141,24 +139,8 @@ public class NavigationCamera implements ProgressChangeListener {
    */
   public void resetCameraPosition() {
     this.trackingEnabled = true;
-    if (location != null) {
-      Position targetPosition = TurfMeasurement.destination(
-        Position.fromCoordinates(location.getLongitude(), location.getLatitude()),
-        targetDistance, location.getBearing(), TurfConstants.UNIT_METERS
-      );
-
-      LatLng target = new LatLng(
-        targetPosition.getLatitude(),
-        targetPosition.getLongitude()
-      );
-
-      CameraPosition cameraPosition = new CameraPosition.Builder()
-        .tilt(CAMERA_TILT)
-        .zoom(CAMERA_ZOOM)
-        .target(target)
-        .bearing(location.getBearing())
-        .build();
-      mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 750, true);
+    if (currentCameraPositon != null) {
+      mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(currentCameraPositon), 750, true);
     }
   }
 
@@ -188,10 +170,9 @@ public class NavigationCamera implements ProgressChangeListener {
   }
 
   private void easeCameraToLocation(Location location) {
-    CameraPosition cameraPosition = buildCameraPositionFromLocation(location);
-
+    currentCameraPositon = buildCameraPositionFromLocation(location);
     if (trackingEnabled) {
-      mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 1000, false);
+      mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(currentCameraPositon), 1000, false);
     }
   }
 
