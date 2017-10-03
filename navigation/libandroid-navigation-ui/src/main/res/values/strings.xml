@@ -9,4 +9,7 @@
     <string name="re_center">Re-Center</string>
     <string name="muted">Muted</string>
     <string name="unmuted">Unmuted</string>
+    <string name="instruction_super_state">instruction_super_state</string>
+    <string name="instruction_visibility">instruction_visibility</string>
+    <string name="dark_theme_enabled">dark_theme_enabled</string>
 </resources>
