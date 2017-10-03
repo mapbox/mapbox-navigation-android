@@ -156,6 +156,7 @@ public class InstructionView extends RelativeLayout {
    *
    * @param routeProgress used to provide navigation / progress data
    */
+  @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !showingRerouteState) {
       InstructionModel model = new InstructionModel(routeProgress, decimalFormat);

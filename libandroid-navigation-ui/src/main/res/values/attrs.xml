@@ -17,6 +17,7 @@
         <attr name="navigationViewPrimary" format="color"/>
         <attr name="navigationViewSecondary" format="color"/>
         <attr name="navigationViewAccent" format="color"/>
+        <attr name="navigationViewAccentText" format="color"/>
 
     </declare-styleable>
 </resources>

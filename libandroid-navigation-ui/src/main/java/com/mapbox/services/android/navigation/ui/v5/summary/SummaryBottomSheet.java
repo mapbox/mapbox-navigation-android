@@ -112,6 +112,7 @@ public class SummaryBottomSheet extends FrameLayout {
    *
    * @param routeProgress used to provide navigation / routeProgress data
    */
+  @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !rerouting) {
       SummaryModel model = new SummaryModel(routeProgress, decimalFormat);

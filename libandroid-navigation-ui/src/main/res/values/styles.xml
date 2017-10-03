@@ -16,14 +16,14 @@
         <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary</item>
         <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary</item>
         <item name="navigationViewAccent">@color/mapbox_navigation_view_color_accent</item>
+        <item name="navigationViewAccentText">@color/mapbox_navigation_view_color_accent_text</item>
     </style>
 
     <style name="NavigationViewDark" parent="Theme.AppCompat.NoActionBar">
-        <item name="navigationViewPrimary">@color/mapbox_navigation_route_layer_blue</item>
-        <item name="navigationViewSecondary">@color/mapbox_navigation_route_layer_congestion_red
-        </item>
-        <item name="navigationViewAccent">@color/mapbox_navigation_route_layer_congestion_yellow
-        </item>
+        <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary_dark</item>
+        <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary_dark</item>
+        <item name="navigationViewAccent">@color/mapbox_navigation_view_color_accent_dark</item>
+        <item name="navigationViewAccentText">@color/mapbox_navigation_view_color_accent_text_dark</item>
     </style>
 
 </resources>
