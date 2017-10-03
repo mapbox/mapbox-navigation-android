@@ -12,6 +12,7 @@ import com.mapbox.services.commons.utils.PolylineUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @AutoValue
 abstract class SessionState {
@@ -64,6 +65,17 @@ abstract class SessionState {
 
   abstract DirectionsRoute currentDirectionRoute();
 
+  int secondsSinceLastReroute() {
+    if (lastRerouteDate() == null) {
+      return -1;
+    }
+    long diffInMs = lastRerouteDate().getTime() - new Date().getTime();
+    return (int) TimeUnit.MILLISECONDS.toSeconds(diffInMs);
+  }
+
+  @Nullable
+  abstract Date lastRerouteDate();
+
   abstract Date startTimestamp();
 
   @Nullable
@@ -94,6 +106,8 @@ abstract class SessionState {
     abstract Builder originalRequestIdentifier(@Nullable String originalRequestIdentifier);
 
     abstract Builder requestIdentifier(@Nullable String requestIdentifier);
+
+    abstract Builder lastRerouteDate(@Nullable Date lastRerouteDate);
 
     abstract Builder mockLocation(boolean mockLocation);
 

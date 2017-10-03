@@ -64,6 +64,22 @@ class NavigationMetricsWrapper {
     ));
   }
 
+  static void rerouteEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
+    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildRerouteEvent(
+      sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(),
+      location.getLatitude(), location.getLongitude(),
+      sessionState.currentGeometry(), "unknown", -1, -1,
+      sessionState.rerouteCount(), sessionState.startTimestamp(), null, null,
+      -1, -1, -1, -1, -1,
+      sessionState.secondsSinceLastReroute(), "", "", sessionState.mockLocation(),
+      null, null, sessionState.originalGeometry(),
+      sessionState.originalDistance(), sessionState.originalDuration(), null, "",
+      "", "", "", "", "", "",
+      "", -1, -1, -1, -1, -1,
+      -1
+    ));
+  }
+
   static void turnstileEvent() {
     MapboxTelemetry.getInstance().setCustomTurnstileEvent(
       MapboxNavigationEvent.buildTurnstileEvent(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)

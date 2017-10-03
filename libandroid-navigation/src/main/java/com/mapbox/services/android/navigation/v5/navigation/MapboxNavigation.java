@@ -373,6 +373,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
         .currentDirectionRoute(directionsRoute)
         .rerouteCount(sessionState.rerouteCount() + 1)
         .build();
+
+      // TODO once all reroute event occurs (after 20 seconds) set the seconds using .lastRerouteDate()
     }
   }
 
