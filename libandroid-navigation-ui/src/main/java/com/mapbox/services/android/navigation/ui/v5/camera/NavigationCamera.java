@@ -284,7 +284,7 @@ public class NavigationCamera implements ProgressChangeListener {
    * Holds the two different screen orientations
    * and their corresponding zoom levels.
    */
-  private class OrientationMap extends SparseArray<Integer> {
+  private static class OrientationMap extends SparseArray<Integer> {
 
     OrientationMap() {
       put(ORIENTATION_PORTRAIT, 17);
