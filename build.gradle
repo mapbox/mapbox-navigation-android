@@ -1,0 +1,50 @@
+apply plugin: 'com.github.kt3k.coveralls'
+apply plugin: 'jacoco'
+
+buildscript {
+  apply from: "${rootDir}/gradle/dependencies.gradle"
+
+  repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url 'https://plugins.gradle.org/m2' }
+    maven { url "https://maven.google.com" }
+    jcenter()
+  }
+  dependencies {
+    classpath pluginDependencies.gradle
+    classpath pluginDependencies.sonarqube
+    classpath pluginDependencies.coveralls
+    classpath pluginDependencies.errorprone
+  }
+}
+
+task testReport(type: TestReport, group: 'Build') {
+  description = 'Generates an aggregate test report'
+  destinationDir = file("${buildDir}/reports/allTests")
+}
+
+allprojects {
+  repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url 'https://plugins.gradle.org/m2' }
+    maven { url "https://maven.google.com" }
+    jcenter()
+  }
+
+  group = GROUP
+  version = VERSION_NAME
+}
+
+subprojects {
+  apply plugin: 'idea'
+  apply plugin: 'net.ltgt.errorprone'
+  apply from: "${rootDir}/gradle/dependencies.gradle"
+
+  dependencies {
+    errorprone dependenciesList.errorprone
+  }
+}
+
+task clean(type: Delete) {
+  delete rootProject.buildDir
+}

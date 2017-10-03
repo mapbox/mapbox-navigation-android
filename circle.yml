@@ -18,18 +18,27 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "navigation/build.gradle" }}-{{ checksum  "navigation/app/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
           name: Accept Android license
           command: |
            echo y | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;26.0.1"
       - run:
           name: Download Dependencies
-          command: cd navigation && ./gradlew androidDependencies
+          command: ./gradlew androidDependencies
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "navigation/build.gradle" }}-{{ checksum  "navigation/app/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      - run:
+          name: Sonarcloud upload
+          command: |
+            ./gradlew sonarqube \
+              -DskipTests=true \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.organization=mapbox \
+              -Dsonar.login=$SONARCLOUD_KEY \
+              -Dsonar.test.failure.ignore=true
       - run:
           name: Check Java code style
           command: make checkstyle
@@ -39,7 +48,7 @@ jobs:
       - run:
           name: Build testapp APK
           command: |
-            cd navigation && ./gradlew accessToken
+            ./gradlew accessToken
             ./gradlew app:assembleDebug
       - run:
           name: Log in to Google Cloud Platform
@@ -53,7 +62,7 @@ jobs:
           no_output_timeout: 1200
           shell: /bin/bash -euo pipefail
           command: |
-            gcloud firebase test android run --type robo --app navigation/app/build/outputs/apk/app-debug.apk --device-ids shamu --os-version-ids 22 --locales en --orientations portrait --timeout 10m
+            gcloud firebase test android run --type robo --app app/build/outputs/apk/app-debug.apk --device-ids shamu --os-version-ids 22 --locales en --orientations portrait --timeout 10m
       - run:
           name: Update Transifex
           command: |
@@ -65,10 +74,10 @@ jobs:
               echo "Skipping push to Transifex"
             fi
       - store_artifacts:
-          path: navigation/app/build/reports
+          path: app/build/reports
           destination: reports
       - store_test_results:
-          path: navigation/app/build/test-results
+          path: app/build/test-results
 
 # ------------------------------------------------------------------------------
   release:
@@ -96,7 +105,7 @@ jobs:
             NEXUS_PASSWORD=$PUBLISH_NEXUS_PASSWORD
             signing.keyId=$SIGNING_KEYID
             signing.password=$SIGNING_PASSWORD
-            signing.secretKeyRingFile=../../secring.gpg" >> navigation/gradle.properties
+            signing.secretKeyRingFile=../../secring.gpg" >> gradle.properties
       - run:
           name: Build Navigation SDK
           command: make build-release
@@ -107,5 +116,5 @@ jobs:
             make publish ;
             fi
       - store_artifacts:
-          path: navigation/app/build/reports
+          path: app/build/reports
           destination: reports
