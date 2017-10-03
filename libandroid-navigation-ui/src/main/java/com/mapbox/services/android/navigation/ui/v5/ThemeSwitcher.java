@@ -7,6 +7,8 @@ import android.content.res.TypedArray;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 
+import com.mapbox.mapboxsdk.annotations.Icon;
+import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.maps.MapView;
 
 public class ThemeSwitcher {
@@ -32,6 +34,13 @@ public class ThemeSwitcher {
     String nightThemeUrl = activity.getString(R.string.navigation_guidance_night_v2);
     String dayThemeUrl = activity.getString(R.string.navigation_guidance_day_v2);
     mapView.setStyleUrl(darkThemeEnabled ? nightThemeUrl : dayThemeUrl);
+  }
+
+  static Icon retrieveMapMarker(Context context) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
+    IconFactory iconFactory = IconFactory.getInstance(context);
+    return iconFactory.fromResource(darkThemeEnabled ? R.drawable.map_marker_dark : R.drawable.map_marker_light);
   }
 
   public static int retrieveNavigationViewPrimaryColor(Context context) {

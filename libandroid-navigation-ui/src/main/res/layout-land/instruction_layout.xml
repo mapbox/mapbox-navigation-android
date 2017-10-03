@@ -37,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:includeFontPadding="false"
-            android:textColor="@color/md_grey_800"
+            android:textColor="?attr/navigationViewAccentText"
             android:textSize="28sp"
             tools:text="3.2 miles"/>
 

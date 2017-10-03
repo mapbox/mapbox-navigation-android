@@ -21,7 +21,7 @@
         <ImageView
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:tint="@color/md_grey_800"
+            android:tint="?attr/navigationViewIcon"
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             app:srcCompat="@drawable/ic_list"/>
@@ -29,7 +29,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/md_grey_800"
+            android:textColor="?attr/navigationViewAccentText"
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             android:text="@string/directions"

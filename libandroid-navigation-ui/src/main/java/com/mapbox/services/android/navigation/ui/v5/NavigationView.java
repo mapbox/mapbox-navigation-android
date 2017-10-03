@@ -12,8 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
 
-import com.mapbox.mapboxsdk.annotations.Icon;
-import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -266,13 +264,11 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    */
   @Override
   public void addMarker(Position position) {
-    IconFactory iconFactory = IconFactory.getInstance(this);
-    Icon icon = iconFactory.fromResource(R.drawable.map_marker);
     LatLng markerPosition = new LatLng(position.getLatitude(),
       position.getLongitude());
     map.addMarker(new MarkerOptions()
       .position(markerPosition)
-      .icon(icon));
+      .icon(ThemeSwitcher.retrieveMapMarker(this)));
   }
 
   @Override

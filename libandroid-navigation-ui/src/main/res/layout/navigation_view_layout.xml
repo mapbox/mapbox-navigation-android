@@ -33,6 +33,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
-        app:behavior_peekHeight="82dp"/>
+        app:behavior_peekHeight="78dp"/>
 
 </android.support.design.widget.CoordinatorLayout>

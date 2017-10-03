@@ -16,14 +16,12 @@ public class SummaryModel {
   private SpannableStringBuilder distanceRemaining;
   private String timeRemaining;
   private String arrivalTime;
-  private float stepFractionTraveled;
 
   public SummaryModel(RouteProgress progress, DecimalFormat decimalFormat) {
     this.progress = progress;
     distanceRemaining = distanceFormatterBold(progress.distanceRemaining(), decimalFormat);
     timeRemaining = formatTimeRemaining(progress.durationRemaining());
     arrivalTime = formatArrivalTime(progress.durationRemaining());
-    stepFractionTraveled = progress.currentLegProgress().currentStepProgress().fractionTraveled();
   }
 
   RouteProgress getProgress() {
@@ -40,9 +38,5 @@ public class SummaryModel {
 
   String getArrivalTime() {
     return arrivalTime;
-  }
-
-  float getStepFractionTraveled() {
-    return stepFractionTraveled;
   }
 }

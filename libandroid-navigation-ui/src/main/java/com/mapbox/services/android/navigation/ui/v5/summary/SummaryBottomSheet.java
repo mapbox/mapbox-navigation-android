@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5.summary;
 
-import android.animation.ObjectAnimator;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.support.annotation.Nullable;
@@ -9,7 +8,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -42,7 +40,6 @@ public class SummaryBottomSheet extends FrameLayout {
   private TextView distanceRemainingText;
   private TextView timeRemainingText;
   private TextView arrivalTimeText;
-  private ProgressBar stepProgressBar;
   private ProgressBar rerouteProgressBar;
   private RecyclerView rvDirections;
   private View rvShadow;
@@ -85,7 +82,6 @@ public class SummaryBottomSheet extends FrameLayout {
           arrivalTimeText.setText(summaryModel.getArrivalTime());
           timeRemainingText.setText(summaryModel.getTimeRemaining());
           distanceRemainingText.setText(summaryModel.getDistanceRemaining());
-          setProgressBar(summaryModel.getStepFractionTraveled());
           updateSteps(summaryModel.getProgress());
           updateFirstViewHolder();
         }
@@ -119,7 +115,6 @@ public class SummaryBottomSheet extends FrameLayout {
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());
-      setProgressBar(model.getStepFractionTraveled());
       updateSteps(routeProgress);
       updateFirstViewHolder();
     }
@@ -135,7 +130,6 @@ public class SummaryBottomSheet extends FrameLayout {
   public void showRerouteState() {
     if (!rerouting) {
       rerouting = true;
-      stepProgressBar.setVisibility(INVISIBLE);
       rerouteProgressBar.setVisibility(VISIBLE);
       clearViews();
     }
@@ -150,7 +144,6 @@ public class SummaryBottomSheet extends FrameLayout {
   public void hideRerouteState() {
     if (rerouting) {
       rerouting = false;
-      stepProgressBar.setVisibility(VISIBLE);
       rerouteProgressBar.setVisibility(INVISIBLE);
     }
   }
@@ -169,7 +162,6 @@ public class SummaryBottomSheet extends FrameLayout {
     distanceRemainingText = findViewById(R.id.distanceRemainingText);
     timeRemainingText = findViewById(R.id.timeRemainingText);
     arrivalTimeText = findViewById(R.id.arrivalTimeText);
-    stepProgressBar = findViewById(R.id.stepProgressBar);
     rerouteProgressBar = findViewById(R.id.rerouteProgressBar);
     rvDirections = findViewById(R.id.rvDirections);
     rvShadow = findViewById(R.id.rvShadow);
@@ -200,21 +192,6 @@ public class SummaryBottomSheet extends FrameLayout {
    */
   private void initDecimalFormat() {
     decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
-  }
-
-  /**
-   * Sets the current progress.
-   * <p>
-   * Use {@link ObjectAnimator} to provide smooth transitions between values.
-   *
-   * @param fractionRemaining to update progress value
-   */
-  private void setProgressBar(float fractionRemaining) {
-    ObjectAnimator animation = ObjectAnimator.ofInt(stepProgressBar, "progress",
-      Math.round(fractionRemaining * 10000));
-    animation.setInterpolator(new LinearInterpolator());
-    animation.setDuration(1000);
-    animation.start();
   }
 
   /**
