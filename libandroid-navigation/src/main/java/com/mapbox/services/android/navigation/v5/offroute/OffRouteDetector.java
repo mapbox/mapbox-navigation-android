@@ -37,22 +37,9 @@ public class OffRouteDetector extends OffRoute {
     // Check to see if the user is moving away from the maneuver. Here, we store an array of
     // distances. If the current distance is greater than the last distance, add it to the array. If
     // the array grows larger than x, reroute the user.
-    double userDistanceToManeuver = TurfMeasurement.distance(
-      routeProgress.currentLegProgress().currentStep().getManeuver().asPosition(),
-      futurePosition, TurfConstants.UNIT_METERS
-    );
-
-    if (recentDistancesFromManeuverInMeters.size() >= 3) {
-      // User's moving away from maneuver position, thus offRoute.
+    if (movingAwayFromManeuver(routeProgress, recentDistancesFromManeuverInMeters,
+      futurePosition)) {
       return true;
-    }
-    if (recentDistancesFromManeuverInMeters.isEmpty()) {
-      recentDistancesFromManeuverInMeters.push((int) userDistanceToManeuver);
-    } else if (userDistanceToManeuver > recentDistancesFromManeuverInMeters.peek()) {
-      recentDistancesFromManeuverInMeters.push((int) userDistanceToManeuver);
-    } else {
-      // If we get a descending distance, reset the counter
-      recentDistancesFromManeuverInMeters.clear();
     }
 
     // If the user is moving away from the maneuver location and they are close to the next step we
@@ -86,6 +73,30 @@ public class OffRouteDetector extends OffRoute {
     );
   }
 
+  private static boolean movingAwayFromManeuver(RouteProgress routeProgress,
+                                                RingBuffer<Integer> recentDistancesFromManeuverInMeters,
+                                                Position futurePosition) {
+
+    double userDistanceToManeuver = TurfMeasurement.distance(
+      routeProgress.currentLegProgress().currentStep().getManeuver().asPosition(),
+      futurePosition, TurfConstants.UNIT_METERS
+    );
+
+    if (recentDistancesFromManeuverInMeters.size() >= 3) {
+      // User's moving away from maneuver position, thus offRoute.
+      return true;
+    }
+    if (recentDistancesFromManeuverInMeters.isEmpty()) {
+      recentDistancesFromManeuverInMeters.push((int) userDistanceToManeuver);
+    } else if (userDistanceToManeuver > recentDistancesFromManeuverInMeters.peek()) {
+      recentDistancesFromManeuverInMeters.push((int) userDistanceToManeuver);
+    } else {
+      // If we get a descending distance, reset the counter
+      recentDistancesFromManeuverInMeters.clear();
+    }
+    return false;
+  }
+
   /**
    * Gets the distance from the users predicted {@link Position} to the
    * closest point on the given {@link LegStep}.
@@ -95,7 +106,7 @@ public class OffRouteDetector extends OffRoute {
    * @return double in distance meters
    * @since 0.2.0
    */
-  private double userTrueDistanceFromStep(Position futurePosition, LegStep step) {
+  private static double userTrueDistanceFromStep(Position futurePosition, LegStep step) {
     LineString lineString = LineString.fromPolyline(step.getGeometry(), Constants.PRECISION_6);
     Feature feature = TurfMisc.pointOnLine(Point.fromCoordinates(futurePosition), lineString.getCoordinates());
 

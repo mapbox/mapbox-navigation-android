@@ -13,4 +13,10 @@ public class OffRouteDetectorTest extends BaseTest {
     OffRoute offRoute = new OffRouteDetector();
     assertNotNull(offRoute);
   }
+
+  @Test
+  public void isUserOffRoute_falseWhenMovingTowardsManeuver() throws Exception {
+    
+
+  }
 }
