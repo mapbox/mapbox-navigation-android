@@ -8,11 +8,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
+import com.mapbox.mapboxsdk.exceptions.InvalidLatLngBoundsException;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.location.LocationSource;
@@ -280,8 +282,14 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       for (Position position : routeCoords) {
         bboxPoints.add(new LatLng(position.getLatitude(), position.getLongitude()));
       }
-      LatLngBounds bounds = new LatLngBounds.Builder().includes(bboxPoints).build();
-      animateCameraBbox(bounds, CAMERA_ANIMATION_DURATION, new int[] {50, 500, 50, 335});
+      if (bboxPoints.size() > 1) {
+        try {
+          LatLngBounds bounds = new LatLngBounds.Builder().includes(bboxPoints).build();
+          animateCameraBbox(bounds, CAMERA_ANIMATION_DURATION, new int[] {50, 500, 50, 335});
+        } catch (InvalidLatLngBoundsException exception) {
+          Toast.makeText(this, "Valid route not found.", Toast.LENGTH_SHORT).show();
+        }
+      }
     }
   }
 
