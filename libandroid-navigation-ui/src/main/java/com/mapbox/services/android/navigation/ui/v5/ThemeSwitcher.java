@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
@@ -14,8 +15,12 @@ import com.mapbox.mapboxsdk.maps.MapView;
 public class ThemeSwitcher {
 
   static void setTheme(Activity activity) {
+    int uiMode = activity.getResources().getConfiguration().uiMode;
+    boolean darkThemeEnabled = uiMode == Configuration.UI_MODE_NIGHT_YES;
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
-    boolean darkThemeEnabled = preferences.getBoolean(activity.getString(R.string.dark_theme_enabled), false);
+    SharedPreferences.Editor editor = preferences.edit();
+    editor.putBoolean(activity.getString(R.string.dark_theme_enabled), darkThemeEnabled);
+    editor.apply();
     activity.setTheme(darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight);
   }
 

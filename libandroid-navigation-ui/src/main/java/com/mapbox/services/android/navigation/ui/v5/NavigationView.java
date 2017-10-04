@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.view.View;
 import android.widget.ImageButton;
 
@@ -80,6 +81,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
+    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
     ThemeSwitcher.setTheme(this);
     super.onCreate(savedInstanceState);
     setContentView(R.layout.navigation_view_layout);
@@ -343,7 +345,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     soundFab.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        ThemeSwitcher.toggleTheme(NavigationView.this);
         navigationPresenter.onMuteClick(instructionView.toggleMute());
       }
     });
