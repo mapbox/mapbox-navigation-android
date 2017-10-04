@@ -13,6 +13,5 @@ public abstract class OffRoute {
 
   public abstract boolean isUserOffRoute(Location location, RouteProgress routeProgress,
                                          MapboxNavigationOptions options,
-                                         List<Position> stepPositions,
                                          RingBuffer<Integer> recentDistancesFromManeuverInMeters);
 }

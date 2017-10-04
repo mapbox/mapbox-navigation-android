@@ -182,11 +182,10 @@ class NavigationHelper {
   }
 
   static boolean isUserOffRoute(NewLocationModel newLocationModel, RouteProgress routeProgress,
-                                List<Position> stepPositions,
                                 RingBuffer<Integer> recentDistancesFromManeuverInMeters) {
     OffRoute offRoute = newLocationModel.mapboxNavigation().getOffRouteEngine();
     return offRoute.isUserOffRoute(newLocationModel.location(), routeProgress,
-      newLocationModel.mapboxNavigation().options(), stepPositions,
+      newLocationModel.mapboxNavigation().options(),
       recentDistancesFromManeuverInMeters);
   }
 

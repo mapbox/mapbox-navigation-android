@@ -71,7 +71,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       newLocationModel.mapboxNavigation(), newLocationModel.location());
     final List<Milestone> milestones = checkMilestones(
       previousRouteProgress, routeProgress, newLocationModel.mapboxNavigation());
-    final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress, stepPositions,
+    final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress,
       recentDistancesFromManeuverInMeters);
     final Location location = !userOffRoute && newLocationModel.mapboxNavigation().options().snapToRoute()
       ? getSnappedLocation(newLocationModel.mapboxNavigation(), newLocationModel.location(),

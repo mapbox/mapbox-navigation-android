@@ -15,8 +15,6 @@ import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
 
-import java.util.List;
-
 public class OffRouteDetector extends OffRoute {
 
   /**
@@ -27,7 +25,7 @@ public class OffRouteDetector extends OffRoute {
    */
   @Override
   public boolean isUserOffRoute(Location location, RouteProgress routeProgress,
-                                MapboxNavigationOptions options, List<Position> stepPositions,
+                                MapboxNavigationOptions options,
                                 RingBuffer<Integer> recentDistancesFromManeuverInMeters) {
     Position futurePosition = getFuturePosition(location, options);
     double radius = Math.max(options.maximumDistanceOffRoute(),
@@ -39,24 +37,22 @@ public class OffRouteDetector extends OffRoute {
     // Check to see if the user is moving away from the maneuver. Here, we store an array of
     // distances. If the current distance is greater than the last distance, add it to the array. If
     // the array grows larger than x, reroute the user.
-    if (stepPositions != null) {
-      double userDistanceToManeuver = TurfMeasurement.distance(
-        routeProgress.currentLegProgress().currentStep().getManeuver().asPosition(),
-        futurePosition, TurfConstants.UNIT_METERS
-      );
+    double userDistanceToManeuver = TurfMeasurement.distance(
+      routeProgress.currentLegProgress().currentStep().getManeuver().asPosition(),
+      futurePosition, TurfConstants.UNIT_METERS
+    );
 
-      if (recentDistancesFromManeuverInMeters.size() >= 3) {
-        // User's moving away from maneuver position, thus offRoute.
-        return true;
-      }
-      if (recentDistancesFromManeuverInMeters.isEmpty()) {
-        recentDistancesFromManeuverInMeters.push((int) userDistanceToManeuver);
-      } else if (userDistanceToManeuver > recentDistancesFromManeuverInMeters.peek()) {
-        recentDistancesFromManeuverInMeters.push((int) userDistanceToManeuver);
-      } else {
-        // If we get a descending distance, reset the counter
-        recentDistancesFromManeuverInMeters.clear();
-      }
+    if (recentDistancesFromManeuverInMeters.size() >= 3) {
+      // User's moving away from maneuver position, thus offRoute.
+      return true;
+    }
+    if (recentDistancesFromManeuverInMeters.isEmpty()) {
+      recentDistancesFromManeuverInMeters.push((int) userDistanceToManeuver);
+    } else if (userDistanceToManeuver > recentDistancesFromManeuverInMeters.peek()) {
+      recentDistancesFromManeuverInMeters.push((int) userDistanceToManeuver);
+    } else {
+      // If we get a descending distance, reset the counter
+      recentDistancesFromManeuverInMeters.clear();
     }
 
     // If the user is moving away from the maneuver location and they are close to the next step we
