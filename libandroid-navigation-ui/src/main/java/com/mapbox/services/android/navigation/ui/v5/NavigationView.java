@@ -278,12 +278,26 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     finish();
   }
 
+  /**
+   * Used when starting this {@link android.app.Activity}
+   * for the first time.
+   * <p>
+   * Zooms to the beginning of the {@link DirectionsRoute}.
+   *
+   * @param directionsRoute where camera should move to
+   */
   public void startCamera(DirectionsRoute directionsRoute) {
     if (!resumeState) {
       camera.start(directionsRoute);
     }
   }
 
+  /**
+   * Used after configuration changes to resume the camera
+   * to the last location update from the Navigation SDK.
+   *
+   * @param location where the camera should move to
+   */
   public void resumeCamera(Location location) {
     if (resumeState) {
       camera.resume(location);
@@ -418,16 +432,26 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     locationLayer.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
   }
 
+  /**
+   * Add lifecycle observers to ensure these objects properly
+   * start / stop based on the Android lifecycle.
+   */
   private void initLifecycleObservers() {
     getLifecycle().addObserver(locationLayer);
     getLifecycle().addObserver(locationViewModel);
     getLifecycle().addObserver(navigationViewModel);
   }
 
+  /**
+   * Initialize a new presenter for this Activity.
+   */
   private void initNavigationPresenter() {
     navigationPresenter = new NavigationPresenter(this);
   }
 
+  /**
+   * Initiate observing of ViewModels by Views.
+   */
   private void subscribeViews() {
     instructionView.subscribe(navigationViewModel);
     summaryBottomSheet.subscribe(navigationViewModel);

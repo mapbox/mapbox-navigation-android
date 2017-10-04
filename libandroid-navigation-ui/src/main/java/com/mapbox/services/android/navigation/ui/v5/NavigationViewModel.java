@@ -150,6 +150,10 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
     decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
   }
 
+  /**
+   * Adds this class as a listener for progress,
+   * milestones, and off route events.
+   */
   private void addNavigationListeners() {
     if (navigation != null) {
       navigation.addProgressChangeListener(this);
@@ -158,6 +162,13 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
     }
   }
 
+  /**
+   * Starts navigation and sets isRunning to true.
+   * <p>
+   * This will notify any observer of isRunning that navigation has begun.
+   *
+   * @param route that is being navigated
+   */
   private void startNavigation(DirectionsRoute route) {
     if (route != null) {
       navigation.startNavigation(route);
