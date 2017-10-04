@@ -5,6 +5,7 @@ import android.location.Location;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.api.directions.v5.models.LegStep;
 import com.mapbox.services.api.utils.turf.TurfConstants;
 import com.mapbox.services.api.utils.turf.TurfMeasurement;
@@ -13,6 +14,8 @@ import com.mapbox.services.commons.geojson.Feature;
 import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
+
+import java.util.List;
 
 public class OffRouteDetector extends OffRoute {
 
@@ -23,7 +26,9 @@ public class OffRouteDetector extends OffRoute {
    * @since 0.2.0
    */
   @Override
-  public boolean isUserOffRoute(Location location, RouteProgress routeProgress, MapboxNavigationOptions options) {
+  public boolean isUserOffRoute(Location location, RouteProgress routeProgress,
+                                MapboxNavigationOptions options, List<Position> stepPositions,
+                                RingBuffer<Integer> recentDistancesFromManeuverInMeters) {
     Position futurePosition = getFuturePosition(location, options);
     double radius = Math.max(options.maximumDistanceOffRoute(),
       location.getAccuracy() + options.userLocationSnapDistance());
@@ -31,9 +36,32 @@ public class OffRouteDetector extends OffRoute {
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     boolean isOffRoute = userTrueDistanceFromStep(futurePosition, currentStep) > radius;
 
-    // If the user is moving away from the maneuver location and they are close to the next step we can safely say they
-    // have completed the maneuver. This is intended to be a fallback case when we do find that the users course matches
-    // the exit bearing.
+    // Check to see if the user is moving away from the maneuver. Here, we store an array of
+    // distances. If the current distance is greater than the last distance, add it to the array. If
+    // the array grows larger than x, reroute the user.
+    if (stepPositions != null) {
+      double userDistanceToManeuver = TurfMeasurement.distance(
+        routeProgress.currentLegProgress().currentStep().getManeuver().asPosition(),
+        futurePosition, TurfConstants.UNIT_METERS
+      );
+
+      if (recentDistancesFromManeuverInMeters.size() >= 3) {
+        // User's moving away from maneuver position, thus offRoute.
+        return true;
+      }
+      if (recentDistancesFromManeuverInMeters.isEmpty()) {
+        recentDistancesFromManeuverInMeters.push((int) userDistanceToManeuver);
+      } else if (userDistanceToManeuver > recentDistancesFromManeuverInMeters.peek()) {
+        recentDistancesFromManeuverInMeters.push((int) userDistanceToManeuver);
+      } else {
+        // If we get a descending distance, reset the counter
+        recentDistancesFromManeuverInMeters.clear();
+      }
+    }
+
+    // If the user is moving away from the maneuver location and they are close to the next step we
+    // can safely say they have completed the maneuver. This is intended to be a fallback case when
+    // we do find that the users course matches the exit bearing.
     boolean isCloseToUpcomingStep;
 
     LegStep upComingStep = routeProgress.currentLegProgress().upComingStep();
