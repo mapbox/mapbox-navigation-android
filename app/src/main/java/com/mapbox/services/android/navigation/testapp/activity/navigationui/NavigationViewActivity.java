@@ -280,8 +280,10 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       for (Position position : routeCoords) {
         bboxPoints.add(new LatLng(position.getLatitude(), position.getLongitude()));
       }
-      LatLngBounds bounds = new LatLngBounds.Builder().includes(bboxPoints).build();
-      animateCameraBbox(bounds, CAMERA_ANIMATION_DURATION, new int[] {50, 500, 50, 335});
+      if (bboxPoints.size() > 1) {
+        LatLngBounds bounds = new LatLngBounds.Builder().includes(bboxPoints).build();
+        animateCameraBbox(bounds, CAMERA_ANIMATION_DURATION, new int[] {50, 500, 50, 335});
+      }
     }
   }
 
