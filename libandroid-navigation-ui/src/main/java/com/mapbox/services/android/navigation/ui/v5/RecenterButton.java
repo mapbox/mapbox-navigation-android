@@ -2,11 +2,11 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
-import android.widget.LinearLayout;
 
 /**
  * Button used to re-activate following user location during navigation.
@@ -20,7 +20,7 @@ import android.widget.LinearLayout;
  *
  * @since 0.6.0
  */
-public class RecenterButton extends LinearLayout {
+public class RecenterButton extends CardView {
 
   private Animation slideUpBottom;
 

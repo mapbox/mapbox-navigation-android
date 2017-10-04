@@ -43,6 +43,7 @@ dependencies {
   compile dependenciesList.supportDesign
   compile dependenciesList.supportRecyclerView
   compile dependenciesList.supportConstraintLayout
+  compile dependenciesList.supportCardView
 
   // Architecture libraries
   compile dependenciesList.lifecycleExtensions
