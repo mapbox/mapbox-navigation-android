@@ -44,6 +44,8 @@ dependencies {
   // Mapbox Android Services
   compile dependenciesList.mapboxServices
 
+  compile dependenciesList.supportAppcompatV7
+
   // Logging
   compile dependenciesList.timber
 

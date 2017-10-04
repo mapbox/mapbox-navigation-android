@@ -4,6 +4,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
@@ -12,6 +13,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 
 import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.R;
@@ -44,7 +46,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private static final int MSG_LOCATION_UPDATED = 1001;
 
   private final IBinder localBinder = new LocalBinder();
-  private NavigationNotification notificationManager;
+  private NavigationNotification navNotificationManager;
   private long timeIntervalSinceLastOffRoute;
   private MapboxNavigation mapboxNavigation;
   private LocationEngine locationEngine;
@@ -78,15 +80,15 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onDestroy() {
     super.onDestroy();
+    if (mapboxNavigation.options().enableNotification()) {
+      stopForeground(true);
+    }
     // User canceled navigation session
     if (routeProgress != null && location != null) {
       NavigationMetricsWrapper.cancelEvent(mapboxNavigation.getSessionState(), routeProgress,
         location);
     }
     endNavigation();
-    if (notificationManager != null) {
-      notificationManager.onDestroy();
-    }
   }
 
   /**
@@ -106,10 +108,12 @@ public class NavigationService extends Service implements LocationEngineListener
    * builds a new navigation notification instance and attaches it to this service.
    */
   private void initializeNotification() {
-    notificationManager = new NavigationNotification(this, mapboxNavigation);
+    navNotificationManager = new NavigationNotification(this, mapboxNavigation);
     Notification notifyBuilder
-      = notificationManager.buildPersistentNotification(R.layout.layout_notification_default,
+      = navNotificationManager.buildPersistentNotification(R.layout.layout_notification_default,
       R.layout.layout_notification_default_big);
+
+    notifyBuilder.flags = Notification.FLAG_FOREGROUND_SERVICE;
     startForeground(NAVIGATION_NOTIFICATION_ID, notifyBuilder);
   }
 
@@ -199,7 +203,7 @@ public class NavigationService extends Service implements LocationEngineListener
       firstProgressUpdate = false;
     }
     if (mapboxNavigation.options().enableNotification()) {
-      notificationManager.updateDefaultNotification(routeProgress);
+      navNotificationManager.updateDefaultNotification(routeProgress);
     }
     mapboxNavigation.getEventDispatcher().onProgressChange(location, routeProgress);
   }
