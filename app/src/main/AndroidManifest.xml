@@ -27,22 +27,6 @@
         </activity>
 
         <activity
-            android:name=".activity.SnapToRouteActivity"
-            android:label="@string/title_snap_to_route">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.LocationInfoActivity"
-            android:label="@string/title_location_info">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
             android:name=".activity.RerouteActivity"
             android:label="@string/title_reroute">
             <meta-data
@@ -58,15 +42,7 @@
                 android:value=".MainActivity"/>
         </activity>
 
-        <activity
-            android:name=".activity.LongStepTestActivity"
-            android:label="@string/title_long_step">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
+      <activity
             android:name=".activity.navigationui.NavigationViewActivity"
             android:label="@string/title_navigation_view_ui">
             <meta-data
