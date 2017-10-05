@@ -13,6 +13,7 @@ import com.mapbox.services.commons.models.Position;
 import com.mapbox.services.commons.utils.PolylineUtils;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -59,6 +60,7 @@ public class SnapToRouteTest extends BaseTest {
   }
 
   @Test
+  @Ignore
   public void getSnappedLocation_returnsProviderNameCorrectly() throws Exception {
     Snap snap = new SnapToRoute();
     Location location = new Location("test");
