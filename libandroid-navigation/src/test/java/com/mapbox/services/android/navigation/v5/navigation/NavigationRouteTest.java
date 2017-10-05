@@ -13,12 +13,10 @@ import static junit.framework.Assert.assertTrue;
 
 public class NavigationRouteTest extends BaseTest {
 
-  private static final String accessToken = "pk.XXX";
-
   @Test
   public void sanityTest() throws Exception {
     NavigationRoute navigationRoute = NavigationRoute.builder()
-      .accessToken(accessToken)
+      .accessToken(ACCESS_TOKEN)
       .origin(Position.fromCoordinates(1.0, 2.0))
       .destination(Position.fromCoordinates(1.0, 5.0))
       .build();
@@ -31,7 +29,7 @@ public class NavigationRouteTest extends BaseTest {
     Position destination = Position.fromCoordinates(1.0, 5.0);
 
     NavigationRoute navigationRoute = NavigationRoute.builder()
-      .accessToken(accessToken)
+      .accessToken(ACCESS_TOKEN)
       .origin(origin)
       .destination(destination)
       .build();
@@ -49,7 +47,7 @@ public class NavigationRouteTest extends BaseTest {
     Position waypointThree = Position.fromCoordinates(9.0, 7.0);
 
     NavigationRoute navigationRoute = NavigationRoute.builder()
-      .accessToken(accessToken)
+      .accessToken(ACCESS_TOKEN)
       .origin(origin)
       .destination(destination)
       .profile(DirectionsCriteria.PROFILE_DRIVING)
@@ -66,7 +64,7 @@ public class NavigationRouteTest extends BaseTest {
   @Test
   public void requestDoesNotAttachRadiusIfOnesNotProvided() throws Exception {
     NavigationRoute navigationRoute = NavigationRoute.builder()
-      .accessToken(accessToken)
+      .accessToken(ACCESS_TOKEN)
       .origin(Position.fromCoordinates(1.0, 2.0))
       .destination(Position.fromCoordinates(1.0, 5.0))
       .addBearing(90, 100)

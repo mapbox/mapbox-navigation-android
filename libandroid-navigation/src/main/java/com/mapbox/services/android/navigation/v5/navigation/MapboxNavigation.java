@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.Location;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -358,7 +359,12 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
         .build();
 
       Intent intent = getServiceIntent();
-      context.startService(intent);
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        context.startForegroundService(intent);
+      } else {
+        context.startService(intent);
+      }
+
       context.bindService(intent, this, Context.BIND_AUTO_CREATE);
       navigationEventDispatcher.onNavigationEvent(true);
     } else {

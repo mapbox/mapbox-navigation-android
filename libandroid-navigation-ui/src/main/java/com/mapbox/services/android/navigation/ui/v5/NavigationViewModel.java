@@ -19,6 +19,7 @@ import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListene
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -29,7 +30,7 @@ import com.mapbox.services.commons.models.Position;
 import java.text.DecimalFormat;
 
 public class NavigationViewModel extends AndroidViewModel implements LifecycleObserver, ProgressChangeListener,
-  MilestoneEventListener, OffRouteListener {
+  OffRouteListener, MilestoneEventListener, NavigationEventListener {
 
   public final MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
   public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
@@ -109,6 +110,20 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
     instructionPlayer.play(instruction);
   }
 
+  /**
+   * Listener used to determine is navigation is running / not running.
+   *
+   * In {@link NavigationView}, views will be shown when true.  When false,
+   * the {@link android.app.Activity} will be destroyed.
+   *
+   * @param running true if {@link MapboxNavigation} is up and running, false if not
+   * @since 0.6.0
+   */
+  @Override
+  public void onRunning(boolean running) {
+    isRunning.setValue(running);
+  }
+
   public void setMuted(boolean isMuted) {
     instructionPlayer.setMuted(isMuted);
   }
@@ -157,8 +172,9 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   private void addNavigationListeners() {
     if (navigation != null) {
       navigation.addProgressChangeListener(this);
-      navigation.addMilestoneEventListener(this);
       navigation.addOffRouteListener(this);
+      navigation.addMilestoneEventListener(this);
+      navigation.addNavigationEventListener(this);
     }
   }
 
@@ -172,7 +188,6 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   private void startNavigation(DirectionsRoute route) {
     if (route != null) {
       navigation.startNavigation(route);
-      isRunning.setValue(true);
     }
   }
 
