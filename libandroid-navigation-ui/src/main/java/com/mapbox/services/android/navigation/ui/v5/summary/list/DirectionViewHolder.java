@@ -12,7 +12,6 @@ public class DirectionViewHolder extends RecyclerView.ViewHolder {
 
   private boolean firstViewHolder;
 
-  private View itemView;
   TextView instructionText;
   TextView distanceText;
   ImageView directionIcon;
@@ -20,7 +19,6 @@ public class DirectionViewHolder extends RecyclerView.ViewHolder {
 
   DirectionViewHolder(View itemView) {
     super(itemView);
-    this.itemView = itemView;
     instructionText = itemView.findViewById(R.id.instructionText);
     distanceText = itemView.findViewById(R.id.distanceText);
     directionIcon = itemView.findViewById(R.id.directionIcon);

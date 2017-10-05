@@ -319,7 +319,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapView.onSaveInstanceState(outState);
   }
 
-  private class BeginRouteInstruction extends Instruction {
+  private static class BeginRouteInstruction extends Instruction {
 
     @Override
     public String buildInstruction(RouteProgress routeProgress) {

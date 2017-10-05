@@ -34,7 +34,7 @@
             android:background="@android:color/transparent"
             android:layout_gravity="center"
             android:padding="16dp"
-            android:tint="@color/md_grey_700"
+            android:tint="?attr/navigationViewIcon"
             app:srcCompat="@drawable/ic_clear"/>
 
     </LinearLayout>
@@ -56,7 +56,7 @@
             android:background="@android:color/transparent"
             android:layout_gravity="center"
             android:padding="16dp"
-            android:tint="@color/md_grey_800"
+            android:tint="?attr/navigationViewIcon"
             app:srcCompat="@drawable/ic_arrow_up"/>
 
     </LinearLayout>

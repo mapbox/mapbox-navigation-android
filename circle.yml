@@ -31,6 +31,9 @@ jobs:
             - ~/.gradle
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
+          name: Jacoco test report
+          command: ./gradlew createDebugUnitTestCoverageReport
+      - run:
           name: Sonarcloud upload
           command: |
             ./gradlew sonarqube \

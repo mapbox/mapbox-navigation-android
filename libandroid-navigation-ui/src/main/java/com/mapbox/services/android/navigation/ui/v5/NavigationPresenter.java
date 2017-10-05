@@ -81,4 +81,10 @@ class NavigationPresenter {
   void onDestinationUpdate(Position position) {
     view.addMarker(position);
   }
+
+  void onNavigationRunning() {
+    view.showInstructionView();
+    view.setSummaryBehaviorHideable(false);
+    view.setSummaryBehaviorState(BottomSheetBehavior.STATE_COLLAPSED);
+  }
 }

@@ -63,6 +63,12 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
     rawLocation.setValue(location);
   }
 
+  /**
+   * Activates the {@link MockLocationEngine} with the
+   * give {@link DirectionsRoute}.
+   *
+   * @param route to be mocked
+   */
   void updateRoute(DirectionsRoute route) {
     if (shouldSimulateRoute()) {
       activateMockLocationEngine(route);

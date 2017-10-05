@@ -4,10 +4,14 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BaseTransientBottomBar;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.mapbox.mapboxsdk.Mapbox;
@@ -64,8 +68,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   Button launchRouteBtn;
   @BindView(R.id.loading)
   ProgressBar loading;
-  @BindView(R.id.launchCoordinatesBtn)
-  Button launchCoordinatesBtn;
+  @BindView(R.id.demoSwitch)
+  Switch demoSwitch;
 
   private Marker currentMarker;
   private Position currentPosition;
@@ -73,6 +77,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private DirectionsRoute route;
 
   private boolean locationFound;
+  private boolean shouldSimulateRoute;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -81,6 +86,12 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     ButterKnife.bind(this);
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
+    demoSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+      @Override
+      public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+        shouldSimulateRoute = checked;
+      }
+    });
   }
 
   @SuppressWarnings({"MissingPermission"})
@@ -151,11 +162,6 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     launchNavigationWithRoute();
   }
 
-  @OnClick(R.id.launchCoordinatesBtn)
-  public void onCoordinatesLaunchClick() {
-    launchNavigationWithCoordinates();
-  }
-
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
@@ -168,7 +174,6 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onMapLongClick(@NonNull LatLng point) {
     destination = Position.fromCoordinates(point.getLongitude(), point.getLatitude());
-    launchCoordinatesBtn.setEnabled(true);
     launchRouteBtn.setEnabled(false);
     loading.setVisibility(View.VISIBLE);
     setCurrentMarkerPosition(point);
@@ -243,14 +248,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private void launchNavigationWithRoute() {
     if (route != null) {
       NavigationLauncher.startNavigation(this, route,
-        null, true);
-    }
-  }
-
-  private void launchNavigationWithCoordinates() {
-    if (currentPosition != null && destination != null) {
-      NavigationLauncher.startNavigation(this, currentPosition, destination,
-        null, true);
+        null, shouldSimulateRoute);
     }
   }
 
@@ -269,6 +267,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private void onLocationFound(Location location) {
     if (!locationFound) {
       animateCamera(new LatLng(location.getLatitude(), location.getLongitude()));
+      Snackbar.make(mapView, "Long press map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
       locationFound = true;
       hideLoading();
     }
