@@ -30,10 +30,9 @@ public class SnapToRoute extends Snap {
   @Override
   public Location getSnappedLocation(Location location, RouteProgress routeProgress,
                                      @Nullable List<Position> coords) {
-    Location snappedLocation = new Location(String.format("%s-snapped", location.getProvider()));
-    snappedLocation = snapLocationLatLng(location, snappedLocation, coords);
-    snappedLocation.setBearing(snapLocationBearing(routeProgress));
-    return snappedLocation;
+    location = snapLocationLatLng(location, coords);
+    location.setBearing(snapLocationBearing(routeProgress));
+    return location;
   }
 
   /**
@@ -41,12 +40,11 @@ public class SnapToRoute extends Snap {
    * step.
    *
    * @param location        the raw location
-   * @param snappedLocation new Location object representing the snapped position
    * @param coords          the list of step geometry coordinates
    * @return the altered user location
    * @since 0.4.0
    */
-  private static Location snapLocationLatLng(Location location, Location snappedLocation,
+  private static Location snapLocationLatLng(Location location,
                                              List<Position> coords) {
     Point locationToPoint = Point.fromCoordinates(
       new double[] {location.getLongitude(), location.getLatitude()}
@@ -57,10 +55,10 @@ public class SnapToRoute extends Snap {
     if (coords.size() > 1) {
       Feature feature = TurfMisc.pointOnLine(locationToPoint, coords);
       Position position = ((Point) feature.getGeometry()).getCoordinates();
-      snappedLocation.setLongitude(position.getLongitude());
-      snappedLocation.setLatitude(position.getLatitude());
+      location.setLongitude(position.getLongitude());
+      location.setLatitude(position.getLatitude());
     }
-    return snappedLocation;
+    return location;
   }
 
   private static float snapLocationBearing(RouteProgress routeProgress) {
