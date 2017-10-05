@@ -24,7 +24,8 @@ public class ThemeSwitcher {
    * @param activity {@link NavigationView} where the theme will be set
    */
   static void setTheme(Activity activity) {
-    int uiMode = activity.getResources().getConfiguration().uiMode;
+    int uiMode = activity.getResources().getConfiguration().uiMode
+      & Configuration.UI_MODE_NIGHT_MASK;
     boolean darkThemeEnabled = uiMode == Configuration.UI_MODE_NIGHT_YES;
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
     SharedPreferences.Editor editor = preferences.edit();
