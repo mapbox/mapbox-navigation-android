@@ -12,11 +12,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mapbox.services.android.navigation.testapp.activity.LocationInfoActivity;
-import com.mapbox.services.android.navigation.testapp.activity.LongStepTestActivity;
 import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
-import com.mapbox.services.android.navigation.testapp.activity.SnapToRouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationViewActivity;
 import com.mapbox.services.android.telemetry.permissions.PermissionsListener;
@@ -48,16 +45,6 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         MockNavigationActivity.class
       ),
       new SampleItem(
-        getString(R.string.title_snap_to_route),
-        getString(R.string.description_snap_to_route),
-        SnapToRouteActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_location_info),
-        getString(R.string.description_location_info),
-        LocationInfoActivity.class
-      ),
-      new SampleItem(
         getString(R.string.title_reroute),
         getString(R.string.description_reroute),
         RerouteActivity.class
@@ -66,16 +53,11 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         getString(R.string.title_navigation_route_ui),
         getString(R.string.description_navigation_route_ui),
         NavigationMapRouteActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_long_step),
-        getString(R.string.description_long_step),
-        LongStepTestActivity.class
       )
     ));
 
     // RecyclerView
-    recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+    recyclerView = findViewById(R.id.recycler_view);
     recyclerView.setHasFixedSize(true);
 
     // Use a linear layout manager
@@ -95,7 +77,8 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
   }
 
   @Override
-  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                         @NonNull int[] grantResults) {
     permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
   }
 

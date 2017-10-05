@@ -2,23 +2,11 @@
     <string name="title_mock_navigation">Mock Navigation</string>
     <string name="description_mock_navigation">Mock a navigation session using a mock location engine.</string>
 
-    <string name="title_true_navigation">True Navigation</string>
-    <string name="description_true_navigation">Start a navigation session using LOST location engine.</string>
-
-    <string name="title_snap_to_route">Snap to route</string>
-    <string name="description_snap_to_route">Move forward or backwards between route steps and snap a point to the line.</string>
-
     <string name="title_off_route_detection">Off route detection</string>
     <string name="description_off_route_detection">Uses the Route Utils class to determine if a users off route.</string>
 
-    <string name="title_location_info">Location information</string>
-    <string name="description_location_info">Get information every location update event</string>
-
     <string name="title_reroute">Reroute</string>
     <string name="description_reroute">Test the reroute function inside the navigation SDK</string>
-
-    <string name="title_long_step">Route with single long step</string>
-    <string name="description_long_step">Test the navigation engine against a step with a long linestring.</string>
 
     <string name="title_navigation_route_ui">Navigation Map Route</string>
     <string name="description_navigation_route_ui">Draws a route on the map</string>
