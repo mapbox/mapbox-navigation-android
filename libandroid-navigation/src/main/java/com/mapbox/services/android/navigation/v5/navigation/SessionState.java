@@ -16,6 +16,18 @@ import java.util.List;
 @AutoValue
 abstract class SessionState {
 
+  /**
+   * Holds onto the step index for the duration of the navigation session. If a reroute occurs, this
+   * gets set back to 0.
+   */
+  abstract int stepIndex();
+
+  /**
+   * Holds onto the leg index for the duration of the navigation session. If a reroute occurs, this
+   * gets set back to 0.
+   */
+  abstract int legIndex();
+
   String originalGeometry() {
     List<Position> geometryPositions
       = PolylineUtils.decode(originalDirectionRoute().getGeometry(), Constants.PRECISION_6);
@@ -84,6 +96,10 @@ abstract class SessionState {
 
   @AutoValue.Builder
   abstract static class Builder {
+
+    abstract Builder stepIndex(int stepIndex);
+
+    abstract Builder legIndex(int legIndex);
 
     abstract Builder originalDirectionRoute(@NonNull DirectionsRoute directionsRoute);
 

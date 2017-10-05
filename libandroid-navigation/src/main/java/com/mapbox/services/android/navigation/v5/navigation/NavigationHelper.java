@@ -152,20 +152,20 @@ class NavigationHelper {
    * provides type safety and making the code a bit more readable.
    * </p>
    *
-   * @param routeProgress   need a routeProgress in order to get the directions route leg list size
-   * @param previousIndices used for adjusting the indices
-   * @return a {@link NavigationIndices} object which contains the new leg and step indices
+   * @param routeProgress need a routeProgress in order to get the directions route leg list size
+   * @param sessionState  used for adjusting the indices
+   * @return a {@link SessionState} object which contains the new leg and step indices
    */
-  static NavigationIndices increaseIndex(RouteProgress routeProgress,
-                                         NavigationIndices previousIndices) {
+  static SessionState increaseIndex(RouteProgress routeProgress, SessionState sessionState) {
     // Check if we are in the last step in the current routeLeg and iterate it if needed.
-    if (previousIndices.stepIndex()
+    if (sessionState.stepIndex()
       >= routeProgress.directionsRoute().getLegs().get(routeProgress.legIndex())
       .getSteps().size() - 2
-      && previousIndices.legIndex() < routeProgress.directionsRoute().getLegs().size() - 1) {
-      return NavigationIndices.create((previousIndices.legIndex() + 1), 0);
+      && sessionState.legIndex() < routeProgress.directionsRoute().getLegs().size() - 1) {
+      return sessionState.toBuilder().stepIndex(0).legIndex(sessionState.legIndex() + 1).build();
+
     }
-    return NavigationIndices.create(previousIndices.legIndex(), (previousIndices.stepIndex() + 1));
+    return sessionState.toBuilder().stepIndex(sessionState.stepIndex() + 1).build();
   }
 
   static List<Milestone> checkMilestones(RouteProgress previousRouteProgress,

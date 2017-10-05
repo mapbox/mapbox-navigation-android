@@ -354,6 +354,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
         .previousRouteDistancesCompleted(0)
         .startTimestamp(new Date())
         .rerouteCount(0)
+        .stepIndex(0)
+        .legIndex(0)
         .mockLocation(locationEngine instanceof MockLocationEngine)
         .build();
 
@@ -643,6 +645,10 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   SessionState getSessionState() {
     return sessionState;
+  }
+
+  void setSessionState(SessionState sessionState) {
+    this.sessionState = sessionState;
   }
 
   private Intent getServiceIntent() {

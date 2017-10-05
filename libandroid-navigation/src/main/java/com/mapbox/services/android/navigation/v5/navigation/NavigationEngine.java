@@ -36,7 +36,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
 
   private RouteProgress previousRouteProgress;
   private List<Position> stepPositions;
-  private NavigationIndices indices;
   private Handler responseHandler;
   private Handler workerHandler;
   private Callback callback;
@@ -45,7 +44,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     super(THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
     this.responseHandler = responseHandler;
     this.callback = callback;
-    indices = NavigationIndices.create(0, 0);
   }
 
   void queueTask(int msgIdentifier, NewLocationModel newLocationModel) {
@@ -111,33 +109,34 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
         .stepIndex(0)
         .legIndex(0)
         .build();
-
-      indices = NavigationIndices.create(0, 0);
     }
+
+    SessionState sessionState = mapboxNavigation.getSessionState();
 
     Position snappedPosition = userSnappedToRoutePosition(location, stepPositions);
     double stepDistanceRemaining = stepDistanceRemaining(
-      snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute, stepPositions);
+      snappedPosition, sessionState.legIndex(), sessionState.stepIndex(), directionsRoute, stepPositions);
     double legDistanceRemaining = legDistanceRemaining(
-      stepDistanceRemaining, indices.legIndex(), indices.stepIndex(), directionsRoute);
+      stepDistanceRemaining, sessionState.legIndex(), sessionState.stepIndex(), directionsRoute);
     double routeDistanceRemaining = routeDistanceRemaining(
-      legDistanceRemaining, indices.legIndex(), directionsRoute);
+      legDistanceRemaining, sessionState.legIndex(), directionsRoute);
 
     if (bearingMatchesManeuverFinalHeading(location, previousRouteProgress, options.maxTurnCompletionOffset())
       && stepDistanceRemaining < options.maneuverZoneRadius()) {
       // First increase the indices and then update the majority of information for the new
       // routeProgress.
-      indices = increaseIndex(previousRouteProgress, indices);
+      sessionState = increaseIndex(previousRouteProgress, sessionState);
+      mapboxNavigation.setSessionState(sessionState);
       stepPositions = PolylineUtils.decode(
         directionsRoute.getLegs().get(
-          indices.legIndex()).getSteps().get(indices.stepIndex()).getGeometry(), PRECISION_6);
+          sessionState.legIndex()).getSteps().get(sessionState.stepIndex()).getGeometry(), PRECISION_6);
       snappedPosition = userSnappedToRoutePosition(location, stepPositions);
       stepDistanceRemaining = stepDistanceRemaining(
-        snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute, stepPositions);
+        snappedPosition, sessionState.legIndex(), sessionState.stepIndex(), directionsRoute, stepPositions);
       legDistanceRemaining = legDistanceRemaining(
-        stepDistanceRemaining, indices.legIndex(), indices.stepIndex(), directionsRoute);
+        stepDistanceRemaining, sessionState.legIndex(), sessionState.stepIndex(), directionsRoute);
       routeDistanceRemaining = routeDistanceRemaining(
-        legDistanceRemaining, indices.legIndex(), directionsRoute);
+        legDistanceRemaining, sessionState.legIndex(), directionsRoute);
     }
 
     // Create a RouteProgress.create object using the latest user location
@@ -146,8 +145,8 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       .legDistanceRemaining(legDistanceRemaining)
       .distanceRemaining(routeDistanceRemaining)
       .directionsRoute(directionsRoute)
-      .stepIndex(indices.stepIndex())
-      .legIndex(indices.legIndex())
+      .stepIndex(sessionState.stepIndex())
+      .legIndex(sessionState.legIndex())
       .build();
   }
 
