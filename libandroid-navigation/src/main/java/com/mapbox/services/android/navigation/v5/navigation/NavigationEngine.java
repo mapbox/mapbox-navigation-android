@@ -9,6 +9,7 @@ import android.text.TextUtils;
 
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.models.Position;
 import com.mapbox.services.commons.utils.PolylineUtils;
@@ -34,6 +35,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
 
   private static final String THREAD_NAME = "NavThread";
 
+  private RingBuffer<Integer> recentDistancesFromManeuverInMeters;
   private RouteProgress previousRouteProgress;
   private List<Position> stepPositions;
   private NavigationIndices indices;
@@ -46,6 +48,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     this.responseHandler = responseHandler;
     this.callback = callback;
     indices = NavigationIndices.create(0, 0);
+    recentDistancesFromManeuverInMeters = new RingBuffer<>(3);
   }
 
   void queueTask(int msgIdentifier, NewLocationModel newLocationModel) {
@@ -68,7 +71,8 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       newLocationModel.mapboxNavigation(), newLocationModel.location());
     final List<Milestone> milestones = checkMilestones(
       previousRouteProgress, routeProgress, newLocationModel.mapboxNavigation());
-    final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress);
+    final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress,
+      recentDistancesFromManeuverInMeters);
     final Location location = !userOffRoute && newLocationModel.mapboxNavigation().options().snapToRoute()
       ? getSnappedLocation(newLocationModel.mapboxNavigation(), newLocationModel.location(),
       routeProgress, stepPositions)
@@ -138,6 +142,9 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
         stepDistanceRemaining, indices.legIndex(), indices.stepIndex(), directionsRoute);
       routeDistanceRemaining = routeDistanceRemaining(
         legDistanceRemaining, indices.legIndex(), directionsRoute);
+
+      // Remove all distance values from recentDistancesFromManeuverInMeters
+      recentDistancesFromManeuverInMeters.clear();
     }
 
     // Create a RouteProgress.create object using the latest user location
