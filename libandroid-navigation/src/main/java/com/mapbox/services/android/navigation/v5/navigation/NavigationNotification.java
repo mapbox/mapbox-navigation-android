@@ -26,8 +26,6 @@ import com.mapbox.services.api.directions.v5.models.LegStep;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
-import timber.log.Timber;
-
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
 
 /**
@@ -36,7 +34,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 class NavigationNotification {
 
   private static final String NAVIGATION_NOTIFICATION_CHANNEL = "NAVIGATION_NOTIFICATION_CHANNEL";
-  private static final String END_NAVIGATION_BUTTON_TAG = "TAG_END_NAVIGATION_BUTTON";
+  private static final String END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION";
 
   private NotificationCompat.Builder notificationBuilder;
   private SpannableStringBuilder currentDistanceText;
@@ -56,18 +54,11 @@ class NavigationNotification {
     initialize();
   }
 
-  private void initialize() {
-    notificationManager
-      = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
-    createNotificationChannel();
-  }
-
   Notification buildPersistentNotification(@LayoutRes int layout, @LayoutRes int bigLayout) {
     remoteViewsBig = new RemoteViews(context.getPackageName(), bigLayout);
     remoteViews = new RemoteViews(context.getPackageName(), layout);
 
-    // Will trigger EndNavigationReceiver when clicked
+    // Will trigger endNavigationBtnReceiver when clicked
     PendingIntent pendingCloseIntent = createPendingCloseIntent();
     remoteViewsBig.setOnClickPendingIntent(R.id.endNavigationButton, pendingCloseIntent);
 
@@ -81,9 +72,6 @@ class NavigationNotification {
       .setSmallIcon(R.drawable.ic_navigation)
       .setContentIntent(PendingIntent.getActivity(context, 0,
         new Intent(context, NavigationService.class), 0));
-
-    IntentFilter filter = new IntentFilter(END_NAVIGATION_BUTTON_TAG);
-    filter.addCategory(Intent.CATEGORY_DEFAULT);
 
     return notificationBuilder.build();
   }
@@ -117,6 +105,12 @@ class NavigationNotification {
     addManeuverImage(step);
 
     notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notificationBuilder.build());
+  }
+
+  void unregisterReceiver() {
+    if (context != null) {
+      context.unregisterReceiver(endNavigationBtnReceiver);
+    }
   }
 
   private boolean newStepName(RouteProgress routeProgress) {
@@ -183,6 +177,13 @@ class NavigationNotification {
     }
   }
 
+  private void initialize() {
+    notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
+    createNotificationChannel();
+    registerReceiver();
+  }
+
   /**
    * Notification channel setup for devices running Android Oreo or later.
    */
@@ -195,16 +196,30 @@ class NavigationNotification {
     }
   }
 
+  private void registerReceiver() {
+    if (context != null) {
+      context.registerReceiver(endNavigationBtnReceiver, new IntentFilter(END_NAVIGATION_ACTION));
+    }
+  }
+
   private PendingIntent createPendingCloseIntent() {
-    Intent endNavigationBtn = new Intent(context, EndNavigationReceiver.class);
-    endNavigationBtn.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+    Intent endNavigationBtn = new Intent(END_NAVIGATION_ACTION);
     return PendingIntent.getBroadcast(context, 0, endNavigationBtn, 0);
   }
 
-  public static class EndNavigationReceiver extends BroadcastReceiver {
+  private BroadcastReceiver endNavigationBtnReceiver = new BroadcastReceiver() {
     @Override
-    public void onReceive(Context context, Intent intent) {
-      Timber.d("End Navigation click");
+    public void onReceive(final Context context, final Intent intent) {
+      NavigationNotification.this.onEndNavigationBtnClick();
+    }
+  };
+
+  private void onEndNavigationBtnClick() {
+    if (notificationManager != null) {
+      notificationManager.cancel(NAVIGATION_NOTIFICATION_ID);
+    }
+    if (mapboxNavigation != null) {
+      mapboxNavigation.endNavigation();
     }
   }
 }

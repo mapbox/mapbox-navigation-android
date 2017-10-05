@@ -121,6 +121,7 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   void endNavigation() {
     locationEngine.removeLocationEngineListener(this);
+    navNotificationManager.unregisterReceiver();
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
       thread.quitSafely();
     } else {

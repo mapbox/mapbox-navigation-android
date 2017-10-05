@@ -479,6 +479,8 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
         if (isRunning != null) {
           if (isRunning) {
             showInstructionView();
+          } else {
+            finish();
           }
         }
       }
