@@ -24,7 +24,7 @@
         android:layout_height="8dp"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        android:tint="@color/md_grey_800"
+        android:tint="?attr/navigationViewSecondary"
         app:srcCompat="@drawable/ic_circle"/>
 
     <TextView
@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        android:textColor="@color/md_grey_800"
+        android:textColor="?attr/navigationViewAccentText"
         android:includeFontPadding="false"
         android:maxLines="1"
         android:ellipsize="end"
@@ -45,7 +45,7 @@
         android:layout_height="8dp"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        android:tint="@color/md_grey_800"
+        android:tint="?attr/navigationViewSecondary"
         app:srcCompat="@drawable/ic_circle"/>
 
     <TextView
@@ -54,7 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        android:textColor="@color/md_grey_800"
+        android:textColor="?attr/navigationViewAccentText"
         android:includeFontPadding="false"
         android:maxLines="1"
         android:ellipsize="end"

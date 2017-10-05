@@ -14,7 +14,6 @@
         android:layout_height="24dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        tools:src="@drawable/ic_maneuver_starting"
         android:tint="?attr/navigationViewSecondary"/>
 
     <LinearLayout
@@ -32,7 +31,7 @@
             android:layout_marginRight="8dp"
             android:layout_marginEnd="8dp"
             tools:text="Instruction Text"
-            android:textColor="@color/md_grey_800"
+            android:textColor="?attr/navigationViewAccentText"
             android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Title"
             android:textSize="18sp"/>
 

@@ -5,9 +5,17 @@
     <color name="mapbox_navigation_route_layer_congestion_red">#E85552</color>
     <color name="mapbox_navigation_route_shield_layer_color">#2C5F99</color>
 
+    <!--Default Light Theme-->
     <color name="mapbox_navigation_view_color_primary">#FFFFFF</color>
     <color name="mapbox_navigation_view_color_secondary">#28353D</color>
     <color name="mapbox_navigation_view_color_accent">#4882C6</color>
+    <color name="mapbox_navigation_view_color_accent_text">#424242</color>
+
+    <!--Default Dark Theme-->
+    <color name="mapbox_navigation_view_color_primary_dark">#263D57</color>
+    <color name="mapbox_navigation_view_color_secondary_dark">#D8D8D8</color>
+    <color name="mapbox_navigation_view_color_accent_dark">#FFFFFF</color>
+    <color name="mapbox_navigation_view_color_accent_text_dark">#FFFFFF</color>
 
     <color name="mapbox_plugin_navigation_route_default_blue">#4882C6</color>
 

@@ -74,7 +74,7 @@ final class AbbreviationArray extends SparseArray<AbbreviationArray.Abbreviation
     put(size(), new Abbreviation("point", "Pt"));
   }
 
-  class Abbreviation {
+  static class Abbreviation {
     String string;
     String abbreviatedString;
 

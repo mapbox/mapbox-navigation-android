@@ -2,8 +2,13 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.arch.lifecycle.Observer;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,6 +30,7 @@ import android.widget.TextView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -50,6 +56,7 @@ import java.text.DecimalFormat;
  */
 public class InstructionView extends RelativeLayout {
 
+  private View instructionLayout;
   private ImageView maneuverImage;
   private TextView stepDistanceText;
   private TextView stepInstructionText;
@@ -96,9 +103,25 @@ public class InstructionView extends RelativeLayout {
   protected void onFinishInflate() {
     super.onFinishInflate();
     bind();
+    initBackground();
     initTurnLaneRecyclerView();
     initDecimalFormat();
     initAnimations();
+  }
+
+  @Override
+  public Parcelable onSaveInstanceState() {
+    super.onSaveInstanceState();
+    return createSavedState();
+  }
+
+  @Override
+  public void onRestoreInstanceState(Parcelable state) {
+    if (state instanceof Bundle) {
+      setRestoredState((Bundle) state);
+    } else {
+      super.onRestoreInstanceState(state);
+    }
   }
 
   public void subscribe(NavigationViewModel navigationViewModel) {
@@ -133,6 +156,7 @@ public class InstructionView extends RelativeLayout {
    *
    * @param routeProgress used to provide navigation / progress data
    */
+  @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !showingRerouteState) {
       InstructionModel model = new InstructionModel(routeProgress, decimalFormat);
@@ -163,8 +187,10 @@ public class InstructionView extends RelativeLayout {
    * @since 0.6.0
    */
   public void showRerouteState() {
-    showingRerouteState = true;
-    rerouteLayout.startAnimation(rerouteSlideDownTop);
+    if (!showingRerouteState && rerouteLayout.getVisibility() == INVISIBLE) {
+      showingRerouteState = true;
+      rerouteLayout.startAnimation(rerouteSlideDownTop);
+    }
   }
 
   /**
@@ -174,8 +200,10 @@ public class InstructionView extends RelativeLayout {
    * @since 0.6.0
    */
   public void hideRerouteState() {
-    showingRerouteState = false;
-    rerouteLayout.startAnimation(rerouteSlideUpTop);
+    if (showingRerouteState && rerouteLayout.getVisibility() == VISIBLE) {
+      showingRerouteState = false;
+      rerouteLayout.startAnimation(rerouteSlideUpTop);
+    }
   }
 
   /**
@@ -204,10 +232,27 @@ public class InstructionView extends RelativeLayout {
     stepInstructionText = findViewById(R.id.stepInstructionText);
     soundChipText = findViewById(R.id.soundText);
     soundFab = findViewById(R.id.soundFab);
+    instructionLayout = findViewById(R.id.instructionLayout);
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
     initInstructionAutoSize();
+  }
+
+  private void initBackground() {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+      int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewPrimaryColor(getContext());
+      int navigationViewSecondaryColor = ThemeSwitcher.retrieveNavigationViewSecondaryColor(getContext());
+      // Instruction Layout - primary
+      Drawable instructionBackground = DrawableCompat.wrap(instructionLayout.getBackground()).mutate();
+      DrawableCompat.setTint(instructionBackground, navigationViewPrimaryColor);
+      // Sound chip text - primary
+      Drawable soundChipBackground = DrawableCompat.wrap(soundChipText.getBackground()).mutate();
+      DrawableCompat.setTint(soundChipBackground, navigationViewPrimaryColor);
+      // Reroute Layout - secondary
+      Drawable rerouteBackground = DrawableCompat.wrap(rerouteLayout.getBackground()).mutate();
+      DrawableCompat.setTint(rerouteBackground, navigationViewSecondaryColor);
+    }
   }
 
   /**
@@ -448,5 +493,20 @@ public class InstructionView extends RelativeLayout {
       turnLanesHidden = true;
       turnLaneLayout.setVisibility(GONE);
     }
+  }
+
+  @NonNull
+  private Parcelable createSavedState() {
+    Bundle state = new Bundle();
+    state.putParcelable(getContext().getString(R.string.instruction_super_state), super.onSaveInstanceState());
+    state.putInt(getContext().getString(R.string.instruction_visibility), getVisibility());
+    return state;
+  }
+
+  @SuppressWarnings("WrongConstant")
+  private void setRestoredState(Bundle state) {
+    this.setVisibility(state.getInt(getContext().getString(R.string.instruction_visibility), getVisibility()));
+    Parcelable superState = state.getParcelable(getContext().getString(R.string.instruction_super_state));
+    super.onRestoreInstanceState(superState);
   }
 }

@@ -9,11 +9,10 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.view.View;
 import android.widget.ImageButton;
 
-import com.mapbox.mapboxsdk.annotations.Icon;
-import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -78,13 +77,15 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private NavigationMapRoute mapRoute;
   private NavigationCamera camera;
   private LocationLayerPlugin locationLayer;
-  private boolean resumeCamera;
+  private boolean resumeState;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
+    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
+    ThemeSwitcher.setTheme(this);
     super.onCreate(savedInstanceState);
     setContentView(R.layout.navigation_view_layout);
-    resumeCamera = savedInstanceState != null;
+    resumeState = savedInstanceState != null;
     bind();
     initViewModels();
     initClickListeners();
@@ -265,13 +266,11 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    */
   @Override
   public void addMarker(Position position) {
-    IconFactory iconFactory = IconFactory.getInstance(this);
-    Icon icon = iconFactory.fromResource(R.drawable.map_marker);
     LatLng markerPosition = new LatLng(position.getLatitude(),
       position.getLongitude());
     map.addMarker(new MarkerOptions()
       .position(markerPosition)
-      .icon(icon));
+      .icon(ThemeSwitcher.retrieveMapMarker(this)));
   }
 
   @Override
@@ -279,16 +278,30 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     finish();
   }
 
+  /**
+   * Used when starting this {@link android.app.Activity}
+   * for the first time.
+   * <p>
+   * Zooms to the beginning of the {@link DirectionsRoute}.
+   *
+   * @param directionsRoute where camera should move to
+   */
   public void startCamera(DirectionsRoute directionsRoute) {
-    if (!resumeCamera) {
+    if (!resumeState) {
       camera.start(directionsRoute);
     }
   }
 
+  /**
+   * Used after configuration changes to resume the camera
+   * to the last location update from the Navigation SDK.
+   *
+   * @param location where the camera should move to
+   */
   public void resumeCamera(Location location) {
-    if (resumeCamera) {
+    if (resumeState) {
       camera.resume(location);
-      resumeCamera = false;
+      resumeState = false;
     }
   }
 
@@ -359,6 +372,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private void initMap(Bundle savedInstanceState) {
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
+    ThemeSwitcher.setMapStyle(this, mapView);
   }
 
   /**
@@ -366,8 +380,6 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    */
   private void initSummaryBottomSheet() {
     summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
-    summaryBehavior.setHideable(false);
-    summaryBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
       @Override
       public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -420,16 +432,26 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     locationLayer.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
   }
 
+  /**
+   * Add lifecycle observers to ensure these objects properly
+   * start / stop based on the Android lifecycle.
+   */
   private void initLifecycleObservers() {
     getLifecycle().addObserver(locationLayer);
     getLifecycle().addObserver(locationViewModel);
     getLifecycle().addObserver(navigationViewModel);
   }
 
+  /**
+   * Initialize a new presenter for this Activity.
+   */
   private void initNavigationPresenter() {
     navigationPresenter = new NavigationPresenter(this);
   }
 
+  /**
+   * Initiate observing of ViewModels by Views.
+   */
   private void subscribeViews() {
     instructionView.subscribe(navigationViewModel);
     summaryBottomSheet.subscribe(navigationViewModel);
@@ -477,8 +499,8 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       @Override
       public void onChanged(@Nullable Boolean isRunning) {
         if (isRunning != null) {
-          if (isRunning) {
-            showInstructionView();
+          if (isRunning && !resumeState) {
+            navigationPresenter.onNavigationRunning();
           }
         }
       }
