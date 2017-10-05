@@ -6,6 +6,8 @@
         <!-- Include the telemetry service to simplify set up (https://www.mapbox.com/telemetry) -->
         <service android:name="com.mapbox.services.android.telemetry.service.TelemetryService"/>
 
+        <receiver android:name=".v5.navigation.NavigationNotification$EndNavigationReceiver"/>
+
     </application>
 
 </manifest>

@@ -26,6 +26,8 @@ import com.mapbox.services.api.directions.v5.models.LegStep;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
+import timber.log.Timber;
+
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
 
 /**
@@ -65,8 +67,9 @@ class NavigationNotification {
     remoteViewsBig = new RemoteViews(context.getPackageName(), bigLayout);
     remoteViews = new RemoteViews(context.getPackageName(), layout);
 
-    remoteViewsBig.setOnClickPendingIntent(R.id.endNavigationButton,
-      getPendingSelfIntent(context, END_NAVIGATION_BUTTON_TAG));
+    // Will trigger EndNavigationReceiver when clicked
+    PendingIntent pendingCloseIntent = createPendingCloseIntent();
+    remoteViewsBig.setOnClickPendingIntent(R.id.endNavigationButton, pendingCloseIntent);
 
     // Sets up the top bar notification
     notificationBuilder = new NotificationCompat.Builder(context, NAVIGATION_NOTIFICATION_CHANNEL)
@@ -138,7 +141,7 @@ class NavigationNotification {
   private boolean newDistanceText(RouteProgress routeProgress) {
     return currentDistanceText != null
       && !currentDistanceText.toString().contentEquals(DistanceUtils.distanceFormatterBold(
-        routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
+      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
       decimalFormat).toString());
   }
 
@@ -192,16 +195,16 @@ class NavigationNotification {
     }
   }
 
-  private PendingIntent getPendingSelfIntent(Context context, String action) {
-    Intent intent = new Intent(END_NAVIGATION_BUTTON_TAG);
-    intent.setAction(action);
-    return PendingIntent.getBroadcast(context, 0, intent, 0);
+  private PendingIntent createPendingCloseIntent() {
+    Intent endNavigationBtn = new Intent(context, EndNavigationReceiver.class);
+    endNavigationBtn.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+    return PendingIntent.getBroadcast(context, 0, endNavigationBtn, 0);
   }
 
-  public class EndNavigationReceiver extends BroadcastReceiver {
+  public static class EndNavigationReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-      mapboxNavigation.endNavigation();
+      Timber.d("End Navigation click");
     }
   }
 }

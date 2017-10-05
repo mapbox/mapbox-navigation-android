@@ -1,10 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
-
 import android.app.Notification;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
@@ -13,7 +9,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 
 import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.R;
@@ -27,6 +22,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
+
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
 
 /**
  * Internal usage only, use navigation by initializing a new instance of {@link MapboxNavigation}

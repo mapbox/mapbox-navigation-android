@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
