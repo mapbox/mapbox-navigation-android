@@ -76,8 +76,8 @@ public class InstructionView extends RelativeLayout {
   private String currentInstruction;
   private int currentManeuverId;
   private SpannableStringBuilder currentDistanceText;
-  private boolean showingRerouteState;
   private boolean turnLanesHidden;
+  private boolean isRerouting;
   public boolean isMuted;
 
   public InstructionView(Context context) {
@@ -140,7 +140,8 @@ public class InstructionView extends RelativeLayout {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {
-          if (isOffRoute) {
+          isRerouting = isOffRoute;
+          if (isRerouting) {
             showRerouteState();
           } else {
             hideRerouteState();
@@ -158,7 +159,7 @@ public class InstructionView extends RelativeLayout {
    */
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
-    if (routeProgress != null && !showingRerouteState) {
+    if (routeProgress != null && !isRerouting) {
       InstructionModel model = new InstructionModel(routeProgress, decimalFormat);
       addManeuverImage(model);
       addDistanceText(model);
@@ -187,9 +188,9 @@ public class InstructionView extends RelativeLayout {
    * @since 0.6.0
    */
   public void showRerouteState() {
-    if (!showingRerouteState && rerouteLayout.getVisibility() == INVISIBLE) {
-      showingRerouteState = true;
+    if (rerouteLayout.getVisibility() == INVISIBLE) {
       rerouteLayout.startAnimation(rerouteSlideDownTop);
+      rerouteLayout.setVisibility(VISIBLE);
     }
   }
 
@@ -200,9 +201,9 @@ public class InstructionView extends RelativeLayout {
    * @since 0.6.0
    */
   public void hideRerouteState() {
-    if (showingRerouteState && rerouteLayout.getVisibility() == VISIBLE) {
-      showingRerouteState = false;
+    if (rerouteLayout.getVisibility() == VISIBLE) {
       rerouteLayout.startAnimation(rerouteSlideUpTop);
+      rerouteLayout.setVisibility(INVISIBLE);
     }
   }
 
