@@ -132,8 +132,21 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
 
   @Override
   protected void onSaveInstanceState(Bundle outState) {
+    outState.putInt(getString(R.string.bottom_sheet_state),
+      summaryBehavior.getState());
+    outState.putBoolean(getString(R.string.recenter_btn_visible),
+      recenterBtn.getVisibility() == View.VISIBLE);
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
+  }
+
+  @Override
+  protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
+    boolean isVisible = savedInstanceState.getBoolean(getString(R.string.recenter_btn_visible));
+    recenterBtn.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE);
+    int bottomSheetState = savedInstanceState.getInt(getString(R.string.bottom_sheet_state));
+    resetBottomSheetState(bottomSheetState);
   }
 
   /**
@@ -299,7 +312,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    * @param location where the camera should move to
    */
   public void resumeCamera(Location location) {
-    if (resumeState) {
+    if (resumeState && recenterBtn.getVisibility() != View.VISIBLE) {
       camera.resume(location);
       resumeState = false;
     }
@@ -404,6 +417,19 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
           sheetShadow.getVisibility() != View.VISIBLE);
       }
     });
+  }
+
+  /**
+   * Sets the {@link BottomSheetBehavior} based on the last state stored
+   * in {@link Bundle} savedInstanceState.
+   *
+   * @param bottomSheetState retrieved from savedInstanceState
+   */
+  private void resetBottomSheetState(int bottomSheetState) {
+    boolean isShowing = bottomSheetState == BottomSheetBehavior.STATE_COLLAPSED
+      || bottomSheetState == BottomSheetBehavior.STATE_EXPANDED;
+    summaryBehavior.setHideable(!isShowing);
+    summaryBehavior.setState(bottomSheetState);
   }
 
   /**

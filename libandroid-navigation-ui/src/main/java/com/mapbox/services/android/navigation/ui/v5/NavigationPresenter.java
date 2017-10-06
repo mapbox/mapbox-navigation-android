@@ -84,7 +84,5 @@ class NavigationPresenter {
 
   void onNavigationRunning() {
     view.showInstructionView();
-    view.setSummaryBehaviorHideable(false);
-    view.setSummaryBehaviorState(BottomSheetBehavior.STATE_COLLAPSED);
   }
 }
