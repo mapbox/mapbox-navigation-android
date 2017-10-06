@@ -108,14 +108,14 @@ jobs:
             NEXUS_PASSWORD=$PUBLISH_NEXUS_PASSWORD
             signing.keyId=$SIGNING_KEYID
             signing.password=$SIGNING_PASSWORD
-            signing.secretKeyRingFile=../../secring.gpg" >> gradle.properties
+            signing.secretKeyRingFile=../secring.gpg" >> gradle.properties
       - run:
           name: Build Navigation SDK
           command: make build-release
       - deploy:
           name: Publish Navigation SDK To Maven Central
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            if [ "${CIRCLE_BRANCH}" == "fix-snapshot" ]; then
             make publish ;
             fi
       - store_artifacts:
