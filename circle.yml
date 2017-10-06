@@ -115,9 +115,9 @@ jobs:
       - deploy:
           name: Publish Navigation SDK To Maven Central
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+#            if [ "${CIRCLE_BRANCH}" == "master" ]; then
             make publish ;
-            fi
+#            fi
       - store_artifacts:
           path: app/build/reports
           destination: reports
