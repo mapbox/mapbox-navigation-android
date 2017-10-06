@@ -19,8 +19,6 @@ import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 
-import timber.log.Timber;
-
 public class LocationViewModel extends AndroidViewModel implements LifecycleObserver, LocationEngineListener {
 
   final MutableLiveData<LocationEngine> locationEngine = new MutableLiveData<>();
