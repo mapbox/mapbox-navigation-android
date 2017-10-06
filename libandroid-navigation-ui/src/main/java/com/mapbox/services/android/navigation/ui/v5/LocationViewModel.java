@@ -10,7 +10,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.preference.PreferenceManager;
 
-import com.mapbox.services.android.location.LostLocationEngine;
+import com.mapbox.mapboxsdk.location.LocationSource;
 import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
@@ -23,6 +23,7 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
 
   final MutableLiveData<LocationEngine> locationEngine = new MutableLiveData<>();
   final MutableLiveData<Location> rawLocation = new MutableLiveData<>();
+  private LocationEngine modelLocationEngine;
   private SharedPreferences preferences;
 
   public LocationViewModel(Application application) {
@@ -45,8 +46,8 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
   @SuppressWarnings( {"MissingPermission"})
   @Override
   public void onConnected() {
-    if (locationEngine.getValue() != null) {
-      locationEngine.getValue().requestLocationUpdates();
+    if (modelLocationEngine != null) {
+      modelLocationEngine.requestLocationUpdates();
     }
   }
 
@@ -82,16 +83,16 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
   @SuppressWarnings( {"MissingPermission"})
   private void initLocation(Application application) {
     if (!shouldSimulateRoute()) {
-      LocationEngine locationEngine = new LostLocationEngine(application.getApplicationContext());
-      locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
-      locationEngine.addLocationEngineListener(this);
-      locationEngine.setFastestInterval(1000);
-      locationEngine.setInterval(0);
-      locationEngine.activate();
-      this.locationEngine.setValue(locationEngine);
+      modelLocationEngine = new LocationSource(application.getApplicationContext());
+      modelLocationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
+      modelLocationEngine.addLocationEngineListener(this);
+      modelLocationEngine.setFastestInterval(1000);
+      modelLocationEngine.setInterval(0);
+      modelLocationEngine.activate();
+      this.locationEngine.setValue(modelLocationEngine);
 
-      if (locationEngine.getLastLocation() != null) {
-        onLocationChanged(locationEngine.getLastLocation());
+      if (modelLocationEngine.getLastLocation() != null) {
+        onLocationChanged(modelLocationEngine.getLastLocation());
       }
     } else {
       // Fire a null location update to fetch the route if we are launching with coordinates
