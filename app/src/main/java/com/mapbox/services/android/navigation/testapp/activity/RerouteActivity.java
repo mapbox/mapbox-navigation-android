@@ -95,6 +95,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void onMapClick(@NonNull LatLng point) {
+    System.out.println("clicked");
     if (!running || mapboxMap == null) {
       return;
     }

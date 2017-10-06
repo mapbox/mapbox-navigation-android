@@ -73,10 +73,15 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       previousRouteProgress, routeProgress, newLocationModel.mapboxNavigation());
     final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress,
       recentDistancesFromManeuverInMeters);
+//    if (userOffRoute) {
+//      recentDistancesFromManeuverInMeters.clear();
+//    }
     final Location location = !userOffRoute && newLocationModel.mapboxNavigation().options().snapToRoute()
       ? getSnappedLocation(newLocationModel.mapboxNavigation(), newLocationModel.location(),
       routeProgress, stepPositions)
       : newLocationModel.location();
+
+    System.out.println("snapping?: " + (!userOffRoute && newLocationModel.mapboxNavigation().options().snapToRoute()));
 
     previousRouteProgress = routeProgress;
 
@@ -159,8 +164,8 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
   }
 
   /**
-   * Check used to determine if navigation is starting for the first time (previousRouteProgress is null).
-   * Or, a new route has been found (in off-route scenarios).
+   * Check used to determine if navigation is starting for the first time (previousRouteProgress is
+   * null). Or, a new route has been found (in off-route scenarios).
    *
    * @param directionsRoute to check against the current route
    * @return true if starting navigation for the first time

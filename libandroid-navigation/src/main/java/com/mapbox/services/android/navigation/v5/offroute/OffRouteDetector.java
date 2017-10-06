@@ -17,6 +17,8 @@ import com.mapbox.services.commons.models.Position;
 
 public class OffRouteDetector extends OffRoute {
 
+  private static final double minimumBackupDistanceForOffRoute = 50;
+
   /**
    * Detects if the user is off route or not.
    *
@@ -78,13 +80,19 @@ public class OffRouteDetector extends OffRoute {
                                                 Position futurePosition) {
 
     double userDistanceToManeuver = TurfMeasurement.distance(
-      routeProgress.currentLegProgress().currentStep().getManeuver().asPosition(),
+      routeProgress.currentLegProgress().upComingStep().getManeuver().asPosition(),
       futurePosition, TurfConstants.UNIT_METERS
     );
 
-    if (recentDistancesFromManeuverInMeters.size() >= 3) {
-      // User's moving away from maneuver position, thus offRoute.
-      return true;
+    System.out.println(recentDistancesFromManeuverInMeters.toString());
+
+    if (!recentDistancesFromManeuverInMeters.isEmpty()
+      && recentDistancesFromManeuverInMeters.peekLast()
+      - recentDistancesFromManeuverInMeters.peekFirst() < minimumBackupDistanceForOffRoute) {
+      if (recentDistancesFromManeuverInMeters.size() >= 3) {
+        // User's moving away from maneuver position, thus offRoute.
+        return true;
+      }
     }
     if (recentDistancesFromManeuverInMeters.isEmpty()) {
       recentDistancesFromManeuverInMeters.push((int) userDistanceToManeuver);

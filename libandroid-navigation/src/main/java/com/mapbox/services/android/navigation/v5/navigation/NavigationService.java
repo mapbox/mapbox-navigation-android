@@ -228,8 +228,16 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onUserOffRoute(Location location, boolean userOffRoute) {
     if (userOffRoute) {
+
+      System.out.println("location.getTime(): " + location.getTime());
+      System.out.println("timeIntervalSinceLastOffRoute: " + timeIntervalSinceLastOffRoute);
+      System.out.println(timeIntervalSinceLastOffRoute
+        + TimeUnit.SECONDS.toMillis(mapboxNavigation.options().secondsBeforeReroute()) - location.getTime());
+
+
       if (location.getTime() > timeIntervalSinceLastOffRoute
         + TimeUnit.SECONDS.toMillis(mapboxNavigation.options().secondsBeforeReroute())) {
+        System.out.println("hello");
         mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
         timeIntervalSinceLastOffRoute = location.getTime();
       }
