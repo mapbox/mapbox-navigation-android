@@ -12,4 +12,6 @@
     <string name="instruction_super_state">instruction_super_state</string>
     <string name="instruction_visibility">instruction_visibility</string>
     <string name="dark_theme_enabled">dark_theme_enabled</string>
+    <string name="recenter_btn_visible">recenter_btn_visible</string>
+    <string name="bottom_sheet_state">bottom_sheet_state</string>
 </resources>
