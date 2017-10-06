@@ -14,6 +14,7 @@ import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
@@ -43,6 +44,7 @@ public class NavigationService extends Service implements LocationEngineListener
   // Message id used when a new location update occurs and we send to the thread.
   private static final int MSG_LOCATION_UPDATED = 1001;
 
+  private RingBuffer<Integer> recentDistancesFromManeuverInMeters;
   private final IBinder localBinder = new LocalBinder();
   private NavigationNotification navNotificationManager;
   private long timeIntervalSinceLastOffRoute;
@@ -64,6 +66,7 @@ public class NavigationService extends Service implements LocationEngineListener
     thread = new NavigationEngine(new Handler(), this);
     thread.start();
     thread.prepareHandler();
+    recentDistancesFromManeuverInMeters = new RingBuffer<>(3);
   }
 
   /**
@@ -148,7 +151,8 @@ public class NavigationService extends Service implements LocationEngineListener
   private void forceLocationUpdate() {
     Location lastLocation = locationEngine.getLastLocation();
     if (lastLocation != null) {
-      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(lastLocation, mapboxNavigation));
+      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(lastLocation, mapboxNavigation,
+        recentDistancesFromManeuverInMeters));
     }
   }
 
@@ -164,7 +168,8 @@ public class NavigationService extends Service implements LocationEngineListener
     Timber.d("onLocationChanged");
     if (location != null) {
       if (validLocationUpdate(location)) {
-        thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation));
+        thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation,
+          recentDistancesFromManeuverInMeters));
       }
     }
   }
@@ -230,6 +235,7 @@ public class NavigationService extends Service implements LocationEngineListener
     if (userOffRoute) {
       if (location.getTime() > timeIntervalSinceLastOffRoute
         + TimeUnit.SECONDS.toMillis(mapboxNavigation.options().secondsBeforeReroute())) {
+        recentDistancesFromManeuverInMeters.clear();
         mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
         timeIntervalSinceLastOffRoute = location.getTime();
       }

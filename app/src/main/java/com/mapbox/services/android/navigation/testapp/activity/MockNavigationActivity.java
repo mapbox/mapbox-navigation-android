@@ -34,6 +34,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -52,7 +53,8 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener, MilestoneEventListener {
+  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener,
+  MilestoneEventListener, OffRouteListener {
 
   private static final int BEGIN_ROUTE_MILESTONE = 1001;
 
@@ -112,6 +114,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       navigation.addNavigationEventListener(this);
       navigation.addProgressChangeListener(this);
       navigation.addMilestoneEventListener(this);
+      navigation.addOffRouteListener(this);
 
       ((MockLocationEngine) locationEngine).setRoute(route);
       navigation.setLocationEngine(locationEngine);
@@ -149,7 +152,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapboxMap.setOnMapClickListener(this);
     Snackbar.make(mapView, "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
 
-    locationEngine = new MockLocationEngine(1000, 50, false);
+    locationEngine = new MockLocationEngine(1000, 50, true);
     mapboxMap.setLocationSource(locationEngine);
 
     newOrigin();
@@ -196,10 +199,10 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
         Timber.d("Url: %s", call.request().url().toString());
         if (response.body() != null) {
-          if (response.body().getRoutes().size() > 0) {
-            DirectionsRoute route = response.body().getRoutes().get(0);
-            MockNavigationActivity.this.route = route;
-            navigationMapRoute.addRoute(route);
+          if (!response.body().getRoutes().isEmpty()) {
+            DirectionsRoute directionsRoute = response.body().getRoutes().get(0);
+            MockNavigationActivity.this.route = directionsRoute;
+            navigationMapRoute.addRoute(directionsRoute);
 
             /*for (LegStep step: route.getLegs().get(0).getSteps()) {
               mapboxMap.addMarker(new MarkerOptions().position(new LatLng(
@@ -256,6 +259,11 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     } else {
       Timber.d("onRunning: Stopped");
     }
+  }
+
+  @Override
+  public void userOffRoute(Location location) {
+    Toast.makeText(this, "off-route called", Toast.LENGTH_LONG).show();
   }
 
   @Override
