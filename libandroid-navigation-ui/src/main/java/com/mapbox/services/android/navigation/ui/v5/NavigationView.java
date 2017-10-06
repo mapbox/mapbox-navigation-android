@@ -527,6 +527,8 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
         if (isRunning != null) {
           if (isRunning && !resumeState) {
             navigationPresenter.onNavigationRunning();
+          } else if (!isRunning) {
+            finish();
           }
         }
       }

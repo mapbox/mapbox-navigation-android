@@ -15,6 +15,8 @@ import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
+
 public class OffRouteDetector extends OffRoute {
 
   /**
@@ -77,12 +79,19 @@ public class OffRouteDetector extends OffRoute {
                                                 RingBuffer<Integer> recentDistancesFromManeuverInMeters,
                                                 Position futurePosition) {
 
+    if (routeProgress.currentLegProgress().upComingStep() == null) {
+      return false;
+    }
+
     double userDistanceToManeuver = TurfMeasurement.distance(
-      routeProgress.currentLegProgress().currentStep().getManeuver().asPosition(),
+      routeProgress.currentLegProgress().upComingStep().getManeuver().asPosition(),
       futurePosition, TurfConstants.UNIT_METERS
     );
 
-    if (recentDistancesFromManeuverInMeters.size() >= 3) {
+    if (!recentDistancesFromManeuverInMeters.isEmpty()
+      && recentDistancesFromManeuverInMeters.peekLast()
+      - recentDistancesFromManeuverInMeters.peekFirst() < MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE
+      && recentDistancesFromManeuverInMeters.size() >= 3) {
       // User's moving away from maneuver position, thus offRoute.
       return true;
     }

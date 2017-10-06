@@ -65,7 +65,6 @@ public abstract class NavigationRoute {
 
   MapboxDirections getDirectionsRequest() {
 
-
     MapboxDirections.Builder builder = new MapboxDirections.Builder()
       .setUser(user())
       .setProfile(profile())
@@ -78,6 +77,7 @@ public abstract class NavigationRoute {
       .setGeometry(DirectionsCriteria.GEOMETRY_POLYLINE6)
       .setOverview(DirectionsCriteria.OVERVIEW_FULL)
       .setSteps(true)
+      .setContinueStraight(true)
       .setRoundaboutExits(true);
 
     if (!bearings().isEmpty()) {

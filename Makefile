@@ -2,7 +2,7 @@ checkstyle:
 	./gradlew checkstyle
 
 test:
-	# See navigation/libandroid-navigation/build.gradle for details
+	# See libandroid-navigation/build.gradle for details
 	./gradlew :libandroid-navigation:test
 	./gradlew :libandroid-navigation-ui:test
 
@@ -30,8 +30,8 @@ dex-count:
 navigation-fixtures:
 	# Navigation: Taylor street to Page street
 	curl "https://api.mapbox.com/directions/v5/mapbox/driving/-122.413165,37.795042;-122.433378,37.7727?geometries=polyline6&overview=full&steps=true&access_token=$(MAPBOX_ACCESS_TOKEN)" \
-		-o navigation/libandroid-navigation/src/test/res/navigation.json
+		-o libandroid-navigation/src/test/res/navigation.json
 
 	# Directions: polyline geometry with precision 5
 	curl "https://api.mapbox.com/directions/v5/mapbox/driving/-122.416667,37.783333;-121.900000,37.333333?geometries=polyline&steps=true&access_token=$(MAPBOX_ACCESS_TOKEN)" \
-		-o navigation/libandroid-navigation/src/test/res/directions_v5.json
+		-o libandroid-navigation/src/test/res/directions_v5.json

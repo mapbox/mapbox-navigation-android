@@ -2,7 +2,7 @@ apply plugin: 'org.sonarqube'
 
 sonarqube {
   properties {
-    property "sonar.exclusions", "${project.rootDir}/navigation/app"
+    property "sonar.exclusions", "${project.rootDir}/app"
     property "sonar.java.coveragePlugin", "jacoco"
     property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/testDebugUnitTest.exec"
     property "sonar.links.homepage", "https://github.com/mapbox/mapbox-navigation-android"
