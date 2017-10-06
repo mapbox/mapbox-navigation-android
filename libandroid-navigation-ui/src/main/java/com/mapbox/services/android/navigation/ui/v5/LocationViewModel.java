@@ -32,6 +32,14 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
     initLocation(application);
   }
 
+  @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+  public void onCreate() {
+    if (locationEngine.getValue() != null) {
+      locationEngine.getValue().addLocationEngineListener(this);
+      locationEngine.getValue().activate();
+    }
+  }
+
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
   public void onDestroy() {
     deactivateLocationEngine();
@@ -85,10 +93,8 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
     if (!shouldSimulateRoute()) {
       modelLocationEngine = new LocationSource(application.getApplicationContext());
       modelLocationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
-      modelLocationEngine.addLocationEngineListener(this);
       modelLocationEngine.setFastestInterval(1000);
       modelLocationEngine.setInterval(0);
-      modelLocationEngine.activate();
       this.locationEngine.setValue(modelLocationEngine);
 
       if (modelLocationEngine.getLastLocation() != null) {
