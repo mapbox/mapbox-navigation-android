@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.Constants;
-import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.commons.models.Position;
