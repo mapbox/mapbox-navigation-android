@@ -19,6 +19,8 @@ import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 
+import timber.log.Timber;
+
 public class LocationViewModel extends AndroidViewModel implements LifecycleObserver, LocationEngineListener {
 
   final MutableLiveData<LocationEngine> locationEngine = new MutableLiveData<>();
@@ -30,6 +32,14 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
     super(application);
     preferences = PreferenceManager.getDefaultSharedPreferences(application);
     initLocation(application);
+  }
+
+  @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+  public void onCreate() {
+    if (locationEngine.getValue() != null) {
+      locationEngine.getValue().addLocationEngineListener(this);
+      locationEngine.getValue().activate();
+    }
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -85,10 +95,8 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
     if (!shouldSimulateRoute()) {
       modelLocationEngine = new LocationSource(application.getApplicationContext());
       modelLocationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
-      modelLocationEngine.addLocationEngineListener(this);
       modelLocationEngine.setFastestInterval(1000);
       modelLocationEngine.setInterval(0);
-      modelLocationEngine.activate();
       this.locationEngine.setValue(modelLocationEngine);
 
       if (modelLocationEngine.getLastLocation() != null) {
