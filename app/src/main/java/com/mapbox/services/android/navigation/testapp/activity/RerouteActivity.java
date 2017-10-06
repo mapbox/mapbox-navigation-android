@@ -90,12 +90,11 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     navigation.setLocationEngine(locationEngine);
 
     // Acquire the navigation's route
-    getRoute(origin, destination);
+    getRoute(origin, destination, null);
   }
 
   @Override
   public void onMapClick(@NonNull LatLng point) {
-    System.out.println("clicked");
     if (!running || mapboxMap == null) {
       return;
     }
@@ -119,7 +118,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   public void userOffRoute(Location location) {
     Position newOrigin = Position.fromLngLat(location.getLongitude(), location.getLatitude());
-    getRoute(newOrigin, destination);
+    getRoute(newOrigin, destination, location.getBearing());
     Timber.d("offRoute");
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
   }
@@ -134,7 +133,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (response.body() != null) {
-      if (response.body().getRoutes().size() > 0) {
+      if (!response.body().getRoutes().isEmpty()) {
         DirectionsRoute route = response.body().getRoutes().get(0);
         // First run
         drawRoute(route);
@@ -146,14 +145,16 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     }
   }
 
-  private void getRoute(Position origin, Position destination) {
-    NavigationRoute navigationRoute = NavigationRoute.builder()
+  private void getRoute(Position origin, Position destination, Float bearing) {
+    NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder()
       .origin(origin)
       .destination(destination)
-      .accessToken(Mapbox.getAccessToken())
-      .build();
+      .accessToken(Mapbox.getAccessToken());
 
-    navigationRoute.getRoute(this);
+    if (bearing != null) {
+      navigationRouteBuilder.addBearing(bearing, 90);
+    }
+    navigationRouteBuilder.build().getRoute(this);
   }
 
   @Override
@@ -169,7 +170,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
       points.add(new LatLng(position.getLatitude(), position.getLongitude()));
     }
 
-    if (points.size() > 0) {
+    if (!points.isEmpty()) {
 
       if (polyline != null) {
         mapboxMap.removePolyline(polyline);

@@ -34,8 +34,6 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
 class NavigationEngine extends HandlerThread implements Handler.Callback {
 
   private static final String THREAD_NAME = "NavThread";
-
-  private RingBuffer<Integer> recentDistancesFromManeuverInMeters;
   private RouteProgress previousRouteProgress;
   private List<Position> stepPositions;
   private NavigationIndices indices;
@@ -48,7 +46,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     this.responseHandler = responseHandler;
     this.callback = callback;
     indices = NavigationIndices.create(0, 0);
-    recentDistancesFromManeuverInMeters = new RingBuffer<>(3);
   }
 
   void queueTask(int msgIdentifier, NewLocationModel newLocationModel) {
@@ -68,20 +65,15 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
 
   private void handleRequest(final NewLocationModel newLocationModel) {
     final RouteProgress routeProgress = generateNewRouteProgress(
-      newLocationModel.mapboxNavigation(), newLocationModel.location());
+      newLocationModel.mapboxNavigation(), newLocationModel.location(),
+      newLocationModel.recentDistancesFromManeuverInMeters());
     final List<Milestone> milestones = checkMilestones(
       previousRouteProgress, routeProgress, newLocationModel.mapboxNavigation());
-    final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress,
-      recentDistancesFromManeuverInMeters);
-//    if (userOffRoute) {
-//      recentDistancesFromManeuverInMeters.clear();
-//    }
+    final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress);
     final Location location = !userOffRoute && newLocationModel.mapboxNavigation().options().snapToRoute()
       ? getSnappedLocation(newLocationModel.mapboxNavigation(), newLocationModel.location(),
       routeProgress, stepPositions)
       : newLocationModel.location();
-
-    System.out.println("snapping?: " + (!userOffRoute && newLocationModel.mapboxNavigation().options().snapToRoute()));
 
     previousRouteProgress = routeProgress;
 
@@ -95,7 +87,8 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     });
   }
 
-  private RouteProgress generateNewRouteProgress(MapboxNavigation mapboxNavigation, Location location) {
+  private RouteProgress generateNewRouteProgress(MapboxNavigation mapboxNavigation, Location location,
+                                                 RingBuffer recentDistances) {
     DirectionsRoute directionsRoute = mapboxNavigation.getRoute();
     MapboxNavigationOptions options = mapboxNavigation.options();
 
@@ -149,7 +142,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
         legDistanceRemaining, indices.legIndex(), directionsRoute);
 
       // Remove all distance values from recentDistancesFromManeuverInMeters
-      recentDistancesFromManeuverInMeters.clear();
+      recentDistances.clear();
     }
 
     // Create a RouteProgress.create object using the latest user location

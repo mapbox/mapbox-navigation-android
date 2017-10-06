@@ -181,12 +181,11 @@ class NavigationHelper {
     return milestones;
   }
 
-  static boolean isUserOffRoute(NewLocationModel newLocationModel, RouteProgress routeProgress,
-                                RingBuffer<Integer> recentDistancesFromManeuverInMeters) {
+  static boolean isUserOffRoute(NewLocationModel newLocationModel, RouteProgress routeProgress) {
     OffRoute offRoute = newLocationModel.mapboxNavigation().getOffRouteEngine();
     return offRoute.isUserOffRoute(newLocationModel.location(), routeProgress,
       newLocationModel.mapboxNavigation().options(),
-      recentDistancesFromManeuverInMeters);
+      newLocationModel.recentDistancesFromManeuverInMeters());
   }
 
   static Location getSnappedLocation(MapboxNavigation mapboxNavigation, Location location,
