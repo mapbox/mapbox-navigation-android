@@ -69,7 +69,7 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
   }
 
   public void clear() {
-    legSteps.remove(legSteps.size());
+    legSteps.clear();
     notifyDataSetChanged();
   }
 

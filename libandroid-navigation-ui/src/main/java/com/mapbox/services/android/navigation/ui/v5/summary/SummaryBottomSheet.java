@@ -46,7 +46,7 @@ public class SummaryBottomSheet extends FrameLayout {
 
   private DecimalFormat decimalFormat;
   private DirectionListAdapter directionListAdapter;
-  private boolean rerouting;
+  private boolean isRerouting;
 
   public SummaryBottomSheet(Context context) {
     this(context, null);
@@ -78,7 +78,7 @@ public class SummaryBottomSheet extends FrameLayout {
     navigationViewModel.summaryModel.observe((NavigationView) getContext(), new Observer<SummaryModel>() {
       @Override
       public void onChanged(@Nullable SummaryModel summaryModel) {
-        if (summaryModel != null && !rerouting) {
+        if (summaryModel != null && !isRerouting) {
           arrivalTimeText.setText(summaryModel.getArrivalTime());
           timeRemainingText.setText(summaryModel.getTimeRemaining());
           distanceRemainingText.setText(summaryModel.getDistanceRemaining());
@@ -91,8 +91,8 @@ public class SummaryBottomSheet extends FrameLayout {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {
-          rerouting = isOffRoute;
-          if (rerouting) {
+          isRerouting = isOffRoute;
+          if (isRerouting) {
             showRerouteState();
           } else {
             hideRerouteState();
@@ -110,7 +110,7 @@ public class SummaryBottomSheet extends FrameLayout {
    */
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
-    if (routeProgress != null && !rerouting) {
+    if (routeProgress != null && !isRerouting) {
       SummaryModel model = new SummaryModel(routeProgress, decimalFormat);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
@@ -128,11 +128,8 @@ public class SummaryBottomSheet extends FrameLayout {
    * @since 0.6.0
    */
   public void showRerouteState() {
-    if (!rerouting) {
-      rerouting = true;
-      rerouteProgressBar.setVisibility(VISIBLE);
-      clearViews();
-    }
+    rerouteProgressBar.setVisibility(VISIBLE);
+    clearViews();
   }
 
   /**
@@ -142,10 +139,7 @@ public class SummaryBottomSheet extends FrameLayout {
    * @since 0.6.0
    */
   public void hideRerouteState() {
-    if (rerouting) {
-      rerouting = false;
-      rerouteProgressBar.setVisibility(INVISIBLE);
-    }
+    rerouteProgressBar.setVisibility(INVISIBLE);
   }
 
   /**
