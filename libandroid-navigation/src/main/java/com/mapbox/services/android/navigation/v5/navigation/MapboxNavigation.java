@@ -23,7 +23,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
-import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.telemetry.MapboxEvent;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -650,10 +649,6 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   SessionState getSessionState() {
     return sessionState;
-  }
-
-  void setSessionState(SessionState sessionState) {
-    this.sessionState = sessionState;
   }
 
   private Intent getServiceIntent() {
