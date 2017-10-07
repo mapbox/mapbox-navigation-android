@@ -376,10 +376,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
         .rerouteCount(sessionState.rerouteCount() + 1)
         .build();
 
-      // In rare cases the service could be disconnected causing a NPE, thus we check.
-      if (navigationService != null) {
-        navigationService.rerouteOccurred();
-      }
+      navigationService.rerouteOccurred();
     }
   }
 
