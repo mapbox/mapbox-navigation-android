@@ -49,13 +49,5 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
-
-        <meta-data
-            android:name="com.mapbox.TestEventsServer"
-            android:value="https://api-events-staging.tilestream.net"/>
-        <meta-data
-            android:name="com.mapbox.TestEventsAccessToken"
-            android:value="pk.eyJ1IjoienVnYWxkaWEiLCJhIjoiY2l5YnZpODUyMDAwMjMycnY3NmM4MHdnZyJ9.qG4fPhi91CKZHYQj7n6fMw"/>
-
     </application>
 </manifest>
