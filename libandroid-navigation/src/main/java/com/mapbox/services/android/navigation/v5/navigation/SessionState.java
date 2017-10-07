@@ -1,10 +1,12 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.Constants;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.commons.models.Position;
@@ -12,6 +14,7 @@ import com.mapbox.services.commons.utils.PolylineUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @AutoValue
 abstract class SessionState {
@@ -64,6 +67,17 @@ abstract class SessionState {
 
   abstract DirectionsRoute currentDirectionRoute();
 
+  int secondsSinceLastReroute() {
+    if (lastRerouteDate() == null) {
+      return -1;
+    }
+    long diffInMs = lastRerouteDate().getTime() - new Date().getTime();
+    return (int) TimeUnit.MILLISECONDS.toSeconds(diffInMs);
+  }
+
+  @Nullable
+  abstract Date lastRerouteDate();
+
   abstract Date startTimestamp();
 
   @Nullable
@@ -75,15 +89,29 @@ abstract class SessionState {
 
   abstract double previousRouteDistancesCompleted();
 
+  @Nullable
+  abstract List<Location> beforeRerouteLocations();
+
+  @Nullable
+  abstract List<Location> afterRerouteLocations();
+
+  @Nullable
+  abstract RouteProgress routeProgressBeforeReroute();
+
   abstract Builder toBuilder();
 
   static Builder builder() {
     return new AutoValue_SessionState.Builder();
   }
 
-
   @AutoValue.Builder
   abstract static class Builder {
+
+    abstract Builder routeProgressBeforeReroute(@Nullable RouteProgress routeProgress);
+
+    abstract Builder afterRerouteLocations(@Nullable List<Location> beforeLocations);
+
+    abstract Builder beforeRerouteLocations(@Nullable List<Location> beforeLocations);
 
     abstract Builder originalDirectionRoute(@NonNull DirectionsRoute directionsRoute);
 
@@ -94,6 +122,8 @@ abstract class SessionState {
     abstract Builder originalRequestIdentifier(@Nullable String originalRequestIdentifier);
 
     abstract Builder requestIdentifier(@Nullable String requestIdentifier);
+
+    abstract Builder lastRerouteDate(@Nullable Date lastRerouteDate);
 
     abstract Builder mockLocation(boolean mockLocation);
 

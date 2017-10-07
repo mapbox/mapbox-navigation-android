@@ -19,6 +19,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -43,17 +44,22 @@ public class NavigationService extends Service implements LocationEngineListener
 
   // Message id used when a new location update occurs and we send to the thread.
   private static final int MSG_LOCATION_UPDATED = 1001;
+  private static final int TWENTY_SECOND_INTERVAL = 20000;
 
   private RingBuffer<Integer> recentDistancesFromManeuverInMeters;
   private final IBinder localBinder = new LocalBinder();
   private NavigationNotification navNotificationManager;
+  private RingBuffer<Location> locationBuffer;
   private long timeIntervalSinceLastOffRoute;
   private MapboxNavigation mapboxNavigation;
   private LocationEngine locationEngine;
   private RouteProgress routeProgress;
   private boolean firstProgressUpdate = true;
+  private boolean queuedRerouteEvent;
   private NavigationEngine thread;
   private Location location;
+  private Runnable runnable;
+  private Handler handler;
 
   @Nullable
   @Override
@@ -67,6 +73,7 @@ public class NavigationService extends Service implements LocationEngineListener
     thread.start();
     thread.prepareHandler();
     recentDistancesFromManeuverInMeters = new RingBuffer<>(3);
+    locationBuffer = new RingBuffer<>(20);
   }
 
   /**
@@ -80,16 +87,25 @@ public class NavigationService extends Service implements LocationEngineListener
 
   @Override
   public void onDestroy() {
-    super.onDestroy();
     if (mapboxNavigation.options().enableNotification()) {
       stopForeground(true);
     }
+
+    if (handler != null && runnable != null) {
+      if (queuedRerouteEvent) {
+        runnable.run();
+      }
+      handler.removeCallbacks(runnable);
+
+    }
+
     // User canceled navigation session
     if (routeProgress != null && location != null) {
       NavigationMetricsWrapper.cancelEvent(mapboxNavigation.getSessionState(), routeProgress,
         location);
     }
     endNavigation();
+    super.onDestroy();
   }
 
   /**
@@ -166,11 +182,10 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onLocationChanged(Location location) {
     Timber.d("onLocationChanged");
-    if (location != null) {
-      if (validLocationUpdate(location)) {
-        thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation,
-          recentDistancesFromManeuverInMeters));
-      }
+    if (location != null && validLocationUpdate(location)) {
+      locationBuffer.push(location);
+      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation,
+        recentDistancesFromManeuverInMeters));
     }
   }
 
@@ -242,6 +257,34 @@ public class NavigationService extends Service implements LocationEngineListener
     } else {
       timeIntervalSinceLastOffRoute = location.getTime();
     }
+  }
+
+  public void rerouteOccurred() {
+    mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder()
+      .beforeRerouteLocations(Arrays.asList(
+        locationBuffer.toArray(new Location[locationBuffer.size()])))
+      .routeProgressBeforeReroute(routeProgress)
+      .build());
+    locationBuffer.clear();
+    queuedRerouteEvent = true;
+
+    handler = new Handler();
+    runnable = new Runnable() {
+      @Override
+      public void run() {
+        mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder()
+          .afterRerouteLocations(Arrays.asList(
+            locationBuffer.toArray(new Location[locationBuffer.size()])))
+          .build());
+
+        locationBuffer.clear();
+
+        NavigationMetricsWrapper.rerouteEvent(mapboxNavigation.getSessionState(), routeProgress,
+          location);
+        queuedRerouteEvent = false;
+      }
+    };
+    handler.postDelayed(runnable, TWENTY_SECOND_INTERVAL);
   }
 
   class LocalBinder extends Binder {

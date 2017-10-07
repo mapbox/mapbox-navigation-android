@@ -48,8 +48,10 @@ import timber.log.Timber;
  * @since 0.1.0
  */
 public class MapboxNavigation implements ServiceConnection, ProgressChangeListener {
+
   private static final String MAPBOX_NAVIGATION_SDK_IDENTIFIER = "mapbox-navigation-android";
   private static final String MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER = "mapbox-navigation-ui-android";
+
   private NavigationEventDispatcher navigationEventDispatcher;
   private NavigationService navigationService;
   private DirectionsRoute directionsRoute;
@@ -373,6 +375,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
         .currentDirectionRoute(directionsRoute)
         .rerouteCount(sessionState.rerouteCount() + 1)
         .build();
+
+      navigationService.rerouteOccurred();
     }
   }
 
@@ -649,6 +653,10 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   SessionState getSessionState() {
     return sessionState;
+  }
+
+  void setSessionState(SessionState sessionState) {
+    this.sessionState = sessionState;
   }
 
   private Intent getServiceIntent() {
