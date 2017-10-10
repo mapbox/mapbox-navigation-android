@@ -18,6 +18,9 @@ import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.api.utils.turf.TurfConstants;
+import com.mapbox.services.api.utils.turf.TurfMeasurement;
+import com.mapbox.services.commons.models.Position;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MINIMUM_DISTANCE_BEFORE_REROUTING;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
 
@@ -249,9 +253,13 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onUserOffRoute(Location location, boolean userOffRoute) {
     if (userOffRoute) {
       if (location.getTime() > timeIntervalSinceLastOffRoute
-        + TimeUnit.SECONDS.toMillis(mapboxNavigation.options().secondsBeforeReroute())) {
+        + TimeUnit.SECONDS.toMillis(mapboxNavigation.options().secondsBeforeReroute())
+        && TurfMeasurement.distance(mapboxNavigation.getSessionState().lastReroutePosition(),
+        Position.fromLngLat(location.getLongitude(), location.getLatitude()),
+        TurfConstants.UNIT_METERS) > MINIMUM_DISTANCE_BEFORE_REROUTING) {
         recentDistancesFromManeuverInMeters.clear();
         mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
+
         timeIntervalSinceLastOffRoute = location.getTime();
       }
     } else {
