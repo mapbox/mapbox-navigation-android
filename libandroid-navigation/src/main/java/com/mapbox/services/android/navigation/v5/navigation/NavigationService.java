@@ -255,15 +255,24 @@ public class NavigationService extends Service implements LocationEngineListener
       if (location.getTime() > timeIntervalSinceLastOffRoute
         + TimeUnit.SECONDS.toMillis(mapboxNavigation.options().secondsBeforeReroute())) {
         timeIntervalSinceLastOffRoute = location.getTime();
-        if (mapboxNavigation.getSessionState().lastReroutePosition() != null
-          && TurfMeasurement.distance(mapboxNavigation.getSessionState().lastReroutePosition(),
-          Position.fromLngLat(location.getLongitude(), location.getLatitude()),
-          TurfConstants.UNIT_METERS) > MINIMUM_DISTANCE_BEFORE_REROUTING) {
+        if (mapboxNavigation.getSessionState().lastReroutePosition() == null) {
           recentDistancesFromManeuverInMeters.clear();
           mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
-          mapboxNavigation.getSessionState().toBuilder().lastReroutePosition(
-            Position.fromLngLat(location.getLongitude(), location.getLatitude())
+          mapboxNavigation.setSessionState(
+            mapboxNavigation.getSessionState().toBuilder().lastReroutePosition(
+              Position.fromLngLat(location.getLongitude(), location.getLatitude())).build()
           );
+        } else {
+          if (TurfMeasurement.distance(mapboxNavigation.getSessionState().lastReroutePosition(),
+            Position.fromLngLat(location.getLongitude(), location.getLatitude()),
+            TurfConstants.UNIT_METERS) > MINIMUM_DISTANCE_BEFORE_REROUTING) {
+            recentDistancesFromManeuverInMeters.clear();
+            mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
+            mapboxNavigation.setSessionState(
+              mapboxNavigation.getSessionState().toBuilder().lastReroutePosition(
+                Position.fromLngLat(location.getLongitude(), location.getLatitude())).build()
+            );
+          }
         }
       }
     } else {
