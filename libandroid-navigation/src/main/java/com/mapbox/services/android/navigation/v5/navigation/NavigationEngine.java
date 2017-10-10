@@ -125,7 +125,9 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     double routeDistanceRemaining = routeDistanceRemaining(
       legDistanceRemaining, indices.legIndex(), directionsRoute);
 
-    if (bearingMatchesManeuverFinalHeading(location, previousRouteProgress, options.maxTurnCompletionOffset())
+    if (stepDistanceRemaining == 0
+      || bearingMatchesManeuverFinalHeading(
+        location, previousRouteProgress, options.maxTurnCompletionOffset())
       && stepDistanceRemaining < options.maneuverZoneRadius()) {
       // First increase the indices and then update the majority of information for the new
       // routeProgress.

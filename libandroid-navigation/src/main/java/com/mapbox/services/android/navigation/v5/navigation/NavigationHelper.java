@@ -26,7 +26,7 @@ import static com.mapbox.services.Constants.PRECISION_6;
  * This contains several single purpose methods that help out when a new location update occurs and
  * calculations need to be performed on it.
  */
-class NavigationHelper {
+final class NavigationHelper {
 
   private NavigationHelper() {
     // Empty private constructor to prevent users creating an instance of this class.
