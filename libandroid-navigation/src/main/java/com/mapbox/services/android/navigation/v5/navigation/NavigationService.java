@@ -259,6 +259,9 @@ public class NavigationService extends Service implements LocationEngineListener
         TurfConstants.UNIT_METERS) > MINIMUM_DISTANCE_BEFORE_REROUTING) {
         recentDistancesFromManeuverInMeters.clear();
         mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
+        mapboxNavigation.getSessionState().toBuilder().lastReroutePosition(
+          Position.fromLngLat(location.getLongitude(), location.getLatitude())
+        );
 
         timeIntervalSinceLastOffRoute = location.getTime();
       }
