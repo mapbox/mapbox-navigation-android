@@ -56,11 +56,10 @@ CIRCLECI_API_TOKEN_ENV_VAR = 'CIRCLECI_API_TOKEN'
 ALLOWED_PRE_RELEASE = ['beta']
 
 # We get the default version from here
-MAPBOX_GL_ANDROID_SDK_PATH = '../navigation'
-GRADLE_PROPERTIES_PATH = '%s/gradle.properties' % MAPBOX_GL_ANDROID_SDK_PATH
+GRADLE_PROPERTIES_PATH = '../gradle.properties'
 GRADLE_TOKEN = 'VERSION_NAME='
 
-# Bitrise
+# Circle CI
 # Triggers a new build, returns a summary of the build
 URL_CIRCLECI = 'https://circleci.com/api/v1.1/project/github/mapbox/mapbox-gl-native/tree/'  # + :branch
 
@@ -144,7 +143,7 @@ def publish_final(branch, version):
 	if dirty_gradle:
 		git_add(path=GRADLE_PROPERTIES_PATH)
 		git_commit_and_push(branch=branch, version=version)
-	do_bitrise_request(build_params={'branch': branch, 'workflow_id': 'scheduled'})
+	do_circleci_request(branch=branch)
 
 #
 # Utils
