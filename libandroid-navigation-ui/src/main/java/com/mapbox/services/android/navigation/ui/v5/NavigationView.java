@@ -1,15 +1,20 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
+import android.app.Activity;
+import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatDelegate;
+import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
 
@@ -34,9 +39,9 @@ import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.commons.models.Position;
 
 /**
- * Activity that creates the drop-in UI.
+ * View that creates the drop-in UI.
  * <p>
- * Once started, this activity will check if launched with a {@link DirectionsRoute}.
+ * Once started, this view will check if launched with a {@link DirectionsRoute}.
  * Or, if not found, this activity will look for a set of {@link Position} coordinates.
  * In the latter case, a new {@link DirectionsRoute} will be retrieved from {@link NavigationRoute}.
  * </p><p>
@@ -53,7 +58,7 @@ import com.mapbox.services.commons.models.Position;
  * @since 0.6.0
  * </p>
  */
-public class NavigationView extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnScrollListener,
+public class NavigationView extends CoordinatorLayout implements OnMapReadyCallback, MapboxMap.OnScrollListener,
   NavigationContract.View {
 
   private MapView mapView;
@@ -77,75 +82,65 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   private NavigationMapRoute mapRoute;
   private NavigationCamera camera;
   private LocationLayerPlugin locationLayer;
+  private OnNavigationReadyCallback onNavigationReadyCallback;
   private boolean resumeState;
 
-  @Override
-  protected void onCreate(@Nullable Bundle savedInstanceState) {
+  public NavigationView(Context context) {
+    this(context, null);
+  }
+
+  public NavigationView(Context context, @Nullable AttributeSet attrs) {
+    this(context, attrs, -1);
+  }
+
+  public NavigationView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    super(context, attrs, defStyleAttr);
     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
-    ThemeSwitcher.setTheme(this);
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.navigation_view_layout);
+    ThemeSwitcher.setTheme(getContext());
+    init();
+  }
+
+  public void onCreate(@Nullable Bundle savedInstanceState) {
     resumeState = savedInstanceState != null;
-    bind();
-    initViewModels();
-    initClickListeners();
-    initSummaryBottomSheet();
     initMap(savedInstanceState);
   }
 
-  @SuppressWarnings( {"MissingPermission"})
-  @Override
-  protected void onStart() {
-    super.onStart();
+  public void onStart() {
     mapView.onStart();
   }
 
-  @Override
   public void onResume() {
-    super.onResume();
     mapView.onResume();
   }
 
-  @Override
   public void onPause() {
-    super.onPause();
     mapView.onPause();
   }
 
-  @Override
   public void onLowMemory() {
-    super.onLowMemory();
     mapView.onLowMemory();
   }
 
-  @Override
-  protected void onStop() {
-    super.onStop();
+  public void onStop() {
     mapView.onStop();
   }
 
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
+  public void onDestroy() {
     mapView.onDestroy();
   }
 
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    outState.putInt(getString(R.string.bottom_sheet_state),
+  public void onSaveInstanceState(Bundle outState) {
+    outState.putInt(getContext().getString(R.string.bottom_sheet_state),
       summaryBehavior.getState());
-    outState.putBoolean(getString(R.string.recenter_btn_visible),
+    outState.putBoolean(getContext().getString(R.string.recenter_btn_visible),
       recenterBtn.getVisibility() == View.VISIBLE);
-    super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
   }
 
-  @Override
-  protected void onRestoreInstanceState(Bundle savedInstanceState) {
-    super.onRestoreInstanceState(savedInstanceState);
-    boolean isVisible = savedInstanceState.getBoolean(getString(R.string.recenter_btn_visible));
+  public void onRestoreInstanceState(Bundle savedInstanceState) {
+    boolean isVisible = savedInstanceState.getBoolean(getContext().getString(R.string.recenter_btn_visible));
     recenterBtn.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE);
-    int bottomSheetState = savedInstanceState.getInt(getString(R.string.bottom_sheet_state));
+    int bottomSheetState = savedInstanceState.getInt(getContext().getString(R.string.bottom_sheet_state));
     resetBottomSheetState(bottomSheetState);
   }
 
@@ -168,7 +163,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     initLifecycleObservers();
     initNavigationPresenter();
     subscribeViews();
-    routeViewModel.extractLaunchData(this);
+    onNavigationReadyCallback.onNavigationReady();
   }
 
   /**
@@ -283,12 +278,21 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       position.getLongitude());
     map.addMarker(new MarkerOptions()
       .position(markerPosition)
-      .icon(ThemeSwitcher.retrieveMapMarker(this)));
+      .icon(ThemeSwitcher.retrieveMapMarker(getContext())));
   }
 
   @Override
   public void finishNavigationView() {
-    finish();
+    // TODO FINISH - callback to context?
+  }
+
+  public void startNavigation(Activity activity) {
+    routeViewModel.extractLaunchData(activity);
+  }
+
+  public void getNavigationAsync(OnNavigationReadyCallback onNavigationReadyCallback) {
+    this.onNavigationReadyCallback = onNavigationReadyCallback;
+    mapView.getMapAsync(this);
   }
 
   /**
@@ -318,6 +322,14 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     }
   }
 
+  private void init() {
+    inflate(getContext(), R.layout.navigation_view_layout, this);
+    bind();
+    initViewModels();
+    initClickListeners();
+    initSummaryBottomSheet();
+  }
+
   /**
    * Binds all necessary views.
    */
@@ -336,9 +348,11 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
   }
 
   private void initViewModels() {
-    locationViewModel = ViewModelProviders.of(this).get(LocationViewModel.class);
-    routeViewModel = ViewModelProviders.of(this).get(RouteViewModel.class);
-    navigationViewModel = ViewModelProviders.of(this).get(NavigationViewModel.class);
+    if (getContext() instanceof FragmentActivity) {
+      locationViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(LocationViewModel.class);
+      routeViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(RouteViewModel.class);
+      navigationViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(NavigationViewModel.class);
+    }
   }
 
   /**
@@ -384,8 +398,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    */
   private void initMap(Bundle savedInstanceState) {
     mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(this);
-    ThemeSwitcher.setMapStyle(this, mapView);
+    ThemeSwitcher.setMapStyle(getContext(), mapView);
   }
 
   /**
@@ -445,7 +458,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    * the {@link Location} updates from {@link MapboxNavigation}.
    */
   private void initCamera() {
-    camera = new NavigationCamera(this, map, navigationViewModel.getNavigation());
+    camera = new NavigationCamera(getContext(), map, navigationViewModel.getNavigation());
   }
 
   /**
@@ -463,9 +476,9 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
    * start / stop based on the Android lifecycle.
    */
   private void initLifecycleObservers() {
-    getLifecycle().addObserver(locationLayer);
-    getLifecycle().addObserver(locationViewModel);
-    getLifecycle().addObserver(navigationViewModel);
+    ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationLayer);
+    ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationViewModel);
+    ((LifecycleOwner) getContext()).getLifecycle().addObserver(navigationViewModel);
   }
 
   /**
@@ -482,7 +495,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
     instructionView.subscribe(navigationViewModel);
     summaryBottomSheet.subscribe(navigationViewModel);
 
-    locationViewModel.rawLocation.observe(this, new Observer<Location>() {
+    locationViewModel.rawLocation.observe((LifecycleOwner) getContext(), new Observer<Location>() {
       @Override
       public void onChanged(@Nullable Location location) {
         if (location != null) {
@@ -491,7 +504,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       }
     });
 
-    locationViewModel.locationEngine.observe(this, new Observer<LocationEngine>() {
+    locationViewModel.locationEngine.observe((LifecycleOwner) getContext(), new Observer<LocationEngine>() {
       @Override
       public void onChanged(@Nullable LocationEngine locationEngine) {
         if (locationEngine != null) {
@@ -500,7 +513,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       }
     });
 
-    routeViewModel.route.observe(this, new Observer<DirectionsRoute>() {
+    routeViewModel.route.observe((LifecycleOwner) getContext(), new Observer<DirectionsRoute>() {
       @Override
       public void onChanged(@Nullable DirectionsRoute directionsRoute) {
         if (directionsRoute != null) {
@@ -512,7 +525,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       }
     });
 
-    routeViewModel.destination.observe(this, new Observer<Position>() {
+    routeViewModel.destination.observe((LifecycleOwner) getContext(), new Observer<Position>() {
       @Override
       public void onChanged(@Nullable Position position) {
         if (position != null) {
@@ -521,20 +534,20 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       }
     });
 
-    navigationViewModel.isRunning.observe(this, new Observer<Boolean>() {
+    navigationViewModel.isRunning.observe((LifecycleOwner) getContext(), new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isRunning) {
         if (isRunning != null) {
           if (isRunning && !resumeState) {
             navigationPresenter.onNavigationRunning();
           } else if (!isRunning) {
-            finish();
+            // TODO FINISH
           }
         }
       }
     });
 
-    navigationViewModel.navigationLocation.observe(this, new Observer<Location>() {
+    navigationViewModel.navigationLocation.observe((LifecycleOwner) getContext(), new Observer<Location>() {
       @Override
       public void onChanged(@Nullable Location location) {
         if (location != null && location.getLongitude() != 0 && location.getLatitude() != 0) {
@@ -544,7 +557,7 @@ public class NavigationView extends AppCompatActivity implements OnMapReadyCallb
       }
     });
 
-    navigationViewModel.newOrigin.observe(this, new Observer<Position>() {
+    navigationViewModel.newOrigin.observe((LifecycleOwner) getContext(), new Observer<Position>() {
       @Override
       public void onChanged(@Nullable Position newOrigin) {
         if (newOrigin != null) {

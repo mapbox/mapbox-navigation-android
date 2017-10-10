@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
+import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -27,7 +28,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
@@ -125,7 +125,7 @@ public class InstructionView extends RelativeLayout {
   }
 
   public void subscribe(NavigationViewModel navigationViewModel) {
-    navigationViewModel.instructionModel.observe((NavigationView) getContext(), new Observer<InstructionModel>() {
+    navigationViewModel.instructionModel.observe((LifecycleOwner) getContext(), new Observer<InstructionModel>() {
       @Override
       public void onChanged(@Nullable InstructionModel instructionModel) {
         if (instructionModel != null) {
@@ -136,7 +136,7 @@ public class InstructionView extends RelativeLayout {
         }
       }
     });
-    navigationViewModel.isOffRoute.observe((NavigationView) getContext(), new Observer<Boolean>() {
+    navigationViewModel.isOffRoute.observe((LifecycleOwner) getContext(), new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {

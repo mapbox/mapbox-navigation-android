@@ -21,17 +21,17 @@ public class ThemeSwitcher {
    * Called in onCreate() to check the UI Mode (day or night)
    * and set the theme colors accordingly.
    *
-   * @param activity {@link NavigationView} where the theme will be set
+   * @param context {@link NavigationView} where the theme will be set
    */
-  static void setTheme(Activity activity) {
-    int uiMode = activity.getResources().getConfiguration().uiMode
+  static void setTheme(Context context) {
+    int uiMode = context.getResources().getConfiguration().uiMode
       & Configuration.UI_MODE_NIGHT_MASK;
     boolean darkThemeEnabled = uiMode == Configuration.UI_MODE_NIGHT_YES;
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
     SharedPreferences.Editor editor = preferences.edit();
-    editor.putBoolean(activity.getString(R.string.dark_theme_enabled), darkThemeEnabled);
+    editor.putBoolean(context.getString(R.string.dark_theme_enabled), darkThemeEnabled);
     editor.apply();
-    activity.setTheme(darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight);
+    context.setTheme(darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight);
   }
 
   /**
@@ -51,14 +51,14 @@ public class ThemeSwitcher {
   /**
    * Sets the {@link MapView} style based on the current theme setting.
    *
-   * @param activity to retrieve {@link SharedPreferences}
+   * @param context to retrieve {@link SharedPreferences}
    * @param mapView  the style will be set on
    */
-  static void setMapStyle(Activity activity, MapView mapView) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
-    boolean darkThemeEnabled = preferences.getBoolean(activity.getString(R.string.dark_theme_enabled), false);
-    String nightThemeUrl = activity.getString(R.string.navigation_guidance_night_v2);
-    String dayThemeUrl = activity.getString(R.string.navigation_guidance_day_v2);
+  static void setMapStyle(Context context, MapView mapView) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
+    String nightThemeUrl = context.getString(R.string.navigation_guidance_night_v2);
+    String dayThemeUrl = context.getString(R.string.navigation_guidance_day_v2);
     mapView.setStyleUrl(darkThemeEnabled ? nightThemeUrl : dayThemeUrl);
   }
 
