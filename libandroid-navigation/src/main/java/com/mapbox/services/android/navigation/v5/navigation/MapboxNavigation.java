@@ -356,8 +356,6 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
         .sessionIdentifier(TelemetryUtils.buildUUID())
         .previousRouteDistancesCompleted(0)
         .startTimestamp(new Date())
-        .lastReroutePosition(directionsRoute.getLegs().get(0)
-          .getSteps().get(0).getManeuver().asPosition())
         .rerouteCount(0)
         .mockLocation(locationEngine instanceof MockLocationEngine)
         .build();
