@@ -13,8 +13,9 @@
     app:layout_constraintHorizontal_bias="0.0"
     tools:showIn="@layout/instruction_view_layout">
 
-    <ImageView
-        android:id="@+id/maneuverImageView"
+    <view
+        android:id="@+id/maneuverView"
+        class="com.mapbox.services.android.navigation.ui.v5.stylekit.ManeuverView"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="center"
@@ -25,7 +26,7 @@
         android:tint="?attr/navigationViewSecondary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -37,7 +38,7 @@
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toRightOf="@+id/maneuverImageView"
+        app:layout_constraintLeft_toRightOf="@+id/maneuverView"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0">

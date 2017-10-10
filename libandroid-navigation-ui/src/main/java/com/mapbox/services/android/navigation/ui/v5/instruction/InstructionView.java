@@ -32,6 +32,7 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
+import com.mapbox.services.android.navigation.ui.v5.stylekit.ManeuverView;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -57,7 +58,7 @@ import java.text.DecimalFormat;
 public class InstructionView extends RelativeLayout {
 
   private View instructionLayout;
-  private ImageView maneuverImage;
+  private ManeuverView maneuverView;
   private TextView stepDistanceText;
   private TextView stepInstructionText;
   private TextView soundChipText;
@@ -74,7 +75,6 @@ public class InstructionView extends RelativeLayout {
 
   private DecimalFormat decimalFormat;
   private String currentInstruction;
-  private int currentManeuverId;
   private SpannableStringBuilder currentDistanceText;
   private boolean turnLanesHidden;
   private boolean isRerouting;
@@ -228,7 +228,7 @@ public class InstructionView extends RelativeLayout {
    * Finds and binds all necessary views
    */
   private void bind() {
-    maneuverImage = findViewById(R.id.maneuverImageView);
+    maneuverView = findViewById(R.id.maneuverView);
     stepDistanceText = findViewById(R.id.stepDistanceText);
     stepInstructionText = findViewById(R.id.stepInstructionText);
     soundChipText = findViewById(R.id.soundText);
@@ -384,10 +384,8 @@ public class InstructionView extends RelativeLayout {
    * @param model provides maneuver image id
    */
   private void addManeuverImage(InstructionModel model) {
-    if (currentManeuverId != model.getManeuverImage()) {
-      currentManeuverId = model.getManeuverImage();
-      maneuverImage.setImageResource(model.getManeuverImage());
-    }
+    maneuverView.setManeuverModifier(model.getManeuverModifier());
+    maneuverView.setManeuverType(model.getStep().getManeuver().getType());
   }
 
   /**

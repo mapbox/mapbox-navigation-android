@@ -18,9 +18,9 @@ public class InstructionModel {
 
   private SpannableStringBuilder stepDistanceRemaining;
   private String textInstruction;
-  private int maneuverImage;
   private String maneuverModifier;
   private IntersectionLanes[] turnLanes;
+  private LegStep step;
 
   public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
     buildInstructionModel(progress, decimalFormat);
@@ -34,9 +34,7 @@ public class InstructionModel {
     return textInstruction;
   }
 
-  int getManeuverImage() {
-    return maneuverImage;
-  }
+  LegStep getStep() { return step; }
 
   IntersectionLanes[] getTurnLanes() {
     return turnLanes;
@@ -55,7 +53,8 @@ public class InstructionModel {
   }
 
   private void extractStepResources(LegStep upComingStep) {
-    maneuverImage = getManeuverResource(upComingStep);
+    step = upComingStep;
+
     if (hasManeuver(upComingStep)) {
       buildTextInstruction(upComingStep);
       maneuverModifier = upComingStep.getManeuver().getModifier();
