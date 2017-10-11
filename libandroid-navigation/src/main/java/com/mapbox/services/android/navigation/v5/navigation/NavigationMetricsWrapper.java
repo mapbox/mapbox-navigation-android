@@ -1,11 +1,14 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
+import android.support.annotation.Nullable;
 
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
+
+import java.util.List;
 
 class NavigationMetricsWrapper {
   static String sdkIdentifier;
@@ -88,15 +91,9 @@ class NavigationMetricsWrapper {
       previousModifier = routeProgress.currentLegProgress().currentStep().getManeuver().getModifier();
     }
 
-    Location[] beforeLocations = null;
-    if (sessionState.beforeRerouteLocations() != null && !sessionState.beforeRerouteLocations().isEmpty()) {
-      beforeLocations = (Location[]) sessionState.beforeRerouteLocations().toArray();
-    }
+    Location[] beforeLocations = obtainLocations(sessionState.beforeRerouteLocations());
 
-    Location[] afterLocations = null;
-    if (sessionState.afterRerouteLocations() != null && !sessionState.afterRerouteLocations().isEmpty()) {
-      afterLocations = (Location[]) sessionState.afterRerouteLocations().toArray();
-    }
+    Location[] afterLocations = obtainLocations(sessionState.afterRerouteLocations());
 
     String previousName = routeProgress.currentLegProgress().currentStep().getName();
 
@@ -130,5 +127,18 @@ class NavigationMetricsWrapper {
     MapboxTelemetry.getInstance().setCustomTurnstileEvent(
       MapboxNavigationEvent.buildTurnstileEvent(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
     );
+  }
+
+  @Nullable
+  private static Location[] obtainLocations(List<Location> rerouteLocations) {
+    Location[] locations = null;
+    if (rerouteLocations != null) {
+      if (rerouteLocations.isEmpty()) {
+        locations = new Location[0];
+      } else {
+        locations = (Location[]) rerouteLocations.toArray();
+      }
+    }
+    return locations;
   }
 }
