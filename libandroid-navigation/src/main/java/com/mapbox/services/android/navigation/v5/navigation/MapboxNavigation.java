@@ -358,6 +358,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
         .startTimestamp(new Date())
         .rerouteCount(0)
         .mockLocation(locationEngine instanceof MockLocationEngine)
+        .feedbackIdentifier(TelemetryUtils.buildUUID())
         .build();
 
       Intent intent = getServiceIntent();

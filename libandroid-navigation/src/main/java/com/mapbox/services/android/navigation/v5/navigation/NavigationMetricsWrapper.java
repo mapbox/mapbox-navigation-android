@@ -112,7 +112,7 @@ class NavigationMetricsWrapper {
       (int) sessionState.routeProgressBeforeReroute().durationRemaining(),
       (int) routeProgress.distanceRemaining(),
       (int) routeProgress.durationRemaining(),
-      sessionState.secondsSinceLastReroute(), "",
+      sessionState.secondsSinceLastReroute(), sessionState.feedbackIdentifier(),
       routeProgress.directionsRoute().getGeometry(), sessionState.mockLocation(),
       null, null, sessionState.originalGeometry(),
       sessionState.originalDistance(), sessionState.originalDuration(), null,
