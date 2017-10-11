@@ -15,11 +15,17 @@ import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
+import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.api.utils.turf.TurfConstants;
+import com.mapbox.services.api.utils.turf.TurfMeasurement;
+import com.mapbox.services.commons.models.Position;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -44,22 +50,20 @@ public class NavigationService extends Service implements LocationEngineListener
 
   // Message id used when a new location update occurs and we send to the thread.
   private static final int MSG_LOCATION_UPDATED = 1001;
-  private static final int TWENTY_SECOND_INTERVAL = 20000;
+  private static final int TWENTY_SECOND_INTERVAL = 20;
 
   private RingBuffer<Integer> recentDistancesFromManeuverInMeters;
   private final IBinder localBinder = new LocalBinder();
   private NavigationNotification navNotificationManager;
+  private List<SessionState> queuedRerouteEvents;
   private RingBuffer<Location> locationBuffer;
   private long timeIntervalSinceLastOffRoute;
   private MapboxNavigation mapboxNavigation;
   private LocationEngine locationEngine;
   private RouteProgress routeProgress;
   private boolean firstProgressUpdate = true;
-  private boolean queuedRerouteEvent;
   private NavigationEngine thread;
-  private Location location;
-  private Runnable runnable;
-  private Handler handler;
+  private Location rawLocation;
 
   @Nullable
   @Override
@@ -74,6 +78,7 @@ public class NavigationService extends Service implements LocationEngineListener
     thread.prepareHandler();
     recentDistancesFromManeuverInMeters = new RingBuffer<>(3);
     locationBuffer = new RingBuffer<>(20);
+    queuedRerouteEvents = new ArrayList<>();
   }
 
   /**
@@ -91,18 +96,14 @@ public class NavigationService extends Service implements LocationEngineListener
       stopForeground(true);
     }
 
-    if (handler != null && runnable != null) {
-      if (queuedRerouteEvent) {
-        runnable.run();
-      }
-      handler.removeCallbacks(runnable);
-
+    for (SessionState sessionState : queuedRerouteEvents) {
+      sendRerouteEvent(sessionState);
     }
 
     // User canceled navigation session
-    if (routeProgress != null && location != null) {
+    if (routeProgress != null && rawLocation != null) {
       NavigationMetricsWrapper.cancelEvent(mapboxNavigation.getSessionState(), routeProgress,
-        location);
+        rawLocation);
     }
     endNavigation();
     super.onDestroy();
@@ -151,7 +152,7 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   /**
-   * location engine already checks if the listener isn't already added so no need to check here.
+   * Location engine already checks if the listener isn't already added so no need to check here.
    * If the user decides to call {@link MapboxNavigation#setLocationEngine(LocationEngine)} during
    * the navigation session, this gets called again in order to attach the location listener to the
    * new engine.
@@ -177,7 +178,7 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   @SuppressWarnings("MissingPermission")
   public void onConnected() {
-    Timber.d("NavigationService now connected to location listener.");
+    Timber.d("NavigationService now connected to rawLocation listener.");
     locationEngine.requestLocationUpdates();
   }
 
@@ -185,19 +186,26 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onLocationChanged(Location location) {
     Timber.d("onLocationChanged");
     if (location != null && validLocationUpdate(location)) {
+      rawLocation = location;
       locationBuffer.push(location);
       thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation,
         recentDistancesFromManeuverInMeters));
+      for (SessionState sessionState : queuedRerouteEvents) {
+        if (TimeUtils.dateDiff(sessionState.lastRerouteDate(), new Date(), TimeUnit.SECONDS)
+          > TWENTY_SECOND_INTERVAL) {
+          sendRerouteEvent(sessionState);
+        }
+      }
     }
   }
 
   /**
-   * Runs several checks on the actual location object itself in order to ensure that we are
-   * performing navigation progress on a accurate/valid location update.
+   * Runs several checks on the actual rawLocation object itself in order to ensure that we are
+   * performing navigation progress on a accurate/valid rawLocation update.
    */
   @SuppressWarnings("MissingPermission")
   private boolean validLocationUpdate(Location location) {
-    // TODO fix mock location engine and remove this if statement.
+    // TODO fix mock rawLocation engine and remove this if statement.
     if (locationEngine instanceof MockLocationEngine) {
       return true;
     }
@@ -217,10 +225,10 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onNewRouteProgress(Location location, RouteProgress routeProgress) {
     this.routeProgress = routeProgress;
-    this.location = location;
+
     if (firstProgressUpdate) {
       NavigationMetricsWrapper.departEvent(mapboxNavigation.getSessionState(), routeProgress,
-        location);
+        rawLocation);
       firstProgressUpdate = false;
     }
     if (mapboxNavigation.options().enableNotification()) {
@@ -230,7 +238,7 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   /**
-   * With each valid and successful location update, this will get called once the work on the
+   * With each valid and successful rawLocation update, this will get called once the work on the
    * navigation engine thread has finished. Depending on whether or not a milestone gets triggered
    * or not, the navigation event dispatcher will be called to notify the developer.
    */
@@ -244,7 +252,7 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   /**
-   * With each valid and successful location update, this callback gets invoked and depending on
+   * With each valid and successful rawLocation update, this callback gets invoked and depending on
    * whether or not the user is off route, the event dispatcher gets called.
    */
   @Override
@@ -252,42 +260,54 @@ public class NavigationService extends Service implements LocationEngineListener
     if (userOffRoute) {
       if (location.getTime() > timeIntervalSinceLastOffRoute
         + TimeUnit.SECONDS.toMillis(mapboxNavigation.options().secondsBeforeReroute())) {
-        recentDistancesFromManeuverInMeters.clear();
-        mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
         timeIntervalSinceLastOffRoute = location.getTime();
+        if (mapboxNavigation.getSessionState().lastReroutePosition() == null) {
+          rerouteSessionsStateUpdate();
+        } else {
+          if (TurfMeasurement.distance(mapboxNavigation.getSessionState().lastReroutePosition(),
+            Position.fromLngLat(location.getLongitude(), location.getLatitude()),
+            TurfConstants.UNIT_METERS)
+            > mapboxNavigation.options().minimumDistanceBeforeRerouting()) {
+            mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
+            rerouteSessionsStateUpdate();
+          }
+        }
       }
     } else {
       timeIntervalSinceLastOffRoute = location.getTime();
     }
   }
 
+  private void rerouteSessionsStateUpdate() {
+    recentDistancesFromManeuverInMeters.clear();
+    mapboxNavigation.getEventDispatcher().onUserOffRoute(rawLocation);
+    mapboxNavigation.setSessionState(
+      mapboxNavigation.getSessionState().toBuilder().lastReroutePosition(
+        Position.fromLngLat(rawLocation.getLongitude(), rawLocation.getLatitude())).build()
+    );
+  }
+
   public void rerouteOccurred() {
     mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder()
+      .routeProgressBeforeReroute(routeProgress)
       .beforeRerouteLocations(Arrays.asList(
         locationBuffer.toArray(new Location[locationBuffer.size()])))
-      .routeProgressBeforeReroute(routeProgress)
+      .lastRerouteDate(new Date())
       .build());
-    locationBuffer.clear();
-    queuedRerouteEvent = true;
 
-    handler = new Handler();
-    runnable = new Runnable() {
-      @Override
-      public void run() {
-        mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder()
-          .afterRerouteLocations(Arrays.asList(
-            locationBuffer.toArray(new Location[locationBuffer.size()])))
-          .build());
-
-        locationBuffer.clear();
-
-        NavigationMetricsWrapper.rerouteEvent(mapboxNavigation.getSessionState(), routeProgress,
-          location);
-        queuedRerouteEvent = false;
-      }
-    };
-    handler.postDelayed(runnable, TWENTY_SECOND_INTERVAL);
+    queuedRerouteEvents.add(mapboxNavigation.getSessionState());
   }
+
+  void sendRerouteEvent(SessionState sessionState) {
+    mapboxNavigation.setSessionState(sessionState.toBuilder()
+      .afterRerouteLocations(Arrays.asList(
+        locationBuffer.toArray(new Location[locationBuffer.size()])))
+      .build());
+
+    NavigationMetricsWrapper.rerouteEvent(sessionState, routeProgress, rawLocation);
+    queuedRerouteEvents.remove(sessionState);
+  }
+
 
   class LocalBinder extends Binder {
     NavigationService getService() {

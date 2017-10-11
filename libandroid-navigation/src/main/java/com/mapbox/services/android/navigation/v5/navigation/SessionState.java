@@ -78,6 +78,9 @@ abstract class SessionState {
   @Nullable
   abstract Date lastRerouteDate();
 
+  @Nullable
+  abstract Position lastReroutePosition();
+
   abstract Date startTimestamp();
 
   @Nullable
@@ -108,6 +111,8 @@ abstract class SessionState {
   abstract static class Builder {
 
     abstract Builder routeProgressBeforeReroute(@Nullable RouteProgress routeProgress);
+
+    abstract Builder lastReroutePosition(@Nullable Position lastReroutePosition);
 
     abstract Builder afterRerouteLocations(@Nullable List<Location> beforeLocations);
 
