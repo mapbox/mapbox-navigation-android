@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
-public class NavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback {
+public class NavigationActivity extends AppCompatActivity implements NavigationViewListener {
 
   private NavigationView navigationView;
 
@@ -68,5 +68,10 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   @Override
   public void onNavigationReady() {
     navigationView.startNavigation(this);
+  }
+
+  @Override
+  public void onNavigationFinished() {
+    finish();
   }
 }

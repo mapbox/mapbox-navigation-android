@@ -82,7 +82,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   private NavigationMapRoute mapRoute;
   private NavigationCamera camera;
   private LocationLayerPlugin locationLayer;
-  private OnNavigationReadyCallback onNavigationReadyCallback;
+  private NavigationViewListener navigationListener;
   private boolean resumeState;
 
   public NavigationView(Context context) {
@@ -163,7 +163,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     initLifecycleObservers();
     initNavigationPresenter();
     subscribeViews();
-    onNavigationReadyCallback.onNavigationReady();
+    navigationListener.onNavigationReady();
   }
 
   /**
@@ -283,15 +283,15 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
 
   @Override
   public void finishNavigationView() {
-    // TODO FINISH - callback to context?
+    navigationListener.onNavigationFinished();
   }
 
   public void startNavigation(Activity activity) {
     routeViewModel.extractLaunchData(activity);
   }
 
-  public void getNavigationAsync(OnNavigationReadyCallback onNavigationReadyCallback) {
-    this.onNavigationReadyCallback = onNavigationReadyCallback;
+  public void getNavigationAsync(NavigationViewListener navigationViewListener) {
+    this.navigationListener = navigationViewListener;
     mapView.getMapAsync(this);
   }
 
@@ -541,7 +541,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
           if (isRunning && !resumeState) {
             navigationPresenter.onNavigationRunning();
           } else if (!isRunning) {
-            // TODO FINISH
+            navigationListener.onNavigationFinished();
           }
         }
       }
