@@ -202,7 +202,7 @@ public class NavigationCamera implements ProgressChangeListener {
       Position.fromCoordinates(
         lineString.getCoordinates().get(0).getLongitude(), lineString.getCoordinates().get(0).getLatitude()
       ),
-      120, initialBearing, TurfConstants.UNIT_METERS
+      targetDistance, initialBearing, TurfConstants.UNIT_METERS
     );
 
     LatLng target = new LatLng(
