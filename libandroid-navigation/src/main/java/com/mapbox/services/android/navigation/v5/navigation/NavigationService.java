@@ -19,6 +19,9 @@ import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.api.utils.turf.TurfConstants;
+import com.mapbox.services.api.utils.turf.TurfMeasurement;
+import com.mapbox.services.commons.models.Position;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -257,13 +260,31 @@ public class NavigationService extends Service implements LocationEngineListener
     if (userOffRoute) {
       if (location.getTime() > timeIntervalSinceLastOffRoute
         + TimeUnit.SECONDS.toMillis(mapboxNavigation.options().secondsBeforeReroute())) {
-        recentDistancesFromManeuverInMeters.clear();
-        mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
         timeIntervalSinceLastOffRoute = location.getTime();
+        if (mapboxNavigation.getSessionState().lastReroutePosition() == null) {
+          rerouteSessionsStateUpdate();
+        } else {
+          if (TurfMeasurement.distance(mapboxNavigation.getSessionState().lastReroutePosition(),
+            Position.fromLngLat(location.getLongitude(), location.getLatitude()),
+            TurfConstants.UNIT_METERS)
+            > mapboxNavigation.options().minimumDistanceBeforeRerouting()) {
+            mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
+            rerouteSessionsStateUpdate();
+          }
+        }
       }
     } else {
       timeIntervalSinceLastOffRoute = location.getTime();
     }
+  }
+
+  private void rerouteSessionsStateUpdate() {
+    recentDistancesFromManeuverInMeters.clear();
+    mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
+    mapboxNavigation.setSessionState(
+      mapboxNavigation.getSessionState().toBuilder().lastReroutePosition(
+        Position.fromLngLat(location.getLongitude(), location.getLatitude())).build()
+    );
   }
 
   public void rerouteOccurred() {

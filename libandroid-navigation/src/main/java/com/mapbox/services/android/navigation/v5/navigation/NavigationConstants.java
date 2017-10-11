@@ -123,6 +123,8 @@ public class NavigationConstants {
 
   public static final double MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE = 50;
 
+  public static final double MINIMUM_DISTANCE_BEFORE_REROUTING = 50;
+
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat";
   public static final String NAVIGATION_VIEW_ORIGIN_LNG_KEY = "origin_long";
