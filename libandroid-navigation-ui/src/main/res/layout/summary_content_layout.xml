@@ -28,15 +28,7 @@
             android:layout_height="1dp"
             android:layout_below="@id/summaryPeekLayout"
             android:layout_marginTop="2dp"
-            android:background="@color/md_grey_500"/>
-
-        <View
-            android:id="@+id/rvShadow"
-            android:layout_width="wrap_content"
-            android:layout_height="6dp"
-            android:layout_below="@id/divider"
-            android:background="@drawable/gradient_shadow_down"
-            android:visibility="gone"/>
+            android:background="?attr/navigationViewSecondary"/>
 
         <include
             android:id="@+id/summaryOptions"
@@ -53,6 +45,14 @@
             android:layout_height="match_parent"
             android:layout_below="@id/divider"
             android:visibility="gone"/>
+
+        <View
+            android:id="@+id/rvShadow"
+            android:layout_width="wrap_content"
+            android:layout_height="6dp"
+            android:layout_below="@id/divider"
+            android:background="@drawable/gradient_shadow_down"
+            android:visibility="invisible"/>
 
     </RelativeLayout>
 

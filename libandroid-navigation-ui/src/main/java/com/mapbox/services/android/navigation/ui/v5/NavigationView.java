@@ -427,7 +427,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
       @Override
       public void onSlide(@NonNull View bottomSheet, float slideOffset) {
         navigationPresenter.onBottomSheetSlide(slideOffset,
-          sheetShadow.getVisibility() != View.VISIBLE);
+          sheetShadow.getVisibility() == View.VISIBLE);
       }
     });
   }
