@@ -131,11 +131,9 @@ class NavigationMetricsWrapper {
 
   @Nullable
   private static Location[] obtainLocations(List<Location> rerouteLocations) {
-    Location[] locations = null;
+    Location[] locations = new Location[0];
     if (rerouteLocations != null) {
-      if (rerouteLocations.isEmpty()) {
-        locations = new Location[0];
-      } else {
+      if (!rerouteLocations.isEmpty()) {
         locations = (Location[]) rerouteLocations.toArray();
       }
     }
