@@ -6,6 +6,7 @@ import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
+import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 
 class NavigationMetricsWrapper {
   static String sdkIdentifier;
@@ -112,7 +113,7 @@ class NavigationMetricsWrapper {
       (int) sessionState.routeProgressBeforeReroute().durationRemaining(),
       (int) routeProgress.distanceRemaining(),
       (int) routeProgress.durationRemaining(),
-      sessionState.secondsSinceLastReroute(), sessionState.feedbackIdentifier(),
+      sessionState.secondsSinceLastReroute(), TelemetryUtils.buildUUID(),
       routeProgress.directionsRoute().getGeometry(), sessionState.mockLocation(),
       null, null, sessionState.originalGeometry(),
       sessionState.originalDistance(), sessionState.originalDuration(), null,
