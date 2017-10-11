@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -56,7 +57,6 @@ import java.text.DecimalFormat;
  */
 public class InstructionView extends RelativeLayout {
 
-  private View instructionLayout;
   private ImageView maneuverImage;
   private TextView stepDistanceText;
   private TextView stepInstructionText;
@@ -233,7 +233,6 @@ public class InstructionView extends RelativeLayout {
     stepInstructionText = findViewById(R.id.stepInstructionText);
     soundChipText = findViewById(R.id.soundText);
     soundFab = findViewById(R.id.soundFab);
-    instructionLayout = findViewById(R.id.instructionLayout);
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
@@ -245,8 +244,18 @@ public class InstructionView extends RelativeLayout {
       int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewPrimaryColor(getContext());
       int navigationViewSecondaryColor = ThemeSwitcher.retrieveNavigationViewSecondaryColor(getContext());
       // Instruction Layout - primary
-      Drawable instructionBackground = DrawableCompat.wrap(instructionLayout.getBackground()).mutate();
-      DrawableCompat.setTint(instructionBackground, navigationViewPrimaryColor);
+      if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        View instructionLayoutText = findViewById(R.id.instructionLayoutText);
+        View instructionLayoutManeuver = findViewById(R.id.instructionLayoutManeuver);
+        Drawable textBackground = DrawableCompat.wrap(instructionLayoutText.getBackground()).mutate();
+        Drawable maneuverBackground = DrawableCompat.wrap(instructionLayoutManeuver.getBackground()).mutate();
+        DrawableCompat.setTint(textBackground, navigationViewPrimaryColor);
+        DrawableCompat.setTint(maneuverBackground, navigationViewPrimaryColor);
+      } else {
+        View instructionLayout = findViewById(R.id.instructionLayout);
+        Drawable instructionBackground = DrawableCompat.wrap(instructionLayout.getBackground()).mutate();
+        DrawableCompat.setTint(instructionBackground, navigationViewPrimaryColor);
+      }
       // Sound chip text - primary
       Drawable soundChipBackground = DrawableCompat.wrap(soundChipText.getBackground()).mutate();
       DrawableCompat.setTint(soundChipBackground, navigationViewPrimaryColor);
