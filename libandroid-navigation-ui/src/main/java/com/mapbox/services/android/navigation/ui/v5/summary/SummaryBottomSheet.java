@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.summary;
 
+import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.support.annotation.Nullable;
@@ -12,7 +13,6 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.DirectionListAdapter;
@@ -75,7 +75,7 @@ public class SummaryBottomSheet extends FrameLayout {
   }
 
   public void subscribe(NavigationViewModel navigationViewModel) {
-    navigationViewModel.summaryModel.observe((NavigationView) getContext(), new Observer<SummaryModel>() {
+    navigationViewModel.summaryModel.observe((LifecycleOwner) getContext(), new Observer<SummaryModel>() {
       @Override
       public void onChanged(@Nullable SummaryModel summaryModel) {
         if (summaryModel != null && !isRerouting) {
@@ -87,7 +87,7 @@ public class SummaryBottomSheet extends FrameLayout {
         }
       }
     });
-    navigationViewModel.isOffRoute.observe((NavigationView) getContext(), new Observer<Boolean>() {
+    navigationViewModel.isOffRoute.observe((LifecycleOwner) getContext(), new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {

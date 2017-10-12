@@ -50,11 +50,11 @@ public class NavigationLauncher {
     editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, simulateRoute);
     editor.apply();
 
-    Intent navigationView = new Intent(activity, NavigationView.class);
+    Intent navigationActivity = new Intent(activity, NavigationActivity.class);
     Bundle bundle = new Bundle();
     bundle.putBoolean(NavigationConstants.NAVIGATION_VIEW_LAUNCH_ROUTE, true);
-    navigationView.putExtras(bundle);
-    activity.startActivity(navigationView);
+    navigationActivity.putExtras(bundle);
+    activity.startActivity(navigationActivity);
   }
 
   /**
@@ -85,11 +85,11 @@ public class NavigationLauncher {
     editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, simulateRoute);
     editor.apply();
 
-    Intent navigationView = new Intent(activity, NavigationView.class);
+    Intent navigationActivity = new Intent(activity, NavigationActivity.class);
     Bundle bundle = new Bundle();
     bundle.putBoolean(NavigationConstants.NAVIGATION_VIEW_LAUNCH_ROUTE, false);
-    navigationView.putExtras(bundle);
-    activity.startActivity(navigationView);
+    navigationActivity.putExtras(bundle);
+    activity.startActivity(navigationActivity);
   }
 
   /**
