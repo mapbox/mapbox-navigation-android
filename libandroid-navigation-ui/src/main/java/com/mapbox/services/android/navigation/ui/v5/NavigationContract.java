@@ -44,5 +44,13 @@ public interface NavigationContract {
     void animateExpandArrowRotation(float value);
 
     void animateInstructionViewAlpha(float value);
+
+    int getBottomSheetHeight();
+
+    int getBottomSheetPeekHeight();
+
+    int[] getMapPadding();
+
+    void setMapPadding(int left, int top, int right, int bottom);
   }
 }

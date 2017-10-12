@@ -50,6 +50,8 @@ class NavigationPresenter {
 
     if (view.isSummaryDirectionsVisible()) {
       view.setSheetShadowVisibility(false);
+    } else {
+      view.setMapPadding(0, 0, 0, view.getBottomSheetHeight());
     }
   }
 
@@ -57,6 +59,11 @@ class NavigationPresenter {
     view.setCancelBtnClickable(true);
     view.setSummaryOptionsVisibility(true);
     view.setSummaryDirectionsVisibility(false);
+
+    int bottomPadding = view.getMapPadding()[3];
+    if (bottomPadding != view.getBottomSheetPeekHeight()) {
+      view.setMapPadding(0, 0, 0, view.getBottomSheetPeekHeight());
+    }
   }
 
   void onSummaryBottomSheetHidden() {

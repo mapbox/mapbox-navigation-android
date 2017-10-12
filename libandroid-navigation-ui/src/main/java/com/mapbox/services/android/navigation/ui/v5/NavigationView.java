@@ -157,6 +157,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
     map.setOnScrollListener(this);
+    setMapPadding(0, 0, 0, summaryBehavior.getPeekHeight());
     initRoute();
     initCamera();
     initLocationLayer();
@@ -264,6 +265,26 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   @Override
   public void animateInstructionViewAlpha(float value) {
     instructionView.animate().alpha(value).setDuration(0).start();
+  }
+
+  @Override
+  public int getBottomSheetHeight() {
+    return summaryBottomSheet.getHeight();
+  }
+
+  @Override
+  public int getBottomSheetPeekHeight() {
+    return summaryBehavior.getPeekHeight();
+  }
+
+  @Override
+  public int[] getMapPadding() {
+    return map.getPadding();
+  }
+
+  @Override
+  public void setMapPadding(int left, int top, int right, int bottom) {
+    map.setPadding(left, top, right, bottom);
   }
 
   /**
