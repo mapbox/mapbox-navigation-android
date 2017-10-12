@@ -26,6 +26,7 @@ import com.mapbox.services.commons.models.Position;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -191,10 +192,15 @@ public class NavigationService extends Service implements LocationEngineListener
       locationBuffer.push(location);
       thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation,
         recentDistancesFromManeuverInMeters));
-      for (SessionState sessionState : queuedRerouteEvents) {
-        if (TimeUtils.dateDiff(sessionState.lastRerouteDate(), new Date(), TimeUnit.SECONDS)
+      Iterator<SessionState> iterator = queuedRerouteEvents.listIterator();
+      while (iterator.hasNext()) {
+        SessionState sessionState = iterator.next();
+        if (sessionState.lastRerouteLocation() != null
+          && sessionState.lastRerouteLocation().equals(locationBuffer.peekLast())
+          || TimeUtils.dateDiff(sessionState.lastRerouteDate(), new Date(), TimeUnit.SECONDS)
           > TWENTY_SECOND_INTERVAL) {
           sendRerouteEvent(sessionState);
+          iterator.remove();
         }
       }
     }
@@ -262,14 +268,15 @@ public class NavigationService extends Service implements LocationEngineListener
       if (location.getTime() > timeIntervalSinceLastOffRoute
         + TimeUnit.SECONDS.toMillis(mapboxNavigation.options().secondsBeforeReroute())) {
         timeIntervalSinceLastOffRoute = location.getTime();
-        if (mapboxNavigation.getSessionState().lastReroutePosition() == null) {
+        if (mapboxNavigation.getSessionState().lastRerouteLocation() == null) {
           rerouteSessionsStateUpdate();
         } else {
-          if (TurfMeasurement.distance(mapboxNavigation.getSessionState().lastReroutePosition(),
+          if (TurfMeasurement.distance(
+            Position.fromLngLat(mapboxNavigation.getSessionState().lastRerouteLocation().getLongitude(),
+              mapboxNavigation.getSessionState().lastRerouteLocation().getLatitude()),
             Position.fromLngLat(location.getLongitude(), location.getLatitude()),
             TurfConstants.UNIT_METERS)
             > mapboxNavigation.options().minimumDistanceBeforeRerouting()) {
-            mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
             rerouteSessionsStateUpdate();
           }
         }
@@ -283,9 +290,7 @@ public class NavigationService extends Service implements LocationEngineListener
     recentDistancesFromManeuverInMeters.clear();
     mapboxNavigation.getEventDispatcher().onUserOffRoute(rawLocation);
     mapboxNavigation.setSessionState(
-      mapboxNavigation.getSessionState().toBuilder().lastReroutePosition(
-        Position.fromLngLat(rawLocation.getLongitude(), rawLocation.getLatitude())).build()
-    );
+      mapboxNavigation.getSessionState().toBuilder().lastRerouteLocation(rawLocation).build());
   }
 
   public void rerouteOccurred() {
@@ -299,13 +304,13 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   void sendRerouteEvent(SessionState sessionState) {
-    mapboxNavigation.setSessionState(sessionState.toBuilder()
+    sessionState = sessionState.toBuilder()
       .afterRerouteLocations(Arrays.asList(
         locationBuffer.toArray(new Location[locationBuffer.size()])))
-      .build());
+      .build();
 
-    NavigationMetricsWrapper.rerouteEvent(sessionState, routeProgress, rawLocation);
-    queuedRerouteEvents.remove(sessionState);
+    NavigationMetricsWrapper.rerouteEvent(sessionState, routeProgress,
+      sessionState.lastRerouteLocation());
   }
 
 

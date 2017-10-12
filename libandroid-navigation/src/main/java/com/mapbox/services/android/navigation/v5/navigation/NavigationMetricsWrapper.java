@@ -5,10 +5,15 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 class NavigationMetricsWrapper {
@@ -92,9 +97,19 @@ class NavigationMetricsWrapper {
       previousModifier = routeProgress.currentLegProgress().currentStep().getManeuver().getModifier();
     }
 
-    Location[] beforeLocations = obtainLocations(sessionState.beforeRerouteLocations());
+    // Check if location update happened before or after the reroute
+    List<Location> afterLoc = new ArrayList<>();
 
-    Location[] afterLocations = obtainLocations(sessionState.afterRerouteLocations());
+    if (sessionState.afterRerouteLocations() != null) {
+      for (Location loc : sessionState.afterRerouteLocations()) {
+        if (loc.getTime() > sessionState.lastRerouteLocation().getTime()) {
+          afterLoc.add(loc);
+        }
+      }
+    }
+
+    Location[] beforeLocations = prepareLocations(sessionState.beforeRerouteLocations());
+    Location[] afterLocations = prepareLocations(afterLoc);
 
     String previousName = routeProgress.currentLegProgress().currentStep().getName();
 
@@ -124,20 +139,19 @@ class NavigationMetricsWrapper {
     ));
   }
 
+  private static Location[] prepareLocations(List<Location> locations) {
+    // Check if the list of locations is empty and if so return an empty array
+    if(locations == null || locations.isEmpty()) {
+      return new Location[0];
+    }
+    // Reverse the list order to conform with the spec
+    Collections.reverse(locations);
+    return locations.toArray(new Location[locations.size()]);
+  }
+
   static void turnstileEvent() {
     MapboxTelemetry.getInstance().setCustomTurnstileEvent(
       MapboxNavigationEvent.buildTurnstileEvent(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
     );
-  }
-
-  @Nullable
-  private static Location[] obtainLocations(List<Location> rerouteLocations) {
-    Location[] locations = new Location[0];
-    if (rerouteLocations != null) {
-      if (!rerouteLocations.isEmpty()) {
-        locations = (Location[]) rerouteLocations.toArray();
-      }
-    }
-    return locations;
   }
 }
