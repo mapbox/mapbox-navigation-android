@@ -277,10 +277,10 @@ public class NavigationService extends Service implements LocationEngineListener
 
   private void rerouteSessionsStateUpdate() {
     recentDistancesFromManeuverInMeters.clear();
-    mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
+    mapboxNavigation.getEventDispatcher().onUserOffRoute(rawLocation);
     mapboxNavigation.setSessionState(
       mapboxNavigation.getSessionState().toBuilder().lastReroutePosition(
-        Position.fromLngLat(location.getLongitude(), location.getLatitude())).build()
+        Position.fromLngLat(rawLocation.getLongitude(), rawLocation.getLatitude())).build()
     );
   }
 
