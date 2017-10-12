@@ -479,7 +479,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
    * the {@link Location} updates from {@link MapboxNavigation}.
    */
   private void initCamera() {
-    camera = new NavigationCamera(getContext(), map, navigationViewModel.getNavigation());
+    camera = new NavigationCamera(this, map, navigationViewModel.getNavigation());
   }
 
   /**
@@ -509,7 +509,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     navigationPresenter = new NavigationPresenter(this);
   }
 
-  /**
+  /**a
    * Initiate observing of ViewModels by Views.
    */
   private void subscribeViews() {
