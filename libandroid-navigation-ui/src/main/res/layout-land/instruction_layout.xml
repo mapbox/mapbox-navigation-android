@@ -12,7 +12,7 @@
     tools:showIn="@layout/instruction_view_layout">
 
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/instructionLayoutManeuver"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
@@ -44,14 +44,14 @@
     </LinearLayout>
 
     <FrameLayout
-        android:id="@+id/frameLayout"
+        android:id="@+id/instructionLayoutText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"
         android:elevation="4dp"
         android:background="@drawable/instruction_text_background"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/linearLayout"
+        app:layout_constraintStart_toEndOf="@+id/instructionLayoutManeuver"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -76,8 +76,8 @@
         layout="@layout/turn_lane_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toEndOf="@+id/linearLayout"
-        app:layout_constraintTop_toBottomOf="@+id/frameLayout"/>
+        app:layout_constraintStart_toEndOf="@+id/instructionLayoutManeuver"
+        app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText"/>
 
     <LinearLayout
         android:id="@+id/rerouteLayout"
