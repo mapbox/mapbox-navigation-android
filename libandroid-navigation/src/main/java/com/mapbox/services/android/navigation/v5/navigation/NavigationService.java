@@ -60,7 +60,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private boolean firstProgressUpdate = true;
   private boolean queuedRerouteEvent;
   private NavigationEngine thread;
-  private Location location;
+  private Location rawLocation;
   private Runnable runnable;
   private Handler handler;
 
@@ -103,9 +103,9 @@ public class NavigationService extends Service implements LocationEngineListener
     }
 
     // User canceled navigation session
-    if (routeProgress != null && location != null) {
+    if (routeProgress != null && rawLocation != null) {
       NavigationMetricsWrapper.cancelEvent(mapboxNavigation.getSessionState(), routeProgress,
-        location);
+        rawLocation);
     }
     endNavigation();
     super.onDestroy();
@@ -154,7 +154,7 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   /**
-   * location engine already checks if the listener isn't already added so no need to check here.
+   * Location engine already checks if the listener isn't already added so no need to check here.
    * If the user decides to call {@link MapboxNavigation#setLocationEngine(LocationEngine)} during
    * the navigation session, this gets called again in order to attach the location listener to the
    * new engine.
@@ -172,6 +172,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private void forceLocationUpdate() {
     Location lastLocation = locationEngine.getLastLocation();
     if (lastLocation != null) {
+      rawLocation = lastLocation;
       thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(lastLocation, mapboxNavigation,
         recentDistancesFromManeuverInMeters));
     }
@@ -180,7 +181,7 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   @SuppressWarnings("MissingPermission")
   public void onConnected() {
-    Timber.d("NavigationService now connected to location listener.");
+    Timber.d("NavigationService now connected to rawLocation listener.");
     locationEngine.requestLocationUpdates();
   }
 
@@ -188,6 +189,7 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onLocationChanged(Location location) {
     Timber.d("onLocationChanged");
     if (location != null && validLocationUpdate(location)) {
+      rawLocation = location;
       locationBuffer.push(location);
       thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation,
         recentDistancesFromManeuverInMeters));
@@ -195,12 +197,12 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   /**
-   * Runs several checks on the actual location object itself in order to ensure that we are
-   * performing navigation progress on a accurate/valid location update.
+   * Runs several checks on the actual rawLocation object itself in order to ensure that we are
+   * performing navigation progress on a accurate/valid rawLocation update.
    */
   @SuppressWarnings("MissingPermission")
   private boolean validLocationUpdate(Location location) {
-    // TODO fix mock location engine and remove this if statement.
+    // TODO fix mock rawLocation engine and remove this if statement.
     if (locationEngine instanceof MockLocationEngine) {
       return true;
     }
@@ -220,10 +222,10 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onNewRouteProgress(Location location, RouteProgress routeProgress) {
     this.routeProgress = routeProgress;
-    this.location = location;
+
     if (firstProgressUpdate) {
       NavigationMetricsWrapper.departEvent(mapboxNavigation.getSessionState(), routeProgress,
-        location);
+        rawLocation);
       firstProgressUpdate = false;
     }
     if (mapboxNavigation.options().enableNotification()) {
@@ -233,7 +235,7 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   /**
-   * With each valid and successful location update, this will get called once the work on the
+   * With each valid and successful rawLocation update, this will get called once the work on the
    * navigation engine thread has finished. Depending on whether or not a milestone gets triggered
    * or not, the navigation event dispatcher will be called to notify the developer.
    */
@@ -247,7 +249,7 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   /**
-   * With each valid and successful location update, this callback gets invoked and depending on
+   * With each valid and successful rawLocation update, this callback gets invoked and depending on
    * whether or not the user is off route, the event dispatcher gets called.
    */
   @Override
@@ -275,10 +277,10 @@ public class NavigationService extends Service implements LocationEngineListener
 
   private void rerouteSessionsStateUpdate() {
     recentDistancesFromManeuverInMeters.clear();
-    mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
+    mapboxNavigation.getEventDispatcher().onUserOffRoute(rawLocation);
     mapboxNavigation.setSessionState(
       mapboxNavigation.getSessionState().toBuilder().lastReroutePosition(
-        Position.fromLngLat(location.getLongitude(), location.getLatitude())).build()
+        Position.fromLngLat(rawLocation.getLongitude(), rawLocation.getLatitude())).build()
     );
   }
 
@@ -303,7 +305,7 @@ public class NavigationService extends Service implements LocationEngineListener
         locationBuffer.clear();
 
         NavigationMetricsWrapper.rerouteEvent(mapboxNavigation.getSessionState(), routeProgress,
-          location);
+          rawLocation);
         queuedRerouteEvent = false;
       }
     };
