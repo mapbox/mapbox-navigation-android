@@ -369,10 +369,12 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   }
 
   private void initViewModels() {
-    if (getContext() instanceof FragmentActivity) {
+    try {
       locationViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(LocationViewModel.class);
       routeViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(RouteViewModel.class);
       navigationViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(NavigationViewModel.class);
+    } catch (ClassCastException exception) {
+      throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
     }
   }
 
@@ -497,9 +499,13 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
    * start / stop based on the Android lifecycle.
    */
   private void initLifecycleObservers() {
-    ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationLayer);
-    ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationViewModel);
-    ((LifecycleOwner) getContext()).getLifecycle().addObserver(navigationViewModel);
+    try {
+      ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationLayer);
+      ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationViewModel);
+      ((LifecycleOwner) getContext()).getLifecycle().addObserver(navigationViewModel);
+    } catch (ClassCastException exception) {
+      throw new ClassCastException("Please ensure that the provided Context is a valid LifecycleOwner");
+    }
   }
 
   /**
@@ -509,7 +515,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     navigationPresenter = new NavigationPresenter(this);
   }
 
-  /**a
+  /**
    * Initiate observing of ViewModels by Views.
    */
   private void subscribeViews() {
