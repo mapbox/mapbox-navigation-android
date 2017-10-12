@@ -4,168 +4,114 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.google.auto.value.AutoValue;
-import com.mapbox.services.api.directions.v5.DirectionsCriteria;
-import com.mapbox.services.api.directions.v5.MapboxDirections;
-import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.services.commons.models.Position;
+import com.mapbox.directions.v5.DirectionsCriteria;
+import com.mapbox.directions.v5.MapboxDirections;
+import com.mapbox.geojson.Point;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Locale;
 
-import retrofit2.Callback;
+public class NavigationRoute {
 
-@AutoValue
-public abstract class NavigationRoute {
+  private final MapboxDirections mapboxDirections;
 
-  /**
-   * @inheritDoc MapboxDirections#user
-   */
-  abstract String user();
-
-  abstract String profile();
-
-  @Nullable
-  abstract Position origin();
-
-  @Nullable
-  abstract Position destination();
-
-  abstract List<Position> coordinates();
-
-  abstract String accessToken();
-
-  abstract boolean alternatives();
-
-  @Nullable
-  abstract List<Double[]> bearings();
-
-  @Nullable
-  abstract double[] radiuses();
-
-  abstract boolean congestion();
-
-  @Nullable
-  abstract String language();
-
-  public void getRoute(@NonNull Callback<DirectionsResponse> callback) {
-    List<Callback<DirectionsResponse>> callbacks = new ArrayList<>(1);
-    callbacks.add(callback);
-    getRoute(callbacks);
+  private NavigationRoute(MapboxDirections mapboxDirections) {
+    this.mapboxDirections = mapboxDirections;
   }
 
-  public void getRoute(@NonNull List<Callback<DirectionsResponse>> callbacks) {
 
-    for (Callback<DirectionsResponse> callback : callbacks) {
-      // TODO am I making the request here multiple times?
-      getDirectionsRequest().enqueueCall(callback);
-    }
-  }
+  public static final class Builder {
 
-  MapboxDirections getDirectionsRequest() {
+    private final MapboxDirections.Builder builder;
 
-    MapboxDirections.Builder builder = new MapboxDirections.Builder()
-      .setUser(user())
-      .setProfile(profile())
-      .setCoordinates(coordinates())
-      .setAccessToken(accessToken()) // TODO use access token in mapboxNavigation
-      .setAlternatives(alternatives())
-      .setRadiuses(radiuses())
-      .setAnnotation(congestion() ? DirectionsCriteria.ANNOTATION_CONGESTION : null)
-      .setLanguage(language())
-      .setGeometry(DirectionsCriteria.GEOMETRY_POLYLINE6)
-      .setOverview(DirectionsCriteria.OVERVIEW_FULL)
-      .setSteps(true)
-      .setContinueStraight(true)
-      .setRoundaboutExits(true);
-
-    if (!bearings().isEmpty()) {
-      builder.setBearings(formatBearingValues());
+    /**
+     * Private constructor for initializing the raw MapboxDirections.Builder
+     */
+    private Builder() {
+      builder = MapboxDirections.builder();
     }
 
-    return builder.build();
-  }
-
-  private double[][] formatBearingValues() {
-    double[][] bearings = new double[coordinates().size()][];
-    for (int i = 0; i < bearings().size(); i++) {
-      double angle = bearings().get(i)[0];
-      double tolerance = bearings().get(i)[1];
-      bearings[i] = new double[] {angle, tolerance};
-    }
-    for (int i = bearings().size(); i < coordinates().size(); i++) {
-      bearings[i] = new double[] {};
-    }
-    return bearings;
-  }
-
-  @AutoValue.Builder
-  public abstract static class Builder {
-
-    List<Double[]> bearings = new ArrayList<>();
-    List<Position> coordinates = new ArrayList<>();
-
-    public abstract Builder user(String user);
-
-    public abstract Builder profile(String profile);
-
-    abstract List<Position> coordinates();
-
-    abstract Builder coordinates(List<Position> coordinates);
-
-    public Builder addWaypoint(@NonNull Position waypoint) {
-      coordinates.add(waypoint);
+    /**
+     * The username for the account that the directions engine runs on. In most cases, this should
+     * always remain the default value of {@link DirectionsCriteria#PROFILE_DEFAULT_USER}.
+     *
+     * @param user a non-null string which will replace the default user used in the directions
+     *             request
+     * @return this builder for chaining options together
+     * @since 1.0.0
+     */
+    public Builder user(@NonNull String user) {
+      builder.user(user);
       return this;
     }
 
-    abstract Position origin();
-
-    public abstract Builder origin(Position origin);
-
-    abstract Position destination();
-
-    public abstract Builder destination(Position destination);
-
-    public abstract Builder accessToken(String accessToken);
-
-    public abstract Builder alternatives(boolean alternatives);
-
-    abstract Builder bearings(List<Double[]> bearings);
-
-    public Builder addBearing(@FloatRange(from = 0, to = 360) double angle,
-                              @FloatRange(from = 0, to = 360) double tolerance) {
-      bearings.add(new Double[] {angle, tolerance});
+    public Builder profile(@NonNull @DirectionsCriteria.ProfileCriteria String profile) {
+      builder.profile(profile);
       return this;
     }
 
-    public abstract Builder radiuses(double... radiuses);
+    public Builder origin(@NonNull Point origin) {
+      builder.origin(origin);
+      return this;
+    }
 
-    public abstract Builder congestion(boolean congestion);
+    public Builder destination(@NonNull Point destination) {
+      builder.destination(destination);
+      return this;
+    }
 
-    public abstract Builder language(String language);
+    public Builder addWaypoint(@NonNull Point waypoint) {
+      builder.addWaypoint(waypoint);
+      return this;
+    }
 
-    abstract NavigationRoute autoBuild(); // not public
+    public Builder alternatives(@Nullable Boolean alternatives) {
+      builder.alternatives(alternatives);
+      return this;
+    }
+
+    public Builder language(@Nullable Locale language) {
+      builder.language(language);
+      return this;
+    }
+    public Builder annotations(@Nullable @DirectionsCriteria.AnnotationCriteria String... annotations) {
+      builder.annotations(annotations);
+      return this;
+    }
+
+    public Builder addBearing(@Nullable @FloatRange(from = 0, to = 360) Double angle,
+                              @Nullable @FloatRange(from = 0, to = 360) Double tolerance) {
+      builder.addBearing(angle, tolerance);
+      return this;
+    }
+
+    public Builder radiuses(@FloatRange(from = 0) double... radiuses) {
+      builder.radiuses(radiuses);
+      return this;
+    }
+
+    public Builder clientAppName(@NonNull String clientAppName) {
+      builder.clientAppName(clientAppName);
+      return this;
+    }
+
+    public Builder accessToken(@NonNull String accessToken) {
+      builder.accessToken(accessToken);
+      return this;
+    }
+
+    public Builder baseUrl(String baseUrl) {
+      builder.baseUrl(baseUrl);
+      return this;
+    }
 
     public NavigationRoute build() {
-      if (origin() != null) {
-        coordinates.add(0, origin());
-      }
-      if (destination() != null) {
-        coordinates.add(destination());
-      }
+      builder.steps(true);
+      builder.continueStraight(true);
+      builder.geometries(DirectionsCriteria.GEOMETRY_POLYLINE6);
+      builder.overview(DirectionsCriteria.OVERVIEW_FULL)
 
-      bearings(Collections.unmodifiableList(bearings));
-      coordinates(Collections.unmodifiableList(coordinates));
-      return autoBuild();
+      // TODO add roundaboutExit=true
+      return new NavigationRoute(builder.build());
     }
-  }
-
-  public static Builder builder() {
-    return new AutoValue_NavigationRoute.Builder()
-      .user(DirectionsCriteria.PROFILE_DEFAULT_USER)
-      .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-      .alternatives(false)
-      .congestion(true);
   }
 }
