@@ -36,6 +36,8 @@ public abstract class MapboxNavigationOptions {
 
   public abstract boolean isFromNavigationUi();
 
+  public abstract double minimumDistanceBeforeRerouting();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -67,6 +69,8 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder isFromNavigationUi(boolean isFromNavigationUi);
 
+    public abstract Builder minimumDistanceBeforeRerouting(double distanceInMeters);
+
     public abstract MapboxNavigationOptions build();
   }
 
@@ -83,6 +87,7 @@ public abstract class MapboxNavigationOptions {
       .snapToRoute(true)
       .manuallyEndNavigationUponCompletion(false)
       .defaultMilestonesEnabled(true)
+      .minimumDistanceBeforeRerouting(NavigationConstants.MINIMUM_DISTANCE_BEFORE_REROUTING)
       .metersRemainingTillArrival(NavigationConstants.METERS_REMAINING_TILL_ARRIVAL)
       .enableNotification(true)
       .isFromNavigationUi(false);
