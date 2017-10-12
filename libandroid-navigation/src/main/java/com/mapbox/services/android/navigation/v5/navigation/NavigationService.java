@@ -169,6 +169,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private void forceLocationUpdate() {
     Location lastLocation = locationEngine.getLastLocation();
     if (lastLocation != null) {
+      rawLocation = lastLocation;
       thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(lastLocation, mapboxNavigation,
         recentDistancesFromManeuverInMeters));
     }
