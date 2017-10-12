@@ -2,20 +2,16 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
 
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.directions.v5.models.LegStep;
+import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.LineString;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.directions.v5.models.LegStep;
-import com.mapbox.services.api.utils.turf.TurfConstants;
-import com.mapbox.services.api.utils.turf.TurfMeasurement;
-import com.mapbox.services.api.utils.turf.TurfMisc;
-import com.mapbox.services.commons.geojson.Feature;
-import com.mapbox.services.commons.geojson.LineString;
-import com.mapbox.services.commons.geojson.Point;
-import com.mapbox.services.commons.models.Position;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,16 +33,14 @@ class NavigationHelper {
    * route. This is isolated as separate logic from the snap logic provided because we will always
    * need to snap to the route in order to get the most accurate information.
    */
-  static Position userSnappedToRoutePosition(Location location, List<Position> coordinates) {
-    Point locationToPoint = Point.fromCoordinates(
-      new double[] {location.getLongitude(), location.getLatitude()}
-    );
+  static Point userSnappedToRoutePosition(Location location, List<Point> coordinates) {
+    Point locationToPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
 
 
     // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
     // Point on the LineString.
     Feature feature = TurfMisc.pointOnLine(locationToPoint, coordinates);
-    return ((Point) feature.getGeometry()).getCoordinates();
+    return ((Point) feature.geometry()).coordinates();
   }
 
   /**
@@ -65,19 +59,18 @@ class NavigationHelper {
    * Calculates the distance remaining in the step from the current users snapped position, to the
    * next maneuver position.
    */
-  static double stepDistanceRemaining(Position snappedPosition, int legIndex, int stepIndex,
-                                      DirectionsRoute directionsRoute, List<Position> coordinates) {
-    List<LegStep> steps = directionsRoute.getLegs().get(legIndex).getSteps();
-    Position nextManeuverPosition = nextManeuverPosition(stepIndex, steps, coordinates);
+  static double stepDistanceRemaining(Point snappedPosition, int legIndex, int stepIndex,
+                                      DirectionsRoute directionsRoute, List<Point> coordinates) {
+    List<LegStep> steps = directionsRoute.legs().get(legIndex).steps();
+    Point nextManeuverPosition = nextManeuverPosition(stepIndex, steps, coordinates);
 
-    LineString lineString = LineString.fromPolyline(steps.get(stepIndex).getGeometry(), PRECISION_6);
+    LineString lineString = LineString.fromPolyline(steps.get(stepIndex).geometry(), PRECISION_6);
     // If the users snapped position equals the next maneuver
     // position or the linestring coordinate size is less than 2,the distance remaining is zero.
-    if (snappedPosition.equals(nextManeuverPosition) || lineString.getCoordinates().size() < 2) {
+    if (snappedPosition.equals(nextManeuverPosition) || lineString.coordinates().size() < 2) {
       return 0;
     }
-    LineString slicedLine = TurfMisc.lineSlice(Point.fromCoordinates(snappedPosition),
-      Point.fromCoordinates(nextManeuverPosition), lineString);
+    LineString slicedLine = TurfMisc.lineSlice(snappedPosition, nextManeuverPosition, lineString);
     return TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
   }
 
@@ -87,12 +80,12 @@ class NavigationHelper {
    */
   static double legDistanceRemaining(double stepDistanceRemaining, int legIndex, int stepIndex,
                                      DirectionsRoute directionsRoute) {
-    List<LegStep> steps = directionsRoute.getLegs().get(legIndex).getSteps();
+    List<LegStep> steps = directionsRoute.legs().get(legIndex).steps();
     if ((steps.size() < stepIndex + 1)) {
       return stepDistanceRemaining;
     }
     for (int i = stepIndex + 1; i < steps.size(); i++) {
-      stepDistanceRemaining += steps.get(i).getDistance();
+      stepDistanceRemaining += steps.get(i).distance();
     }
     return stepDistanceRemaining;
   }
@@ -105,12 +98,12 @@ class NavigationHelper {
    */
   static double routeDistanceRemaining(double legDistanceRemaining, int legIndex,
                                        DirectionsRoute directionsRoute) {
-    if (directionsRoute.getLegs().size() < 2) {
+    if (directionsRoute.legs().size() < 2) {
       return legDistanceRemaining;
     }
 
-    for (int i = legIndex + 1; i < directionsRoute.getLegs().size(); i++) {
-      legDistanceRemaining += directionsRoute.getLegs().get(i).getDistance();
+    for (int i = legIndex + 1; i < directionsRoute.legs().size(); i++) {
+      legDistanceRemaining += directionsRoute.legs().get(i).distance();
     }
     return legDistanceRemaining;
   }
@@ -134,7 +127,7 @@ class NavigationHelper {
 
     // Bearings need to be normalized so when the bearingAfter is 359 and the user heading is 1, we
     // count this as within the MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION.
-    double finalHeading = routeProgress.currentLegProgress().upComingStep().getManeuver()
+    double finalHeading = routeProgress.currentLegProgress().upComingStep().maneuver()
       .getBearingAfter();
     double finalHeadingNormalized = MathUtils.wrap(finalHeading, 0, 360);
     double userHeadingNormalized = MathUtils.wrap(userLocation.getBearing(), 0, 360);
@@ -160,9 +153,9 @@ class NavigationHelper {
                                          NavigationIndices previousIndices) {
     // Check if we are in the last step in the current routeLeg and iterate it if needed.
     if (previousIndices.stepIndex()
-      >= routeProgress.directionsRoute().getLegs().get(routeProgress.legIndex())
-      .getSteps().size() - 2
-      && previousIndices.legIndex() < routeProgress.directionsRoute().getLegs().size() - 1) {
+      >= routeProgress.directionsRoute().legs().get(routeProgress.legIndex())
+      .steps().size() - 2
+      && previousIndices.legIndex() < routeProgress.directionsRoute().legs().size() - 1) {
       return NavigationIndices.create((previousIndices.legIndex() + 1), 0);
     }
     return NavigationIndices.create(previousIndices.legIndex(), (previousIndices.stepIndex() + 1));
@@ -188,7 +181,7 @@ class NavigationHelper {
   }
 
   static Location getSnappedLocation(MapboxNavigation mapboxNavigation, Location location,
-                                     RouteProgress routeProgress, List<Position> stepCoordinates) {
+                                     RouteProgress routeProgress, List<Point> stepCoordinates) {
     Snap snap = mapboxNavigation.getSnapEngine();
     return snap.getSnappedLocation(location, routeProgress, stepCoordinates);
   }
@@ -197,10 +190,10 @@ class NavigationHelper {
    * Retrieves the next steps maneuver position if one exist, otherwise it decodes the current steps
    * geometry and uses the last coordinate in the position list.
    */
-  static Position nextManeuverPosition(int stepIndex, List<LegStep> steps, List<Position> coords) {
+  static Point nextManeuverPosition(int stepIndex, List<LegStep> steps, List<Point> coords) {
     // If there is an upcoming step, use it's maneuver as the position.
     if (steps.size() > (stepIndex + 1)) {
-      return steps.get(stepIndex + 1).getManeuver().asPosition();
+      return steps.get(stepIndex + 1).maneuver().location();
     }
     return !coords.isEmpty() ? coords.get(coords.size() - 1) : coords.get(coords.size());
   }

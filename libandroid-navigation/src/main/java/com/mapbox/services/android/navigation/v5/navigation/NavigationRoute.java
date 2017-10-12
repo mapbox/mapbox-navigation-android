@@ -5,12 +5,19 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.directions.v5.DirectionsCriteria;
+import com.mapbox.directions.v5.DirectionsCriteria.AnnotationCriteria;
+import com.mapbox.directions.v5.DirectionsCriteria.ProfileCriteria;
 import com.mapbox.directions.v5.MapboxDirections;
+import com.mapbox.directions.v5.models.DirectionsResponse;
 import com.mapbox.geojson.Point;
 
 import java.util.Locale;
 
-public class NavigationRoute {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public final class NavigationRoute {
 
   private final MapboxDirections mapboxDirections;
 
@@ -18,6 +25,9 @@ public class NavigationRoute {
     this.mapboxDirections = mapboxDirections;
   }
 
+  public void getRoute(Callback<DirectionsResponse> callback) {
+    mapboxDirections.enqueueCall(callback);
+  }
 
   public static final class Builder {
 
@@ -44,7 +54,7 @@ public class NavigationRoute {
       return this;
     }
 
-    public Builder profile(@NonNull @DirectionsCriteria.ProfileCriteria String profile) {
+    public Builder profile(@NonNull @ProfileCriteria String profile) {
       builder.profile(profile);
       return this;
     }
@@ -73,7 +83,8 @@ public class NavigationRoute {
       builder.language(language);
       return this;
     }
-    public Builder annotations(@Nullable @DirectionsCriteria.AnnotationCriteria String... annotations) {
+
+    public Builder annotations(@Nullable @AnnotationCriteria String... annotations) {
       builder.annotations(annotations);
       return this;
     }
@@ -108,9 +119,8 @@ public class NavigationRoute {
       builder.steps(true);
       builder.continueStraight(true);
       builder.geometries(DirectionsCriteria.GEOMETRY_POLYLINE6);
-      builder.overview(DirectionsCriteria.OVERVIEW_FULL)
-
-      // TODO add roundaboutExit=true
+      builder.overview(DirectionsCriteria.OVERVIEW_FULL);
+      builder.roundaboutExits(true);
       return new NavigationRoute(builder.build());
     }
   }

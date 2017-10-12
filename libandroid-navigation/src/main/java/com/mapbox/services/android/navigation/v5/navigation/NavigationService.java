@@ -10,6 +10,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -17,10 +19,8 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.utils.turf.TurfConstants;
-import com.mapbox.services.api.utils.turf.TurfMeasurement;
-import com.mapbox.services.commons.models.Position;
+import com.mapbox.turf.TurfConstants;
+import com.mapbox.turf.TurfMeasurement;
 
 import java.util.Arrays;
 import java.util.List;
@@ -262,7 +262,7 @@ public class NavigationService extends Service implements LocationEngineListener
           rerouteSessionsStateUpdate();
         } else {
           if (TurfMeasurement.distance(mapboxNavigation.getSessionState().lastReroutePosition(),
-            Position.fromLngLat(location.getLongitude(), location.getLatitude()),
+            Point.fromLngLat(location.getLongitude(), location.getLatitude()),
             TurfConstants.UNIT_METERS)
             > mapboxNavigation.options().minimumDistanceBeforeRerouting()) {
             mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
@@ -280,7 +280,7 @@ public class NavigationService extends Service implements LocationEngineListener
     mapboxNavigation.getEventDispatcher().onUserOffRoute(rawLocation);
     mapboxNavigation.setSessionState(
       mapboxNavigation.getSessionState().toBuilder().lastReroutePosition(
-        Position.fromLngLat(rawLocation.getLongitude(), rawLocation.getLatitude())).build()
+        Point.fromLngLat(rawLocation.getLongitude(), rawLocation.getLatitude())).build()
     );
   }
 

@@ -7,16 +7,17 @@ import android.os.Message;
 import android.os.Process;
 import android.text.TextUtils;
 
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
+import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.models.Position;
-import com.mapbox.services.commons.utils.PolylineUtils;
+
 
 import java.util.List;
 
-import static com.mapbox.services.Constants.PRECISION_6;
+
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.bearingMatchesManeuverFinalHeading;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getSnappedLocation;
@@ -35,7 +36,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
 
   private static final String THREAD_NAME = "NavThread";
   private RouteProgress previousRouteProgress;
-  private List<Position> stepPositions;
+  private List<Point> stepPositions;
   private NavigationIndices indices;
   private Handler responseHandler;
   private Handler workerHandler;
@@ -103,12 +104,12 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       // Decode the first steps geometry and hold onto the resulting Position objects till the users
       // on the next step. Indices are both 0 since the user just started on the new route.
       stepPositions = PolylineUtils.decode(
-        directionsRoute.getLegs().get(0).getSteps().get(0).getGeometry(), PRECISION_6);
+        directionsRoute.legs().get(0).steps().get(0).geometry(), PRECISION_6);
 
       previousRouteProgress = RouteProgress.builder()
-        .stepDistanceRemaining(directionsRoute.getLegs().get(0).getSteps().get(0).getDistance())
-        .legDistanceRemaining(directionsRoute.getLegs().get(0).getDistance())
-        .distanceRemaining(directionsRoute.getDistance())
+        .stepDistanceRemaining(directionsRoute.legs().get(0).steps().get(0).distance())
+        .legDistanceRemaining(directionsRoute.legs().get(0).distance())
+        .distanceRemaining(directionsRoute.distance())
         .directionsRoute(directionsRoute)
         .stepIndex(0)
         .legIndex(0)
@@ -117,7 +118,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       indices = NavigationIndices.create(0, 0);
     }
 
-    Position snappedPosition = userSnappedToRoutePosition(location, stepPositions);
+    Point snappedPosition = userSnappedToRoutePosition(location, stepPositions);
     double stepDistanceRemaining = stepDistanceRemaining(
       snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute, stepPositions);
     double legDistanceRemaining = legDistanceRemaining(
@@ -131,8 +132,8 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       // routeProgress.
       indices = increaseIndex(previousRouteProgress, indices);
       stepPositions = PolylineUtils.decode(
-        directionsRoute.getLegs().get(
-          indices.legIndex()).getSteps().get(indices.stepIndex()).getGeometry(), PRECISION_6);
+        directionsRoute.legs().get(
+          indices.legIndex()).steps().get(indices.stepIndex()).geometry(), PRECISION_6);
       snappedPosition = userSnappedToRoutePosition(location, stepPositions);
       stepDistanceRemaining = stepDistanceRemaining(
         snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute, stepPositions);
@@ -166,8 +167,8 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
    */
   private boolean newRoute(DirectionsRoute directionsRoute) {
     return previousRouteProgress == null
-      || !TextUtils.equals(directionsRoute.getGeometry(),
-      previousRouteProgress.directionsRoute().getGeometry());
+      || !TextUtils.equals(directionsRoute.geometry(),
+      previousRouteProgress.directionsRoute().geometry());
   }
 
   /**
