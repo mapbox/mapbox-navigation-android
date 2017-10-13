@@ -152,6 +152,11 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
       BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
     MapboxTelemetry.getInstance().newUserAgent(userAgent);
 
+    if (BuildConfig.DEBUG) {
+      // Enable extra logging in debug mode
+      MapboxTelemetry.getInstance().setDebugLoggingEnabled(true);
+    }
+
     NavigationMetricsWrapper.sdkIdentifier = sdkIdentifier;
     NavigationMetricsWrapper.turnstileEvent();
     // TODO This should be removed when we figure out a solution in Telemetry
