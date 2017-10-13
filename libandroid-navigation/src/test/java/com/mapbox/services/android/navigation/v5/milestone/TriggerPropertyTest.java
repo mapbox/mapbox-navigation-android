@@ -1,11 +1,13 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mapbox.directions.v5.DirectionsAdapterFactory;
+import com.mapbox.directions.v5.models.DirectionsResponse;
+import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 
 import junit.framework.Assert;
 
@@ -28,16 +30,18 @@ public class TriggerPropertyTest extends BaseTest {
 
   @Before
   public void setup() throws IOException {
-    Gson gson = new Gson();
+    Gson gson = new GsonBuilder()
+      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
     String body = loadJsonFixture(PRECISION_6);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
-    DirectionsRoute route = response.getRoutes().get(0);
+
+    DirectionsRoute route = response.routes().get(0);
 
     routeProgress = RouteProgress.builder()
       .directionsRoute(route)
-      .distanceRemaining(route.getDistance())
-      .legDistanceRemaining(route.getLegs().get(0).getDistance())
-      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+      .distanceRemaining(route.distance())
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
       .legIndex(0)
       .stepIndex(1)
       .build();
@@ -83,7 +87,7 @@ public class TriggerPropertyTest extends BaseTest {
 
   @Test
   public void stepDistanceTotalProperty_onlyPassesValidationWhenEqual() {
-    double stepDistanceTotal = routeProgress.currentLegProgress().currentStep().getDistance();
+    double stepDistanceTotal = routeProgress.currentLegProgress().currentStep().distance();
 
     for (int i = 10; i > 0; i--) {
       Milestone milestone = new StepMilestone.Builder()
@@ -102,7 +106,7 @@ public class TriggerPropertyTest extends BaseTest {
 
   @Test
   public void stepDurationTotalProperty_onlyPassesValidationWhenEqual() {
-    double stepDurationTotal = routeProgress.currentLegProgress().currentStep().getDuration();
+    double stepDurationTotal = routeProgress.currentLegProgress().currentStep().duration();
 
     for (int i = 10; i > 0; i--) {
       Milestone milestone = new StepMilestone.Builder()

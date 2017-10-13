@@ -3,14 +3,18 @@ package com.mapbox.services.android.navigation.v5.snap;
 import android.location.Location;
 
 import com.google.gson.Gson;
-import com.mapbox.services.Constants;
+
+import com.google.gson.GsonBuilder;
+import com.mapbox.directions.v5.DirectionsAdapterFactory;
+import com.mapbox.directions.v5.models.DirectionsResponse;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
+import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.models.Position;
-import com.mapbox.services.commons.utils.PolylineUtils;
+import com.mapbox.services.constants.Constants;
+
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -36,11 +40,11 @@ public class SnapToRouteTest extends BaseTest {
 
   @Before
   public void setUp() throws Exception {
-    Gson gson = new Gson();
-    
+    Gson gson = new GsonBuilder()
+      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
     String body = loadJsonFixture(MULTI_LEG_ROUTE);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
-    route = response.getRoutes().get(0);
+    route = response.routes().get(0);
 
     routeProgress = RouteProgress.builder()
       .stepIndex(0)
@@ -64,8 +68,8 @@ public class SnapToRouteTest extends BaseTest {
   public void getSnappedLocation_returnsProviderNameCorrectly() throws Exception {
     Snap snap = new SnapToRoute();
     Location location = new Location("test");
-    List<Position> coordinates = PolylineUtils.decode(
-      route.getLegs().get(0).getSteps().get(1).getGeometry(), Constants.PRECISION_6);
+    List<Point> coordinates = PolylineUtils.decode(
+      route.legs().get(0).steps().get(1).geometry(), Constants.PRECISION_6);
     Location snappedLocation
       = snap.getSnappedLocation(location, routeProgress, coordinates);
     assertTrue(snappedLocation.getProvider().equals("test-snapped"));
