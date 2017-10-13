@@ -5,12 +5,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.directions.v5.models.RouteLeg;
+import com.mapbox.geojson.Point;
+import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.directions.v5.models.RouteLeg;
-import com.mapbox.services.commons.models.Position;
-import com.mapbox.services.commons.utils.PolylineUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -20,37 +20,37 @@ import java.util.concurrent.TimeUnit;
 abstract class SessionState {
 
   String originalGeometry() {
-    List<Position> geometryPositions
-      = PolylineUtils.decode(originalDirectionRoute().getGeometry(), Constants.PRECISION_6);
+    List<Point> geometryPositions
+      = PolylineUtils.decode(originalDirectionRoute().geometry(), Constants.PRECISION_6);
     return PolylineUtils.encode(geometryPositions, Constants.PRECISION_5);
   }
 
   String currentGeometry() {
-    List<Position> geometryPositions
-      = PolylineUtils.decode(currentDirectionRoute().getGeometry(), Constants.PRECISION_6);
+    List<Point> geometryPositions
+      = PolylineUtils.decode(currentDirectionRoute().geometry(), Constants.PRECISION_6);
     return PolylineUtils.encode(geometryPositions, Constants.PRECISION_5);
   }
 
   int originalDuration() {
-    return (int) originalDirectionRoute().getDuration();
+    return originalDirectionRoute().duration().intValue();
   }
 
   int originalDistance() {
-    return (int) originalDirectionRoute().getDistance();
+    return originalDirectionRoute().distance().intValue();
   }
 
   int originalStepCount() {
     int stepCount = 0;
-    for (RouteLeg leg : originalDirectionRoute().getLegs()) {
-      stepCount += leg.getSteps().size();
+    for (RouteLeg leg : originalDirectionRoute().legs()) {
+      stepCount += leg.steps().size();
     }
     return stepCount;
   }
 
   int currentStepCount() {
     int stepCount = 0;
-    for (RouteLeg leg : currentDirectionRoute().getLegs()) {
-      stepCount += leg.getSteps().size();
+    for (RouteLeg leg : currentDirectionRoute().legs()) {
+      stepCount += leg.steps().size();
     }
     return stepCount;
   }

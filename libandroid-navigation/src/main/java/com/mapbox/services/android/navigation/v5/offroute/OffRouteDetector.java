@@ -2,18 +2,17 @@ package com.mapbox.services.android.navigation.v5.offroute;
 
 import android.location.Location;
 
+import com.mapbox.directions.v5.models.LegStep;
+import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.LineString;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
-import com.mapbox.services.api.directions.v5.models.LegStep;
-import com.mapbox.services.api.utils.turf.TurfConstants;
-import com.mapbox.services.api.utils.turf.TurfMeasurement;
-import com.mapbox.services.api.utils.turf.TurfMisc;
-import com.mapbox.services.commons.geojson.Feature;
-import com.mapbox.services.commons.geojson.LineString;
-import com.mapbox.services.commons.geojson.Point;
-import com.mapbox.services.commons.models.Position;
+import com.mapbox.turf.TurfConstants;
+import com.mapbox.turf.TurfMeasurement;
+import com.mapbox.turf.TurfMisc;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
 
@@ -29,18 +28,18 @@ public class OffRouteDetector extends OffRoute {
   public boolean isUserOffRoute(Location location, RouteProgress routeProgress,
                                 MapboxNavigationOptions options,
                                 RingBuffer<Integer> recentDistancesFromManeuverInMeters) {
-    Position futurePosition = getFuturePosition(location, options);
+    Point futurePoint = getFuturePosition(location, options);
     double radius = Math.max(options.maximumDistanceOffRoute(),
       location.getAccuracy() + options.userLocationSnapDistance());
 
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
-    boolean isOffRoute = userTrueDistanceFromStep(futurePosition, currentStep) > radius;
+    boolean isOffRoute = userTrueDistanceFromStep(futurePoint, currentStep) > radius;
 
     // Check to see if the user is moving away from the maneuver. Here, we store an array of
     // distances. If the current distance is greater than the last distance, add it to the array. If
     // the array grows larger than x, reroute the user.
     if (movingAwayFromManeuver(routeProgress, recentDistancesFromManeuverInMeters,
-      futurePosition)) {
+      futurePoint)) {
       return true;
     }
 
@@ -51,7 +50,7 @@ public class OffRouteDetector extends OffRoute {
 
     LegStep upComingStep = routeProgress.currentLegProgress().upComingStep();
     if (upComingStep != null) {
-      isCloseToUpcomingStep = userTrueDistanceFromStep(futurePosition, upComingStep) < radius;
+      isCloseToUpcomingStep = userTrueDistanceFromStep(futurePoint, upComingStep) < radius;
       if (isOffRoute && isCloseToUpcomingStep) {
         // TODO increment step index
         return false;
@@ -63,12 +62,12 @@ public class OffRouteDetector extends OffRoute {
   /**
    * uses dead reckoning to find the users future location.
    *
-   * @return a {@link Position}
+   * @return a {@link Point}
    * @since 0.2.0
    */
-  private static Position getFuturePosition(Location location, MapboxNavigationOptions options) {
+  private static Point getFuturePosition(Location location, MapboxNavigationOptions options) {
     // Find future location of user
-    Position locationToPosition = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
+    Point locationToPosition = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     double metersInFrontOfUser = location.getSpeed() * options.deadReckoningTimeInterval();
     return TurfMeasurement.destination(
       locationToPosition, metersInFrontOfUser, location.getBearing(), TurfConstants.UNIT_METERS
@@ -77,14 +76,14 @@ public class OffRouteDetector extends OffRoute {
 
   private static boolean movingAwayFromManeuver(RouteProgress routeProgress,
                                                 RingBuffer<Integer> recentDistancesFromManeuverInMeters,
-                                                Position futurePosition) {
+                                                Point futurePosition) {
 
     if (routeProgress.currentLegProgress().upComingStep() == null) {
       return false;
     }
 
     double userDistanceToManeuver = TurfMeasurement.distance(
-      routeProgress.currentLegProgress().upComingStep().getManeuver().asPosition(),
+      routeProgress.currentLegProgress().upComingStep().maneuver().location(),
       futurePosition, TurfConstants.UNIT_METERS
     );
 
@@ -107,22 +106,22 @@ public class OffRouteDetector extends OffRoute {
   }
 
   /**
-   * Gets the distance from the users predicted {@link Position} to the
+   * Gets the distance from the users predicted {@link Point} to the
    * closest point on the given {@link LegStep}.
    *
-   * @param futurePosition {@link Position} where the user is predicted to be
+   * @param futurePoint {@link Point} where the user is predicted to be
    * @param step           {@link LegStep} to calculate the closest point on the step to our predicted location
    * @return double in distance meters
    * @since 0.2.0
    */
-  private static double userTrueDistanceFromStep(Position futurePosition, LegStep step) {
-    LineString lineString = LineString.fromPolyline(step.getGeometry(), Constants.PRECISION_6);
-    Feature feature = TurfMisc.pointOnLine(Point.fromCoordinates(futurePosition), lineString.getCoordinates());
+  private static double userTrueDistanceFromStep(Point futurePoint, LegStep step) {
+    LineString lineString = LineString.fromPolyline(step.geometry(), Constants.PRECISION_6);
+    Feature feature = TurfMisc.pointOnLine(futurePoint, lineString.coordinates());
 
-    Point snappedPoint = (Point) feature.getGeometry();
+    Point snappedPoint = (Point) feature.geometry();
 
     return TurfMeasurement.distance(
-      Point.fromCoordinates(futurePosition),
+      futurePoint,
       snappedPoint,
       TurfConstants.UNIT_METERS);
   }

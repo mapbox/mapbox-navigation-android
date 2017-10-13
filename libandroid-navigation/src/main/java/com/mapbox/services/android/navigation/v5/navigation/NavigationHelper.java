@@ -12,6 +12,9 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
+import com.mapbox.turf.TurfConstants;
+import com.mapbox.turf.TurfMeasurement;
+import com.mapbox.turf.TurfMisc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +43,7 @@ class NavigationHelper {
     // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
     // Point on the LineString.
     Feature feature = TurfMisc.pointOnLine(locationToPoint, coordinates);
-    return ((Point) feature.geometry()).coordinates();
+    return ((Point) feature.geometry());
   }
 
   /**
@@ -127,8 +130,7 @@ class NavigationHelper {
 
     // Bearings need to be normalized so when the bearingAfter is 359 and the user heading is 1, we
     // count this as within the MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION.
-    double finalHeading = routeProgress.currentLegProgress().upComingStep().maneuver()
-      .getBearingAfter();
+    double finalHeading = routeProgress.currentLegProgress().upComingStep().maneuver().bearingAfter();
     double finalHeadingNormalized = MathUtils.wrap(finalHeading, 0, 360);
     double userHeadingNormalized = MathUtils.wrap(userLocation.getBearing(), 0, 360);
     return MathUtils.differenceBetweenAngles(finalHeadingNormalized, userHeadingNormalized)
