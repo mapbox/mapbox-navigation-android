@@ -8,9 +8,9 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.models.Position;
 
 import java.util.HashMap;
 
@@ -19,7 +19,7 @@ import java.util.HashMap;
  * <p>
  * You can launch the UI with either a route you have already retrieved from
  * {@link com.mapbox.services.android.navigation.v5.navigation.NavigationRoute} or you can pass a
- * {@link Position} origin and {@link Position} destination and the UI will request the {@link DirectionsRoute}
+ * {@link Point} origin and {@link Point} destination and the UI will request the {@link DirectionsRoute}
  * while initializing.
  * </p><p>
  * You have an option to include a AWS Cognito Pool ID, which will initialize the UI with AWS Polly Voice instructions
@@ -58,7 +58,7 @@ public class NavigationLauncher {
   }
 
   /**
-   * Starts the UI with a {@link Position} origin and {@link Position} destination which will allow the UI
+   * Starts the UI with a {@link Point} origin and {@link Point} destination which will allow the UI
    * to retrieve a {@link DirectionsRoute} upon initialization
    *
    * @param activity      must be launched from another {@link Activity}
@@ -67,19 +67,19 @@ public class NavigationLauncher {
    * @param awsPoolId     used to activate AWS Polly (if null, will use to {@link android.speech.tts.TextToSpeech})
    * @param simulateRoute if true, will mock location movement - if false, will use true location
    */
-  public static void startNavigation(Activity activity, Position origin, Position destination,
+  public static void startNavigation(Activity activity, Point origin, Point destination,
                                      String awsPoolId, boolean simulateRoute) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
     SharedPreferences.Editor editor = preferences.edit();
 
     editor.putLong(NavigationConstants.NAVIGATION_VIEW_ORIGIN_LAT_KEY,
-      Double.doubleToRawLongBits(origin.getLatitude()));
+      Double.doubleToRawLongBits(origin.latitude()));
     editor.putLong(NavigationConstants.NAVIGATION_VIEW_ORIGIN_LNG_KEY,
-      Double.doubleToRawLongBits(origin.getLongitude()));
+      Double.doubleToRawLongBits(origin.longitude()));
     editor.putLong(NavigationConstants.NAVIGATION_VIEW_DESTINATION_LAT_KEY,
-      Double.doubleToRawLongBits(destination.getLatitude()));
+      Double.doubleToRawLongBits(destination.latitude()));
     editor.putLong(NavigationConstants.NAVIGATION_VIEW_DESTINATION_LNG_KEY,
-      Double.doubleToRawLongBits(destination.getLongitude()));
+      Double.doubleToRawLongBits(destination.longitude()));
 
     editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, awsPoolId);
     editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, simulateRoute);
@@ -117,7 +117,7 @@ public class NavigationLauncher {
    * @param context to retrieve {@link SharedPreferences}
    * @return map with both origin and destination coordinates
    */
-  public static HashMap<String, Position> extractCoordinates(Context context) {
+  public static HashMap<String, Point> extractCoordinates(Context context) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
     double originLng = Double.longBitsToDouble(preferences
       .getLong(NavigationConstants.NAVIGATION_VIEW_ORIGIN_LNG_KEY, 0));
@@ -128,10 +128,10 @@ public class NavigationLauncher {
     double destinationLat = Double.longBitsToDouble(preferences
       .getLong(NavigationConstants.NAVIGATION_VIEW_DESTINATION_LAT_KEY, 0));
 
-    Position origin = Position.fromLngLat(originLng, originLat);
-    Position destination = Position.fromLngLat(destinationLng, destinationLat);
+    Point origin = Point.fromLngLat(originLng, originLat);
+    Point destination = Point.fromLngLat(destinationLng, destinationLat);
 
-    HashMap<String, Position> coordinates = new HashMap<>();
+    HashMap<String, Point> coordinates = new HashMap<>();
     coordinates.put(NavigationConstants.NAVIGATION_VIEW_ORIGIN, origin);
     coordinates.put(NavigationConstants.NAVIGATION_VIEW_DESTINATION, destination);
     return coordinates;

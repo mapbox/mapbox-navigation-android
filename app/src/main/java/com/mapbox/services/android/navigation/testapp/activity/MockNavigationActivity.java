@@ -11,6 +11,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.mapbox.directions.v5.models.DirectionsResponse;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -21,7 +24,6 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
-import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
@@ -30,6 +32,7 @@ import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListene
 import com.mapbox.services.android.navigation.v5.milestone.RouteMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Trigger;
 import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty;
+import com.mapbox.services.android.navigation.v5.mock.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
@@ -38,11 +41,8 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.utils.turf.TurfConstants;
-import com.mapbox.services.api.utils.turf.TurfMeasurement;
-import com.mapbox.services.commons.models.Position;
+import com.mapbox.turf.TurfConstants;
+import com.mapbox.turf.TurfMeasurement;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -77,8 +77,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   private DirectionsRoute route;
   private NavigationMapRoute navigationMapRoute;
   private LocationLayerPlugin locationLayerPlugin;
-  private Position destination;
-  private Position waypoint;
+  private Point destination;
+  private Point waypoint;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -132,7 +132,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     if (mapboxMap != null) {
       LatLng latLng = Utils.getRandomLatLng(new double[] {-77.1825, 38.7825, -76.9790, 39.0157});
       ((MockLocationEngine) locationEngine).setLastLocation(
-        Position.fromLngLat(latLng.getLongitude(), latLng.getLatitude())
+        Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())
       );
       mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
       mapboxMap.setMyLocationEnabled(true);
@@ -161,9 +161,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onMapClick(@NonNull LatLng point) {
     if (destination == null) {
-      destination = Position.fromLngLat(point.getLongitude(), point.getLatitude());
+      destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     } else if (waypoint == null) {
-      waypoint = Position.fromLngLat(point.getLongitude(), point.getLatitude());
+      waypoint = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     } else {
       Toast.makeText(this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show();
     }
@@ -180,7 +180,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       return;
     }
 
-    Position origin = Position.fromCoordinates(userLocation.getLongitude(), userLocation.getLatitude());
+    Point origin = Point.fromLngLat(userLocation.getLongitude(), userLocation.getLatitude());
     if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) < 50) {
       startRouteButton.setVisibility(View.GONE);
       return;
@@ -199,8 +199,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
         Timber.d("Url: %s", call.request().url().toString());
         if (response.body() != null) {
-          if (!response.body().getRoutes().isEmpty()) {
-            DirectionsRoute directionsRoute = response.body().getRoutes().get(0);
+          if (!response.body().routes().isEmpty()) {
+            DirectionsRoute directionsRoute = response.body().routes().get(0);
             MockNavigationActivity.this.route = directionsRoute;
             navigationMapRoute.addRoute(directionsRoute);
 

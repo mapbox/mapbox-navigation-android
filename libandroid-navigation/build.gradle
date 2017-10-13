@@ -44,6 +44,8 @@ dependencies {
   // Mapbox Android Services
   compile 'com.mapbox.mapboxsdk:mapbox-android-telemetry:2.2.6'
 
+  compile 'com.mapbox.mapboxsdk:mapbox-android-services:2.2.6'
+
   compile "com.mapbox.mapboxsdk:mapbox-java-services-directions:3.0.0-SNAPSHOT"
   compile "com.mapbox.mapboxsdk:mapbox-java-services-turf:3.0.0-SNAPSHOT"
 

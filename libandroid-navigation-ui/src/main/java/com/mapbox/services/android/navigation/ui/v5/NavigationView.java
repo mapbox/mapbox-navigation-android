@@ -18,6 +18,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
 
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -35,14 +37,12 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.models.Position;
 
 /**
  * View that creates the drop-in UI.
  * <p>
  * Once started, this view will check if launched with a {@link DirectionsRoute}.
- * Or, if not found, this activity will look for a set of {@link Position} coordinates.
+ * Or, if not found, this activity will look for a set of {@link Point} coordinates.
  * In the latter case, a new {@link DirectionsRoute} will be retrieved from {@link NavigationRoute}.
  * </p><p>
  * Once valid data is obtained, this activity will immediately begin navigation
@@ -289,14 +289,14 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
 
   /**
    * Creates a marker based on the
-   * {@link Position} destination coordinate.
+   * {@link Point} destination coordinate.
    *
    * @param position where the marker should be placed
    */
   @Override
-  public void addMarker(Position position) {
-    LatLng markerPosition = new LatLng(position.getLatitude(),
-      position.getLongitude());
+  public void addMarker(Point position) {
+    LatLng markerPosition = new LatLng(position.latitude(),
+      position.longitude());
     map.addMarker(new MarkerOptions()
       .position(markerPosition)
       .icon(ThemeSwitcher.retrieveMapMarker(getContext())));
@@ -552,11 +552,11 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
       }
     });
 
-    routeViewModel.destination.observe((LifecycleOwner) getContext(), new Observer<Position>() {
+    routeViewModel.destination.observe((LifecycleOwner) getContext(), new Observer<Point>() {
       @Override
-      public void onChanged(@Nullable Position position) {
-        if (position != null) {
-          navigationPresenter.onDestinationUpdate(position);
+      public void onChanged(@Nullable Point point) {
+        if (point != null) {
+          navigationPresenter.onDestinationUpdate(point);
         }
       }
     });
@@ -584,9 +584,9 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
       }
     });
 
-    navigationViewModel.newOrigin.observe((LifecycleOwner) getContext(), new Observer<Position>() {
+    navigationViewModel.newOrigin.observe((LifecycleOwner) getContext(), new Observer<Point>() {
       @Override
-      public void onChanged(@Nullable Position newOrigin) {
+      public void onChanged(@Nullable Point newOrigin) {
         if (newOrigin != null) {
           routeViewModel.fetchRouteNewOrigin(newOrigin);
           // To prevent from firing on rotation

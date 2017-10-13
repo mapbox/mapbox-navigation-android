@@ -14,6 +14,8 @@ import com.mapbox.turf.TurfMisc;
 
 import java.util.List;
 
+import static com.mapbox.services.constants.Constants.PRECISION_6;
+
 /**
  * This attempts to snap the user to the closest position along the route. Prior to snapping the
  * user, their location's checked to ensure that the user didn't veer off-route. If your application

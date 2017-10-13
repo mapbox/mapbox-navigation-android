@@ -13,6 +13,7 @@ import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
+import com.mapbox.services.constants.Constants;
 
 
 import java.util.List;
@@ -27,6 +28,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.routeDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.stepDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.userSnappedToRoutePosition;
+import static com.mapbox.services.constants.Constants.PRECISION_6;
 
 /**
  * This class extends handler thread to run most of the navigation calculations on a separate

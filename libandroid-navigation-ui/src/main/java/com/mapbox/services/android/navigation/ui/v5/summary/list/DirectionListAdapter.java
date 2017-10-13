@@ -5,13 +5,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.mapbox.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
-import com.mapbox.services.api.directions.v5.models.LegStep;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -40,11 +40,11 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
   @Override
   public void onBindViewHolder(DirectionViewHolder holder, int position) {
     LegStep legStep = legSteps.get(position);
-    holder.instructionText.setText(StringAbbreviator.abbreviate(legStep.getManeuver().getInstruction()));
+    holder.instructionText.setText(StringAbbreviator.abbreviate(legStep.maneuver().instruction()));
     holder.directionIcon.setImageResource(ManeuverUtils.getManeuverResource(legStep));
 
-    if (legStep.getDistance() > 0) {
-      holder.distanceText.setText(DistanceUtils.distanceFormatterBold(legStep.getDistance(), decimalFormat));
+    if (legStep.distance() > 0) {
+      holder.distanceText.setText(DistanceUtils.distanceFormatterBold(legStep.distance(), decimalFormat));
     } else {
       holder.distanceDivider.setVisibility(View.GONE);
     }
@@ -74,8 +74,13 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
   }
 
   private void addLegSteps(RouteProgress routeProgress) {
+<<<<<<< HEAD
     if ((newLeg(routeProgress) || legSteps.size() == 0) && legHasSteps(routeProgress)) {
       List<LegStep> steps = routeProgress.directionsRoute().getLegs().get(0).getSteps();
+=======
+    if (newLeg(routeProgress) && legHasSteps(routeProgress)) {
+      List<LegStep> steps = routeProgress.directionsRoute().legs().get(0).steps();
+>>>>>>> 404c28d... Finished converting project over to 3.0
       addStepsNotifyAdapter(steps);
       currentLegIndex = routeProgress.legIndex();
     }
@@ -101,7 +106,7 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
   }
 
   private boolean legHasSteps(RouteProgress routeProgress) {
-    return routeProgress.directionsRoute() != null && routeProgress.directionsRoute().getLegs().size() > 0;
+    return routeProgress.directionsRoute() != null && routeProgress.directionsRoute().legs().size() > 0;
   }
 
   private boolean newLeg(RouteProgress routeProgress) {

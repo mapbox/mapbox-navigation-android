@@ -12,14 +12,13 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
+import com.mapbox.services.constants.Constants;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.mapbox.services.Constants.PRECISION_6;
 
 /**
  * This contains several single purpose methods that help out when a new location update occurs and
@@ -67,7 +66,8 @@ class NavigationHelper {
     List<LegStep> steps = directionsRoute.legs().get(legIndex).steps();
     Point nextManeuverPosition = nextManeuverPosition(stepIndex, steps, coordinates);
 
-    LineString lineString = LineString.fromPolyline(steps.get(stepIndex).geometry(), PRECISION_6);
+    LineString lineString = LineString.fromPolyline(steps.get(stepIndex).geometry(),
+      Constants.PRECISION_6);
     // If the users snapped position equals the next maneuver
     // position or the linestring coordinate size is less than 2,the distance remaining is zero.
     if (snappedPosition.equals(nextManeuverPosition) || lineString.coordinates().size() < 2) {

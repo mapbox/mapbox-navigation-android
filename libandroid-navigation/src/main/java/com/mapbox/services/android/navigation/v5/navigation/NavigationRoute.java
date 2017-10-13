@@ -13,13 +13,15 @@ import com.mapbox.geojson.Point;
 
 import java.util.Locale;
 
-import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Response;
 
 public final class NavigationRoute {
 
   private final MapboxDirections mapboxDirections;
+
+  public static Builder builder() {
+    return new Builder();
+  }
 
   private NavigationRoute(MapboxDirections mapboxDirections) {
     this.mapboxDirections = mapboxDirections;
@@ -31,13 +33,13 @@ public final class NavigationRoute {
 
   public static final class Builder {
 
-    private final MapboxDirections.Builder builder;
+    private final MapboxDirections.Builder directionsBuilder;
 
     /**
      * Private constructor for initializing the raw MapboxDirections.Builder
      */
     private Builder() {
-      builder = MapboxDirections.builder();
+      directionsBuilder = MapboxDirections.builder();
     }
 
     /**
@@ -46,82 +48,85 @@ public final class NavigationRoute {
      *
      * @param user a non-null string which will replace the default user used in the directions
      *             request
-     * @return this builder for chaining options together
+     * @return this directionsBuilder for chaining options together
      * @since 1.0.0
      */
     public Builder user(@NonNull String user) {
-      builder.user(user);
+      directionsBuilder.user(user);
       return this;
     }
 
     public Builder profile(@NonNull @ProfileCriteria String profile) {
-      builder.profile(profile);
+      directionsBuilder.profile(profile);
       return this;
     }
 
     public Builder origin(@NonNull Point origin) {
-      builder.origin(origin);
+      directionsBuilder.origin(origin);
       return this;
     }
 
     public Builder destination(@NonNull Point destination) {
-      builder.destination(destination);
+      directionsBuilder.destination(destination);
       return this;
     }
 
     public Builder addWaypoint(@NonNull Point waypoint) {
-      builder.addWaypoint(waypoint);
+      directionsBuilder.addWaypoint(waypoint);
       return this;
     }
 
     public Builder alternatives(@Nullable Boolean alternatives) {
-      builder.alternatives(alternatives);
+      directionsBuilder.alternatives(alternatives);
       return this;
     }
 
     public Builder language(@Nullable Locale language) {
-      builder.language(language);
+      directionsBuilder.language(language);
       return this;
     }
 
     public Builder annotations(@Nullable @AnnotationCriteria String... annotations) {
-      builder.annotations(annotations);
+      directionsBuilder.annotations(annotations);
       return this;
     }
 
     public Builder addBearing(@Nullable @FloatRange(from = 0, to = 360) Double angle,
                               @Nullable @FloatRange(from = 0, to = 360) Double tolerance) {
-      builder.addBearing(angle, tolerance);
+      directionsBuilder.addBearing(angle, tolerance);
       return this;
     }
 
     public Builder radiuses(@FloatRange(from = 0) double... radiuses) {
-      builder.radiuses(radiuses);
+      directionsBuilder.radiuses(radiuses);
       return this;
     }
 
     public Builder clientAppName(@NonNull String clientAppName) {
-      builder.clientAppName(clientAppName);
+      directionsBuilder.clientAppName(clientAppName);
       return this;
     }
 
     public Builder accessToken(@NonNull String accessToken) {
-      builder.accessToken(accessToken);
+      directionsBuilder.accessToken(accessToken);
       return this;
     }
 
     public Builder baseUrl(String baseUrl) {
-      builder.baseUrl(baseUrl);
+      directionsBuilder.baseUrl(baseUrl);
       return this;
     }
 
     public NavigationRoute build() {
-      builder.steps(true);
-      builder.continueStraight(true);
-      builder.geometries(DirectionsCriteria.GEOMETRY_POLYLINE6);
-      builder.overview(DirectionsCriteria.OVERVIEW_FULL);
-      builder.roundaboutExits(true);
-      return new NavigationRoute(builder.build());
+      // These are the default values required to have a directions
+      // route worthy of navigating along.
+      directionsBuilder.steps(true);
+      directionsBuilder.continueStraight(true);
+      directionsBuilder.geometries(DirectionsCriteria.GEOMETRY_POLYLINE6);
+      directionsBuilder.overview(DirectionsCriteria.OVERVIEW_FULL);
+      directionsBuilder.voiceInstructions(true);
+      directionsBuilder.roundaboutExits(true);
+      return new NavigationRoute(directionsBuilder.build());
     }
   }
 }

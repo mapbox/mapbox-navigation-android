@@ -6,6 +6,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 
+import com.mapbox.directions.v5.models.DirectionsResponse;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.LineString;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.annotations.Polyline;
@@ -17,8 +21,8 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.Constants;
-import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.v5.mock.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
@@ -27,10 +31,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
-import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.geojson.LineString;
-import com.mapbox.services.commons.models.Position;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +56,8 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   private boolean running;
   private Polyline polyline;
 
-  Position origin = Position.fromCoordinates(-87.6900, 41.8529);
-  Position destination = Position.fromCoordinates(-87.8921, 41.9794);
+  Point origin = Point.fromLngLat(-87.6900, 41.8529);
+  Point destination = Point.fromLngLat(-87.8921, 41.9794);
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +102,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     mapboxMap.addMarker(new MarkerOptions().position(point));
     mapboxMap.setOnMapClickListener(null);
 
-    Position newDestination = Position.fromLngLat(point.getLongitude(), point.getLatitude());
+    Point newDestination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     ((MockLocationEngine) locationEngine).moveToLocation(newDestination);
   }
 
@@ -117,7 +117,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void userOffRoute(Location location) {
-    Position newOrigin = Position.fromLngLat(location.getLongitude(), location.getLatitude());
+    Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     getRoute(newOrigin, destination, location.getBearing());
     Timber.d("offRoute");
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
@@ -133,8 +133,8 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (response.body() != null) {
-      if (!response.body().getRoutes().isEmpty()) {
-        DirectionsRoute route = response.body().getRoutes().get(0);
+      if (!response.body().routes().isEmpty()) {
+        DirectionsRoute route = response.body().routes().get(0);
         // First run
         drawRoute(route);
         if (!running) {
@@ -145,14 +145,14 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     }
   }
 
-  private void getRoute(Position origin, Position destination, Float bearing) {
+  private void getRoute(Point origin, Point destination, Float bearing) {
     NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder()
       .origin(origin)
       .destination(destination)
       .accessToken(Mapbox.getAccessToken());
 
     if (bearing != null) {
-      navigationRouteBuilder.addBearing(bearing, 90);
+      navigationRouteBuilder.addBearing(Float.valueOf(bearing).doubleValue(), 90d);
     }
     navigationRouteBuilder.build().getRoute(this);
   }
@@ -164,10 +164,10 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   private void drawRoute(DirectionsRoute route) {
     List<LatLng> points = new ArrayList<>();
-    List<Position> coords = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6).getCoordinates();
+    List<Point> coords = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6).coordinates();
 
-    for (Position position : coords) {
-      points.add(new LatLng(position.getLatitude(), position.getLongitude()));
+    for (Point point : coords) {
+      points.add(new LatLng(point.latitude(), point.longitude()));
     }
 
     if (!points.isEmpty()) {
