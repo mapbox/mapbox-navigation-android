@@ -74,13 +74,8 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
   }
 
   private void addLegSteps(RouteProgress routeProgress) {
-<<<<<<< HEAD
     if ((newLeg(routeProgress) || legSteps.size() == 0) && legHasSteps(routeProgress)) {
-      List<LegStep> steps = routeProgress.directionsRoute().getLegs().get(0).getSteps();
-=======
-    if (newLeg(routeProgress) && legHasSteps(routeProgress)) {
       List<LegStep> steps = routeProgress.directionsRoute().legs().get(0).steps();
->>>>>>> 404c28d... Finished converting project over to 3.0
       addStepsNotifyAdapter(steps);
       currentLegIndex = routeProgress.legIndex();
     }
