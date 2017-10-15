@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.mock;
+package com.mapbox.services.android.navigation.v5.location;
 
 import android.location.Location;
 import android.os.Handler;
