@@ -44,15 +44,25 @@ dependencies {
   // Mapbox Android Services
   compile 'com.mapbox.mapboxsdk:mapbox-android-telemetry:2.2.6'
 
-  compile ('com.mapbox.mapboxsdk:mapbox-android-services:2.2.6@aar') {
-    transitive = true
-    exclude module: 'mapbox-java-geojson'
-    exclude module: 'mapbox-java-core'
+//  compile ('com.mapbox.mapboxsdk:mapbox-android-services:2.2.6@aar') {
+//    transitive = true
+//    exclude module: 'mapbox-java-geojson'
+//    exclude module: 'mapbox-java-core'
+//    exclude module: 'mapbox-java-services'
+//  }
+
+  compile ('com.mapzen.android:lost:1.1.1') {
+    exclude group: 'com.google.guava'
+  }
+
+  compile "com.mapbox.mapboxsdk:mapbox-java-services:3.0.0-SNAPSHOT"
+  compile ("com.mapbox.mapboxsdk:mapbox-java-services-directions:3.0.0-SNAPSHOT") {
     exclude module: 'mapbox-java-services'
   }
 
-  compile "com.mapbox.mapboxsdk:mapbox-java-services-directions:3.0.0-SNAPSHOT"
-  compile "com.mapbox.mapboxsdk:mapbox-java-services-turf:3.0.0-SNAPSHOT"
+  compile ("com.mapbox.mapboxsdk:mapbox-java-services-turf:3.0.0-SNAPSHOT") {
+    exclude module: 'mapbox-java-services'
+  }
 
   // Support
   compile dependenciesList.supportAppcompatV7
