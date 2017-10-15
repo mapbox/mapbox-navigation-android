@@ -47,9 +47,7 @@ dependencies {
   }
 
   // Mapbox plugins
-  compile ("com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.2.0-SNAPSHOT") {
-    exclude module: 'mapbox-android-services'
-  }
+  compile "com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.2.0-SNAPSHOT"
 
   // Logging
   compile dependenciesList.timber
