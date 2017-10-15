@@ -36,6 +36,7 @@ public class MockLocationEngine extends LocationEngine {
   private static final boolean DEFAULT_NOISY_GPS = true;
 
   private Location lastLocation = new Location(MockLocationEngine.class.getSimpleName());
+  private Location currentLocation;
   private List<LocationEngineListener> listeners;
 
   private boolean noisyGps;
@@ -335,24 +336,24 @@ public class MockLocationEngine extends LocationEngine {
    * @since 2.2.0
    */
   private Location mockLocation(Point point) {
-    lastLocation = new Location(MockLocationEngine.class.getName());
-    lastLocation.setLatitude(point.latitude());
-    lastLocation.setLongitude(point.longitude());
+    currentLocation = new Location(MockLocationEngine.class.getName());
+    currentLocation.setLatitude(point.latitude());
+    currentLocation.setLongitude(point.longitude());
 
     // Need to convert speed to meters/second as specified in Android's Location object documentation.
     float speedInMeterPerSec = (float) (((speed * 1.609344) * 1000) / (60 * 60));
-    lastLocation.setSpeed(speedInMeterPerSec);
+    currentLocation.setSpeed(speedInMeterPerSec);
 
     if (points.size() >= 2) {
       double bearing = TurfMeasurement.bearing(point, points.get(1));
       Timber.v("Bearing value %f", bearing);
-      lastLocation.setBearing((float) bearing);
+      currentLocation.setBearing((float) bearing);
     }
 
-    lastLocation.setAccuracy(3f);
-    lastLocation.setTime(SystemClock.elapsedRealtime());
+    currentLocation.setAccuracy(3f);
+    currentLocation.setTime(SystemClock.elapsedRealtime());
 
-    return lastLocation;
+    return currentLocation;
   }
 
   /**
@@ -366,11 +367,11 @@ public class MockLocationEngine extends LocationEngine {
     public void run() {
       // Calculate the next steps points if the list becomes empty
       // so that the mock location continues along the route
-      if (points.size() <= 0) {
+      if (points.isEmpty()) {
         calculateStepPoints();
       }
 
-      if (points.size() > 0) {
+      if (!points.isEmpty()) {
         // Notify of an update
         Location location = mockLocation(points.get(0));
         for (LocationEngineListener listener : locationListeners) {
@@ -383,6 +384,7 @@ public class MockLocationEngine extends LocationEngine {
           listener.onLocationChanged(location);
         }
       }
+      lastLocation = currentLocation;
       // Schedule the next update
       handler.postDelayed(this, delay);
     }

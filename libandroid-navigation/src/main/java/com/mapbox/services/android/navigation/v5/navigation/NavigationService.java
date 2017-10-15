@@ -203,10 +203,6 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @SuppressWarnings("MissingPermission")
   private boolean validLocationUpdate(Location location) {
-    // TODO fix mock rawLocation engine and remove this if statement.
-    if (locationEngine instanceof MockLocationEngine) {
-      return true;
-    }
     if (locationEngine.getLastLocation() == null) {
       return true;
     }
