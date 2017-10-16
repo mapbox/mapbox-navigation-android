@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mapbox.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.directions.v5.DirectionsCriteria;
 import com.mapbox.directions.v5.MapboxDirections;
 import com.mapbox.directions.v5.models.DirectionsResponse;
@@ -68,7 +70,8 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap);
-    Gson gson = new Gson();
+    Gson gson = new GsonBuilder().registerTypeAdapterFactory(DirectionsAdapterFactory.create())
+      .create();
     DirectionsResponse response = gson.fromJson(loadJsonFromAsset(DIRECTIONS_RESPONSE), DirectionsResponse.class);
     navigationMapRoute.addRoute(response.routes().get(0));
     mapboxMap.setOnMapClickListener(this);
