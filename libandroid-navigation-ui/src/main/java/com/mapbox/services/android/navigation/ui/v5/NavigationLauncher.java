@@ -46,7 +46,8 @@ public class NavigationLauncher {
                                      String awsPoolId, boolean simulateRoute) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
     SharedPreferences.Editor editor = preferences.edit();
-    editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, new Gson().toJson(route));
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, new GsonBuilder()
+      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create().toJson(route));
 
     editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, awsPoolId);
     editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, simulateRoute);
