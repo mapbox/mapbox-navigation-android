@@ -9,6 +9,7 @@ import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 
+import java.util.Hashtable;
 import java.util.List;
 
 class NavigationMetricsWrapper {
@@ -19,7 +20,7 @@ class NavigationMetricsWrapper {
   }
 
   static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
-    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildArriveEvent(
+    Hashtable<String, Object> arriveEvent = MapboxNavigationEvent.buildArriveEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
       sessionState.currentGeometry(), "unknown",
@@ -32,11 +33,13 @@ class NavigationMetricsWrapper {
       sessionState.originalGeometry(), sessionState.originalDistance(),
       sessionState.originalDuration(), null, sessionState.currentStepCount(),
       sessionState.originalStepCount()
-    ));
+    );
+    MapboxTelemetry.getInstance().addLocationEngineName("placeholder", arriveEvent);
+    MapboxTelemetry.getInstance().pushEvent(arriveEvent);
   }
 
   static void cancelEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
-    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildCancelEvent(
+    Hashtable<String, Object> cancelEvent = MapboxNavigationEvent.buildCancelEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(),
       location.getLatitude(), location.getLongitude(),
@@ -50,11 +53,13 @@ class NavigationMetricsWrapper {
       null, null, sessionState.originalGeometry(),
       sessionState.originalDistance(), sessionState.originalDuration(), null,
       sessionState.arrivalTimestamp(), sessionState.currentStepCount(), sessionState.originalStepCount()
-    ));
+    );
+    MapboxTelemetry.getInstance().addLocationEngineName("placeholder", cancelEvent);
+    MapboxTelemetry.getInstance().pushEvent(cancelEvent);
   }
 
   static void departEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
-    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildDepartEvent(
+    Hashtable<String, Object> departEvent = MapboxNavigationEvent.buildDepartEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
       sessionState.currentGeometry(), "unknown",
@@ -65,7 +70,9 @@ class NavigationMetricsWrapper {
       null, sessionState.currentStepCount(), sessionState.originalStepCount(),
       (int) routeProgress.distanceTraveled(), (int) routeProgress.distanceRemaining(),
       (int) routeProgress.durationRemaining(), sessionState.startTimestamp()
-    ));
+    );
+    MapboxTelemetry.getInstance().addLocationEngineName("placeholder", departEvent);
+    MapboxTelemetry.getInstance().pushEvent(departEvent);
   }
 
   static void rerouteEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
@@ -98,7 +105,7 @@ class NavigationMetricsWrapper {
 
     String previousName = routeProgress.currentLegProgress().currentStep().getName();
 
-    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildRerouteEvent(
+    Hashtable<String, Object> rerouteEvent = MapboxNavigationEvent.buildRerouteEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(),
       location.getLatitude(), location.getLongitude(),
       sessionState.currentGeometry(), "unknown",
@@ -121,7 +128,9 @@ class NavigationMetricsWrapper {
       (int) routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
       sessionState.currentStepCount(), sessionState.originalStepCount()
-    ));
+    );
+    MapboxTelemetry.getInstance().addLocationEngineName("placeholder", rerouteEvent);
+    MapboxTelemetry.getInstance().pushEvent(rerouteEvent);
   }
 
   static void turnstileEvent() {
