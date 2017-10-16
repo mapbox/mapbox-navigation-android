@@ -114,13 +114,13 @@ abstract class SessionState {
 
     abstract Builder lastRerouteLocation(@Nullable Location lastReroutePosition);
 
-    abstract Builder afterRerouteLocations(@Nullable List<Location> beforeLocations);
+    abstract Builder afterRerouteLocations(@Nullable List<Location> afterLocations);
 
     abstract Builder beforeRerouteLocations(@Nullable List<Location> beforeLocations);
 
-    abstract Builder originalDirectionRoute(@NonNull DirectionsRoute directionsRoute);
+    abstract Builder originalDirectionRoute(@NonNull DirectionsRoute originalDirectionsRoute);
 
-    abstract Builder currentDirectionRoute(@NonNull DirectionsRoute directionsRoute);
+    abstract Builder currentDirectionRoute(@NonNull DirectionsRoute currentDirectionsRoute);
 
     abstract Builder sessionIdentifier(@NonNull String sessionIdentifier);
 
