@@ -309,6 +309,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     // Notify service to get new location engine.
     if (isServiceAvailable()) {
       navigationService.acquireLocationEngine();
+      // Update location engine name in the session state
+      sessionState.toBuilder().locationEngineName(locationEngine.getClass().getSimpleName());
     }
   }
 
@@ -357,6 +359,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
         .previousRouteDistancesCompleted(0)
         .startTimestamp(new Date())
         .rerouteCount(0)
+        .locationEngineName(locationEngine.getClass().getSimpleName())
         .mockLocation(locationEngine instanceof MockLocationEngine)
         .build();
 

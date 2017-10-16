@@ -101,6 +101,8 @@ abstract class SessionState {
   @Nullable
   abstract RouteProgress routeProgressBeforeReroute();
 
+  abstract String locationEngineName();
+
   abstract Builder toBuilder();
 
   static Builder builder() {
@@ -139,6 +141,8 @@ abstract class SessionState {
     abstract Builder arrivalTimestamp(@Nullable Date arrivalTimestamp);
 
     abstract Builder previousRouteDistancesCompleted(double previousRouteDistancesCompleted);
+
+    abstract Builder locationEngineName(String locationEngineName);
 
     abstract SessionState build();
 
