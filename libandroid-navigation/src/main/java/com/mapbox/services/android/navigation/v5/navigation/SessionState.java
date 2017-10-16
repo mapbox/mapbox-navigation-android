@@ -71,7 +71,7 @@ abstract class SessionState {
     if (lastRerouteDate() == null) {
       return -1;
     }
-    long diffInMs = lastRerouteDate().getTime() - new Date().getTime();
+    long diffInMs = new Date().getTime() - lastRerouteDate().getTime();
     return (int) TimeUnit.MILLISECONDS.toSeconds(diffInMs);
   }
 
