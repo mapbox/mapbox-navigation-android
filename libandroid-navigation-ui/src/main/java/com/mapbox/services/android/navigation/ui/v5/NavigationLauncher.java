@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mapbox.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -104,7 +106,8 @@ public class NavigationLauncher {
   public static DirectionsRoute extractRoute(Context context) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
     String directionsRoute = preferences.getString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, "");
-    return new Gson().fromJson(directionsRoute, DirectionsRoute.class);
+    return new GsonBuilder().registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create()
+      .fromJson(directionsRoute, DirectionsRoute.class);
   }
 
   /**
