@@ -12,8 +12,6 @@ import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 import java.util.Hashtable;
 import java.util.List;
 
-import timber.log.Timber;
-
 class NavigationMetricsWrapper {
   static String sdkIdentifier;
 
@@ -21,7 +19,8 @@ class NavigationMetricsWrapper {
     // Empty private constructor for preventing initialization of this class.
   }
 
-  static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
+  static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
+                          String locationEngineName) {
     Hashtable<String, Object> arriveEvent = MapboxNavigationEvent.buildArriveEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
@@ -36,12 +35,12 @@ class NavigationMetricsWrapper {
       sessionState.originalDuration(), null, sessionState.currentStepCount(),
       sessionState.originalStepCount()
     );
-    Timber.d("Arrive Location Engine name: " + sessionState.locationEngineName());
-    MapboxTelemetry.getInstance().addLocationEngineName(sessionState.locationEngineName(), arriveEvent);
+    MapboxTelemetry.getInstance().addLocationEngineName(locationEngineName, arriveEvent);
     MapboxTelemetry.getInstance().pushEvent(arriveEvent);
   }
 
-  static void cancelEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
+  static void cancelEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
+                          String locationEngineName) {
     Hashtable<String, Object> cancelEvent = MapboxNavigationEvent.buildCancelEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(),
@@ -57,12 +56,12 @@ class NavigationMetricsWrapper {
       sessionState.originalDistance(), sessionState.originalDuration(), null,
       sessionState.arrivalTimestamp(), sessionState.currentStepCount(), sessionState.originalStepCount()
     );
-    Timber.d("Cancel Location Engine name: " + sessionState.locationEngineName());
-    MapboxTelemetry.getInstance().addLocationEngineName(sessionState.locationEngineName(), cancelEvent);
+    MapboxTelemetry.getInstance().addLocationEngineName(locationEngineName, cancelEvent);
     MapboxTelemetry.getInstance().pushEvent(cancelEvent);
   }
 
-  static void departEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
+  static void departEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
+                          String locationEngineName) {
     Hashtable<String, Object> departEvent = MapboxNavigationEvent.buildDepartEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
@@ -75,12 +74,12 @@ class NavigationMetricsWrapper {
       (int) routeProgress.distanceTraveled(), (int) routeProgress.distanceRemaining(),
       (int) routeProgress.durationRemaining(), sessionState.startTimestamp()
     );
-    Timber.d("Depart Location Engine name: " + sessionState.locationEngineName());
-    MapboxTelemetry.getInstance().addLocationEngineName(sessionState.locationEngineName(), departEvent);
+    MapboxTelemetry.getInstance().addLocationEngineName(locationEngineName, departEvent);
     MapboxTelemetry.getInstance().pushEvent(departEvent);
   }
 
-  static void rerouteEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
+  static void rerouteEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
+                           String locationEngineName) {
     String upcomingInstruction = null;
     String previousInstruction = null;
     String upcomingModifier = null;
@@ -134,8 +133,7 @@ class NavigationMetricsWrapper {
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
       sessionState.currentStepCount(), sessionState.originalStepCount()
     );
-    Timber.d("Reroute Location Engine name: " + sessionState.locationEngineName());
-    MapboxTelemetry.getInstance().addLocationEngineName(sessionState.locationEngineName(), rerouteEvent);
+    MapboxTelemetry.getInstance().addLocationEngineName(locationEngineName, rerouteEvent);
     MapboxTelemetry.getInstance().pushEvent(rerouteEvent);
   }
 
