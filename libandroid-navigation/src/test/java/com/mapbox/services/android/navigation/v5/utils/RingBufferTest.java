@@ -41,4 +41,15 @@ public class RingBufferTest extends BaseTest {
     assertEquals(2, buffer.size());
     assertEquals(1, buffer.pop(), DELTA);
   }
+
+  @Test
+  public void testPeek() {
+    RingBuffer<Integer> buffer = new RingBuffer<>(2);
+    buffer.add(1);
+    buffer.add(2);
+    buffer.add(3);
+    assertEquals(2, buffer.size());
+    assertEquals(2, buffer.peekFirst(), DELTA);
+    assertEquals(3, buffer.peekLast(), DELTA);
+  }
 }
