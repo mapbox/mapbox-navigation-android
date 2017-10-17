@@ -17,6 +17,7 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
+import com.mapbox.services.android.navigation.v5.milestone.ApiMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
@@ -146,7 +147,9 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    */
   private void initNavigation(Application application) {
     navigation = new MapboxNavigation(application.getApplicationContext(), Mapbox.getAccessToken(),
-      MapboxNavigationOptions.builder().isFromNavigationUi(true).build());
+      MapboxNavigationOptions.builder().isFromNavigationUi(true).defaultMilestonesEnabled(false).build());
+
+    navigation.addMilestone(new ApiMilestone.Builder().setIdentifier(1567).build());
   }
 
   /**
