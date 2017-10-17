@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.DEFAULT_MILESTONE_IDENTIFIER;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
 
@@ -239,7 +240,7 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onMilestoneTrigger(List<Milestone> triggeredMilestones, RouteProgress routeProgress) {
     for (Milestone milestone : triggeredMilestones) {
       String instruction = buildInstructionString(routeProgress, milestone);
-      if (milestone.getIdentifier() == 1567) {
+      if (milestone.getIdentifier() == DEFAULT_MILESTONE_IDENTIFIER) {
         instruction = ((ApiMilestone) milestone).announcement();
       }
       mapboxNavigation.getEventDispatcher().onMilestoneEvent(

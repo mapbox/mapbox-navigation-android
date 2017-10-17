@@ -91,25 +91,20 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
 
-//    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
-//
-//    navigation.addMilestone(new RouteMilestone.Builder()
-//      .setIdentifier(BEGIN_ROUTE_MILESTONE)
-//      .setInstruction(new BeginRouteInstruction())
-//      .setTrigger(
-//        Trigger.all(
-//          Trigger.lt(TriggerProperty.STEP_INDEX, 3),
-//          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 200),
-//          Trigger.gte(TriggerProperty.STEP_DISTANCE_TRAVELED_METERS, 75)
-//        )
-//      ).build());
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
 
-    MapboxNavigationOptions options = MapboxNavigationOptions.builder()
-      .defaultMilestonesEnabled(false).build();
+    navigation.addMilestone(new RouteMilestone.Builder()
+      .setIdentifier(BEGIN_ROUTE_MILESTONE)
+      .setInstruction(new BeginRouteInstruction())
+      .setTrigger(
+        Trigger.all(
+          Trigger.lt(TriggerProperty.STEP_INDEX, 3),
+          Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 200),
+          Trigger.gte(TriggerProperty.STEP_DISTANCE_TRAVELED_METERS, 75)
+        )
+      ).build());
 
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken(), options);
-
-    navigation.addMilestone(new ApiMilestone.Builder().setIdentifier(1567).build());
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
   }
 
   @OnClick(R.id.startRouteButton)
@@ -235,29 +230,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
     Timber.d("Milestone Event Occurred with id: %d", identifier);
-    switch (identifier) {
-      case NavigationConstants.URGENT_MILESTONE:
-        Toast.makeText(this, "Urgent Milestone", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.IMMINENT_MILESTONE:
-        Toast.makeText(this, "Imminent Milestone", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.NEW_STEP_MILESTONE:
-        Toast.makeText(this, "New Step", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.DEPARTURE_MILESTONE:
-        Toast.makeText(this, "Depart", Toast.LENGTH_LONG).show();
-        break;
-      case NavigationConstants.ARRIVAL_MILESTONE:
-        Toast.makeText(this, "Arrival", Toast.LENGTH_LONG).show();
-        break;
-      case BEGIN_ROUTE_MILESTONE:
-        Toast.makeText(this, "you should reach your destination by", Toast.LENGTH_LONG).show();
-        break;
-      default:
-        Toast.makeText(this, "Undefined milestone event occurred", Toast.LENGTH_LONG).show();
-        break;
-    }
+    Timber.d("Voice instruction: %s", instruction);
   }
 
   @Override

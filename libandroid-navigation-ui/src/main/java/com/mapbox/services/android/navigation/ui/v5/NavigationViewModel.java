@@ -147,9 +147,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    */
   private void initNavigation(Application application) {
     navigation = new MapboxNavigation(application.getApplicationContext(), Mapbox.getAccessToken(),
-      MapboxNavigationOptions.builder().isFromNavigationUi(true).defaultMilestonesEnabled(false).build());
-
-    navigation.addMilestone(new ApiMilestone.Builder().setIdentifier(1567).build());
+      MapboxNavigationOptions.builder().isFromNavigationUi(true).build());
   }
 
   /**

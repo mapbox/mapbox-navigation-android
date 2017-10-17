@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.DEFAULT_MILESTONE_IDENTIFIER;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +16,7 @@ import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.location.LostLocationEngine;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
+import com.mapbox.services.android.navigation.v5.milestone.ApiMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
@@ -129,7 +132,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     // Create and add default milestones if enabled.
     milestones = new ArrayList<>();
     if (options.defaultMilestonesEnabled()) {
-      new DefaultMilestones(this);
+      addMilestone(new ApiMilestone.Builder().setIdentifier(DEFAULT_MILESTONE_IDENTIFIER).build());
     }
 
     initializeDefaultLocationEngine();
