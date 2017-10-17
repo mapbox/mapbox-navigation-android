@@ -327,13 +327,16 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       if (leg.getAnnotation() != null) {
         if (leg.getAnnotation().getCongestion() != null) {
           for (int i = 0; i < leg.getAnnotation().getCongestion().length; i++) {
-            double[] startCoord = lineString.getCoordinates().get(i).getCoordinates();
-            double[] endCoord = lineString.getCoordinates().get(i + 1).getCoordinates();
+            // See https://github.com/mapbox/mapbox-navigation-android/issues/353
+            if (leg.getAnnotation().getCongestion().length + 1 <= lineString.getCoordinates().size()) {
+              double[] startCoord = lineString.getCoordinates().get(i).getCoordinates();
+              double[] endCoord = lineString.getCoordinates().get(i + 1).getCoordinates();
 
-            LineString congestionLineString = LineString.fromCoordinates(new double[][] {startCoord, endCoord});
-            Feature feature = Feature.fromGeometry(congestionLineString);
-            feature.addStringProperty(CONGESTION_KEY, leg.getAnnotation().getCongestion()[i]);
-            features.add(feature);
+              LineString congestionLineString = LineString.fromCoordinates(new double[][] {startCoord, endCoord});
+              Feature feature = Feature.fromGeometry(congestionLineString);
+              feature.addStringProperty(CONGESTION_KEY, leg.getAnnotation().getCongestion()[i]);
+              features.add(feature);
+            }
           }
         }
       } else {
