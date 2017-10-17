@@ -197,7 +197,7 @@ public class NavigationService extends Service implements LocationEngineListener
         SessionState sessionState = iterator.next();
         if (sessionState.lastRerouteLocation() != null
           && sessionState.lastRerouteLocation().equals(locationBuffer.peekFirst())
-          || TimeUtils.dateDiff(sessionState.lastRerouteDate(), new Date(), TimeUnit.SECONDS)
+          || TimeUtils.dateDiff(sessionState.rerouteDate(), new Date(), TimeUnit.SECONDS)
           > TWENTY_SECOND_INTERVAL) {
           sendRerouteEvent(sessionState);
           iterator.remove();
@@ -298,7 +298,7 @@ public class NavigationService extends Service implements LocationEngineListener
       .routeProgressBeforeReroute(routeProgress)
       .beforeRerouteLocations(Arrays.asList(
         locationBuffer.toArray(new Location[locationBuffer.size()])))
-      .lastRerouteDate(new Date())
+      .rerouteDate(new Date())
       .build());
     queuedRerouteEvents.add(mapboxNavigation.getSessionState());
   }
@@ -311,6 +311,16 @@ public class NavigationService extends Service implements LocationEngineListener
 
     NavigationMetricsWrapper.rerouteEvent(sessionState, routeProgress,
       sessionState.lastRerouteLocation());
+
+    for (SessionState session : queuedRerouteEvents) {
+      session.toBuilder().lastRerouteDate(
+        sessionState.rerouteDate()
+      ).build();
+    }
+
+    mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder().lastRerouteDate(
+      sessionState.rerouteDate()
+    ).build());
   }
 
 

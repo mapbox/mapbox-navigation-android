@@ -67,11 +67,14 @@ abstract class SessionState {
 
   abstract DirectionsRoute currentDirectionRoute();
 
+  @Nullable
+  abstract Date rerouteDate();
+
   int secondsSinceLastReroute() {
-    if (lastRerouteDate() == null) {
+    if (lastRerouteDate() == null || rerouteDate() == null) {
       return -1;
     }
-    long diffInMs = new Date().getTime() - lastRerouteDate().getTime();
+    long diffInMs = rerouteDate().getTime() - lastRerouteDate().getTime();
     return (int) TimeUnit.MILLISECONDS.toSeconds(diffInMs);
   }
 
@@ -127,6 +130,8 @@ abstract class SessionState {
     abstract Builder originalRequestIdentifier(@Nullable String originalRequestIdentifier);
 
     abstract Builder requestIdentifier(@Nullable String requestIdentifier);
+
+    abstract Builder rerouteDate(@Nullable Date rerouteDate);
 
     abstract Builder lastRerouteDate(@Nullable Date lastRerouteDate);
 
