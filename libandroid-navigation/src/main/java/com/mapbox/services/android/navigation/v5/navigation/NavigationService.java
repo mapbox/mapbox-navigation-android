@@ -189,14 +189,14 @@ public class NavigationService extends Service implements LocationEngineListener
     Timber.d("onLocationChanged");
     if (location != null && validLocationUpdate(location)) {
       rawLocation = location;
-      locationBuffer.push(location);
+      locationBuffer.addLast(location);
       thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation,
         recentDistancesFromManeuverInMeters));
       Iterator<SessionState> iterator = queuedRerouteEvents.listIterator();
       while (iterator.hasNext()) {
         SessionState sessionState = iterator.next();
         if (sessionState.lastRerouteLocation() != null
-          && sessionState.lastRerouteLocation().equals(locationBuffer.peekLast())
+          && sessionState.lastRerouteLocation().equals(locationBuffer.peekFirst())
           || TimeUtils.dateDiff(sessionState.lastRerouteDate(), new Date(), TimeUnit.SECONDS)
           > TWENTY_SECOND_INTERVAL) {
           sendRerouteEvent(sessionState);
