@@ -124,6 +124,54 @@ class NavigationMetricsWrapper {
     ));
   }
 
+  static void feedbackEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
+                            String description, String feedbackType, String screenshot) {
+    String upcomingInstruction = null;
+    String previousInstruction = null;
+    String upcomingModifier = null;
+    String previousModifier = null;
+    String upcomingType = null;
+    String upcomingName = null;
+    String previousType = null;
+
+    if (routeProgress.currentLegProgress().upComingStep() != null) {
+      upcomingName = routeProgress.currentLegProgress().upComingStep().getName();
+      if (routeProgress.currentLegProgress().upComingStep().getManeuver() != null) {
+        upcomingInstruction = routeProgress.currentLegProgress().upComingStep().getManeuver().getInstruction();
+        upcomingType = routeProgress.currentLegProgress().upComingStep().getManeuver().getType();
+        upcomingModifier = routeProgress.currentLegProgress().upComingStep().getManeuver().getModifier();
+      }
+    }
+
+    if (routeProgress.currentLegProgress().currentStep().getManeuver() != null) {
+      previousInstruction = routeProgress.currentLegProgress().currentStep().getManeuver().getInstruction();
+      previousType = routeProgress.currentLegProgress().currentStep().getManeuver().getType();
+      previousModifier = routeProgress.currentLegProgress().currentStep().getManeuver().getModifier();
+    }
+
+    Location[] beforeLocations = obtainLocations(sessionState.beforeRerouteLocations());
+
+    Location[] afterLocations = obtainLocations(sessionState.afterRerouteLocations());
+
+    String previousName = routeProgress.currentLegProgress().currentStep().getName();
+
+    MapboxNavigationEvent.buildFeedbackEvent(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
+          sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
+      sessionState.currentGeometry(), "unknown", (int) routeProgress.directionsRoute().getDistance(),
+      (int) routeProgress.directionsRoute().getDuration(), sessionState.rerouteCount(), sessionState.startTimestamp(),
+      feedbackType, beforeLocations, afterLocations, (int) sessionState.routeProgressBeforeReroute().distanceTraveled(),
+      (int) sessionState.routeProgressBeforeReroute().distanceRemaining(),
+      (int) sessionState.routeProgressBeforeReroute().durationRemaining(), description, TelemetryUtils.buildUUID(),
+      TelemetryUtils.buildUUID(), screenshot, sessionState.mockLocation(), null, null, sessionState.originalGeometry(),
+      sessionState.originalDistance(), sessionState.originalDuration(), null, upcomingInstruction, upcomingType,
+      upcomingModifier, upcomingName, previousInstruction, previousType, previousModifier, previousName,
+      (int) routeProgress.currentLegProgress().currentStep().getDistance(),
+      (int) routeProgress.currentLegProgress().currentStep().getDuration(),
+      (int) routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
+      (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
+      sessionState.currentStepCount(), sessionState.originalStepCount());
+  }
+
   static void turnstileEvent() {
     MapboxTelemetry.getInstance().setCustomTurnstileEvent(
       MapboxNavigationEvent.buildTurnstileEvent(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
