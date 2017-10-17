@@ -56,6 +56,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private long timeIntervalSinceLastOffRoute;
   private MapboxNavigation mapboxNavigation;
   private LocationEngine locationEngine;
+  private String locationEngineName;
   private RouteProgress routeProgress;
   private boolean firstProgressUpdate = true;
   private boolean queuedRerouteEvent;
@@ -105,7 +106,7 @@ public class NavigationService extends Service implements LocationEngineListener
     // User canceled navigation session
     if (routeProgress != null && rawLocation != null) {
       NavigationMetricsWrapper.cancelEvent(mapboxNavigation.getSessionState(), routeProgress,
-        rawLocation);
+        rawLocation, locationEngineName);
     }
     endNavigation();
     super.onDestroy();
@@ -162,6 +163,7 @@ public class NavigationService extends Service implements LocationEngineListener
   void acquireLocationEngine() {
     locationEngine = mapboxNavigation.getLocationEngine();
     locationEngine.addLocationEngineListener(this);
+    locationEngineName = obtainLocationEngineName();
   }
 
   /**
@@ -225,7 +227,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
     if (firstProgressUpdate) {
       NavigationMetricsWrapper.departEvent(mapboxNavigation.getSessionState(), routeProgress,
-        rawLocation);
+        rawLocation, locationEngineName);
       firstProgressUpdate = false;
     }
     if (mapboxNavigation.options().enableNotification()) {
@@ -305,7 +307,7 @@ public class NavigationService extends Service implements LocationEngineListener
         locationBuffer.clear();
 
         NavigationMetricsWrapper.rerouteEvent(mapboxNavigation.getSessionState(), routeProgress,
-          rawLocation);
+          rawLocation, locationEngineName);
         queuedRerouteEvent = false;
       }
     };
@@ -317,5 +319,9 @@ public class NavigationService extends Service implements LocationEngineListener
       Timber.d("Local binder called.");
       return NavigationService.this;
     }
+  }
+
+  private String obtainLocationEngineName() {
+    return locationEngine.getClass().getSimpleName();
   }
 }

@@ -9,7 +9,8 @@ ext {
 
   version = [
       mapboxMapSdk       : '5.1.4',
-      mapboxServices     : '2.2.6',
+      // TODO Fix mapboxServices version when PR https://github.com/mapbox/mapbox-java/pull/605 lands
+      mapboxServices     : '2.3.0-SNAPSHOT',
       locationLayerPlugin: '0.1.0',
       autoValue          : '1.4.1',
       autoValueParcel    : '0.2.5',

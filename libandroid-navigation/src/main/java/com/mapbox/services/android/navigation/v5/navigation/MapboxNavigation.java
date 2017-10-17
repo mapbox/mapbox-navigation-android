@@ -57,6 +57,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
   private LocationEngine locationEngine;
+  private String locationEngineName;
   private List<Milestone> milestones;
   private SessionState sessionState;
   private final String accessToken;
@@ -182,6 +183,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     locationEngine.setFastestInterval(1000);
     locationEngine.setInterval(0);
     locationEngine.activate();
+    locationEngineName = obtainLocationEngineName();
   }
 
   /**
@@ -306,6 +308,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    */
   public void setLocationEngine(@NonNull LocationEngine locationEngine) {
     this.locationEngine = locationEngine;
+    locationEngineName = obtainLocationEngineName();
     // Notify service to get new location engine.
     if (isServiceAvailable()) {
       navigationService.acquireLocationEngine();
@@ -628,7 +631,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     Timber.v("Arrived event occurred");
     sessionState = sessionState.toBuilder().arrivalTimestamp(new Date()).build();
-    NavigationMetricsWrapper.arriveEvent(sessionState, routeProgress, location);
+    NavigationMetricsWrapper.arriveEvent(sessionState, routeProgress, location, locationEngineName);
     // Remove all listeners except the onProgressChange by passing in null.
     navigationEventDispatcher.removeOffRouteListener(null);
     // Remove this listener so that the arrival event only occurs once.
@@ -681,5 +684,9 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     Timber.d("Disconnected from service.");
     navigationService = null;
     isBound = false;
+  }
+
+  private String obtainLocationEngineName() {
+    return locationEngine.getClass().getSimpleName();
   }
 }
