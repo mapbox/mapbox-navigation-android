@@ -1,11 +1,12 @@
 <manifest
-    package="com.mapbox.services.android.navigation.ui.v5"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mapbox.services.android.navigation.ui.v5">
 
-    <application>
-        <activity android:name=".NavigationView"
-            android:screenOrientation="portrait"/>
-    </application>
+  <application>
+    <activity
+        android:name=".NavigationView"
+        android:screenOrientation="portrait"/>
+  </application>
 
 </manifest>
 

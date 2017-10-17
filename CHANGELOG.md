@@ -2,6 +2,11 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.6.3 -October 17, 2017
+
+* significant reroute metric fixes [#348](https://github.com/mapbox/mapbox-navigation-android/pull/348)
+* Avoid index out of bounds when drawing route line traffic [#384](https://github.com/mapbox/mapbox-navigation-android/pull/384)
+
 ### v0.6.2 - October 7, 2017
  
 * Fixed an issue with the Location Engine not being activated correctly inside the Navigation-UI lib [#321](https://github.com/mapbox/mapbox-navigation-android/pull/321)
