@@ -17,6 +17,7 @@ import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
@@ -294,7 +295,9 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     // Determine whether the source needs to be added or updated
     GeoJsonSource source = mapboxMap.getSourceAs(NavigationMapSources.NAVIGATION_ROUTE_SOURCE);
     if (source == null) {
-      GeoJsonSource routeSource = new GeoJsonSource(NavigationMapSources.NAVIGATION_ROUTE_SOURCE, routeLineFeature);
+      GeoJsonOptions routeGeoJsonOptions = new GeoJsonOptions().withMaxZoom(16);
+      GeoJsonSource routeSource = new GeoJsonSource(NavigationMapSources.NAVIGATION_ROUTE_SOURCE,
+                                                    routeLineFeature, routeGeoJsonOptions);
       mapboxMap.addSource(routeSource);
     } else {
       source.setGeoJson(routeLineFeature);
