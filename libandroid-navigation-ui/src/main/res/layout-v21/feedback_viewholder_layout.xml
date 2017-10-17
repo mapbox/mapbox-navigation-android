@@ -34,6 +34,7 @@
         android:layout_marginBottom="8dp"
         android:layout_marginTop="16dp"
         android:gravity="center"
+        android:textColor="?attr/navigationViewSecondary"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/feedbackLayout"

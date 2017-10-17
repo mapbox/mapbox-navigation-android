@@ -2,9 +2,13 @@ package com.mapbox.services.android.navigation.ui.v5.feedback;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialogFragment;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,6 +18,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.ProgressBar;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 
 public class FeedbackBottomSheet extends BottomSheetDialogFragment {
 
@@ -39,6 +44,12 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment {
     initFeedbackRecyclerView();
     initCountDownAnimation();
     return bottomSheetView;
+  }
+
+  @Override
+  public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    initBackground(view);
   }
 
   private void bind(View bottomSheetView) {
@@ -78,5 +89,19 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment {
       }
     });
     countdownAnimation.start();
+  }
+
+  private void initBackground(View view) {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+      int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewPrimaryColor(getContext());
+      int navigationViewSecondaryColor = ThemeSwitcher.retrieveNavigationViewSecondaryColor(getContext());
+      // BottomSheet background
+      Drawable bottomSheetBackground = DrawableCompat.wrap(view.getBackground()).mutate();
+      DrawableCompat.setTint(bottomSheetBackground, navigationViewPrimaryColor);
+      // ProgressBar progress color
+      LayerDrawable progressBarBackground = (LayerDrawable) feedbackProgressBar.getProgressDrawable();
+      Drawable progressDrawable = progressBarBackground.getDrawable(1);
+      progressDrawable.setColorFilter(navigationViewSecondaryColor, PorterDuff.Mode.SRC_IN);
+    }
   }
 }

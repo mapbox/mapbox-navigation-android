@@ -4,6 +4,8 @@
        android:layout_height="wrap_content"
        android:shape="rectangle">
 
+    <solid android:color="?attr/navigationViewPrimary"/>
+
     <corners android:topLeftRadius="8dp"
              android:topRightRadius="8dp"/>
 
