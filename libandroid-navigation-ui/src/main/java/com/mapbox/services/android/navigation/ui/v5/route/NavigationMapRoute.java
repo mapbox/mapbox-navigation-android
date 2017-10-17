@@ -336,8 +336,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
               Feature feature = Feature.fromGeometry(congestionLineString);
               feature.addStringProperty(CONGESTION_KEY, leg.getAnnotation().getCongestion()[i]);
               features.add(feature);
-            } else {
-              throw new IndexOutOfBoundsException("Directions route congestion array out of bounds");
             }
           }
         }
