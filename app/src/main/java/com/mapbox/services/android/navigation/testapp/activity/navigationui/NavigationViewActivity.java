@@ -72,7 +72,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   Switch demoSwitch;
 
   private Marker currentMarker;
-  private Point currentPoint;
+  private Point currentLocation;
   private Point destination;
   private DirectionsRoute route;
 
@@ -177,7 +177,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     launchRouteBtn.setEnabled(false);
     loading.setVisibility(View.VISIBLE);
     setCurrentMarkerPosition(point);
-    if (currentPoint != null) {
+    if (currentLocation != null) {
       fetchRoute();
     }
   }
@@ -190,7 +190,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onLocationChanged(Location location) {
-    currentPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    currentLocation = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     onLocationFound(location);
   }
 
@@ -198,10 +198,14 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (validRouteResponse(response)) {
       route = response.body().routes().get(0);
-      launchRouteBtn.setEnabled(true);
-      mapRoute.addRoute(route);
-      boundCameraToRoute();
       hideLoading();
+      if (route.distance() > 25d) {
+        launchRouteBtn.setEnabled(true);
+        mapRoute.addRoute(route);
+        boundCameraToRoute();
+      } else {
+        Snackbar.make(mapView, "Please select a longer route", BaseTransientBottomBar.LENGTH_SHORT).show();
+      }
     }
   }
 
@@ -221,7 +225,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
     if (locationEngine.getLastLocation() != null) {
       Location lastLocation = locationEngine.getLastLocation();
-      currentPoint = Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude());
+      currentLocation = Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude());
     }
   }
 
@@ -238,7 +242,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private void fetchRoute() {
     NavigationRoute.builder()
       .accessToken(Mapbox.getAccessToken())
-      .origin(currentPoint)
+      .origin(currentLocation)
       .destination(destination)
       .build()
       .getRoute(this);
