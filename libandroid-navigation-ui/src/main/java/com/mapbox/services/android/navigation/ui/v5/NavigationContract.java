@@ -52,5 +52,7 @@ public interface NavigationContract {
     int[] getMapPadding();
 
     void setMapPadding(int left, int top, int right, int bottom);
+
+    void showFeedbackBottomSheet();
   }
 }

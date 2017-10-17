@@ -53,7 +53,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment {
 
   private void initCountDownAnimation() {
     ObjectAnimator countdownAnimation = ObjectAnimator.ofInt(feedbackProgressBar,
-      "progress", 5000);
+      "progress", 0);
     countdownAnimation.setInterpolator(new LinearInterpolator());
     countdownAnimation.setDuration(5000);
     countdownAnimation.addListener(new Animator.AnimatorListener() {

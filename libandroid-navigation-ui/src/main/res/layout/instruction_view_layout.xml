@@ -25,4 +25,10 @@
              android:layout_below="@id/turnLaneLayout"
              android:id="@+id/soundLayout"/>
 
+    <include layout="@layout/feedback_button_layout"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:layout_below="@id/soundLayout"
+             android:id="@+id/feedbackLayout"/>
+
 </RelativeLayout>

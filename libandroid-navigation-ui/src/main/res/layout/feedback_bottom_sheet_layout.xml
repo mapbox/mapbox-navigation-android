@@ -19,7 +19,7 @@
         android:progressDrawable="@drawable/feedback_progress_drawable"
         android:layout_width="0dp"
         android:layout_height="8dp"
-        android:progress="0"
+        android:progress="5000"
         android:max="5000"
         app:layout_constraintTop_toBottomOf="@id/feedbackItems"
         app:layout_constraintBottom_toBottomOf="parent"

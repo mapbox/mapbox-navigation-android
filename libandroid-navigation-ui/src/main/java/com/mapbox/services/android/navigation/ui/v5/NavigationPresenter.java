@@ -92,4 +92,8 @@ class NavigationPresenter {
   void onNavigationRunning() {
     view.showInstructionView();
   }
+
+  void onFeedbackClick() {
+    view.showFeedbackBottomSheet();
+  }
 }

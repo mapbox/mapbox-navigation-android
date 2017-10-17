@@ -27,6 +27,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
@@ -73,6 +74,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   private View sheetShadow;
   private RecenterButton recenterBtn;
   private FloatingActionButton soundFab;
+  private FloatingActionButton feedbackFab;
 
   private NavigationPresenter navigationPresenter;
   private NavigationViewModel navigationViewModel;
@@ -242,6 +244,26 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     mapRoute.addRoute(directionsRoute);
   }
 
+  /**
+   * Creates a marker based on the
+   * {@link Position} destination coordinate.
+   *
+   * @param position where the marker should be placed
+   */
+  @Override
+  public void addMarker(Position position) {
+    LatLng markerPosition = new LatLng(position.getLatitude(),
+      position.getLongitude());
+    map.addMarker(new MarkerOptions()
+      .position(markerPosition)
+      .icon(ThemeSwitcher.retrieveMapMarker(getContext())));
+  }
+
+  @Override
+  public void finishNavigationView() {
+    navigationListener.onNavigationFinished();
+  }
+
   @Override
   public void setMuted(boolean isMuted) {
     navigationViewModel.setMuted(isMuted);
@@ -287,24 +309,10 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     map.setPadding(left, top, right, bottom);
   }
 
-  /**
-   * Creates a marker based on the
-   * {@link Position} destination coordinate.
-   *
-   * @param position where the marker should be placed
-   */
   @Override
-  public void addMarker(Position position) {
-    LatLng markerPosition = new LatLng(position.getLatitude(),
-      position.getLongitude());
-    map.addMarker(new MarkerOptions()
-      .position(markerPosition)
-      .icon(ThemeSwitcher.retrieveMapMarker(getContext())));
-  }
-
-  @Override
-  public void finishNavigationView() {
-    navigationListener.onNavigationFinished();
+  public void showFeedbackBottomSheet() {
+    FeedbackBottomSheet.newInstance().show(
+      ((FragmentActivity) getContext()).getSupportFragmentManager(), FeedbackBottomSheet.TAG);
   }
 
   public void startNavigation(Activity activity) {
@@ -366,6 +374,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     sheetShadow = findViewById(R.id.sheetShadow);
     recenterBtn = findViewById(R.id.recenterBtn);
     soundFab = findViewById(R.id.soundFab);
+    feedbackFab = findViewById(R.id.feedbackFab);
   }
 
   private void initViewModels() {
@@ -410,6 +419,12 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
       @Override
       public void onClick(View view) {
         navigationPresenter.onMuteClick(instructionView.toggleMute());
+      }
+    });
+    feedbackFab.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        navigationPresenter.onFeedbackClick();
       }
     });
   }
