@@ -313,9 +313,10 @@ public class NavigationService extends Service implements LocationEngineListener
       sessionState.lastRerouteLocation());
 
     for (SessionState session : queuedRerouteEvents) {
-      session.toBuilder().lastRerouteDate(
+      queuedRerouteEvents.set(queuedRerouteEvents.indexOf(session),
+        session.toBuilder().lastRerouteDate(
         sessionState.rerouteDate()
-      ).build();
+      ).build());
     }
 
     mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder().lastRerouteDate(
