@@ -122,6 +122,8 @@ public final class NavigationRoute {
       // route worthy of navigating along.
       directionsBuilder.steps(true);
       directionsBuilder.continueStraight(true);
+      directionsBuilder.annotations(DirectionsCriteria.ANNOTATION_CONGESTION);
+      directionsBuilder.profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
       directionsBuilder.geometries(DirectionsCriteria.GEOMETRY_POLYLINE6);
       directionsBuilder.overview(DirectionsCriteria.OVERVIEW_FULL);
       directionsBuilder.voiceInstructions(true);
