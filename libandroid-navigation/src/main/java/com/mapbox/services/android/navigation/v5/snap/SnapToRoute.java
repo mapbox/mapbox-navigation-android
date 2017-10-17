@@ -46,6 +46,8 @@ public class SnapToRoute extends Snap {
    */
   private static Location snapLocationLatLng(Location location,
                                              List<Position> coords) {
+    // Construct a new Location copy
+    Location snappedLocation = new Location(location);
     Point locationToPoint = Point.fromCoordinates(
       new double[] {location.getLongitude(), location.getLatitude()}
     );
@@ -55,10 +57,10 @@ public class SnapToRoute extends Snap {
     if (coords.size() > 1) {
       Feature feature = TurfMisc.pointOnLine(locationToPoint, coords);
       Position position = ((Point) feature.getGeometry()).getCoordinates();
-      location.setLongitude(position.getLongitude());
-      location.setLatitude(position.getLatitude());
+      snappedLocation.setLongitude(position.getLongitude());
+      snappedLocation.setLatitude(position.getLatitude());
     }
-    return location;
+    return snappedLocation;
   }
 
   private static float snapLocationBearing(RouteProgress routeProgress) {

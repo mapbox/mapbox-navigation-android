@@ -20,6 +20,7 @@ import com.mapbox.services.Constants;
 import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -69,7 +70,8 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     mapView.getMapAsync(this);
 
     // Initialize MapboxNavigation and add listeners
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
+    MapboxNavigationOptions options = MapboxNavigationOptions.builder().isDebugLoggingEnabled(true).build();
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken(), options);
     navigation.addNavigationEventListener(this);
   }
 

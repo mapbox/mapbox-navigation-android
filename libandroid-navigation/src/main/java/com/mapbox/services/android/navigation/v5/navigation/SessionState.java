@@ -71,7 +71,7 @@ abstract class SessionState {
     if (lastRerouteDate() == null) {
       return -1;
     }
-    long diffInMs = lastRerouteDate().getTime() - new Date().getTime();
+    long diffInMs = new Date().getTime() - lastRerouteDate().getTime();
     return (int) TimeUnit.MILLISECONDS.toSeconds(diffInMs);
   }
 
@@ -79,7 +79,7 @@ abstract class SessionState {
   abstract Date lastRerouteDate();
 
   @Nullable
-  abstract Position lastReroutePosition();
+  abstract Location lastRerouteLocation();
 
   abstract Date startTimestamp();
 
@@ -112,15 +112,15 @@ abstract class SessionState {
 
     abstract Builder routeProgressBeforeReroute(@Nullable RouteProgress routeProgress);
 
-    abstract Builder lastReroutePosition(@Nullable Position lastReroutePosition);
+    abstract Builder lastRerouteLocation(@Nullable Location lastReroutePosition);
 
-    abstract Builder afterRerouteLocations(@Nullable List<Location> beforeLocations);
+    abstract Builder afterRerouteLocations(@Nullable List<Location> afterLocations);
 
     abstract Builder beforeRerouteLocations(@Nullable List<Location> beforeLocations);
 
-    abstract Builder originalDirectionRoute(@NonNull DirectionsRoute directionsRoute);
+    abstract Builder originalDirectionRoute(@NonNull DirectionsRoute originalDirectionsRoute);
 
-    abstract Builder currentDirectionRoute(@NonNull DirectionsRoute directionsRoute);
+    abstract Builder currentDirectionRoute(@NonNull DirectionsRoute currentDirectionsRoute);
 
     abstract Builder sessionIdentifier(@NonNull String sessionIdentifier);
 
