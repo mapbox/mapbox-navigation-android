@@ -298,6 +298,9 @@ public class NavigationService extends Service implements LocationEngineListener
       .routeProgressBeforeReroute(routeProgress)
       .beforeRerouteLocations(Arrays.asList(
         locationBuffer.toArray(new Location[locationBuffer.size()])))
+      .previousRouteDistancesCompleted(
+        mapboxNavigation.getSessionState().previousRouteDistancesCompleted()
+          + routeProgress.distanceTraveled())
       .rerouteDate(new Date())
       .build());
     queuedRerouteEvents.add(mapboxNavigation.getSessionState());
