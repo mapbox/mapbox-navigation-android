@@ -84,7 +84,7 @@ class NavigationMetricsWrapper {
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildRerouteEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(),
       location.getLatitude(), location.getLongitude(),
-      sessionState.currentGeometry(), "unknown",
+      sessionState.currentGeometry(), routeProgress.directionsRoute().routeOptions().profile(),
       routeProgress.directionsRoute().distance().intValue(),
       routeProgress.directionsRoute().duration().intValue(),
       sessionState.rerouteCount(), sessionState.startTimestamp(), beforeLocations, afterLocations,
@@ -95,7 +95,7 @@ class NavigationMetricsWrapper {
       (int) routeProgress.durationRemaining(),
       sessionState.secondsSinceLastReroute(), TelemetryUtils.buildUUID(),
       routeProgress.directionsRoute().geometry(), sessionState.mockLocation(),
-      null, null, sessionState.originalGeometry(),
+      sessionState.originalRequestIdentifier(), sessionState.requestIdentifier(), sessionState.originalGeometry(),
       sessionState.originalDistance(), sessionState.originalDuration(), null,
       upcomingInstruction, upcomingType, upcomingModifier, upcomingName, previousInstruction,
       previousType, previousModifier,
@@ -111,19 +111,21 @@ class NavigationMetricsWrapper {
                             String description, String feedbackType, String screenshot) {
     updateRouteProgressSessionData(routeProgress, sessionState);
 
+
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildFeedbackEvent(sdkIdentifier,
       BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(), location.getLatitude(),
-      location.getLongitude(), sessionState.currentGeometry(), "unknown",
-      (int) routeProgress.directionsRoute().getDistance(), (int) routeProgress.directionsRoute().getDuration(),
+      location.getLongitude(), sessionState.currentGeometry(), routeProgress.directionsRoute().routeOptions().profile(),
+      routeProgress.directionsRoute().distance().intValue(), routeProgress.directionsRoute().duration().intValue(),
       sessionState.rerouteCount(), sessionState.startTimestamp(), feedbackType, beforeLocations, afterLocations,
       (int) sessionState.routeProgressBeforeReroute().distanceTraveled(),
       (int) sessionState.routeProgressBeforeReroute().distanceRemaining(),
       (int) sessionState.routeProgressBeforeReroute().durationRemaining(), description, TelemetryUtils.buildUUID(),
-      TelemetryUtils.buildUUID(), screenshot, sessionState.mockLocation(), null, null, sessionState.originalGeometry(),
-      sessionState.originalDistance(), sessionState.originalDuration(), null, upcomingInstruction, upcomingType,
-      upcomingModifier, upcomingName, previousInstruction, previousType, previousModifier, previousName,
-      (int) routeProgress.currentLegProgress().currentStep().getDistance(),
-      (int) routeProgress.currentLegProgress().currentStep().getDuration(),
+      TelemetryUtils.buildUUID(), screenshot, sessionState.mockLocation(), sessionState.originalRequestIdentifier(),
+      sessionState.requestIdentifier(), sessionState.originalGeometry(), sessionState.originalDistance(),
+      sessionState.originalDuration(), null, upcomingInstruction, upcomingType, upcomingModifier, upcomingName,
+      previousInstruction, previousType, previousModifier, previousName,
+      routeProgress.currentLegProgress().currentStep().distance().intValue(),
+      routeProgress.currentLegProgress().currentStep().duration().intValue(),
       (int) routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
       sessionState.currentStepCount(), sessionState.originalStepCount()
@@ -158,21 +160,21 @@ class NavigationMetricsWrapper {
     previousModifier = null;
 
     if (routeProgress.currentLegProgress().upComingStep() != null) {
-      upcomingName = routeProgress.currentLegProgress().upComingStep().getName();
-      if (routeProgress.currentLegProgress().upComingStep().getManeuver() != null) {
-        upcomingInstruction = routeProgress.currentLegProgress().upComingStep().getManeuver().getInstruction();
-        upcomingType = routeProgress.currentLegProgress().upComingStep().getManeuver().getType();
-        upcomingModifier = routeProgress.currentLegProgress().upComingStep().getManeuver().getModifier();
+      upcomingName = routeProgress.currentLegProgress().upComingStep().name();
+      if (routeProgress.currentLegProgress().upComingStep().maneuver() != null) {
+        upcomingInstruction = routeProgress.currentLegProgress().upComingStep().maneuver().instruction();
+        upcomingType = routeProgress.currentLegProgress().upComingStep().maneuver().type();
+        upcomingModifier = routeProgress.currentLegProgress().upComingStep().maneuver().modifier();
       }
     }
 
-    if (routeProgress.currentLegProgress().currentStep().getManeuver() != null) {
-      previousInstruction = routeProgress.currentLegProgress().currentStep().getManeuver().getInstruction();
-      previousType = routeProgress.currentLegProgress().currentStep().getManeuver().getType();
-      previousModifier = routeProgress.currentLegProgress().currentStep().getManeuver().getModifier();
+    if (routeProgress.currentLegProgress().currentStep().maneuver() != null) {
+      previousInstruction = routeProgress.currentLegProgress().currentStep().maneuver().instruction();
+      previousType = routeProgress.currentLegProgress().currentStep().maneuver().type();
+      previousModifier = routeProgress.currentLegProgress().currentStep().maneuver().modifier();
     }
 
-    previousName = routeProgress.currentLegProgress().currentStep().getName();
+    previousName = routeProgress.currentLegProgress().currentStep().name();
 
     beforeLocations = obtainLocations(sessionState.beforeRerouteLocations());
 
