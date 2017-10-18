@@ -1,6 +1,9 @@
 checkstyle:
 	./gradlew checkstyle
 
+sonarqube:
+	./gradlew sonarqube
+
 test:
 	# See libandroid-navigation/build.gradle for details
 	./gradlew :libandroid-navigation:test
