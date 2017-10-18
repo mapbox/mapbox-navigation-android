@@ -16,7 +16,6 @@ import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,16 +46,15 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment {
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    View bottomSheetView = inflater.inflate(R.layout.feedback_bottom_sheet_layout, container, false);
-    bind(bottomSheetView);
-    initFeedbackRecyclerView();
-    initCountDownAnimation();
-    return bottomSheetView;
+    return inflater.inflate(R.layout.feedback_bottom_sheet_layout, container, false);
   }
 
   @Override
   public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+    bind(view);
+    initFeedbackRecyclerView();
+    initCountDownAnimation();
     initBackground(view);
   }
 
@@ -88,8 +86,9 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment {
     feedbackItems.setAdapter(new FeedbackAdapter());
     feedbackItems.setOverScrollMode(RecyclerView.OVER_SCROLL_IF_CONTENT_SCROLLS);
     if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      feedbackItems.setLayoutManager(new LinearLayoutManager(getContext(),
-        LinearLayoutManager.HORIZONTAL, false));
+      int itemCount = feedbackItems.getAdapter().getItemCount();
+      int spanCount = itemCount >= 6 ? 6 : itemCount;
+      feedbackItems.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
     } else {
       feedbackItems.setLayoutManager(new GridLayoutManager(getContext(), 3));
     }
