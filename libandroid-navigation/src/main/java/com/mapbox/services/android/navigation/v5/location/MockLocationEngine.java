@@ -271,7 +271,8 @@ public class MockLocationEngine extends LocationEngine {
       addNoiseToRoute(distance);
     }
 
-    handler.postDelayed(runnable = new LocationUpdateRunnable(), delay);
+    Runnable runnable = new LocationUpdateRunnable();
+    handler.postDelayed(runnable, delay);
   }
 
   /**
@@ -297,7 +298,8 @@ public class MockLocationEngine extends LocationEngine {
 
     calculateStepPoints();
 
-    handler.postDelayed(runnable = new LocationUpdateRunnable(), delay);
+    Runnable runnable = new LocationUpdateRunnable();
+    handler.postDelayed(runnable, delay);
   }
 
   /**
