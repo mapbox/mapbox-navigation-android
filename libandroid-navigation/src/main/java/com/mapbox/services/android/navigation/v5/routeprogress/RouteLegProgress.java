@@ -4,8 +4,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
-import com.mapbox.services.api.directions.v5.models.LegStep;
-import com.mapbox.services.api.directions.v5.models.RouteLeg;
+import com.mapbox.directions.v5.models.LegStep;
+import com.mapbox.directions.v5.models.RouteLeg;
 
 /**
  * This is a progress object specific to the current leg the user is on. If there is only one leg
@@ -39,7 +39,7 @@ public abstract class RouteLegProgress {
   static RouteLegProgress create(RouteLeg routeLeg, int stepIndex, double legDistanceRemaining,
                                  double stepDistanceRemaining) {
     RouteStepProgress stepProgress = RouteStepProgress.create(
-      routeLeg.getSteps().get(stepIndex), stepDistanceRemaining);
+      routeLeg.steps().get(stepIndex), stepDistanceRemaining);
     return new AutoValue_RouteLegProgress(
       routeLeg, stepIndex, legDistanceRemaining, stepProgress);
   }
@@ -60,7 +60,7 @@ public abstract class RouteLegProgress {
    * @since 0.1.0
    */
   public double distanceTraveled() {
-    double distanceTraveled = routeLeg().getDistance() - distanceRemaining();
+    double distanceTraveled = routeLeg().distance() - distanceRemaining();
     if (distanceTraveled < 0) {
       distanceTraveled = 0;
     }
@@ -82,7 +82,7 @@ public abstract class RouteLegProgress {
    * @since 0.1.0
    */
   public double durationRemaining() {
-    return (1 - fractionTraveled()) * routeLeg().getDuration();
+    return (1 - fractionTraveled()) * routeLeg().duration();
   }
 
   /**
@@ -96,8 +96,8 @@ public abstract class RouteLegProgress {
   public float fractionTraveled() {
     float fractionTraveled = 1;
 
-    if (routeLeg().getDistance() > 0) {
-      fractionTraveled = (float) (distanceTraveled() / routeLeg().getDistance());
+    if (routeLeg().distance() > 0) {
+      fractionTraveled = (float) (distanceTraveled() / routeLeg().distance());
       if (fractionTraveled < 0) {
         fractionTraveled = 0;
       }
@@ -118,7 +118,7 @@ public abstract class RouteLegProgress {
     if (stepIndex() == 0) {
       return null;
     }
-    return routeLeg().getSteps().get(stepIndex() - 1);
+    return routeLeg().steps().get(stepIndex() - 1);
   }
 
   /**
@@ -129,7 +129,7 @@ public abstract class RouteLegProgress {
    */
   @NonNull
   public LegStep currentStep() {
-    return routeLeg().getSteps().get(stepIndex());
+    return routeLeg().steps().get(stepIndex());
   }
 
   /**
@@ -141,8 +141,8 @@ public abstract class RouteLegProgress {
    */
   @Nullable
   public LegStep upComingStep() {
-    if (routeLeg().getSteps().size() - 1 > stepIndex()) {
-      return routeLeg().getSteps().get(stepIndex() + 1);
+    if (routeLeg().steps().size() - 1 > stepIndex()) {
+      return routeLeg().steps().get(stepIndex() + 1);
     }
     return null;
   }
@@ -156,8 +156,8 @@ public abstract class RouteLegProgress {
    */
   @Nullable
   public LegStep followOnStep() {
-    if (routeLeg().getSteps().size() - 2 > stepIndex()) {
-      return routeLeg().getSteps().get(stepIndex() + 2);
+    if (routeLeg().steps().size() - 2 > stepIndex()) {
+      return routeLeg().steps().get(stepIndex() + 2);
     }
     return null;
   }

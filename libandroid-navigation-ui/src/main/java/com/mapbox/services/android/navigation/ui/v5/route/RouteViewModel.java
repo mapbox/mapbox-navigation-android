@@ -8,16 +8,16 @@ import android.content.Intent;
 import android.location.Location;
 import android.support.annotation.NonNull;
 
+import com.mapbox.directions.v5.models.DirectionsResponse;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.directions.v5.models.LegStep;
+import com.mapbox.directions.v5.models.RouteLeg;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.directions.v5.models.LegStep;
-import com.mapbox.services.api.directions.v5.models.RouteLeg;
-import com.mapbox.services.commons.models.Position;
 
 import java.util.HashMap;
 
@@ -28,9 +28,9 @@ import retrofit2.Response;
 public class RouteViewModel extends ViewModel implements Callback<DirectionsResponse> {
 
   public final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
-  public final MutableLiveData<Position> destination = new MutableLiveData<>();
+  public final MutableLiveData<Point> destination = new MutableLiveData<>();
   private MutableLiveData<Boolean> isSuccessful = new MutableLiveData<>();
-  private Position origin;
+  private Point origin;
   private Location rawLocation;
   private boolean extractLaunchData = true;
 
@@ -48,7 +48,7 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (validRouteResponse(response)) {
-      route.setValue(response.body().getRoutes().get(0));
+      route.setValue(response.body().routes().get(0));
       isSuccessful.setValue(true);
     }
   }
@@ -66,7 +66,7 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
    * Checks the activity used to launch this activity.
    * Will start navigation based on the data found in the {@link Intent}
    *
-   * @param activity holds either a set of {@link Position} coordinates or a {@link DirectionsRoute}
+   * @param activity holds either a set of {@link Point} coordinates or a {@link DirectionsRoute}
    */
   public void extractLaunchData(Activity activity) {
     if (extractLaunchData) {
@@ -78,7 +78,7 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
     }
   }
 
-  public void fetchRouteNewOrigin(Position newOrigin) {
+  public void fetchRouteNewOrigin(Point newOrigin) {
     if (newOrigin != null && destination.getValue() != null) {
       fetchRoute(newOrigin, destination.getValue());
     }
@@ -92,7 +92,7 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
    * @param origin      start point
    * @param destination end point
    */
-  private void fetchRoute(Position origin, Position destination) {
+  private void fetchRoute(Point origin, Point destination) {
     if (origin != null && destination != null) {
       NavigationRoute.Builder routeBuilder = NavigationRoute.builder()
         .accessToken(Mapbox.getAccessToken())
@@ -131,20 +131,20 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
   private void extractRoute(Context context) {
     DirectionsRoute route = NavigationLauncher.extractRoute(context);
     if (route != null) {
-      RouteLeg lastLeg = route.getLegs().get(route.getLegs().size() - 1);
-      LegStep lastStep = lastLeg.getSteps().get(lastLeg.getSteps().size() - 1);
-      destination.setValue(lastStep.getManeuver().asPosition());
+      RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
+      LegStep lastStep = lastLeg.steps().get(lastLeg.steps().size() - 1);
+      destination.setValue(lastStep.maneuver().location());
       this.route.setValue(route);
       extractLaunchData = false;
     }
   }
 
   /**
-   * Extracts the {@link Position} coordinates, adds a destination marker,
+   * Extracts the {@link Point} coordinates, adds a destination marker,
    * and fetches a route with the coordinates.
    */
   private void extractCoordinates(Context context) {
-    HashMap<String, Position> coordinates = NavigationLauncher.extractCoordinates(context);
+    HashMap<String, Point> coordinates = NavigationLauncher.extractCoordinates(context);
     if (coordinates.size() > 0) {
       origin = coordinates.get(NavigationConstants.NAVIGATION_VIEW_ORIGIN);
       destination.setValue(coordinates.get(NavigationConstants.NAVIGATION_VIEW_DESTINATION));
@@ -161,8 +161,8 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
    */
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
     return response.body() != null
-      && response.body().getRoutes() != null
-      && response.body().getRoutes().size() > 0;
+      && response.body().routes() != null
+      && response.body().routes().size() > 0;
   }
 
   /**
@@ -181,7 +181,7 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
    * @param routeBuilder to fetch the route
    */
   private void fetchRouteWithBearing(NavigationRoute.Builder routeBuilder) {
-    routeBuilder.addBearing(rawLocation.getBearing(), 90);
+    routeBuilder.addBearing(Float.valueOf(rawLocation.getBearing()).doubleValue(), 90d);
     routeBuilder.build().getRoute(this);
   }
 }

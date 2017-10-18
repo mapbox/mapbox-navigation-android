@@ -1,9 +1,9 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.api.utils.turf.TurfConstants;
-import com.mapbox.services.api.utils.turf.TurfHelpers;
-import com.mapbox.services.commons.utils.TextUtils;
+import com.mapbox.services.utils.TextUtils;
+import com.mapbox.turf.TurfConstants;
+import com.mapbox.turf.TurfHelpers;
 
 import java.text.DecimalFormat;
 import java.util.Locale;

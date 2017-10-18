@@ -3,8 +3,8 @@ package com.mapbox.services.android.navigation.v5.utils;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 
-import com.mapbox.services.api.utils.turf.TurfConstants;
-import com.mapbox.services.api.utils.turf.TurfHelpers;
+import com.mapbox.turf.TurfConstants;
+import com.mapbox.turf.TurfHelpers;
 
 import java.text.DecimalFormat;
 import java.util.Locale;
