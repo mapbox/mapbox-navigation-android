@@ -9,7 +9,6 @@ import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 class NavigationMetricsWrapper {
@@ -140,8 +139,6 @@ class NavigationMetricsWrapper {
     if (locations == null || locations.isEmpty()) {
       return new Location[0];
     }
-    // Reverse the list order to conform with the spec
-    Collections.reverse(locations);
     return locations.toArray(new Location[locations.size()]);
   }
 
