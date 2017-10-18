@@ -142,13 +142,10 @@ final class NavigationMetricsWrapper {
     );
   }
 
-  @Nullable
   private static Location[] obtainLocations(List<Location> rerouteLocations) {
     Location[] locations = new Location[0];
-    if (rerouteLocations != null) {
-      if (!rerouteLocations.isEmpty()) {
-        locations = (Location[]) rerouteLocations.toArray();
-      }
+    if (rerouteLocations != null && !rerouteLocations.isEmpty()) {
+        locations = rerouteLocations.toArray(new Location[0]);
     }
     return locations;
   }
