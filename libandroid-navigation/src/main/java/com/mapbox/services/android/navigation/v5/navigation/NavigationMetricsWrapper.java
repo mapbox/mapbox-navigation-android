@@ -13,6 +13,16 @@ import java.util.List;
 
 class NavigationMetricsWrapper {
   static String sdkIdentifier;
+  private static String upcomingInstruction;
+  private static String previousInstruction;
+  private static String upcomingModifier;
+  private static String previousModifier;
+  private static String upcomingType;
+  private static String upcomingName;
+  private static String previousType;
+  private static String previousName;
+  private static Location[] beforeLocations;
+  private static Location[] afterLocations;
 
   private NavigationMetricsWrapper() {
     // Empty private constructor for preventing initialization of this class.
@@ -69,34 +79,7 @@ class NavigationMetricsWrapper {
   }
 
   static void rerouteEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
-    String upcomingInstruction = null;
-    String previousInstruction = null;
-    String upcomingModifier = null;
-    String previousModifier = null;
-    String upcomingType = null;
-    String upcomingName = null;
-    String previousType = null;
-
-    if (routeProgress.currentLegProgress().upComingStep() != null) {
-      upcomingName = routeProgress.currentLegProgress().upComingStep().getName();
-      if (routeProgress.currentLegProgress().upComingStep().getManeuver() != null) {
-        upcomingInstruction = routeProgress.currentLegProgress().upComingStep().getManeuver().getInstruction();
-        upcomingType = routeProgress.currentLegProgress().upComingStep().getManeuver().getType();
-        upcomingModifier = routeProgress.currentLegProgress().upComingStep().getManeuver().getModifier();
-      }
-    }
-
-    if (routeProgress.currentLegProgress().currentStep().getManeuver() != null) {
-      previousInstruction = routeProgress.currentLegProgress().currentStep().getManeuver().getInstruction();
-      previousType = routeProgress.currentLegProgress().currentStep().getManeuver().getType();
-      previousModifier = routeProgress.currentLegProgress().currentStep().getManeuver().getModifier();
-    }
-
-    Location[] beforeLocations = obtainLocations(sessionState.beforeRerouteLocations());
-
-    Location[] afterLocations = obtainLocations(sessionState.afterRerouteLocations());
-
-    String previousName = routeProgress.currentLegProgress().currentStep().getName();
+    updateRouteProgressSessionData(routeProgress, sessionState);
 
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildRerouteEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(),
@@ -126,36 +109,9 @@ class NavigationMetricsWrapper {
 
   static void feedbackEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
                             String description, String feedbackType, String screenshot) {
-    String upcomingInstruction = null;
-    String previousInstruction = null;
-    String upcomingModifier = null;
-    String previousModifier = null;
-    String upcomingType = null;
-    String upcomingName = null;
-    String previousType = null;
+    updateRouteProgressSessionData(routeProgress, sessionState);
 
-    if (routeProgress.currentLegProgress().upComingStep() != null) {
-      upcomingName = routeProgress.currentLegProgress().upComingStep().getName();
-      if (routeProgress.currentLegProgress().upComingStep().getManeuver() != null) {
-        upcomingInstruction = routeProgress.currentLegProgress().upComingStep().getManeuver().getInstruction();
-        upcomingType = routeProgress.currentLegProgress().upComingStep().getManeuver().getType();
-        upcomingModifier = routeProgress.currentLegProgress().upComingStep().getManeuver().getModifier();
-      }
-    }
-
-    if (routeProgress.currentLegProgress().currentStep().getManeuver() != null) {
-      previousInstruction = routeProgress.currentLegProgress().currentStep().getManeuver().getInstruction();
-      previousType = routeProgress.currentLegProgress().currentStep().getManeuver().getType();
-      previousModifier = routeProgress.currentLegProgress().currentStep().getManeuver().getModifier();
-    }
-
-    Location[] beforeLocations = obtainLocations(sessionState.beforeRerouteLocations());
-
-    Location[] afterLocations = obtainLocations(sessionState.afterRerouteLocations());
-
-    String previousName = routeProgress.currentLegProgress().currentStep().getName();
-
-    MapboxNavigationEvent.buildFeedbackEvent(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
+    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildFeedbackEvent(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
           sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
       sessionState.currentGeometry(), "unknown", (int) routeProgress.directionsRoute().getDistance(),
       (int) routeProgress.directionsRoute().getDuration(), sessionState.rerouteCount(), sessionState.startTimestamp(),
@@ -169,7 +125,9 @@ class NavigationMetricsWrapper {
       (int) routeProgress.currentLegProgress().currentStep().getDuration(),
       (int) routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
-      sessionState.currentStepCount(), sessionState.originalStepCount());
+      sessionState.currentStepCount(), sessionState.originalStepCount()
+      )
+    );
   }
 
   static void turnstileEvent() {
@@ -187,5 +145,36 @@ class NavigationMetricsWrapper {
       }
     }
     return locations;
+  }
+
+  private static void updateRouteProgressSessionData(RouteProgress routeProgress, SessionState sessionState) {
+    upcomingName = null;
+    upcomingInstruction = null;
+    upcomingType = null;
+    upcomingModifier = null;
+    previousInstruction = null;
+    previousType = null;
+    previousModifier = null;
+
+    if (routeProgress.currentLegProgress().upComingStep() != null) {
+      upcomingName = routeProgress.currentLegProgress().upComingStep().getName();
+      if (routeProgress.currentLegProgress().upComingStep().getManeuver() != null) {
+        upcomingInstruction = routeProgress.currentLegProgress().upComingStep().getManeuver().getInstruction();
+        upcomingType = routeProgress.currentLegProgress().upComingStep().getManeuver().getType();
+        upcomingModifier = routeProgress.currentLegProgress().upComingStep().getManeuver().getModifier();
+      }
+    }
+
+    if (routeProgress.currentLegProgress().currentStep().getManeuver() != null) {
+      previousInstruction = routeProgress.currentLegProgress().currentStep().getManeuver().getInstruction();
+      previousType = routeProgress.currentLegProgress().currentStep().getManeuver().getType();
+      previousModifier = routeProgress.currentLegProgress().currentStep().getManeuver().getModifier();
+    }
+
+    previousName = routeProgress.currentLegProgress().currentStep().getName();
+
+    beforeLocations = obtainLocations(sessionState.beforeRerouteLocations());
+
+    afterLocations = obtainLocations(sessionState.afterRerouteLocations());
   }
 }
