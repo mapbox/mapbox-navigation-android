@@ -14,6 +14,10 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.mapbox.directions.v5.models.DirectionsResponse;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.LineString;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
@@ -34,10 +38,6 @@ import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
-import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.geojson.LineString;
-import com.mapbox.services.commons.models.Position;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,8 +72,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   Switch demoSwitch;
 
   private Marker currentMarker;
-  private Position currentPosition;
-  private Position destination;
+  private Point currentLocation;
+  private Point destination;
   private DirectionsRoute route;
 
   private boolean locationFound;
@@ -173,11 +173,11 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onMapLongClick(@NonNull LatLng point) {
-    destination = Position.fromCoordinates(point.getLongitude(), point.getLatitude());
+    destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     launchRouteBtn.setEnabled(false);
     loading.setVisibility(View.VISIBLE);
     setCurrentMarkerPosition(point);
-    if (currentPosition != null) {
+    if (currentLocation != null) {
       fetchRoute();
     }
   }
@@ -190,18 +190,22 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onLocationChanged(Location location) {
-    currentPosition = Position.fromCoordinates(location.getLongitude(), location.getLatitude());
+    currentLocation = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     onLocationFound(location);
   }
 
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (validRouteResponse(response)) {
-      route = response.body().getRoutes().get(0);
-      launchRouteBtn.setEnabled(true);
-      mapRoute.addRoute(route);
-      boundCameraToRoute();
+      route = response.body().routes().get(0);
       hideLoading();
+      if (route.distance() > 25d) {
+        launchRouteBtn.setEnabled(true);
+        mapRoute.addRoute(route);
+        boundCameraToRoute();
+      } else {
+        Snackbar.make(mapView, "Please select a longer route", BaseTransientBottomBar.LENGTH_SHORT).show();
+      }
     }
   }
 
@@ -221,7 +225,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
     if (locationEngine.getLastLocation() != null) {
       Location lastLocation = locationEngine.getLastLocation();
-      currentPosition = Position.fromCoordinates(lastLocation.getLongitude(), lastLocation.getLatitude());
+      currentLocation = Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude());
     }
   }
 
@@ -238,7 +242,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private void fetchRoute() {
     NavigationRoute.builder()
       .accessToken(Mapbox.getAccessToken())
-      .origin(currentPosition)
+      .origin(currentLocation)
       .destination(destination)
       .build()
       .getRoute(this);
@@ -254,8 +258,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
     return response.body() != null
-      && response.body().getRoutes() != null
-      && response.body().getRoutes().size() > 0;
+      && response.body().routes() != null
+      && response.body().routes().size() > 0;
   }
 
   private void hideLoading() {
@@ -275,11 +279,11 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   public void boundCameraToRoute() {
     if (route != null) {
-      List<Position> routeCoords = LineString.fromPolyline(route.getGeometry(),
-        Constants.PRECISION_6).getCoordinates();
+      List<Point> routeCoords = LineString.fromPolyline(route.geometry(),
+        Constants.PRECISION_6).coordinates();
       List<LatLng> bboxPoints = new ArrayList<>();
-      for (Position position : routeCoords) {
-        bboxPoints.add(new LatLng(position.getLatitude(), position.getLongitude()));
+      for (Point point : routeCoords) {
+        bboxPoints.add(new LatLng(point.latitude(), point.longitude()));
       }
       if (bboxPoints.size() > 1) {
         try {

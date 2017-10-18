@@ -3,8 +3,8 @@ package com.mapbox.services.android.navigation.v5.routeprogress;
 import android.support.annotation.NonNull;
 
 import com.google.auto.value.AutoValue;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.directions.v5.models.RouteLeg;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.directions.v5.models.RouteLeg;
 
 /**
  * This class contains all progress information at any given time during a navigation session. This
@@ -51,7 +51,7 @@ public abstract class RouteProgress {
    */
   @NonNull
   public RouteLeg currentLeg() {
-    return directionsRoute().getLegs().get(legIndex());
+    return directionsRoute().legs().get(legIndex());
   }
 
   /**
@@ -62,7 +62,7 @@ public abstract class RouteProgress {
    * @since 0.1.0
    */
   public double distanceTraveled() {
-    double distanceTraveled = directionsRoute().getDistance() - distanceRemaining();
+    double distanceTraveled = directionsRoute().distance() - distanceRemaining();
     if (distanceTraveled < 0) {
       distanceTraveled = 0;
     }
@@ -77,7 +77,7 @@ public abstract class RouteProgress {
    * @since 0.1.0
    */
   public double durationRemaining() {
-    return (1 - fractionTraveled()) * directionsRoute().getDuration();
+    return (1 - fractionTraveled()) * directionsRoute().duration();
   }
 
   /**
@@ -91,8 +91,8 @@ public abstract class RouteProgress {
   public float fractionTraveled() {
     float fractionRemaining = 1;
 
-    if (directionsRoute().getDistance() > 0) {
-      fractionRemaining = (float) (distanceTraveled() / directionsRoute().getDistance());
+    if (directionsRoute().distance() > 0) {
+      fractionRemaining = (float) (distanceTraveled() / directionsRoute().distance());
     }
     return fractionRemaining;
   }
@@ -112,7 +112,7 @@ public abstract class RouteProgress {
    * @since 0.5.0
    */
   public int remainingWaypoints() {
-    return directionsRoute().getLegs().size() - legIndex();
+    return directionsRoute().legs().size() - legIndex();
   }
 
   /**
@@ -162,7 +162,7 @@ public abstract class RouteProgress {
 
     public RouteProgress build() {
       RouteLegProgress legProgress = RouteLegProgress.create(
-        directionsRoute().getLegs().get(legIndex()),
+        directionsRoute().legs().get(legIndex()),
         stepIndex,
         legDistanceRemaining,
         stepDistanceRemaining

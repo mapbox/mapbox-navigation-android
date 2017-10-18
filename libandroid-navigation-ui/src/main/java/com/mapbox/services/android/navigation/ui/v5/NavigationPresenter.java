@@ -2,8 +2,8 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.support.design.widget.BottomSheetBehavior;
 
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.models.Position;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 
 class NavigationPresenter {
 
@@ -85,8 +85,8 @@ class NavigationPresenter {
     view.drawRoute(directionsRoute);
   }
 
-  void onDestinationUpdate(Position position) {
-    view.addMarker(position);
+  void onDestinationUpdate(Point point) {
+    view.addMarker(point);
   }
 
   void onNavigationRunning() {

@@ -1,7 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.models.Position;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 
 public interface NavigationContract {
 
@@ -31,7 +31,7 @@ public interface NavigationContract {
 
     void drawRoute(DirectionsRoute directionsRoute);
 
-    void addMarker(Position position);
+    void addMarker(Point point);
 
     void finishNavigationView();
 
