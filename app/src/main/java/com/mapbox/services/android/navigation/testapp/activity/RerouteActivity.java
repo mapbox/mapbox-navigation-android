@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 
+import com.mapbox.directions.v5.DirectionsCriteria;
 import com.mapbox.directions.v5.models.DirectionsResponse;
 import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.LineString;
@@ -155,6 +156,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
     if (bearing != null) {
       navigationRouteBuilder.addBearing(Float.valueOf(bearing).doubleValue(), 90d);
+      navigationRouteBuilder.addBearing(null, null);
     }
     navigationRouteBuilder.build().getRoute(this);
   }

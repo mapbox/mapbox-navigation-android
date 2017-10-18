@@ -14,6 +14,7 @@ import com.mapbox.services.constants.Constants;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -36,7 +37,7 @@ public class MockLocationEngine extends LocationEngine {
   private static final boolean DEFAULT_NOISY_GPS = true;
 
   private Location lastLocation = new Location(MockLocationEngine.class.getSimpleName());
-  private Location currentLocation;
+  private Location location;
   private List<LocationEngineListener> listeners;
 
   private boolean noisyGps;
@@ -247,9 +248,9 @@ public class MockLocationEngine extends LocationEngine {
   }
 
   public void moveToLocation(Point point) {
-    List<Point> positionList = new ArrayList<>();
-    positionList.add(Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude()));
-    positionList.add(point);
+    List<Point> pointList = new ArrayList<>();
+    pointList.add(Point.fromLngLat(location.getLongitude(), location.getLatitude()));
+    pointList.add(point);
 
     if (handler != null && runnable != null) {
       handler.removeCallbacks(runnable);
@@ -263,15 +264,14 @@ public class MockLocationEngine extends LocationEngine {
     // Calculate the distance which will always be consistent throughout the route.
     distance = calculateDistancePerSec();
 
-    LineString route = LineString.fromLngLats(positionList);
+    LineString route = LineString.fromLngLats(pointList);
 
     sliceRoute(route, distance);
     if (noisyGps) {
       addNoiseToRoute(distance);
     }
 
-    runnable = new LocationUpdateRunnable();
-    handler.postDelayed(runnable, delay);
+    handler.postDelayed(runnable = new LocationUpdateRunnable(), delay);
   }
 
   /**
@@ -297,8 +297,7 @@ public class MockLocationEngine extends LocationEngine {
 
     calculateStepPoints();
 
-    runnable = new LocationUpdateRunnable();
-    handler.postDelayed(runnable, delay);
+    handler.postDelayed(runnable = new LocationUpdateRunnable(), delay);
   }
 
   /**
@@ -336,24 +335,24 @@ public class MockLocationEngine extends LocationEngine {
    * @since 2.2.0
    */
   private Location mockLocation(Point point) {
-    currentLocation = new Location(MockLocationEngine.class.getName());
-    currentLocation.setLatitude(point.latitude());
-    currentLocation.setLongitude(point.longitude());
+    location = new Location(MockLocationEngine.class.getName());
+    location.setLatitude(point.latitude());
+    location.setLongitude(point.longitude());
 
     // Need to convert speed to meters/second as specified in Android's Location object documentation.
     float speedInMeterPerSec = (float) (((speed * 1.609344) * 1000) / (60 * 60));
-    currentLocation.setSpeed(speedInMeterPerSec);
+    location.setSpeed(speedInMeterPerSec);
 
     if (points.size() >= 2) {
       double bearing = TurfMeasurement.bearing(point, points.get(1));
       Timber.v("Bearing value %f", bearing);
-      currentLocation.setBearing((float) bearing);
+      location.setBearing((float) bearing);
     }
 
-    currentLocation.setAccuracy(3f);
-    currentLocation.setTime(SystemClock.elapsedRealtime());
+    location.setAccuracy(3f);
+    location.setTime(SystemClock.elapsedRealtime());
 
-    return currentLocation;
+    return location;
   }
 
   /**
@@ -384,7 +383,7 @@ public class MockLocationEngine extends LocationEngine {
           listener.onLocationChanged(location);
         }
       }
-      lastLocation = currentLocation;
+      lastLocation = location;
       // Schedule the next update
       handler.postDelayed(this, delay);
     }
