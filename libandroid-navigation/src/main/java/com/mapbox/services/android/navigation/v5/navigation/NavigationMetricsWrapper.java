@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
-import android.support.annotation.Nullable;
 
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -145,7 +144,7 @@ final class NavigationMetricsWrapper {
   private static Location[] obtainLocations(List<Location> rerouteLocations) {
     Location[] locations = new Location[0];
     if (rerouteLocations != null && !rerouteLocations.isEmpty()) {
-        locations = rerouteLocations.toArray(new Location[0]);
+      locations = rerouteLocations.toArray(new Location[0]);
     }
     return locations;
   }
