@@ -3,14 +3,16 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.location.Location;
 
 import com.google.gson.Gson;
-import com.mapbox.services.Constants;
+import com.google.gson.GsonBuilder;
+import com.mapbox.directions.v5.DirectionsAdapterFactory;
+import com.mapbox.directions.v5.models.DirectionsResponse;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
+import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.models.Position;
-import com.mapbox.services.commons.utils.PolylineUtils;
+import com.mapbox.services.constants.Constants;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,16 +37,17 @@ public class NavigationHelperTest extends BaseTest {
 
   @Before
   public void setUp() throws Exception {
-    Gson gson = new Gson();
+    Gson gson = new GsonBuilder()
+      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
     String body = loadJsonFixture(MULTI_LEG_ROUTE);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
-    route = response.getRoutes().get(0);
+    route = response.routes().get(0);
 
     Location location = new Location("test");
-    List<Position> coords = PolylineUtils.decode(route.getLegs().get(0).getSteps().get(1).getGeometry(),
+    List<Point> coords = PolylineUtils.decode(route.legs().get(0).steps().get(1).geometry(),
       Constants.PRECISION_6);
-    location.setLatitude(coords.get(0).getLatitude());
-    location.setLongitude(coords.get(0).getLongitude());
+    location.setLatitude(coords.get(0).latitude());
+    location.setLongitude(coords.get(0).longitude());
 
     routeProgressBuilder = RouteProgress.builder()
       .directionsRoute(route)
@@ -112,30 +115,30 @@ public class NavigationHelperTest extends BaseTest {
 
   @Test
   public void stepDistanceRemaining_returnsZeroWhenPositionsEqualEachOther() throws Exception {
-    Position snappedPosition = Position.fromCoordinates(new double[] {-77.062996, 38.798405});
-    List<Position> coordinates = PolylineUtils.decode(
-      route.getLegs().get(0).getSteps().get(1).getGeometry(), Constants.PRECISION_6);
-    double distance = NavigationHelper.stepDistanceRemaining(snappedPosition, 0,
+    Point snappedPoint = Point.fromLngLat(-77.062996, 38.798405);
+    List<Point> coordinates = PolylineUtils.decode(
+      route.legs().get(0).steps().get(1).geometry(), Constants.PRECISION_6);
+    double distance = NavigationHelper.stepDistanceRemaining(snappedPoint, 0,
       1, route, coordinates);
     assertEquals(0.0, distance);
   }
 
   @Test
   public void nextManeuverPosition_correctlyReturnsNextManeuverPosition() throws Exception {
-    List<Position> coordinates = PolylineUtils.decode(
-      route.getLegs().get(0).getSteps().get(0).getGeometry(), Constants.PRECISION_6);
-    Position nextManeuver = NavigationHelper.nextManeuverPosition(0,
-      route.getLegs().get(0).getSteps(), coordinates);
-    assertTrue(nextManeuver.equals(route.getLegs().get(0).getSteps().get(1).getManeuver().asPosition()));
+    List<Point> coordinates = PolylineUtils.decode(
+      route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6);
+    Point nextManeuver = NavigationHelper.nextManeuverPosition(0,
+      route.legs().get(0).steps(), coordinates);
+    assertTrue(nextManeuver.equals(route.legs().get(0).steps().get(1).maneuver().location()));
   }
 
   @Test
   public void nextManeuverPosition_correctlyReturnsNextManeuverPositionInNextLeg() throws Exception {
-    int stepIndex = route.getLegs().get(0).getSteps().size() - 1;
-    List<Position> coordinates = PolylineUtils.decode(
-      route.getLegs().get(0).getSteps().get(stepIndex).getGeometry(), Constants.PRECISION_6);
-    Position nextManeuver = NavigationHelper.nextManeuverPosition(stepIndex,
-      route.getLegs().get(0).getSteps(), coordinates);
-    assertTrue(nextManeuver.equals(route.getLegs().get(1).getSteps().get(0).getManeuver().asPosition()));
+    int stepIndex = route.legs().get(0).steps().size() - 1;
+    List<Point> coordinates = PolylineUtils.decode(
+      route.legs().get(0).steps().get(stepIndex).geometry(), Constants.PRECISION_6);
+    Point nextManeuver = NavigationHelper.nextManeuverPosition(stepIndex,
+      route.legs().get(0).steps(), coordinates);
+    assertTrue(nextManeuver.equals(route.legs().get(1).steps().get(0).maneuver().location()));
   }
 }

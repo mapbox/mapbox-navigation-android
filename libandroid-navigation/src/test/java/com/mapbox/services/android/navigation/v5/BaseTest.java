@@ -3,17 +3,10 @@ package com.mapbox.services.android.navigation.v5;
 import static junit.framework.Assert.assertEquals;
 import static okhttp3.internal.Util.UTF_8;
 
-import android.location.Location;
-import android.util.Log;
-
 import com.google.gson.JsonParser;
-import com.mapbox.services.commons.models.Position;
-
-import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.Scanner;
 
 public class BaseTest {
