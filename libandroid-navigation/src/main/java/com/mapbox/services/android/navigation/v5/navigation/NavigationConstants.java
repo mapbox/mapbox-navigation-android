@@ -4,12 +4,15 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 
 /**
  * Navigation constants
+ *
+ * @since 0.1.0
  */
-public class NavigationConstants {
+public final class NavigationConstants {
 
   private NavigationConstants() {
     // Empty private constructor to prevent users creating an instance of this class.
   }
+
   /**
    * If default voice instructions are enabled, this identifier will be used to differentiate them
    * from custom milestones in the
@@ -85,7 +88,6 @@ public class NavigationConstants {
   /**
    * Meter radius which the user must be inside for an arrival milestone to be triggered and
    * navigation to end.
-   *
    */
   static final double METERS_REMAINING_TILL_ARRIVAL = 40;
 
