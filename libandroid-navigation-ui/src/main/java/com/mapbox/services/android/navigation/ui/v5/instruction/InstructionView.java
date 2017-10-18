@@ -32,6 +32,7 @@ import android.widget.TextView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
+import com.mapbox.services.android.navigation.ui.v5.alert.AlertView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -65,6 +66,7 @@ public class InstructionView extends RelativeLayout {
   private View rerouteLayout;
   private View turnLaneLayout;
   private RecyclerView rvTurnLanes;
+  private AlertView alertView;
   private TurnLaneAdapter turnLaneAdapter;
 
   private Animation slideDownTop;
@@ -181,6 +183,10 @@ public class InstructionView extends RelativeLayout {
     }
   }
 
+  public void showAlert(String alertText) {
+    alertView.show(alertText);
+  }
+
   /**
    * Will slide the reroute view down from the top of the screen
    * and make it visible
@@ -236,6 +242,7 @@ public class InstructionView extends RelativeLayout {
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
+    alertView = findViewById(R.id.alertView);
     initInstructionAutoSize();
   }
 
