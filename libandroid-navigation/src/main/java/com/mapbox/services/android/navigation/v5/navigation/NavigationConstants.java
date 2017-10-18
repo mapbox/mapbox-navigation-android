@@ -10,46 +10,14 @@ public class NavigationConstants {
   private NavigationConstants() {
     // Empty private constructor to prevent users creating an instance of this class.
   }
-
   /**
-   * Identifier value for the default departure milestone event. If additional milestones are added,
-   * avoid using the 1-5 integer values as identifiers.
+   * If default voice instructions are enabled, this identifier will be used to differentiate them
+   * from custom milestones in the
+   * {@link com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener}.
    *
-   * @since 0.4.0
+   * @since 0.7.0
    */
-  public static final int DEPARTURE_MILESTONE = 1;
-
-  /**
-   * Identifier value for the default new step milestone event. If additional milestones are added,
-   * avoid using the 1-5 integer values as identifiers.
-   *
-   * @since 0.4.0
-   */
-  public static final int NEW_STEP_MILESTONE = 2;
-
-  /**
-   * Identifier value for the default imminent milestone event. If additional milestones are added,
-   * avoid using the 1-5 integer values as identifiers.
-   *
-   * @since 0.4.0
-   */
-  public static final int IMMINENT_MILESTONE = 3;
-
-  /**
-   * Identifier value for the default urgent milestone event. If additional milestones are added,
-   * avoid using the 1-5 integer values as identifiers.
-   *
-   * @since 0.4.0
-   */
-  public static final int URGENT_MILESTONE = 4;
-
-  /**
-   * Identifier value for the default arrival milestone event. If additional milestones are added,
-   * avoid using the 1-5 integer values as identifiers.
-   *
-   * @since 0.4.0
-   */
-  public static final int ARRIVAL_MILESTONE = 5;
+  public static final int DEFAULT_MILESTONE_IDENTIFIER = 1;
 
   /**
    * Random integer value used for identifying the navigation notification.
