@@ -9,6 +9,7 @@ import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 class NavigationMetricsWrapper {
@@ -108,7 +109,7 @@ class NavigationMetricsWrapper {
 
     String previousName = routeProgress.currentLegProgress().currentStep().getName();
 
-    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildRerouteEvent(
+    Hashtable<String, Object> rerouteEvent = MapboxNavigationEvent.buildRerouteEvent(
         sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(),
         location.getLatitude(), location.getLongitude(),
         sessionState.currentGeometry(), "unknown",
@@ -130,8 +131,9 @@ class NavigationMetricsWrapper {
         (int) routeProgress.currentLegProgress().currentStep().getDuration(),
         (int) routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
         (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
-        sessionState.currentStepCount(), sessionState.originalStepCount()
-    ));
+        sessionState.currentStepCount(), sessionState.originalStepCount());
+    rerouteEvent.put(MapboxNavigationEvent.KEY_CREATED, TelemetryUtils.generateCreateDate(location));
+    MapboxTelemetry.getInstance().pushEvent(rerouteEvent);
   }
 
   private static Location[] prepareLocations(List<Location> locations) {
