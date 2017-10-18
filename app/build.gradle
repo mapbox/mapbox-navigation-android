@@ -35,6 +35,10 @@ android {
   }
 }
 
+sonarqube {
+  skipProject = true
+}
+
 dependencies {
   // Mapbox Navigation SDK
   compile project(':libandroid-navigation-ui')
