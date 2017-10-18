@@ -4,10 +4,12 @@ import android.app.NotificationManager;
 import android.content.Context;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mapbox.directions.v5.DirectionsAdapterFactory;
+import com.mapbox.directions.v5.models.DirectionsResponse;
+import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
 
 import junit.framework.Assert;
 
@@ -29,9 +31,10 @@ public class NavigationNotificationTest extends BaseTest {
   @Before
   public void setUp() throws Exception {
     final String json = loadJsonFixture(DIRECTIONS_ROUTE_FIXTURE);
-    Gson gson = new Gson();
+    Gson gson = new GsonBuilder()
+      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
     DirectionsResponse response = gson.fromJson(json, DirectionsResponse.class);
-    route = response.getRoutes().get(0);
+    route = response.routes().get(0);
   }
 
   @Test

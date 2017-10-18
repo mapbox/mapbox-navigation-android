@@ -5,6 +5,12 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mapbox.directions.v5.DirectionsAdapterFactory;
+import com.mapbox.directions.v5.DirectionsCriteria;
+import com.mapbox.directions.v5.MapboxDirections;
+import com.mapbox.directions.v5.models.DirectionsResponse;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -15,10 +21,6 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
-import com.mapbox.services.api.directions.v5.DirectionsCriteria;
-import com.mapbox.services.api.directions.v5.MapboxDirections;
-import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.services.commons.models.Position;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,9 +70,10 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap);
-    Gson gson = new Gson();
+    Gson gson = new GsonBuilder().registerTypeAdapterFactory(DirectionsAdapterFactory.create())
+      .create();
     DirectionsResponse response = gson.fromJson(loadJsonFromAsset(DIRECTIONS_RESPONSE), DirectionsResponse.class);
-    navigationMapRoute.addRoute(response.getRoutes().get(0));
+    navigationMapRoute.addRoute(response.routes().get(0));
     mapboxMap.setOnMapClickListener(this);
   }
 
@@ -80,11 +83,11 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       originMarker = mapboxMap.addMarker(new MarkerOptions().position(point));
     } else if (destinationMarker == null) {
       destinationMarker = mapboxMap.addMarker(new MarkerOptions().position(point));
-      Position originPosition = Position.fromLngLat(
+      Point originPoint = Point.fromLngLat(
         originMarker.getPosition().getLongitude(), originMarker.getPosition().getLatitude());
-      Position destinationPosition = Position.fromLngLat(
+      Point destinationPoint = Point.fromLngLat(
         destinationMarker.getPosition().getLongitude(), destinationMarker.getPosition().getLatitude());
-      requestDirectionsRoute(originPosition, destinationPosition);
+      requestDirectionsRoute(originPoint, destinationPoint);
     } else {
       mapboxMap.removeMarker(originMarker);
       mapboxMap.removeMarker(destinationMarker);
@@ -94,15 +97,15 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
     }
   }
 
-  public void requestDirectionsRoute(Position origin, Position destination) {
-    MapboxDirections directions = new MapboxDirections.Builder()
-      .setOrigin(origin)
-      .setDestination(destination)
-      .setAccessToken(Mapbox.getAccessToken())
-      .setProfile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-      .setOverview(DirectionsCriteria.OVERVIEW_FULL)
-      .setAnnotation(DirectionsCriteria.ANNOTATION_CONGESTION)
-      .setSteps(true)
+  public void requestDirectionsRoute(Point origin, Point destination) {
+    MapboxDirections directions = MapboxDirections.builder()
+      .origin(origin)
+      .destination(destination)
+      .accessToken(Mapbox.getAccessToken())
+      .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+      .overview(DirectionsCriteria.OVERVIEW_FULL)
+      .annotations(DirectionsCriteria.ANNOTATION_CONGESTION)
+      .steps(true)
       .build();
 
     directions.enqueueCall(this);
@@ -111,8 +114,8 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (response.body() != null) {
-      if (response.body().getRoutes().size() > 0) {
-        navigationMapRoute.addRoute(response.body().getRoutes().get(0));
+      if (response.body().routes().size() > 0) {
+        navigationMapRoute.addRoute(response.body().routes().get(0));
       }
     }
   }

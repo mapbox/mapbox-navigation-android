@@ -6,7 +6,7 @@ import com.mapbox.services.android.navigation.v5.milestone.StepMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Trigger;
 import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.commons.utils.TextUtils;
+import com.mapbox.services.utils.TextUtils;
 
 import java.util.Locale;
 
@@ -57,7 +57,7 @@ class DefaultMilestones {
           return String.format(Locale.US, "%s then %s",
             getInstructionString(routeProgress),
             convertFirstCharLowercase(routeProgress.currentLegProgress()
-              .followOnStep().getManeuver().getInstruction())
+              .followOnStep().maneuver().instruction())
           );
         }
       })
@@ -81,7 +81,7 @@ class DefaultMilestones {
         @Override
         public String buildInstruction(RouteProgress routeProgress) {
           double userDistance = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
-          if (TextUtils.isEmpty(routeProgress.currentLegProgress().currentStep().getName())
+          if (TextUtils.isEmpty(routeProgress.currentLegProgress().currentStep().name())
             || userDistance == 0) {
             return "";
           } else {
@@ -110,7 +110,7 @@ class DefaultMilestones {
         public String buildInstruction(RouteProgress routeProgress) {
           double userDistance = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
           return String.format(Locale.US, "Continue on %s for %s",
-            routeProgress.currentLegProgress().currentStep().getName(), distanceFormatter(userDistance)
+            routeProgress.currentLegProgress().currentStep().name(), distanceFormatter(userDistance)
           );
         }
       })
@@ -132,12 +132,12 @@ class DefaultMilestones {
         @Override
         public String buildInstruction(RouteProgress routeProgress) {
           double userDistance = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
-          if (TextUtils.isEmpty(routeProgress.currentLegProgress().currentStep().getName())
+          if (TextUtils.isEmpty(routeProgress.currentLegProgress().currentStep().name())
             || userDistance == 0) {
             return "";
           } else {
             return String.format(Locale.US, "Continue on %s for %s and then %s",
-              routeProgress.currentLegProgress().currentStep().getName(), distanceFormatter(userDistance),
+              routeProgress.currentLegProgress().currentStep().name(), distanceFormatter(userDistance),
               getInstructionString(routeProgress));
           }
         }
@@ -193,7 +193,7 @@ class DefaultMilestones {
 
   private String getInstructionString(RouteProgress routeProgress) {
     return routeProgress.currentLegProgress().upComingStep() != null
-      ? routeProgress.currentLegProgress().upComingStep().getManeuver().getInstruction() :
+      ? routeProgress.currentLegProgress().upComingStep().maneuver().instruction() :
       "You have arrived";
   }
 }
