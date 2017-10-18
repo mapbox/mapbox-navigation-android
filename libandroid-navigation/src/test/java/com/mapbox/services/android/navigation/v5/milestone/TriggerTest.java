@@ -3,14 +3,16 @@ package com.mapbox.services.android.navigation.v5.milestone;
 import android.location.Location;
 
 import com.google.gson.Gson;
-import com.mapbox.services.Constants;
+import com.google.gson.GsonBuilder;
+import com.mapbox.directions.v5.DirectionsAdapterFactory;
+import com.mapbox.directions.v5.models.DirectionsResponse;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
+import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.models.Position;
-import com.mapbox.services.commons.utils.PolylineUtils;
+import com.mapbox.services.constants.Constants;
 
 import junit.framework.Assert;
 
@@ -34,20 +36,21 @@ public class TriggerTest extends BaseTest {
 
   @Before
   public void setup() throws IOException {
-    Gson gson = new Gson();
+    Gson gson = new GsonBuilder()
+      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
     String body = loadJsonFixture(PRECISION_6);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
-    DirectionsRoute route = response.getRoutes().get(0);
+    DirectionsRoute route = response.routes().get(0);
     Location location = new Location("test");
-    List<Position> coords = PolylineUtils.decode(route.getLegs().get(0).getSteps().get(1).getGeometry(),
+    List<Point> coords = PolylineUtils.decode(route.legs().get(0).steps().get(1).geometry(),
       Constants.PRECISION_6);
-    location.setLatitude(coords.get(0).getLatitude());
-    location.setLongitude(coords.get(0).getLongitude());
+    location.setLatitude(coords.get(0).latitude());
+    location.setLongitude(coords.get(0).longitude());
     routeProgress = RouteProgress.builder()
       .directionsRoute(route)
-      .distanceRemaining(route.getDistance())
-      .legDistanceRemaining(route.getLegs().get(0).getDistance())
-      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
+      .distanceRemaining(route.distance())
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
       .legIndex(0)
       .stepIndex(1)
       .build();
@@ -218,7 +221,7 @@ public class TriggerTest extends BaseTest {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
         Trigger.gte(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
-          routeProgress.currentLegProgress().currentStep().getDistance())
+          routeProgress.currentLegProgress().currentStep().distance())
       )
       .build();
 
@@ -279,7 +282,7 @@ public class TriggerTest extends BaseTest {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
         Trigger.lte(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
-          routeProgress.currentLegProgress().currentStep().getDistance())
+          routeProgress.currentLegProgress().currentStep().distance())
       )
       .build();
 
@@ -316,7 +319,7 @@ public class TriggerTest extends BaseTest {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
         Trigger.eq(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
-          routeProgress.currentLegProgress().currentStep().getDistance())
+          routeProgress.currentLegProgress().currentStep().distance())
       )
       .build();
 
@@ -329,7 +332,7 @@ public class TriggerTest extends BaseTest {
     Milestone milestone = new StepMilestone.Builder()
       .setTrigger(
         Trigger.neq(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
-          routeProgress.currentLegProgress().currentStep().getDistance())
+          routeProgress.currentLegProgress().currentStep().distance())
       )
       .build();
 

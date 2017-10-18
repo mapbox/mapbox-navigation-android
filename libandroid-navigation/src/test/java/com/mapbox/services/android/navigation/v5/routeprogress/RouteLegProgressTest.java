@@ -1,10 +1,12 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mapbox.directions.v5.DirectionsAdapterFactory;
+import com.mapbox.directions.v5.models.DirectionsResponse;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.v5.BaseTest;
-import com.mapbox.services.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.directions.v5.models.RouteLeg;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,19 +29,20 @@ public class RouteLegProgressTest extends BaseTest {
 
   @Before
   public void setup() throws IOException {
-    Gson gson = new Gson();
+    Gson gson = new GsonBuilder()
+      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
     String body = loadJsonFixture(DIRECTIONS_PRECISION_6);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
-    route = response.getRoutes().get(0);
-    firstLeg = route.getLegs().get(0);
+    route = response.routes().get(0);
+    firstLeg = route.legs().get(0);
   }
 
   @Test
   public void sanityTest() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
-      .legDistanceRemaining(route.getLegs().get(0).getDistance())
-      .distanceRemaining(route.getDistance())
+      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .distanceRemaining(route.distance())
       .directionsRoute(route)
       .stepIndex(0)
       .legIndex(0)
@@ -50,24 +53,24 @@ public class RouteLegProgressTest extends BaseTest {
   @Test
   public void upComingStep_returnsNextStepInLeg() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
-      .legDistanceRemaining(route.getLegs().get(0).getDistance())
-      .distanceRemaining(route.getDistance())
+      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .distanceRemaining(route.distance())
       .directionsRoute(route)
       .stepIndex(5)
       .legIndex(0)
       .build();
-    assertTrue(routeProgress.currentLegProgress().upComingStep().getGeometry()
+    assertTrue(routeProgress.currentLegProgress().upComingStep().geometry()
       .startsWith("so{gfA~}xpgFzOyNnRoOdVqXzLmQbDiGhKqQ|Vie@`X{g@dkAw{B~NcXhPoWlRmXfSeW|U"));
   }
 
   @Test
   public void upComingStep_returnsNull() {
-    int lastStepIndex = firstLeg.getSteps().size() - 1;
+    int lastStepIndex = firstLeg.steps().size() - 1;
     RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
-      .legDistanceRemaining(route.getLegs().get(0).getDistance())
-      .distanceRemaining(route.getDistance())
+      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .distanceRemaining(route.distance())
       .directionsRoute(route)
       .stepIndex(lastStepIndex)
       .legIndex(0)
@@ -78,27 +81,27 @@ public class RouteLegProgressTest extends BaseTest {
   @Test
   public void currentStep_returnsCurrentStep() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
-      .legDistanceRemaining(route.getLegs().get(0).getDistance())
-      .distanceRemaining(route.getDistance())
+      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .distanceRemaining(route.distance())
       .directionsRoute(route)
       .stepIndex(5)
       .legIndex(0)
       .build();
     assertEquals(
-      firstLeg.getSteps().get(5).getGeometry(), routeProgress.currentLegProgress().currentStep().getGeometry()
+      firstLeg.steps().get(5).geometry(), routeProgress.currentLegProgress().currentStep().geometry()
     );
     assertNotSame(
-      firstLeg.getSteps().get(6).getGeometry(), routeProgress.currentLegProgress().currentStep().getGeometry()
+      firstLeg.steps().get(6).geometry(), routeProgress.currentLegProgress().currentStep().geometry()
     );
   }
 
   @Test
   public void previousStep_returnsPreviousStep() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
-      .legDistanceRemaining(route.getLegs().get(0).getDistance())
-      .distanceRemaining(route.getDistance())
+      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .distanceRemaining(route.distance())
       .directionsRoute(route)
       .stepIndex(5)
       .legIndex(0)
@@ -106,19 +109,19 @@ public class RouteLegProgressTest extends BaseTest {
 
     // TODO replace with equalsTo once https://github.com/mapbox/mapbox-java/pull/450 merged
     assertEquals(
-      firstLeg.getSteps().get(4).getGeometry(), routeProgress.currentLegProgress().previousStep().getGeometry()
+      firstLeg.steps().get(4).geometry(), routeProgress.currentLegProgress().previousStep().geometry()
     );
     assertNotSame(
-      firstLeg.getSteps().get(5).getGeometry(), routeProgress.currentLegProgress().previousStep().getGeometry()
+      firstLeg.steps().get(5).geometry(), routeProgress.currentLegProgress().previousStep().geometry()
     );
   }
 
   @Test
   public void stepIndex_returnsCurrentStepIndex() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
-      .legDistanceRemaining(route.getLegs().get(0).getDistance())
-      .distanceRemaining(route.getDistance())
+      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .distanceRemaining(route.distance())
       .directionsRoute(route)
       .stepIndex(3)
       .legIndex(0)
@@ -130,9 +133,9 @@ public class RouteLegProgressTest extends BaseTest {
   @Test
   public void fractionTraveled_equalsZeroAtBeginning() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
-      .legDistanceRemaining(route.getLegs().get(0).getDistance())
-      .distanceRemaining(route.getDistance())
+      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .distanceRemaining(route.distance())
       .directionsRoute(route)
       .stepIndex(0)
       .legIndex(0)
@@ -146,18 +149,18 @@ public class RouteLegProgressTest extends BaseTest {
     double stepSegments = 5000; // meters
 
     // Chop the line in small pieces
-    for (double i = 0; i < firstLeg.getDistance(); i += stepSegments) {
+    for (double i = 0; i < firstLeg.distance(); i += stepSegments) {
       RouteProgress routeProgress = RouteProgress.builder()
-        .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
-        .legDistanceRemaining(route.getLegs().get(0).getDistance())
-        .distanceRemaining(route.getDistance())
+        .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
+        .legDistanceRemaining(route.legs().get(0).distance())
+        .distanceRemaining(route.distance())
         .directionsRoute(route)
         .stepIndex(0)
         .legIndex(0)
         .build();
 
       float fractionRemaining = (float) (routeProgress.currentLegProgress().distanceTraveled()
-        / firstLeg.getDistance());
+        / firstLeg.distance());
       assertEquals(fractionRemaining, routeProgress.currentLegProgress().fractionTraveled(), BaseTest.DELTA);
     }
   }
@@ -169,7 +172,7 @@ public class RouteLegProgressTest extends BaseTest {
       .legDistanceRemaining(0)
       .distanceRemaining(0)
       .directionsRoute(route)
-      .stepIndex(firstLeg.getSteps().size() - 1)
+      .stepIndex(firstLeg.steps().size() - 1)
       .legIndex(0)
       .build();
 
@@ -179,15 +182,15 @@ public class RouteLegProgressTest extends BaseTest {
   @Test
   public void distanceRemaining_equalsLegDistanceAtBeginning() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
-      .legDistanceRemaining(route.getLegs().get(0).getDistance())
-      .distanceRemaining(route.getDistance())
+      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .distanceRemaining(route.distance())
       .directionsRoute(route)
       .stepIndex(0)
       .legIndex(0)
       .build();
 
-    assertEquals(firstLeg.getDistance(), routeProgress.currentLegProgress().distanceRemaining(),
+    assertEquals(firstLeg.distance(), routeProgress.currentLegProgress().distanceRemaining(),
       BaseTest.LARGE_DELTA);
   }
 
@@ -198,7 +201,7 @@ public class RouteLegProgressTest extends BaseTest {
       .legDistanceRemaining(0)
       .distanceRemaining(0)
       .directionsRoute(route)
-      .stepIndex(firstLeg.getSteps().size() - 1)
+      .stepIndex(firstLeg.steps().size() - 1)
       .legIndex(0)
       .build();
 
@@ -208,9 +211,9 @@ public class RouteLegProgressTest extends BaseTest {
   @Test
   public void distanceTraveled_equalsZeroAtBeginning() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
-      .legDistanceRemaining(route.getLegs().get(0).getDistance())
-      .distanceRemaining(route.getDistance())
+      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .distanceRemaining(route.distance())
       .directionsRoute(route)
       .stepIndex(0)
       .legIndex(0)
@@ -225,18 +228,18 @@ public class RouteLegProgressTest extends BaseTest {
       .legDistanceRemaining(0)
       .distanceRemaining(0)
       .directionsRoute(route)
-      .stepIndex(firstLeg.getSteps().size() - 1)
+      .stepIndex(firstLeg.steps().size() - 1)
       .legIndex(0)
       .build();
-    assertEquals(firstLeg.getDistance(), routeProgress.currentLegProgress().distanceTraveled(), BaseTest.DELTA);
+    assertEquals(firstLeg.distance(), routeProgress.currentLegProgress().distanceTraveled(), BaseTest.DELTA);
   }
 
   @Test
   public void getDurationRemaining_equalsLegDurationAtBeginning() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
-      .legDistanceRemaining(route.getLegs().get(0).getDistance())
-      .distanceRemaining(route.getDistance())
+      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .distanceRemaining(route.distance())
       .directionsRoute(route)
       .stepIndex(0)
       .legIndex(0)
@@ -251,7 +254,7 @@ public class RouteLegProgressTest extends BaseTest {
       .legDistanceRemaining(0)
       .distanceRemaining(0)
       .directionsRoute(route)
-      .stepIndex(firstLeg.getSteps().size() - 1)
+      .stepIndex(firstLeg.steps().size() - 1)
       .legIndex(0)
       .build();
     assertEquals(0, routeProgress.currentLegProgress().durationRemaining(), BaseTest.DELTA);
@@ -260,24 +263,24 @@ public class RouteLegProgressTest extends BaseTest {
   @Test
   public void followOnStep_doesReturnTwoStepsAheadOfCurrent() throws Exception {
     RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
-      .legDistanceRemaining(route.getLegs().get(0).getDistance())
-      .distanceRemaining(route.getDistance())
+      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .distanceRemaining(route.distance())
       .directionsRoute(route)
       .stepIndex(5)
       .legIndex(0)
       .build();
-    assertTrue(routeProgress.currentLegProgress().followOnStep().getGeometry()
+    assertTrue(routeProgress.currentLegProgress().followOnStep().geometry()
       .startsWith("un`ffAz_dogFz`Aq^hF{B|GaB|HcAxKKlIp@lOzC|Dh@hKtAzFh@`FDvHy@bG{AjKaEfF"));
   }
 
   @Test
   public void followOnStep_returnsNull() {
-    int lastStepIndex = firstLeg.getSteps().size() - 1;
+    int lastStepIndex = firstLeg.steps().size() - 1;
     RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(route.getLegs().get(0).getSteps().get(0).getDistance())
-      .legDistanceRemaining(route.getLegs().get(0).getDistance())
-      .distanceRemaining(route.getDistance())
+      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .distanceRemaining(route.distance())
       .directionsRoute(route)
       .stepIndex(lastStepIndex)
       .legIndex(0)

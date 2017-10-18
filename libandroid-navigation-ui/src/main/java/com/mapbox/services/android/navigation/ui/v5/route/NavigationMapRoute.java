@@ -8,6 +8,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
 
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.directions.v5.models.RouteLeg;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.style.functions.Function;
@@ -17,13 +19,12 @@ import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.commons.geojson.Feature;
 import com.mapbox.services.commons.geojson.FeatureCollection;
 import com.mapbox.services.commons.geojson.LineString;
@@ -294,7 +295,9 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     // Determine whether the source needs to be added or updated
     GeoJsonSource source = mapboxMap.getSourceAs(NavigationMapSources.NAVIGATION_ROUTE_SOURCE);
     if (source == null) {
-      GeoJsonSource routeSource = new GeoJsonSource(NavigationMapSources.NAVIGATION_ROUTE_SOURCE, routeLineFeature);
+      GeoJsonOptions routeGeoJsonOptions = new GeoJsonOptions().withMaxZoom(16);
+      GeoJsonSource routeSource = new GeoJsonSource(NavigationMapSources.NAVIGATION_ROUTE_SOURCE,
+                                                    routeLineFeature, routeGeoJsonOptions);
       mapboxMap.addSource(routeSource);
     } else {
       source.setGeoJson(routeLineFeature);
@@ -319,20 +322,20 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    */
   private FeatureCollection addTrafficToSource(DirectionsRoute route) {
     List<Feature> features = new ArrayList<>();
-    LineString originalGeometry = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6);
+    LineString originalGeometry = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
     features.add(Feature.fromGeometry(originalGeometry));
 
-    LineString lineString = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6);
-    for (RouteLeg leg : route.getLegs()) {
-      if (leg.getAnnotation() != null) {
-        if (leg.getAnnotation().getCongestion() != null) {
-          for (int i = 0; i < leg.getAnnotation().getCongestion().length; i++) {
+    LineString lineString = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
+    for (RouteLeg leg : route.legs()) {
+      if (leg.annotation() != null) {
+        if (leg.annotation().congestion() != null) {
+          for (int i = 0; i < leg.annotation().congestion().size(); i++) {
             double[] startCoord = lineString.getCoordinates().get(i).getCoordinates();
             double[] endCoord = lineString.getCoordinates().get(i + 1).getCoordinates();
 
             LineString congestionLineString = LineString.fromCoordinates(new double[][] {startCoord, endCoord});
             Feature feature = Feature.fromGeometry(congestionLineString);
-            feature.addStringProperty(CONGESTION_KEY, leg.getAnnotation().getCongestion()[i]);
+            feature.addStringProperty(CONGESTION_KEY, leg.annotation().congestion().get(i));
             features.add(feature);
           }
         }

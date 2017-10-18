@@ -2,9 +2,13 @@ apply plugin: 'org.sonarqube'
 
 sonarqube {
   properties {
-    property "sonar.exclusions", "${project.rootDir}/app"
     property "sonar.java.coveragePlugin", "jacoco"
-    property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/testDebugUnitTest.exec"
+    property "sonar.host.url", "https://sonarcloud.io"
+    property "sonar.login", System.env.SONARQUBE_API_TOKEN
+    property "sonar.organization", "mapbox"
+    property "sonar.projectName", "mapbox-navigation-android"
+    property "sonar.projectKey", "mapbox-navigation-android"
+    property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec"
     property "sonar.links.homepage", "https://github.com/mapbox/mapbox-navigation-android"
   }
 }

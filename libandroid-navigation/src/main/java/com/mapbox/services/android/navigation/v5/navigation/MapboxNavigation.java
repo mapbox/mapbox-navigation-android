@@ -10,12 +10,14 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.location.LostLocationEngine;
-import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
+import com.mapbox.services.android.navigation.v5.milestone.ApiMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -28,8 +30,8 @@ import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.utils.TextUtils;
+import com.mapbox.services.utils.TextUtils;
+
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,6 +40,8 @@ import java.util.Locale;
 
 import retrofit2.Callback;
 import timber.log.Timber;
+
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.DEFAULT_MILESTONE_IDENTIFIER;
 
 /**
  * A MapboxNavigation class for interacting with and customizing a navigation session.
@@ -128,7 +132,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     // Create and add default milestones if enabled.
     milestones = new ArrayList<>();
     if (options.defaultMilestonesEnabled()) {
-      new DefaultMilestones(this);
+      addMilestone(new ApiMilestone.Builder().setIdentifier(DEFAULT_MILESTONE_IDENTIFIER).build());
     }
 
     initializeDefaultLocationEngine();
