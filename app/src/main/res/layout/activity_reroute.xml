@@ -13,6 +13,7 @@
         app:mapbox_cameraTargetLat="41.9005"
         app:mapbox_cameraTargetLng="-87.7789"
         app:mapbox_cameraZoom="10"
+        app:mapbox_uiAttribution="false"
         app:mapbox_styleUrl="@string/mapbox_style_dark"/>
 
 </LinearLayout>
