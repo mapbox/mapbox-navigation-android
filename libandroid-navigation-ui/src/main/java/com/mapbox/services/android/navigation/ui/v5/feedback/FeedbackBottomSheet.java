@@ -2,19 +2,27 @@ package com.mapbox.services.android.navigation.ui.v5.feedback;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
@@ -52,6 +60,25 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment {
     initBackground(view);
   }
 
+  @NonNull
+  @Override
+  public Dialog onCreateDialog(Bundle savedInstanceState) {
+    BottomSheetDialog dialog = (BottomSheetDialog) super.onCreateDialog(savedInstanceState);
+    dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+      @Override
+      public void onShow(DialogInterface dialog) {
+        BottomSheetDialog bottomSheetDialog = (BottomSheetDialog) dialog;
+        FrameLayout bottomSheet = bottomSheetDialog.findViewById(android.support.design.R.id.design_bottom_sheet);
+        if (bottomSheet != null) {
+          BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheet);
+          behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+          behavior.setSkipCollapsed(true);
+        }
+      }
+    });
+    return dialog;
+  }
+
   private void bind(View bottomSheetView) {
     feedbackItems = bottomSheetView.findViewById(R.id.feedbackItems);
     feedbackProgressBar = bottomSheetView.findViewById(R.id.feedbackProgress);
@@ -59,7 +86,13 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment {
 
   private void initFeedbackRecyclerView() {
     feedbackItems.setAdapter(new FeedbackAdapter());
-    feedbackItems.setLayoutManager(new GridLayoutManager(getContext(), 3));
+    feedbackItems.setOverScrollMode(RecyclerView.OVER_SCROLL_IF_CONTENT_SCROLLS);
+    if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      feedbackItems.setLayoutManager(new LinearLayoutManager(getContext(),
+        LinearLayoutManager.HORIZONTAL, false));
+    } else {
+      feedbackItems.setLayoutManager(new GridLayoutManager(getContext(), 3));
+    }
   }
 
   private void initCountDownAnimation() {
