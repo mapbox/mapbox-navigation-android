@@ -111,11 +111,12 @@ class NavigationMetricsWrapper {
                             String description, String feedbackType, String screenshot) {
     updateRouteProgressSessionData(routeProgress, sessionState);
 
-    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildFeedbackEvent(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
-          sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
-      sessionState.currentGeometry(), "unknown", (int) routeProgress.directionsRoute().getDistance(),
-      (int) routeProgress.directionsRoute().getDuration(), sessionState.rerouteCount(), sessionState.startTimestamp(),
-      feedbackType, beforeLocations, afterLocations, (int) sessionState.routeProgressBeforeReroute().distanceTraveled(),
+    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildFeedbackEvent(sdkIdentifier,
+      BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(), location.getLatitude(),
+      location.getLongitude(), sessionState.currentGeometry(), "unknown",
+      (int) routeProgress.directionsRoute().getDistance(), (int) routeProgress.directionsRoute().getDuration(),
+      sessionState.rerouteCount(), sessionState.startTimestamp(), feedbackType, beforeLocations, afterLocations,
+      (int) sessionState.routeProgressBeforeReroute().distanceTraveled(),
       (int) sessionState.routeProgressBeforeReroute().distanceRemaining(),
       (int) sessionState.routeProgressBeforeReroute().durationRemaining(), description, TelemetryUtils.buildUUID(),
       TelemetryUtils.buildUUID(), screenshot, sessionState.mockLocation(), null, null, sessionState.originalGeometry(),
