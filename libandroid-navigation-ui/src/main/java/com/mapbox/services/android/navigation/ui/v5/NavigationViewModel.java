@@ -13,6 +13,7 @@ import android.preference.PreferenceManager;
 import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
@@ -112,7 +113,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
 
   /**
    * Listener used to determine is navigation is running / not running.
-   *
+   * <p>
    * In {@link NavigationView}, views will be shown when true.  When false,
    * the {@link android.app.Activity} will be destroyed.
    *
@@ -130,6 +131,18 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
 
   public MapboxNavigation getNavigation() {
     return navigation;
+  }
+
+  void onFeedbackClick() {
+    // TODO telem stuff - record screenshot
+  }
+
+  void recordFeedback(FeedbackItem feedbackItem) {
+    navigation.recordFeedback("", "");
+  }
+
+  void updateFeedback(FeedbackItem feedbackItem) {
+    navigation.updateFeedback("", "", "");
   }
 
   void updateRoute(DirectionsRoute route) {

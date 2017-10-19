@@ -23,19 +23,24 @@ import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 
-public class FeedbackBottomSheet extends BottomSheetDialogFragment {
+public class FeedbackBottomSheet extends BottomSheetDialogFragment implements FeedbackClickListener.ClickCallback {
 
   public static final String TAG = FeedbackBottomSheet.class.getSimpleName();
 
+  private FeedbackSelectedCallback feedbackSelectedCallback;
+  private FeedbackAdapter feedbackAdapter;
   private RecyclerView feedbackItems;
   private ProgressBar feedbackProgressBar;
 
-  public static FeedbackBottomSheet newInstance() {
-    return new FeedbackBottomSheet();
+  public static FeedbackBottomSheet newInstance(FeedbackSelectedCallback feedbackSelectedCallback) {
+    FeedbackBottomSheet feedbackBottomSheet = new FeedbackBottomSheet();
+    feedbackBottomSheet.setFeedbackSelectedCallback(feedbackSelectedCallback);
+    return feedbackBottomSheet;
   }
 
   @Override
@@ -77,14 +82,27 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment {
     return dialog;
   }
 
+  @Override
+  public void onFeedbackItemClick(int feedbackPosition) {
+    FeedbackItem feedbackItem = feedbackAdapter.getFeedbackItem(feedbackPosition);
+    Toast.makeText(getContext(), feedbackItem.getFeedbackText(), Toast.LENGTH_SHORT).show();
+    feedbackSelectedCallback.onFeedbackItemSelected(feedbackItem);
+  }
+
+  public void setFeedbackSelectedCallback(FeedbackSelectedCallback feedbackSelectedCallback) {
+    this.feedbackSelectedCallback = feedbackSelectedCallback;
+  }
+
   private void bind(View bottomSheetView) {
     feedbackItems = bottomSheetView.findViewById(R.id.feedbackItems);
     feedbackProgressBar = bottomSheetView.findViewById(R.id.feedbackProgress);
   }
 
   private void initFeedbackRecyclerView() {
-    feedbackItems.setAdapter(new FeedbackAdapter());
+    feedbackAdapter = new FeedbackAdapter();
+    feedbackItems.setAdapter(feedbackAdapter);
     feedbackItems.setOverScrollMode(RecyclerView.OVER_SCROLL_IF_CONTENT_SCROLLS);
+    feedbackItems.addOnItemTouchListener(new FeedbackClickListener(getContext(), this));
     if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
       int itemCount = feedbackItems.getAdapter().getItemCount();
       int spanCount = itemCount >= 6 ? 6 : itemCount;

@@ -14,10 +14,10 @@ import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.location.LostLocationEngine;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
+import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.ApiMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -31,7 +31,6 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 import com.mapbox.services.utils.TextUtils;
-
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -637,6 +636,15 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     navigationEventDispatcher.removeOffRouteListener(null);
     // Remove this listener so that the arrival event only occurs once.
     navigationEventDispatcher.removeInternalProgressChangeListener();
+  }
+
+  public String recordFeedback(String feedbackType, String description) {
+    // TODO navigationService.recordFeedbackEvent(feedbackType, description);
+    return "some_feedback_id";
+  }
+
+  public void updateFeedback(String feedbackId, String feedbackType, String description) {
+    // TODO navigationService.updateFeedbackEvent(feedbackId, feedbackType, description);
   }
 
   DirectionsRoute getRoute() {
