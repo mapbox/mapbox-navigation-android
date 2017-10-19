@@ -312,6 +312,47 @@ public class NavigationService extends Service implements LocationEngineListener
     handler.postDelayed(runnable, TWENTY_SECOND_INTERVAL);
   }
 
+  //need to confirm working as reroute functions
+  public String recordFeedbackEvent(final String feedbackType, final String description) {
+
+    mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder()
+      .beforeRerouteLocations(Arrays.asList(
+        locationBuffer.toArray(new Location[locationBuffer.size()])))
+      .routeProgressBeforeReroute(routeProgress)
+      .build());
+    locationBuffer.clear();
+    queuedRerouteEvent = true;
+
+    handler = new Handler();
+    runnable = new Runnable() {
+      @Override
+      public void run() {
+        mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder()
+          .afterRerouteLocations(Arrays.asList(
+            locationBuffer.toArray(new Location[locationBuffer.size()])))
+          .build());
+
+        locationBuffer.clear();
+
+        NavigationMetricsWrapper.feedbackEvent(mapboxNavigation.getSessionState(), routeProgress, rawLocation,
+          description, feedbackType, "screenshot");
+        queuedRerouteEvent = false;
+      }
+    };
+
+    handler.postDelayed(runnable, TWENTY_SECOND_INTERVAL);
+
+    return mapboxNavigation.getSessionState().sessionIdentifier();
+  }
+
+  //create system for updating OR tweak above to work with this better
+  public void updateFeedbackEvent(String feedbackId, String feedbackType, String description) {
+  }
+
+  //method to prevent the creation of feedback end (boolean? usage of feedbackID?)
+  public void cancelFeedback(String feedbackId) {
+  }
+
   class LocalBinder extends Binder {
     NavigationService getService() {
       Timber.d("Local binder called.");

@@ -639,12 +639,15 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   }
 
   public String recordFeedback(String feedbackType, String description) {
-    // TODO navigationService.recordFeedbackEvent(feedbackType, description);
-    return "some_feedback_id";
+    return navigationService.recordFeedbackEvent(feedbackType, description);
   }
 
   public void updateFeedback(String feedbackId, String feedbackType, String description) {
-    // TODO navigationService.updateFeedbackEvent(feedbackId, feedbackType, description);
+    navigationService.updateFeedbackEvent(feedbackId, feedbackType, description);
+  }
+
+  public void cancelFeedback(String feedbackId) {
+    navigationService.cancelFeedback(feedbackId);
   }
 
   DirectionsRoute getRoute() {
