@@ -42,9 +42,10 @@ android {
 
 dependencies {
   // Mapbox Android Services
-  compile 'com.mapbox.mapboxsdk:mapbox-android-telemetry:2.2.6'
-
-  compile ('com.mapbox.mapboxsdk:mapbox-android-services:2.2.6@aar') {
+  // TODO Fix mapboxServices version when releasing next version of MAS (2.2.7)
+  compile 'com.mapbox.mapboxsdk:mapbox-android-telemetry:2.3.0-SNAPSHOT'
+  // TODO Fix mapboxServices version when releasing next version of MAS (2.2.7)
+  compile ('com.mapbox.mapboxsdk:mapbox-android-services:2.3.0-SNAPSHOT@aar') {
     transitive = true
     exclude module: 'mapbox-java-geojson'
     exclude module: 'mapbox-java-core'
