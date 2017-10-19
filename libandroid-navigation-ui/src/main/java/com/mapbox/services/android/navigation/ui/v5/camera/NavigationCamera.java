@@ -3,9 +3,11 @@ package com.mapbox.services.android.navigation.ui.v5.camera;
 import android.content.Context;
 import android.location.Location;
 import android.support.annotation.NonNull;
-import android.util.DisplayMetrics;
 import android.util.SparseArray;
+import android.view.View;
 
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -14,11 +16,9 @@ import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.utils.turf.TurfConstants;
-import com.mapbox.services.api.utils.turf.TurfMeasurement;
 import com.mapbox.services.commons.geojson.LineString;
-import com.mapbox.services.commons.models.Position;
+import com.mapbox.turf.TurfConstants;
+import com.mapbox.turf.TurfMeasurement;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -38,23 +38,23 @@ public class NavigationCamera implements ProgressChangeListener {
 
   private MapboxMap mapboxMap;
   private MapboxNavigation navigation;
-  private CameraPosition currentCameraPositon;
+  private CameraPosition currentCameraPosition;
   private double targetDistance;
   private boolean trackingEnabled = true;
 
   /**
    * Creates an instance of {@link NavigationCamera}.
    *
-   * @param context    for determining screen density
+   * @param view       for determining percentage of total screen
    * @param mapboxMap  for moving the camera
    * @param navigation for listening to location updates
    * @since 0.6.0
    */
-  public NavigationCamera(@NonNull Context context, @NonNull MapboxMap mapboxMap,
+  public NavigationCamera(@NonNull View view, @NonNull MapboxMap mapboxMap,
                           @NonNull MapboxNavigation navigation) {
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
-    initialize(context);
+    initialize(view);
   }
 
   /**
@@ -68,8 +68,8 @@ public class NavigationCamera implements ProgressChangeListener {
    */
   public void start(DirectionsRoute route) {
     if (route != null) {
-      currentCameraPositon = buildCameraPositionFromRoute(route);
-      animateCameraToPosition(currentCameraPositon);
+      currentCameraPosition = buildCameraPositionFromRoute(route);
+      animateCameraToPosition(currentCameraPosition);
     } else {
       navigation.addProgressChangeListener(NavigationCamera.this);
     }
@@ -87,8 +87,8 @@ public class NavigationCamera implements ProgressChangeListener {
    */
   public void resume(Location location) {
     if (location != null) {
-      currentCameraPositon = buildCameraPositionFromLocation(location);
-      animateCameraToPosition(currentCameraPositon);
+      currentCameraPosition = buildCameraPositionFromLocation(location);
+      animateCameraToPosition(currentCameraPosition);
     } else {
       navigation.addProgressChangeListener(NavigationCamera.this);
     }
@@ -139,8 +139,8 @@ public class NavigationCamera implements ProgressChangeListener {
    */
   public void resetCameraPosition() {
     this.trackingEnabled = true;
-    if (currentCameraPositon != null) {
-      mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(currentCameraPositon), 750, true);
+    if (currentCameraPosition != null) {
+      mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(currentCameraPosition), 750, true);
     }
   }
 
@@ -170,9 +170,9 @@ public class NavigationCamera implements ProgressChangeListener {
   }
 
   private void easeCameraToLocation(Location location) {
-    currentCameraPositon = buildCameraPositionFromLocation(location);
+    currentCameraPosition = buildCameraPositionFromLocation(location);
     if (trackingEnabled) {
-      mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(currentCameraPositon), 1000, false);
+      mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(currentCameraPosition), 1000, false);
     }
   }
 
@@ -187,27 +187,27 @@ public class NavigationCamera implements ProgressChangeListener {
    */
   @NonNull
   private CameraPosition buildCameraPositionFromRoute(DirectionsRoute route) {
-    LineString lineString = LineString.fromPolyline(route.getGeometry(), Constants.PRECISION_6);
+    LineString lineString = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
 
     double initialBearing = TurfMeasurement.bearing(
-      Position.fromLngLat(
+      Point.fromLngLat(
         lineString.getCoordinates().get(0).getLongitude(), lineString.getCoordinates().get(0).getLatitude()
       ),
-      Position.fromLngLat(
+      Point.fromLngLat(
         lineString.getCoordinates().get(1).getLongitude(), lineString.getCoordinates().get(1).getLatitude()
       )
     );
 
-    Position targetPosition = TurfMeasurement.destination(
-      Position.fromCoordinates(
+    Point targetPoint = TurfMeasurement.destination(
+      Point.fromLngLat(
         lineString.getCoordinates().get(0).getLongitude(), lineString.getCoordinates().get(0).getLatitude()
       ),
-      120, initialBearing, TurfConstants.UNIT_METERS
+      targetDistance, initialBearing, TurfConstants.UNIT_METERS
     );
 
     LatLng target = new LatLng(
-      targetPosition.getLatitude(),
-      targetPosition.getLongitude()
+      targetPoint.latitude(),
+      targetPoint.longitude()
     );
 
     return new CameraPosition.Builder()
@@ -229,14 +229,14 @@ public class NavigationCamera implements ProgressChangeListener {
    */
   @NonNull
   private CameraPosition buildCameraPositionFromLocation(Location location) {
-    Position targetPosition = TurfMeasurement.destination(
-      Position.fromCoordinates(location.getLongitude(), location.getLatitude()),
+    Point targetPoint = TurfMeasurement.destination(
+      Point.fromLngLat(location.getLongitude(), location.getLatitude()),
       targetDistance, location.getBearing(), TurfConstants.UNIT_METERS
     );
 
     LatLng target = new LatLng(
-      targetPosition.getLatitude(),
-      targetPosition.getLongitude()
+      targetPoint.latitude(),
+      targetPoint.longitude()
     );
 
     return new CameraPosition.Builder()
@@ -250,25 +250,26 @@ public class NavigationCamera implements ProgressChangeListener {
   /**
    * Initializes both the target distance and zoom level for the camera.
    *
-   * @param context used for getting current orientation
+   * @param view used for setting target distance / zoom level
    */
-  private void initialize(Context context) {
-    initializeTargetDistance(context);
-    initializeScreenOrientation(context);
+  private void initialize(View view) {
+    initializeTargetDistance(view);
+    initializeScreenOrientation(view.getContext());
   }
 
   /**
-   * Defines the camera target distance given the phone's screen density.
+   * Defines the camera target distance given the percentage of the
+   * total phone screen the view uses.
    * <p>
-   * If the camera has a higher screen density, the target distance needs
-   * to be increased to accommodate more pixels.
+   * If the view takes up a smaller portion of the screen, the target distance needs
+   * to be adjusted to accommodate.
    *
-   * @param context used for getting current orientation
+   * @param view used for calculating target distance
    */
-  private void initializeTargetDistance(Context context) {
-    DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-    ScreenDensityMap densityMap = new ScreenDensityMap();
-    targetDistance = densityMap.getTargetDistance(metrics.densityDpi);
+  private void initializeTargetDistance(View view) {
+    double viewHeight = (double) view.getHeight();
+    double screenHeight = (double) view.getContext().getResources().getDisplayMetrics().heightPixels;
+    targetDistance = (viewHeight / screenHeight) * 100;
   }
 
   /**

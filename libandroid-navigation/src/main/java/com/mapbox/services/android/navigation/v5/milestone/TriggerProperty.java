@@ -72,9 +72,9 @@ public final class TriggerProperty {
     // Build hashMap matching the trigger properties to their corresponding current values.
     SparseArray<Number[]> statementObjects = new SparseArray<>(13);
     statementObjects.put(TriggerProperty.STEP_DISTANCE_TOTAL_METERS,
-      new Number[] {routeProgress.currentLegProgress().currentStep().getDistance()});
+      new Number[] {routeProgress.currentLegProgress().currentStep().distance()});
     statementObjects.put(TriggerProperty.STEP_DURATION_TOTAL_SECONDS,
-      new Number[] {routeProgress.currentLegProgress().currentStep().getDuration()});
+      new Number[] {routeProgress.currentLegProgress().currentStep().duration()});
     statementObjects.put(TriggerProperty.STEP_DISTANCE_REMAINING_METERS,
       new Number[] {routeProgress.currentLegProgress().currentStepProgress().distanceRemaining()});
     statementObjects.put(TriggerProperty.STEP_DURATION_REMAINING_SECONDS,
@@ -89,20 +89,20 @@ public final class TriggerProperty {
         routeProgress.currentLegProgress().stepIndex()});
     statementObjects.put(TriggerProperty.LAST_STEP,
       new Number[] {routeProgress.currentLegProgress().stepIndex(),
-        (routeProgress.currentLeg().getSteps().size() - 2)});
+        (routeProgress.currentLeg().steps().size() - 2)});
     statementObjects.put(TriggerProperty.FIRST_STEP,
       new Number[] {routeProgress.currentLegProgress().stepIndex(), 0});
     statementObjects.put(TriggerProperty.NEXT_STEP_DURATION_SECONDS,
       new Number[] {
         routeProgress.currentLegProgress().upComingStep() != null
-          ? routeProgress.currentLegProgress().upComingStep().getDuration() : 0});
+          ? routeProgress.currentLegProgress().upComingStep().duration() : 0});
     statementObjects.put(TriggerProperty.NEXT_STEP_DISTANCE_METERS,
       new Number[] {
         routeProgress.currentLegProgress().upComingStep() != null
-          ? routeProgress.currentLegProgress().upComingStep().getDistance() : 0});
+          ? routeProgress.currentLegProgress().upComingStep().distance() : 0});
     statementObjects.put(TriggerProperty.FIRST_LEG, new Number[] {routeProgress.legIndex(), 0});
     statementObjects.put(TriggerProperty.LAST_LEG, new Number[] {routeProgress.legIndex(),
-      (routeProgress.directionsRoute().getLegs().size() - 1)});
+      (routeProgress.directionsRoute().legs().size() - 1)});
     return statementObjects;
   }
 }

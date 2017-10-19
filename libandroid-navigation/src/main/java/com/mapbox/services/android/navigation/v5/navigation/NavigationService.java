@@ -10,18 +10,18 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.mapbox.services.android.location.MockLocationEngine;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.R;
+import com.mapbox.services.android.navigation.v5.milestone.ApiMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.api.utils.turf.TurfConstants;
-import com.mapbox.services.api.utils.turf.TurfMeasurement;
-import com.mapbox.services.commons.models.Position;
+import com.mapbox.turf.TurfConstants;
+import com.mapbox.turf.TurfMeasurement;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.DEFAULT_MILESTONE_IDENTIFIER;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
 
@@ -212,10 +213,6 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @SuppressWarnings("MissingPermission")
   private boolean validLocationUpdate(Location location) {
-    // TODO fix mock rawLocation engine and remove this if statement.
-    if (locationEngine instanceof MockLocationEngine) {
-      return true;
-    }
     if (locationEngine.getLastLocation() == null) {
       return true;
     }
@@ -253,6 +250,9 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onMilestoneTrigger(List<Milestone> triggeredMilestones, RouteProgress routeProgress) {
     for (Milestone milestone : triggeredMilestones) {
       String instruction = buildInstructionString(routeProgress, milestone);
+      if (milestone.getIdentifier() == DEFAULT_MILESTONE_IDENTIFIER) {
+        instruction = ((ApiMilestone) milestone).announcement();
+      }
       mapboxNavigation.getEventDispatcher().onMilestoneEvent(
         routeProgress, instruction, milestone.getIdentifier());
     }
@@ -271,10 +271,11 @@ public class NavigationService extends Service implements LocationEngineListener
         if (mapboxNavigation.getSessionState().lastRerouteLocation() == null) {
           rerouteSessionsStateUpdate();
         } else {
-          if (TurfMeasurement.distance(
-            Position.fromLngLat(mapboxNavigation.getSessionState().lastRerouteLocation().getLongitude(),
-              mapboxNavigation.getSessionState().lastRerouteLocation().getLatitude()),
-            Position.fromLngLat(location.getLongitude(), location.getLatitude()),
+          Point lastReroutePoint = Point.fromLngLat(
+            mapboxNavigation.getSessionState().lastRerouteLocation().getLongitude(),
+            mapboxNavigation.getSessionState().lastRerouteLocation().getLatitude());
+          if (TurfMeasurement.distance(lastReroutePoint,
+            Point.fromLngLat(location.getLongitude(), location.getLatitude()),
             TurfConstants.UNIT_METERS)
             > mapboxNavigation.options().minimumDistanceBeforeRerouting()) {
             rerouteSessionsStateUpdate();

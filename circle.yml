@@ -31,23 +31,14 @@ jobs:
             - ~/.gradle
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
-          name: Jacoco test report
-          command: ./gradlew createDebugUnitTestCoverageReport
-      - run:
-          name: Sonarcloud upload
-          command: |
-            ./gradlew sonarqube \
-              -DskipTests=true \
-              -Dsonar.host.url=https://sonarcloud.io \
-              -Dsonar.organization=mapbox \
-              -Dsonar.login=$SONARCLOUD_KEY \
-              -Dsonar.test.failure.ignore=true
-      - run:
           name: Check Java code style
           command: make checkstyle
       - run:
-          name: Run unit-test in both libraries
-          command: make test
+          name: Run unit-test and generate Jacoco test report
+          command: ./gradlew createDebugUnitTestCoverageReport
+      - run:
+          name: Sonarcloud upload
+          command: make sonarqube
       - run:
           name: Build testapp APK
           command: |

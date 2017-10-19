@@ -10,6 +10,8 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.preference.PreferenceManager;
 
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
@@ -24,8 +26,6 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.models.Position;
 
 import java.text.DecimalFormat;
 
@@ -36,7 +36,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
   final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
-  final MutableLiveData<Position> newOrigin = new MutableLiveData<>();
+  final MutableLiveData<Point> newOrigin = new MutableLiveData<>();
   final MutableLiveData<Boolean> isRunning = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
@@ -89,7 +89,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    */
   @Override
   public void userOffRoute(Location location) {
-    Position newOrigin = Position.fromLngLat(location.getLongitude(), location.getLatitude());
+    Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     this.newOrigin.setValue(newOrigin);
     isOffRoute.setValue(true);
   }

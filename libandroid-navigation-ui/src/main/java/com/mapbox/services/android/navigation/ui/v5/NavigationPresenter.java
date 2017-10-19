@@ -2,8 +2,8 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.support.design.widget.BottomSheetBehavior;
 
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.models.Position;
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 
 class NavigationPresenter {
 
@@ -50,6 +50,8 @@ class NavigationPresenter {
 
     if (view.isSummaryDirectionsVisible()) {
       view.setSheetShadowVisibility(false);
+    } else {
+      view.setMapPadding(0, 0, 0, view.getBottomSheetHeight());
     }
   }
 
@@ -57,6 +59,11 @@ class NavigationPresenter {
     view.setCancelBtnClickable(true);
     view.setSummaryOptionsVisibility(true);
     view.setSummaryDirectionsVisibility(false);
+
+    int bottomPadding = view.getMapPadding()[3];
+    if (bottomPadding != view.getBottomSheetPeekHeight()) {
+      view.setMapPadding(0, 0, 0, view.getBottomSheetPeekHeight());
+    }
   }
 
   void onSummaryBottomSheetHidden() {
@@ -78,8 +85,8 @@ class NavigationPresenter {
     view.drawRoute(directionsRoute);
   }
 
-  void onDestinationUpdate(Position position) {
-    view.addMarker(position);
+  void onDestinationUpdate(Point point) {
+    view.addMarker(point);
   }
 
   void onNavigationRunning() {
