@@ -13,16 +13,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_LEFT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_STRAIGHT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.*;
 
 public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
 
   private List<IntersectionLanes> lanes;
-  private String maneuverModifier;
+  //private String maneuverModifier;
+  private ManeuverModifier maneuverModifier;
 
   public TurnLaneAdapter() {
     lanes = new ArrayList<>();
@@ -39,7 +36,9 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
   @Override
   public void onBindViewHolder(TurnLaneViewHolder holder, int position) {
     IntersectionLanes lane = lanes.get(position);
-    setLaneImage(holder, lane);
+
+    holder.laneView.setLane(lane);
+    holder.laneView.setManeuverModifier(maneuverModifier);
   }
 
   @Override
@@ -47,22 +46,23 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
     return lanes.size();
   }
 
-  public void addTurnLanes(IntersectionLanes[] lanes, String maneuverModifier) {
+  public void addTurnLanes(IntersectionLanes[] lanes, ManeuverModifier maneuverModifier) {
     this.maneuverModifier = maneuverModifier;
     this.lanes.clear();
     Collections.addAll(this.lanes, lanes);
     notifyDataSetChanged();
   }
 
-  private void setLaneImage(TurnLaneViewHolder holder, IntersectionLanes lanes) {
+  /*
+  private void setLaneImage(TurnLaneViewHolder holder, IntersectionLanes lane) {
     StringBuilder builder = new StringBuilder();
 
     // Indications
-    if (lanes.getIndications() != null) {
-      for (String indication : lanes.getIndications()) {
+    if (lane.getIndications() != null) {
+      for (String indication : lane.getIndications()) {
         builder.append(indication);
       }
-      if (builder.toString().contains(TURN_LANE_INDICATION_STRAIGHT) && lanes.getValid()) {
+      if (builder.toString().contains(TURN_LANE_INDICATION_STRAIGHT) && lane.getValid()) {
         appendModifier(builder);
       }
     }
@@ -83,8 +83,9 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
     } else {
       holder.turnImage.setScaleX(1);
     }
-  }
+  }*/
 
+  /*
   private void appendModifier(StringBuilder builder) {
     // Maneuver modifier
     if (maneuverModifier.contains(STEP_MANEUVER_MODIFIER_LEFT)) {
@@ -94,7 +95,7 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
     } else if (maneuverModifier.contains(STEP_MANEUVER_MODIFIER_RIGHT)) {
       builder.append(STEP_MANEUVER_MODIFIER_RIGHT);
     }
-  }
+  }*/
 
   private static int retrieveTurnLaneResource(String turnLaneKey) {
     TurnLaneMap turnLaneMap = new TurnLaneMap();
