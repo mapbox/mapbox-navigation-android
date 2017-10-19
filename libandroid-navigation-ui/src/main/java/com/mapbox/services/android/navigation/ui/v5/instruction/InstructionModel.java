@@ -18,7 +18,8 @@ import static com.mapbox.services.android.navigation.v5.utils.ManeuverUtils.getM
 public class InstructionModel {
 
   private SpannableStringBuilder stepDistanceRemaining;
-  private String textInstruction;
+  private String primaryText;
+  private String secondaryText;
   private int maneuverImage;
   private String maneuverModifier;
   private List<IntersectionLanes> turnLanes;
@@ -31,8 +32,12 @@ public class InstructionModel {
     return stepDistanceRemaining;
   }
 
-  String getTextInstruction() {
-    return textInstruction;
+  String getPrimaryText() {
+    return primaryText;
+  }
+
+  String getSecondaryText() {
+    return secondaryText;
   }
 
   int getManeuverImage() {
@@ -58,7 +63,7 @@ public class InstructionModel {
   private void extractStepResources(LegStep upComingStep) {
     maneuverImage = getManeuverResource(upComingStep);
     if (hasManeuver(upComingStep)) {
-      buildTextInstruction(upComingStep);
+      buildTextInstructions(upComingStep);
       maneuverModifier = upComingStep.maneuver().modifier();
     }
     if (hasIntersections(upComingStep)) {
@@ -104,7 +109,8 @@ public class InstructionModel {
       && upComingStep.intersections().get(0) != null;
   }
 
-  private void buildTextInstruction(LegStep upComingStep) {
+  private void buildTextInstructions(LegStep upComingStep) {
+    // TODO New logic will go here
     if (hasDestinations(upComingStep)) {
       destinationInstruction(upComingStep);
     } else if (hasName(upComingStep)) {
@@ -115,7 +121,7 @@ public class InstructionModel {
   }
 
   private void maneuverInstruction(LegStep upComingStep) {
-    textInstruction = upComingStep.maneuver().instruction();
+    primaryText = upComingStep.maneuver().instruction();
   }
 
   private boolean hasManeuverInstruction(LegStep upComingStep) {
@@ -123,7 +129,7 @@ public class InstructionModel {
   }
 
   private void nameInstruction(LegStep upComingStep) {
-    textInstruction = upComingStep.name();
+    primaryText = upComingStep.name();
   }
 
   private boolean hasName(LegStep upComingStep) {
@@ -131,8 +137,8 @@ public class InstructionModel {
   }
 
   private void destinationInstruction(LegStep upComingStep) {
-    textInstruction = upComingStep.destinations().trim();
-    textInstruction = StringAbbreviator.deliminator(textInstruction);
+    primaryText = upComingStep.destinations().trim();
+    primaryText = StringAbbreviator.deliminator(primaryText);
   }
 
   private boolean hasDestinations(LegStep upComingStep) {
