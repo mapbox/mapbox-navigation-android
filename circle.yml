@@ -112,7 +112,3 @@ jobs:
       - store_artifacts:
           path: app/build/reports
           destination: reports
-notify:
-  webhooks:
-    # notify to Slack
-    - url: https://hooks.slack.com/services/some-hash/some-another-hash/some-another-another-hash
