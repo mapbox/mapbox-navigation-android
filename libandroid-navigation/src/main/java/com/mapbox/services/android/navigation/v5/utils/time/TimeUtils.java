@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.utils.time;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -57,6 +58,11 @@ public class TimeUtils {
     }
 
     return (sb.toString());
+  }
+
+  public static long dateDiff(Date date1, Date date2, TimeUnit timeUnit) {
+    long diffInMillies = date2.getTime() - date1.getTime();
+    return timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
   }
 
 }

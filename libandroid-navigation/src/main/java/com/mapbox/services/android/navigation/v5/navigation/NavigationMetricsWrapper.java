@@ -8,6 +8,8 @@ import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 
+import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 final class NavigationMetricsWrapper {
@@ -81,9 +83,10 @@ final class NavigationMetricsWrapper {
   }
 
   static void rerouteEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
+
     updateRouteProgressSessionData(routeProgress, sessionState);
 
-    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildRerouteEvent(
+    Hashtable<String, Object> rerouteEvent = MapboxNavigationEvent.buildRerouteEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(),
       location.getLatitude(), location.getLongitude(),
       sessionState.currentGeometry(), routeProgress.directionsRoute().routeOptions().profile(),
@@ -105,8 +108,9 @@ final class NavigationMetricsWrapper {
       routeProgress.currentLegProgress().currentStep().duration().intValue(),
       (int) routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
-      sessionState.currentStepCount(), sessionState.originalStepCount()
-    ));
+      sessionState.currentStepCount(), sessionState.originalStepCount());
+    rerouteEvent.put(MapboxNavigationEvent.KEY_CREATED, TelemetryUtils.generateCreateDate(location));
+    MapboxTelemetry.getInstance().pushEvent(rerouteEvent);
   }
 
   static void feedbackEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
@@ -140,12 +144,12 @@ final class NavigationMetricsWrapper {
     );
   }
 
-  private static Location[] obtainLocations(List<Location> rerouteLocations) {
-    Location[] locations = new Location[0];
-    if (rerouteLocations != null && !rerouteLocations.isEmpty()) {
-      locations = rerouteLocations.toArray(new Location[0]);
+  private static Location[] obtainLocations(List<Location> locations) {
+    // Check if the list of locations is empty and if so return an empty array
+    if (locations == null || locations.isEmpty()) {
+      return new Location[0];
     }
-    return locations;
+    return locations.toArray(new Location[locations.size()]);
   }
 
   private static void updateRouteProgressSessionData(RouteProgress routeProgress, SessionState sessionState) {
@@ -172,10 +176,21 @@ final class NavigationMetricsWrapper {
       previousModifier = routeProgress.currentLegProgress().currentStep().maneuver().modifier();
     }
 
+    // Check if location update happened before or after the reroute
+    List<Location> afterLoc = new ArrayList<>();
+
+    if (sessionState.afterRerouteLocations() != null) {
+      for (Location loc : sessionState.afterRerouteLocations()) {
+        if (loc.getTime() > sessionState.rerouteDate().getTime()) {
+          afterLoc.add(loc);
+        }
+      }
+    }
+
     previousName = routeProgress.currentLegProgress().currentStep().name();
 
     beforeLocations = obtainLocations(sessionState.beforeRerouteLocations());
 
-    afterLocations = obtainLocations(sessionState.afterRerouteLocations());
+    afterLocations = obtainLocations(afterLoc);
   }
 }
