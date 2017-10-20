@@ -112,7 +112,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     this.context = context;
     this.options = options;
     this.isFromNavigationUi = options.isFromNavigationUi();
-    initialize();
+    initialize(options.isDebugLoggingEnabled());
   }
 
   /**
@@ -120,8 +120,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    * be changed later on using their corresponding setter. An internal progressChangeListeners used
    * to prevent users from removing it.
    */
-  private void initialize() {
-    initializeTelemetry();
+  private void initialize(boolean debugLoggingEnabled) {
+    initializeTelemetry(debugLoggingEnabled);
 
     // Initialize event dispatcher and add internal listeners
     navigationEventDispatcher = new NavigationEventDispatcher();
@@ -145,7 +145,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     }
   }
 
-  private void initializeTelemetry() {
+  private void initializeTelemetry(boolean debugLoggingEnabled) {
     validateAccessToken(accessToken);
     String sdkIdentifier = MAPBOX_NAVIGATION_SDK_IDENTIFIER;
     if (isFromNavigationUi) {
@@ -155,6 +155,9 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     MapboxTelemetry.getInstance().initialize(context, accessToken, userAgent, sdkIdentifier,
       BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
     MapboxTelemetry.getInstance().newUserAgent(userAgent);
+
+    // Enable extra logging in debug mode
+    MapboxTelemetry.getInstance().setDebugLoggingEnabled(debugLoggingEnabled);
 
     NavigationMetricsWrapper.sdkIdentifier = sdkIdentifier;
     NavigationMetricsWrapper.turnstileEvent();

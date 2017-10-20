@@ -17,12 +17,16 @@ import com.mapbox.services.android.navigation.v5.milestone.ApiMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
+import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -48,22 +52,20 @@ public class NavigationService extends Service implements LocationEngineListener
 
   // Message id used when a new location update occurs and we send to the thread.
   private static final int MSG_LOCATION_UPDATED = 1001;
-  private static final int TWENTY_SECOND_INTERVAL = 20000;
+  private static final int TWENTY_SECOND_INTERVAL = 20;
 
   private RingBuffer<Integer> recentDistancesFromManeuverInMeters;
   private final IBinder localBinder = new LocalBinder();
   private NavigationNotification navNotificationManager;
+  private List<SessionState> queuedRerouteEvents;
   private RingBuffer<Location> locationBuffer;
   private long timeIntervalSinceLastOffRoute;
   private MapboxNavigation mapboxNavigation;
   private LocationEngine locationEngine;
   private RouteProgress routeProgress;
   private boolean firstProgressUpdate = true;
-  private boolean queuedRerouteEvent;
   private NavigationEngine thread;
   private Location rawLocation;
-  private Runnable runnable;
-  private Handler handler;
 
   @Nullable
   @Override
@@ -78,6 +80,7 @@ public class NavigationService extends Service implements LocationEngineListener
     thread.prepareHandler();
     recentDistancesFromManeuverInMeters = new RingBuffer<>(3);
     locationBuffer = new RingBuffer<>(20);
+    queuedRerouteEvents = new ArrayList<>();
   }
 
   /**
@@ -95,12 +98,8 @@ public class NavigationService extends Service implements LocationEngineListener
       stopForeground(true);
     }
 
-    if (handler != null && runnable != null) {
-      if (queuedRerouteEvent) {
-        runnable.run();
-      }
-      handler.removeCallbacks(runnable);
-
+    for (SessionState sessionState : queuedRerouteEvents) {
+      sendRerouteEvent(sessionState);
     }
 
     // User canceled navigation session
@@ -191,9 +190,20 @@ public class NavigationService extends Service implements LocationEngineListener
     Timber.d("onLocationChanged");
     if (location != null && validLocationUpdate(location)) {
       rawLocation = location;
-      locationBuffer.push(location);
+      locationBuffer.addLast(location);
       thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation,
         recentDistancesFromManeuverInMeters));
+      Iterator<SessionState> iterator = queuedRerouteEvents.listIterator();
+      while (iterator.hasNext()) {
+        SessionState sessionState = iterator.next();
+        if (sessionState.lastRerouteLocation() != null
+          && sessionState.lastRerouteLocation().equals(locationBuffer.peekFirst())
+          || TimeUtils.dateDiff(sessionState.rerouteDate(), new Date(), TimeUnit.SECONDS)
+          > TWENTY_SECOND_INTERVAL) {
+          sendRerouteEvent(sessionState);
+          iterator.remove();
+        }
+      }
     }
   }
 
@@ -258,14 +268,16 @@ public class NavigationService extends Service implements LocationEngineListener
       if (location.getTime() > timeIntervalSinceLastOffRoute
         + TimeUnit.SECONDS.toMillis(mapboxNavigation.options().secondsBeforeReroute())) {
         timeIntervalSinceLastOffRoute = location.getTime();
-        if (mapboxNavigation.getSessionState().lastReroutePosition() == null) {
+        if (mapboxNavigation.getSessionState().lastRerouteLocation() == null) {
           rerouteSessionsStateUpdate();
         } else {
-          if (TurfMeasurement.distance(mapboxNavigation.getSessionState().lastReroutePosition(),
+          Point lastReroutePoint = Point.fromLngLat(
+            mapboxNavigation.getSessionState().lastRerouteLocation().getLongitude(),
+            mapboxNavigation.getSessionState().lastRerouteLocation().getLatitude());
+          if (TurfMeasurement.distance(lastReroutePoint,
             Point.fromLngLat(location.getLongitude(), location.getLatitude()),
             TurfConstants.UNIT_METERS)
             > mapboxNavigation.options().minimumDistanceBeforeRerouting()) {
-            mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
             rerouteSessionsStateUpdate();
           }
         }
@@ -279,38 +291,43 @@ public class NavigationService extends Service implements LocationEngineListener
     recentDistancesFromManeuverInMeters.clear();
     mapboxNavigation.getEventDispatcher().onUserOffRoute(rawLocation);
     mapboxNavigation.setSessionState(
-      mapboxNavigation.getSessionState().toBuilder().lastReroutePosition(
-        Point.fromLngLat(rawLocation.getLongitude(), rawLocation.getLatitude())).build()
-    );
+      mapboxNavigation.getSessionState().toBuilder().lastRerouteLocation(rawLocation).build());
   }
 
   public void rerouteOccurred() {
     mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder()
+      .routeProgressBeforeReroute(routeProgress)
       .beforeRerouteLocations(Arrays.asList(
         locationBuffer.toArray(new Location[locationBuffer.size()])))
-      .routeProgressBeforeReroute(routeProgress)
+      .previousRouteDistancesCompleted(
+        mapboxNavigation.getSessionState().previousRouteDistancesCompleted()
+          + routeProgress.distanceTraveled())
+      .rerouteDate(new Date())
       .build());
-    locationBuffer.clear();
-    queuedRerouteEvent = true;
-
-    handler = new Handler();
-    runnable = new Runnable() {
-      @Override
-      public void run() {
-        mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder()
-          .afterRerouteLocations(Arrays.asList(
-            locationBuffer.toArray(new Location[locationBuffer.size()])))
-          .build());
-
-        locationBuffer.clear();
-
-        NavigationMetricsWrapper.rerouteEvent(mapboxNavigation.getSessionState(), routeProgress,
-          rawLocation);
-        queuedRerouteEvent = false;
-      }
-    };
-    handler.postDelayed(runnable, TWENTY_SECOND_INTERVAL);
+    queuedRerouteEvents.add(mapboxNavigation.getSessionState());
   }
+
+  void sendRerouteEvent(SessionState sessionState) {
+    sessionState = sessionState.toBuilder()
+      .afterRerouteLocations(Arrays.asList(
+        locationBuffer.toArray(new Location[locationBuffer.size()])))
+      .build();
+
+    NavigationMetricsWrapper.rerouteEvent(sessionState, routeProgress,
+      sessionState.lastRerouteLocation());
+
+    for (SessionState session : queuedRerouteEvents) {
+      queuedRerouteEvents.set(queuedRerouteEvents.indexOf(session),
+        session.toBuilder().lastRerouteDate(
+        sessionState.rerouteDate()
+      ).build());
+    }
+
+    mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder().lastRerouteDate(
+      sessionState.rerouteDate()
+    ).build());
+  }
+
 
   class LocalBinder extends Binder {
     NavigationService getService() {

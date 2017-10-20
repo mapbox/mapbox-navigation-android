@@ -18,8 +18,8 @@ import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
@@ -297,7 +297,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     if (source == null) {
       GeoJsonOptions routeGeoJsonOptions = new GeoJsonOptions().withMaxZoom(16);
       GeoJsonSource routeSource = new GeoJsonSource(NavigationMapSources.NAVIGATION_ROUTE_SOURCE,
-                                                    routeLineFeature, routeGeoJsonOptions);
+        routeLineFeature, routeGeoJsonOptions);
       mapboxMap.addSource(routeSource);
     } else {
       source.setGeoJson(routeLineFeature);
@@ -330,13 +330,16 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       if (leg.annotation() != null) {
         if (leg.annotation().congestion() != null) {
           for (int i = 0; i < leg.annotation().congestion().size(); i++) {
-            double[] startCoord = lineString.getCoordinates().get(i).getCoordinates();
-            double[] endCoord = lineString.getCoordinates().get(i + 1).getCoordinates();
+            // See https://github.com/mapbox/mapbox-navigation-android/issues/353
+            if (leg.annotation().congestion().size() + 1 <= lineString.getCoordinates().size()) {
+              double[] startCoord = lineString.getCoordinates().get(i).getCoordinates();
+              double[] endCoord = lineString.getCoordinates().get(i + 1).getCoordinates();
 
-            LineString congestionLineString = LineString.fromCoordinates(new double[][] {startCoord, endCoord});
-            Feature feature = Feature.fromGeometry(congestionLineString);
-            feature.addStringProperty(CONGESTION_KEY, leg.annotation().congestion().get(i));
-            features.add(feature);
+              LineString congestionLineString = LineString.fromCoordinates(new double[][] {startCoord, endCoord});
+              Feature feature = Feature.fromGeometry(congestionLineString);
+              feature.addStringProperty(CONGESTION_KEY, leg.annotation().congestion().get(i));
+              features.add(feature);
+            }
           }
         }
       } else {

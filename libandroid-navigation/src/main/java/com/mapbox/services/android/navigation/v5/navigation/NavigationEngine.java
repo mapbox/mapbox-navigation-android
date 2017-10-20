@@ -93,13 +93,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     MapboxNavigationOptions options = mapboxNavigation.options();
 
     if (newRoute(directionsRoute)) {
-      // Need to keep track of total distance traveled even when reroute occurs.
-      if (previousRouteProgress != null) {
-        mapboxNavigation.getSessionState().toBuilder().previousRouteDistancesCompleted(
-          mapboxNavigation.getSessionState().previousRouteDistancesCompleted()
-            + previousRouteProgress.distanceTraveled()
-        );
-      }
       // Decode the first steps geometry and hold onto the resulting Position objects till the users
       // on the next step. Indices are both 0 since the user just started on the new route.
       stepPositions = PolylineUtils.decode(

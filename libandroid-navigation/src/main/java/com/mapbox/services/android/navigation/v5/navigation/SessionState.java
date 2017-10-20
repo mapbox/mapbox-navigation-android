@@ -67,11 +67,14 @@ abstract class SessionState {
 
   abstract DirectionsRoute currentDirectionRoute();
 
+  @Nullable
+  abstract Date rerouteDate();
+
   int secondsSinceLastReroute() {
-    if (lastRerouteDate() == null) {
+    if (lastRerouteDate() == null || rerouteDate() == null) {
       return -1;
     }
-    long diffInMs = lastRerouteDate().getTime() - new Date().getTime();
+    long diffInMs = rerouteDate().getTime() - lastRerouteDate().getTime();
     return (int) TimeUnit.MILLISECONDS.toSeconds(diffInMs);
   }
 
@@ -79,7 +82,7 @@ abstract class SessionState {
   abstract Date lastRerouteDate();
 
   @Nullable
-  abstract Point lastReroutePosition();
+  abstract Location lastRerouteLocation();
 
   abstract Date startTimestamp();
 
@@ -112,21 +115,23 @@ abstract class SessionState {
 
     abstract Builder routeProgressBeforeReroute(@Nullable RouteProgress routeProgress);
 
-    abstract Builder lastReroutePosition(@Nullable Point lastReroutePosition);
+    abstract Builder lastRerouteLocation(@Nullable Location lastReroutePosition);
 
-    abstract Builder afterRerouteLocations(@Nullable List<Location> beforeLocations);
+    abstract Builder afterRerouteLocations(@Nullable List<Location> afterLocations);
 
     abstract Builder beforeRerouteLocations(@Nullable List<Location> beforeLocations);
 
-    abstract Builder originalDirectionRoute(@NonNull DirectionsRoute directionsRoute);
+    abstract Builder originalDirectionRoute(@NonNull DirectionsRoute originalDirectionsRoute);
 
-    abstract Builder currentDirectionRoute(@NonNull DirectionsRoute directionsRoute);
+    abstract Builder currentDirectionRoute(@NonNull DirectionsRoute currentDirectionsRoute);
 
     abstract Builder sessionIdentifier(@NonNull String sessionIdentifier);
 
     abstract Builder originalRequestIdentifier(@Nullable String originalRequestIdentifier);
 
     abstract Builder requestIdentifier(@Nullable String requestIdentifier);
+
+    abstract Builder rerouteDate(@Nullable Date rerouteDate);
 
     abstract Builder lastRerouteDate(@Nullable Date lastRerouteDate);
 
