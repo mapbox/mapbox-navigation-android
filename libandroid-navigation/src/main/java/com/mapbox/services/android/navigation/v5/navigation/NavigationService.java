@@ -110,7 +110,6 @@ public class NavigationService extends Service implements LocationEngineListener
     for (SessionState sessionState : queuedFeedbackEvents) {
       sendFeedbackEvent(sessionState);
     }
-    
     for (SessionState sessionState : queuedRerouteEvents) {
       sendRerouteEvent(sessionState);
     }
