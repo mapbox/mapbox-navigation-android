@@ -40,8 +40,6 @@ import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbrev
 
 import java.text.DecimalFormat;
 
-import timber.log.Timber;
-
 /**
  * A view that can be used to display upcoming maneuver information and control
  * voice instruction mute / unmute.
@@ -448,7 +446,6 @@ public class InstructionView extends RelativeLayout {
    */
   private void addTextInstruction(InstructionModel model) {
     updateMaxLines(model);
-    Timber.d("Primary Text: " + model.getPrimaryText() + " Secondary Text: " + model.getSecondaryText());
     if (newPrimaryText(model) || newSecondaryText(model)) {
       textInstructions(model);
     } else if (stepPrimaryText.getText().toString().isEmpty()

@@ -118,15 +118,8 @@ public class InstructionModel {
   private void buildTextInstructions(LegStep upComingStep) {
     String exitText = "";
 
+    // Extract Exit for later use
     if (upComingStep.maneuver() != null) {
-      // Arrival
-      if (upComingStep.maneuver().type().equals("arrive")) {
-        // TODO destination info from end of each leg
-        primaryText = "Address";
-        secondaryText = "City or Destination Name";
-        return;
-      }
-      // Extract Exit for later use
       if (!TextUtils.isEmpty(upComingStep.exits())) {
         exitText = "Exit " + upComingStep.exits();
       }
