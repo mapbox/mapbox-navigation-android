@@ -64,6 +64,10 @@ public class NavigationService extends Service implements LocationEngineListener
   private Location rawLocation;
   private Runnable runnable;
   private Handler handler;
+  private boolean queuedFeedbackEvent;
+  private boolean sendFeedback = true;
+  private volatile String feedbackType;
+  private volatile String description;
 
   @Nullable
   @Override
@@ -97,6 +101,10 @@ public class NavigationService extends Service implements LocationEngineListener
 
     if (handler != null && runnable != null) {
       if (queuedRerouteEvent) {
+        runnable.run();
+      }
+
+      if (queuedFeedbackEvent) {
         runnable.run();
       }
       handler.removeCallbacks(runnable);
@@ -313,7 +321,9 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   //need to confirm working as reroute functions
-  public String recordFeedbackEvent(final String feedbackType, final String description) {
+  public String recordFeedbackEvent(String feedbackType, String description) {
+    this.description = description;
+    this.feedbackType = feedbackType;
 
     mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder()
       .beforeRerouteLocations(Arrays.asList(
@@ -321,7 +331,7 @@ public class NavigationService extends Service implements LocationEngineListener
       .routeProgressBeforeReroute(routeProgress)
       .build());
     locationBuffer.clear();
-    queuedRerouteEvent = true;
+    queuedFeedbackEvent = true;
 
     handler = new Handler();
     runnable = new Runnable() {
@@ -334,9 +344,13 @@ public class NavigationService extends Service implements LocationEngineListener
 
         locationBuffer.clear();
 
-        NavigationMetricsWrapper.feedbackEvent(mapboxNavigation.getSessionState(), routeProgress, rawLocation,
-          description, feedbackType, "screenshot");
-        queuedRerouteEvent = false;
+        if (sendFeedback) {
+          NavigationMetricsWrapper.feedbackEvent(mapboxNavigation.getSessionState(), routeProgress, rawLocation,
+            NavigationService.this.description, NavigationService.this.feedbackType, "screenshot");
+        } else {
+          sendFeedback = true;
+        }
+        queuedFeedbackEvent = false;
       }
     };
 
@@ -347,10 +361,13 @@ public class NavigationService extends Service implements LocationEngineListener
 
   //create system for updating OR tweak above to work with this better
   public void updateFeedbackEvent(String feedbackId, String feedbackType, String description) {
+    this.feedbackType = feedbackType;
+    this.description = description;
   }
 
   //method to prevent the creation of feedback end (boolean? usage of feedbackID?)
   public void cancelFeedback(String feedbackId) {
+    sendFeedback = false;
   }
 
   class LocalBinder extends Binder {
