@@ -33,14 +33,14 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
 
   public static final String TAG = FeedbackBottomSheet.class.getSimpleName();
 
-  private FeedbackSelectedCallback feedbackSelectedCallback;
+  private FeedbackBottomSheetListener feedbackBottomSheetListener;
   private FeedbackAdapter feedbackAdapter;
   private RecyclerView feedbackItems;
   private ProgressBar feedbackProgressBar;
 
-  public static FeedbackBottomSheet newInstance(FeedbackSelectedCallback feedbackSelectedCallback) {
+  public static FeedbackBottomSheet newInstance(FeedbackBottomSheetListener feedbackBottomSheetListener) {
     FeedbackBottomSheet feedbackBottomSheet = new FeedbackBottomSheet();
-    feedbackBottomSheet.setFeedbackSelectedCallback(feedbackSelectedCallback);
+    feedbackBottomSheet.setFeedbackBottomSheetListener(feedbackBottomSheetListener);
     return feedbackBottomSheet;
   }
 
@@ -86,12 +86,18 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   @Override
   public void onFeedbackItemClick(int feedbackPosition) {
     FeedbackItem feedbackItem = feedbackAdapter.getFeedbackItem(feedbackPosition);
-    Toast.makeText(getContext(), feedbackItem.getFeedbackText(), Toast.LENGTH_SHORT).show();
-    feedbackSelectedCallback.onFeedbackItemSelected(feedbackItem);
+    Toast.makeText(getContext(), feedbackItem.getFeedbackType(), Toast.LENGTH_SHORT).show();
+    feedbackBottomSheetListener.onFeedbackSelected(feedbackItem);
   }
 
-  public void setFeedbackSelectedCallback(FeedbackSelectedCallback feedbackSelectedCallback) {
-    this.feedbackSelectedCallback = feedbackSelectedCallback;
+  @Override
+  public void onDismiss(DialogInterface dialog) {
+    super.onDismiss(dialog);
+    feedbackBottomSheetListener.onFeedbackDismissed();
+  }
+
+  public void setFeedbackBottomSheetListener(FeedbackBottomSheetListener feedbackBottomSheetListener) {
+    this.feedbackBottomSheetListener = feedbackBottomSheetListener;
   }
 
   private void bind(View bottomSheetView) {

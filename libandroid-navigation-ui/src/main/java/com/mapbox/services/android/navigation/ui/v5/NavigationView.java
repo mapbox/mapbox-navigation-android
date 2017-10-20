@@ -30,7 +30,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
-import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackSelectedCallback;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheetListener;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
@@ -62,7 +62,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
  * </p>
  */
 public class NavigationView extends CoordinatorLayout implements OnMapReadyCallback, MapboxMap.OnScrollListener,
-  NavigationContract.View, FeedbackSelectedCallback {
+  NavigationContract.View, FeedbackBottomSheetListener {
 
   private MapView mapView;
   private InstructionView instructionView;
@@ -318,8 +318,13 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   }
 
   @Override
-  public void onFeedbackItemSelected(FeedbackItem feedbackItem) {
+  public void onFeedbackSelected(FeedbackItem feedbackItem) {
     navigationViewModel.updateFeedback(feedbackItem);
+  }
+
+  @Override
+  public void onFeedbackDismissed() {
+    navigationViewModel.cancelFeedback();
   }
 
   public void startNavigation(Activity activity) {
@@ -432,7 +437,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
       @Override
       public void onClick(View view) {
         navigationPresenter.onFeedbackClick();
-        navigationViewModel.onFeedbackClick();
+        navigationViewModel.recordFeedback();
       }
     });
   }

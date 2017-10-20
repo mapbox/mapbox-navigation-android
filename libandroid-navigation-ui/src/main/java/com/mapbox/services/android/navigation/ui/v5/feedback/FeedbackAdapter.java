@@ -16,17 +16,17 @@ public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
 
   FeedbackAdapter() {
     feedbackItems.add(new FeedbackItem("Road\nClosed",
-      R.drawable.ic_road_closed, "", ""));
+      R.drawable.ic_road_closed, FeedbackItem.FEEDBACK_TYPE_ROAD_CLOSED, ""));
     feedbackItems.add(new FeedbackItem("Not\nAllowed",
-      R.drawable.ic_no_turn_allowed, "", ""));
+      R.drawable.ic_no_turn_allowed, FeedbackItem.FEEDBACK_TYPE_UNALLOWED_TURN, ""));
     feedbackItems.add(new FeedbackItem("Report\nTraffic",
-      R.drawable.ic_traffic, "", ""));
+      R.drawable.ic_traffic, FeedbackItem.FEEDBACK_TYPE_REPORT_TRAFFIC, ""));
     feedbackItems.add(new FeedbackItem("Confusing\nInstruction",
-      R.drawable.ic_confusing_directions, "", ""));
+      R.drawable.ic_confusing_directions, FeedbackItem.FEEDBACK_TYPE_CONFUSING_INSTRUCTION, ""));
     feedbackItems.add(new FeedbackItem("GPS\nInaccurate",
-      R.drawable.ic_gps, "", ""));
+      R.drawable.ic_gps, FeedbackItem.FEEDBACK_TYPE_INACCURATE_GPS, ""));
     feedbackItems.add(new FeedbackItem("Bad\nRoute",
-      R.drawable.ic_wrong_directions, "", ""));
+      R.drawable.ic_wrong_directions, FeedbackItem.FEEDBACK_TYPE_BAD_ROUTE, ""));
   }
 
   @Override

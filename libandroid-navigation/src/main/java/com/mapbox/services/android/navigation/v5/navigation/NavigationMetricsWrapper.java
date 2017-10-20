@@ -117,7 +117,6 @@ final class NavigationMetricsWrapper {
                             String description, String feedbackType, String screenshot) {
     updateRouteProgressSessionData(routeProgress, sessionState);
 
-
     MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildFeedbackEvent(sdkIdentifier,
       BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(), location.getLatitude(),
       location.getLongitude(), sessionState.currentGeometry(), routeProgress.directionsRoute().routeOptions().profile(),
