@@ -48,7 +48,7 @@ public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
   }
 
   FeedbackItem getFeedbackItem(int feedbackPosition) {
-    if (feedbackPosition < feedbackItems.size() - 1) {
+    if (feedbackPosition < feedbackItems.size()) {
       return feedbackItems.get(feedbackPosition);
     } else {
       return null;
