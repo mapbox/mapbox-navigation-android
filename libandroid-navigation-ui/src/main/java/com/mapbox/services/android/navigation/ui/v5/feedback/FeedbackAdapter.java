@@ -15,24 +15,18 @@ public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
   private List<FeedbackItem> feedbackItems = new ArrayList<>();
 
   FeedbackAdapter() {
-    feedbackItems.add(new FeedbackItem(R.drawable.feedback_item_orange_background,
-      "Instruction\nTiming", R.drawable.ic_access_time,
-      FeedbackItem.FEEDBACK_TYPE_INSTRUCTION_TIMING, ""));
-    feedbackItems.add(new FeedbackItem(R.drawable.feedback_item_red_background,
-      "Confusing\nInstruction", R.drawable.ic_routing_error,
-      FeedbackItem.FEEDBACK_TYPE_CONFUSING_INSTRUCTION, ""));
-    feedbackItems.add(new FeedbackItem(R.drawable.feedback_item_orange_background,
-      "Not\nAllowed", R.drawable.ic_road_closed,
-      FeedbackItem.FEEDBACK_TYPE_UNALLOWED_TURN, ""));
-    feedbackItems.add(new FeedbackItem(R.drawable.feedback_item_red_background,
-      "GPS\nInaccurate", R.drawable.ic_gps_not_fixed,
-      FeedbackItem.FEEDBACK_TYPE_INACCURATE_GPS, ""));
-    feedbackItems.add(new FeedbackItem(R.drawable.feedback_item_orange_background,
-      "Bad\nRoute", R.drawable.ic_hazard,
-      FeedbackItem.FEEDBACK_TYPE_BAD_ROUTE, ""));
-    feedbackItems.add(new FeedbackItem(R.drawable.feedback_item_red_background,
-      "Report\nTraffic", R.drawable.ic_traffic,
-      FeedbackItem.FEEDBACK_TYPE_REPORT_TRAFFIC, ""));
+    feedbackItems.add(new FeedbackItem("Road\nClosed",
+      R.drawable.ic_road_closed, "", ""));
+    feedbackItems.add(new FeedbackItem("Not\nAllowed",
+      R.drawable.ic_no_turn_allowed, "", ""));
+    feedbackItems.add(new FeedbackItem("Report\nTraffic",
+      R.drawable.ic_traffic, "", ""));
+    feedbackItems.add(new FeedbackItem("Confusing\nInstruction",
+      R.drawable.ic_confusing_directions, "", ""));
+    feedbackItems.add(new FeedbackItem("GPS\nInaccurate",
+      R.drawable.ic_gps, "", ""));
+    feedbackItems.add(new FeedbackItem("Bad\nRoute",
+      R.drawable.ic_wrong_directions, "", ""));
   }
 
   @Override
@@ -44,7 +38,6 @@ public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
 
   @Override
   public void onBindViewHolder(FeedbackViewHolder viewHolder, int position) {
-    viewHolder.setFeedbackBackground(feedbackItems.get(position).getFeedbackBackgroundId());
     viewHolder.setFeedbackImage(feedbackItems.get(position).getFeedbackImageId());
     viewHolder.setFeedbackText(feedbackItems.get(position).getFeedbackText());
   }

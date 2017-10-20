@@ -11,7 +11,6 @@ public class FeedbackItem {
   private String feedbackType;
   private String feedbackText;
   private String description;
-  private int feedbackBackground;
   private int feedbackImage;
 
   @Retention(RetentionPolicy.SOURCE)
@@ -43,20 +42,14 @@ public class FeedbackItem {
   public static final String FEEDBACK_TYPE_BAD_ROUTE = "bad_route";
   public static final String FEEDBACK_TYPE_REPORT_TRAFFIC = "report_traffic";
 
-  FeedbackItem(int feedbackBackground,
-               String feedbackText,
+  FeedbackItem(String feedbackText,
                int feedbackImage,
                @FeedbackType String feedbackType,
                String description) {
-    this.feedbackBackground = feedbackBackground;
     this.feedbackText = feedbackText;
     this.feedbackImage = feedbackImage;
     this.feedbackType = feedbackType;
     this.description = description;
-  }
-
-  int getFeedbackBackgroundId() {
-    return feedbackBackground;
   }
 
   String getFeedbackText() {
