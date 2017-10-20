@@ -16,6 +16,7 @@ import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -104,9 +105,8 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
     feedbackItems.setOverScrollMode(RecyclerView.OVER_SCROLL_IF_CONTENT_SCROLLS);
     feedbackItems.addOnItemTouchListener(new FeedbackClickListener(getContext(), this));
     if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      int itemCount = feedbackItems.getAdapter().getItemCount();
-      int spanCount = itemCount >= 6 ? 6 : itemCount;
-      feedbackItems.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
+      feedbackItems.setLayoutManager(new LinearLayoutManager(getContext(),
+        LinearLayoutManager.HORIZONTAL, false));
     } else {
       feedbackItems.setLayoutManager(new GridLayoutManager(getContext(), 3));
     }

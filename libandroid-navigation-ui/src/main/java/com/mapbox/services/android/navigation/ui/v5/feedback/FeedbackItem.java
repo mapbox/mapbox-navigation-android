@@ -2,7 +2,6 @@ package com.mapbox.services.android.navigation.ui.v5.feedback;
 
 public class FeedbackItem {
 
-  private int feedbackBackground;
   private String feedbackText;
   private int feedbackImage;
 
@@ -10,20 +9,14 @@ public class FeedbackItem {
   private String feedbackType;
   private String description;
 
-  FeedbackItem(int feedbackBackground,
-               String feedbackText,
+  FeedbackItem(String feedbackText,
                int feedbackImage,
                String feedbackType,
                String description) {
-    this.feedbackBackground = feedbackBackground;
     this.feedbackText = feedbackText;
     this.feedbackImage = feedbackImage;
     this.feedbackType = feedbackType;
     this.description = description;
-  }
-
-  int getFeedbackBackgroundId() {
-    return feedbackBackground;
   }
 
   String getFeedbackText() {

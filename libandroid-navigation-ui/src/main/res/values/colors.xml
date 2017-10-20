@@ -18,8 +18,6 @@
     <color name="mapbox_navigation_view_color_accent_text_dark">#FFFFFF</color>
 
     <!-- Feedback -->
-    <color name="mapbox_navigation_feedback_red">#C45454</color>
-    <color name="mapbox_navigation_feedback_orange">#FAA826</color>
 
     <!--grey-->
     <color name="md_grey_200">#EEEEEE</color>

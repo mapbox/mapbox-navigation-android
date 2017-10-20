@@ -1,27 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:layout_marginEnd="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="8dp"
     android:gravity="center_horizontal"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/feedbackLayout"
+    <ImageView
+        android:id="@+id/feedbackImage"
         android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/feedback_item_red_background"
-        android:gravity="center">
-
-        <ImageView
-            android:id="@+id/feedbackImage"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:tint="@android:color/white"/>
-
-    </LinearLayout>
+        android:layout_height="80dp"/>
 
     <TextView
         android:id="@+id/feedbackText"
