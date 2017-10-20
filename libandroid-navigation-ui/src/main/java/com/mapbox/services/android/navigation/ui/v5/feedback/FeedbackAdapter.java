@@ -16,17 +16,23 @@ public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
 
   FeedbackAdapter() {
     feedbackItems.add(new FeedbackItem(R.drawable.feedback_item_orange_background,
-      "Instruction\nTiming", R.drawable.ic_access_time, "", ""));
+      "Instruction\nTiming", R.drawable.ic_access_time,
+      FeedbackItem.FEEDBACK_TYPE_INSTRUCTION_TIMING, ""));
     feedbackItems.add(new FeedbackItem(R.drawable.feedback_item_red_background,
-      "Confusing\nInstruction", R.drawable.ic_routing_error,"", ""));
+      "Confusing\nInstruction", R.drawable.ic_routing_error,
+      FeedbackItem.FEEDBACK_TYPE_CONFUSING_INSTRUCTION, ""));
     feedbackItems.add(new FeedbackItem(R.drawable.feedback_item_orange_background,
-      "Not\nAllowed", R.drawable.ic_road_closed, "", ""));
+      "Not\nAllowed", R.drawable.ic_road_closed,
+      FeedbackItem.FEEDBACK_TYPE_UNALLOWED_TURN, ""));
     feedbackItems.add(new FeedbackItem(R.drawable.feedback_item_red_background,
-      "GPS\nInaccurate", R.drawable.ic_gps_not_fixed, "", ""));
+      "GPS\nInaccurate", R.drawable.ic_gps_not_fixed,
+      FeedbackItem.FEEDBACK_TYPE_INACCURATE_GPS, ""));
     feedbackItems.add(new FeedbackItem(R.drawable.feedback_item_orange_background,
-      "Bad\nRoute", R.drawable.ic_hazard, "", ""));
+      "Bad\nRoute", R.drawable.ic_hazard,
+      FeedbackItem.FEEDBACK_TYPE_BAD_ROUTE, ""));
     feedbackItems.add(new FeedbackItem(R.drawable.feedback_item_red_background,
-      "Report\nTraffic", R.drawable.ic_traffic, "", ""));
+      "Report\nTraffic", R.drawable.ic_traffic,
+      FeedbackItem.FEEDBACK_TYPE_REPORT_TRAFFIC, ""));
   }
 
   @Override

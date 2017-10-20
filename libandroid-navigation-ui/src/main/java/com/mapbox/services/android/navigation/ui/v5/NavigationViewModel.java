@@ -9,6 +9,7 @@ import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -44,6 +45,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   private NavigationInstructionPlayer instructionPlayer;
   private DecimalFormat decimalFormat;
   private SharedPreferences preferences;
+  private String feedbackId;
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -133,16 +135,22 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
     return navigation;
   }
 
-  void onFeedbackClick() {
-    // TODO telem stuff - record screenshot
-  }
-
-  void recordFeedback(FeedbackItem feedbackItem) {
-    navigation.recordFeedback("", "");
+  void recordFeedback() {
+    feedbackId = navigation.recordFeedback("", "");
   }
 
   void updateFeedback(FeedbackItem feedbackItem) {
-    navigation.updateFeedback("", "", "");
+    if (!TextUtils.isEmpty(feedbackId)) {
+      navigation.updateFeedback(feedbackId, feedbackItem.getFeedbackType(), feedbackItem.getDescription());
+      feedbackId = null;
+    }
+  }
+
+  void cancelFeedback() {
+    if (!TextUtils.isEmpty(feedbackId)) {
+      navigation.cancelFeedback(feedbackId);
+      feedbackId = null;
+    }
   }
 
   void updateRoute(DirectionsRoute route) {
