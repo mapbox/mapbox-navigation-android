@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
+    app:layout_constraintHorizontal_bias="0.0"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
     app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintHorizontal_bias="0.0"
     tools:showIn="@layout/instruction_view_layout">
 
     <LinearLayout
         android:id="@+id/instructionLayoutManeuver"
-        android:layout_width="wrap_content"
+        android:layout_width="88dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
-        android:elevation="4dp"
         android:background="@drawable/instruction_background"
+        android:elevation="4dp"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -29,47 +30,60 @@
             android:id="@+id/maneuverImageView"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:layout_gravity="center"
-            android:tint="?attr/navigationViewSecondary"/>
+            android:tint="?attr/navigationViewSecondary"
+            app:srcCompat="@drawable/ic_maneuver_depart"/>
 
         <TextView
             android:id="@+id/stepDistanceText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:includeFontPadding="false"
+            android:maxLines="1"
             android:textColor="?attr/navigationViewAccentText"
-            android:textSize="28sp"
-            tools:text="3.2 miles"/>
+            android:textSize="20sp"
+            tools:text="3.2 mi"/>
 
     </LinearLayout>
 
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/instructionLayoutText"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
-        android:elevation="4dp"
+        android:layout_height="64dp"
         android:background="@drawable/instruction_text_background"
+        android:elevation="4dp"
+        android:gravity="center_vertical"
+        android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/instructionLayoutManeuver"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/stepInstructionText"
+            android:id="@+id/stepPrimaryText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:maxLines="1"
             android:textColor="?attr/navigationViewSecondary"
             android:textSize="28sp"
             android:textStyle="bold"
-            tools:layout_editor_absoluteX="130dp"
-            tools:layout_editor_absoluteY="16dp"
-            tools:text="Fulton St. test is really long text"/>
+            tools:text="Fulton St."/>
 
-    </FrameLayout>
+        <TextView
+            android:id="@+id/stepSecondaryText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="?attr/navigationViewAccentText"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            tools:text="San Jose / Cupertino / Saratoga Montery / SR-1"/>
+
+    </LinearLayout>
 
     <include
         android:id="@+id/turnLaneLayout"
