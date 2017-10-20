@@ -21,6 +21,10 @@ public class StringAbbreviator {
   }
 
   public static String deliminator(String inputStr) {
-    return inputStr.replaceAll(REGEX_COLON_SEMICOLON_COMMA, " /");
+    return inputStr.replaceAll(REGEX_COLON_SEMICOLON_COMMA, "/");
+  }
+
+  public static String[] splitter(String inputStr) {
+    return inputStr.split(REGEX_COLON_SEMICOLON_COMMA);
   }
 }
