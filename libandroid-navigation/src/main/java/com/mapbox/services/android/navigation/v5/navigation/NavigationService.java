@@ -22,6 +22,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -64,10 +65,10 @@ public class NavigationService extends Service implements LocationEngineListener
   private Location rawLocation;
   private Runnable runnable;
   private Handler handler;
-  private boolean queuedFeedbackEvent;
+  private List<SessionState> queuedFeedbackEvents;
   private boolean sendFeedback = true;
-  private volatile String feedbackType;
-  private volatile String description;
+  private String feedbackType;
+  private String description;
 
   @Nullable
   @Override
@@ -82,6 +83,7 @@ public class NavigationService extends Service implements LocationEngineListener
     thread.prepareHandler();
     recentDistancesFromManeuverInMeters = new RingBuffer<>(3);
     locationBuffer = new RingBuffer<>(20);
+    queuedFeedbackEvents = new ArrayList<>();
   }
 
   /**
@@ -104,11 +106,11 @@ public class NavigationService extends Service implements LocationEngineListener
         runnable.run();
       }
 
-      if (queuedFeedbackEvent) {
-        runnable.run();
-      }
       handler.removeCallbacks(runnable);
+    }
 
+    for (SessionState sessionState : queuedFeedbackEvents) {
+      sendFeedbackEvent(sessionState);
     }
 
     // User canceled navigation session
@@ -331,7 +333,6 @@ public class NavigationService extends Service implements LocationEngineListener
       .routeProgressBeforeReroute(routeProgress)
       .build());
     locationBuffer.clear();
-    queuedFeedbackEvent = true;
 
     handler = new Handler();
     runnable = new Runnable() {
@@ -344,13 +345,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
         locationBuffer.clear();
 
-        if (sendFeedback) {
-          NavigationMetricsWrapper.feedbackEvent(mapboxNavigation.getSessionState(), routeProgress, rawLocation,
-            NavigationService.this.description, NavigationService.this.feedbackType, "screenshot");
-        } else {
-          sendFeedback = true;
-        }
-        queuedFeedbackEvent = false;
+        sendFeedbackEvent(mapboxNavigation.getSessionState());
       }
     };
 
@@ -359,15 +354,37 @@ public class NavigationService extends Service implements LocationEngineListener
     return mapboxNavigation.getSessionState().sessionIdentifier();
   }
 
-  //create system for updating OR tweak above to work with this better
   public void updateFeedbackEvent(String feedbackId, String feedbackType, String description) {
     this.feedbackType = feedbackType;
     this.description = description;
   }
 
-  //method to prevent the creation of feedback end (boolean? usage of feedbackID?)
   public void cancelFeedback(String feedbackId) {
     sendFeedback = false;
+  }
+
+  void sendFeedbackEvent(SessionState sessionState) {
+    sessionState = sessionState.toBuilder().afterRerouteLocations(Arrays.asList(
+      locationBuffer.toArray(new Location[locationBuffer.size()])))
+      .build();
+
+    if (sendFeedback) {
+      NavigationMetricsWrapper.feedbackEvent(mapboxNavigation.getSessionState(), routeProgress, rawLocation,
+        description, feedbackType, "screenshot");
+    } else {
+      sendFeedback = true;
+    }
+
+    for (SessionState session : queuedFeedbackEvents) {
+      queuedFeedbackEvents.set(queuedFeedbackEvents.indexOf(session),
+        session.toBuilder().lastRerouteDate(
+          sessionState.lastRerouteDate()
+        ).build());
+    }
+
+    mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder().lastRerouteDate(
+      sessionState.lastRerouteDate()
+    ).build());
   }
 
   class LocalBinder extends Binder {
