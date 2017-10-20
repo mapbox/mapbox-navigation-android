@@ -40,6 +40,8 @@ import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbrev
 
 import java.text.DecimalFormat;
 
+import timber.log.Timber;
+
 /**
  * A view that can be used to display upcoming maneuver information and control
  * voice instruction mute / unmute.
@@ -74,6 +76,7 @@ public class InstructionView extends RelativeLayout {
 
   private DecimalFormat decimalFormat;
   private int currentManeuverId;
+  private int primaryTextMaxLines = 1;
   private boolean turnLanesHidden;
   private boolean isRerouting;
   public boolean isMuted;
@@ -344,7 +347,7 @@ public class InstructionView extends RelativeLayout {
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepSecondaryText,
       20, 26, 1, TypedValue.COMPLEX_UNIT_SP);
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepDistanceText,
-      14, 20, 1, TypedValue.COMPLEX_UNIT_SP);
+      16, 20, 1, TypedValue.COMPLEX_UNIT_SP);
   }
 
   /**
@@ -444,11 +447,30 @@ public class InstructionView extends RelativeLayout {
    * @param model provides instruction text
    */
   private void addTextInstruction(InstructionModel model) {
+    updateMaxLines(model);
+    Timber.d("Primary Text: " + model.getPrimaryText() + " Secondary Text: " + model.getSecondaryText());
     if (newPrimaryText(model) || newSecondaryText(model)) {
       textInstructions(model);
     } else if (stepPrimaryText.getText().toString().isEmpty()
       || stepSecondaryText.getText().toString().isEmpty()) {
       textInstructions(model);
+    }
+  }
+
+  /**
+   * Based on a boolean from the model,
+   * update to 2 lines for primary text.
+   * <p>
+   * Track the lines so the max can revert to 1.
+   *
+   * @param model the cue to go to 2 lines
+   */
+  private void updateMaxLines(InstructionModel model) {
+    if (model.isUsingInstruction()) {
+      stepPrimaryText.setMaxLines(2);
+      primaryTextMaxLines = 2;
+    } else if (primaryTextMaxLines == 2) {
+      stepPrimaryText.setMaxLines(1);
     }
   }
 
@@ -484,8 +506,17 @@ public class InstructionView extends RelativeLayout {
    * @param model provides instruction text
    */
   private void textInstructions(InstructionModel model) {
-    stepPrimaryText.setText(StringAbbreviator.abbreviate(model.getPrimaryText()));
-    stepSecondaryText.setText(StringAbbreviator.abbreviate(model.getSecondaryText()));
+    if (!TextUtils.isEmpty(model.getPrimaryText())) {
+      stepPrimaryText.setText(StringAbbreviator.abbreviate(model.getPrimaryText()));
+    }
+    if (!TextUtils.isEmpty(model.getSecondaryText())) {
+      if (stepSecondaryText.getVisibility() == GONE) {
+        stepSecondaryText.setVisibility(VISIBLE);
+      }
+      stepSecondaryText.setText(StringAbbreviator.abbreviate(model.getSecondaryText()));
+    } else {
+      stepSecondaryText.setVisibility(GONE);
+    }
   }
 
   /**

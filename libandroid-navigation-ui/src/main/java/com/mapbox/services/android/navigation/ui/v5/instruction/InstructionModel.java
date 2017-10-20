@@ -11,6 +11,7 @@ import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbrev
 import com.mapbox.services.commons.utils.TextUtils;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.utils.ManeuverUtils.getManeuverResource;
@@ -23,6 +24,7 @@ public class InstructionModel {
   private int maneuverImage;
   private String maneuverModifier;
   private List<IntersectionLanes> turnLanes;
+  private boolean isUsingInstruction;
 
   public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
     buildInstructionModel(progress, decimalFormat);
@@ -44,12 +46,16 @@ public class InstructionModel {
     return maneuverImage;
   }
 
+  String getManeuverModifier() {
+    return maneuverModifier;
+  }
+
   List<IntersectionLanes> getTurnLanes() {
     return turnLanes;
   }
 
-  String getManeuverModifier() {
-    return maneuverModifier;
+  boolean isUsingInstruction() {
+    return isUsingInstruction;
   }
 
   private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
@@ -63,12 +69,12 @@ public class InstructionModel {
   private void extractStepResources(LegStep upComingStep) {
     maneuverImage = getManeuverResource(upComingStep);
     if (hasManeuver(upComingStep)) {
-      buildTextInstructions(upComingStep);
       maneuverModifier = upComingStep.maneuver().modifier();
     }
     if (hasIntersections(upComingStep)) {
       intersectionTurnLanes(upComingStep);
     }
+    buildTextInstructions(upComingStep);
   }
 
   private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat) {
@@ -110,38 +116,109 @@ public class InstructionModel {
   }
 
   private void buildTextInstructions(LegStep upComingStep) {
-    // TODO New logic will go here
-    if (hasDestinations(upComingStep)) {
-      destinationInstruction(upComingStep);
+    String exitText = "";
+
+    if (upComingStep.maneuver() != null) {
+      // Arrival
+      if (upComingStep.maneuver().type().equals("arrive")) {
+        // TODO destination info from end of each leg
+        primaryText = "Address";
+        secondaryText = "City or Destination Name";
+        return;
+      }
+      // Extract Exit for later use
+      if (!TextUtils.isEmpty(upComingStep.exits())) {
+        exitText = "Exit " + upComingStep.exits();
+      }
+    }
+
+    // Refs
+    if (hasRefs(upComingStep)) {
+      primaryText = StringAbbreviator.deliminator(upComingStep.ref());
+      if (hasDestination(upComingStep)) {
+        secondaryText = destinations(upComingStep);
+      }
+      return;
+    }
+
+    // Multiple Destinations
+    if (hasMultipleDestinations(upComingStep)) {
+      formatMultipleStrings(upComingStep.destinations(), exitText);
+      return;
+    }
+
+    // Multiple Names
+    if (hasMultipleNames(upComingStep)) {
+      formatMultipleStrings(upComingStep.name(), exitText);
+      return;
+    }
+
+    // Destination or Street Name
+    if (hasDestination(upComingStep)) {
+      primaryText = destinations(upComingStep);
+      return;
     } else if (hasName(upComingStep)) {
-      nameInstruction(upComingStep);
-    } else if (hasManeuverInstruction(upComingStep)) {
-      maneuverInstruction(upComingStep);
+      primaryText = names(upComingStep);
+      return;
+    }
+
+    // Instruction
+    if (hasInstruction(upComingStep)) {
+      primaryText = instruction(upComingStep);
+      isUsingInstruction = true;
     }
   }
 
-  private void maneuverInstruction(LegStep upComingStep) {
-    primaryText = upComingStep.maneuver().instruction();
+  private boolean hasRefs(LegStep upComingStep) {
+    return !TextUtils.isEmpty(upComingStep.ref());
   }
 
-  private boolean hasManeuverInstruction(LegStep upComingStep) {
-    return !TextUtils.isEmpty(upComingStep.maneuver().instruction());
+  private String instruction(LegStep upComingStep) {
+    return upComingStep.maneuver().instruction();
   }
 
-  private void nameInstruction(LegStep upComingStep) {
-    primaryText = upComingStep.name();
+  private boolean hasInstruction(LegStep upComingStep) {
+    return upComingStep.maneuver() != null
+      && !TextUtils.isEmpty(upComingStep.maneuver().instruction());
+  }
+
+  private String names(LegStep upComingStep) {
+    String instruction = upComingStep.name().trim();
+    return StringAbbreviator.deliminator(instruction);
   }
 
   private boolean hasName(LegStep upComingStep) {
     return !TextUtils.isEmpty(upComingStep.name());
   }
 
-  private void destinationInstruction(LegStep upComingStep) {
-    primaryText = upComingStep.destinations().trim();
-    primaryText = StringAbbreviator.deliminator(primaryText);
+  private String destinations(LegStep upComingStep) {
+    String instruction = upComingStep.destinations().trim();
+    return StringAbbreviator.deliminator(instruction);
   }
 
-  private boolean hasDestinations(LegStep upComingStep) {
+  private boolean hasDestination(LegStep upComingStep) {
     return !TextUtils.isEmpty(upComingStep.destinations());
+  }
+
+  private boolean hasMultipleDestinations(LegStep upComingStep) {
+    return !TextUtils.isEmpty(upComingStep.destinations())
+      && StringAbbreviator.splitter(upComingStep.destinations()).length > 1;
+  }
+
+  private boolean hasMultipleNames(LegStep upComingStep) {
+    return !TextUtils.isEmpty(upComingStep.name())
+      && StringAbbreviator.splitter(upComingStep.name()).length > 1;
+  }
+
+  private void formatMultipleStrings(String multipleString, String exitText) {
+    String[] strings = StringAbbreviator.splitter(multipleString);
+    String[] firstString = Arrays.copyOfRange(strings, 0, 1);
+    if (!TextUtils.isEmpty(exitText)) {
+      primaryText = exitText + " " + firstString[0];
+    } else {
+      primaryText = firstString[0];
+    }
+    String[] remainingStrings = Arrays.copyOfRange(strings, 1, strings.length);
+    secondaryText = TextUtils.join(" / ", remainingStrings).trim();
   }
 }
