@@ -86,7 +86,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   @Override
   public void onFeedbackItemClick(int feedbackPosition) {
     FeedbackItem feedbackItem = feedbackAdapter.getFeedbackItem(feedbackPosition);
-    Toast.makeText(getContext(), feedbackItem.getFeedbackType(), Toast.LENGTH_SHORT).show();
+    Toast.makeText(getContext(), "Feedback Submitted", Toast.LENGTH_SHORT).show();
     feedbackBottomSheetListener.onFeedbackSelected(feedbackItem);
     dismiss();
   }
