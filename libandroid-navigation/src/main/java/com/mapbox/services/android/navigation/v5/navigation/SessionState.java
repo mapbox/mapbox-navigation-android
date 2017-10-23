@@ -82,7 +82,7 @@ abstract class SessionState {
   abstract Date lastRerouteDate();
 
   @Nullable
-  abstract Location lastRerouteLocation();
+  abstract Location eventLocation();
 
   abstract Date startTimestamp();
 
