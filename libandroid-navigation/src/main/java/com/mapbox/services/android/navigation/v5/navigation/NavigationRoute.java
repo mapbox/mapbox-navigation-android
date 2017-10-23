@@ -78,7 +78,7 @@ public final class NavigationRoute {
   public Call<DirectionsResponse> getCall() {
     return mapboxDirections.cloneCall();
   }
-  
+
   public void cancelCall() {
     getCall().cancel();
   }

@@ -36,4 +36,18 @@ public class NavigationRouteTest extends BaseTest {
     assertThat(navigationRoute.getCall().request().url().toString(),
       containsString("/cycling/"));
   }
+
+  @Test
+  public void addingPointAndBearingKeepsCorrectOrder() throws Exception {
+    NavigationRoute navigationRoute = NavigationRoute.builder()
+      .accessToken(ACCESS_TOKEN)
+      .origin(Point.fromLngLat(1.0, 2.0), 90d, 90d)
+      .addBearing(2.0, 3.0)
+      .destination(Point.fromLngLat(1.0, 5.0))
+      .destination(Point.fromLngLat(1.0, 10.0))
+      .build();
+
+    assertThat(navigationRoute.getCall().request().url().toString(),
+      containsString("bearings=90,90;2,3;;"));
+  }
 }
