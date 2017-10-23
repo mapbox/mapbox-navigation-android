@@ -199,8 +199,8 @@ public class NavigationService extends Service implements LocationEngineListener
       thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation,
         recentDistancesFromManeuverInMeters));
 
-      updateRerouteQueue(location);
-      updateFeedbackQueue(location);
+      updateRerouteQueue(locationBuffer);
+      updateFeedbackQueue(locationBuffer);
     }
   }
 
@@ -383,7 +383,7 @@ public class NavigationService extends Service implements LocationEngineListener
     return null;
   }
 
-  private void updateFeedbackQueue(Location location) {
+  private void updateFeedbackQueue(RingBuffer locationBuffer) {
     Iterator<FeedbackEvent> iterator = queuedFeedbackEvents.listIterator();
     while (iterator.hasNext()) {
       FeedbackEvent feedbackEvent = iterator.next();
@@ -397,7 +397,7 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
-  private void updateRerouteQueue(Location location) {
+  private void updateRerouteQueue(RingBuffer locationBuffer) {
     Iterator<SessionState> iterator = queuedRerouteEvents.listIterator();
     while (iterator.hasNext()) {
       SessionState sessionState = iterator.next();
