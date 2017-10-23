@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.TextViewCompat;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -32,6 +33,7 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
+import com.mapbox.services.android.navigation.ui.v5.summary.list.DirectionListAdapter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -56,6 +58,8 @@ import java.text.DecimalFormat;
  */
 public class InstructionView extends RelativeLayout {
 
+  private static final int SCROLL_DIRECTION_UP = -1;
+
   private ImageView maneuverImage;
   private TextView stepDistanceText;
   private TextView stepPrimaryText;
@@ -65,7 +69,10 @@ public class InstructionView extends RelativeLayout {
   private View rerouteLayout;
   private View turnLaneLayout;
   private RecyclerView rvTurnLanes;
+  private RecyclerView rvDirections;
   private TurnLaneAdapter turnLaneAdapter;
+  private DirectionListAdapter directionListAdapter;
+  private View rvShadow;
 
   private Animation slideDownTop;
   private Animation rerouteSlideUpTop;
@@ -75,7 +82,6 @@ public class InstructionView extends RelativeLayout {
   private DecimalFormat decimalFormat;
   private int currentManeuverId;
   private int primaryTextMaxLines = 1;
-  private boolean turnLanesHidden;
   private boolean isRerouting;
   public boolean isMuted;
 
@@ -104,6 +110,7 @@ public class InstructionView extends RelativeLayout {
     bind();
     initBackground();
     initTurnLaneRecyclerView();
+    initDirectionsRecyclerView();
     initDecimalFormat();
     initAnimations();
   }
@@ -132,6 +139,7 @@ public class InstructionView extends RelativeLayout {
           addDistanceText(instructionModel);
           addTextInstruction(instructionModel);
           addTurnLanes(instructionModel);
+          updateSteps(instructionModel.getProgress());
         }
       }
     });
@@ -236,6 +244,8 @@ public class InstructionView extends RelativeLayout {
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
+    rvDirections = findViewById(R.id.rvDirections);
+    rvShadow = findViewById(R.id.rvShadow);
     initInstructionAutoSize();
   }
 
@@ -357,6 +367,25 @@ public class InstructionView extends RelativeLayout {
     rvTurnLanes.setHasFixedSize(true);
     rvTurnLanes.setLayoutManager(new LinearLayoutManager(getContext(),
       LinearLayoutManager.HORIZONTAL, false));
+  }
+
+  /**
+   * Sets up the {@link RecyclerView} that is used to display the list of directions.
+   */
+  private void initDirectionsRecyclerView() {
+    directionListAdapter = new DirectionListAdapter();
+    rvDirections.setAdapter(directionListAdapter);
+    rvDirections.setHasFixedSize(true);
+    rvDirections.setNestedScrollingEnabled(true);
+    rvDirections.setItemAnimator(new DefaultItemAnimator());
+    rvDirections.setLayoutManager(new LinearLayoutManager(getContext()));
+    rvDirections.addOnScrollListener(new RecyclerView.OnScrollListener() {
+      @Override
+      public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+        super.onScrolled(recyclerView, dx, dy);
+        rvShadow.setVisibility(rvDirections.canScrollVertically(SCROLL_DIRECTION_UP) ? View.VISIBLE : View.INVISIBLE);
+      }
+    });
   }
 
   /**
@@ -536,8 +565,7 @@ public class InstructionView extends RelativeLayout {
    * Shows turn lane view
    */
   private void showTurnLanes() {
-    if (turnLanesHidden) {
-      turnLanesHidden = false;
+    if (turnLaneLayout.getVisibility() == GONE) {
       turnLaneLayout.setVisibility(VISIBLE);
     }
   }
@@ -546,10 +574,18 @@ public class InstructionView extends RelativeLayout {
    * Hides turn lane view
    */
   private void hideTurnLanes() {
-    if (!turnLanesHidden) {
-      turnLanesHidden = true;
+    if (turnLaneLayout.getVisibility() == VISIBLE) {
       turnLaneLayout.setVisibility(GONE);
     }
+  }
+
+  /**
+   * Used to update the directions list with the current steps.
+   *
+   * @param routeProgress to provide the current steps
+   */
+  private void updateSteps(RouteProgress routeProgress) {
+    directionListAdapter.updateSteps(routeProgress);
   }
 
   @NonNull

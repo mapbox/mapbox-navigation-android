@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <View
         android:id="@+id/sheetShadow"
@@ -10,50 +11,11 @@
         android:animateLayoutChanges="true"
         android:background="@drawable/gradient_shadow_up"/>
 
-    <RelativeLayout
+    <include
+        android:id="@+id/summaryPeekLayout"
+        layout="@layout/summary_peek_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/sheetShadow"
-        android:background="?attr/navigationViewPrimary">
-
-        <include
-            android:id="@+id/summaryPeekLayout"
-            layout="@layout/summary_peek_layout"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"/>
-
-        <View
-            android:id="@+id/divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_below="@id/summaryPeekLayout"
-            android:layout_marginTop="2dp"
-            android:background="@color/md_grey_500"/>
-
-        <View
-            android:id="@+id/rvShadow"
-            android:layout_width="wrap_content"
-            android:layout_height="6dp"
-            android:layout_below="@id/divider"
-            android:background="@drawable/gradient_shadow_down"
-            android:visibility="gone"/>
-
-        <include
-            android:id="@+id/summaryOptions"
-            layout="@layout/summary_options_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/divider"
-            android:visibility="visible"/>
-
-        <include
-            android:id="@+id/summaryDirections"
-            layout="@layout/summary_directions_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/divider"
-            android:visibility="gone"/>
-
-    </RelativeLayout>
+        android:layout_height="56dp"
+        android:layout_below="@id/sheetShadow"/>
 
 </RelativeLayout>

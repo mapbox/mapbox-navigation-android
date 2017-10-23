@@ -55,14 +55,6 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
     return legSteps.size();
   }
 
-  @Override
-  public void onViewAttachedToWindow(DirectionViewHolder holder) {
-    super.onViewAttachedToWindow(holder);
-    if (holder.getAdapterPosition() != 0) {
-      holder.resetViewSizes();
-    }
-  }
-
   public void updateSteps(RouteProgress routeProgress) {
     addLegSteps(routeProgress);
     updateStepList(routeProgress);

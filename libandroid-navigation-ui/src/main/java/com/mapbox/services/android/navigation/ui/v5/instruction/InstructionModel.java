@@ -24,9 +24,11 @@ public class InstructionModel {
   private int maneuverImage;
   private String maneuverModifier;
   private List<IntersectionLanes> turnLanes;
+  private RouteProgress progress;
   private boolean isUsingInstruction;
 
   public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
+    this.progress = progress;
     buildInstructionModel(progress, decimalFormat);
   }
 
@@ -52,6 +54,10 @@ public class InstructionModel {
 
   List<IntersectionLanes> getTurnLanes() {
     return turnLanes;
+  }
+
+  public RouteProgress getProgress() {
+    return progress;
   }
 
   boolean isUsingInstruction() {
