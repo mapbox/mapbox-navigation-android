@@ -289,7 +289,7 @@ public class NavigationService extends Service implements LocationEngineListener
     recentDistancesFromManeuverInMeters.clear();
     mapboxNavigation.getEventDispatcher().onUserOffRoute(rawLocation);
     mapboxNavigation.setSessionState(
-      mapboxNavigation.getSessionState().toBuilder().lastRerouteLocation(rawLocation).build());
+      mapboxNavigation.getSessionState().toBuilder().eventLocation(rawLocation).build());
   }
 
   public void rerouteOccurred() {
@@ -307,9 +307,9 @@ public class NavigationService extends Service implements LocationEngineListener
 
   public String recordFeedbackEvent(String feedbackType, String description,
                                     @FeedbackEvent.FeedbackSource String feedbackSource) {
-
     // Get current session state and update with "before" locations (equal to current state of the location buffer)
     SessionState feedbackEventSessionState = mapboxNavigation.getSessionState().toBuilder()
+      .rerouteDate(new Date())
       .beforeRerouteLocations(Arrays.asList(
         locationBuffer.toArray(new Location[locationBuffer.size()])))
       .routeProgressBeforeReroute(routeProgress)
@@ -318,6 +318,7 @@ public class NavigationService extends Service implements LocationEngineListener
     FeedbackEvent feedbackEvent = new FeedbackEvent(feedbackEventSessionState, feedbackSource);
     feedbackEvent.setDescription(description);
     feedbackEvent.setFeedbackType(feedbackType);
+    queuedFeedbackEvents.add(feedbackEvent);
 
     return feedbackEvent.getFeedbackId();
   }
