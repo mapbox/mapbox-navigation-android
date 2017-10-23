@@ -10,23 +10,30 @@ import com.mapbox.services.android.navigation.ui.v5.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_BAD_ROUTE;
+import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_CONFUSING_INSTRUCTION;
+import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_INACCURATE_GPS;
+import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_NOT_ALLOWED_TURN;
+import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_REPORT_TRAFFIC;
+import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_ROAD_CLOSED;
+
 public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
 
   private List<FeedbackItem> feedbackItems = new ArrayList<>();
 
   FeedbackAdapter() {
     feedbackItems.add(new FeedbackItem("Road\nClosed",
-      R.drawable.ic_road_closed, FeedbackItem.FEEDBACK_TYPE_ROAD_CLOSED, ""));
+      R.drawable.ic_road_closed, FEEDBACK_TYPE_ROAD_CLOSED, ""));
     feedbackItems.add(new FeedbackItem("Not\nAllowed",
-      R.drawable.ic_no_turn_allowed, FeedbackItem.FEEDBACK_TYPE_UNALLOWED_TURN, ""));
+      R.drawable.ic_no_turn_allowed, FEEDBACK_TYPE_NOT_ALLOWED_TURN, ""));
     feedbackItems.add(new FeedbackItem("Report\nTraffic",
-      R.drawable.ic_traffic, FeedbackItem.FEEDBACK_TYPE_REPORT_TRAFFIC, ""));
+      R.drawable.ic_traffic, FEEDBACK_TYPE_REPORT_TRAFFIC, ""));
     feedbackItems.add(new FeedbackItem("Confusing\nInstruction",
-      R.drawable.ic_confusing_directions, FeedbackItem.FEEDBACK_TYPE_CONFUSING_INSTRUCTION, ""));
+      R.drawable.ic_confusing_directions, FEEDBACK_TYPE_CONFUSING_INSTRUCTION, ""));
     feedbackItems.add(new FeedbackItem("GPS\nInaccurate",
-      R.drawable.ic_gps, FeedbackItem.FEEDBACK_TYPE_INACCURATE_GPS, ""));
+      R.drawable.ic_gps, FEEDBACK_TYPE_INACCURATE_GPS, ""));
     feedbackItems.add(new FeedbackItem("Bad\nRoute",
-      R.drawable.ic_wrong_directions, FeedbackItem.FEEDBACK_TYPE_BAD_ROUTE, ""));
+      R.drawable.ic_wrong_directions, FEEDBACK_TYPE_BAD_ROUTE, ""));
   }
 
   @Override

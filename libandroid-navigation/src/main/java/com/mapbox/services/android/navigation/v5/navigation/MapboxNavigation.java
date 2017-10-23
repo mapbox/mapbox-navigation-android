@@ -641,11 +641,13 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     navigationEventDispatcher.removeInternalProgressChangeListener();
   }
 
-  public String recordFeedback(String feedbackType, String description) {
-    return navigationService.recordFeedbackEvent(feedbackType, description);
+  public String recordFeedback(@FeedbackEvent.FeedbackType String feedbackType,
+                               String description, @FeedbackEvent.FeedbackSource String source) {
+    return navigationService.recordFeedbackEvent(feedbackType, description, source);
   }
 
-  public void updateFeedback(String feedbackId, String feedbackType, String description) {
+  public void updateFeedback(String feedbackId,
+                             @FeedbackEvent.FeedbackType String feedbackType, String description) {
     navigationService.updateFeedbackEvent(feedbackId, feedbackType, description);
   }
 

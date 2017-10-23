@@ -66,13 +66,8 @@ public class NavigationService extends Service implements LocationEngineListener
   private boolean firstProgressUpdate = true;
   private NavigationEngine thread;
   private Location rawLocation;
-  private Runnable runnable;
-  private Handler handler;
-  private List<SessionState> queuedFeedbackEvents;
-  private boolean sendFeedback = true;
-  private String feedbackType;
-  private String description;
 
+  private List<FeedbackEvent> queuedFeedbackEvents;
 
   @Nullable
   @Override
@@ -89,7 +84,6 @@ public class NavigationService extends Service implements LocationEngineListener
     locationBuffer = new RingBuffer<>(20);
     queuedFeedbackEvents = new ArrayList<>();
     queuedRerouteEvents = new ArrayList<>();
-
   }
 
   /**
@@ -107,8 +101,8 @@ public class NavigationService extends Service implements LocationEngineListener
       stopForeground(true);
     }
 
-    for (SessionState sessionState : queuedFeedbackEvents) {
-      sendFeedbackEvent(sessionState);
+    for (FeedbackEvent feedbackEvent : queuedFeedbackEvents) {
+      sendFeedbackEvent(feedbackEvent);
     }
     for (SessionState sessionState : queuedRerouteEvents) {
       sendRerouteEvent(sessionState);
@@ -319,69 +313,60 @@ public class NavigationService extends Service implements LocationEngineListener
     queuedRerouteEvents.add(mapboxNavigation.getSessionState());
   }
 
-  //need to confirm working as reroute functions
-  public String recordFeedbackEvent(String feedbackType, String description) {
-    this.description = description;
-    this.feedbackType = feedbackType;
+  public String recordFeedbackEvent(String feedbackType, String description,
+                                    @FeedbackEvent.FeedbackSource String feedbackSource) {
 
-    mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder()
+    // Get current session state and update with "before" locations (equal to current state of the location buffer)
+    SessionState feedbackEventSessionState = mapboxNavigation.getSessionState().toBuilder()
       .beforeRerouteLocations(Arrays.asList(
         locationBuffer.toArray(new Location[locationBuffer.size()])))
       .routeProgressBeforeReroute(routeProgress)
-      .build());
-    locationBuffer.clear();
+      .build();
 
-    handler = new Handler();
-    runnable = new Runnable() {
-      @Override
-      public void run() {
-        mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder()
-          .afterRerouteLocations(Arrays.asList(
-            locationBuffer.toArray(new Location[locationBuffer.size()])))
-          .build());
+    FeedbackEvent feedbackEvent = new FeedbackEvent(feedbackEventSessionState, feedbackSource);
+    // TODO set feedback type and description from the parameters based
+    // TODO - note: these should use default values if the values passed are empty
 
-        locationBuffer.clear();
+    // TODO Send 20 seconds later with "after" location updates
+    //    runnable = new Runnable() {
+    //      @Override
+    //      public void run() {
+    //        mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder()
+    //          .afterRerouteLocations(Arrays.asList(
+    //            locationBuffer.toArray(new Location[locationBuffer.size()])))
+    //          .build());
+    //
+    //
+    //        sendFeedbackEvent(mapboxNavigation.getSessionState());
+    //      }
+    //    };
+    //    handler.postDelayed(runnable, TWENTY_SECOND_INTERVAL);
 
-        sendFeedbackEvent(mapboxNavigation.getSessionState());
-      }
-    };
-
-    handler.postDelayed(runnable, TWENTY_SECOND_INTERVAL);
-
-    return mapboxNavigation.getSessionState().sessionIdentifier();
+    return feedbackEvent.getFeedbackId();
   }
 
-  public void updateFeedbackEvent(String feedbackId, String feedbackType, String description) {
-    this.feedbackType = feedbackType;
-    this.description = description;
+  public void updateFeedbackEvent(String feedbackId,
+                                  @FeedbackEvent.FeedbackType String feedbackType, String description) {
+    FeedbackEvent feedbackEvent = findQueuedFeedbackEvent(feedbackId);
+    if (feedbackEvent != null) {
+      feedbackEvent.setFeedbackType(feedbackType);
+      feedbackEvent.setDescription(description);
+    }
   }
 
   public void cancelFeedback(String feedbackId) {
-    sendFeedback = false;
+    FeedbackEvent feedbackEvent = findQueuedFeedbackEvent(feedbackId);
+    queuedFeedbackEvents.remove(feedbackEvent);
   }
 
-  void sendFeedbackEvent(SessionState sessionState) {
-    sessionState = sessionState.toBuilder().afterRerouteLocations(Arrays.asList(
+  void sendFeedbackEvent(FeedbackEvent feedbackEvent) {
+    SessionState feedbackSessionState = feedbackEvent.getSessionState();
+    feedbackSessionState = feedbackSessionState.toBuilder().afterRerouteLocations(Arrays.asList(
       locationBuffer.toArray(new Location[locationBuffer.size()])))
       .build();
 
-    if (sendFeedback) {
-      NavigationMetricsWrapper.feedbackEvent(mapboxNavigation.getSessionState(), routeProgress, rawLocation,
-        description, feedbackType, "screenshot");
-    } else {
-      sendFeedback = true;
-    }
-
-    for (SessionState session : queuedFeedbackEvents) {
-      queuedFeedbackEvents.set(queuedFeedbackEvents.indexOf(session),
-        session.toBuilder().lastRerouteDate(
-          sessionState.lastRerouteDate()
-        ).build());
-    }
-
-    mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder().lastRerouteDate(
-      sessionState.lastRerouteDate()
-    ).build());
+    NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, routeProgress, rawLocation,
+      feedbackEvent.getDescription(), feedbackEvent.getFeedbackType(), "");
   }
 
   void sendRerouteEvent(SessionState sessionState) {
@@ -410,5 +395,14 @@ public class NavigationService extends Service implements LocationEngineListener
       Timber.d("Local binder called.");
       return NavigationService.this;
     }
+  }
+
+  private FeedbackEvent findQueuedFeedbackEvent(String feedbackId) {
+    for (FeedbackEvent feedbackEvent : queuedFeedbackEvents) {
+      if (feedbackEvent.getFeedbackId().equals(feedbackId)) {
+        return feedbackEvent;
+      }
+    }
+    return null;
   }
 }

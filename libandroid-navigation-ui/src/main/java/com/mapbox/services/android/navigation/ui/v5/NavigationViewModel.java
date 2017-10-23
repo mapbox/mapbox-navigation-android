@@ -20,6 +20,7 @@ import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -136,7 +137,8 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   }
 
   void recordFeedback() {
-    feedbackId = navigation.recordFeedback("", "");
+    feedbackId = navigation.recordFeedback(FeedbackEvent.FEEDBACK_TYPE_GENERAL, "",
+      FeedbackEvent.FEEDBACK_SOURCE_UI);
   }
 
   void updateFeedback(FeedbackItem feedbackItem) {
