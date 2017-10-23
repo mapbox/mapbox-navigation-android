@@ -78,8 +78,7 @@ public final class NavigationRoute {
   public Call<DirectionsResponse> getCall() {
     return mapboxDirections.cloneCall();
   }
-
-  // TODO add lifecycle cancel event
+  
   public void cancelCall() {
     getCall().cancel();
   }
