@@ -32,7 +32,6 @@
     <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView
         android:id="@+id/instructionView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"/>
+        android:layout_height="wrap_content"/>
 
 </android.support.design.widget.CoordinatorLayout>

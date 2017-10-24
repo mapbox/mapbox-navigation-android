@@ -45,8 +45,4 @@ class NavigationPresenter {
   void onDestinationUpdate(Point point) {
     view.addMarker(point);
   }
-
-  void onNavigationRunning() {
-    view.showInstructionView();
-  }
 }

@@ -14,12 +14,12 @@
         android:id="@+id/instructionLayoutManeuver"
         android:layout_width="88dp"
         android:layout_height="104dp"
-        android:layout_marginBottom="4dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/instruction_background"
         android:elevation="4dp"
+        android:foreground="?attr/selectableItemBackground"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -47,12 +47,13 @@
     <LinearLayout
         android:id="@+id/instructionLayoutText"
         android:layout_width="0dp"
-        android:layout_height="64dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/instruction_text_background"
         android:elevation="4dp"
         android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
-        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/instructionLayoutManeuver"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/instructionLayoutManeuver"
         app:layout_constraintTop_toTopOf="parent">
@@ -99,11 +100,12 @@
         layout="@layout/directions_layout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:visibility="invisible"
+        android:layout_marginTop="90dp"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/instructionLayoutManeuver"/>
+        app:layout_constraintTop_toTopOf="@+id/rerouteLayout"/>
 
     <include
         android:id="@+id/soundLayout"

@@ -19,8 +19,6 @@ public interface NavigationContract {
 
     void hideRecenterBtn();
 
-    void showInstructionView();
-
     void drawRoute(DirectionsRoute directionsRoute);
 
     void addMarker(Point point);

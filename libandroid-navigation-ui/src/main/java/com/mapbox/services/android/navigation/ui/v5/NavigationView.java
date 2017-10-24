@@ -213,11 +213,6 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   }
 
   @Override
-  public void showInstructionView() {
-    instructionView.show();
-  }
-
-  @Override
   public void drawRoute(DirectionsRoute directionsRoute) {
     mapRoute.addRoute(directionsRoute);
   }
@@ -466,9 +461,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
       @Override
       public void onChanged(@Nullable Boolean isRunning) {
         if (isRunning != null) {
-          if (isRunning && !resumeState) {
-            navigationPresenter.onNavigationRunning();
-          } else if (!isRunning) {
+          if (!isRunning) {
             navigationListener.onNavigationFinished();
           }
         }

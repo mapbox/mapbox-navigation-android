@@ -5,10 +5,13 @@ import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.TextViewCompat;
@@ -16,6 +19,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.transition.TransitionManager;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -58,6 +62,7 @@ import java.text.DecimalFormat;
  */
 public class InstructionView extends RelativeLayout {
 
+  public boolean isMuted;
   private ImageView maneuverImage;
   private TextView stepDistanceText;
   private TextView stepPrimaryText;
@@ -70,20 +75,16 @@ public class InstructionView extends RelativeLayout {
   private RecyclerView rvDirections;
   private TurnLaneAdapter turnLaneAdapter;
   private View soundLayout;
-  private View instructionLayout;
+  private ConstraintLayout instructionLayout;
   private View directionsLayout;
   private DirectionListAdapter directionListAdapter;
-
-  private Animation slideDownTop;
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
   private AnimationSet fadeInSlowOut;
-
   private DecimalFormat decimalFormat;
   private int currentManeuverId;
   private int primaryTextMaxLines = 1;
   private boolean isRerouting;
-  public boolean isMuted;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -173,19 +174,6 @@ public class InstructionView extends RelativeLayout {
       addDistanceText(model);
       addTextInstruction(model);
       addTurnLanes(model);
-    }
-  }
-
-  /**
-   * If invisible, this method will slide the view down
-   * from the top of the screen and set the visibility to visible
-   *
-   * @since 0.6.0
-   */
-  public void show() {
-    if (this.getVisibility() == INVISIBLE) {
-      this.setVisibility(VISIBLE);
-      this.startAnimation(slideDownTop);
     }
   }
 
@@ -397,7 +385,6 @@ public class InstructionView extends RelativeLayout {
    */
   private void initAnimations() {
     Context context = getContext();
-    slideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
     rerouteSlideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
     rerouteSlideUpTop = AnimationUtils.loadAnimation(context, R.anim.slide_up_top);
 
@@ -416,6 +403,18 @@ public class InstructionView extends RelativeLayout {
   }
 
   private void initClickListener() {
+    if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      initLandscapeClickListener();
+    } else {
+      initPortraitClickListener();
+    }
+  }
+
+  /**
+   * For portrait orientation, attach the listener to the whole layout
+   * and use custom animations to hide and show the directions /sound layout
+   */
+  private void initPortraitClickListener() {
     instructionLayout.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View instructionView) {
@@ -435,6 +434,37 @@ public class InstructionView extends RelativeLayout {
           soundLayout.setVisibility(VISIBLE);
           soundLayout.startAnimation(slideInRight);
           directionsLayout.startAnimation(slideUp);
+          directionsLayout.setVisibility(INVISIBLE);
+        }
+      }
+    });
+  }
+
+  /**
+   * For landscape orientation, the click listener is attached to
+   * the instruction text layout and the constraints are adjusted before animating
+   */
+  private void initLandscapeClickListener() {
+    findViewById(R.id.instructionLayoutText).setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        ConstraintSet collapsed = new ConstraintSet();
+        collapsed.clone(getContext(), R.layout.instruction_layout);
+        ConstraintSet expanded = new ConstraintSet();
+        expanded.clone(getContext(), R.layout.instruction_layout_alt);
+
+        boolean directionsVisible = directionsLayout.getVisibility() == VISIBLE;
+        ConstraintSet constraint = directionsVisible ? collapsed : expanded;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+          TransitionManager.beginDelayedTransition(InstructionView.this);
+        }
+        if (!directionsVisible) {
+          constraint.applyTo(instructionLayout);
+          directionsLayout.setVisibility(VISIBLE);
+          soundLayout.setVisibility(INVISIBLE);
+        } else {
+          constraint.applyTo(instructionLayout);
+          soundLayout.setVisibility(VISIBLE);
           directionsLayout.setVisibility(INVISIBLE);
         }
       }
@@ -602,7 +632,7 @@ public class InstructionView extends RelativeLayout {
   }
 
   /**
-   * Used to update the directions list with the current steps.
+   * Used to update the directions list with the current steps.n
    *
    * @param routeProgress to provide the current steps
    */
