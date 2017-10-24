@@ -152,7 +152,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
     map.setOnScrollListener(this);
-    map.setPadding(0, 0, 0, summaryBehavior.getPeekHeight());
+    map.setPadding(0, 0, 0, summaryBottomSheet.getHeight());
     ThemeSwitcher.setMapStyle(getContext(), map, new MapboxMap.OnStyleLoadedListener() {
       @Override
       public void onStyleLoaded(String style) {

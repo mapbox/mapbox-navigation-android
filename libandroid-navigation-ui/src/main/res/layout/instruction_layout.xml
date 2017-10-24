@@ -6,6 +6,7 @@
     android:layout_width="0dp"
     android:layout_height="120dp"
     android:background="@drawable/instruction_background"
+    android:foreground="?attr/selectableItemBackground"
     android:elevation="4dp"
     tools:showIn="@layout/instruction_view_layout">
 

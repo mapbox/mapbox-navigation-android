@@ -4,7 +4,6 @@
     android:id="@+id/instructionViewLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
     android:keepScreenOn="true">
 
     <include
@@ -14,6 +13,15 @@
         android:layout_height="wrap_content"/>
 
     <include
+        android:id="@+id/directionsLayout"
+        layout="@layout/directions_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/instructionLayout"
+        android:layout_marginTop="-8dp"
+        android:visibility="invisible"/>
+
+    <include
         android:id="@+id/turnLaneLayout"
         layout="@layout/turn_lane_layout"
         android:layout_width="match_parent"
@@ -21,15 +29,6 @@
         android:layout_below="@id/instructionLayout"
         android:layout_marginTop="-8dp"
         android:visibility="gone"/>
-
-    <include
-        android:id="@+id/instructionDirectionLayout"
-        layout="@layout/instruction_directions_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/instructionLayout"
-        android:layout_marginTop="-8dp"
-        android:visibility="visible"/>
 
     <include
         android:id="@+id/soundLayout"

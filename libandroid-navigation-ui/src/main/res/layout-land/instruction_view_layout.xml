@@ -4,7 +4,6 @@
     android:id="@+id/instructionViewLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
     android:keepScreenOn="true">
 
     <include
@@ -12,15 +11,6 @@
         layout="@layout/instruction_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
-
-    <include
-        android:id="@+id/instructionDirectionLayout"
-        layout="@layout/instruction_directions_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/instructionLayout"
-        android:layout_marginTop="-8dp"
-        android:visibility="visible"/>
 
     <include
         android:id="@+id/soundLayout"

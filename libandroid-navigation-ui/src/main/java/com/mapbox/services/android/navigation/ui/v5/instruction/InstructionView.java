@@ -58,8 +58,6 @@ import java.text.DecimalFormat;
  */
 public class InstructionView extends RelativeLayout {
 
-  private static final int SCROLL_DIRECTION_UP = -1;
-
   private ImageView maneuverImage;
   private TextView stepDistanceText;
   private TextView stepPrimaryText;
@@ -71,8 +69,10 @@ public class InstructionView extends RelativeLayout {
   private RecyclerView rvTurnLanes;
   private RecyclerView rvDirections;
   private TurnLaneAdapter turnLaneAdapter;
+  private View soundLayout;
+  private View instructionLayout;
+  private View directionsLayout;
   private DirectionListAdapter directionListAdapter;
-  private View rvShadow;
 
   private Animation slideDownTop;
   private Animation rerouteSlideUpTop;
@@ -113,6 +113,7 @@ public class InstructionView extends RelativeLayout {
     initDirectionsRecyclerView();
     initDecimalFormat();
     initAnimations();
+    initClickListener();
   }
 
   @Override
@@ -244,8 +245,10 @@ public class InstructionView extends RelativeLayout {
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
+    soundLayout = findViewById(R.id.soundLayout);
+    instructionLayout = findViewById(R.id.instructionLayout);
+    directionsLayout = findViewById(R.id.directionsLayout);
     rvDirections = findViewById(R.id.rvDirections);
-    rvShadow = findViewById(R.id.rvShadow);
     initInstructionAutoSize();
   }
 
@@ -379,13 +382,6 @@ public class InstructionView extends RelativeLayout {
     rvDirections.setNestedScrollingEnabled(true);
     rvDirections.setItemAnimator(new DefaultItemAnimator());
     rvDirections.setLayoutManager(new LinearLayoutManager(getContext()));
-    rvDirections.addOnScrollListener(new RecyclerView.OnScrollListener() {
-      @Override
-      public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-        super.onScrolled(recyclerView, dx, dy);
-        rvShadow.setVisibility(rvDirections.canScrollVertically(SCROLL_DIRECTION_UP) ? View.VISIBLE : View.INVISIBLE);
-      }
-    });
   }
 
   /**
@@ -417,6 +413,32 @@ public class InstructionView extends RelativeLayout {
     fadeInSlowOut = new AnimationSet(false);
     fadeInSlowOut.addAnimation(fadeIn);
     fadeInSlowOut.addAnimation(fadeOut);
+  }
+
+  private void initClickListener() {
+    instructionLayout.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View instructionView) {
+        Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.slide_up_top);
+        slideUp.setInterpolator(new AccelerateInterpolator());
+        Animation slideDown = AnimationUtils.loadAnimation(getContext(), R.anim.slide_down_top);
+        slideDown.setInterpolator(new DecelerateInterpolator());
+        Animation slideOutRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_right);
+        Animation slideInRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_right);
+        boolean directionsVisible = directionsLayout.getVisibility() == VISIBLE;
+        if (!directionsVisible) {
+          directionsLayout.setVisibility(VISIBLE);
+          directionsLayout.startAnimation(slideDown);
+          soundLayout.startAnimation(slideOutRight);
+          soundLayout.setVisibility(INVISIBLE);
+        } else {
+          soundLayout.setVisibility(VISIBLE);
+          soundLayout.startAnimation(slideInRight);
+          directionsLayout.startAnimation(slideUp);
+          directionsLayout.setVisibility(INVISIBLE);
+        }
+      }
+    });
   }
 
   /**
