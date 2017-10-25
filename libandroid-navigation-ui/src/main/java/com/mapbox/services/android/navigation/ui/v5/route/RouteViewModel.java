@@ -182,6 +182,7 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
    */
   private void fetchRouteWithBearing(NavigationRoute.Builder routeBuilder) {
     routeBuilder.addBearing(Float.valueOf(rawLocation.getBearing()).doubleValue(), 90d);
+    routeBuilder.addBearing(null, null);
     routeBuilder.build().getRoute(this);
   }
 }
