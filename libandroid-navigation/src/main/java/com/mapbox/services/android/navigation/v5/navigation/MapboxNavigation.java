@@ -25,6 +25,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
+import com.mapbox.services.android.navigation.v5.utils.ValidationUtils;
 import com.mapbox.services.android.telemetry.MapboxEvent;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -353,6 +354,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    * @since 0.1.0
    */
   public void startNavigation(@NonNull DirectionsRoute directionsRoute) {
+    ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
     Timber.d("MapboxNavigation startNavigation called.");
     if (!isBound) {
