@@ -19,7 +19,7 @@ import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.utils.ManeuverUtils.getManeuverResource;
 
-public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHolder> {
+public class InstructionListAdapter extends RecyclerView.Adapter<DirectionViewHolder> {
 
   private List<TextInstruction> instructions;
   private DecimalFormat decimalFormat;
@@ -27,7 +27,7 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
   private int currentLegIndex = -1;
   private int currentStepIndex = -1;
 
-  public DirectionListAdapter() {
+  public InstructionListAdapter() {
     instructions = new ArrayList<>();
     decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
   }
@@ -35,7 +35,7 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
   @Override
   public DirectionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext())
-      .inflate(R.layout.direction_viewholder_layout, parent, false);
+      .inflate(R.layout.instruction_viewholder_layout, parent, false);
     return new DirectionViewHolder(view);
   }
 

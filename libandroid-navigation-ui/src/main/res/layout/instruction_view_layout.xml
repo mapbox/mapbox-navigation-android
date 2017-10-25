@@ -13,8 +13,8 @@
         android:layout_height="wrap_content"/>
 
     <include
-        android:id="@+id/directionsLayout"
-        layout="@layout/directions_layout"
+        android:id="@+id/instructionListLayout"
+        layout="@layout/instruction_list_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/instructionLayout"

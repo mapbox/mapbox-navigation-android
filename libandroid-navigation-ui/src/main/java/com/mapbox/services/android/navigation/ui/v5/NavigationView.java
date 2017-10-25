@@ -124,6 +124,20 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     mapView.onDestroy();
   }
 
+  /**
+   * If the instruction list is showing and onBackPressed is called,
+   * hide the instruction list and do not hide the activity or fragment.
+   *
+   * @return true if back press handled, false if not
+   */
+  public boolean onBackPressed() {
+    if (instructionView.isShowingInstructionList()) {
+      instructionView.hideInstructionList();
+      return true;
+    }
+    return false;
+  }
+
   public void onSaveInstanceState(Bundle outState) {
     outState.putInt(getContext().getString(R.string.bottom_sheet_state),
       summaryBehavior.getState());

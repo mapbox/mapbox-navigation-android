@@ -35,7 +35,7 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
-import com.mapbox.services.android.navigation.ui.v5.summary.list.DirectionListAdapter;
+import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -70,12 +70,12 @@ public class InstructionView extends RelativeLayout {
   private View rerouteLayout;
   private View turnLaneLayout;
   private RecyclerView rvTurnLanes;
-  private RecyclerView rvDirections;
+  private RecyclerView rvInstrcutions;
   private TurnLaneAdapter turnLaneAdapter;
   private View soundLayout;
   private ConstraintLayout instructionLayout;
-  private View directionsLayout;
-  private DirectionListAdapter directionListAdapter;
+  private View instructionListLayout;
+  private InstructionListAdapter instructionListAdapter;
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
   private AnimationSet fadeInSlowOut;
@@ -143,7 +143,7 @@ public class InstructionView extends RelativeLayout {
           isRerouting = isOffRoute;
           if (isRerouting) {
             showRerouteState();
-            directionListAdapter.clear();
+            instructionListAdapter.clear();
           } else {
             hideRerouteState();
           }
@@ -207,6 +207,72 @@ public class InstructionView extends RelativeLayout {
   }
 
   /**
+   * Can be used to determine the visibility of the instruction list.
+   *
+   * @return true if instruction list is visible, false is not
+   */
+  public boolean isShowingInstructionList() {
+    return instructionListLayout.getVisibility() == VISIBLE;
+  }
+
+  /**
+   * Hide the instruction list and show the sound button.
+   * <p>
+   * This is based on orientation so the different layouts (for portrait vs. landscape)
+   * can be animated appropriately.
+   */
+  public void hideInstructionList() {
+    int orientation = getContext().getResources().getConfiguration().orientation;
+    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      ConstraintSet collapsed = new ConstraintSet();
+      collapsed.clone(getContext(), R.layout.instruction_layout);
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        TransitionManager.beginDelayedTransition(InstructionView.this);
+      }
+      collapsed.applyTo(instructionLayout);
+      instructionListLayout.setVisibility(INVISIBLE);
+      soundLayout.setVisibility(VISIBLE);
+    } else {
+      Animation slideInRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_right);
+      Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.slide_up_top);
+      slideUp.setInterpolator(new AccelerateInterpolator());
+      soundLayout.setVisibility(VISIBLE);
+      soundLayout.startAnimation(slideInRight);
+      instructionListLayout.startAnimation(slideUp);
+      instructionListLayout.setVisibility(INVISIBLE);
+    }
+  }
+
+  /**
+   * Show the instruction list and hide the sound button.
+   * <p>
+   * This is based on orientation so the different layouts (for portrait vs. landscape)
+   * can be animated appropriately.
+   */
+  public void showInstructionList() {
+    int orientation = getContext().getResources().getConfiguration().orientation;
+    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      ConstraintSet expanded = new ConstraintSet();
+      expanded.clone(getContext(), R.layout.instruction_layout_alt);
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        TransitionManager.beginDelayedTransition(InstructionView.this);
+      }
+      expanded.applyTo(instructionLayout);
+      instructionListLayout.setVisibility(VISIBLE);
+      soundLayout.setVisibility(INVISIBLE);
+    } else {
+      Animation slideDown = AnimationUtils.loadAnimation(getContext(), R.anim.slide_down_top);
+      slideDown.setInterpolator(new DecelerateInterpolator());
+      Animation slideOutRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_right);
+      instructionListLayout.setVisibility(VISIBLE);
+      instructionListLayout.startAnimation(slideDown);
+      soundLayout.startAnimation(slideOutRight);
+      soundLayout.setVisibility(INVISIBLE);
+    }
+  }
+
+
+  /**
    * Inflates this layout needed for this view.
    */
   private void init() {
@@ -228,8 +294,8 @@ public class InstructionView extends RelativeLayout {
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
     soundLayout = findViewById(R.id.soundLayout);
     instructionLayout = findViewById(R.id.instructionLayout);
-    directionsLayout = findViewById(R.id.directionsLayout);
-    rvDirections = findViewById(R.id.rvDirections);
+    instructionListLayout = findViewById(R.id.instructionListLayout);
+    rvInstrcutions = findViewById(R.id.rvInstructions);
     initInstructionAutoSize();
   }
 
@@ -358,16 +424,16 @@ public class InstructionView extends RelativeLayout {
   }
 
   /**
-   * Sets up the {@link RecyclerView} that is used to display the list of directions.
+   * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
   private void initDirectionsRecyclerView() {
-    directionListAdapter = new DirectionListAdapter();
-    rvDirections.setAdapter(directionListAdapter);
-    rvDirections.setHasFixedSize(true);
-    rvDirections.setNestedScrollingEnabled(true);
-    rvDirections.setItemAnimator(new DefaultItemAnimator());
-    rvDirections.setLayoutManager(new LinearLayoutManager(getContext()));
-    rvDirections.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
+    instructionListAdapter = new InstructionListAdapter();
+    rvInstrcutions.setAdapter(instructionListAdapter);
+    rvInstrcutions.setHasFixedSize(true);
+    rvInstrcutions.setNestedScrollingEnabled(true);
+    rvInstrcutions.setItemAnimator(new DefaultItemAnimator());
+    rvInstrcutions.setLayoutManager(new LinearLayoutManager(getContext()));
+    rvInstrcutions.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
   }
 
   /**
@@ -410,29 +476,17 @@ public class InstructionView extends RelativeLayout {
 
   /**
    * For portrait orientation, attach the listener to the whole layout
-   * and use custom animations to hide and show the directions /sound layout
+   * and use custom animations to hide and show the instructions /sound layout
    */
   private void initPortraitClickListener() {
     instructionLayout.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View instructionView) {
-        Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.slide_up_top);
-        slideUp.setInterpolator(new AccelerateInterpolator());
-        Animation slideDown = AnimationUtils.loadAnimation(getContext(), R.anim.slide_down_top);
-        slideDown.setInterpolator(new DecelerateInterpolator());
-        Animation slideOutRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_right);
-        Animation slideInRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_right);
-        boolean directionsVisible = directionsLayout.getVisibility() == VISIBLE;
-        if (!directionsVisible) {
-          directionsLayout.setVisibility(VISIBLE);
-          directionsLayout.startAnimation(slideDown);
-          soundLayout.startAnimation(slideOutRight);
-          soundLayout.setVisibility(INVISIBLE);
+        boolean instructionsVisible = instructionListLayout.getVisibility() == VISIBLE;
+        if (!instructionsVisible) {
+          showInstructionList();
         } else {
-          soundLayout.setVisibility(VISIBLE);
-          soundLayout.startAnimation(slideInRight);
-          directionsLayout.startAnimation(slideUp);
-          directionsLayout.setVisibility(INVISIBLE);
+          hideInstructionList();
         }
       }
     });
@@ -446,24 +500,11 @@ public class InstructionView extends RelativeLayout {
     findViewById(R.id.instructionLayoutText).setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View instructionLayoutText) {
-        ConstraintSet collapsed = new ConstraintSet();
-        collapsed.clone(getContext(), R.layout.instruction_layout);
-        ConstraintSet expanded = new ConstraintSet();
-        expanded.clone(getContext(), R.layout.instruction_layout_alt);
-
-        boolean directionsVisible = directionsLayout.getVisibility() == VISIBLE;
-        ConstraintSet constraint = directionsVisible ? collapsed : expanded;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-          TransitionManager.beginDelayedTransition(InstructionView.this);
-        }
-        if (!directionsVisible) {
-          constraint.applyTo(instructionLayout);
-          directionsLayout.setVisibility(VISIBLE);
-          soundLayout.setVisibility(INVISIBLE);
+        boolean instructionsVisible = instructionListLayout.getVisibility() == VISIBLE;
+        if (!instructionsVisible) {
+          showInstructionList();
         } else {
-          constraint.applyTo(instructionLayout);
-          soundLayout.setVisibility(VISIBLE);
-          directionsLayout.setVisibility(INVISIBLE);
+          hideInstructionList();
         }
       }
     });
@@ -614,11 +655,11 @@ public class InstructionView extends RelativeLayout {
   }
 
   /**
-   * Used to update the directions list with the current steps.n
+   * Used to update the instructions list with the current steps.
    *
    * @param routeProgress to provide the current steps
    */
   private void updateSteps(RouteProgress routeProgress) {
-    directionListAdapter.updateSteps(routeProgress);
+    instructionListAdapter.updateSteps(routeProgress);
   }
 }

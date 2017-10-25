@@ -96,8 +96,8 @@
         app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText"/>
 
     <include
-        android:id="@+id/directionsLayout"
-        layout="@layout/directions_layout"
+        android:id="@+id/instructionListLayout"
+        layout="@layout/instruction_list_layout"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:visibility="invisible"
