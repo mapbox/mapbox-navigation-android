@@ -111,6 +111,9 @@ class NavigationNotification {
     if (context != null) {
       context.unregisterReceiver(endNavigationBtnReceiver);
     }
+    if (notificationManager != null) {
+      notificationManager.cancel(NAVIGATION_NOTIFICATION_ID);
+    }
   }
 
   private boolean newStepName(RouteProgress routeProgress) {
@@ -215,9 +218,6 @@ class NavigationNotification {
   };
 
   private void onEndNavigationBtnClick() {
-    if (notificationManager != null) {
-      notificationManager.cancel(NAVIGATION_NOTIFICATION_ID);
-    }
     if (mapboxNavigation != null) {
       mapboxNavigation.endNavigation();
     }
