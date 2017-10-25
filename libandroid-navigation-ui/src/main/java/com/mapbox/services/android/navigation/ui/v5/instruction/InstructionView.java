@@ -6,9 +6,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Bundle;
-import android.os.Parcelable;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -16,6 +13,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -83,7 +81,6 @@ public class InstructionView extends RelativeLayout {
   private AnimationSet fadeInSlowOut;
   private DecimalFormat decimalFormat;
   private int currentManeuverId;
-  private int primaryTextMaxLines = 1;
   private boolean isRerouting;
 
   public InstructionView(Context context) {
@@ -117,21 +114,15 @@ public class InstructionView extends RelativeLayout {
     initClickListener();
   }
 
-  @Override
-  public Parcelable onSaveInstanceState() {
-    super.onSaveInstanceState();
-    return createSavedState();
-  }
-
-  @Override
-  public void onRestoreInstanceState(Parcelable state) {
-    if (state instanceof Bundle) {
-      setRestoredState((Bundle) state);
-    } else {
-      super.onRestoreInstanceState(state);
-    }
-  }
-
+  /**
+   * Subscribes to a {@link NavigationViewModel} for
+   * updates from {@link android.arch.lifecycle.LiveData}.
+   * <p>
+   * Updates all views with fresh data / shows & hides re-route state.
+   *
+   * @param navigationViewModel to which this View is subscribing
+   * @since 0.6.2
+   */
   public void subscribe(NavigationViewModel navigationViewModel) {
     navigationViewModel.instructionModel.observe((LifecycleOwner) getContext(), new Observer<InstructionModel>() {
       @Override
@@ -152,6 +143,7 @@ public class InstructionView extends RelativeLayout {
           isRerouting = isOffRoute;
           if (isRerouting) {
             showRerouteState();
+            directionListAdapter.clear();
           } else {
             hideRerouteState();
           }
@@ -165,6 +157,7 @@ public class InstructionView extends RelativeLayout {
    * uses it to update the views.
    *
    * @param routeProgress used to provide navigation / progress data
+   * @since 0.6.2
    */
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
@@ -240,6 +233,10 @@ public class InstructionView extends RelativeLayout {
     initInstructionAutoSize();
   }
 
+  /**
+   * For API 21 and lower, manually set the drawable tint based on the colors
+   * set in the given navigation theme (light or dark).
+   */
   private void initBackground() {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
       int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewPrimaryColor(getContext());
@@ -370,6 +367,7 @@ public class InstructionView extends RelativeLayout {
     rvDirections.setNestedScrollingEnabled(true);
     rvDirections.setItemAnimator(new DefaultItemAnimator());
     rvDirections.setLayoutManager(new LinearLayoutManager(getContext()));
+    rvDirections.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
   }
 
   /**
@@ -447,7 +445,7 @@ public class InstructionView extends RelativeLayout {
   private void initLandscapeClickListener() {
     findViewById(R.id.instructionLayoutText).setOnClickListener(new OnClickListener() {
       @Override
-      public void onClick(View v) {
+      public void onClick(View instructionLayoutText) {
         ConstraintSet collapsed = new ConstraintSet();
         collapsed.clone(getContext(), R.layout.instruction_layout);
         ConstraintSet expanded = new ConstraintSet();
@@ -526,29 +524,11 @@ public class InstructionView extends RelativeLayout {
    * @param model provides instruction text
    */
   private void addTextInstruction(InstructionModel model) {
-    updateMaxLines(model);
     if (newPrimaryText(model) || newSecondaryText(model)) {
       textInstructions(model);
     } else if (stepPrimaryText.getText().toString().isEmpty()
       || stepSecondaryText.getText().toString().isEmpty()) {
       textInstructions(model);
-    }
-  }
-
-  /**
-   * Based on a boolean from the model,
-   * update to 2 lines for primary text.
-   * <p>
-   * Track the lines so the max can revert to 1.
-   *
-   * @param model the cue to go to 2 lines
-   */
-  private void updateMaxLines(InstructionModel model) {
-    if (model.isUsingInstruction()) {
-      stepPrimaryText.setMaxLines(2);
-      primaryTextMaxLines = 2;
-    } else if (primaryTextMaxLines == 2) {
-      stepPrimaryText.setMaxLines(1);
     }
   }
 
@@ -590,9 +570,11 @@ public class InstructionView extends RelativeLayout {
     if (!TextUtils.isEmpty(model.getSecondaryText())) {
       if (stepSecondaryText.getVisibility() == GONE) {
         stepSecondaryText.setVisibility(VISIBLE);
+        stepPrimaryText.setMaxLines(1);
       }
       stepSecondaryText.setText(StringAbbreviator.abbreviate(model.getSecondaryText()));
     } else {
+      stepPrimaryText.setMaxLines(2);
       stepSecondaryText.setVisibility(GONE);
     }
   }
@@ -638,20 +620,5 @@ public class InstructionView extends RelativeLayout {
    */
   private void updateSteps(RouteProgress routeProgress) {
     directionListAdapter.updateSteps(routeProgress);
-  }
-
-  @NonNull
-  private Parcelable createSavedState() {
-    Bundle state = new Bundle();
-    state.putParcelable(getContext().getString(R.string.instruction_super_state), super.onSaveInstanceState());
-    state.putInt(getContext().getString(R.string.instruction_visibility), getVisibility());
-    return state;
-  }
-
-  @SuppressWarnings("WrongConstant")
-  private void setRestoredState(Bundle state) {
-    this.setVisibility(state.getInt(getContext().getString(R.string.instruction_visibility), getVisibility()));
-    Parcelable superState = state.getParcelable(getContext().getString(R.string.instruction_super_state));
-    super.onRestoreInstanceState(superState);
   }
 }

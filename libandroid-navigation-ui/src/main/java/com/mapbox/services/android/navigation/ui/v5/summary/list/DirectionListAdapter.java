@@ -1,32 +1,34 @@
 package com.mapbox.services.android.navigation.ui.v5.summary.list;
 
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.mapbox.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.services.android.navigation.ui.v5.instruction.TextInstruction;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
-import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
-import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mapbox.services.android.navigation.v5.utils.ManeuverUtils.getManeuverResource;
+
 public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHolder> {
 
-  private List<LegStep> legSteps;
+  private List<TextInstruction> instructions;
   private DecimalFormat decimalFormat;
 
   private int currentLegIndex = -1;
   private int currentStepIndex = -1;
 
   public DirectionListAdapter() {
-    legSteps = new ArrayList<>();
+    instructions = new ArrayList<>();
     decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
   }
 
@@ -39,20 +41,19 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
 
   @Override
   public void onBindViewHolder(DirectionViewHolder holder, int position) {
-    LegStep legStep = legSteps.get(position);
-    holder.instructionText.setText(StringAbbreviator.abbreviate(legStep.maneuver().instruction()));
-    holder.directionIcon.setImageResource(ManeuverUtils.getManeuverResource(legStep));
-
-    if (legStep.distance() > 0) {
-      holder.distanceText.setText(DistanceUtils.distanceFormatterBold(legStep.distance(), decimalFormat));
-    } else {
-      holder.distanceDivider.setVisibility(View.GONE);
+    TextInstruction textInstruction = instructions.get(position);
+    if (textInstruction != null) {
+      updatePrimaryText(holder, textInstruction.getPrimaryText());
+      updateSecondaryText(holder, textInstruction.getSecondaryText());
+      holder.maneuverImage.setImageResource(getManeuverResource(textInstruction.getStep()));
+      holder.stepDistanceText.setText(DistanceUtils
+        .distanceFormatterBold(textInstruction.getStepDistance(), decimalFormat));
     }
   }
 
   @Override
   public int getItemCount() {
-    return legSteps.size();
+    return instructions.size();
   }
 
   public void updateSteps(RouteProgress routeProgress) {
@@ -61,14 +62,35 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
   }
 
   public void clear() {
-    legSteps.clear();
+    instructions.clear();
     notifyDataSetChanged();
   }
 
+  private void updatePrimaryText(DirectionViewHolder holder, String primaryText) {
+    holder.stepPrimaryText.setText(primaryText);
+  }
+
+  private void updateSecondaryText(DirectionViewHolder holder, String secondaryText) {
+    if (!TextUtils.isEmpty(secondaryText)) {
+      holder.stepPrimaryText.setMaxLines(1);
+      holder.stepSecondaryText.setVisibility(View.VISIBLE);
+      holder.stepSecondaryText.setText(secondaryText);
+    } else {
+      holder.stepPrimaryText.setMaxLines(2);
+      holder.stepSecondaryText.setVisibility(View.GONE);
+    }
+  }
+
   private void addLegSteps(RouteProgress routeProgress) {
-    if ((newLeg(routeProgress) || legSteps.size() == 0) && legHasSteps(routeProgress)) {
+    if ((newLeg(routeProgress) || instructions.size() == 0) && legHasSteps(routeProgress)) {
       List<LegStep> steps = routeProgress.directionsRoute().legs().get(0).steps();
-      addStepsNotifyAdapter(steps);
+      instructions.clear();
+      if (steps != null) {
+        for (LegStep step : steps) {
+          instructions.add(new TextInstruction(step));
+        }
+      }
+      notifyDataSetChanged();
       currentLegIndex = routeProgress.legIndex();
     }
   }
@@ -81,14 +103,8 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
     }
   }
 
-  private void addStepsNotifyAdapter(List<LegStep> steps) {
-    legSteps.clear();
-    legSteps.addAll(steps);
-    notifyDataSetChanged();
-  }
-
   private void removeFirstStep() {
-    legSteps.remove(0);
+    instructions.remove(0);
     notifyItemRemoved(0);
   }
 
@@ -101,6 +117,6 @@ public class DirectionListAdapter extends RecyclerView.Adapter<DirectionViewHold
   }
 
   private boolean newStep(int currentStepIndex) {
-    return this.currentStepIndex != currentStepIndex && legSteps.size() > 0;
+    return this.currentStepIndex != currentStepIndex && instructions.size() > 0;
   }
 }

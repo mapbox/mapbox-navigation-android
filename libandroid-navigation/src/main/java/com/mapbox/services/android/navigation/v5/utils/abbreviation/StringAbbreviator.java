@@ -10,6 +10,10 @@ public class StringAbbreviator {
 
   public static String abbreviate(String inputStr) {
     if (!TextUtils.isEmpty(inputStr)) {
+      if (inputStr.length() < 25) {
+        return inputStr;
+      }
+
       AbbreviationArray abbreviations = new AbbreviationArray();
       for (int i = 0; i < abbreviations.size(); i++) {
         AbbreviationArray.Abbreviation abbv = abbreviations.get(i);
