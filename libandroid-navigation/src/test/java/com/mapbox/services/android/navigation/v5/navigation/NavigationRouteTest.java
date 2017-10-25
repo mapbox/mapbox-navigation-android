@@ -5,10 +5,7 @@ import com.mapbox.services.android.navigation.v5.BaseTest;
 
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
 
 public class NavigationRouteTest extends BaseTest {
 
