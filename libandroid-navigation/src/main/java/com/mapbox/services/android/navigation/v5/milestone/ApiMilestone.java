@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
+import android.text.TextUtils;
+
 import com.mapbox.directions.v5.models.VoiceInstructions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -16,16 +18,12 @@ public class ApiMilestone extends Milestone {
 
   @Override
   public boolean isOccurring(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-    if (previousRouteProgress.currentLegProgress().stepIndex()
-      < routeProgress.currentLegProgress().stepIndex() || stepVoiceInstructions == null) {
+    if (shouldAddInstructions(previousRouteProgress, routeProgress)) {
       stepVoiceInstructions = routeProgress.currentLegProgress().currentStep().voiceInstructions();
     }
-
-
-    for (VoiceInstructions voice : routeProgress.currentLegProgress().currentStep().voiceInstructions()) {
-      if (voice.distanceAlongGeometry()
-        >= routeProgress.currentLegProgress().currentStepProgress().distanceRemaining()) {
-        announcement = routeProgress.currentLegProgress().currentStep().voiceInstructions().get(0).announcement();
+    for (VoiceInstructions voice : stepVoiceInstructions) {
+      if (shouldBeVoiced(routeProgress, voice)) {
+        announcement = voice.announcement();
         stepVoiceInstructions.remove(voice);
         return true;
       }
@@ -37,6 +35,27 @@ public class ApiMilestone extends Milestone {
     return announcement;
   }
 
+  private boolean shouldAddInstructions(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
+    return newStep(previousRouteProgress, routeProgress)
+      || newRoute(previousRouteProgress, routeProgress)
+      || stepVoiceInstructions == null;
+  }
+
+  private boolean newRoute(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
+    return !TextUtils.equals(previousRouteProgress.directionsRoute().geometry(),
+      routeProgress.directionsRoute().geometry());
+  }
+
+  private boolean newStep(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
+    return previousRouteProgress.currentLegProgress().stepIndex()
+      < routeProgress.currentLegProgress().stepIndex();
+  }
+
+  private boolean shouldBeVoiced(RouteProgress routeProgress, VoiceInstructions voice) {
+    return voice.distanceAlongGeometry()
+      >= routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+  }
+
   public static final class Builder extends Milestone.Builder {
 
     private Trigger.Statement trigger;
@@ -46,14 +65,14 @@ public class ApiMilestone extends Milestone {
     }
 
     @Override
-    public Builder setTrigger(Trigger.Statement trigger) {
-      this.trigger = trigger;
-      return this;
+    Trigger.Statement getTrigger() {
+      return trigger;
     }
 
     @Override
-    Trigger.Statement getTrigger() {
-      return trigger;
+    public Builder setTrigger(Trigger.Statement trigger) {
+      this.trigger = trigger;
+      return this;
     }
 
     @Override
