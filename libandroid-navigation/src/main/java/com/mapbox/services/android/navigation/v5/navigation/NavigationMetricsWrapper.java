@@ -117,7 +117,7 @@ final class NavigationMetricsWrapper {
                             String description, String feedbackType, String screenshot) {
     updateRouteProgressSessionData(routeProgress, sessionState);
 
-    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildFeedbackEvent(sdkIdentifier,
+    Hashtable<String, Object> feedbackEvent = MapboxNavigationEvent.buildFeedbackEvent(sdkIdentifier,
       BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(), location.getLatitude(),
       location.getLongitude(), sessionState.currentGeometry(), routeProgress.directionsRoute().routeOptions().profile(),
       routeProgress.directionsRoute().distance().intValue(), routeProgress.directionsRoute().duration().intValue(),
@@ -133,9 +133,9 @@ final class NavigationMetricsWrapper {
       routeProgress.currentLegProgress().currentStep().duration().intValue(),
       (int) routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
-      sessionState.currentStepCount(), sessionState.originalStepCount()
-      )
-    );
+      sessionState.currentStepCount(), sessionState.originalStepCount());
+    feedbackEvent.put(MapboxNavigationEvent.KEY_CREATED, TelemetryUtils.generateCreateDate(location));
+    MapboxTelemetry.getInstance().pushEvent(feedbackEvent);
   }
 
   static void turnstileEvent() {
