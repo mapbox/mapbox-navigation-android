@@ -467,7 +467,7 @@ public class InstructionView extends RelativeLayout {
   private void addTurnLanes(InstructionModel model) {
     if (model.getTurnLanes() != null
       && !TextUtils.isEmpty(model.getManeuverModifier())) {
-      turnLaneAdapter.addTurnLanes(model.getTurnLanes(), model.getManeuverModifier());
+//      turnLaneAdapter.addTurnLanes(model.getTurnLanes(), model.getManeuverModifier());
       showTurnLanes();
     } else {
       hideTurnLanes();

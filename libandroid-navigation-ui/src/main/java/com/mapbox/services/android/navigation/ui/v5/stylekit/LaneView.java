@@ -10,7 +10,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneMap;
+//import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneMap;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.*;
 import com.mapbox.services.api.directions.v5.models.IntersectionLanes;
 
@@ -35,13 +35,13 @@ public class LaneView extends View {
     private String laneIndications;
     int primaryColor = Color.BLACK;
     int secondaryColor = Color.LTGRAY;
-    TurnLaneMap turnLaneMap;
+//    TurnLaneMap turnLaneMap;
     RectF rect;
 
     public LaneView(Context context) {
         super(context);
         init(null, 0);
-        turnLaneMap = new TurnLaneMap();
+//        turnLaneMap = new TurnLaneMap();
     }
 
     public LaneView(Context context, AttributeSet attrs) {
@@ -102,13 +102,6 @@ public class LaneView extends View {
         //LanesStyleKit.drawLane_straight(canvas, rect, resizingBehavior, primaryColor);
 
         //if lane.indications.isSuperset(of: [.straightAhead, .sharpRight]) || lane.indications.isSuperset(of: [.straightAhead, .right]) || lane.indications.isSuperset(of: [.straightAhead, .slightRight])
-
-        String turnLaneResourceKey = laneIndications + maneuverModifier;
-        int drawLaneKey = turnLaneMap.getTurnLaneResource(turnLaneResourceKey);
-
-        switch (drawLaneKey) {
-
-        }
 
 
 //

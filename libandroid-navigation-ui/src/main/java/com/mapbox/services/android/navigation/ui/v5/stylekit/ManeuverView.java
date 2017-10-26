@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
@@ -69,10 +71,15 @@ public class ManeuverView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        // TODO: Move to outside of onDraw()
         RectF rect = new RectF(0, 0, getWidth(), getHeight());
+        PointF size = new PointF(getWidth(), getHeight());
+
+
         ManeuversStyleKit.ResizingBehavior resizingBehavior = ManeuversStyleKit.ResizingBehavior.AspectFit;
         if (isInEditMode()) {
-            ManeuversStyleKit.drawArrow0(canvas, rect, resizingBehavior, primaryColor, 1);
+
+            ManeuversStyleKit.drawArrow0(canvas, rect, resizingBehavior, primaryColor, size);
             return;
         }
 
@@ -85,17 +92,17 @@ public class ManeuverView extends View {
 
         switch (maneuverType) {
             case STEP_MANEUVER_TYPE_MERGE:
-                ManeuversStyleKit.drawMerge(canvas, rect, resizingBehavior, primaryColor, secondaryColor, 1);
+                ManeuversStyleKit.drawMerge(canvas, rect, resizingBehavior, primaryColor, secondaryColor, size);
                 flip = shouldFlip(maneuverModifier);
                 break;
 
             case STEP_MANEUVER_TYPE_OFF_RAMP:
-                ManeuversStyleKit.drawOfframp(canvas, rect, resizingBehavior, primaryColor, secondaryColor, 1);
+                ManeuversStyleKit.drawOfframp(canvas, rect, resizingBehavior, primaryColor, secondaryColor, size);
                 flip = shouldFlip(maneuverModifier);
                 break;
 
             case STEP_MANEUVER_TYPE_FORK:
-                ManeuversStyleKit.drawFork(canvas, rect, resizingBehavior, primaryColor, secondaryColor, 1);
+                ManeuversStyleKit.drawFork(canvas, rect, resizingBehavior, primaryColor, secondaryColor, size);
                 flip = shouldFlip(maneuverModifier);
                 break;
 
@@ -104,75 +111,75 @@ public class ManeuverView extends View {
             case STEP_MANEUVER_TYPE_ROTARY:
                 switch (maneuverModifier) {
                     case STEP_MANEUVER_MODIFIER_STRAIGHT:
-                        ManeuversStyleKit.drawRoundabout_180(canvas, rect, resizingBehavior, primaryColor, secondaryColor, 1);
+                        ManeuversStyleKit.drawRoundabout(canvas, rect, resizingBehavior, primaryColor, secondaryColor, size, 180);
                         break;
 
                     case STEP_MANEUVER_MODIFIER_SLIGHT_LEFT:
                     case STEP_MANEUVER_MODIFIER_LEFT:
                     case STEP_MANEUVER_MODIFIER_SHARP_LEFT:
-                        ManeuversStyleKit.drawRoundabout_275(canvas, rect, resizingBehavior, primaryColor, secondaryColor, 1);
+                        ManeuversStyleKit.drawRoundabout(canvas, rect, resizingBehavior, primaryColor, secondaryColor, size, 275);
                         break;
 
                     default:
-                        ManeuversStyleKit.drawRoundabout(canvas, rect, resizingBehavior, primaryColor, secondaryColor, 1);
+                        ManeuversStyleKit.drawRoundabout(canvas, rect, resizingBehavior, primaryColor, secondaryColor, size, 90);
                 }
                 break;
 
             case STEP_MANEUVER_TYPE_ARRIVE:
                 switch (maneuverModifier) {
                     case STEP_MANEUVER_MODIFIER_RIGHT:
-                        ManeuversStyleKit.drawArrive(canvas, rect, resizingBehavior, primaryColor, 1);
+                        ManeuversStyleKit.drawArriveright2(canvas, rect, resizingBehavior, primaryColor, size);
                         flip = false;
                         break;
 
                     case STEP_MANEUVER_MODIFIER_LEFT:
-                        ManeuversStyleKit.drawArrive(canvas, rect, resizingBehavior, primaryColor, 1);
+                        ManeuversStyleKit.drawArriveright2(canvas, rect, resizingBehavior, primaryColor, size);
                         flip = true;
                         break;
 
                     default:
-                        ManeuversStyleKit.drawArrive(canvas, rect, resizingBehavior, primaryColor, 1);
+                        ManeuversStyleKit.drawArriveright2(canvas, rect, resizingBehavior, primaryColor, size);
                 }
                 break;
 
             default:
                 switch (maneuverModifier) {
                     case STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT:
-                        ManeuversStyleKit.drawArrow30(canvas, rect, resizingBehavior, primaryColor, 1);
+                        ManeuversStyleKit.drawArrow30(canvas, rect, resizingBehavior, primaryColor, size);
                         flip = false;
                         break;
 
                     case STEP_MANEUVER_MODIFIER_RIGHT:
-                        ManeuversStyleKit.drawArrow45(canvas, rect, resizingBehavior, primaryColor, 1);
+                        ManeuversStyleKit.drawArrow45(canvas, rect, resizingBehavior, primaryColor, size);
                         flip = false;
                         break;
 
                     case STEP_MANEUVER_MODIFIER_SHARP_RIGHT:
-                        ManeuversStyleKit.drawArrow75(canvas, rect, resizingBehavior, primaryColor, 1);
+                        ManeuversStyleKit.drawArrow75(canvas, rect, resizingBehavior, primaryColor, size);
                         flip = false;
                         break;
 
                     case STEP_MANEUVER_MODIFIER_SLIGHT_LEFT:
-                        ManeuversStyleKit.drawArrow30(canvas, rect, resizingBehavior, primaryColor, 1);
+                        ManeuversStyleKit.drawArrow30(canvas, rect, resizingBehavior, primaryColor, size);
                         flip = true;
                         break;
 
                     case STEP_MANEUVER_MODIFIER_LEFT:
-                        ManeuversStyleKit.drawArrow45(canvas, rect, resizingBehavior, primaryColor, 1);
+                        ManeuversStyleKit.drawArrow45(canvas, rect, resizingBehavior, primaryColor, size);
                         flip = true;
                         break;
 
                     case STEP_MANEUVER_MODIFIER_SHARP_LEFT:
-                        ManeuversStyleKit.drawArrow75(canvas, rect, resizingBehavior, primaryColor, 1);
+                        ManeuversStyleKit.drawArrow75(canvas, rect, resizingBehavior, primaryColor, size);
                         flip = true;
                         break;
 
                     case STEP_MANEUVER_MODIFIER_UTURN:
-                        ManeuversStyleKit.drawArrow180(canvas, rect, resizingBehavior, primaryColor, 1);
+                        ManeuversStyleKit.drawArrow180(canvas, rect, resizingBehavior, primaryColor, size);
                         break;
 
                     default:
-                        ManeuversStyleKit.drawArrow0(canvas, rect, resizingBehavior, primaryColor, 1);
+                        ManeuversStyleKit.drawArrow0(canvas, rect, resizingBehavior, primaryColor, size);
                 }
         }
 

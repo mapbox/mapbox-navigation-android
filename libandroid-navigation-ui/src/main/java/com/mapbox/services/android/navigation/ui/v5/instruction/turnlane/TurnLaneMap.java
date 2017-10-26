@@ -18,12 +18,11 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_STRAIGHT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_UTURN;
 
-
-public class TurnLaneMap {
+class TurnLaneMap {
 
   private Map<String, Integer> turnLaneMap;
 
-  public TurnLaneMap() {
+  TurnLaneMap() {
     turnLaneMap = new HashMap<>();
 
     // Left
@@ -33,10 +32,7 @@ public class TurnLaneMap {
 
     // Left / Straight valid - maneuver modifier left
     turnLaneMap.put(TURN_LANE_INDICATION_LEFT + TURN_LANE_INDICATION_STRAIGHT
-        + STEP_MANEUVER_MODIFIER_LEFT, "draw30");
-
-    String method = "draw30";
-
+        + STEP_MANEUVER_MODIFIER_LEFT, R.drawable.lane_right_only);
     turnLaneMap.put(TURN_LANE_INDICATION_SHARP_LEFT + TURN_LANE_INDICATION_STRAIGHT
       + STEP_MANEUVER_MODIFIER_LEFT, R.drawable.lane_right_only);
     turnLaneMap.put(TURN_LANE_INDICATION_SLIGHT_LEFT + TURN_LANE_INDICATION_STRAIGHT
@@ -80,17 +76,9 @@ public class TurnLaneMap {
       + STEP_MANEUVER_MODIFIER_STRAIGHT, R.drawable.lane_straight_only_right);
   }
 
-  public enum TurnLaneResource {
-    Straight,
-    StraightLeft,
-    StraightAndSlightLeft,
-    StraightRight,
-    StraightAnd
-  }
-
-  public int getTurnLaneResource(String turnLaneResourceKey) {
-    if (turnLaneMap.get(turnLaneResourceKey) != null) {
-      return turnLaneMap.get(turnLaneResourceKey);
+  int getTurnLaneResource(String turnLaneKey) {
+    if (turnLaneMap.get(turnLaneKey) != null) {
+      return turnLaneMap.get(turnLaneKey);
     }
     return 0;
   }
