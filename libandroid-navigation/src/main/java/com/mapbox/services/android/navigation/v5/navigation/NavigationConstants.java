@@ -20,7 +20,7 @@ public final class NavigationConstants {
    *
    * @since 0.7.0
    */
-  public static final int DEFAULT_MILESTONE_IDENTIFIER = 1;
+  public static final int VOICE_INSTRUCTION_MILESTONE_ID = 1;
 
   /**
    * Random integer value used for identifying the navigation notification.
