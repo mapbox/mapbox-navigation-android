@@ -5,12 +5,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.mapbox.directions.v5.models.IntersectionLanes;
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.services.commons.utils.TextUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.*;
@@ -18,7 +17,6 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
 
   private List<IntersectionLanes> lanes;
-  //private String maneuverModifier;
   private ManeuverModifier maneuverModifier;
 
   public TurnLaneAdapter() {
@@ -37,7 +35,7 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
   public void onBindViewHolder(TurnLaneViewHolder holder, int position) {
     IntersectionLanes lane = lanes.get(position);
 
-    holder.laneView.setLane(lane);
+    //    holder.laneView.setLane(lane);
     holder.laneView.setManeuverModifier(maneuverModifier);
   }
 
@@ -46,10 +44,10 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
     return lanes.size();
   }
 
-  public void addTurnLanes(IntersectionLanes[] lanes, ManeuverModifier maneuverModifier) {
+  public void addTurnLanes(List<IntersectionLanes> lanes, ManeuverModifier maneuverModifier) {
     this.maneuverModifier = maneuverModifier;
     this.lanes.clear();
-    Collections.addAll(this.lanes, lanes);
+    this.lanes = lanes;
     notifyDataSetChanged();
   }
 
@@ -58,11 +56,19 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
     StringBuilder builder = new StringBuilder();
 
     // Indications
+<<<<<<< HEAD
     if (lane.getIndications() != null) {
       for (String indication : lane.getIndications()) {
         builder.append(indication);
       }
       if (builder.toString().contains(TURN_LANE_INDICATION_STRAIGHT) && lane.getValid()) {
+=======
+    if (lanes.indications() != null) {
+      for (String indication : lanes.indications()) {
+        builder.append(indication);
+      }
+      if (builder.toString().contains(TURN_LANE_INDICATION_STRAIGHT) && lanes.valid()) {
+>>>>>>> master
         appendModifier(builder);
       }
     }
@@ -71,7 +77,7 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
       holder.turnImage.setImageResource(retrieveTurnLaneResource(builder.toString()));
     }
 
-    if (!lanes.getValid()) {
+    if (!lanes.valid()) {
       holder.turnImage.setAlpha(0.4f);
     } else {
       holder.turnImage.setAlpha(1.0f);

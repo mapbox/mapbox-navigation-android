@@ -15,13 +15,13 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.widget.RemoteViews;
 
+import com.mapbox.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
-import com.mapbox.services.api.directions.v5.models.LegStep;
 
 import java.text.DecimalFormat;
 import java.util.Locale;
@@ -111,15 +111,18 @@ class NavigationNotification {
     if (context != null) {
       context.unregisterReceiver(endNavigationBtnReceiver);
     }
+    if (notificationManager != null) {
+      notificationManager.cancel(NAVIGATION_NOTIFICATION_ID);
+    }
   }
 
   private boolean newStepName(RouteProgress routeProgress) {
     return currentStepName != null
-      && !currentStepName.contentEquals(routeProgress.currentLegProgress().currentStep().getName());
+      && !currentStepName.contentEquals(routeProgress.currentLegProgress().currentStep().name());
   }
 
   private void addStepName(RouteProgress routeProgress) {
-    currentStepName = routeProgress.currentLegProgress().currentStep().getName();
+    currentStepName = routeProgress.currentLegProgress().currentStep().name();
     String formattedStepName = StringAbbreviator.deliminator(
       StringAbbreviator.abbreviate(currentStepName));
     remoteViews.setTextViewText(
@@ -215,9 +218,6 @@ class NavigationNotification {
   };
 
   private void onEndNavigationBtnClick() {
-    if (notificationManager != null) {
-      notificationManager.cancel(NAVIGATION_NOTIFICATION_ID);
-    }
     if (mapboxNavigation != null) {
       mapboxNavigation.endNavigation();
     }

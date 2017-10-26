@@ -2,7 +2,8 @@ package com.mapbox.services.android.navigation.v5.routeprogress;
 
 
 import com.google.auto.value.AutoValue;
-import com.mapbox.services.api.directions.v5.models.LegStep;
+import com.mapbox.directions.v5.models.LegStep;
+
 
 /**
  * This is a progress object specific to the current step the user is on.
@@ -31,7 +32,7 @@ public abstract class RouteStepProgress {
    * @since 0.1.0
    */
   public double distanceTraveled() {
-    double distanceTraveled = step().getDistance() - distanceRemaining();
+    double distanceTraveled = step().distance() - distanceRemaining();
     if (distanceTraveled < 0) {
       distanceTraveled = 0;
     }
@@ -58,8 +59,8 @@ public abstract class RouteStepProgress {
   public float fractionTraveled() {
     float fractionTraveled = 1;
 
-    if (step().getDistance() > 0) {
-      fractionTraveled = (float) (distanceTraveled() / step().getDistance());
+    if (step().distance() > 0) {
+      fractionTraveled = (float) (distanceTraveled() / step().distance());
       if (fractionTraveled < 0) {
         fractionTraveled = 0;
       }
@@ -74,6 +75,6 @@ public abstract class RouteStepProgress {
    * @since 0.1.0
    */
   public double durationRemaining() {
-    return (1 - fractionTraveled()) * step().getDuration();
+    return (1 - fractionTraveled()) * step().duration();
   }
 }

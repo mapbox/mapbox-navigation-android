@@ -1,7 +1,9 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
+import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -12,7 +14,6 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -27,7 +28,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
@@ -57,10 +57,10 @@ import java.text.DecimalFormat;
  */
 public class InstructionView extends RelativeLayout {
 
-  private View instructionLayout;
   private ManeuverView maneuverView;
   private TextView stepDistanceText;
-  private TextView stepInstructionText;
+  private TextView stepPrimaryText;
+  private TextView stepSecondaryText;
   private TextView soundChipText;
   private FloatingActionButton soundFab;
   private View rerouteLayout;
@@ -74,8 +74,7 @@ public class InstructionView extends RelativeLayout {
   private AnimationSet fadeInSlowOut;
 
   private DecimalFormat decimalFormat;
-  private String currentInstruction;
-  private SpannableStringBuilder currentDistanceText;
+  private int primaryTextMaxLines = 1;
   private boolean turnLanesHidden;
   private boolean isRerouting;
   public boolean isMuted;
@@ -125,7 +124,7 @@ public class InstructionView extends RelativeLayout {
   }
 
   public void subscribe(NavigationViewModel navigationViewModel) {
-    navigationViewModel.instructionModel.observe((NavigationView) getContext(), new Observer<InstructionModel>() {
+    navigationViewModel.instructionModel.observe((LifecycleOwner) getContext(), new Observer<InstructionModel>() {
       @Override
       public void onChanged(@Nullable InstructionModel instructionModel) {
         if (instructionModel != null) {
@@ -136,7 +135,7 @@ public class InstructionView extends RelativeLayout {
         }
       }
     });
-    navigationViewModel.isOffRoute.observe((NavigationView) getContext(), new Observer<Boolean>() {
+    navigationViewModel.isOffRoute.observe((LifecycleOwner) getContext(), new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {
@@ -230,10 +229,10 @@ public class InstructionView extends RelativeLayout {
   private void bind() {
     maneuverView = findViewById(R.id.maneuverView);
     stepDistanceText = findViewById(R.id.stepDistanceText);
-    stepInstructionText = findViewById(R.id.stepInstructionText);
+    stepPrimaryText = findViewById(R.id.stepPrimaryText);
+    stepSecondaryText = findViewById(R.id.stepSecondaryText);
     soundChipText = findViewById(R.id.soundText);
     soundFab = findViewById(R.id.soundFab);
-    instructionLayout = findViewById(R.id.instructionLayout);
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
@@ -245,8 +244,18 @@ public class InstructionView extends RelativeLayout {
       int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewPrimaryColor(getContext());
       int navigationViewSecondaryColor = ThemeSwitcher.retrieveNavigationViewSecondaryColor(getContext());
       // Instruction Layout - primary
-      Drawable instructionBackground = DrawableCompat.wrap(instructionLayout.getBackground()).mutate();
-      DrawableCompat.setTint(instructionBackground, navigationViewPrimaryColor);
+      if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        View instructionLayoutText = findViewById(R.id.instructionLayoutText);
+        View instructionLayoutManeuver = findViewById(R.id.instructionLayoutManeuver);
+        Drawable textBackground = DrawableCompat.wrap(instructionLayoutText.getBackground()).mutate();
+        Drawable maneuverBackground = DrawableCompat.wrap(instructionLayoutManeuver.getBackground()).mutate();
+        DrawableCompat.setTint(textBackground, navigationViewPrimaryColor);
+        DrawableCompat.setTint(maneuverBackground, navigationViewPrimaryColor);
+      } else {
+        View instructionLayout = findViewById(R.id.instructionLayout);
+        Drawable instructionBackground = DrawableCompat.wrap(instructionLayout.getBackground()).mutate();
+        DrawableCompat.setTint(instructionBackground, navigationViewPrimaryColor);
+      }
       // Sound chip text - primary
       Drawable soundChipBackground = DrawableCompat.wrap(soundChipText.getBackground()).mutate();
       DrawableCompat.setTint(soundChipBackground, navigationViewPrimaryColor);
@@ -331,8 +340,12 @@ public class InstructionView extends RelativeLayout {
    * to automatically re-size based on the length of the text.
    */
   private void initInstructionAutoSize() {
-    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepInstructionText,
-      16, 28, 2, TypedValue.COMPLEX_UNIT_SP);
+    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepPrimaryText,
+      24, 30, 1, TypedValue.COMPLEX_UNIT_SP);
+    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepSecondaryText,
+      20, 26, 1, TypedValue.COMPLEX_UNIT_SP);
+    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepDistanceText,
+      16, 20, 1, TypedValue.COMPLEX_UNIT_SP);
   }
 
   /**
@@ -385,7 +398,7 @@ public class InstructionView extends RelativeLayout {
    */
   private void addManeuverImage(InstructionModel model) {
     maneuverView.setManeuverModifier(model.getManeuverModifier());
-    maneuverView.setManeuverType(model.getStep().getManeuver().getType());
+    maneuverView.setManeuverType(model.getStep().maneuver().type());
   }
 
   /**
@@ -397,7 +410,7 @@ public class InstructionView extends RelativeLayout {
   private void addDistanceText(InstructionModel model) {
     if (newDistanceText(model)) {
       distanceText(model);
-    } else if (currentDistanceText == null) {
+    } else if (stepDistanceText.getText().toString().isEmpty()) {
       distanceText(model);
     }
   }
@@ -408,9 +421,10 @@ public class InstructionView extends RelativeLayout {
    * @param model provides distance text
    */
   private boolean newDistanceText(InstructionModel model) {
-    return currentDistanceText != null
+    return !stepDistanceText.getText().toString().isEmpty()
       && !TextUtils.isEmpty(model.getStepDistanceRemaining())
-      && !currentDistanceText.toString().contentEquals(model.getStepDistanceRemaining().toString());
+      && !stepDistanceText.getText().toString()
+      .contentEquals(model.getStepDistanceRemaining().toString());
   }
 
   /**
@@ -419,7 +433,6 @@ public class InstructionView extends RelativeLayout {
    * @param model provides distance text
    */
   private void distanceText(InstructionModel model) {
-    currentDistanceText = model.getStepDistanceRemaining();
     stepDistanceText.setText(model.getStepDistanceRemaining());
   }
 
@@ -430,22 +443,56 @@ public class InstructionView extends RelativeLayout {
    * @param model provides instruction text
    */
   private void addTextInstruction(InstructionModel model) {
-    if (newTextInstruction(model)) {
-      textInstruction(model);
-    } else if (currentInstruction == null) {
-      textInstruction(model);
+    updateMaxLines(model);
+    if (newPrimaryText(model) || newSecondaryText(model)) {
+      textInstructions(model);
+    } else if (stepPrimaryText.getText().toString().isEmpty()
+      || stepSecondaryText.getText().toString().isEmpty()) {
+      textInstructions(model);
     }
   }
 
   /**
-   * Looks to see if we have a new instruction text.
+   * Based on a boolean from the model,
+   * update to 2 lines for primary text.
+   * <p>
+   * Track the lines so the max can revert to 1.
    *
-   * @param model provides instruction text
+   * @param model the cue to go to 2 lines
    */
-  private boolean newTextInstruction(InstructionModel model) {
-    return currentInstruction != null
-      && !TextUtils.isEmpty(model.getTextInstruction())
-      && !currentInstruction.contentEquals(model.getTextInstruction());
+  private void updateMaxLines(InstructionModel model) {
+    if (model.isUsingInstruction()) {
+      stepPrimaryText.setMaxLines(2);
+      primaryTextMaxLines = 2;
+    } else if (primaryTextMaxLines == 2) {
+      stepPrimaryText.setMaxLines(1);
+    }
+  }
+
+  /**
+   * Looks to see if we have a new primary instruction text.
+   *
+   * @param model provides primary instruction text
+   */
+  private boolean newPrimaryText(InstructionModel model) {
+    // New primaryText instruction
+    String currentPrimaryText = stepPrimaryText.getText().toString();
+    return !currentPrimaryText.isEmpty()
+      && !TextUtils.isEmpty(model.getPrimaryText())
+      && !currentPrimaryText.contentEquals(model.getPrimaryText());
+  }
+
+  /**
+   * Looks to see if we have a new secondary instruction text.
+   *
+   * @param model provides secondary instruction text
+   */
+  private boolean newSecondaryText(InstructionModel model) {
+    // New primaryText instruction
+    String currentSecondaryText = stepSecondaryText.getText().toString();
+    return !currentSecondaryText.isEmpty()
+      && !TextUtils.isEmpty(model.getSecondaryText())
+      && !currentSecondaryText.contentEquals(model.getSecondaryText());
   }
 
   /**
@@ -453,9 +500,18 @@ public class InstructionView extends RelativeLayout {
    *
    * @param model provides instruction text
    */
-  private void textInstruction(InstructionModel model) {
-    currentInstruction = model.getTextInstruction();
-    stepInstructionText.setText(StringAbbreviator.abbreviate(model.getTextInstruction()));
+  private void textInstructions(InstructionModel model) {
+    if (!TextUtils.isEmpty(model.getPrimaryText())) {
+      stepPrimaryText.setText(StringAbbreviator.abbreviate(model.getPrimaryText()));
+    }
+    if (!TextUtils.isEmpty(model.getSecondaryText())) {
+      if (stepSecondaryText.getVisibility() == GONE) {
+        stepSecondaryText.setVisibility(VISIBLE);
+      }
+      stepSecondaryText.setText(StringAbbreviator.abbreviate(model.getSecondaryText()));
+    } else {
+      stepSecondaryText.setVisibility(GONE);
+    }
   }
 
   /**

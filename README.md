@@ -28,7 +28,7 @@ The snippet to add to your `build.gradle` file to use this SDK is the following:
 ```
 // Mapbox Navigation SDK for Android
 
-compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.6.1'
+compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.6.3'
 
 ```
 
@@ -59,7 +59,7 @@ dependencies {
 
 ## Sample code
 
-[We've added several navigation examples to this repo's test app](https://github.com/mapbox/mapbox-navigation-android/tree/master/navigation/app/src/main/java/com/mapbox/services/android/navigation/testapp/activity) to help you get started with the SDK and to inspire you.
+[We've added several navigation examples to this repo's test app](https://github.com/mapbox/mapbox-navigation-android/tree/master/app/src/main/java/com/mapbox/services/android/navigation/testapp/activity) to help you get started with the SDK and to inspire you.
 
 ## Translations
 

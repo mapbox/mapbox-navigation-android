@@ -10,12 +10,14 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.location.LostLocationEngine;
-import com.mapbox.services.android.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
+import com.mapbox.services.android.navigation.v5.milestone.ApiMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -23,13 +25,14 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
+import com.mapbox.services.android.navigation.v5.utils.ValidationUtils;
 import com.mapbox.services.android.telemetry.MapboxEvent;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.utils.TextUtils;
+import com.mapbox.services.utils.TextUtils;
+
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,6 +41,8 @@ import java.util.Locale;
 
 import retrofit2.Callback;
 import timber.log.Timber;
+
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.DEFAULT_MILESTONE_IDENTIFIER;
 
 /**
  * A MapboxNavigation class for interacting with and customizing a navigation session.
@@ -108,7 +113,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     this.context = context;
     this.options = options;
     this.isFromNavigationUi = options.isFromNavigationUi();
-    initialize();
+    initialize(options.isDebugLoggingEnabled());
   }
 
   /**
@@ -116,8 +121,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    * be changed later on using their corresponding setter. An internal progressChangeListeners used
    * to prevent users from removing it.
    */
-  private void initialize() {
-    initializeTelemetry();
+  private void initialize(boolean debugLoggingEnabled) {
+    initializeTelemetry(debugLoggingEnabled);
 
     // Initialize event dispatcher and add internal listeners
     navigationEventDispatcher = new NavigationEventDispatcher();
@@ -128,7 +133,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     // Create and add default milestones if enabled.
     milestones = new ArrayList<>();
     if (options.defaultMilestonesEnabled()) {
-      new DefaultMilestones(this);
+      addMilestone(new ApiMilestone.Builder().setIdentifier(DEFAULT_MILESTONE_IDENTIFIER).build());
     }
 
     initializeDefaultLocationEngine();
@@ -141,7 +146,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     }
   }
 
-  private void initializeTelemetry() {
+  private void initializeTelemetry(boolean debugLoggingEnabled) {
     validateAccessToken(accessToken);
     String sdkIdentifier = MAPBOX_NAVIGATION_SDK_IDENTIFIER;
     if (isFromNavigationUi) {
@@ -151,6 +156,9 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     MapboxTelemetry.getInstance().initialize(context, accessToken, userAgent, sdkIdentifier,
       BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
     MapboxTelemetry.getInstance().newUserAgent(userAgent);
+
+    // Enable extra logging in debug mode
+    MapboxTelemetry.getInstance().setDebugLoggingEnabled(debugLoggingEnabled);
 
     NavigationMetricsWrapper.sdkIdentifier = sdkIdentifier;
     NavigationMetricsWrapper.turnstileEvent();
@@ -346,6 +354,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    * @since 0.1.0
    */
   public void startNavigation(@NonNull DirectionsRoute directionsRoute) {
+    ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
     Timber.d("MapboxNavigation startNavigation called.");
     if (!isBound) {

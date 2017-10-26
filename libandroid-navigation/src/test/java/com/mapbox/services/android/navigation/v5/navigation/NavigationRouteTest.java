@@ -1,15 +1,17 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import com.mapbox.directions.v5.DirectionsCriteria;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.BaseTest;
-import com.mapbox.services.api.directions.v5.DirectionsCriteria;
-import com.mapbox.services.commons.models.Position;
 
+import org.hamcrest.CoreMatchers;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
 
 public class NavigationRouteTest extends BaseTest {
 
@@ -17,60 +19,48 @@ public class NavigationRouteTest extends BaseTest {
   public void sanityTest() throws Exception {
     NavigationRoute navigationRoute = NavigationRoute.builder()
       .accessToken(ACCESS_TOKEN)
-      .origin(Position.fromCoordinates(1.0, 2.0))
-      .destination(Position.fromCoordinates(1.0, 5.0))
+      .origin(Point.fromLngLat(1.0, 2.0))
+      .destination(Point.fromLngLat(1.0, 5.0))
       .build();
     assertNotNull(navigationRoute);
   }
 
   @Test
-  public void originDestination_doGetAddedToNullCoordinateList() throws Exception {
-    Position origin = Position.fromCoordinates(1.0, 2.0);
-    Position destination = Position.fromCoordinates(1.0, 5.0);
-
+  public void changingDefaultValueToCustomWorksProperly() throws Exception {
     NavigationRoute navigationRoute = NavigationRoute.builder()
       .accessToken(ACCESS_TOKEN)
-      .origin(origin)
-      .destination(destination)
+      .origin(Point.fromLngLat(1.0, 2.0))
+      .destination(Point.fromLngLat(1.0, 5.0))
+      .profile(DirectionsCriteria.PROFILE_CYCLING)
       .build();
-    assertEquals(2, navigationRoute.coordinates().size());
-    assertTrue(origin.equals(navigationRoute.coordinates().get(0)));
-    assertTrue(destination.equals(navigationRoute.coordinates().get(1)));
+
+    assertThat(navigationRoute.getCall().request().url().toString(),
+      containsString("/cycling/"));
   }
 
   @Test
-  public void originDestination_doGetAddedToFullCoordinateList() throws Exception {
-    Position origin = Position.fromCoordinates(1.0, 2.0);
-    Position destination = Position.fromCoordinates(1.0, 5.0);
-    Position waypointOne = Position.fromCoordinates(10.0, 4.0);
-    Position waypointTwo = Position.fromCoordinates(5.0, 3.0);
-    Position waypointThree = Position.fromCoordinates(9.0, 7.0);
-
+  public void addingPointAndBearingKeepsCorrectOrder() throws Exception {
     NavigationRoute navigationRoute = NavigationRoute.builder()
       .accessToken(ACCESS_TOKEN)
-      .origin(origin)
-      .destination(destination)
-      .profile(DirectionsCriteria.PROFILE_DRIVING)
-      .addWaypoint(waypointOne)
-      .addWaypoint(waypointTwo)
-      .addWaypoint(waypointThree)
+      .origin(Point.fromLngLat(1.0, 2.0), 90d, 90d)
+      .addBearing(2.0, 3.0)
+      .destination(Point.fromLngLat(1.0, 5.0))
       .build();
-    assertEquals(5, navigationRoute.coordinates().size());
-    assertTrue(origin.equals(navigationRoute.coordinates().get(0)));
-    assertTrue(waypointOne.equals(navigationRoute.coordinates().get(1)));
-    assertTrue(destination.equals(navigationRoute.coordinates().get(4)));
+
+    assertThat(navigationRoute.getCall().request().url().toString(),
+      containsString("bearings=90,90;2,3;"));
   }
 
   @Test
-  public void requestDoesNotAttachRadiusIfOnesNotProvided() throws Exception {
+  @Ignore
+  public void reverseOriginDestinationDoesntMessUpBearings() throws Exception {
     NavigationRoute navigationRoute = NavigationRoute.builder()
       .accessToken(ACCESS_TOKEN)
-      .origin(Position.fromCoordinates(1.0, 2.0))
-      .destination(Position.fromCoordinates(1.0, 5.0))
-      .addBearing(90, 100)
+      .destination(Point.fromLngLat(1.0, 5.0),1d,5d)
+      .origin(Point.fromLngLat(1.0, 2.0), 90d, 90d)
       .build();
 
-    String url = navigationRoute.getDirectionsRequest().cloneCall().request().url().toString();
-    assertFalse(url.contains("radiuses="));
+    assertThat(navigationRoute.getCall().request().url().toString(),
+      containsString("bearings=90,90;1,5"));
   }
 }
