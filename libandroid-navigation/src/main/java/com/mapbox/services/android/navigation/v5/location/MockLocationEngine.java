@@ -2,7 +2,6 @@ package com.mapbox.services.android.navigation.v5.location;
 
 import android.location.Location;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
@@ -352,7 +351,7 @@ public class MockLocationEngine extends LocationEngine {
     }
 
     location.setAccuracy(3f);
-    location.setTime(SystemClock.elapsedRealtime());
+    location.setTime(System.currentTimeMillis());
 
     return location;
   }

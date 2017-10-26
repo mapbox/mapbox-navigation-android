@@ -313,6 +313,7 @@ public class NavigationService extends Service implements LocationEngineListener
       .beforeRerouteLocations(Arrays.asList(
         locationBuffer.toArray(new Location[locationBuffer.size()])))
       .routeProgressBeforeReroute(routeProgress)
+      .eventLocation(rawLocation)
       .build();
 
     FeedbackEvent feedbackEvent = new FeedbackEvent(feedbackEventSessionState, feedbackSource);
@@ -343,8 +344,9 @@ public class NavigationService extends Service implements LocationEngineListener
       locationBuffer.toArray(new Location[locationBuffer.size()])))
       .build();
 
-    NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, routeProgress, rawLocation,
-      feedbackEvent.getDescription(), feedbackEvent.getFeedbackType(), "");
+    NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, routeProgress,
+      feedbackEvent.getSessionState().eventLocation(), feedbackEvent.getDescription(),
+      feedbackEvent.getFeedbackType(), "");
   }
 
   void sendRerouteEvent(SessionState sessionState) {
