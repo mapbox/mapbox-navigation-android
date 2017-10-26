@@ -11,12 +11,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.20"/>
+        app:layout_constraintGuide_percent="0.2"/>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:gravity="center_horizontal"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -28,7 +29,7 @@
             android:id="@+id/maneuverImageView"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:tint="?attr/navigationViewSecondary"
+            android:tint="?attr/navigationViewBannerManeuverPrimary"
             app:srcCompat="@drawable/ic_maneuver_depart"/>
 
         <TextView
@@ -38,7 +39,7 @@
             android:gravity="center"
             android:includeFontPadding="false"
             android:maxLines="1"
-            android:textColor="?attr/navigationViewAccentText"
+            android:textColor="?attr/navigationViewBannerSecondaryText"
             android:textSize="20sp"
             tools:text="302 mi"/>
 
@@ -47,10 +48,6 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -65,7 +62,7 @@
             android:gravity="center_vertical"
             android:includeFontPadding="false"
             android:maxLines="1"
-            android:textColor="?attr/navigationViewSecondary"
+            android:textColor="?attr/navigationViewBannerPrimaryText"
             android:textSize="28sp"
             android:textStyle="bold"
             tools:text="I-580 South"/>
@@ -78,7 +75,7 @@
             android:gravity="center_vertical"
             android:includeFontPadding="false"
             android:maxLines="2"
-            android:textColor="?attr/navigationViewAccentText"
+            android:textColor="?attr/navigationViewBannerSecondaryText"
             android:textSize="22sp"
             android:textStyle="bold"
             tools:text="San Jose / Cupertino / Saratoga Montery / SR-1"/>

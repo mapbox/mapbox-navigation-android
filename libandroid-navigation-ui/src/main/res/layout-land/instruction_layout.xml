@@ -29,7 +29,7 @@
             android:id="@+id/maneuverImageView"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:tint="?attr/navigationViewSecondary"
+            android:tint="?attr/navigationViewBannerManeuverPrimary"
             app:srcCompat="@drawable/ic_maneuver_depart"/>
 
         <TextView
@@ -39,7 +39,7 @@
             android:gravity="center"
             android:includeFontPadding="false"
             android:maxLines="1"
-            android:textColor="?attr/navigationViewAccentText"
+            android:textColor="?attr/navigationViewBannerSecondaryText"
             android:textSize="20sp"
             tools:text="3.2 mi"/>
 
@@ -67,7 +67,7 @@
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:maxLines="1"
-            android:textColor="?attr/navigationViewSecondary"
+            android:textColor="?attr/navigationViewBannerPrimaryText"
             android:textSize="28sp"
             android:textStyle="bold"
             tools:text="Fulton St."/>
@@ -79,7 +79,7 @@
             android:ellipsize="end"
             android:includeFontPadding="false"
             android:maxLines="1"
-            android:textColor="?attr/navigationViewAccentText"
+            android:textColor="?attr/navigationViewBannerSecondaryText"
             android:textSize="22sp"
             android:textStyle="bold"
             tools:text="San Jose / Cupertino / Saratoga Montery / SR-1"/>

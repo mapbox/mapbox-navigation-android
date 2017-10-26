@@ -13,7 +13,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -307,18 +306,19 @@ public class InstructionView extends RelativeLayout {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
       int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewPrimaryColor(getContext());
       int navigationViewSecondaryColor = ThemeSwitcher.retrieveNavigationViewSecondaryColor(getContext());
-      // Instruction Layout - primary
+      int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveNavigationViewBannerBackgroundColor(getContext());
+      // Instruction Layout banner - banner background
       if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
         View instructionLayoutText = findViewById(R.id.instructionLayoutText);
         View instructionLayoutManeuver = findViewById(R.id.instructionLayoutManeuver);
         Drawable textBackground = DrawableCompat.wrap(instructionLayoutText.getBackground()).mutate();
         Drawable maneuverBackground = DrawableCompat.wrap(instructionLayoutManeuver.getBackground()).mutate();
-        DrawableCompat.setTint(textBackground, navigationViewPrimaryColor);
-        DrawableCompat.setTint(maneuverBackground, navigationViewPrimaryColor);
+        DrawableCompat.setTint(textBackground, navigationViewBannerBackgroundColor);
+        DrawableCompat.setTint(maneuverBackground, navigationViewBannerBackgroundColor);
       } else {
         View instructionLayout = findViewById(R.id.instructionLayout);
         Drawable instructionBackground = DrawableCompat.wrap(instructionLayout.getBackground()).mutate();
-        DrawableCompat.setTint(instructionBackground, navigationViewPrimaryColor);
+        DrawableCompat.setTint(instructionBackground, navigationViewBannerBackgroundColor);
       }
       // Sound chip text - primary
       Drawable soundChipBackground = DrawableCompat.wrap(soundChipText.getBackground()).mutate();
@@ -433,7 +433,6 @@ public class InstructionView extends RelativeLayout {
     rvInstrcutions.setNestedScrollingEnabled(true);
     rvInstrcutions.setItemAnimator(new DefaultItemAnimator());
     rvInstrcutions.setLayoutManager(new LinearLayoutManager(getContext()));
-    rvInstrcutions.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
   }
 
   /**

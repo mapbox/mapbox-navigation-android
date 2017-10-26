@@ -10,7 +10,18 @@
     android:foreground="?attr/selectableItemBackground"
     tools:showIn="@layout/instruction_view_layout">
 
-    <include layout="@layout/instruction_content_layout"/>
+    <include
+        layout="@layout/instruction_content_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <LinearLayout
         android:id="@+id/rerouteLayout"
@@ -33,7 +44,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:text="@string/rerouting"
-            android:textColor="?attr/navigationViewPrimary"
+            android:textColor="?attr/navigationViewBannerPrimaryText"
             android:textSize="20sp"
             android:textStyle="bold"/>
 

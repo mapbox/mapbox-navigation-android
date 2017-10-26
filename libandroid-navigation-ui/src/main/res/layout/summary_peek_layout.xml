@@ -35,7 +35,7 @@
             android:background="@android:color/transparent"
             android:foreground="?attr/selectableItemBackground"
             android:padding="16dp"
-            android:tint="?attr/navigationViewIcon"
+            android:tint="?attr/navigationViewSecondary"
             app:srcCompat="@drawable/ic_clear"/>
 
     </LinearLayout>
