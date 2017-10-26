@@ -53,6 +53,7 @@ public class NavigationService extends Service implements LocationEngineListener
   // Message id used when a new location update occurs and we send to the thread.
   private static final int MSG_LOCATION_UPDATED = 1001;
   private static final int TWENTY_SECOND_INTERVAL = 20;
+  private static final String MOCK_PROVIDER = "com.mapbox.services.android.navigation.v5.location.MockLocationEngine";
 
   private RingBuffer<Integer> recentDistancesFromManeuverInMeters;
   private final IBinder localBinder = new LocalBinder();
@@ -314,6 +315,7 @@ public class NavigationService extends Service implements LocationEngineListener
         locationBuffer.toArray(new Location[locationBuffer.size()])))
       .routeProgressBeforeReroute(routeProgress)
       .eventLocation(rawLocation)
+      .mockLocation((rawLocation.getProvider().equals(MOCK_PROVIDER)) ? true : false)
       .build();
 
     FeedbackEvent feedbackEvent = new FeedbackEvent(feedbackEventSessionState, feedbackSource);
