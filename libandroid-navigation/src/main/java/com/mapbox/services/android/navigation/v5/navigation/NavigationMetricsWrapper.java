@@ -114,7 +114,8 @@ final class NavigationMetricsWrapper {
   }
 
   static void feedbackEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
-                            String description, String feedbackType, String screenshot) {
+                            String description, String feedbackType, String screenshot, String feedbackId,
+                            String vendorId) {
     updateRouteProgressSessionData(routeProgress, sessionState);
 
     Hashtable<String, Object> feedbackEvent = MapboxNavigationEvent.buildFeedbackEvent(sdkIdentifier,
@@ -124,8 +125,8 @@ final class NavigationMetricsWrapper {
       sessionState.rerouteCount(), sessionState.startTimestamp(), feedbackType, beforeLocations, afterLocations,
       (int) sessionState.routeProgressBeforeReroute().distanceTraveled(),
       (int) sessionState.routeProgressBeforeReroute().distanceRemaining(),
-      (int) sessionState.routeProgressBeforeReroute().durationRemaining(), description, TelemetryUtils.buildUUID(),
-      TelemetryUtils.buildUUID(), screenshot, sessionState.mockLocation(), sessionState.originalRequestIdentifier(),
+      (int) sessionState.routeProgressBeforeReroute().durationRemaining(), description, vendorId,
+      feedbackId, screenshot, sessionState.mockLocation(), sessionState.originalRequestIdentifier(),
       sessionState.requestIdentifier(), sessionState.originalGeometry(), sessionState.originalDistance(),
       sessionState.originalDuration(), null, upcomingInstruction, upcomingType, upcomingModifier, upcomingName,
       previousInstruction, previousType, previousModifier, previousName,

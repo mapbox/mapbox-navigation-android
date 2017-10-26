@@ -346,7 +346,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
     NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, routeProgress,
       feedbackEvent.getSessionState().eventLocation(), feedbackEvent.getDescription(),
-      feedbackEvent.getFeedbackType(), "");
+      feedbackEvent.getFeedbackType(), "", feedbackEvent.getFeedbackId(), mapboxNavigation.obtainVendorId());
   }
 
   void sendRerouteEvent(SessionState sessionState) {

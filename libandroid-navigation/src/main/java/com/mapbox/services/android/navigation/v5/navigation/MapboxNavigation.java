@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
@@ -27,6 +28,7 @@ import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 import com.mapbox.services.android.telemetry.MapboxEvent;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
+import com.mapbox.services.android.telemetry.constants.TelemetryConstants;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
@@ -685,6 +687,11 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   private boolean isServiceAvailable() {
     return navigationService != null && isBound;
+  }
+
+  String obtainVendorId() {
+    SharedPreferences prefs = TelemetryUtils.getSharedPreferences(context.getApplicationContext());
+    return prefs.getString(TelemetryConstants.MAPBOX_SHARED_PREFERENCE_KEY_VENDOR_ID, "");
   }
 
   @Override
