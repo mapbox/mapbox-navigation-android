@@ -77,7 +77,7 @@ public class VoiceInstructionMilestone extends Milestone {
   /**
    * @param previousRouteProgress most recent progress before the current progress
    * @param routeProgress         the current route progress
-   * @return
+   * @return true if on a new step, false if not
    */
   private boolean newStep(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
     return previousRouteProgress.currentLegProgress().stepIndex()
