@@ -1711,6 +1711,8 @@ public class ManeuversStyleKit {
         scale = 1f;
         break;
       }
+      default:
+        break;
     }
 
     float newWidth = Math.abs(rect.width() * scale);
