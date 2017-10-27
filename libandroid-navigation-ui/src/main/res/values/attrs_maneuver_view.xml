@@ -1,6 +1,0 @@
-<resources>
-    <declare-styleable name="ManeuverView">
-        <attr name="primaryColor" format="color" />
-        <attr name="secondaryColor" format="color" />
-    </declare-styleable>
-</resources>

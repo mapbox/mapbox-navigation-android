@@ -14,16 +14,16 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.mapbox.services.android.navigation.v5.utils.ManeuverUtils.getManeuverResource;
+
 public class InstructionModel {
 
   private SpannableStringBuilder stepDistanceRemaining;
-  private LegStep upcomingStep;
   private String primaryText;
   private String secondaryText;
+  private int maneuverImage;
   private String maneuverModifier;
-  private String maneuverType;
   private List<IntersectionLanes> turnLanes;
-  private float roundaboutAngle;
   private boolean isUsingInstruction;
 
   public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
@@ -42,12 +42,8 @@ public class InstructionModel {
     return secondaryText;
   }
 
-  LegStep getUpcomingStep() {
-    return upcomingStep;
-  }
-
-  String getManeuverType() {
-    return maneuverType;
+  int getManeuverImage() {
+    return maneuverImage;
   }
 
   String getManeuverModifier() {
@@ -70,17 +66,15 @@ public class InstructionModel {
     }
   }
 
-  private void extractStepResources(LegStep upcomingStep) {
-    this.upcomingStep = upcomingStep;
-
-    if (hasManeuver(upcomingStep)) {
-      maneuverModifier = upcomingStep.maneuver().modifier();
-      maneuverType = upcomingStep.maneuver().type();
+  private void extractStepResources(LegStep upComingStep) {
+    maneuverImage = getManeuverResource(upComingStep);
+    if (hasManeuver(upComingStep)) {
+      maneuverModifier = upComingStep.maneuver().modifier();
     }
-    if (hasIntersections(upcomingStep)) {
-      intersectionTurnLanes(upcomingStep);
+    if (hasIntersections(upComingStep)) {
+      intersectionTurnLanes(upComingStep);
     }
-    buildTextInstructions(upcomingStep);
+    buildTextInstructions(upComingStep);
   }
 
   private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat) {

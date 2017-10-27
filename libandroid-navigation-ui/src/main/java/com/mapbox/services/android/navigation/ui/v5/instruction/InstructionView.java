@@ -31,7 +31,6 @@ import android.widget.TextView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
-import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -57,8 +56,7 @@ import java.text.DecimalFormat;
  */
 public class InstructionView extends RelativeLayout {
 
-  public boolean isMuted;
-  private ManeuverView maneuverView;
+  private ImageView maneuverImage;
   private TextView stepDistanceText;
   private TextView stepPrimaryText;
   private TextView stepSecondaryText;
@@ -68,14 +66,18 @@ public class InstructionView extends RelativeLayout {
   private View turnLaneLayout;
   private RecyclerView rvTurnLanes;
   private TurnLaneAdapter turnLaneAdapter;
+
   private Animation slideDownTop;
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
   private AnimationSet fadeInSlowOut;
+
   private DecimalFormat decimalFormat;
+  private int currentManeuverId;
   private int primaryTextMaxLines = 1;
   private boolean turnLanesHidden;
   private boolean isRerouting;
+  public boolean isMuted;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -225,7 +227,7 @@ public class InstructionView extends RelativeLayout {
    * Finds and binds all necessary views
    */
   private void bind() {
-    maneuverView = findViewById(R.id.maneuverView);
+    maneuverImage = findViewById(R.id.maneuverImageView);
     stepDistanceText = findViewById(R.id.stepDistanceText);
     stepPrimaryText = findViewById(R.id.stepPrimaryText);
     stepSecondaryText = findViewById(R.id.stepSecondaryText);
@@ -395,8 +397,10 @@ public class InstructionView extends RelativeLayout {
    * @param model provides maneuver image id
    */
   private void addManeuverImage(InstructionModel model) {
-    maneuverView.setManeuverModifier(model.getManeuverModifier());
-    maneuverView.setManeuverType(model.getManeuverType());
+    if (currentManeuverId != model.getManeuverImage()) {
+      currentManeuverId = model.getManeuverImage();
+      maneuverImage.setImageResource(model.getManeuverImage());
+    }
   }
 
   /**
