@@ -36,6 +36,16 @@ public final class NavigationRoute {
   private final MapboxDirections mapboxDirections;
 
   /**
+   * Private constructor used for the {@link Builder#build()} method.
+   *
+   * @param mapboxDirections a new instance of a {@link MapboxDirections} class
+   * @since 0.5.0
+   */
+  private NavigationRoute(MapboxDirections mapboxDirections) {
+    this.mapboxDirections = mapboxDirections;
+  }
+
+  /**
    * Build a new {@link NavigationRoute} object with the proper navigation parameters already setup.
    *
    * @return a {@link Builder} object for creating this object
@@ -45,16 +55,6 @@ public final class NavigationRoute {
     return new Builder()
       .annotations(DirectionsCriteria.ANNOTATION_CONGESTION)
       .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
-  }
-
-  /**
-   * Private constructor used for the {@link Builder#build()} method.
-   *
-   * @param mapboxDirections a new instance of a {@link MapboxDirections} class
-   * @since 0.5.0
-   */
-  private NavigationRoute(MapboxDirections mapboxDirections) {
-    this.mapboxDirections = mapboxDirections;
   }
 
   /**
@@ -215,6 +215,7 @@ public final class NavigationRoute {
      */
     public Builder addWaypoint(@NonNull Point waypoint) {
       directionsBuilder.addWaypoint(waypoint);
+      directionsBuilder.addBearing(null, null);
       return this;
     }
 
