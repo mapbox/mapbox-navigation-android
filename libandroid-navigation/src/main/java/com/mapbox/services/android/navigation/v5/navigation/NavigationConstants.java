@@ -46,7 +46,7 @@ public final class NavigationConstants {
    *
    * @since 0.1.0
    */
-  static final int MANEUVER_ZONE_RADIUS = 40;
+  public static final int MANEUVER_ZONE_RADIUS = 40;
 
   /**
    * Maximum number of meters the user can travel away from step before the

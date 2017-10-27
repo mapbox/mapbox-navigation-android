@@ -345,4 +345,14 @@ public class RouteStepProgressTest extends BaseTest {
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
     assertEquals(0, routeStepProgress.durationRemaining(), BaseTest.DELTA);
   }
+
+  @Test
+  public void stepIntersections_includesAllStepIntersectionsAndNextManeuver() throws Exception {
+
+  }
+
+  @Test
+  public void stepIntersections_handlesNullNextManeuverCorrectly() throws Exception {
+
+  }
 }
