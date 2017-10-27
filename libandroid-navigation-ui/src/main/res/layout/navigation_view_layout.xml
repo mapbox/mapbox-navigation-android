@@ -15,6 +15,12 @@
         app:mapbox_uiAttribution="false"
         app:mapbox_uiLogo="false"/>
 
+    <ImageView
+        android:id="@+id/screenshotView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"/>
+
     <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView
         android:id="@+id/instructionView"
         android:layout_width="match_parent"
