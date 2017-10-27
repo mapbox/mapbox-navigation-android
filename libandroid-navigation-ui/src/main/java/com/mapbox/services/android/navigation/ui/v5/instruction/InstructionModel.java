@@ -17,11 +17,13 @@ import java.util.List;
 public class InstructionModel {
 
   private SpannableStringBuilder stepDistanceRemaining;
-  private LegStep step;
+  private LegStep upcomingStep;
   private String primaryText;
   private String secondaryText;
   private String maneuverModifier;
+  private String maneuverType;
   private List<IntersectionLanes> turnLanes;
+  private float roundaboutAngle;
   private boolean isUsingInstruction;
 
   public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
@@ -40,8 +42,12 @@ public class InstructionModel {
     return secondaryText;
   }
 
-  LegStep getStep() {
-    return step;
+  LegStep getUpcomingStep() {
+    return upcomingStep;
+  }
+
+  String getManeuverType() {
+    return maneuverType;
   }
 
   String getManeuverModifier() {
@@ -64,16 +70,17 @@ public class InstructionModel {
     }
   }
 
-  private void extractStepResources(LegStep upComingStep) {
-    step = upComingStep;
+  private void extractStepResources(LegStep upcomingStep) {
+    this.upcomingStep = upcomingStep;
 
-    if (hasManeuver(upComingStep)) {
-      maneuverModifier = upComingStep.maneuver().modifier();
+    if (hasManeuver(upcomingStep)) {
+      maneuverModifier = upcomingStep.maneuver().modifier();
+      maneuverType = upcomingStep.maneuver().type();
     }
-    if (hasIntersections(upComingStep)) {
-      intersectionTurnLanes(upComingStep);
+    if (hasIntersections(upcomingStep)) {
+      intersectionTurnLanes(upcomingStep);
     }
-    buildTextInstructions(upComingStep);
+    buildTextInstructions(upcomingStep);
   }
 
   private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat) {

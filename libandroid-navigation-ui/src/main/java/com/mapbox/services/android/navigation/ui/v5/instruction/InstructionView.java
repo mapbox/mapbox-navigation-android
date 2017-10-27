@@ -31,8 +31,8 @@ import android.widget.TextView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
+import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
-import com.mapbox.services.android.navigation.ui.v5.stylekit.ManeuverView;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -57,6 +57,7 @@ import java.text.DecimalFormat;
  */
 public class InstructionView extends RelativeLayout {
 
+  public boolean isMuted;
   private ManeuverView maneuverView;
   private TextView stepDistanceText;
   private TextView stepPrimaryText;
@@ -67,17 +68,14 @@ public class InstructionView extends RelativeLayout {
   private View turnLaneLayout;
   private RecyclerView rvTurnLanes;
   private TurnLaneAdapter turnLaneAdapter;
-
   private Animation slideDownTop;
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
   private AnimationSet fadeInSlowOut;
-
   private DecimalFormat decimalFormat;
   private int primaryTextMaxLines = 1;
   private boolean turnLanesHidden;
   private boolean isRerouting;
-  public boolean isMuted;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -398,7 +396,7 @@ public class InstructionView extends RelativeLayout {
    */
   private void addManeuverImage(InstructionModel model) {
     maneuverView.setManeuverModifier(model.getManeuverModifier());
-    maneuverView.setManeuverType(model.getStep().maneuver().type());
+    maneuverView.setManeuverType(model.getManeuverType());
   }
 
   /**
@@ -523,7 +521,7 @@ public class InstructionView extends RelativeLayout {
   private void addTurnLanes(InstructionModel model) {
     if (model.getTurnLanes() != null
       && !TextUtils.isEmpty(model.getManeuverModifier())) {
-//      turnLaneAdapter.addTurnLanes(model.getTurnLanes(), model.getManeuverModifier());
+      turnLaneAdapter.addTurnLanes(model.getTurnLanes(), model.getManeuverModifier());
       showTurnLanes();
     } else {
       hideTurnLanes();

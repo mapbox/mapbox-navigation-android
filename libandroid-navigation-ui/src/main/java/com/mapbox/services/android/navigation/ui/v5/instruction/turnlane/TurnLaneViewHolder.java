@@ -5,14 +5,13 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.ui.v5.stylekit.LaneView;
 
 class TurnLaneViewHolder extends RecyclerView.ViewHolder {
 
-  public LaneView laneView;
+  ImageView turnImage;
 
   TurnLaneViewHolder(View itemView) {
     super(itemView);
-    laneView = itemView.findViewById(R.id.laneView);
+    turnImage = itemView.findViewById(R.id.turnImage);
   }
 }
