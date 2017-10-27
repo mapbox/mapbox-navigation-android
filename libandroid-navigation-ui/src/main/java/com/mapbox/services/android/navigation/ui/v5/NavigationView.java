@@ -108,13 +108,6 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   public void onCreate(@Nullable Bundle savedInstanceState) {
     resumeState = savedInstanceState != null;
     mapView.onCreate(savedInstanceState);
-    mapView.setOnLongClickListener(new OnLongClickListener() {
-      @Override
-      public boolean onLongClick(View view) {
-        takeScreenshot(view);
-        return true;
-      }
-    });
   }
 
   public void onStart() {
