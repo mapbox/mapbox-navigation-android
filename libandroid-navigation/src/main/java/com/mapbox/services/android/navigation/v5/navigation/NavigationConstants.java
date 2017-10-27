@@ -20,7 +20,7 @@ public final class NavigationConstants {
    *
    * @since 0.7.0
    */
-  public static final int DEFAULT_MILESTONE_IDENTIFIER = 1;
+  public static final int VOICE_INSTRUCTION_MILESTONE_ID = 1;
 
   /**
    * Random integer value used for identifying the navigation notification.
@@ -46,7 +46,7 @@ public final class NavigationConstants {
    *
    * @since 0.1.0
    */
-  static final int MANEUVER_ZONE_RADIUS = 40;
+  public static final int MANEUVER_ZONE_RADIUS = 40;
 
   /**
    * Maximum number of meters the user can travel away from step before the

@@ -7,86 +7,21 @@
     android:layout_height="120dp"
     android:background="@drawable/instruction_background"
     android:elevation="4dp"
+    android:foreground="?attr/selectableItemBackground"
     tools:showIn="@layout/instruction_view_layout">
 
-    <android.support.constraint.Guideline
-        android:id="@+id/guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.20"/>
-
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/guideline"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:id="@+id/maneuverImageView"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:tint="?attr/navigationViewSecondary"
-            app:srcCompat="@drawable/ic_maneuver_depart"/>
-
-        <TextView
-            android:id="@+id/stepDistanceText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:includeFontPadding="false"
-            android:maxLines="1"
-            android:textColor="?attr/navigationViewAccentText"
-            android:textSize="20sp"
-            tools:text="302 mi"/>
-
-    </LinearLayout>
-
-    <LinearLayout
+    <include
+        layout="@layout/instruction_content_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/guideline"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/stepPrimaryText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="center_vertical"
-            android:includeFontPadding="false"
-            android:maxLines="1"
-            android:textColor="?attr/navigationViewSecondary"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            tools:text="I-580 South"/>
-
-        <TextView
-            android:id="@+id/stepSecondaryText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="center_vertical"
-            android:includeFontPadding="false"
-            android:maxLines="2"
-            android:textColor="?attr/navigationViewAccentText"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            tools:text="San Jose / Cupertino / Saratoga Montery / SR-1"/>
-
-    </LinearLayout>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <LinearLayout
         android:id="@+id/rerouteLayout"
@@ -109,7 +44,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:text="@string/rerouting"
-            android:textColor="?attr/navigationViewPrimary"
+            android:textColor="?attr/navigationViewBannerPrimaryText"
             android:textSize="20sp"
             android:textStyle="bold"/>
 

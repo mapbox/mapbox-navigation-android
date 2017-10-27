@@ -1,8 +1,15 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.google.auto.value.AutoValue;
 import com.mapbox.directions.v5.models.LegStep;
+import com.mapbox.directions.v5.models.StepIntersection;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -20,8 +27,12 @@ public abstract class RouteStepProgress {
 
   abstract LegStep step();
 
-  public static RouteStepProgress create(LegStep step, double stepDistanceRemaining) {
-    return new AutoValue_RouteStepProgress(step, stepDistanceRemaining);
+  @Nullable
+  abstract LegStep nextStep();
+
+  public static RouteStepProgress create(@NonNull LegStep step, @Nullable LegStep nextStep,
+                                         double stepDistanceRemaining) {
+    return new AutoValue_RouteStepProgress(step, nextStep, stepDistanceRemaining);
   }
 
   /**
@@ -76,5 +87,22 @@ public abstract class RouteStepProgress {
    */
   public double durationRemaining() {
     return (1 - fractionTraveled()) * step().duration();
+  }
+
+  /**
+   * A collection of all the current steps intersections and the next steps maneuver location
+   * (if one exist).
+   *
+   * @return a list of {@link StepIntersection}s which may include the next steps maneuver
+   * intersection if it exist
+   * @since 0.7.0
+   */
+  public List<StepIntersection> intersections() {
+    List<StepIntersection> intersectionsWithNextManeuver = new ArrayList<>();
+    intersectionsWithNextManeuver.addAll(step().intersections());
+    if (nextStep() != null && !nextStep().intersections().isEmpty()) {
+      intersectionsWithNextManeuver.add(nextStep().intersections().get(0));
+    }
+    return intersectionsWithNextManeuver;
   }
 }

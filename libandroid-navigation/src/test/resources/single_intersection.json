@@ -1,0 +1,126 @@
+{
+  "waypoints": [
+    {
+      "name": "Adams Street",
+      "location": [
+        -101.70939,
+        33.621371
+      ]
+    },
+    {
+      "name": "Adams Street",
+      "location": [
+        -101.687219,
+        33.621357
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "legs": [
+        {
+          "steps": [
+            {
+              "intersections": [
+                {
+                  "out": 0,
+                  "entry": [
+                    true
+                  ],
+                  "location": [
+                    -101.70939,
+                    33.621371
+                  ],
+                  "bearings": [
+                    90
+                  ]
+                },
+                {
+                  "out": 1,
+                  "in": 3,
+                  "entry": [
+                    true,
+                    true,
+                    true,
+                    false
+                  ],
+                  "location": [
+                    -101.697066,
+                    33.621352
+                  ],
+                  "bearings": [
+                    0,
+                    90,
+                    180,
+                    270
+                  ]
+                }
+              ],
+              "geometry": "uvac_Azcz~`Ed@gaWImfR",
+              "duration": 568.5,
+              "distance": 2053.5,
+              "name": "Adams Street",
+              "weight": 1137.2,
+              "mode": "driving",
+              "maneuver": {
+                "bearing_after": 90,
+                "location": [
+                  -101.70939,
+                  33.621371
+                ],
+                "type": "depart",
+                "bearing_before": 0,
+                "modifier": "left",
+                "instruction": "Head east on Adams Street"
+              }
+            },
+            {
+              "intersections": [
+                {
+                  "in": 0,
+                  "entry": [
+                    true
+                  ],
+                  "location": [
+                    -101.687219,
+                    33.621357
+                  ],
+                  "bearings": [
+                    270
+                  ]
+                }
+              ],
+              "geometry": "yuac_Adzn}`E",
+              "duration": 0,
+              "distance": 0,
+              "name": "Adams Street",
+              "weight": 0,
+              "mode": "driving",
+              "maneuver": {
+                "bearing_after": 0,
+                "bearing_before": 90,
+                "type": "arrive",
+                "location": [
+                  -101.687219,
+                  33.621357
+                ],
+                "instruction": "You have arrived at your destination"
+              }
+            }
+          ],
+          "weight": 1137.2,
+          "distance": 2053.5,
+          "summary": "Adams Street",
+          "duration": 568.5
+        }
+      ],
+      "weight_name": "routability",
+      "geometry": "uvac_Azcz~`EZuhj@",
+      "weight": 1137.2,
+      "distance": 2053.5,
+      "duration": 568.5
+    }
+  ],
+  "code": "Ok",
+  "uuid": "cj97q1jxa00ij5hmu1m8yawe0"
+}

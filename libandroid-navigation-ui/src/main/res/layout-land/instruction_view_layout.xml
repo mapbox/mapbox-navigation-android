@@ -4,27 +4,12 @@
     android:id="@+id/instructionViewLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
     android:keepScreenOn="true">
 
     <include
         android:id="@+id/instructionLayout"
         layout="@layout/instruction_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <include
-        android:id="@+id/soundLayout"
-        layout="@layout/sound_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/instructionLayout"/>
-
-    <include
-        android:id="@+id/feedbackLayout"
-        layout="@layout/feedback_button_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/soundLayout"/>
+        android:layout_height="match_parent"/>
 
 </RelativeLayout>

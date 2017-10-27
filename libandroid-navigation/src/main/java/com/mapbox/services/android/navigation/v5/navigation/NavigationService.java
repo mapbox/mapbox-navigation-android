@@ -13,7 +13,7 @@ import android.support.annotation.Nullable;
 import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.R;
-import com.mapbox.services.android.navigation.v5.milestone.ApiMilestone;
+import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.DEFAULT_MILESTONE_IDENTIFIER;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
 
@@ -64,6 +64,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private long timeIntervalSinceLastOffRoute;
   private MapboxNavigation mapboxNavigation;
   private LocationEngine locationEngine;
+  private String locationEngineName;
   private RouteProgress routeProgress;
   private boolean firstProgressUpdate = true;
   private NavigationEngine thread;
@@ -111,7 +112,7 @@ public class NavigationService extends Service implements LocationEngineListener
     // User canceled navigation session
     if (routeProgress != null && rawLocation != null) {
       NavigationMetricsWrapper.cancelEvent(mapboxNavigation.getSessionState(), routeProgress,
-        rawLocation);
+        rawLocation, locationEngineName);
     }
     endNavigation();
     super.onDestroy();
@@ -168,6 +169,7 @@ public class NavigationService extends Service implements LocationEngineListener
   void acquireLocationEngine() {
     locationEngine = mapboxNavigation.getLocationEngine();
     locationEngine.addLocationEngineListener(this);
+    locationEngineName = obtainLocationEngineName();
   }
 
   /**
@@ -231,7 +233,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
     if (firstProgressUpdate) {
       NavigationMetricsWrapper.departEvent(mapboxNavigation.getSessionState(), routeProgress,
-        rawLocation);
+        rawLocation, locationEngineName);
       firstProgressUpdate = false;
     }
     if (mapboxNavigation.options().enableNotification()) {
@@ -249,8 +251,8 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onMilestoneTrigger(List<Milestone> triggeredMilestones, RouteProgress routeProgress) {
     for (Milestone milestone : triggeredMilestones) {
       String instruction = buildInstructionString(routeProgress, milestone);
-      if (milestone.getIdentifier() == DEFAULT_MILESTONE_IDENTIFIER) {
-        instruction = ((ApiMilestone) milestone).announcement();
+      if (milestone.getIdentifier() == VOICE_INSTRUCTION_MILESTONE_ID) {
+        instruction = ((VoiceInstructionMilestone) milestone).announcement();
       }
       mapboxNavigation.getEventDispatcher().onMilestoneEvent(
         routeProgress, instruction, milestone.getIdentifier());
@@ -348,7 +350,8 @@ public class NavigationService extends Service implements LocationEngineListener
 
     NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, routeProgress,
       feedbackEvent.getSessionState().eventLocation(), feedbackEvent.getDescription(),
-      feedbackEvent.getFeedbackType(), "", feedbackEvent.getFeedbackId(), mapboxNavigation.obtainVendorId());
+      feedbackEvent.getFeedbackType(), "", feedbackEvent.getFeedbackId(),
+      mapboxNavigation.obtainVendorId(), locationEngineName);
   }
 
   void sendRerouteEvent(SessionState sessionState) {
@@ -358,7 +361,7 @@ public class NavigationService extends Service implements LocationEngineListener
       .build();
 
     NavigationMetricsWrapper.rerouteEvent(sessionState, routeProgress,
-      sessionState.eventLocation());
+      sessionState.eventLocation(), locationEngineName);
 
     for (SessionState session : queuedRerouteEvents) {
       queuedRerouteEvents.set(queuedRerouteEvents.indexOf(session),
@@ -414,5 +417,9 @@ public class NavigationService extends Service implements LocationEngineListener
         iterator.remove();
       }
     }
+  }
+
+  private String obtainLocationEngineName() {
+    return locationEngine.getClass().getSimpleName();
   }
 }

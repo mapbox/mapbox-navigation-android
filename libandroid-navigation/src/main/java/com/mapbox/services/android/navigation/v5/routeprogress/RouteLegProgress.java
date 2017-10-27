@@ -38,8 +38,12 @@ public abstract class RouteLegProgress {
    */
   static RouteLegProgress create(RouteLeg routeLeg, int stepIndex, double legDistanceRemaining,
                                  double stepDistanceRemaining) {
+
+    LegStep nextStep
+      = stepIndex == (routeLeg.steps().size() - 1) ? null : routeLeg.steps().get(stepIndex + 1);
+
     RouteStepProgress stepProgress = RouteStepProgress.create(
-      routeLeg.steps().get(stepIndex), stepDistanceRemaining);
+      routeLeg.steps().get(stepIndex), nextStep, stepDistanceRemaining);
     return new AutoValue_RouteLegProgress(
       routeLeg, stepIndex, legDistanceRemaining, stepProgress);
   }
