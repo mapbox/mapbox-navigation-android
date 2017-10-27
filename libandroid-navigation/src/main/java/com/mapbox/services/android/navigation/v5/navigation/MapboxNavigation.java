@@ -14,10 +14,10 @@ import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.location.LostLocationEngine;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
-import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
+import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
+import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -32,7 +32,6 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 import com.mapbox.services.utils.TextUtils;
-
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -637,7 +636,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     Timber.v("Arrived event occurred");
     sessionState = sessionState.toBuilder().arrivalTimestamp(new Date()).build();
-    NavigationMetricsWrapper.arriveEvent(sessionState, routeProgress, location);
+    String locationEngineName = obtainLocationEngineName();
+    NavigationMetricsWrapper.arriveEvent(sessionState, routeProgress, location, locationEngineName);
     // Remove all listeners except the onProgressChange by passing in null.
     navigationEventDispatcher.removeOffRouteListener(null);
     // Remove this listener so that the arrival event only occurs once.
@@ -690,5 +690,9 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     Timber.d("Disconnected from service.");
     navigationService = null;
     isBound = false;
+  }
+
+  private String obtainLocationEngineName() {
+    return locationEngine.getClass().getSimpleName();
   }
 }
