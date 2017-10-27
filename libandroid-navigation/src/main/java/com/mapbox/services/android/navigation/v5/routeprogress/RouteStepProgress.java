@@ -27,6 +27,7 @@ public abstract class RouteStepProgress {
 
   abstract LegStep step();
 
+  @Nullable
   abstract LegStep nextStep();
 
   public static RouteStepProgress create(@NonNull LegStep step, @Nullable LegStep nextStep,
@@ -96,7 +97,7 @@ public abstract class RouteStepProgress {
    * intersection if it exist
    * @since 0.7.0
    */
-  public List<StepIntersection> stepIntersections() {
+  public List<StepIntersection> intersections() {
     List<StepIntersection> intersectionsWithNextManeuver = new ArrayList<>();
     intersectionsWithNextManeuver.addAll(step().intersections());
     if (nextStep() != null && !nextStep().intersections().isEmpty()) {

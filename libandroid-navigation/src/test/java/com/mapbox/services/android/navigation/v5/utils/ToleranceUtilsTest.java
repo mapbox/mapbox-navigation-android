@@ -77,7 +77,6 @@ public class ToleranceUtilsTest extends BaseTest {
   }
 
   @Test
-  @Ignore
   public void dynamicRerouteDistanceTolerance_userJustPastTheIntersection() throws Exception {
     RouteProgress routeProgress = RouteProgress.builder()
       .directionsRoute(response.routes().get(0))

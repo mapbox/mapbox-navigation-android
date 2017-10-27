@@ -4,6 +4,7 @@ import com.mapbox.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.turf.TurfClassification;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
@@ -12,16 +13,20 @@ import java.util.List;
 
 public final class ToleranceUtils {
 
+  private ToleranceUtils() {
+    // Utils class therefore, shouldn't be initialized.
+  }
+
   public static double dynamicRerouteDistanceTolerance(Point snappedPoint,
                                                        RouteProgress routeProgress) {
     List<StepIntersection> intersections
-      = routeProgress.currentLegProgress().currentStepProgress().stepIntersections();
+      = routeProgress.currentLegProgress().currentStepProgress().intersections();
     List<Point> intersectionsPoints = new ArrayList<>();
     for (StepIntersection intersection : intersections) {
       intersectionsPoints.add(intersection.location());
     }
 
-    Point closestIntersection = nearest(snappedPoint, intersectionsPoints);
+    Point closestIntersection = TurfClassification.nearest(snappedPoint, intersectionsPoints);
 
     if (closestIntersection.equals(snappedPoint)) {
       return NavigationConstants.MINIMUM_DISTANCE_BEFORE_REROUTING;
@@ -34,34 +39,5 @@ public final class ToleranceUtils {
       return NavigationConstants.MINIMUM_DISTANCE_BEFORE_REROUTING / 2;
     }
     return NavigationConstants.MINIMUM_DISTANCE_BEFORE_REROUTING;
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // Port of Turf nearest method.
-  public static Point nearest(Point targetPoint, List<Point> points) {
-    if (points.isEmpty()) {
-      return targetPoint;
-    }
-    Point nearestPoint = points.get(0);
-    double minDist = Double.POSITIVE_INFINITY;
-    for (Point point : points) {
-      double distanceToPoint = TurfMeasurement.distance(targetPoint, point);
-      if (distanceToPoint < minDist) {
-        nearestPoint = point;
-      }
-    }
-    return nearestPoint;
   }
 }
