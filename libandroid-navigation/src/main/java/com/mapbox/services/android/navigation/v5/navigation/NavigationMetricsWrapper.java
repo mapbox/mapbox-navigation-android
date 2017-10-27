@@ -30,7 +30,7 @@ final class NavigationMetricsWrapper {
   }
 
   static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
-    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildArriveEvent(
+    Hashtable<String, Object> arriveEvent = MapboxNavigationEvent.buildArriveEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
       sessionState.currentGeometry(), routeProgress.directionsRoute().routeOptions().profile(),
@@ -44,11 +44,14 @@ final class NavigationMetricsWrapper {
       sessionState.originalGeometry(), sessionState.originalDistance(),
       sessionState.originalDuration(), null, sessionState.currentStepCount(),
       sessionState.originalStepCount()
-    ));
+    );
+    MapboxTelemetry.getInstance().addPercentTimeInForeground(0, arriveEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, arriveEvent);
+    MapboxTelemetry.getInstance().pushEvent(arriveEvent);
   }
 
   static void cancelEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
-    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildCancelEvent(
+    Hashtable<String, Object> cancelEvent = MapboxNavigationEvent.buildCancelEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(),
       location.getLatitude(), location.getLongitude(),
@@ -63,11 +66,14 @@ final class NavigationMetricsWrapper {
       sessionState.originalGeometry(),
       sessionState.originalDistance(), sessionState.originalDuration(), null,
       sessionState.arrivalTimestamp(), sessionState.currentStepCount(), sessionState.originalStepCount()
-    ));
+    );
+    MapboxTelemetry.getInstance().addPercentTimeInForeground(0, cancelEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, cancelEvent);
+    MapboxTelemetry.getInstance().pushEvent(cancelEvent);
   }
 
   static void departEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
-    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildDepartEvent(
+    Hashtable<String, Object> departEvent = MapboxNavigationEvent.buildDepartEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
       sessionState.currentGeometry(), routeProgress.directionsRoute().routeOptions().profile(),
@@ -79,7 +85,10 @@ final class NavigationMetricsWrapper {
       null, sessionState.currentStepCount(), sessionState.originalStepCount(),
       (int) routeProgress.distanceTraveled(), (int) routeProgress.distanceRemaining(),
       (int) routeProgress.durationRemaining(), sessionState.startTimestamp()
-    ));
+    );
+    MapboxTelemetry.getInstance().addPercentTimeInForeground(0, departEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, departEvent);
+    MapboxTelemetry.getInstance().pushEvent(departEvent);
   }
 
   static void rerouteEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
@@ -110,6 +119,8 @@ final class NavigationMetricsWrapper {
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
       sessionState.currentStepCount(), sessionState.originalStepCount());
     rerouteEvent.put(MapboxNavigationEvent.KEY_CREATED, TelemetryUtils.generateCreateDate(location));
+    MapboxTelemetry.getInstance().addPercentTimeInForeground(0, rerouteEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, rerouteEvent);
     MapboxTelemetry.getInstance().pushEvent(rerouteEvent);
   }
 
@@ -118,7 +129,7 @@ final class NavigationMetricsWrapper {
     updateRouteProgressSessionData(routeProgress, sessionState);
 
 
-    MapboxTelemetry.getInstance().pushEvent(MapboxNavigationEvent.buildFeedbackEvent(sdkIdentifier,
+    Hashtable<String, Object> feedbackEvent = MapboxNavigationEvent.buildFeedbackEvent(sdkIdentifier,
       BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(), location.getLatitude(),
       location.getLongitude(), sessionState.currentGeometry(), routeProgress.directionsRoute().routeOptions().profile(),
       routeProgress.directionsRoute().distance().intValue(), routeProgress.directionsRoute().duration().intValue(),
@@ -135,8 +146,10 @@ final class NavigationMetricsWrapper {
       (int) routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
       sessionState.currentStepCount(), sessionState.originalStepCount()
-      )
     );
+    MapboxTelemetry.getInstance().addPercentTimeInForeground(0, feedbackEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, feedbackEvent);
+    MapboxTelemetry.getInstance().pushEvent(feedbackEvent);
   }
 
   static void turnstileEvent() {
