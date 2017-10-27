@@ -27,14 +27,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/instructionLayout"
-        android:layout_marginTop="-8dp"
+        android:layout_marginTop="-9dp"
         android:visibility="gone"/>
 
     <include
         android:id="@+id/soundLayout"
         layout="@layout/sound_layout"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:layout_below="@id/turnLaneLayout"/>
 
 </RelativeLayout>
