@@ -5,8 +5,10 @@ import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
@@ -17,6 +19,8 @@ import android.support.v7.app.AppCompatDelegate;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -37,6 +41,11 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
+
+import java.io.File;
+import java.io.FileOutputStream;
+
+import timber.log.Timber;
 
 /**
  * View that creates the drop-in UI.
@@ -103,6 +112,13 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   public void onCreate(@Nullable Bundle savedInstanceState) {
     resumeState = savedInstanceState != null;
     mapView.onCreate(savedInstanceState);
+    mapView.setOnLongClickListener(new OnLongClickListener() {
+      @Override
+      public boolean onLongClick(View view) {
+        takeScreenshot(view);
+        return true;
+      }
+    });
   }
 
   public void onStart() {
@@ -417,6 +433,54 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
         navigationPresenter.onMuteClick(instructionView.toggleMute());
       }
     });
+  }
+
+  private void takeScreenshot(final View view) {
+    Toast.makeText(getContext(), "Capturing session.", Toast.LENGTH_LONG).show();
+    map.snapshot(new MapboxMap.SnapshotReadyCallback() {
+      @Override
+      public void onSnapshotReady(Bitmap snapshot) {
+        // Make the image visible
+        ImageView screenshotView = findViewById(R.id.screenshotView);
+        screenshotView.setVisibility(View.VISIBLE);
+        screenshotView.setImageBitmap(snapshot);
+
+        // Take a screenshot without the map
+        mapView.setVisibility(View.INVISIBLE);
+
+        // Save the result on external storage
+        storeBitmap(captureView(view), "telemetry.png");
+
+        // Restore visibility
+        screenshotView.setVisibility(View.INVISIBLE);
+        mapView.setVisibility(View.VISIBLE);
+      }
+    });
+  }
+
+  public static Bitmap captureView(View view) {
+    Timber.d("Getting screenshot.");
+    View rootView = view.getRootView();
+    rootView.setDrawingCacheEnabled(true);
+    Bitmap bitmap = Bitmap.createBitmap(rootView.getDrawingCache());
+    rootView.setDrawingCacheEnabled(false);
+    return bitmap;
+  }
+
+  public static void storeBitmap(Bitmap bitmap, String filename) {
+    Timber.d("Storing file: %s", filename);
+    String folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath();
+    File folderFile = new File(folder);
+    if(!folderFile.exists()) folderFile.mkdirs();
+    File file = new File(folder, filename);
+    try {
+      FileOutputStream fos = new FileOutputStream(file);
+      bitmap.compress(Bitmap.CompressFormat.PNG, 85, fos);
+      fos.flush();
+      fos.close();
+    } catch (Exception e) {
+      Timber.e(e, "Store failed.");
+    }
   }
 
   /**
