@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/turn_lane_background"
     android:elevation="2dp"
-    android:gravity="center_horizontal"
-    android:background="@drawable/turn_lane_background">
+    android:gravity="center_horizontal">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvTurnLanes"
-        android:layout_marginTop="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         tools:listitem="@layout/turn_lane_listitem_layout"/>
 
 </RelativeLayout>

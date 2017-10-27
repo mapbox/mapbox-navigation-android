@@ -2,16 +2,16 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
+    android:background="?attr/navigationViewListBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/rvDirections"
+        android:id="@+id/rvInstructions"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:listitem="@layout/direction_viewholder_layout"/>
+        android:scrollbars="none"
+        tools:listitem="@layout/instruction_viewholder_layout"/>
 
 </LinearLayout>

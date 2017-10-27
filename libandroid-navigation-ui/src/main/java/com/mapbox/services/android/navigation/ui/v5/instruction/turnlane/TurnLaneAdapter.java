@@ -27,15 +27,6 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
     lanes = new ArrayList<>();
   }
 
-  private static int retrieveTurnLaneResource(String turnLaneKey) {
-    TurnLaneMap turnLaneMap = new TurnLaneMap();
-    if (!TextUtils.isEmpty(turnLaneKey) && turnLaneMap.getTurnLaneResource(turnLaneKey) > 0) {
-      return turnLaneMap.getTurnLaneResource(turnLaneKey);
-    } else {
-      return 0;
-    }
-  }
-
   @Override
   public TurnLaneViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext())
@@ -58,7 +49,7 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
   public void addTurnLanes(List<IntersectionLanes> lanes, String maneuverModifier) {
     this.maneuverModifier = maneuverModifier;
     this.lanes.clear();
-    this.lanes.addAll(lanes);
+    this.lanes = lanes;
     notifyDataSetChanged();
   }
 
@@ -101,6 +92,15 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
       builder.append(STEP_MANEUVER_MODIFIER_STRAIGHT);
     } else if (maneuverModifier.contains(STEP_MANEUVER_MODIFIER_RIGHT)) {
       builder.append(STEP_MANEUVER_MODIFIER_RIGHT);
+    }
+  }
+
+  private static int retrieveTurnLaneResource(String turnLaneKey) {
+    TurnLaneMap turnLaneMap = new TurnLaneMap();
+    if (!TextUtils.isEmpty(turnLaneKey) && turnLaneMap.getTurnLaneResource(turnLaneKey) > 0) {
+      return turnLaneMap.getTurnLaneResource(turnLaneKey);
+    } else {
+      return 0;
     }
   }
 }

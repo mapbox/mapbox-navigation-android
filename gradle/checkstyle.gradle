@@ -12,7 +12,6 @@ task checkstyle(type: Checkstyle) {
   exclude '**/gen/**'
   exclude '**/*Test.java'
   exclude '**/*FeatureOverviewActivity.java'
-  exclude '**/*ManeuversStyleKit.java'
 
   classpath = files()
   ignoreFailures = false
