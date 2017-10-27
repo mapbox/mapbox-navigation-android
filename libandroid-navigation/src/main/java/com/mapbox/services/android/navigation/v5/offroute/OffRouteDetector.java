@@ -9,6 +9,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
+import com.mapbox.services.android.navigation.v5.utils.ToleranceUtils;
 import com.mapbox.services.constants.Constants;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
@@ -29,8 +30,9 @@ public class OffRouteDetector extends OffRoute {
                                 MapboxNavigationOptions options,
                                 RingBuffer<Integer> recentDistancesFromManeuverInMeters) {
     Point futurePoint = getFuturePosition(location, options);
-    double radius = Math.max(options.maximumDistanceOffRoute(),
-      location.getAccuracy() + options.userLocationSnapDistance());
+
+    double radius = ToleranceUtils.dynamicRerouteDistanceTolerance(
+      Point.fromLngLat(location.getLongitude(), location.getLatitude()), routeProgress);
 
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     boolean isOffRoute = userTrueDistanceFromStep(futurePoint, currentStep) > radius;
