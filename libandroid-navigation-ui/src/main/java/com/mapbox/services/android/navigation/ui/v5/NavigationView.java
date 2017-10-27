@@ -8,7 +8,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
@@ -41,9 +40,6 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
-
-import java.io.File;
-import java.io.FileOutputStream;
 
 import timber.log.Timber;
 
@@ -448,8 +444,8 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
         // Take a screenshot without the map
         mapView.setVisibility(View.INVISIBLE);
 
-        // Save the result on external storage
-        storeBitmap(captureView(view), "telemetry.png");
+        // Capture view
+        captureView(view);
 
         // Restore visibility
         screenshotView.setVisibility(View.INVISIBLE);
@@ -465,22 +461,6 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     Bitmap bitmap = Bitmap.createBitmap(rootView.getDrawingCache());
     rootView.setDrawingCacheEnabled(false);
     return bitmap;
-  }
-
-  public static void storeBitmap(Bitmap bitmap, String filename) {
-    Timber.d("Storing file: %s", filename);
-    String folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath();
-    File folderFile = new File(folder);
-    if(!folderFile.exists()) folderFile.mkdirs();
-    File file = new File(folder, filename);
-    try {
-      FileOutputStream fos = new FileOutputStream(file);
-      bitmap.compress(Bitmap.CompressFormat.PNG, 85, fos);
-      fos.flush();
-      fos.close();
-    } catch (Exception e) {
-      Timber.e(e, "Store failed.");
-    }
   }
 
   /**

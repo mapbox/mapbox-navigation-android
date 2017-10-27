@@ -2,8 +2,6 @@
     package="com.mapbox.services.android.navigation.ui.v5"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
   <application>
     <activity android:name=".NavigationActivity"/>
   </application>
