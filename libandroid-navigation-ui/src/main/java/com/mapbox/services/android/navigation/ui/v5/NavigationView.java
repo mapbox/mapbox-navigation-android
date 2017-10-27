@@ -16,6 +16,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.AttributeSet;
+import android.util.Base64;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -41,7 +42,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 
-import timber.log.Timber;
+import java.io.ByteArrayOutputStream;
 
 /**
  * View that creates the drop-in UI.
@@ -425,7 +426,6 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   }
 
   private void takeScreenshot(final View view) {
-    Toast.makeText(getContext(), "Capturing session.", Toast.LENGTH_LONG).show();
     map.snapshot(new MapboxMap.SnapshotReadyCallback() {
       @Override
       public void onSnapshotReady(Bitmap snapshot) {
@@ -436,9 +436,8 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
 
         // Take a screenshot without the map
         mapView.setVisibility(View.INVISIBLE);
-
-        // Capture view
-        captureView(view);
+        Bitmap capture = captureView(view);
+        String encoded = encodeView(capture);
 
         // Restore visibility
         screenshotView.setVisibility(View.INVISIBLE);
@@ -447,13 +446,27 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     });
   }
 
-  public static Bitmap captureView(View view) {
-    Timber.d("Getting screenshot.");
+  private static Bitmap captureView(View view) {
     View rootView = view.getRootView();
     rootView.setDrawingCacheEnabled(true);
     Bitmap bitmap = Bitmap.createBitmap(rootView.getDrawingCache());
     rootView.setDrawingCacheEnabled(false);
     return bitmap;
+  }
+
+  private static String encodeView(Bitmap capture) {
+    // Resize to 250px wide while keeping the aspect ratio
+    int width = 250;
+    int height = Math.round((float) width * capture.getHeight() / capture.getWidth());
+    Bitmap scaled = Bitmap.createScaledBitmap(capture, width, height, /*filter=*/true);
+
+    // Convert to JPEG low-quality (~20%)
+    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    scaled.compress(Bitmap.CompressFormat.JPEG, 20, stream);
+
+    // Convert to base64 encoded string
+    byte[] data = stream.toByteArray();
+    return Base64.encodeToString(data, Base64.DEFAULT);
   }
 
   /**
