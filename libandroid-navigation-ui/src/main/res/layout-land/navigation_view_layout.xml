@@ -11,7 +11,6 @@
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:mapbox_styleUrl="@string/navigation_guidance_day_v2"
         app:mapbox_uiAttribution="false"
         app:mapbox_uiCompass="false"
         app:mapbox_uiLogo="false"/>
