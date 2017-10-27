@@ -11,6 +11,7 @@ import android.support.v4.content.ContextCompat;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
 
 /**
  * This class is used to switch theme colors in {@link NavigationView}.
@@ -52,14 +53,14 @@ public class ThemeSwitcher {
    * Sets the {@link MapView} style based on the current theme setting.
    *
    * @param context to retrieve {@link SharedPreferences}
-   * @param mapView  the style will be set on
+   * @param map     the style will be set on
    */
-  static void setMapStyle(Context context, MapView mapView) {
+  static void setMapStyle(Context context, MapboxMap map, MapboxMap.OnStyleLoadedListener listener) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
     boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
     String nightThemeUrl = context.getString(R.string.navigation_guidance_night_v2);
     String dayThemeUrl = context.getString(R.string.navigation_guidance_day_v2);
-    mapView.setStyleUrl(darkThemeEnabled ? nightThemeUrl : dayThemeUrl);
+    map.setStyleUrl(darkThemeEnabled ? nightThemeUrl : dayThemeUrl, listener);
   }
 
   /**

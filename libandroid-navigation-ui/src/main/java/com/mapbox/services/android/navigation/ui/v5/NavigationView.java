@@ -102,7 +102,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
 
   public void onCreate(@Nullable Bundle savedInstanceState) {
     resumeState = savedInstanceState != null;
-    initMap(savedInstanceState);
+    mapView.onCreate(savedInstanceState);
   }
 
   public void onStart() {
@@ -158,13 +158,18 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     map = mapboxMap;
     map.setOnScrollListener(this);
     setMapPadding(0, 0, 0, summaryBehavior.getPeekHeight());
-    initRoute();
-    initCamera();
-    initLocationLayer();
-    initLifecycleObservers();
-    initNavigationPresenter();
-    subscribeViews();
-    navigationListener.onNavigationReady();
+    ThemeSwitcher.setMapStyle(getContext(), map, new MapboxMap.OnStyleLoadedListener() {
+      @Override
+      public void onStyleLoaded(String style) {
+        initRoute();
+        initCamera();
+        initLocationLayer();
+        initLifecycleObservers();
+        initNavigationPresenter();
+        subscribeViews();
+        navigationListener.onNavigationReady();
+      }
+    });
   }
 
   /**
@@ -412,16 +417,6 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
         navigationPresenter.onMuteClick(instructionView.toggleMute());
       }
     });
-  }
-
-  /**
-   * Sets up the {@link MapboxMap}.
-   *
-   * @param savedInstanceState from onCreate()
-   */
-  private void initMap(Bundle savedInstanceState) {
-    mapView.onCreate(savedInstanceState);
-    ThemeSwitcher.setMapStyle(getContext(), mapView);
   }
 
   /**
