@@ -247,6 +247,9 @@ public class MockLocationEngine extends LocationEngine {
   }
 
   public void moveToLocation(Point point) {
+    if (location == null) {
+      return;
+    }
     List<Point> pointList = new ArrayList<>();
     pointList.add(Point.fromLngLat(location.getLongitude(), location.getLatitude()));
     pointList.add(point);
