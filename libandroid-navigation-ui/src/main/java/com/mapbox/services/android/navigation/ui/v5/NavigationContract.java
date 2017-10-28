@@ -26,5 +26,7 @@ public interface NavigationContract {
     void finishNavigationView();
 
     void setMuted(boolean isMuted);
+
+    void showFeedbackBottomSheet();
   }
 }

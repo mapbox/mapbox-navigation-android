@@ -36,7 +36,7 @@
     <color name="mapbox_navigation_view_color_banner_maneuver_primary_dark">#FFFFFF</color>
     <color name="mapbox_navigation_view_color_banner_maneuver_secondary_dark">#E6FFFFFF</color>
 
-    <color name="mapbox_plugin_navigation_route_default_blue">#4882C6</color>
+    <!-- Feedback -->
 
     <!--grey-->
     <color name="md_grey_200">#EEEEEE</color>

@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
@@ -28,6 +29,7 @@ import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 import com.mapbox.services.android.navigation.v5.utils.ValidationUtils;
 import com.mapbox.services.android.telemetry.MapboxEvent;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
+import com.mapbox.services.android.telemetry.constants.TelemetryConstants;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
@@ -644,6 +646,20 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     navigationEventDispatcher.removeInternalProgressChangeListener();
   }
 
+  public String recordFeedback(@FeedbackEvent.FeedbackType String feedbackType,
+                               String description, @FeedbackEvent.FeedbackSource String source) {
+    return navigationService.recordFeedbackEvent(feedbackType, description, source);
+  }
+
+  public void updateFeedback(String feedbackId,
+                             @FeedbackEvent.FeedbackType String feedbackType, String description) {
+    navigationService.updateFeedbackEvent(feedbackId, feedbackType, description);
+  }
+
+  public void cancelFeedback(String feedbackId) {
+    navigationService.cancelFeedback(feedbackId);
+  }
+
   DirectionsRoute getRoute() {
     return directionsRoute;
   }
@@ -674,6 +690,11 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
 
   private boolean isServiceAvailable() {
     return navigationService != null && isBound;
+  }
+
+  String obtainVendorId() {
+    SharedPreferences prefs = TelemetryUtils.getSharedPreferences(context.getApplicationContext());
+    return prefs.getString(TelemetryConstants.MAPBOX_SHARED_PREFERENCE_KEY_VENDOR_ID, "");
   }
 
   @Override

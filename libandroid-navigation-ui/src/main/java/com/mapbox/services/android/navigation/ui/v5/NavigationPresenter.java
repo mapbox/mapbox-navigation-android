@@ -45,4 +45,8 @@ class NavigationPresenter {
   void onDestinationUpdate(Point point) {
     view.addMarker(point);
   }
+
+  void onFeedbackClick() {
+    view.showFeedbackBottomSheet();
+  }
 }

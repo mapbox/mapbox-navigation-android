@@ -48,6 +48,7 @@ final class NavigationMetricsWrapper {
     );
     MapboxTelemetry.getInstance().addLocationEngineName(locationEngineName, arriveEvent);
     MapboxTelemetry.getInstance().pushEvent(arriveEvent);
+    MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
   }
 
   static void cancelEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
@@ -70,6 +71,7 @@ final class NavigationMetricsWrapper {
     );
     MapboxTelemetry.getInstance().addLocationEngineName(locationEngineName, cancelEvent);
     MapboxTelemetry.getInstance().pushEvent(cancelEvent);
+    MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
   }
 
   static void departEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
@@ -89,6 +91,7 @@ final class NavigationMetricsWrapper {
     );
     MapboxTelemetry.getInstance().addLocationEngineName(locationEngineName, departEvent);
     MapboxTelemetry.getInstance().pushEvent(departEvent);
+    MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
   }
 
   static void rerouteEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
@@ -102,7 +105,8 @@ final class NavigationMetricsWrapper {
       routeProgress.directionsRoute().distance().intValue(),
       routeProgress.directionsRoute().duration().intValue(),
       sessionState.rerouteCount(), sessionState.startTimestamp(), beforeLocations, afterLocations,
-      (int) sessionState.routeProgressBeforeReroute().distanceTraveled(),
+      (int) (sessionState.previousRouteDistancesCompleted()
+        + sessionState.routeProgressBeforeReroute().distanceTraveled()),
       (int) sessionState.routeProgressBeforeReroute().distanceRemaining(),
       (int) sessionState.routeProgressBeforeReroute().durationRemaining(),
       (int) routeProgress.distanceRemaining(),
@@ -121,10 +125,12 @@ final class NavigationMetricsWrapper {
     rerouteEvent.put(MapboxNavigationEvent.KEY_CREATED, TelemetryUtils.generateCreateDate(location));
     MapboxTelemetry.getInstance().addLocationEngineName(locationEngineName, rerouteEvent);
     MapboxTelemetry.getInstance().pushEvent(rerouteEvent);
+    MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
   }
 
   static void feedbackEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
-                            String description, String feedbackType, String screenshot, String locationEngineName) {
+                            String description, String feedbackType, String screenshot, String feedbackId,
+                            String vendorId, String locationEngineName) {
     updateRouteProgressSessionData(routeProgress, sessionState);
 
     Hashtable<String, Object> feedbackEvent = MapboxNavigationEvent.buildFeedbackEvent(sdkIdentifier,
@@ -132,10 +138,11 @@ final class NavigationMetricsWrapper {
       location.getLongitude(), sessionState.currentGeometry(), routeProgress.directionsRoute().routeOptions().profile(),
       routeProgress.directionsRoute().distance().intValue(), routeProgress.directionsRoute().duration().intValue(),
       sessionState.rerouteCount(), sessionState.startTimestamp(), feedbackType, beforeLocations, afterLocations,
-      (int) sessionState.routeProgressBeforeReroute().distanceTraveled(),
+      (int) (sessionState.previousRouteDistancesCompleted()
+        + sessionState.routeProgressBeforeReroute().distanceTraveled()),
       (int) sessionState.routeProgressBeforeReroute().distanceRemaining(),
-      (int) sessionState.routeProgressBeforeReroute().durationRemaining(), description, TelemetryUtils.buildUUID(),
-      TelemetryUtils.buildUUID(), screenshot, sessionState.mockLocation(), sessionState.originalRequestIdentifier(),
+      (int) sessionState.routeProgressBeforeReroute().durationRemaining(), description, vendorId,
+      feedbackId, screenshot, sessionState.mockLocation(), sessionState.originalRequestIdentifier(),
       sessionState.requestIdentifier(), sessionState.originalGeometry(), sessionState.originalDistance(),
       sessionState.originalDuration(), null, upcomingInstruction, upcomingType, upcomingModifier, upcomingName,
       previousInstruction, previousType, previousModifier, previousName,
@@ -144,8 +151,11 @@ final class NavigationMetricsWrapper {
       (int) routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
       sessionState.currentStepCount(), sessionState.originalStepCount());
+
+    feedbackEvent.put(MapboxNavigationEvent.KEY_CREATED, TelemetryUtils.generateCreateDate(location));
     MapboxTelemetry.getInstance().addLocationEngineName(locationEngineName, feedbackEvent);
     MapboxTelemetry.getInstance().pushEvent(feedbackEvent);
+    MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
   }
 
   static void turnstileEvent() {

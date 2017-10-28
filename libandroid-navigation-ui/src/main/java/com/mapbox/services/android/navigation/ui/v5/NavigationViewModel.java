@@ -9,15 +9,18 @@ import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -43,6 +46,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   private NavigationInstructionPlayer instructionPlayer;
   private DecimalFormat decimalFormat;
   private SharedPreferences preferences;
+  private String feedbackId;
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -112,7 +116,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
 
   /**
    * Listener used to determine is navigation is running / not running.
-   *
+   * <p>
    * In {@link NavigationView}, views will be shown when true.  When false,
    * the {@link android.app.Activity} will be destroyed.
    *
@@ -130,6 +134,25 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
 
   public MapboxNavigation getNavigation() {
     return navigation;
+  }
+
+  void recordFeedback() {
+    feedbackId = navigation.recordFeedback(FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE, "",
+      FeedbackEvent.FEEDBACK_SOURCE_UI);
+  }
+
+  void updateFeedback(FeedbackItem feedbackItem) {
+    if (!TextUtils.isEmpty(feedbackId)) {
+      navigation.updateFeedback(feedbackId, feedbackItem.getFeedbackType(), feedbackItem.getDescription());
+      feedbackId = null;
+    }
+  }
+
+  void cancelFeedback() {
+    if (!TextUtils.isEmpty(feedbackId)) {
+      navigation.cancelFeedback(feedbackId);
+      feedbackId = null;
+    }
   }
 
   void updateRoute(DirectionsRoute route) {

@@ -28,6 +28,9 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheetListener;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
@@ -59,7 +62,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
  * </p>
  */
 public class NavigationView extends CoordinatorLayout implements OnMapReadyCallback, MapboxMap.OnScrollListener,
-  NavigationContract.View {
+  NavigationContract.View, FeedbackBottomSheetListener {
 
   private MapView mapView;
   private InstructionView instructionView;
@@ -68,6 +71,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   private ImageButton cancelBtn;
   private RecenterButton recenterBtn;
   private FloatingActionButton soundFab;
+  private FloatingActionButton feedbackFab;
 
   private NavigationPresenter navigationPresenter;
   private NavigationViewModel navigationViewModel;
@@ -231,11 +235,6 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     mapRoute.addRoute(directionsRoute);
   }
 
-  @Override
-  public void setMuted(boolean isMuted) {
-    navigationViewModel.setMuted(isMuted);
-  }
-
   /**
    * Creates a marker based on the
    * {@link Point} destination coordinate.
@@ -254,6 +253,27 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   @Override
   public void finishNavigationView() {
     navigationListener.onNavigationFinished();
+  }
+
+  @Override
+  public void setMuted(boolean isMuted) {
+    navigationViewModel.setMuted(isMuted);
+  }
+
+  @Override
+  public void showFeedbackBottomSheet() {
+    FeedbackBottomSheet.newInstance(this).show(
+      ((FragmentActivity) getContext()).getSupportFragmentManager(), FeedbackBottomSheet.TAG);
+  }
+
+  @Override
+  public void onFeedbackSelected(FeedbackItem feedbackItem) {
+    navigationViewModel.updateFeedback(feedbackItem);
+  }
+
+  @Override
+  public void onFeedbackDismissed() {
+    navigationViewModel.cancelFeedback();
   }
 
   public void startNavigation(Activity activity) {
@@ -310,6 +330,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     cancelBtn = findViewById(R.id.cancelBtn);
     recenterBtn = findViewById(R.id.recenterBtn);
     soundFab = findViewById(R.id.soundFab);
+    feedbackFab = findViewById(R.id.feedbackFab);
   }
 
   private void initViewModels() {
@@ -342,6 +363,13 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
       @Override
       public void onClick(View view) {
         navigationPresenter.onMuteClick(instructionView.toggleMute());
+      }
+    });
+    feedbackFab.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        navigationPresenter.onFeedbackClick();
+        navigationViewModel.recordFeedback();
       }
     });
   }
