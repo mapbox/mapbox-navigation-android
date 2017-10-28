@@ -137,7 +137,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   }
 
   void recordFeedback() {
-    feedbackId = navigation.recordFeedback(FeedbackEvent.FEEDBACK_TYPE_GENERAL, "",
+    feedbackId = navigation.recordFeedback(FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE, "",
       FeedbackEvent.FEEDBACK_SOURCE_UI);
   }
 

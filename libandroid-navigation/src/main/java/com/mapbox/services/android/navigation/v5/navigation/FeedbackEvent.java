@@ -11,17 +11,17 @@ public class FeedbackEvent {
 
   @Retention(RetentionPolicy.SOURCE)
   @StringDef({
-    FEEDBACK_TYPE_GENERAL,
+    FEEDBACK_TYPE_GENERAL_ISSUE,
     FEEDBACK_TYPE_ACCIDENT,
     FEEDBACK_TYPE_HAZARD,
     FEEDBACK_TYPE_ROAD_CLOSED,
-    FEEDBACK_TYPE_NOT_ALLOWED_TURN,
+    FEEDBACK_TYPE_NOT_ALLOWED,
     FEEDBACK_TYPE_ROUTING_ERROR,
-    FEEDBACK_TYPE_INSTRUCTION_TIMING,
     FEEDBACK_TYPE_CONFUSING_INSTRUCTION,
     FEEDBACK_TYPE_INACCURATE_GPS,
-    FEEDBACK_TYPE_BAD_ROUTE,
-    FEEDBACK_TYPE_REPORT_TRAFFIC
+    FEEDBACK_TYPE_REPORT_TRAFFIC,
+    FEEDBACK_TYPE_MISSING_ROAD,
+    FEEDBACK_TYPE_MISSING_EXIT
   })
   public @interface FeedbackType {
   }
@@ -34,16 +34,16 @@ public class FeedbackEvent {
   public @interface FeedbackSource {
   }
 
-  public static final String FEEDBACK_TYPE_GENERAL = "general";
+  public static final String FEEDBACK_TYPE_GENERAL_ISSUE = "general";
   public static final String FEEDBACK_TYPE_ACCIDENT = "accident";
   public static final String FEEDBACK_TYPE_HAZARD = "hazard";
   public static final String FEEDBACK_TYPE_ROAD_CLOSED = "road_closed";
-  public static final String FEEDBACK_TYPE_NOT_ALLOWED_TURN = "not_allowed_turn";
+  public static final String FEEDBACK_TYPE_NOT_ALLOWED = "not_allowed";
   public static final String FEEDBACK_TYPE_ROUTING_ERROR = "routing_error";
-  public static final String FEEDBACK_TYPE_INSTRUCTION_TIMING = "instruction_timing";
+  public static final String FEEDBACK_TYPE_MISSING_ROAD = "missing_road";
+  public static final String FEEDBACK_TYPE_MISSING_EXIT = "missing_exit";
   public static final String FEEDBACK_TYPE_CONFUSING_INSTRUCTION = "confusing_instruction";
   public static final String FEEDBACK_TYPE_INACCURATE_GPS = "inaccurate_gps";
-  public static final String FEEDBACK_TYPE_BAD_ROUTE = "bad_route";
   public static final String FEEDBACK_TYPE_REPORT_TRAFFIC = "report_traffic";
 
   public static final String FEEDBACK_SOURCE_REROUTE = "reroute";
@@ -58,7 +58,7 @@ public class FeedbackEvent {
   public FeedbackEvent(SessionState sessionState, @FeedbackSource String feedbackSource) {
     this.sessionState = sessionState;
     this.feedbackSource = feedbackSource;
-    this.feedbackType = "general"; // Default until updated
+    this.feedbackType = FEEDBACK_TYPE_GENERAL_ISSUE; // Default until updated
     this.feedbackId = TelemetryUtils.buildUUID();
   }
 
@@ -69,6 +69,11 @@ public class FeedbackEvent {
   @FeedbackType
   public String getFeedbackType() {
     return feedbackType;
+  }
+
+  @FeedbackSource
+  public String getFeedbackSource() {
+    return feedbackSource;
   }
 
   public void setFeedbackType(@FeedbackType String feedbackType) {
