@@ -50,7 +50,7 @@ public class TextInstruction {
     if (hasRefs(upComingStep)) {
       primaryText = StringAbbreviator.deliminator(upComingStep.ref());
       if (hasDestination(upComingStep)) {
-        secondaryText = destinations(upComingStep);
+        secondaryText = destination(upComingStep);
       }
       return;
     }
@@ -69,10 +69,10 @@ public class TextInstruction {
 
     // Destination or Street Name
     if (hasDestination(upComingStep)) {
-      primaryText = destinations(upComingStep);
+      primaryText = destination(upComingStep);
       return;
     } else if (hasName(upComingStep)) {
-      primaryText = names(upComingStep);
+      primaryText = name(upComingStep);
       return;
     }
 
@@ -95,18 +95,16 @@ public class TextInstruction {
       && !TextUtils.isEmpty(upComingStep.maneuver().instruction());
   }
 
-  private String names(LegStep upComingStep) {
-    String instruction = upComingStep.name().trim();
-    return StringAbbreviator.deliminator(instruction);
+  private String name(LegStep upComingStep) {
+    return upComingStep.name().trim();
   }
 
   private boolean hasName(LegStep upComingStep) {
     return !TextUtils.isEmpty(upComingStep.name());
   }
 
-  private String destinations(LegStep upComingStep) {
-    String instruction = upComingStep.destinations().trim();
-    return StringAbbreviator.deliminator(instruction);
+  private String destination(LegStep upComingStep) {
+    return upComingStep.destinations().trim();
   }
 
   private boolean hasDestination(LegStep upComingStep) {
@@ -132,6 +130,6 @@ public class TextInstruction {
       primaryText = firstString[0];
     }
     String[] remainingStrings = Arrays.copyOfRange(strings, 1, strings.length);
-    secondaryText = TextUtils.join(" / ", remainingStrings).trim();
+    secondaryText = TextUtils.join("  / ", remainingStrings).trim();
   }
 }
