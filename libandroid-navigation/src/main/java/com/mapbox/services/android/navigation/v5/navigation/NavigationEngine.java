@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
-import android.text.TextUtils;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
