@@ -123,7 +123,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
     ObjectAnimator countdownAnimation = ObjectAnimator.ofInt(feedbackProgressBar,
       "progress", 0);
     countdownAnimation.setInterpolator(new LinearInterpolator());
-    countdownAnimation.setDuration(5000);
+    countdownAnimation.setDuration(10000);
     countdownAnimation.addListener(new Animator.AnimatorListener() {
       @Override
       public void onAnimationStart(Animator animation) {
