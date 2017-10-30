@@ -5,17 +5,18 @@ import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.Parcelable;
-import android.support.annotation.NonNull;
+import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.TextViewCompat;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.transition.TransitionManager;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -32,8 +33,8 @@ import android.widget.TextView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
-import com.mapbox.services.android.navigation.ui.v5.alert.AlertView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
+import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -58,29 +59,29 @@ import java.text.DecimalFormat;
  */
 public class InstructionView extends RelativeLayout {
 
+  public boolean isMuted;
   private ImageView maneuverImage;
   private TextView stepDistanceText;
-  private TextView stepInstructionText;
+  private TextView stepPrimaryText;
+  private TextView stepSecondaryText;
   private TextView soundChipText;
   private FloatingActionButton soundFab;
   private View rerouteLayout;
   private View turnLaneLayout;
   private RecyclerView rvTurnLanes;
-  private AlertView alertView;
+  private RecyclerView rvInstructions;
   private TurnLaneAdapter turnLaneAdapter;
-
-  private Animation slideDownTop;
+  private View soundLayout;
+  private View feedbackLayout;
+  private ConstraintLayout instructionLayout;
+  private View instructionListLayout;
+  private InstructionListAdapter instructionListAdapter;
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
   private AnimationSet fadeInSlowOut;
-
   private DecimalFormat decimalFormat;
-  private String currentInstruction;
   private int currentManeuverId;
-  private SpannableStringBuilder currentDistanceText;
-  private boolean turnLanesHidden;
   private boolean isRerouting;
-  public boolean isMuted;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -107,25 +108,21 @@ public class InstructionView extends RelativeLayout {
     bind();
     initBackground();
     initTurnLaneRecyclerView();
+    initDirectionsRecyclerView();
     initDecimalFormat();
     initAnimations();
+    initClickListener();
   }
 
-  @Override
-  public Parcelable onSaveInstanceState() {
-    super.onSaveInstanceState();
-    return createSavedState();
-  }
-
-  @Override
-  public void onRestoreInstanceState(Parcelable state) {
-    if (state instanceof Bundle) {
-      setRestoredState((Bundle) state);
-    } else {
-      super.onRestoreInstanceState(state);
-    }
-  }
-
+  /**
+   * Subscribes to a {@link NavigationViewModel} for
+   * updates from {@link android.arch.lifecycle.LiveData}.
+   * <p>
+   * Updates all views with fresh data / shows & hides re-route state.
+   *
+   * @param navigationViewModel to which this View is subscribing
+   * @since 0.6.2
+   */
   public void subscribe(NavigationViewModel navigationViewModel) {
     navigationViewModel.instructionModel.observe((LifecycleOwner) getContext(), new Observer<InstructionModel>() {
       @Override
@@ -135,6 +132,7 @@ public class InstructionView extends RelativeLayout {
           addDistanceText(instructionModel);
           addTextInstruction(instructionModel);
           addTurnLanes(instructionModel);
+          updateSteps(instructionModel.getProgress());
         }
       }
     });
@@ -145,6 +143,7 @@ public class InstructionView extends RelativeLayout {
           isRerouting = isOffRoute;
           if (isRerouting) {
             showRerouteState();
+            instructionListAdapter.clear();
           } else {
             hideRerouteState();
           }
@@ -158,6 +157,7 @@ public class InstructionView extends RelativeLayout {
    * uses it to update the views.
    *
    * @param routeProgress used to provide navigation / progress data
+   * @since 0.6.2
    */
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
@@ -168,23 +168,6 @@ public class InstructionView extends RelativeLayout {
       addTextInstruction(model);
       addTurnLanes(model);
     }
-  }
-
-  /**
-   * If invisible, this method will slide the view down
-   * from the top of the screen and set the visibility to visible
-   *
-   * @since 0.6.0
-   */
-  public void show() {
-    if (this.getVisibility() == INVISIBLE) {
-      this.setVisibility(VISIBLE);
-      this.startAnimation(slideDownTop);
-    }
-  }
-
-  public void showAlert(String alertText) {
-    alertView.show(alertText);
   }
 
   /**
@@ -224,6 +207,77 @@ public class InstructionView extends RelativeLayout {
   }
 
   /**
+   * Can be used to determine the visibility of the instruction list.
+   *
+   * @return true if instruction list is visible, false is not
+   */
+  public boolean isShowingInstructionList() {
+    return instructionListLayout.getVisibility() == VISIBLE;
+  }
+
+  /**
+   * Hide the instruction list and show the sound button.
+   * <p>
+   * This is based on orientation so the different layouts (for portrait vs. landscape)
+   * can be animated appropriately.
+   */
+  public void hideInstructionList() {
+    int orientation = getContext().getResources().getConfiguration().orientation;
+    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      ConstraintSet collapsed = new ConstraintSet();
+      collapsed.clone(getContext(), R.layout.instruction_layout);
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        TransitionManager.beginDelayedTransition(InstructionView.this);
+      }
+      collapsed.applyTo(instructionLayout);
+      instructionListLayout.setVisibility(INVISIBLE);
+      soundLayout.setVisibility(VISIBLE);
+      feedbackLayout.setVisibility(VISIBLE);
+    } else {
+      Animation slideInRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_right);
+      Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.slide_up_top);
+      slideUp.setInterpolator(new AccelerateInterpolator());
+      soundLayout.setVisibility(VISIBLE);
+      soundLayout.startAnimation(slideInRight);
+      feedbackLayout.setVisibility(VISIBLE);
+      feedbackLayout.startAnimation(slideInRight);
+      instructionListLayout.startAnimation(slideUp);
+      instructionListLayout.setVisibility(INVISIBLE);
+    }
+  }
+
+  /**
+   * Show the instruction list and hide the sound button.
+   * <p>
+   * This is based on orientation so the different layouts (for portrait vs. landscape)
+   * can be animated appropriately.
+   */
+  public void showInstructionList() {
+    int orientation = getContext().getResources().getConfiguration().orientation;
+    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      ConstraintSet expanded = new ConstraintSet();
+      expanded.clone(getContext(), R.layout.instruction_layout_alt);
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        TransitionManager.beginDelayedTransition(InstructionView.this);
+      }
+      expanded.applyTo(instructionLayout);
+      instructionListLayout.setVisibility(VISIBLE);
+      soundLayout.setVisibility(INVISIBLE);
+      feedbackLayout.setVisibility(INVISIBLE);
+    } else {
+      Animation slideDown = AnimationUtils.loadAnimation(getContext(), R.anim.slide_down_top);
+      slideDown.setInterpolator(new DecelerateInterpolator());
+      Animation slideOutRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_right);
+      instructionListLayout.setVisibility(VISIBLE);
+      instructionListLayout.startAnimation(slideDown);
+      soundLayout.startAnimation(slideOutRight);
+      soundLayout.setVisibility(INVISIBLE);
+      feedbackLayout.startAnimation(slideOutRight);
+      feedbackLayout.setVisibility(INVISIBLE);
+    }
+  }
+
+  /**
    * Inflates this layout needed for this view.
    */
   private void init() {
@@ -236,32 +290,42 @@ public class InstructionView extends RelativeLayout {
   private void bind() {
     maneuverImage = findViewById(R.id.maneuverImageView);
     stepDistanceText = findViewById(R.id.stepDistanceText);
-    stepInstructionText = findViewById(R.id.stepInstructionText);
+    stepPrimaryText = findViewById(R.id.stepPrimaryText);
+    stepSecondaryText = findViewById(R.id.stepSecondaryText);
     soundChipText = findViewById(R.id.soundText);
     soundFab = findViewById(R.id.soundFab);
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
-    alertView = findViewById(R.id.alertView);
+    soundLayout = findViewById(R.id.soundLayout);
+    feedbackLayout = findViewById(R.id.feedbackLayout);
+    instructionLayout = findViewById(R.id.instructionLayout);
+    instructionListLayout = findViewById(R.id.instructionListLayout);
+    rvInstructions = findViewById(R.id.rvInstructions);
     initInstructionAutoSize();
   }
 
+  /**
+   * For API 21 and lower, manually set the drawable tint based on the colors
+   * set in the given navigation theme (light or dark).
+   */
   private void initBackground() {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
       int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewPrimaryColor(getContext());
       int navigationViewSecondaryColor = ThemeSwitcher.retrieveNavigationViewSecondaryColor(getContext());
-      // Instruction Layout - primary
+      int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveNavigationViewBannerBackgroundColor(getContext());
+      // Instruction Layout banner - banner background
       if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
         View instructionLayoutText = findViewById(R.id.instructionLayoutText);
         View instructionLayoutManeuver = findViewById(R.id.instructionLayoutManeuver);
         Drawable textBackground = DrawableCompat.wrap(instructionLayoutText.getBackground()).mutate();
         Drawable maneuverBackground = DrawableCompat.wrap(instructionLayoutManeuver.getBackground()).mutate();
-        DrawableCompat.setTint(textBackground, navigationViewPrimaryColor);
-        DrawableCompat.setTint(maneuverBackground, navigationViewPrimaryColor);
+        DrawableCompat.setTint(textBackground, navigationViewBannerBackgroundColor);
+        DrawableCompat.setTint(maneuverBackground, navigationViewBannerBackgroundColor);
       } else {
         View instructionLayout = findViewById(R.id.instructionLayout);
         Drawable instructionBackground = DrawableCompat.wrap(instructionLayout.getBackground()).mutate();
-        DrawableCompat.setTint(instructionBackground, navigationViewPrimaryColor);
+        DrawableCompat.setTint(instructionBackground, navigationViewBannerBackgroundColor);
       }
       // Sound chip text - primary
       Drawable soundChipBackground = DrawableCompat.wrap(soundChipText.getBackground()).mutate();
@@ -347,8 +411,12 @@ public class InstructionView extends RelativeLayout {
    * to automatically re-size based on the length of the text.
    */
   private void initInstructionAutoSize() {
-    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepInstructionText,
-      16, 28, 2, TypedValue.COMPLEX_UNIT_SP);
+    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepPrimaryText,
+      24, 30, 1, TypedValue.COMPLEX_UNIT_SP);
+    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepSecondaryText,
+      20, 26, 1, TypedValue.COMPLEX_UNIT_SP);
+    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepDistanceText,
+      16, 20, 1, TypedValue.COMPLEX_UNIT_SP);
   }
 
   /**
@@ -360,6 +428,18 @@ public class InstructionView extends RelativeLayout {
     rvTurnLanes.setHasFixedSize(true);
     rvTurnLanes.setLayoutManager(new LinearLayoutManager(getContext(),
       LinearLayoutManager.HORIZONTAL, false));
+  }
+
+  /**
+   * Sets up the {@link RecyclerView} that is used to display the list of instructions.
+   */
+  private void initDirectionsRecyclerView() {
+    instructionListAdapter = new InstructionListAdapter();
+    rvInstructions.setAdapter(instructionListAdapter);
+    rvInstructions.setHasFixedSize(true);
+    rvInstructions.setNestedScrollingEnabled(true);
+    rvInstructions.setItemAnimator(new DefaultItemAnimator());
+    rvInstructions.setLayoutManager(new LinearLayoutManager(getContext()));
   }
 
   /**
@@ -375,7 +455,6 @@ public class InstructionView extends RelativeLayout {
    */
   private void initAnimations() {
     Context context = getContext();
-    slideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
     rerouteSlideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
     rerouteSlideUpTop = AnimationUtils.loadAnimation(context, R.anim.slide_up_top);
 
@@ -391,6 +470,50 @@ public class InstructionView extends RelativeLayout {
     fadeInSlowOut = new AnimationSet(false);
     fadeInSlowOut.addAnimation(fadeIn);
     fadeInSlowOut.addAnimation(fadeOut);
+  }
+
+  private void initClickListener() {
+    if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      initLandscapeClickListener();
+    } else {
+      initPortraitClickListener();
+    }
+  }
+
+  /**
+   * For portrait orientation, attach the listener to the whole layout
+   * and use custom animations to hide and show the instructions /sound layout
+   */
+  private void initPortraitClickListener() {
+    instructionLayout.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View instructionView) {
+        boolean instructionsVisible = instructionListLayout.getVisibility() == VISIBLE;
+        if (!instructionsVisible) {
+          showInstructionList();
+        } else {
+          hideInstructionList();
+        }
+      }
+    });
+  }
+
+  /**
+   * For landscape orientation, the click listener is attached to
+   * the instruction text layout and the constraints are adjusted before animating
+   */
+  private void initLandscapeClickListener() {
+    findViewById(R.id.instructionLayoutText).setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View instructionLayoutText) {
+        boolean instructionsVisible = instructionListLayout.getVisibility() == VISIBLE;
+        if (!instructionsVisible) {
+          showInstructionList();
+        } else {
+          hideInstructionList();
+        }
+      }
+    });
   }
 
   /**
@@ -415,7 +538,7 @@ public class InstructionView extends RelativeLayout {
   private void addDistanceText(InstructionModel model) {
     if (newDistanceText(model)) {
       distanceText(model);
-    } else if (currentDistanceText == null) {
+    } else if (stepDistanceText.getText().toString().isEmpty()) {
       distanceText(model);
     }
   }
@@ -426,9 +549,10 @@ public class InstructionView extends RelativeLayout {
    * @param model provides distance text
    */
   private boolean newDistanceText(InstructionModel model) {
-    return currentDistanceText != null
+    return !stepDistanceText.getText().toString().isEmpty()
       && !TextUtils.isEmpty(model.getStepDistanceRemaining())
-      && !currentDistanceText.toString().contentEquals(model.getStepDistanceRemaining().toString());
+      && !stepDistanceText.getText().toString()
+      .contentEquals(model.getStepDistanceRemaining().toString());
   }
 
   /**
@@ -437,7 +561,6 @@ public class InstructionView extends RelativeLayout {
    * @param model provides distance text
    */
   private void distanceText(InstructionModel model) {
-    currentDistanceText = model.getStepDistanceRemaining();
     stepDistanceText.setText(model.getStepDistanceRemaining());
   }
 
@@ -448,22 +571,38 @@ public class InstructionView extends RelativeLayout {
    * @param model provides instruction text
    */
   private void addTextInstruction(InstructionModel model) {
-    if (newTextInstruction(model)) {
-      textInstruction(model);
-    } else if (currentInstruction == null) {
-      textInstruction(model);
+    if (newPrimaryText(model) || newSecondaryText(model)) {
+      textInstructions(model);
+    } else if (stepPrimaryText.getText().toString().isEmpty()
+      || stepSecondaryText.getText().toString().isEmpty()) {
+      textInstructions(model);
     }
   }
 
   /**
-   * Looks to see if we have a new instruction text.
+   * Looks to see if we have a new primary instruction text.
    *
-   * @param model provides instruction text
+   * @param model provides primary instruction text
    */
-  private boolean newTextInstruction(InstructionModel model) {
-    return currentInstruction != null
-      && !TextUtils.isEmpty(model.getTextInstruction())
-      && !currentInstruction.contentEquals(model.getTextInstruction());
+  private boolean newPrimaryText(InstructionModel model) {
+    // New primaryText instruction
+    String currentPrimaryText = stepPrimaryText.getText().toString();
+    return !currentPrimaryText.isEmpty()
+      && !TextUtils.isEmpty(model.getPrimaryText())
+      && !currentPrimaryText.contentEquals(model.getPrimaryText());
+  }
+
+  /**
+   * Looks to see if we have a new secondary instruction text.
+   *
+   * @param model provides secondary instruction text
+   */
+  private boolean newSecondaryText(InstructionModel model) {
+    // New primaryText instruction
+    String currentSecondaryText = stepSecondaryText.getText().toString();
+    return !currentSecondaryText.isEmpty()
+      && !TextUtils.isEmpty(model.getSecondaryText())
+      && !currentSecondaryText.contentEquals(model.getSecondaryText());
   }
 
   /**
@@ -471,9 +610,20 @@ public class InstructionView extends RelativeLayout {
    *
    * @param model provides instruction text
    */
-  private void textInstruction(InstructionModel model) {
-    currentInstruction = model.getTextInstruction();
-    stepInstructionText.setText(StringAbbreviator.abbreviate(model.getTextInstruction()));
+  private void textInstructions(InstructionModel model) {
+    if (!TextUtils.isEmpty(model.getPrimaryText())) {
+      stepPrimaryText.setText(StringAbbreviator.abbreviate(model.getPrimaryText()));
+    }
+    if (!TextUtils.isEmpty(model.getSecondaryText())) {
+      if (stepSecondaryText.getVisibility() == GONE) {
+        stepSecondaryText.setVisibility(VISIBLE);
+        stepPrimaryText.setMaxLines(1);
+      }
+      stepSecondaryText.setText(StringAbbreviator.abbreviate(model.getSecondaryText()));
+    } else {
+      stepPrimaryText.setMaxLines(2);
+      stepSecondaryText.setVisibility(GONE);
+    }
   }
 
   /**
@@ -496,8 +646,7 @@ public class InstructionView extends RelativeLayout {
    * Shows turn lane view
    */
   private void showTurnLanes() {
-    if (turnLanesHidden) {
-      turnLanesHidden = false;
+    if (turnLaneLayout.getVisibility() == GONE) {
       turnLaneLayout.setVisibility(VISIBLE);
     }
   }
@@ -506,24 +655,17 @@ public class InstructionView extends RelativeLayout {
    * Hides turn lane view
    */
   private void hideTurnLanes() {
-    if (!turnLanesHidden) {
-      turnLanesHidden = true;
+    if (turnLaneLayout.getVisibility() == VISIBLE) {
       turnLaneLayout.setVisibility(GONE);
     }
   }
 
-  @NonNull
-  private Parcelable createSavedState() {
-    Bundle state = new Bundle();
-    state.putParcelable(getContext().getString(R.string.instruction_super_state), super.onSaveInstanceState());
-    state.putInt(getContext().getString(R.string.instruction_visibility), getVisibility());
-    return state;
-  }
-
-  @SuppressWarnings("WrongConstant")
-  private void setRestoredState(Bundle state) {
-    this.setVisibility(state.getInt(getContext().getString(R.string.instruction_visibility), getVisibility()));
-    Parcelable superState = state.getParcelable(getContext().getString(R.string.instruction_super_state));
-    super.onRestoreInstanceState(superState);
+  /**
+   * Used to update the instructions list with the current steps.
+   *
+   * @param routeProgress to provide the current steps
+   */
+  private void updateSteps(RouteProgress routeProgress) {
+    instructionListAdapter.updateSteps(routeProgress);
   }
 }

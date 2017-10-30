@@ -2,27 +2,28 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.text.SpannableStringBuilder;
 
+import com.mapbox.directions.v5.models.IntersectionLanes;
+import com.mapbox.directions.v5.models.LegStep;
+import com.mapbox.directions.v5.models.StepIntersection;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
-import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
-import com.mapbox.services.api.directions.v5.models.IntersectionLanes;
-import com.mapbox.services.api.directions.v5.models.LegStep;
-import com.mapbox.services.api.directions.v5.models.StepIntersection;
-import com.mapbox.services.commons.utils.TextUtils;
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.utils.ManeuverUtils.getManeuverResource;
 
 public class InstructionModel {
 
   private SpannableStringBuilder stepDistanceRemaining;
-  private String textInstruction;
+  private TextInstruction instruction;
   private int maneuverImage;
   private String maneuverModifier;
-  private IntersectionLanes[] turnLanes;
+  private List<IntersectionLanes> turnLanes;
+  private RouteProgress progress;
 
   public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
+    this.progress = progress;
     buildInstructionModel(progress, decimalFormat);
   }
 
@@ -30,20 +31,36 @@ public class InstructionModel {
     return stepDistanceRemaining;
   }
 
-  String getTextInstruction() {
-    return textInstruction;
+  String getPrimaryText() {
+    if (instruction != null) {
+      return instruction.getPrimaryText();
+    } else {
+      return "";
+    }
+  }
+
+  String getSecondaryText() {
+    if (instruction != null) {
+      return instruction.getSecondaryText();
+    } else {
+      return "";
+    }
   }
 
   int getManeuverImage() {
     return maneuverImage;
   }
 
-  IntersectionLanes[] getTurnLanes() {
+  String getManeuverModifier() {
+    return maneuverModifier;
+  }
+
+  List<IntersectionLanes> getTurnLanes() {
     return turnLanes;
   }
 
-  String getManeuverModifier() {
-    return maneuverModifier;
+  RouteProgress getProgress() {
+    return progress;
   }
 
   private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
@@ -55,14 +72,14 @@ public class InstructionModel {
   }
 
   private void extractStepResources(LegStep upComingStep) {
-    maneuverImage = getManeuverResource(upComingStep);
     if (hasManeuver(upComingStep)) {
-      buildTextInstruction(upComingStep);
-      maneuverModifier = upComingStep.getManeuver().getModifier();
+      maneuverModifier = upComingStep.maneuver().modifier();
     }
     if (hasIntersections(upComingStep)) {
       intersectionTurnLanes(upComingStep);
     }
+    instruction = new TextInstruction(upComingStep);
+    maneuverImage = getManeuverResource(upComingStep);
   }
 
   private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat) {
@@ -71,12 +88,12 @@ public class InstructionModel {
   }
 
   private boolean hasManeuver(LegStep upComingStep) {
-    return upComingStep.getManeuver() != null;
+    return upComingStep.maneuver() != null;
   }
 
   private void intersectionTurnLanes(LegStep upComingStep) {
-    StepIntersection intersection = upComingStep.getIntersections().get(0);
-    IntersectionLanes[] lanes = intersection.getLanes();
+    StepIntersection intersection = upComingStep.intersections().get(0);
+    List<IntersectionLanes> lanes = intersection.lanes();
     if (checkForNoneIndications(lanes)) {
       turnLanes = null;
       return;
@@ -84,12 +101,12 @@ public class InstructionModel {
     turnLanes = lanes;
   }
 
-  private boolean checkForNoneIndications(IntersectionLanes[] lanes) {
+  private boolean checkForNoneIndications(List<IntersectionLanes> lanes) {
     if (lanes == null) {
       return true;
     }
     for (IntersectionLanes lane : lanes) {
-      for (String indication : lane.getIndications()) {
+      for (String indication : lane.indications()) {
         if (indication.contains("none")) {
           return true;
         }
@@ -99,42 +116,7 @@ public class InstructionModel {
   }
 
   private boolean hasIntersections(LegStep upComingStep) {
-    return upComingStep.getIntersections() != null
-      && upComingStep.getIntersections().get(0) != null;
-  }
-
-  private void buildTextInstruction(LegStep upComingStep) {
-    if (hasDestinations(upComingStep)) {
-      destinationInstruction(upComingStep);
-    } else if (hasName(upComingStep)) {
-      nameInstruction(upComingStep);
-    } else if (hasManeuverInstruction(upComingStep)) {
-      maneuverInstruction(upComingStep);
-    }
-  }
-
-  private void maneuverInstruction(LegStep upComingStep) {
-    textInstruction = upComingStep.getManeuver().getInstruction();
-  }
-
-  private boolean hasManeuverInstruction(LegStep upComingStep) {
-    return !TextUtils.isEmpty(upComingStep.getManeuver().getInstruction());
-  }
-
-  private void nameInstruction(LegStep upComingStep) {
-    textInstruction = upComingStep.getName();
-  }
-
-  private boolean hasName(LegStep upComingStep) {
-    return !TextUtils.isEmpty(upComingStep.getName());
-  }
-
-  private void destinationInstruction(LegStep upComingStep) {
-    textInstruction = upComingStep.getDestinations().trim();
-    textInstruction = StringAbbreviator.deliminator(textInstruction);
-  }
-
-  private boolean hasDestinations(LegStep upComingStep) {
-    return !TextUtils.isEmpty(upComingStep.getDestinations());
+    return upComingStep.intersections() != null
+      && upComingStep.intersections().get(0) != null;
   }
 }

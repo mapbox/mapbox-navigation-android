@@ -55,6 +55,14 @@ public class NavigationActivity extends AppCompatActivity implements NavigationV
   }
 
   @Override
+  public void onBackPressed() {
+    // If the navigation view didn't need to do anything, call super
+    if (!navigationView.onBackPressed()) {
+      super.onBackPressed();
+    }
+  }
+
+  @Override
   protected void onSaveInstanceState(Bundle outState) {
     navigationView.onSaveInstanceState(outState);
     super.onSaveInstanceState(outState);

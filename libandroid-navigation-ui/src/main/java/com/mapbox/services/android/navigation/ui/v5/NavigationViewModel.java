@@ -9,13 +9,18 @@ import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -24,8 +29,6 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.commons.models.Position;
 
 import java.text.DecimalFormat;
 
@@ -36,13 +39,14 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
   final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
-  final MutableLiveData<Position> newOrigin = new MutableLiveData<>();
+  final MutableLiveData<Point> newOrigin = new MutableLiveData<>();
   final MutableLiveData<Boolean> isRunning = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
   private NavigationInstructionPlayer instructionPlayer;
   private DecimalFormat decimalFormat;
   private SharedPreferences preferences;
+  private String feedbackId;
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -89,7 +93,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    */
   @Override
   public void userOffRoute(Location location) {
-    Position newOrigin = Position.fromLngLat(location.getLongitude(), location.getLatitude());
+    Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     this.newOrigin.setValue(newOrigin);
     isOffRoute.setValue(true);
   }
@@ -112,7 +116,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
 
   /**
    * Listener used to determine is navigation is running / not running.
-   *
+   * <p>
    * In {@link NavigationView}, views will be shown when true.  When false,
    * the {@link android.app.Activity} will be destroyed.
    *
@@ -130,6 +134,25 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
 
   public MapboxNavigation getNavigation() {
     return navigation;
+  }
+
+  void recordFeedback() {
+    feedbackId = navigation.recordFeedback(FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE, "",
+      FeedbackEvent.FEEDBACK_SOURCE_UI);
+  }
+
+  void updateFeedback(FeedbackItem feedbackItem) {
+    if (!TextUtils.isEmpty(feedbackId)) {
+      navigation.updateFeedback(feedbackId, feedbackItem.getFeedbackType(), feedbackItem.getDescription());
+      feedbackId = null;
+    }
+  }
+
+  void cancelFeedback() {
+    if (!TextUtils.isEmpty(feedbackId)) {
+      navigation.cancelFeedback(feedbackId);
+      feedbackId = null;
+    }
   }
 
   void updateRoute(DirectionsRoute route) {

@@ -1,67 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    tools:showIn="@layout/instruction_view_layout">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/soundLayout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/soundLayout"
+    <TextView
+        android:id="@+id/soundText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/sound_chip_background"
+        android:gravity="center_vertical"
+        android:paddingBottom="8dp"
+        android:paddingEnd="12dp"
+        android:paddingStart="12dp"
+        android:paddingTop="8dp"
+        android:text="@string/muted"
+        android:textColor="?attr/navigationViewSecondary"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/soundFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:gravity="center_vertical|end">
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:tint="?attr/navigationViewSecondary"
+        app:backgroundTint="?attr/navigationViewPrimary"
+        app:borderWidth="0dp"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/soundText"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_sound_on"/>
 
-        <TextView
-            android:id="@+id/soundText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="17dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="17dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/sound_chip_background"
-            android:gravity="center_vertical"
-            android:paddingBottom="8dp"
-            android:paddingEnd="12dp"
-            android:paddingStart="12dp"
-            android:paddingTop="8dp"
-            android:text="@string/muted"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="?attr/navigationViewSecondary"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/soundFab"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:layout_constraintRight_creator="1"
-            tools:layout_constraintTop_creator="1"
-            android:layout_marginStart="8dp"/>
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/soundFab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="16dp"
-            app:backgroundTint="?attr/navigationViewPrimary"
-            android:tint="?attr/navigationViewSecondary"
-            app:borderWidth="0dp"
-            app:fabSize="mini"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_sound_on"/>
-
-    </android.support.constraint.ConstraintLayout>
-
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>

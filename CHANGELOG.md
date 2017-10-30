@@ -2,8 +2,17 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
-### v0.6.2 - October 7, 2017
+### v0.7.0 - TBD
 
+* Updated to Mapbox Java 3.0 [#373](https://github.com/mapbox/mapbox-navigation-android/pull/373)
+
+### v0.6.3 -October 18, 2017
+
+* significant reroute metric fixes [#348](https://github.com/mapbox/mapbox-navigation-android/pull/348)
+* Avoid index out of bounds when drawing route line traffic [#384](https://github.com/mapbox/mapbox-navigation-android/pull/384) 
+
+### v0.6.2 - October 7, 2017
+ 
 * Fixed an issue with the Location Engine not being activated correctly inside the Navigation-UI lib [#321](https://github.com/mapbox/mapbox-navigation-android/pull/321)
 * Fixed bottom sheet not getting placed correctly when the device is rotated [#320](https://github.com/mapbox/mapbox-navigation-android/pull/320)
 * Fixed missing reroute UI when a navigation session reroute occurs [#319](https://github.com/mapbox/mapbox-navigation-android/pull/319)

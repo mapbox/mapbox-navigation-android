@@ -4,52 +4,23 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 
 /**
  * Navigation constants
+ *
+ * @since 0.1.0
  */
-public class NavigationConstants {
+public final class NavigationConstants {
 
   private NavigationConstants() {
     // Empty private constructor to prevent users creating an instance of this class.
   }
 
   /**
-   * Identifier value for the default departure milestone event. If additional milestones are added,
-   * avoid using the 1-5 integer values as identifiers.
+   * If default voice instructions are enabled, this identifier will be used to differentiate them
+   * from custom milestones in the
+   * {@link com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener}.
    *
-   * @since 0.4.0
+   * @since 0.7.0
    */
-  public static final int DEPARTURE_MILESTONE = 1;
-
-  /**
-   * Identifier value for the default new step milestone event. If additional milestones are added,
-   * avoid using the 1-5 integer values as identifiers.
-   *
-   * @since 0.4.0
-   */
-  public static final int NEW_STEP_MILESTONE = 2;
-
-  /**
-   * Identifier value for the default imminent milestone event. If additional milestones are added,
-   * avoid using the 1-5 integer values as identifiers.
-   *
-   * @since 0.4.0
-   */
-  public static final int IMMINENT_MILESTONE = 3;
-
-  /**
-   * Identifier value for the default urgent milestone event. If additional milestones are added,
-   * avoid using the 1-5 integer values as identifiers.
-   *
-   * @since 0.4.0
-   */
-  public static final int URGENT_MILESTONE = 4;
-
-  /**
-   * Identifier value for the default arrival milestone event. If additional milestones are added,
-   * avoid using the 1-5 integer values as identifiers.
-   *
-   * @since 0.4.0
-   */
-  public static final int ARRIVAL_MILESTONE = 5;
+  public static final int VOICE_INSTRUCTION_MILESTONE_ID = 1;
 
   /**
    * Random integer value used for identifying the navigation notification.
@@ -75,7 +46,7 @@ public class NavigationConstants {
    *
    * @since 0.1.0
    */
-  static final int MANEUVER_ZONE_RADIUS = 40;
+  public static final int MANEUVER_ZONE_RADIUS = 40;
 
   /**
    * Maximum number of meters the user can travel away from step before the
@@ -117,7 +88,6 @@ public class NavigationConstants {
   /**
    * Meter radius which the user must be inside for an arrival milestone to be triggered and
    * navigation to end.
-   *
    */
   static final double METERS_REMAINING_TILL_ARRIVAL = 40;
 

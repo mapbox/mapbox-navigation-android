@@ -8,8 +8,9 @@ ext {
   ]
 
   version = [
-      mapboxMapSdk       : '5.1.4',
-      mapboxServices     : '2.2.6',
+      mapboxMapSdk       : '5.2.0-beta.3',
+      // TODO Fix mapboxServices version when releasing next version of MAS (2.2.7)
+      mapboxServices     : '2.3.0-SNAPSHOT',
       locationLayerPlugin: '0.1.0',
       autoValue          : '1.4.1',
       autoValueParcel    : '0.2.5',

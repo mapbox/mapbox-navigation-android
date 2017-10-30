@@ -42,8 +42,18 @@ android {
 
 dependencies {
   // Mapbox Android Services
-  compile dependenciesList.mapboxServices
+  // TODO Fix mapboxServices version when releasing next version of MAS (2.2.7)
+  compile 'com.mapbox.mapboxsdk:mapbox-android-telemetry:2.3.0-SNAPSHOT'
+  // TODO Fix mapboxServices version when releasing next version of MAS (2.2.7)
+  compile ('com.mapbox.mapboxsdk:mapbox-android-services:2.3.0-SNAPSHOT@aar') {
+    transitive = true
+    exclude module: 'mapbox-java-geojson'
+    exclude module: 'mapbox-java-core'
+    exclude module: 'mapbox-java-services'
+  }
 
+  compile "com.mapbox.mapboxsdk:mapbox-java-services-directions:3.0.0-SNAPSHOT"
+  compile "com.mapbox.mapboxsdk:mapbox-java-services-turf:3.0.0-SNAPSHOT"
   // Support
   compile dependenciesList.supportAppcompatV7
 
@@ -71,4 +81,3 @@ apply from: 'javadoc.gradle'
 apply from: "${rootDir}/gradle/mvn-push-android.gradle"
 apply from: "${rootDir}/gradle/checkstyle.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
-apply from: "${rootDir}/gradle/sonarqube.gradle"

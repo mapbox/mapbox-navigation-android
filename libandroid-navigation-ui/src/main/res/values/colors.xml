@@ -9,15 +9,34 @@
     <color name="mapbox_navigation_view_color_primary">#FFFFFF</color>
     <color name="mapbox_navigation_view_color_secondary">#28353D</color>
     <color name="mapbox_navigation_view_color_accent">#4882C6</color>
+    <color name="mapbox_navigation_view_color_primary_text">#424242</color>
     <color name="mapbox_navigation_view_color_accent_text">#424242</color>
+
+    <color name="mapbox_navigation_view_color_list_background">#1B2633</color>
+
+    <color name="mapbox_navigation_view_color_banner_background">#37516F</color>
+    <color name="mapbox_navigation_view_color_banner_primary_text">#FFFFFF</color>
+    <color name="mapbox_navigation_view_color_banner_secondary_text">#E6FFFFFF</color>
+    <color name="mapbox_navigation_view_color_banner_maneuver_primary">#FFFFFF</color>
+    <color name="mapbox_navigation_view_color_banner_maneuver_secondary">#E6FFFFFF</color>
 
     <!--Default Dark Theme-->
     <color name="mapbox_navigation_view_color_primary_dark">#263D57</color>
     <color name="mapbox_navigation_view_color_secondary_dark">#D8D8D8</color>
     <color name="mapbox_navigation_view_color_accent_dark">#FFFFFF</color>
+    <color name="mapbox_navigation_view_color_primary_text_dark">#424242</color>
     <color name="mapbox_navigation_view_color_accent_text_dark">#FFFFFF</color>
+    <color name="mapbox_navigation_view_color_banner_dark">#37516F</color>
 
-    <color name="mapbox_plugin_navigation_route_default_blue">#4882C6</color>
+    <color name="mapbox_navigation_view_color_list_background_dark">#1B2633</color>
+
+    <color name="mapbox_navigation_view_color_banner_background_dark">#37516F</color>
+    <color name="mapbox_navigation_view_color_banner_primary_text_dark">#FFFFFF</color>
+    <color name="mapbox_navigation_view_color_banner_secondary_text_dark">#E6FFFFFF</color>
+    <color name="mapbox_navigation_view_color_banner_maneuver_primary_dark">#FFFFFF</color>
+    <color name="mapbox_navigation_view_color_banner_maneuver_secondary_dark">#E6FFFFFF</color>
+
+    <!-- Feedback -->
 
     <!--grey-->
     <color name="md_grey_200">#EEEEEE</color>
