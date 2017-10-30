@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mapbox.directions.v5.models.LegStep;
+import com.mapbox.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.TextInstruction;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -19,14 +20,15 @@ import java.util.List;
 
 public class InstructionListAdapter extends RecyclerView.Adapter<InstructionViewHolder> {
 
-  private List<TextInstruction> instructions;
+  private List<LegStep> stepList;
   private DecimalFormat decimalFormat;
 
-  private int currentLegIndex = -1;
-  private int currentStepIndex = -1;
+  private RouteLeg currentLeg;
+  private LegStep currentStep;
+  private LegStep currentUpcomingStep;
 
   public InstructionListAdapter() {
-    instructions = new ArrayList<>();
+    stepList = new ArrayList<>();
     decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
   }
 
@@ -39,11 +41,12 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
 
   @Override
   public void onBindViewHolder(InstructionViewHolder holder, int position) {
-    TextInstruction textInstruction = instructions.get(position);
-    if (textInstruction != null) {
+    if (stepList.get(position) != null) {
+      LegStep step = stepList.get(position);
+      TextInstruction textInstruction = new TextInstruction(step);
       updatePrimaryText(holder, textInstruction.getPrimaryText());
       updateSecondaryText(holder, textInstruction.getSecondaryText());
-//      holder.maneuverView.setImageResource(getManeuverResource(textInstruction.getStep()));
+      updateManeuverView(holder, step);
       holder.stepDistanceText.setText(DistanceUtils
         .distanceFormatterBold(textInstruction.getStepDistance(), decimalFormat));
     }
@@ -51,7 +54,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
 
   @Override
   public int getItemCount() {
-    return instructions.size();
+    return stepList.size();
   }
 
   public void updateSteps(RouteProgress routeProgress) {
@@ -60,7 +63,8 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   }
 
   public void clear() {
-    instructions.clear();
+    // Clear remaining stepList
+    stepList.clear();
     notifyDataSetChanged();
   }
 
@@ -79,42 +83,61 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     }
   }
 
+  private void updateManeuverView(InstructionViewHolder holder, LegStep step) {
+    if (step.maneuver() != null) {
+      holder.maneuverView.setManeuverModifier(step.maneuver().modifier());
+      holder.maneuverView.setManeuverType(step.maneuver().type());
+    }
+  }
+
   private void addLegSteps(RouteProgress routeProgress) {
-    if ((newLeg(routeProgress) || instructions.size() == 0) && legHasSteps(routeProgress)) {
+    if ((newLeg(routeProgress) || stepList.size() == 0) && hasLegSteps(routeProgress)) {
       List<LegStep> steps = routeProgress.directionsRoute().legs().get(0).steps();
-      instructions.clear();
-      if (steps != null) {
-        for (LegStep step : steps) {
-          instructions.add(new TextInstruction(step));
-        }
-      }
+      stepList.clear();
+      stepList.addAll(steps);
       notifyDataSetChanged();
-      currentLegIndex = routeProgress.legIndex();
     }
   }
 
   private void updateStepList(RouteProgress routeProgress) {
-    int currentStepIndex = routeProgress.currentLegProgress().stepIndex();
-    if (newStep(currentStepIndex)) {
-      removeFirstStep();
-      this.currentStepIndex = currentStepIndex;
+    if (newStep(routeProgress)) {
+      removeCurrentStep();
+      removeCurrentUpcomingStep();
     }
   }
 
-  private void removeFirstStep() {
-    instructions.remove(0);
-    notifyItemRemoved(0);
+  private void removeCurrentStep() {
+    int currentStepPosition = stepList.indexOf(currentStep);
+    if (currentStepPosition >= 0) {
+      stepList.remove(currentStepPosition);
+      notifyItemRemoved(currentStepPosition);
+    }
   }
 
-  private boolean legHasSteps(RouteProgress routeProgress) {
-    return routeProgress.directionsRoute() != null && routeProgress.directionsRoute().legs().size() > 0;
+  private void removeCurrentUpcomingStep() {
+    int currentUpcomingStepPosition = stepList.indexOf(currentUpcomingStep);
+    if (currentUpcomingStepPosition >= 0) {
+      stepList.remove(currentUpcomingStepPosition);
+      notifyItemRemoved(currentUpcomingStepPosition);
+    }
+  }
+
+  private boolean hasLegSteps(RouteProgress routeProgress) {
+    return routeProgress.directionsRoute() != null
+      && routeProgress.directionsRoute().legs() != null
+      && routeProgress.directionsRoute().legs().size() > 0;
   }
 
   private boolean newLeg(RouteProgress routeProgress) {
-    return this.currentLegIndex != routeProgress.legIndex();
+    boolean newLeg = currentLeg == null || !currentLeg.equals(routeProgress.currentLeg());
+    currentLeg = routeProgress.currentLeg();
+    return newLeg;
   }
 
-  private boolean newStep(int currentStepIndex) {
-    return this.currentStepIndex != currentStepIndex && instructions.size() > 0;
+  private boolean newStep(RouteProgress routeProgress) {
+    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().stepIndex());
+    currentStep = routeProgress.currentLegProgress().currentStep();
+    currentUpcomingStep = routeProgress.currentLegProgress().upComingStep();
+    return newStep;
   }
 }
