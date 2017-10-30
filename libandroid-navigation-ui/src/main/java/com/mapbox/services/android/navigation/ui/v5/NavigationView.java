@@ -222,7 +222,9 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
 
   @Override
   public void showRecenterBtn() {
-    recenterBtn.show();
+    if (summaryBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
+      recenterBtn.show();
+    }
   }
 
   @Override
