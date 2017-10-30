@@ -1,9 +1,8 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-import android.text.TextUtils;
-
 import com.mapbox.directions.v5.models.VoiceInstructions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
 
@@ -18,8 +17,10 @@ public class VoiceInstructionMilestone extends Milestone {
 
   @Override
   public boolean isOccurring(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-    if (shouldAddInstructions(previousRouteProgress, routeProgress)) {
+    if (RouteUtils.isNewRoute(previousRouteProgress, routeProgress)) {
       clearInstructionList();
+    }
+    if (shouldAddInstructions(previousRouteProgress, routeProgress)) {
       stepVoiceInstructions = routeProgress.currentLegProgress().currentStep().voiceInstructions();
     }
     for (VoiceInstructions voice : stepVoiceInstructions) {
@@ -45,7 +46,6 @@ public class VoiceInstructionMilestone extends Milestone {
    */
   private boolean shouldAddInstructions(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
     return newStep(previousRouteProgress, routeProgress)
-      || newRoute(previousRouteProgress, routeProgress)
       || stepVoiceInstructions == null;
   }
 
@@ -58,20 +58,6 @@ public class VoiceInstructionMilestone extends Milestone {
     if (stepVoiceInstructions != null && !stepVoiceInstructions.isEmpty()) {
       stepVoiceInstructions.clear();
     }
-  }
-
-  /**
-   * Used to check for a new route.  Route geometries will be the same only on the first
-   * update.  This is because the previousRouteProgress is reset and the current routeProgress is generated
-   * from the previous.
-   *
-   * @param previousRouteProgress most recent progress before the current progress
-   * @param routeProgress         the current route progress
-   * @return true if there's a new route, false if not
-   */
-  private boolean newRoute(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-    return TextUtils.equals(previousRouteProgress.directionsRoute().geometry(),
-      routeProgress.directionsRoute().geometry());
   }
 
   /**
