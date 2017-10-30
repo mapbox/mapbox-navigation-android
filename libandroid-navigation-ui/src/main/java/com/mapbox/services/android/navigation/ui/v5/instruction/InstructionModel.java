@@ -11,14 +11,12 @@ import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import static com.mapbox.services.android.navigation.v5.utils.ManeuverUtils.getManeuverResource;
-
 public class InstructionModel {
 
   private SpannableStringBuilder stepDistanceRemaining;
   private TextInstruction instruction;
-  private int maneuverImage;
   private String maneuverModifier;
+  private String maneuverType;
   private List<IntersectionLanes> turnLanes;
   private RouteProgress progress;
 
@@ -47,12 +45,12 @@ public class InstructionModel {
     }
   }
 
-  int getManeuverImage() {
-    return maneuverImage;
-  }
-
   String getManeuverModifier() {
     return maneuverModifier;
+  }
+
+  String getManeuverType() {
+    return maneuverType;
   }
 
   List<IntersectionLanes> getTurnLanes() {
@@ -74,12 +72,12 @@ public class InstructionModel {
   private void extractStepResources(LegStep upComingStep) {
     if (hasManeuver(upComingStep)) {
       maneuverModifier = upComingStep.maneuver().modifier();
+      maneuverType = upComingStep.maneuver().type();
     }
     if (hasIntersections(upComingStep)) {
       intersectionTurnLanes(upComingStep);
     }
     instruction = new TextInstruction(upComingStep);
-    maneuverImage = getManeuverResource(upComingStep);
   }
 
   private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat) {
