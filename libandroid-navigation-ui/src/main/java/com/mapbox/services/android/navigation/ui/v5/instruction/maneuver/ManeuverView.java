@@ -35,9 +35,9 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 public class ManeuverView extends View {
 
   @ManeuverType
-  String maneuverType = null;
+  String maneuverType = "";
   @ManeuverModifier
-  String maneuverModifier = null;
+  String maneuverModifier = "";
 
   private int primaryColor;
   private int secondaryColor;
@@ -55,6 +55,11 @@ public class ManeuverView extends View {
 
   public ManeuverView(Context context, AttributeSet attrs, int defStyle) {
     super(context, attrs, defStyle);
+  }
+
+  @Override
+  protected void onFinishInflate() {
+    super.onFinishInflate();
     initManeuverColor();
   }
 
@@ -194,7 +199,6 @@ public class ManeuverView extends View {
           ManeuversStyleKit.drawArrowStraight(canvas, primaryColor, size);
         }
     }
-
     setScaleX(flip ? -1 : 1);
   }
 
