@@ -679,6 +679,9 @@ public class InstructionView extends RelativeLayout {
    */
   private void showTurnLanes() {
     if (turnLaneLayout.getVisibility() == GONE) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        TransitionManager.beginDelayedTransition(this);
+      }
       turnLaneLayout.setVisibility(VISIBLE);
     }
   }
@@ -688,6 +691,9 @@ public class InstructionView extends RelativeLayout {
    */
   private void hideTurnLanes() {
     if (turnLaneLayout.getVisibility() == VISIBLE) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        TransitionManager.beginDelayedTransition(this);
+      }
       turnLaneLayout.setVisibility(GONE);
     }
   }

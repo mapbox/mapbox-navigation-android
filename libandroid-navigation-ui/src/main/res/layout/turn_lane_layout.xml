@@ -6,13 +6,7 @@
     android:layout_height="wrap_content"
     android:background="?attr/navigationViewListBackground"
     android:orientation="vertical"
-    android:elevation="4dp">
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:alpha=".5"
-        android:background="?attr/navigationViewBannerManeuverSecondary"/>
+    android:elevation="2dp">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvTurnLanes"
