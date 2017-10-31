@@ -20,13 +20,28 @@
         android:layout_below="@id/instructionLayout"
         android:visibility="invisible"/>
 
-    <include
-        android:id="@+id/turnLaneLayout"
-        layout="@layout/turn_lane_layout"
+    <LinearLayout
+        android:id="@+id/extraInstructionContentLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/instructionLayout"
-        android:visibility="gone"/>
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/turnLaneLayout"
+            layout="@layout/turn_lane_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+
+        <include
+            android:id="@+id/thenInstructionLayout"
+            layout="@layout/then_instruction_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+
+    </LinearLayout>
 
     <include
         android:id="@+id/soundLayout"
@@ -36,7 +51,7 @@
         android:layout_margin="8dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_below="@id/turnLaneLayout"/>
+        android:layout_below="@id/extraInstructionContentLayout"/>
 
     <include
         android:id="@+id/feedbackLayout"
