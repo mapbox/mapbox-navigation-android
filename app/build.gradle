@@ -58,16 +58,16 @@ dependencies {
   annotationProcessor dependenciesList.butterKnifeProcessor
 
   // Leak Canary
-  debugCompile dependenciesList.leakCanaryDebug
-  releaseCompile dependenciesList.leakCanaryRelease
+  debugImplementation dependenciesList.leakCanaryDebug
+  releaseImplementation dependenciesList.leakCanaryRelease
   androidTestImplementation dependenciesList.leakCanaryTest
 
   // Unit Testing
-  androidTestImplementation dependenciesList.junit
-  androidTestImplementation dependenciesList.mockito
+  testImplementation dependenciesList.junit
+  testImplementation dependenciesList.mockito
 
   // Instrumentation testing
-  androidTestCompile(dependenciesList.testEspressoCore, {
+  androidTestImplementation(dependenciesList.testEspressoCore, {
     exclude group: 'com.android.support', module: 'support-annotations'
   })
 }

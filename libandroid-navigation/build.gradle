@@ -37,6 +37,7 @@ android {
 
   testOptions {
     unitTests.returnDefaultValues = true
+    unitTests.includeAndroidResources = true
   }
 }
 
@@ -62,11 +63,11 @@ dependencies {
   compileOnly dependenciesList.autoValue
 
   // Unit testing
-  androidTestImplementation dependenciesList.junit
-  androidTestImplementation dependenciesList.mockito
-  androidTestImplementation dependenciesList.hamcrest
-  androidTestImplementation dependenciesList.commonsIO
-  androidTestImplementation dependenciesList.robolectric
+  testImplementation dependenciesList.junit
+  testImplementation dependenciesList.mockito
+  testImplementation dependenciesList.hamcrest
+  testImplementation dependenciesList.commonsIO
+  testImplementation dependenciesList.robolectric
 }
 
 apply from: 'javadoc.gradle'

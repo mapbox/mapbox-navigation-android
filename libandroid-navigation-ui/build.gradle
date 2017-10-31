@@ -68,8 +68,8 @@ dependencies {
   javadocDeps dependenciesList.mapboxMapSdk
 
   // Unit testing
-  androidTestImplementation dependenciesList.junit
-  androidTestImplementation dependenciesList.mockito
+  testImplementation dependenciesList.junit
+  testImplementation dependenciesList.mockito
 }
 
 apply from: 'javadoc.gradle'
