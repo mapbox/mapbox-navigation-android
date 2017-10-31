@@ -95,14 +95,14 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
   private void fetchRoute(Point origin, Point destination) {
     if (origin != null && destination != null) {
       NavigationRoute.Builder routeBuilder = NavigationRoute.builder()
-        .accessToken(Mapbox.getAccessToken())
-        .destination(destination);
+        .accessToken(Mapbox.getAccessToken());
 
       if (locationHasBearing()) {
         fetchRouteWithBearing(routeBuilder, origin);
       } else {
         fetchRouteWithoutBearing(routeBuilder, origin);
       }
+      routeBuilder.destination(destination);
     }
   }
 
