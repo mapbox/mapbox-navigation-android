@@ -264,7 +264,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
 
   @Override
   public void showFeedbackBottomSheet() {
-    FeedbackBottomSheet.newInstance(this).show(
+    FeedbackBottomSheet.newInstance(this, 10000).show(
       ((FragmentActivity) getContext()).getSupportFragmentManager(), FeedbackBottomSheet.TAG);
   }
 
