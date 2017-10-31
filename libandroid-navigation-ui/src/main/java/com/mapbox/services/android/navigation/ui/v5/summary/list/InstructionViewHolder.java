@@ -4,21 +4,21 @@ import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView;
 
-class DirectionViewHolder extends RecyclerView.ViewHolder {
+class InstructionViewHolder extends RecyclerView.ViewHolder {
 
-  ImageView maneuverImage;
+  ManeuverView maneuverView;
   TextView stepDistanceText;
   TextView stepPrimaryText;
   TextView stepSecondaryText;
 
-  DirectionViewHolder(View itemView) {
+  InstructionViewHolder(View itemView) {
     super(itemView);
-    maneuverImage = itemView.findViewById(R.id.maneuverImageView);
+    maneuverView = itemView.findViewById(R.id.maneuverView);
     stepDistanceText = itemView.findViewById(R.id.stepDistanceText);
     stepPrimaryText = itemView.findViewById(R.id.stepPrimaryText);
     stepSecondaryText = itemView.findViewById(R.id.stepSecondaryText);
