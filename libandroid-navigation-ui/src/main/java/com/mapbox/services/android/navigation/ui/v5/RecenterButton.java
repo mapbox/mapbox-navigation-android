@@ -43,8 +43,10 @@ public class RecenterButton extends CardView {
    * @since 0.6.0
    */
   public void show() {
-    setVisibility(VISIBLE);
-    startAnimation(slideUpBottom);
+    if (getVisibility() == INVISIBLE) {
+      setVisibility(VISIBLE);
+      startAnimation(slideUpBottom);
+    }
   }
 
   /**
@@ -53,7 +55,9 @@ public class RecenterButton extends CardView {
    * @since 0.6.0
    */
   public void hide() {
-    setVisibility(INVISIBLE);
+    if (getVisibility() == VISIBLE) {
+      setVisibility(INVISIBLE);
+    }
   }
 
   /**

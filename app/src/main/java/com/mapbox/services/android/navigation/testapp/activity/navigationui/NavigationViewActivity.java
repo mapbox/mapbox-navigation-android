@@ -225,6 +225,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
     if (locationEngine.getLastLocation() != null) {
       Location lastLocation = locationEngine.getLastLocation();
+      onLocationChanged(lastLocation);
       currentLocation = Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude());
     }
   }
