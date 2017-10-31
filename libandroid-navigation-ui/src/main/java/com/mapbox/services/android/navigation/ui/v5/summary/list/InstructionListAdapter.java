@@ -43,7 +43,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   public void onBindViewHolder(InstructionViewHolder holder, int position) {
     if (stepList.get(position) != null) {
       LegStep step = stepList.get(position);
-      TextInstruction textInstruction = new TextInstruction(step);
+      TextInstruction textInstruction = new TextInstruction(stepList.get(position));
       updatePrimaryText(holder, textInstruction.getPrimaryText());
       updateSecondaryText(holder, textInstruction.getSecondaryText());
       updateManeuverView(holder, step);

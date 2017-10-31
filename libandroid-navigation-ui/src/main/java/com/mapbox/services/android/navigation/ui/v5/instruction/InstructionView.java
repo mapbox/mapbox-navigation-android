@@ -20,6 +20,7 @@ import android.transition.TransitionManager;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewParent;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -30,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
@@ -244,6 +246,7 @@ public class InstructionView extends RelativeLayout {
       instructionListLayout.startAnimation(slideUp);
       instructionListLayout.setVisibility(INVISIBLE);
     }
+    showNavigationViewRecenterBtn();
   }
 
   /**
@@ -274,6 +277,29 @@ public class InstructionView extends RelativeLayout {
       soundLayout.setVisibility(INVISIBLE);
       feedbackLayout.startAnimation(slideOutRight);
       feedbackLayout.setVisibility(INVISIBLE);
+    }
+    hideNavigationViewRecenterBtn();
+  }
+
+  /**
+   * If the parent is an instance of {@link NavigationView},
+   * show the recenter button.
+   */
+  private void showNavigationViewRecenterBtn() {
+    ViewParent parent = getParent().getParent();
+    if (parent instanceof NavigationView) {
+      ((NavigationView) parent).showRecenterBtn();
+    }
+  }
+
+  /**
+   * If the parent is an instance of {@link NavigationView},
+   * hide the recenter button.
+   */
+  private void hideNavigationViewRecenterBtn() {
+    ViewParent parent = getParent().getParent();
+    if (parent instanceof NavigationView) {
+      ((NavigationView) parent).hideRecenterBtn();
     }
   }
 
