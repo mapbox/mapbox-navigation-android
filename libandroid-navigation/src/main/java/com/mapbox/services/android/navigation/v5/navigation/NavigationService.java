@@ -343,36 +343,40 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   void sendFeedbackEvent(FeedbackEvent feedbackEvent) {
-    SessionState feedbackSessionState = feedbackEvent.getSessionState();
-    feedbackSessionState = feedbackSessionState.toBuilder().afterRerouteLocations(Arrays.asList(
-      locationBuffer.toArray(new Location[locationBuffer.size()])))
-      .build();
+    if(routeProgress != null) {
+      SessionState feedbackSessionState = feedbackEvent.getSessionState();
+      feedbackSessionState = feedbackSessionState.toBuilder().afterRerouteLocations(Arrays.asList(
+        locationBuffer.toArray(new Location[locationBuffer.size()])))
+        .build();
 
-    NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, routeProgress,
-      feedbackEvent.getSessionState().eventLocation(), feedbackEvent.getDescription(),
-      feedbackEvent.getFeedbackType(), "", feedbackEvent.getFeedbackId(),
-      mapboxNavigation.obtainVendorId(), locationEngineName);
+      NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, routeProgress,
+        feedbackEvent.getSessionState().eventLocation(), feedbackEvent.getDescription(),
+        feedbackEvent.getFeedbackType(), "", feedbackEvent.getFeedbackId(),
+        mapboxNavigation.obtainVendorId(), locationEngineName);
+    }
   }
 
   void sendRerouteEvent(SessionState sessionState) {
-    sessionState = sessionState.toBuilder()
-      .afterRerouteLocations(Arrays.asList(
-        locationBuffer.toArray(new Location[locationBuffer.size()])))
-      .build();
+    if(routeProgress != null) {
+      sessionState = sessionState.toBuilder()
+        .afterRerouteLocations(Arrays.asList(
+          locationBuffer.toArray(new Location[locationBuffer.size()])))
+        .build();
 
-    NavigationMetricsWrapper.rerouteEvent(sessionState, routeProgress,
-      sessionState.eventLocation(), locationEngineName);
+      NavigationMetricsWrapper.rerouteEvent(sessionState, routeProgress,
+        sessionState.eventLocation(), locationEngineName);
 
-    for (SessionState session : queuedRerouteEvents) {
-      queuedRerouteEvents.set(queuedRerouteEvents.indexOf(session),
-        session.toBuilder().lastRerouteDate(
-          sessionState.rerouteDate()
-        ).build());
+      for (SessionState session : queuedRerouteEvents) {
+        queuedRerouteEvents.set(queuedRerouteEvents.indexOf(session),
+          session.toBuilder().lastRerouteDate(
+            sessionState.rerouteDate()
+          ).build());
+      }
+
+      mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder().lastRerouteDate(
+        sessionState.rerouteDate()
+      ).build());
     }
-
-    mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder().lastRerouteDate(
-      sessionState.rerouteDate()
-    ).build());
   }
 
   class LocalBinder extends Binder {
