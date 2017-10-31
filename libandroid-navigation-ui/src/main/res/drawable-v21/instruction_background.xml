@@ -4,7 +4,6 @@
 
     <solid android:color="?attr/navigationViewBannerBackground"/>
 
-    <corners android:bottomLeftRadius="8dp"
-             android:bottomRightRadius="8dp"/>
+    <corners android:bottomRightRadius="4dp"/>
 
 </shape>
