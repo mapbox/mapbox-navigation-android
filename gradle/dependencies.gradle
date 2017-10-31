@@ -39,7 +39,7 @@ ext {
       errorprone: '0.0.13',
       coveralls : '2.8.1',
       spotbugs  : '1.3',
-      sonarqube : '2.5',
+      sonarqube : '2.6-rc1',
       gradle    : '3.0.0'
   ]
 
