@@ -2,12 +2,12 @@ package com.mapbox.services.android.navigation.ui.v5.instruction.maneuver;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.PointF;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ManeuverModifier;
@@ -64,8 +64,8 @@ public class ManeuverView extends View {
   }
 
   private void initManeuverColor() {
-    this.primaryColor = Color.BLACK;
-    this.secondaryColor = Color.LTGRAY;
+    this.primaryColor = ThemeSwitcher.retrieveNavigationViewBannerManeuverPrimaryColor(getContext());
+    this.secondaryColor = ThemeSwitcher.retrieveNavigationViewBannerManeuverSecondaryColor(getContext());
   }
 
   public void setManeuverType(String maneuverType) {
