@@ -18,7 +18,7 @@
     <color name="mapbox_navigation_view_color_banner_primary_text">#FFFFFF</color>
     <color name="mapbox_navigation_view_color_banner_secondary_text">#E6FFFFFF</color>
     <color name="mapbox_navigation_view_color_banner_maneuver_primary">#FFFFFF</color>
-    <color name="mapbox_navigation_view_color_banner_maneuver_secondary">#E6FFFFFF</color>
+    <color name="mapbox_navigation_view_color_banner_maneuver_secondary">#4DFFFFFF</color>
 
     <!--Default Dark Theme-->
     <color name="mapbox_navigation_view_color_primary_dark">#263D57</color>
@@ -34,7 +34,7 @@
     <color name="mapbox_navigation_view_color_banner_primary_text_dark">#FFFFFF</color>
     <color name="mapbox_navigation_view_color_banner_secondary_text_dark">#E6FFFFFF</color>
     <color name="mapbox_navigation_view_color_banner_maneuver_primary_dark">#FFFFFF</color>
-    <color name="mapbox_navigation_view_color_banner_maneuver_secondary_dark">#E6FFFFFF</color>
+    <color name="mapbox_navigation_view_color_banner_maneuver_secondary_dark">#4DFFFFFF</color>
 
     <!-- Feedback -->
 

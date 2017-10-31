@@ -35,6 +35,7 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
+import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -61,8 +62,7 @@ import java.text.DecimalFormat;
  */
 public class InstructionView extends RelativeLayout {
 
-  public boolean isMuted;
-  private ImageView maneuverImage;
+  private ManeuverView maneuverView;
   private TextView stepDistanceText;
   private TextView stepPrimaryText;
   private TextView stepSecondaryText;
@@ -82,8 +82,8 @@ public class InstructionView extends RelativeLayout {
   private Animation rerouteSlideDownTop;
   private AnimationSet fadeInSlowOut;
   private DecimalFormat decimalFormat;
-  private int currentManeuverId;
   private boolean isRerouting;
+  public boolean isMuted;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -130,7 +130,7 @@ public class InstructionView extends RelativeLayout {
       @Override
       public void onChanged(@Nullable InstructionModel instructionModel) {
         if (instructionModel != null) {
-          addManeuverImage(instructionModel);
+          updateManeuverView(instructionModel);
           addDistanceText(instructionModel);
           addTextInstruction(instructionModel);
           addTurnLanes(instructionModel);
@@ -165,7 +165,7 @@ public class InstructionView extends RelativeLayout {
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
       InstructionModel model = new InstructionModel(routeProgress, decimalFormat);
-      addManeuverImage(model);
+      updateManeuverView(model);
       addDistanceText(model);
       addTextInstruction(model);
       addTurnLanes(model);
@@ -314,7 +314,7 @@ public class InstructionView extends RelativeLayout {
    * Finds and binds all necessary views
    */
   private void bind() {
-    maneuverImage = findViewById(R.id.maneuverImageView);
+    maneuverView = findViewById(R.id.maneuverView);
     stepDistanceText = findViewById(R.id.stepDistanceText);
     stepPrimaryText = findViewById(R.id.stepPrimaryText);
     stepSecondaryText = findViewById(R.id.stepSecondaryText);
@@ -543,16 +543,14 @@ public class InstructionView extends RelativeLayout {
   }
 
   /**
-   * Looks to see if we have a new image id.
-   * Sets new image resource if one is found.
+   * Looks to see if we have a new maneuver modifier or type.
+   * Updates new maneuver image if one is found.
    *
-   * @param model provides maneuver image id
+   * @param model provides maneuver modifier / type
    */
-  private void addManeuverImage(InstructionModel model) {
-    if (currentManeuverId != model.getManeuverImage()) {
-      currentManeuverId = model.getManeuverImage();
-      maneuverImage.setImageResource(model.getManeuverImage());
-    }
+  private void updateManeuverView(InstructionModel model) {
+    maneuverView.setManeuverModifier(model.getManeuverModifier());
+    maneuverView.setManeuverType(model.getManeuverType());
   }
 
   /**

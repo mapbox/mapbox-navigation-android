@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.support.annotation.StringDef;
+
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 
 /**
@@ -125,6 +127,24 @@ public final class NavigationConstants {
   public static final String STEP_MANEUVER_TYPE_ROUNDABOUT_TURN = "roundabout turn";
   public static final String STEP_MANEUVER_TYPE_NOTIFICATION = "notification";
 
+  @StringDef({
+    STEP_MANEUVER_TYPE_TURN,
+    STEP_MANEUVER_TYPE_NEW_NAME,
+    STEP_MANEUVER_TYPE_DEPART,
+    STEP_MANEUVER_TYPE_ARRIVE,
+    STEP_MANEUVER_TYPE_MERGE,
+    STEP_MANEUVER_TYPE_ON_RAMP,
+    STEP_MANEUVER_TYPE_OFF_RAMP,
+    STEP_MANEUVER_TYPE_FORK,
+    STEP_MANEUVER_TYPE_END_OF_ROAD,
+    STEP_MANEUVER_TYPE_CONTINUE,
+    STEP_MANEUVER_TYPE_ROUNDABOUT,
+    STEP_MANEUVER_TYPE_ROTARY,
+    STEP_MANEUVER_TYPE_ROUNDABOUT_TURN,
+    STEP_MANEUVER_TYPE_NOTIFICATION
+  })
+  public @interface ManeuverType {}
+
   // Step Maneuver Modifiers
   public static final String STEP_MANEUVER_MODIFIER_UTURN = "uturn";
   public static final String STEP_MANEUVER_MODIFIER_SHARP_RIGHT = "sharp right";
@@ -134,6 +154,18 @@ public final class NavigationConstants {
   public static final String STEP_MANEUVER_MODIFIER_SLIGHT_LEFT = "slight left";
   public static final String STEP_MANEUVER_MODIFIER_LEFT = "left";
   public static final String STEP_MANEUVER_MODIFIER_SHARP_LEFT = "sharp left";
+
+  @StringDef({
+    STEP_MANEUVER_MODIFIER_UTURN,
+    STEP_MANEUVER_MODIFIER_SHARP_RIGHT,
+    STEP_MANEUVER_MODIFIER_RIGHT,
+    STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT,
+    STEP_MANEUVER_MODIFIER_STRAIGHT,
+    STEP_MANEUVER_MODIFIER_SLIGHT_LEFT,
+    STEP_MANEUVER_MODIFIER_LEFT,
+    STEP_MANEUVER_MODIFIER_SHARP_LEFT
+  })
+  public @interface ManeuverModifier {}
 
   // Turn Lane Indication
   public static final String TURN_LANE_INDICATION_LEFT = "left";
