@@ -10,10 +10,13 @@ android {
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true
 
-    buildConfigField('String', "MAPBOX_NAVIGATION_SDK_IDENTIFIER", String.format("\"%s\"",
-        "mapbox-navigation-ui-android"))
-    buildConfigField "String", "MAPBOX_NAVIGATION_EVENTS_USER_AGENT",
-        String.format("\"mapbox-navigation-ui-android/%s\"", project.VERSION_NAME)
+    buildConfigField('String',
+        "MAPBOX_NAVIGATION_SDK_IDENTIFIER", String.format("\"%s\"", "mapbox-navigation-ui-android")
+    )
+    buildConfigField 'String',
+        "MAPBOX_NAVIGATION_EVENTS_USER_AGENT", String.format("\"mapbox-navigation-ui-android/%s\"",
+        project.VERSION_NAME
+    )
   }
   configurations {
     javadocDeps
@@ -28,10 +31,10 @@ android {
 
 dependencies {
   // Navigation SDK
-  compile project(':libandroid-navigation')
+  api project(':libandroid-navigation')
 
   // Mapbox Map SDK
-  compile(dependenciesList.mapboxMapSdk + '@aar') {
+  api(dependenciesList.mapboxMapSdk) {
     transitive = true
     exclude module: 'lost'
     exclude module: 'mapbox-java-geojson'
@@ -39,36 +42,34 @@ dependencies {
   }
 
   // Support libraries
-  compile dependenciesList.supportAppcompatV7
-  compile dependenciesList.supportDesign
-  compile dependenciesList.supportRecyclerView
-  compile dependenciesList.supportConstraintLayout
-  compile dependenciesList.supportCardView
+  api dependenciesList.supportAppcompatV7
+  api dependenciesList.supportDesign
+  api dependenciesList.supportRecyclerView
+  api dependenciesList.supportConstraintLayout
+  api dependenciesList.supportCardView
 
   // Architecture libraries
-  compile dependenciesList.lifecycleExtensions
-  compile dependenciesList.lifecycleCompiler
+  implementation dependenciesList.lifecycleExtensions
+  annotationProcessor dependenciesList.lifecycleCompiler
 
   // Mapbox plugins
-  compile dependenciesList.locationLayerPlugin
+  api(dependenciesList.locationLayerPlugin) {
+    transitive = true
+    exclude module: 'mapbox-android-services'
+  }
 
   // Logging
-  compile dependenciesList.timber
+  implementation dependenciesList.timber
 
   // AWS Polly
-  compile dependenciesList.polly
+  implementation dependenciesList.polly
 
   // Mapbox Map SDK Javadoc
   javadocDeps dependenciesList.mapboxMapSdk
 
   // Unit testing
-  testCompile dependenciesList.junit
-  testCompile dependenciesList.mockito
-
-
-  androidTestCompile(dependenciesList.testEspressoCore, {
-    exclude group: 'com.android.support', module: 'support-annotations'
-  })
+  androidTestImplementation dependenciesList.junit
+  androidTestImplementation dependenciesList.mockito
 }
 
 apply from: 'javadoc.gradle'
