@@ -148,10 +148,10 @@ public class ManeuverView extends View {
               break;
 
             default:
-              ManeuversStyleKit.drawArriveRight(canvas, primaryColor, size);
+              ManeuversStyleKit.drawArrive(canvas, primaryColor, size);
           }
         } else {
-          ManeuversStyleKit.drawArriveRight(canvas, primaryColor, size);
+          ManeuversStyleKit.drawArrive(canvas, primaryColor, size);
         }
         break;
 
@@ -190,6 +190,7 @@ public class ManeuverView extends View {
 
             case STEP_MANEUVER_MODIFIER_UTURN:
               ManeuversStyleKit.drawArrow180Right(canvas, primaryColor, size);
+              flip = true;
               break;
 
             default:
@@ -210,6 +211,7 @@ public class ManeuverView extends View {
 
   private boolean isRoundabout() {
     return maneuverType.equals(NavigationConstants.STEP_MANEUVER_TYPE_ROTARY)
-      || maneuverType.equals(NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT);
+      || maneuverType.equals(NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT)
+      || maneuverType.equals(NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT_TURN);
   }
 }
