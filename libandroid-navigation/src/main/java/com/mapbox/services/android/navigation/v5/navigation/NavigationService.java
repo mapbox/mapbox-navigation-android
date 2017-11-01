@@ -90,13 +90,16 @@ public class NavigationService extends Service implements LocationEngineListener
       stopForeground(true);
     }
 
+    // Send remaining items in queues
     navigationQueueContainer.sendQueues();
 
+    // TODO extract into NavigationQueueContainer
     // User canceled navigation session
     if (routeProgress != null && rawLocation != null) {
       NavigationMetricsWrapper.cancelEvent(mapboxNavigation.getSessionState(), routeProgress,
         rawLocation, locationEngineName);
     }
+
     endNavigation();
     super.onDestroy();
   }
@@ -183,12 +186,10 @@ public class NavigationService extends Service implements LocationEngineListener
     Timber.d("onLocationChanged");
     if (location != null && validLocationUpdate(location)) {
       rawLocation = location;
-      navigationQueueContainer.setCurrentLocation(location);
       thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation,
         recentDistancesFromManeuverInMeters));
 
-      navigationQueueContainer.updateRerouteQueue();
-      navigationQueueContainer.updateFeedbackQueue();
+      navigationQueueContainer.updateCurrentLocation(location);
     }
   }
 
@@ -217,11 +218,13 @@ public class NavigationService extends Service implements LocationEngineListener
     this.routeProgress = routeProgress;
     navigationQueueContainer.setRouteProgress(routeProgress);
 
+    // TODO extract into NavigationQueueContainer
     if (firstProgressUpdate) {
       NavigationMetricsWrapper.departEvent(mapboxNavigation.getSessionState(), routeProgress,
         rawLocation, locationEngineName);
       firstProgressUpdate = false;
     }
+
     if (mapboxNavigation.options().enableNotification()) {
       navNotificationManager.updateDefaultNotification(routeProgress);
     }
@@ -251,6 +254,8 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @Override
   public void onUserOffRoute(Location location, boolean userOffRoute) {
+
+    // TODO extract into NavigationQueueContainer
     if (userOffRoute) {
       if (location.getTime() > timeIntervalSinceLastOffRoute
         + TimeUnit.SECONDS.toMillis(mapboxNavigation.options().secondsBeforeReroute())) {
