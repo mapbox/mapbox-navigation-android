@@ -2,6 +2,8 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
 
+import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
@@ -36,6 +38,8 @@ class NavigationQueueContainer {
   }
 
   void sendQueues() {
+
+
     for (FeedbackEvent feedbackEvent : queuedFeedbackEvents) {
       sendFeedbackEvent(feedbackEvent);
     }
@@ -102,7 +106,7 @@ class NavigationQueueContainer {
       locationBuffer.toArray(new Location[locationBuffer.size()])))
       .build();
 
-    NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, routeProgress,
+    NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, checkRouteProgress(routeProgress),
       feedbackEvent.getSessionState().eventLocation(), feedbackEvent.getDescription(),
       feedbackEvent.getFeedbackType(), "", feedbackEvent.getFeedbackId(),
       mapboxNavigation.obtainVendorId(), locationEngineName);
@@ -114,7 +118,7 @@ class NavigationQueueContainer {
         locationBuffer.toArray(new Location[locationBuffer.size()])))
       .build();
 
-    NavigationMetricsWrapper.rerouteEvent(sessionState, routeProgress,
+    NavigationMetricsWrapper.rerouteEvent(sessionState, checkRouteProgress(routeProgress),
       sessionState.eventLocation(), locationEngineName);
 
     for (SessionState session : queuedRerouteEvents) {
@@ -172,5 +176,36 @@ class NavigationQueueContainer {
 
   void setRouteProgress(RouteProgress routeProgress) {
     this.routeProgress = routeProgress;
+  }
+
+  private RouteProgress checkRouteProgress(RouteProgress routeProgress) {
+    if (routeProgress != null) {
+      return  routeProgress;
+    }
+    return obtainNewRouteProgress();
+  }
+
+  private RouteProgress obtainNewRouteProgress() {
+    return new RouteProgress() {
+      @Override
+      public DirectionsRoute directionsRoute() {
+        return null;
+      }
+
+      @Override
+      public int legIndex() {
+        return 0;
+      }
+
+      @Override
+      public double distanceRemaining() {
+        return 0;
+      }
+
+      @Override
+      public RouteLegProgress currentLegProgress() {
+        return null;
+      }
+    };
   }
 }
