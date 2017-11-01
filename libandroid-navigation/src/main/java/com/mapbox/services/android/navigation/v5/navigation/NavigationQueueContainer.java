@@ -22,7 +22,7 @@ class NavigationQueueContainer {
   private List<SessionState> queuedRerouteEvents = new ArrayList<>();
   private List<FeedbackEvent> queuedFeedbackEvents = new ArrayList<>();
   private MapboxNavigation mapboxNavigation;
-  String locationEngineName;
+  private String locationEngineName;
   private RouteProgress routeProgress;
   private Location currentLocation;
   private RingBuffer<Location> locationBuffer;
@@ -32,14 +32,16 @@ class NavigationQueueContainer {
     locationBuffer = new RingBuffer<>(20);
   }
 
-  void setCurrentLocation(Location rawLocation) {
+  void updateCurrentLocation(Location rawLocation) {
     this.currentLocation = rawLocation;
     locationBuffer.addLast(rawLocation);
+
+    // Update queues with new location
+    updateRerouteQueue();
+    updateFeedbackQueue();
   }
 
   void sendQueues() {
-
-
     for (FeedbackEvent feedbackEvent : queuedFeedbackEvents) {
       sendFeedbackEvent(feedbackEvent);
     }
@@ -54,7 +56,7 @@ class NavigationQueueContainer {
       .eventLocation(currentLocation).build());
   }
 
-  public void rerouteOccurred() {
+  void rerouteOccurred() {
     mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder()
       .routeProgressBeforeReroute(routeProgress)
       .beforeRerouteLocations(Arrays.asList(
@@ -68,14 +70,14 @@ class NavigationQueueContainer {
   }
 
   String recordFeedbackEvent(String feedbackType, String description,
-                                  @FeedbackEvent.FeedbackSource String feedbackSource) {
+                             @FeedbackEvent.FeedbackSource String feedbackSource) {
     SessionState feedbackEventSessionState = mapboxNavigation.getSessionState().toBuilder()
       .rerouteDate(new Date())
       .beforeRerouteLocations(Arrays.asList(
         locationBuffer.toArray(new Location[locationBuffer.size()])))
       .routeProgressBeforeReroute(routeProgress)
       .eventLocation(currentLocation)
-      .mockLocation((currentLocation.getProvider().equals(MOCK_PROVIDER)) ? true : false)
+      .mockLocation(currentLocation.getProvider().equals(MOCK_PROVIDER))
       .build();
 
     FeedbackEvent feedbackEvent = new FeedbackEvent(feedbackEventSessionState, feedbackSource);
@@ -87,7 +89,7 @@ class NavigationQueueContainer {
   }
 
   void updateFeedbackEvent(String feedbackId,
-                                  @FeedbackEvent.FeedbackType String feedbackType, String description) {
+                           @FeedbackEvent.FeedbackType String feedbackType, String description) {
     FeedbackEvent feedbackEvent = findQueuedFeedbackEvent(feedbackId);
     if (feedbackEvent != null) {
       feedbackEvent.setFeedbackType(feedbackType);
@@ -142,7 +144,7 @@ class NavigationQueueContainer {
     return null;
   }
 
-  void updateFeedbackQueue() {
+  private void updateFeedbackQueue() {
     Iterator<FeedbackEvent> iterator = queuedFeedbackEvents.listIterator();
     while (iterator.hasNext()) {
       FeedbackEvent feedbackEvent = iterator.next();
@@ -156,7 +158,7 @@ class NavigationQueueContainer {
     }
   }
 
-  void updateRerouteQueue() {
+  private void updateRerouteQueue() {
     Iterator<SessionState> iterator = queuedRerouteEvents.listIterator();
     while (iterator.hasNext()) {
       SessionState sessionState = iterator.next();
@@ -180,7 +182,7 @@ class NavigationQueueContainer {
 
   private RouteProgress checkRouteProgress(RouteProgress routeProgress) {
     if (routeProgress != null) {
-      return  routeProgress;
+      return routeProgress;
     }
     return obtainNewRouteProgress();
   }
