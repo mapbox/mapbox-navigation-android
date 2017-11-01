@@ -31,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.mapbox.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
@@ -82,6 +83,7 @@ public class InstructionView extends RelativeLayout {
   private Animation rerouteSlideDownTop;
   private AnimationSet fadeInSlowOut;
   private DecimalFormat decimalFormat;
+  private LegStep currentStep;
   private boolean isRerouting;
   public boolean isMuted;
 
@@ -133,8 +135,10 @@ public class InstructionView extends RelativeLayout {
           updateManeuverView(instructionModel);
           addDistanceText(instructionModel);
           addTextInstruction(instructionModel);
-          addTurnLanes(instructionModel);
           updateSteps(instructionModel.getProgress());
+          if (newStep(instructionModel.getProgress())) {
+            addTurnLanes(instructionModel);
+          }
         }
       }
     });
@@ -168,7 +172,10 @@ public class InstructionView extends RelativeLayout {
       updateManeuverView(model);
       addDistanceText(model);
       addTextInstruction(model);
-      addTurnLanes(model);
+      updateSteps(routeProgress);
+      if (newStep(routeProgress)) {
+        addTurnLanes(model);
+      }
     }
   }
 
@@ -338,27 +345,16 @@ public class InstructionView extends RelativeLayout {
   private void initBackground() {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
       int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewPrimaryColor(getContext());
-      int navigationViewSecondaryColor = ThemeSwitcher.retrieveNavigationViewSecondaryColor(getContext());
       int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveNavigationViewBannerBackgroundColor(getContext());
-      // Instruction Layout banner - banner background
+      // Instruction Layout landscape - banner background
       if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        View instructionLayoutText = findViewById(R.id.instructionLayoutText);
-        View instructionLayoutManeuver = findViewById(R.id.instructionLayoutManeuver);
-        Drawable textBackground = DrawableCompat.wrap(instructionLayoutText.getBackground()).mutate();
+        View instructionLayoutManeuver = findViewById(R.id.instructionManeuverLayout);
         Drawable maneuverBackground = DrawableCompat.wrap(instructionLayoutManeuver.getBackground()).mutate();
-        DrawableCompat.setTint(textBackground, navigationViewBannerBackgroundColor);
         DrawableCompat.setTint(maneuverBackground, navigationViewBannerBackgroundColor);
-      } else {
-        View instructionLayout = findViewById(R.id.instructionLayout);
-        Drawable instructionBackground = DrawableCompat.wrap(instructionLayout.getBackground()).mutate();
-        DrawableCompat.setTint(instructionBackground, navigationViewBannerBackgroundColor);
       }
       // Sound chip text - primary
       Drawable soundChipBackground = DrawableCompat.wrap(soundChipText.getBackground()).mutate();
       DrawableCompat.setTint(soundChipBackground, navigationViewPrimaryColor);
-      // Reroute Layout - secondary
-      Drawable rerouteBackground = DrawableCompat.wrap(rerouteLayout.getBackground()).mutate();
-      DrawableCompat.setTint(rerouteBackground, navigationViewSecondaryColor);
     }
   }
 
@@ -604,6 +600,18 @@ public class InstructionView extends RelativeLayout {
   }
 
   /**
+   * Looks to see if we have a new step.
+   *
+   * @param routeProgress provides updated step information
+   * @return true if new step, false if not
+   */
+  private boolean newStep(RouteProgress routeProgress) {
+    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().currentStep());
+    currentStep = routeProgress.currentLegProgress().currentStep();
+    return newStep;
+  }
+
+  /**
    * Looks to see if we have a new primary instruction text.
    *
    * @param model provides primary instruction text
@@ -671,6 +679,9 @@ public class InstructionView extends RelativeLayout {
    */
   private void showTurnLanes() {
     if (turnLaneLayout.getVisibility() == GONE) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        TransitionManager.beginDelayedTransition(this);
+      }
       turnLaneLayout.setVisibility(VISIBLE);
     }
   }
@@ -680,6 +691,9 @@ public class InstructionView extends RelativeLayout {
    */
   private void hideTurnLanes() {
     if (turnLaneLayout.getVisibility() == VISIBLE) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        TransitionManager.beginDelayedTransition(this);
+      }
       turnLaneLayout.setVisibility(GONE);
     }
   }

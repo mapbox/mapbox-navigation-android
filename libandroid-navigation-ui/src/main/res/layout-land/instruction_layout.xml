@@ -10,8 +10,8 @@
     app:layout_constraintTop_toTopOf="parent"
     tools:showIn="@layout/instruction_view_layout">
 
-    <LinearLayout
-        android:id="@+id/instructionLayoutManeuver"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/instructionManeuverLayout"
         android:layout_width="88dp"
         android:layout_height="104dp"
         android:layout_marginBottom="4dp"
@@ -29,32 +29,43 @@
             android:id="@+id/maneuverView"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:layerType="software"/>
+            android:layerType="software"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
             android:id="@+id/stepDistanceText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
             android:gravity="center"
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textColor="?attr/navigationViewBannerSecondaryText"
             android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/maneuverView"
             tools:text="3.2 mi"/>
 
-    </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/instructionLayoutText"
         android:layout_width="0dp"
         android:layout_height="64dp"
-        android:background="@drawable/instruction_text_background"
+        android:background="?attr/navigationViewBannerBackground"
         android:elevation="4dp"
         android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/instructionLayoutManeuver"
+        app:layout_constraintStart_toEndOf="@+id/instructionManeuverLayout"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -89,9 +100,10 @@
         android:id="@+id/turnLaneLayout"
         layout="@layout/turn_lane_layout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"
-        app:layout_constraintStart_toEndOf="@+id/instructionLayoutManeuver"
+        android:layout_height="0dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@+id/instructionManeuverLayout"
+        app:layout_constraintStart_toEndOf="@+id/instructionManeuverLayout"
         app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText"/>
 
     <include
@@ -103,7 +115,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/instructionLayoutManeuver"/>
+        app:layout_constraintTop_toBottomOf="@+id/instructionManeuverLayout"/>
 
     <include
         android:id="@+id/soundLayout"
@@ -126,7 +138,7 @@
         android:id="@+id/rerouteLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/reroute_background"
+        android:background="?attr/navigationViewSecondary"
         android:elevation="4dp"
         android:gravity="center"
         android:orientation="vertical"
