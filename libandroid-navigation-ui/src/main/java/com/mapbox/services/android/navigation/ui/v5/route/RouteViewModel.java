@@ -94,15 +94,13 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
    */
   private void fetchRoute(Point origin, Point destination) {
     if (origin != null && destination != null) {
-      NavigationRoute.Builder routeBuilder = NavigationRoute.builder()
-        .accessToken(Mapbox.getAccessToken())
-        .destination(destination);
+      Double bearing
+        = rawLocation.hasBearing() ? Float.valueOf(rawLocation.getBearing()).doubleValue() : null;
 
-      if (locationHasBearing()) {
-        fetchRouteWithBearing(routeBuilder, origin);
-      } else {
-        fetchRouteWithoutBearing(routeBuilder, origin);
-      }
+      NavigationRoute.builder()
+        .accessToken(Mapbox.getAccessToken())
+        .origin(origin, bearing, 90d)
+        .destination(destination).build().getRoute(this);
     }
   }
 
@@ -171,27 +169,5 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
    */
   private boolean locationHasBearing() {
     return rawLocation != null && rawLocation.hasBearing();
-  }
-
-  /**
-   * Will finish building the {@link NavigationRoute} after adding a bearing
-   * and request the route.
-   *
-   * @param routeBuilder to fetch the route
-   */
-  private void fetchRouteWithBearing(NavigationRoute.Builder routeBuilder, Point origin) {
-    routeBuilder.origin(origin, Float.valueOf(rawLocation.getBearing()).doubleValue(), 90d);
-    routeBuilder.build().getRoute(this);
-  }
-
-  /**
-   * Will finish building the {@link NavigationRoute} without adding a bearing
-   * and request the route.
-   *
-   * @param routeBuilder to fetch the route
-   */
-  private void fetchRouteWithoutBearing(NavigationRoute.Builder routeBuilder, Point origin) {
-    routeBuilder.origin(origin);
-    routeBuilder.build().getRoute(this);
   }
 }

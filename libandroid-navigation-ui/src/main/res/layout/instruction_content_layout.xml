@@ -25,12 +25,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/maneuverImageView"
+        <com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView
+            android:id="@+id/maneuverView"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:tint="?attr/navigationViewBannerManeuverPrimary"
-            app:srcCompat="@drawable/ic_maneuver_depart"/>
+            android:layerType="software"/>
 
         <TextView
             android:id="@+id/stepDistanceText"
