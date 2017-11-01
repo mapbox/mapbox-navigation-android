@@ -14,9 +14,11 @@ import java.util.List;
 public class InstructionModel {
 
   private SpannableStringBuilder stepDistanceRemaining;
-  private TextInstruction instruction;
-  private String maneuverModifier;
-  private String maneuverType;
+  private InstructionText instruction;
+  private String upcomingStepManeuverModifier;
+  private String upcomingStepManeuverType;
+  private String thenStepManeuverModifier;
+  private String thenStepManeuverType;
   private List<IntersectionLanes> turnLanes;
   private RouteProgress progress;
 
@@ -45,12 +47,28 @@ public class InstructionModel {
     }
   }
 
-  String getManeuverModifier() {
-    return maneuverModifier;
+  String getThenStepText() {
+    if (instruction != null) {
+      return instruction.getThenStepText();
+    } else {
+      return "";
+    }
   }
 
-  String getManeuverType() {
-    return maneuverType;
+  String getUpcomingStepManeuverModifier() {
+    return upcomingStepManeuverModifier;
+  }
+
+  String getUpcomingStepManeuverType() {
+    return upcomingStepManeuverType;
+  }
+
+  public String getThenStepManeuverModifier() {
+    return thenStepManeuverModifier;
+  }
+
+  public String getThenStepManeuverType() {
+    return thenStepManeuverType;
   }
 
   List<IntersectionLanes> getTurnLanes() {
@@ -65,19 +83,21 @@ public class InstructionModel {
     formatStepDistance(progress, decimalFormat);
     LegStep upComingStep = progress.currentLegProgress().upComingStep();
     if (upComingStep != null) {
-      extractStepResources(upComingStep);
+      extractStepResources(progress, upComingStep);
     }
   }
 
-  private void extractStepResources(LegStep upComingStep) {
-    if (hasManeuver(upComingStep)) {
-      maneuverModifier = upComingStep.maneuver().modifier();
-      maneuverType = upComingStep.maneuver().type();
+  private void extractStepResources(RouteProgress progress, LegStep upcomingStep) {
+    if (hasManeuver(upcomingStep)) {
+      upcomingStepManeuverModifier = upcomingStep.maneuver().modifier();
+      upcomingStepManeuverType = upcomingStep.maneuver().type();
     }
-    if (hasIntersections(upComingStep)) {
-      intersectionTurnLanes(upComingStep);
+    if (hasIntersections(upcomingStep)) {
+      intersectionTurnLanes(upcomingStep);
     }
-    instruction = new TextInstruction(upComingStep);
+
+    LegStep thenStep = extractThenStep(progress, upcomingStep);
+    instruction = new InstructionText(upcomingStep, thenStep);
   }
 
   private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat) {
@@ -85,18 +105,24 @@ public class InstructionModel {
       .currentStepProgress().distanceRemaining(), decimalFormat);
   }
 
-  private boolean hasManeuver(LegStep upComingStep) {
-    return upComingStep.maneuver() != null;
+  private boolean hasManeuver(LegStep step) {
+    return step.maneuver() != null;
   }
 
-  private void intersectionTurnLanes(LegStep upComingStep) {
-    StepIntersection intersection = upComingStep.intersections().get(0);
+  private void intersectionTurnLanes(LegStep step) {
+    StepIntersection intersection = step.intersections().get(0);
     List<IntersectionLanes> lanes = intersection.lanes();
     if (checkForNoneIndications(lanes)) {
       turnLanes = null;
       return;
     }
     turnLanes = lanes;
+  }
+
+  private LegStep extractThenStep(RouteProgress progress, LegStep upcomingStep) {
+    List<LegStep> currentLegSteps = progress.currentLeg().steps();
+    int thenStepIndex = currentLegSteps.indexOf(upcomingStep) + 1;
+    return currentLegSteps.get(thenStepIndex);
   }
 
   private boolean checkForNoneIndications(List<IntersectionLanes> lanes) {
@@ -113,8 +139,8 @@ public class InstructionModel {
     return false;
   }
 
-  private boolean hasIntersections(LegStep upComingStep) {
-    return upComingStep.intersections() != null
-      && upComingStep.intersections().get(0) != null;
+  private boolean hasIntersections(LegStep step) {
+    return step.intersections() != null
+      && step.intersections().get(0) != null;
   }
 }

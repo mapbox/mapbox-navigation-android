@@ -71,6 +71,7 @@ public class InstructionView extends RelativeLayout {
   private FloatingActionButton soundFab;
   private View rerouteLayout;
   private View turnLaneLayout;
+  private View thenStepLayout;
   private RecyclerView rvTurnLanes;
   private RecyclerView rvInstructions;
   private TurnLaneAdapter turnLaneAdapter;
@@ -329,6 +330,7 @@ public class InstructionView extends RelativeLayout {
     soundFab = findViewById(R.id.soundFab);
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
+    thenStepLayout = findViewById(R.id.thenStepLayout);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
     soundLayout = findViewById(R.id.soundLayout);
     feedbackLayout = findViewById(R.id.feedbackLayout);
@@ -545,8 +547,8 @@ public class InstructionView extends RelativeLayout {
    * @param model provides maneuver modifier / type
    */
   private void updateManeuverView(InstructionModel model) {
-    maneuverView.setManeuverModifier(model.getManeuverModifier());
-    maneuverView.setManeuverType(model.getManeuverType());
+    maneuverView.setManeuverModifier(model.getUpcomingStepManeuverModifier());
+    maneuverView.setManeuverType(model.getUpcomingStepManeuverType());
   }
 
   /**
@@ -666,8 +668,8 @@ public class InstructionView extends RelativeLayout {
    */
   private void addTurnLanes(InstructionModel model) {
     if (model.getTurnLanes() != null
-      && !TextUtils.isEmpty(model.getManeuverModifier())) {
-      turnLaneAdapter.addTurnLanes(model.getTurnLanes(), model.getManeuverModifier());
+      && !TextUtils.isEmpty(model.getUpcomingStepManeuverModifier())) {
+      turnLaneAdapter.addTurnLanes(model.getTurnLanes(), model.getUpcomingStepManeuverModifier());
       showTurnLanes();
     } else {
       hideTurnLanes();
@@ -695,6 +697,30 @@ public class InstructionView extends RelativeLayout {
         TransitionManager.beginDelayedTransition(this);
       }
       turnLaneLayout.setVisibility(GONE);
+    }
+  }
+
+  /**
+   * Shows then step layout
+   */
+  private void showThenStepLayout() {
+    if (thenStepLayout.getVisibility() == GONE) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        TransitionManager.beginDelayedTransition(this);
+      }
+      thenStepLayout.setVisibility(VISIBLE);
+    }
+  }
+
+  /**
+   * Hides then step layout
+   */
+  private void hideThenStepLayout() {
+    if (thenStepLayout.getVisibility() == VISIBLE) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        TransitionManager.beginDelayedTransition(this);
+      }
+      thenStepLayout.setVisibility(GONE);
     }
   }
 
