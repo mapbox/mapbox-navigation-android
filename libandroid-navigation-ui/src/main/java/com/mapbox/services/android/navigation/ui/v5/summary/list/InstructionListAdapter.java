@@ -18,9 +18,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mapbox.services.android.navigation.v5.utils.ManeuverUtils.getManeuverResource;
-
-public class InstructionListAdapter extends RecyclerView.Adapter<DirectionViewHolder> {
+public class InstructionListAdapter extends RecyclerView.Adapter<InstructionViewHolder> {
 
   private List<LegStep> stepList;
   private DecimalFormat decimalFormat;
@@ -35,19 +33,20 @@ public class InstructionListAdapter extends RecyclerView.Adapter<DirectionViewHo
   }
 
   @Override
-  public DirectionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+  public InstructionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext())
       .inflate(R.layout.instruction_viewholder_layout, parent, false);
-    return new DirectionViewHolder(view);
+    return new InstructionViewHolder(view);
   }
 
   @Override
-  public void onBindViewHolder(DirectionViewHolder holder, int position) {
+  public void onBindViewHolder(InstructionViewHolder holder, int position) {
     if (stepList.get(position) != null) {
+      LegStep step = stepList.get(position);
       TextInstruction textInstruction = new TextInstruction(stepList.get(position));
       updatePrimaryText(holder, textInstruction.getPrimaryText());
       updateSecondaryText(holder, textInstruction.getSecondaryText());
-      holder.maneuverImage.setImageResource(getManeuverResource(textInstruction.getStep()));
+      updateManeuverView(holder, step);
       holder.stepDistanceText.setText(DistanceUtils
         .distanceFormatterBold(textInstruction.getStepDistance(), decimalFormat));
     }
@@ -69,11 +68,11 @@ public class InstructionListAdapter extends RecyclerView.Adapter<DirectionViewHo
     notifyDataSetChanged();
   }
 
-  private void updatePrimaryText(DirectionViewHolder holder, String primaryText) {
+  private void updatePrimaryText(InstructionViewHolder holder, String primaryText) {
     holder.stepPrimaryText.setText(primaryText);
   }
 
-  private void updateSecondaryText(DirectionViewHolder holder, String secondaryText) {
+  private void updateSecondaryText(InstructionViewHolder holder, String secondaryText) {
     if (!TextUtils.isEmpty(secondaryText)) {
       holder.stepPrimaryText.setMaxLines(1);
       holder.stepSecondaryText.setVisibility(View.VISIBLE);
@@ -81,6 +80,13 @@ public class InstructionListAdapter extends RecyclerView.Adapter<DirectionViewHo
     } else {
       holder.stepPrimaryText.setMaxLines(2);
       holder.stepSecondaryText.setVisibility(View.GONE);
+    }
+  }
+
+  private void updateManeuverView(InstructionViewHolder holder, LegStep step) {
+    if (step.maneuver() != null) {
+      holder.maneuverView.setManeuverModifier(step.maneuver().modifier());
+      holder.maneuverView.setManeuverType(step.maneuver().type());
     }
   }
 

@@ -139,6 +139,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+    Timber.d(call.request().url().toString());
     if (response.body() != null) {
       if (response.body().routes() != null) {
         if (!response.body().routes().isEmpty()) {
@@ -155,16 +156,12 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   }
 
   private void getRoute(Point origin, Point destination, Float bearing) {
-    NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder()
+    Double heading = bearing == null ? null : bearing.doubleValue();
+    NavigationRoute.builder()
+      .origin(origin, heading, 90d)
       .destination(destination)
-      .accessToken(Mapbox.getAccessToken());
-
-    if (bearing != null) {
-      navigationRouteBuilder.origin(origin, Float.valueOf(bearing).doubleValue(), 90d);
-    } else {
-      navigationRouteBuilder.origin(origin);
-    }
-    navigationRouteBuilder.build().getRoute(this);
+      .accessToken(Mapbox.getAccessToken())
+      .build().getRoute(this);
   }
 
   @Override
