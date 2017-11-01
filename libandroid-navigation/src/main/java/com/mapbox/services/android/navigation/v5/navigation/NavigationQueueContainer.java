@@ -3,10 +3,13 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.location.Location;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
+import com.mapbox.turf.TurfConstants;
+import com.mapbox.turf.TurfMeasurement;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +29,8 @@ class NavigationQueueContainer {
   private RouteProgress routeProgress;
   private Location currentLocation;
   private RingBuffer<Location> locationBuffer;
+  private boolean firstProgressUpdate = true;
+  private long timeIntervalSinceLastOffRoute;
 
   NavigationQueueContainer(MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
@@ -176,8 +181,14 @@ class NavigationQueueContainer {
     this.locationEngineName = locationEngineName;
   }
 
-  void setRouteProgress(RouteProgress routeProgress) {
+  void setRouteProgress(Location location, RouteProgress routeProgress) {
     this.routeProgress = routeProgress;
+
+    if (firstProgressUpdate) {
+      NavigationMetricsWrapper.departEvent(mapboxNavigation.getSessionState(), routeProgress,
+        currentLocation, locationEngineName);
+      firstProgressUpdate = false;
+    }
   }
 
   private RouteProgress checkRouteProgress(RouteProgress routeProgress) {
@@ -209,5 +220,36 @@ class NavigationQueueContainer {
         return null;
       }
     };
+  }
+
+  void cancelNavigationSession() {
+    if (routeProgress != null && currentLocation != null) {
+      NavigationMetricsWrapper.cancelEvent(mapboxNavigation.getSessionState(), routeProgress,
+        currentLocation, locationEngineName);
+    }
+  }
+
+  void onUserOffRoute(Location location, boolean userOffRoute) {
+    if (userOffRoute) {
+      if (location.getTime() > timeIntervalSinceLastOffRoute
+        + TimeUnit.SECONDS.toMillis(mapboxNavigation.options().secondsBeforeReroute())) {
+        timeIntervalSinceLastOffRoute = location.getTime();
+        if (mapboxNavigation.getSessionState().eventLocation() == null) {
+          rerouteSessionsStateUpdate();
+        } else {
+          Point lastReroutePoint = Point.fromLngLat(
+            mapboxNavigation.getSessionState().eventLocation().getLongitude(),
+            mapboxNavigation.getSessionState().eventLocation().getLatitude());
+          if (TurfMeasurement.distance(lastReroutePoint,
+            Point.fromLngLat(location.getLongitude(), location.getLatitude()),
+            TurfConstants.UNIT_METERS)
+            > mapboxNavigation.options().minimumDistanceBeforeRerouting()) {
+            rerouteSessionsStateUpdate();
+          }
+        }
+      }
+    } else {
+      timeIntervalSinceLastOffRoute = location.getTime();
+    }
   }
 }
