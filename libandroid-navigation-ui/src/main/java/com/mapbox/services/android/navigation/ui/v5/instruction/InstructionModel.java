@@ -14,13 +14,15 @@ import java.util.List;
 public class InstructionModel {
 
   private SpannableStringBuilder stepDistanceRemaining;
-  private InstructionText instruction;
+  private InstructionText upcomingInstructionText;
+  private InstructionText thenInstructionText;
   private String upcomingStepManeuverModifier;
   private String upcomingStepManeuverType;
   private String thenStepManeuverModifier;
   private String thenStepManeuverType;
   private List<IntersectionLanes> turnLanes;
   private RouteProgress progress;
+  private boolean shouldShowThenStep;
 
   public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
     this.progress = progress;
@@ -32,24 +34,24 @@ public class InstructionModel {
   }
 
   String getPrimaryText() {
-    if (instruction != null) {
-      return instruction.getPrimaryText();
+    if (upcomingInstructionText != null) {
+      return upcomingInstructionText.getPrimaryText();
     } else {
       return "";
     }
   }
 
   String getSecondaryText() {
-    if (instruction != null) {
-      return instruction.getSecondaryText();
+    if (upcomingInstructionText != null) {
+      return upcomingInstructionText.getSecondaryText();
     } else {
       return "";
     }
   }
 
   String getThenStepText() {
-    if (instruction != null) {
-      return instruction.getThenStepText();
+    if (thenInstructionText != null) {
+      return thenInstructionText.getPrimaryText();
     } else {
       return "";
     }
@@ -63,12 +65,16 @@ public class InstructionModel {
     return upcomingStepManeuverType;
   }
 
-  public String getThenStepManeuverModifier() {
+  String getThenStepManeuverModifier() {
     return thenStepManeuverModifier;
   }
 
-  public String getThenStepManeuverType() {
+  String getThenStepManeuverType() {
     return thenStepManeuverType;
+  }
+
+  boolean shouldShowThenStep() {
+    return shouldShowThenStep;
   }
 
   List<IntersectionLanes> getTurnLanes() {
@@ -81,23 +87,38 @@ public class InstructionModel {
 
   private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
     formatStepDistance(progress, decimalFormat);
-    LegStep upComingStep = progress.currentLegProgress().upComingStep();
-    if (upComingStep != null) {
-      extractStepResources(progress, upComingStep);
+    LegStep upcomingStep = progress.currentLegProgress().upComingStep();
+    if (upcomingStep != null) {
+      extractStepResources(progress, upcomingStep);
     }
   }
 
   private void extractStepResources(RouteProgress progress, LegStep upcomingStep) {
+    // Upcoming step
     if (hasManeuver(upcomingStep)) {
-      upcomingStepManeuverModifier = upcomingStep.maneuver().modifier();
       upcomingStepManeuverType = upcomingStep.maneuver().type();
+      upcomingStepManeuverModifier = upcomingStep.maneuver().modifier();
     }
+
+    // Then step (step after upcoming)
+    LegStep thenStep = extractThenStep(progress, upcomingStep);
+    if (thenStep != null && hasManeuver(thenStep)) {
+      thenStepManeuverType = thenStep.maneuver().modifier();
+      thenStepManeuverModifier = thenStep.maneuver().type();
+      thenInstructionText = new InstructionText(thenStep);
+    }
+
+    // Turn lane data
     if (hasIntersections(upcomingStep)) {
       intersectionTurnLanes(upcomingStep);
     }
 
-    LegStep thenStep = extractThenStep(progress, upcomingStep);
-    instruction = new InstructionText(upcomingStep, thenStep);
+    // Should show then step if the upcoming step is less than 15 seconds
+    // TODO adjust this to not always show
+    shouldShowThenStep = true;
+
+    // Upcoming instruction text data
+    upcomingInstructionText = new InstructionText(upcomingStep);
   }
 
   private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat) {
@@ -122,7 +143,11 @@ public class InstructionModel {
   private LegStep extractThenStep(RouteProgress progress, LegStep upcomingStep) {
     List<LegStep> currentLegSteps = progress.currentLeg().steps();
     int thenStepIndex = currentLegSteps.indexOf(upcomingStep) + 1;
-    return currentLegSteps.get(thenStepIndex);
+    if (thenStepIndex < currentLegSteps.size()) {
+      return currentLegSteps.get(thenStepIndex);
+    } else {
+      return null;
+    }
   }
 
   private boolean checkForNoneIndications(List<IntersectionLanes> lanes) {

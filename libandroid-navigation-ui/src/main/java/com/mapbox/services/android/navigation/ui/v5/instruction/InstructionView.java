@@ -63,10 +63,12 @@ import java.text.DecimalFormat;
  */
 public class InstructionView extends RelativeLayout {
 
-  private ManeuverView maneuverView;
-  private TextView stepDistanceText;
-  private TextView stepPrimaryText;
-  private TextView stepSecondaryText;
+  private ManeuverView upcomingManeuverView;
+  private TextView upcomingDistanceText;
+  private TextView upcomingPrimaryText;
+  private TextView upcomingSecondaryText;
+  private ManeuverView thenManeuverView;
+  private TextView thenStepText;
   private TextView soundChipText;
   private FloatingActionButton soundFab;
   private View rerouteLayout;
@@ -131,14 +133,15 @@ public class InstructionView extends RelativeLayout {
   public void subscribe(NavigationViewModel navigationViewModel) {
     navigationViewModel.instructionModel.observe((LifecycleOwner) getContext(), new Observer<InstructionModel>() {
       @Override
-      public void onChanged(@Nullable InstructionModel instructionModel) {
-        if (instructionModel != null) {
-          updateManeuverView(instructionModel);
-          addDistanceText(instructionModel);
-          addTextInstruction(instructionModel);
-          updateSteps(instructionModel.getProgress());
-          if (newStep(instructionModel.getProgress())) {
-            addTurnLanes(instructionModel);
+      public void onChanged(@Nullable InstructionModel model) {
+        if (model != null) {
+          updateManeuverView(model);
+          addDistanceText(model);
+          addTextInstruction(model);
+          updateInstructionList(model.getProgress());
+          if (newStep(model.getProgress())) {
+            checkTurnLanes(model);
+            updateThenStep(model);
           }
         }
       }
@@ -173,9 +176,10 @@ public class InstructionView extends RelativeLayout {
       updateManeuverView(model);
       addDistanceText(model);
       addTextInstruction(model);
-      updateSteps(routeProgress);
-      if (newStep(routeProgress)) {
-        addTurnLanes(model);
+      updateInstructionList(routeProgress);
+      if (newStep(model.getProgress())) {
+        checkTurnLanes(model);
+        updateThenStep(model);
       }
     }
   }
@@ -322,10 +326,12 @@ public class InstructionView extends RelativeLayout {
    * Finds and binds all necessary views
    */
   private void bind() {
-    maneuverView = findViewById(R.id.maneuverView);
-    stepDistanceText = findViewById(R.id.stepDistanceText);
-    stepPrimaryText = findViewById(R.id.stepPrimaryText);
-    stepSecondaryText = findViewById(R.id.stepSecondaryText);
+    upcomingManeuverView = findViewById(R.id.maneuverView);
+    upcomingDistanceText = findViewById(R.id.stepDistanceText);
+    upcomingPrimaryText = findViewById(R.id.stepPrimaryText);
+    upcomingSecondaryText = findViewById(R.id.stepSecondaryText);
+    thenManeuverView = findViewById(R.id.thenManeuverView);
+    thenStepText = findViewById(R.id.thenStepText);
     soundChipText = findViewById(R.id.soundText);
     soundFab = findViewById(R.id.soundFab);
     rerouteLayout = findViewById(R.id.rerouteLayout);
@@ -435,11 +441,11 @@ public class InstructionView extends RelativeLayout {
    * to automatically re-size based on the length of the text.
    */
   private void initInstructionAutoSize() {
-    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepPrimaryText,
-      24, 30, 1, TypedValue.COMPLEX_UNIT_SP);
-    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepSecondaryText,
+    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(upcomingPrimaryText,
+      26, 30, 1, TypedValue.COMPLEX_UNIT_SP);
+    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(upcomingSecondaryText,
       20, 26, 1, TypedValue.COMPLEX_UNIT_SP);
-    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepDistanceText,
+    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(upcomingDistanceText,
       16, 20, 1, TypedValue.COMPLEX_UNIT_SP);
   }
 
@@ -547,8 +553,8 @@ public class InstructionView extends RelativeLayout {
    * @param model provides maneuver modifier / type
    */
   private void updateManeuverView(InstructionModel model) {
-    maneuverView.setManeuverModifier(model.getUpcomingStepManeuverModifier());
-    maneuverView.setManeuverType(model.getUpcomingStepManeuverType());
+    upcomingManeuverView.setManeuverModifier(model.getUpcomingStepManeuverModifier());
+    upcomingManeuverView.setManeuverType(model.getUpcomingStepManeuverType());
   }
 
   /**
@@ -560,7 +566,7 @@ public class InstructionView extends RelativeLayout {
   private void addDistanceText(InstructionModel model) {
     if (newDistanceText(model)) {
       distanceText(model);
-    } else if (stepDistanceText.getText().toString().isEmpty()) {
+    } else if (upcomingDistanceText.getText().toString().isEmpty()) {
       distanceText(model);
     }
   }
@@ -571,9 +577,9 @@ public class InstructionView extends RelativeLayout {
    * @param model provides distance text
    */
   private boolean newDistanceText(InstructionModel model) {
-    return !stepDistanceText.getText().toString().isEmpty()
+    return !upcomingDistanceText.getText().toString().isEmpty()
       && !TextUtils.isEmpty(model.getStepDistanceRemaining())
-      && !stepDistanceText.getText().toString()
+      && !upcomingDistanceText.getText().toString()
       .contentEquals(model.getStepDistanceRemaining().toString());
   }
 
@@ -583,7 +589,7 @@ public class InstructionView extends RelativeLayout {
    * @param model provides distance text
    */
   private void distanceText(InstructionModel model) {
-    stepDistanceText.setText(model.getStepDistanceRemaining());
+    upcomingDistanceText.setText(model.getStepDistanceRemaining());
   }
 
   /**
@@ -595,8 +601,8 @@ public class InstructionView extends RelativeLayout {
   private void addTextInstruction(InstructionModel model) {
     if (newPrimaryText(model) || newSecondaryText(model)) {
       textInstructions(model);
-    } else if (stepPrimaryText.getText().toString().isEmpty()
-      || stepSecondaryText.getText().toString().isEmpty()) {
+    } else if (upcomingPrimaryText.getText().toString().isEmpty()
+      || upcomingSecondaryText.getText().toString().isEmpty()) {
       textInstructions(model);
     }
   }
@@ -620,7 +626,7 @@ public class InstructionView extends RelativeLayout {
    */
   private boolean newPrimaryText(InstructionModel model) {
     // New primaryText instruction
-    String currentPrimaryText = stepPrimaryText.getText().toString();
+    String currentPrimaryText = upcomingPrimaryText.getText().toString();
     return !currentPrimaryText.isEmpty()
       && !TextUtils.isEmpty(model.getPrimaryText())
       && !currentPrimaryText.contentEquals(model.getPrimaryText());
@@ -633,7 +639,7 @@ public class InstructionView extends RelativeLayout {
    */
   private boolean newSecondaryText(InstructionModel model) {
     // New primaryText instruction
-    String currentSecondaryText = stepSecondaryText.getText().toString();
+    String currentSecondaryText = upcomingSecondaryText.getText().toString();
     return !currentSecondaryText.isEmpty()
       && !TextUtils.isEmpty(model.getSecondaryText())
       && !currentSecondaryText.contentEquals(model.getSecondaryText());
@@ -646,17 +652,17 @@ public class InstructionView extends RelativeLayout {
    */
   private void textInstructions(InstructionModel model) {
     if (!TextUtils.isEmpty(model.getPrimaryText())) {
-      stepPrimaryText.setText(StringAbbreviator.abbreviate(model.getPrimaryText()));
+      upcomingPrimaryText.setText(StringAbbreviator.abbreviate(model.getPrimaryText()));
     }
     if (!TextUtils.isEmpty(model.getSecondaryText())) {
-      if (stepSecondaryText.getVisibility() == GONE) {
-        stepSecondaryText.setVisibility(VISIBLE);
-        stepPrimaryText.setMaxLines(1);
+      if (upcomingSecondaryText.getVisibility() == GONE) {
+        upcomingSecondaryText.setVisibility(VISIBLE);
+        upcomingPrimaryText.setMaxLines(1);
       }
-      stepSecondaryText.setText(StringAbbreviator.abbreviate(model.getSecondaryText()));
+      upcomingSecondaryText.setText(StringAbbreviator.abbreviate(model.getSecondaryText()));
     } else {
-      stepPrimaryText.setMaxLines(2);
-      stepSecondaryText.setVisibility(GONE);
+      upcomingPrimaryText.setMaxLines(2);
+      upcomingSecondaryText.setVisibility(GONE);
     }
   }
 
@@ -666,7 +672,7 @@ public class InstructionView extends RelativeLayout {
    *
    * @param model created with new {@link RouteProgress} holding turn lane data
    */
-  private void addTurnLanes(InstructionModel model) {
+  private void checkTurnLanes(InstructionModel model) {
     if (model.getTurnLanes() != null
       && !TextUtils.isEmpty(model.getUpcomingStepManeuverModifier())) {
       turnLaneAdapter.addTurnLanes(model.getTurnLanes(), model.getUpcomingStepManeuverModifier());
@@ -701,6 +707,36 @@ public class InstructionView extends RelativeLayout {
   }
 
   /**
+   * Check if the the then step should be shown.
+   * If true, update the "then" maneuver and the "then" step text.
+   * If false, hide the then layout.
+   *
+   * @param model to determine if the then step layout should be shown
+   */
+  private void updateThenStep(InstructionModel model) {
+    if (shouldShowThenStep(model)) {
+      thenManeuverView.setManeuverType(model.getThenStepManeuverType());
+      thenManeuverView.setManeuverModifier(model.getThenStepManeuverModifier());
+      thenStepText.setText(model.getThenStepText());
+      showThenStepLayout();
+    } else {
+      hideThenStepLayout();
+    }
+  }
+
+  /**
+   * First, checks if the turn lanes are visible (if they are, don't show then step).
+   * Second, checks if the upcoming step is less than 15 seconds long.
+   * This is our cue to show the thenStep.
+   *
+   * @param model to check the upcoming step
+   * @return true if should show, false if not
+   */
+  private boolean shouldShowThenStep(InstructionModel model) {
+    return turnLaneLayout.getVisibility() != VISIBLE && model.shouldShowThenStep();
+  }
+
+  /**
    * Shows then step layout
    */
   private void showThenStepLayout() {
@@ -729,7 +765,7 @@ public class InstructionView extends RelativeLayout {
    *
    * @param routeProgress to provide the current steps
    */
-  private void updateSteps(RouteProgress routeProgress) {
+  private void updateInstructionList(RouteProgress routeProgress) {
     instructionListAdapter.updateSteps(routeProgress);
   }
 }

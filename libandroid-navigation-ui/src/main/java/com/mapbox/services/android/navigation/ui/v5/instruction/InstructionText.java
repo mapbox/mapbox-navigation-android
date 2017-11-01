@@ -4,41 +4,31 @@ import com.mapbox.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 import com.mapbox.services.utils.TextUtils;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.util.Arrays;
 
 public class InstructionText {
 
-  private TextFields upcomingStepTextFields;
-  private TextFields nextStepTextFields;
+  private TextFields stepTextFields;
   private double stepDistance;
 
-  public InstructionText(LegStep upcomingStep, @Nullable LegStep thenStep) {
-    stepDistance = upcomingStep.distance();
-    upcomingStepTextFields = buildTextInstructions(upcomingStep);
-    if (thenStep != null) {
-      nextStepTextFields = buildTextInstructions(thenStep);
-    }
+  public InstructionText(LegStep step) {
+    stepDistance = step.distance();
+    stepTextFields = buildInstructionText(step);
   }
 
   public String getPrimaryText() {
-    return StringAbbreviator.abbreviate(upcomingStepTextFields.primaryText);
+    return StringAbbreviator.abbreviate(stepTextFields.primaryText);
   }
 
   public String getSecondaryText() {
-    return StringAbbreviator.abbreviate(upcomingStepTextFields.secondaryText);
-  }
-
-  public String getThenStepText() {
-    return StringAbbreviator.abbreviate(nextStepTextFields.thenStepText);
+    return StringAbbreviator.abbreviate(stepTextFields.secondaryText);
   }
 
   public double getStepDistance() {
     return stepDistance;
   }
 
-  private TextFields buildTextInstructions(LegStep step) {
+  private TextFields buildInstructionText(LegStep step) {
 
     TextFields textFields = new TextFields();
     String exitText = "";
@@ -53,7 +43,6 @@ public class InstructionText {
     // Refs
     if (hasRefs(step)) {
       textFields.primaryText = StringAbbreviator.deliminator(step.ref());
-      textFields.thenStepText = textFields.primaryText;
       if (hasDestination(step)) {
         textFields.secondaryText = destination(step);
       }
@@ -73,18 +62,15 @@ public class InstructionText {
     // Destination or Street Name
     if (hasDestination(step)) {
       textFields.primaryText = destination(step);
-      textFields.thenStepText = textFields.primaryText;
       return textFields;
     } else if (hasName(step)) {
       textFields.primaryText = name(step);
-      textFields.thenStepText = textFields.primaryText;
       return textFields;
     }
 
-    // Instruction
+    // Fall back to instruction
     if (hasInstruction(step)) {
       textFields.primaryText = instruction(step);
-      textFields.thenStepText = textFields.primaryText;
       return textFields;
     }
     return textFields;
@@ -140,13 +126,11 @@ public class InstructionText {
     }
     String[] remainingStrings = Arrays.copyOfRange(strings, 1, strings.length);
     textFields.secondaryText = TextUtils.join("  / ", remainingStrings).trim();
-    textFields.thenStepText = textFields.primaryText;
     return textFields;
   }
 
   private class TextFields {
     String primaryText = "";
     String secondaryText = "";
-    String thenStepText = "";
   }
 }
