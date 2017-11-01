@@ -20,7 +20,6 @@ import android.transition.TransitionManager;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewParent;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -32,7 +31,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mapbox.directions.v5.models.LegStep;
-import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
@@ -245,20 +243,12 @@ public class InstructionView extends RelativeLayout {
       }
       collapsed.applyTo(instructionLayout);
       instructionListLayout.setVisibility(INVISIBLE);
-      soundLayout.setVisibility(VISIBLE);
-      feedbackLayout.setVisibility(VISIBLE);
     } else {
-      Animation slideInRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_right);
       Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.slide_up_top);
       slideUp.setInterpolator(new AccelerateInterpolator());
-      soundLayout.setVisibility(VISIBLE);
-      soundLayout.startAnimation(slideInRight);
-      feedbackLayout.setVisibility(VISIBLE);
-      feedbackLayout.startAnimation(slideInRight);
       instructionListLayout.startAnimation(slideUp);
       instructionListLayout.setVisibility(INVISIBLE);
     }
-    showNavigationViewRecenterBtn();
   }
 
   /**
@@ -277,41 +267,11 @@ public class InstructionView extends RelativeLayout {
       }
       expanded.applyTo(instructionLayout);
       instructionListLayout.setVisibility(VISIBLE);
-      soundLayout.setVisibility(INVISIBLE);
-      feedbackLayout.setVisibility(INVISIBLE);
     } else {
       Animation slideDown = AnimationUtils.loadAnimation(getContext(), R.anim.slide_down_top);
       slideDown.setInterpolator(new DecelerateInterpolator());
-      Animation slideOutRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_right);
       instructionListLayout.setVisibility(VISIBLE);
       instructionListLayout.startAnimation(slideDown);
-      soundLayout.startAnimation(slideOutRight);
-      soundLayout.setVisibility(INVISIBLE);
-      feedbackLayout.startAnimation(slideOutRight);
-      feedbackLayout.setVisibility(INVISIBLE);
-    }
-    hideNavigationViewRecenterBtn();
-  }
-
-  /**
-   * If the parent is an instance of {@link NavigationView},
-   * show the recenter button.
-   */
-  private void showNavigationViewRecenterBtn() {
-    ViewParent parent = getParent().getParent();
-    if (parent instanceof NavigationView) {
-      ((NavigationView) parent).showRecenterBtn();
-    }
-  }
-
-  /**
-   * If the parent is an instance of {@link NavigationView},
-   * hide the recenter button.
-   */
-  private void hideNavigationViewRecenterBtn() {
-    ViewParent parent = getParent().getParent();
-    if (parent instanceof NavigationView) {
-      ((NavigationView) parent).hideRecenterBtn();
     }
   }
 

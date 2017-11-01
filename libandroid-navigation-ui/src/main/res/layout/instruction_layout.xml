@@ -6,7 +6,7 @@
     android:layout_width="0dp"
     android:layout_height="120dp"
     android:background="?attr/navigationViewBannerBackground"
-    android:elevation="4dp"
+    android:elevation="6dp"
     android:foreground="?attr/selectableItemBackground"
     tools:showIn="@layout/instruction_view_layout">
 
