@@ -1,28 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-    android:id="@+id/instructionViewLayout"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/instructionViewLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
     android:keepScreenOn="true">
 
-    <include layout="@layout/instruction_layout"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:id="@+id/instructionLayout"/>
+    <include
+        android:id="@+id/instructionLayout"
+        layout="@layout/instruction_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
-    <include layout="@layout/turn_lane_layout"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:layout_marginTop="-8dp"
-             android:layout_below="@id/instructionLayout"
-             android:id="@+id/turnLaneLayout"/>
+    <include
+        android:id="@+id/instructionListLayout"
+        layout="@layout/instruction_list_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/instructionLayout"
+        android:layout_marginTop="-8dp"
+        android:visibility="invisible"/>
 
-    <include layout="@layout/sound_layout"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:layout_below="@id/turnLaneLayout"
-             android:id="@+id/soundLayout"/>
+    <include
+        android:id="@+id/turnLaneLayout"
+        layout="@layout/turn_lane_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/instructionLayout"
+        android:layout_marginTop="-9dp"
+        android:visibility="gone"/>
+
+    <include
+        android:id="@+id/soundLayout"
+        layout="@layout/sound_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/turnLaneLayout"/>
+
+    <include
+        android:id="@+id/feedbackLayout"
+        layout="@layout/feedback_button_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/soundLayout"/>
 
 </RelativeLayout>

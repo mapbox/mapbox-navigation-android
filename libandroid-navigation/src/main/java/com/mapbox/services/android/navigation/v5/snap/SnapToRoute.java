@@ -29,9 +29,9 @@ public class SnapToRoute extends Snap {
   @Override
   public Location getSnappedLocation(Location location, RouteProgress routeProgress,
                                      @Nullable List<Point> coords) {
-    location = snapLocationLatLng(location, coords);
-    location.setBearing(snapLocationBearing(routeProgress));
-    return location;
+    Location snappedLocation = snapLocationLatLng(location, coords);
+    snappedLocation.setBearing(snapLocationBearing(routeProgress));
+    return snappedLocation;
   }
 
   /**
@@ -43,8 +43,8 @@ public class SnapToRoute extends Snap {
    * @return the altered user location
    * @since 0.4.0
    */
-  private static Location snapLocationLatLng(Location location,
-                                             List<Point> coords) {
+  private static Location snapLocationLatLng(Location location, List<Point> coords) {
+    Location snappedLocation = new Location(location);
     Point locationToPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
 
     // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
@@ -52,10 +52,10 @@ public class SnapToRoute extends Snap {
     if (coords.size() > 1) {
       Feature feature = TurfMisc.pointOnLine(locationToPoint, coords);
       Point point = ((Point) feature.geometry());
-      location.setLongitude(point.longitude());
-      location.setLatitude(point.latitude());
+      snappedLocation.setLongitude(point.longitude());
+      snappedLocation.setLatitude(point.latitude());
     }
-    return location;
+    return snappedLocation;
   }
 
   private static float snapLocationBearing(RouteProgress routeProgress) {

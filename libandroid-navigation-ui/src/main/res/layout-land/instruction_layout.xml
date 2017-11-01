@@ -5,7 +5,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
-    app:layout_constraintHorizontal_bias="0.0"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
     app:layout_constraintTop_toTopOf="parent"
@@ -14,11 +13,11 @@
     <LinearLayout
         android:id="@+id/instructionLayoutManeuver"
         android:layout_width="88dp"
-        android:layout_height="wrap_content"
+        android:layout_height="104dp"
         android:layout_marginBottom="4dp"
         android:background="@drawable/instruction_background"
         android:elevation="4dp"
-        android:gravity="center_horizontal"
+        android:gravity="center"
         android:orientation="vertical"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -26,20 +25,20 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0">
 
-        <ImageView
-            android:id="@+id/maneuverImageView"
+        <com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView
+            android:id="@+id/maneuverView"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:tint="?attr/navigationViewSecondary"
-            app:srcCompat="@drawable/ic_maneuver_depart"/>
+            android:layerType="software"/>
 
         <TextView
             android:id="@+id/stepDistanceText"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:includeFontPadding="false"
             android:maxLines="1"
-            android:textColor="?attr/navigationViewAccentText"
+            android:textColor="?attr/navigationViewBannerSecondaryText"
             android:textSize="20sp"
             tools:text="3.2 mi"/>
 
@@ -51,6 +50,7 @@
         android:layout_height="64dp"
         android:background="@drawable/instruction_text_background"
         android:elevation="4dp"
+        android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -66,7 +66,7 @@
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:maxLines="1"
-            android:textColor="?attr/navigationViewSecondary"
+            android:textColor="?attr/navigationViewBannerPrimaryText"
             android:textSize="28sp"
             android:textStyle="bold"
             tools:text="Fulton St."/>
@@ -78,7 +78,7 @@
             android:ellipsize="end"
             android:includeFontPadding="false"
             android:maxLines="1"
-            android:textColor="?attr/navigationViewAccentText"
+            android:textColor="?attr/navigationViewBannerSecondaryText"
             android:textSize="22sp"
             android:textStyle="bold"
             tools:text="San Jose / Cupertino / Saratoga Montery / SR-1"/>
@@ -90,8 +90,37 @@
         layout="@layout/turn_lane_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="invisible"
         app:layout_constraintStart_toEndOf="@+id/instructionLayoutManeuver"
         app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText"/>
+
+    <include
+        android:id="@+id/instructionListLayout"
+        layout="@layout/instruction_list_layout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/instructionLayoutManeuver"/>
+
+    <include
+        android:id="@+id/soundLayout"
+        layout="@layout/sound_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText"/>
+
+    <include
+        android:id="@+id/feedbackLayout"
+        layout="@layout/feedback_button_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/soundLayout"/>
 
     <LinearLayout
         android:id="@+id/rerouteLayout"
@@ -102,12 +131,11 @@
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/soundLayout"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:layout_width="wrap_content"

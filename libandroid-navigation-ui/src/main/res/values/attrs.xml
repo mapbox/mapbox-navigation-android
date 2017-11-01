@@ -17,8 +17,18 @@
         <attr name="navigationViewPrimary" format="color"/>
         <attr name="navigationViewSecondary" format="color"/>
         <attr name="navigationViewAccent" format="color"/>
-        <attr name="navigationViewAccentText" format="color"/>
-        <attr name="navigationViewIcon" format="color"/>
+        <attr name="navigationViewPrimaryText" format="color"/>
+        <attr name="navigationViewSecondaryText" format="color"/>
+
+        <!-- Instruction List -->
+        <attr name="navigationViewListBackground" format="color"/>
+
+        <!-- Banner -->
+        <attr name="navigationViewBannerBackground" format="color"/>
+        <attr name="navigationViewBannerPrimaryText" format="color"/>
+        <attr name="navigationViewBannerSecondaryText" format="color"/>
+        <attr name="navigationViewBannerManeuverPrimary" format="color"/>
+        <attr name="navigationViewBannerManeuverSecondary" format="color"/>
 
     </declare-styleable>
 </resources>

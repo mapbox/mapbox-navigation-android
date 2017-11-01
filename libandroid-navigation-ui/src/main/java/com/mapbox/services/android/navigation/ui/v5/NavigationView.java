@@ -20,7 +20,6 @@ import android.util.Base64;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -32,6 +31,9 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheetListener;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
@@ -65,20 +67,16 @@ import java.io.ByteArrayOutputStream;
  * </p>
  */
 public class NavigationView extends CoordinatorLayout implements OnMapReadyCallback, MapboxMap.OnScrollListener,
-  NavigationContract.View {
+  NavigationContract.View, FeedbackBottomSheetListener {
 
   private MapView mapView;
   private InstructionView instructionView;
   private SummaryBottomSheet summaryBottomSheet;
   private BottomSheetBehavior summaryBehavior;
   private ImageButton cancelBtn;
-  private ImageButton expandArrow;
-  private View summaryDirections;
-  private View summaryOptions;
-  private View directionsOptionLayout;
-  private View sheetShadow;
   private RecenterButton recenterBtn;
   private FloatingActionButton soundFab;
+  private FloatingActionButton feedbackFab;
 
   private NavigationPresenter navigationPresenter;
   private NavigationViewModel navigationViewModel;
@@ -135,6 +133,20 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     mapView.onDestroy();
   }
 
+  /**
+   * If the instruction list is showing and onBackPressed is called,
+   * hide the instruction list and do not hide the activity or fragment.
+   *
+   * @return true if back press handled, false if not
+   */
+  public boolean onBackPressed() {
+    if (instructionView.isShowingInstructionList()) {
+      instructionView.hideInstructionList();
+      return true;
+    }
+    return false;
+  }
+
   public void onSaveInstanceState(Bundle outState) {
     outState.putInt(getContext().getString(R.string.bottom_sheet_state),
       summaryBehavior.getState());
@@ -163,7 +175,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
     map.setOnScrollListener(this);
-    setMapPadding(0, 0, 0, summaryBehavior.getPeekHeight());
+    map.setPadding(0, 0, 0, summaryBottomSheet.getHeight());
     ThemeSwitcher.setMapStyle(getContext(), map, new MapboxMap.OnStyleLoadedListener() {
       @Override
       public void onStyleLoaded(String style) {
@@ -204,26 +216,6 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   }
 
   @Override
-  public void setSummaryOptionsVisibility(boolean isVisible) {
-    summaryOptions.setVisibility(isVisible ? View.VISIBLE : View.GONE);
-  }
-
-  @Override
-  public void setSummaryDirectionsVisibility(boolean isVisible) {
-    summaryDirections.setVisibility(isVisible ? View.VISIBLE : View.GONE);
-  }
-
-  @Override
-  public boolean isSummaryDirectionsVisible() {
-    return summaryDirections.getVisibility() == View.VISIBLE;
-  }
-
-  @Override
-  public void setSheetShadowVisibility(boolean isVisible) {
-    sheetShadow.setVisibility(isVisible ? View.VISIBLE : View.GONE);
-  }
-
-  @Override
   public void setCameraTrackingEnabled(boolean isEnabled) {
     camera.setCameraTrackingLocation(isEnabled);
   }
@@ -235,7 +227,9 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
 
   @Override
   public void showRecenterBtn() {
-    recenterBtn.show();
+    if (summaryBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
+      recenterBtn.show();
+    }
   }
 
   @Override
@@ -244,58 +238,8 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   }
 
   @Override
-  public void showInstructionView() {
-    instructionView.show();
-  }
-
-  @Override
   public void drawRoute(DirectionsRoute directionsRoute) {
     mapRoute.addRoute(directionsRoute);
-  }
-
-  @Override
-  public void setMuted(boolean isMuted) {
-    navigationViewModel.setMuted(isMuted);
-  }
-
-  @Override
-  public void setCancelBtnClickable(boolean isClickable) {
-    cancelBtn.setClickable(isClickable);
-  }
-
-  @Override
-  public void animateCancelBtnAlpha(float value) {
-    cancelBtn.animate().alpha(value).setDuration(0).start();
-  }
-
-  @Override
-  public void animateExpandArrowRotation(float value) {
-    expandArrow.animate().rotation(value).setDuration(0).start();
-  }
-
-  @Override
-  public void animateInstructionViewAlpha(float value) {
-    instructionView.animate().alpha(value).setDuration(0).start();
-  }
-
-  @Override
-  public int getBottomSheetHeight() {
-    return summaryBottomSheet.getHeight();
-  }
-
-  @Override
-  public int getBottomSheetPeekHeight() {
-    return summaryBehavior.getPeekHeight();
-  }
-
-  @Override
-  public int[] getMapPadding() {
-    return map.getPadding();
-  }
-
-  @Override
-  public void setMapPadding(int left, int top, int right, int bottom) {
-    map.setPadding(left, top, right, bottom);
   }
 
   /**
@@ -316,6 +260,27 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   @Override
   public void finishNavigationView() {
     navigationListener.onNavigationFinished();
+  }
+
+  @Override
+  public void setMuted(boolean isMuted) {
+    navigationViewModel.setMuted(isMuted);
+  }
+
+  @Override
+  public void showFeedbackBottomSheet() {
+    FeedbackBottomSheet.newInstance(this, 10000).show(
+      ((FragmentActivity) getContext()).getSupportFragmentManager(), FeedbackBottomSheet.TAG);
+  }
+
+  @Override
+  public void onFeedbackSelected(FeedbackItem feedbackItem) {
+    navigationViewModel.updateFeedback(feedbackItem);
+  }
+
+  @Override
+  public void onFeedbackDismissed() {
+    navigationViewModel.cancelFeedback();
   }
 
   public void startNavigation(Activity activity) {
@@ -370,13 +335,9 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     instructionView = findViewById(R.id.instructionView);
     summaryBottomSheet = findViewById(R.id.summaryBottomSheet);
     cancelBtn = findViewById(R.id.cancelBtn);
-    expandArrow = findViewById(R.id.expandArrow);
-    summaryOptions = findViewById(R.id.summaryOptions);
-    summaryDirections = findViewById(R.id.summaryDirections);
-    directionsOptionLayout = findViewById(R.id.directionsOptionLayout);
-    sheetShadow = findViewById(R.id.sheetShadow);
     recenterBtn = findViewById(R.id.recenterBtn);
     soundFab = findViewById(R.id.soundFab);
+    feedbackFab = findViewById(R.id.feedbackFab);
   }
 
   private void initViewModels() {
@@ -393,22 +354,10 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
    * Sets click listeners to all views that need them.
    */
   private void initClickListeners() {
-    directionsOptionLayout.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        navigationPresenter.onDirectionsOptionClick();
-      }
-    });
     cancelBtn.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         navigationPresenter.onCancelBtnClick();
-      }
-    });
-    expandArrow.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        navigationPresenter.onExpandArrowClick(summaryBehavior.getState());
       }
     });
     recenterBtn.setOnClickListener(new View.OnClickListener() {
@@ -421,6 +370,13 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
       @Override
       public void onClick(View view) {
         navigationPresenter.onMuteClick(instructionView.toggleMute());
+      }
+    });
+    feedbackFab.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        navigationPresenter.onFeedbackClick();
+        navigationViewModel.recordFeedback();
       }
     });
   }
@@ -474,28 +430,17 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
    */
   private void initSummaryBottomSheet() {
     summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
+    summaryBehavior.setHideable(false);
     summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
       @Override
       public void onStateChanged(@NonNull View bottomSheet, int newState) {
-        switch (newState) {
-          case BottomSheetBehavior.STATE_EXPANDED:
-            navigationPresenter.onSummaryBottomSheetExpanded();
-            break;
-          case BottomSheetBehavior.STATE_COLLAPSED:
-            navigationPresenter.onSummaryBottomSheetCollapsed();
-            break;
-          case BottomSheetBehavior.STATE_HIDDEN:
-            navigationPresenter.onSummaryBottomSheetHidden();
-            break;
-          default:
-            break;
+        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+          navigationPresenter.onSummaryBottomSheetHidden();
         }
       }
 
       @Override
       public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-        navigationPresenter.onBottomSheetSlide(slideOffset,
-          sheetShadow.getVisibility() == View.VISIBLE);
       }
     });
   }
@@ -507,8 +452,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
    * @param bottomSheetState retrieved from savedInstanceState
    */
   private void resetBottomSheetState(int bottomSheetState) {
-    boolean isShowing = bottomSheetState == BottomSheetBehavior.STATE_COLLAPSED
-      || bottomSheetState == BottomSheetBehavior.STATE_EXPANDED;
+    boolean isShowing = bottomSheetState == BottomSheetBehavior.STATE_EXPANDED;
     summaryBehavior.setHideable(!isShowing);
     summaryBehavior.setState(bottomSheetState);
   }
@@ -610,9 +554,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
       @Override
       public void onChanged(@Nullable Boolean isRunning) {
         if (isRunning != null) {
-          if (isRunning && !resumeState) {
-            navigationPresenter.onNavigationRunning();
-          } else if (!isRunning) {
+          if (!isRunning) {
             navigationListener.onNavigationFinished();
           }
         }

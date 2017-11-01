@@ -12,20 +12,14 @@ import static com.mapbox.services.android.navigation.v5.utils.time.TimeUtils.for
 
 public class SummaryModel {
 
-  private RouteProgress progress;
   private SpannableStringBuilder distanceRemaining;
   private String timeRemaining;
   private String arrivalTime;
 
   public SummaryModel(RouteProgress progress, DecimalFormat decimalFormat) {
-    this.progress = progress;
     distanceRemaining = distanceFormatterBold(progress.distanceRemaining(), decimalFormat);
     timeRemaining = formatTimeRemaining(progress.durationRemaining());
     arrivalTime = formatArrivalTime(progress.durationRemaining());
-  }
-
-  RouteProgress getProgress() {
-    return progress;
   }
 
   SpannableStringBuilder getDistanceRemaining() {
