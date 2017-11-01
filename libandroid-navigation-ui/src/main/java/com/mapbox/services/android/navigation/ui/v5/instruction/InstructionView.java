@@ -75,8 +75,6 @@ public class InstructionView extends RelativeLayout {
   private RecyclerView rvTurnLanes;
   private RecyclerView rvInstructions;
   private TurnLaneAdapter turnLaneAdapter;
-  private View soundLayout;
-  private View feedbackLayout;
   private ConstraintLayout instructionLayout;
   private View instructionListLayout;
   private InstructionListAdapter instructionListAdapter;
@@ -298,8 +296,6 @@ public class InstructionView extends RelativeLayout {
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
     thenStepLayout = findViewById(R.id.thenStepLayout);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
-    soundLayout = findViewById(R.id.soundLayout);
-    feedbackLayout = findViewById(R.id.feedbackLayout);
     instructionLayout = findViewById(R.id.instructionLayout);
     instructionListLayout = findViewById(R.id.instructionListLayout);
     rvInstructions = findViewById(R.id.rvInstructions);
