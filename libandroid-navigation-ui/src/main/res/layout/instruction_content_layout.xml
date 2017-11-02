@@ -4,54 +4,83 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="96dp"
+    tools:background="?navigationViewBannerBackground">
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.2"/>
+        app:layout_constraintGuide_begin="80dp"/>
 
-    <LinearLayout
+    <!--<View-->
+        <!--android:layout_width="30dp"-->
+        <!--android:layout_height="17dp"-->
+        <!--android:background="@android:color/black"-->
+        <!--tools:layout_editor_absoluteX="190dp"-->
+        <!--tools:layout_editor_absoluteY="79dp"/>-->
+
+    <!--<View-->
+        <!--android:layout_width="30dp"-->
+        <!--android:layout_height="50dp"-->
+        <!--android:background="@android:color/black"-->
+        <!--tools:layout_editor_absoluteX="160dp"-->
+        <!--tools:layout_editor_absoluteY="49dp"/>-->
+
+    <!--<View-->
+        <!--android:layout_width="30dp"-->
+        <!--android:layout_height="23dp"-->
+        <!--android:background="@android:color/black"-->
+        <!--tools:layout_editor_absoluteX="206dp"-->
+        <!--tools:layout_editor_absoluteY="0dp"/>-->
+
+    <RelativeLayout
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_height="0dp"
         android:gravity="center_horizontal"
-        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/guideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView
-            android:id="@+id/maneuverView"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layerType="software"/>
-
         <TextView
             android:id="@+id/stepDistanceText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="11dp"
             android:gravity="center"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textColor="?attr/navigationViewBannerSecondaryText"
-            android:textSize="20sp"
+            android:textSize="22sp"
             tools:text="302 mi"/>
 
-    </LinearLayout>
+        <com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView
+            android:id="@+id/maneuverView"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="16dp"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/stepDistanceText"
+            android:layerType="software"/>
+
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:layout_marginRight="12dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/guideline"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.65">
 
         <TextView
             android:id="@+id/stepPrimaryText"
@@ -61,8 +90,9 @@
             android:gravity="center_vertical"
             android:includeFontPadding="false"
             android:maxLines="1"
+            android:minHeight="35dp"
             android:textColor="?attr/navigationViewBannerPrimaryText"
-            android:textSize="28sp"
+            android:textSize="30sp"
             android:textStyle="bold"
             tools:text="I-580 South"/>
 
@@ -73,11 +103,13 @@
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:includeFontPadding="false"
+            android:lineSpacingMultiplier="0.8"
             android:maxLines="2"
+            android:minHeight="31dp"
             android:textColor="?attr/navigationViewBannerSecondaryText"
-            android:textSize="22sp"
+            android:textSize="26sp"
             android:textStyle="bold"
-            tools:text="San Jose / Cupertino / Saratoga Montery / SR-1"/>
+            tools:text="San Jose / Cupertino"/>
 
     </LinearLayout>
 
