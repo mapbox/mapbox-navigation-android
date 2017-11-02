@@ -38,6 +38,7 @@ import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
+import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -216,7 +217,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   @SuppressWarnings({"MissingPermission"})
   private void initLocationEngine() {
-    locationEngine = new LocationSource(this);
+    locationEngine = new LostLocationEngine(this);
     locationEngine.setPriority(HIGH_ACCURACY);
     locationEngine.setInterval(0);
     locationEngine.setFastestInterval(1000);
