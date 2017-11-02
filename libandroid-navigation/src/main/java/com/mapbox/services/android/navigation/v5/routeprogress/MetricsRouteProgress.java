@@ -7,12 +7,14 @@ public class MetricsRouteProgress {
   private double distanceRemaining = 0;
   private double durationRemaining = 0;
   private RouteLegProgress currentLegProgress;
+  private double distanceTraveled = 0;
 
   public MetricsRouteProgress(RouteProgress routeProgress) {
     this.directionsRoute = routeProgress.directionsRoute();
     this.distanceRemaining = routeProgress.distanceRemaining();
     this.durationRemaining = routeProgress.durationRemaining();
     this.currentLegProgress = routeProgress.currentLegProgress();
+    this.distanceTraveled = routeProgress.distanceTraveled();
   }
 
   public double getDistanceRemaining() {
@@ -21,6 +23,10 @@ public class MetricsRouteProgress {
 
   public double getDurationRemaining() {
     return durationRemaining;
+  }
+
+  public double getDistanceTraveled() {
+    return distanceTraveled;
   }
 
   public RouteLegProgress getCurrentLegProgress() {
