@@ -1310,8 +1310,8 @@ public class ManeuversStyleKit {
     private static PaintCodeDashPathEffect bezier3PathDashEffect = new PaintCodeDashPathEffect();
   }
 
-  public static void drawRoundabout(Canvas canvas, int primaryColor, int secondaryColor, PointF size, float roundabout_angle, float roundabout_radius) {
-    ManeuversStyleKit.drawRoundabout(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, secondaryColor, size, roundabout_angle, roundabout_radius);
+  public static void drawRoundabout(Canvas canvas, int primaryColor, int secondaryColor, PointF size, float roundabout_angle) {
+    ManeuversStyleKit.drawRoundabout(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, secondaryColor, size, roundabout_angle, 6.5f);
   }
 
   public static void drawRoundabout(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, int secondaryColor, PointF size, float roundabout_angle, float roundabout_radius) {
