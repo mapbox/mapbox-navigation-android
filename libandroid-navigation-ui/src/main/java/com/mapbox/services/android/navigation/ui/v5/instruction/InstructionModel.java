@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 
 import com.mapbox.directions.v5.models.IntersectionLanes;
 import com.mapbox.directions.v5.models.LegStep;
@@ -103,19 +104,13 @@ public class InstructionModel {
     // Then step (step after upcoming)
     LegStep thenStep = extractThenStep(progress, upcomingStep);
     if (thenStep != null && hasManeuver(thenStep)) {
-      thenStepManeuverType = thenStep.maneuver().modifier();
-      thenStepManeuverModifier = thenStep.maneuver().type();
-      thenInstructionText = new InstructionText(thenStep);
+      thenStep(upcomingStep, thenStep);
     }
 
     // Turn lane data
     if (hasIntersections(upcomingStep)) {
       intersectionTurnLanes(upcomingStep);
     }
-
-    // Should show then step if the upcoming step is less than 15 seconds
-    // TODO adjust this to not always show
-    shouldShowThenStep = true;
 
     // Upcoming instruction text data
     upcomingInstructionText = new InstructionText(upcomingStep);
@@ -148,6 +143,15 @@ public class InstructionModel {
     } else {
       return null;
     }
+  }
+
+  private void thenStep(LegStep upcomingStep, LegStep thenStep) {
+    thenStepManeuverType = thenStep.maneuver().type();
+    thenStepManeuverModifier = thenStep.maneuver().modifier();
+    thenInstructionText = new InstructionText(thenStep);
+    // Should show then step if the upcoming step is less than 25 seconds
+    shouldShowThenStep = upcomingStep.duration() <= (25d * 1.2d)
+      && !TextUtils.isEmpty(thenInstructionText.getPrimaryText());
   }
 
   private boolean checkForNoneIndications(List<IntersectionLanes> lanes) {
