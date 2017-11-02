@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.location.Location;
 
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.location.MetricsLocation;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
@@ -25,8 +26,8 @@ class NavigationQueueContainer {
   private List<FeedbackEvent> queuedFeedbackEvents = new ArrayList<>();
   private MapboxNavigation mapboxNavigation;
   private String locationEngineName;
-  private RouteProgress routeProgress;
-  private Location currentLocation;
+  private MetricsRouteProgress routeProgress;
+  private MetricsLocation currentLocation;
   private RingBuffer<Location> locationBuffer;
   private boolean firstProgressUpdate = true;
   private long timeIntervalSinceLastOffRoute;
@@ -37,7 +38,7 @@ class NavigationQueueContainer {
   }
 
   void updateCurrentLocation(Location rawLocation) {
-    this.currentLocation = rawLocation;
+    this.currentLocation = new MetricsLocation(rawLocation);
     locationBuffer.addLast(rawLocation);
 
     // Update queues with new location
@@ -55,9 +56,9 @@ class NavigationQueueContainer {
   }
 
   void rerouteSessionsStateUpdate() {
-    mapboxNavigation.getEventDispatcher().onUserOffRoute(currentLocation);
+    mapboxNavigation.getEventDispatcher().onUserOffRoute(currentLocation.getLocation());
     mapboxNavigation.setSessionState(mapboxNavigation.getSessionState().toBuilder()
-      .eventLocation(currentLocation).build());
+      .eventLocation(currentLocation.getLocation()).build());
   }
 
   void rerouteOccurred() {
@@ -67,7 +68,7 @@ class NavigationQueueContainer {
         locationBuffer.toArray(new Location[locationBuffer.size()])))
       .previousRouteDistancesCompleted(
         mapboxNavigation.getSessionState().previousRouteDistancesCompleted()
-          + routeProgress.distanceTraveled())
+          + routeProgress.getDistanceTraveled())
       .rerouteDate(new Date())
       .build());
     queuedRerouteEvents.add(mapboxNavigation.getSessionState());
@@ -80,8 +81,8 @@ class NavigationQueueContainer {
       .beforeRerouteLocations(Arrays.asList(
         locationBuffer.toArray(new Location[locationBuffer.size()])))
       .routeProgressBeforeReroute(routeProgress)
-      .eventLocation(currentLocation)
-      .mockLocation(currentLocation.getProvider().equals(MOCK_PROVIDER))
+      .eventLocation(currentLocation.getLocation())
+      .mockLocation(currentLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
       .build();
 
     FeedbackEvent feedbackEvent = new FeedbackEvent(feedbackEventSessionState, feedbackSource);
@@ -112,7 +113,7 @@ class NavigationQueueContainer {
       locationBuffer.toArray(new Location[locationBuffer.size()])))
       .build();
 
-    NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, new MetricsRouteProgress(routeProgress),
+    NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, routeProgress,
       feedbackEvent.getSessionState().eventLocation(), feedbackEvent.getDescription(),
       feedbackEvent.getFeedbackType(), "", feedbackEvent.getFeedbackId(),
       mapboxNavigation.obtainVendorId(), locationEngineName);
@@ -124,7 +125,7 @@ class NavigationQueueContainer {
         locationBuffer.toArray(new Location[locationBuffer.size()])))
       .build();
 
-    NavigationMetricsWrapper.rerouteEvent(sessionState, new MetricsRouteProgress(routeProgress),
+    NavigationMetricsWrapper.rerouteEvent(sessionState, routeProgress,
       sessionState.eventLocation(), locationEngineName);
 
     for (SessionState session : queuedRerouteEvents) {
@@ -181,11 +182,11 @@ class NavigationQueueContainer {
   }
 
   void setRouteProgress(RouteProgress routeProgress) {
-    this.routeProgress = routeProgress;
+    this.routeProgress = new MetricsRouteProgress(routeProgress);
 
     if (firstProgressUpdate) {
-      NavigationMetricsWrapper.departEvent(mapboxNavigation.getSessionState(), routeProgress,
-        currentLocation, locationEngineName);
+      NavigationMetricsWrapper.departEvent(mapboxNavigation.getSessionState(), this.routeProgress,
+        currentLocation.getLocation(), locationEngineName);
       firstProgressUpdate = false;
     }
   }
@@ -193,7 +194,7 @@ class NavigationQueueContainer {
   void cancelNavigationSession() {
     if (routeProgress != null && currentLocation != null) {
       NavigationMetricsWrapper.cancelEvent(mapboxNavigation.getSessionState(), routeProgress,
-        currentLocation, locationEngineName);
+        currentLocation.getLocation(), locationEngineName);
     }
   }
 
