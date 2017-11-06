@@ -9,21 +9,25 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.mapbox.directions.v5.models.IntersectionLanes;
-
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
+import com.mapbox.services.commons.utils.TextUtils;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT;
+import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_RIGHT;
+import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_RIGHT_ONLY;
+import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_SLIGHT_RIGHT;
+import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_STRAIGHT;
+import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_STRAIGHT_ONLY;
+import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_STRAIGHT_RIGHT;
+import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_UTURN;
 
 public class TurnLaneView extends View {
 
-  private String laneIndications;
-  private String maneuverModifier;
+  private TurnLaneViewData drawData;
+  private PointF size;
+  private boolean isValid;
 
   private int primaryColor;
   private int secondaryColor;
-  private PointF size;
 
   public TurnLaneView(Context context) {
     super(context);
@@ -56,32 +60,56 @@ public class TurnLaneView extends View {
     super.onDraw(canvas);
 
     if (isInEditMode()) {
-      TurnLaneStyleKit.drawLaneRight(canvas, primaryColor);
+      LanesStyleKit.drawLaneStraight(canvas, primaryColor, size);
       return;
     }
 
-    boolean flip = false;
+    if (drawData == null || TextUtils.isEmpty(drawData.getDrawMethod())) {
+      return;
+    }
 
-    // TODO call correct stylekit method here
+    switch (drawData.getDrawMethod()) {
+      case DRAW_LANE_STRAIGHT:
+        LanesStyleKit.drawLaneStraight(canvas, primaryColor, size);
+        break;
+      case DRAW_LANE_UTURN:
+        LanesStyleKit.drawLaneUturn(canvas, primaryColor, size);
+        break;
+      case DRAW_LANE_RIGHT:
+        LanesStyleKit.drawLaneRight(canvas, primaryColor, size);
+        break;
+      case DRAW_LANE_SLIGHT_RIGHT:
+        LanesStyleKit.drawLaneSlightRight(canvas, primaryColor, size);
+        break;
+      case DRAW_LANE_RIGHT_ONLY:
+        LanesStyleKit.drawLaneRightOnly(canvas, primaryColor, secondaryColor, size);
+        break;
+      case DRAW_LANE_STRAIGHT_RIGHT:
+        LanesStyleKit.drawLaneStraightRight(canvas, primaryColor, size);
+        break;
+      case DRAW_LANE_STRAIGHT_ONLY:
+        LanesStyleKit.drawLaneStraightOnly(canvas, primaryColor, secondaryColor, size);
+        break;
+      default:
+        LanesStyleKit.drawLaneStraight(canvas, primaryColor, size);
+        break;
+    }
 
-    setScaleX(flip ? -1 : 1);
+    // Set alpha based on validity
+    setAlpha(!isValid ? 0.4f : 1.0f);
+
+    // Flip if needed
+    setScaleX(drawData.shouldBeFlipped() ? -1 : 1);
   }
 
-  public void setLaneIndications(@NonNull List<IntersectionLanes> lanes) {
+  public void updateLaneView(@NonNull IntersectionLanes lane, @NonNull String maneuverModifier) {
     StringBuilder builder = new StringBuilder();
-    for (String indication : lanes.indications()) {
+    for (String indication : lane.indications()) {
       builder.append(indication);
     }
-  }
-
-  public void setManeuverModifier(@NonNull String maneuverModifier) {
-    this.maneuverModifier = maneuverModifier;
-  }
-
-  private boolean shouldFlip(String modifier) {
-    return modifier.contains(STEP_MANEUVER_MODIFIER_SLIGHT_LEFT)
-      || modifier.contains(STEP_MANEUVER_MODIFIER_LEFT)
-      || modifier.contains(STEP_MANEUVER_MODIFIER_SHARP_LEFT);
+    this.drawData = new TurnLaneViewData(builder.toString(), maneuverModifier);
+    this.isValid = lane.valid();
+    invalidate();
   }
 
   private void initManeuverColor() {
