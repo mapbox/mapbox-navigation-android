@@ -245,6 +245,7 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   public void rerouteOccurred() {
+    recentDistancesFromManeuverInMeters.clear();
     navigationQueueContainer.rerouteOccurred();
   }
 
