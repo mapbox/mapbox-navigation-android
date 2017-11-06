@@ -86,8 +86,6 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     locationEngine = new MockLocationEngine(1000, 30, false);
     locationEngine.addLocationEngineListener(this);
 
-    mapboxMap.setLocationSource(locationEngine);
-    mapboxMap.setMyLocationEnabled(true);
     navigation.addMilestoneEventListener(this);
     navigation.setLocationEngine(locationEngine);
 

@@ -11,7 +11,7 @@
     tools:showIn="@layout/instruction_view_layout">
 
     <LinearLayout
-        android:id="@+id/instructionLayoutManeuver"
+        android:id="@+id/instructionManeuverLayout"
         android:layout_width="88dp"
         android:layout_height="104dp"
         android:layout_marginBottom="8dp"
@@ -27,8 +27,9 @@
 
         <com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView
             android:id="@+id/maneuverView"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="8dp"
             android:layerType="software"/>
 
         <TextView
@@ -48,13 +49,13 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/instruction_text_background"
+        android:background="?attr/navigationViewBannerBackground"
         android:elevation="4dp"
         android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
-        app:layout_constraintBottom_toBottomOf="@+id/instructionLayoutManeuver"
+        app:layout_constraintBottom_toBottomOf="@+id/instructionManeuverLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/instructionLayoutManeuver"
+        app:layout_constraintStart_toEndOf="@+id/instructionManeuverLayout"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -91,7 +92,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="invisible"
-        app:layout_constraintStart_toEndOf="@+id/instructionLayoutManeuver"
+        app:layout_constraintStart_toEndOf="@+id/instructionManeuverLayout"
         app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText"/>
 
     <include
@@ -118,7 +119,7 @@
         android:id="@+id/rerouteLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/reroute_background"
+        android:background="?attr/navigationViewSecondary"
         android:elevation="4dp"
         android:gravity="center"
         android:orientation="vertical"
