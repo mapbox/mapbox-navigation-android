@@ -173,7 +173,6 @@ public class NavigationService extends Service implements LocationEngineListener
       navigationQueueContainer.updateCurrentLocation(location);
       thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation,
         recentDistancesFromManeuverInMeters));
-
       navigationQueueContainer.updateCurrentLocation(location);
     }
   }
@@ -232,7 +231,6 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onUserOffRoute(Location location, boolean userOffRoute) {
     navigationQueueContainer.onUserOffRoute(location, userOffRoute);
-    recentDistancesFromManeuverInMeters.clear();
   }
 
   class LocalBinder extends Binder {
