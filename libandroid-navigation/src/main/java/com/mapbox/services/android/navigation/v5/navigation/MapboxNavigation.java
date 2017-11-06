@@ -12,7 +12,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.location.LostLocationEngine;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
@@ -32,6 +31,7 @@ import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.constants.TelemetryConstants;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
+import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 import com.mapbox.services.utils.TextUtils;
 

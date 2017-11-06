@@ -1,12 +1,12 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction.maneuver;
 
-import android.graphics.Canvas;
-import android.graphics.DashPathEffect;
-import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
+import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.graphics.Canvas;
+import android.graphics.Path;
+import android.graphics.DashPathEffect;
 
 import java.util.Stack;
 
@@ -34,7 +34,7 @@ public class ManeuversStyleKit {
 
   private static class CacheForArrow180right {
     private static Paint paint = new Paint();
-    private static RectF originalFrame = new RectF(0f, 0f, 50f, 50f);
+    private static RectF originalFrame = new RectF(0f, 0f, 32f, 32f);
     private static RectF resizedFrame = new RectF();
     private static RectF frame = new RectF();
     private static RectF bezierRect = new RectF();
@@ -44,7 +44,7 @@ public class ManeuversStyleKit {
   }
 
   public static void drawArrow180Right(Canvas canvas, int primaryColor, PointF size) {
-    ManeuversStyleKit.drawArrow180Right(canvas, new RectF(0f, 0f, 50f, 50f), ResizingBehavior.AspectFit, primaryColor, size);
+    ManeuversStyleKit.drawArrow180Right(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, size);
   }
 
   public static void drawArrow180Right(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, PointF size) {
@@ -54,16 +54,16 @@ public class ManeuversStyleKit {
     Paint paint = CacheForArrow180right.paint;
 
     // Local Variables
-    float y = size.y / 2f;
     float x = size.x / 2f;
-    float scale = Math.min(size.x / 50f, size.y / 50f);
+    float scale = Math.min(size.x / 32f, size.y / 32f);
+    float y = size.y / 2f;
 
     // Resize to Target Frame
     canvas.save();
     RectF resizedFrame = CacheForArrow180right.resizedFrame;
     ManeuversStyleKit.resizingBehaviorApply(resizing, CacheForArrow180right.originalFrame, targetFrame, resizedFrame);
     canvas.translate(resizedFrame.left, resizedFrame.top);
-    canvas.scale(resizedFrame.width() / 50f, resizedFrame.height() / 50f);
+    canvas.scale(resizedFrame.width() / 32f, resizedFrame.height() / 32f);
 
     // Frame
     RectF frame = CacheForArrow180right.frame;
@@ -72,35 +72,35 @@ public class ManeuversStyleKit {
     // Group 2
     {
       canvas.save();
-      canvas.translate(x, y);
-      currentTransformation.peek().postTranslate(x, y);
+      canvas.translate(x, y + 1f);
+      currentTransformation.peek().postTranslate(x, y + 1f);
       canvas.scale(scale, scale);
       currentTransformation.peek().postScale(scale, scale);
 
       // Bezier
       RectF bezierRect = CacheForArrow180right.bezierRect;
-      bezierRect.set(-3.49f, 0.5f, 14.51f, 14.49f);
+      bezierRect.set(-3.49f, 1f, 14.51f, 14.99f);
       Path bezierPath = CacheForArrow180right.bezierPath;
       bezierPath.reset();
-      bezierPath.moveTo(-3.36f, 2.3f);
-      bezierPath.lineTo(5.51f, 14.49f);
-      bezierPath.lineTo(14.37f, 2.3f);
-      bezierPath.cubicTo(14.45f, 2.21f, 14.51f, 2.09f, 14.51f, 1.96f);
-      bezierPath.cubicTo(14.51f, 1.69f, 14.28f, 1.46f, 14.01f, 1.46f);
-      bezierPath.cubicTo(13.97f, 1.46f, 13.89f, 1.47f, 13.89f, 1.47f);
-      bezierPath.lineTo(8.15f, 3.44f);
-      bezierPath.cubicTo(8.11f, 3.45f, 8.06f, 3.46f, 8.01f, 3.46f);
-      bezierPath.cubicTo(7.74f, 3.46f, 7.51f, 3.26f, 7.51f, 3f);
-      bezierPath.cubicTo(7.51f, 2.63f, 7.51f, 0.5f, 7.51f, 0.5f);
-      bezierPath.lineTo(5.51f, 0.5f);
-      bezierPath.lineTo(3.5f, 0.5f);
-      bezierPath.cubicTo(3.5f, 0.5f, 3.51f, 2.63f, 3.51f, 3f);
-      bezierPath.cubicTo(3.51f, 3.26f, 3.28f, 3.47f, 3.01f, 3.47f);
-      bezierPath.cubicTo(2.96f, 3.47f, 2.91f, 3.46f, 2.86f, 3.45f);
-      bezierPath.lineTo(-2.88f, 1.48f);
-      bezierPath.cubicTo(-2.88f, 1.48f, -2.95f, 1.46f, -2.99f, 1.46f);
-      bezierPath.cubicTo(-3.27f, 1.46f, -3.49f, 1.69f, -3.49f, 1.96f);
-      bezierPath.cubicTo(-3.49f, 2.09f, -3.44f, 2.21f, -3.36f, 2.3f);
+      bezierPath.moveTo(-3.36f, 2.8f);
+      bezierPath.lineTo(5.51f, 14.99f);
+      bezierPath.lineTo(14.37f, 2.8f);
+      bezierPath.cubicTo(14.45f, 2.71f, 14.51f, 2.59f, 14.51f, 2.46f);
+      bezierPath.cubicTo(14.51f, 2.19f, 14.28f, 1.96f, 14.01f, 1.96f);
+      bezierPath.cubicTo(13.97f, 1.96f, 13.89f, 1.97f, 13.89f, 1.97f);
+      bezierPath.lineTo(8.15f, 3.94f);
+      bezierPath.cubicTo(8.11f, 3.95f, 8.06f, 3.96f, 8.01f, 3.96f);
+      bezierPath.cubicTo(7.74f, 3.96f, 7.51f, 3.76f, 7.51f, 3.5f);
+      bezierPath.cubicTo(7.51f, 3.13f, 7.51f, 1f, 7.51f, 1f);
+      bezierPath.lineTo(5.51f, 1f);
+      bezierPath.lineTo(3.5f, 1f);
+      bezierPath.cubicTo(3.5f, 1f, 3.51f, 3.13f, 3.51f, 3.5f);
+      bezierPath.cubicTo(3.51f, 3.76f, 3.28f, 3.97f, 3.01f, 3.97f);
+      bezierPath.cubicTo(2.96f, 3.97f, 2.91f, 3.96f, 2.86f, 3.95f);
+      bezierPath.lineTo(-2.88f, 1.98f);
+      bezierPath.cubicTo(-2.88f, 1.98f, -2.95f, 1.96f, -2.99f, 1.96f);
+      bezierPath.cubicTo(-3.27f, 1.96f, -3.49f, 2.19f, -3.49f, 2.46f);
+      bezierPath.cubicTo(-3.49f, 2.59f, -3.44f, 2.71f, -3.36f, 2.8f);
       bezierPath.close();
 
       paint.reset();
@@ -111,14 +111,14 @@ public class ManeuversStyleKit {
 
       // Bezier 2
       RectF bezier2Rect = CacheForArrow180right.bezier2Rect;
-      bezier2Rect.set(-7.5f, -12.5f, 5.5f, 14.5f);
+      bezier2Rect.set(-7.5f, -12f, 5.5f, 15f);
       Path bezier2Path = CacheForArrow180right.bezier2Path;
       bezier2Path.reset();
-      bezier2Path.moveTo(-7.5f, 14.5f);
-      bezier2Path.lineTo(-7.5f, -5.66f);
-      bezier2Path.cubicTo(-7.5f, -9.41f, -4.55f, -12.5f, -1f, -12.5f);
-      bezier2Path.cubicTo(2.59f, -12.5f, 5.5f, -9.22f, 5.5f, -5.65f);
-      bezier2Path.lineTo(5.5f, 3.5f);
+      bezier2Path.moveTo(-7.5f, 15f);
+      bezier2Path.lineTo(-7.5f, -5.16f);
+      bezier2Path.cubicTo(-7.5f, -8.91f, -4.55f, -12f, -1f, -12f);
+      bezier2Path.cubicTo(2.59f, -12f, 5.5f, -8.72f, 5.5f, -5.15f);
+      bezier2Path.lineTo(5.5f, 4f);
 
       paint.reset();
       paint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -138,7 +138,7 @@ public class ManeuversStyleKit {
 
   private static class CacheForArrowright {
     private static Paint paint = new Paint();
-    private static RectF originalFrame = new RectF(0f, 0f, 50f, 50f);
+    private static RectF originalFrame = new RectF(0f, 0f, 32f, 32f);
     private static RectF resizedFrame = new RectF();
     private static RectF frame = new RectF();
     private static RectF bezierRect = new RectF();
@@ -146,7 +146,7 @@ public class ManeuversStyleKit {
   }
 
   public static void drawArrowRight(Canvas canvas, int primaryColor, PointF size) {
-    ManeuversStyleKit.drawArrowRight(canvas, new RectF(0f, 0f, 50f, 50f), ResizingBehavior.AspectFit, primaryColor, size);
+    ManeuversStyleKit.drawArrowRight(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, size);
   }
 
   public static void drawArrowRight(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, PointF size) {
@@ -157,15 +157,15 @@ public class ManeuversStyleKit {
 
     // Local Variables
     float y = size.y / 2f;
+    float scale = Math.min(size.x / 32f, size.y / 32f);
     float x = size.x / 2f;
-    float scale = Math.min(size.x / 50f, size.y / 50f);
 
     // Resize to Target Frame
     canvas.save();
     RectF resizedFrame = CacheForArrowright.resizedFrame;
     ManeuversStyleKit.resizingBehaviorApply(resizing, CacheForArrowright.originalFrame, targetFrame, resizedFrame);
     canvas.translate(resizedFrame.left, resizedFrame.top);
-    canvas.scale(resizedFrame.width() / 50f, resizedFrame.height() / 50f);
+    canvas.scale(resizedFrame.width() / 32f, resizedFrame.height() / 32f);
 
     // Frame
     RectF frame = CacheForArrowright.frame;
@@ -173,8 +173,8 @@ public class ManeuversStyleKit {
 
     // Bezier
     canvas.save();
-    canvas.translate(x, y);
-    currentTransformation.peek().postTranslate(x, y);
+    canvas.translate(x, y + 1f);
+    currentTransformation.peek().postTranslate(x, y + 1f);
     canvas.scale(scale, scale);
     currentTransformation.peek().postScale(scale, scale);
     RectF bezierRect = CacheForArrowright.bezierRect;
@@ -215,7 +215,7 @@ public class ManeuversStyleKit {
 
   private static class CacheForArrowslightright {
     private static Paint paint = new Paint();
-    private static RectF originalFrame = new RectF(0f, 0f, 50f, 50f);
+    private static RectF originalFrame = new RectF(0f, 0f, 32f, 32f);
     private static RectF resizedFrame = new RectF();
     private static RectF frame = new RectF();
     private static RectF bezier3Rect = new RectF();
@@ -226,7 +226,7 @@ public class ManeuversStyleKit {
   }
 
   public static void drawArrowSlightRight(Canvas canvas, int primaryColor, PointF size) {
-    ManeuversStyleKit.drawArrowSlightRight(canvas, new RectF(0f, 0f, 50f, 50f), ResizingBehavior.AspectFit, primaryColor, size);
+    ManeuversStyleKit.drawArrowSlightRight(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, size);
   }
 
   public static void drawArrowSlightRight(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, PointF size) {
@@ -236,16 +236,16 @@ public class ManeuversStyleKit {
     Paint paint = CacheForArrowslightright.paint;
 
     // Local Variables
-    float y = size.y / 2f;
     float x = size.x / 2f;
-    float scale = Math.min(size.x / 50f, size.y / 50f);
+    float scale = Math.min(size.x / 32f, size.y / 32f);
+    float y = size.y / 2f;
 
     // Resize to Target Frame
     canvas.save();
     RectF resizedFrame = CacheForArrowslightright.resizedFrame;
     ManeuversStyleKit.resizingBehaviorApply(resizing, CacheForArrowslightright.originalFrame, targetFrame, resizedFrame);
     canvas.translate(resizedFrame.left, resizedFrame.top);
-    canvas.scale(resizedFrame.width() / 50f, resizedFrame.height() / 50f);
+    canvas.scale(resizedFrame.width() / 32f, resizedFrame.height() / 32f);
 
     // Frame
     RectF frame = CacheForArrowslightright.frame;
@@ -254,20 +254,20 @@ public class ManeuversStyleKit {
     // Group 3
     {
       canvas.save();
-      canvas.translate(x, y);
-      currentTransformation.peek().postTranslate(x, y);
+      canvas.translate(x + 1f, y + 1f);
+      currentTransformation.peek().postTranslate(x + 1f, y + 1f);
       canvas.scale(scale, scale);
       currentTransformation.peek().postScale(scale, scale);
 
       // Bezier 3
       RectF bezier3Rect = CacheForArrowslightright.bezier3Rect;
-      bezier3Rect.set(-8.34f, -4.77f, 0.99f, 15.38f);
+      bezier3Rect.set(-8.34f, -5.09f, 0.99f, 15.06f);
       Path bezier3Path = CacheForArrowslightright.bezier3Path;
       bezier3Path.reset();
-      bezier3Path.moveTo(0.99f, -4.77f);
-      bezier3Path.lineTo(-6.55f, 2.2f);
-      bezier3Path.cubicTo(-7.71f, 3.95f, -8.34f, 6.07f, -8.34f, 8.25f);
-      bezier3Path.lineTo(-8.34f, 15.38f);
+      bezier3Path.moveTo(0.99f, -5.09f);
+      bezier3Path.lineTo(-6.55f, 1.88f);
+      bezier3Path.cubicTo(-7.71f, 3.63f, -8.34f, 5.75f, -8.34f, 7.93f);
+      bezier3Path.lineTo(-8.34f, 15.06f);
 
       paint.reset();
       paint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -282,28 +282,28 @@ public class ManeuversStyleKit {
 
       // Bezier 4
       RectF bezier4Rect = CacheForArrowslightright.bezier4Rect;
-      bezier4Rect.set(-3.5f, -12.44f, 9.88f, 0.62f);
+      bezier4Rect.set(-3.5f, -12.76f, 9.88f, 0.3f);
       Path bezier4Path = CacheForArrowslightright.bezier4Path;
       bezier4Path.reset();
-      bezier4Path.moveTo(-2.97f, -11.72f);
-      bezier4Path.lineTo(9.88f, -12.44f);
-      bezier4Path.lineTo(7.31f, 0.17f);
-      bezier4Path.cubicTo(7.3f, 0.3f, 7.24f, 0.41f, 7.15f, 0.5f);
-      bezier4Path.cubicTo(6.94f, 0.68f, 6.62f, 0.66f, 6.44f, 0.45f);
-      bezier4Path.cubicTo(6.41f, 0.42f, 6.38f, 0.35f, 6.38f, 0.35f);
-      bezier4Path.lineTo(4f, -3.87f);
-      bezier4Path.cubicTo(3.99f, -3.91f, 3.96f, -3.95f, 3.93f, -3.99f);
-      bezier4Path.cubicTo(3.75f, -4.19f, 3.25f, -4.06f, 3.05f, -3.89f);
-      bezier4Path.cubicTo(2.78f, -3.66f, 0.97f, -2.09f, 0.97f, -2.09f);
-      bezier4Path.lineTo(-0.34f, -3.6f);
-      bezier4Path.lineTo(-1.65f, -5.12f);
-      bezier4Path.cubicTo(-1.65f, -5.12f, 0.16f, -6.68f, 0.43f, -6.92f);
-      bezier4Path.cubicTo(0.63f, -7.09f, 0.74f, -7.49f, 0.57f, -7.69f);
-      bezier4Path.cubicTo(0.53f, -7.73f, 0.54f, -7.8f, 0.5f, -7.83f);
-      bezier4Path.lineTo(-3.31f, -10.8f);
-      bezier4Path.cubicTo(-3.31f, -10.8f, -3.36f, -10.86f, -3.38f, -10.89f);
-      bezier4Path.cubicTo(-3.56f, -11.1f, -3.53f, -11.42f, -3.32f, -11.6f);
-      bezier4Path.cubicTo(-3.22f, -11.69f, -3.09f, -11.73f, -2.97f, -11.72f);
+      bezier4Path.moveTo(-2.97f, -12.04f);
+      bezier4Path.lineTo(9.88f, -12.76f);
+      bezier4Path.lineTo(7.31f, -0.15f);
+      bezier4Path.cubicTo(7.3f, -0.02f, 7.24f, 0.09f, 7.15f, 0.18f);
+      bezier4Path.cubicTo(6.94f, 0.36f, 6.62f, 0.34f, 6.44f, 0.13f);
+      bezier4Path.cubicTo(6.41f, 0.1f, 6.38f, 0.03f, 6.38f, 0.03f);
+      bezier4Path.lineTo(4f, -4.19f);
+      bezier4Path.cubicTo(3.99f, -4.23f, 3.96f, -4.27f, 3.93f, -4.31f);
+      bezier4Path.cubicTo(3.75f, -4.51f, 3.25f, -4.38f, 3.05f, -4.21f);
+      bezier4Path.cubicTo(2.78f, -3.98f, 0.97f, -2.41f, 0.97f, -2.41f);
+      bezier4Path.lineTo(-0.34f, -3.92f);
+      bezier4Path.lineTo(-1.65f, -5.44f);
+      bezier4Path.cubicTo(-1.65f, -5.44f, 0.16f, -7f, 0.43f, -7.24f);
+      bezier4Path.cubicTo(0.63f, -7.41f, 0.74f, -7.81f, 0.57f, -8.01f);
+      bezier4Path.cubicTo(0.53f, -8.05f, 0.54f, -8.12f, 0.5f, -8.15f);
+      bezier4Path.lineTo(-3.31f, -11.12f);
+      bezier4Path.cubicTo(-3.31f, -11.12f, -3.36f, -11.18f, -3.38f, -11.21f);
+      bezier4Path.cubicTo(-3.56f, -11.42f, -3.53f, -11.74f, -3.32f, -11.92f);
+      bezier4Path.cubicTo(-3.22f, -12.01f, -3.09f, -12.05f, -2.97f, -12.04f);
       bezier4Path.close();
 
       paint.reset();
@@ -314,7 +314,7 @@ public class ManeuversStyleKit {
 
       // Clip
       RectF clipRect = CacheForArrowslightright.clipRect;
-      clipRect.set(-10.2f, -13.38f, 10.2f, 13.37f);
+      clipRect.set(-10.2f, -13.7f, 10.2f, 13.05f);
 
       canvas.restore();
     }
@@ -324,7 +324,7 @@ public class ManeuversStyleKit {
 
   private static class CacheForArrowstraight {
     private static Paint paint = new Paint();
-    private static RectF originalFrame = new RectF(0f, 0f, 50f, 50f);
+    private static RectF originalFrame = new RectF(0f, 0f, 32f, 32f);
     private static RectF resizedFrame = new RectF();
     private static RectF frame = new RectF();
     private static RectF bezierRect = new RectF();
@@ -332,7 +332,7 @@ public class ManeuversStyleKit {
   }
 
   public static void drawArrowStraight(Canvas canvas, int primaryColor, PointF size) {
-    ManeuversStyleKit.drawArrowStraight(canvas, new RectF(0f, 0f, 50f, 50f), ResizingBehavior.AspectFit, primaryColor, size);
+    ManeuversStyleKit.drawArrowStraight(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, size);
   }
 
   public static void drawArrowStraight(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, PointF size) {
@@ -343,15 +343,15 @@ public class ManeuversStyleKit {
 
     // Local Variables
     float y = size.y / 2f;
+    float scale = Math.min(size.x / 32f, size.y / 32f);
     float x = size.x / 2f;
-    float scale = Math.min(size.x / 50f, size.y / 50f);
 
     // Resize to Target Frame
     canvas.save();
     RectF resizedFrame = CacheForArrowstraight.resizedFrame;
     ManeuversStyleKit.resizingBehaviorApply(resizing, CacheForArrowstraight.originalFrame, targetFrame, resizedFrame);
     canvas.translate(resizedFrame.left, resizedFrame.top);
-    canvas.scale(resizedFrame.width() / 50f, resizedFrame.height() / 50f);
+    canvas.scale(resizedFrame.width() / 32f, resizedFrame.height() / 32f);
 
     // Frame
     RectF frame = CacheForArrowstraight.frame;
@@ -359,8 +359,8 @@ public class ManeuversStyleKit {
 
     // Bezier
     canvas.save();
-    canvas.translate(x, y);
-    currentTransformation.peek().postTranslate(x, y);
+    canvas.translate(x, y + 1f);
+    currentTransformation.peek().postTranslate(x, y + 1f);
     canvas.scale(scale, scale);
     currentTransformation.peek().postScale(scale, scale);
     RectF bezierRect = CacheForArrowstraight.bezierRect;
@@ -399,7 +399,7 @@ public class ManeuversStyleKit {
 
   private static class CacheForArrowsharpright {
     private static Paint paint = new Paint();
-    private static RectF originalFrame = new RectF(0f, 0f, 50f, 50f);
+    private static RectF originalFrame = new RectF(0f, 0f, 32f, 32f);
     private static RectF resizedFrame = new RectF();
     private static RectF frame = new RectF();
     private static RectF bezierRect = new RectF();
@@ -409,7 +409,7 @@ public class ManeuversStyleKit {
   }
 
   public static void drawArrowSharpRight(Canvas canvas, int primaryColor, PointF size) {
-    ManeuversStyleKit.drawArrowSharpRight(canvas, new RectF(0f, 0f, 50f, 50f), ResizingBehavior.AspectFit, primaryColor, size);
+    ManeuversStyleKit.drawArrowSharpRight(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, size);
   }
 
   public static void drawArrowSharpRight(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, PointF size) {
@@ -419,16 +419,16 @@ public class ManeuversStyleKit {
     Paint paint = CacheForArrowsharpright.paint;
 
     // Local Variables
-    float y = size.y / 2f;
     float x = size.x / 2f;
-    float scale = Math.min(size.x / 50f, size.y / 50f);
+    float scale = Math.min(size.x / 32f, size.y / 32f);
+    float y = size.y / 2f;
 
     // Resize to Target Frame
     canvas.save();
     RectF resizedFrame = CacheForArrowsharpright.resizedFrame;
     ManeuversStyleKit.resizingBehaviorApply(resizing, CacheForArrowsharpright.originalFrame, targetFrame, resizedFrame);
     canvas.translate(resizedFrame.left, resizedFrame.top);
-    canvas.scale(resizedFrame.width() / 50f, resizedFrame.height() / 50f);
+    canvas.scale(resizedFrame.width() / 32f, resizedFrame.height() / 32f);
 
     // Frame
     RectF frame = CacheForArrowsharpright.frame;
@@ -476,7 +476,7 @@ public class ManeuversStyleKit {
 
       // Bezier 3
       RectF bezier3Rect = CacheForArrowsharpright.bezier3Rect;
-      bezier3Rect.set(-11.12f, -8.5f, 4.88f, 14.5f);
+      bezier3Rect.set(-11.12f, -8.5f, 4.88f, 16f);
       Path bezier3Path = CacheForArrowsharpright.bezier3Path;
       bezier3Path.reset();
       bezier3Path.moveTo(-11.12f, -4f);
@@ -488,7 +488,8 @@ public class ManeuversStyleKit {
       bezier3Path.moveTo(-11.12f, 1.5f);
       bezier3Path.lineTo(-11.12f, 3.5f);
       bezier3Path.moveTo(-11.12f, 3.5f);
-      bezier3Path.lineTo(-11.12f, 14.5f);
+      bezier3Path.lineTo(-11.12f, 12.98f);
+      bezier3Path.lineTo(-11.12f, 16f);
 
       paint.reset();
       paint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -508,7 +509,7 @@ public class ManeuversStyleKit {
 
   private static class CacheForArrive {
     private static Paint paint = new Paint();
-    private static RectF originalFrame = new RectF(0f, 0f, 50f, 50f);
+    private static RectF originalFrame = new RectF(0f, 0f, 32f, 32f);
     private static RectF resizedFrame = new RectF();
     private static RectF frame = new RectF();
     private static RectF bezierRect = new RectF();
@@ -522,7 +523,7 @@ public class ManeuversStyleKit {
   }
 
   public static void drawArrive(Canvas canvas, int primaryColor, PointF size) {
-    ManeuversStyleKit.drawArrive(canvas, new RectF(0f, 0f, 50f, 50f), ResizingBehavior.AspectFit, primaryColor, size);
+    ManeuversStyleKit.drawArrive(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, size);
   }
 
   public static void drawArrive(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, PointF size) {
@@ -532,16 +533,16 @@ public class ManeuversStyleKit {
     Paint paint = CacheForArrive.paint;
 
     // Local Variables
-    float y = size.y / 2f;
     float x = size.x / 2f;
-    float scale = Math.min(size.x / 50f, size.y / 50f);
+    float scale = Math.min(size.x / 32f, size.y / 32f);
+    float y = size.y / 2f;
 
     // Resize to Target Frame
     canvas.save();
     RectF resizedFrame = CacheForArrive.resizedFrame;
     ManeuversStyleKit.resizingBehaviorApply(resizing, CacheForArrive.originalFrame, targetFrame, resizedFrame);
     canvas.translate(resizedFrame.left, resizedFrame.top);
-    canvas.scale(resizedFrame.width() / 50f, resizedFrame.height() / 50f);
+    canvas.scale(resizedFrame.width() / 32f, resizedFrame.height() / 32f);
 
     // Frame
     RectF frame = CacheForArrive.frame;
@@ -550,18 +551,18 @@ public class ManeuversStyleKit {
     // Group 2
     {
       canvas.save();
-      canvas.translate(x, y);
-      currentTransformation.peek().postTranslate(x, y);
+      canvas.translate(x, y + 1f);
+      currentTransformation.peek().postTranslate(x, y + 1f);
       canvas.scale(scale, scale);
       currentTransformation.peek().postScale(scale, scale);
 
       // Bezier
       RectF bezierRect = CacheForArrive.bezierRect;
-      bezierRect.set(0.06f, 6.6f, 0.06f, 16.6f);
+      bezierRect.set(0.06f, 6.6f, 0.06f, 15f);
       Path bezierPath = CacheForArrive.bezierPath;
       bezierPath.reset();
       bezierPath.moveTo(0.06f, 6.6f);
-      bezierPath.lineTo(0.06f, 16.6f);
+      bezierPath.lineTo(0.06f, 15f);
 
       paint.reset();
       paint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -641,7 +642,7 @@ public class ManeuversStyleKit {
 
   private static class CacheForStarting {
     private static Paint paint = new Paint();
-    private static RectF originalFrame = new RectF(0f, 0f, 50f, 50f);
+    private static RectF originalFrame = new RectF(0f, 0f, 32f, 32f);
     private static RectF resizedFrame = new RectF();
     private static RectF frame = new RectF();
     private static RectF bezier2Rect = new RectF();
@@ -649,7 +650,7 @@ public class ManeuversStyleKit {
   }
 
   public static void drawStarting(Canvas canvas, int primaryColor, PointF size) {
-    ManeuversStyleKit.drawStarting(canvas, new RectF(0f, 0f, 50f, 50f), ResizingBehavior.AspectFit, primaryColor, size);
+    ManeuversStyleKit.drawStarting(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, size);
   }
 
   public static void drawStarting(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, PointF size) {
@@ -660,15 +661,15 @@ public class ManeuversStyleKit {
 
     // Local Variables
     float y = size.y / 2f;
+    float scale = Math.min(size.x / 32f, size.y / 32f);
     float x = size.x / 2f;
-    float scale = Math.min(size.x / 50f, size.y / 50f);
 
     // Resize to Target Frame
     canvas.save();
     RectF resizedFrame = CacheForStarting.resizedFrame;
     ManeuversStyleKit.resizingBehaviorApply(resizing, CacheForStarting.originalFrame, targetFrame, resizedFrame);
     canvas.translate(resizedFrame.left, resizedFrame.top);
-    canvas.scale(resizedFrame.width() / 50f, resizedFrame.height() / 50f);
+    canvas.scale(resizedFrame.width() / 32f, resizedFrame.height() / 32f);
 
     // Frame
     RectF frame = CacheForStarting.frame;
@@ -704,7 +705,7 @@ public class ManeuversStyleKit {
 
   private static class CacheForDestination {
     private static Paint paint = new Paint();
-    private static RectF originalFrame = new RectF(0f, 0f, 50f, 50f);
+    private static RectF originalFrame = new RectF(0f, 0f, 32f, 32f);
     private static RectF resizedFrame = new RectF();
     private static RectF frame = new RectF();
     private static RectF bezierRect = new RectF();
@@ -712,7 +713,7 @@ public class ManeuversStyleKit {
   }
 
   public static void drawDestination(Canvas canvas, int primaryColor, PointF size) {
-    ManeuversStyleKit.drawDestination(canvas, new RectF(0f, 0f, 50f, 50f), ResizingBehavior.AspectFit, primaryColor, size);
+    ManeuversStyleKit.drawDestination(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, size);
   }
 
   public static void drawDestination(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, PointF size) {
@@ -723,15 +724,15 @@ public class ManeuversStyleKit {
 
     // Local Variables
     float y = size.y / 2f;
+    float scale = Math.min(size.x / 32f, size.y / 32f);
     float x = size.x / 2f;
-    float scale = Math.min(size.x / 50f, size.y / 50f);
 
     // Resize to Target Frame
     canvas.save();
     RectF resizedFrame = CacheForDestination.resizedFrame;
     ManeuversStyleKit.resizingBehaviorApply(resizing, CacheForDestination.originalFrame, targetFrame, resizedFrame);
     canvas.translate(resizedFrame.left, resizedFrame.top);
-    canvas.scale(resizedFrame.width() / 50f, resizedFrame.height() / 50f);
+    canvas.scale(resizedFrame.width() / 32f, resizedFrame.height() / 32f);
 
     // Frame
     RectF frame = CacheForDestination.frame;
@@ -775,7 +776,7 @@ public class ManeuversStyleKit {
 
   private static class CacheForMerge {
     private static Paint paint = new Paint();
-    private static RectF originalFrame = new RectF(0f, 0f, 50f, 50f);
+    private static RectF originalFrame = new RectF(0f, 0f, 32f, 32f);
     private static RectF resizedFrame = new RectF();
     private static RectF frame = new RectF();
     private static RectF bezierRect = new RectF();
@@ -787,7 +788,7 @@ public class ManeuversStyleKit {
   }
 
   public static void drawMerge(Canvas canvas, int primaryColor, int secondaryColor, PointF size) {
-    ManeuversStyleKit.drawMerge(canvas, new RectF(0f, 0f, 50f, 50f), ResizingBehavior.AspectFit, primaryColor, secondaryColor, size);
+    ManeuversStyleKit.drawMerge(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, secondaryColor, size);
   }
 
   public static void drawMerge(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, int secondaryColor, PointF size) {
@@ -797,16 +798,16 @@ public class ManeuversStyleKit {
     Paint paint = CacheForMerge.paint;
 
     // Local Variables
-    float y = size.y / 2f;
     float x = size.x / 2f;
-    float scale = Math.min(size.x / 50f, size.y / 50f);
+    float scale = Math.min(size.x / 32f, size.y / 32f);
+    float y = size.y / 2f;
 
     // Resize to Target Frame
     canvas.save();
     RectF resizedFrame = CacheForMerge.resizedFrame;
     ManeuversStyleKit.resizingBehaviorApply(resizing, CacheForMerge.originalFrame, targetFrame, resizedFrame);
     canvas.translate(resizedFrame.left, resizedFrame.top);
-    canvas.scale(resizedFrame.width() / 50f, resizedFrame.height() / 50f);
+    canvas.scale(resizedFrame.width() / 32f, resizedFrame.height() / 32f);
 
     // Frame
     RectF frame = CacheForMerge.frame;
@@ -815,22 +816,22 @@ public class ManeuversStyleKit {
     // Group 3
     {
       canvas.save();
-      canvas.translate(x, y);
-      currentTransformation.peek().postTranslate(x, y);
+      canvas.translate(x, y + 1f);
+      currentTransformation.peek().postTranslate(x, y + 1f);
       canvas.scale(scale, scale);
       currentTransformation.peek().postScale(scale, scale);
 
       // Bezier
       RectF bezierRect = CacheForMerge.bezierRect;
-      bezierRect.set(-8.07f, -10.51f, -0.07f, 16.49f);
+      bezierRect.set(0.07f, -10.51f, 8.07f, 15f);
       Path bezierPath = CacheForMerge.bezierPath;
       bezierPath.reset();
-      bezierPath.moveTo(-8.07f, 16.49f);
-      bezierPath.lineTo(-8.07f, 12.47f);
-      bezierPath.cubicTo(-8.07f, 10.53f, -7.44f, 8.65f, -6.28f, 7.1f);
-      bezierPath.lineTo(-1.86f, 1.19f);
-      bezierPath.cubicTo(-0.69f, -0.36f, -0.07f, -2.25f, -0.07f, -4.19f);
-      bezierPath.lineTo(-0.07f, -10.51f);
+      bezierPath.moveTo(8.07f, 15f);
+      bezierPath.lineTo(8.07f, 12.47f);
+      bezierPath.cubicTo(8.07f, 10.53f, 7.44f, 8.65f, 6.28f, 7.1f);
+      bezierPath.lineTo(1.86f, 1.19f);
+      bezierPath.cubicTo(0.69f, -0.36f, 0.07f, -2.25f, 0.07f, -4.19f);
+      bezierPath.lineTo(0.07f, -10.51f);
 
       paint.reset();
       paint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -845,15 +846,15 @@ public class ManeuversStyleKit {
 
       // Bezier 2
       RectF bezier2Rect = CacheForMerge.bezier2Rect;
-      bezier2Rect.set(0.06f, -10.6f, 8.06f, 16.4f);
+      bezier2Rect.set(-8.06f, -10.6f, -0.06f, 15f);
       Path bezier2Path = CacheForMerge.bezier2Path;
       bezier2Path.reset();
-      bezier2Path.moveTo(8.06f, 16.4f);
-      bezier2Path.lineTo(8.06f, 12.39f);
-      bezier2Path.cubicTo(8.06f, 10.45f, 7.43f, 8.56f, 6.27f, 7.01f);
-      bezier2Path.lineTo(1.85f, 1.11f);
-      bezier2Path.cubicTo(0.69f, -0.45f, 0.06f, -2.33f, 0.06f, -4.27f);
-      bezier2Path.lineTo(0.06f, -10.6f);
+      bezier2Path.moveTo(-8.06f, 15f);
+      bezier2Path.lineTo(-8.06f, 12.39f);
+      bezier2Path.cubicTo(-8.06f, 10.45f, -7.43f, 8.56f, -6.27f, 7.01f);
+      bezier2Path.lineTo(-1.85f, 1.11f);
+      bezier2Path.cubicTo(-0.69f, -0.45f, -0.06f, -2.33f, -0.06f, -4.27f);
+      bezier2Path.lineTo(-0.06f, -10.6f);
 
       paint.reset();
       paint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -868,28 +869,28 @@ public class ManeuversStyleKit {
 
       // Bezier 3
       RectF bezier3Rect = CacheForMerge.bezier3Rect;
-      bezier3Rect.set(-7.93f, -16.48f, 8.07f, -2.96f);
+      bezier3Rect.set(-8.07f, -16.48f, 7.93f, -2.96f);
       Path bezier3Path = CacheForMerge.bezier3Path;
       bezier3Path.reset();
-      bezier3Path.moveTo(-7.8f, -6.29f);
-      bezier3Path.lineTo(0.07f, -16.48f);
-      bezier3Path.lineTo(7.93f, -6.29f);
-      bezier3Path.cubicTo(8.01f, -6.2f, 8.07f, -6.08f, 8.07f, -5.95f);
-      bezier3Path.cubicTo(8.07f, -5.67f, 7.84f, -5.45f, 7.57f, -5.45f);
-      bezier3Path.cubicTo(7.53f, -5.45f, 7.45f, -5.46f, 7.45f, -5.46f);
-      bezier3Path.lineTo(2.71f, -6.43f);
-      bezier3Path.cubicTo(2.66f, -6.44f, 2.62f, -6.45f, 2.57f, -6.45f);
-      bezier3Path.cubicTo(2.3f, -6.45f, 2.07f, -5.98f, 2.07f, -5.72f);
-      bezier3Path.cubicTo(2.07f, -5.36f, 2.07f, -2.96f, 2.07f, -2.96f);
-      bezier3Path.lineTo(0.07f, -2.96f);
-      bezier3Path.lineTo(-1.94f, -2.96f);
-      bezier3Path.cubicTo(-1.94f, -2.96f, -1.93f, -5.36f, -1.93f, -5.72f);
-      bezier3Path.cubicTo(-1.93f, -5.98f, -2.16f, -6.33f, -2.43f, -6.33f);
-      bezier3Path.cubicTo(-2.48f, -6.33f, -2.53f, -6.38f, -2.58f, -6.37f);
-      bezier3Path.lineTo(-7.32f, -5.43f);
-      bezier3Path.cubicTo(-7.32f, -5.43f, -7.4f, -5.43f, -7.43f, -5.43f);
-      bezier3Path.cubicTo(-7.71f, -5.43f, -7.93f, -5.66f, -7.93f, -5.94f);
-      bezier3Path.cubicTo(-7.93f, -6.07f, -7.88f, -6.2f, -7.8f, -6.29f);
+      bezier3Path.moveTo(7.8f, -6.29f);
+      bezier3Path.lineTo(-0.07f, -16.48f);
+      bezier3Path.lineTo(-7.93f, -6.29f);
+      bezier3Path.cubicTo(-8.01f, -6.2f, -8.07f, -6.08f, -8.07f, -5.95f);
+      bezier3Path.cubicTo(-8.07f, -5.67f, -7.84f, -5.45f, -7.57f, -5.45f);
+      bezier3Path.cubicTo(-7.53f, -5.45f, -7.45f, -5.46f, -7.45f, -5.46f);
+      bezier3Path.lineTo(-2.71f, -6.43f);
+      bezier3Path.cubicTo(-2.66f, -6.44f, -2.62f, -6.45f, -2.57f, -6.45f);
+      bezier3Path.cubicTo(-2.3f, -6.45f, -2.07f, -5.98f, -2.07f, -5.72f);
+      bezier3Path.cubicTo(-2.07f, -5.36f, -2.07f, -2.96f, -2.07f, -2.96f);
+      bezier3Path.lineTo(-0.07f, -2.96f);
+      bezier3Path.lineTo(1.94f, -2.96f);
+      bezier3Path.cubicTo(1.94f, -2.96f, 1.93f, -5.36f, 1.93f, -5.72f);
+      bezier3Path.cubicTo(1.93f, -5.98f, 2.16f, -6.33f, 2.43f, -6.33f);
+      bezier3Path.cubicTo(2.48f, -6.33f, 2.53f, -6.38f, 2.58f, -6.37f);
+      bezier3Path.lineTo(7.32f, -5.43f);
+      bezier3Path.cubicTo(7.32f, -5.43f, 7.4f, -5.43f, 7.43f, -5.43f);
+      bezier3Path.cubicTo(7.71f, -5.43f, 7.93f, -5.66f, 7.93f, -5.94f);
+      bezier3Path.cubicTo(7.93f, -6.07f, 7.88f, -6.2f, 7.8f, -6.29f);
       bezier3Path.close();
 
       paint.reset();
@@ -906,11 +907,9 @@ public class ManeuversStyleKit {
 
   private static class CacheForFork {
     private static Paint paint = new Paint();
-    private static RectF originalFrame = new RectF(0f, 0f, 50f, 50f);
+    private static RectF originalFrame = new RectF(0f, 0f, 32f, 32f);
     private static RectF resizedFrame = new RectF();
     private static RectF frame = new RectF();
-    private static RectF group3 = new RectF();
-    private static Path clipPath = new Path();
     private static RectF bezierRect = new RectF();
     private static Path bezierPath = new Path();
     private static RectF bezier2Rect = new RectF();
@@ -920,7 +919,7 @@ public class ManeuversStyleKit {
   }
 
   public static void drawFork(Canvas canvas, int primaryColor, int secondaryColor, PointF size) {
-    ManeuversStyleKit.drawFork(canvas, new RectF(0f, 0f, 50f, 50f), ResizingBehavior.AspectFit, primaryColor, secondaryColor, size);
+    ManeuversStyleKit.drawFork(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, secondaryColor, size);
   }
 
   public static void drawFork(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, int secondaryColor, PointF size) {
@@ -930,16 +929,16 @@ public class ManeuversStyleKit {
     Paint paint = CacheForFork.paint;
 
     // Local Variables
-    float y = size.y / 2f;
     float x = size.x / 2f;
-    float scale = Math.min(size.x / 50f, size.y / 50f);
+    float scale = Math.min(size.x / 32f, size.y / 32f);
+    float y = size.y / 2f;
 
     // Resize to Target Frame
     canvas.save();
     RectF resizedFrame = CacheForFork.resizedFrame;
     ManeuversStyleKit.resizingBehaviorApply(resizing, CacheForFork.originalFrame, targetFrame, resizedFrame);
     canvas.translate(resizedFrame.left, resizedFrame.top);
-    canvas.scale(resizedFrame.width() / 50f, resizedFrame.height() / 50f);
+    canvas.scale(resizedFrame.width() / 32f, resizedFrame.height() / 32f);
 
     // Frame
     RectF frame = CacheForFork.frame;
@@ -947,35 +946,23 @@ public class ManeuversStyleKit {
 
     // Group 3
     {
-      RectF group3 = CacheForFork.group3;
-      group3.set(-13.6f, -13.39f, 11.55f, 15.41f);
       canvas.save();
-      canvas.translate(x, y);
-      currentTransformation.peek().postTranslate(x, y);
+      canvas.translate(x + 2.99f, y);
+      currentTransformation.peek().postTranslate(x + 2.99f, y);
       canvas.scale(scale, scale);
       currentTransformation.peek().postScale(scale, scale);
 
-      // Clip
-      Path clipPath = CacheForFork.clipPath;
-      clipPath.reset();
-      clipPath.moveTo(group3.left, group3.top);
-      clipPath.lineTo(group3.right, group3.top);
-      clipPath.lineTo(group3.right, group3.bottom);
-      clipPath.lineTo(group3.left, group3.bottom);
-      clipPath.close();
-      canvas.clipPath(clipPath);
-
       // Bezier
       RectF bezierRect = CacheForFork.bezierRect;
-      bezierRect.set(1.11f, -12.73f, 9.58f, 15.32f);
+      bezierRect.set(-12.57f, -12.73f, -3.99f, 16f);
       Path bezierPath = CacheForFork.bezierPath;
       bezierPath.reset();
-      bezierPath.moveTo(1.11f, 15.32f);
-      bezierPath.lineTo(1.11f, 9f);
-      bezierPath.cubicTo(1.11f, 7.06f, 1.74f, 5.17f, 2.9f, 3.62f);
-      bezierPath.lineTo(7.33f, -2.29f);
-      bezierPath.cubicTo(8.49f, -3.84f, 9.58f, -5.73f, 9.58f, -7.67f);
-      bezierPath.lineTo(9.58f, -12.73f);
+      bezierPath.moveTo(-3.99f, 16f);
+      bezierPath.lineTo(-3.99f, 9f);
+      bezierPath.cubicTo(-3.99f, 7.06f, -4.74f, 5.17f, -5.9f, 3.62f);
+      bezierPath.lineTo(-10.32f, -2.29f);
+      bezierPath.cubicTo(-11.48f, -3.84f, -12.57f, -5.73f, -12.57f, -7.67f);
+      bezierPath.lineTo(-12.57f, -12.73f);
 
       paint.reset();
       paint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -990,13 +977,13 @@ public class ManeuversStyleKit {
 
       // Bezier 2
       RectF bezier2Rect = CacheForFork.bezier2Rect;
-      bezier2Rect.set(-5.22f, -2.2f, 0.99f, 15.41f);
+      bezier2Rect.set(-3.99f, -2.2f, 2.23f, 16f);
       Path bezier2Path = CacheForFork.bezier2Path;
       bezier2Path.reset();
-      bezier2Path.moveTo(-5.22f, -2.2f);
-      bezier2Path.lineTo(-0.8f, 3.7f);
-      bezier2Path.cubicTo(0.36f, 5.25f, 0.99f, 7.14f, 0.99f, 9.08f);
-      bezier2Path.lineTo(0.99f, 15.41f);
+      bezier2Path.moveTo(2.23f, -2.2f);
+      bezier2Path.lineTo(-2.2f, 3.7f);
+      bezier2Path.cubicTo(-3.36f, 5.25f, -3.99f, 7.06f, -3.99f, 9f);
+      bezier2Path.lineTo(-3.99f, 16f);
 
       paint.reset();
       paint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -1011,28 +998,28 @@ public class ManeuversStyleKit {
 
       // Bezier 3
       RectF bezier3Rect = CacheForFork.bezier3Rect;
-      bezier3Rect.set(-13.57f, -13.42f, -0f, 0f);
+      bezier3Rect.set(-2.99f, -13.42f, 10.58f, 0f);
       Path bezier3Path = CacheForFork.bezier3Path;
       bezier3Path.reset();
-      bezier3Path.moveTo(-0.39f, -9.17f);
-      bezier3Path.lineTo(-12.54f, -13.42f);
-      bezier3Path.lineTo(-13.56f, -0.59f);
-      bezier3Path.cubicTo(-13.59f, -0.47f, -13.57f, -0.34f, -13.49f, -0.23f);
-      bezier3Path.cubicTo(-13.34f, 0f, -13.03f, 0.07f, -12.8f, -0.08f);
-      bezier3Path.cubicTo(-12.77f, -0.1f, -12.71f, -0.15f, -12.71f, -0.15f);
-      bezier3Path.lineTo(-9.27f, -3.55f);
-      bezier3Path.cubicTo(-9.24f, -3.59f, -9.2f, -3.62f, -9.16f, -3.65f);
-      bezier3Path.cubicTo(-8.93f, -3.8f, -8.48f, -3.53f, -8.34f, -3.31f);
-      bezier3Path.cubicTo(-8.14f, -3.01f, -6.84f, -1f, -6.84f, -1f);
-      bezier3Path.lineTo(-5.16f, -2.09f);
-      bezier3Path.lineTo(-3.48f, -3.19f);
-      bezier3Path.cubicTo(-3.48f, -3.19f, -4.79f, -5.19f, -4.99f, -5.49f);
-      bezier3Path.cubicTo(-5.13f, -5.71f, -5.13f, -6.13f, -4.9f, -6.28f);
-      bezier3Path.cubicTo(-4.86f, -6.3f, -4.85f, -6.37f, -4.8f, -6.39f);
-      bezier3Path.lineTo(-0.32f, -8.19f);
-      bezier3Path.cubicTo(-0.32f, -8.19f, -0.26f, -8.23f, -0.22f, -8.26f);
-      bezier3Path.cubicTo(0.01f, -8.41f, 0.07f, -8.72f, -0.08f, -8.95f);
-      bezier3Path.cubicTo(-0.15f, -9.06f, -0.27f, -9.14f, -0.39f, -9.17f);
+      bezier3Path.moveTo(-2.61f, -9.17f);
+      bezier3Path.lineTo(9.54f, -13.42f);
+      bezier3Path.lineTo(10.57f, -0.59f);
+      bezier3Path.cubicTo(10.59f, -0.47f, 10.57f, -0.34f, 10.5f, -0.23f);
+      bezier3Path.cubicTo(10.35f, 0f, 10.04f, 0.07f, 9.81f, -0.08f);
+      bezier3Path.cubicTo(9.77f, -0.1f, 9.72f, -0.15f, 9.72f, -0.15f);
+      bezier3Path.lineTo(6.27f, -3.55f);
+      bezier3Path.cubicTo(6.24f, -3.59f, 6.2f, -3.62f, 6.16f, -3.65f);
+      bezier3Path.cubicTo(5.94f, -3.8f, 5.49f, -3.53f, 5.35f, -3.31f);
+      bezier3Path.cubicTo(5.15f, -3.01f, 3.85f, -1f, 3.85f, -1f);
+      bezier3Path.lineTo(2.17f, -2.09f);
+      bezier3Path.lineTo(0.49f, -3.19f);
+      bezier3Path.cubicTo(0.49f, -3.19f, 1.8f, -5.19f, 1.99f, -5.49f);
+      bezier3Path.cubicTo(2.14f, -5.71f, 2.13f, -6.13f, 1.91f, -6.28f);
+      bezier3Path.cubicTo(1.87f, -6.3f, 1.85f, -6.37f, 1.81f, -6.39f);
+      bezier3Path.lineTo(-2.68f, -8.19f);
+      bezier3Path.cubicTo(-2.68f, -8.19f, -2.74f, -8.23f, -2.77f, -8.26f);
+      bezier3Path.cubicTo(-3f, -8.41f, -3.06f, -8.72f, -2.91f, -8.95f);
+      bezier3Path.cubicTo(-2.84f, -9.06f, -2.73f, -9.14f, -2.61f, -9.17f);
       bezier3Path.close();
 
       paint.reset();
@@ -1049,11 +1036,9 @@ public class ManeuversStyleKit {
 
   private static class CacheForOfframp {
     private static Paint paint = new Paint();
-    private static RectF originalFrame = new RectF(0f, 0f, 50f, 50f);
+    private static RectF originalFrame = new RectF(0f, 0f, 32f, 32f);
     private static RectF resizedFrame = new RectF();
     private static RectF frame = new RectF();
-    private static RectF group3 = new RectF();
-    private static Path clipPath = new Path();
     private static RectF bezierRect = new RectF();
     private static Path bezierPath = new Path();
     private static RectF bezier2Rect = new RectF();
@@ -1062,27 +1047,27 @@ public class ManeuversStyleKit {
     private static Path bezier3Path = new Path();
   }
 
-  public static void drawOfframp(Canvas canvas, int primaryColor, int secondaryColor, PointF size) {
-    ManeuversStyleKit.drawOfframp(canvas, new RectF(0f, 0f, 50f, 50f), ResizingBehavior.AspectFit, primaryColor, secondaryColor, size);
+  public static void drawOffRamp(Canvas canvas, int primaryColor, int secondaryColor, PointF size) {
+    ManeuversStyleKit.drawOffRamp(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, secondaryColor, size);
   }
 
-  public static void drawOfframp(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, int secondaryColor, PointF size) {
+  public static void drawOffRamp(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, int secondaryColor, PointF size) {
     // General Declarations
     Stack<Matrix> currentTransformation = new Stack<Matrix>();
     currentTransformation.push(new Matrix());
     Paint paint = CacheForOfframp.paint;
 
     // Local Variables
-    float y = size.y / 2f;
     float x = size.x / 2f;
-    float scale = Math.min(size.x / 50f, size.y / 50f);
+    float scale = Math.min(size.x / 32f, size.y / 32f);
+    float y = size.y / 2f;
 
     // Resize to Target Frame
     canvas.save();
     RectF resizedFrame = CacheForOfframp.resizedFrame;
     ManeuversStyleKit.resizingBehaviorApply(resizing, CacheForOfframp.originalFrame, targetFrame, resizedFrame);
     canvas.translate(resizedFrame.left, resizedFrame.top);
-    canvas.scale(resizedFrame.width() / 50f, resizedFrame.height() / 50f);
+    canvas.scale(resizedFrame.width() / 32f, resizedFrame.height() / 32f);
 
     // Frame
     RectF frame = CacheForOfframp.frame;
@@ -1090,32 +1075,20 @@ public class ManeuversStyleKit {
 
     // Group 3
     {
-      RectF group3 = CacheForOfframp.group3;
-      group3.set(-12.38f, -12.23f, 8.02f, 14.52f);
       canvas.save();
-      canvas.translate(x, y);
-      currentTransformation.peek().postTranslate(x, y);
+      canvas.translate(x + 3.38f, y);
+      currentTransformation.peek().postTranslate(x + 3.38f, y);
       canvas.scale(scale, scale);
       currentTransformation.peek().postScale(scale, scale);
 
-      // Clip
-      Path clipPath = CacheForOfframp.clipPath;
-      clipPath.reset();
-      clipPath.moveTo(group3.left, group3.top);
-      clipPath.lineTo(group3.right, group3.top);
-      clipPath.lineTo(group3.right, group3.bottom);
-      clipPath.lineTo(group3.left, group3.bottom);
-      clipPath.close();
-      canvas.clipPath(clipPath);
-
       // Bezier
       RectF bezierRect = CacheForOfframp.bezierRect;
-      bezierRect.set(5.88f, -12.23f, 6.01f, 14.41f);
+      bezierRect.set(-10.38f, -13f, -10.38f, 16f);
       Path bezierPath = CacheForOfframp.bezierPath;
       bezierPath.reset();
-      bezierPath.moveTo(5.88f, 14.41f);
-      bezierPath.lineTo(5.88f, 8.51f);
-      bezierPath.cubicTo(5.88f, 6.7f, 6.01f, -12.23f, 6.01f, -12.23f);
+      bezierPath.moveTo(-10.38f, 16f);
+      bezierPath.lineTo(-10.38f, 7.51f);
+      bezierPath.cubicTo(-10.38f, 5.7f, -10.38f, -13f, -10.38f, -13f);
 
       paint.reset();
       paint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -1130,13 +1103,13 @@ public class ManeuversStyleKit {
 
       // Bezier 2
       RectF bezier2Rect = CacheForOfframp.bezier2Rect;
-      bezier2Rect.set(-3.57f, -3.4f, 5.76f, 14.49f);
+      bezier2Rect.set(-10.38f, -4.4f, -0.81f, 16f);
       Path bezier2Path = CacheForOfframp.bezier2Path;
       bezier2Path.reset();
-      bezier2Path.moveTo(-3.57f, -3.4f);
-      bezier2Path.lineTo(3.97f, 2.79f);
-      bezier2Path.cubicTo(5.13f, 4.34f, 5.76f, 6.23f, 5.76f, 8.17f);
-      bezier2Path.lineTo(5.76f, 14.49f);
+      bezier2Path.moveTo(-0.81f, -4.4f);
+      bezier2Path.lineTo(-8.35f, 1.79f);
+      bezier2Path.cubicTo(-9.51f, 3.34f, -10.38f, 5.23f, -10.38f, 7.17f);
+      bezier2Path.lineTo(-10.38f, 16f);
 
       paint.reset();
       paint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -1151,28 +1124,28 @@ public class ManeuversStyleKit {
 
       // Bezier 3
       RectF bezier3Rect = CacheForOfframp.bezier3Rect;
-      bezier3Rect.set(-12.38f, -11.06f, 1f, 2f);
+      bezier3Rect.set(-5.38f, -12.07f, 8f, 0.99f);
       Path bezier3Path = CacheForOfframp.bezier3Path;
       bezier3Path.reset();
-      bezier3Path.moveTo(0.47f, -10.35f);
-      bezier3Path.lineTo(-12.38f, -11.06f);
-      bezier3Path.lineTo(-9.81f, 1.55f);
-      bezier3Path.cubicTo(-9.8f, 1.67f, -9.74f, 1.79f, -9.64f, 1.87f);
-      bezier3Path.cubicTo(-9.44f, 2.06f, -9.12f, 2.03f, -8.94f, 1.82f);
-      bezier3Path.cubicTo(-8.91f, 1.79f, -8.87f, 1.73f, -8.87f, 1.73f);
-      bezier3Path.lineTo(-6.5f, -2.49f);
-      bezier3Path.cubicTo(-6.48f, -2.53f, -6.46f, -2.58f, -6.43f, -2.61f);
-      bezier3Path.cubicTo(-6.25f, -2.82f, -5.75f, -2.69f, -5.55f, -2.52f);
-      bezier3Path.cubicTo(-5.28f, -2.28f, -3.47f, -0.71f, -3.47f, -0.71f);
-      bezier3Path.lineTo(-2.15f, -2.23f);
-      bezier3Path.lineTo(-0.84f, -3.74f);
-      bezier3Path.cubicTo(-0.84f, -3.74f, -2.66f, -5.31f, -2.93f, -5.54f);
-      bezier3Path.cubicTo(-3.13f, -5.71f, -3.24f, -6.11f, -3.06f, -6.32f);
-      bezier3Path.cubicTo(-3.03f, -6.35f, -3.04f, -6.43f, -3f, -6.45f);
-      bezier3Path.lineTo(0.81f, -9.43f);
-      bezier3Path.cubicTo(0.81f, -9.43f, 0.86f, -9.49f, 0.88f, -9.52f);
-      bezier3Path.cubicTo(1.06f, -9.72f, 1.03f, -10.04f, 0.82f, -10.23f);
-      bezier3Path.cubicTo(0.72f, -10.31f, 0.59f, -10.35f, 0.47f, -10.35f);
+      bezier3Path.moveTo(-4.85f, -11.35f);
+      bezier3Path.lineTo(8f, -12.07f);
+      bezier3Path.lineTo(5.43f, 0.55f);
+      bezier3Path.cubicTo(5.42f, 0.67f, 5.36f, 0.79f, 5.27f, 0.87f);
+      bezier3Path.cubicTo(5.06f, 1.05f, 4.74f, 1.03f, 4.56f, 0.82f);
+      bezier3Path.cubicTo(4.53f, 0.79f, 4.5f, 0.73f, 4.5f, 0.73f);
+      bezier3Path.lineTo(2.12f, -3.49f);
+      bezier3Path.cubicTo(2.11f, -3.54f, 2.08f, -3.58f, 2.05f, -3.62f);
+      bezier3Path.cubicTo(1.87f, -3.82f, 1.37f, -3.69f, 1.17f, -3.52f);
+      bezier3Path.cubicTo(0.9f, -3.28f, -0.91f, -1.71f, -0.91f, -1.71f);
+      bezier3Path.lineTo(-2.23f, -3.23f);
+      bezier3Path.lineTo(-3.54f, -4.74f);
+      bezier3Path.cubicTo(-3.54f, -4.74f, -1.72f, -6.31f, -1.45f, -6.54f);
+      bezier3Path.cubicTo(-1.25f, -6.72f, -1.14f, -7.11f, -1.32f, -7.32f);
+      bezier3Path.cubicTo(-1.35f, -7.36f, -1.34f, -7.43f, -1.38f, -7.45f);
+      bezier3Path.lineTo(-5.19f, -10.43f);
+      bezier3Path.cubicTo(-5.19f, -10.43f, -5.24f, -10.49f, -5.26f, -10.52f);
+      bezier3Path.cubicTo(-5.44f, -10.73f, -5.41f, -11.05f, -5.2f, -11.23f);
+      bezier3Path.cubicTo(-5.1f, -11.31f, -4.97f, -11.36f, -4.85f, -11.35f);
       bezier3Path.close();
 
       paint.reset();
@@ -1189,7 +1162,7 @@ public class ManeuversStyleKit {
 
   private static class CacheForArriveright {
     private static Paint paint = new Paint();
-    private static RectF originalFrame = new RectF(0f, 0f, 50f, 50f);
+    private static RectF originalFrame = new RectF(0f, 0f, 32f, 32f);
     private static RectF resizedFrame = new RectF();
     private static RectF frame = new RectF();
     private static RectF bezierRect = new RectF();
@@ -1203,7 +1176,7 @@ public class ManeuversStyleKit {
   }
 
   public static void drawArriveRight(Canvas canvas, int primaryColor, PointF size) {
-    ManeuversStyleKit.drawArriveRight(canvas, new RectF(0f, 0f, 50f, 50f), ResizingBehavior.AspectFit, primaryColor, size);
+    ManeuversStyleKit.drawArriveRight(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, size);
   }
 
   public static void drawArriveRight(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, PointF size) {
@@ -1213,16 +1186,16 @@ public class ManeuversStyleKit {
     Paint paint = CacheForArriveright.paint;
 
     // Local Variables
-    float y = size.y / 2f;
     float x = size.x / 2f;
-    float scale = Math.min(size.x / 50f, size.y / 50f);
+    float scale = Math.min(size.x / 32f, size.y / 32f);
+    float y = size.y / 2f;
 
     // Resize to Target Frame
     canvas.save();
     RectF resizedFrame = CacheForArriveright.resizedFrame;
     ManeuversStyleKit.resizingBehaviorApply(resizing, CacheForArriveright.originalFrame, targetFrame, resizedFrame);
     canvas.translate(resizedFrame.left, resizedFrame.top);
-    canvas.scale(resizedFrame.width() / 50f, resizedFrame.height() / 50f);
+    canvas.scale(resizedFrame.width() / 32f, resizedFrame.height() / 32f);
 
     // Frame
     RectF frame = CacheForArriveright.frame;
@@ -1238,11 +1211,11 @@ public class ManeuversStyleKit {
 
       // Bezier
       RectF bezierRect = CacheForArriveright.bezierRect;
-      bezierRect.set(-0.99f, 5.6f, -0.99f, 15.6f);
+      bezierRect.set(-0.99f, 5.6f, -0.99f, 16f);
       Path bezierPath = CacheForArriveright.bezierPath;
       bezierPath.reset();
       bezierPath.moveTo(-0.99f, 5.6f);
-      bezierPath.lineTo(-0.99f, 15.6f);
+      bezierPath.lineTo(-0.99f, 16f);
 
       paint.reset();
       paint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -1322,7 +1295,7 @@ public class ManeuversStyleKit {
 
   private static class CacheForRoundabout {
     private static Paint paint = new Paint();
-    private static RectF originalFrame = new RectF(0f, 0f, 50f, 50f);
+    private static RectF originalFrame = new RectF(0f, 0f, 32f, 32f);
     private static RectF resizedFrame = new RectF();
     private static RectF frame = new RectF();
     private static RectF bezierRect = new RectF();
@@ -1338,29 +1311,29 @@ public class ManeuversStyleKit {
   }
 
   public static void drawRoundabout(Canvas canvas, int primaryColor, int secondaryColor, PointF size, float roundabout_angle) {
-    ManeuversStyleKit.drawRoundabout(canvas, new RectF(0f, 0f, 50f, 50f), ResizingBehavior.AspectFit, primaryColor, secondaryColor, size, roundabout_angle);
+    ManeuversStyleKit.drawRoundabout(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, secondaryColor, size, roundabout_angle, 6.5f);
   }
 
-  public static void drawRoundabout(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, int secondaryColor, PointF size, float roundabout_angle) {
+  public static void drawRoundabout(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, int secondaryColor, PointF size, float roundabout_angle, float roundabout_radius) {
     // General Declarations
     Stack<Matrix> currentTransformation = new Stack<Matrix>();
     currentTransformation.push(new Matrix());
     Paint paint = CacheForRoundabout.paint;
 
     // Local Variables
-    float roundabout_percentage = roundabout_angle / 360f * 2f * (float) Math.PI * 15f / 2f;
-    float scale = Math.min(size.x / 50f, size.y / 50f);
-    float roundabout_arrow_height = scale * Math.max(4f, (float) Math.cos((roundabout_angle - 180f) * (float) Math.PI / 180f) * 17f - 4f);
-    float roundabout_arrow_width = scale * 0.6f * (float) Math.sin((roundabout_angle - 180f) * (float) Math.PI / 180f) * 17f;
+    float roundabout_percentage = roundabout_angle / 360f * 2f * (float) Math.PI * roundabout_radius;
+    float scale = Math.min(size.x / 32f, size.y / 32f);
+    float roundabout_arrow_height = scale * (float) Math.cos((roundabout_angle - 180f) * (float) Math.PI / 180f) * 20f;
+    float roundabout_y = size.y - scale * (roundabout_radius * 2f + 4f) + 1f + roundabout_arrow_height / 4f;
+    float roundabout_arrow_width = scale * 0.75f * (float) Math.sin((roundabout_angle - 180f) * (float) Math.PI / 180f) * 16f;
     float roundabout_x = size.x / 2f + roundabout_arrow_width / 2f;
-    float roundabout_y = size.y / 4f + (scale * (7.5f * 2f + 4f) + roundabout_arrow_height) / 2f;
 
     // Resize to Target Frame
     canvas.save();
     RectF resizedFrame = CacheForRoundabout.resizedFrame;
     ManeuversStyleKit.resizingBehaviorApply(resizing, CacheForRoundabout.originalFrame, targetFrame, resizedFrame);
     canvas.translate(resizedFrame.left, resizedFrame.top);
-    canvas.scale(resizedFrame.width() / 50f, resizedFrame.height() / 50f);
+    canvas.scale(resizedFrame.width() / 32f, resizedFrame.height() / 32f);
 
     // Frame
     RectF frame = CacheForRoundabout.frame;
@@ -1369,25 +1342,25 @@ public class ManeuversStyleKit {
     // Group 3
     {
       canvas.save();
-      canvas.translate(roundabout_x, roundabout_y);
-      currentTransformation.peek().postTranslate(roundabout_x, roundabout_y);
+      canvas.translate(roundabout_x - 0f, roundabout_y - 1f);
+      currentTransformation.peek().postTranslate(roundabout_x - 0f, roundabout_y - 1f);
       canvas.scale(scale, scale);
       currentTransformation.peek().postScale(scale, scale);
 
       // Bezier
       RectF bezierRect = CacheForRoundabout.bezierRect;
-      bezierRect.set(-7.5f, -7.5f, 7.5f, 7.5f);
+      bezierRect.set(-6.5f, -5.5f, 6.5f, 7.5f);
       Path bezierPath = CacheForRoundabout.bezierPath;
       bezierPath.reset();
-      bezierPath.moveTo(7.5f, 0f);
-      bezierPath.cubicTo(7.5f, 2.07f, 6.66f, 3.94f, 5.31f, 5.3f);
-      bezierPath.cubicTo(3.95f, 6.66f, 2.08f, 7.5f, 0f, 7.5f);
-      bezierPath.cubicTo(-2.07f, 7.5f, -3.94f, 6.67f, -5.29f, 5.32f);
-      bezierPath.cubicTo(-6.66f, 3.96f, -7.5f, 2.08f, -7.5f, 0f);
-      bezierPath.cubicTo(-7.5f, -2.07f, -6.66f, -3.95f, -5.3f, -5.3f);
-      bezierPath.cubicTo(-3.95f, -6.66f, -2.07f, -7.5f, 0f, -7.5f);
-      bezierPath.cubicTo(2.07f, -7.5f, 3.95f, -6.66f, 5.3f, -5.3f);
-      bezierPath.cubicTo(6.66f, -3.95f, 7.5f, -2.07f, 7.5f, 0f);
+      bezierPath.moveTo(6.5f, 1f);
+      bezierPath.cubicTo(6.5f, 2.8f, 5.78f, 4.42f, 4.6f, 5.59f);
+      bezierPath.cubicTo(3.43f, 6.77f, 1.8f, 7.5f, 0f, 7.5f);
+      bezierPath.cubicTo(-1.79f, 7.5f, -3.41f, 6.78f, -4.59f, 5.61f);
+      bezierPath.cubicTo(-5.77f, 4.43f, -6.5f, 2.8f, -6.5f, 1f);
+      bezierPath.cubicTo(-6.5f, -0.79f, -5.77f, -2.42f, -4.6f, -3.59f);
+      bezierPath.cubicTo(-3.42f, -4.77f, -1.79f, -5.5f, 0f, -5.5f);
+      bezierPath.cubicTo(1.79f, -5.5f, 3.42f, -4.77f, 4.6f, -3.59f);
+      bezierPath.cubicTo(5.77f, -2.42f, 6.5f, -0.79f, 6.5f, 1f);
       bezierPath.close();
 
       paint.reset();
@@ -1403,7 +1376,7 @@ public class ManeuversStyleKit {
 
       // Rectangle 2
       RectF rectangle2Rect = CacheForRoundabout.rectangle2Rect;
-      rectangle2Rect.set(-1.97f, 5.5f, 2.03f, 15.5f);
+      rectangle2Rect.set(-1.97f, 5.5f, 2.03f, 17.5f);
       Path rectangle2Path = CacheForRoundabout.rectangle2Path;
       rectangle2Path.reset();
       float rectangle2CornerRadius = Math.min(Math.min(rectangle2Rect.width(), rectangle2Rect.height()) / 2f, 1f);
@@ -1424,34 +1397,34 @@ public class ManeuversStyleKit {
       {
         // Bezier 2
         canvas.save();
+        canvas.translate(0f, 1f);
+        currentTransformation.peek().postTranslate(0f, 1f);
         canvas.rotate(-(roundabout_angle + 90f));
         currentTransformation.peek().postRotate(-(roundabout_angle + 90f));
         RectF bezier2Rect = CacheForRoundabout.bezier2Rect;
-        bezier2Rect.set(-22.47f, -7.99f, -5.47f, 8.01f);
+        bezier2Rect.set(-20.5f, -7.99f, -4.5f, 8.01f);
         Path bezier2Path = CacheForRoundabout.bezier2Path;
         bezier2Path.reset();
-        bezier2Path.moveTo(-11.44f, -7.49f);
-        bezier2Path.cubicTo(-11.44f, -7.45f, -11.46f, -7.38f, -11.46f, -7.38f);
-        bezier2Path.cubicTo(-11.54f, -6.97f, -12.42f, -2.64f, -12.42f, -2.64f);
-        bezier2Path.cubicTo(-12.44f, -2.59f, -12.44f, -2.54f, -12.44f, -2.49f);
-        bezier2Path.cubicTo(-12.44f, -2.25f, -12.06f, -2.03f, -11.79f, -2f);
-        bezier2Path.lineTo(-6.47f, -2f);
-        bezier2Path.cubicTo(-5.92f, -2f, -5.47f, -1.55f, -5.47f, -1f);
-        bezier2Path.cubicTo(-5.47f, -1f, -5.47f, -0.15f, -5.47f, 0.44f);
-        bezier2Path.cubicTo(-5.47f, 0.76f, -5.47f, 1f, -5.47f, 1f);
-        bezier2Path.cubicTo(-5.47f, 1.55f, -5.92f, 2f, -6.47f, 2f);
-        bezier2Path.lineTo(-8.96f, 2f);
-        bezier2Path.cubicTo(-8.96f, 2.01f, -11.35f, 2.01f, -11.72f, 2.01f);
-        bezier2Path.cubicTo(-11.98f, 2.01f, -12.32f, 2.24f, -12.32f, 2.51f);
-        bezier2Path.cubicTo(-12.32f, 2.56f, -12.38f, 2.6f, -12.36f, 2.65f);
-        bezier2Path.lineTo(-11.42f, 7.39f);
-        bezier2Path.cubicTo(-11.42f, 7.39f, -11.43f, 7.47f, -11.43f, 7.51f);
-        bezier2Path.cubicTo(-11.43f, 7.78f, -11.66f, 8.01f, -11.94f, 8.01f);
-        bezier2Path.cubicTo(-12.07f, 8.01f, -12.19f, 7.95f, -12.28f, 7.87f);
-        bezier2Path.lineTo(-22.47f, 0.01f);
-        bezier2Path.lineTo(-12.28f, -7.86f);
-        bezier2Path.cubicTo(-12.19f, -7.94f, -12.08f, -7.99f, -11.94f, -7.99f);
-        bezier2Path.cubicTo(-11.67f, -7.99f, -11.44f, -7.77f, -11.44f, -7.49f);
+        bezier2Path.moveTo(-9.47f, -7.49f);
+        bezier2Path.cubicTo(-9.47f, -7.45f, -9.49f, -7.38f, -9.49f, -7.38f);
+        bezier2Path.cubicTo(-9.57f, -6.97f, -10.45f, -2.64f, -10.45f, -2.64f);
+        bezier2Path.cubicTo(-10.47f, -2.59f, -10.47f, -2.54f, -10.47f, -2.49f);
+        bezier2Path.cubicTo(-10.47f, -2.25f, -10.09f, -2.03f, -9.82f, -2f);
+        bezier2Path.lineTo(-5.5f, -2f);
+        bezier2Path.cubicTo(-4.95f, -2f, -4.5f, -1.55f, -4.5f, -1f);
+        bezier2Path.lineTo(-4.5f, 1f);
+        bezier2Path.cubicTo(-4.5f, 1.55f, -4.95f, 2f, -5.5f, 2f);
+        bezier2Path.cubicTo(-5.5f, 2f, -9.38f, 2.01f, -9.75f, 2.01f);
+        bezier2Path.cubicTo(-10.01f, 2.01f, -10.35f, 2.24f, -10.35f, 2.51f);
+        bezier2Path.cubicTo(-10.35f, 2.56f, -10.41f, 2.6f, -10.39f, 2.65f);
+        bezier2Path.lineTo(-9.46f, 7.39f);
+        bezier2Path.cubicTo(-9.46f, 7.39f, -9.46f, 7.47f, -9.46f, 7.51f);
+        bezier2Path.cubicTo(-9.46f, 7.78f, -9.69f, 8.01f, -9.97f, 8.01f);
+        bezier2Path.cubicTo(-10.1f, 8.01f, -10.22f, 7.95f, -10.31f, 7.87f);
+        bezier2Path.lineTo(-20.5f, 0.01f);
+        bezier2Path.lineTo(-10.31f, -7.86f);
+        bezier2Path.cubicTo(-10.22f, -7.94f, -10.11f, -7.99f, -9.97f, -7.99f);
+        bezier2Path.cubicTo(-9.7f, -7.99f, -9.47f, -7.77f, -9.47f, -7.49f);
         bezier2Path.close();
 
         paint.reset();
@@ -1464,23 +1437,25 @@ public class ManeuversStyleKit {
 
       // Bezier 3
       canvas.save();
+      canvas.translate(1f, 2f);
+      currentTransformation.peek().postTranslate(1f, 2f);
       canvas.rotate(-90f);
       currentTransformation.peek().postRotate(-90f);
       canvas.scale(-1f, 1f);
       currentTransformation.peek().postScale(-1f, 1f);
       RectF bezier3Rect = CacheForRoundabout.bezier3Rect;
-      bezier3Rect.set(-7.5f, -7.5f, 7.5f, 7.5f);
+      bezier3Rect.set(-7.5f, -7.5f, 5.5f, 5.5f);
       Path bezier3Path = CacheForRoundabout.bezier3Path;
       bezier3Path.reset();
-      bezier3Path.moveTo(7.5f, 0f);
-      bezier3Path.cubicTo(7.5f, 2.07f, 6.66f, 3.94f, 5.31f, 5.3f);
-      bezier3Path.cubicTo(3.95f, 6.66f, 2.08f, 7.5f, 0f, 7.5f);
-      bezier3Path.cubicTo(-2.07f, 7.5f, -3.94f, 6.67f, -5.29f, 5.32f);
-      bezier3Path.cubicTo(-6.66f, 3.96f, -7.5f, 2.08f, -7.5f, 0f);
-      bezier3Path.cubicTo(-7.5f, -2.07f, -6.66f, -3.95f, -5.3f, -5.3f);
-      bezier3Path.cubicTo(-3.95f, -6.66f, -2.07f, -7.5f, 0f, -7.5f);
-      bezier3Path.cubicTo(2.07f, -7.5f, 3.95f, -6.66f, 5.3f, -5.3f);
-      bezier3Path.cubicTo(6.66f, -3.95f, 7.5f, -2.07f, 7.5f, 0f);
+      bezier3Path.moveTo(5.5f, -1f);
+      bezier3Path.cubicTo(5.5f, 0.79f, 4.78f, 2.41f, 3.6f, 3.59f);
+      bezier3Path.cubicTo(2.43f, 4.77f, 0.8f, 5.5f, -1f, 5.5f);
+      bezier3Path.cubicTo(-2.79f, 5.5f, -4.41f, 4.78f, -5.59f, 3.61f);
+      bezier3Path.cubicTo(-6.77f, 2.43f, -7.5f, 0.8f, -7.5f, -1f);
+      bezier3Path.cubicTo(-7.5f, -2.79f, -6.77f, -4.42f, -5.6f, -5.6f);
+      bezier3Path.cubicTo(-4.42f, -6.77f, -2.79f, -7.5f, -1f, -7.5f);
+      bezier3Path.cubicTo(0.79f, -7.5f, 2.42f, -6.77f, 3.6f, -5.6f);
+      bezier3Path.cubicTo(4.77f, -4.42f, 5.5f, -2.79f, 5.5f, -1f);
       bezier3Path.close();
 
       paint.reset();
@@ -1504,7 +1479,7 @@ public class ManeuversStyleKit {
 
   private static class CacheForArriveright2 {
     private static Paint paint = new Paint();
-    private static RectF originalFrame = new RectF(0f, 0f, 50f, 50f);
+    private static RectF originalFrame = new RectF(0f, 0f, 32f, 32f);
     private static RectF resizedFrame = new RectF();
     private static RectF frame = new RectF();
     private static RectF bezierRect = new RectF();
@@ -1518,7 +1493,7 @@ public class ManeuversStyleKit {
   }
 
   public static void drawArriveright2(Canvas canvas, int primaryColor, PointF size) {
-    ManeuversStyleKit.drawArriveright2(canvas, new RectF(0f, 0f, 50f, 50f), ResizingBehavior.AspectFit, primaryColor, size);
+    ManeuversStyleKit.drawArriveright2(canvas, new RectF(0f, 0f, 32f, 32f), ResizingBehavior.AspectFit, primaryColor, size);
   }
 
   public static void drawArriveright2(Canvas canvas, RectF targetFrame, ResizingBehavior resizing, int primaryColor, PointF size) {
@@ -1528,16 +1503,16 @@ public class ManeuversStyleKit {
     Paint paint = CacheForArriveright2.paint;
 
     // Local Variables
-    float y = size.y / 2f;
     float x = size.x / 2f;
-    float scale = Math.min(size.x / 50f, size.y / 50f);
+    float scale = Math.min(size.x / 32f, size.y / 32f);
+    float y = size.y / 2f;
 
     // Resize to Target Frame
     canvas.save();
     RectF resizedFrame = CacheForArriveright2.resizedFrame;
     ManeuversStyleKit.resizingBehaviorApply(resizing, CacheForArriveright2.originalFrame, targetFrame, resizedFrame);
     canvas.translate(resizedFrame.left, resizedFrame.top);
-    canvas.scale(resizedFrame.width() / 50f, resizedFrame.height() / 50f);
+    canvas.scale(resizedFrame.width() / 32f, resizedFrame.height() / 32f);
 
     // Frame
     RectF frame = CacheForArriveright2.frame;
@@ -1553,11 +1528,11 @@ public class ManeuversStyleKit {
 
       // Bezier
       RectF bezierRect = CacheForArriveright2.bezierRect;
-      bezierRect.set(0.06f, 6.6f, 0.06f, 16.6f);
+      bezierRect.set(0.06f, 6.6f, 0.06f, 16f);
       Path bezierPath = CacheForArriveright2.bezierPath;
       bezierPath.reset();
       bezierPath.moveTo(0.06f, 6.6f);
-      bezierPath.lineTo(0.06f, 16.6f);
+      bezierPath.lineTo(0.06f, 16f);
 
       paint.reset();
       paint.setFlags(Paint.ANTI_ALIAS_FLAG);
