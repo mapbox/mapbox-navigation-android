@@ -32,7 +32,7 @@ class TurnLaneMap {
 
     // Left / Straight valid - maneuver modifier left
     turnLaneMap.put(TURN_LANE_INDICATION_LEFT + TURN_LANE_INDICATION_STRAIGHT
-        + STEP_MANEUVER_MODIFIER_LEFT, R.drawable.lane_right_only);
+      + STEP_MANEUVER_MODIFIER_LEFT, R.drawable.lane_right_only);
     turnLaneMap.put(TURN_LANE_INDICATION_SHARP_LEFT + TURN_LANE_INDICATION_STRAIGHT
       + STEP_MANEUVER_MODIFIER_LEFT, R.drawable.lane_right_only);
     turnLaneMap.put(TURN_LANE_INDICATION_SLIGHT_LEFT + TURN_LANE_INDICATION_STRAIGHT

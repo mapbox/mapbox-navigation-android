@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import com.mapbox.directions.v5.models.LegStep;
 import com.mapbox.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.ui.v5.instruction.TextInstruction;
+import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionText;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
@@ -43,12 +43,12 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   public void onBindViewHolder(InstructionViewHolder holder, int position) {
     if (stepList.get(position) != null) {
       LegStep step = stepList.get(position);
-      TextInstruction textInstruction = new TextInstruction(stepList.get(position));
-      updatePrimaryText(holder, textInstruction.getPrimaryText());
-      updateSecondaryText(holder, textInstruction.getSecondaryText());
+      InstructionText instructionText = new InstructionText(stepList.get(position));
+      updatePrimaryText(holder, instructionText.getPrimaryText());
+      updateSecondaryText(holder, instructionText.getSecondaryText());
       updateManeuverView(holder, step);
       holder.stepDistanceText.setText(DistanceUtils
-        .distanceFormatterBold(textInstruction.getStepDistance(), decimalFormat));
+        .distanceFormatterBold(instructionText.getStepDistance(), decimalFormat));
     }
   }
 
@@ -135,7 +135,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   }
 
   private boolean newStep(RouteProgress routeProgress) {
-    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().stepIndex());
+    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress());
     currentStep = routeProgress.currentLegProgress().currentStep();
     currentUpcomingStep = routeProgress.currentLegProgress().upComingStep();
     return newStep;

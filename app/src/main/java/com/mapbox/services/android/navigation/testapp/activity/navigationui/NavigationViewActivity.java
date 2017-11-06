@@ -25,7 +25,6 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.exceptions.InvalidLatLngBoundsException;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
-import com.mapbox.mapboxsdk.location.LocationSource;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -38,6 +37,7 @@ import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
+import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +94,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     });
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  @SuppressWarnings( {"MissingPermission"})
   @Override
   protected void onStart() {
     super.onStart();
@@ -104,7 +104,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  @SuppressWarnings( {"MissingPermission"})
   @Override
   public void onResume() {
     super.onResume();
@@ -182,7 +182,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  @SuppressWarnings( {"MissingPermission"})
   @Override
   public void onConnected() {
     locationEngine.requestLocationUpdates();
@@ -214,9 +214,9 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     Timber.e(throwable.getMessage());
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  @SuppressWarnings( {"MissingPermission"})
   private void initLocationEngine() {
-    locationEngine = new LocationSource(this);
+    locationEngine = new LostLocationEngine(this);
     locationEngine.setPriority(HIGH_ACCURACY);
     locationEngine.setInterval(0);
     locationEngine.setFastestInterval(1000);
@@ -230,7 +230,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  @SuppressWarnings( {"MissingPermission"})
   private void initLocationLayer() {
     locationLayer = new LocationLayerPlugin(mapView, mapboxMap, locationEngine);
     locationLayer.setLocationLayerEnabled(LocationLayerMode.COMPASS);
