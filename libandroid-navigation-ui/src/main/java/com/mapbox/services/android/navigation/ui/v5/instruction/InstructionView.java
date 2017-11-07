@@ -130,6 +130,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   @Override
   public void onFeedbackSelected(FeedbackItem feedbackItem) {
     navigationViewModel.updateFeedback(feedbackItem);
+    alertView.show(NavigationConstants.FEEDBACK_SUBMITTED, 3000, false);
   }
 
   @Override
@@ -171,9 +172,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
           if (isRerouting) {
             showRerouteState();
             instructionListAdapter.clear();
-            showAlertView();
           } else {
             hideRerouteState();
+            showAlertView();
           }
         }
       }
@@ -434,7 +435,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     handler.postDelayed(new Runnable() {
       @Override
       public void run() {
-        alertView.show(NavigationConstants.REPORT_PROBLEM, NavigationConstants.ALERT_VIEW_PROBLEM_DURATION);
+        alertView.show(NavigationConstants.REPORT_PROBLEM,
+          NavigationConstants.ALERT_VIEW_PROBLEM_DURATION, true);
       }
     }, 3000);
   }

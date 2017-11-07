@@ -63,10 +63,11 @@ public class AlertView extends CardView {
    * If a non-null duration is passed, a countdown loading bar will show to
    * indicate the View will be automatically dismissed if not clicked.
    *
-   * @param alertText text to be shown in the View
-   * @param duration  in milliseconds, how long the view will be shown
+   * @param alertText   text to be shown in the View
+   * @param duration    in milliseconds, how long the view will be shown
+   * @param showLoading true if should show the progress bar, false if not
    */
-  public void show(String alertText, long duration) {
+  public void show(String alertText, long duration, boolean showLoading) {
     this.alertText.setText(alertText);
     alertProgressBar.setProgress(alertProgressBar.getMax());
     // Start animation based on current visibility
@@ -78,6 +79,8 @@ public class AlertView extends CardView {
       if (duration > 0L) {
         startCountdown(duration);
       }
+      // Show / hide loading
+      showLoading(showLoading);
     }
   }
 
@@ -162,5 +165,9 @@ public class AlertView extends CardView {
       }
     });
     countdownAnimation.start();
+  }
+
+  private void showLoading(boolean showLoading) {
+    alertProgressBar.setVisibility(showLoading ? VISIBLE : INVISIBLE);
   }
 }
