@@ -20,7 +20,6 @@ import org.robolectric.annotation.Config;
 import java.io.IOException;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class)
 public class StepMilestoneTest extends BaseTest {
 
   // Fixtures
