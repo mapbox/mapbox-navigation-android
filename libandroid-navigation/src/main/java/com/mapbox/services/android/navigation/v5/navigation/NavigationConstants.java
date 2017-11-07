@@ -97,6 +97,21 @@ public final class NavigationConstants {
 
   public static final double MINIMUM_DISTANCE_BEFORE_REROUTING = 50;
 
+  /**
+   * Text to be shown in AlertView during off-route scenario.
+   */
+  public static final String REPORT_PROBLEM = "Report Problem";
+
+  /**
+   * Duration in which the AlertView is shown with the "Report Problem" text.
+   */
+  public static final long ALERT_VIEW_PROBLEM_DURATION = 10000;
+
+  /**
+   * Duration in which the feedback BottomSheet is shown.
+   */
+  public static final long FEEDBACK_BOTTOM_SHEET_DURATION = 10000;
+
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat";
   public static final String NAVIGATION_VIEW_ORIGIN_LNG_KEY = "origin_long";
