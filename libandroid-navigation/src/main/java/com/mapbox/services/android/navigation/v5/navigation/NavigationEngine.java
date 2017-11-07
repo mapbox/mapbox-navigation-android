@@ -24,7 +24,6 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.legDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.routeDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.stepDistanceRemaining;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.userSnappedToRoutePosition;
 import static com.mapbox.services.constants.Constants.PRECISION_6;
 
 /**
@@ -34,9 +33,7 @@ import static com.mapbox.services.constants.Constants.PRECISION_6;
 class NavigationEngine extends HandlerThread implements Handler.Callback {
 
   private static final String THREAD_NAME = "NavThread";
-  private RouteProgress previousRouteProgress;
-  private List<Point> stepPositions;
-  private NavigationIndices indices;
+  private RouteProgress routeProgress;
   private Handler responseHandler;
   private Handler workerHandler;
   private Callback callback;
@@ -45,7 +42,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     super(THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
     this.responseHandler = responseHandler;
     this.callback = callback;
-    indices = NavigationIndices.create(0, 0);
   }
 
   void queueTask(int msgIdentifier, NewLocationModel newLocationModel) {
@@ -64,18 +60,16 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
   }
 
   private void handleRequest(final NewLocationModel newLocationModel) {
-    final RouteProgress routeProgress = generateNewRouteProgress(
+    generateNewRouteProgress(
       newLocationModel.mapboxNavigation(), newLocationModel.location(),
       newLocationModel.recentDistancesFromManeuverInMeters());
     final List<Milestone> milestones = checkMilestones(
-      previousRouteProgress, routeProgress, newLocationModel.mapboxNavigation());
+      this.routeProgress, routeProgress, newLocationModel.mapboxNavigation());
     final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress);
     final Location location = !userOffRoute && newLocationModel.mapboxNavigation().options().snapToRoute()
       ? getSnappedLocation(newLocationModel.mapboxNavigation(), newLocationModel.location(),
-      routeProgress, stepPositions)
+      routeProgress)
       : newLocationModel.location();
-
-    previousRouteProgress = routeProgress;
 
     responseHandler.post(new Runnable() {
       @Override
@@ -87,65 +81,64 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     });
   }
 
-  private RouteProgress generateNewRouteProgress(MapboxNavigation mapboxNavigation, Location location,
-                                                 RingBuffer recentDistances) {
+  private void generateNewRouteProgress(MapboxNavigation mapboxNavigation, Location location,
+                                        RingBuffer recentDistances) {
     DirectionsRoute directionsRoute = mapboxNavigation.getRoute();
     MapboxNavigationOptions options = mapboxNavigation.options();
 
-    if (RouteUtils.isNewRoute(previousRouteProgress, directionsRoute)) {
-      // Decode the first steps geometry and hold onto the resulting Position objects till the users
-      // on the next step. Indices are both 0 since the user just started on the new route.
-      stepPositions = PolylineUtils.decode(
-        directionsRoute.legs().get(0).steps().get(0).geometry(), PRECISION_6);
-
-      previousRouteProgress = RouteProgress.builder()
+    if (RouteUtils.isNewRoute(routeProgress, directionsRoute)) {
+      routeProgress = RouteProgress.builder()
         .stepDistanceRemaining(directionsRoute.legs().get(0).steps().get(0).distance())
         .legDistanceRemaining(directionsRoute.legs().get(0).distance())
         .distanceRemaining(directionsRoute.distance())
         .directionsRoute(directionsRoute)
+        .currentStepCoordinates(PolylineUtils.decode(
+          directionsRoute.legs().get(0).steps().get(0).geometry(), PRECISION_6))
         .stepIndex(0)
         .legIndex(0)
         .build();
 
-      indices = NavigationIndices.create(0, 0);
+      if (routeProgress.currentLegProgress().upComingStep() != null) {
+        routeProgress = routeProgress.toBuilder().upcomingStepCoordinates(PolylineUtils.decode(
+          routeProgress.currentLegProgress().upComingStep().geometry(), PRECISION_6)).build();
+      }
     }
 
-    Point snappedPosition = userSnappedToRoutePosition(location, stepPositions);
-    double stepDistanceRemaining = stepDistanceRemaining(
-      snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute, stepPositions);
-    double legDistanceRemaining = legDistanceRemaining(
-      stepDistanceRemaining, indices.legIndex(), indices.stepIndex(), directionsRoute);
-    double routeDistanceRemaining = routeDistanceRemaining(
-      legDistanceRemaining, indices.legIndex(), directionsRoute);
+    Point snappedPoint = RouteUtils.userSnappedToRoutePosition(location, routeProgress);
+    double stepDistanceRemaining = stepDistanceRemaining(snappedPoint, routeProgress);
 
-    if (bearingMatchesManeuverFinalHeading(location, previousRouteProgress, options.maxTurnCompletionOffset())
-      && stepDistanceRemaining < options.maneuverZoneRadius()) {
+    // User is on a new step
+    if (bearingMatchesManeuverFinalHeading(location, routeProgress,
+      options.maxTurnCompletionOffset()) && stepDistanceRemaining < options.maneuverZoneRadius()) {
+
       // First increase the indices and then update the majority of information for the new
       // routeProgress.
-      indices = increaseIndex(previousRouteProgress, indices);
-      stepPositions = PolylineUtils.decode(
-        directionsRoute.legs().get(
-          indices.legIndex()).steps().get(indices.stepIndex()).geometry(), PRECISION_6);
-      snappedPosition = userSnappedToRoutePosition(location, stepPositions);
-      stepDistanceRemaining = stepDistanceRemaining(
-        snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute, stepPositions);
-      legDistanceRemaining = legDistanceRemaining(
-        stepDistanceRemaining, indices.legIndex(), indices.stepIndex(), directionsRoute);
-      routeDistanceRemaining = routeDistanceRemaining(
-        legDistanceRemaining, indices.legIndex(), directionsRoute);
+      NavigationIndices indices = increaseIndex(routeProgress);
+
+      routeProgress = routeProgress.toBuilder()
+        .legIndex(indices.legIndex())
+        .stepIndex(indices.stepIndex())
+        .build();
+
+      routeProgress = routeProgress.toBuilder()
+        .priorStepCoordinates(routeProgress.currentStepCoordinates())
+        .currentStepCoordinates(routeProgress.upcomingStepCoordinates())
+        .build();
+
+      // recalculate the stepDistance value since it has changed
+      stepDistanceRemaining = stepDistanceRemaining(snappedPoint, routeProgress);
 
       // Remove all distance values from recentDistancesFromManeuverInMeters
       recentDistances.clear();
     }
 
-    // Create a RouteProgress.create object using the latest user location
-    return RouteProgress.builder()
+    double legDistanceRemaining = legDistanceRemaining(stepDistanceRemaining, routeProgress);
+    double routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, routeProgress);
+
+    routeProgress = routeProgress.toBuilder()
       .stepDistanceRemaining(stepDistanceRemaining)
       .legDistanceRemaining(legDistanceRemaining)
       .distanceRemaining(routeDistanceRemaining)
-      .directionsRoute(directionsRoute)
-      .stepIndex(indices.stepIndex())
-      .legIndex(indices.legIndex())
       .build();
   }
 
