@@ -100,8 +100,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
           Trigger.gte(TriggerProperty.STEP_DISTANCE_TRAVELED_METERS, 75)
         )
       ).build());
-
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
   }
 
   @OnClick(R.id.startRouteButton)

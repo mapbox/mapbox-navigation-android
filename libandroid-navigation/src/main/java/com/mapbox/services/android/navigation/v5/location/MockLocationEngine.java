@@ -2,12 +2,12 @@ package com.mapbox.services.android.navigation.v5.location;
 
 import android.location.Location;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
+
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.constants.Constants;
@@ -248,6 +248,9 @@ public class MockLocationEngine extends LocationEngine {
   }
 
   public void moveToLocation(Point point) {
+    if (location == null) {
+      return;
+    }
     List<Point> pointList = new ArrayList<>();
     pointList.add(Point.fromLngLat(location.getLongitude(), location.getLatitude()));
     pointList.add(point);
@@ -352,7 +355,7 @@ public class MockLocationEngine extends LocationEngine {
     }
 
     location.setAccuracy(3f);
-    location.setTime(SystemClock.elapsedRealtime());
+    location.setTime(System.currentTimeMillis());
 
     return location;
   }

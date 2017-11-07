@@ -4,7 +4,7 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 
 import com.mapbox.turf.TurfConstants;
-import com.mapbox.turf.TurfHelpers;
+import com.mapbox.turf.TurfConversion;
 
 import java.text.DecimalFormat;
 import java.util.Locale;
@@ -27,7 +27,7 @@ public class DistanceUtils {
   }
 
   private static SpannableStringBuilder roundByFiftyFeet(double distance) {
-    distance = TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET);
+    distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET);
     int roundedNumber = ((int) Math.round(distance)) / 50 * 50;
 
     SpannableStringBuilder formattedString
@@ -39,7 +39,7 @@ public class DistanceUtils {
   }
 
   private static SpannableStringBuilder roundOneDecimalPlace(double distance, DecimalFormat decimalFormat) {
-    distance = TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES);
+    distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES);
     double roundedNumber = (distance / 100 * 100);
     SpannableStringBuilder formattedString = new SpannableStringBuilder(String.format(Locale.getDefault(),
       MILE_FORMAT, decimalFormat.format(roundedNumber)));
@@ -49,12 +49,12 @@ public class DistanceUtils {
   }
 
   private static boolean mediumDistance(double distance) {
-    return TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES) < 10
-      && TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET) > 401;
+    return TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES) < 10
+      && TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET) > 401;
   }
 
   private static SpannableStringBuilder roundToNearestMile(double distance) {
-    distance = TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES);
+    distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES);
     SpannableStringBuilder formattedString
       = new SpannableStringBuilder(String.format(Locale.getDefault(), MILE_FORMAT, (int) Math.round(distance)));
     formattedString.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
@@ -63,6 +63,6 @@ public class DistanceUtils {
   }
 
   private static boolean longDistance(double distance) {
-    return TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES) > 10;
+    return TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES) > 10;
   }
 }

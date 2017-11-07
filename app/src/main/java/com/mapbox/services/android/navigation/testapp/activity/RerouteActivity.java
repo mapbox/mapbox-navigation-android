@@ -23,6 +23,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
@@ -45,20 +46,18 @@ import timber.log.Timber;
 
 public class RerouteActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener,
   Callback<DirectionsResponse>, MapboxMap.OnMapClickListener, NavigationEventListener, OffRouteListener,
-  ProgressChangeListener {
+  ProgressChangeListener, MilestoneEventListener {
 
   @BindView(R.id.mapView)
   MapView mapView;
-
+  Point origin = Point.fromLngLat(-87.6900, 41.8529);
+  Point destination = Point.fromLngLat(-87.8921, 41.9794);
   private LocationLayerPlugin locationLayerPlugin;
   private LocationEngine locationEngine;
   private MapboxNavigation navigation;
   private MapboxMap mapboxMap;
   private boolean running;
   private Polyline polyline;
-
-  Point origin = Point.fromLngLat(-87.6900, 41.8529);
-  Point destination = Point.fromLngLat(-87.8921, 41.9794);
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -87,8 +86,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     locationEngine = new MockLocationEngine(1000, 30, false);
     locationEngine.addLocationEngineListener(this);
 
-    mapboxMap.setLocationSource(locationEngine);
-    mapboxMap.setMyLocationEnabled(true);
+    navigation.addMilestoneEventListener(this);
     navigation.setLocationEngine(locationEngine);
 
     // Acquire the navigation's route
@@ -133,7 +131,13 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   }
 
   @Override
+  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
+    Timber.d("onMilestoneEvent - Current Instruction: " + instruction);
+  }
+
+  @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+    Timber.d(call.request().url().toString());
     if (response.body() != null) {
       if (response.body().routes() != null) {
         if (!response.body().routes().isEmpty()) {
@@ -150,16 +154,12 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   }
 
   private void getRoute(Point origin, Point destination, Float bearing) {
-    NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder()
-      .origin(origin)
+    Double heading = bearing == null ? null : bearing.doubleValue();
+    NavigationRoute.builder()
+      .origin(origin, heading, 90d)
       .destination(destination)
-      .accessToken(Mapbox.getAccessToken());
-
-    if (bearing != null) {
-      navigationRouteBuilder.addBearing(Float.valueOf(bearing).doubleValue(), 90d);
-      navigationRouteBuilder.addBearing(null, null);
-    }
-    navigationRouteBuilder.build().getRoute(this);
+      .accessToken(Mapbox.getAccessToken())
+      .build().getRoute(this);
   }
 
   @Override

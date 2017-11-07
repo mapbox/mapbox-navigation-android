@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
@@ -11,13 +12,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.location.LostLocationEngine;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
-import com.mapbox.services.android.navigation.v5.milestone.ApiMilestone;
+import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
+import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -25,13 +25,15 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
+import com.mapbox.services.android.navigation.v5.utils.ValidationUtils;
 import com.mapbox.services.android.telemetry.MapboxEvent;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
+import com.mapbox.services.android.telemetry.constants.TelemetryConstants;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
+import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 import com.mapbox.services.utils.TextUtils;
-
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,7 +43,7 @@ import java.util.Locale;
 import retrofit2.Callback;
 import timber.log.Timber;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.DEFAULT_MILESTONE_IDENTIFIER;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID;
 
 /**
  * A MapboxNavigation class for interacting with and customizing a navigation session.
@@ -132,7 +134,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     // Create and add default milestones if enabled.
     milestones = new ArrayList<>();
     if (options.defaultMilestonesEnabled()) {
-      addMilestone(new ApiMilestone.Builder().setIdentifier(DEFAULT_MILESTONE_IDENTIFIER).build());
+      addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
     }
 
     initializeDefaultLocationEngine();
@@ -353,6 +355,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    * @since 0.1.0
    */
   public void startNavigation(@NonNull DirectionsRoute directionsRoute) {
+    ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
     Timber.d("MapboxNavigation startNavigation called.");
     if (!isBound) {
@@ -635,11 +638,26 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     Timber.v("Arrived event occurred");
     sessionState = sessionState.toBuilder().arrivalTimestamp(new Date()).build();
-    NavigationMetricsWrapper.arriveEvent(sessionState, routeProgress, location);
+    String locationEngineName = obtainLocationEngineName();
+    NavigationMetricsWrapper.arriveEvent(sessionState, routeProgress, location, locationEngineName);
     // Remove all listeners except the onProgressChange by passing in null.
     navigationEventDispatcher.removeOffRouteListener(null);
     // Remove this listener so that the arrival event only occurs once.
     navigationEventDispatcher.removeInternalProgressChangeListener();
+  }
+
+  public String recordFeedback(@FeedbackEvent.FeedbackType String feedbackType,
+                               String description, @FeedbackEvent.FeedbackSource String source) {
+    return navigationService.recordFeedbackEvent(feedbackType, description, source);
+  }
+
+  public void updateFeedback(String feedbackId,
+                             @FeedbackEvent.FeedbackType String feedbackType, String description) {
+    navigationService.updateFeedbackEvent(feedbackId, feedbackType, description);
+  }
+
+  public void cancelFeedback(String feedbackId) {
+    navigationService.cancelFeedback(feedbackId);
   }
 
   DirectionsRoute getRoute() {
@@ -674,6 +692,11 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     return navigationService != null && isBound;
   }
 
+  String obtainVendorId() {
+    SharedPreferences prefs = TelemetryUtils.getSharedPreferences(context.getApplicationContext());
+    return prefs.getString(TelemetryConstants.MAPBOX_SHARED_PREFERENCE_KEY_VENDOR_ID, "");
+  }
+
   @Override
   public void onServiceConnected(ComponentName name, IBinder service) {
     Timber.d("Connected to service.");
@@ -688,5 +711,9 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     Timber.d("Disconnected from service.");
     navigationService = null;
     isBound = false;
+  }
+
+  private String obtainLocationEngineName() {
+    return locationEngine.getClass().getSimpleName();
   }
 }
