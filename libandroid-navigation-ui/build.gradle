@@ -53,10 +53,7 @@ dependencies {
   annotationProcessor dependenciesList.lifecycleCompiler
 
   // Mapbox plugins
-  api(dependenciesList.locationLayerPlugin) {
-    transitive = true
-    exclude module: 'mapbox-android-services'
-  }
+  api dependenciesList.locationLayerPlugin
 
   // Logging
   implementation dependenciesList.timber
