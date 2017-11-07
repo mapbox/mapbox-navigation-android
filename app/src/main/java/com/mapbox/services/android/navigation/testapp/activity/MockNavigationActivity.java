@@ -154,6 +154,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     Snackbar.make(mapView, "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
 
     locationEngine = new MockLocationEngine(1000, 50, true);
+    mapboxMap.setLocationSource(locationEngine);
 
     newOrigin();
   }
