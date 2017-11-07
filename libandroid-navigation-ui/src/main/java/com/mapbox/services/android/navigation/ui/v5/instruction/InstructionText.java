@@ -6,80 +6,74 @@ import com.mapbox.services.utils.TextUtils;
 
 import java.util.Arrays;
 
-public class TextInstruction {
+public class InstructionText {
 
-  private String primaryText;
-  private String secondaryText;
-  private LegStep legStep;
+  private TextFields stepTextFields;
   private double stepDistance;
 
-  public TextInstruction(LegStep legStep) {
-    this.legStep = legStep;
-    stepDistance = legStep.distance();
-    buildTextInstructions(legStep);
+  public InstructionText(LegStep step) {
+    stepDistance = step.distance();
+    stepTextFields = buildInstructionText(step);
   }
 
   public String getPrimaryText() {
-    return StringAbbreviator.abbreviate(primaryText);
+    return StringAbbreviator.abbreviate(stepTextFields.primaryText);
   }
 
   public String getSecondaryText() {
-    return StringAbbreviator.abbreviate(secondaryText);
+    return StringAbbreviator.abbreviate(stepTextFields.secondaryText);
   }
 
   public double getStepDistance() {
     return stepDistance;
   }
 
-  public LegStep getStep() {
-    return legStep;
-  }
+  private TextFields buildInstructionText(LegStep step) {
 
-  private void buildTextInstructions(LegStep upComingStep) {
-
+    TextFields textFields = new TextFields();
     String exitText = "";
 
     // Extract Exit for later use
-    if (upComingStep.maneuver() != null) {
-      if (!TextUtils.isEmpty(upComingStep.exits())) {
-        exitText = "Exit " + upComingStep.exits();
+    if (step.maneuver() != null) {
+      if (!TextUtils.isEmpty(step.exits())) {
+        exitText = "Exit " + step.exits();
       }
     }
 
     // Refs
-    if (hasRefs(upComingStep)) {
-      primaryText = StringAbbreviator.deliminator(upComingStep.ref());
-      if (hasDestination(upComingStep)) {
-        secondaryText = destination(upComingStep);
+    if (hasRefs(step)) {
+      textFields.primaryText = StringAbbreviator.deliminator(step.ref());
+      if (hasDestination(step)) {
+        textFields.secondaryText = destination(step);
       }
-      return;
+      return textFields;
     }
 
     // Multiple Destinations
-    if (hasMultipleDestinations(upComingStep)) {
-      formatMultipleStrings(upComingStep.destinations(), exitText);
-      return;
+    if (hasMultipleDestinations(step)) {
+      return formatMultipleStrings(step.destinations(), exitText);
     }
 
     // Multiple Names
-    if (hasMultipleNames(upComingStep)) {
-      formatMultipleStrings(upComingStep.name(), exitText);
-      return;
+    if (hasMultipleNames(step)) {
+      return formatMultipleStrings(step.name(), exitText);
     }
 
     // Destination or Street Name
-    if (hasDestination(upComingStep)) {
-      primaryText = destination(upComingStep);
-      return;
-    } else if (hasName(upComingStep)) {
-      primaryText = name(upComingStep);
-      return;
+    if (hasDestination(step)) {
+      textFields.primaryText = destination(step);
+      return textFields;
+    } else if (hasName(step)) {
+      textFields.primaryText = name(step);
+      return textFields;
     }
 
-    // Instruction
-    if (hasInstruction(upComingStep)) {
-      primaryText = instruction(upComingStep);
+    // Fall back to instruction
+    if (hasInstruction(step)) {
+      textFields.primaryText = instruction(step);
+      return textFields;
     }
+    return textFields;
   }
 
   private boolean hasRefs(LegStep upComingStep) {
@@ -121,15 +115,22 @@ public class TextInstruction {
       && StringAbbreviator.splitter(upComingStep.name()).length > 1;
   }
 
-  private void formatMultipleStrings(String multipleString, String exitText) {
+  private TextFields formatMultipleStrings(String multipleString, String exitText) {
+    TextFields textFields = new TextFields();
     String[] strings = StringAbbreviator.splitter(multipleString);
     String[] firstString = Arrays.copyOfRange(strings, 0, 1);
     if (!TextUtils.isEmpty(exitText)) {
-      primaryText = exitText + ": " + firstString[0];
+      textFields.primaryText = exitText + ": " + firstString[0];
     } else {
-      primaryText = firstString[0];
+      textFields.primaryText = firstString[0];
     }
     String[] remainingStrings = Arrays.copyOfRange(strings, 1, strings.length);
-    secondaryText = TextUtils.join("  / ", remainingStrings).trim();
+    textFields.secondaryText = TextUtils.join("  / ", remainingStrings).trim();
+    return textFields;
+  }
+
+  private class TextFields {
+    String primaryText = "";
+    String secondaryText = "";
   }
 }

@@ -21,8 +21,6 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.Constants;
-import com.mapbox.services.android.core.location.LocationEngine;
-import com.mapbox.services.android.core.location.LocationEngineListener;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -33,6 +31,8 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.telemetry.location.LocationEngine;
+import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,8 +86,9 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     locationEngine = new MockLocationEngine(1000, 30, false);
     locationEngine.addLocationEngineListener(this);
 
-//    mapboxMap.setLocationSource(locationEngine);
-//    mapboxMap.setMyLocationEnabled(true);
+    mapboxMap.setLocationSource(locationEngine);
+    mapboxMap.setMyLocationEnabled(true);
+
     navigation.addMilestoneEventListener(this);
     navigation.setLocationEngine(locationEngine);
 
