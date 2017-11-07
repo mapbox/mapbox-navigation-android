@@ -19,6 +19,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 
+
 public class LocationViewModel extends AndroidViewModel implements LifecycleObserver, LocationEngineListener {
 
   final MutableLiveData<LocationEngine> locationEngine = new MutableLiveData<>();

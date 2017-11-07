@@ -9,16 +9,16 @@ android {
     targetSdkVersion androidVersions.targetSdkVersion
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-    buildConfigField('String', "MAPBOX_NAVIGATION_SDK_IDENTIFIER", String.format("\"%s\"",
-        "mapbox-navigation-android"))
-    buildConfigField('String', "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.VERSION_NAME))
-    buildConfigField "String", "MAPBOX_NAVIGATION_EVENTS_USER_AGENT",
-        String.format("\"mapbox-navigation-android/%s\"", project.VERSION_NAME)
-  }
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_7
-    targetCompatibility JavaVersion.VERSION_1_7
+    buildConfigField('String',
+        "MAPBOX_NAVIGATION_SDK_IDENTIFIER", String.format("\"%s\"", "mapbox-navigation-android")
+    )
+    buildConfigField('String',
+        "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.VERSION_NAME)
+    )
+    buildConfigField "String",
+        "MAPBOX_NAVIGATION_EVENTS_USER_AGENT", String.format("\"mapbox-navigation-android/%s\"",
+        project.VERSION_NAME
+    )
   }
 
   configurations {
@@ -37,44 +37,37 @@ android {
 
   testOptions {
     unitTests.returnDefaultValues = true
+    unitTests.includeAndroidResources = true
   }
 }
 
 dependencies {
   // Mapbox Android Services
-  // TODO Fix mapboxServices version when releasing next version of MAS (2.2.7)
-  compile 'com.mapbox.mapboxsdk:mapbox-android-telemetry:2.3.0-SNAPSHOT'
-  // TODO Fix mapboxServices version when releasing next version of MAS (2.2.7)
-  compile ('com.mapbox.mapboxsdk:mapbox-android-services:2.3.0-SNAPSHOT@aar') {
+  api (dependenciesList.mapboxServices) {
     transitive = true
     exclude module: 'mapbox-java-geojson'
     exclude module: 'mapbox-java-core'
     exclude module: 'mapbox-java-services'
   }
 
-  compile "com.mapbox.mapboxsdk:mapbox-java-services-directions:3.0.0-SNAPSHOT"
-  compile "com.mapbox.mapboxsdk:mapbox-java-services-turf:3.0.0-SNAPSHOT"
+  api "com.mapbox.mapboxsdk:mapbox-java-services-directions:3.0.0-SNAPSHOT"
+  api "com.mapbox.mapboxsdk:mapbox-java-services-turf:3.0.0-SNAPSHOT"
   // Support
-  compile dependenciesList.supportAppcompatV7
+  implementation dependenciesList.supportAppcompatV7
 
   // Logging
-  compile dependenciesList.timber
+  implementation dependenciesList.timber
 
   // AutoValues
-  provided dependenciesList.autoValue
   annotationProcessor dependenciesList.autoValue
+  compileOnly dependenciesList.autoValue
 
   // Unit testing
-  testCompile dependenciesList.junit
-  testCompile dependenciesList.mockito
-  testCompile dependenciesList.hamcrest
-  testCompile dependenciesList.commonsIO
-  testCompile dependenciesList.robolectric
-
-  // Instrument testing
-  androidTestCompile(dependenciesList.testEspressoCore, {
-    exclude group: 'com.android.support', module: 'support-annotations'
-  })
+  testImplementation dependenciesList.junit
+  testImplementation dependenciesList.mockito
+  testImplementation dependenciesList.hamcrest
+  testImplementation dependenciesList.commonsIO
+  testImplementation dependenciesList.robolectric
 }
 
 apply from: 'javadoc.gradle'
