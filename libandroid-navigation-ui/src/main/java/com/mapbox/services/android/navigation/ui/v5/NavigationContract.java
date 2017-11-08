@@ -24,9 +24,5 @@ public interface NavigationContract {
     void addMarker(Point point);
 
     void finishNavigationView();
-
-    void setMuted(boolean isMuted);
-
-    void showFeedbackBottomSheet();
   }
 }
