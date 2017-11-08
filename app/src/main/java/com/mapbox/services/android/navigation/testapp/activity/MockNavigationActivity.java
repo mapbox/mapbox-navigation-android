@@ -100,8 +100,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
           Trigger.gte(TriggerProperty.STEP_DISTANCE_TRAVELED_METERS, 75)
         )
       ).build());
-
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
   }
 
   @OnClick(R.id.startRouteButton)
@@ -154,6 +152,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     Snackbar.make(mapView, "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
 
     locationEngine = new MockLocationEngine(1000, 50, true);
+    mapboxMap.setLocationSource(locationEngine);
 
     newOrigin();
   }

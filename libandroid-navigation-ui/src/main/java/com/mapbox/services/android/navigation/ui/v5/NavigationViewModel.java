@@ -132,27 +132,52 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
     instructionPlayer.setMuted(isMuted);
   }
 
-  public MapboxNavigation getNavigation() {
-    return navigation;
+  /**
+   * Records a general feedback item with source
+   */
+  public void recordFeedback(@FeedbackEvent.FeedbackSource String feedbackSource) {
+    feedbackId = navigation.recordFeedback(FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE, "", feedbackSource);
   }
 
-  void recordFeedback() {
-    feedbackId = navigation.recordFeedback(FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE, "",
-      FeedbackEvent.FEEDBACK_SOURCE_UI);
-  }
-
-  void updateFeedback(FeedbackItem feedbackItem) {
+  /**
+   * Used to update an existing {@link FeedbackItem}
+   * with a feedback type and description.
+   * <p>
+   * Uses cached feedbackId to ensure the proper item is updated.
+   *
+   * @param feedbackItem item to be updated
+   * @since 0.7.0
+   */
+  public void updateFeedback(FeedbackItem feedbackItem) {
     if (!TextUtils.isEmpty(feedbackId)) {
       navigation.updateFeedback(feedbackId, feedbackItem.getFeedbackType(), feedbackItem.getDescription());
       feedbackId = null;
     }
   }
 
-  void cancelFeedback() {
+  /**
+   * Used to cancel an existing {@link FeedbackItem}.
+   * <p>
+   * Uses cached feedbackId to ensure the proper item is cancelled.
+   *
+   * @param feedbackItem item to be updated
+   * @since 0.7.0
+   */
+  public void cancelFeedback() {
     if (!TextUtils.isEmpty(feedbackId)) {
       navigation.cancelFeedback(feedbackId);
       feedbackId = null;
     }
+  }
+
+  /**
+   * Returns the current instance of {@link MapboxNavigation}.
+   *
+   * @param feedbackItem item to be updated
+   * @since 0.6.1
+   */
+  public MapboxNavigation getNavigation() {
+    return navigation;
   }
 
   void updateRoute(DirectionsRoute route) {

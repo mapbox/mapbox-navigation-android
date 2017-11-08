@@ -19,6 +19,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 
+
 public class LocationViewModel extends AndroidViewModel implements LifecycleObserver, LocationEngineListener {
 
   final MutableLiveData<LocationEngine> locationEngine = new MutableLiveData<>();
@@ -88,7 +89,7 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
    * Initializes the {@link LocationEngine} based on whether or not
    * simulation is enabled.
    */
-  @SuppressWarnings( {"MissingPermission"})
+  @SuppressWarnings({"MissingPermission"})
   private void initLocation(Application application) {
     if (!shouldSimulateRoute()) {
       modelLocationEngine = new LostLocationEngine(application.getApplicationContext());
