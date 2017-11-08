@@ -168,14 +168,14 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {
-          isRerouting = isOffRoute;
-          if (isRerouting) {
+          if (isOffRoute) {
             showRerouteState();
             instructionListAdapter.clear();
-          } else {
+          } else if (isRerouting) {
             hideRerouteState();
             showAlertView();
           }
+          isRerouting = isOffRoute;
         }
       }
     });
