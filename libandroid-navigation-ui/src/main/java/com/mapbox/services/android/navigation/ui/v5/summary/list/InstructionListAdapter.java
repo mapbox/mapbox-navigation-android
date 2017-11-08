@@ -91,7 +91,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   }
 
   private void addLegSteps(RouteProgress routeProgress) {
-    if ((newLeg(routeProgress) || stepList.size() == 0) && hasLegSteps(routeProgress)) {
+    if ((newLeg(routeProgress) || rerouteTriggered(routeProgress)) && hasLegSteps(routeProgress)) {
       List<LegStep> steps = routeProgress.directionsRoute().legs().get(0).steps();
       stepList.clear();
       stepList.addAll(steps);
@@ -132,6 +132,12 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     boolean newLeg = currentLeg == null || !currentLeg.equals(routeProgress.currentLeg());
     currentLeg = routeProgress.currentLeg();
     return newLeg;
+  }
+
+  private boolean rerouteTriggered(RouteProgress routeProgress) {
+    return stepList.size() == 0
+      && !routeProgress.currentLegProgress().currentStep().maneuver().type()
+      .equals(NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE);
   }
 
   private boolean newStep(RouteProgress routeProgress) {

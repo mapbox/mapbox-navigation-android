@@ -28,7 +28,9 @@ public class DistanceUtils {
 
   private static SpannableStringBuilder roundByFiftyFeet(double distance) {
     distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET);
+
     int roundedNumber = ((int) Math.round(distance)) / 50 * 50;
+    roundedNumber = roundedNumber < 50 ? 50 : roundedNumber;
 
     SpannableStringBuilder formattedString
       = new SpannableStringBuilder(String.format(Locale.getDefault(), FEET_FORMAT, roundedNumber));

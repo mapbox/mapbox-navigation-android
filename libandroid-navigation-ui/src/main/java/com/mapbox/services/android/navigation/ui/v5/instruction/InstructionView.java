@@ -581,8 +581,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model provides maneuver modifier / type
    */
   private void updateManeuverView(InstructionModel model) {
-    upcomingManeuverView.setManeuverModifier(model.getUpcomingStepManeuverModifier());
-    upcomingManeuverView.setManeuverType(model.getUpcomingStepManeuverType());
+    upcomingManeuverView.setManeuverModifier(model.getManeuverViewModifier());
+    upcomingManeuverView.setManeuverType(model.getManeuverViewType());
   }
 
   /**
@@ -702,8 +702,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void checkTurnLanes(InstructionModel model) {
     if (model.getTurnLanes() != null
-      && !TextUtils.isEmpty(model.getUpcomingStepManeuverModifier())) {
-      turnLaneAdapter.addTurnLanes(model.getTurnLanes(), model.getUpcomingStepManeuverModifier());
+      && !TextUtils.isEmpty(model.getManeuverViewModifier())) {
+      turnLaneAdapter.addTurnLanes(model.getTurnLanes(), model.getManeuverViewModifier());
       showTurnLanes();
     } else {
       hideTurnLanes();
