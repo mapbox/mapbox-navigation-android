@@ -55,7 +55,8 @@ public class MetricsRouteProgress {
   }
 
   public String getDirectionsRouteProfile() {
-    if (directionsRoute.routeOptions().profile() != null) {
+    if (directionsRoute.routeOptions() != null
+      && directionsRoute.routeOptions().profile() != null) {
       return directionsRoute.routeOptions().profile();
     }
     return "";
@@ -76,14 +77,14 @@ public class MetricsRouteProgress {
   }
 
   public double getCurrentStepProgressDistanceRemaining() {
-    if ((Double)currentLegProgress.currentStepProgress().distanceRemaining() != null) {
+    if ((Double) currentLegProgress.currentStepProgress().distanceRemaining() != null) {
       return currentLegProgress.currentStepProgress().distanceRemaining();
     }
     return 0;
   }
 
   public double getCurrentStepProgressDurationRemaining() {
-    if ((Double)currentLegProgress.currentStepProgress().durationRemaining() != null) {
+    if ((Double) currentLegProgress.currentStepProgress().durationRemaining() != null) {
       return currentLegProgress.currentStepProgress().durationRemaining();
     }
     return 0;
