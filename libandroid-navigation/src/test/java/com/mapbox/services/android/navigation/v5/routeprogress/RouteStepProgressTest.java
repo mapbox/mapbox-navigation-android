@@ -54,6 +54,8 @@ public class RouteStepProgressTest extends BaseTest {
   @Test
   public void sanityTest() {
     RouteProgress routeProgress = RouteProgress.builder()
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
       .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
       .legDistanceRemaining(route.legs().get(0).distance())
       .distanceRemaining(route.distance())
@@ -73,6 +75,8 @@ public class RouteStepProgressTest extends BaseTest {
     DirectionsRoute route = response.routes().get(0);
 
     RouteProgress routeProgress = RouteProgress.builder()
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
       .stepDistanceRemaining(0)
       .legDistanceRemaining(0)
       .distanceRemaining(0)
@@ -96,6 +100,8 @@ public class RouteStepProgressTest extends BaseTest {
     double stepDistance = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_METERS);
 
     RouteProgress routeProgress = RouteProgress.builder()
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
       .stepDistanceRemaining(firstLeg.steps().get(5).distance())
       .legDistanceRemaining(firstLeg.distance())
       .distanceRemaining(route.distance())
@@ -129,6 +135,8 @@ public class RouteStepProgressTest extends BaseTest {
 
       double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
       RouteProgress routeProgress = RouteProgress.builder()
+        .currentStepCoordinates(
+          PolylineUtils.decode(route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
         .stepDistanceRemaining(distance)
         .legDistanceRemaining(firstLeg.distance())
         .distanceRemaining(route.distance())
@@ -145,6 +153,8 @@ public class RouteStepProgressTest extends BaseTest {
   public void distanceRemaining_equalsZeroAtEndOfStep() {
 
     RouteProgress routeProgress = RouteProgress.builder()
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(3).geometry(), Constants.PRECISION_6))
       .stepDistanceRemaining(0)
       .legDistanceRemaining(0)
       .distanceRemaining(0)
@@ -160,6 +170,8 @@ public class RouteStepProgressTest extends BaseTest {
   @Test
   public void distanceTraveled_equalsZeroAtBeginning() {
     RouteProgress routeProgress = RouteProgress.builder()
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(5).geometry(), Constants.PRECISION_6))
       .stepDistanceRemaining(firstLeg.steps().get(5).distance())
       .legDistanceRemaining(firstLeg.distance())
       .distanceRemaining(route.distance())
@@ -193,6 +205,8 @@ public class RouteStepProgressTest extends BaseTest {
 
       RouteProgress routeProgress = RouteProgress.builder()
         .stepDistanceRemaining(firstLeg.steps().get(0).distance() - distance)
+        .currentStepCoordinates(
+          PolylineUtils.decode(route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
         .legDistanceRemaining(firstLeg.distance())
         .distanceRemaining(route.distance())
         .directionsRoute(route)
@@ -209,6 +223,8 @@ public class RouteStepProgressTest extends BaseTest {
   public void distanceTraveled_equalsStepDistanceAtEndOfStep() {
 
     RouteProgress routeProgress = RouteProgress.builder()
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(3).geometry(), Constants.PRECISION_6))
       .stepDistanceRemaining(0)
       .legDistanceRemaining(firstLeg.distance())
       .distanceRemaining(route.distance())
@@ -224,7 +240,9 @@ public class RouteStepProgressTest extends BaseTest {
   @Test
   public void fractionTraveled_equalsZeroAtBeginning() {
     RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(firstLeg.steps().get(4).distance())
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(5).geometry(), Constants.PRECISION_6))
+      .stepDistanceRemaining(firstLeg.steps().get(5).distance())
       .legDistanceRemaining(firstLeg.distance())
       .distanceRemaining(route.distance())
       .directionsRoute(route)
@@ -253,6 +271,8 @@ public class RouteStepProgressTest extends BaseTest {
       double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
 
       RouteProgress routeProgress = RouteProgress.builder()
+        .currentStepCoordinates(
+          PolylineUtils.decode(route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
         .stepDistanceRemaining(distance)
         .legDistanceRemaining(firstLeg.distance())
         .distanceRemaining(route.distance())
@@ -276,6 +296,8 @@ public class RouteStepProgressTest extends BaseTest {
 
     RouteProgress routeProgress = RouteProgress.builder()
       .stepDistanceRemaining(0)
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(3).geometry(), Constants.PRECISION_6))
       .legDistanceRemaining(firstLeg.distance())
       .distanceRemaining(route.distance())
       .directionsRoute(route)
@@ -288,9 +310,11 @@ public class RouteStepProgressTest extends BaseTest {
   }
 
   @Test
-  public void getDurationRemaining_equalsStepDurationAtBeginning() {
+  public void durationRemaining_equalsStepDurationAtBeginning() {
     RouteProgress routeProgress = RouteProgress.builder()
       .stepDistanceRemaining(firstLeg.steps().get(5).distance())
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(5).geometry(), Constants.PRECISION_6))
       .legDistanceRemaining(firstLeg.distance())
       .distanceRemaining(route.distance())
       .directionsRoute(route)
@@ -303,7 +327,7 @@ public class RouteStepProgressTest extends BaseTest {
   }
 
   @Test
-  public void getDurationRemaining_equalsCorrectValueAtIntervals() {
+  public void durationRemaining_equalsCorrectValueAtIntervals() {
     LineString lineString
       = LineString.fromPolyline(firstStep.geometry(), Constants.PRECISION_6);
 
@@ -320,6 +344,8 @@ public class RouteStepProgressTest extends BaseTest {
 
       RouteProgress routeProgress = RouteProgress.builder()
         .stepDistanceRemaining(distance)
+        .currentStepCoordinates(
+          PolylineUtils.decode(route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
         .legDistanceRemaining(firstLeg.distance())
         .distanceRemaining(route.distance())
         .directionsRoute(route)
@@ -336,9 +362,11 @@ public class RouteStepProgressTest extends BaseTest {
   }
 
   @Test
-  public void getDurationRemaining_equalsZeroAtEndOfStep() {
+  public void durationRemaining_equalsZeroAtEndOfStep() {
     RouteProgress routeProgress = RouteProgress.builder()
       .stepDistanceRemaining(0)
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(3).geometry(), Constants.PRECISION_6))
       .legDistanceRemaining(firstLeg.distance())
       .distanceRemaining(route.distance())
       .directionsRoute(route)
@@ -353,6 +381,8 @@ public class RouteStepProgressTest extends BaseTest {
   public void stepIntersections_includesAllStepIntersectionsAndNextManeuver() throws Exception {
     RouteProgress routeProgress = RouteProgress.builder()
       .stepDistanceRemaining(0)
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(3).geometry(), Constants.PRECISION_6))
       .legDistanceRemaining(firstLeg.distance())
       .distanceRemaining(route.distance())
       .directionsRoute(route)
@@ -375,6 +405,8 @@ public class RouteStepProgressTest extends BaseTest {
 
     RouteProgress routeProgress = RouteProgress.builder()
       .stepDistanceRemaining(0)
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(lastStepIndex).geometry(), Constants.PRECISION_6))
       .legDistanceRemaining(firstLeg.distance())
       .distanceRemaining(route.distance())
       .directionsRoute(route)

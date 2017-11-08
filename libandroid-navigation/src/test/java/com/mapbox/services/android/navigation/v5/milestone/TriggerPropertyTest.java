@@ -5,9 +5,11 @@ import com.google.gson.GsonBuilder;
 import com.mapbox.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.directions.v5.models.DirectionsResponse;
 import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.constants.Constants;
 
 import junit.framework.Assert;
 
@@ -20,7 +22,6 @@ import org.robolectric.annotation.Config;
 import java.io.IOException;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class)
 public class TriggerPropertyTest extends BaseTest {
 
   // Fixtures
@@ -38,12 +39,14 @@ public class TriggerPropertyTest extends BaseTest {
     DirectionsRoute route = response.routes().get(0);
 
     routeProgress = RouteProgress.builder()
-      .directionsRoute(route)
-      .distanceRemaining(route.distance())
-      .legDistanceRemaining(route.legs().get(0).distance())
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(1).geometry(), Constants.PRECISION_6))
       .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
-      .legIndex(0)
+      .legDistanceRemaining(route.legs().get(0).distance())
+      .distanceRemaining(route.distance())
+      .directionsRoute(route)
       .stepIndex(1)
+      .legIndex(0)
       .build();
   }
 

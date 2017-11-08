@@ -11,8 +11,6 @@ import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
 
-import java.util.List;
-
 import static com.mapbox.services.constants.Constants.PRECISION_6;
 
 /**

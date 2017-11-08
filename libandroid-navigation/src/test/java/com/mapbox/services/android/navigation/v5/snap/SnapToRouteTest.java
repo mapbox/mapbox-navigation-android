@@ -29,7 +29,6 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class)
 public class SnapToRouteTest extends BaseTest {
 
   // Fixtures
@@ -47,6 +46,9 @@ public class SnapToRouteTest extends BaseTest {
     route = response.routes().get(0);
 
     routeProgress = RouteProgress.builder()
+      .currentStepCoordinates(
+        PolylineUtils.decode(response.routes().get(0)
+          .legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
       .stepIndex(0)
       .legIndex(0)
       .legDistanceRemaining(100)
@@ -63,16 +65,16 @@ public class SnapToRouteTest extends BaseTest {
     assertNotNull(snap);
   }
 
-  @Test
-  @Ignore
-  public void getSnappedLocation_returnsProviderNameCorrectly() throws Exception {
-    Snap snap = new SnapToRoute();
-    Location location = new Location("test");
-    List<Point> coordinates = PolylineUtils.decode(
-      route.legs().get(0).steps().get(1).geometry(), Constants.PRECISION_6);
-    Location snappedLocation
-      = snap.getSnappedLocation(location, routeProgress, coordinates);
-    assertTrue(snappedLocation.getProvider().equals("test-snapped"));
-    assertTrue(location.getProvider().equals("test"));
-  }
+//  @Test
+//  @Ignore
+//  public void getSnappedLocation_returnsProviderNameCorrectly() throws Exception {
+//    Snap snap = new SnapToRoute();
+//    Location location = new Location("test");
+//    List<Point> coordinates = PolylineUtils.decode(
+//      route.legs().get(0).steps().get(1).geometry(), Constants.PRECISION_6);
+//    Location snappedLocation
+//      = snap.getSnappedLocation(location, routeProgress, coordinates);
+//    assertTrue(snappedLocation.getProvider().equals("test-snapped"));
+//    assertTrue(location.getProvider().equals("test"));
+//  }
 }

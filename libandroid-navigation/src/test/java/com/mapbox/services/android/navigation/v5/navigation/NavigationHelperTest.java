@@ -26,7 +26,6 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
 public class NavigationHelperTest extends BaseTest {
 
   // Fixtures
@@ -58,37 +57,6 @@ public class NavigationHelperTest extends BaseTest {
       .legIndex(0);
   }
 
-  @Test
-  public void increaseIndex_increasesStepByOne() throws Exception {
-    RouteProgress routeProgress = routeProgressBuilder.legIndex(0).stepIndex(0).build();
-    NavigationIndices previousIndices = NavigationIndices.create(0, 0);
-    NavigationIndices newIndices = NavigationHelper.increaseIndex(routeProgress, previousIndices);
-    assertEquals(0, newIndices.legIndex());
-    assertEquals(1, newIndices.stepIndex());
-  }
-
-  @Test
-  public void increaseIndex_increasesLegIndex() throws Exception {
-    RouteProgress routeProgress = routeProgressBuilder
-      .legIndex(0)
-      .stepIndex(21)
-      .build();
-    NavigationIndices previousIndices = NavigationIndices.create(0, 21);
-    NavigationIndices newIndices = NavigationHelper.increaseIndex(routeProgress, previousIndices);
-    assertEquals(1, newIndices.legIndex());
-  }
-
-  @Test
-  public void increaseIndex_stepIndexResetsOnLegIndexIncrease() throws Exception {
-    RouteProgress routeProgress = routeProgressBuilder
-      .legIndex(0)
-      .stepIndex(21)
-      .build();
-    NavigationIndices previousIndices = NavigationIndices.create(0, 21);
-    NavigationIndices newIndices = NavigationHelper.increaseIndex(routeProgress, previousIndices);
-    assertEquals(0, newIndices.stepIndex());
-  }
-
   //  @Test
   //  public void checkMilestones_onlyTriggeredMilestonesGetReturned() throws Exception {
   //    RouteProgress routeProgress = routeProgressBuilder
@@ -114,12 +82,15 @@ public class NavigationHelperTest extends BaseTest {
   //  }
 
   @Test
-  public void stepDistanceRemaining_returnsZeroWhenPositionsEqualEachOther() throws Exception {
+  public void stepDistanceRemaining_returnsZeroWhenPointsEqualEachOther() throws Exception {
     Point snappedPoint = Point.fromLngLat(-77.062996, 38.798405);
     List<Point> coordinates = PolylineUtils.decode(
       route.legs().get(0).steps().get(1).geometry(), Constants.PRECISION_6);
-    double distance = NavigationHelper.stepDistanceRemaining(snappedPoint, 0,
-      1, route, coordinates);
+
+    routeProgressBuilder.currentStepCoordinates(coordinates).build();
+
+
+    double distance = NavigationHelper.stepDistanceRemaining(snappedPoint, routeProgressBuilder.build());
     assertEquals(0.0, distance);
   }
 

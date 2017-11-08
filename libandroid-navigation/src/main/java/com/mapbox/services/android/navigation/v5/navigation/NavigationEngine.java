@@ -19,7 +19,6 @@ import java.util.List;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.bearingMatchesManeuverFinalHeading;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getSnappedLocation;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.increaseIndex;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.isUserOffRoute;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.legDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.routeDistanceRemaining;
@@ -113,12 +112,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
 
       // First increase the indices and then update the majority of information for the new
       // routeProgress.
-      NavigationIndices indices = increaseIndex(routeProgress);
-
-      routeProgress = routeProgress.toBuilder()
-        .legIndex(indices.legIndex())
-        .stepIndex(indices.stepIndex())
-        .build();
+      routeProgress = RouteUtils.increaseIndex(routeProgress);
 
       routeProgress = routeProgress.toBuilder()
         .priorStepCoordinates(routeProgress.currentStepCoordinates())

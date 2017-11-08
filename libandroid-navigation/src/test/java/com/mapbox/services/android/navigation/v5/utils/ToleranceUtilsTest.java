@@ -39,6 +39,10 @@ public class ToleranceUtilsTest extends BaseTest {
   @Test
   public void dynamicRerouteDistanceTolerance_userFarAwayFromIntersection() throws Exception {
     RouteProgress routeProgress = RouteProgress.builder()
+      .currentStepCoordinates(
+        PolylineUtils.decode(response.routes().get(0)
+          .legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
+      .stepDistanceRemaining(response.routes().get(0).legs().get(0).steps().get(0).distance())
       .directionsRoute(response.routes().get(0))
       .legDistanceRemaining(0)
       .distanceRemaining(0)
@@ -60,6 +64,10 @@ public class ToleranceUtilsTest extends BaseTest {
   public void dynamicRerouteDistanceTolerance_userCloseToIntersection() throws Exception {
     RouteProgress routeProgress = RouteProgress.builder()
       .directionsRoute(response.routes().get(0))
+      .currentStepCoordinates(
+        PolylineUtils.decode(response.routes().get(0)
+          .legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
+      .stepDistanceRemaining(response.routes().get(0).legs().get(0).steps().get(0).distance())
       .legDistanceRemaining(0)
       .distanceRemaining(0)
       .stepIndex(0)
@@ -80,6 +88,10 @@ public class ToleranceUtilsTest extends BaseTest {
   public void dynamicRerouteDistanceTolerance_userJustPastTheIntersection() throws Exception {
     RouteProgress routeProgress = RouteProgress.builder()
       .directionsRoute(response.routes().get(0))
+      .currentStepCoordinates(
+        PolylineUtils.decode(response.routes().get(0)
+          .legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
+      .stepDistanceRemaining(response.routes().get(0).legs().get(0).steps().get(0).distance())
       .legDistanceRemaining(0)
       .distanceRemaining(0)
       .stepIndex(0)

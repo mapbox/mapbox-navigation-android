@@ -126,31 +126,6 @@ class NavigationHelper {
       <= maxTurnCompletionOffset;
   }
 
-  /**
-   * This is used when a user has completed a step maneuver and the indices need to be incremented.
-   * The main purpose of this class is to determine if an additional leg exist and the step index
-   * has met the first legs total size, a leg index needs to occur and step index should be reset.
-   * Otherwise, the step index is incremented while the leg index remains the same.
-   * <p>
-   * Rather than returning an int array, a new instance of Navigation Indices gets returned. This
-   * provides type safety and making the code a bit more readable.
-   * </p>
-   *
-   * @param routeProgress need a routeProgress in order to get the directions route leg list size
-   * @return a {@link NavigationIndices} object which contains the new leg and step indices
-   */
-  static NavigationIndices increaseIndex(RouteProgress routeProgress) {
-    // Check if we are in the last step in the current routeLeg and iterate it if needed.
-    if (routeProgress.currentLegProgress().stepIndex()
-      >= routeProgress.directionsRoute().legs().get(routeProgress.legIndex())
-      .steps().size() - 2
-      && routeProgress.legIndex() < routeProgress.directionsRoute().legs().size() - 1) {
-      return NavigationIndices.create((routeProgress.legIndex() + 1), 0);
-    }
-    return NavigationIndices.create(routeProgress.legIndex(), (routeProgress.currentLegProgress()
-      .stepIndex() + 1));
-  }
-
   static List<Milestone> checkMilestones(RouteProgress previousRouteProgress,
                                          RouteProgress routeProgress,
                                          MapboxNavigation mapboxNavigation) {
