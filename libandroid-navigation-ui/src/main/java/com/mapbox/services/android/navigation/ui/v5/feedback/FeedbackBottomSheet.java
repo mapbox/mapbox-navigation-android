@@ -36,6 +36,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   private FeedbackAdapter feedbackAdapter;
   private RecyclerView feedbackItems;
   private ProgressBar feedbackProgressBar;
+  private ObjectAnimator countdownAnimation;
   private long duration;
 
   public static FeedbackBottomSheet newInstance(FeedbackBottomSheetListener feedbackBottomSheetListener,
@@ -98,6 +99,14 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
     feedbackBottomSheetListener.onFeedbackDismissed();
   }
 
+  @Override
+  public void onStop() {
+    super.onStop();
+    if (countdownAnimation != null) {
+      countdownAnimation.cancel();
+    }
+  }
+
   public void setFeedbackBottomSheetListener(FeedbackBottomSheetListener feedbackBottomSheetListener) {
     this.feedbackBottomSheetListener = feedbackBottomSheetListener;
   }
@@ -128,7 +137,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   }
 
   private void initCountDownAnimation() {
-    ObjectAnimator countdownAnimation = ObjectAnimator.ofInt(feedbackProgressBar,
+    countdownAnimation = ObjectAnimator.ofInt(feedbackProgressBar,
       "progress", 0);
     countdownAnimation.setInterpolator(new LinearInterpolator());
     countdownAnimation.setDuration(duration);
