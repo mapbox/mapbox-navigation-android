@@ -6,10 +6,12 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -34,9 +36,14 @@ import com.mapbox.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
+import com.mapbox.services.android.navigation.ui.v5.alert.AlertView;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheetListener;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
+import com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -59,7 +66,7 @@ import java.text.DecimalFormat;
  *
  * @since 0.6.0
  */
-public class InstructionView extends RelativeLayout {
+public class InstructionView extends RelativeLayout implements FeedbackBottomSheetListener {
 
   private ManeuverView upcomingManeuverView;
   private TextView upcomingDistanceText;
@@ -69,6 +76,8 @@ public class InstructionView extends RelativeLayout {
   private TextView thenStepText;
   private TextView soundChipText;
   private FloatingActionButton soundFab;
+  private FloatingActionButton feedbackFab;
+  private AlertView alertView;
   private View rerouteLayout;
   private View turnLaneLayout;
   private View thenStepLayout;
@@ -83,6 +92,7 @@ public class InstructionView extends RelativeLayout {
   private AnimationSet fadeInSlowOut;
   private DecimalFormat decimalFormat;
   private LegStep currentStep;
+  private NavigationViewModel navigationViewModel;
   private boolean isRerouting;
   public boolean isMuted;
 
@@ -114,7 +124,18 @@ public class InstructionView extends RelativeLayout {
     initDirectionsRecyclerView();
     initDecimalFormat();
     initAnimations();
-    initClickListener();
+    initClickListeners();
+  }
+
+  @Override
+  public void onFeedbackSelected(FeedbackItem feedbackItem) {
+    navigationViewModel.updateFeedback(feedbackItem);
+    alertView.show(NavigationConstants.FEEDBACK_SUBMITTED, 3000, false);
+  }
+
+  @Override
+  public void onFeedbackDismissed() {
+    navigationViewModel.cancelFeedback();
   }
 
   /**
@@ -127,6 +148,7 @@ public class InstructionView extends RelativeLayout {
    * @since 0.6.2
    */
   public void subscribe(NavigationViewModel navigationViewModel) {
+    this.navigationViewModel = navigationViewModel;
     navigationViewModel.instructionModel.observe((LifecycleOwner) getContext(), new Observer<InstructionModel>() {
       @Override
       public void onChanged(@Nullable InstructionModel model) {
@@ -146,13 +168,14 @@ public class InstructionView extends RelativeLayout {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {
-          isRerouting = isOffRoute;
-          if (isRerouting) {
+          if (isOffRoute) {
             showRerouteState();
             instructionListAdapter.clear();
-          } else {
+          } else if (isRerouting) {
             hideRerouteState();
+            showAlertView();
           }
+          isRerouting = isOffRoute;
         }
       }
     });
@@ -178,6 +201,16 @@ public class InstructionView extends RelativeLayout {
         updateThenStep(model);
       }
     }
+  }
+
+  /**
+   * Shows {@link FeedbackBottomSheet} and adds a listener so
+   * the proper feedback information is collected or the user dismisses the UI.
+   */
+  public void showFeedbackBottomSheet() {
+    FeedbackBottomSheet.newInstance(this,
+      NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION).show(
+      ((FragmentActivity) getContext()).getSupportFragmentManager(), FeedbackBottomSheet.TAG);
   }
 
   /**
@@ -292,6 +325,8 @@ public class InstructionView extends RelativeLayout {
     thenStepText = findViewById(R.id.thenStepText);
     soundChipText = findViewById(R.id.soundText);
     soundFab = findViewById(R.id.soundFab);
+    feedbackFab = findViewById(R.id.feedbackFab);
+    alertView = findViewById(R.id.alertView);
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
     thenStepLayout = findViewById(R.id.thenStepLayout);
@@ -393,6 +428,20 @@ public class InstructionView extends RelativeLayout {
   }
 
   /**
+   * Show AlertView with "Report Problem" text for 10 seconds - after waiting 2 seconds.
+   */
+  private void showAlertView() {
+    final Handler handler = new Handler();
+    handler.postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        alertView.show(NavigationConstants.REPORT_PROBLEM,
+          NavigationConstants.ALERT_VIEW_PROBLEM_DURATION, true);
+      }
+    }, 3000);
+  }
+
+  /**
    * Called after we bind the views, this will allow the step instruction {@link TextView}
    * to automatically re-size based on the length of the text.
    */
@@ -458,19 +507,42 @@ public class InstructionView extends RelativeLayout {
     fadeInSlowOut.addAnimation(fadeOut);
   }
 
-  private void initClickListener() {
+  private void initClickListeners() {
     if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      initLandscapeClickListener();
+      initLandscapeListListener();
     } else {
-      initPortraitClickListener();
+      initPortraitListListener();
     }
+    alertView.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        if (((AlertView) view).getAlertText().equals(NavigationConstants.REPORT_PROBLEM)) {
+          navigationViewModel.recordFeedback(FeedbackEvent.FEEDBACK_SOURCE_REROUTE);
+          showFeedbackBottomSheet();
+        }
+        alertView.hide();
+      }
+    });
+    soundFab.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        navigationViewModel.setMuted(toggleMute());
+      }
+    });
+    feedbackFab.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        navigationViewModel.recordFeedback(FeedbackEvent.FEEDBACK_SOURCE_UI);
+        showFeedbackBottomSheet();
+      }
+    });
   }
 
   /**
    * For portrait orientation, attach the listener to the whole layout
    * and use custom animations to hide and show the instructions /sound layout
    */
-  private void initPortraitClickListener() {
+  private void initPortraitListListener() {
     instructionLayout.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View instructionView) {
@@ -488,7 +560,7 @@ public class InstructionView extends RelativeLayout {
    * For landscape orientation, the click listener is attached to
    * the instruction text layout and the constraints are adjusted before animating
    */
-  private void initLandscapeClickListener() {
+  private void initLandscapeListListener() {
     findViewById(R.id.instructionLayoutText).setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View instructionLayoutText) {

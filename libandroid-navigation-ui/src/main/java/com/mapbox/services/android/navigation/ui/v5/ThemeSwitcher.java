@@ -110,10 +110,10 @@ public class ThemeSwitcher {
       darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
       R.styleable.NavigationView
     );
-    int navigationViewPrimary = styleArray.getColor(R.styleable.NavigationView_navigationViewSecondary,
+    int navigationViewSecondary = styleArray.getColor(R.styleable.NavigationView_navigationViewSecondary,
       ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_secondary));
     styleArray.recycle();
-    return navigationViewPrimary;
+    return navigationViewSecondary;
   }
 
   /**
@@ -130,10 +130,10 @@ public class ThemeSwitcher {
       darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
       R.styleable.NavigationView
     );
-    int navigationViewPrimary = styleArray.getColor(R.styleable.NavigationView_navigationViewBannerBackground,
+    int bannerBackground = styleArray.getColor(R.styleable.NavigationView_navigationViewBannerBackground,
       ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_banner_background));
     styleArray.recycle();
-    return navigationViewPrimary;
+    return bannerBackground;
   }
 
   /**
@@ -150,10 +150,10 @@ public class ThemeSwitcher {
       darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
       R.styleable.NavigationView
     );
-    int navigationViewPrimary = styleArray.getColor(R.styleable.NavigationView_navigationViewBannerManeuverPrimary,
+    int bannerManeuverPrimary = styleArray.getColor(R.styleable.NavigationView_navigationViewBannerManeuverPrimary,
       ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_banner_maneuver_primary));
     styleArray.recycle();
-    return navigationViewPrimary;
+    return bannerManeuverPrimary;
   }
 
   /**
@@ -170,9 +170,49 @@ public class ThemeSwitcher {
       darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
       R.styleable.NavigationView
     );
-    int navigationViewPrimary = styleArray.getColor(R.styleable.NavigationView_navigationViewBannerManeuverSecondary,
+    int bannerManeuverSecondary = styleArray.getColor(R.styleable.NavigationView_navigationViewBannerManeuverSecondary,
       ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_banner_maneuver_secondary));
     styleArray.recycle();
-    return navigationViewPrimary;
+    return bannerManeuverSecondary;
+  }
+
+  /**
+   * Looks are current theme and retrieves the progress color
+   * for the given set theme.
+   *
+   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
+   * @return color resource identifier for progress color
+   */
+  public static int retrieveNavigationViewProgressColor(Context context) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
+    TypedArray styleArray = context.obtainStyledAttributes(
+      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
+      R.styleable.NavigationView
+    );
+    int progress = styleArray.getColor(R.styleable.NavigationView_navigationViewProgress,
+      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_progress));
+    styleArray.recycle();
+    return progress;
+  }
+
+  /**
+   * Looks are current theme and retrieves the progress background color
+   * for the given set theme.
+   *
+   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
+   * @return color resource identifier for progress background color
+   */
+  public static int retrieveNavigationViewProgressBackgroundColor(Context context) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
+    TypedArray styleArray = context.obtainStyledAttributes(
+      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
+      R.styleable.NavigationView
+    );
+    int progressBackground = styleArray.getColor(R.styleable.NavigationView_navigationViewProgressBackground,
+      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_progress_background));
+    styleArray.recycle();
+    return progressBackground;
   }
 }

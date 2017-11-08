@@ -45,6 +45,18 @@
 
     </LinearLayout>
 
+    <com.mapbox.services.android.navigation.ui.v5.alert.AlertView
+        android:id="@+id/alertView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_below="@id/extraInstructionContentLayout"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible"/>
+
     <include
         android:id="@+id/soundLayout"
         layout="@layout/sound_layout"
