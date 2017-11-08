@@ -29,6 +29,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -85,6 +86,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private RecyclerView rvInstructions;
   private TurnLaneAdapter turnLaneAdapter;
   private ConstraintLayout instructionLayout;
+  private LinearLayout instructionLayoutText;
   private View instructionListLayout;
   private InstructionListAdapter instructionListAdapter;
   private Animation rerouteSlideUpTop;
@@ -332,6 +334,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     thenStepLayout = findViewById(R.id.thenStepLayout);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
     instructionLayout = findViewById(R.id.instructionLayout);
+    instructionLayoutText = findViewById(R.id.instructionLayoutText);
     instructionListLayout = findViewById(R.id.instructionListLayout);
     rvInstructions = findViewById(R.id.rvInstructions);
     initInstructionAutoSize();
@@ -561,7 +564,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * the instruction text layout and the constraints are adjusted before animating
    */
   private void initLandscapeListListener() {
-    findViewById(R.id.instructionLayoutText).setOnClickListener(new OnClickListener() {
+    instructionLayoutText.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View instructionLayoutText) {
         boolean instructionsVisible = instructionListLayout.getVisibility() == VISIBLE;
@@ -686,11 +689,13 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       if (upcomingSecondaryText.getVisibility() == GONE) {
         upcomingSecondaryText.setVisibility(VISIBLE);
         upcomingPrimaryText.setMaxLines(1);
+        adjustBannerTextVerticalBias(0.65f);
       }
       upcomingSecondaryText.setText(StringAbbreviator.abbreviate(model.getSecondaryText()));
     } else {
       upcomingPrimaryText.setMaxLines(2);
       upcomingSecondaryText.setVisibility(GONE);
+      adjustBannerTextVerticalBias(0.5f);
     }
   }
 
@@ -787,6 +792,21 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       thenStepLayout.setVisibility(GONE);
     }
   }
+
+  /**
+   * Adjust the banner text layout {@link ConstraintLayout} vertical bias.
+   *
+   * @param percentBias to be set to the text layout
+   */
+  private void adjustBannerTextVerticalBias(float percentBias) {
+    int orientation = getContext().getResources().getConfiguration().orientation;
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+      ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) instructionLayoutText.getLayoutParams();
+      params.verticalBias = percentBias;
+      instructionLayoutText.setLayoutParams(params);
+    }
+  }
+
 
   /**
    * Used to update the instructions list with the current steps.
