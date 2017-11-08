@@ -204,9 +204,9 @@ public class ManeuverView extends View {
   }
 
   private boolean shouldFlip(String modifier) {
-    return modifier.contains(STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT)
-      || modifier.contains(STEP_MANEUVER_MODIFIER_RIGHT)
-      || modifier.contains(STEP_MANEUVER_MODIFIER_SHARP_RIGHT);
+    return modifier.contains(STEP_MANEUVER_MODIFIER_SLIGHT_LEFT)
+      || modifier.contains(STEP_MANEUVER_MODIFIER_LEFT)
+      || modifier.contains(STEP_MANEUVER_MODIFIER_SHARP_LEFT);
   }
 
   private boolean isRoundabout() {
