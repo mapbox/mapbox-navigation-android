@@ -89,7 +89,7 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
    * Initializes the {@link LocationEngine} based on whether or not
    * simulation is enabled.
    */
-  @SuppressWarnings( {"MissingPermission"})
+  @SuppressWarnings({"MissingPermission"})
   private void initLocation(Application application) {
     if (!shouldSimulateRoute()) {
       modelLocationEngine = new LostLocationEngine(application.getApplicationContext());

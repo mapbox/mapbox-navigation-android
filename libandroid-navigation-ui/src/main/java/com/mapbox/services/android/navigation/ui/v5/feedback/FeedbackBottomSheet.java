@@ -24,7 +24,6 @@ import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
@@ -89,7 +88,6 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   @Override
   public void onFeedbackItemClick(int feedbackPosition) {
     FeedbackItem feedbackItem = feedbackAdapter.getFeedbackItem(feedbackPosition);
-    Toast.makeText(getContext(), "Feedback Submitted", Toast.LENGTH_SHORT).show();
     feedbackBottomSheetListener.onFeedbackSelected(feedbackItem);
     dismiss();
   }
