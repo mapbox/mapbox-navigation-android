@@ -6,8 +6,6 @@ import android.os.Bundle;
 
 import java.util.ArrayList;
 
-import timber.log.Timber;
-
 public class NavigationForegroundCalculation implements Application.ActivityLifecycleCallbacks {
   private long startSessionTime = 0;
   private ArrayList<Long> pauses = new ArrayList<Long>();
@@ -52,14 +50,10 @@ public class NavigationForegroundCalculation implements Application.ActivityLife
 
   }
 
-  public long getForegroundPercentage() {
+  public int obtainForegroundPercentage() {
     long currentTime = System.currentTimeMillis();
     double foregroundTime = calculateForegroundTime(currentTime);
-
-    Timber.d("foreground - foregroundTime: " + foregroundTime);
-//    Timber.d("foreground - timeSinceStart: " + (currentTime - startSessionTime));
-//    Timber.d("foreground - precentage: " + percentage);
-    return (long) (100 * (foregroundTime/(currentTime - startSessionTime)));
+    return (int) (100 * (foregroundTime / (currentTime - startSessionTime)));
   }
 
   private double calculateForegroundTime(long currentTime) {
@@ -72,7 +66,6 @@ public class NavigationForegroundCalculation implements Application.ActivityLife
     long resumePauseDiff = 0;
     for (int i = 0; i < tempResumes.size(); i++) {
       resumePauseDiff = resumePauseDiff + (tempResumes.get(i) - pauses.get(i));
-      Timber.d("foreground - resumePauseDiff: " + resumePauseDiff);
     }
 
     return currentTime - resumePauseDiff - startSessionTime;

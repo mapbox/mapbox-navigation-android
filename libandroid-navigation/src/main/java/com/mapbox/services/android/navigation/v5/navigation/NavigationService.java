@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Build;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -94,20 +93,6 @@ public class NavigationService extends Service implements LocationEngineListener
     navigationForegroundCalculation = new NavigationForegroundCalculation();
     getApplication().registerActivityLifecycleCallbacks(navigationForegroundCalculation);
 
-    new CountDownTimer( 100000, 1000) {
-
-      @Override
-      public void onTick(long l) {
-        long percentage = navigationForegroundCalculation.getForegroundPercentage();
-        Timber.d("foreground percentage: " + percentage);
-      }
-
-      @Override
-      public void onFinish() {
-
-      }
-    }.start();
-
     return START_STICKY;
   }
 
@@ -124,7 +109,7 @@ public class NavigationService extends Service implements LocationEngineListener
     // User canceled navigation session
     if (routeProgress != null && rawLocation != null) {
       NavigationMetricsWrapper.cancelEvent(mapboxNavigation.getSessionState(), routeProgress,
-        rawLocation);
+        rawLocation, obtainForegroundPercentage());
     }
     endNavigation();
 
@@ -253,7 +238,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
     if (firstProgressUpdate) {
       NavigationMetricsWrapper.departEvent(mapboxNavigation.getSessionState(), routeProgress,
-        rawLocation);
+        rawLocation, obtainForegroundPercentage());
       firstProgressUpdate = false;
     }
     if (mapboxNavigation.options().enableNotification()) {
@@ -335,7 +320,7 @@ public class NavigationService extends Service implements LocationEngineListener
       .build();
 
     NavigationMetricsWrapper.rerouteEvent(sessionState, routeProgress,
-      sessionState.lastRerouteLocation());
+      sessionState.lastRerouteLocation(), obtainForegroundPercentage());
 
     for (SessionState session : queuedRerouteEvents) {
       queuedRerouteEvents.set(queuedRerouteEvents.indexOf(session),
@@ -354,5 +339,9 @@ public class NavigationService extends Service implements LocationEngineListener
       Timber.d("Local binder called.");
       return NavigationService.this;
     }
+  }
+
+  int obtainForegroundPercentage() {
+    return navigationForegroundCalculation.obtainForegroundPercentage();
   }
 }

@@ -29,7 +29,8 @@ final class NavigationMetricsWrapper {
     // Empty private constructor for preventing initialization of this class.
   }
 
-  static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
+  static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
+                          int percentInForeground) {
     Hashtable<String, Object> arriveEvent = MapboxNavigationEvent.buildArriveEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
@@ -45,12 +46,13 @@ final class NavigationMetricsWrapper {
       sessionState.originalDuration(), null, sessionState.currentStepCount(),
       sessionState.originalStepCount()
     );
-    MapboxTelemetry.getInstance().addPercentTimeInForeground(0, arriveEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInForeground(percentInForeground, arriveEvent);
     MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, arriveEvent);
     MapboxTelemetry.getInstance().pushEvent(arriveEvent);
   }
 
-  static void cancelEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
+  static void cancelEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
+                          int percentInForeground) {
     Hashtable<String, Object> cancelEvent = MapboxNavigationEvent.buildCancelEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(),
@@ -67,12 +69,13 @@ final class NavigationMetricsWrapper {
       sessionState.originalDistance(), sessionState.originalDuration(), null,
       sessionState.arrivalTimestamp(), sessionState.currentStepCount(), sessionState.originalStepCount()
     );
-    MapboxTelemetry.getInstance().addPercentTimeInForeground(0, cancelEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInForeground(percentInForeground, cancelEvent);
     MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, cancelEvent);
     MapboxTelemetry.getInstance().pushEvent(cancelEvent);
   }
 
-  static void departEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
+  static void departEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
+                          int percentInForeground) {
     Hashtable<String, Object> departEvent = MapboxNavigationEvent.buildDepartEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
@@ -86,12 +89,13 @@ final class NavigationMetricsWrapper {
       (int) routeProgress.distanceTraveled(), (int) routeProgress.distanceRemaining(),
       (int) routeProgress.durationRemaining(), sessionState.startTimestamp()
     );
-    MapboxTelemetry.getInstance().addPercentTimeInForeground(0, departEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInForeground(percentInForeground, departEvent);
     MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, departEvent);
     MapboxTelemetry.getInstance().pushEvent(departEvent);
   }
 
-  static void rerouteEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
+  static void rerouteEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
+                           int percentInForeground) {
 
     updateRouteProgressSessionData(routeProgress, sessionState);
 
@@ -119,13 +123,13 @@ final class NavigationMetricsWrapper {
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
       sessionState.currentStepCount(), sessionState.originalStepCount());
     rerouteEvent.put(MapboxNavigationEvent.KEY_CREATED, TelemetryUtils.generateCreateDate(location));
-    MapboxTelemetry.getInstance().addPercentTimeInForeground(0, rerouteEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInForeground(percentInForeground, rerouteEvent);
     MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, rerouteEvent);
     MapboxTelemetry.getInstance().pushEvent(rerouteEvent);
   }
 
   static void feedbackEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
-                            String description, String feedbackType, String screenshot) {
+                            String description, String feedbackType, String screenshot, int percentInForeground) {
     updateRouteProgressSessionData(routeProgress, sessionState);
 
 
@@ -147,7 +151,7 @@ final class NavigationMetricsWrapper {
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
       sessionState.currentStepCount(), sessionState.originalStepCount()
     );
-    MapboxTelemetry.getInstance().addPercentTimeInForeground(0, feedbackEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInForeground(percentInForeground, feedbackEvent);
     MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, feedbackEvent);
     MapboxTelemetry.getInstance().pushEvent(feedbackEvent);
   }
