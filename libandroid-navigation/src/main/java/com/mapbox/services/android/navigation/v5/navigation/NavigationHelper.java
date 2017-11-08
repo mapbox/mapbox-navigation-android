@@ -2,9 +2,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.directions.v5.models.LegStep;
-import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;

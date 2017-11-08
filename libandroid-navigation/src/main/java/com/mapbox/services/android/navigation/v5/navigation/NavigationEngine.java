@@ -104,7 +104,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       }
     }
 
-    Point snappedPoint = RouteUtils.userSnappedToRoutePosition(location, routeProgress);
+    Point snappedPoint = RouteUtils.userSnappedToRoutePoint(location, routeProgress);
     double stepDistanceRemaining = stepDistanceRemaining(snappedPoint, routeProgress);
 
     // User is on a new step

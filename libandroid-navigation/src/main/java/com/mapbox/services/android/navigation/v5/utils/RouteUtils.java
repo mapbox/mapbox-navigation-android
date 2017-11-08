@@ -51,57 +51,28 @@ public final class RouteUtils {
       .equals(directionsRoute.geometry());
   }
 
-
-
-
-
-
-
-
   /**
    * Takes in a raw location, converts it to a point, and snaps it to the closest point along the
    * route. This is isolated as separate logic from the snap logic provided because we will always
    * need to snap to the route in order to get the most accurate information.
+   * <p>
+   * <strong>Note:</strong> This is not the same method used to calculate the user location
+   * displayed on the map but is rather the logic used internally for measurements only. To alter
+   * snap logic, extend {@link com.mapbox.services.android.navigation.v5.snap.Snap} with your own
+   * logic and pass in through {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}
+   * </p>
+   *
+   * @param routeProgress
+   * @param location
+   * @since 0.7.0
    */
-  public static Point userSnappedToRoutePosition(Location location, RouteProgress routeProgress) {
+  public static Point userSnappedToRoutePoint(@NonNull Location location,
+                                              @NonNull RouteProgress routeProgress) {
     Point locationToPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-
 
     // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
     // Point on the LineString.
     Feature feature = TurfMisc.pointOnLine(locationToPoint, routeProgress.currentStepCoordinates());
     return ((Point) feature.geometry());
   }
-
-
-
-//  public static List<Point> calculateNearbyPoints(RouteProgress routeProgress) {
-//    int stepIndex = routeProgress.currentLegProgress().stepIndex();
-//    int legIndex = routeProgress.legIndex();
-//
-//    List<Point> nearbyPoints = new ArrayList<>();
-//    // Adds the prior step geometry Points
-//    if (stepIndex != 0) {
-//      // Users not on the first step
-//      nearbyPoints.addAll(
-//        PolylineUtils.decode(
-//          routeProgress.directionsRoute().legs().get(legIndex)
-//            .steps().get(stepIndex - 1).geometry(), PRECISION_6)
-//      );
-//    }
-//
-//    // Current step points
-//    nearbyPoints.addAll(
-//      PolylineUtils.decode(
-//        routeProgress.directionsRoute().legs().get(0).steps().get(0).geometry(), PRECISION_6)
-//    );
-//
-//
-//    if ((routeProgress.currentLeg().steps().size() - 1) > stepIndex) {
-//      nearbyPoints.addAll(PolylineUtils.decode(
-//        routeProgress.directionsRoute().legs().get(legIndex).steps().get(stepIndex + 1).geometry(),
-//        PRECISION_6));
-//    }
-//    return nearbyPoints;
-//  }
 }

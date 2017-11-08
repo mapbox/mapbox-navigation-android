@@ -9,6 +9,7 @@ import com.mapbox.directions.v5.models.LegStep;
 import com.mapbox.directions.v5.models.RouteLeg;
 import com.mapbox.geojson.Point;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -140,9 +141,24 @@ public abstract class RouteProgress {
   @Nullable
   public abstract RouteLegProgress currentLegProgress();
 
+  /**
+   * Provides the previous steps geometry as points along the route the users currently traversing
+   * along. If the users at the very first step along the route, this will return null, otherwise a
+   * value should always be given.
+   *
+   * @return either a list of the points making up the previous geometry or null if the user's
+   * currently on the first step along the route
+   * @since 0.7.0
+   */
   @Nullable
   public abstract List<Point> priorStepCoordinates();
 
+  /**
+   * The current step's geometry found along the route. Since a step requires at least a geometry
+   * made up of one {@link Point}, this should never return null.
+   *
+   * @return a list of points making up the current step geometry
+   */
   @NonNull
   public abstract List<Point> currentStepCoordinates();
 
@@ -150,12 +166,32 @@ public abstract class RouteProgress {
    * The next step's geometry found along the route. If the user is already on the last step, this
    * will return null.
    *
-   * @return either a list of the points making up the upcoming geometry or null if there isn't an
-   * upcoming step
+   * @return either a list of the points making up the upcoming step geometry or null if there isn't
+   * an upcoming step
    * @since 0.7.0
    */
   @Nullable
   public abstract List<Point> upcomingStepCoordinates();
+
+  /**
+   * Will return a list of {@link Point}s which includes the prior, current, and upcoming points in
+   * a single list.
+   *
+   * @return a list of points making up the prior, current, and upcoming points
+   * @since 0.7.0
+   */
+  @NonNull
+  public List<Point> nearbyCoordinates() {
+    List<Point> nearbyCoordinates = new ArrayList<>();
+    if (priorStepCoordinates() != null) {
+      nearbyCoordinates.addAll(priorStepCoordinates());
+    }
+    nearbyCoordinates.addAll(currentStepCoordinates());
+    if (upcomingStepCoordinates() != null) {
+      nearbyCoordinates.addAll(upcomingStepCoordinates());
+    }
+    return nearbyCoordinates;
+  }
 
   /**
    * Provides a new instance of the {@link RouteProgress.Builder} with the default values for each
@@ -178,9 +214,9 @@ public abstract class RouteProgress {
   @AutoValue.Builder
   public abstract static class Builder {
 
-    abstract DirectionsRoute directionsRoute();
-
     public abstract Builder directionsRoute(DirectionsRoute directionsRoute);
+
+    abstract DirectionsRoute directionsRoute();
 
     abstract int legIndex();
 
@@ -205,11 +241,11 @@ public abstract class RouteProgress {
     abstract RouteProgress autoBuild(); // not public
 
     public RouteProgress build() {
-
       RouteProgress routeProgress = autoBuild();
 
       LegStep nextStep
-        = routeProgress.stepIndex() == (directionsRoute().legs().get(legIndex()).steps().size() - 1) ? null
+        = routeProgress.stepIndex() == (directionsRoute().legs().get(legIndex()).steps().size() - 1)
+        ? null
         : directionsRoute().legs().get(legIndex()).steps().get(routeProgress.stepIndex() + 1);
 
       RouteLegProgress legProgress = RouteLegProgress.builder()
