@@ -30,5 +30,8 @@
         <attr name="navigationViewBannerManeuverPrimary" format="color"/>
         <attr name="navigationViewBannerManeuverSecondary" format="color"/>
 
+        <attr name="navigationViewProgress" format="color"/>
+        <attr name="navigationViewProgressBackground" format="color"/>
+
     </declare-styleable>
 </resources>

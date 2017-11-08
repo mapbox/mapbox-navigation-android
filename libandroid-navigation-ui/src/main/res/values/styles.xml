@@ -26,6 +26,9 @@
         <item name="navigationViewBannerSecondaryText">@color/mapbox_navigation_view_color_banner_secondary_text</item>
         <item name="navigationViewBannerManeuverPrimary">@color/mapbox_navigation_view_color_banner_maneuver_primary</item>
         <item name="navigationViewBannerManeuverSecondary">@color/mapbox_navigation_view_color_banner_maneuver_secondary</item>
+
+        <item name="navigationViewProgress">@color/mapbox_navigation_view_color_progress</item>
+        <item name="navigationViewProgressBackground">@color/mapbox_navigation_view_color_progress_background</item>
     </style>
 
     <style name="NavigationViewDark" parent="Theme.AppCompat.Light.NoActionBar">
@@ -42,6 +45,9 @@
         <item name="navigationViewBannerSecondaryText">@color/mapbox_navigation_view_color_banner_secondary_text_dark</item>
         <item name="navigationViewBannerManeuverPrimary">@color/mapbox_navigation_view_color_banner_maneuver_primary_dark</item>
         <item name="navigationViewBannerManeuverSecondary">@color/mapbox_navigation_view_color_banner_maneuver_secondary_dark</item>
+
+        <item name="navigationViewProgress">@color/mapbox_navigation_view_color_progress_dark</item>
+        <item name="navigationViewProgressBackground">@color/mapbox_navigation_view_color_progress_background_dark</item>
     </style>
 
 </resources>

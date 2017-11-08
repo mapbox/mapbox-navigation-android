@@ -2,14 +2,14 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@android:id/background">
         <shape>
-            <solid android:color="@color/md_grey_200" />
+            <solid android:color="?attr/navigationViewProgressBackground" />
         </shape>
     </item>
 
     <item android:id="@android:id/progress">
         <clip>
             <shape>
-                <solid android:color="?attr/navigationViewSecondary" />
+                <solid android:color="?attr/navigationViewProgress" />
             </shape>
         </clip>
     </item>
