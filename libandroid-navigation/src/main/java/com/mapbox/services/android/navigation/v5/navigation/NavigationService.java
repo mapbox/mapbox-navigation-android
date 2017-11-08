@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Build;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -66,6 +67,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private boolean firstProgressUpdate = true;
   private NavigationEngine thread;
   private Location rawLocation;
+  private NavigationForegroundCalculation navigationForegroundCalculation;
 
   @Nullable
   @Override
@@ -89,6 +91,23 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
+    navigationForegroundCalculation = new NavigationForegroundCalculation();
+    getApplication().registerActivityLifecycleCallbacks(navigationForegroundCalculation);
+
+    new CountDownTimer( 100000, 1000) {
+
+      @Override
+      public void onTick(long l) {
+        long percentage = navigationForegroundCalculation.getForegroundPercentage();
+        Timber.d("foreground percentage: " + percentage);
+      }
+
+      @Override
+      public void onFinish() {
+
+      }
+    }.start();
+
     return START_STICKY;
   }
 
@@ -108,6 +127,8 @@ public class NavigationService extends Service implements LocationEngineListener
         rawLocation);
     }
     endNavigation();
+
+    getApplication().unregisterActivityLifecycleCallbacks(navigationForegroundCalculation);
     super.onDestroy();
   }
 
@@ -327,7 +348,6 @@ public class NavigationService extends Service implements LocationEngineListener
       sessionState.rerouteDate()
     ).build());
   }
-
 
   class LocalBinder extends Binder {
     NavigationService getService() {
