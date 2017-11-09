@@ -56,7 +56,8 @@ public class ThemeSwitcher {
    * @param context to retrieve {@link SharedPreferences}
    * @param map     the style will be set on
    */
-  static void setMapStyle(Context context, MapboxMap map, @Nullable String customMapStyleUrl, MapboxMap.OnStyleLoadedListener listener) {
+  static void setMapStyle(Context context, MapboxMap map, @Nullable String customMapStyleUrl,
+                          MapboxMap.OnStyleLoadedListener listener) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
     if (customMapStyleUrl != null) {
       map.setStyleUrl(customMapStyleUrl, listener);
