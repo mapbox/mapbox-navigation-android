@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+
 public class NavigationActivity extends AppCompatActivity implements NavigationViewListener {
 
   private NavigationView navigationView;
@@ -14,7 +16,13 @@ public class NavigationActivity extends AppCompatActivity implements NavigationV
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_navigation);
     navigationView = findViewById(R.id.navigationView);
-    navigationView.onCreate(savedInstanceState);
+    String customMapStyleUrl;
+    if (getIntent().getStringExtra(NavigationConstants.NAVIGATION_VIEW_CUSTOM_MAP_STYLE_URL) != null) {
+      customMapStyleUrl = getIntent().getStringExtra(NavigationConstants.NAVIGATION_VIEW_CUSTOM_MAP_STYLE_URL);
+      navigationView.onCreate(savedInstanceState, customMapStyleUrl);
+    } else {
+      navigationView.onCreate(savedInstanceState, null);
+    }
     navigationView.getNavigationAsync(this);
   }
 

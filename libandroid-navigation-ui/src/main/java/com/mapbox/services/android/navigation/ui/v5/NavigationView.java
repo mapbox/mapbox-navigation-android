@@ -77,6 +77,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   private LocationLayerPlugin locationLayer;
   private NavigationViewListener navigationListener;
   private boolean resumeState;
+  private String customMapStyle;
 
   public NavigationView(Context context) {
     this(context, null);
@@ -93,12 +94,15 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     init();
   }
 
-  public void onCreate(@Nullable Bundle savedInstanceState) {
+  public void onCreate(@Nullable Bundle savedInstanceState, @Nullable String customMapStyle) {
     resumeState = savedInstanceState != null;
+    if (customMapStyle != null) {
+      this.customMapStyle = customMapStyle;
+    }
     mapView.onCreate(savedInstanceState);
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  @SuppressWarnings( {"MissingPermission"})
   public void onStart() {
     mapView.onStart();
   }
@@ -166,18 +170,33 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     map = mapboxMap;
     map.setOnScrollListener(this);
     map.setPadding(0, 0, 0, summaryBottomSheet.getHeight());
-    ThemeSwitcher.setMapStyle(getContext(), map, new MapboxMap.OnStyleLoadedListener() {
-      @Override
-      public void onStyleLoaded(String style) {
-        initRoute();
-        initCamera();
-        initLocationLayer();
-        initLifecycleObservers();
-        initNavigationPresenter();
-        subscribeViews();
-        navigationListener.onNavigationReady();
-      }
-    });
+    if (customMapStyle != null) {
+      ThemeSwitcher.setMapStyle(getContext(), map, customMapStyle, new MapboxMap.OnStyleLoadedListener() {
+        @Override
+        public void onStyleLoaded(String style) {
+          initRoute();
+          initCamera();
+          initLocationLayer();
+          initLifecycleObservers();
+          initNavigationPresenter();
+          subscribeViews();
+          navigationListener.onNavigationReady();
+        }
+      });
+    } else {
+      ThemeSwitcher.setMapStyle(getContext(), map, null, new MapboxMap.OnStyleLoadedListener() {
+        @Override
+        public void onStyleLoaded(String style) {
+          initRoute();
+          initCamera();
+          initLocationLayer();
+          initLifecycleObservers();
+          initNavigationPresenter();
+          subscribeViews();
+          navigationListener.onNavigationReady();
+        }
+      });
+    }
   }
 
   /**

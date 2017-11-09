@@ -253,7 +253,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private void launchNavigationWithRoute() {
     if (route != null) {
       NavigationLauncher.startNavigation(this, route,
-        null, shouldSimulateRoute);
+        null, shouldSimulateRoute,"mapbox://styles/langsmith/cj8buc1fx0ufv2rmwq33xslj6");
     }
   }
 
