@@ -38,7 +38,8 @@ public class PollyPlayer implements InstructionPlayer {
 
   /**
    * Construct an instance of {@link PollyPlayer}
-   * @param context to initialize {@link CognitoCachingCredentialsProvider} and {@link AudioManager}
+   *
+   * @param context   to initialize {@link CognitoCachingCredentialsProvider} and {@link AudioManager}
    * @param awsPoolId to initialize {@link CognitoCachingCredentialsProvider}
    */
   public PollyPlayer(Context context, String awsPoolId) {
@@ -47,7 +48,6 @@ public class PollyPlayer implements InstructionPlayer {
   }
 
   /**
-   *
    * @param instruction voice instruction to be synthesized and played.
    */
   @Override
@@ -135,10 +135,12 @@ public class PollyPlayer implements InstructionPlayer {
   }
 
   private void playInstruction(String instruction) {
-    pollyMediaPlayer = new MediaPlayer();
-    setDataSource(instruction);
-    pollyMediaPlayer.prepareAsync();
-    setListeners();
+    if (!TextUtils.isEmpty(instruction)) {
+      pollyMediaPlayer = new MediaPlayer();
+      setDataSource(instruction);
+      pollyMediaPlayer.prepareAsync();
+      setListeners();
+    }
   }
 
   private void pauseInstruction() {

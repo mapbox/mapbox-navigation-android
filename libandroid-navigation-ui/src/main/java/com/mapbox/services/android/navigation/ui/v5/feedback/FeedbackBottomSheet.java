@@ -24,7 +24,6 @@ import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
@@ -37,6 +36,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   private FeedbackAdapter feedbackAdapter;
   private RecyclerView feedbackItems;
   private ProgressBar feedbackProgressBar;
+  private ObjectAnimator countdownAnimation;
   private long duration;
 
   public static FeedbackBottomSheet newInstance(FeedbackBottomSheetListener feedbackBottomSheetListener,
@@ -89,7 +89,6 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   @Override
   public void onFeedbackItemClick(int feedbackPosition) {
     FeedbackItem feedbackItem = feedbackAdapter.getFeedbackItem(feedbackPosition);
-    Toast.makeText(getContext(), "Feedback Submitted", Toast.LENGTH_SHORT).show();
     feedbackBottomSheetListener.onFeedbackSelected(feedbackItem);
     dismiss();
   }
@@ -98,6 +97,14 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   public void onDismiss(DialogInterface dialog) {
     super.onDismiss(dialog);
     feedbackBottomSheetListener.onFeedbackDismissed();
+  }
+
+  @Override
+  public void onStop() {
+    super.onStop();
+    if (countdownAnimation != null) {
+      countdownAnimation.cancel();
+    }
   }
 
   public void setFeedbackBottomSheetListener(FeedbackBottomSheetListener feedbackBottomSheetListener) {
@@ -130,7 +137,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   }
 
   private void initCountDownAnimation() {
-    ObjectAnimator countdownAnimation = ObjectAnimator.ofInt(feedbackProgressBar,
+    countdownAnimation = ObjectAnimator.ofInt(feedbackProgressBar,
       "progress", 0);
     countdownAnimation.setInterpolator(new LinearInterpolator());
     countdownAnimation.setDuration(duration);

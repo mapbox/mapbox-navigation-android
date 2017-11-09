@@ -13,10 +13,6 @@ class NavigationPresenter {
     this.view = view;
   }
 
-  void onMuteClick(boolean isMuted) {
-    view.setMuted(isMuted);
-  }
-
   void onRecenterClick() {
     view.setSummaryBehaviorHideable(false);
     view.setSummaryBehaviorState(BottomSheetBehavior.STATE_EXPANDED);
@@ -44,9 +40,5 @@ class NavigationPresenter {
 
   void onDestinationUpdate(Point point) {
     view.addMarker(point);
-  }
-
-  void onFeedbackClick() {
-    view.showFeedbackBottomSheet();
   }
 }

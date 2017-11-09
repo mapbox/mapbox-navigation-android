@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:gravity="center"
-    android:layout_marginTop="4dp"
     android:layout_marginBottom="4dp"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_marginTop="4dp">
 
-    <ImageView
-        android:id="@+id/turnImage"
+    <com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneView
+        android:id="@+id/turnLaneView"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_gravity="center"
-        app:srcCompat="@drawable/lane_straight"/>
+        android:layerType="software"/>
 
 </RelativeLayout>

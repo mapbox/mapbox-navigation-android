@@ -97,6 +97,26 @@ public final class NavigationConstants {
 
   public static final double MINIMUM_DISTANCE_BEFORE_REROUTING = 50;
 
+  /**
+   * Text to be shown in AlertView during off-route scenario.
+   */
+  public static final String REPORT_PROBLEM = "Report Problem";
+
+  /**
+   * Duration in which the AlertView is shown with the "Report Problem" text.
+   */
+  public static final long ALERT_VIEW_PROBLEM_DURATION = 10000;
+
+  /**
+   * Duration in which the feedback BottomSheet is shown.
+   */
+  public static final long FEEDBACK_BOTTOM_SHEET_DURATION = 10000;
+
+  /**
+   * Shown in AlertView after a particular feedback item has been selected.
+   */
+  public static final String FEEDBACK_SUBMITTED = "Feedback Submitted";
+
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat";
   public static final String NAVIGATION_VIEW_ORIGIN_LNG_KEY = "origin_long";
@@ -169,12 +189,9 @@ public final class NavigationConstants {
 
   // Turn Lane Indication
   public static final String TURN_LANE_INDICATION_LEFT = "left";
-  public static final String TURN_LANE_INDICATION_SHARP_LEFT = "sharp left";
   public static final String TURN_LANE_INDICATION_SLIGHT_LEFT = "slight left";
   public static final String TURN_LANE_INDICATION_STRAIGHT = "straight";
-  public static final String TURN_LANE_INDICATION_NONE = "none";
   public static final String TURN_LANE_INDICATION_RIGHT = "right";
-  public static final String TURN_LANE_INDICATION_SHARP_RIGHT = "sharp right";
   public static final String TURN_LANE_INDICATION_SLIGHT_RIGHT = "slight right";
   public static final String TURN_LANE_INDICATION_UTURN = "uturn";
   public static final String NAVIGATION_VIEW_SIMULATE_ROUTE = "navigation_view_simulate_route";

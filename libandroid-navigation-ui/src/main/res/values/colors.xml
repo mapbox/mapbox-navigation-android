@@ -12,7 +12,7 @@
     <color name="mapbox_navigation_view_color_primary_text">#424242</color>
     <color name="mapbox_navigation_view_color_accent_text">#424242</color>
 
-    <color name="mapbox_navigation_view_color_list_background">#1B2633</color>
+    <color name="mapbox_navigation_view_color_list_background">#2D3F53</color>
 
     <color name="mapbox_navigation_view_color_banner_background">#37516F</color>
     <color name="mapbox_navigation_view_color_banner_primary_text">#FFFFFF</color>
@@ -21,14 +21,13 @@
     <color name="mapbox_navigation_view_color_banner_maneuver_secondary">#4DFFFFFF</color>
 
     <!--Default Dark Theme-->
-    <color name="mapbox_navigation_view_color_primary_dark">#263D57</color>
+    <color name="mapbox_navigation_view_color_primary_dark">#2D3F53</color>
     <color name="mapbox_navigation_view_color_secondary_dark">#D8D8D8</color>
     <color name="mapbox_navigation_view_color_accent_dark">#FFFFFF</color>
     <color name="mapbox_navigation_view_color_primary_text_dark">#424242</color>
     <color name="mapbox_navigation_view_color_accent_text_dark">#FFFFFF</color>
-    <color name="mapbox_navigation_view_color_banner_dark">#37516F</color>
 
-    <color name="mapbox_navigation_view_color_list_background_dark">#1B2633</color>
+    <color name="mapbox_navigation_view_color_list_background_dark">#2D3F53</color>
 
     <color name="mapbox_navigation_view_color_banner_background_dark">#37516F</color>
     <color name="mapbox_navigation_view_color_banner_primary_text_dark">#FFFFFF</color>
@@ -36,7 +35,12 @@
     <color name="mapbox_navigation_view_color_banner_maneuver_primary_dark">#FFFFFF</color>
     <color name="mapbox_navigation_view_color_banner_maneuver_secondary_dark">#4DFFFFFF</color>
 
-    <!-- Feedback -->
+    <!-- Alert View -->
+    <color name="mapbox_navigation_view_color_progress">#4B75A4</color>
+    <color name="mapbox_navigation_view_color_progress_background">#39587B</color>
+
+    <color name="mapbox_navigation_view_color_progress_dark">#4B75A4</color>
+    <color name="mapbox_navigation_view_color_progress_background_dark">#39587B</color>
 
     <!--grey-->
     <color name="md_grey_200">#EEEEEE</color>

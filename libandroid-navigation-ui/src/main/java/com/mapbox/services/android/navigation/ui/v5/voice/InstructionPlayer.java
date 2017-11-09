@@ -19,7 +19,7 @@ public interface InstructionPlayer {
 
   /**
    * Will determine if voice instructions will be played or not.
-   *
+   * <p>
    * If called while an instruction is currently playing, the instruction should end immediately and any
    * instructions queued should be cleared.
    *
