@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.summary.list;
 
+import android.content.res.Configuration;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -77,9 +79,26 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
       holder.stepPrimaryText.setMaxLines(1);
       holder.stepSecondaryText.setVisibility(View.VISIBLE);
       holder.stepSecondaryText.setText(secondaryText);
+      adjustBannerTextVerticalBias(holder, 0.65f);
     } else {
       holder.stepPrimaryText.setMaxLines(2);
       holder.stepSecondaryText.setVisibility(View.GONE);
+      adjustBannerTextVerticalBias(holder, 0.5f);
+    }
+  }
+
+  /**
+   * Adjust the banner text layout {@link ConstraintLayout} vertical bias.
+   *
+   * @param percentBias to be set to the text layout
+   */
+  private void adjustBannerTextVerticalBias(InstructionViewHolder holder, float percentBias) {
+    int orientation = holder.itemView.getResources().getConfiguration().orientation;
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+      ConstraintLayout.LayoutParams params =
+        (ConstraintLayout.LayoutParams) holder.instructionLayoutText.getLayoutParams();
+      params.verticalBias = percentBias;
+      holder.instructionLayoutText.setLayoutParams(params);
     }
   }
 
