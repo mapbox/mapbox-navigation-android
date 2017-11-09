@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
 import com.mapbox.mapboxsdk.annotations.Icon;
@@ -55,12 +56,17 @@ public class ThemeSwitcher {
    * @param context to retrieve {@link SharedPreferences}
    * @param map     the style will be set on
    */
-  static void setMapStyle(Context context, MapboxMap map, MapboxMap.OnStyleLoadedListener listener) {
+  static void setMapStyle(Context context, MapboxMap map, @Nullable String customMapStyleUrl,
+                          MapboxMap.OnStyleLoadedListener listener) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    String nightThemeUrl = context.getString(R.string.navigation_guidance_night_v2);
-    String dayThemeUrl = context.getString(R.string.navigation_guidance_day_v2);
-    map.setStyleUrl(darkThemeEnabled ? nightThemeUrl : dayThemeUrl, listener);
+    if (customMapStyleUrl != null) {
+      map.setStyleUrl(customMapStyleUrl, listener);
+    } else {
+      boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
+      String nightThemeUrl = context.getString(R.string.navigation_guidance_night_v2);
+      String dayThemeUrl = context.getString(R.string.navigation_guidance_day_v2);
+      map.setStyleUrl(darkThemeEnabled ? nightThemeUrl : dayThemeUrl, listener);
+    }
   }
 
   /**
