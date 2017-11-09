@@ -118,7 +118,7 @@ public class InstructionModel {
 
   private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat) {
     stepDistanceRemaining = DistanceUtils.distanceFormatterBold(progress.currentLegProgress()
-      .currentStepProgress().distanceRemaining(), decimalFormat);
+      .currentStepProgress().distanceRemaining(), decimalFormat, true);
   }
 
   private boolean hasManeuver(LegStep step) {

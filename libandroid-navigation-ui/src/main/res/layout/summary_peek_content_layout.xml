@@ -15,7 +15,6 @@
         android:textColor="?attr/navigationViewPrimaryText"
         android:includeFontPadding="false"
         android:textSize="26sp"
-        android:textStyle="bold"
         tools:text="5 min"/>
 
     <LinearLayout
