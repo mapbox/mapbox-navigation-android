@@ -3,7 +3,7 @@ package com.mapbox.services.android.navigation.v5.utils;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.utils.TextUtils;
 import com.mapbox.turf.TurfConstants;
-import com.mapbox.turf.TurfHelpers;
+import com.mapbox.turf.TurfConversion;
 
 import java.text.DecimalFormat;
 import java.util.Locale;
@@ -31,13 +31,13 @@ public class StringUtils {
    */
   public static String distanceFormatter(double distance) {
     String formattedString;
-    if (TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET) > 1099) {
-      distance = TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES);
+    if (TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET) > 1099) {
+      distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES);
       DecimalFormat df = new DecimalFormat(DECIMAL_FORMAT);
       double roundedNumber = (distance / 100 * 100);
       formattedString = String.format(Locale.US, MILES_STRING_FORMAT, df.format(roundedNumber));
     } else {
-      distance = TurfHelpers.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET);
+      distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET);
       int roundedNumber = ((int) Math.round(distance)) / 100 * 100;
       formattedString = String.format(Locale.US, FEET_STRING_FORMAT, roundedNumber);
     }

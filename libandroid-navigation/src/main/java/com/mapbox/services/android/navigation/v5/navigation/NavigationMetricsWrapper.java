@@ -2,15 +2,22 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
 
+import com.mapbox.directions.v5.models.StepManeuver;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
+import com.mapbox.turf.TurfConstants;
+import com.mapbox.turf.TurfConversion;
+import com.mapbox.turf.TurfMeasurement;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+
+import timber.log.Timber;
 
 final class NavigationMetricsWrapper {
   static String sdkIdentifier;
@@ -84,6 +91,9 @@ final class NavigationMetricsWrapper {
       (int) routeProgress.distanceTraveled(), (int) routeProgress.distanceRemaining(),
       (int) routeProgress.durationRemaining(), sessionState.startTimestamp()
     );
+
+    calculateAbsoluteDistance(location, routeProgress);
+
     MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(0, departEvent);
     MapboxTelemetry.getInstance().pushEvent(departEvent);
   }
@@ -201,5 +211,18 @@ final class NavigationMetricsWrapper {
     beforeLocations = obtainLocations(sessionState.beforeRerouteLocations());
 
     afterLocations = obtainLocations(afterLoc);
+  }
+
+  private static int calculateAbsoluteDistance(Location currentLocation, RouteProgress routeProgress) {
+    StepManeuver finalManuever = routeProgress.directionsRoute().legs().get(routeProgress.directionsRoute().legs()
+      .size()-1).steps().get(routeProgress.directionsRoute().legs().get(routeProgress.directionsRoute().legs()
+      .size()-1).steps().size()-1).maneuver();
+
+    Point currentPoint = Point.fromLngLat(currentLocation.getLongitude(), currentLocation.getLatitude());
+
+    Timber.d("AbsoluteDist: " + TurfMeasurement.distance(currentPoint, finalManuever.location(), TurfConstants.UNIT_METERS));
+    Timber.d("RouteDist: " + routeProgress.distanceRemaining());
+
+    return 1;
   }
 }
