@@ -94,8 +94,11 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
    */
   private void fetchRoute(Point origin, Point destination) {
     if (origin != null && destination != null) {
-      Double bearing
-        = rawLocation.hasBearing() ? Float.valueOf(rawLocation.getBearing()).doubleValue() : null;
+
+      Double bearing = null;
+      if (rawLocation != null) {
+        bearing = rawLocation.hasBearing() ? Float.valueOf(rawLocation.getBearing()).doubleValue() : null;
+      }
 
       NavigationRoute.builder()
         .accessToken(Mapbox.getAccessToken())

@@ -135,10 +135,12 @@ public class PollyPlayer implements InstructionPlayer {
   }
 
   private void playInstruction(String instruction) {
-    pollyMediaPlayer = new MediaPlayer();
-    setDataSource(instruction);
-    pollyMediaPlayer.prepareAsync();
-    setListeners();
+    if (!TextUtils.isEmpty(instruction)) {
+      pollyMediaPlayer = new MediaPlayer();
+      setDataSource(instruction);
+      pollyMediaPlayer.prepareAsync();
+      setListeners();
+    }
   }
 
   private void pauseInstruction() {

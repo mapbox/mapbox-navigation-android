@@ -50,7 +50,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
       updateSecondaryText(holder, instructionText.getSecondaryText());
       updateManeuverView(holder, step);
       holder.stepDistanceText.setText(DistanceUtils
-        .distanceFormatterBold(instructionText.getStepDistance(), decimalFormat));
+        .distanceFormatterBold(instructionText.getStepDistance(), decimalFormat, true));
     }
   }
 
