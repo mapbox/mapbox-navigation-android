@@ -101,9 +101,6 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   @SuppressWarnings({"MissingPermission"})
   public void onStart() {
     mapView.onStart();
-    if (locationLayer != null) {
-      locationLayer.onStart();
-    }
   }
 
   public void onResume() {
@@ -120,9 +117,6 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
 
   public void onStop() {
     mapView.onStop();
-    if (locationLayer != null) {
-      locationLayer.onStop();
-    }
   }
 
   public void onDestroy() {
@@ -405,6 +399,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
    */
   private void initLifecycleObservers() {
     try {
+      ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationLayer);
       ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationViewModel);
       ((LifecycleOwner) getContext()).getLifecycle().addObserver(navigationViewModel);
     } catch (ClassCastException exception) {
