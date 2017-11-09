@@ -14,27 +14,6 @@
         android:orientation="vertical"
         app:layout_constraintGuide_begin="80dp"/>
 
-    <!--<View-->
-        <!--android:layout_width="30dp"-->
-        <!--android:layout_height="17dp"-->
-        <!--android:background="@android:color/black"-->
-        <!--tools:layout_editor_absoluteX="190dp"-->
-        <!--tools:layout_editor_absoluteY="79dp"/>-->
-
-    <!--<View-->
-        <!--android:layout_width="30dp"-->
-        <!--android:layout_height="50dp"-->
-        <!--android:background="@android:color/black"-->
-        <!--tools:layout_editor_absoluteX="160dp"-->
-        <!--tools:layout_editor_absoluteY="49dp"/>-->
-
-    <!--<View-->
-        <!--android:layout_width="30dp"-->
-        <!--android:layout_height="23dp"-->
-        <!--android:background="@android:color/black"-->
-        <!--tools:layout_editor_absoluteX="206dp"-->
-        <!--tools:layout_editor_absoluteY="0dp"/>-->
-
     <android.support.constraint.ConstraintLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
