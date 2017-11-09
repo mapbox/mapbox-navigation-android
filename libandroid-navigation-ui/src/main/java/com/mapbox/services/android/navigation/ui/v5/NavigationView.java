@@ -40,12 +40,15 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 /**
  * View that creates the drop-in UI.
  * <p>
- * Once started, this view will check if launched with a {@link DirectionsRoute}.
- * Or, if not found, this activity will look for a set of {@link Point} coordinates.
+ * Once started, this view will check if the {@link Activity} that inflated
+ * it was launched with a {@link DirectionsRoute}.
+ * <p>
+ * Or, if not found, this view will look for a set of {@link Point} coordinates.
  * In the latter case, a new {@link DirectionsRoute} will be retrieved from {@link NavigationRoute}.
- * </p><p>
+ * <p>
  * Once valid data is obtained, this activity will immediately begin navigation
  * with {@link MapboxNavigation}.
+ * <p>
  * If launched with the simulation boolean set to true, a {@link MockLocationEngine}
  * will be initialized and begin pushing updates.
  * <p>
@@ -54,8 +57,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
  * <p>
  * A Mapbox access token must also be set by the developer (to initialize navigation).
  *
- * @since 0.6.0
- * </p>
+ * @since 0.7.0
  */
 public class NavigationView extends CoordinatorLayout implements OnMapReadyCallback, MapboxMap.OnScrollListener,
   NavigationContract.View {
@@ -98,7 +100,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     mapView.onCreate(savedInstanceState);
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  @SuppressWarnings( {"MissingPermission"})
   public void onStart() {
     mapView.onStart();
   }
@@ -247,15 +249,32 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
       .icon(ThemeSwitcher.retrieveMapMarker(getContext())));
   }
 
+  /**
+   * Called when the navigation session is finished.
+   * Can either be from a cancel event or if the user has arrived at their destination.
+   */
   @Override
   public void finishNavigationView() {
     navigationListener.onNavigationFinished();
   }
 
+  /**
+   * Should be called when this view is completely initialized.
+   *
+   * @param activity with {@link android.content.Intent} containing route / coordinate data
+   */
   public void startNavigation(Activity activity) {
     routeViewModel.extractLaunchData(activity);
   }
 
+  /**
+   * Should be called after {@link NavigationView#onCreate(Bundle)}.
+   * <p>
+   * This method adds the {@link NavigationViewListener},
+   * which will fire ready / cancel events for this view.
+   *
+   * @param navigationViewListener to be set to this view
+   */
   public void getNavigationAsync(NavigationViewListener navigationViewListener) {
     this.navigationListener = navigationViewListener;
     mapView.getMapAsync(this);
