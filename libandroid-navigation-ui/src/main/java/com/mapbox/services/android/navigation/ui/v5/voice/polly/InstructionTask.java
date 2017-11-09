@@ -8,7 +8,7 @@ import com.amazonaws.services.polly.model.OutputFormat;
 import com.amazonaws.services.polly.model.SynthesizeSpeechPresignRequest;
 import com.amazonaws.services.polly.model.VoiceId;
 
-public class InstructionTask extends AsyncTask<String, Void, Void> {
+public class InstructionTask extends AsyncTask<String, Void, String> {
 
   private AmazonPollyPresigningClient client;
   private TaskListener listener;
@@ -19,12 +19,16 @@ public class InstructionTask extends AsyncTask<String, Void, Void> {
   }
 
   @Override
-  protected Void doInBackground(String... strings) {
-    listener.onFinished(retrieveAudioUrl(strings[0]));
-    return null;
+  protected String doInBackground(String... strings) {
+    return retrieveSpeechUrl(strings[0]);
   }
 
-  private String retrieveAudioUrl(String instruction) {
+  @Override
+  protected void onPostExecute(String speechUrl) {
+    listener.onFinished(speechUrl);
+  }
+
+  private String retrieveSpeechUrl(String instruction) {
     SynthesizeSpeechPresignRequest synthesizeSpeechPresignRequest =
       new SynthesizeSpeechPresignRequest()
         .withText(instruction)
