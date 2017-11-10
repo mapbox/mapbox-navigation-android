@@ -165,7 +165,7 @@
         android:id="@+id/rerouteLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="?attr/navigationViewSecondary"
+        android:background="?attr/navigationViewBannerBackground"
         android:elevation="4dp"
         android:gravity="center"
         android:orientation="vertical"
@@ -181,7 +181,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:text="@string/rerouting"
-            android:textColor="?attr/navigationViewPrimary"
+            android:textColor="?attr/navigationViewBannerPrimaryText"
             android:textSize="20sp"
             android:textStyle="bold"/>
 

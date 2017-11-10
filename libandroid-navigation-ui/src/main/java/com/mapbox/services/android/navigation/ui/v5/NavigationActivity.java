@@ -4,6 +4,11 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
+/**
+ * Serves as a launching point for the custom drop-in UI, {@link NavigationView}.
+ * <p>
+ * Demonstrates the proper setup and usage of the view, including all lifecycle methods.
+ */
 public class NavigationActivity extends AppCompatActivity implements NavigationViewListener {
 
   private NavigationView navigationView;
