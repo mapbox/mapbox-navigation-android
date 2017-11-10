@@ -16,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import timber.log.Timber;
-
 final class NavigationMetricsWrapper {
   static String sdkIdentifier;
   private static String upcomingInstruction;
@@ -51,7 +49,8 @@ final class NavigationMetricsWrapper {
       sessionState.originalDuration(), null, sessionState.currentStepCount(),
       sessionState.originalStepCount()
     );
-    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(0, arriveEvent);
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(calculateAbsoluteDistance(location, routeProgress),
+      arriveEvent);
     MapboxTelemetry.getInstance().pushEvent(arriveEvent);
   }
 
@@ -72,7 +71,8 @@ final class NavigationMetricsWrapper {
       sessionState.originalDistance(), sessionState.originalDuration(), null,
       sessionState.arrivalTimestamp(), sessionState.currentStepCount(), sessionState.originalStepCount()
     );
-    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(0, cancelEvent);
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(calculateAbsoluteDistance(location, routeProgress),
+      cancelEvent);
     MapboxTelemetry.getInstance().pushEvent(cancelEvent);
   }
 
@@ -93,12 +93,12 @@ final class NavigationMetricsWrapper {
 
     calculateAbsoluteDistance(location, routeProgress);
 
-    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(0, departEvent);
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(calculateAbsoluteDistance(location, routeProgress),
+      departEvent);
     MapboxTelemetry.getInstance().pushEvent(departEvent);
   }
 
   static void rerouteEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
-
     updateRouteProgressSessionData(routeProgress, sessionState);
 
     Hashtable<String, Object> rerouteEvent = MapboxNavigationEvent.buildRerouteEvent(
@@ -125,14 +125,14 @@ final class NavigationMetricsWrapper {
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
       sessionState.currentStepCount(), sessionState.originalStepCount());
     rerouteEvent.put(MapboxNavigationEvent.KEY_CREATED, TelemetryUtils.generateCreateDate(location));
-    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(0, rerouteEvent);
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(calculateAbsoluteDistance(location, routeProgress),
+      rerouteEvent);
     MapboxTelemetry.getInstance().pushEvent(rerouteEvent);
   }
 
   static void feedbackEvent(SessionState sessionState, RouteProgress routeProgress, Location location,
                             String description, String feedbackType, String screenshot) {
     updateRouteProgressSessionData(routeProgress, sessionState);
-
 
     Hashtable<String, Object> feedbackEvent = MapboxNavigationEvent.buildFeedbackEvent(sdkIdentifier,
       BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(), location.getLatitude(),
@@ -152,7 +152,8 @@ final class NavigationMetricsWrapper {
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
       sessionState.currentStepCount(), sessionState.originalStepCount()
     );
-    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(0, feedbackEvent);
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(calculateAbsoluteDistance(location, routeProgress),
+      feedbackEvent);
     MapboxTelemetry.getInstance().pushEvent(feedbackEvent);
   }
 
@@ -218,11 +219,9 @@ final class NavigationMetricsWrapper {
       .size() - 1).steps().size() - 1).maneuver();
 
     Point currentPoint = Point.fromLngLat(currentLocation.getLongitude(), currentLocation.getLatitude());
+    int absoluteDistance = (int) TurfMeasurement.distance(currentPoint, finalManuever.location(),
+      TurfConstants.UNIT_METERS);
 
-    Timber.d("AbsoluteDist: " + TurfMeasurement.distance(currentPoint, finalManuever.location(),
-      TurfConstants.UNIT_METERS));
-    Timber.d("RouteDist: " + routeProgress.distanceRemaining());
-
-    return 1;
+    return absoluteDistance;
   }
 }
