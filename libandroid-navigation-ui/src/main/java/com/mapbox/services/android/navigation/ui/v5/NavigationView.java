@@ -190,7 +190,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
    */
   @Override
   public void onScroll() {
-    if (!summaryBehavior.isHideable()) {
+    if (summaryBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
       navigationPresenter.onMapScroll();
     }
   }
