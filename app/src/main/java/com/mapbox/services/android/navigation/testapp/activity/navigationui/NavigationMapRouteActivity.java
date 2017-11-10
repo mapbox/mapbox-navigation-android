@@ -34,7 +34,7 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class NavigationMapRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapClickListener, Callback<DirectionsResponse> {
+  MapboxMap.OnMapLongClickListener, Callback<DirectionsResponse> {
 
   private static final String DIRECTIONS_RESPONSE = "directions-route.json";
 
@@ -74,11 +74,12 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       .create();
     DirectionsResponse response = gson.fromJson(loadJsonFromAsset(DIRECTIONS_RESPONSE), DirectionsResponse.class);
     navigationMapRoute.addRoute(response.routes().get(0));
-    mapboxMap.setOnMapClickListener(this);
+//    mapboxMap.setOnMapClickListener(this);
+    mapboxMap.setOnMapLongClickListener(this);
   }
 
   @Override
-  public void onMapClick(@NonNull LatLng point) {
+  public void onMapLongClick(@NonNull LatLng point) {
     if (originMarker == null) {
       originMarker = mapboxMap.addMarker(new MarkerOptions().position(point));
     } else if (destinationMarker == null) {
@@ -88,14 +89,18 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       Point destinationPoint = Point.fromLngLat(
         destinationMarker.getPosition().getLongitude(), destinationMarker.getPosition().getLatitude());
       requestDirectionsRoute(originPoint, destinationPoint);
-    } else {
       mapboxMap.removeMarker(originMarker);
       mapboxMap.removeMarker(destinationMarker);
-      originMarker = null;
-      destinationMarker = null;
-      navigationMapRoute.removeRoute();
     }
+//    } else {
+//
+//      originMarker = null;
+//      destinationMarker = null;
+//      navigationMapRoute.removeRoute();
+//    }
   }
+
+
 
   public void requestDirectionsRoute(Point origin, Point destination) {
     MapboxDirections directions = MapboxDirections.builder()
