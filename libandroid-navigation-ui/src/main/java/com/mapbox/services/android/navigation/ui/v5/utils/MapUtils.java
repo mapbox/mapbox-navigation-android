@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.services.commons.geojson.Feature;
@@ -18,7 +19,7 @@ public class MapUtils {
                                                           @Nullable FeatureCollection collection,
                                                           @NonNull String sourceId) {
     if (collection == null) {
-      collection = FeatureCollection.fromFeatures(new Feature[]{});
+      collection = FeatureCollection.fromFeatures(new Feature[] {});
     }
 
     GeoJsonSource source = mapboxMap.getSourceAs(sourceId);
@@ -31,24 +32,17 @@ public class MapUtils {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  /**
+   * Generic method for adding layers to the map.
+   */
+  public static void addLayerToMap(@NonNull MapboxMap mapboxMap, @NonNull Layer layer,
+                                    @Nullable String idBelowLayer) {
+    if (idBelowLayer == null) {
+      mapboxMap.addLayer(layer);
+    } else {
+      mapboxMap.addLayerBelow(layer, idBelowLayer);
+    }
+  }
 
 
 }

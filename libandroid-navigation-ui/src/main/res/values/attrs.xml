@@ -13,7 +13,11 @@
     <attr name="alternativeRouteSevereCongestionColor" format="color"/>
     <attr name="alternativeRouteShieldColor" format="color"/>
 
-    <!-- Scales -->
+    <!-- Origin/Destination waypoint drawables -->
+    <attr name="originWaypointIcon" format="reference"/>
+    <attr name="destinationWaypointIcon" format="reference"/>
+
+    <!-- Route Scales -->
     <attr name="routeScale" format="float"/>
     <attr name="alternativeRouteScale" format="float"/>
 

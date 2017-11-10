@@ -91,13 +91,11 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       requestDirectionsRoute(originPoint, destinationPoint);
       mapboxMap.removeMarker(originMarker);
       mapboxMap.removeMarker(destinationMarker);
+    } else {
+      originMarker = null;
+      destinationMarker = null;
+      navigationMapRoute.removeRoute();
     }
-//    } else {
-//
-//      originMarker = null;
-//      destinationMarker = null;
-//      navigationMapRoute.removeRoute();
-//    }
   }
 
 

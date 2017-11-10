@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
@@ -50,12 +51,12 @@ import static com.mapbox.mapboxsdk.style.functions.stops.Stops.categorical;
 import static com.mapbox.mapboxsdk.style.functions.stops.Stops.exponential;
 
 /**
- * Provide a route using {@link NavigationMapRoute#addRoute(DirectionsRoute)} and a route will be
- * drawn using runtime styling. The route will automatically be placed below all labels independent
- * of specific style. If the map styles changed when a routes drawn on the map, the route will
- * automatically be redrawn onto the new map style. If during a navigation session, the user gets
- * re-routed, the route line will be redrawn to reflect the new geometry. To remove the route from
- * the map, use {@link NavigationMapRoute#removeRoute()}.
+ * Provide a route using {@link NavigationMapRoute#addRoutes(List)} and a route will be drawn using
+ * runtime styling. The route will automatically be placed below all labels independent of specific
+ * style. If the map styles changed when a routes drawn on the map, the route will automatically be
+ * redrawn onto the new map style. If during a navigation session, the user gets re-routed, the
+ * route line will be redrawn to reflect the new geometry. To remove the route from the map, use
+ * {@link NavigationMapRoute#removeRoute()}.
  * <p>
  * You are given the option when first constructing an instance of this class to pass in a style
  * resource. This allows for custom colorizing and line scaling of the route. Inside your
@@ -74,14 +75,11 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
 
   private static final String GENERIC_ROUTE_SOURCE_ID = "mapbox-navigation-route-source";
   private static final String GENERIC_ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
-  private static final String GENERIC_ROUTE_SHIELD_LAYER_ID = "mapbox-navigation-route-shield-layer";
   private static final String WAYPOINT_SOURCE_ID = "mapbox-navigation-waypoint-source";
   private static final String WAYPOINT_LAYER_ID = "mapbox-navigation-waypoint-layer";
-
-
-
-
-
+  private static final String ID_FORMAT = "%s-%d";
+  private static final String GENERIC_ROUTE_SHIELD_LAYER_ID
+    = "mapbox-navigation-route-shield-layer";
 
   @StyleRes
   private int styleRes;
@@ -101,6 +99,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private int alternativeRouteShieldColor;
   @ColorInt
   private int routeShieldColor;
+  @DrawableRes
+  private int originWaypointIcon;
+  @DrawableRes
+  private int destinationWaypointIcon;
 
   private List<DirectionsRoute> directionsRoutes;
   private final MapboxNavigation navigation;
@@ -108,7 +110,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private List<String> layerIds;
   private final MapView mapView;
   private int primaryRouteIndex;
-  private final List<FeatureCollection> featureCollections = new ArrayList<>();
+  private final List<FeatureCollection> featureCollections;
   private float routeScale;
   private float alternativeRouteScale;
   private String belowLayer;
@@ -199,6 +201,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
     this.belowLayer = belowLayer;
+    featureCollections = new ArrayList<>();
     addListeners();
     initialize();
   }
@@ -212,37 +215,53 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     placeRouteBelow();
   }
 
+  public void addRoute(DirectionsRoute directionsRoute) {
+    List<DirectionsRoute> routes = new ArrayList<>();
+    routes.add(directionsRoute);
+    addRoutes(routes);
+  }
+
   public void addRoutes(@NonNull @Size(min = 1) List<DirectionsRoute> directionsRoutes) {
     this.directionsRoutes = directionsRoutes;
+    if (!layerIds.isEmpty()) {
+      for (String id : layerIds) {
+        mapboxMap.removeLayer(id);
+      }
+    }
+    featureCollections.clear();
     generateFeatureCollectionList(directionsRoutes);
     drawRoutes();
     addDirectionWaypoints();
   }
 
+  /**
+   * Takes the directions route list and draws each line on the map.
+   */
   private void drawRoutes() {
-    // Add all the sources
+    // Add all the sources, the list is traversed backwards to ensure the primary route always gets
+    // drawn on top of the others since it initially has a index of zero.
     for (int i = featureCollections.size() - 1; i >= 0; i--) {
       MapUtils.updateMapSourceFromFeatureCollection(
-        mapboxMap, featureCollections.get(i), featureCollections.get(i).getFeatures().get(0).getStringProperty(SOURCE_KEY)
+        mapboxMap, featureCollections.get(i),
+        featureCollections.get(i).getFeatures().get(0).getStringProperty(SOURCE_KEY)
       );
 
-      String sourceId = featureCollections.get(i).getFeatures().get(0).getStringProperty(SOURCE_KEY);
+      // Get some required information for the next step
+      String sourceId = featureCollections.get(i).getFeatures()
+        .get(0).getStringProperty(SOURCE_KEY);
       int index = featureCollections.indexOf(featureCollections.get(i));
 
-      addRouteShieldLayer(String.format(Locale.US, "%s-%d", GENERIC_ROUTE_SHIELD_LAYER_ID,
-        index), sourceId, index);
-      addRouteLayer(String.format(Locale.US, "%s-%d", GENERIC_ROUTE_LAYER_ID,
-        index), sourceId, index);
+      // Add the layer IDs to a list so we can quickly remove them when needed without traversing
+      // through all the map layers.
+      layerIds.add(String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_SHIELD_LAYER_ID, index));
+      layerIds.add(String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_LAYER_ID, index));
+
+      // Add the route shield first followed by the route to ensure the shield is always on the
+      // bottom.
+      addRouteShieldLayer(layerIds.get(layerIds.size() - 2), sourceId, index);
+      addRouteLayer(layerIds.get(layerIds.size() - 1), sourceId, index);
     }
   }
-
-
-
-
-
-
-
-
 
   private void generateFeatureCollectionList(List<DirectionsRoute> directionsRoutes) {
     // Each route contains traffic information and should be recreated considering this traffic
@@ -257,9 +276,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     );
   }
 
-
-
-
   private static FeatureCollection waypointFeatureCollection(DirectionsRoute route) {
     final List<Feature> waypointFeatures = new ArrayList<>();
     for (RouteLeg leg : route.legs()) {
@@ -270,42 +286,12 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   }
 
   private void addDirectionWaypoints() {
-    MapUtils.updateMapSourceFromFeatureCollection(mapboxMap, featureCollections.get(featureCollections.size() - 1), WAYPOINT_SOURCE_ID);
+    MapUtils.updateMapSourceFromFeatureCollection(
+      mapboxMap, featureCollections.get(featureCollections.size() - 1), WAYPOINT_SOURCE_ID);
     drawWaypointMarkers(mapboxMap,
-      ContextCompat.getDrawable(mapView.getContext(), R.drawable.ic_route_origin),
-      ContextCompat.getDrawable(mapView.getContext(), R.drawable.ic_route_destination)
+      ContextCompat.getDrawable(mapView.getContext(), originWaypointIcon),
+      ContextCompat.getDrawable(mapView.getContext(), destinationWaypointIcon)
     );
-  }
-
-
-  @Override
-  public void onMapClick(@NonNull LatLng point) {
-    // determine which feature collections are alternative routes
-    for (FeatureCollection featureCollection : featureCollections) {
-      if (!(featureCollection.getFeatures().get(0).getGeometry() instanceof Point)) {
-        List<com.mapbox.geojson.Point> linePoints = new ArrayList<>();
-        for (Feature feature : featureCollection.getFeatures()) {
-          List<Position> positions = (List<Position>) feature.getGeometry().getCoordinates();
-          for (Position pos : positions) {
-            linePoints.add(com.mapbox.geojson.Point.fromLngLat(pos.getLongitude(), pos.getLatitude()));
-          }
-        }
-
-        com.mapbox.geojson.Feature feature = TurfMisc.pointOnLine(com.mapbox.geojson.Point.fromLngLat(point.getLongitude(), point.getLatitude()), linePoints);
-        com.mapbox.geojson.Point pointAlong = (com.mapbox.geojson.Point) feature.geometry();
-        double dis = TurfMeasurement.distance(com.mapbox.geojson.Point.fromLngLat(point.getLongitude(), point.getLatitude()), pointAlong, TurfConstants.UNIT_METERS);
-        if (dis <= 250) {
-          primaryRouteIndex = featureCollection.getFeatures().get(0).getNumberProperty(INDEX_KEY).intValue();
-        }
-      }
-    }
-    for (FeatureCollection featureCollection : featureCollections) {
-      if (!(featureCollection.getFeatures().get(0).getGeometry() instanceof Point)) {
-        int index = featureCollection.getFeatures().get(0).getNumberProperty("index").intValue();
-        updatePrimaryShieldRoute(String.format(Locale.US, "%s-%d", GENERIC_ROUTE_SHIELD_LAYER_ID, index), index);
-        updatePrimaryRoute(String.format(Locale.US, "%s-%d", GENERIC_ROUTE_LAYER_ID, index), index);
-      }
-    }
   }
 
   private void updatePrimaryRoute(String layerId, int index) {
@@ -345,34 +331,33 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   }
 
   /**
-   * If the {@link DirectionsRoute} request contains congestion information via annotations, breakup the source into
-   * pieces so data-driven styling can be used to change the route colors accordingly.
+   * If the {@link DirectionsRoute} request contains congestion information via annotations, breakup
+   * the source into pieces so data-driven styling can be used to change the route colors
+   * accordingly.
    */
   private static FeatureCollection addTrafficToSource(DirectionsRoute route, int index) {
     final List<Feature> features = new ArrayList<>();
     LineString originalGeometry = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
     Feature feat = Feature.fromGeometry(originalGeometry);
-    feat.addStringProperty(SOURCE_KEY, String.format(Locale.US, "%s-%d", NavigationMapSources.NAVIGATION_ROUTE_SOURCE, index));
-    feat.addNumberProperty("index", index);
+    feat.addStringProperty(SOURCE_KEY, String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_SOURCE_ID, index));
+    feat.addNumberProperty(INDEX_KEY, index);
     features.add(feat);
 
     LineString lineString = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
     for (RouteLeg leg : route.legs()) {
-      if (leg.annotation() != null) {
-        if (leg.annotation().congestion() != null) {
-          for (int i = 0; i < leg.annotation().congestion().size(); i++) {
-            // See https://github.com/mapbox/mapbox-navigation-android/issues/353
-            if (leg.annotation().congestion().size() + 1 <= lineString.getCoordinates().size()) {
-              double[] startCoord = lineString.getCoordinates().get(i).getCoordinates();
-              double[] endCoord = lineString.getCoordinates().get(i + 1).getCoordinates();
+      if (leg.annotation() != null && leg.annotation().congestion() != null) {
+        for (int i = 0; i < leg.annotation().congestion().size(); i++) {
+          // See https://github.com/mapbox/mapbox-navigation-android/issues/353
+          if (leg.annotation().congestion().size() + 1 <= lineString.getCoordinates().size()) {
+            double[] startCoord = lineString.getCoordinates().get(i).getCoordinates();
+            double[] endCoord = lineString.getCoordinates().get(i + 1).getCoordinates();
 
-              LineString congestionLineString = LineString.fromCoordinates(new double[][] {startCoord, endCoord});
-              Feature feature = Feature.fromGeometry(congestionLineString);
-              feature.addStringProperty(CONGESTION_KEY, leg.annotation().congestion().get(i));
-              feature.addStringProperty(SOURCE_KEY, String.format(Locale.US, "%s-%d", NavigationMapSources.NAVIGATION_ROUTE_SOURCE, index));
-              feature.addNumberProperty("index", index);
-              features.add(feature);
-            }
+            LineString congestionLineString = LineString.fromCoordinates(new double[][] {startCoord, endCoord});
+            Feature feature = Feature.fromGeometry(congestionLineString);
+            feature.addStringProperty(CONGESTION_KEY, leg.annotation().congestion().get(i));
+            feature.addStringProperty(SOURCE_KEY, String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_SOURCE_ID, index));
+            feature.addNumberProperty(INDEX_KEY, index);
+            features.add(feature);
           }
         }
       } else {
@@ -391,7 +376,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     Layer routeLayer = new LineLayer(layerId, sourceId).withProperties(
       PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
       PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-//      PropertyFactory.visibility(Property.NONE),
       PropertyFactory.lineWidth(Function.zoom(
         exponential(
           stop(4f, PropertyFactory.lineWidth(3f * scale)),
@@ -413,7 +397,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
         )).withDefaultValue(PropertyFactory.lineColor(
           index == primaryRouteIndex ? routeDefaultColor : alternativeRouteDefaultColor)))
     );
-    addLayerToMap(routeLayer, belowLayer);
+    MapUtils.addLayerToMap(mapboxMap, routeLayer, belowLayer);
   }
 
   /**
@@ -424,7 +408,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     Layer routeLayer = new LineLayer(layerId, sourceId).withProperties(
       PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
       PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-//      PropertyFactory.visibility(Property.NONE),
       PropertyFactory.lineWidth(Function.zoom(
         exponential(
           stop(10f, PropertyFactory.lineWidth(7f)),
@@ -437,9 +420,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       PropertyFactory.lineColor(
         index == primaryRouteIndex ? routeShieldColor : alternativeRouteShieldColor)
     );
-    addLayerToMap(routeLayer, belowLayer);
+    MapUtils.addLayerToMap(mapboxMap, routeLayer, belowLayer);
   }
-
 
   private void getAttributes() {
     Context context = mapView.getContext();
@@ -468,6 +450,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       ContextCompat.getColor(context, R.color.mapbox_navigation_route_alternative_shield_color));
     alternativeRouteScale = typedArray.getFloat(R.styleable.NavigationMapRoute_alternativeRouteScale, 1.0f);
 
+    // Waypoint attributes
+    originWaypointIcon = typedArray.getResourceId(R.styleable.NavigationMapRoute_originWaypointIcon, R.drawable.ic_route_origin);
+    destinationWaypointIcon = typedArray.getResourceId(R.styleable.NavigationMapRoute_destinationWaypointIcon, R.drawable.ic_route_destination);
+
     typedArray.recycle();
   }
 
@@ -486,8 +472,12 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     return belowLayer;
   }
 
+  private void drawWaypointMarkers(@NonNull MapboxMap mapboxMap, @Nullable Drawable originMarker,
+                                   @Nullable Drawable destinationMarker) {
+    if (originMarker == null || destinationMarker == null) {
+      return;
+    }
 
-  private void drawWaypointMarkers(@NonNull MapboxMap mapboxMap, @NonNull Drawable originMarker, @NonNull Drawable destinationMarker) {
     SymbolLayer waypointLayer = mapboxMap.getLayerAs(WAYPOINT_LAYER_ID);
     if (waypointLayer == null) {
       Bitmap bitmap = MapImageUtils.getBitmapFromDrawable(originMarker);
@@ -513,7 +503,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
         PropertyFactory.iconAllowOverlap(true),
         PropertyFactory.iconIgnorePlacement(true)
       );
-      addLayerToMap(waypointLayer, null);
+      layerIds.add(WAYPOINT_LAYER_ID);
+      MapUtils.addLayerToMap(mapboxMap, waypointLayer, null);
     }
   }
 
@@ -531,7 +522,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     return feature;
   }
 
-
   /**
    * Adds the necessary listeners
    */
@@ -544,25 +534,44 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   }
 
   /**
-   * Remove the route line from the map style, note that this only changes the visibility and does not remove any layers
-   * or sources.
+   * Remove the route line from the map style.
    *
    * @since 0.4.0
    */
   public void removeRoute() {
-    setLayerVisibility(false);
+    for (String layerId : layerIds) {
+      mapboxMap.removeLayer(layerId);
+    }
   }
 
-  /**
-   * Get the current route being used to draw the route, if one hasn't been added to the map yet, this will return
-   * {@code null}
-   *
-   * @return the {@link DirectionsRoute} used to draw the route line
-   * @since 0.4.0
-   */
-  public DirectionsRoute getRoute() {
-//    return route;
-    return null;
+  @Override
+  public void onMapClick(@NonNull LatLng point) {
+    // determine which feature collections are alternative routes
+    for (FeatureCollection featureCollection : featureCollections) {
+      if (!(featureCollection.getFeatures().get(0).getGeometry() instanceof Point)) {
+        List<com.mapbox.geojson.Point> linePoints = new ArrayList<>();
+        for (Feature feature : featureCollection.getFeatures()) {
+          List<Position> positions = (List<Position>) feature.getGeometry().getCoordinates();
+          for (Position pos : positions) {
+            linePoints.add(com.mapbox.geojson.Point.fromLngLat(pos.getLongitude(), pos.getLatitude()));
+          }
+        }
+
+        com.mapbox.geojson.Feature feature = TurfMisc.pointOnLine(com.mapbox.geojson.Point.fromLngLat(point.getLongitude(), point.getLatitude()), linePoints);
+        com.mapbox.geojson.Point pointAlong = (com.mapbox.geojson.Point) feature.geometry();
+        double dis = TurfMeasurement.distance(com.mapbox.geojson.Point.fromLngLat(point.getLongitude(), point.getLatitude()), pointAlong, TurfConstants.UNIT_METERS);
+        if (dis <= 250) {
+          primaryRouteIndex = featureCollection.getFeatures().get(0).getNumberProperty(INDEX_KEY).intValue();
+        }
+      }
+    }
+    for (FeatureCollection featureCollection : featureCollections) {
+      if (!(featureCollection.getFeatures().get(0).getGeometry() instanceof Point)) {
+        int index = featureCollection.getFeatures().get(0).getNumberProperty(INDEX_KEY).intValue();
+        updatePrimaryShieldRoute(String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_SHIELD_LAYER_ID, index), index);
+        updatePrimaryRoute(String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_LAYER_ID, index), index);
+      }
+    }
   }
 
   /**
@@ -575,8 +584,9 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   @Override
   public void onMapChanged(int change) {
     if (change == MapView.DID_FINISH_LOADING_STYLE) {
-      initialize();
-      setLayerVisibility(visible);
+      placeRouteBelow();
+      drawRoutes();
+      addDirectionWaypoints();
     }
   }
 
@@ -591,73 +601,11 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     // Check if the route's the same as the route currently drawn
-//    if (!routeProgress.directionsRoute().equals(route)) {
-//      route = routeProgress.directionsRoute();
-//      addSource(route);
-//    }
-  }
-
-  /**
-   * Toggle whether or not the route lines visible or not, used in {@link NavigationMapRoute#addRoute(DirectionsRoute)}
-   * and {@link NavigationMapRoute#removeRoute()}.
-   *
-   * @param visible true if you want the route to be visible, else false
-   */
-  private void setLayerVisibility(boolean visible) {
-    this.visible = visible;
-    List<Layer> layers = mapboxMap.getLayers();
-    String id;
-
-    for (Layer layer : layers) {
-      id = layer.getId();
-      if (layerIds.contains(layer.getId()) || id.equals(NavigationMapLayers.NAVIGATION_ROUTE_LAYER)
-        || id.equals(NavigationMapLayers.NAVIGATION_ROUTE_SHIELD_LAYER)) {
-        layer.setProperties(PropertyFactory.visibility(visible ? Property.VISIBLE : Property.NONE));
-      }
+    if (!routeProgress.directionsRoute().equals(directionsRoutes.get(primaryRouteIndex))) {
+      directionsRoutes.clear();
+      directionsRoutes.add(routeProgress.directionsRoute());
+      drawRoutes();
+      addDirectionWaypoints();
     }
-  }
-
-  /**
-   * Generic method for adding layers to the map.
-   */
-  private void addLayerToMap(@NonNull Layer layer, @Nullable String idBelowLayer) {
-    if (idBelowLayer == null) {
-      mapboxMap.addLayer(layer);
-    } else {
-      mapboxMap.addLayerBelow(layer, idBelowLayer);
-    }
-    layerIds.add(layer.getId());
-  }
-
-
-  /**
-   * Pass in a {@link DirectionsRoute} and display the route geometry on your map.
-   *
-   * @param route a {@link DirectionsRoute} used to draw the route line
-   * @since 0.4.0
-   */
-  public void addRoute(@NonNull DirectionsRoute route) {
-//    this.route = route;
-//    addSource(route);
-//    setLayerVisibility(true);
-  }
-
-
-  /**
-   * Layer id constants.
-   */
-  public static class NavigationMapLayers {
-    public static final String NAVIGATION_ROUTE_SHIELD_LAYER = "mapbox-plugin-navigation-route-shield-layer";
-    public static final String NAVIGATION_ROUTE_LAYER = "mapbox-plugin-navigation-route-layer";
-    public static final String ALTERNATIVE_ROUTE_SHIELD_LAYER = "navigation-ui-alternative-route-shield-layer";
-    public static final String ALTERNATIVE_ROUTE_LAYER = "navigation-ui-alternative-route-layer";
-  }
-
-  /**
-   * Source id constants.
-   */
-  public static class NavigationMapSources {
-    public static final String NAVIGATION_ROUTE_SOURCE = "mapbox-plugin-navigation-route-source";
-    public static final String ALTERNATIVE_ROUTE_SOURCE = "navigation-ui-alternative-route-source";
   }
 }
