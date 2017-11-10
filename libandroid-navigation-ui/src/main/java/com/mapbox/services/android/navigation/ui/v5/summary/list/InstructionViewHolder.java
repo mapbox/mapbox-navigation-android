@@ -34,7 +34,7 @@ class InstructionViewHolder extends RecyclerView.ViewHolder {
    */
   private void initInstructionAutoSize() {
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepPrimaryText,
-      26, 30, 1, TypedValue.COMPLEX_UNIT_SP);
+      26, 28, 1, TypedValue.COMPLEX_UNIT_SP);
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepSecondaryText,
       20, 26, 1, TypedValue.COMPLEX_UNIT_SP);
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepDistanceText,

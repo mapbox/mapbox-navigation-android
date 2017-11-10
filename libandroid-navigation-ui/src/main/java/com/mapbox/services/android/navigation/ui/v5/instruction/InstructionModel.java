@@ -139,16 +139,6 @@ public class InstructionModel {
     turnLanes = lanes;
   }
 
-  private LegStep extractThenStep(RouteProgress progress, LegStep upcomingStep) {
-    List<LegStep> currentLegSteps = progress.currentLeg().steps();
-    int thenStepIndex = currentLegSteps.indexOf(upcomingStep) + 1;
-    if (thenStepIndex < currentLegSteps.size()) {
-      return currentLegSteps.get(thenStepIndex);
-    } else {
-      return null;
-    }
-  }
-
   private void thenStep(LegStep upcomingStep, LegStep thenStep) {
     thenStepManeuverType = thenStep.maneuver().type();
     thenStepManeuverModifier = thenStep.maneuver().modifier();

@@ -128,15 +128,25 @@ public class InstructionText {
 
   private TextFields formatMultipleStrings(String multipleString, String exitText) {
     TextFields textFields = new TextFields();
-    String[] strings = StringAbbreviator.splitter(multipleString);
+
+    String[] strings = {multipleString};
+
+    if (!(multipleString.contains("(") || multipleString.contains(")"))) {
+      strings = StringAbbreviator.splitter(multipleString);
+    }
+
     String[] firstString = Arrays.copyOfRange(strings, 0, 1);
     if (!TextUtils.isEmpty(exitText)) {
       textFields.primaryText = exitText + ": " + firstString[0];
     } else {
       textFields.primaryText = firstString[0];
     }
-    String[] remainingStrings = Arrays.copyOfRange(strings, 1, strings.length);
-    textFields.secondaryText = TextUtils.join("  / ", remainingStrings).trim();
+
+    if (strings.length > 1) {
+      String[] remainingStrings = Arrays.copyOfRange(strings, 1, strings.length);
+      textFields.secondaryText = TextUtils.join("  / ", remainingStrings).trim();
+    }
+
     return textFields;
   }
 
