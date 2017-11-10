@@ -35,6 +35,7 @@ class NavigationQueueContainer {
   NavigationQueueContainer(MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
     locationBuffer = new RingBuffer<>(20);
+    currentLocation = new MetricsLocation(null);
   }
 
   void updateCurrentLocation(Location rawLocation) {

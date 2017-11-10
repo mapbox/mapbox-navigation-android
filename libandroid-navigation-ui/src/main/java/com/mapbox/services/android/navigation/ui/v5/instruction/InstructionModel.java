@@ -15,10 +15,10 @@ import java.util.List;
 public class InstructionModel {
 
   private SpannableStringBuilder stepDistanceRemaining;
-  private InstructionText upcomingInstructionText;
+  private InstructionText bannerInstructionText;
   private InstructionText thenInstructionText;
-  private String upcomingStepManeuverModifier;
-  private String upcomingStepManeuverType;
+  private String maneuverViewModifier;
+  private String maneuverViewType;
   private String thenStepManeuverModifier;
   private String thenStepManeuverType;
   private List<IntersectionLanes> turnLanes;
@@ -35,16 +35,16 @@ public class InstructionModel {
   }
 
   String getPrimaryText() {
-    if (upcomingInstructionText != null) {
-      return upcomingInstructionText.getPrimaryText();
+    if (bannerInstructionText != null) {
+      return bannerInstructionText.getPrimaryText();
     } else {
       return "";
     }
   }
 
   String getSecondaryText() {
-    if (upcomingInstructionText != null) {
-      return upcomingInstructionText.getSecondaryText();
+    if (bannerInstructionText != null) {
+      return bannerInstructionText.getSecondaryText();
     } else {
       return "";
     }
@@ -58,12 +58,12 @@ public class InstructionModel {
     }
   }
 
-  String getUpcomingStepManeuverModifier() {
-    return upcomingStepManeuverModifier;
+  String getManeuverViewModifier() {
+    return maneuverViewModifier;
   }
 
-  String getUpcomingStepManeuverType() {
-    return upcomingStepManeuverType;
+  String getManeuverViewType() {
+    return maneuverViewType;
   }
 
   String getThenStepManeuverModifier() {
@@ -88,37 +88,41 @@ public class InstructionModel {
 
   private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
     formatStepDistance(progress, decimalFormat);
-    LegStep upcomingStep = progress.currentLegProgress().upComingStep();
-    if (upcomingStep != null) {
-      extractStepResources(progress, upcomingStep);
-    }
+    extractStepResources(progress);
   }
 
-  private void extractStepResources(RouteProgress progress, LegStep upcomingStep) {
-    // Upcoming step
-    if (hasManeuver(upcomingStep)) {
-      upcomingStepManeuverType = upcomingStep.maneuver().type();
-      upcomingStepManeuverModifier = upcomingStep.maneuver().modifier();
+  private void extractStepResources(RouteProgress progress) {
+    LegStep currentStep = progress.currentLegProgress().currentStep();
+    LegStep upcomingStep = progress.currentLegProgress().upComingStep();
+    LegStep thenStep = progress.currentLegProgress().followOnStep();
+
+    // Type / Modifier / Text
+    if (upcomingStep != null && hasManeuver(upcomingStep)) {
+      maneuverViewType = upcomingStep.maneuver().type();
+      maneuverViewModifier = upcomingStep.maneuver().modifier();
+      // Upcoming instruction text data
+      bannerInstructionText = new InstructionText(upcomingStep);
+    } else if (hasManeuver(currentStep)) {
+      maneuverViewType = currentStep.maneuver().type();
+      maneuverViewModifier = currentStep.maneuver().modifier();
+      // Current instruction text data
+      bannerInstructionText = new InstructionText(currentStep);
     }
 
     // Then step (step after upcoming)
-    LegStep thenStep = extractThenStep(progress, upcomingStep);
     if (thenStep != null && hasManeuver(thenStep)) {
       thenStep(upcomingStep, thenStep);
     }
 
     // Turn lane data
-    if (hasIntersections(upcomingStep)) {
+    if (upcomingStep != null && hasIntersections(upcomingStep)) {
       intersectionTurnLanes(upcomingStep);
     }
-
-    // Upcoming instruction text data
-    upcomingInstructionText = new InstructionText(upcomingStep);
   }
 
   private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat) {
     stepDistanceRemaining = DistanceUtils.distanceFormatterBold(progress.currentLegProgress()
-      .currentStepProgress().distanceRemaining(), decimalFormat);
+      .currentStepProgress().distanceRemaining(), decimalFormat, true);
   }
 
   private boolean hasManeuver(LegStep step) {
@@ -133,16 +137,6 @@ public class InstructionModel {
       return;
     }
     turnLanes = lanes;
-  }
-
-  private LegStep extractThenStep(RouteProgress progress, LegStep upcomingStep) {
-    List<LegStep> currentLegSteps = progress.currentLeg().steps();
-    int thenStepIndex = currentLegSteps.indexOf(upcomingStep) + 1;
-    if (thenStepIndex < currentLegSteps.size()) {
-      return currentLegSteps.get(thenStepIndex);
-    } else {
-      return null;
-    }
   }
 
   private void thenStep(LegStep upcomingStep, LegStep thenStep) {
