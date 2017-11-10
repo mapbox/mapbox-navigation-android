@@ -174,6 +174,8 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
         initLocationLayer();
         initLifecycleObservers();
         initNavigationPresenter();
+        initClickListeners();
+        initSummaryBottomSheet();
         subscribeViews();
         navigationListener.onNavigationReady();
       }
@@ -292,8 +294,6 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
     initViewModels();
-    initClickListeners();
-    initSummaryBottomSheet();
   }
 
   /**
@@ -315,44 +315,6 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     } catch (ClassCastException exception) {
       throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
     }
-  }
-
-  /**
-   * Sets click listeners to all views that need them.
-   */
-  private void initClickListeners() {
-    cancelBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        navigationPresenter.onCancelBtnClick();
-      }
-    });
-    recenterBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        navigationPresenter.onRecenterClick();
-      }
-    });
-  }
-
-  /**
-   * Initializes the {@link BottomSheetBehavior} for {@link SummaryBottomSheet}.
-   */
-  private void initSummaryBottomSheet() {
-    summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
-    summaryBehavior.setHideable(false);
-    summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-      @Override
-      public void onStateChanged(@NonNull View bottomSheet, int newState) {
-        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-          navigationPresenter.onSummaryBottomSheetHidden();
-        }
-      }
-
-      @Override
-      public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-      }
-    });
   }
 
   /**
@@ -412,6 +374,44 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
    */
   private void initNavigationPresenter() {
     navigationPresenter = new NavigationPresenter(this);
+  }
+
+  /**
+   * Sets click listeners to all views that need them.
+   */
+  private void initClickListeners() {
+    cancelBtn.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        navigationPresenter.onCancelBtnClick();
+      }
+    });
+    recenterBtn.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        navigationPresenter.onRecenterClick();
+      }
+    });
+  }
+
+  /**
+   * Initializes the {@link BottomSheetBehavior} for {@link SummaryBottomSheet}.
+   */
+  private void initSummaryBottomSheet() {
+    summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
+    summaryBehavior.setHideable(false);
+    summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+      @Override
+      public void onStateChanged(@NonNull View bottomSheet, int newState) {
+        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+          navigationPresenter.onSummaryBottomSheetHidden();
+        }
+      }
+
+      @Override
+      public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+      }
+    });
   }
 
   /**
