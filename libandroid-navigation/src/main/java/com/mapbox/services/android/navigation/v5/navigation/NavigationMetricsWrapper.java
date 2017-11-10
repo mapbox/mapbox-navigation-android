@@ -2,15 +2,12 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
 
-import com.mapbox.directions.v5.models.StepManeuver;
-import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
-import com.mapbox.turf.TurfConstants;
-import com.mapbox.turf.TurfMeasurement;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -49,8 +46,10 @@ final class NavigationMetricsWrapper {
       sessionState.originalDuration(), null, sessionState.currentStepCount(),
       sessionState.originalStepCount()
     );
-    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(calculateAbsoluteDistance(location, routeProgress),
-      arriveEvent);
+
+    int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, routeProgress);
+
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, arriveEvent);
     MapboxTelemetry.getInstance().pushEvent(arriveEvent);
   }
 
@@ -71,8 +70,10 @@ final class NavigationMetricsWrapper {
       sessionState.originalDistance(), sessionState.originalDuration(), null,
       sessionState.arrivalTimestamp(), sessionState.currentStepCount(), sessionState.originalStepCount()
     );
-    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(calculateAbsoluteDistance(location, routeProgress),
-      cancelEvent);
+
+    int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, routeProgress);
+
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, cancelEvent);
     MapboxTelemetry.getInstance().pushEvent(cancelEvent);
   }
 
@@ -91,10 +92,9 @@ final class NavigationMetricsWrapper {
       (int) routeProgress.durationRemaining(), sessionState.startTimestamp()
     );
 
-    calculateAbsoluteDistance(location, routeProgress);
+    int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, routeProgress);
 
-    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(calculateAbsoluteDistance(location, routeProgress),
-      departEvent);
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, departEvent);
     MapboxTelemetry.getInstance().pushEvent(departEvent);
   }
 
@@ -125,8 +125,10 @@ final class NavigationMetricsWrapper {
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
       sessionState.currentStepCount(), sessionState.originalStepCount());
     rerouteEvent.put(MapboxNavigationEvent.KEY_CREATED, TelemetryUtils.generateCreateDate(location));
-    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(calculateAbsoluteDistance(location, routeProgress),
-      rerouteEvent);
+
+    int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, routeProgress);
+
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, rerouteEvent);
     MapboxTelemetry.getInstance().pushEvent(rerouteEvent);
   }
 
@@ -152,8 +154,10 @@ final class NavigationMetricsWrapper {
       (int) routeProgress.currentLegProgress().currentStepProgress().durationRemaining(),
       sessionState.currentStepCount(), sessionState.originalStepCount()
     );
-    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(calculateAbsoluteDistance(location, routeProgress),
-      feedbackEvent);
+
+    int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, routeProgress);
+
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, feedbackEvent);
     MapboxTelemetry.getInstance().pushEvent(feedbackEvent);
   }
 
@@ -211,17 +215,5 @@ final class NavigationMetricsWrapper {
     beforeLocations = obtainLocations(sessionState.beforeRerouteLocations());
 
     afterLocations = obtainLocations(afterLoc);
-  }
-
-  private static int calculateAbsoluteDistance(Location currentLocation, RouteProgress routeProgress) {
-    StepManeuver finalManuever = routeProgress.directionsRoute().legs().get(routeProgress.directionsRoute().legs()
-      .size() - 1).steps().get(routeProgress.directionsRoute().legs().get(routeProgress.directionsRoute().legs()
-      .size() - 1).steps().size() - 1).maneuver();
-
-    Point currentPoint = Point.fromLngLat(currentLocation.getLongitude(), currentLocation.getLatitude());
-    int absoluteDistance = (int) TurfMeasurement.distance(currentPoint, finalManuever.location(),
-      TurfConstants.UNIT_METERS);
-
-    return absoluteDistance;
   }
 }
