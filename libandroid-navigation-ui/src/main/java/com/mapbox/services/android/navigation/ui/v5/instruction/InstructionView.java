@@ -124,7 +124,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     initDirectionsRecyclerView();
     initDecimalFormat();
     initAnimations();
-    initClickListeners();
   }
 
   @Override
@@ -179,6 +178,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         }
       }
     });
+
+    // ViewModel set - click listeners can be set now
+    initClickListeners();
   }
 
   /**
