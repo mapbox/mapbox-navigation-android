@@ -68,12 +68,13 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   }
 
   /**
-   * Listener used to update the TODO.
+   * Listener used to update the location on screen
+   * and the data in the top / bottom views of the drop-in UI.
    * <p>
    * Added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
    *
-   * @param location      given to the TODO to show our current location
-   * @param routeProgress ignored in this scenario
+   * @param location      modified to snap to the route being driven
+   * @param routeProgress used to create new models for our top / bottom views
    * @since 0.6.0
    */
   @Override
@@ -84,11 +85,14 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   }
 
   /**
-   * Listener used to update the TODO.
+   * Listener used to update when a user has gone off-route.
+   * <p>
+   * This is being used as a cue for a re-route UX / to fetch a new route to
+   * keep the user on course.
    * <p>
    * Added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
    *
-   * @param location given to the TODO to show our current location
+   * @param location given to create a new origin
    * @since 0.6.0
    */
   @Override
@@ -160,7 +164,6 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    * <p>
    * Uses cached feedbackId to ensure the proper item is cancelled.
    *
-   * @param feedbackItem item to be updated
    * @since 0.7.0
    */
   public void cancelFeedback() {
@@ -173,7 +176,6 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   /**
    * Returns the current instance of {@link MapboxNavigation}.
    *
-   * @param feedbackItem item to be updated
    * @since 0.6.1
    */
   public MapboxNavigation getNavigation() {
