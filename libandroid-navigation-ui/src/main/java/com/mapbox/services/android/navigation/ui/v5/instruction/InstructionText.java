@@ -41,7 +41,7 @@ public class InstructionText {
     }
 
     // Refs
-    if (hasRefs(step)) {
+    if (hasRefs(step) && isMotorway(step)) {
       textFields.primaryText = StringAbbreviator.deliminator(step.ref());
       if (hasDestination(step)) {
         textFields.secondaryText = destination(step);
@@ -79,6 +79,17 @@ public class InstructionText {
   private boolean hasRefs(LegStep upComingStep) {
     return !TextUtils.isEmpty(upComingStep.ref());
   }
+
+  private boolean isMotorway(LegStep step) {
+    if (step.intersections() == null || step.intersections().isEmpty()) {
+      return false;
+    }
+    if (step.intersections().get(0).classes() == null || step.intersections().get(0).classes().isEmpty()) {
+      return false;
+    }
+    return step.intersections().get(0).classes().contains("motorway");
+  }
+
 
   private String instruction(LegStep upComingStep) {
     return upComingStep.maneuver().instruction();
