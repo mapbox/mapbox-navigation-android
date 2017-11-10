@@ -9,15 +9,18 @@ import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -43,6 +46,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   private NavigationInstructionPlayer instructionPlayer;
   private DecimalFormat decimalFormat;
   private SharedPreferences preferences;
+  private String feedbackId;
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -112,7 +116,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
 
   /**
    * Listener used to determine is navigation is running / not running.
-   *
+   * <p>
    * In {@link NavigationView}, views will be shown when true.  When false,
    * the {@link android.app.Activity} will be destroyed.
    *
@@ -128,6 +132,50 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
     instructionPlayer.setMuted(isMuted);
   }
 
+  /**
+   * Records a general feedback item with source
+   */
+  public void recordFeedback(@FeedbackEvent.FeedbackSource String feedbackSource) {
+    feedbackId = navigation.recordFeedback(FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE, "", feedbackSource);
+  }
+
+  /**
+   * Used to update an existing {@link FeedbackItem}
+   * with a feedback type and description.
+   * <p>
+   * Uses cached feedbackId to ensure the proper item is updated.
+   *
+   * @param feedbackItem item to be updated
+   * @since 0.7.0
+   */
+  public void updateFeedback(FeedbackItem feedbackItem) {
+    if (!TextUtils.isEmpty(feedbackId)) {
+      navigation.updateFeedback(feedbackId, feedbackItem.getFeedbackType(), feedbackItem.getDescription());
+      feedbackId = null;
+    }
+  }
+
+  /**
+   * Used to cancel an existing {@link FeedbackItem}.
+   * <p>
+   * Uses cached feedbackId to ensure the proper item is cancelled.
+   *
+   * @param feedbackItem item to be updated
+   * @since 0.7.0
+   */
+  public void cancelFeedback() {
+    if (!TextUtils.isEmpty(feedbackId)) {
+      navigation.cancelFeedback(feedbackId);
+      feedbackId = null;
+    }
+  }
+
+  /**
+   * Returns the current instance of {@link MapboxNavigation}.
+   *
+   * @param feedbackItem item to be updated
+   * @since 0.6.1
+   */
   public MapboxNavigation getNavigation() {
     return navigation;
   }

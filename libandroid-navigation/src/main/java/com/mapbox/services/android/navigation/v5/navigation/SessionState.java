@@ -9,7 +9,7 @@ import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.directions.v5.models.RouteLeg;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.constants.Constants;
 
 import java.util.Date;
@@ -82,7 +82,7 @@ abstract class SessionState {
   abstract Date lastRerouteDate();
 
   @Nullable
-  abstract Location lastRerouteLocation();
+  abstract Location eventLocation();
 
   abstract Date startTimestamp();
 
@@ -102,7 +102,7 @@ abstract class SessionState {
   abstract List<Location> afterRerouteLocations();
 
   @Nullable
-  abstract RouteProgress routeProgressBeforeReroute();
+  abstract MetricsRouteProgress routeProgressBeforeReroute();
 
   abstract Builder toBuilder();
 
@@ -113,9 +113,9 @@ abstract class SessionState {
   @AutoValue.Builder
   abstract static class Builder {
 
-    abstract Builder routeProgressBeforeReroute(@Nullable RouteProgress routeProgress);
+    abstract Builder routeProgressBeforeReroute(@Nullable MetricsRouteProgress routeProgress);
 
-    abstract Builder lastRerouteLocation(@Nullable Location lastReroutePosition);
+    abstract Builder eventLocation(@Nullable Location eventLocation);
 
     abstract Builder afterRerouteLocations(@Nullable List<Location> afterLocations);
 

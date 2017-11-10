@@ -13,11 +13,6 @@ android {
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
   }
 
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_7
-    targetCompatibility JavaVersion.VERSION_1_7
-  }
-
   buildTypes {
     debug {
       testCoverageEnabled = false
@@ -33,6 +28,10 @@ android {
     javaMaxHeapSize "2g"
     preDexLibraries true
   }
+
+  lintOptions {
+    abortOnError false
+  }
 }
 
 sonarqube {
@@ -41,41 +40,34 @@ sonarqube {
 
 dependencies {
   // Mapbox Navigation SDK
-  compile project(':libandroid-navigation-ui')
+  implementation project(':libandroid-navigation-ui')
 
   // Support libraries
-  compile dependenciesList.supportAppcompatV7
-  compile dependenciesList.supportConstraintLayout
+  implementation dependenciesList.supportAppcompatV7
+  implementation dependenciesList.supportConstraintLayout
 
-  // Mapbox Maps SDK
-  compile(dependenciesList.mapboxMapSdk + '@aar') {
-    transitive = true
-    exclude module: 'lost'
-    exclude module: 'mapbox-java-geojson'
-    exclude module: 'mapbox-android-telemetry'
-  }
-
-  // Mapbox plugins
-  compile dependenciesList.locationLayerPlugin
+  // Architecture libraries
+  implementation dependenciesList.lifecycleExtensions
+  annotationProcessor dependenciesList.lifecycleCompiler
 
   // Logging
-  compile dependenciesList.timber
+  implementation dependenciesList.timber
 
   // Butter Knife
-  compile dependenciesList.butterKnife
+  implementation dependenciesList.butterKnife
   annotationProcessor dependenciesList.butterKnifeProcessor
 
   // Leak Canary
-  debugCompile dependenciesList.leakCanaryDebug
-  releaseCompile dependenciesList.leakCanaryRelease
-  testCompile dependenciesList.leakCanaryTest
+  debugImplementation dependenciesList.leakCanaryDebug
+  releaseImplementation dependenciesList.leakCanaryRelease
+  androidTestImplementation dependenciesList.leakCanaryTest
 
   // Unit Testing
-  testCompile dependenciesList.junit
-  testCompile dependenciesList.mockito
+  testImplementation dependenciesList.junit
+  testImplementation dependenciesList.mockito
 
   // Instrumentation testing
-  androidTestCompile(dependenciesList.testEspressoCore, {
+  androidTestImplementation(dependenciesList.testEspressoCore, {
     exclude group: 'com.android.support', module: 'support-annotations'
   })
 }
