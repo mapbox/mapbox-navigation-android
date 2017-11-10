@@ -1,14 +1,10 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.directions.v5.models.LegStep;
+import com.mapbox.directions.v5.models.RouteLeg;
 import com.mapbox.directions.v5.models.StepManeuver;
-import com.mapbox.geojson.BoundingBox;
 import com.mapbox.geojson.Point;
-
-import java.util.List;
 
 public class MetricsRouteProgress {
   private DirectionsRoute directionsRoute;
@@ -106,26 +102,14 @@ public class MetricsRouteProgress {
   }
 
   public Point getDirectionsRouteDestination() {
-    StepManeuver finalManuever = directionsRoute.legs().get(directionsRoute.legs().size() - 1).steps()
-      .get(directionsRoute.legs().get(directionsRoute.legs().size() - 1).steps().size() - 1).maneuver();
-
+    RouteLeg lastLeg = directionsRoute.legs().get(directionsRoute.legs().size() - 1);
+    LegStep lastStep = lastLeg.steps().get(lastLeg.steps().size() - 1);
+    StepManeuver finalManuever = lastStep.maneuver();
 
     if (finalManuever.location() != null) {
       return finalManuever.location();
     }
 
-    return new Point() {
-      @Nullable
-      @Override
-      public BoundingBox bbox() {
-        return null;
-      }
-
-      @NonNull
-      @Override
-      public List<Double> coordinates() {
-        return null;
-      }
-    };
+    return Point.fromLngLat(0d, 0d);
   }
 }
