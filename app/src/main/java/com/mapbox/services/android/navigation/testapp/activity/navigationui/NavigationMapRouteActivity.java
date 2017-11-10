@@ -69,7 +69,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap);
+    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap, "admin-3-4-boundaries-bg");
     Gson gson = new GsonBuilder().registerTypeAdapterFactory(DirectionsAdapterFactory.create())
       .create();
     DirectionsResponse response = gson.fromJson(loadJsonFromAsset(DIRECTIONS_RESPONSE), DirectionsResponse.class);
@@ -105,6 +105,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
       .overview(DirectionsCriteria.OVERVIEW_FULL)
       .annotations(DirectionsCriteria.ANNOTATION_CONGESTION)
+      .alternatives(true)
       .steps(true)
       .build();
 
@@ -113,10 +114,10 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
 
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-    if (response.body() != null) {
-      if (response.body().routes().size() > 0) {
-        navigationMapRoute.addRoute(response.body().routes().get(0));
-      }
+    System.out.println(call.request().url().toString());
+    if (response.body() != null && !response.body().routes().isEmpty()) {
+      navigationMapRoute.addRoute(response.body().routes().get(0));
+      navigationMapRoute.addRoutes(response.body().routes());
     }
   }
 

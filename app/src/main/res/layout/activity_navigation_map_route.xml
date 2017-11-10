@@ -13,9 +13,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:mapbox_uiAttribution="false"
-        app:mapbox_cameraTargetLat="38.393"
-        app:mapbox_cameraTargetLng="-93.186"
-        app:mapbox_cameraZoom="2"/>
+        app:mapbox_cameraTargetLat="40.7448"
+        app:mapbox_cameraTargetLng="-73.9861"
+        app:mapbox_cameraZoom="12"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabStyles"
