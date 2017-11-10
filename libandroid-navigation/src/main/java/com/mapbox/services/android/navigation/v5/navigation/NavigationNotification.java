@@ -139,12 +139,12 @@ class NavigationNotification {
     return currentDistanceText != null
       && !currentDistanceText.toString().contentEquals(DistanceUtils.distanceFormatterBold(
       routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
-      decimalFormat).toString());
+      decimalFormat, true).toString());
   }
 
   private void addDistanceText(RouteProgress routeProgress) {
     currentDistanceText = DistanceUtils.distanceFormatterBold(
-      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(), decimalFormat);
+      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(), decimalFormat, true);
     remoteViewsBig.setTextViewText(R.id.notificationStepDistanceTextView, currentDistanceText);
     if (!TextUtils.isEmpty(currentStepName)) {
       currentDistanceText.append(" - ");

@@ -41,7 +41,7 @@ public class InstructionText {
     }
 
     // Refs
-    if (hasRefs(step)) {
+    if (hasRefs(step) && isMotorway(step)) {
       textFields.primaryText = StringAbbreviator.deliminator(step.ref());
       if (hasDestination(step)) {
         textFields.secondaryText = destination(step);
@@ -80,6 +80,17 @@ public class InstructionText {
     return !TextUtils.isEmpty(upComingStep.ref());
   }
 
+  private boolean isMotorway(LegStep step) {
+    if (step.intersections() == null || step.intersections().isEmpty()) {
+      return false;
+    }
+    if (step.intersections().get(0).classes() == null || step.intersections().get(0).classes().isEmpty()) {
+      return false;
+    }
+    return step.intersections().get(0).classes().contains("motorway");
+  }
+
+
   private String instruction(LegStep upComingStep) {
     return upComingStep.maneuver().instruction();
   }
@@ -117,15 +128,25 @@ public class InstructionText {
 
   private TextFields formatMultipleStrings(String multipleString, String exitText) {
     TextFields textFields = new TextFields();
-    String[] strings = StringAbbreviator.splitter(multipleString);
+
+    String[] strings = {multipleString};
+
+    if (!(multipleString.contains("(") || multipleString.contains(")"))) {
+      strings = StringAbbreviator.splitter(multipleString);
+    }
+
     String[] firstString = Arrays.copyOfRange(strings, 0, 1);
     if (!TextUtils.isEmpty(exitText)) {
       textFields.primaryText = exitText + ": " + firstString[0];
     } else {
       textFields.primaryText = firstString[0];
     }
-    String[] remainingStrings = Arrays.copyOfRange(strings, 1, strings.length);
-    textFields.secondaryText = TextUtils.join("  / ", remainingStrings).trim();
+
+    if (strings.length > 1) {
+      String[] remainingStrings = Arrays.copyOfRange(strings, 1, strings.length);
+      textFields.secondaryText = TextUtils.join("  / ", remainingStrings).trim();
+    }
+
     return textFields;
   }
 

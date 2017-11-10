@@ -78,6 +78,12 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
     }
   }
 
+  /**
+   * Called when an off-route event is fired and a new {@link DirectionsRoute}
+   * is needed to continue navigating.
+   *
+   * @param newOrigin found from off-route event
+   */
   public void fetchRouteNewOrigin(Point newOrigin) {
     if (newOrigin != null && destination.getValue() != null) {
       fetchRoute(newOrigin, destination.getValue());
@@ -94,8 +100,11 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
    */
   private void fetchRoute(Point origin, Point destination) {
     if (origin != null && destination != null) {
-      Double bearing
-        = rawLocation.hasBearing() ? Float.valueOf(rawLocation.getBearing()).doubleValue() : null;
+
+      Double bearing = null;
+      if (rawLocation != null) {
+        bearing = rawLocation.hasBearing() ? Float.valueOf(rawLocation.getBearing()).doubleValue() : null;
+      }
 
       NavigationRoute.builder()
         .accessToken(Mapbox.getAccessToken())
@@ -160,14 +169,5 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
     return response.body() != null
       && response.body().routes() != null
       && response.body().routes().size() > 0;
-  }
-
-  /**
-   * Used to determine if a rawLocation has a bearing.
-   *
-   * @return true if bearing exists, false if not
-   */
-  private boolean locationHasBearing() {
-    return rawLocation != null && rawLocation.hasBearing();
   }
 }
