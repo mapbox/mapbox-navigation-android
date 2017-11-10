@@ -40,12 +40,15 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 /**
  * View that creates the drop-in UI.
  * <p>
- * Once started, this view will check if launched with a {@link DirectionsRoute}.
- * Or, if not found, this activity will look for a set of {@link Point} coordinates.
+ * Once started, this view will check if the {@link Activity} that inflated
+ * it was launched with a {@link DirectionsRoute}.
+ * <p>
+ * Or, if not found, this view will look for a set of {@link Point} coordinates.
  * In the latter case, a new {@link DirectionsRoute} will be retrieved from {@link NavigationRoute}.
- * </p><p>
+ * <p>
  * Once valid data is obtained, this activity will immediately begin navigation
  * with {@link MapboxNavigation}.
+ * <p>
  * If launched with the simulation boolean set to true, a {@link MockLocationEngine}
  * will be initialized and begin pushing updates.
  * <p>
@@ -54,8 +57,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
  * <p>
  * A Mapbox access token must also be set by the developer (to initialize navigation).
  *
- * @since 0.6.0
- * </p>
+ * @since 0.7.0
  */
 public class NavigationView extends CoordinatorLayout implements OnMapReadyCallback, MapboxMap.OnScrollListener,
   NavigationContract.View {
@@ -98,7 +100,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     mapView.onCreate(savedInstanceState);
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  @SuppressWarnings( {"MissingPermission"})
   public void onStart() {
     mapView.onStart();
   }
@@ -174,6 +176,8 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
         initLocationLayer();
         initLifecycleObservers();
         initNavigationPresenter();
+        initClickListeners();
+        initSummaryBottomSheet();
         subscribeViews();
         navigationListener.onNavigationReady();
       }
@@ -190,7 +194,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
    */
   @Override
   public void onScroll() {
-    if (!summaryBehavior.isHideable()) {
+    if (summaryBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
       navigationPresenter.onMapScroll();
     }
   }
@@ -247,15 +251,32 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
       .icon(ThemeSwitcher.retrieveMapMarker(getContext())));
   }
 
+  /**
+   * Called when the navigation session is finished.
+   * Can either be from a cancel event or if the user has arrived at their destination.
+   */
   @Override
   public void finishNavigationView() {
     navigationListener.onNavigationFinished();
   }
 
+  /**
+   * Should be called when this view is completely initialized.
+   *
+   * @param activity with {@link android.content.Intent} containing route / coordinate data
+   */
   public void startNavigation(Activity activity) {
     routeViewModel.extractLaunchData(activity);
   }
 
+  /**
+   * Should be called after {@link NavigationView#onCreate(Bundle)}.
+   * <p>
+   * This method adds the {@link NavigationViewListener},
+   * which will fire ready / cancel events for this view.
+   *
+   * @param navigationViewListener to be set to this view
+   */
   public void getNavigationAsync(NavigationViewListener navigationViewListener) {
     this.navigationListener = navigationViewListener;
     mapView.getMapAsync(this);
@@ -292,8 +313,6 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
     initViewModels();
-    initClickListeners();
-    initSummaryBottomSheet();
   }
 
   /**
@@ -315,44 +334,6 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     } catch (ClassCastException exception) {
       throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
     }
-  }
-
-  /**
-   * Sets click listeners to all views that need them.
-   */
-  private void initClickListeners() {
-    cancelBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        navigationPresenter.onCancelBtnClick();
-      }
-    });
-    recenterBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        navigationPresenter.onRecenterClick();
-      }
-    });
-  }
-
-  /**
-   * Initializes the {@link BottomSheetBehavior} for {@link SummaryBottomSheet}.
-   */
-  private void initSummaryBottomSheet() {
-    summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
-    summaryBehavior.setHideable(false);
-    summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-      @Override
-      public void onStateChanged(@NonNull View bottomSheet, int newState) {
-        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-          navigationPresenter.onSummaryBottomSheetHidden();
-        }
-      }
-
-      @Override
-      public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-      }
-    });
   }
 
   /**
@@ -412,6 +393,44 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
    */
   private void initNavigationPresenter() {
     navigationPresenter = new NavigationPresenter(this);
+  }
+
+  /**
+   * Sets click listeners to all views that need them.
+   */
+  private void initClickListeners() {
+    cancelBtn.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        navigationPresenter.onCancelBtnClick();
+      }
+    });
+    recenterBtn.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        navigationPresenter.onRecenterClick();
+      }
+    });
+  }
+
+  /**
+   * Initializes the {@link BottomSheetBehavior} for {@link SummaryBottomSheet}.
+   */
+  private void initSummaryBottomSheet() {
+    summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
+    summaryBehavior.setHideable(false);
+    summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+      @Override
+      public void onStateChanged(@NonNull View bottomSheet, int newState) {
+        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+          navigationPresenter.onSummaryBottomSheetHidden();
+        }
+      }
+
+      @Override
+      public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+      }
+    });
   }
 
   /**
