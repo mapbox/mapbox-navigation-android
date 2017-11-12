@@ -35,7 +35,7 @@
         <attr name="navigationViewProgress" format="color"/>
         <attr name="navigationViewProgressBackground" format="color"/>
 
-        <!-- Standarts -->
+        <!-- Standards -->
         <attr name="navigationUnitType">
             <enum name="imperial" value="0" />
             <enum name="metric" value="1" />
