@@ -22,7 +22,7 @@ import java.util.List;
  * Created by selimyildiz on 12/11/2017.
  */
 
-public class MeterDistanceUtils extends DistanceUtils {
+public class MetricDistanceUtils extends DistanceUtils {
 
     private static final String METER_FORMAT = " m";
     private static final String KILOMETER_FORMAT = " km";

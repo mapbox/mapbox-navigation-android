@@ -18,7 +18,7 @@ public abstract class DistanceUtils {
   public static DistanceUtils get(UnitType unitType){
     switch (unitType){
       case UNIT_METRIC:
-         if(meterDistanceUtils == null) meterDistanceUtils = new MeterDistanceUtils();
+         if(meterDistanceUtils == null) meterDistanceUtils = new MetricDistanceUtils();
          return meterDistanceUtils;
       case UNIT_IMPERIAL:
         if(imperialDistanceUtils == null) imperialDistanceUtils = new ImperialDistanceUtils();
