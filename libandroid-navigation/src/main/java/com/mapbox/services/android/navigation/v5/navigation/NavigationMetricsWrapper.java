@@ -5,7 +5,7 @@ import android.location.Location;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
+import com.mapbox.services.android.navigation.v5.utils.distance.DistanceUtils;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;

@@ -16,6 +16,7 @@ import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.distance.UnitType;
 
 import java.text.DecimalFormat;
 
@@ -38,6 +39,7 @@ public class SummaryBottomSheet extends FrameLayout {
   private ProgressBar rerouteProgressBar;
 
   private DecimalFormat decimalFormat;
+  private UnitType unitType = UnitType.UNIT_IMPERIAL;
   private boolean isRerouting;
 
   public SummaryBottomSheet(Context context) {
@@ -51,6 +53,10 @@ public class SummaryBottomSheet extends FrameLayout {
   public SummaryBottomSheet(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     init();
+  }
+
+  public void setUnitType(UnitType unitType) {
+    this.unitType = unitType;
   }
 
   /**
@@ -100,7 +106,7 @@ public class SummaryBottomSheet extends FrameLayout {
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      SummaryModel model = new SummaryModel(routeProgress, decimalFormat);
+      SummaryModel model = new SummaryModel(routeProgress, decimalFormat,unitType);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());

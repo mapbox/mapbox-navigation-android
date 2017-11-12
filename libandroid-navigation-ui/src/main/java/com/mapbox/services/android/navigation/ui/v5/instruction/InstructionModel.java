@@ -7,7 +7,8 @@ import com.mapbox.directions.v5.models.IntersectionLanes;
 import com.mapbox.directions.v5.models.LegStep;
 import com.mapbox.directions.v5.models.StepIntersection;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
+import com.mapbox.services.android.navigation.v5.utils.distance.DistanceUtils;
+import com.mapbox.services.android.navigation.v5.utils.distance.UnitType;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -25,9 +26,9 @@ public class InstructionModel {
   private RouteProgress progress;
   private boolean shouldShowThenStep;
 
-  public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
+  public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat, UnitType unitType) {
     this.progress = progress;
-    buildInstructionModel(progress, decimalFormat);
+    buildInstructionModel(progress, decimalFormat,unitType);
   }
 
   SpannableStringBuilder getStepDistanceRemaining() {
@@ -86,8 +87,8 @@ public class InstructionModel {
     return progress;
   }
 
-  private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
-    formatStepDistance(progress, decimalFormat);
+  private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat,UnitType unitType) {
+    formatStepDistance(progress, decimalFormat,unitType);
     extractStepResources(progress);
   }
 
@@ -120,8 +121,8 @@ public class InstructionModel {
     }
   }
 
-  private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat) {
-    stepDistanceRemaining = DistanceUtils.distanceFormatterBold(progress.currentLegProgress()
+  private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat,UnitType unitType) {
+    stepDistanceRemaining = DistanceUtils.get(unitType).distanceFormatterBold(progress.currentLegProgress()
       .currentStepProgress().distanceRemaining(), decimalFormat, true);
   }
 

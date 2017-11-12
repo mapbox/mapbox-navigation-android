@@ -14,14 +14,15 @@ import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionText;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
+import com.mapbox.services.android.navigation.v5.utils.distance.DistanceUtils;
+import com.mapbox.services.android.navigation.v5.utils.distance.UnitType;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class InstructionListAdapter extends RecyclerView.Adapter<InstructionViewHolder> {
-
+  private UnitType unitType;
   private List<LegStep> stepList;
   private DecimalFormat decimalFormat;
 
@@ -29,9 +30,10 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   private LegStep currentStep;
   private LegStep currentUpcomingStep;
 
-  public InstructionListAdapter() {
+  public InstructionListAdapter(UnitType unitType) {
     stepList = new ArrayList<>();
     decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
+    this.unitType = unitType;
   }
 
   @Override
@@ -49,7 +51,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
       updatePrimaryText(holder, instructionText.getPrimaryText());
       updateSecondaryText(holder, instructionText.getSecondaryText());
       updateManeuverView(holder, step);
-      holder.stepDistanceText.setText(DistanceUtils
+      holder.stepDistanceText.setText(DistanceUtils.get(unitType)
         .distanceFormatterBold(instructionText.getStepDistance(), decimalFormat, true));
     }
   }

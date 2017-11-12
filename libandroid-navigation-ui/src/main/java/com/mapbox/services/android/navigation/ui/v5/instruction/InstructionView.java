@@ -50,6 +50,7 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
+import com.mapbox.services.android.navigation.v5.utils.distance.UnitType;
 
 import java.text.DecimalFormat;
 
@@ -97,6 +98,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private NavigationViewModel navigationViewModel;
   private boolean isRerouting;
   public boolean isMuted;
+  private UnitType unitType = UnitType.UNIT_IMPERIAL;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -126,6 +128,14 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     initDirectionsRecyclerView();
     initDecimalFormat();
     initAnimations();
+  }
+
+  /**
+   * Set unit type of view
+   * @param unitType
+   */
+  public void setUnitType(UnitType unitType){
+     this.unitType = unitType;
   }
 
   @Override
@@ -195,7 +205,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      InstructionModel model = new InstructionModel(routeProgress, decimalFormat);
+      InstructionModel model = new InstructionModel(routeProgress, decimalFormat,unitType);
       updateManeuverView(model);
       addDistanceText(model);
       addTextInstruction(model);
@@ -474,7 +484,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
   private void initDirectionsRecyclerView() {
-    instructionListAdapter = new InstructionListAdapter();
+    instructionListAdapter = new InstructionListAdapter(unitType);
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
     rvInstructions.setNestedScrollingEnabled(true);

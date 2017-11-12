@@ -5,6 +5,7 @@ import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -35,6 +36,7 @@ import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.utils.distance.UnitType;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 /**
@@ -62,6 +64,9 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 public class NavigationView extends CoordinatorLayout implements OnMapReadyCallback, MapboxMap.OnScrollListener,
   NavigationContract.View {
 
+  private static final int UNIT_IMPERIAL = 0;
+  private static final int UNIT_METRIC = 1;
+
   private MapView mapView;
   private InstructionView instructionView;
   private SummaryBottomSheet summaryBottomSheet;
@@ -79,6 +84,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   private LocationLayerPlugin locationLayer;
   private NavigationViewListener navigationListener;
   private boolean resumeState;
+  UnitType unitType = UnitType.UNIT_IMPERIAL;
 
   public NavigationView(Context context) {
     this(context, null);
@@ -92,12 +98,20 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     super(context, attrs, defStyleAttr);
     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
     ThemeSwitcher.setTheme(getContext());
-    init();
+    init(attrs);
   }
 
   public void onCreate(@Nullable Bundle savedInstanceState) {
     resumeState = savedInstanceState != null;
     mapView.onCreate(savedInstanceState);
+  }
+
+  /**
+   * change unit type
+   * @param type
+   */
+  public void changeUnitType(UnitType type){
+    this.unitType = type;
   }
 
   @SuppressWarnings( {"MissingPermission"})
@@ -309,10 +323,42 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     }
   }
 
-  private void init() {
+  /**
+   * init view
+   * @param attrs
+   */
+  private void init(AttributeSet attrs) {
+    initStyledAttrs(attrs);
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
     initViewModels();
+  }
+
+  /**
+   * Set styled attrs {@link AttributeSet} of properties
+   * @param attrs
+   */
+  private void initStyledAttrs(AttributeSet attrs){
+    TypedArray array = getContext().obtainStyledAttributes(attrs, R.styleable.NavigationView);
+    int unitType = array.getInt(R.styleable.NavigationView_navigationUnitType,UnitType.UNIT_IMPERIAL.getValue());
+    changeUnitType(getUnitType(unitType));
+    array.recycle();
+  }
+
+  /**
+   * get Unit Type with int
+   * @param unitType
+   * @return
+   */
+  private UnitType getUnitType(int unitType){
+    switch (unitType){
+      case UNIT_IMPERIAL:
+        return UnitType.UNIT_IMPERIAL;
+      case UNIT_METRIC:
+        return UnitType.UNIT_METRIC;
+      default:
+        return UnitType.UNIT_IMPERIAL;
+    }
   }
 
   /**
@@ -324,6 +370,15 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     summaryBottomSheet = findViewById(R.id.summaryBottomSheet);
     cancelBtn = findViewById(R.id.cancelBtn);
     recenterBtn = findViewById(R.id.recenterBtn);
+    onBindAfter();
+  }
+
+  /**
+   * Binds After
+   */
+  private void onBindAfter(){
+    instructionView.setUnitType(unitType);
+    summaryBottomSheet.setUnitType(unitType);
   }
 
   private void initViewModels() {
@@ -331,9 +386,14 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
       locationViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(LocationViewModel.class);
       routeViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(RouteViewModel.class);
       navigationViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(NavigationViewModel.class);
+      onInitViewModelsAfter();
     } catch (ClassCastException exception) {
       throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
     }
+  }
+
+  private void onInitViewModelsAfter(){
+    navigationViewModel.setUnitType(unitType);
   }
 
   /**
