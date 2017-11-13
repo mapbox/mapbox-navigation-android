@@ -4,7 +4,6 @@ import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
@@ -16,7 +15,7 @@ class InstructionViewHolder extends RecyclerView.ViewHolder {
   TextView stepDistanceText;
   TextView stepPrimaryText;
   TextView stepSecondaryText;
-  LinearLayout instructionLayoutText;
+  View instructionLayoutText;
 
   InstructionViewHolder(View itemView) {
     super(itemView);
