@@ -53,7 +53,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.8.0-SNAPSHOT'
+    compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.7.1-SNAPSHOT'
 }
 ```
 
