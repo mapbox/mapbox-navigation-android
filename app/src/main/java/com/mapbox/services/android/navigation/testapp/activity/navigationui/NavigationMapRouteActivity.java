@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -25,12 +24,12 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,14 +40,14 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class NavigationMapRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, Callback<DirectionsResponse>, MapboxMap.OnScrollListener {
+  MapboxMap.OnMapLongClickListener, Callback<DirectionsResponse>, OnRouteSelectionChangeListener {
 
   private static final String DIRECTIONS_RESPONSE = "directions-route.json";
 
   @BindView(R.id.mapView)
   MapView mapView;
-  @BindView(R.id.primaryRouteIndexSelected)
-  TextView primaryRouteIndexSelected;
+  @BindView(R.id.primaryRouteIndexTextView)
+  TextView primaryRouteIndexTextView;
 
   private MapboxMap mapboxMap;
   private NavigationMapRoute navigationMapRoute;
@@ -83,26 +82,25 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
     if (navigationMapRoute != null) {
       navigationMapRoute.showAlternativeRoutes(alternativesVisible);
     }
-    Toast.makeText(this, String.format(Locale.US, "%s: %b", "Alternatives visible", alternativesVisible), Toast.LENGTH_LONG).show();
   }
 
   @Override
-  public void onScroll() {
-    primaryRouteIndexSelected.setText(
-      String.valueOf(routes.indexOf(navigationMapRoute.getPrimaryRoute()))
-    );
+  public void onNewPrimaryRouteSelected(DirectionsRoute directionsRoute) {
+    primaryRouteIndexTextView.setText(String.valueOf(routes.indexOf(directionsRoute)));
   }
 
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap, "admin-3-4-boundaries-bg");
+    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap,
+      "admin-3-4-boundaries-bg");
     Gson gson = new GsonBuilder().registerTypeAdapterFactory(DirectionsAdapterFactory.create())
       .create();
-    DirectionsResponse response = gson.fromJson(loadJsonFromAsset(DIRECTIONS_RESPONSE), DirectionsResponse.class);
+    DirectionsResponse response = gson.fromJson(loadJsonFromAsset(DIRECTIONS_RESPONSE),
+      DirectionsResponse.class);
     navigationMapRoute.addRoute(response.routes().get(0));
     mapboxMap.setOnMapLongClickListener(this);
-    mapboxMap.setOnScrollListener(this);
+    navigationMapRoute.setOnRouteSelectionChangeListener(this);
   }
 
   @Override
@@ -142,7 +140,6 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
 
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-    System.out.println(call.request().url().toString());
     if (response.body() != null && !response.body().routes().isEmpty()) {
       List<DirectionsRoute> routes = response.body().routes();
       this.routes = routes;
