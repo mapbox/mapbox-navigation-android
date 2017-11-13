@@ -517,8 +517,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private void placeRouteBelow() {
     if (belowLayer == null || belowLayer.isEmpty()) {
       List<Layer> styleLayers = mapboxMap.getLayers();
-      for (int i = styleLayers.size() - 1; i >= 0; i--) {
-        if (!(styleLayers.get(i) instanceof SymbolLayer)) {
+      for (int i = 0; i < styleLayers.size(); i++) {
+        if (!(styleLayers.get(i) instanceof SymbolLayer)
+          // Avoid placing the route on top of the user location layer
+          && !styleLayers.get(i).getId().contains("mapbox-location")) {
           belowLayer = styleLayers.get(i).getId();
         }
       }
@@ -599,7 +601,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
 
   @Override
   public void onMapClick(@NonNull LatLng point) {
-    if (!alternativesVisible) {
+    if (directionsRoutes == null || directionsRoutes.isEmpty() || !alternativesVisible) {
       return;
     }
     // determine which feature collections are alternative routes
@@ -625,8 +627,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       }
     }
     updateRoute();
-    onRouteSelectionChangeListener.onNewPrimaryRouteSelected(
-      directionsRoutes.get(primaryRouteIndex));
+    if (onRouteSelectionChangeListener != null) {
+      onRouteSelectionChangeListener.onNewPrimaryRouteSelected(
+        directionsRoutes.get(primaryRouteIndex));
+    }
   }
 
   @SuppressWarnings("unchecked")
