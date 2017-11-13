@@ -93,8 +93,8 @@ public class VoiceInstructionMilestone extends Milestone {
    * @return true if time to voice the announcement, false if not
    */
   private boolean shouldBeVoiced(RouteProgress routeProgress, VoiceInstructions voice) {
-    return voice.distanceAlongGeometry()
-      >= routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    return voice.distanceAlongGeometry() != null
+      && voice.distanceAlongGeometry() >= routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
   }
 
   public static final class Builder extends Milestone.Builder {
