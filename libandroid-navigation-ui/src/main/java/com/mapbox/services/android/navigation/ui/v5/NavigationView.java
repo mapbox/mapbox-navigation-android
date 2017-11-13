@@ -177,7 +177,6 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
         initLifecycleObservers();
         initNavigationPresenter();
         initClickListeners();
-        initSummaryBottomSheet();
         subscribeViews();
         navigationListener.onNavigationReady();
       }
@@ -313,6 +312,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
     initViewModels();
+    initSummaryBottomSheet();
   }
 
   /**
@@ -422,7 +422,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
       @Override
       public void onStateChanged(@NonNull View bottomSheet, int newState) {
-        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+        if (newState == BottomSheetBehavior.STATE_HIDDEN && navigationPresenter != null) {
           navigationPresenter.onSummaryBottomSheetHidden();
         }
       }
