@@ -234,6 +234,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     addDirectionWaypoints();
   }
 
+  public DirectionsRoute getPrimaryRoute() {
+    return directionsRoutes.get(primaryRouteIndex);
+  }
+
   /**
    * Takes the directions route list and draws each line on the map.
    */
