@@ -5,6 +5,7 @@ import android.location.Location;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
@@ -47,6 +48,11 @@ final class NavigationMetricsWrapper {
       sessionState.originalDuration(), null, sessionState.currentStepCount(),
       sessionState.originalStepCount()
     );
+
+    MetricsRouteProgress metricsRouteProgress = new MetricsRouteProgress(routeProgress);
+    int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, metricsRouteProgress);
+
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, arriveEvent);
     MapboxTelemetry.getInstance().addLocationEngineName(locationEngineName, arriveEvent);
     MapboxTelemetry.getInstance().pushEvent(arriveEvent);
     MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
@@ -70,6 +76,10 @@ final class NavigationMetricsWrapper {
       sessionState.originalDistance(), sessionState.originalDuration(), null,
       sessionState.arrivalTimestamp(), sessionState.currentStepCount(), sessionState.originalStepCount()
     );
+
+    int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, routeProgress);
+
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, cancelEvent);
     MapboxTelemetry.getInstance().addLocationEngineName(locationEngineName, cancelEvent);
     MapboxTelemetry.getInstance().pushEvent(cancelEvent);
     MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
@@ -90,6 +100,10 @@ final class NavigationMetricsWrapper {
       (int) routeProgress.getDistanceTraveled(), (int) routeProgress.getDistanceRemaining(),
       (int) routeProgress.getDurationRemaining(), sessionState.startTimestamp()
     );
+
+    int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, routeProgress);
+
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, departEvent);
     MapboxTelemetry.getInstance().addLocationEngineName(locationEngineName, departEvent);
     MapboxTelemetry.getInstance().pushEvent(departEvent);
     MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
@@ -124,6 +138,10 @@ final class NavigationMetricsWrapper {
       (int) routeProgress.getCurrentStepProgressDurationRemaining(),
       sessionState.currentStepCount(), sessionState.originalStepCount());
     rerouteEvent.put(MapboxNavigationEvent.KEY_CREATED, TelemetryUtils.generateCreateDate(location));
+
+    int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, routeProgress);
+
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, rerouteEvent);
     MapboxTelemetry.getInstance().addLocationEngineName(locationEngineName, rerouteEvent);
     MapboxTelemetry.getInstance().pushEvent(rerouteEvent);
     MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
@@ -146,13 +164,16 @@ final class NavigationMetricsWrapper {
       feedbackId, screenshot, sessionState.mockLocation(), sessionState.originalRequestIdentifier(),
       sessionState.requestIdentifier(), sessionState.originalGeometry(), sessionState.originalDistance(),
       sessionState.originalDuration(), null, upcomingInstruction, upcomingType, upcomingModifier, upcomingName,
-      previousInstruction, previousType, previousModifier, previousName,
-      routeProgress.getCurrentStepDistance(),
+      previousInstruction, previousType, previousModifier, previousName, routeProgress.getCurrentStepDistance(),
       routeProgress.getCurrentStepDuration(),
       (int) routeProgress.getCurrentStepProgressDistanceRemaining(),
       (int) routeProgress.getCurrentStepProgressDurationRemaining(),
-      sessionState.currentStepCount(), sessionState.originalStepCount());
+      sessionState.currentStepCount(), sessionState.originalStepCount()
+    );
 
+    int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, routeProgress);
+
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, feedbackEvent);
     feedbackEvent.put(MapboxNavigationEvent.KEY_CREATED, TelemetryUtils.generateCreateDate(location));
     MapboxTelemetry.getInstance().addLocationEngineName(locationEngineName, feedbackEvent);
     MapboxTelemetry.getInstance().pushEvent(feedbackEvent);
