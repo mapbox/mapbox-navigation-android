@@ -1,6 +1,10 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.directions.v5.models.LegStep;
+import com.mapbox.directions.v5.models.RouteLeg;
+import com.mapbox.directions.v5.models.StepManeuver;
+import com.mapbox.geojson.Point;
 
 public class MetricsRouteProgress {
   private DirectionsRoute directionsRoute;
@@ -95,5 +99,17 @@ public class MetricsRouteProgress {
       return currentLegProgress.currentStep().name();
     }
     return "";
+  }
+
+  public Point getDirectionsRouteDestination() {
+    RouteLeg lastLeg = directionsRoute.legs().get(directionsRoute.legs().size() - 1);
+    LegStep lastStep = lastLeg.steps().get(lastLeg.steps().size() - 1);
+    StepManeuver finalManuever = lastStep.maneuver();
+
+    if (finalManuever.location() != null) {
+      return finalManuever.location();
+    }
+
+    return Point.fromLngLat(0d, 0d);
   }
 }

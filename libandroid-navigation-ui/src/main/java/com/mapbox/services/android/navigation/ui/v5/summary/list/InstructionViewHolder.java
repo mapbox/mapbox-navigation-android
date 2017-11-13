@@ -4,6 +4,7 @@ import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
@@ -15,6 +16,7 @@ class InstructionViewHolder extends RecyclerView.ViewHolder {
   TextView stepDistanceText;
   TextView stepPrimaryText;
   TextView stepSecondaryText;
+  LinearLayout instructionLayoutText;
 
   InstructionViewHolder(View itemView) {
     super(itemView);
@@ -22,6 +24,7 @@ class InstructionViewHolder extends RecyclerView.ViewHolder {
     stepDistanceText = itemView.findViewById(R.id.stepDistanceText);
     stepPrimaryText = itemView.findViewById(R.id.stepPrimaryText);
     stepSecondaryText = itemView.findViewById(R.id.stepSecondaryText);
+    instructionLayoutText = itemView.findViewById(R.id.instructionLayoutText);
     initInstructionAutoSize();
   }
 
@@ -31,7 +34,7 @@ class InstructionViewHolder extends RecyclerView.ViewHolder {
    */
   private void initInstructionAutoSize() {
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepPrimaryText,
-      24, 30, 1, TypedValue.COMPLEX_UNIT_SP);
+      26, 28, 1, TypedValue.COMPLEX_UNIT_SP);
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepSecondaryText,
       20, 26, 1, TypedValue.COMPLEX_UNIT_SP);
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepDistanceText,

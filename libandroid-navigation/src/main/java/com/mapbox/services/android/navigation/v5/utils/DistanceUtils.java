@@ -1,14 +1,18 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
+import android.location.Location;
 import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 
-import com.mapbox.services.android.navigation.v5.utils.span.SpanItem;
-import com.mapbox.services.android.navigation.v5.utils.span.SpanUtils;
+import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfConversion;
+import com.mapbox.turf.TurfMeasurement;
+import com.mapbox.services.android.navigation.v5.utils.span.SpanItem;
+import com.mapbox.services.android.navigation.v5.utils.span.SpanUtils;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -81,6 +85,16 @@ public class DistanceUtils {
 
   private static boolean longDistance(double distance) {
     return TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES) > 10;
+  }
+
+  public static int calculateAbsoluteDistance(Location currentLocation, MetricsRouteProgress routeProgress) {
+
+    Point currentPoint = Point.fromLngLat(currentLocation.getLongitude(), currentLocation.getLatitude());
+    Point finalPoint = routeProgress.getDirectionsRouteDestination();
+
+    int absoluteDistance = (int) TurfMeasurement.distance(currentPoint, finalPoint, TurfConstants.UNIT_METERS);
+
+    return absoluteDistance;
   }
 
   private static SpannableStringBuilder generateSpannedText(String distance, String unit) {
