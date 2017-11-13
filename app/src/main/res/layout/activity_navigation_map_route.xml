@@ -17,17 +17,34 @@
         app:mapbox_cameraTargetLng="-73.9861"
         app:mapbox_cameraZoom="12"/>
 
+    <TextView
+        android:background="@android:color/transparent"
+        android:id="@+id/primaryRouteIndexSelected"
+        android:layout_gravity="top|start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabStyles"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="82dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:src="@drawable/ic_layers"
         android:tint="@android:color/white"
         app:backgroundTint="@color/colorAccent"
         app:layout_anchorGravity="top"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabToggleAlternatives"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_clear"
+        android:tint="@android:color/white"
+        app:backgroundTint="@color/colorPrimary"/>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -80,6 +80,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private static final String ID_FORMAT = "%s-%d";
   private static final String GENERIC_ROUTE_SHIELD_LAYER_ID
     = "mapbox-navigation-route-shield-layer";
+  private static final double ROUTE_CLICK_PADDING = 250; // TODO make this customizable
 
   @StyleRes
   private int styleRes;
@@ -114,7 +115,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private float routeScale;
   private float alternativeRouteScale;
   private String belowLayer;
-  private boolean visible;
+  private boolean alternativesVisible;
 
   /**
    * Construct an instance of {@link NavigationMapRoute}.
@@ -202,6 +203,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     this.navigation = navigation;
     this.belowLayer = belowLayer;
     featureCollections = new ArrayList<>();
+    alternativesVisible = true;
     addListeners();
     initialize();
   }
@@ -223,6 +225,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
 
   public void addRoutes(@NonNull @Size(min = 1) List<DirectionsRoute> directionsRoutes) {
     this.directionsRoutes = directionsRoutes;
+    primaryRouteIndex = 0;
     if (!layerIds.isEmpty()) {
       for (String id : layerIds) {
         mapboxMap.removeLayer(id);
@@ -236,6 +239,26 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
 
   public DirectionsRoute getPrimaryRoute() {
     return directionsRoutes.get(primaryRouteIndex);
+  }
+
+  public void showAlternativeRoutes(boolean alternativesVisible) {
+    this.alternativesVisible = alternativesVisible;
+    toggleAlternativeVisibility(alternativesVisible);
+  }
+
+  private void toggleAlternativeVisibility(boolean visible) {
+    for (String layerId : layerIds) {
+      if (layerId.contains(String.valueOf(primaryRouteIndex))
+        || layerId.contains(WAYPOINT_LAYER_ID)) {
+        continue;
+      }
+      Layer layer = mapboxMap.getLayer(layerId);
+      if (layer != null) {
+        layer.setProperties(
+          PropertyFactory.visibility(visible ? Property.VISIBLE : Property.NONE)
+        );
+      }
+    }
   }
 
   /**
@@ -551,6 +574,9 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
 
   @Override
   public void onMapClick(@NonNull LatLng point) {
+    if (!alternativesVisible) {
+      return;
+    }
     // determine which feature collections are alternative routes
     for (FeatureCollection featureCollection : featureCollections) {
       if (!(featureCollection.getFeatures().get(0).getGeometry() instanceof Point)) {
@@ -565,11 +591,17 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
         com.mapbox.geojson.Feature feature = TurfMisc.pointOnLine(com.mapbox.geojson.Point.fromLngLat(point.getLongitude(), point.getLatitude()), linePoints);
         com.mapbox.geojson.Point pointAlong = (com.mapbox.geojson.Point) feature.geometry();
         double dis = TurfMeasurement.distance(com.mapbox.geojson.Point.fromLngLat(point.getLongitude(), point.getLatitude()), pointAlong, TurfConstants.UNIT_METERS);
-        if (dis <= 250) {
+        if (dis <= ROUTE_CLICK_PADDING) {
           primaryRouteIndex = featureCollection.getFeatures().get(0).getNumberProperty(INDEX_KEY).intValue();
         }
       }
     }
+    updateRoute();
+  }
+
+  private void updateRoute() {
+    // Update all route geometries to reflect their appropriate colors depending on if they are
+    // alternative or primary.
     for (FeatureCollection featureCollection : featureCollections) {
       if (!(featureCollection.getFeatures().get(0).getGeometry() instanceof Point)) {
         int index = featureCollection.getFeatures().get(0).getNumberProperty(INDEX_KEY).intValue();
@@ -592,6 +624,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       placeRouteBelow();
       drawRoutes();
       addDirectionWaypoints();
+      showAlternativeRoutes(alternativesVisible);
     }
   }
 

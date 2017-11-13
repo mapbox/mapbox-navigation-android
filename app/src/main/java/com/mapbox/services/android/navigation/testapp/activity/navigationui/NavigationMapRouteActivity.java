@@ -3,6 +3,9 @@ package com.mapbox.services.android.navigation.testapp.activity.navigationui;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,6 +13,7 @@ import com.mapbox.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.directions.v5.DirectionsCriteria;
 import com.mapbox.directions.v5.MapboxDirections;
 import com.mapbox.directions.v5.models.DirectionsResponse;
+import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -24,6 +28,9 @@ import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,12 +41,14 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class NavigationMapRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, Callback<DirectionsResponse> {
+  MapboxMap.OnMapLongClickListener, Callback<DirectionsResponse>, MapboxMap.OnScrollListener {
 
   private static final String DIRECTIONS_RESPONSE = "directions-route.json";
 
   @BindView(R.id.mapView)
   MapView mapView;
+  @BindView(R.id.primaryRouteIndexSelected)
+  TextView primaryRouteIndexSelected;
 
   private MapboxMap mapboxMap;
   private NavigationMapRoute navigationMapRoute;
@@ -47,6 +56,8 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
 
   private Marker originMarker;
   private Marker destinationMarker;
+  private boolean alternativesVisible = true;
+  private List<DirectionsRoute> routes = new ArrayList<>();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -60,10 +71,26 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   }
 
   @OnClick(R.id.fabStyles)
-  public void onStyleFabClick() {
+  public void onStyleFabClick(View view) {
     if (mapboxMap != null) {
       mapboxMap.setStyleUrl(styleCycle.getNextStyle());
     }
+  }
+
+  @OnClick(R.id.fabToggleAlternatives)
+  public void onToggleAlternativesClick(View view) {
+    alternativesVisible = !alternativesVisible;
+    if (navigationMapRoute != null) {
+      navigationMapRoute.showAlternativeRoutes(alternativesVisible);
+    }
+    Toast.makeText(this, String.format(Locale.US, "%s: %b", "Alternatives visible", alternativesVisible), Toast.LENGTH_LONG).show();
+  }
+
+  @Override
+  public void onScroll() {
+    primaryRouteIndexSelected.setText(
+      String.valueOf(routes.indexOf(navigationMapRoute.getPrimaryRoute()))
+    );
   }
 
   @Override
@@ -74,8 +101,8 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       .create();
     DirectionsResponse response = gson.fromJson(loadJsonFromAsset(DIRECTIONS_RESPONSE), DirectionsResponse.class);
     navigationMapRoute.addRoute(response.routes().get(0));
-//    mapboxMap.setOnMapClickListener(this);
     mapboxMap.setOnMapLongClickListener(this);
+    mapboxMap.setOnScrollListener(this);
   }
 
   @Override
@@ -98,8 +125,6 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
     }
   }
 
-
-
   public void requestDirectionsRoute(Point origin, Point destination) {
     MapboxDirections directions = MapboxDirections.builder()
       .origin(origin)
@@ -119,8 +144,9 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     System.out.println(call.request().url().toString());
     if (response.body() != null && !response.body().routes().isEmpty()) {
-      navigationMapRoute.addRoute(response.body().routes().get(0));
-      navigationMapRoute.addRoutes(response.body().routes());
+      List<DirectionsRoute> routes = response.body().routes();
+      this.routes = routes;
+      navigationMapRoute.addRoutes(routes);
     }
   }
 
