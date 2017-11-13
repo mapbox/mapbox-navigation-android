@@ -500,6 +500,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
             Stop.stop(10f, PropertyFactory.iconSize(0.8f)),
             Stop.stop(0f, PropertyFactory.iconSize(0.6f))
           ).withBase(1.5f))),
+        PropertyFactory.iconPitchAlignment(Property.ANCHOR_MAP),
         PropertyFactory.iconAllowOverlap(true),
         PropertyFactory.iconIgnorePlacement(true)
       );
