@@ -13,6 +13,7 @@ import com.mapbox.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionText;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
@@ -28,6 +29,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   private RouteLeg currentLeg;
   private LegStep currentStep;
   private LegStep currentUpcomingStep;
+  private int unitType;
 
   public InstructionListAdapter() {
     stepList = new ArrayList<>();
@@ -50,7 +52,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
       updateSecondaryText(holder, instructionText.getSecondaryText());
       updateManeuverView(holder, step);
       holder.stepDistanceText.setText(DistanceUtils
-        .distanceFormatterBold(instructionText.getStepDistance(), decimalFormat, true));
+        .distanceFormatter(instructionText.getStepDistance(), decimalFormat, true, unitType));
     }
   }
 
@@ -59,7 +61,8 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     return stepList.size();
   }
 
-  public void updateSteps(RouteProgress routeProgress) {
+  public void updateSteps(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
+    this.unitType = unitType;
     addLegSteps(routeProgress);
     updateStepList(routeProgress);
   }

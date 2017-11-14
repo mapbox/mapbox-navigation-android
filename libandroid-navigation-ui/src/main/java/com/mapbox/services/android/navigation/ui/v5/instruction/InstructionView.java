@@ -46,6 +46,7 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLan
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
 import com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -157,7 +158,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
           updateManeuverView(model);
           addDistanceText(model);
           addTextInstruction(model);
-          updateInstructionList(model.getProgress());
+          updateInstructionList(model);
           if (newStep(model.getProgress())) {
             checkTurnLanes(model);
             updateThenStep(model);
@@ -189,17 +190,18 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Called in {@link ProgressChangeListener}, creates a new model and then
    * uses it to update the views.
    *
-   * @param routeProgress used to provide navigation / progress data
+   * @param routeProgress used to provide navigation / routeProgress data
+   * @param unitType      either imperial or metric
    * @since 0.6.2
    */
   @SuppressWarnings("UnusedDeclaration")
-  public void update(RouteProgress routeProgress) {
+  public void update(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
     if (routeProgress != null && !isRerouting) {
-      InstructionModel model = new InstructionModel(routeProgress, decimalFormat);
+      InstructionModel model = new InstructionModel(routeProgress, decimalFormat, unitType);
       updateManeuverView(model);
       addDistanceText(model);
       addTextInstruction(model);
-      updateInstructionList(routeProgress);
+      updateInstructionList(model);
       if (newStep(model.getProgress())) {
         checkTurnLanes(model);
         updateThenStep(model);
@@ -813,9 +815,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   /**
    * Used to update the instructions list with the current steps.
    *
-   * @param routeProgress to provide the current steps
+   * @param model to provide the current steps and unit type
    */
-  private void updateInstructionList(RouteProgress routeProgress) {
-    instructionListAdapter.updateSteps(routeProgress);
+  private void updateInstructionList(InstructionModel model) {
+    instructionListAdapter.updateSteps(model.getProgress(), model.getUnitType());
   }
 }

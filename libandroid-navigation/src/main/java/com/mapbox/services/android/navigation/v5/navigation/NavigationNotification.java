@@ -47,10 +47,12 @@ class NavigationNotification {
   private String currentStepName;
   private int currentManeuverId;
   private Context context;
+  private int distanceUnitType;
 
   NavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
     this.context = context;
     this.mapboxNavigation = mapboxNavigation;
+    this.distanceUnitType = mapboxNavigation.options().unitType();
     initialize();
   }
 
@@ -137,14 +139,15 @@ class NavigationNotification {
 
   private boolean newDistanceText(RouteProgress routeProgress) {
     return currentDistanceText != null
-      && !currentDistanceText.toString().contentEquals(DistanceUtils.distanceFormatterBold(
+      && !currentDistanceText.toString().contentEquals(DistanceUtils.distanceFormatter(
       routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
-      decimalFormat, true).toString());
+      decimalFormat, true, distanceUnitType).toString());
   }
 
   private void addDistanceText(RouteProgress routeProgress) {
-    currentDistanceText = DistanceUtils.distanceFormatterBold(
-      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(), decimalFormat, true);
+    currentDistanceText = DistanceUtils.distanceFormatter(
+      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
+      decimalFormat, true, distanceUnitType);
     remoteViewsBig.setTextViewText(R.id.notificationStepDistanceTextView, currentDistanceText);
     if (!TextUtils.isEmpty(currentStepName)) {
       currentDistanceText.append(" - ");

@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -96,11 +97,13 @@ public class SummaryBottomSheet extends FrameLayout {
    * uses it to update the views.
    *
    * @param routeProgress used to provide navigation / routeProgress data
+   * @param unitType      either imperial or metric
+   * @since 0.6.2
    */
   @SuppressWarnings("UnusedDeclaration")
-  public void update(RouteProgress routeProgress) {
+  public void update(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
     if (routeProgress != null && !isRerouting) {
-      SummaryModel model = new SummaryModel(routeProgress, decimalFormat);
+      SummaryModel model = new SummaryModel(routeProgress, decimalFormat, unitType);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());

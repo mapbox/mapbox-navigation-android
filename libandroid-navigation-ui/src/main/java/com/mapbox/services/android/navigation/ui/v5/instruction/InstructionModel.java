@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import com.mapbox.directions.v5.models.IntersectionLanes;
 import com.mapbox.directions.v5.models.LegStep;
 import com.mapbox.directions.v5.models.StepIntersection;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
@@ -23,11 +24,14 @@ public class InstructionModel {
   private String thenStepManeuverType;
   private List<IntersectionLanes> turnLanes;
   private RouteProgress progress;
+  private int unitType;
   private boolean shouldShowThenStep;
 
-  public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
+  public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat,
+                          @NavigationUnitType.UnitType int unitType) {
     this.progress = progress;
-    buildInstructionModel(progress, decimalFormat);
+    this.unitType = unitType;
+    buildInstructionModel(progress, decimalFormat, unitType);
   }
 
   SpannableStringBuilder getStepDistanceRemaining() {
@@ -86,8 +90,12 @@ public class InstructionModel {
     return progress;
   }
 
-  private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
-    formatStepDistance(progress, decimalFormat);
+  int getUnitType() {
+    return unitType;
+  }
+
+  private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat, int unitType) {
+    formatStepDistance(progress, decimalFormat, unitType);
     extractStepResources(progress);
   }
 
@@ -120,9 +128,9 @@ public class InstructionModel {
     }
   }
 
-  private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat) {
-    stepDistanceRemaining = DistanceUtils.distanceFormatterBold(progress.currentLegProgress()
-      .currentStepProgress().distanceRemaining(), decimalFormat, true);
+  private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat, int unitType) {
+    stepDistanceRemaining = DistanceUtils.distanceFormatter(progress.currentLegProgress()
+      .currentStepProgress().distanceRemaining(), decimalFormat, true, unitType);
   }
 
   private boolean hasManeuver(LegStep step) {

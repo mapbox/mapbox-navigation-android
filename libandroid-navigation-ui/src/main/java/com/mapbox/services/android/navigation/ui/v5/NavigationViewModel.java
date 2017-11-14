@@ -24,6 +24,7 @@ import com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -46,11 +47,13 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   private NavigationInstructionPlayer instructionPlayer;
   private DecimalFormat decimalFormat;
   private SharedPreferences preferences;
+  private int unitType;
   private String feedbackId;
 
   public NavigationViewModel(Application application) {
     super(application);
     preferences = PreferenceManager.getDefaultSharedPreferences(application);
+    initUnitType();
     initNavigation(application);
     initVoiceInstructions(application);
     initDecimalFormat();
@@ -79,8 +82,8 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    */
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    instructionModel.setValue(new InstructionModel(routeProgress, decimalFormat));
-    summaryModel.setValue(new SummaryModel(routeProgress, decimalFormat));
+    instructionModel.setValue(new InstructionModel(routeProgress, decimalFormat, unitType));
+    summaryModel.setValue(new SummaryModel(routeProgress, decimalFormat, unitType));
     navigationLocation.setValue(location);
   }
 
@@ -196,7 +199,18 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    */
   private void initNavigation(Application application) {
     navigation = new MapboxNavigation(application.getApplicationContext(), Mapbox.getAccessToken(),
-      MapboxNavigationOptions.builder().isFromNavigationUi(true).build());
+      MapboxNavigationOptions.builder()
+        .isFromNavigationUi(true)
+        .unitType(unitType)
+        .build());
+  }
+
+  /**
+   * Initializes distance unit (imperial or metric).
+   */
+  private void initUnitType() {
+    unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE,
+      NavigationUnitType.TYPE_IMPERIAL);
   }
 
   /**
