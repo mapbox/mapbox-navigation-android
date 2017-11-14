@@ -263,7 +263,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private void launchNavigationWithRoute() {
     NavigationViewOptions options = NavigationViewOptions.builder()
-      .distanceUnitType(NavigationUnitType.TYPE_METRIC)
+      .unitType(NavigationUnitType.TYPE_IMPERIAL)
       .shouldSimulateRoute(true)
       .build();
     if (route != null) {

@@ -11,7 +11,7 @@ public abstract class NavigationViewOptions {
   @Nullable
   public abstract String awsPoolId();
 
-  public abstract int distanceUnitType();
+  public abstract int unitType();
 
   public abstract boolean shouldSimulateRoute();
 
@@ -20,7 +20,7 @@ public abstract class NavigationViewOptions {
 
     public abstract Builder awsPoolId(String awsPoolId);
 
-    public abstract Builder distanceUnitType(@NavigationUnitType.UnitType int unitType);
+    public abstract Builder unitType(@NavigationUnitType.UnitType int unitType);
 
     public abstract Builder shouldSimulateRoute(boolean shouldSimulateRoute);
 
@@ -30,7 +30,7 @@ public abstract class NavigationViewOptions {
   public static Builder builder() {
     return new AutoValue_NavigationViewOptions.Builder()
       .awsPoolId(null)
-      .distanceUnitType(NavigationUnitType.TYPE_IMPERIAL)
+      .unitType(NavigationUnitType.TYPE_IMPERIAL)
       .shouldSimulateRoute(false);
   }
 }
