@@ -6,7 +6,9 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.directions.v5.DirectionsCriteria;
 import com.mapbox.directions.v5.DirectionsCriteria.AnnotationCriteria;
+import com.mapbox.directions.v5.DirectionsCriteria.ExcludeCriteria;
 import com.mapbox.directions.v5.DirectionsCriteria.ProfileCriteria;
+import com.mapbox.directions.v5.DirectionsCriteria.VoiceUnitCriteria;
 import com.mapbox.directions.v5.MapboxDirections;
 import com.mapbox.directions.v5.models.DirectionsResponse;
 import com.mapbox.directions.v5.models.DirectionsRoute;
@@ -355,6 +357,31 @@ public final class NavigationRoute {
     }
 
     /**
+     * Change the units used for voice announcements, this does not change the units provided in
+     * other fields outside of the {@link com.mapbox.directions.v5.models.VoiceInstructions} object.
+     *
+     * @param voiceUnits one of the values found inside the {@link VoiceUnitCriteria}
+     * @return this builder for chaining options together
+     * @since 0.8.0
+     */
+    public Builder voiceUnits(@Nullable @VoiceUnitCriteria String voiceUnits) {
+      directionsBuilder.voiceUnits(voiceUnits);
+      return this;
+    }
+
+    /**
+     * Exclude specific road classes such as highways, tolls, and more.
+     *
+     * @param exclude one of the values found inside the {@link ExcludeCriteria}
+     * @return this builder for chaining options together
+     * @since 0.8.0
+     */
+    public Builder exclude(@Nullable @ExcludeCriteria String exclude) {
+      directionsBuilder.exclude(exclude);
+      return this;
+    }
+
+    /**
      * Base package name or other simple string identifier. Used inside the calls user agent header.
      *
      * @param clientAppName base package name or other simple string identifier
@@ -407,6 +434,7 @@ public final class NavigationRoute {
         .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
         .overview(DirectionsCriteria.OVERVIEW_FULL)
         .voiceInstructions(true)
+        .bannerInstructions(true)
         .roundaboutExits(true);
       return new NavigationRoute(directionsBuilder.build());
     }
