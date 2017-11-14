@@ -12,6 +12,8 @@
 
     </declare-styleable>
 
+
+
     <declare-styleable name="NavigationView">
         <!-- Colors -->
         <attr name="navigationViewPrimary" format="color"/>
@@ -32,6 +34,12 @@
 
         <attr name="navigationViewProgress" format="color"/>
         <attr name="navigationViewProgressBackground" format="color"/>
+
+        <!-- Standards -->
+        <attr name="navigationUnitType">
+            <enum name="imperial" value="0" />
+            <enum name="metric" value="1" />
+        </attr>
 
     </declare-styleable>
 </resources>

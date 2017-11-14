@@ -28,6 +28,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListe
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.distance.UnitType;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 import java.text.DecimalFormat;
@@ -47,6 +48,8 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   private DecimalFormat decimalFormat;
   private SharedPreferences preferences;
   private String feedbackId;
+  private UnitType unitType = UnitType.UNIT_IMPERIAL;
+
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -54,6 +57,10 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
     initNavigation(application);
     initVoiceInstructions(application);
     initDecimalFormat();
+  }
+
+  public void setUnitType(UnitType unitType){
+    this.unitType = unitType;
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -79,8 +86,8 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    */
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    instructionModel.setValue(new InstructionModel(routeProgress, decimalFormat));
-    summaryModel.setValue(new SummaryModel(routeProgress, decimalFormat));
+    instructionModel.setValue(new InstructionModel(routeProgress, decimalFormat,unitType));
+    summaryModel.setValue(new SummaryModel(routeProgress, decimalFormat,unitType));
     navigationLocation.setValue(location);
   }
 

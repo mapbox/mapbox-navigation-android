@@ -18,9 +18,10 @@ import android.widget.RemoteViews;
 import com.mapbox.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
+import com.mapbox.services.android.navigation.v5.utils.distance.DistanceUtils;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
+import com.mapbox.services.android.navigation.v5.utils.distance.UnitType;
 import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 
 import java.text.DecimalFormat;
@@ -47,6 +48,7 @@ class NavigationNotification {
   private String currentStepName;
   private int currentManeuverId;
   private Context context;
+  private UnitType unitType;
 
   NavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
     this.context = context;
@@ -137,13 +139,13 @@ class NavigationNotification {
 
   private boolean newDistanceText(RouteProgress routeProgress) {
     return currentDistanceText != null
-      && !currentDistanceText.toString().contentEquals(DistanceUtils.distanceFormatterBold(
+      && !currentDistanceText.toString().contentEquals(DistanceUtils.get(UnitType.UNIT_IMPERIAL).distanceFormatterBold(
       routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
       decimalFormat, true).toString());
   }
 
   private void addDistanceText(RouteProgress routeProgress) {
-    currentDistanceText = DistanceUtils.distanceFormatterBold(
+    currentDistanceText = DistanceUtils.get(UnitType.UNIT_IMPERIAL).distanceFormatterBold(
       routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(), decimalFormat, true);
     remoteViewsBig.setTextViewText(R.id.notificationStepDistanceTextView, currentDistanceText);
     if (!TextUtils.isEmpty(currentStepName)) {
