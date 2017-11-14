@@ -3,6 +3,8 @@ package com.mapbox.services.android.navigation.testapp.activity.navigationui;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,6 +12,7 @@ import com.mapbox.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.directions.v5.DirectionsCriteria;
 import com.mapbox.directions.v5.MapboxDirections;
 import com.mapbox.directions.v5.models.DirectionsResponse;
+import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -21,9 +24,12 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,12 +40,14 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class NavigationMapRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapClickListener, Callback<DirectionsResponse> {
+  MapboxMap.OnMapLongClickListener, Callback<DirectionsResponse>, OnRouteSelectionChangeListener {
 
   private static final String DIRECTIONS_RESPONSE = "directions-route.json";
 
   @BindView(R.id.mapView)
   MapView mapView;
+  @BindView(R.id.primaryRouteIndexTextView)
+  TextView primaryRouteIndexTextView;
 
   private MapboxMap mapboxMap;
   private NavigationMapRoute navigationMapRoute;
@@ -47,6 +55,8 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
 
   private Marker originMarker;
   private Marker destinationMarker;
+  private boolean alternativesVisible = true;
+  private List<DirectionsRoute> routes = new ArrayList<>();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -60,25 +70,41 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   }
 
   @OnClick(R.id.fabStyles)
-  public void onStyleFabClick() {
+  public void onStyleFabClick(View view) {
     if (mapboxMap != null) {
       mapboxMap.setStyleUrl(styleCycle.getNextStyle());
     }
   }
 
-  @Override
-  public void onMapReady(MapboxMap mapboxMap) {
-    this.mapboxMap = mapboxMap;
-    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap);
-    Gson gson = new GsonBuilder().registerTypeAdapterFactory(DirectionsAdapterFactory.create())
-      .create();
-    DirectionsResponse response = gson.fromJson(loadJsonFromAsset(DIRECTIONS_RESPONSE), DirectionsResponse.class);
-    navigationMapRoute.addRoute(response.routes().get(0));
-    mapboxMap.setOnMapClickListener(this);
+  @OnClick(R.id.fabToggleAlternatives)
+  public void onToggleAlternativesClick(View view) {
+    alternativesVisible = !alternativesVisible;
+    if (navigationMapRoute != null) {
+      navigationMapRoute.showAlternativeRoutes(alternativesVisible);
+    }
   }
 
   @Override
-  public void onMapClick(@NonNull LatLng point) {
+  public void onNewPrimaryRouteSelected(DirectionsRoute directionsRoute) {
+    primaryRouteIndexTextView.setText(String.valueOf(routes.indexOf(directionsRoute)));
+  }
+
+  @Override
+  public void onMapReady(MapboxMap mapboxMap) {
+    this.mapboxMap = mapboxMap;
+    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap,
+      "admin-3-4-boundaries-bg");
+    Gson gson = new GsonBuilder().registerTypeAdapterFactory(DirectionsAdapterFactory.create())
+      .create();
+    DirectionsResponse response = gson.fromJson(loadJsonFromAsset(DIRECTIONS_RESPONSE),
+      DirectionsResponse.class);
+    navigationMapRoute.addRoute(response.routes().get(0));
+    mapboxMap.setOnMapLongClickListener(this);
+    navigationMapRoute.setOnRouteSelectionChangeListener(this);
+  }
+
+  @Override
+  public void onMapLongClick(@NonNull LatLng point) {
     if (originMarker == null) {
       originMarker = mapboxMap.addMarker(new MarkerOptions().position(point));
     } else if (destinationMarker == null) {
@@ -88,9 +114,9 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       Point destinationPoint = Point.fromLngLat(
         destinationMarker.getPosition().getLongitude(), destinationMarker.getPosition().getLatitude());
       requestDirectionsRoute(originPoint, destinationPoint);
-    } else {
       mapboxMap.removeMarker(originMarker);
       mapboxMap.removeMarker(destinationMarker);
+    } else {
       originMarker = null;
       destinationMarker = null;
       navigationMapRoute.removeRoute();
@@ -105,6 +131,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
       .overview(DirectionsCriteria.OVERVIEW_FULL)
       .annotations(DirectionsCriteria.ANNOTATION_CONGESTION)
+      .alternatives(true)
       .steps(true)
       .build();
 
@@ -113,10 +140,10 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
 
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-    if (response.body() != null) {
-      if (response.body().routes().size() > 0) {
-        navigationMapRoute.addRoute(response.body().routes().get(0));
-      }
+    if (response.body() != null && !response.body().routes().isEmpty()) {
+      List<DirectionsRoute> routes = response.body().routes();
+      this.routes = routes;
+      navigationMapRoute.addRoutes(routes);
     }
   }
 

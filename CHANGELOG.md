@@ -2,6 +2,10 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.7.1 - TBD
+* Expanded the width of route lines when zoomed out
+* Added support for displaying alternative routes on map
+
 ### v0.7.0 - November 13, 2017
 
 * Updated to Mapbox Java 3.0 [#373](https://github.com/mapbox/mapbox-navigation-android/pull/373)

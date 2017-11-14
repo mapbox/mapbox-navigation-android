@@ -185,7 +185,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       return;
     }
 
-    NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder()
+    final NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder()
       .accessToken(Mapbox.getAccessToken());
     navigationRouteBuilder.origin(origin);
     navigationRouteBuilder.destination(destination);
@@ -201,12 +201,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
           if (!response.body().routes().isEmpty()) {
             DirectionsRoute directionsRoute = response.body().routes().get(0);
             MockNavigationActivity.this.route = directionsRoute;
-            navigationMapRoute.addRoute(directionsRoute);
-
-            /*for (LegStep step: route.getLegs().get(0).getSteps()) {
-              mapboxMap.addMarker(new MarkerOptions().position(new LatLng(
-                  step.getManeuver().asPosition().getLatitude(), step.getManeuver().asPosition().getLongitude())));
-             }*/
+            navigationMapRoute.addRoutes(response.body().routes());
           }
         }
       }

@@ -34,6 +34,7 @@ import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
@@ -53,7 +54,8 @@ import timber.log.Timber;
 import static com.mapbox.services.android.telemetry.location.LocationEnginePriority.HIGH_ACCURACY;
 
 public class NavigationViewActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, LocationEngineListener, Callback<DirectionsResponse> {
+  MapboxMap.OnMapLongClickListener, LocationEngineListener, Callback<DirectionsResponse>,
+  OnRouteSelectionChangeListener {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
 
@@ -197,11 +199,11 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (validRouteResponse(response)) {
-      route = response.body().routes().get(0);
       hideLoading();
+      route = response.body().routes().get(0);
       if (route.distance() > 25d) {
         launchRouteBtn.setEnabled(true);
-        mapRoute.addRoute(route);
+        mapRoute.addRoutes(response.body().routes());
         boundCameraToRoute();
       } else {
         Snackbar.make(mapView, "Please select a longer route", BaseTransientBottomBar.LENGTH_SHORT).show();
@@ -212,6 +214,11 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
     Timber.e(throwable.getMessage());
+  }
+
+  @Override
+  public void onNewPrimaryRouteSelected(DirectionsRoute directionsRoute) {
+    route = directionsRoute;
   }
 
   @SuppressWarnings( {"MissingPermission"})
@@ -237,7 +244,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void initMapRoute() {
-    mapRoute = new NavigationMapRoute(mapView, mapboxMap);
+    mapRoute = new NavigationMapRoute(mapView, mapboxMap, "admin-3-4-boundaries-bg");
+    mapRoute.setOnRouteSelectionChangeListener(this);
   }
 
   private void fetchRoute() {
@@ -245,6 +253,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       .accessToken(Mapbox.getAccessToken())
       .origin(currentLocation)
       .destination(destination)
+      .alternatives(true)
       .build()
       .getRoute(this);
     loading.setVisibility(View.VISIBLE);

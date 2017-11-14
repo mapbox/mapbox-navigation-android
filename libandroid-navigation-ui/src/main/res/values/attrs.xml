@@ -1,37 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="NavigationMapRoute">
-        <!-- Colors -->
-        <attr name="routeColor" format="color"/>
-        <attr name="routeModerateCongestionColor" format="color"/>
-        <attr name="routeSevereCongestionColor" format="color"/>
-        <attr name="routeShieldColor" format="color"/>
+  <declare-styleable name="NavigationMapRoute">
+    <!-- Primary route colors -->
+    <attr name="routeColor" format="color"/>
+    <attr name="routeModerateCongestionColor" format="color"/>
+    <attr name="routeSevereCongestionColor" format="color"/>
+    <attr name="routeShieldColor" format="color"/>
 
-        <!-- Scales -->
-        <attr name="routeScale" format="float"/>
+    <!-- Alternative route colors -->
+    <attr name="alternativeRouteColor" format="color"/>
+    <attr name="alternativeRouteModerateCongestionColor" format="color"/>
+    <attr name="alternativeRouteSevereCongestionColor" format="color"/>
+    <attr name="alternativeRouteShieldColor" format="color"/>
 
-    </declare-styleable>
+    <!-- Origin/Destination waypoint drawables -->
+    <attr name="originWaypointIcon" format="reference"/>
+    <attr name="destinationWaypointIcon" format="reference"/>
 
-    <declare-styleable name="NavigationView">
-        <!-- Colors -->
-        <attr name="navigationViewPrimary" format="color"/>
-        <attr name="navigationViewSecondary" format="color"/>
-        <attr name="navigationViewAccent" format="color"/>
-        <attr name="navigationViewPrimaryText" format="color"/>
-        <attr name="navigationViewSecondaryText" format="color"/>
+    <!-- Route Scales -->
+    <attr name="routeScale" format="float"/>
+    <attr name="alternativeRouteScale" format="float"/>
 
-        <!-- Instruction List -->
-        <attr name="navigationViewListBackground" format="color"/>
+  </declare-styleable>
 
-        <!-- Banner -->
-        <attr name="navigationViewBannerBackground" format="color"/>
-        <attr name="navigationViewBannerPrimaryText" format="color"/>
-        <attr name="navigationViewBannerSecondaryText" format="color"/>
-        <attr name="navigationViewBannerManeuverPrimary" format="color"/>
-        <attr name="navigationViewBannerManeuverSecondary" format="color"/>
+  <declare-styleable name="NavigationView">
+    <!-- Colors -->
+    <attr name="navigationViewPrimary" format="color"/>
+    <attr name="navigationViewSecondary" format="color"/>
+    <attr name="navigationViewAccent" format="color"/>
+    <attr name="navigationViewPrimaryText" format="color"/>
+    <attr name="navigationViewSecondaryText" format="color"/>
 
-        <attr name="navigationViewProgress" format="color"/>
-        <attr name="navigationViewProgressBackground" format="color"/>
+    <!-- Instruction List -->
+    <attr name="navigationViewListBackground" format="color"/>
 
-    </declare-styleable>
+    <!-- Banner -->
+    <attr name="navigationViewBannerBackground" format="color"/>
+    <attr name="navigationViewBannerPrimaryText" format="color"/>
+    <attr name="navigationViewBannerSecondaryText" format="color"/>
+    <attr name="navigationViewBannerManeuverPrimary" format="color"/>
+    <attr name="navigationViewBannerManeuverSecondary" format="color"/>
+
+    <attr name="navigationViewProgress" format="color"/>
+    <attr name="navigationViewProgressBackground" format="color"/>
+
+  </declare-styleable>
 </resources>
