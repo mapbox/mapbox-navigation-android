@@ -55,6 +55,10 @@ dependencies {
   // Mapbox plugins
   api dependenciesList.locationLayerPlugin
 
+  // AutoValues
+  annotationProcessor dependenciesList.autoValue
+  compileOnly dependenciesList.autoValue
+
   // Logging
   implementation dependenciesList.timber
 

@@ -127,6 +127,7 @@ public final class NavigationConstants {
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
   public static final String NAVIGATION_VIEW_LAUNCH_ROUTE = "launch_with_route";
   public static final String NAVIGATION_VIEW_AWS_POOL_ID = "navigation_view_aws_pool_id";
+  public static final String NAVIGATION_VIEW_UNIT_TYPE = "navigation_view_unit_type";
   public static final String NAVIGATION_VIEW_REROUTING = "Rerouting";
   public static final String ROUTE_BELOW_LAYER = "admin-3-4-boundaries-bg";
   public static final String DECIMAL_FORMAT = "#.#";
@@ -147,7 +148,7 @@ public final class NavigationConstants {
   public static final String STEP_MANEUVER_TYPE_ROUNDABOUT_TURN = "roundabout turn";
   public static final String STEP_MANEUVER_TYPE_NOTIFICATION = "notification";
 
-  @StringDef({
+  @StringDef( {
     STEP_MANEUVER_TYPE_TURN,
     STEP_MANEUVER_TYPE_NEW_NAME,
     STEP_MANEUVER_TYPE_DEPART,
@@ -163,7 +164,8 @@ public final class NavigationConstants {
     STEP_MANEUVER_TYPE_ROUNDABOUT_TURN,
     STEP_MANEUVER_TYPE_NOTIFICATION
   })
-  public @interface ManeuverType {}
+  public @interface ManeuverType {
+  }
 
   // Step Maneuver Modifiers
   public static final String STEP_MANEUVER_MODIFIER_UTURN = "uturn";
@@ -175,7 +177,7 @@ public final class NavigationConstants {
   public static final String STEP_MANEUVER_MODIFIER_LEFT = "left";
   public static final String STEP_MANEUVER_MODIFIER_SHARP_LEFT = "sharp left";
 
-  @StringDef({
+  @StringDef( {
     STEP_MANEUVER_MODIFIER_UTURN,
     STEP_MANEUVER_MODIFIER_SHARP_RIGHT,
     STEP_MANEUVER_MODIFIER_RIGHT,
@@ -185,7 +187,8 @@ public final class NavigationConstants {
     STEP_MANEUVER_MODIFIER_LEFT,
     STEP_MANEUVER_MODIFIER_SHARP_LEFT
   })
-  public @interface ManeuverModifier {}
+  public @interface ManeuverModifier {
+  }
 
   // Turn Lane Indication
   public static final String TURN_LANE_INDICATION_LEFT = "left";

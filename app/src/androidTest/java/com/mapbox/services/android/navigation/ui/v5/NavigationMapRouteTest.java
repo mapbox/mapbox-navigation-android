@@ -25,13 +25,15 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute.NavigationMapLayers.NAVIGATION_ROUTE_LAYER;
-import static com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute.NavigationMapLayers.NAVIGATION_ROUTE_SHIELD_LAYER;
-import static com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute.NavigationMapSources.NAVIGATION_ROUTE_SOURCE;
 import static junit.framework.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class NavigationMapRouteTest {
+
+  private static final String GENERIC_ROUTE_SOURCE_ID = "mapbox-navigation-route-source";
+  private static final String GENERIC_ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
+  private static final String GENERIC_ROUTE_SHIELD_LAYER_ID
+    = "mapbox-navigation-route-shield-layer";
 
   @Rule
   public ActivityTestRule<NavigationMapRouteActivity> rule = new ActivityTestRule<>(NavigationMapRouteActivity.class);
@@ -70,7 +72,7 @@ public class NavigationMapRouteTest {
       @Override
       public void onNavigationMapRouteAction(NavigationMapRoute navigationMapRoute, MapboxMap mapboxMap,
                                              UiController uiController) {
-        assertTrue(mapboxMap.getSource(NAVIGATION_ROUTE_SOURCE) != null);
+        assertTrue(mapboxMap.getSource(GENERIC_ROUTE_SOURCE_ID) != null);
       }
     });
   }
@@ -81,7 +83,7 @@ public class NavigationMapRouteTest {
       @Override
       public void onNavigationMapRouteAction(NavigationMapRoute navigationMapRoute, MapboxMap mapboxMap,
                                              UiController uiController) {
-        assertTrue(mapboxMap.getLayer(NAVIGATION_ROUTE_SHIELD_LAYER) != null);
+        assertTrue(mapboxMap.getLayer(GENERIC_ROUTE_SHIELD_LAYER_ID) != null);
       }
     });
   }
@@ -92,7 +94,7 @@ public class NavigationMapRouteTest {
       @Override
       public void onNavigationMapRouteAction(NavigationMapRoute navigationMapRoute, MapboxMap mapboxMap,
                                              UiController uiController) {
-        assertTrue(mapboxMap.getLayer(NAVIGATION_ROUTE_LAYER) != null);
+        assertTrue(mapboxMap.getLayer(GENERIC_ROUTE_LAYER_ID) != null);
       }
     });
   }
@@ -103,7 +105,7 @@ public class NavigationMapRouteTest {
       @Override
       public void onNavigationMapRouteAction(NavigationMapRoute navigationMapRoute, MapboxMap mapboxMap,
                                              UiController controller) {
-        assertTrue(mapboxMap.getLayer(NAVIGATION_ROUTE_SHIELD_LAYER)
+        assertTrue(mapboxMap.getLayer(GENERIC_ROUTE_SHIELD_LAYER_ID)
           .getVisibility().getValue().equals(Property.VISIBLE));
       }
     });
@@ -115,7 +117,7 @@ public class NavigationMapRouteTest {
       @Override
       public void onNavigationMapRouteAction(NavigationMapRoute navigationMapRoute, MapboxMap mapboxMap,
                                              UiController controller) {
-        assertTrue(mapboxMap.getLayer(NAVIGATION_ROUTE_LAYER)
+        assertTrue(mapboxMap.getLayer(GENERIC_ROUTE_LAYER_ID)
           .getVisibility().getValue().equals(Property.VISIBLE));
       }
     });
@@ -128,7 +130,7 @@ public class NavigationMapRouteTest {
       public void onNavigationMapRouteAction(NavigationMapRoute navigationMapRoute, MapboxMap mapboxMap,
                                              UiController controller) {
         navigationMapRoute.removeRoute();
-        assertTrue(mapboxMap.getLayer(NAVIGATION_ROUTE_SHIELD_LAYER)
+        assertTrue(mapboxMap.getLayer(GENERIC_ROUTE_SHIELD_LAYER_ID)
           .getVisibility().getValue().equals(Property.NONE));
       }
     });
@@ -141,7 +143,7 @@ public class NavigationMapRouteTest {
       public void onNavigationMapRouteAction(NavigationMapRoute navigationMapRoute, MapboxMap mapboxMap,
                                              UiController controller) {
         navigationMapRoute.removeRoute();
-        assertTrue(mapboxMap.getLayer(NAVIGATION_ROUTE_LAYER)
+        assertTrue(mapboxMap.getLayer(GENERIC_ROUTE_LAYER_ID)
           .getVisibility().getValue().equals(Property.NONE));
       }
     });
@@ -155,7 +157,7 @@ public class NavigationMapRouteTest {
                                              UiController controller) {
         mapboxMap.setStyleUrl(Style.DARK);
         controller.loopMainThreadForAtLeast(500);
-        assertTrue(mapboxMap.getLayer(NAVIGATION_ROUTE_SHIELD_LAYER) != null);
+        assertTrue(mapboxMap.getLayer(GENERIC_ROUTE_SHIELD_LAYER_ID) != null);
       }
     });
   }
@@ -168,7 +170,7 @@ public class NavigationMapRouteTest {
                                              UiController controller) {
         mapboxMap.setStyleUrl(Style.DARK);
         controller.loopMainThreadForAtLeast(500);
-        assertTrue(mapboxMap.getLayer(NAVIGATION_ROUTE_LAYER) != null);
+        assertTrue(mapboxMap.getLayer(GENERIC_ROUTE_LAYER_ID) != null);
       }
     });
   }
@@ -181,7 +183,7 @@ public class NavigationMapRouteTest {
                                              UiController controller) {
         mapboxMap.setStyleUrl(Style.DARK);
         controller.loopMainThreadForAtLeast(500);
-        assertTrue(mapboxMap.getSource(NAVIGATION_ROUTE_SOURCE) != null);
+        assertTrue(mapboxMap.getSource(GENERIC_ROUTE_SOURCE_ID) != null);
       }
     });
   }

@@ -1,19 +1,24 @@
 package com.mapbox.services.android.navigation.ui.v5.route;
 
 import android.app.Activity;
+import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 
+import com.mapbox.directions.v5.DirectionsCriteria;
 import com.mapbox.directions.v5.models.DirectionsResponse;
 import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.directions.v5.models.LegStep;
 import com.mapbox.directions.v5.models.RouteLeg;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -25,7 +30,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class RouteViewModel extends ViewModel implements Callback<DirectionsResponse> {
+public class RouteViewModel extends AndroidViewModel implements Callback<DirectionsResponse> {
 
   public final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
   public final MutableLiveData<Point> destination = new MutableLiveData<>();
@@ -33,6 +38,12 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
   private Point origin;
   private Location rawLocation;
   private boolean extractLaunchData = true;
+  private String unitType;
+
+  public RouteViewModel(@NonNull Application application) {
+    super(application);
+    initUnitType(PreferenceManager.getDefaultSharedPreferences(application));
+  }
 
   /**
    * A new directions response has been received.
@@ -91,6 +102,16 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
   }
 
   /**
+   * Initializes distance unit (imperial or metric).
+   */
+  private void initUnitType(SharedPreferences preferences) {
+    int unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE,
+      NavigationUnitType.TYPE_IMPERIAL);
+    boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
+    this.unitType = isImperialUnitType ? DirectionsCriteria.IMPERIAL : DirectionsCriteria.METRIC;
+  }
+
+  /**
    * Requests a new {@link DirectionsRoute}.
    * <p>
    * Will use {@link Location} bearing if we have a rawLocation with bearing.
@@ -109,6 +130,7 @@ public class RouteViewModel extends ViewModel implements Callback<DirectionsResp
       NavigationRoute.builder()
         .accessToken(Mapbox.getAccessToken())
         .origin(origin, bearing, 90d)
+        .voiceUnits(unitType)
         .destination(destination).build().getRoute(this);
     }
   }
