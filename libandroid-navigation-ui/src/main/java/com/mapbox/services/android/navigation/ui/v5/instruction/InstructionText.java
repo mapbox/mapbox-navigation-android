@@ -1,157 +1,79 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
+import android.text.TextUtils;
+
+import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
-import com.mapbox.core.utils.TextUtils;
 
-import java.util.Arrays;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
 
 public class InstructionText {
 
-  private TextFields stepTextFields;
+  private String primaryText;
+  private String secondaryText;
   private double stepDistance;
+  private double distanceAlongStep;
 
-  public InstructionText(LegStep step) {
+  public InstructionText(LegStep step, double distanceAlongStep) {
+    primaryText = "";
+    secondaryText = "";
     stepDistance = step.distance();
-    stepTextFields = buildInstructionText(step);
+    if (distanceAlongStep > 0d) {
+      this.distanceAlongStep = distanceAlongStep;
+    }
+    buildInstructionText(step);
   }
 
   public String getPrimaryText() {
-    return StringAbbreviator.abbreviate(stepTextFields.primaryText);
+    return StringAbbreviator.abbreviate(primaryText);
   }
 
   public String getSecondaryText() {
-    return StringAbbreviator.abbreviate(stepTextFields.secondaryText);
+    return StringAbbreviator.abbreviate(secondaryText);
   }
 
   public double getStepDistance() {
     return stepDistance;
   }
 
-  private TextFields buildInstructionText(LegStep step) {
-
-    TextFields textFields = new TextFields();
-    String exitText = "";
-
-    // Extract Exit for later use
-    if (step.maneuver() != null) {
-      if (!TextUtils.isEmpty(step.exits())) {
-        exitText = "Exit " + step.exits();
+  private void buildInstructionText(LegStep step) {
+    if (hasBannerInstructions(step)) {
+      if (isArrivalManeuverType(step) && shouldUseArrivalInstruction(step)) {
+        // Arrival instructions
+        BannerInstructions instructions = step.bannerInstructions().get(1);
+        createInstructionText(instructions);
+      } else {
+        // Normal instructions
+        BannerInstructions instructions = step.bannerInstructions().get(0);
+        createInstructionText(instructions);
       }
     }
+  }
 
-    // Refs
-    if (hasRefs(step) && isMotorway(step)) {
-      textFields.primaryText = StringAbbreviator.deliminator(step.ref());
-      if (hasDestination(step)) {
-        textFields.secondaryText = destination(step);
-      }
-      return textFields;
+  private boolean hasBannerInstructions(LegStep step) {
+    return step.bannerInstructions() != null && !step.bannerInstructions().isEmpty();
+  }
+
+  private boolean isArrivalManeuverType(LegStep step) {
+    return step.maneuver() != null
+      && !TextUtils.isEmpty(step.maneuver().type())
+      && step.maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE);
+  }
+
+  private boolean shouldUseArrivalInstruction(LegStep step) {
+    return step.bannerInstructions().size() > 1
+      && distanceAlongStep >= step.bannerInstructions().get(1).distanceAlongGeometry();
+  }
+
+  private void createInstructionText(BannerInstructions instructions) {
+    if (instructions.primary() != null
+      && !TextUtils.isEmpty(instructions.primary().text())) {
+      primaryText = instructions.primary().text();
     }
-
-    // Multiple Destinations
-    if (hasMultipleDestinations(step)) {
-      return formatMultipleStrings(step.destinations(), exitText);
+    if (instructions.secondary() != null
+      && !TextUtils.isEmpty(instructions.secondary().text())) {
+      secondaryText = instructions.secondary().text();
     }
-
-    // Multiple Names
-    if (hasMultipleNames(step)) {
-      return formatMultipleStrings(step.name(), exitText);
-    }
-
-    // Destination or Street Name
-    if (hasDestination(step)) {
-      textFields.primaryText = destination(step);
-      return textFields;
-    } else if (hasName(step)) {
-      textFields.primaryText = name(step);
-      return textFields;
-    }
-
-    // Fall back to instruction
-    if (hasInstruction(step)) {
-      textFields.primaryText = instruction(step);
-      return textFields;
-    }
-    return textFields;
-  }
-
-  private boolean hasRefs(LegStep upComingStep) {
-    return !TextUtils.isEmpty(upComingStep.ref());
-  }
-
-  private boolean isMotorway(LegStep step) {
-    if (step.intersections() == null || step.intersections().isEmpty()) {
-      return false;
-    }
-    if (step.intersections().get(0).classes() == null || step.intersections().get(0).classes().isEmpty()) {
-      return false;
-    }
-    return step.intersections().get(0).classes().contains("motorway");
-  }
-
-
-  private String instruction(LegStep upComingStep) {
-    return upComingStep.maneuver().instruction();
-  }
-
-  private boolean hasInstruction(LegStep upComingStep) {
-    return upComingStep.maneuver() != null
-      && !TextUtils.isEmpty(upComingStep.maneuver().instruction());
-  }
-
-  private String name(LegStep upComingStep) {
-    return upComingStep.name().trim();
-  }
-
-  private boolean hasName(LegStep upComingStep) {
-    return !TextUtils.isEmpty(upComingStep.name());
-  }
-
-  private String destination(LegStep upComingStep) {
-    return upComingStep.destinations().trim();
-  }
-
-  private boolean hasDestination(LegStep upComingStep) {
-    return !TextUtils.isEmpty(upComingStep.destinations());
-  }
-
-  private boolean hasMultipleDestinations(LegStep upComingStep) {
-    return !TextUtils.isEmpty(upComingStep.destinations())
-      && StringAbbreviator.splitter(upComingStep.destinations()).length > 1;
-  }
-
-  private boolean hasMultipleNames(LegStep upComingStep) {
-    return !TextUtils.isEmpty(upComingStep.name())
-      && StringAbbreviator.splitter(upComingStep.name()).length > 1;
-  }
-
-  private TextFields formatMultipleStrings(String multipleString, String exitText) {
-    TextFields textFields = new TextFields();
-
-    String[] strings = {multipleString};
-
-    if (!(multipleString.contains("(") || multipleString.contains(")"))) {
-      strings = StringAbbreviator.splitter(multipleString);
-    }
-
-    String[] firstString = Arrays.copyOfRange(strings, 0, 1);
-    if (!TextUtils.isEmpty(exitText)) {
-      textFields.primaryText = exitText + ": " + firstString[0];
-    } else {
-      textFields.primaryText = firstString[0];
-    }
-
-    if (strings.length > 1) {
-      String[] remainingStrings = Arrays.copyOfRange(strings, 1, strings.length);
-      textFields.secondaryText = TextUtils.join("  / ", remainingStrings).trim();
-    }
-
-    return textFields;
-  }
-
-  private static class TextFields {
-    String primaryText = "";
-    String secondaryText = "";
   }
 }

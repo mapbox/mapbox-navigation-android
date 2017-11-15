@@ -103,18 +103,19 @@ public class InstructionModel {
     LegStep currentStep = progress.currentLegProgress().currentStep();
     LegStep upcomingStep = progress.currentLegProgress().upComingStep();
     LegStep thenStep = progress.currentLegProgress().followOnStep();
+    double distanceAlongCurrentStep = progress.currentLegProgress().currentStepProgress().distanceRemaining();
 
     // Type / Modifier / Text
     if (upcomingStep != null && hasManeuver(upcomingStep)) {
       maneuverViewType = upcomingStep.maneuver().type();
       maneuverViewModifier = upcomingStep.maneuver().modifier();
       // Upcoming instruction text data
-      bannerInstructionText = new InstructionText(upcomingStep);
+      bannerInstructionText = new InstructionText(upcomingStep, distanceAlongCurrentStep);
     } else if (hasManeuver(currentStep)) {
       maneuverViewType = currentStep.maneuver().type();
       maneuverViewModifier = currentStep.maneuver().modifier();
       // Current instruction text data
-      bannerInstructionText = new InstructionText(currentStep);
+      bannerInstructionText = new InstructionText(currentStep, distanceAlongCurrentStep);
     }
 
     // Then step (step after upcoming)
@@ -150,7 +151,7 @@ public class InstructionModel {
   private void thenStep(LegStep upcomingStep, LegStep thenStep) {
     thenStepManeuverType = thenStep.maneuver().type();
     thenStepManeuverModifier = thenStep.maneuver().modifier();
-    thenInstructionText = new InstructionText(thenStep);
+    thenInstructionText = new InstructionText(thenStep, 0d);
     // Should show then step if the upcoming step is less than 25 seconds
     shouldShowThenStep = upcomingStep.duration() <= (25d * 1.2d)
       && !TextUtils.isEmpty(thenInstructionText.getPrimaryText());
