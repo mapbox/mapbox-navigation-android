@@ -99,6 +99,7 @@ public abstract class MapboxNavigationOptions {
       .metersRemainingTillArrival(NavigationConstants.METERS_REMAINING_TILL_ARRIVAL)
       .enableNotification(true)
       .isFromNavigationUi(false)
-      .isDebugLoggingEnabled(false);
+      .isDebugLoggingEnabled(false)
+      .unitType(NavigationUnitType.TYPE_IMPERIAL);
   }
 }
