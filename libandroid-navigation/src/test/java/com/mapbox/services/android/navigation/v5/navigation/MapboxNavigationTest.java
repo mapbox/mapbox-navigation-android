@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
@@ -45,9 +46,9 @@ public class MapboxNavigationTest extends BaseTest {
   }
 
   @Test
-  @Ignore
-  public void defaultMilestones_onInitializationDoGetAdded() throws Exception {
-    assertTrue(navigation.getMilestones().size() > 5);
+  public void voiceMilestone_onInitializationDoesGetAdded() throws Exception {
+    assertTrue(navigation.getMilestones().size() == 1
+      && navigation.getMilestones().get(0).getIdentifier() == VOICE_INSTRUCTION_MILESTONE_ID);
   }
 
   @Test
@@ -170,7 +171,6 @@ public class MapboxNavigationTest extends BaseTest {
   }
 
   @Test
-  @Ignore
   public void startNavigation_doesSendTrueToNavigationEvent() throws Exception {
     NavigationEventListener navigationEventListener = mock(NavigationEventListener.class);
     navigation.addNavigationEventListener(navigationEventListener);

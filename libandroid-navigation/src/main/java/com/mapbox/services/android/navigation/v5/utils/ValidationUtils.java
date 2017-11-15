@@ -12,7 +12,9 @@ public final class ValidationUtils {
 
   public static void validDirectionsRoute(DirectionsRoute directionsRoute,
                                           boolean defaultMilestonesEnabled) {
-    if (defaultMilestonesEnabled && !directionsRoute.routeOptions().voiceInstructions()) {
+    if (defaultMilestonesEnabled
+      && directionsRoute.routeOptions() != null
+      && !directionsRoute.routeOptions().voiceInstructions()) {
       throw new MissingFormatArgumentException("Using the default milestone requires the "
         + "directions route to include the voice instructions object.");
     }
