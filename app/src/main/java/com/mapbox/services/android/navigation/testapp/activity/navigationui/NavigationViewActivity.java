@@ -264,7 +264,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private void launchNavigationWithRoute() {
     NavigationViewOptions options = NavigationViewOptions.builder()
       .unitType(NavigationUnitType.TYPE_IMPERIAL)
-      .shouldSimulateRoute(true)
+      .shouldSimulateRoute(shouldSimulateRoute)
       .build();
     if (route != null) {
       NavigationLauncher.startNavigation(this, route, options);
