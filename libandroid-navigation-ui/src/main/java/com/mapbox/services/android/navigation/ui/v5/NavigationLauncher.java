@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
@@ -53,9 +52,6 @@ public class NavigationLauncher {
     editor.apply();
 
     Intent navigationActivity = new Intent(activity, NavigationActivity.class);
-    Bundle bundle = new Bundle();
-    bundle.putBoolean(NavigationConstants.NAVIGATION_VIEW_LAUNCH_ROUTE, true);
-    navigationActivity.putExtras(bundle);
     activity.startActivity(navigationActivity);
   }
 
@@ -88,9 +84,6 @@ public class NavigationLauncher {
     editor.apply();
 
     Intent navigationActivity = new Intent(activity, NavigationActivity.class);
-    Bundle bundle = new Bundle();
-    bundle.putBoolean(NavigationConstants.NAVIGATION_VIEW_LAUNCH_ROUTE, false);
-    navigationActivity.putExtras(bundle);
     activity.startActivity(navigationActivity);
   }
 
