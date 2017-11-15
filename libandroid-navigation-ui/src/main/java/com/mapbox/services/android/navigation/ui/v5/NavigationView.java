@@ -262,10 +262,10 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   /**
    * Should be called when this view is completely initialized.
    *
-   * @param activity with {@link android.content.Intent} containing route / coordinate data
+   * @param options with containing route / coordinate data
    */
-  public void startNavigation(Activity activity) {
-    routeViewModel.extractLaunchData(activity);
+  public void startNavigation(NavigationViewOptions options) {
+    routeViewModel.extractLaunchData(options);
   }
 
   /**

@@ -1,11 +1,8 @@
 package com.mapbox.services.android.navigation.ui.v5.route;
 
-import android.app.Activity;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.preference.PreferenceManager;
@@ -18,13 +15,11 @@ import com.mapbox.directions.v5.models.LegStep;
 import com.mapbox.directions.v5.models.RouteLeg;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
-import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-
-import java.util.HashMap;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -74,17 +69,18 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   }
 
   /**
-   * Checks the activity used to launch this activity.
-   * Will start navigation based on the data found in the {@link Intent}
+   * Checks the options used to launch this {@link com.mapbox.services.android.navigation.ui.v5.NavigationView}.
+   * <p>
+   * Will launch with either a {@link DirectionsRoute} or pair of {@link Point}s
    *
-   * @param activity holds either a set of {@link Point} coordinates or a {@link DirectionsRoute}
+   * @param options holds either a set of {@link Point} coordinates or a {@link DirectionsRoute}
    */
-  public void extractLaunchData(Activity activity) {
+  public void extractLaunchData(NavigationViewOptions options) {
     if (extractLaunchData) {
-      if (launchWithRoute(activity.getIntent())) {
-        extractRoute(activity);
+      if (launchWithRoute(options)) {
+        extractRoute(options);
       } else {
-        extractCoordinates(activity);
+        extractCoordinates(options);
       }
     }
   }
@@ -143,21 +139,23 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   }
 
   /**
-   * Check if the given {@link Intent} has been launched with a {@link DirectionsRoute}.
+   * Check if the given {@link NavigationViewOptions} has been launched with a {@link DirectionsRoute}.
    *
-   * @param intent possibly containing route
+   * @param options possibly containing route
    * @return true if route found, false if not
    */
-  private boolean launchWithRoute(Intent intent) {
-    return intent.getBooleanExtra(NavigationConstants.NAVIGATION_VIEW_LAUNCH_ROUTE, false);
+  private boolean launchWithRoute(NavigationViewOptions options) {
+    return options.directionsRoute() != null;
   }
 
   /**
    * Extracts the {@link DirectionsRoute}, adds a destination marker,
    * and starts navigation.
+   *
+   * @param options containing route
    */
-  private void extractRoute(Context context) {
-    DirectionsRoute route = NavigationLauncher.extractRoute(context);
+  private void extractRoute(NavigationViewOptions options) {
+    DirectionsRoute route = options.directionsRoute();
     if (route != null) {
       RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
       LegStep lastStep = lastLeg.steps().get(lastLeg.steps().size() - 1);
@@ -170,12 +168,13 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   /**
    * Extracts the {@link Point} coordinates, adds a destination marker,
    * and fetches a route with the coordinates.
+   *
+   * @param options containing origin and destination
    */
-  private void extractCoordinates(Context context) {
-    HashMap<String, Point> coordinates = NavigationLauncher.extractCoordinates(context);
-    if (coordinates.size() > 0) {
-      origin = coordinates.get(NavigationConstants.NAVIGATION_VIEW_ORIGIN);
-      destination.setValue(coordinates.get(NavigationConstants.NAVIGATION_VIEW_DESTINATION));
+  private void extractCoordinates(NavigationViewOptions options) {
+    if (options.origin() != null && options.destination() != null) {
+      origin = options.origin();
+      destination.setValue(options.destination());
       fetchRouteFromCoordinates();
     }
   }
