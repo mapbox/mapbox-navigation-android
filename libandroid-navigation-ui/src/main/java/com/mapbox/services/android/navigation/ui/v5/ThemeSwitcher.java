@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
+import android.util.AttributeSet;
 
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
@@ -23,8 +24,9 @@ public class ThemeSwitcher {
    * and set the theme colors accordingly.
    *
    * @param context {@link NavigationView} where the theme will be set
+   * @param attrs   holding custom styles if any are set
    */
-  static void setTheme(Context context) {
+  static void setTheme(Context context, AttributeSet attrs) {
     int uiMode = context.getResources().getConfiguration().uiMode
       & Configuration.UI_MODE_NIGHT_MASK;
     boolean darkThemeEnabled = uiMode == Configuration.UI_MODE_NIGHT_YES;
@@ -32,7 +34,13 @@ public class ThemeSwitcher {
     SharedPreferences.Editor editor = preferences.edit();
     editor.putBoolean(context.getString(R.string.dark_theme_enabled), darkThemeEnabled);
     editor.apply();
-    context.setTheme(darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight);
+
+    TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.NavigationView);
+    int lightTheme = array.getResourceId(R.styleable.NavigationView_navigationLightTheme, R.style.NavigationViewLight);
+    int darkTheme = array.getResourceId(R.styleable.NavigationView_navigationDarkTheme, R.style.NavigationViewDark);
+    array.recycle();
+
+    context.setTheme(darkThemeEnabled ? darkTheme : lightTheme);
   }
 
   /**
