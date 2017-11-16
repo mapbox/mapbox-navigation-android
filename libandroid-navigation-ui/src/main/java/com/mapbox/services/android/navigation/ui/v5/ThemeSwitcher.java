@@ -8,6 +8,7 @@ import android.content.res.TypedArray;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
@@ -35,10 +36,12 @@ public class ThemeSwitcher {
     editor.putBoolean(context.getString(R.string.dark_theme_enabled), darkThemeEnabled);
     editor.apply();
 
-    TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.NavigationView);
-    int lightTheme = array.getResourceId(R.styleable.NavigationView_navigationLightTheme, R.style.NavigationViewLight);
-    int darkTheme = array.getResourceId(R.styleable.NavigationView_navigationDarkTheme, R.style.NavigationViewDark);
-    array.recycle();
+    TypedArray styledAttributes = context.obtainStyledAttributes(attrs, R.styleable.NavigationView);
+    int lightTheme = styledAttributes.getResourceId(R.styleable.NavigationView_navigationLightTheme,
+      R.style.NavigationViewLight);
+    int darkTheme = styledAttributes.getResourceId(R.styleable.NavigationView_navigationDarkTheme,
+      R.style.NavigationViewDark);
+    styledAttributes.recycle();
 
     context.setTheme(darkThemeEnabled ? darkTheme : lightTheme);
   }
@@ -64,11 +67,10 @@ public class ThemeSwitcher {
    * @param map     the style will be set on
    */
   static void setMapStyle(Context context, MapboxMap map, MapboxMap.OnStyleLoadedListener listener) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    String nightThemeUrl = context.getString(R.string.navigation_guidance_night_v2);
-    String dayThemeUrl = context.getString(R.string.navigation_guidance_day_v2);
-    map.setStyleUrl(darkThemeEnabled ? nightThemeUrl : dayThemeUrl, listener);
+    TypedValue mapStyleAttr = new TypedValue();
+    context.getTheme().resolveAttribute(R.attr.navigationViewMapStyle, mapStyleAttr, true);
+    String styleUrl = mapStyleAttr.string.toString();
+    map.setStyleUrl(styleUrl, listener);
   }
 
   /**
@@ -92,16 +94,9 @@ public class ThemeSwitcher {
    * @return color resource identifier for primary theme color
    */
   public static int retrieveNavigationViewPrimaryColor(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    TypedArray styleArray = context.obtainStyledAttributes(
-      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
-      R.styleable.NavigationView
-    );
-    int navigationViewPrimary = styleArray.getColor(R.styleable.NavigationView_navigationViewPrimary,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_primary));
-    styleArray.recycle();
-    return navigationViewPrimary;
+    TypedValue outValue = new TypedValue();
+    context.getTheme().resolveAttribute(R.attr.navigationViewPrimary, outValue, true);
+    return ContextCompat.getColor(context, outValue.resourceId);
   }
 
   /**
@@ -112,16 +107,9 @@ public class ThemeSwitcher {
    * @return color resource identifier for secondary theme color
    */
   public static int retrieveNavigationViewSecondaryColor(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    TypedArray styleArray = context.obtainStyledAttributes(
-      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
-      R.styleable.NavigationView
-    );
-    int navigationViewSecondary = styleArray.getColor(R.styleable.NavigationView_navigationViewSecondary,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_secondary));
-    styleArray.recycle();
-    return navigationViewSecondary;
+    TypedValue outValue = new TypedValue();
+    context.getTheme().resolveAttribute(R.attr.navigationViewSecondary, outValue, true);
+    return ContextCompat.getColor(context, outValue.resourceId);
   }
 
   /**
@@ -132,16 +120,9 @@ public class ThemeSwitcher {
    * @return color resource identifier for banner background color
    */
   public static int retrieveNavigationViewBannerBackgroundColor(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    TypedArray styleArray = context.obtainStyledAttributes(
-      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
-      R.styleable.NavigationView
-    );
-    int bannerBackground = styleArray.getColor(R.styleable.NavigationView_navigationViewBannerBackground,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_banner_background));
-    styleArray.recycle();
-    return bannerBackground;
+    TypedValue outValue = new TypedValue();
+    context.getTheme().resolveAttribute(R.attr.navigationViewBannerBackground, outValue, true);
+    return ContextCompat.getColor(context, outValue.resourceId);
   }
 
   /**
@@ -152,16 +133,9 @@ public class ThemeSwitcher {
    * @return color resource identifier for banner maneuver primary theme color
    */
   public static int retrieveNavigationViewBannerManeuverPrimaryColor(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    TypedArray styleArray = context.obtainStyledAttributes(
-      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
-      R.styleable.NavigationView
-    );
-    int bannerManeuverPrimary = styleArray.getColor(R.styleable.NavigationView_navigationViewBannerManeuverPrimary,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_banner_maneuver_primary));
-    styleArray.recycle();
-    return bannerManeuverPrimary;
+    TypedValue outValue = new TypedValue();
+    context.getTheme().resolveAttribute(R.attr.navigationViewBannerManeuverPrimary, outValue, true);
+    return ContextCompat.getColor(context, outValue.resourceId);
   }
 
   /**
@@ -172,16 +146,9 @@ public class ThemeSwitcher {
    * @return color resource identifier for banner maneuver secondary theme color
    */
   public static int retrieveNavigationViewBannerManeuverSecondaryColor(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    TypedArray styleArray = context.obtainStyledAttributes(
-      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
-      R.styleable.NavigationView
-    );
-    int bannerManeuverSecondary = styleArray.getColor(R.styleable.NavigationView_navigationViewBannerManeuverSecondary,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_banner_maneuver_secondary));
-    styleArray.recycle();
-    return bannerManeuverSecondary;
+    TypedValue outValue = new TypedValue();
+    context.getTheme().resolveAttribute(R.attr.navigationViewBannerManeuverSecondary, outValue, true);
+    return ContextCompat.getColor(context, outValue.resourceId);
   }
 
   /**
@@ -192,16 +159,9 @@ public class ThemeSwitcher {
    * @return color resource identifier for progress color
    */
   public static int retrieveNavigationViewProgressColor(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    TypedArray styleArray = context.obtainStyledAttributes(
-      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
-      R.styleable.NavigationView
-    );
-    int progress = styleArray.getColor(R.styleable.NavigationView_navigationViewProgress,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_progress));
-    styleArray.recycle();
-    return progress;
+    TypedValue outValue = new TypedValue();
+    context.getTheme().resolveAttribute(R.attr.navigationViewProgress, outValue, true);
+    return ContextCompat.getColor(context, outValue.resourceId);
   }
 
   /**
@@ -212,15 +172,8 @@ public class ThemeSwitcher {
    * @return color resource identifier for progress background color
    */
   public static int retrieveNavigationViewProgressBackgroundColor(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    TypedArray styleArray = context.obtainStyledAttributes(
-      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
-      R.styleable.NavigationView
-    );
-    int progressBackground = styleArray.getColor(R.styleable.NavigationView_navigationViewProgressBackground,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_progress_background));
-    styleArray.recycle();
-    return progressBackground;
+    TypedValue outValue = new TypedValue();
+    context.getTheme().resolveAttribute(R.attr.navigationViewProgressBackground, outValue, true);
+    return ContextCompat.getColor(context, outValue.resourceId);
   }
 }
