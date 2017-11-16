@@ -4,6 +4,7 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListener;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -15,14 +16,15 @@ import java.util.List;
 import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.METERS_REMAINING_TILL_ARRIVAL;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_DEPART;
 
 class NavigationEventDispatcher {
 
   private List<NavigationEventListener> navigationEventListeners;
-  private ProgressChangeListener internalProgressChangeListener;
   private List<MilestoneEventListener> milestoneEventListeners;
   private List<ProgressChangeListener> progressChangeListeners;
   private List<OffRouteListener> offRouteListeners;
+  private NavigationMetricListener navigationMetricListener;
 
   NavigationEventDispatcher() {
     navigationEventListeners = new ArrayList<>();
@@ -103,12 +105,8 @@ class NavigationEventDispatcher {
     }
   }
 
-  void setInternalProgressChangeListener(ProgressChangeListener internalProgressChangeListener) {
-    this.internalProgressChangeListener = internalProgressChangeListener;
-  }
-
-  void removeInternalProgressChangeListener() {
-    internalProgressChangeListener = null;
+  void setNavigationMetricListener(NavigationMetricListener navigationMetricListener) {
+    this.navigationMetricListener = navigationMetricListener;
   }
 
   void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
@@ -118,10 +116,24 @@ class NavigationEventDispatcher {
   }
 
   void onProgressChange(Location location, RouteProgress routeProgress) {
-    // Check if user has arrived and notify internal progress change listener if so.
-    if (internalProgressChangeListener != null
-      && routeProgress.distanceRemaining() <= METERS_REMAINING_TILL_ARRIVAL) {
-      internalProgressChangeListener.onProgressChange(location, routeProgress);
+    if (navigationMetricListener != null) {
+      // Update RouteProgress
+      navigationMetricListener.onRouteProgressUpdate(routeProgress);
+      // Check if user has departed and notify metric listener if so
+      boolean isDepartureEvent = routeProgress.currentLegProgress().currentStep().maneuver() != null
+        && routeProgress.currentLegProgress().currentStep().maneuver().type().contains(STEP_MANEUVER_TYPE_DEPART);
+      if (isDepartureEvent) {
+        navigationMetricListener.onDeparture(location, routeProgress);
+      }
+      // Check if user has arrived and notify metric listener if so
+      boolean isArrivalEvent = routeProgress.distanceRemaining() <= METERS_REMAINING_TILL_ARRIVAL;
+      if (isArrivalEvent) {
+        navigationMetricListener.onArrival(location, routeProgress);
+        // Remove off route listeners
+        removeOffRouteListener(null);
+        // Remove metric listener
+        navigationMetricListener = null;
+      }
     }
 
     for (ProgressChangeListener progressChangeListener : progressChangeListeners) {
@@ -132,6 +144,10 @@ class NavigationEventDispatcher {
   void onUserOffRoute(Location location) {
     for (OffRouteListener offRouteListener : offRouteListeners) {
       offRouteListener.userOffRoute(location);
+    }
+    // Send off route event to metric listener
+    if (navigationMetricListener != null) {
+      navigationMetricListener.onOffRouteEvent(location);
     }
   }
 

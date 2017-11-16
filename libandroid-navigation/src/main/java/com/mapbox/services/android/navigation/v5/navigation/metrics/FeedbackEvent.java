@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
 import android.support.annotation.StringDef;
 

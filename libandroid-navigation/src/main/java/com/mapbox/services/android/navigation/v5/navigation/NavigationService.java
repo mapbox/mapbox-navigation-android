@@ -51,7 +51,6 @@ public class NavigationService extends Service implements LocationEngineListener
   private MapboxNavigation mapboxNavigation;
   private LocationEngine locationEngine;
   private NavigationEngine thread;
-  private NavigationQueueContainer navigationQueueContainer;
 
   @Nullable
   @Override
@@ -81,11 +80,6 @@ public class NavigationService extends Service implements LocationEngineListener
     if (mapboxNavigation.options().enableNotification()) {
       stopForeground(true);
     }
-
-    // Send remaining items in queues
-    navigationQueueContainer.sendQueues();
-    navigationQueueContainer.cancelNavigationSession();
-
     endNavigation();
     super.onDestroy();
   }
@@ -96,7 +90,6 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   void startNavigation(MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
-    navigationQueueContainer = new NavigationQueueContainer(mapboxNavigation);
     if (mapboxNavigation.options().enableNotification()) {
       initializeNotification();
     }
@@ -142,7 +135,6 @@ public class NavigationService extends Service implements LocationEngineListener
   void acquireLocationEngine() {
     locationEngine = mapboxNavigation.getLocationEngine();
     locationEngine.addLocationEngineListener(this);
-    navigationQueueContainer.setLocationEngineName(obtainLocationEngineName());
   }
 
   /**
@@ -153,7 +145,6 @@ public class NavigationService extends Service implements LocationEngineListener
   private void forceLocationUpdate() {
     Location lastLocation = locationEngine.getLastLocation();
     if (lastLocation != null) {
-      navigationQueueContainer.updateCurrentLocation(lastLocation);
       thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(lastLocation, mapboxNavigation,
         recentDistancesFromManeuverInMeters));
     }
@@ -170,10 +161,8 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onLocationChanged(Location location) {
     Timber.d("onLocationChanged");
     if (location != null && validLocationUpdate(location)) {
-      navigationQueueContainer.updateCurrentLocation(location);
       thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation,
         recentDistancesFromManeuverInMeters));
-      navigationQueueContainer.updateCurrentLocation(location);
     }
   }
 
@@ -199,8 +188,6 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @Override
   public void onNewRouteProgress(Location location, RouteProgress routeProgress) {
-    navigationQueueContainer.setRouteProgress(routeProgress);
-
     if (mapboxNavigation.options().enableNotification()) {
       navNotificationManager.updateDefaultNotification(routeProgress);
     }
@@ -230,7 +217,11 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @Override
   public void onUserOffRoute(Location location, boolean userOffRoute) {
-    navigationQueueContainer.onUserOffRoute(location, userOffRoute);
+    if (userOffRoute) {
+      recentDistancesFromManeuverInMeters.clear();
+      // Send off route event with current location
+      mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
+    }
   }
 
   class LocalBinder extends Binder {
@@ -238,29 +229,5 @@ public class NavigationService extends Service implements LocationEngineListener
       Timber.d("Local binder called.");
       return NavigationService.this;
     }
-  }
-
-  private String obtainLocationEngineName() {
-    return locationEngine.getClass().getSimpleName();
-  }
-
-  public void rerouteOccurred() {
-    recentDistancesFromManeuverInMeters.clear();
-    navigationQueueContainer.rerouteOccurred();
-  }
-
-  public String recordFeedbackEvent(String feedbackType, String description,
-                                    @FeedbackEvent.FeedbackSource String feedbackSource) {
-
-    return navigationQueueContainer.recordFeedbackEvent(feedbackType, description, feedbackSource);
-  }
-
-  public void updateFeedbackEvent(String feedbackId,
-                                  @FeedbackEvent.FeedbackType String feedbackType, String description) {
-    navigationQueueContainer.updateFeedbackEvent(feedbackId, feedbackType, description);
-  }
-
-  public void cancelFeedback(String feedbackId) {
-    navigationQueueContainer.cancelFeedback(feedbackId);
   }
 }

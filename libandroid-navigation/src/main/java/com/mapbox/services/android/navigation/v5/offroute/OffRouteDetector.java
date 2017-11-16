@@ -15,9 +15,14 @@ import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
 
 public class OffRouteDetector extends OffRoute {
+
+  private long timeSinceLastOffRoute;
+  private Point lastReroutePoint;
 
   /**
    * Detects if the user is off route or not.
@@ -29,6 +34,14 @@ public class OffRouteDetector extends OffRoute {
   public boolean isUserOffRoute(Location location, RouteProgress routeProgress,
                                 MapboxNavigationOptions options,
                                 RingBuffer<Integer> recentDistancesFromManeuverInMeters) {
+
+    if (!validOffRoute(location, options)) {
+      return false;
+    } else {
+      // Valid off-route
+      lastReroutePoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    }
+
     Point futurePoint = getFuturePosition(location, options);
 
     double radius = ToleranceUtils.dynamicRerouteDistanceTolerance(
@@ -59,6 +72,30 @@ public class OffRouteDetector extends OffRoute {
       }
     }
     return isOffRoute;
+  }
+
+  /**
+   * Method to check if the user has passed either the set (in {@link MapboxNavigationOptions})
+   * minimum amount of seconds or minimum amount of meters since the last reroute.
+   * <p>
+   * If the user is above both thresholds, then the off-route can proceed.  Otherwise, ignore.
+   *
+   * @param location current location from engine
+   * @param options  for second (default 3) / distance (default 50m) minimums
+   * @return true if valid, false if not
+   */
+  private boolean validOffRoute(Location location, MapboxNavigationOptions options) {
+    // Check if minimum amount of time has passed since last reroute
+    long secondsBeforeRerouteAllowed = TimeUnit.SECONDS.toMillis(options.secondsBeforeReroute());
+    if (location.getTime() > timeSinceLastOffRoute + secondsBeforeRerouteAllowed) {
+      timeSinceLastOffRoute = location.getTime();
+      return true;
+    }
+    // Check if minimum amount of distance has been passed since last reroute
+    Point currentPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    double distanceFromLastReroute = TurfMeasurement.distance(lastReroutePoint,
+      currentPoint, TurfConstants.UNIT_METERS);
+    return distanceFromLastReroute > options.minimumDistanceBeforeRerouting();
   }
 
   /**
@@ -112,7 +149,7 @@ public class OffRouteDetector extends OffRoute {
    * closest point on the given {@link LegStep}.
    *
    * @param futurePoint {@link Point} where the user is predicted to be
-   * @param step           {@link LegStep} to calculate the closest point on the step to our predicted location
+   * @param step        {@link LegStep} to calculate the closest point on the step to our predicted location
    * @return double in distance meters
    * @since 0.2.0
    */
