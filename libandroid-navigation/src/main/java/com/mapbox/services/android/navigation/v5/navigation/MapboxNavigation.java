@@ -12,8 +12,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.BuildConfig;
-import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -26,19 +24,15 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 import com.mapbox.services.android.navigation.v5.utils.ValidationUtils;
-import com.mapbox.services.android.telemetry.MapboxEvent;
-import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.constants.TelemetryConstants;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
 import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
-import com.mapbox.services.utils.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import retrofit2.Callback;
 import timber.log.Timber;
@@ -54,10 +48,6 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  * @since 0.1.0
  */
 public class MapboxNavigation implements ServiceConnection, ProgressChangeListener {
-
-  private static final String MAPBOX_NAVIGATION_SDK_IDENTIFIER = "mapbox-navigation-android";
-  private static final String MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER = "mapbox-navigation-ui-android";
-
   private NavigationEventDispatcher navigationEventDispatcher;
   private NavigationService navigationService;
   private DirectionsRoute directionsRoute;
@@ -70,7 +60,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
   private Snap snapEngine;
   private Context context;
   private boolean isBound;
-  private boolean isFromNavigationUi = false;
+  private Telemetry telemetry = null;
 
   /**
    * Constructs a new instance of this class using the default options. This should be used over
@@ -88,6 +78,15 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    */
   public MapboxNavigation(@NonNull Context context, @NonNull String accessToken) {
     this(context, accessToken, MapboxNavigationOptions.builder().build());
+  }
+
+  // Package private (no modifier) for testing purposes
+  MapboxNavigation(@NonNull Context context, @NonNull String accessToken, Telemetry telemetry) {
+    this.context = context;
+    this.accessToken = accessToken;
+    this.options = MapboxNavigationOptions.builder().build();
+    this.telemetry = telemetry;
+    initialize();
   }
 
   /**
@@ -113,8 +112,17 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     this.accessToken = accessToken;
     this.context = context;
     this.options = options;
-    this.isFromNavigationUi = options.isFromNavigationUi();
-    initialize(options.isDebugLoggingEnabled());
+    initialize();
+  }
+
+  // Package private (no modifier) for testing purposes
+  MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
+                   @NonNull MapboxNavigationOptions options, Telemetry telemetry) {
+    this.accessToken = accessToken;
+    this.context = context;
+    this.options = options;
+    this.telemetry = telemetry;
+    initialize();
   }
 
   /**
@@ -122,8 +130,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    * be changed later on using their corresponding setter. An internal progressChangeListeners used
    * to prevent users from removing it.
    */
-  private void initialize(boolean debugLoggingEnabled) {
-    initializeTelemetry(debugLoggingEnabled);
+  private void initialize() {
+    initializeTelemetry();
 
     // Initialize event dispatcher and add internal listeners
     navigationEventDispatcher = new NavigationEventDispatcher();
@@ -147,38 +155,19 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     }
   }
 
-  private void initializeTelemetry(boolean debugLoggingEnabled) {
-    validateAccessToken(accessToken);
-    String sdkIdentifier = MAPBOX_NAVIGATION_SDK_IDENTIFIER;
-    if (isFromNavigationUi) {
-      sdkIdentifier = MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER;
-    }
-    String userAgent = String.format("%s/%s", sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
-    MapboxTelemetry.getInstance().initialize(context, accessToken, userAgent, sdkIdentifier,
-      BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
-    MapboxTelemetry.getInstance().newUserAgent(userAgent);
-
-    // Enable extra logging in debug mode
-    MapboxTelemetry.getInstance().setDebugLoggingEnabled(debugLoggingEnabled);
-
-    NavigationMetricsWrapper.sdkIdentifier = sdkIdentifier;
-    NavigationMetricsWrapper.turnstileEvent();
-    // TODO This should be removed when we figure out a solution in Telemetry
-    // Force pushing a TYPE_MAP_LOAD event to ensure that the Nav turnstile event is sent
-    MapboxTelemetry.getInstance().pushEvent(MapboxEvent.buildMapLoadEvent());
+  private void initializeTelemetry() {
+    Telemetry telemetry = obtainTelemetry();
+    boolean isFromNavigationUi = options.isFromNavigationUi();
+    boolean isDebugLoggingEnabled = options.isDebugLoggingEnabled();
+    telemetry.initialize(context, accessToken, isFromNavigationUi, isDebugLoggingEnabled);
   }
 
-  /**
-   * Runtime validation of access token.
-   *
-   * @throws NavigationException exception thrown when not using a valid accessToken
-   */
-  private static void validateAccessToken(String accessToken) {
-    if (TextUtils.isEmpty(accessToken) || (!accessToken.toLowerCase(Locale.US).startsWith("pk.")
-      && !accessToken.toLowerCase(Locale.US).startsWith("sk."))) {
-      throw new NavigationException("A valid access token must be passed in when first initializing"
-        + " MapboxNavigation");
+  private Telemetry obtainTelemetry() {
+    if (telemetry == null) {
+      return new Telemetry();
     }
+
+    return telemetry;
   }
 
   /**
