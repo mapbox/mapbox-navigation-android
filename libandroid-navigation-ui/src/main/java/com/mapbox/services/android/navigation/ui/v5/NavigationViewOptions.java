@@ -5,7 +5,7 @@ import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 
 @AutoValue
 public abstract class NavigationViewOptions {
@@ -22,7 +22,7 @@ public abstract class NavigationViewOptions {
   @Nullable
   public abstract String awsPoolId();
 
-  public abstract int unitType();
+  public abstract MapboxNavigationOptions navigationOptions();
 
   public abstract boolean shouldSimulateRoute();
 
@@ -37,7 +37,7 @@ public abstract class NavigationViewOptions {
 
     public abstract Builder awsPoolId(String awsPoolId);
 
-    public abstract Builder unitType(@NavigationUnitType.UnitType int unitType);
+    public abstract Builder navigationOptions(MapboxNavigationOptions navigationOptions);
 
     public abstract Builder shouldSimulateRoute(boolean shouldSimulateRoute);
 
@@ -47,7 +47,9 @@ public abstract class NavigationViewOptions {
   public static Builder builder() {
     return new AutoValue_NavigationViewOptions.Builder()
       .awsPoolId(null)
-      .unitType(NavigationUnitType.TYPE_IMPERIAL)
+      .navigationOptions(MapboxNavigationOptions.builder()
+        .isFromNavigationUi(true)
+        .build())
       .shouldSimulateRoute(false);
   }
 }
