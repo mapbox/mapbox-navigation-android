@@ -4,19 +4,17 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListener;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import timber.log.Timber;
-
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.METERS_REMAINING_TILL_ARRIVAL;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_DEPART;
 
 class NavigationEventDispatcher {
 
@@ -119,20 +117,22 @@ class NavigationEventDispatcher {
     if (navigationMetricListener != null) {
       // Update RouteProgress
       navigationMetricListener.onRouteProgressUpdate(routeProgress);
+
       // Check if user has departed and notify metric listener if so
-      boolean isDepartureEvent = routeProgress.currentLegProgress().currentStep().maneuver() != null
-        && routeProgress.currentLegProgress().currentStep().maneuver().type().contains(STEP_MANEUVER_TYPE_DEPART);
-      if (isDepartureEvent) {
+      if (RouteUtils.isDepartureEvent(routeProgress)) {
         navigationMetricListener.onDeparture(location, routeProgress);
       }
+
       // Check if user has arrived and notify metric listener if so
-      boolean isArrivalEvent = routeProgress.distanceRemaining() <= METERS_REMAINING_TILL_ARRIVAL;
-      if (isArrivalEvent) {
+      if (RouteUtils.isArrivalEvent(routeProgress)) {
         navigationMetricListener.onArrival(location, routeProgress);
-        // Remove off route listeners
-        removeOffRouteListener(null);
-        // Remove metric listener
-        navigationMetricListener = null;
+        // If a follow on leg doesn't exist, navigation is ending - remove listeners
+        if (routeProgress.currentLegProgress().followOnStep() == null) {
+          // Remove off route listeners
+          removeOffRouteListener(null);
+          // Remove metric listener
+          navigationMetricListener = null;
+        }
       }
     }
 

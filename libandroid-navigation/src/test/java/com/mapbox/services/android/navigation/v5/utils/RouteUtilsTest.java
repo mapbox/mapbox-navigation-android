@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.mapbox.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.directions.v5.models.DirectionsResponse;
 import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -69,5 +70,107 @@ public class RouteUtilsTest extends BaseTest {
 
     boolean isNewRoute = RouteUtils.isNewRoute(previousRouteProgress, routeProgress);
     assertTrue(isNewRoute);
+  }
+
+  @Test
+  public void isDepartureEvent_returnsTrueWhenManeuverTypeDepart() throws Exception {
+    RouteProgress routeProgress = RouteProgress.builder()
+      .stepDistanceRemaining(100)
+      .legDistanceRemaining(100)
+      .distanceRemaining(100)
+      .directionsRoute(route)
+      .stepIndex(0)
+      .legIndex(0)
+      .build();
+
+    boolean isDepartureEvent = RouteUtils.isDepartureEvent(routeProgress);
+    assertTrue(isDepartureEvent);
+  }
+
+  @Test
+  public void isDepartureEvent_returnsFalseWhenManeuverTypeIsNotDepart() throws Exception {
+    RouteProgress routeProgress = RouteProgress.builder()
+      .stepDistanceRemaining(100)
+      .legDistanceRemaining(100)
+      .distanceRemaining(100)
+      .directionsRoute(route)
+      .stepIndex(1)
+      .legIndex(0)
+      .build();
+
+    boolean isDepartureEvent = RouteUtils.isDepartureEvent(routeProgress);
+    assertFalse(isDepartureEvent);
+  }
+
+  @Test
+  public void isArrivalEvent_returnsTrueWhenManeuverTypeIsArrival_andIsValidMetersRemaining() throws Exception {
+    RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
+    int lastStepIndex = lastLeg.steps().indexOf(lastLeg.steps().get(lastLeg.steps().size() - 1));
+
+    RouteProgress routeProgress = RouteProgress.builder()
+      .stepDistanceRemaining(30)
+      .legDistanceRemaining(30)
+      .distanceRemaining(30)
+      .directionsRoute(route)
+      .stepIndex(lastStepIndex)
+      .legIndex(0)
+      .build();
+
+    boolean isArrivalEvent = RouteUtils.isArrivalEvent(routeProgress);
+    assertTrue(isArrivalEvent);
+  }
+
+  @Test
+  public void isArrivalEvent_returnsFalseWhenManeuverTypeIsArrival_andIsNotValidMetersRemaining() throws Exception {
+    RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
+    int lastStepIndex = lastLeg.steps().indexOf(lastLeg.steps().get(lastLeg.steps().size() - 1));
+
+    RouteProgress routeProgress = RouteProgress.builder()
+      .stepDistanceRemaining(100)
+      .legDistanceRemaining(100)
+      .distanceRemaining(100)
+      .directionsRoute(route)
+      .stepIndex(lastStepIndex)
+      .legIndex(0)
+      .build();
+
+    boolean isArrivalEvent = RouteUtils.isArrivalEvent(routeProgress);
+    assertFalse(isArrivalEvent);
+  }
+
+  @Test
+  public void isArrivalEvent_returnsFalseWhenManeuverTypeIsNotArrival_andIsValidMetersRemaining() throws Exception {
+    RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
+    int lastStepIndex = lastLeg.steps().indexOf(lastLeg.steps().get(lastLeg.steps().size() - 1));
+
+    RouteProgress routeProgress = RouteProgress.builder()
+      .stepDistanceRemaining(30)
+      .legDistanceRemaining(100)
+      .distanceRemaining(100)
+      .directionsRoute(route)
+      .stepIndex(lastStepIndex - 1)
+      .legIndex(0)
+      .build();
+
+    boolean isArrivalEvent = RouteUtils.isArrivalEvent(routeProgress);
+    assertFalse(isArrivalEvent);
+  }
+
+  @Test
+  public void isArrivalEvent_returnsFalseWhenManeuverTypeIsNotArrival_andIsNotValidMetersRemaining() throws Exception {
+    RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
+    int lastStepIndex = lastLeg.steps().indexOf(lastLeg.steps().get(lastLeg.steps().size() - 1));
+
+    RouteProgress routeProgress = RouteProgress.builder()
+      .stepDistanceRemaining(200)
+      .legDistanceRemaining(300)
+      .distanceRemaining(300)
+      .directionsRoute(route)
+      .stepIndex(lastStepIndex - 1)
+      .legIndex(0)
+      .build();
+
+    boolean isArrivalEvent = RouteUtils.isArrivalEvent(routeProgress);
+    assertFalse(isArrivalEvent);
   }
 }
