@@ -11,6 +11,7 @@ import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 
 import java.util.Hashtable;
+import java.util.List;
 
 public final class NavigationMetricsWrapper {
   public static String sdkIdentifier;
@@ -116,7 +117,7 @@ public final class NavigationMetricsWrapper {
       routeProgress.getDirectionsRouteDistance(),
       routeProgress.getDirectionsRouteDuration(),
       sessionState.rerouteCount(), sessionState.startTimestamp(),
-      sessionState.beforeEventLocations(), sessionState.afterEventLocations(),
+      convertToArray(sessionState.beforeEventLocations()), convertToArray(sessionState.afterEventLocations()),
       (int) (sessionState.routeDistanceCompleted()
         + sessionState.routeProgressBeforeEvent().getDistanceTraveled()),
       (int) sessionState.routeProgressBeforeEvent().getDistanceRemaining(),
@@ -154,7 +155,7 @@ public final class NavigationMetricsWrapper {
       location.getLongitude(), sessionState.currentGeometry(), routeProgress.getDirectionsRouteProfile(),
       routeProgress.getDirectionsRouteDistance(), routeProgress.getDirectionsRouteDuration(),
       sessionState.rerouteCount(), sessionState.startTimestamp(), feedbackType,
-      sessionState.beforeEventLocations(), sessionState.afterEventLocations(),
+      convertToArray(sessionState.beforeEventLocations()), convertToArray(sessionState.afterEventLocations()),
       (int) (sessionState.routeDistanceCompleted()
         + sessionState.routeProgressBeforeEvent().getDistanceTraveled()),
       (int) sessionState.routeProgressBeforeEvent().getDistanceRemaining(),
@@ -209,5 +210,9 @@ public final class NavigationMetricsWrapper {
     }
 
     previousName = routeProgress.getCurrentStepName();
+  }
+
+  private static Location[] convertToArray(List<Location> locationList) {
+    return locationList.toArray(new Location[locationList.size()]);
   }
 }
