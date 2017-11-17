@@ -102,10 +102,10 @@ public abstract class SessionState {
   public abstract double routeDistanceCompleted();
 
   @Nullable
-  public abstract List<Location> beforeEventLocations();
+  public abstract Location[] beforeEventLocations();
 
   @Nullable
-  public abstract List<Location> afterEventLocations();
+  public abstract Location[] afterEventLocations();
 
   @Nullable
   public abstract MetricsRouteProgress routeProgressBeforeEvent();
@@ -123,9 +123,9 @@ public abstract class SessionState {
 
     public abstract Builder eventLocation(@Nullable Location eventLocation);
 
-    public abstract Builder afterEventLocations(@Nullable List<Location> afterLocations);
+    public abstract Builder beforeEventLocations(@Nullable Location[] beforeLocations);
 
-    public abstract Builder beforeEventLocations(@Nullable List<Location> beforeLocations);
+    public abstract Builder afterEventLocations(@Nullable Location[] afterLocations);
 
     public abstract Builder originalDirectionRoute(@NonNull DirectionsRoute originalDirectionsRoute);
 

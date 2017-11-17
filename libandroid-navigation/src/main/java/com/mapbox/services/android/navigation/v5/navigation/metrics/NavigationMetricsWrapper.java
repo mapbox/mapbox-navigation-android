@@ -10,9 +10,7 @@ import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 
 public final class NavigationMetricsWrapper {
   public static String sdkIdentifier;
@@ -24,8 +22,6 @@ public final class NavigationMetricsWrapper {
   private static String upcomingName;
   private static String previousType;
   private static String previousName;
-  private static Location[] beforeLocations;
-  private static Location[] afterLocations;
 
   private NavigationMetricsWrapper() {
     // Empty private constructor for preventing initialization of this class.
@@ -119,7 +115,8 @@ public final class NavigationMetricsWrapper {
       sessionState.currentGeometry(), routeProgress.getDirectionsRouteProfile(),
       routeProgress.getDirectionsRouteDistance(),
       routeProgress.getDirectionsRouteDuration(),
-      sessionState.rerouteCount(), sessionState.startTimestamp(), beforeLocations, afterLocations,
+      sessionState.rerouteCount(), sessionState.startTimestamp(),
+      sessionState.beforeEventLocations(), sessionState.afterEventLocations(),
       (int) (sessionState.routeDistanceCompleted()
         + sessionState.routeProgressBeforeEvent().getDistanceTraveled()),
       (int) sessionState.routeProgressBeforeEvent().getDistanceRemaining(),
@@ -156,7 +153,8 @@ public final class NavigationMetricsWrapper {
       BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(), location.getLatitude(),
       location.getLongitude(), sessionState.currentGeometry(), routeProgress.getDirectionsRouteProfile(),
       routeProgress.getDirectionsRouteDistance(), routeProgress.getDirectionsRouteDuration(),
-      sessionState.rerouteCount(), sessionState.startTimestamp(), feedbackType, beforeLocations, afterLocations,
+      sessionState.rerouteCount(), sessionState.startTimestamp(), feedbackType,
+      sessionState.beforeEventLocations(), sessionState.afterEventLocations(),
       (int) (sessionState.routeDistanceCompleted()
         + sessionState.routeProgressBeforeEvent().getDistanceTraveled()),
       (int) sessionState.routeProgressBeforeEvent().getDistanceRemaining(),
@@ -186,14 +184,6 @@ public final class NavigationMetricsWrapper {
     );
   }
 
-  private static Location[] obtainLocations(List<Location> locations) {
-    // Check if the list of locations is empty and if so return an empty array
-    if (locations == null || locations.isEmpty()) {
-      return new Location[0];
-    }
-    return locations.toArray(new Location[locations.size()]);
-  }
-
   private static void updateRouteProgressSessionData(MetricsRouteProgress routeProgress, SessionState sessionState) {
     upcomingName = null;
     upcomingInstruction = null;
@@ -218,21 +208,6 @@ public final class NavigationMetricsWrapper {
       previousModifier = routeProgress.getCurrentLegProgress().currentStep().maneuver().modifier();
     }
 
-    // Check if location update happened before or after the reroute
-    List<Location> afterLoc = new ArrayList<>();
-
-    if (sessionState.afterEventLocations() != null) {
-      for (Location loc : sessionState.afterEventLocations()) {
-        if (loc.getTime() > sessionState.eventDate().getTime()) {
-          afterLoc.add(loc);
-        }
-      }
-    }
-
     previousName = routeProgress.getCurrentStepName();
-
-    beforeLocations = obtainLocations(sessionState.beforeEventLocations());
-
-    afterLocations = obtainLocations(afterLoc);
   }
 }

@@ -309,12 +309,12 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     }
   }
 
-  private boolean shouldSendEvent(SessionState rerouteSessionState) {
-    return TimeUtils.dateDiff(rerouteSessionState.eventDate(), new Date(), TimeUnit.SECONDS) > TWENTY_SECOND_INTERVAL;
+  private boolean shouldSendEvent(SessionState sessionState) {
+    return TimeUtils.dateDiff(sessionState.eventDate(), new Date(), TimeUnit.SECONDS) > TWENTY_SECOND_INTERVAL;
   }
 
   @NonNull
-  private List<Location> createLocationListBeforeEvent(Date eventDate) {
+  private Location[] createLocationListBeforeEvent(Date eventDate) {
     Location[] locations = locationBuffer.toArray(new Location[locationBuffer.size()]);
     // Create current list of dates
     List<Location> currentLocationList = Arrays.asList(locations);
@@ -327,11 +327,11 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
         locationsBeforeEvent.add(location);
       }
     }
-    return locationsBeforeEvent;
+    return locationsBeforeEvent.toArray(new Location[locationsBeforeEvent.size()]);
   }
 
   @NonNull
-  private List<Location> createLocationListAfterEvent(Date eventDate) {
+  private Location[] createLocationListAfterEvent(Date eventDate) {
     Location[] locations = locationBuffer.toArray(new Location[locationBuffer.size()]);
     // Create current list of dates
     List<Location> currentLocationList = Arrays.asList(locations);
@@ -344,7 +344,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
         locationsAfterEvent.add(location);
       }
     }
-    return locationsAfterEvent;
+    return locationsAfterEvent.toArray(new Location[locationsAfterEvent.size()]);
   }
 
   private void queueRerouteEvent() {
@@ -384,8 +384,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
   private void sendRerouteEvent(SessionState sessionState) {
     // Create arrays with locations from before / after the reroute occurred
-    List<Location> beforeLocations = createLocationListBeforeEvent(sessionState.eventDate());
-    List<Location> afterLocations = createLocationListAfterEvent(sessionState.eventDate());
+    Location[] beforeLocations = createLocationListBeforeEvent(sessionState.eventDate());
+    Location[] afterLocations = createLocationListAfterEvent(sessionState.eventDate());
     // Update session state with locations after feedback
     SessionState rerouteSessionState = sessionState.toBuilder()
       .beforeEventLocations(beforeLocations)
@@ -398,8 +398,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
   private void sendFeedbackEvent(FeedbackEvent feedbackEvent) {
     // Create arrays with locations from before / after the reroute occurred
-    List<Location> beforeLocations = createLocationListBeforeEvent(feedbackEvent.getSessionState().eventDate());
-    List<Location> afterLocations = createLocationListAfterEvent(feedbackEvent.getSessionState().eventDate());
+    Location[] beforeLocations = createLocationListBeforeEvent(feedbackEvent.getSessionState().eventDate());
+    Location[] afterLocations = createLocationListAfterEvent(feedbackEvent.getSessionState().eventDate());
     // Update session state with locations after feedback
     SessionState feedbackSessionState = feedbackEvent.getSessionState().toBuilder()
       .beforeEventLocations(beforeLocations)
