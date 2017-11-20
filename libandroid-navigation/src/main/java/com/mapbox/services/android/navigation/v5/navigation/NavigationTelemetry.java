@@ -12,7 +12,9 @@ import com.mapbox.services.android.navigation.v5.location.MetricsLocation;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListener;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricsWrapper;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.RerouteEvent;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.SessionState;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.TelemetryEvent;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
@@ -40,7 +42,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   private static final String MOCK_PROVIDER = "com.mapbox.services.android.navigation.v5.location.MockLocationEngine";
   private static final int TWENTY_SECOND_INTERVAL = 20;
 
-  private List<SessionState> queuedRerouteEvents = new ArrayList<>();
+  private List<RerouteEvent> queuedRerouteEvents = new ArrayList<>();
   private List<FeedbackEvent> queuedFeedbackEvents = new ArrayList<>();
 
   private MetricsRouteProgress metricProgress;
@@ -50,7 +52,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   private LocationEngine navigationLocationEngine;
   private RingBuffer<Location> locationBuffer;
 
-  private String locationEngineName;
   private String vendorId;
   private boolean isOffRoute;
 
@@ -77,7 +78,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   @Override
   public void onOffRouteEvent(Location offRouteLocation) {
     isOffRoute = true;
-    // TODO generate reroute event here, then update with route after successful reroute
+    queueRerouteEvent();
   }
 
   @Override
@@ -85,7 +86,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (metricProgress == null) {
       metricProgress = new MetricsRouteProgress(routeProgress);
     }
-    NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, location, locationEngineName);
+    NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, location);
   }
 
   @Override
@@ -93,7 +94,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     // Update arrival time stamp
     navigationSessionState = navigationSessionState.toBuilder().arrivalTimestamp(new Date()).build();
     // Send arrival event
-    NavigationMetricsWrapper.arriveEvent(navigationSessionState, routeProgress, location, locationEngineName);
+    NavigationMetricsWrapper.arriveEvent(navigationSessionState, routeProgress, location);
   }
 
   void initialize(@NonNull Context context, @NonNull String accessToken,
@@ -139,7 +140,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       .originalDirectionRoute(directionsRoute)
       .currentDirectionRoute(directionsRoute)
       .sessionIdentifier(TelemetryUtils.buildUUID())
-      .routeDistanceCompleted(0)
+      .eventRouteDistanceCompleted(0)
       .startTimestamp(new Date())
       .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
       .rerouteCount(0)
@@ -152,8 +153,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
    */
   void endSession() {
     flushEventQueues();
-    NavigationMetricsWrapper.cancelEvent(navigationSessionState, metricProgress,
-      metricLocation.getLocation(), locationEngineName);
+    NavigationMetricsWrapper.cancelEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
   }
 
   /**
@@ -174,15 +174,21 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       navigationBuilder.rerouteCount(navigationSessionState.rerouteCount() + 1);
       navigationSessionState = navigationBuilder.build();
 
-      // TODO do this during off-route - update new geometry, distance remaining, duration remaining here
-      // TODO also need to update last reoute date for queued event items
-      // Add a reroute event to the queue
-      queueRerouteEvent();
+      updateLastRerouteEvent(directionsRoute);
+      updateLastRerouteDate(new Date());
       isOffRoute = false;
     } else {
       // Not current off-route - just update the session
       navigationSessionState = navigationBuilder.build();
     }
+  }
+
+  private void updateLastRerouteEvent(DirectionsRoute newDirectionsRoute) {
+    RerouteEvent rerouteEvent = queuedRerouteEvents.get(queuedRerouteEvents.size() - 1);
+    int newDistanceRemaining = newDirectionsRoute.distance() == null ? 0 : newDirectionsRoute.distance().intValue();
+    rerouteEvent.setNewDistanceRemaining(newDistanceRemaining);
+    int newDurationRemaining = newDirectionsRoute.duration() == null ? 0 : newDirectionsRoute.duration().intValue();
+    rerouteEvent.setNewDurationRemaining(newDurationRemaining);
   }
 
   /**
@@ -204,7 +210,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (locationEngine != null) {
       navigationLocationEngine = locationEngine;
       navigationLocationEngine.addLocationEngineListener(this);
-      locationEngineName = locationEngine.getClass().getName();
+      String locationEngineName = locationEngine.getClass().getName();
+      navigationSessionState.toBuilder().locationEngineName(locationEngineName);
     }
   }
 
@@ -220,7 +227,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   String recordFeedbackEvent(@FeedbackEvent.FeedbackType String feedbackType, String description,
                              @FeedbackEvent.FeedbackSource String feedbackSource) {
     FeedbackEvent feedbackEvent = queueFeedbackEvent(feedbackType, description, feedbackSource);
-    return feedbackEvent.getFeedbackId();
+    return feedbackEvent.getEventId();
   }
 
   /**
@@ -235,7 +242,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   void updateFeedbackEvent(String feedbackId, @FeedbackEvent.FeedbackType String feedbackType,
                            String description) {
     // Find the event and update
-    FeedbackEvent feedbackEvent = findQueuedFeedbackEvent(feedbackId);
+    FeedbackEvent feedbackEvent = (FeedbackEvent) findQueuedTelemetryEvent(feedbackId);
     if (feedbackEvent != null) {
       feedbackEvent.setFeedbackType(feedbackType);
       feedbackEvent.setDescription(description);
@@ -251,7 +258,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
    */
   void cancelFeedback(String feedbackId) {
     // Find the event and remove it from the queue
-    FeedbackEvent feedbackEvent = findQueuedFeedbackEvent(feedbackId);
+    FeedbackEvent feedbackEvent = (FeedbackEvent) findQueuedTelemetryEvent(feedbackId);
     queuedFeedbackEvents.remove(feedbackEvent);
   }
 
@@ -267,8 +274,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     for (FeedbackEvent feedbackEvent : queuedFeedbackEvents) {
       sendFeedbackEvent(feedbackEvent);
     }
-    for (SessionState sessionState : queuedRerouteEvents) {
-      sendRerouteEvent(sessionState);
+    for (RerouteEvent rerouteEvent : queuedRerouteEvents) {
+      sendRerouteEvent(rerouteEvent);
     }
   }
 
@@ -288,11 +295,11 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   }
 
   private void checkRerouteQueue() {
-    Iterator<SessionState> iterator = queuedRerouteEvents.listIterator();
+    Iterator<RerouteEvent> iterator = queuedRerouteEvents.listIterator();
     while (iterator.hasNext()) {
-      SessionState sessionState = iterator.next();
-      if (shouldSendEvent(sessionState)) {
-        sendRerouteEvent(sessionState);
+      RerouteEvent rerouteEvent = iterator.next();
+      if (shouldSendEvent(rerouteEvent.getSessionState())) {
+        sendRerouteEvent(rerouteEvent);
         iterator.remove();
       }
     }
@@ -349,19 +356,20 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
   private void queueRerouteEvent() {
     // Distance completed = previous distance completed + current RouteProgress distance traveled
-    double distanceCompleted = navigationSessionState.routeDistanceCompleted()
+    double distanceCompleted = navigationSessionState.eventRouteDistanceCompleted()
       + metricProgress.getDistanceTraveled();
 
     // Create a new session state given the current navigation session
     SessionState rerouteEventSessionState = navigationSessionState.toBuilder()
       .eventDate(new Date())
-      .routeProgressBeforeEvent(metricProgress)
-      .routeDistanceCompleted(distanceCompleted)
+      .eventRouteProgress(metricProgress)
+      .eventRouteDistanceCompleted(distanceCompleted)
       .eventLocation(metricLocation.getLocation())
       .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
       .build();
 
-    queuedRerouteEvents.add(rerouteEventSessionState);
+    RerouteEvent rerouteEvent = new RerouteEvent(rerouteEventSessionState);
+    queuedRerouteEvents.add(rerouteEvent);
   }
 
   @NonNull
@@ -370,7 +378,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     // Create a new session state given the current navigation session
     SessionState feedbackEventSessionState = navigationSessionState.toBuilder()
       .eventDate(new Date())
-      .routeProgressBeforeEvent(metricProgress)
+      .eventRouteProgress(metricProgress)
       .eventLocation(metricLocation.getLocation())
       .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
       .build();
@@ -382,18 +390,17 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     return feedbackEvent;
   }
 
-  private void sendRerouteEvent(SessionState sessionState) {
+  private void sendRerouteEvent(RerouteEvent rerouteEvent) {
     // Create arrays with locations from before / after the reroute occurred
-    List<Location> beforeLocations = createLocationListBeforeEvent(sessionState.eventDate());
-    List<Location> afterLocations = createLocationListAfterEvent(sessionState.eventDate());
+    List<Location> beforeLocations = createLocationListBeforeEvent(rerouteEvent.getSessionState().eventDate());
+    List<Location> afterLocations = createLocationListAfterEvent(rerouteEvent.getSessionState().eventDate());
     // Update session state with locations after feedback
-    SessionState rerouteSessionState = sessionState.toBuilder()
+    SessionState rerouteSessionState = rerouteEvent.getSessionState().toBuilder()
       .beforeEventLocations(beforeLocations)
       .afterEventLocations(afterLocations)
       .build();
 
-    NavigationMetricsWrapper.rerouteEvent(rerouteSessionState, metricProgress,
-      sessionState.eventLocation(), locationEngineName);
+    NavigationMetricsWrapper.rerouteEvent(rerouteEvent, metricProgress, rerouteSessionState.eventLocation());
   }
 
   private void sendFeedbackEvent(FeedbackEvent feedbackEvent) {
@@ -408,16 +415,26 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
     NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, metricProgress,
       feedbackEvent.getSessionState().eventLocation(), feedbackEvent.getDescription(),
-      feedbackEvent.getFeedbackType(), "", feedbackEvent.getFeedbackId(),
-      vendorId, locationEngineName);
+      feedbackEvent.getFeedbackType(), "", feedbackEvent.getEventId(), vendorId);
   }
 
-  private FeedbackEvent findQueuedFeedbackEvent(String feedbackId) {
+  private TelemetryEvent findQueuedTelemetryEvent(String eventId) {
     for (FeedbackEvent feedbackEvent : queuedFeedbackEvents) {
-      if (feedbackEvent.getFeedbackId().equals(feedbackId)) {
+      if (feedbackEvent.getEventId().equals(eventId)) {
         return feedbackEvent;
       }
     }
+    for (RerouteEvent rerouteEvent : queuedRerouteEvents) {
+      if (rerouteEvent.getEventId().equals(eventId)) {
+        return rerouteEvent;
+      }
+    }
     return null;
+  }
+
+  private void updateLastRerouteDate(Date date) {
+    for (RerouteEvent rerouteEvent : queuedRerouteEvents) {
+      rerouteEvent.getSessionState().toBuilder().lastRerouteDate(date).build();
+    }
   }
 }

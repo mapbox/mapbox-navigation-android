@@ -15,13 +15,10 @@ import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
 
-import java.util.concurrent.TimeUnit;
-
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
 
 public class OffRouteDetector extends OffRoute {
 
-  private long timeSinceLastOffRoute;
   private Point lastReroutePoint;
 
   /**
@@ -85,12 +82,6 @@ public class OffRouteDetector extends OffRoute {
    * @return true if valid, false if not
    */
   private boolean validOffRoute(Location location, MapboxNavigationOptions options) {
-    // Check if minimum amount of time has passed since last reroute
-    long secondsBeforeRerouteAllowed = TimeUnit.SECONDS.toMillis(options.secondsBeforeReroute());
-    if (location.getTime() > timeSinceLastOffRoute + secondsBeforeRerouteAllowed) {
-      timeSinceLastOffRoute = location.getTime();
-      return true;
-    }
     // Check if minimum amount of distance has been passed since last reroute
     Point currentPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     double distanceFromLastReroute = TurfMeasurement.distance(lastReroutePoint,

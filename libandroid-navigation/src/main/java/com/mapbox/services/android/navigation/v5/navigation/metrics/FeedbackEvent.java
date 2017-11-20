@@ -7,7 +7,7 @@ import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-public class FeedbackEvent {
+public class FeedbackEvent implements TelemetryEvent {
 
   @Retention(RetentionPolicy.SOURCE)
   @StringDef({
@@ -51,19 +51,25 @@ public class FeedbackEvent {
 
   private String feedbackType;
   private String feedbackSource;
-  private String feedbackId;
+  private String eventId;
   private String description;
-  private SessionState sessionState;
+  private SessionState feedbackSessionState;
 
   public FeedbackEvent(SessionState sessionState, @FeedbackSource String feedbackSource) {
-    this.sessionState = sessionState;
+    this.feedbackSessionState = sessionState;
     this.feedbackSource = feedbackSource;
     this.feedbackType = FEEDBACK_TYPE_GENERAL_ISSUE; // Default until updated
-    this.feedbackId = TelemetryUtils.buildUUID();
+    this.eventId = TelemetryUtils.buildUUID();
   }
 
-  public String getFeedbackId() {
-    return feedbackId;
+  @Override
+  public String getEventId() {
+    return eventId;
+  }
+
+  @Override
+  public SessionState getSessionState() {
+    return feedbackSessionState;
   }
 
   @FeedbackType
@@ -86,9 +92,5 @@ public class FeedbackEvent {
 
   public void setDescription(String description) {
     this.description = description;
-  }
-
-  public SessionState getSessionState() {
-    return sessionState;
   }
 }

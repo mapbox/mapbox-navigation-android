@@ -8,10 +8,10 @@ import com.mapbox.geojson.Point;
 
 public class MetricsRouteProgress {
   private DirectionsRoute directionsRoute;
-  private double distanceRemaining = 0;
-  private double durationRemaining = 0;
+  private double distanceRemaining;
+  private double durationRemaining;
   private RouteLegProgress currentLegProgress;
-  private double distanceTraveled = 0;
+  private double distanceTraveled;
 
   public MetricsRouteProgress(RouteProgress routeProgress) {
     this.directionsRoute = routeProgress.directionsRoute();
