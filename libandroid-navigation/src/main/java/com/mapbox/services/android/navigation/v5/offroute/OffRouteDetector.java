@@ -84,8 +84,11 @@ public class OffRouteDetector extends OffRoute {
   private boolean validOffRoute(Location location, MapboxNavigationOptions options) {
     // Check if minimum amount of distance has been passed since last reroute
     Point currentPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    double distanceFromLastReroute = TurfMeasurement.distance(lastReroutePoint,
-      currentPoint, TurfConstants.UNIT_METERS);
+    double distanceFromLastReroute = 0d;
+    if (lastReroutePoint != null) {
+      distanceFromLastReroute = TurfMeasurement.distance(lastReroutePoint,
+        currentPoint, TurfConstants.UNIT_METERS);
+    }
     return distanceFromLastReroute > options.minimumDistanceBeforeRerouting();
   }
 

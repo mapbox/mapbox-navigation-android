@@ -86,8 +86,10 @@ public abstract class SessionState {
   @Nullable
   public abstract List<Location> beforeEventLocations();
 
+  @Nullable
   public abstract DirectionsRoute originalDirectionRoute();
 
+  @Nullable
   public abstract DirectionsRoute currentDirectionRoute();
 
   public abstract String sessionIdentifier();
@@ -115,7 +117,13 @@ public abstract class SessionState {
   public abstract Builder toBuilder();
 
   public static Builder builder() {
-    return new AutoValue_SessionState.Builder();
+    return new AutoValue_SessionState.Builder()
+      .eventRouteDistanceCompleted(0d)
+      .sessionIdentifier("")
+      .mockLocation(false)
+      .startTimestamp(new Date())
+      .rerouteCount(0)
+      .locationEngineName("");
   }
 
   @AutoValue.Builder
@@ -133,11 +141,11 @@ public abstract class SessionState {
 
     public abstract Builder beforeEventLocations(@Nullable List<Location> beforeLocations);
 
-    public abstract Builder originalDirectionRoute(@NonNull DirectionsRoute originalDirectionsRoute);
+    public abstract Builder originalDirectionRoute(@Nullable DirectionsRoute originalDirectionsRoute);
 
-    public abstract Builder currentDirectionRoute(@NonNull DirectionsRoute currentDirectionsRoute);
+    public abstract Builder currentDirectionRoute(@Nullable DirectionsRoute currentDirectionsRoute);
 
-    public abstract Builder sessionIdentifier(@NonNull String sessionIdentifier);
+    public abstract Builder sessionIdentifier(String sessionIdentifier);
 
     public abstract Builder originalRequestIdentifier(@Nullable String originalRequestIdentifier);
 
@@ -153,7 +161,7 @@ public abstract class SessionState {
 
     public abstract Builder arrivalTimestamp(@Nullable Date arrivalTimestamp);
 
-    public abstract Builder locationEngineName(@NonNull String locationEngineName);
+    public abstract Builder locationEngineName(String locationEngineName);
 
     public abstract SessionState build();
   }

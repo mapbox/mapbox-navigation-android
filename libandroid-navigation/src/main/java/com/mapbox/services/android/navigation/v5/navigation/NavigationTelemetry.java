@@ -103,6 +103,9 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   void initialize(@NonNull Context context, @NonNull String accessToken,
                   MapboxNavigation navigation, LocationEngine locationEngine) {
 
+    // Initial session state
+    navigationSessionState = SessionState.builder().build();
+
     // Setup the location engine
     updateLocationEngine(locationEngine);
 
@@ -139,7 +142,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
    * @param directionsRoute first route passed to navigation
    */
   void startSession(DirectionsRoute directionsRoute) {
-    navigationSessionState = SessionState.builder()
+    navigationSessionState = navigationSessionState.toBuilder()
       .originalDirectionRoute(directionsRoute)
       .currentDirectionRoute(directionsRoute)
       .sessionIdentifier(TelemetryUtils.buildUUID())

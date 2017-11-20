@@ -103,13 +103,13 @@ public final class NavigationMetricsWrapper {
     MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
   }
 
-  public static void rerouteEvent(RerouteEvent rerouteTelemEvent, MetricsRouteProgress routeProgress,
+  public static void rerouteEvent(RerouteEvent rerouteEvent, MetricsRouteProgress routeProgress,
                                   Location location) {
 
-    SessionState sessionState = rerouteTelemEvent.getSessionState();
+    SessionState sessionState = rerouteEvent.getSessionState();
     updateRouteProgressSessionData(routeProgress);
 
-    Hashtable<String, Object> rerouteEvent = MapboxNavigationEvent.buildRerouteEvent(
+    Hashtable<String, Object> buildRerouteEvent = MapboxNavigationEvent.buildRerouteEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(),
       location.getLatitude(), location.getLongitude(),
       sessionState.currentGeometry(), routeProgress.getDirectionsRouteProfile(),
@@ -121,10 +121,10 @@ public final class NavigationMetricsWrapper {
       (int) sessionState.eventRouteDistanceCompleted(), // distanceCompleted
       (int) sessionState.eventRouteProgress().getDistanceRemaining(), // distanceRemaining
       (int) sessionState.eventRouteProgress().getDurationRemaining(), // durationRemaining
-      rerouteTelemEvent.getNewDistanceRemaining(), // new distanceRemaining
-      rerouteTelemEvent.getNewDurationRemaining(), // new durationRemaining
+      rerouteEvent.getNewDistanceRemaining(), // new distanceRemaining
+      rerouteEvent.getNewDurationRemaining(), // new durationRemaining
       sessionState.secondsSinceLastReroute(), TelemetryUtils.buildUUID(),
-      rerouteTelemEvent.getNewRouteGeometry(), sessionState.mockLocation(),
+      rerouteEvent.getNewRouteGeometry(), sessionState.mockLocation(),
       sessionState.originalRequestIdentifier(), sessionState.requestIdentifier(), sessionState.originalGeometry(),
       sessionState.originalDistance(), sessionState.originalDuration(), null,
       upcomingInstruction, upcomingType, upcomingModifier, upcomingName, previousInstruction,
@@ -134,13 +134,13 @@ public final class NavigationMetricsWrapper {
       (int) routeProgress.getCurrentStepProgressDistanceRemaining(),
       (int) routeProgress.getCurrentStepProgressDurationRemaining(),
       sessionState.currentStepCount(), sessionState.originalStepCount());
-    rerouteEvent.put(MapboxNavigationEvent.KEY_CREATED, TelemetryUtils.generateCreateDate(location));
+    buildRerouteEvent.put(MapboxNavigationEvent.KEY_CREATED, TelemetryUtils.generateCreateDate(location));
 
     int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, routeProgress);
 
-    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, rerouteEvent);
-    MapboxTelemetry.getInstance().addLocationEngineName(sessionState.locationEngineName(), rerouteEvent);
-    MapboxTelemetry.getInstance().pushEvent(rerouteEvent);
+    MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, buildRerouteEvent);
+    MapboxTelemetry.getInstance().addLocationEngineName(sessionState.locationEngineName(), buildRerouteEvent);
+    MapboxTelemetry.getInstance().pushEvent(buildRerouteEvent);
     MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
   }
 
