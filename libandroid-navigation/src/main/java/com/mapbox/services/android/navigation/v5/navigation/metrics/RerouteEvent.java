@@ -8,6 +8,7 @@ public class RerouteEvent implements TelemetryEvent {
 
   private SessionState rerouteSessionState;
   private String eventId;
+  private String newRouteGeometry;
   private int newDurationRemaining;
   private int newDistanceRemaining;
 
@@ -25,6 +26,14 @@ public class RerouteEvent implements TelemetryEvent {
   @Override
   public SessionState getSessionState() {
     return rerouteSessionState;
+  }
+
+  String getNewRouteGeometry() {
+    return newRouteGeometry;
+  }
+
+  public void setNewRouteGeometry(String newRouteGeometry) {
+    this.newRouteGeometry = newRouteGeometry;
   }
 
   int getNewDurationRemaining() {

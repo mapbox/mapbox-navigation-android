@@ -124,7 +124,7 @@ public final class NavigationMetricsWrapper {
       rerouteTelemEvent.getNewDistanceRemaining(), // new distanceRemaining
       rerouteTelemEvent.getNewDurationRemaining(), // new durationRemaining
       sessionState.secondsSinceLastReroute(), TelemetryUtils.buildUUID(),
-      routeProgress.getDirectionsRouteGeometry(), sessionState.mockLocation(),
+      rerouteTelemEvent.getNewRouteGeometry(), sessionState.mockLocation(),
       sessionState.originalRequestIdentifier(), sessionState.requestIdentifier(), sessionState.originalGeometry(),
       sessionState.originalDistance(), sessionState.originalDuration(), null,
       upcomingInstruction, upcomingType, upcomingModifier, upcomingName, previousInstruction,

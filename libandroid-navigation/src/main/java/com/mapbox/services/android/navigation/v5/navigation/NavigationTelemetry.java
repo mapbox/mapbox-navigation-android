@@ -6,6 +6,8 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
+import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.location.MetricsLocation;
@@ -25,6 +27,7 @@ import com.mapbox.services.android.telemetry.constants.TelemetryConstants;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
+import com.mapbox.services.constants.Constants;
 import com.mapbox.services.utils.TextUtils;
 
 import java.util.ArrayList;
@@ -185,6 +188,9 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
   private void updateLastRerouteEvent(DirectionsRoute newDirectionsRoute) {
     RerouteEvent rerouteEvent = queuedRerouteEvents.get(queuedRerouteEvents.size() - 1);
+    List<Point> geometryPositions = PolylineUtils.decode(newDirectionsRoute.geometry(), Constants.PRECISION_6);
+    PolylineUtils.encode(geometryPositions, Constants.PRECISION_5);
+    rerouteEvent.setNewRouteGeometry(PolylineUtils.encode(geometryPositions, Constants.PRECISION_5));
     int newDistanceRemaining = newDirectionsRoute.distance() == null ? 0 : newDirectionsRoute.distance().intValue();
     rerouteEvent.setNewDistanceRemaining(newDistanceRemaining);
     int newDurationRemaining = newDirectionsRoute.duration() == null ? 0 : newDirectionsRoute.duration().intValue();
