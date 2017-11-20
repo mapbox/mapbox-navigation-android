@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.v5.snap;
 
 import android.location.Location;
-import android.support.annotation.Nullable;
 
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.LineString;
@@ -11,8 +10,6 @@ import com.mapbox.services.android.telemetry.utils.MathUtils;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
-
-import java.util.List;
 
 import static com.mapbox.services.constants.Constants.PRECISION_6;
 
@@ -27,9 +24,8 @@ import static com.mapbox.services.constants.Constants.PRECISION_6;
 public class SnapToRoute extends Snap {
 
   @Override
-  public Location getSnappedLocation(Location location, RouteProgress routeProgress,
-                                     @Nullable List<Point> coords) {
-    Location snappedLocation = snapLocationLatLng(location, coords);
+  public Location getSnappedLocation(Location location, RouteProgress routeProgress) {
+    Location snappedLocation = snapLocationLatLng(location, routeProgress);
     snappedLocation.setBearing(snapLocationBearing(routeProgress));
     return snappedLocation;
   }
@@ -38,19 +34,20 @@ public class SnapToRoute extends Snap {
    * Logic used to snap the users location coordinates to the closest position along the current
    * step.
    *
-   * @param location        the raw location
-   * @param coords          the list of step geometry coordinates
+   * @param location      the raw location
+   * @param routeProgress the latest {@link RouteProgress} for getting route and index information
    * @return the altered user location
    * @since 0.4.0
    */
-  private static Location snapLocationLatLng(Location location, List<Point> coords) {
+  private static Location snapLocationLatLng(Location location, RouteProgress routeProgress) {
     Location snappedLocation = new Location(location);
     Point locationToPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
 
     // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
     // Point on the LineString.
-    if (coords.size() > 1) {
-      Feature feature = TurfMisc.pointOnLine(locationToPoint, coords);
+    if (routeProgress.currentStepCoordinates().size() > 1) {
+      Feature feature = TurfMisc.pointOnLine(locationToPoint,
+        routeProgress.currentStepCoordinates());
       Point point = ((Point) feature.geometry());
       snappedLocation.setLongitude(point.longitude());
       snappedLocation.setLatitude(point.latitude());

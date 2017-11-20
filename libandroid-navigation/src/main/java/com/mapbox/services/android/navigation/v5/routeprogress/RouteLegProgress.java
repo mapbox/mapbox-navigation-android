@@ -12,8 +12,9 @@ import com.mapbox.directions.v5.models.RouteLeg;
  * in the directions route, much of this information will be identical to the parent
  * {@link RouteProgress}.
  * <p>
- * The latest route leg progress object can be obtained through either the {@link ProgressChangeListener}
- * or the {@link com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener} callbacks.
+ * The latest route leg progress object can be obtained through either the
+ * {@link ProgressChangeListener} or the
+ * {@link com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener} callbacks.
  * Note that the route leg progress object's immutable.
  * </p>
  *
@@ -23,30 +24,19 @@ import com.mapbox.directions.v5.models.RouteLeg;
 public abstract class RouteLegProgress {
 
   /**
+   * Build a new {@link RouteLegProgress} object.
+   *
+   * @return a {@link Builder} object for creating this object
+   * @since 0.7.0
+   */
+  public static Builder builder() {
+    return new AutoValue_RouteLegProgress.Builder();
+  }
+
+  /**
    * Not public since developer can access same information from {@link RouteProgress}.
    */
   abstract RouteLeg routeLeg();
-
-  /**
-   * Constructor for the route leg progress information.
-   *
-   * @param routeLeg            the current {@link RouteLeg} the user is traversing along
-   * @param stepIndex           the current step index the user is on
-   * @param legDistanceRemaining the leg distance remaining which is calculated in navigation engine
-   * @param stepDistanceRemaining the step distance remaining which is calculated in navigation engine
-   * @since 0.1.0
-   */
-  static RouteLegProgress create(RouteLeg routeLeg, int stepIndex, double legDistanceRemaining,
-                                 double stepDistanceRemaining) {
-
-    LegStep nextStep
-      = stepIndex == (routeLeg.steps().size() - 1) ? null : routeLeg.steps().get(stepIndex + 1);
-
-    RouteStepProgress stepProgress = RouteStepProgress.create(
-      routeLeg.steps().get(stepIndex), nextStep, stepDistanceRemaining);
-    return new AutoValue_RouteLegProgress(
-      routeLeg, stepIndex, legDistanceRemaining, stepProgress);
-  }
 
   /**
    * Index representing the current step the user is on.
@@ -174,4 +164,32 @@ public abstract class RouteLegProgress {
    * @since 0.1.0
    */
   public abstract RouteStepProgress currentStepProgress();
+
+  /**
+   * Returns the builder which created this instance of {@link RouteLegProgress} and allows for
+   * modification and building a new route leg progress with new information.
+   *
+   * @return {@link RouteLegProgress.Builder} with the same variables set as this route leg progress
+   * object
+   * @since 0.7.0
+   */
+  public abstract Builder toBuilder();
+
+  /**
+   * This builder is used to create a new {@link RouteLegProgress}.
+   *
+   * @since 0.7.0
+   */
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract Builder routeLeg(RouteLeg routeLeg);
+
+    public abstract Builder stepIndex(int stepIndex);
+
+    public abstract Builder distanceRemaining(double distanceRemaining);
+
+    public abstract Builder currentStepProgress(RouteStepProgress currentStepProgress);
+
+    public abstract RouteLegProgress build();
+  }
 }

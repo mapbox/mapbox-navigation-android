@@ -1,10 +1,16 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.directions.v5.models.LegStep;
 import com.mapbox.directions.v5.models.RouteLeg;
+import com.mapbox.geojson.Point;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class contains all progress information at any given time during a navigation session. This
@@ -21,6 +27,16 @@ import com.mapbox.directions.v5.models.RouteLeg;
  */
 @AutoValue
 public abstract class RouteProgress {
+
+  /**
+   * Build a new {@link RouteProgress} object.
+   *
+   * @return a {@link Builder} object for creating this object
+   * @since 0.7.0
+   */
+  public static Builder builder() {
+    return new AutoValue_RouteProgress.Builder();
+  }
 
   /**
    * Get the route the navigation session is currently using. When a reroute occurs and a new
@@ -122,18 +138,85 @@ public abstract class RouteProgress {
    * @return a {@link RouteLegProgress} object
    * @since 0.1.0
    */
+  @Nullable
   public abstract RouteLegProgress currentLegProgress();
+
+  /**
+   * Provides the previous steps geometry as points along the route the users currently traversing
+   * along. If the users at the very first step along the route, this will return null, otherwise a
+   * value should always be given.
+   *
+   * @return either a list of the points making up the previous geometry or null if the user's
+   * currently on the first step along the route
+   * @since 0.7.0
+   */
+  @Nullable
+  public abstract List<Point> priorStepCoordinates();
+
+  /**
+   * The current step's geometry found along the route. Since a step requires at least a geometry
+   * made up of one {@link Point}, this should never return null.
+   *
+   * @return a list of points making up the current step geometry
+   */
+  @NonNull
+  public abstract List<Point> currentStepCoordinates();
+
+  /**
+   * The next step's geometry found along the route. If the user is already on the last step, this
+   * will return null.
+   *
+   * @return either a list of the points making up the upcoming step geometry or null if there isn't
+   * an upcoming step
+   * @since 0.7.0
+   */
+  @Nullable
+  public abstract List<Point> upcomingStepCoordinates();
+
+  /**
+   * Will return a list of {@link Point}s which includes the prior, current, and upcoming points in
+   * a single list.
+   *
+   * @return a list of points making up the prior, current, and upcoming points
+   * @since 0.7.0
+   */
+  @NonNull
+  public List<Point> nearbyCoordinates() {
+    List<Point> nearbyCoordinates = new ArrayList<>();
+    if (priorStepCoordinates() != null) {
+      nearbyCoordinates.addAll(priorStepCoordinates());
+    }
+    nearbyCoordinates.addAll(currentStepCoordinates());
+    if (upcomingStepCoordinates() != null) {
+      nearbyCoordinates.addAll(upcomingStepCoordinates());
+    }
+    return nearbyCoordinates;
+  }
+
+  /**
+   * Provides a new instance of the {@link RouteProgress.Builder} with the default values for each
+   * field being the current {@link RouteProgress} instance values. This allows for easily changing
+   * a single value in the Route Progress object and then quickly creating a new immutable instance
+   * of this class.
+   *
+   * @return a new instance of {@link RouteProgress.Builder} with the values already set to the
+   * current {@link RouteProgress} instance
+   * @since 0.7.0
+   */
+  public abstract Builder toBuilder();
+
+  abstract double stepDistanceRemaining();
+
+  abstract double legDistanceRemaining();
+
+  abstract int stepIndex();
 
   @AutoValue.Builder
   public abstract static class Builder {
 
-    private int stepIndex;
-    private double legDistanceRemaining;
-    private double stepDistanceRemaining;
+    public abstract Builder directionsRoute(DirectionsRoute directionsRoute);
 
     abstract DirectionsRoute directionsRoute();
-
-    public abstract Builder directionsRoute(DirectionsRoute directionsRoute);
 
     abstract int legIndex();
 
@@ -141,38 +224,40 @@ public abstract class RouteProgress {
 
     public abstract Builder distanceRemaining(double distanceRemaining);
 
-    public Builder stepIndex(int stepIndex) {
-      this.stepIndex = stepIndex;
-      return this;
-    }
+    public abstract Builder stepIndex(int stepIndex);
 
-    public Builder legDistanceRemaining(double legDistanceRemaining) {
-      this.legDistanceRemaining = legDistanceRemaining;
-      return this;
-    }
+    public abstract Builder legDistanceRemaining(double legDistanceRemaining);
 
-    public Builder stepDistanceRemaining(double stepDistanceRemaining) {
-      this.stepDistanceRemaining = stepDistanceRemaining;
-      return this;
-    }
+    public abstract Builder stepDistanceRemaining(double stepDistanceRemaining);
 
-    abstract Builder currentLegProgress(RouteLegProgress routeLegProgress);
+    public abstract Builder currentLegProgress(RouteLegProgress routeLegProgress);
+
+    public abstract Builder priorStepCoordinates(List<Point> priorStepCoordinates);
+
+    public abstract Builder upcomingStepCoordinates(List<Point> upcomingStepCoordinates);
+
+    public abstract Builder currentStepCoordinates(List<Point> currentStepCoordinates);
 
     abstract RouteProgress autoBuild(); // not public
 
     public RouteProgress build() {
-      RouteLegProgress legProgress = RouteLegProgress.create(
-        directionsRoute().legs().get(legIndex()),
-        stepIndex,
-        legDistanceRemaining,
-        stepDistanceRemaining
-      );
+      RouteProgress routeProgress = autoBuild();
+
+      LegStep nextStep
+        = routeProgress.stepIndex() == (directionsRoute().legs().get(legIndex()).steps().size() - 1)
+        ? null
+        : directionsRoute().legs().get(legIndex()).steps().get(routeProgress.stepIndex() + 1);
+
+      RouteLegProgress legProgress = RouteLegProgress.builder()
+        .currentStepProgress(RouteStepProgress.create(
+          directionsRoute().legs().get(legIndex()).steps().get(routeProgress.stepIndex()), nextStep,
+          routeProgress.stepDistanceRemaining()))
+        .routeLeg(directionsRoute().legs().get(legIndex()))
+        .stepIndex(routeProgress.stepIndex())
+        .distanceRemaining(routeProgress.legDistanceRemaining())
+        .build();
       currentLegProgress(legProgress);
       return autoBuild();
     }
-  }
-
-  public static Builder builder() {
-    return new AutoValue_RouteProgress.Builder();
   }
 }

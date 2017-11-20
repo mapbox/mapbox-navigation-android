@@ -2,9 +2,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
 import com.mapbox.directions.v5.models.LegStep;
-import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -31,21 +29,6 @@ class NavigationHelper {
   }
 
   /**
-   * Takes in a raw location, converts it to a point, and snaps it to the closest point along the
-   * route. This is isolated as separate logic from the snap logic provided because we will always
-   * need to snap to the route in order to get the most accurate information.
-   */
-  static Point userSnappedToRoutePosition(Location location, List<Point> coordinates) {
-    Point locationToPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-
-
-    // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
-    // Point on the LineString.
-    Feature feature = TurfMisc.pointOnLine(locationToPoint, coordinates);
-    return ((Point) feature.geometry());
-  }
-
-  /**
    * When a milestones triggered, it's instruction needs to be built either using the provided
    * string or an empty string.
    */
@@ -61,10 +44,13 @@ class NavigationHelper {
    * Calculates the distance remaining in the step from the current users snapped position, to the
    * next maneuver position.
    */
-  static double stepDistanceRemaining(Point snappedPosition, int legIndex, int stepIndex,
-                                      DirectionsRoute directionsRoute, List<Point> coordinates) {
-    List<LegStep> steps = directionsRoute.legs().get(legIndex).steps();
-    Point nextManeuverPosition = nextManeuverPosition(stepIndex, steps, coordinates);
+  static double stepDistanceRemaining(Point snappedPosition, RouteProgress routeProgress) {
+    int stepIndex = routeProgress.currentLegProgress().stepIndex();
+    int legIndex = routeProgress.legIndex();
+
+    List<LegStep> steps = routeProgress.directionsRoute().legs().get(legIndex).steps();
+    Point nextManeuverPosition = nextManeuverPosition(stepIndex, steps,
+      routeProgress.currentStepCoordinates());
 
     LineString lineString = LineString.fromPolyline(steps.get(stepIndex).geometry(),
       Constants.PRECISION_6);
@@ -81,9 +67,11 @@ class NavigationHelper {
    * Takes in the already calculated step distance and iterates through the step list from the
    * step index value plus one till the end of the leg.
    */
-  static double legDistanceRemaining(double stepDistanceRemaining, int legIndex, int stepIndex,
-                                     DirectionsRoute directionsRoute) {
-    List<LegStep> steps = directionsRoute.legs().get(legIndex).steps();
+  static double legDistanceRemaining(double stepDistanceRemaining, RouteProgress routeProgress) {
+    int stepIndex = routeProgress.currentLegProgress().stepIndex();
+    int legIndex = routeProgress.legIndex();
+
+    List<LegStep> steps = routeProgress.directionsRoute().legs().get(legIndex).steps();
     if ((steps.size() < stepIndex + 1)) {
       return stepDistanceRemaining;
     }
@@ -99,14 +87,15 @@ class NavigationHelper {
    * Otherwise, if the route only contains one leg or the users on the last leg, this value will
    * equal the leg distance remaining.
    */
-  static double routeDistanceRemaining(double legDistanceRemaining, int legIndex,
-                                       DirectionsRoute directionsRoute) {
-    if (directionsRoute.legs().size() < 2) {
+  static double routeDistanceRemaining(double legDistanceRemaining, RouteProgress routeProgress) {
+    int legIndex = routeProgress.legIndex();
+
+    if (routeProgress.directionsRoute().legs().size() < 2) {
       return legDistanceRemaining;
     }
 
-    for (int i = legIndex + 1; i < directionsRoute.legs().size(); i++) {
-      legDistanceRemaining += directionsRoute.legs().get(i).distance();
+    for (int i = legIndex + 1; i < routeProgress.directionsRoute().legs().size(); i++) {
+      legDistanceRemaining += routeProgress.directionsRoute().legs().get(i).distance();
     }
     return legDistanceRemaining;
   }
@@ -137,32 +126,6 @@ class NavigationHelper {
       <= maxTurnCompletionOffset;
   }
 
-  /**
-   * This is used when a user has completed a step maneuver and the indices need to be incremented.
-   * The main purpose of this class is to determine if an additional leg exist and the step index
-   * has met the first legs total size, a leg index needs to occur and step index should be reset.
-   * Otherwise, the step index is incremented while the leg index remains the same.
-   * <p>
-   * Rather than returning an int array, a new instance of Navigation Indices gets returned. This
-   * provides type safety and making the code a bit more readable.
-   * </p>
-   *
-   * @param routeProgress   need a routeProgress in order to get the directions route leg list size
-   * @param previousIndices used for adjusting the indices
-   * @return a {@link NavigationIndices} object which contains the new leg and step indices
-   */
-  static NavigationIndices increaseIndex(RouteProgress routeProgress,
-                                         NavigationIndices previousIndices) {
-    // Check if we are in the last step in the current routeLeg and iterate it if needed.
-    if (previousIndices.stepIndex()
-      >= routeProgress.directionsRoute().legs().get(routeProgress.legIndex())
-      .steps().size() - 2
-      && previousIndices.legIndex() < routeProgress.directionsRoute().legs().size() - 1) {
-      return NavigationIndices.create((previousIndices.legIndex() + 1), 0);
-    }
-    return NavigationIndices.create(previousIndices.legIndex(), (previousIndices.stepIndex() + 1));
-  }
-
   static List<Milestone> checkMilestones(RouteProgress previousRouteProgress,
                                          RouteProgress routeProgress,
                                          MapboxNavigation mapboxNavigation) {
@@ -183,9 +146,9 @@ class NavigationHelper {
   }
 
   static Location getSnappedLocation(MapboxNavigation mapboxNavigation, Location location,
-                                     RouteProgress routeProgress, List<Point> stepCoordinates) {
+                                     RouteProgress routeProgress) {
     Snap snap = mapboxNavigation.getSnapEngine();
-    return snap.getSnappedLocation(location, routeProgress, stepCoordinates);
+    return snap.getSnappedLocation(location, routeProgress);
   }
 
   /**

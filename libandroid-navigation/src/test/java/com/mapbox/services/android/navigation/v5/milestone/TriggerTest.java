@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class)
 public class TriggerTest extends BaseTest {
 
   // Fixtures
@@ -47,6 +46,8 @@ public class TriggerTest extends BaseTest {
     location.setLatitude(coords.get(0).latitude());
     location.setLongitude(coords.get(0).longitude());
     routeProgress = RouteProgress.builder()
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(1).geometry(), Constants.PRECISION_6))
       .directionsRoute(route)
       .distanceRemaining(route.distance())
       .legDistanceRemaining(route.legs().get(0).distance())

@@ -5,9 +5,11 @@ import com.google.gson.GsonBuilder;
 import com.mapbox.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.directions.v5.models.DirectionsResponse;
 import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.constants.Constants;
 
 import junit.framework.Assert;
 
@@ -36,6 +38,8 @@ public class StepMilestoneTest extends BaseTest {
     DirectionsRoute route = response.routes().get(0);
 
     routeProgress = RouteProgress.builder()
+      .currentStepCoordinates(
+        PolylineUtils.decode(route.legs().get(0).steps().get(1).geometry(), Constants.PRECISION_6))
       .directionsRoute(route)
       .distanceRemaining(route.distance())
       .legDistanceRemaining(route.legs().get(0).distance())
