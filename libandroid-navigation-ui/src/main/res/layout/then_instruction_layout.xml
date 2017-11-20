@@ -13,10 +13,8 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_margin="8dp"
-        android:layerType="software"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
-        app:layout_constraintHorizontal_bias="0.7"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
