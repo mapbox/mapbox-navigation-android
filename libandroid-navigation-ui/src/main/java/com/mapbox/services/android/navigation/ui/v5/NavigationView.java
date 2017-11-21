@@ -1,8 +1,11 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.app.Activity;
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.location.Location;
@@ -59,8 +62,8 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
  *
  * @since 0.7.0
  */
-public class NavigationView extends CoordinatorLayout implements OnMapReadyCallback, MapboxMap.OnScrollListener,
-  NavigationContract.View {
+public class NavigationView extends CoordinatorLayout implements LifecycleObserver,
+  OnMapReadyCallback, MapboxMap.OnScrollListener, NavigationContract.View {
 
   private MapView mapView;
   private InstructionView instructionView;
@@ -95,34 +98,22 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     init();
   }
 
+  /**
+   * Uses savedInstanceState as a cue to restore state (if not null).
+   *
+   * @param savedInstanceState to restore state if not null
+   */
   public void onCreate(@Nullable Bundle savedInstanceState) {
     resumeState = savedInstanceState != null;
     mapView.onCreate(savedInstanceState);
   }
 
-  @SuppressWarnings( {"MissingPermission"})
-  public void onStart() {
-    mapView.onStart();
-  }
-
-  public void onResume() {
-    mapView.onResume();
-  }
-
-  public void onPause() {
-    mapView.onPause();
-  }
-
+  /**
+   * Low memory must be reported so the {@link MapView}
+   * can react appropriately.
+   */
   public void onLowMemory() {
     mapView.onLowMemory();
-  }
-
-  public void onStop() {
-    mapView.onStop();
-  }
-
-  public void onDestroy() {
-    mapView.onDestroy();
   }
 
   /**
@@ -139,6 +130,13 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     return false;
   }
 
+  /**
+   * Used to store the bottomsheet state and re-center
+   * button visibility.  As well as anything the {@link MapView}
+   * needs to store in the bundle.
+   *
+   * @param outState to store state variables
+   */
   public void onSaveInstanceState(Bundle outState) {
     outState.putInt(getContext().getString(R.string.bottom_sheet_state),
       summaryBehavior.getState());
@@ -147,6 +145,13 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     mapView.onSaveInstanceState(outState);
   }
 
+  /**
+   * Used to restore the bottomsheet state and re-center
+   * button visibility.  As well as the {@link MapView}
+   * position prior to rotation.
+   *
+   * @param savedInstanceState to extract state variables
+   */
   public void onRestoreInstanceState(Bundle savedInstanceState) {
     boolean isVisible = savedInstanceState.getBoolean(getContext().getString(R.string.recenter_btn_visible));
     recenterBtn.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE);
@@ -312,6 +317,7 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
     initViewModels();
+    initNavigationViewObserver();
     initSummaryBottomSheet();
   }
 
@@ -375,6 +381,18 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
   }
 
   /**
+   * Adds this view as a lifecycle observer.
+   * This needs to be done earlier than the other observers (prior to the style loading).
+   */
+  private void initNavigationViewObserver() {
+    try {
+      ((LifecycleOwner) getContext()).getLifecycle().addObserver(this);
+    } catch (ClassCastException exception) {
+      throw new ClassCastException("Please ensure that the provided Context is a valid LifecycleOwner");
+    }
+  }
+
+  /**
    * Add lifecycle observers to ensure these objects properly
    * start / stop based on the Android lifecycle.
    */
@@ -431,6 +449,31 @@ public class NavigationView extends CoordinatorLayout implements OnMapReadyCallb
       public void onSlide(@NonNull View bottomSheet, float slideOffset) {
       }
     });
+  }
+
+  @OnLifecycleEvent(Lifecycle.Event.ON_START)
+  public void onStart() {
+    mapView.onStart();
+  }
+
+  @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+  public void onResume() {
+    mapView.onResume();
+  }
+
+  @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+  public void onPause() {
+    mapView.onPause();
+  }
+
+  @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+  public void onStop() {
+    mapView.onStop();
+  }
+
+  @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+  public void onDestroy() {
+    mapView.onDestroy();
   }
 
   /**
