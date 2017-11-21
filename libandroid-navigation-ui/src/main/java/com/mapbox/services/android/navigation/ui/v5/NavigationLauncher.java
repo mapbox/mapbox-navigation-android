@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
@@ -37,26 +36,22 @@ public class NavigationLauncher {
    * Starts the UI with a {@link DirectionsRoute} already retrieved from
    * {@link com.mapbox.services.android.navigation.v5.navigation.NavigationRoute}
    *
-   * @param activity      must be launched from another {@link Activity}
-   * @param route         initial route in which the navigation will follow
-   * @param awsPoolId     used to activate AWS Polly (if null, will use to {@link android.speech.tts.TextToSpeech})
-   * @param simulateRoute if true, will mock location movement - if false, will use true location
+   * @param activity must be launched from another {@link Activity}
+   * @param route    initial route in which the navigation will follow
+   * @param options  with fields to customize the navigation view
    */
-  public static void startNavigation(Activity activity, DirectionsRoute route,
-                                     String awsPoolId, boolean simulateRoute) {
+  public static void startNavigation(Activity activity, DirectionsRoute route, NavigationViewOptions options) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
     SharedPreferences.Editor editor = preferences.edit();
     editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, new GsonBuilder()
       .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create().toJson(route));
 
-    editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, awsPoolId);
-    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, simulateRoute);
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, options.awsPoolId());
+    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, options.shouldSimulateRoute());
+    editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, options.unitType());
     editor.apply();
 
     Intent navigationActivity = new Intent(activity, NavigationActivity.class);
-    Bundle bundle = new Bundle();
-    bundle.putBoolean(NavigationConstants.NAVIGATION_VIEW_LAUNCH_ROUTE, true);
-    navigationActivity.putExtras(bundle);
     activity.startActivity(navigationActivity);
   }
 
@@ -64,14 +59,13 @@ public class NavigationLauncher {
    * Starts the UI with a {@link Point} origin and {@link Point} destination which will allow the UI
    * to retrieve a {@link DirectionsRoute} upon initialization
    *
-   * @param activity      must be launched from another {@link Activity}
-   * @param origin        where you want to start navigation (most likely your current location)
-   * @param destination   where you want to navigate to
-   * @param awsPoolId     used to activate AWS Polly (if null, will use to {@link android.speech.tts.TextToSpeech})
-   * @param simulateRoute if true, will mock location movement - if false, will use true location
+   * @param activity    must be launched from another {@link Activity}
+   * @param origin      where you want to start navigation (most likely your current location)
+   * @param destination where you want to navigate to
+   * @param options     with fields to customize the navigation view
    */
   public static void startNavigation(Activity activity, Point origin, Point destination,
-                                     String awsPoolId, boolean simulateRoute) {
+                                     NavigationViewOptions options) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
     SharedPreferences.Editor editor = preferences.edit();
 
@@ -84,14 +78,12 @@ public class NavigationLauncher {
     editor.putLong(NavigationConstants.NAVIGATION_VIEW_DESTINATION_LNG_KEY,
       Double.doubleToRawLongBits(destination.longitude()));
 
-    editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, awsPoolId);
-    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, simulateRoute);
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, options.awsPoolId());
+    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, options.shouldSimulateRoute());
+    editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, options.unitType());
     editor.apply();
 
     Intent navigationActivity = new Intent(activity, NavigationActivity.class);
-    Bundle bundle = new Bundle();
-    bundle.putBoolean(NavigationConstants.NAVIGATION_VIEW_LAUNCH_ROUTE, false);
-    navigationActivity.putExtras(bundle);
     activity.startActivity(navigationActivity);
   }
 

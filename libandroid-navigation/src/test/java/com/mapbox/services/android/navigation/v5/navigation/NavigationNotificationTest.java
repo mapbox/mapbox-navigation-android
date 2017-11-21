@@ -37,6 +37,7 @@ public class NavigationNotificationTest extends BaseTest {
     route = response.routes().get(0);
   }
 
+  @Ignore
   @Test
   public void sanity() throws Exception {
     NavigationNotification navigationNotification = new NavigationNotification(
