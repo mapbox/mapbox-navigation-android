@@ -94,7 +94,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public NavigationView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
-    ThemeSwitcher.setTheme(getContext());
+    ThemeSwitcher.setTheme(getContext(), attrs);
     init();
   }
 
@@ -359,7 +359,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * route.
    */
   private void initRoute() {
-    mapRoute = new NavigationMapRoute(mapView, map, NavigationConstants.ROUTE_BELOW_LAYER);
+    int routeStyleRes = ThemeSwitcher.retrieveNavigationViewRouteStyle(getContext());
+    mapRoute = new NavigationMapRoute(null, mapView, map,
+      routeStyleRes, NavigationConstants.ROUTE_BELOW_LAYER);
   }
 
   /**
