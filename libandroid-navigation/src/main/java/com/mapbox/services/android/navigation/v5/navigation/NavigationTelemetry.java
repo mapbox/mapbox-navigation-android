@@ -13,7 +13,6 @@ import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.location.MetricsLocation;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListener;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricsWrapper;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.RerouteEvent;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.SessionState;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.TelemetryEvent;

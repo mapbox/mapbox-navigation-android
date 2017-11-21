@@ -1,8 +1,10 @@
-package com.mapbox.services.android.navigation.v5.navigation.metrics;
+package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
 
 import com.mapbox.services.android.navigation.BuildConfig;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.RerouteEvent;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.SessionState;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
@@ -13,8 +15,8 @@ import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 import java.util.Hashtable;
 import java.util.List;
 
-public final class NavigationMetricsWrapper {
-  public static String sdkIdentifier;
+final class NavigationMetricsWrapper {
+  static String sdkIdentifier;
   private static String upcomingInstruction;
   private static String previousInstruction;
   private static String upcomingModifier;
@@ -28,7 +30,7 @@ public final class NavigationMetricsWrapper {
     // Empty private constructor for preventing initialization of this class.
   }
 
-  public static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
+  static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location) {
     Hashtable<String, Object> arriveEvent = MapboxNavigationEvent.buildArriveEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
@@ -54,7 +56,7 @@ public final class NavigationMetricsWrapper {
     MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
   }
 
-  public static void cancelEvent(SessionState sessionState, MetricsRouteProgress routeProgress, Location location) {
+  static void cancelEvent(SessionState sessionState, MetricsRouteProgress routeProgress, Location location) {
     Hashtable<String, Object> cancelEvent = MapboxNavigationEvent.buildCancelEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(),
@@ -80,7 +82,7 @@ public final class NavigationMetricsWrapper {
     MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
   }
 
-  public static void departEvent(SessionState sessionState, MetricsRouteProgress routeProgress, Location location) {
+  static void departEvent(SessionState sessionState, MetricsRouteProgress routeProgress, Location location) {
     Hashtable<String, Object> departEvent = MapboxNavigationEvent.buildDepartEvent(
       sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
       sessionState.sessionIdentifier(), location.getLatitude(), location.getLongitude(),
@@ -103,8 +105,8 @@ public final class NavigationMetricsWrapper {
     MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
   }
 
-  public static void rerouteEvent(RerouteEvent rerouteEvent, MetricsRouteProgress routeProgress,
-                                  Location location) {
+  static void rerouteEvent(RerouteEvent rerouteEvent, MetricsRouteProgress routeProgress,
+                           Location location) {
 
     SessionState sessionState = rerouteEvent.getSessionState();
     updateRouteProgressSessionData(routeProgress);
@@ -144,7 +146,7 @@ public final class NavigationMetricsWrapper {
     MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
   }
 
-  public static void feedbackEvent(SessionState sessionState, MetricsRouteProgress routeProgress, Location location,
+  static void feedbackEvent(SessionState sessionState, MetricsRouteProgress routeProgress, Location location,
                             String description, String feedbackType, String screenshot, String feedbackId,
                             String vendorId) {
 
@@ -182,7 +184,7 @@ public final class NavigationMetricsWrapper {
     MapboxTelemetry.getInstance().flushEventsQueueImmediately(false);
   }
 
-  public static void turnstileEvent() {
+  static void turnstileEvent() {
     MapboxTelemetry.getInstance().setCustomTurnstileEvent(
       MapboxNavigationEvent.buildTurnstileEvent(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
     );
