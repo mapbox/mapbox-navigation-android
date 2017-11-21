@@ -49,8 +49,8 @@ public class NavigationLauncher {
     } else if (options.origin() != null && options.destination() != null) {
       storeCoordinateValues(options, editor);
     } else {
-      throw new RuntimeException("A valid DirectionsRoute or origin and " +
-        "destination must be provided in NavigationViewOptions");
+      throw new RuntimeException("A valid DirectionsRoute or origin and "
+        + "destination must be provided in NavigationViewOptions");
     }
 
     editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, options.awsPoolId());
