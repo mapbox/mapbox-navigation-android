@@ -91,7 +91,7 @@ public final class NavigationConstants {
    * Meter radius which the user must be inside for an arrival milestone to be triggered and
    * navigation to end.
    */
-  static final double METERS_REMAINING_TILL_ARRIVAL = 40;
+  public static final double METERS_REMAINING_TILL_ARRIVAL = 40;
 
   public static final double MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE = 50;
 

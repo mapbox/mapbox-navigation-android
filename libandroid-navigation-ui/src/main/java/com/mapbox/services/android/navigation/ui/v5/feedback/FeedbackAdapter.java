@@ -10,12 +10,12 @@ import com.mapbox.services.android.navigation.ui.v5.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_CONFUSING_INSTRUCTION;
-import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE;
-import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_NOT_ALLOWED;
-import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_REPORT_TRAFFIC;
-import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_ROAD_CLOSED;
-import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_ROUTING_ERROR;
+import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_CONFUSING_INSTRUCTION;
+import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE;
+import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_NOT_ALLOWED;
+import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_REPORT_TRAFFIC;
+import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_ROAD_CLOSED;
+import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_ROUTING_ERROR;
 
 public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
 

@@ -124,6 +124,8 @@ public abstract class RouteProgress {
    */
   public abstract RouteLegProgress currentLegProgress();
 
+  public abstract RouteProgress.Builder toBuilder();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
