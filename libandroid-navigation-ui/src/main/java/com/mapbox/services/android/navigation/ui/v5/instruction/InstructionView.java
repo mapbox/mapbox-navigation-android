@@ -350,8 +350,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void initBackground() {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-      int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewPrimaryColor(getContext());
-      int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveNavigationViewBannerBackgroundColor(getContext());
+      int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+        R.attr.navigationViewPrimary);
+      int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+        R.attr.navigationViewBannerBackground);
       // Instruction Layout landscape - banner background
       if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
         View instructionLayoutManeuver = findViewById(R.id.instructionManeuverLayout);

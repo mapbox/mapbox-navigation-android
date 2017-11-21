@@ -359,7 +359,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * route.
    */
   private void initRoute() {
-    mapRoute = new NavigationMapRoute(mapView, map, NavigationConstants.ROUTE_BELOW_LAYER);
+    int routeStyleRes = ThemeSwitcher.retrieveNavigationViewRouteStyle(getContext());
+    mapRoute = new NavigationMapRoute(null, mapView, map,
+      routeStyleRes, NavigationConstants.ROUTE_BELOW_LAYER);
   }
 
   /**

@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.mapbox.directions.v5.models.IntersectionLanes;
+import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.commons.utils.TextUtils;
 
@@ -114,7 +115,9 @@ public class TurnLaneView extends View {
   }
 
   private void initManeuverColor() {
-    this.primaryColor = ThemeSwitcher.retrieveNavigationViewBannerManeuverPrimaryColor(getContext());
-    this.secondaryColor = ThemeSwitcher.retrieveNavigationViewBannerManeuverSecondaryColor(getContext());
+    this.primaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+      R.attr.navigationViewBannerManeuverPrimary);
+    this.secondaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+      R.attr.navigationViewBannerManeuverSecondary);
   }
 }

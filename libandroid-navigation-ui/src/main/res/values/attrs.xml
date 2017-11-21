@@ -48,6 +48,9 @@
     <!-- Map style -->
     <attr name="navigationViewMapStyle" format="string"/>
 
+    <!-- Route style -->
+    <attr name="navigationViewRouteStyle" format="reference"/>
+
     <!-- For setting the styles in XML -->
     <attr name="navigationLightTheme" format="reference"/>
     <attr name="navigationDarkTheme" format="reference"/>

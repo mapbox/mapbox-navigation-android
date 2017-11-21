@@ -167,8 +167,10 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
 
   private void initBackground(View view) {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-      int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewPrimaryColor(getContext());
-      int navigationViewSecondaryColor = ThemeSwitcher.retrieveNavigationViewSecondaryColor(getContext());
+      int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+        R.attr.navigationViewPrimary);
+      int navigationViewSecondaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+        R.attr.navigationViewSecondary);
       // BottomSheet background
       Drawable bottomSheetBackground = DrawableCompat.wrap(view.getBackground()).mutate();
       DrawableCompat.setTint(bottomSheetBackground, navigationViewPrimaryColor);

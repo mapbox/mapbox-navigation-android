@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -31,10 +30,7 @@ public class ThemeSwitcher {
     int uiMode = context.getResources().getConfiguration().uiMode
       & Configuration.UI_MODE_NIGHT_MASK;
     boolean darkThemeEnabled = uiMode == Configuration.UI_MODE_NIGHT_YES;
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    SharedPreferences.Editor editor = preferences.edit();
-    editor.putBoolean(context.getString(R.string.dark_theme_enabled), darkThemeEnabled);
-    editor.apply();
+    updatePreferencesDarkEnabled(context, darkThemeEnabled);
 
     TypedArray styledAttributes = context.obtainStyledAttributes(attrs, R.styleable.NavigationView);
     int lightTheme = styledAttributes.getResourceId(R.styleable.NavigationView_navigationLightTheme,
@@ -44,20 +40,6 @@ public class ThemeSwitcher {
     styledAttributes.recycle();
 
     context.setTheme(darkThemeEnabled ? darkTheme : lightTheme);
-  }
-
-  /**
-   * Can be called to toggle the theme based on the current theme setting.
-   *
-   * @param activity {@link NavigationView} where the theme will be set
-   */
-  static void toggleTheme(Activity activity) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
-    boolean darkThemeEnabled = preferences.getBoolean(activity.getString(R.string.dark_theme_enabled), false);
-    SharedPreferences.Editor editor = preferences.edit();
-    editor.putBoolean(activity.getString(R.string.dark_theme_enabled), !darkThemeEnabled);
-    editor.apply();
-    activity.recreate();
   }
 
   /**
@@ -87,93 +69,35 @@ public class ThemeSwitcher {
   }
 
   /**
-   * Looks are current theme and retrieves the primary color
+   * Looks are current theme and retrieves the color attribute
    * for the given set theme.
    *
-   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
+   * @param context to retrieve the set theme and resolved attribute and then color res Id with {@link ContextCompat}
    * @return color resource identifier for primary theme color
    */
-  public static int retrieveNavigationViewPrimaryColor(Context context) {
+  public static int retrieveNavigationViewThemeColor(Context context, int resId) {
     TypedValue outValue = new TypedValue();
-    context.getTheme().resolveAttribute(R.attr.navigationViewPrimary, outValue, true);
+    context.getTheme().resolveAttribute(resId, outValue, true);
     return ContextCompat.getColor(context, outValue.resourceId);
   }
 
   /**
-   * Looks are current theme and retrieves the secondary color
+   * Looks are current theme and retrieves the route style
    * for the given set theme.
    *
-   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
-   * @return color resource identifier for secondary theme color
+   * @param context to retrieve the resolved attribute
+   * @return style resource Id for the route
    */
-  public static int retrieveNavigationViewSecondaryColor(Context context) {
+  public static int retrieveNavigationViewRouteStyle(Context context) {
     TypedValue outValue = new TypedValue();
-    context.getTheme().resolveAttribute(R.attr.navigationViewSecondary, outValue, true);
-    return ContextCompat.getColor(context, outValue.resourceId);
+    context.getTheme().resolveAttribute(R.attr.navigationViewRouteStyle, outValue, true);
+    return outValue.resourceId;
   }
 
-  /**
-   * Looks are current theme and retrieves the banner background color
-   * for the given set theme.
-   *
-   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
-   * @return color resource identifier for banner background color
-   */
-  public static int retrieveNavigationViewBannerBackgroundColor(Context context) {
-    TypedValue outValue = new TypedValue();
-    context.getTheme().resolveAttribute(R.attr.navigationViewBannerBackground, outValue, true);
-    return ContextCompat.getColor(context, outValue.resourceId);
-  }
-
-  /**
-   * Looks are current theme and retrieves the banner maneuver primary color
-   * for the given set theme.
-   *
-   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
-   * @return color resource identifier for banner maneuver primary theme color
-   */
-  public static int retrieveNavigationViewBannerManeuverPrimaryColor(Context context) {
-    TypedValue outValue = new TypedValue();
-    context.getTheme().resolveAttribute(R.attr.navigationViewBannerManeuverPrimary, outValue, true);
-    return ContextCompat.getColor(context, outValue.resourceId);
-  }
-
-  /**
-   * Looks are current theme and retrieves the banner maneuver secondary color
-   * for the given set theme.
-   *
-   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
-   * @return color resource identifier for banner maneuver secondary theme color
-   */
-  public static int retrieveNavigationViewBannerManeuverSecondaryColor(Context context) {
-    TypedValue outValue = new TypedValue();
-    context.getTheme().resolveAttribute(R.attr.navigationViewBannerManeuverSecondary, outValue, true);
-    return ContextCompat.getColor(context, outValue.resourceId);
-  }
-
-  /**
-   * Looks are current theme and retrieves the progress color
-   * for the given set theme.
-   *
-   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
-   * @return color resource identifier for progress color
-   */
-  public static int retrieveNavigationViewProgressColor(Context context) {
-    TypedValue outValue = new TypedValue();
-    context.getTheme().resolveAttribute(R.attr.navigationViewProgress, outValue, true);
-    return ContextCompat.getColor(context, outValue.resourceId);
-  }
-
-  /**
-   * Looks are current theme and retrieves the progress background color
-   * for the given set theme.
-   *
-   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
-   * @return color resource identifier for progress background color
-   */
-  public static int retrieveNavigationViewProgressBackgroundColor(Context context) {
-    TypedValue outValue = new TypedValue();
-    context.getTheme().resolveAttribute(R.attr.navigationViewProgressBackground, outValue, true);
-    return ContextCompat.getColor(context, outValue.resourceId);
+  private static void updatePreferencesDarkEnabled(Context context, boolean darkThemeEnabled) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    SharedPreferences.Editor editor = preferences.edit();
+    editor.putBoolean(context.getString(R.string.dark_theme_enabled), darkThemeEnabled);
+    editor.apply();
   }
 }
