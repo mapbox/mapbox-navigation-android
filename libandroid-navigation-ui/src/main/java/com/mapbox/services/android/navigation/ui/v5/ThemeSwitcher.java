@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -18,6 +19,18 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
  * This class is used to switch theme colors in {@link NavigationView}.
  */
 public class ThemeSwitcher {
+
+  /**
+   * Looks are current theme and retrieves the color attribute
+   * for the given set theme.
+   *
+   * @param context to retrieve the set theme and resolved attribute and then color res Id with {@link ContextCompat}
+   * @return color resource identifier for primary theme color
+   */
+  public static int retrieveNavigationViewThemeColor(Context context, int resId) {
+    TypedValue outValue = obtainTypedValue(context, resId);
+    return ContextCompat.getColor(context, outValue.resourceId);
+  }
 
   /**
    * Called in onCreate() to check the UI Mode (day or night)
@@ -49,8 +62,7 @@ public class ThemeSwitcher {
    * @param map     the style will be set on
    */
   static void setMapStyle(Context context, MapboxMap map, MapboxMap.OnStyleLoadedListener listener) {
-    TypedValue mapStyleAttr = new TypedValue();
-    context.getTheme().resolveAttribute(R.attr.navigationViewMapStyle, mapStyleAttr, true);
+    TypedValue mapStyleAttr = obtainTypedValue(context, R.attr.navigationViewMapStyle);
     String styleUrl = mapStyleAttr.string.toString();
     map.setStyleUrl(styleUrl, listener);
   }
@@ -69,29 +81,22 @@ public class ThemeSwitcher {
   }
 
   /**
-   * Looks are current theme and retrieves the color attribute
-   * for the given set theme.
-   *
-   * @param context to retrieve the set theme and resolved attribute and then color res Id with {@link ContextCompat}
-   * @return color resource identifier for primary theme color
-   */
-  public static int retrieveNavigationViewThemeColor(Context context, int resId) {
-    TypedValue outValue = new TypedValue();
-    context.getTheme().resolveAttribute(resId, outValue, true);
-    return ContextCompat.getColor(context, outValue.resourceId);
-  }
-
-  /**
    * Looks are current theme and retrieves the route style
    * for the given set theme.
    *
    * @param context to retrieve the resolved attribute
    * @return style resource Id for the route
    */
-  public static int retrieveNavigationViewRouteStyle(Context context) {
-    TypedValue outValue = new TypedValue();
-    context.getTheme().resolveAttribute(R.attr.navigationViewRouteStyle, outValue, true);
+  static int retrieveNavigationViewRouteStyle(Context context) {
+    TypedValue outValue = obtainTypedValue(context, R.attr.navigationViewRouteStyle);
     return outValue.resourceId;
+  }
+
+  @NonNull
+  private static TypedValue obtainTypedValue(Context context, int resId) {
+    TypedValue outValue = new TypedValue();
+    context.getTheme().resolveAttribute(resId, outValue, true);
+    return outValue;
   }
 
   private static void updatePreferencesDarkEnabled(Context context, boolean darkThemeEnabled) {
