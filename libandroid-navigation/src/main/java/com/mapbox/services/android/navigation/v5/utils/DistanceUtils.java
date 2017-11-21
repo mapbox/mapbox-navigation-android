@@ -21,14 +21,21 @@ import java.util.List;
 
 public class DistanceUtils {
 
+  private static final int LARGE_UNIT_THRESHOLD = 10;
+  private static final int SMALL_UNIT_THRESHOLD = 401;
+  private static final String MILE = " mi";
+  private static final String FEET = " ft";
+  private static final String KILOMETER = " km";
+  private static final String METER = " m";
+
   public static SpannableStringBuilder distanceFormatter(double distance,
                                                          DecimalFormat decimalFormat,
                                                          boolean spansEnabled,
                                                          int unitType) {
 
     boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
-    String largeUnitFormat = isImperialUnitType ? " mi" : " km";
-    String smallUnitFormat = isImperialUnitType ? " ft" : " m";
+    String largeUnitFormat = isImperialUnitType ? MILE : KILOMETER;
+    String smallUnitFormat = isImperialUnitType ? FEET : METER;
     String largeFinalUnit = isImperialUnitType ? TurfConstants.UNIT_MILES : TurfConstants.UNIT_KILOMETERS;
     String smallFinalUnit = isImperialUnitType ? TurfConstants.UNIT_FEET : TurfConstants.UNIT_METERS;
 
@@ -90,12 +97,12 @@ public class DistanceUtils {
   }
 
   private static boolean mediumDistance(double distance, String largeFinalUnit, String smallFinalUnit) {
-    return TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeFinalUnit) < 10
-      && TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, smallFinalUnit) > 401;
+    return TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeFinalUnit) < LARGE_UNIT_THRESHOLD
+      && TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, smallFinalUnit) > SMALL_UNIT_THRESHOLD;
   }
 
   private static boolean longDistance(double distance, String largeFinalUnit) {
-    return TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeFinalUnit) > 10;
+    return TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeFinalUnit) > LARGE_UNIT_THRESHOLD;
   }
 
   public static int calculateAbsoluteDistance(Location currentLocation, MetricsRouteProgress routeProgress) {
