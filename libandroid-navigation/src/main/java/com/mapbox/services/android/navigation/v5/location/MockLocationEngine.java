@@ -378,19 +378,24 @@ public class MockLocationEngine extends LocationEngine {
       if (!points.isEmpty()) {
         // Notify of an update
         Location location = mockLocation(points.get(0));
-        for (LocationEngineListener listener : locationListeners) {
-          listener.onLocationChanged(location);
-        }
+        sendLocationUpdate(location);
         points.remove(0);
       } else {
         Location location = getLastLocation();
-        for (LocationEngineListener listener : locationListeners) {
-          listener.onLocationChanged(location);
-        }
+        sendLocationUpdate(location);
       }
       lastLocation = location;
       // Schedule the next update
       handler.postDelayed(this, delay);
+    }
+
+    private void sendLocationUpdate(Location location) {
+      if (location == null) {
+        return;
+      }
+      for (LocationEngineListener listener : locationListeners) {
+        listener.onLocationChanged(location);
+      }
     }
   }
 }
