@@ -44,6 +44,7 @@ public class TurnLaneView extends View {
   @Override
   protected void onFinishInflate() {
     super.onFinishInflate();
+    setLayerType(LAYER_TYPE_SOFTWARE, null);
     initManeuverColor();
   }
 
