@@ -4,6 +4,7 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mapbox.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -126,8 +127,10 @@ class NavigationEventDispatcher {
       // Check if user has arrived and notify metric listener if so
       if (RouteUtils.isArrivalEvent(routeProgress)) {
         navigationMetricListener.onArrival(location, routeProgress);
-        // If a follow on leg doesn't exist, navigation is ending - remove listeners
-        if (routeProgress.currentLegProgress().followOnStep() == null) {
+        // If a this is the last leg, navigation is ending - remove listeners
+        List<RouteLeg> legs = routeProgress.directionsRoute().legs();
+        RouteLeg currentLeg = routeProgress.currentLeg();
+        if (currentLeg.equals(legs.get(legs.size() - 1))) {
           // Remove off route listeners
           removeOffRouteListener(null);
           // Remove metric listener
