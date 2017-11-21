@@ -16,6 +16,7 @@ import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMe
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +60,8 @@ public class NavigationEventDispatcherTest extends BaseTest {
   @Before
   public void setup() throws IOException {
     MockitoAnnotations.initMocks(this);
-    navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, mock(NavigationTelemetry.class));
+    navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, mock(NavigationTelemetry.class),
+      mock(LocationEngine.class));
     navigationEventDispatcher = navigation.getEventDispatcher();
 
     Gson gson = new GsonBuilder()

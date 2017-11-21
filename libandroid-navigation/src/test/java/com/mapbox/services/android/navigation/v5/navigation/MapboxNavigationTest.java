@@ -11,8 +11,6 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
-import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -33,7 +31,8 @@ public class MapboxNavigationTest extends BaseTest {
 
   @Before
   public void setUp() throws Exception {
-    navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, mock(NavigationTelemetry.class));
+    navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, mock(NavigationTelemetry.class),
+      mock(LocationEngine.class));
   }
 
   @Test
@@ -41,7 +40,7 @@ public class MapboxNavigationTest extends BaseTest {
     assertNotNull("should not be null", navigation);
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().build();
     MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
-      ACCESS_TOKEN, options, mock(NavigationTelemetry.class));
+      ACCESS_TOKEN, options, mock(NavigationTelemetry.class), mock(LocationEngine.class));
     assertNotNull("should not be null", navigationWithOptions);
   }
 
@@ -55,16 +54,8 @@ public class MapboxNavigationTest extends BaseTest {
   public void defaultMilestones_onInitializationDoNotGetAdded() throws Exception {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
     MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
-      ACCESS_TOKEN, options, mock(NavigationTelemetry.class));
+      ACCESS_TOKEN, options, mock(NavigationTelemetry.class), mock(LocationEngine.class));
     assertEquals(0, navigationWithOptions.getMilestones().size());
-  }
-
-  @Test
-  public void initializeLocationEngine_didInitialize() throws Exception {
-    assertEquals(0, navigation.getLocationEngine().getInterval());
-    assertEquals(1000, navigation.getLocationEngine().getFastestInterval());
-    assertEquals(LocationEnginePriority.HIGH_ACCURACY, navigation.getLocationEngine().getPriority());
-    assertTrue(navigation.getLocationEngine() instanceof LostLocationEngine);
   }
 
   @Test
@@ -84,7 +75,7 @@ public class MapboxNavigationTest extends BaseTest {
   public void addMilestone_milestoneOnlyGetsAddedOnce() throws Exception {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
     MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
-      ACCESS_TOKEN, options, mock(NavigationTelemetry.class));
+      ACCESS_TOKEN, options, mock(NavigationTelemetry.class), mock(LocationEngine.class));
     Milestone milestone = new StepMilestone.Builder().build();
     navigationWithOptions.addMilestone(milestone);
     navigationWithOptions.addMilestone(milestone);
@@ -95,7 +86,7 @@ public class MapboxNavigationTest extends BaseTest {
   public void removeMilestone_milestoneDidGetRemoved() throws Exception {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
     MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
-      ACCESS_TOKEN, options, mock(NavigationTelemetry.class));
+      ACCESS_TOKEN, options, mock(NavigationTelemetry.class), mock(LocationEngine.class));
     Milestone milestone = new StepMilestone.Builder().build();
     navigationWithOptions.addMilestone(milestone);
     assertEquals(1, navigationWithOptions.getMilestones().size());
@@ -107,7 +98,7 @@ public class MapboxNavigationTest extends BaseTest {
   public void removeMilestone_milestoneDoesNotExist() throws Exception {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
     MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
-      ACCESS_TOKEN, options, mock(NavigationTelemetry.class));
+      ACCESS_TOKEN, options, mock(NavigationTelemetry.class), mock(LocationEngine.class));
     Milestone milestone = new StepMilestone.Builder().build();
     navigationWithOptions.addMilestone(new StepMilestone.Builder().build());
     navigationWithOptions.removeMilestone(milestone);
@@ -118,7 +109,7 @@ public class MapboxNavigationTest extends BaseTest {
   public void removeMilestone_nullRemovesAllMilestones() throws Exception {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
     MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
-      ACCESS_TOKEN, options, mock(NavigationTelemetry.class));
+      ACCESS_TOKEN, options, mock(NavigationTelemetry.class), mock(LocationEngine.class));
     navigationWithOptions.addMilestone(new StepMilestone.Builder().build());
     navigationWithOptions.addMilestone(new StepMilestone.Builder().build());
     navigationWithOptions.addMilestone(new StepMilestone.Builder().build());
@@ -132,7 +123,7 @@ public class MapboxNavigationTest extends BaseTest {
   public void removeMilestone_correctMilestoneWithIdentifierGetsRemoved() throws Exception {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
     MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
-      ACCESS_TOKEN, options, mock(NavigationTelemetry.class));
+      ACCESS_TOKEN, options, mock(NavigationTelemetry.class), mock(LocationEngine.class));
     Milestone milestone = new StepMilestone.Builder().setIdentifier(5678).build();
     navigationWithOptions.addMilestone(milestone);
     assertEquals(1, navigationWithOptions.getMilestones().size());
@@ -144,7 +135,7 @@ public class MapboxNavigationTest extends BaseTest {
   public void removeMilestone_noMilestoneWithIdentifierFound() throws Exception {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
     MapboxNavigation navigationWithOptions = new MapboxNavigation(mock(Context.class),
-      ACCESS_TOKEN, options, mock(NavigationTelemetry.class));
+      ACCESS_TOKEN, options, mock(NavigationTelemetry.class), mock(LocationEngine.class));
     navigationWithOptions.addMilestone(new StepMilestone.Builder().build());
     assertEquals(1, navigationWithOptions.getMilestones().size());
     navigationWithOptions.removeMilestone(5678);

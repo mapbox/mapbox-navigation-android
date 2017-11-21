@@ -47,7 +47,7 @@ public class MapboxNavigation implements ServiceConnection {
   private NavigationService navigationService;
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
-  private LocationEngine locationEngine;
+  private LocationEngine locationEngine = null;
   private List<Milestone> milestones;
   private final String accessToken;
   private OffRoute offRouteEngine;
@@ -102,20 +102,24 @@ public class MapboxNavigation implements ServiceConnection {
 
   // Package private (no modifier) for testing purposes
   MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
-                   @NonNull MapboxNavigationOptions options, NavigationTelemetry navigationTelemetry) {
+                   @NonNull MapboxNavigationOptions options, NavigationTelemetry navigationTelemetry,
+                   LocationEngine locationEngine) {
     this.accessToken = accessToken;
     this.context = context;
     this.options = options;
     this.navigationTelemetry = navigationTelemetry;
+    this.locationEngine = locationEngine;
     initialize();
   }
 
   // Package private (no modifier) for testing purposes
-  MapboxNavigation(@NonNull Context context, @NonNull String accessToken, NavigationTelemetry navigationTelemetry) {
+  MapboxNavigation(@NonNull Context context, @NonNull String accessToken, NavigationTelemetry navigationTelemetry,
+                   LocationEngine locationEngine) {
     this.context = context;
     this.accessToken = accessToken;
     this.options = MapboxNavigationOptions.builder().build();
     this.navigationTelemetry = navigationTelemetry;
+    this.locationEngine = locationEngine;
     initialize();
   }
 
@@ -163,11 +167,19 @@ public class MapboxNavigation implements ServiceConnection {
    * which we can use to get information. Therefore, by default we build one.
    */
   private void initializeDefaultLocationEngine() {
-    locationEngine = new LostLocationEngine(context);
+    locationEngine = obtainLocationEngine();
     locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
     locationEngine.setFastestInterval(1000);
     locationEngine.setInterval(0);
     locationEngine.activate();
+  }
+
+  private LocationEngine obtainLocationEngine() {
+    if (locationEngine == null) {
+      return new LostLocationEngine(context);
+    }
+
+    return locationEngine;
   }
 
   /**
