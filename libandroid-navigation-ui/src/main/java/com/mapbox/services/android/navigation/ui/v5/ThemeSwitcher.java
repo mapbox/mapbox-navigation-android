@@ -29,7 +29,12 @@ public class ThemeSwitcher {
    */
   public static int retrieveNavigationViewThemeColor(Context context, int resId) {
     TypedValue outValue = obtainTypedValue(context, resId);
-    return ContextCompat.getColor(context, outValue.resourceId);
+    if (outValue.type >= TypedValue.TYPE_FIRST_COLOR_INT
+      && outValue.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+      return outValue.data;
+    } else {
+      return ContextCompat.getColor(context, outValue.resourceId);
+    }
   }
 
   /**
