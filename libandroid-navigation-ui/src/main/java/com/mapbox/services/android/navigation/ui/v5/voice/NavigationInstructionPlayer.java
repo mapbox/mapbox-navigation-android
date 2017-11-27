@@ -1,7 +1,9 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
 import android.content.Context;
+import android.media.AudioFocusRequest;
 import android.media.AudioManager;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -12,17 +14,26 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 public class NavigationInstructionPlayer implements InstructionPlayer, InstructionListener {
 
   private AudioManager instructionAudioManager;
+  private AudioFocusRequest instructionFocusRequest;
   private InstructionPlayer instructionPlayer;
   private InstructionListener instructionListener;
 
   public NavigationInstructionPlayer(@NonNull Context context, @Nullable String awsPoolId) {
     initAudioManager(context);
+    initAudioFocusRequest();
     if (!TextUtils.isEmpty(awsPoolId)) {
       instructionPlayer = new PollyPlayer(context, awsPoolId);
     } else {
       instructionPlayer = new DefaultPlayer(context);
     }
     instructionPlayer.addInstructionListener(this);
+  }
+
+  private void initAudioFocusRequest() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      instructionFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+        .build();
+    }
   }
 
   @Override
@@ -88,11 +99,19 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
   }
 
   private void requestAudioFocus() {
-    instructionAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
-      AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      instructionAudioManager.requestAudioFocus(instructionFocusRequest);
+    } else {
+      instructionAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
+        AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+    }
   }
 
   private void abandonAudioFocus() {
-    instructionAudioManager.abandonAudioFocus(null);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      instructionAudioManager.abandonAudioFocusRequest(instructionFocusRequest);
+    } else {
+      instructionAudioManager.abandonAudioFocus(null);
+    }
   }
 }
