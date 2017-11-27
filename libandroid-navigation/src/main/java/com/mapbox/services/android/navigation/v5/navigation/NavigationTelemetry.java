@@ -37,8 +37,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import timber.log.Timber;
-
 class NavigationTelemetry implements LocationEngineListener, NavigationMetricListener {
 
   private static final String MAPBOX_NAVIGATION_SDK_IDENTIFIER = "mapbox-navigation-android";
