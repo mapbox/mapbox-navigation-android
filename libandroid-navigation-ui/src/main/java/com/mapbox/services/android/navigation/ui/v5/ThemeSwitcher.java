@@ -1,12 +1,14 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.util.AttributeSet;
+import android.util.TypedValue;
 
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
@@ -19,34 +21,43 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 public class ThemeSwitcher {
 
   /**
+   * Looks are current theme and retrieves the color attribute
+   * for the given set theme.
+   *
+   * @param context to retrieve the set theme and resolved attribute and then color res Id with {@link ContextCompat}
+   * @return color resource identifier for primary theme color
+   */
+  public static int retrieveNavigationViewThemeColor(Context context, int resId) {
+    TypedValue outValue = obtainTypedValue(context, resId);
+    if (outValue.type >= TypedValue.TYPE_FIRST_COLOR_INT
+      && outValue.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+      return outValue.data;
+    } else {
+      return ContextCompat.getColor(context, outValue.resourceId);
+    }
+  }
+
+  /**
    * Called in onCreate() to check the UI Mode (day or night)
    * and set the theme colors accordingly.
    *
    * @param context {@link NavigationView} where the theme will be set
+   * @param attrs   holding custom styles if any are set
    */
-  static void setTheme(Context context) {
+  static void setTheme(Context context, AttributeSet attrs) {
     int uiMode = context.getResources().getConfiguration().uiMode
       & Configuration.UI_MODE_NIGHT_MASK;
     boolean darkThemeEnabled = uiMode == Configuration.UI_MODE_NIGHT_YES;
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    SharedPreferences.Editor editor = preferences.edit();
-    editor.putBoolean(context.getString(R.string.dark_theme_enabled), darkThemeEnabled);
-    editor.apply();
-    context.setTheme(darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight);
-  }
+    updatePreferencesDarkEnabled(context, darkThemeEnabled);
 
-  /**
-   * Can be called to toggle the theme based on the current theme setting.
-   *
-   * @param activity {@link NavigationView} where the theme will be set
-   */
-  static void toggleTheme(Activity activity) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
-    boolean darkThemeEnabled = preferences.getBoolean(activity.getString(R.string.dark_theme_enabled), false);
-    SharedPreferences.Editor editor = preferences.edit();
-    editor.putBoolean(activity.getString(R.string.dark_theme_enabled), !darkThemeEnabled);
-    editor.apply();
-    activity.recreate();
+    TypedArray styledAttributes = context.obtainStyledAttributes(attrs, R.styleable.NavigationView);
+    int lightTheme = styledAttributes.getResourceId(R.styleable.NavigationView_navigationLightTheme,
+      R.style.NavigationViewLight);
+    int darkTheme = styledAttributes.getResourceId(R.styleable.NavigationView_navigationDarkTheme,
+      R.style.NavigationViewDark);
+    styledAttributes.recycle();
+
+    context.setTheme(darkThemeEnabled ? darkTheme : lightTheme);
   }
 
   /**
@@ -56,11 +67,9 @@ public class ThemeSwitcher {
    * @param map     the style will be set on
    */
   static void setMapStyle(Context context, MapboxMap map, MapboxMap.OnStyleLoadedListener listener) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    String nightThemeUrl = context.getString(R.string.navigation_guidance_night_v2);
-    String dayThemeUrl = context.getString(R.string.navigation_guidance_day_v2);
-    map.setStyleUrl(darkThemeEnabled ? nightThemeUrl : dayThemeUrl, listener);
+    TypedValue mapStyleAttr = obtainTypedValue(context, R.attr.navigationViewMapStyle);
+    String styleUrl = mapStyleAttr.string.toString();
+    map.setStyleUrl(styleUrl, listener);
   }
 
   /**
@@ -77,142 +86,28 @@ public class ThemeSwitcher {
   }
 
   /**
-   * Looks are current theme and retrieves the primary color
+   * Looks are current theme and retrieves the route style
    * for the given set theme.
    *
-   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
-   * @return color resource identifier for primary theme color
+   * @param context to retrieve the resolved attribute
+   * @return style resource Id for the route
    */
-  public static int retrieveNavigationViewPrimaryColor(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    TypedArray styleArray = context.obtainStyledAttributes(
-      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
-      R.styleable.NavigationView
-    );
-    int navigationViewPrimary = styleArray.getColor(R.styleable.NavigationView_navigationViewPrimary,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_primary));
-    styleArray.recycle();
-    return navigationViewPrimary;
+  static int retrieveNavigationViewRouteStyle(Context context) {
+    TypedValue outValue = obtainTypedValue(context, R.attr.navigationViewRouteStyle);
+    return outValue.resourceId;
   }
 
-  /**
-   * Looks are current theme and retrieves the secondary color
-   * for the given set theme.
-   *
-   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
-   * @return color resource identifier for secondary theme color
-   */
-  public static int retrieveNavigationViewSecondaryColor(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    TypedArray styleArray = context.obtainStyledAttributes(
-      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
-      R.styleable.NavigationView
-    );
-    int navigationViewSecondary = styleArray.getColor(R.styleable.NavigationView_navigationViewSecondary,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_secondary));
-    styleArray.recycle();
-    return navigationViewSecondary;
+  @NonNull
+  private static TypedValue obtainTypedValue(Context context, int resId) {
+    TypedValue outValue = new TypedValue();
+    context.getTheme().resolveAttribute(resId, outValue, true);
+    return outValue;
   }
 
-  /**
-   * Looks are current theme and retrieves the banner background color
-   * for the given set theme.
-   *
-   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
-   * @return color resource identifier for banner background color
-   */
-  public static int retrieveNavigationViewBannerBackgroundColor(Context context) {
+  private static void updatePreferencesDarkEnabled(Context context, boolean darkThemeEnabled) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    TypedArray styleArray = context.obtainStyledAttributes(
-      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
-      R.styleable.NavigationView
-    );
-    int bannerBackground = styleArray.getColor(R.styleable.NavigationView_navigationViewBannerBackground,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_banner_background));
-    styleArray.recycle();
-    return bannerBackground;
-  }
-
-  /**
-   * Looks are current theme and retrieves the banner maneuver primary color
-   * for the given set theme.
-   *
-   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
-   * @return color resource identifier for banner maneuver primary theme color
-   */
-  public static int retrieveNavigationViewBannerManeuverPrimaryColor(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    TypedArray styleArray = context.obtainStyledAttributes(
-      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
-      R.styleable.NavigationView
-    );
-    int bannerManeuverPrimary = styleArray.getColor(R.styleable.NavigationView_navigationViewBannerManeuverPrimary,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_banner_maneuver_primary));
-    styleArray.recycle();
-    return bannerManeuverPrimary;
-  }
-
-  /**
-   * Looks are current theme and retrieves the banner maneuver secondary color
-   * for the given set theme.
-   *
-   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
-   * @return color resource identifier for banner maneuver secondary theme color
-   */
-  public static int retrieveNavigationViewBannerManeuverSecondaryColor(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    TypedArray styleArray = context.obtainStyledAttributes(
-      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
-      R.styleable.NavigationView
-    );
-    int bannerManeuverSecondary = styleArray.getColor(R.styleable.NavigationView_navigationViewBannerManeuverSecondary,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_banner_maneuver_secondary));
-    styleArray.recycle();
-    return bannerManeuverSecondary;
-  }
-
-  /**
-   * Looks are current theme and retrieves the progress color
-   * for the given set theme.
-   *
-   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
-   * @return color resource identifier for progress color
-   */
-  public static int retrieveNavigationViewProgressColor(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    TypedArray styleArray = context.obtainStyledAttributes(
-      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
-      R.styleable.NavigationView
-    );
-    int progress = styleArray.getColor(R.styleable.NavigationView_navigationViewProgress,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_progress));
-    styleArray.recycle();
-    return progress;
-  }
-
-  /**
-   * Looks are current theme and retrieves the progress background color
-   * for the given set theme.
-   *
-   * @param context to retrieve {@link SharedPreferences} and color with {@link ContextCompat}
-   * @return color resource identifier for progress background color
-   */
-  public static int retrieveNavigationViewProgressBackgroundColor(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
-    TypedArray styleArray = context.obtainStyledAttributes(
-      darkThemeEnabled ? R.style.NavigationViewDark : R.style.NavigationViewLight,
-      R.styleable.NavigationView
-    );
-    int progressBackground = styleArray.getColor(R.styleable.NavigationView_navigationViewProgressBackground,
-      ContextCompat.getColor(context, R.color.mapbox_navigation_view_color_progress_background));
-    styleArray.recycle();
-    return progressBackground;
+    SharedPreferences.Editor editor = preferences.edit();
+    editor.putBoolean(context.getString(R.string.dark_theme_enabled), darkThemeEnabled);
+    editor.apply();
   }
 }

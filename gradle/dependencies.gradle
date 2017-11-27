@@ -4,12 +4,12 @@ ext {
       minSdkVersion    : 15,
       targetSdkVersion : 26,
       compileSdkVersion: 26,
-      buildToolsVersion: '26.0.2'
+      buildToolsVersion: '26.0.3'
   ]
 
   version = [
-      mapboxMapSdk       : '5.2.0-beta.4',
-      mapboxServices     : '2.2.8',
+      mapboxMapSdk       : '5.2.0',
+      mapboxServices     : '2.2.9',
       locationLayerPlugin: '0.2.0',
       autoValue          : '1.5',
       autoValueParcel    : '0.2.5',

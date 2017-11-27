@@ -33,39 +33,9 @@ public class NavigationActivity extends AppCompatActivity implements NavigationV
   }
 
   @Override
-  protected void onStart() {
-    super.onStart();
-    navigationView.onStart();
-  }
-
-  @Override
-  public void onResume() {
-    super.onResume();
-    navigationView.onResume();
-  }
-
-  @Override
-  public void onPause() {
-    super.onPause();
-    navigationView.onPause();
-  }
-
-  @Override
   public void onLowMemory() {
     super.onLowMemory();
     navigationView.onLowMemory();
-  }
-
-  @Override
-  protected void onStop() {
-    super.onStop();
-    navigationView.onStop();
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    navigationView.onDestroy();
   }
 
   @Override

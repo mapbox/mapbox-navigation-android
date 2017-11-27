@@ -9,7 +9,6 @@
     <com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneView
         android:id="@+id/turnLaneView"
         android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layerType="software"/>
+        android:layout_height="24dp"/>
 
 </RelativeLayout>

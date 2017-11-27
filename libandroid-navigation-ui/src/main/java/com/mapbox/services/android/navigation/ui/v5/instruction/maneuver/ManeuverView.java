@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
@@ -60,12 +61,15 @@ public class ManeuverView extends View {
   @Override
   protected void onFinishInflate() {
     super.onFinishInflate();
+    setLayerType(LAYER_TYPE_SOFTWARE, null);
     initManeuverColor();
   }
 
   private void initManeuverColor() {
-    this.primaryColor = ThemeSwitcher.retrieveNavigationViewBannerManeuverPrimaryColor(getContext());
-    this.secondaryColor = ThemeSwitcher.retrieveNavigationViewBannerManeuverSecondaryColor(getContext());
+    this.primaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+      R.attr.navigationViewBannerManeuverPrimary);
+    this.secondaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+      R.attr.navigationViewBannerManeuverSecondary);
   }
 
   public void setManeuverType(String maneuverType) {

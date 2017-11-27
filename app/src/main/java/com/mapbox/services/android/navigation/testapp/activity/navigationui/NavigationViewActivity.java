@@ -261,18 +261,15 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void launchNavigationWithRoute() {
-    NavigationViewOptions options = NavigationViewOptions.builder()
-      .shouldSimulateRoute(shouldSimulateRoute)
-      .build();
+    NavigationViewOptions.Builder optionsBuilder = NavigationViewOptions.builder()
+      .shouldSimulateRoute(shouldSimulateRoute);
     if (route != null) {
-      NavigationLauncher.startNavigation(this, route, options);
-    }
+      optionsBuilder.directionsRoute(route);
+      NavigationLauncher.startNavigation(this, optionsBuilder.build());}
   }
 
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
-    return response.body() != null
-      && response.body().routes() != null
-      && response.body().routes().size() > 0;
+    return response.body() != null && response.body().routes().size() > 0;
   }
 
   private void hideLoading() {
