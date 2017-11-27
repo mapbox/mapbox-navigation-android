@@ -47,9 +47,7 @@ public abstract class NavigationViewOptions {
   public static Builder builder() {
     return new AutoValue_NavigationViewOptions.Builder()
       .awsPoolId(null)
-      .navigationOptions(MapboxNavigationOptions.builder()
-        .isFromNavigationUi(true)
-        .build())
+      .navigationOptions(MapboxNavigationOptions.builder().build())
       .shouldSimulateRoute(false);
   }
 }

@@ -270,7 +270,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void startNavigation(NavigationViewOptions options) {
     // Initialize navigation with options from NavigationViewOptions
     navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
-      options.navigationOptions());
+      options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
     // Initialize the camera (listens to MapboxNavigation)
     initCamera();
     // Everything is setup, subscribe to model updates
