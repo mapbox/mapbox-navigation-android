@@ -151,7 +151,7 @@ public class InstructionModel {
   private void thenStep(LegStep upcomingStep, LegStep thenStep) {
     thenStepManeuverType = thenStep.maneuver().type();
     thenStepManeuverModifier = thenStep.maneuver().modifier();
-    thenInstructionText = new InstructionText(thenStep, 0d);
+    thenInstructionText = new InstructionText(thenStep, null);
     // Should show then step if the upcoming step is less than 25 seconds
     shouldShowThenStep = upcomingStep.duration() <= (25d * 1.2d)
       && !TextUtils.isEmpty(thenInstructionText.getPrimaryText());

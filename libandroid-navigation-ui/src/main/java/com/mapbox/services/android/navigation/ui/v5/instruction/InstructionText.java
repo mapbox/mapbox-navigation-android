@@ -1,10 +1,10 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
 
@@ -15,22 +15,22 @@ public class InstructionText {
   private double stepDistance;
   private double distanceAlongStep;
 
-  public InstructionText(LegStep step, double distanceAlongStep) {
+  public InstructionText(LegStep step, @Nullable Double distanceAlongStep) {
     primaryText = "";
     secondaryText = "";
     stepDistance = step.distance();
-    if (distanceAlongStep > 0d) {
+    if (distanceAlongStep != null) {
       this.distanceAlongStep = distanceAlongStep;
     }
     buildInstructionText(step);
   }
 
   public String getPrimaryText() {
-    return StringAbbreviator.abbreviate(primaryText);
+    return primaryText;
   }
 
   public String getSecondaryText() {
-    return StringAbbreviator.abbreviate(secondaryText);
+    return secondaryText;
   }
 
   public double getStepDistance() {
