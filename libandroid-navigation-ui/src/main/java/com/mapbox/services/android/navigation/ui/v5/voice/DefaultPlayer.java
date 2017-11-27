@@ -2,8 +2,10 @@ package com.mapbox.services.android.navigation.ui.v5.voice;
 
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.text.TextUtils;
 
+import java.util.HashMap;
 import java.util.Locale;
 
 /**
@@ -16,6 +18,9 @@ import java.util.Locale;
  */
 public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitListener {
 
+  private static final String DEFAULT_UTTERANCE_ID = "default_id";
+
+  private InstructionListener instructionListener;
   private TextToSpeech textToSpeech;
   private boolean isMuted;
 
@@ -27,6 +32,28 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
    */
   DefaultPlayer(Context context) {
     textToSpeech = new TextToSpeech(context, this);
+    textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+      @Override
+      public void onStart(String utteranceId) {
+        if (instructionListener != null) {
+          instructionListener.onStart();
+        }
+      }
+
+      @Override
+      public void onDone(String utteranceId) {
+        if (instructionListener != null) {
+          instructionListener.onDone();
+        }
+      }
+
+      @Override
+      public void onError(String utteranceId) {
+        if (instructionListener != null) {
+          instructionListener.onError();
+        }
+      }
+    });
   }
 
   /**
@@ -35,8 +62,18 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
   @Override
   public void play(String instruction) {
     if (!isMuted && !TextUtils.isEmpty(instruction)) {
-      textToSpeech.speak(instruction, TextToSpeech.QUEUE_ADD, null);
+      HashMap<String, String> params = new HashMap<>();
+      params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, DEFAULT_UTTERANCE_ID);
+      textToSpeech.speak(instruction, TextToSpeech.QUEUE_ADD, params);
     }
+  }
+
+  /**
+   * @return true if muted, false if not
+   */
+  @Override
+  public boolean isMuted() {
+    return isMuted;
   }
 
   /**
@@ -50,14 +87,6 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
     }
   }
 
-  /**
-   * @return true if muted, false if not
-   */
-  @Override
-  public boolean isMuted() {
-    return isMuted;
-  }
-
   @Override
   public void onOffRoute() {
     muteTts();
@@ -69,6 +98,11 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
       textToSpeech.stop();
       textToSpeech.shutdown();
     }
+  }
+
+  @Override
+  public void addInstructionListener(InstructionListener instructionListener) {
+    this.instructionListener = instructionListener;
   }
 
   @Override
