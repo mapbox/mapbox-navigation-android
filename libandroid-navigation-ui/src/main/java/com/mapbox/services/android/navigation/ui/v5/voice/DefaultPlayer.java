@@ -18,6 +18,7 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
 
   private TextToSpeech textToSpeech;
   private boolean isMuted;
+  private AudioManager audioManager;
 
   /**
    * Creates an instance of {@link DefaultPlayer}.
@@ -27,6 +28,8 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
    */
   DefaultPlayer(Context context) {
     textToSpeech = new TextToSpeech(context, this);
+    textToSpeech.setOnUtteranceProgressListener(this);
+    audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
   }
 
   /**
@@ -35,7 +38,9 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
   @Override
   public void play(String instruction) {
     if (!isMuted && !TextUtils.isEmpty(instruction)) {
-      textToSpeech.speak(instruction, TextToSpeech.QUEUE_ADD, null);
+      HashMap<String, String> params = new HashMap<>();
+      params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "default");
+      textToSpeech.speak(instruction, TextToSpeech.QUEUE_ADD, params);
     }
   }
 
@@ -87,4 +92,27 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
       textToSpeech.stop();
     }
   }
+
+
+  private final AudioManager.OnAudioFocusChangeListener onAudioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener(){
+    @Override
+    public void onAudioFocusChange(int focusChange) {}
+  };
+
+  @Override
+  public void onStart(String utteranceId) {
+    audioManager.requestAudioFocus(onAudioFocusChangeListener,
+            // Use the notification stream.
+            AudioManager.STREAM_NOTIFICATION,
+            // Request a temporary focus.
+            AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+  }
+
+  @Override
+  public void onDone(String utteranceId) {
+    audioManager.abandonAudioFocus(onAudioFocusChangeListener);
+  }
+
+  @Override
+  public void onError(String utteranceId) {}
 }
