@@ -37,6 +37,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import timber.log.Timber;
+
 class NavigationTelemetry implements LocationEngineListener, NavigationMetricListener {
 
   private static final String MAPBOX_NAVIGATION_SDK_IDENTIFIER = "mapbox-navigation-android";
@@ -55,6 +57,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   private RingBuffer<Location> locationBuffer;
 
   private String vendorId;
+  private boolean hasDeparted;
   private boolean isOffRoute;
 
   NavigationTelemetry() {
@@ -88,7 +91,10 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (metricProgress == null) {
       metricProgress = new MetricsRouteProgress(routeProgress);
     }
-    NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, location);
+    if (!hasDeparted) {
+      NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, location);
+      hasDeparted = true;
+    }
   }
 
   @Override
