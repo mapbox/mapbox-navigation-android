@@ -10,7 +10,7 @@ jobs:
   build:
     working_directory: ~/code
     docker:
-      - image: mbgl/ci@sha256:c34e221294d81da80918d3e9a9df5de795b067e88f86d7c9a5e262763332536e
+      - image: mbgl/de3c86c2ff:android-ndk-r16
     environment:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
@@ -19,10 +19,6 @@ jobs:
       - checkout
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
-      - run:
-          name: Accept Android license
-          command: |
-           echo y | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;26.0.1"
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
@@ -79,17 +75,13 @@ jobs:
       only:
       - master
     docker:
-      - image: mbgl/ci@sha256:c34e221294d81da80918d3e9a9df5de795b067e88f86d7c9a5e262763332536e
+      - image: mbgl/de3c86c2ff:android-ndk-r16
     working_directory: ~/code
     environment:
       BUILDTYPE: Release
       IS_LOCAL_DEVELOPMENT: false
     steps:
       - checkout
-      - run:
-          name: Accept Android license
-          command: |
-           echo y | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;26.0.1"
       - run:
           name: Generate Maven credentials
           shell: /bin/bash -euo pipefail
