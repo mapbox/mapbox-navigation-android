@@ -109,7 +109,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (!isConfigurationChange) {
       NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, location);
     }
-    isConfigurationChange = false;
   }
 
   @Override
@@ -176,6 +175,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
         .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
         .rerouteCount(0)
         .build();
+    } else {
+      isConfigurationChange = false;
     }
   }
 
@@ -187,6 +188,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (!isConfigurationChange) {
       flushEventQueues();
       NavigationMetricsWrapper.cancelEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
+      isInitialized = false;
     }
   }
 
