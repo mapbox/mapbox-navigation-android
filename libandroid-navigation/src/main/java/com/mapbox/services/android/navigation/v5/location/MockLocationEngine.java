@@ -248,9 +248,11 @@ public class MockLocationEngine extends LocationEngine {
   }
 
   public void moveToLocation(Point point) {
+
     if (location == null) {
       return;
     }
+
     List<Point> pointList = new ArrayList<>();
     pointList.add(Point.fromLngLat(location.getLongitude(), location.getLatitude()));
     pointList.add(point);
@@ -270,11 +272,12 @@ public class MockLocationEngine extends LocationEngine {
     LineString route = LineString.fromLngLats(pointList);
 
     sliceRoute(route, distance);
+
     if (noisyGps) {
       addNoiseToRoute(distance);
     }
 
-    Runnable runnable = new LocationUpdateRunnable();
+    runnable = new LocationUpdateRunnable();
     handler.postDelayed(runnable, delay);
   }
 
@@ -301,7 +304,7 @@ public class MockLocationEngine extends LocationEngine {
 
     calculateStepPoints();
 
-    Runnable runnable = new LocationUpdateRunnable();
+    runnable = new LocationUpdateRunnable();
     handler.postDelayed(runnable, delay);
   }
 

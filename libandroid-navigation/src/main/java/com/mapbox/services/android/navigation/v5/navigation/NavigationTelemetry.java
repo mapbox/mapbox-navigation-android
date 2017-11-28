@@ -407,8 +407,11 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       .beforeEventLocations(beforeLocations)
       .afterEventLocations(afterLocations)
       .build();
+    // Set the updated session state
+    rerouteEvent.setRerouteSessionState(rerouteSessionState);
 
-    NavigationMetricsWrapper.rerouteEvent(rerouteEvent, metricProgress, rerouteSessionState.eventLocation());
+    NavigationMetricsWrapper.rerouteEvent(rerouteEvent, metricProgress,
+      rerouteEvent.getSessionState().eventLocation());
   }
 
   private void sendFeedbackEvent(FeedbackEvent feedbackEvent) {
