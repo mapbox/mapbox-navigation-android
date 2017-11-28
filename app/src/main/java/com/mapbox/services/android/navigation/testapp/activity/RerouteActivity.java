@@ -284,6 +284,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   private void shutdownLocationEngine() {
     if (mockLocationEngine != null) {
+      mockLocationEngine.removeLocationEngineListener(this);
       mockLocationEngine.removeLocationUpdates();
       mockLocationEngine.deactivate();
     }
