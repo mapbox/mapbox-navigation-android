@@ -28,6 +28,10 @@ public class RerouteEvent implements TelemetryEvent {
     return rerouteSessionState;
   }
 
+  public void setRerouteSessionState(SessionState rerouteSessionState) {
+    this.rerouteSessionState = rerouteSessionState;
+  }
+
   public String getNewRouteGeometry() {
     return newRouteGeometry;
   }
