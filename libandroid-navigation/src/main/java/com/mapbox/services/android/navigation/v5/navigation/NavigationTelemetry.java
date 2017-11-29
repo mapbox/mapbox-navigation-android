@@ -407,10 +407,15 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   @NonNull
   private FeedbackEvent queueFeedbackEvent(@FeedbackEvent.FeedbackType String feedbackType,
                                            String description, @FeedbackEvent.FeedbackSource String feedbackSource) {
+    // Distance completed = previous distance completed + current RouteProgress distance traveled
+    double distanceCompleted = navigationSessionState.eventRouteDistanceCompleted()
+      + metricProgress.getDistanceTraveled();
+
     // Create a new session state given the current navigation session
     SessionState feedbackEventSessionState = navigationSessionState.toBuilder()
       .eventDate(new Date())
       .eventRouteProgress(metricProgress)
+      .eventRouteDistanceCompleted(distanceCompleted)
       .eventLocation(metricLocation.getLocation())
       .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
       .build();
