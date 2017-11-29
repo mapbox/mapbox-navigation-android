@@ -57,6 +57,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   private SessionState navigationSessionState;
   private LocationEngine navigationLocationEngine;
   private RingBuffer<Location> locationBuffer;
+  private Date lastRerouteDate;
 
   private String vendorId;
   private boolean isOffRoute;
@@ -211,7 +212,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       navigationSessionState = navigationBuilder.build();
 
       updateLastRerouteEvent(directionsRoute);
-      updateLastRerouteDate(new Date());
+      lastRerouteDate = new Date();
       isOffRoute = false;
     } else {
       // Not current off-route - just update the session
@@ -392,11 +393,13 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       + metricProgress.getDistanceTraveled();
 
     // Create a new session state given the current navigation session
+    Date eventDate = new Date();
     SessionState rerouteEventSessionState = navigationSessionState.toBuilder()
-      .eventDate(new Date())
+      .eventDate(eventDate)
       .eventRouteProgress(metricProgress)
       .eventRouteDistanceCompleted(distanceCompleted)
       .eventLocation(metricLocation.getLocation())
+      .secondsSinceLastReroute(getSecondsSinceLastReroute(eventDate))
       .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
       .build();
 
@@ -483,9 +486,13 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     rerouteEvent.setNewDurationRemaining(newDurationRemaining);
   }
 
-  private void updateLastRerouteDate(Date date) {
-    for (RerouteEvent rerouteEvent : queuedRerouteEvents) {
-      rerouteEvent.getSessionState().toBuilder().lastRerouteDate(date).build();
+  private int getSecondsSinceLastReroute(Date eventDate) {
+    int seconds = -1;
+    if (lastRerouteDate == null) {
+      return seconds;
+    } else {
+      long millisSinceLastReroute = eventDate.getTime() - lastRerouteDate.getTime();
+      return (int) TimeUnit.MILLISECONDS.toSeconds(millisSinceLastReroute);
     }
   }
 }
