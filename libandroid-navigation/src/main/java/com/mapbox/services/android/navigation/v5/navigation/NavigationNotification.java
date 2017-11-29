@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
-import android.support.annotation.LayoutRes;
 import android.support.v4.app.NotificationCompat;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -41,7 +40,6 @@ class NavigationNotification {
   private NotificationManager notificationManager;
   private MapboxNavigation mapboxNavigation;
   private DecimalFormat decimalFormat;
-  private RemoteViews remoteViewsBig;
   private String currentArrivalTime;
   private RemoteViews remoteViews;
   private String currentStepName;
@@ -56,24 +54,19 @@ class NavigationNotification {
     initialize();
   }
 
-  Notification buildPersistentNotification(@LayoutRes int layout, @LayoutRes int bigLayout) {
-    remoteViewsBig = new RemoteViews(context.getPackageName(), bigLayout);
-    remoteViews = new RemoteViews(context.getPackageName(), layout);
+  Notification buildNotification() {
+    remoteViews = new RemoteViews(context.getPackageName(), R.layout.navigation_notification_layout);
 
     // Will trigger endNavigationBtnReceiver when clicked
     PendingIntent pendingCloseIntent = createPendingCloseIntent();
-    remoteViewsBig.setOnClickPendingIntent(R.id.endNavigationButton, pendingCloseIntent);
+    remoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent);
 
     // Sets up the top bar notification
     notificationBuilder = new NotificationCompat.Builder(context, NAVIGATION_NOTIFICATION_CHANNEL)
       .setCategory(NotificationCompat.CATEGORY_SERVICE)
-      .setPriority(NotificationCompat.PRIORITY_LOW)
-      .setTicker("Navigation notification")
-      .setContent(remoteViews)
-      .setCustomBigContentView(remoteViewsBig)
       .setSmallIcon(R.drawable.ic_navigation)
-      .setContentIntent(PendingIntent.getActivity(context, 0,
-        new Intent(context, NavigationService.class), 0));
+      .setContent(remoteViews)
+      .setOngoing(true);
 
     return notificationBuilder.build();
   }
@@ -128,11 +121,7 @@ class NavigationNotification {
     String formattedStepName = StringAbbreviator.deliminator(
       StringAbbreviator.abbreviate(currentStepName));
     remoteViews.setTextViewText(
-      R.id.notificationStreetNameTextView,
-      formattedStepName
-    );
-    remoteViewsBig.setTextViewText(
-      R.id.notificationStreetNameTextView,
+      R.id.notificationInstructionText,
       formattedStepName
     );
   }
@@ -148,11 +137,10 @@ class NavigationNotification {
     currentDistanceText = DistanceUtils.distanceFormatter(
       routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
       decimalFormat, true, distanceUnitType);
-    remoteViewsBig.setTextViewText(R.id.notificationStepDistanceTextView, currentDistanceText);
     if (!TextUtils.isEmpty(currentStepName)) {
       currentDistanceText.append(" - ");
     }
-    remoteViews.setTextViewText(R.id.notificationStepDistanceTextView, currentDistanceText);
+    remoteViews.setTextViewText(R.id.notificationDistanceText, currentDistanceText);
   }
 
   private boolean newArrivalTime(RouteProgress routeProgress) {
@@ -162,10 +150,7 @@ class NavigationNotification {
 
   private void addArrivalTime(RouteProgress routeProgress) {
     currentArrivalTime = TimeUtils.formatArrivalTime(routeProgress.durationRemaining());
-    remoteViews.setTextViewText(R.id.estimatedArrivalTimeTextView,
-      String.format(Locale.getDefault(),
-        context.getString(R.string.notification_arrival_time_format), currentArrivalTime));
-    remoteViewsBig.setTextViewText(R.id.estimatedArrivalTimeTextView,
+    remoteViews.setTextViewText(R.id.notificationArrivalText,
       String.format(Locale.getDefault(),
         context.getString(R.string.notification_arrival_time_format), currentArrivalTime));
   }
@@ -179,7 +164,6 @@ class NavigationNotification {
       int maneuverResource = ManeuverUtils.getManeuverResource(step);
       currentManeuverId = maneuverResource;
       remoteViews.setImageViewResource(R.id.maneuverSignal, maneuverResource);
-      remoteViewsBig.setImageViewResource(R.id.maneuverSignal, maneuverResource);
     }
   }
 

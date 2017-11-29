@@ -24,61 +24,47 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:orientation="vertical"
-            android:paddingEnd="8dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:paddingStart="8dp"
-            android:paddingTop="8dp">
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/notificationStepDistanceTextView"
+                android:id="@+id/notificationDistanceText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:lines="1"
-                android:textColor="#ffffff"
-                android:textSize="16sp"
+                android:textColor="@android:color/white"
                 tools:text="250 ft"/>
 
             <TextView
-                android:id="@+id/notificationStreetNameTextView"
+                android:id="@+id/notificationInstructionText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:lines="1"
-                android:textColor="#ffffff"
+                android:textColor="@android:color/white"
                 tools:text="Sherman Ave NW"/>
 
             <TextView
-                android:id="@+id/estimatedArrivalTimeTextView"
+                android:id="@+id/notificationArrivalText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:lines="1"
-                android:textColor="#ffffff"
-                android:textSize="14sp"
+                android:textColor="@android:color/white"
                 tools:text="11:13 AM ETA"/>
         </LinearLayout>
+
     </LinearLayout>
 
-    <TextView
+    <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginLeft="72dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginStart="72dp"
-        android:alpha="0.35"
-        android:background="#ffffff"/>
+        android:background="@android:color/white"/>
 
     <Button
-        android:id="@+id/endNavigationButton"
+        android:id="@+id/endNavigationBtn"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginLeft="72dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginStart="72dp"
         android:background="@android:color/transparent"
         android:gravity="start|center_vertical"
         android:text="@string/end_navigation"
         android:textColor="#ffffff"/>
+
 </LinearLayout>

@@ -12,7 +12,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -47,7 +46,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
   private RingBuffer<Integer> recentDistancesFromManeuverInMeters;
   private final IBinder localBinder = new LocalBinder();
-  private NavigationNotification navNotificationManager;
+  private NavigationNotification navigationNotification;
 
   private MapboxNavigation mapboxNavigation;
   private LocationEngine locationEngine;
@@ -108,13 +107,11 @@ public class NavigationService extends Service implements LocationEngineListener
    * builds a new navigation notification instance and attaches it to this service.
    */
   private void initializeNotification() {
-    navNotificationManager = new NavigationNotification(this, mapboxNavigation);
-    Notification notifyBuilder
-      = navNotificationManager.buildPersistentNotification(R.layout.layout_notification_default,
-      R.layout.layout_notification_default_big);
-
-    notifyBuilder.flags = Notification.FLAG_FOREGROUND_SERVICE;
-    startForeground(NAVIGATION_NOTIFICATION_ID, notifyBuilder);
+    navigationNotification = new NavigationNotification(this, mapboxNavigation);
+    // TODO we do have navigation options here
+    Notification notification = navigationNotification.buildNotification();
+    notification.flags = Notification.FLAG_FOREGROUND_SERVICE;
+    startForeground(NAVIGATION_NOTIFICATION_ID, notification);
   }
 
   /**
@@ -123,8 +120,8 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   void endNavigation() {
     locationEngine.removeLocationEngineListener(this);
-    if (navNotificationManager != null) {
-      navNotificationManager.unregisterReceiver();
+    if (navigationNotification != null) {
+      navigationNotification.unregisterReceiver();
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
       thread.quitSafely();
@@ -196,7 +193,7 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onNewRouteProgress(Location location, RouteProgress routeProgress) {
     if (mapboxNavigation.options().enableNotification()) {
-      navNotificationManager.updateDefaultNotification(routeProgress);
+      navigationNotification.updateDefaultNotification(routeProgress);
     }
     mapboxNavigation.getEventDispatcher().onProgressChange(location, routeProgress);
   }
