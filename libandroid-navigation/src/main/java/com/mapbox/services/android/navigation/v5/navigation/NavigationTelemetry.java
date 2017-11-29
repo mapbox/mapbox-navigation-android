@@ -107,7 +107,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       metricProgress = new MetricsRouteProgress(routeProgress);
     }
     if (!isConfigurationChange) {
-      NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, location);
+      NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
     }
   }
 
@@ -116,7 +116,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     // Update arrival time stamp
     navigationSessionState = navigationSessionState.toBuilder().arrivalTimestamp(new Date()).build();
     // Send arrival event
-    NavigationMetricsWrapper.arriveEvent(navigationSessionState, routeProgress, location);
+    NavigationMetricsWrapper.arriveEvent(navigationSessionState, routeProgress, metricLocation.getLocation());
   }
 
   void initialize(@NonNull Context context, @NonNull String accessToken,
