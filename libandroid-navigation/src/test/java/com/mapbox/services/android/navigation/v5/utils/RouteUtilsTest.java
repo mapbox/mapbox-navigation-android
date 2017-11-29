@@ -99,6 +99,7 @@ public class RouteUtilsTest extends BaseTest {
     RouteProgress defaultRouteProgress = obtainDefaultRouteProgress();
     RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
       .stepIndex(lastStepIndex)
+      .legDistanceRemaining(100)
       .build();
 
     boolean isArrivalEvent = RouteUtils.isArrivalEvent(theRouteProgress);
@@ -107,18 +108,18 @@ public class RouteUtilsTest extends BaseTest {
   }
 
   @Test
-  public void isArrivalEvent_returnsFalseWhenManeuverTypeIsNotArrival_andIsValidMetersRemaining() throws Exception {
+  public void isArrivalEvent_returnsTrueWhenUpcomingManeuverTypeIsArrival_andIsValidMetersRemaining() throws Exception {
     DirectionsRoute aRoute = obtainADirectionsRoute();
     int lastStepIndex = obtainLastStepIndex(aRoute);
     RouteProgress defaultRouteProgress = obtainDefaultRouteProgress();
     RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
-      .stepDistanceRemaining(30)
+      .legDistanceRemaining(30)
       .stepIndex(lastStepIndex - 1)
       .build();
 
     boolean isArrivalEvent = RouteUtils.isArrivalEvent(theRouteProgress);
 
-    assertFalse(isArrivalEvent);
+    assertTrue(isArrivalEvent);
   }
 
   @Test

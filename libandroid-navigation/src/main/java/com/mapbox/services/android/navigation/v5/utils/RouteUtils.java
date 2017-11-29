@@ -54,9 +54,8 @@ public final class RouteUtils {
    * @since 0.8.0
    */
   public static boolean isArrivalEvent(@NonNull RouteProgress routeProgress) {
-    return routeProgress.currentLegProgress().currentStep().maneuver() != null
-      && routeProgress.currentLegProgress().currentStep().maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE)
-      && routeProgress.distanceRemaining() <= METERS_REMAINING_TILL_ARRIVAL;
+    return (upcomingStepIsArrival(routeProgress) || currentStepIsArrival(routeProgress))
+      && routeProgress.currentLegProgress().distanceRemaining() <= METERS_REMAINING_TILL_ARRIVAL;
   }
 
   /**
@@ -69,5 +68,16 @@ public final class RouteUtils {
   public static boolean isDepartureEvent(@NonNull RouteProgress routeProgress) {
     return routeProgress.currentLegProgress().currentStep().maneuver() != null
       && routeProgress.currentLegProgress().currentStep().maneuver().type().contains(STEP_MANEUVER_TYPE_DEPART);
+  }
+
+  private static boolean upcomingStepIsArrival(@NonNull RouteProgress routeProgress) {
+    return routeProgress.currentLegProgress().upComingStep() != null
+      && routeProgress.currentLegProgress().upComingStep().maneuver() != null
+      && routeProgress.currentLegProgress().upComingStep().maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE);
+  }
+
+  private static boolean currentStepIsArrival(@NonNull RouteProgress routeProgress) {
+    return routeProgress.currentLegProgress().currentStep().maneuver() != null
+      && routeProgress.currentLegProgress().currentStep().maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE);
   }
 }
