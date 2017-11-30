@@ -560,7 +560,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
         PropertyFactory.iconIgnorePlacement(true)
       );
       layerIds.add(WAYPOINT_LAYER_ID);
-      MapUtils.addLayerToMap(mapboxMap, waypointLayer, null);
+      MapUtils.addLayerToMap(mapboxMap, waypointLayer, belowLayer);
     }
   }
 
