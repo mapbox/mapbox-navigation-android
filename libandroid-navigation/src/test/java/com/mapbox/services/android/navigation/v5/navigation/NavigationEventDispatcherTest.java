@@ -48,6 +48,8 @@ public class NavigationEventDispatcherTest extends BaseTest {
   @Mock
   NavigationMetricListeners.DepartureListener departureListener;
   @Mock
+  NavigationMetricListeners.ArrivalListener arrivalListener;
+  @Mock
   OffRouteListener offRouteListener;
   @Mock
   NavigationEventListener navigationEventListener;
@@ -271,6 +273,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
     int lastStepIndex = lastLeg.steps().indexOf(lastLeg.steps().get(lastLeg.steps().size() - 1));
 
     navigationEventDispatcher.addMetricEventListeners(eventListeners);
+    navigationEventDispatcher.addMetricArrivalListener(arrivalListener);
 
     // Progress that hasn't arrived
     RouteProgress routeProgressDidNotArrive = RouteProgress.builder()
@@ -284,7 +287,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
 
     navigationEventDispatcher.onProgressChange(location, routeProgressDidNotArrive);
     verify(eventListeners, times(1)).onRouteProgressUpdate(routeProgressDidNotArrive);
-    verify(eventListeners, times(0)).onArrival(location, routeProgressDidNotArrive);
+    verify(arrivalListener, times(0)).onArrival(location, routeProgressDidNotArrive);
 
     // Progress that has arrived
     RouteProgress routeProgressDidArrive = RouteProgress.builder()
@@ -298,7 +301,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
 
     navigationEventDispatcher.onProgressChange(location, routeProgressDidArrive);
     verify(eventListeners, times(1)).onRouteProgressUpdate(routeProgressDidArrive);
-    verify(eventListeners, times(1)).onArrival(location, routeProgressDidArrive);
+    verify(arrivalListener, times(1)).onArrival(location, routeProgressDidArrive);
   }
 
   @Test
