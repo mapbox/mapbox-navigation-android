@@ -22,10 +22,10 @@ public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
   private List<FeedbackItem> feedbackItems = new ArrayList<>();
 
   FeedbackAdapter() {
-    feedbackItems.add(new FeedbackItem("Road\nClosed",
-      R.drawable.ic_road_closed, FEEDBACK_TYPE_ROAD_CLOSED, ""));
     feedbackItems.add(new FeedbackItem("Not\nAllowed",
       R.drawable.ic_no_turn_allowed, FEEDBACK_TYPE_NOT_ALLOWED, ""));
+    feedbackItems.add(new FeedbackItem("Road\nClosed",
+      R.drawable.ic_road_closed, FEEDBACK_TYPE_ROAD_CLOSED, ""));
     feedbackItems.add(new FeedbackItem("Report\nTraffic",
       R.drawable.ic_traffic, FEEDBACK_TYPE_REPORT_TRAFFIC, ""));
     feedbackItems.add(new FeedbackItem("Confusing\nInstruction",
