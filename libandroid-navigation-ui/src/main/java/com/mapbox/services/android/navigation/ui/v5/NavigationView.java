@@ -171,7 +171,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
-    map.setOnScrollListener(this);
     map.setPadding(0, 0, 0, summaryBottomSheet.getHeight());
     ThemeSwitcher.setMapStyle(getContext(), map, new MapboxMap.OnStyleLoadedListener() {
       @Override
@@ -183,6 +182,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
         initNavigationPresenter();
         initClickListeners();
         subscribeViews();
+        map.setOnScrollListener(NavigationView.this);
         navigationListener.onNavigationReady();
       }
     });
