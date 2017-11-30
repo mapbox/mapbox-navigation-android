@@ -1,8 +1,8 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import com.mapbox.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
-import com.mapbox.services.utils.TextUtils;
+import com.mapbox.core.utils.TextUtils;
 
 import java.util.Arrays;
 

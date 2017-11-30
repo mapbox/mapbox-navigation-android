@@ -2,7 +2,7 @@ package com.mapbox.services.android.navigation.v5.offroute;
 
 import android.location.Location;
 
-import com.mapbox.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
@@ -10,7 +10,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOpti
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.navigation.v5.utils.ToleranceUtils;
-import com.mapbox.services.constants.Constants;
+import com.mapbox.core.constants.Constants;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;

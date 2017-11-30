@@ -14,7 +14,7 @@ import com.mapbox.turf.TurfMisc;
 
 import java.util.List;
 
-import static com.mapbox.services.constants.Constants.PRECISION_6;
+import static com.mapbox.core.constants.Constants.PRECISION_6;
 
 /**
  * This attempts to snap the user to the closest position along the route. Prior to snapping the

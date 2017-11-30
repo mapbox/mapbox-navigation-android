@@ -1,9 +1,9 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
-import com.mapbox.directions.v5.models.LegStep;
-import com.mapbox.directions.v5.models.RouteLeg;
-import com.mapbox.directions.v5.models.StepManeuver;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.models.StepManeuver;
 import com.mapbox.geojson.Point;
 
 public class MetricsRouteProgress {

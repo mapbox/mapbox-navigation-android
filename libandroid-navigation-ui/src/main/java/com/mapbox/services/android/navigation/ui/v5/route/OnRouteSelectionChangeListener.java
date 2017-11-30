@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.route;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 
 /**
  * Listener for determining which current route the user has selected as their primary route for

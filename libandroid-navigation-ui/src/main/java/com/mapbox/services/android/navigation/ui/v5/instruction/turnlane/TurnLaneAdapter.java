@@ -5,7 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.mapbox.directions.v5.models.IntersectionLanes;
+import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.services.android.navigation.ui.v5.R;
 
 import java.util.ArrayList;
