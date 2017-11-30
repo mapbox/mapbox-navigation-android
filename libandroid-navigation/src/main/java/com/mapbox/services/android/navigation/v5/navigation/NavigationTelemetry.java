@@ -60,6 +60,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   NavigationTelemetry() {
     locationBuffer = new RingBuffer<>(40);
     metricLocation = new MetricsLocation(null);
+    metricProgress = new MetricsRouteProgress(null);
   }
 
   @Override
