@@ -152,8 +152,6 @@ public class MapboxNavigation implements ServiceConnection {
   private void initializeTelemetry() {
     navigationTelemetry = obtainTelemetry();
     navigationTelemetry.initialize(context, accessToken, this, locationEngine);
-    navigationEventDispatcher.addMetricEventListeners(navigationTelemetry);
-    navigationEventDispatcher.addMetricDepartureListener(navigationTelemetry);
   }
 
   private NavigationTelemetry obtainTelemetry() {

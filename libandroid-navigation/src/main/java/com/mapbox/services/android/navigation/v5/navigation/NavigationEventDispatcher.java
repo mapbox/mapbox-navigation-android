@@ -4,7 +4,6 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.mapbox.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListeners;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -25,6 +24,7 @@ class NavigationEventDispatcher {
   private List<OffRouteListener> offRouteListeners;
   private NavigationMetricListeners.EventListeners metricEventListeners;
   private NavigationMetricListeners.DepartureListener metricDepartureListener;
+  private NavigationMetricListeners.ArrivalListener metricArrivalListener;
 
   NavigationEventDispatcher() {
     navigationEventListeners = new ArrayList<>();
@@ -105,14 +105,6 @@ class NavigationEventDispatcher {
     }
   }
 
-  void addMetricEventListeners(NavigationMetricListeners.EventListeners eventListeners) {
-    this.metricEventListeners = eventListeners;
-  }
-
-  void addMetricDepartureListener(NavigationMetricListeners.DepartureListener departureListener) {
-    this.metricDepartureListener = departureListener;
-  }
-
   void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
     for (MilestoneEventListener milestoneEventListener : milestoneEventListeners) {
       milestoneEventListener.onMilestoneEvent(routeProgress, instruction, identifier);
@@ -131,12 +123,12 @@ class NavigationEventDispatcher {
       }
 
       // Check if user has arrived and notify metric listener if so
-      if (RouteUtils.isArrivalEvent(routeProgress)) {
-        metricEventListeners.onArrival(location, routeProgress);
+      if (RouteUtils.isArrivalEvent(routeProgress) && metricArrivalListener != null) {
+        metricArrivalListener.onArrival(location, routeProgress);
+        metricArrivalListener = null;
+
         // If a this is the last leg, navigation is ending - remove listeners
-        List<RouteLeg> legs = routeProgress.directionsRoute().legs();
-        RouteLeg currentLeg = routeProgress.currentLeg();
-        if (currentLeg.equals(legs.get(legs.size() - 1))) {
+        if (RouteUtils.isLastLeg(routeProgress)) {
           // Remove off route listeners
           removeOffRouteListener(null);
           // Remove metric listener
@@ -164,5 +156,17 @@ class NavigationEventDispatcher {
     for (NavigationEventListener navigationEventListener : navigationEventListeners) {
       navigationEventListener.onRunning(isRunning);
     }
+  }
+
+  void addMetricEventListeners(NavigationMetricListeners.EventListeners eventListeners) {
+    this.metricEventListeners = eventListeners;
+  }
+
+  void addMetricDepartureListener(NavigationMetricListeners.DepartureListener departureListener) {
+    this.metricDepartureListener = departureListener;
+  }
+
+  void addMetricArrivalListener(NavigationMetricListeners.ArrivalListener arrivalListener) {
+    this.metricArrivalListener = arrivalListener;
   }
 }

@@ -6,6 +6,7 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.directions.v5.models.RouteLeg;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.BuildConfig;
@@ -37,8 +38,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import timber.log.Timber;
+
 class NavigationTelemetry implements LocationEngineListener, NavigationMetricListeners.EventListeners,
-  NavigationMetricListeners.DepartureListener {
+  NavigationMetricListeners.DepartureListener, NavigationMetricListeners.ArrivalListener {
 
   private static NavigationTelemetry instance;
   private boolean isInitialized = false;
@@ -51,11 +54,13 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   private List<RerouteEvent> queuedRerouteEvents = new ArrayList<>();
   private List<FeedbackEvent> queuedFeedbackEvents = new ArrayList<>();
 
+  private RouteLeg currentLeg;
   private MetricsRouteProgress metricProgress;
   private MetricsLocation metricLocation;
 
-  private SessionState navigationSessionState;
+  private NavigationEventDispatcher eventDispatcher;
   private LocationEngine navigationLocationEngine;
+  private SessionState navigationSessionState;
   private RingBuffer<Location> locationBuffer;
   private Date lastRerouteDate;
 
@@ -94,11 +99,13 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   @Override
   public void onRouteProgressUpdate(RouteProgress routeProgress) {
     this.metricProgress = new MetricsRouteProgress(routeProgress);
+    checkListenerReset(routeProgress);
   }
 
   @Override
   public void onOffRouteEvent(Location offRouteLocation) {
     isOffRoute = true;
+    currentLeg = null; // so a listener reset doesn't fire with the new route
     queueRerouteEvent();
   }
 
@@ -131,20 +138,17 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       updateLocationEngine(locationEngine);
 
       validateAccessToken(accessToken);
-      MapboxNavigationOptions options = navigation.options();
 
+      // Setup the listeners
+      initEventDispatcherListeners(navigation);
+
+      MapboxNavigationOptions options = navigation.options();
       // Set sdkIdentifier based on if from UI or not
-      String sdkIdentifier = MAPBOX_NAVIGATION_SDK_IDENTIFIER;
-      if (options.isFromNavigationUi()) {
-        sdkIdentifier = MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER;
-      }
+      String sdkIdentifier = updateSdkIdentifier(options);
       // Enable extra logging in debug mode
       MapboxTelemetry.getInstance().setDebugLoggingEnabled(options.isDebugLoggingEnabled());
 
-      String userAgent = String.format("%s/%s", sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
-      MapboxTelemetry.getInstance().initialize(context, accessToken, userAgent, sdkIdentifier,
-        BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
-      MapboxTelemetry.getInstance().newUserAgent(userAgent);
+      updateUserAgent(context, accessToken, sdkIdentifier);
 
       // Get the current vendorId
       vendorId = obtainVendorId(context);
@@ -189,7 +193,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (!isConfigurationChange) {
       flushEventQueues();
       NavigationMetricsWrapper.cancelEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
-      isInitialized = false;
+      shutdown();
     }
   }
 
@@ -295,12 +299,41 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     queuedFeedbackEvents.remove(feedbackEvent);
   }
 
+  private void resetListeners() {
+    Timber.d("Resetting listeners");
+    eventDispatcher.addMetricDepartureListener(this);
+    eventDispatcher.addMetricArrivalListener(this);
+  }
+
   private void validateAccessToken(String accessToken) {
     if (TextUtils.isEmpty(accessToken) || (!accessToken.toLowerCase(Locale.US).startsWith("pk.")
       && !accessToken.toLowerCase(Locale.US).startsWith("sk."))) {
       throw new NavigationException("A valid access token must be passed in when first initializing"
         + " MapboxNavigation");
     }
+  }
+
+  private void initEventDispatcherListeners(MapboxNavigation navigation) {
+    eventDispatcher = navigation.getEventDispatcher();
+    eventDispatcher.addMetricEventListeners(this);
+    eventDispatcher.addMetricDepartureListener(this);
+    eventDispatcher.addMetricArrivalListener(this);
+  }
+
+  @NonNull
+  private String updateSdkIdentifier(MapboxNavigationOptions options) {
+    String sdkIdentifier = MAPBOX_NAVIGATION_SDK_IDENTIFIER;
+    if (options.isFromNavigationUi()) {
+      sdkIdentifier = MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER;
+    }
+    return sdkIdentifier;
+  }
+
+  private void updateUserAgent(@NonNull Context context, @NonNull String accessToken, String sdkIdentifier) {
+    String userAgent = String.format("%s/%s", sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
+    MapboxTelemetry.getInstance().initialize(context, accessToken, userAgent, sdkIdentifier,
+      BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
+    MapboxTelemetry.getInstance().newUserAgent(userAgent);
   }
 
   private void flushEventQueues() {
@@ -310,6 +343,11 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     for (RerouteEvent rerouteEvent : queuedRerouteEvents) {
       sendRerouteEvent(rerouteEvent);
     }
+  }
+
+  private void shutdown() {
+    currentLeg = null;
+    isInitialized = false;
   }
 
   private String obtainVendorId(Context context) {
@@ -325,6 +363,20 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     checkRerouteQueue();
     // Check queued feedback events
     checkFeedbackQueue();
+  }
+
+  /**
+   * Checks if a new leg has begun, if so, reset the arrival and departure
+   * listeners to fire arrival and departure events for new leg.
+   *
+   * @param routeProgress for current leg data
+   */
+  private void checkListenerReset(RouteProgress routeProgress) {
+    if (currentLeg != null && !currentLeg.equals(routeProgress.currentLeg())) {
+      resetListeners();
+    } else {
+      currentLeg = routeProgress.currentLeg();
+    }
   }
 
   private void checkRerouteQueue() {
