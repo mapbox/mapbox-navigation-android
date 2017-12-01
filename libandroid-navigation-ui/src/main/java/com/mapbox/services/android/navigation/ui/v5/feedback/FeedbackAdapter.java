@@ -30,7 +30,7 @@ public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
       R.drawable.ic_traffic, FEEDBACK_TYPE_REPORT_TRAFFIC, ""));
     feedbackItems.add(new FeedbackItem("Confusing\nInstruction",
       R.drawable.ic_confusing_directions, FEEDBACK_TYPE_CONFUSING_INSTRUCTION, ""));
-    feedbackItems.add(new FeedbackItem("General\nIssue",
+    feedbackItems.add(new FeedbackItem("Other\nMap Issue",
       R.drawable.ic_map_error, FEEDBACK_TYPE_GENERAL_ISSUE, ""));
     feedbackItems.add(new FeedbackItem("Bad\nRoute",
       R.drawable.ic_wrong_directions, FEEDBACK_TYPE_ROUTING_ERROR, ""));
