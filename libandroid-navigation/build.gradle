@@ -50,8 +50,8 @@ dependencies {
     exclude module: 'mapbox-java-services'
   }
 
-  api "com.mapbox.mapboxsdk:mapbox-sdk-services:3.0.0-SNAPSHOT"
-  api "com.mapbox.mapboxsdk:mapbox-sdk-turf:3.0.0-SNAPSHOT"
+  api dependenciesList.mapboxSdkServices
+  api dependenciesList.mapboxSdkTurf
   // Support
   implementation dependenciesList.supportAppcompatV7
 
