@@ -62,7 +62,7 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
   @Override
   public void play(String instruction) {
     if (!isMuted && !TextUtils.isEmpty(instruction)) {
-      HashMap<String, String> params = new HashMap<>();
+      HashMap<String, String> params = new HashMap<>(1);
       params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, DEFAULT_UTTERANCE_ID);
       textToSpeech.speak(instruction, TextToSpeech.QUEUE_ADD, params);
     }
