@@ -14,7 +14,6 @@ import com.mapbox.core.constants.Constants;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @AutoValue
 public abstract class SessionState {
@@ -61,13 +60,7 @@ public abstract class SessionState {
     return PolylineUtils.encode(geometryPositions, Constants.PRECISION_5);
   }
 
-  public int secondsSinceLastReroute() {
-    if (lastRerouteDate() == null || eventDate() == null) {
-      return -1;
-    }
-    long diffInMs = eventDate().getTime() - lastRerouteDate().getTime();
-    return (int) TimeUnit.MILLISECONDS.toSeconds(diffInMs);
-  }
+  public abstract int secondsSinceLastReroute();
 
   public abstract MetricsRouteProgress eventRouteProgress();
 
@@ -99,9 +92,6 @@ public abstract class SessionState {
   @Nullable
   public abstract String requestIdentifier();
 
-  @Nullable
-  public abstract Date lastRerouteDate();
-
   public abstract boolean mockLocation();
 
   public abstract int rerouteCount();
@@ -122,6 +112,7 @@ public abstract class SessionState {
       .mockLocation(false)
       .startTimestamp(new Date())
       .rerouteCount(0)
+      .secondsSinceLastReroute(-1)
       .eventRouteProgress(new MetricsRouteProgress(null))
       .locationEngineName("");
   }
@@ -151,7 +142,7 @@ public abstract class SessionState {
 
     public abstract Builder requestIdentifier(@Nullable String requestIdentifier);
 
-    public abstract Builder lastRerouteDate(@Nullable Date lastRerouteDate);
+    public abstract Builder secondsSinceLastReroute(int seconds);
 
     public abstract Builder mockLocation(boolean mockLocation);
 

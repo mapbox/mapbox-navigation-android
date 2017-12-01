@@ -4,7 +4,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+
+import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.METERS_REMAINING_TILL_ARRIVAL;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
@@ -54,9 +57,8 @@ public final class RouteUtils {
    * @since 0.8.0
    */
   public static boolean isArrivalEvent(@NonNull RouteProgress routeProgress) {
-    return routeProgress.currentLegProgress().currentStep().maneuver() != null
-      && routeProgress.currentLegProgress().currentStep().maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE)
-      && routeProgress.distanceRemaining() <= METERS_REMAINING_TILL_ARRIVAL;
+    return (upcomingStepIsArrival(routeProgress) || currentStepIsArrival(routeProgress))
+      && routeProgress.currentLegProgress().distanceRemaining() <= METERS_REMAINING_TILL_ARRIVAL;
   }
 
   /**
@@ -69,5 +71,30 @@ public final class RouteUtils {
   public static boolean isDepartureEvent(@NonNull RouteProgress routeProgress) {
     return routeProgress.currentLegProgress().currentStep().maneuver() != null
       && routeProgress.currentLegProgress().currentStep().maneuver().type().contains(STEP_MANEUVER_TYPE_DEPART);
+  }
+
+  /**
+   * Looks at the current {@link RouteProgress} list of legs and
+   * checks if the current leg is the last leg.
+   *
+   * @param routeProgress the current route progress
+   * @return true if last leg, false if not
+   * @since 0.8.0
+   */
+  public static boolean isLastLeg(RouteProgress routeProgress) {
+    List<RouteLeg> legs = routeProgress.directionsRoute().legs();
+    RouteLeg currentLeg = routeProgress.currentLeg();
+    return currentLeg.equals(legs.get(legs.size() - 1));
+  }
+
+  private static boolean upcomingStepIsArrival(@NonNull RouteProgress routeProgress) {
+    return routeProgress.currentLegProgress().upComingStep() != null
+      && routeProgress.currentLegProgress().upComingStep().maneuver() != null
+      && routeProgress.currentLegProgress().upComingStep().maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE);
+  }
+
+  private static boolean currentStepIsArrival(@NonNull RouteProgress routeProgress) {
+    return routeProgress.currentLegProgress().currentStep().maneuver() != null
+      && routeProgress.currentLegProgress().currentStep().maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE);
   }
 }
