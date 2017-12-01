@@ -5,8 +5,10 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.support.annotation.NonNull;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
-import com.mapbox.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.core.constants.Constants;
+import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.BuildConfig;
@@ -27,8 +29,6 @@ import com.mapbox.services.android.telemetry.constants.TelemetryConstants;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
-import com.mapbox.services.constants.Constants;
-import com.mapbox.services.utils.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,6 +71,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   private NavigationTelemetry() {
     locationBuffer = new RingBuffer<>(40);
     metricLocation = new MetricsLocation(null);
+    metricProgress = new MetricsRouteProgress(null);
   }
 
   /**
@@ -173,6 +174,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (!isConfigurationChange) {
       navigationSessionState = navigationSessionState.toBuilder()
         .originalDirectionRoute(directionsRoute)
+        .originalRequestIdentifier(directionsRoute.routeOptions() != null
+          ? directionsRoute.routeOptions().requestUuid() : null)
         .currentDirectionRoute(directionsRoute)
         .sessionIdentifier(TelemetryUtils.buildUUID())
         .eventRouteDistanceCompleted(0)
@@ -213,6 +216,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (isOffRoute) {
       // If we are off-route, update the reroute count
       navigationBuilder.rerouteCount(navigationSessionState.rerouteCount() + 1);
+      boolean hasRouteOptions = directionsRoute.routeOptions() != null;
+      navigationBuilder.requestIdentifier(hasRouteOptions ? directionsRoute.routeOptions().requestUuid() : null);
       navigationSessionState = navigationBuilder.build();
 
       updateLastRerouteEvent(directionsRoute);

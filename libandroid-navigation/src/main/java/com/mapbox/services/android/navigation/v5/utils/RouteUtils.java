@@ -3,8 +3,8 @@ package com.mapbox.services.android.navigation.v5.utils;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
-import com.mapbox.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.List;

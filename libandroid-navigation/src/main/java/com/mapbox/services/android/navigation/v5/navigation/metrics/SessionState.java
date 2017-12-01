@@ -5,12 +5,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
-import com.mapbox.directions.v5.models.DirectionsRoute;
-import com.mapbox.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
-import com.mapbox.services.constants.Constants;
+import com.mapbox.core.constants.Constants;
 
 import java.util.Date;
 import java.util.List;
@@ -62,7 +62,6 @@ public abstract class SessionState {
 
   public abstract int secondsSinceLastReroute();
 
-  @Nullable
   public abstract MetricsRouteProgress eventRouteProgress();
 
   @Nullable
@@ -114,13 +113,14 @@ public abstract class SessionState {
       .startTimestamp(new Date())
       .rerouteCount(0)
       .secondsSinceLastReroute(-1)
+      .eventRouteProgress(new MetricsRouteProgress(null))
       .locationEngineName("");
   }
 
   @AutoValue.Builder
   public abstract static class Builder {
 
-    public abstract Builder eventRouteProgress(@Nullable MetricsRouteProgress routeProgress);
+    public abstract Builder eventRouteProgress(MetricsRouteProgress routeProgress);
 
     public abstract Builder eventLocation(@Nullable Location eventLocation);
 

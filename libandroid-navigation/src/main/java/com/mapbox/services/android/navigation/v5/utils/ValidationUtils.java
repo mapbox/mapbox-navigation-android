@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 
 import java.util.MissingFormatArgumentException;
 

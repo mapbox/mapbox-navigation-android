@@ -5,15 +5,15 @@ import android.location.Location;
 import com.google.gson.Gson;
 
 import com.google.gson.GsonBuilder;
-import com.mapbox.directions.v5.DirectionsAdapterFactory;
-import com.mapbox.directions.v5.models.DirectionsResponse;
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.constants.Constants;
+import com.mapbox.core.constants.Constants;
 
 
 import org.junit.Before;

@@ -8,10 +8,10 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.mapbox.directions.v5.models.IntersectionLanes;
+import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
-import com.mapbox.services.commons.utils.TextUtils;
+import com.mapbox.core.utils.TextUtils;
 
 import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_RIGHT;
 import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_RIGHT_ONLY;
