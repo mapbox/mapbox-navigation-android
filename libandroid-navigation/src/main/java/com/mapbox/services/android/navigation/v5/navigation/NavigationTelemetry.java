@@ -60,6 +60,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   NavigationTelemetry() {
     locationBuffer = new RingBuffer<>(40);
     metricLocation = new MetricsLocation(null);
+    metricProgress = new MetricsRouteProgress(null);
   }
 
   @Override
@@ -143,6 +144,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   void startSession(DirectionsRoute directionsRoute) {
     navigationSessionState = navigationSessionState.toBuilder()
       .originalDirectionRoute(directionsRoute)
+      .originalRequestIdentifier(directionsRoute.routeOptions() != null
+        ? directionsRoute.routeOptions().requestUuid() : "")
       .currentDirectionRoute(directionsRoute)
       .sessionIdentifier(TelemetryUtils.buildUUID())
       .eventRouteDistanceCompleted(0)
@@ -177,6 +180,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (isOffRoute) {
       // If we are off-route, update the reroute count
       navigationBuilder.rerouteCount(navigationSessionState.rerouteCount() + 1);
+      boolean hasRouteOptions = directionsRoute.routeOptions() != null;
+      navigationBuilder.requestIdentifier(hasRouteOptions ? directionsRoute.routeOptions().requestUuid() : "");
       navigationSessionState = navigationBuilder.build();
 
       updateLastRerouteEvent(directionsRoute);

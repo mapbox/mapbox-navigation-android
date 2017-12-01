@@ -69,7 +69,6 @@ public abstract class SessionState {
     return (int) TimeUnit.MILLISECONDS.toSeconds(diffInMs);
   }
 
-  @Nullable
   public abstract MetricsRouteProgress eventRouteProgress();
 
   @Nullable
@@ -123,13 +122,14 @@ public abstract class SessionState {
       .mockLocation(false)
       .startTimestamp(new Date())
       .rerouteCount(0)
+      .eventRouteProgress(new MetricsRouteProgress(null))
       .locationEngineName("");
   }
 
   @AutoValue.Builder
   public abstract static class Builder {
 
-    public abstract Builder eventRouteProgress(@Nullable MetricsRouteProgress routeProgress);
+    public abstract Builder eventRouteProgress(MetricsRouteProgress routeProgress);
 
     public abstract Builder eventLocation(@Nullable Location eventLocation);
 
