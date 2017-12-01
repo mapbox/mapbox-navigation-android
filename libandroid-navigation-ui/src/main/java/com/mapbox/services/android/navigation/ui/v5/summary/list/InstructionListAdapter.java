@@ -163,7 +163,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   }
 
   private boolean newStep(RouteProgress routeProgress) {
-    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress());
+    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().currentStep());
     currentStep = routeProgress.currentLegProgress().currentStep();
     currentUpcomingStep = routeProgress.currentLegProgress().upComingStep();
     return newStep;
