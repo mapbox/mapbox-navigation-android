@@ -37,7 +37,6 @@ public class NavigationLauncher {
    * {@link com.mapbox.services.android.navigation.v5.navigation.NavigationRoute}
    *
    * @param activity must be launched from another {@link Activity}
-   * @param route    initial route in which the navigation will follow
    * @param options  with fields to customize the navigation view
    */
   public static void startNavigation(Activity activity, NavigationViewOptions options) {
@@ -114,6 +113,9 @@ public class NavigationLauncher {
   }
 
   private static void storeCoordinateValues(NavigationViewOptions options, SharedPreferences.Editor editor) {
+    // Reset any previous value for the route json
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, "");
+    // Store the coordinates
     editor.putLong(NavigationConstants.NAVIGATION_VIEW_ORIGIN_LAT_KEY,
       Double.doubleToRawLongBits(options.origin().latitude()));
     editor.putLong(NavigationConstants.NAVIGATION_VIEW_ORIGIN_LNG_KEY,
