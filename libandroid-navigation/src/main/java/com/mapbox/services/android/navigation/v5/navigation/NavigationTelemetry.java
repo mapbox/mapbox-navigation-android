@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.support.annotation.NonNull;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.BuildConfig;
@@ -26,8 +26,8 @@ import com.mapbox.services.android.telemetry.constants.TelemetryConstants;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
-import com.mapbox.services.constants.Constants;
-import com.mapbox.services.utils.TextUtils;
+import com.mapbox.core.constants.Constants;
+import com.mapbox.core.utils.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

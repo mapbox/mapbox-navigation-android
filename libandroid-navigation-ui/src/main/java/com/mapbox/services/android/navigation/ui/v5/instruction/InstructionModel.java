@@ -3,9 +3,9 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 
-import com.mapbox.directions.v5.models.IntersectionLanes;
-import com.mapbox.directions.v5.models.LegStep;
-import com.mapbox.directions.v5.models.StepIntersection;
+import com.mapbox.api.directions.v5.models.IntersectionLanes;
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;

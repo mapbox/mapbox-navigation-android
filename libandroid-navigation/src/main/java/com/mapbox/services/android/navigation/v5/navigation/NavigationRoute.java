@@ -4,16 +4,16 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.mapbox.directions.v5.DirectionsCriteria;
-import com.mapbox.directions.v5.DirectionsCriteria.AnnotationCriteria;
-import com.mapbox.directions.v5.DirectionsCriteria.ExcludeCriteria;
-import com.mapbox.directions.v5.DirectionsCriteria.ProfileCriteria;
-import com.mapbox.directions.v5.DirectionsCriteria.VoiceUnitCriteria;
-import com.mapbox.directions.v5.MapboxDirections;
-import com.mapbox.directions.v5.models.DirectionsResponse;
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.api.directions.v5.DirectionsCriteria.AnnotationCriteria;
+import com.mapbox.api.directions.v5.DirectionsCriteria.ExcludeCriteria;
+import com.mapbox.api.directions.v5.DirectionsCriteria.ProfileCriteria;
+import com.mapbox.api.directions.v5.DirectionsCriteria.VoiceUnitCriteria;
+import com.mapbox.api.directions.v5.MapboxDirections;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.core.exceptions.ServicesException;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.exceptions.ServicesException;
 
 import java.util.Locale;
 
@@ -24,7 +24,7 @@ import retrofit2.Callback;
 /**
  * The NavigationRoute class wraps the {@link MapboxDirections} class with parameters which
  * <u>must</u> be set inorder for a navigation session to successfully begin. While it is possible
- * to pass in any {@link com.mapbox.directions.v5.models.DirectionsRoute} into
+ * to pass in any {@link com.mapbox.api.directions.v5.models.DirectionsRoute} into
  * {@link MapboxNavigation#startNavigation(DirectionsRoute)}, using this class will ensure your
  * request includes all the proper information needed for the navigation session to begin.
  * <p>
@@ -210,7 +210,7 @@ public final class NavigationRoute {
      * in the request is currently limited to 1.
      *
      * @param waypoint a {@link Point} which represents the pit-stop or waypoint where you'd like
-     *                 one of the {@link com.mapbox.directions.v5.models.RouteLeg} to
+     *                 one of the {@link com.mapbox.api.directions.v5.models.RouteLeg} to
      *                 navigate the user to
      * @return this builder for chaining options together
      * @since 0.5.0
@@ -228,7 +228,7 @@ public final class NavigationRoute {
      * in the request is currently limited to 1.
      *
      * @param waypoint  a {@link Point} which represents the pit-stop or waypoint where you'd like
-     *                  one of the {@link com.mapbox.directions.v5.models.RouteLeg} to
+     *                  one of the {@link com.mapbox.api.directions.v5.models.RouteLeg} to
      *                  navigate the user to
      * @param angle     double value used for setting the corresponding coordinate's angle of travel
      *                  when determining the route
@@ -358,7 +358,8 @@ public final class NavigationRoute {
 
     /**
      * Change the units used for voice announcements, this does not change the units provided in
-     * other fields outside of the {@link com.mapbox.directions.v5.models.VoiceInstructions} object.
+     * other fields outside of the {@link com.mapbox.api.directions.v5.models.VoiceInstructions}
+     * object.
      *
      * @param voiceUnits one of the values found inside the {@link VoiceUnitCriteria}
      * @return this builder for chaining options together

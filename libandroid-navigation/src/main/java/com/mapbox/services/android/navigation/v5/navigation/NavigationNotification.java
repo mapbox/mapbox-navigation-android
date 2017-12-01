@@ -15,7 +15,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.widget.RemoteViews;
 
-import com.mapbox.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
