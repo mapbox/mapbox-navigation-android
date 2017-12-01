@@ -29,7 +29,7 @@ public final class NavigationConstants {
    *
    * @since 0.5.0
    */
-  static final int NAVIGATION_NOTIFICATION_ID = 5678;
+  public static final int NAVIGATION_NOTIFICATION_ID = 5678;
 
   /**
    * Threshold user must be within to count as completing a step. One of two heuristics used to know

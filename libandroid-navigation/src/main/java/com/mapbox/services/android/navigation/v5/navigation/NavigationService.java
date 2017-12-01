@@ -14,6 +14,7 @@ import android.support.annotation.Nullable;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
+import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -23,7 +24,6 @@ import java.util.List;
 
 import timber.log.Timber;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
 
@@ -46,7 +46,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
   private RingBuffer<Integer> recentDistancesFromManeuverInMeters;
   private final IBinder localBinder = new LocalBinder();
-  private NavigationNotification navigationNotification;
+  private MapboxNavigationNotification mapboxNavigationNotification;
 
   private MapboxNavigation mapboxNavigation;
   private LocationEngine locationEngine;
@@ -96,22 +96,33 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   void startNavigation(MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
-    if (mapboxNavigation.options().enableNotification()) {
-      initializeNotification();
-    }
+    initNotification(mapboxNavigation);
     acquireLocationEngine();
     forceLocationUpdate();
+  }
+
+  private void initNotification(MapboxNavigation mapboxNavigation) {
+    if (mapboxNavigation.options().enableNotification() || Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      initializeNotification(mapboxNavigation.options());
+    }
   }
 
   /**
    * builds a new navigation notification instance and attaches it to this service.
    */
-  private void initializeNotification() {
-    navigationNotification = new NavigationNotification(this, mapboxNavigation);
-    // TODO we do have navigation options here
-    Notification notification = navigationNotification.buildNotification();
+  private void initializeNotification(MapboxNavigationOptions options) {
+    Notification notification;
+    int notificationId;
+    if (options.navigationNotification() != null) {
+      notification = options.navigationNotification().getNotification();
+      notificationId = options.navigationNotification().getNotificationId();
+    } else {
+      NavigationNotification navigationNotification = new MapboxNavigationNotification(this, mapboxNavigation);
+      notification = navigationNotification.getNotification();
+      notificationId = navigationNotification.getNotificationId();
+    }
     notification.flags = Notification.FLAG_FOREGROUND_SERVICE;
-    startForeground(NAVIGATION_NOTIFICATION_ID, notification);
+    startForeground(notificationId, notification);
   }
 
   /**
@@ -120,8 +131,8 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   void endNavigation() {
     locationEngine.removeLocationEngineListener(this);
-    if (navigationNotification != null) {
-      navigationNotification.unregisterReceiver();
+    if (mapboxNavigationNotification != null) {
+      mapboxNavigationNotification.unregisterReceiver(this);
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
       thread.quitSafely();
@@ -193,7 +204,7 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onNewRouteProgress(Location location, RouteProgress routeProgress) {
     if (mapboxNavigation.options().enableNotification()) {
-      navigationNotification.updateDefaultNotification(routeProgress);
+      mapboxNavigationNotification.updateDefaultNotification(routeProgress);
     }
     mapboxNavigation.getEventDispatcher().onProgressChange(location, routeProgress);
   }

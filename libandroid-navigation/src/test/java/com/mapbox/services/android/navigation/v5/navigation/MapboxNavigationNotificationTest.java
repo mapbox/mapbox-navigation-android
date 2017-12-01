@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-public class NavigationNotificationTest extends BaseTest {
+public class MapboxNavigationNotificationTest extends BaseTest {
 
   private static final String DIRECTIONS_ROUTE_FIXTURE = "directions_v5_precision_6.json";
 
@@ -40,9 +40,9 @@ public class NavigationNotificationTest extends BaseTest {
   @Ignore
   @Test
   public void sanity() throws Exception {
-    NavigationNotification navigationNotification = new NavigationNotification(
+    MapboxNavigationNotification mapboxNavigationNotification = new MapboxNavigationNotification(
       Mockito.mock(Context.class), Mockito.mock(MapboxNavigation.class));
-    Assert.assertNotNull(navigationNotification);
+    Assert.assertNotNull(mapboxNavigationNotification);
   }
 
   @Ignore
@@ -54,10 +54,10 @@ public class NavigationNotificationTest extends BaseTest {
       .legIndex(0)
       .build();
 
-    NavigationNotification navigationNotification = new NavigationNotification(
+    MapboxNavigationNotification mapboxNavigationNotification = new MapboxNavigationNotification(
       Mockito.mock(Context.class), Mockito.mock(MapboxNavigation.class));
 
-    navigationNotification.updateDefaultNotification(routeProgress);
+    mapboxNavigationNotification.updateDefaultNotification(routeProgress);
     //    notificationManager.getActiveNotifications()[0].getNotification().contentView;
     //    verify(notificationManager, times(1)).getActiveNotifications()[0];
   }
