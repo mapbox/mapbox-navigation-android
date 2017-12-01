@@ -55,6 +55,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   private RingBuffer<Location> locationBuffer;
 
   private String vendorId;
+  private boolean hasDeparted;
   private boolean isOffRoute;
 
   NavigationTelemetry() {
@@ -88,7 +89,10 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (metricProgress == null) {
       metricProgress = new MetricsRouteProgress(routeProgress);
     }
-    NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, location);
+    if (!hasDeparted) {
+      NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, location);
+      hasDeparted = true;
+    }
   }
 
   @Override
