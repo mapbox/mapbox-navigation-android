@@ -150,7 +150,7 @@ public class InstructionText {
     return textFields;
   }
 
-  private class TextFields {
+  private static class TextFields {
     String primaryText = "";
     String secondaryText = "";
   }
