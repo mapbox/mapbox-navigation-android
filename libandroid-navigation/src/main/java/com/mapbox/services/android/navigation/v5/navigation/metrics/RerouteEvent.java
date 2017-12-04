@@ -15,6 +15,7 @@ public class RerouteEvent implements TelemetryEvent {
   public RerouteEvent(SessionState rerouteSessionState) {
     this.rerouteSessionState = rerouteSessionState;
     this.eventId = TelemetryUtils.buildUUID();
+    this.newRouteGeometry = "";
   }
 
   @Override
