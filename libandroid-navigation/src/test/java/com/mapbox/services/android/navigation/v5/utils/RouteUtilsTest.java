@@ -55,27 +55,6 @@ public class RouteUtilsTest extends BaseTest {
   }
 
   @Test
-  public void isDepartureEvent_returnsTrueWhenManeuverTypeDepart() throws Exception {
-    RouteProgress defaultRouteProgress = obtainDefaultRouteProgress();
-
-    boolean isDepartureEvent = RouteUtils.isDepartureEvent(defaultRouteProgress);
-
-    assertTrue(isDepartureEvent);
-  }
-
-  @Test
-  public void isDepartureEvent_returnsFalseWhenManeuverTypeIsNotDepart() throws Exception {
-    RouteProgress defaultRouteProgress = obtainDefaultRouteProgress();
-    RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
-      .stepIndex(1)
-      .build();
-
-    boolean isDepartureEvent = RouteUtils.isDepartureEvent(theRouteProgress);
-
-    assertFalse(isDepartureEvent);
-  }
-
-  @Test
   public void isArrivalEvent_returnsTrueWhenManeuverTypeIsArrival_andIsValidMetersRemaining() throws Exception {
     DirectionsRoute aRoute = obtainADirectionsRoute();
     int lastStepIndex = obtainLastStepIndex(aRoute);

@@ -46,8 +46,6 @@ public class NavigationEventDispatcherTest extends BaseTest {
   @Mock
   NavigationMetricListeners.EventListeners eventListeners;
   @Mock
-  NavigationMetricListeners.DepartureListener departureListener;
-  @Mock
   NavigationMetricListeners.ArrivalListener arrivalListener;
   @Mock
   OffRouteListener offRouteListener;
@@ -302,40 +300,5 @@ public class NavigationEventDispatcherTest extends BaseTest {
     navigationEventDispatcher.onProgressChange(location, routeProgressDidArrive);
     verify(eventListeners, times(1)).onRouteProgressUpdate(routeProgressDidArrive);
     verify(arrivalListener, times(1)).onArrival(location, routeProgressDidArrive);
-  }
-
-  @Test
-  public void setNavigationDepartureListener_didNotGetTriggeredMoreThanOnce() throws Exception {
-
-    navigationEventDispatcher.addMetricEventListeners(eventListeners);
-    navigationEventDispatcher.addMetricDepartureListener(departureListener);
-
-    // Progress that hasn't arrived
-    RouteProgress routeProgressDidNotArrive = RouteProgress.builder()
-      .stepDistanceRemaining(100)
-      .legDistanceRemaining(100)
-      .distanceRemaining(100)
-      .directionsRoute(route)
-      .stepIndex(0)
-      .legIndex(0)
-      .build();
-
-    navigationEventDispatcher.onProgressChange(location, routeProgressDidNotArrive);
-    verify(eventListeners, times(1)).onRouteProgressUpdate(routeProgressDidNotArrive);
-    verify(departureListener, times(1)).onDeparture(location, routeProgressDidNotArrive);
-
-    // Progress that has arrived
-    RouteProgress routeProgressDidArrive = RouteProgress.builder()
-      .stepDistanceRemaining(30)
-      .legDistanceRemaining(30)
-      .distanceRemaining(30)
-      .directionsRoute(route)
-      .stepIndex(0)
-      .legIndex(0)
-      .build();
-
-    navigationEventDispatcher.onProgressChange(location, routeProgressDidArrive);
-    verify(eventListeners, times(1)).onRouteProgressUpdate(routeProgressDidArrive);
-    verify(departureListener, times(0)).onDeparture(location, routeProgressDidArrive);
   }
 }
