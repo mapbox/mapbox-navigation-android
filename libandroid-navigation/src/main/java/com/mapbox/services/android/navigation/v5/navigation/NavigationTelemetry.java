@@ -467,7 +467,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
   private void sendRerouteEvent(RerouteEvent rerouteEvent) {
     // If there isn't an updated geometry, don't send
-    if (rerouteEvent.getNewRouteGeometry() == null) {
+    if (rerouteEvent.getNewRouteGeometry() == null
+      || rerouteEvent.getSessionState().startTimestamp() == null) {
       return;
     }
     // Create arrays with locations from before / after the reroute occurred
@@ -486,6 +487,9 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   }
 
   private void sendFeedbackEvent(FeedbackEvent feedbackEvent) {
+    if (feedbackEvent.getSessionState().startTimestamp() == null) {
+      return;
+    }
     // Create arrays with locations from before / after the reroute occurred
     List<Location> beforeLocations = createLocationListBeforeEvent(feedbackEvent.getSessionState().eventDate());
     List<Location> afterLocations = createLocationListAfterEvent(feedbackEvent.getSessionState().eventDate());
