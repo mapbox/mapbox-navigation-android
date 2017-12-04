@@ -8,10 +8,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.widget.RemoteViews;
@@ -170,8 +168,7 @@ class MapboxNavigationNotification implements NavigationNotification,
   private void addArrivalTime(RouteProgress routeProgress) {
     currentArrivalTime = TimeUtils.formatArrivalTime(routeProgress.durationRemaining());
     notificationRemoteViews.setTextViewText(R.id.notificationArrivalText,
-      String.format(Locale.getDefault(),
-        context.getString(R.string.notification_arrival_time_format), currentArrivalTime));
+      String.format(Locale.getDefault(), "Arrive at %s", currentArrivalTime));
   }
 
   private boolean newManeuverId(LegStep step) {
@@ -189,7 +186,7 @@ class MapboxNavigationNotification implements NavigationNotification,
   private void initialize(Context context) {
     notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
-    createNotificationChannel();
+    createNotificationChannel(context);
     buildNotification(context);
     registerReceiver(context);
   }
@@ -197,7 +194,7 @@ class MapboxNavigationNotification implements NavigationNotification,
   /**
    * Notification channel setup for devices running Android Oreo or later.
    */
-  private void createNotificationChannel() {
+  private void createNotificationChannel(Context context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       NotificationChannel notificationChannel = new NotificationChannel(
         NAVIGATION_NOTIFICATION_CHANNEL, context.getString(R.string.channel_name),
