@@ -39,7 +39,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 class NavigationTelemetry implements LocationEngineListener, NavigationMetricListeners.EventListeners,
-  NavigationMetricListeners.DepartureListener, NavigationMetricListeners.ArrivalListener {
+  NavigationMetricListeners.ArrivalListener {
 
   private static NavigationTelemetry instance;
   private boolean isInitialized = false;
@@ -97,24 +97,21 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   @Override
   public void onRouteProgressUpdate(RouteProgress routeProgress) {
     this.metricProgress = new MetricsRouteProgress(routeProgress);
+
+    if (navigationSessionState.startTimestamp() == null) {
+      // Set departure timestamp
+      navigationSessionState = navigationSessionState.toBuilder()
+        .startTimestamp(new Date())
+        .build();
+      // Send departure event for the start of this session
+      NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
+    }
   }
 
   @Override
   public void onOffRouteEvent(Location offRouteLocation) {
     isOffRoute = true;
     queueRerouteEvent();
-  }
-
-  @Override
-  public void onDeparture(Location location, RouteProgress routeProgress) {
-    if (metricProgress == null) {
-      metricProgress = new MetricsRouteProgress(routeProgress);
-    }
-    if (!isConfigurationChange) {
-      NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
-      // Add the arrival listener
-      eventDispatcher.addMetricArrivalListener(this);
-    }
   }
 
   @Override
@@ -126,7 +123,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
     // Reset the departure listener if there is another leg in the route
     if (!RouteUtils.isLastLeg(routeProgress)) {
-      resetDepartureListener();
+      resetArrivalListener();
     }
   }
 
@@ -181,7 +178,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
         .currentDirectionRoute(directionsRoute)
         .sessionIdentifier(TelemetryUtils.buildUUID())
         .eventRouteDistanceCompleted(0)
-        .startTimestamp(new Date())
         .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
         .rerouteCount(0)
         .build();
@@ -196,8 +192,10 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
    */
   void endSession() {
     if (!isConfigurationChange) {
-      flushEventQueues();
-      NavigationMetricsWrapper.cancelEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
+      if (navigationSessionState.startTimestamp() != null) {
+        flushEventQueues();
+        NavigationMetricsWrapper.cancelEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
+      }
       isInitialized = false;
     }
   }
@@ -306,8 +304,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     queuedFeedbackEvents.remove(feedbackEvent);
   }
 
-  private void resetDepartureListener() {
-    eventDispatcher.addMetricDepartureListener(this);
+  private void resetArrivalListener() {
+    eventDispatcher.addMetricArrivalListener(this);
   }
 
   private void validateAccessToken(String accessToken) {
@@ -321,7 +319,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   private void initEventDispatcherListeners(MapboxNavigation navigation) {
     eventDispatcher = navigation.getEventDispatcher();
     eventDispatcher.addMetricEventListeners(this);
-    eventDispatcher.addMetricDepartureListener(this);
+    eventDispatcher.addMetricArrivalListener(this);
   }
 
   @NonNull

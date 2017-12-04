@@ -11,7 +11,6 @@ import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.METERS_REMAINING_TILL_ARRIVAL;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_DEPART;
 
 public final class RouteUtils {
 
@@ -59,18 +58,6 @@ public final class RouteUtils {
   public static boolean isArrivalEvent(@NonNull RouteProgress routeProgress) {
     return (upcomingStepIsArrival(routeProgress) || currentStepIsArrival(routeProgress))
       && routeProgress.currentLegProgress().distanceRemaining() <= METERS_REMAINING_TILL_ARRIVAL;
-  }
-
-  /**
-   * Looks at the current {@link RouteProgress} maneuverType for type "departure".
-   *
-   * @param routeProgress the current route progress
-   * @return true if in departure state, false if not
-   * @since 0.8.0
-   */
-  public static boolean isDepartureEvent(@NonNull RouteProgress routeProgress) {
-    return routeProgress.currentLegProgress().currentStep().maneuver() != null
-      && routeProgress.currentLegProgress().currentStep().maneuver().type().contains(STEP_MANEUVER_TYPE_DEPART);
   }
 
   /**

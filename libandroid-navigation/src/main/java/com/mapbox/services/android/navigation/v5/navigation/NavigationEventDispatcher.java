@@ -23,7 +23,6 @@ class NavigationEventDispatcher {
   private List<ProgressChangeListener> progressChangeListeners;
   private List<OffRouteListener> offRouteListeners;
   private NavigationMetricListeners.EventListeners metricEventListeners;
-  private NavigationMetricListeners.DepartureListener metricDepartureListener;
   private NavigationMetricListeners.ArrivalListener metricArrivalListener;
 
   NavigationEventDispatcher() {
@@ -116,12 +115,6 @@ class NavigationEventDispatcher {
       // Update RouteProgress
       metricEventListeners.onRouteProgressUpdate(routeProgress);
 
-      // Check if user has departed and notify metric listener if so
-      if (RouteUtils.isDepartureEvent(routeProgress) && metricDepartureListener != null) {
-        metricDepartureListener.onDeparture(location, routeProgress);
-        metricDepartureListener = null;
-      }
-
       // Check if user has arrived and notify metric listener if so
       if (RouteUtils.isArrivalEvent(routeProgress) && metricArrivalListener != null) {
         metricArrivalListener.onArrival(location, routeProgress);
@@ -160,10 +153,6 @@ class NavigationEventDispatcher {
 
   void addMetricEventListeners(NavigationMetricListeners.EventListeners eventListeners) {
     this.metricEventListeners = eventListeners;
-  }
-
-  void addMetricDepartureListener(NavigationMetricListeners.DepartureListener departureListener) {
-    this.metricDepartureListener = departureListener;
   }
 
   void addMetricArrivalListener(NavigationMetricListeners.ArrivalListener arrivalListener) {

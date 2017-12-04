@@ -1,16 +1,15 @@
 package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
 import android.location.Location;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
-import com.mapbox.core.constants.Constants;
 
 import java.util.Date;
 import java.util.List;
@@ -96,6 +95,7 @@ public abstract class SessionState {
 
   public abstract int rerouteCount();
 
+  @Nullable
   public abstract Date startTimestamp();
 
   @Nullable
@@ -110,7 +110,6 @@ public abstract class SessionState {
       .eventRouteDistanceCompleted(0d)
       .sessionIdentifier("")
       .mockLocation(false)
-      .startTimestamp(new Date())
       .rerouteCount(0)
       .secondsSinceLastReroute(-1)
       .eventRouteProgress(new MetricsRouteProgress(null))
@@ -148,7 +147,7 @@ public abstract class SessionState {
 
     public abstract Builder rerouteCount(int rerouteCount);
 
-    public abstract Builder startTimestamp(@NonNull Date startTimeStamp);
+    public abstract Builder startTimestamp(Date startTimeStamp);
 
     public abstract Builder arrivalTimestamp(@Nullable Date arrivalTimestamp);
 

@@ -13,11 +13,6 @@ public interface NavigationMetricListeners {
     void onOffRouteEvent(Location offRouteLocation);
   }
 
-  interface DepartureListener {
-
-    void onDeparture(Location location, RouteProgress routeProgress);
-  }
-
   interface ArrivalListener {
 
     void onArrival(Location location, RouteProgress routeProgress);
