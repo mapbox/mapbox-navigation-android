@@ -112,9 +112,9 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     }
     if (!isConfigurationChange) {
       NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
+      // Add the arrival listener
+      eventDispatcher.addMetricArrivalListener(this);
     }
-    // Add the arrival listener
-    eventDispatcher.addMetricArrivalListener(this);
   }
 
   @Override
