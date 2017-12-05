@@ -11,7 +11,6 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.text.SpannableStringBuilder;
-import android.text.TextUtils;
 import android.widget.RemoteViews;
 
 import com.mapbox.api.directions.v5.models.LegStep;
@@ -20,13 +19,10 @@ import com.mapbox.services.android.navigation.v5.navigation.notification.Navigat
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
-import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 
 import java.text.DecimalFormat;
 import java.util.Locale;
-
-import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
 
@@ -47,9 +43,15 @@ class MapboxNavigationNotification implements NavigationNotification {
   private SpannableStringBuilder currentDistanceText;
   private DecimalFormat decimalFormat;
   private String currentArrivalTime;
-  private String currentStepName;
+  private String instructionText;
   private int currentManeuverId;
   private int distanceUnitType;
+  private BroadcastReceiver endNavigationBtnReceiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(final Context context, final Intent intent) {
+      MapboxNavigationNotification.this.onEndNavigationBtnClick();
+    }
+  };
 
   MapboxNavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
@@ -81,113 +83,6 @@ class MapboxNavigationNotification implements NavigationNotification {
     }
   }
 
-  private void buildNotification(Context context) {
-    notificationRemoteViews = new RemoteViews(context.getPackageName(), R.layout.navigation_notification_layout);
-
-    // Will trigger endNavigationBtnReceiver when clicked
-    PendingIntent pendingCloseIntent = createPendingCloseIntent(context);
-    notificationRemoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent);
-
-    // Sets up the top bar notification
-    notificationBuilder = new NotificationCompat.Builder(context, NAVIGATION_NOTIFICATION_CHANNEL)
-      .setCategory(NotificationCompat.CATEGORY_SERVICE)
-      .setSmallIcon(R.drawable.ic_navigation)
-      .setContent(notificationRemoteViews)
-      .setOngoing(true);
-
-    notification =  notificationBuilder.build();
-  }
-
-  /**
-   * With each location update and new routeProgress, the notification is checked and updated if any
-   * information has changed.
-   *
-   * @param routeProgress the latest RouteProgress object
-   */
-  private void updateNotificationViews(RouteProgress routeProgress) {
-    // Street name
-    if (newStepName(routeProgress) || currentStepName == null) {
-      Timber.d("Updating step name");
-      addStepName(routeProgress);
-    }
-
-    // Distance
-    if (newDistanceText(routeProgress) || currentDistanceText == null) {
-      Timber.d("Updating distance");
-      addDistanceText(routeProgress);
-    }
-
-    // Arrival Time
-    if (newArrivalTime(routeProgress) || currentArrivalTime == null) {
-      Timber.d("Updating arrival time");
-      addArrivalTime(routeProgress);
-    }
-
-    // Maneuver Image
-    LegStep step = routeProgress.currentLegProgress().upComingStep() == null
-      ? routeProgress.currentLegProgress().currentStep()
-      : routeProgress.currentLegProgress().upComingStep();
-    addManeuverImage(step);
-
-    notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notificationBuilder.build());
-  }
-
-  private boolean newStepName(RouteProgress routeProgress) {
-    return currentStepName != null
-      && !currentStepName.contentEquals(routeProgress.currentLegProgress().currentStep().name());
-  }
-
-  private void addStepName(RouteProgress routeProgress) {
-    currentStepName = routeProgress.currentLegProgress().currentStep().name();
-    String formattedStepName = StringAbbreviator.deliminator(
-      StringAbbreviator.abbreviate(currentStepName));
-    notificationRemoteViews.setTextViewText(
-      R.id.notificationInstructionText,
-      formattedStepName
-    );
-  }
-
-  private boolean newDistanceText(RouteProgress routeProgress) {
-    return currentDistanceText != null
-      && !currentDistanceText.toString().contentEquals(DistanceUtils.distanceFormatter(
-      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
-      decimalFormat, true, distanceUnitType).toString());
-  }
-
-  private void addDistanceText(RouteProgress routeProgress) {
-    currentDistanceText = DistanceUtils.distanceFormatter(
-      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
-      decimalFormat, true, distanceUnitType);
-    if (!TextUtils.isEmpty(currentStepName)) {
-      currentDistanceText.append(" - ");
-    }
-    notificationRemoteViews.setTextViewText(R.id.notificationDistanceText, currentDistanceText);
-  }
-
-  private boolean newArrivalTime(RouteProgress routeProgress) {
-    return currentArrivalTime != null && currentArrivalTime.contentEquals(TimeUtils
-      .formatArrivalTime(routeProgress.durationRemaining()));
-  }
-
-  private void addArrivalTime(RouteProgress routeProgress) {
-    currentArrivalTime = TimeUtils.formatArrivalTime(routeProgress.durationRemaining());
-    notificationRemoteViews.setTextViewText(R.id.notificationArrivalText,
-      String.format(Locale.getDefault(), "Arrive at %s", currentArrivalTime));
-  }
-
-  private boolean newManeuverId(LegStep step) {
-    return currentManeuverId != ManeuverUtils.getManeuverResource(step);
-  }
-
-  private void addManeuverImage(LegStep step) {
-    if (newManeuverId(step)) {
-      Timber.d("Updating maneuver");
-      int maneuverResource = ManeuverUtils.getManeuverResource(step);
-      currentManeuverId = maneuverResource;
-      notificationRemoteViews.setImageViewResource(R.id.maneuverImage, maneuverResource);
-    }
-  }
-
   private void initialize(Context context) {
     notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
@@ -208,23 +103,110 @@ class MapboxNavigationNotification implements NavigationNotification {
     }
   }
 
+  private void buildNotification(Context context) {
+    notificationRemoteViews = new RemoteViews(context.getPackageName(), R.layout.navigation_notification_layout);
+
+    // Will trigger endNavigationBtnReceiver when clicked
+    PendingIntent pendingCloseIntent = createPendingCloseIntent(context);
+    notificationRemoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent);
+
+    // Sets up the top bar notification
+    notificationBuilder = new NotificationCompat.Builder(context, NAVIGATION_NOTIFICATION_CHANNEL)
+      .setCategory(NotificationCompat.CATEGORY_SERVICE)
+      .setSmallIcon(R.drawable.ic_navigation)
+      .setCustomBigContentView(notificationRemoteViews)
+      .setOngoing(true);
+
+    notification = notificationBuilder.build();
+  }
+
   private void registerReceiver(Context context) {
     if (context != null) {
       context.registerReceiver(endNavigationBtnReceiver, new IntentFilter(END_NAVIGATION_ACTION));
     }
   }
 
+  /**
+   * With each location update and new routeProgress, the notification is checked and updated if any
+   * information has changed.
+   *
+   * @param routeProgress the latest RouteProgress object
+   */
+  private void updateNotificationViews(RouteProgress routeProgress) {
+    // Instruction
+    updateInstructionText(routeProgress.currentLegProgress().currentStep());
+    // Distance
+    updateDistanceText(routeProgress);
+    // Arrival Time
+    updateArrivalTime(routeProgress);
+    // Get upcoming step for maneuver image - current step if null
+    LegStep step = routeProgress.currentLegProgress().upComingStep() != null
+      ? routeProgress.currentLegProgress().upComingStep()
+      : routeProgress.currentLegProgress().currentStep();
+    // Maneuver Image
+    updateManeuverImage(step);
+
+    notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notificationBuilder.build());
+  }
+
+  private void updateInstructionText(LegStep step) {
+    if (instructionText == null || newInstructionText(step)) {
+      instructionText = step.bannerInstructions().get(0).primary().text();
+      notificationRemoteViews.setTextViewText(R.id.notificationInstructionText, instructionText);
+    }
+  }
+
+  private boolean newInstructionText(LegStep step) {
+    return step.bannerInstructions() != null
+      && !step.bannerInstructions().isEmpty()
+      && !instructionText.equals(step.bannerInstructions().get(0).primary().text());
+  }
+
+  private void updateDistanceText(RouteProgress routeProgress) {
+    if (currentDistanceText == null || newDistanceText(routeProgress)) {
+      currentDistanceText = DistanceUtils.distanceFormatter(
+        routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
+        decimalFormat, true, distanceUnitType);
+      notificationRemoteViews.setTextViewText(R.id.notificationDistanceText, currentDistanceText);
+    }
+  }
+
+  private boolean newDistanceText(RouteProgress routeProgress) {
+    return currentDistanceText != null
+      && !currentDistanceText.toString().equals(DistanceUtils.distanceFormatter(
+      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
+      decimalFormat, true, distanceUnitType).toString());
+  }
+
+  private void updateArrivalTime(RouteProgress routeProgress) {
+    if (currentArrivalTime == null || newArrivalTime(routeProgress)) {
+      currentArrivalTime = TimeUtils.formatArrivalTime(routeProgress.durationRemaining());
+      notificationRemoteViews.setTextViewText(R.id.notificationArrivalText,
+        String.format(Locale.getDefault(), "%s ETA", currentArrivalTime));
+    }
+  }
+
+  private boolean newArrivalTime(RouteProgress routeProgress) {
+    return currentArrivalTime != null && !currentArrivalTime.equals(TimeUtils
+      .formatArrivalTime(routeProgress.durationRemaining()));
+  }
+
+  private void updateManeuverImage(LegStep step) {
+    if (newManeuverId(step)) {
+      int maneuverResource = ManeuverUtils.getManeuverResource(step);
+      currentManeuverId = maneuverResource;
+      notificationRemoteViews.setImageViewResource(R.id.maneuverImage, maneuverResource);
+    }
+  }
+
+  private boolean newManeuverId(LegStep step) {
+    return currentManeuverId != ManeuverUtils.getManeuverResource(step);
+  }
+
   private PendingIntent createPendingCloseIntent(Context context) {
     Intent endNavigationBtn = new Intent(END_NAVIGATION_ACTION);
     return PendingIntent.getBroadcast(context, 0, endNavigationBtn, 0);
   }
-
-  private BroadcastReceiver endNavigationBtnReceiver = new BroadcastReceiver() {
-    @Override
-    public void onReceive(final Context context, final Intent intent) {
-      MapboxNavigationNotification.this.onEndNavigationBtnClick();
-    }
-  };
 
   private void onEndNavigationBtnClick() {
     if (mapboxNavigation != null) {
