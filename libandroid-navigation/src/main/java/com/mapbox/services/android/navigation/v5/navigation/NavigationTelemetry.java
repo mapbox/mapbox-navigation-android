@@ -110,6 +110,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
   @Override
   public void onOffRouteEvent(Location offRouteLocation) {
+    updateDistanceCompleted();
     isOffRoute = true;
     queueRerouteEvent();
   }
@@ -420,6 +421,14 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       }
     }
     return locationsAfterEvent;
+  }
+
+  private void updateDistanceCompleted() {
+    double currentDistanceCompleted = navigationSessionState.eventRouteDistanceCompleted()
+      + metricProgress.getDistanceTraveled();
+    navigationSessionState = navigationSessionState.toBuilder()
+      .eventRouteDistanceCompleted(currentDistanceCompleted)
+      .build();
   }
 
   private void queueRerouteEvent() {
