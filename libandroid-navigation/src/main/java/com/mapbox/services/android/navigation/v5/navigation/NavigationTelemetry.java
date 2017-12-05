@@ -432,16 +432,11 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   }
 
   private void queueRerouteEvent() {
-    // Distance completed = previous distance completed + current RouteProgress distance traveled
-    double distanceCompleted = navigationSessionState.eventRouteDistanceCompleted()
-      + metricProgress.getDistanceTraveled();
-
     // Create a new session state given the current navigation session
     Date eventDate = new Date();
     SessionState rerouteEventSessionState = navigationSessionState.toBuilder()
       .eventDate(eventDate)
       .eventRouteProgress(metricProgress)
-      .eventRouteDistanceCompleted(distanceCompleted)
       .eventLocation(metricLocation.getLocation())
       .secondsSinceLastReroute(getSecondsSinceLastReroute(eventDate))
       .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
