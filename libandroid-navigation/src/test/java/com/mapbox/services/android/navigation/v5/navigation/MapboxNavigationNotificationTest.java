@@ -57,7 +57,7 @@ public class MapboxNavigationNotificationTest extends BaseTest {
     MapboxNavigationNotification mapboxNavigationNotification = new MapboxNavigationNotification(
       Mockito.mock(Context.class), Mockito.mock(MapboxNavigation.class));
 
-    mapboxNavigationNotification.updateDefaultNotification(routeProgress);
+    mapboxNavigationNotification.updateNotification(routeProgress);
     //    notificationManager.getActiveNotifications()[0].getNotification().contentView;
     //    verify(notificationManager, times(1)).getActiveNotifications()[0];
   }

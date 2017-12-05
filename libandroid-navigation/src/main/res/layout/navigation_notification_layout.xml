@@ -1,70 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     style="@android:style/TextAppearance.StatusBar.EventContent"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#4882C6"
-    android:orientation="vertical">
+    android:layout_height="wrap_content"
+    android:background="@android:color/holo_blue_dark">
+
+    <ImageView
+        android:id="@+id/maneuverImage"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:src="@drawable/ic_maneuver_arrive"
+        android:tint="@android:color/white"/>
 
     <LinearLayout
+        android:id="@+id/notificationTextLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_toEndOf="@id/maneuverImage"
+        android:layout_toRightOf="@id/maneuverImage"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/maneuverSignal"
-            android:layout_width="64dp"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_maneuver_arrive"
-            android:tint="#ffffff"/>
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/notificationDistanceText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="vertical">
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:lines="1"
+            android:textColor="@android:color/white"
+            tools:text="250 ft"/>
 
-            <TextView
-                android:id="@+id/notificationDistanceText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:lines="1"
-                android:textColor="@android:color/white"
-                tools:text="250 ft"/>
+        <TextView
+            android:id="@+id/notificationInstructionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:lines="1"
+            android:textColor="@android:color/white"
+            tools:text="Sherman Ave NW"/>
 
-            <TextView
-                android:id="@+id/notificationInstructionText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:lines="1"
-                android:textColor="@android:color/white"
-                tools:text="Sherman Ave NW"/>
-
-            <TextView
-                android:id="@+id/notificationArrivalText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:lines="1"
-                android:textColor="@android:color/white"
-                tools:text="11:13 AM ETA"/>
-        </LinearLayout>
+        <TextView
+            android:id="@+id/notificationArrivalText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:lines="1"
+            android:textColor="@android:color/white"
+            tools:text="11:13 AM ETA"/>
 
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/white"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/notificationTextLayout"
+        android:layout_toEndOf="@id/maneuverImage"
+        android:layout_toRightOf="@id/maneuverImage"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/endNavigationBtn"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="@android:color/transparent"
-        android:gravity="start|center_vertical"
-        android:text="@string/end_navigation"
-        android:textColor="#ffffff"/>
+        <Button
+            android:id="@+id/endNavigationBtn"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:gravity="start|center_vertical"
+            android:text="@string/end_navigation"
+            android:textColor="@android:color/white"/>
 
-</LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

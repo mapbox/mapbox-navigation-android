@@ -26,13 +26,14 @@ import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
+import timber.log.Timber;
+
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
 
 /**
  * This is in charge of creating the persistent navigation session notification and updating it.
  */
-class MapboxNavigationNotification implements NavigationNotification,
-  NavigationNotification.NotificationProgressListener {
+class MapboxNavigationNotification implements NavigationNotification {
 
   private static final String NAVIGATION_NOTIFICATION_CHANNEL = "NAVIGATION_NOTIFICATION_CHANNEL";
   private static final String END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION";
@@ -67,8 +68,17 @@ class MapboxNavigationNotification implements NavigationNotification,
   }
 
   @Override
-  public void onProgressChange(RouteProgress routeProgress) {
+  public void updateNotification(RouteProgress routeProgress) {
+    updateNotificationViews(routeProgress);
+  }
 
+  void unregisterReceiver(Context context) {
+    if (context != null) {
+      context.unregisterReceiver(endNavigationBtnReceiver);
+    }
+    if (notificationManager != null) {
+      notificationManager.cancel(NAVIGATION_NOTIFICATION_ID);
+    }
   }
 
   private void buildNotification(Context context) {
@@ -94,19 +104,22 @@ class MapboxNavigationNotification implements NavigationNotification,
    *
    * @param routeProgress the latest RouteProgress object
    */
-  void updateDefaultNotification(RouteProgress routeProgress) {
+  private void updateNotificationViews(RouteProgress routeProgress) {
     // Street name
     if (newStepName(routeProgress) || currentStepName == null) {
+      Timber.d("Updating step name");
       addStepName(routeProgress);
     }
 
     // Distance
     if (newDistanceText(routeProgress) || currentDistanceText == null) {
+      Timber.d("Updating distance");
       addDistanceText(routeProgress);
     }
 
     // Arrival Time
     if (newArrivalTime(routeProgress) || currentArrivalTime == null) {
+      Timber.d("Updating arrival time");
       addArrivalTime(routeProgress);
     }
 
@@ -117,15 +130,6 @@ class MapboxNavigationNotification implements NavigationNotification,
     addManeuverImage(step);
 
     notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notificationBuilder.build());
-  }
-
-  void unregisterReceiver(Context context) {
-    if (context != null) {
-      context.unregisterReceiver(endNavigationBtnReceiver);
-    }
-    if (notificationManager != null) {
-      notificationManager.cancel(NAVIGATION_NOTIFICATION_ID);
-    }
   }
 
   private boolean newStepName(RouteProgress routeProgress) {
@@ -177,9 +181,10 @@ class MapboxNavigationNotification implements NavigationNotification,
 
   private void addManeuverImage(LegStep step) {
     if (newManeuverId(step)) {
+      Timber.d("Updating maneuver");
       int maneuverResource = ManeuverUtils.getManeuverResource(step);
       currentManeuverId = maneuverResource;
-      notificationRemoteViews.setImageViewResource(R.id.maneuverSignal, maneuverResource);
+      notificationRemoteViews.setImageViewResource(R.id.maneuverImage, maneuverResource);
     }
   }
 

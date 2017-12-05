@@ -10,8 +10,5 @@ public interface NavigationNotification {
 
   int getNotificationId();
 
-  interface NotificationProgressListener {
-
-    void onProgressChange(RouteProgress routeProgress);
-  }
+  void updateNotification(RouteProgress routeProgress);
 }
