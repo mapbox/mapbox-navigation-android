@@ -198,7 +198,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   @Override
   public void onScroll() {
-    if (summaryBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+    int summaryBehaviorState = summaryBehavior.getState();
+    if (summaryBehaviorState != BottomSheetBehavior.STATE_HIDDEN && navigationPresenter != null) {
       navigationPresenter.onMapScroll();
     }
   }
