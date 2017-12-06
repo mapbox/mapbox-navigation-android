@@ -2,7 +2,15 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.7.1 - December 6, 2017
+
+* Fix NPE with reroute metric events [#565](https://github.com/mapbox/mapbox-navigation-android/pull/565)
+* Adjust metric listener reset [#566](https://github.com/mapbox/mapbox-navigation-android/pull/566)
+* Update distance completed in off-route scenario [#568](https://github.com/mapbox/mapbox-navigation-android/pull/568)
+* Update Maps SDK to `5.2.1` [#570](https://github.com/mapbox/mapbox-navigation-android/pull/570)
+
 ### v0.7.1-beta.1 - December 1, 2017
+
 * Expanded the width of route lines when zoomed out
 * Added support for displaying alternative routes on map
 * Adds exclude, voiceUnits, and banner instruction info to request/response [#500](https://github.com/mapbox/mapbox-navigation-android/pull/500)
