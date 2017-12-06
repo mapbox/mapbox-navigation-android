@@ -46,12 +46,6 @@ class MapboxNavigationNotification implements NavigationNotification {
   private String instructionText;
   private int currentManeuverId;
   private int distanceUnitType;
-  private BroadcastReceiver endNavigationBtnReceiver = new BroadcastReceiver() {
-    @Override
-    public void onReceive(final Context context, final Intent intent) {
-      MapboxNavigationNotification.this.onEndNavigationBtnClick();
-    }
-  };
 
   MapboxNavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
@@ -113,6 +107,7 @@ class MapboxNavigationNotification implements NavigationNotification {
     // Sets up the top bar notification
     notificationBuilder = new NotificationCompat.Builder(context, NAVIGATION_NOTIFICATION_CHANNEL)
       .setCategory(NotificationCompat.CATEGORY_SERVICE)
+      .setPriority(NotificationCompat.PRIORITY_HIGH)
       .setSmallIcon(R.drawable.ic_navigation)
       .setCustomBigContentView(notificationRemoteViews)
       .setOngoing(true);
@@ -213,4 +208,11 @@ class MapboxNavigationNotification implements NavigationNotification {
       mapboxNavigation.endNavigation();
     }
   }
+
+  private BroadcastReceiver endNavigationBtnReceiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(final Context context, final Intent intent) {
+      MapboxNavigationNotification.this.onEndNavigationBtnClick();
+    }
+  };
 }

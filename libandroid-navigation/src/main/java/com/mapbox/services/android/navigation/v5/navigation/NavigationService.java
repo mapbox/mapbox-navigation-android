@@ -184,6 +184,13 @@ public class NavigationService extends Service implements LocationEngineListener
     locationEngine.addLocationEngineListener(this);
   }
 
+  /**
+   * Initializes a notification for this service based on whether it's
+   * enabled in {@link MapboxNavigationOptions} or if the current Android API is
+   * Android O or above (in which case it's required for a foreground service).
+   *
+   * @param mapboxNavigation to retrieve the options
+   */
   private void initNotification(MapboxNavigation mapboxNavigation) {
     if (mapboxNavigation.options().enableNotification() || Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       initializeNotification(mapboxNavigation.options());
@@ -191,7 +198,8 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   /**
-   * builds a new navigation notification instance and attaches it to this service.
+   * Builds a new navigation notification instance (either custom or our default implementation)
+   * and attaches it to this service.
    */
   private void initializeNotification(MapboxNavigationOptions options) {
     if (options.navigationNotification() != null) {
@@ -207,6 +215,12 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
+  /**
+   * Starts the given notification flagged as a foreground service.
+   *
+   * @param notification   to be started
+   * @param notificationId for the provided notification
+   */
   private void startForegroundNotification(Notification notification, int notificationId) {
     notification.flags = Notification.FLAG_FOREGROUND_SERVICE;
     startForeground(notificationId, notification);
@@ -240,6 +254,9 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
+  /**
+   * Unregisters the receiver used to end navigation for the Mapbox custom notification.
+   */
   private void unregisterMapboxNotificationReceiver() {
     if (navigationNotification != null && navigationNotification instanceof MapboxNavigationNotification) {
       ((MapboxNavigationNotification) navigationNotification).unregisterReceiver(this);
