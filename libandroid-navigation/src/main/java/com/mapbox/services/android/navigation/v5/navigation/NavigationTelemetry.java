@@ -110,8 +110,11 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
   @Override
   public void onOffRouteEvent(Location offRouteLocation) {
-    isOffRoute = true;
-    queueRerouteEvent();
+    if (!isOffRoute) {
+      updateDistanceCompleted();
+      queueRerouteEvent();
+      isOffRoute = true;
+    }
   }
 
   @Override
@@ -422,17 +425,20 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     return locationsAfterEvent;
   }
 
-  private void queueRerouteEvent() {
-    // Distance completed = previous distance completed + current RouteProgress distance traveled
-    double distanceCompleted = navigationSessionState.eventRouteDistanceCompleted()
+  private void updateDistanceCompleted() {
+    double currentDistanceCompleted = navigationSessionState.eventRouteDistanceCompleted()
       + metricProgress.getDistanceTraveled();
+    navigationSessionState = navigationSessionState.toBuilder()
+      .eventRouteDistanceCompleted(currentDistanceCompleted)
+      .build();
+  }
 
+  private void queueRerouteEvent() {
     // Create a new session state given the current navigation session
     Date eventDate = new Date();
     SessionState rerouteEventSessionState = navigationSessionState.toBuilder()
       .eventDate(eventDate)
       .eventRouteProgress(metricProgress)
-      .eventRouteDistanceCompleted(distanceCompleted)
       .eventLocation(metricLocation.getLocation())
       .secondsSinceLastReroute(getSecondsSinceLastReroute(eventDate))
       .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
