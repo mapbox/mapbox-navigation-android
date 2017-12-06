@@ -110,9 +110,11 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
   @Override
   public void onOffRouteEvent(Location offRouteLocation) {
-    updateDistanceCompleted();
-    isOffRoute = true;
-    queueRerouteEvent();
+    if (!isOffRoute) {
+      updateDistanceCompleted();
+      queueRerouteEvent();
+      isOffRoute = true;
+    }
   }
 
   @Override
