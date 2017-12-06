@@ -26,6 +26,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.Utils;
+import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
@@ -34,6 +35,7 @@ import com.mapbox.services.android.navigation.v5.milestone.RouteMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Trigger;
 import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -88,7 +90,13 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
 
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
+    // Use a custom notification
+    CustomNavigationNotification customNavigationNotification = new CustomNavigationNotification(this);
+    MapboxNavigationOptions options = MapboxNavigationOptions.builder()
+      .navigationNotification(customNavigationNotification)
+      .build();
+
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken(), options);
 
     navigation.addMilestone(new RouteMilestone.Builder()
       .setIdentifier(BEGIN_ROUTE_MILESTONE)
