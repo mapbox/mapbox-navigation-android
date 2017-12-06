@@ -106,10 +106,10 @@ public class DistanceUtils {
     return TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeFinalUnit) > LARGE_UNIT_THRESHOLD;
   }
 
-  public static int calculateAbsoluteDistance(Location currentLocation, MetricsRouteProgress routeProgress) {
+  public static int calculateAbsoluteDistance(Location currentLocation, MetricsRouteProgress metricProgress) {
 
     Point currentPoint = Point.fromLngLat(currentLocation.getLongitude(), currentLocation.getLatitude());
-    Point finalPoint = routeProgress.getDirectionsRouteDestination();
+    Point finalPoint = metricProgress.getDirectionsRouteDestination();
 
     return (int) TurfMeasurement.distance(currentPoint, finalPoint, TurfConstants.UNIT_METERS);
   }

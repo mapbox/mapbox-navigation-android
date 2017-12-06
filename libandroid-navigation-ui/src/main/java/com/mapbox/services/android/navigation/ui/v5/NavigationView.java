@@ -20,7 +20,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -171,7 +171,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
-    map.setOnScrollListener(this);
     map.setPadding(0, 0, 0, summaryBottomSheet.getHeight());
     ThemeSwitcher.setMapStyle(getContext(), map, new MapboxMap.OnStyleLoadedListener() {
       @Override
@@ -181,6 +180,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
         initLifecycleObservers();
         initNavigationPresenter();
         initClickListeners();
+        subscribeViews();
+        map.setOnScrollListener(NavigationView.this);
         navigationListener.onNavigationReady();
       }
     });

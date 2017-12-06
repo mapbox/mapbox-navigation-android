@@ -37,11 +37,15 @@ public class InstructionTask extends AsyncTask<String, Void, String> {
     try {
       return client.getPresignedSynthesizeSpeechUrl(synthesizeSpeechPresignRequest).toString();
     } catch (AmazonClientException exception) {
+      listener.onError();
       return null;
     }
   }
 
   public interface TaskListener {
+
     void onFinished(String speechUrl);
+
+    void onError();
   }
 }

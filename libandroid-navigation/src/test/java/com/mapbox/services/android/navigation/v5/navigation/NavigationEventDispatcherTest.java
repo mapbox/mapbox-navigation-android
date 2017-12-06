@@ -5,14 +5,14 @@ import android.location.Location;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mapbox.directions.v5.DirectionsAdapterFactory;
-import com.mapbox.directions.v5.models.DirectionsResponse;
-import com.mapbox.directions.v5.models.DirectionsRoute;
-import com.mapbox.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListener;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListeners;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -44,7 +44,9 @@ public class NavigationEventDispatcherTest extends BaseTest {
   @Mock
   ProgressChangeListener progressChangeListener;
   @Mock
-  NavigationMetricListener navigationMetricListener;
+  NavigationMetricListeners.EventListeners eventListeners;
+  @Mock
+  NavigationMetricListeners.ArrivalListener arrivalListener;
   @Mock
   OffRouteListener offRouteListener;
   @Mock
@@ -257,10 +259,10 @@ public class NavigationEventDispatcherTest extends BaseTest {
 
   @Test
   public void setNavigationMetricListener_didGetSet() throws Exception {
-    navigationEventDispatcher.setNavigationMetricListener(navigationMetricListener);
+    navigationEventDispatcher.addMetricEventListeners(eventListeners);
     navigationEventDispatcher.onProgressChange(location, routeProgress);
 
-    verify(navigationMetricListener, times(1)).onRouteProgressUpdate(routeProgress);
+    verify(eventListeners, times(1)).onRouteProgressUpdate(routeProgress);
   }
 
   @Test
@@ -268,7 +270,8 @@ public class NavigationEventDispatcherTest extends BaseTest {
     RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
     int lastStepIndex = lastLeg.steps().indexOf(lastLeg.steps().get(lastLeg.steps().size() - 1));
 
-    navigationEventDispatcher.setNavigationMetricListener(navigationMetricListener);
+    navigationEventDispatcher.addMetricEventListeners(eventListeners);
+    navigationEventDispatcher.addMetricArrivalListener(arrivalListener);
 
     // Progress that hasn't arrived
     RouteProgress routeProgressDidNotArrive = RouteProgress.builder()
@@ -281,8 +284,8 @@ public class NavigationEventDispatcherTest extends BaseTest {
       .build();
 
     navigationEventDispatcher.onProgressChange(location, routeProgressDidNotArrive);
-    verify(navigationMetricListener, times(1)).onRouteProgressUpdate(routeProgressDidNotArrive);
-    verify(navigationMetricListener, times(0)).onArrival(location, routeProgressDidNotArrive);
+    verify(eventListeners, times(1)).onRouteProgressUpdate(routeProgressDidNotArrive);
+    verify(arrivalListener, times(0)).onArrival(location, routeProgressDidNotArrive);
 
     // Progress that has arrived
     RouteProgress routeProgressDidArrive = RouteProgress.builder()
@@ -295,7 +298,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
       .build();
 
     navigationEventDispatcher.onProgressChange(location, routeProgressDidArrive);
-    verify(navigationMetricListener, times(1)).onRouteProgressUpdate(routeProgressDidArrive);
-    verify(navigationMetricListener, times(1)).onArrival(location, routeProgressDidArrive);
+    verify(eventListeners, times(1)).onRouteProgressUpdate(routeProgressDidArrive);
+    verify(arrivalListener, times(1)).onArrival(location, routeProgressDidArrive);
   }
 }

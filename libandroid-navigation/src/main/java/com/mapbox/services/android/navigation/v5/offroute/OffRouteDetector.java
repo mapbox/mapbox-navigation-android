@@ -2,7 +2,7 @@ package com.mapbox.services.android.navigation.v5.offroute;
 
 import android.location.Location;
 
-import com.mapbox.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
@@ -10,7 +10,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOpti
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.navigation.v5.utils.ToleranceUtils;
-import com.mapbox.services.constants.Constants;
+import com.mapbox.core.constants.Constants;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
@@ -34,9 +34,6 @@ public class OffRouteDetector extends OffRoute {
 
     if (!validOffRoute(location, options)) {
       return false;
-    } else {
-      // Valid off-route
-      lastReroutePoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     }
 
     Point futurePoint = getFuturePosition(location, options);
@@ -50,8 +47,8 @@ public class OffRouteDetector extends OffRoute {
     // Check to see if the user is moving away from the maneuver. Here, we store an array of
     // distances. If the current distance is greater than the last distance, add it to the array. If
     // the array grows larger than x, reroute the user.
-    if (movingAwayFromManeuver(routeProgress, recentDistancesFromManeuverInMeters,
-      futurePoint)) {
+    if (movingAwayFromManeuver(routeProgress, recentDistancesFromManeuverInMeters, futurePoint)) {
+      updateLastReroutePoint(location);
       return true;
     }
 
@@ -68,6 +65,11 @@ public class OffRouteDetector extends OffRoute {
         return false;
       }
     }
+
+    if (isOffRoute) {
+      updateLastReroutePoint(location);
+    }
+
     return isOffRoute;
   }
 
@@ -88,6 +90,9 @@ public class OffRouteDetector extends OffRoute {
     if (lastReroutePoint != null) {
       distanceFromLastReroute = TurfMeasurement.distance(lastReroutePoint,
         currentPoint, TurfConstants.UNIT_METERS);
+    } else {
+      // If null, this is our first update - set the last reroute point to the given location
+      updateLastReroutePoint(location);
     }
     return distanceFromLastReroute > options.minimumDistanceBeforeRerouting();
   }
@@ -157,5 +162,9 @@ public class OffRouteDetector extends OffRoute {
       futurePoint,
       snappedPoint,
       TurfConstants.UNIT_METERS);
+  }
+
+  private void updateLastReroutePoint(Location location) {
+    lastReroutePoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
   }
 }

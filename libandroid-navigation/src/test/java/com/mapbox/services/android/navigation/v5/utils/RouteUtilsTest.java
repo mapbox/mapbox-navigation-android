@@ -2,10 +2,10 @@ package com.mapbox.services.android.navigation.v5.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mapbox.directions.v5.DirectionsAdapterFactory;
-import com.mapbox.directions.v5.models.DirectionsResponse;
-import com.mapbox.directions.v5.models.DirectionsRoute;
-import com.mapbox.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -55,27 +55,6 @@ public class RouteUtilsTest extends BaseTest {
   }
 
   @Test
-  public void isDepartureEvent_returnsTrueWhenManeuverTypeDepart() throws Exception {
-    RouteProgress defaultRouteProgress = obtainDefaultRouteProgress();
-
-    boolean isDepartureEvent = RouteUtils.isDepartureEvent(defaultRouteProgress);
-
-    assertTrue(isDepartureEvent);
-  }
-
-  @Test
-  public void isDepartureEvent_returnsFalseWhenManeuverTypeIsNotDepart() throws Exception {
-    RouteProgress defaultRouteProgress = obtainDefaultRouteProgress();
-    RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
-      .stepIndex(1)
-      .build();
-
-    boolean isDepartureEvent = RouteUtils.isDepartureEvent(theRouteProgress);
-
-    assertFalse(isDepartureEvent);
-  }
-
-  @Test
   public void isArrivalEvent_returnsTrueWhenManeuverTypeIsArrival_andIsValidMetersRemaining() throws Exception {
     DirectionsRoute aRoute = obtainADirectionsRoute();
     int lastStepIndex = obtainLastStepIndex(aRoute);
@@ -99,6 +78,7 @@ public class RouteUtilsTest extends BaseTest {
     RouteProgress defaultRouteProgress = obtainDefaultRouteProgress();
     RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
       .stepIndex(lastStepIndex)
+      .legDistanceRemaining(100)
       .build();
 
     boolean isArrivalEvent = RouteUtils.isArrivalEvent(theRouteProgress);
@@ -107,18 +87,18 @@ public class RouteUtilsTest extends BaseTest {
   }
 
   @Test
-  public void isArrivalEvent_returnsFalseWhenManeuverTypeIsNotArrival_andIsValidMetersRemaining() throws Exception {
+  public void isArrivalEvent_returnsTrueWhenUpcomingManeuverTypeIsArrival_andIsValidMetersRemaining() throws Exception {
     DirectionsRoute aRoute = obtainADirectionsRoute();
     int lastStepIndex = obtainLastStepIndex(aRoute);
     RouteProgress defaultRouteProgress = obtainDefaultRouteProgress();
     RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
-      .stepDistanceRemaining(30)
+      .legDistanceRemaining(30)
       .stepIndex(lastStepIndex - 1)
       .build();
 
     boolean isArrivalEvent = RouteUtils.isArrivalEvent(theRouteProgress);
 
-    assertFalse(isArrivalEvent);
+    assertTrue(isArrivalEvent);
   }
 
   @Test

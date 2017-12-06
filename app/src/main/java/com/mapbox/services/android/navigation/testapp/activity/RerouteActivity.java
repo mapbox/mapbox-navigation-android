@@ -1,19 +1,24 @@
 package com.mapbox.services.android.navigation.testapp.activity;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 
-import com.mapbox.directions.v5.models.DirectionsResponse;
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.annotations.Polyline;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -31,7 +36,6 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 
 import java.util.ArrayList;
@@ -50,14 +54,19 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @BindView(R.id.mapView)
   MapView mapView;
-  Point origin = Point.fromLngLat(-87.6900, 41.8529);
-  Point destination = Point.fromLngLat(-87.8921, 41.9794);
+  @BindView(android.R.id.content)
+  View contentLayout;
+
+  private Point origin = Point.fromLngLat(-87.6900, 41.8529);
+  private Point destination = Point.fromLngLat(-87.8921, 41.9794);
+  private Polyline polyline;
+
   private LocationLayerPlugin locationLayerPlugin;
-  private LocationEngine locationEngine;
+  private MockLocationEngine mockLocationEngine;
   private MapboxNavigation navigation;
   private MapboxMap mapboxMap;
   private boolean running;
-  private Polyline polyline;
+  private boolean tracking;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -70,134 +79,9 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
     // Initialize MapboxNavigation and add listeners
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().isDebugLoggingEnabled(true).build();
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken(), options);
+    navigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken(), options);
     navigation.addNavigationEventListener(this);
-  }
-
-  @Override
-  public void onMapReady(MapboxMap mapboxMap) {
-    this.mapboxMap = mapboxMap;
-    mapboxMap.setOnMapClickListener(this);
-
-    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, null);
-    locationLayerPlugin.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
-
-    // Use the mockLocationEngine
-    locationEngine = new MockLocationEngine(1000, 30, false);
-    locationEngine.addLocationEngineListener(this);
-
     navigation.addMilestoneEventListener(this);
-    navigation.setLocationEngine(locationEngine);
-
-    // Acquire the navigation's route
-    getRoute(origin, destination, null);
-  }
-
-  @Override
-  public void onMapClick(@NonNull LatLng point) {
-    if (!running || mapboxMap == null) {
-      return;
-    }
-
-    mapboxMap.addMarker(new MarkerOptions().position(point));
-    mapboxMap.setOnMapClickListener(null);
-
-    Point newDestination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
-    ((MockLocationEngine) locationEngine).moveToLocation(newDestination);
-  }
-
-  @Override
-  public void onRunning(boolean running) {
-    this.running = running;
-    if (running) {
-      navigation.addOffRouteListener(this);
-      navigation.addProgressChangeListener(this);
-    }
-  }
-
-  @Override
-  public void userOffRoute(Location location) {
-    Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    getRoute(newOrigin, destination, location.getBearing());
-    Timber.d("offRoute");
-    mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
-  }
-
-
-  @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    locationLayerPlugin.forceLocationUpdate(location);
-    Timber.d("onRouteProgressChange: %s", routeProgress.currentLegProgress().stepIndex());
-  }
-
-  @Override
-  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
-    Timber.d("onMilestoneEvent - Current Instruction: " + instruction);
-  }
-
-  @Override
-  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-    Timber.d(call.request().url().toString());
-    if (response.body() != null) {
-      if (response.body().routes() != null) {
-        if (!response.body().routes().isEmpty()) {
-          DirectionsRoute route = response.body().routes().get(0);
-          // First run
-          drawRoute(route);
-          if (!running) {
-            ((MockLocationEngine) locationEngine).setRoute(route);
-          }
-          navigation.startNavigation(route);
-        }
-      }
-    }
-  }
-
-  private void getRoute(Point origin, Point destination, Float bearing) {
-    Double heading = bearing == null ? null : bearing.doubleValue();
-    NavigationRoute.builder()
-      .origin(origin, heading, 90d)
-      .destination(destination)
-      .accessToken(Mapbox.getAccessToken())
-      .build().getRoute(this);
-  }
-
-  @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-    Timber.e("Getting directions failed: ", throwable);
-  }
-
-  private void drawRoute(DirectionsRoute route) {
-    List<LatLng> points = new ArrayList<>();
-    List<Point> coords = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6).coordinates();
-
-    for (Point point : coords) {
-      points.add(new LatLng(point.latitude(), point.longitude()));
-    }
-
-    if (!points.isEmpty()) {
-
-      if (polyline != null) {
-        mapboxMap.removePolyline(polyline);
-      }
-
-      // Draw polyline on map
-      polyline = mapboxMap.addPolyline(new PolylineOptions()
-        .addAll(points)
-        .color(Color.parseColor("#4264fb"))
-        .width(5));
-    }
-  }
-
-  @Override
-  @SuppressWarnings( {"MissingPermission"})
-  public void onConnected() {
-    locationEngine.requestLocationUpdates();
-  }
-
-  @Override
-  public void onLocationChanged(Location location) {
-
   }
 
   @Override
@@ -206,6 +90,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     mapView.onResume();
   }
 
+  @SuppressLint("MissingPermission")
   @Override
   protected void onStart() {
     super.onStart();
@@ -216,15 +101,17 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   }
 
   @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    mapView.onSaveInstanceState(outState);
+  }
+
+  @Override
   protected void onStop() {
     super.onStop();
     mapView.onStop();
 
-    if (locationEngine != null) {
-      locationEngine.removeLocationEngineListener(this);
-      locationEngine.removeLocationUpdates();
-      locationEngine.deactivate();
-    }
+    shutdownLocationEngine();
 
     if (locationLayerPlugin != null) {
       locationLayerPlugin.onStop();
@@ -252,20 +139,160 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
+    shutdownNavigation();
+  }
 
-    // Remove all navigation listeners
-    navigation.removeNavigationEventListener(this);
-    navigation.removeProgressChangeListener(this);
+  @SuppressLint("MissingPermission")
+  @Override
+  public void onMapReady(MapboxMap mapboxMap) {
+    this.mapboxMap = mapboxMap;
+    mapboxMap.setOnMapClickListener(this);
 
-    navigation.onDestroy();
+    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, null);
+    locationLayerPlugin.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
 
-    // End the navigation session
-    navigation.endNavigation();
+    // Setup the mockLocationEngine
+    mockLocationEngine = new MockLocationEngine(1000, 30, false);
+    mockLocationEngine.addLocationEngineListener(this);
+    navigation.setLocationEngine(mockLocationEngine);
+
+    // Acquire the navigation route
+    getRoute(origin, destination, null);
   }
 
   @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    mapView.onSaveInstanceState(outState);
+  public void onConnected() {
+    // No-op - mock automatically begins pushing updates
+  }
+
+  @Override
+  public void onLocationChanged(Location location) {
+    if (!tracking) {
+      locationLayerPlugin.forceLocationUpdate(location);
+    }
+  }
+
+  @Override
+  public void onMapClick(@NonNull LatLng point) {
+    if (!running || mapboxMap == null) {
+      return;
+    }
+
+    mapboxMap.addMarker(new MarkerOptions().position(point));
+    mapboxMap.setOnMapClickListener(null);
+
+    Point newDestination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
+    mockLocationEngine.moveToLocation(newDestination);
+    destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
+    tracking = false;
+  }
+
+  @Override
+  public void onRunning(boolean running) {
+    this.running = running;
+    if (running) {
+      navigation.addOffRouteListener(this);
+      navigation.addProgressChangeListener(this);
+    }
+  }
+
+  @Override
+  public void userOffRoute(Location location) {
+    Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    getRoute(newOrigin, destination, location.getBearing());
+    Snackbar.make(contentLayout, "User Off Route", Snackbar.LENGTH_SHORT).show();
+    mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
+  }
+
+
+  @Override
+  public void onProgressChange(Location location, RouteProgress routeProgress) {
+    if (tracking) {
+      locationLayerPlugin.forceLocationUpdate(location);
+      CameraPosition cameraPosition = new CameraPosition.Builder()
+        .zoom(15)
+        .target(new LatLng(location.getLatitude(), location.getLongitude()))
+        .bearing(location.getBearing())
+        .build();
+      mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000);
+    }
+  }
+
+  @Override
+  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
+    Timber.d("onMilestoneEvent - Current Instruction: " + instruction);
+  }
+
+  @Override
+  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+    Timber.d(call.request().url().toString());
+    if (response.body() != null) {
+      if (!response.body().routes().isEmpty()) {
+        // Extract the route
+        DirectionsRoute route = response.body().routes().get(0);
+        // Draw it on the map
+        drawRoute(route);
+        // Start mocking the new route
+        resetLocationEngine(route);
+        navigation.startNavigation(route);
+        mapboxMap.setOnMapClickListener(this);
+        tracking = true;
+      }
+    }
+  }
+
+  @Override
+  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+    Timber.e("Getting directions failed: ", throwable);
+  }
+
+  private void getRoute(Point origin, Point destination, Float bearing) {
+    Double heading = bearing == null ? null : bearing.doubleValue();
+    NavigationRoute.builder()
+      .origin(origin, heading, 90d)
+      .destination(destination)
+      .accessToken(Mapbox.getAccessToken())
+      .build().getRoute(this);
+  }
+
+  private void drawRoute(DirectionsRoute route) {
+    List<LatLng> points = new ArrayList<>();
+    List<Point> coords = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6).coordinates();
+
+    for (Point point : coords) {
+      points.add(new LatLng(point.latitude(), point.longitude()));
+    }
+
+    if (!points.isEmpty()) {
+
+      if (polyline != null) {
+        mapboxMap.removePolyline(polyline);
+      }
+
+      // Draw polyline on map
+      polyline = mapboxMap.addPolyline(new PolylineOptions()
+        .addAll(points)
+        .color(Color.parseColor("#4264fb"))
+        .width(5));
+    }
+  }
+
+  private void resetLocationEngine(DirectionsRoute directionsRoute) {
+    mockLocationEngine.deactivate();
+    mockLocationEngine.setRoute(directionsRoute);
+  }
+
+  private void shutdownLocationEngine() {
+    if (mockLocationEngine != null) {
+      mockLocationEngine.removeLocationEngineListener(this);
+      mockLocationEngine.removeLocationUpdates();
+      mockLocationEngine.deactivate();
+    }
+  }
+
+  private void shutdownNavigation() {
+    navigation.removeNavigationEventListener(this);
+    navigation.removeProgressChangeListener(this);
+    navigation.onDestroy();
   }
 }

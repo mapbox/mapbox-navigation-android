@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
-import com.mapbox.directions.v5.models.StepIntersection;
+import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;

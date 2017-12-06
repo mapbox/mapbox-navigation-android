@@ -53,7 +53,11 @@ dependencies {
   annotationProcessor dependenciesList.lifecycleCompiler
 
   // Mapbox plugins
-  api dependenciesList.locationLayerPlugin
+  api(dependenciesList.locationLayerPlugin) {
+    exclude module: 'mapbox-android-services'
+    exclude module: 'mapbox-android-sdk'
+  }
+  api dependenciesList.mapboxJavaServices
 
   // AutoValues
   annotationProcessor dependenciesList.autoValue

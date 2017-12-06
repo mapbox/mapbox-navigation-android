@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Build;
@@ -10,7 +11,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
@@ -64,6 +65,12 @@ public class NavigationService extends Service implements LocationEngineListener
     thread.start();
     thread.prepareHandler();
     recentDistancesFromManeuverInMeters = new RingBuffer<>(3);
+  }
+
+  @Override
+  public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    NavigationTelemetry.getInstance().onConfigurationChange();
   }
 
   /**

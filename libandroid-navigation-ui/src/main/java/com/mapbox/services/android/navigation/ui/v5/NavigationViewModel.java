@@ -12,7 +12,7 @@ import android.location.Location;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;

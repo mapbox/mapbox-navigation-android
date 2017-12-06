@@ -1,20 +1,18 @@
 package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
 import android.location.Location;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
-import com.mapbox.directions.v5.models.DirectionsRoute;
-import com.mapbox.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
-import com.mapbox.services.constants.Constants;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @AutoValue
 public abstract class SessionState {
@@ -61,15 +59,8 @@ public abstract class SessionState {
     return PolylineUtils.encode(geometryPositions, Constants.PRECISION_5);
   }
 
-  public int secondsSinceLastReroute() {
-    if (lastRerouteDate() == null || eventDate() == null) {
-      return -1;
-    }
-    long diffInMs = eventDate().getTime() - lastRerouteDate().getTime();
-    return (int) TimeUnit.MILLISECONDS.toSeconds(diffInMs);
-  }
+  public abstract int secondsSinceLastReroute();
 
-  @Nullable
   public abstract MetricsRouteProgress eventRouteProgress();
 
   @Nullable
@@ -100,13 +91,11 @@ public abstract class SessionState {
   @Nullable
   public abstract String requestIdentifier();
 
-  @Nullable
-  public abstract Date lastRerouteDate();
-
   public abstract boolean mockLocation();
 
   public abstract int rerouteCount();
 
+  @Nullable
   public abstract Date startTimestamp();
 
   @Nullable
@@ -121,15 +110,16 @@ public abstract class SessionState {
       .eventRouteDistanceCompleted(0d)
       .sessionIdentifier("")
       .mockLocation(false)
-      .startTimestamp(new Date())
       .rerouteCount(0)
+      .secondsSinceLastReroute(-1)
+      .eventRouteProgress(new MetricsRouteProgress(null))
       .locationEngineName("");
   }
 
   @AutoValue.Builder
   public abstract static class Builder {
 
-    public abstract Builder eventRouteProgress(@Nullable MetricsRouteProgress routeProgress);
+    public abstract Builder eventRouteProgress(MetricsRouteProgress routeProgress);
 
     public abstract Builder eventLocation(@Nullable Location eventLocation);
 
@@ -151,13 +141,13 @@ public abstract class SessionState {
 
     public abstract Builder requestIdentifier(@Nullable String requestIdentifier);
 
-    public abstract Builder lastRerouteDate(@Nullable Date lastRerouteDate);
+    public abstract Builder secondsSinceLastReroute(int seconds);
 
     public abstract Builder mockLocation(boolean mockLocation);
 
     public abstract Builder rerouteCount(int rerouteCount);
 
-    public abstract Builder startTimestamp(@NonNull Date startTimeStamp);
+    public abstract Builder startTimestamp(Date startTimeStamp);
 
     public abstract Builder arrivalTimestamp(@Nullable Date arrivalTimestamp);
 

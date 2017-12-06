@@ -8,8 +8,8 @@ import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mapbox.directions.v5.DirectionsAdapterFactory;
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
@@ -113,6 +113,9 @@ public class NavigationLauncher {
   }
 
   private static void storeCoordinateValues(NavigationViewOptions options, SharedPreferences.Editor editor) {
+    // Reset any previous value for the route json
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, "");
+    // Store the coordinates
     editor.putLong(NavigationConstants.NAVIGATION_VIEW_ORIGIN_LAT_KEY,
       Double.doubleToRawLongBits(options.origin().latitude()));
     editor.putLong(NavigationConstants.NAVIGATION_VIEW_ORIGIN_LNG_KEY,

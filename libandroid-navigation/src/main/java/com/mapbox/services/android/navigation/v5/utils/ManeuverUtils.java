@@ -2,8 +2,8 @@ package com.mapbox.services.android.navigation.v5.utils;
 
 import android.text.TextUtils;
 
-import com.mapbox.directions.v5.models.LegStep;
-import com.mapbox.directions.v5.models.StepManeuver;
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.StepManeuver;
 import com.mapbox.services.android.navigation.R;
 
 public class ManeuverUtils {

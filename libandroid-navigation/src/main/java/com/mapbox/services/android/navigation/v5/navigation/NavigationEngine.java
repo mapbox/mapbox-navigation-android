@@ -6,7 +6,7 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -25,7 +25,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.routeDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.stepDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.userSnappedToRoutePosition;
-import static com.mapbox.services.constants.Constants.PRECISION_6;
+import static com.mapbox.core.constants.Constants.PRECISION_6;
 
 /**
  * This class extends handler thread to run most of the navigation calculations on a separate
