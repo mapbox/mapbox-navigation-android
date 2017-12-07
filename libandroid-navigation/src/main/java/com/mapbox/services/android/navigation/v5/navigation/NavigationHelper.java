@@ -9,6 +9,7 @@ import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
+import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
@@ -19,6 +20,8 @@ import com.mapbox.turf.TurfMisc;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID;
 
 /**
  * This contains several single purpose methods that help out when a new location update occurs and
@@ -56,6 +59,8 @@ class NavigationHelper {
     if (milestone.getInstruction() != null) {
       // Create a new custom instruction based on the Instruction packaged with the Milestone
       return milestone.getInstruction().buildInstruction(routeProgress);
+    } else if (milestone.getIdentifier() == VOICE_INSTRUCTION_MILESTONE_ID) {
+      return ((VoiceInstructionMilestone) milestone).announcement();
     }
     return "";
   }
