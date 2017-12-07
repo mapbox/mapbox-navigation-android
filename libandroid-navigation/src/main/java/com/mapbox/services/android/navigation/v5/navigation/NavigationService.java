@@ -14,7 +14,6 @@ import android.support.annotation.Nullable;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
-import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -25,7 +24,6 @@ import java.util.List;
 import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
 
 /**
@@ -210,11 +208,7 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onMilestoneTrigger(List<Milestone> triggeredMilestones, RouteProgress routeProgress) {
     for (Milestone milestone : triggeredMilestones) {
       String instruction = buildInstructionString(routeProgress, milestone);
-      if (milestone.getIdentifier() == VOICE_INSTRUCTION_MILESTONE_ID) {
-        instruction = ((VoiceInstructionMilestone) milestone).announcement();
-      }
-      mapboxNavigation.getEventDispatcher().onMilestoneEvent(
-        routeProgress, instruction, milestone.getIdentifier());
+      mapboxNavigation.getEventDispatcher().onMilestoneEvent(routeProgress, instruction, milestone);
     }
   }
 
