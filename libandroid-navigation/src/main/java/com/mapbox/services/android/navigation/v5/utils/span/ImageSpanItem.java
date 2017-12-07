@@ -29,7 +29,9 @@ public class ImageSpanItem implements SpanItem {
   private static Drawable loadImage(String url) {
     try {
       InputStream stream = (InputStream) new URL(url).getContent();
-      return Drawable.createFromStream(stream, IMAGE_SPAN_SRC_NAME);
+      Drawable drawable = Drawable.createFromStream(stream, IMAGE_SPAN_SRC_NAME);
+      drawable.setBounds(0, 0, 32, 32);
+      return drawable;
     } catch (Exception e) {
       return null;
     }

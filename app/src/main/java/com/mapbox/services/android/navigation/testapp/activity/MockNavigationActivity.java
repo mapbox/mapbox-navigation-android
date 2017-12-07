@@ -1,18 +1,25 @@
 package com.mapbox.services.android.navigation.testapp.activity;
 
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ImageSpan;
+import android.text.style.URLSpan;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -42,6 +49,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.span.SpanUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
@@ -69,6 +77,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   @BindView(R.id.startRouteButton)
   Button startRouteButton;
+
+  @BindView(R.id.bannerText)
+  TextView bannerText;
 
   private MapboxMap mapboxMap;
   private boolean running;
@@ -211,6 +222,17 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
             DirectionsRoute directionsRoute = response.body().routes().get(0);
             MockNavigationActivity.this.route = directionsRoute;
             navigationMapRoute.addRoutes(response.body().routes());
+
+            for (LegStep step : directionsRoute.legs().get(0).steps()) {
+              String url = step.bannerInstructions().get(0).primary().components().get(0).imageBaseUrl();
+              if (url != null) {
+                Timber.d("Image URL: " + url);
+                SpannableStringBuilder builder = new SpannableStringBuilder("Shield URL: ");
+                builder.append("Shield URL", new ImageSpan(MockNavigationActivity.this, Uri.parse(url)), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                bannerText.setText(builder);
+                return;
+              }
+            }
           }
         }
       }

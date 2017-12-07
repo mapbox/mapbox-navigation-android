@@ -44,13 +44,12 @@ import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 
 import java.text.DecimalFormat;
 
@@ -666,8 +665,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     // New primaryText instruction
     String currentPrimaryText = upcomingPrimaryText.getText().toString();
     return !currentPrimaryText.isEmpty()
-      && !TextUtils.isEmpty(model.getPrimaryText())
-      && !currentPrimaryText.contentEquals(model.getPrimaryText());
+      && !TextUtils.isEmpty(model.getPrimaryTextInstruction())
+      && !currentPrimaryText.contentEquals(model.getPrimaryTextInstruction());
   }
 
   /**
@@ -679,8 +678,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     // New primaryText instruction
     String currentSecondaryText = upcomingSecondaryText.getText().toString();
     return !currentSecondaryText.isEmpty()
-      && !TextUtils.isEmpty(model.getSecondaryText())
-      && !currentSecondaryText.contentEquals(model.getSecondaryText());
+      && !TextUtils.isEmpty(model.getSecondaryTextInstruction())
+      && !currentSecondaryText.contentEquals(model.getSecondaryTextInstruction());
   }
 
   /**
@@ -689,16 +688,16 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model provides instruction text
    */
   private void textInstructions(InstructionModel model) {
-    if (!TextUtils.isEmpty(model.getPrimaryText())) {
-      upcomingPrimaryText.setText(StringAbbreviator.abbreviate(model.getPrimaryText()));
+    if (!TextUtils.isEmpty(model.getPrimaryTextInstruction())) {
+      upcomingPrimaryText.setText(model.getPrimaryTextInstruction());
     }
-    if (!TextUtils.isEmpty(model.getSecondaryText())) {
+    if (!TextUtils.isEmpty(model.getSecondaryTextInstruction())) {
       if (upcomingSecondaryText.getVisibility() == GONE) {
         upcomingSecondaryText.setVisibility(VISIBLE);
         upcomingPrimaryText.setMaxLines(1);
         adjustBannerTextVerticalBias(0.65f);
       }
-      upcomingSecondaryText.setText(StringAbbreviator.abbreviate(model.getSecondaryText()));
+      upcomingSecondaryText.setText(model.getSecondaryTextInstruction());
     } else {
       upcomingPrimaryText.setMaxLines(2);
       upcomingSecondaryText.setVisibility(GONE);

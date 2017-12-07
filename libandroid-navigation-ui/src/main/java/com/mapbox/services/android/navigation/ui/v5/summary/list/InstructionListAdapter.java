@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.summary.list;
 import android.content.res.Configuration;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
+import com.mapbox.services.android.navigation.v5.utils.span.SpanUtils;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -48,7 +50,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     if (stepList.get(position) != null) {
       LegStep step = stepList.get(position);
       InstructionText instructionText = new InstructionText(stepList.get(position));
-      updatePrimaryText(holder, instructionText.getPrimaryText());
+      updatePrimaryText(holder, SpanUtils.buildInstructionSpanItems(step.bannerInstructions().get(0).primary()));
       updateSecondaryText(holder, instructionText.getSecondaryText());
       updateManeuverView(holder, step);
       holder.stepDistanceText.setText(DistanceUtils
@@ -73,7 +75,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     notifyDataSetChanged();
   }
 
-  private void updatePrimaryText(InstructionViewHolder holder, String primaryText) {
+  private void updatePrimaryText(InstructionViewHolder holder, SpannableStringBuilder primaryText) {
     holder.stepPrimaryText.setText(primaryText);
   }
 

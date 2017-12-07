@@ -1,14 +1,18 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
+import android.support.annotation.NonNull;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 
+import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.StepIntersection;
+import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
+import com.mapbox.services.android.navigation.v5.utils.span.SpanUtils;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -16,7 +20,8 @@ import java.util.List;
 public class InstructionModel {
 
   private SpannableStringBuilder stepDistanceRemaining;
-  private InstructionText bannerInstructionText;
+  private SpannableStringBuilder primaryTextInstruction;
+  private SpannableStringBuilder secondaryTextInstruction;
   private InstructionText thenInstructionText;
   private String maneuverViewModifier;
   private String maneuverViewType;
@@ -26,6 +31,13 @@ public class InstructionModel {
   private RouteProgress progress;
   private int unitType;
   private boolean shouldShowThenStep;
+
+  public InstructionModel(RouteProgress progress, BannerInstructionMilestone milestone,
+                           DecimalFormat decimalFormat, @NavigationUnitType.UnitType int unitType) {
+    this.progress = progress;
+    this.unitType = unitType;
+    buildInstructionModel(progress, milestone, decimalFormat, unitType);
+  }
 
   public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat,
                           @NavigationUnitType.UnitType int unitType) {
@@ -38,20 +50,12 @@ public class InstructionModel {
     return stepDistanceRemaining;
   }
 
-  String getPrimaryText() {
-    if (bannerInstructionText != null) {
-      return bannerInstructionText.getPrimaryText();
-    } else {
-      return "";
-    }
+  SpannableStringBuilder getPrimaryTextInstruction() {
+    return primaryTextInstruction;
   }
 
-  String getSecondaryText() {
-    if (bannerInstructionText != null) {
-      return bannerInstructionText.getSecondaryText();
-    } else {
-      return "";
-    }
+  SpannableStringBuilder getSecondaryTextInstruction() {
+    return secondaryTextInstruction;
   }
 
   String getThenStepText() {
@@ -94,9 +98,51 @@ public class InstructionModel {
     return unitType;
   }
 
+  private void buildInstructionModel(RouteProgress progress, BannerInstructionMilestone milestone,
+                                     DecimalFormat decimalFormat, int unitType) {
+    formatStepDistance(progress, decimalFormat, unitType);
+    extractStepResources(progress);
+    extractMilestoneInstructions(milestone);
+  }
+
   private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat, int unitType) {
     formatStepDistance(progress, decimalFormat, unitType);
     extractStepResources(progress);
+    extractStepInstructions(progress);
+  }
+
+  private void extractMilestoneInstructions(BannerInstructionMilestone milestone) {
+    primaryTextInstruction = milestone.getPrimaryInstruction();
+    secondaryTextInstruction = milestone.getSecondaryInstruction();
+  }
+
+  private void extractStepInstructions(RouteProgress progress) {
+    primaryTextInstruction = retrievePrimaryInstructionText(progress);
+    secondaryTextInstruction = retrieveSecondaryInstructionText(progress);
+  }
+
+  @NonNull
+  private SpannableStringBuilder retrievePrimaryInstructionText(RouteProgress progress) {
+    List<BannerInstructions> bannerInstructions = progress.currentLegProgress().currentStep().bannerInstructions();
+    if (bannerInstructions != null
+      && !bannerInstructions.isEmpty()
+      && bannerInstructions.get(0).primary() != null) {
+      return SpanUtils.buildInstructionSpanItems(bannerInstructions.get(0).primary());
+    } else {
+      return new SpannableStringBuilder("");
+    }
+  }
+
+  @NonNull
+  private SpannableStringBuilder retrieveSecondaryInstructionText(RouteProgress progress) {
+    List<BannerInstructions> bannerInstructions = progress.currentLegProgress().currentStep().bannerInstructions();
+    if (bannerInstructions != null
+      && !bannerInstructions.isEmpty()
+      && bannerInstructions.get(0).secondary() != null) {
+      return SpanUtils.buildInstructionSpanItems(bannerInstructions.get(0).secondary());
+    } else {
+      return new SpannableStringBuilder("");
+    }
   }
 
   private void extractStepResources(RouteProgress progress) {
@@ -108,13 +154,9 @@ public class InstructionModel {
     if (upcomingStep != null && hasManeuver(upcomingStep)) {
       maneuverViewType = upcomingStep.maneuver().type();
       maneuverViewModifier = upcomingStep.maneuver().modifier();
-      // Upcoming instruction text data
-      bannerInstructionText = new InstructionText(upcomingStep);
     } else if (hasManeuver(currentStep)) {
       maneuverViewType = currentStep.maneuver().type();
       maneuverViewModifier = currentStep.maneuver().modifier();
-      // Current instruction text data
-      bannerInstructionText = new InstructionText(currentStep);
     }
 
     // Then step (step after upcoming)

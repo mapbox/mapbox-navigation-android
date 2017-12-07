@@ -1,22 +1,13 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
-import android.text.TextUtils;
-import android.text.style.StyleSpan;
 
-import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
-import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.span.ImageSpanItem;
-import com.mapbox.services.android.navigation.v5.utils.span.SpanItem;
 import com.mapbox.services.android.navigation.v5.utils.span.SpanUtils;
-import com.mapbox.services.android.navigation.v5.utils.span.TextSpanItem;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class BannerInstructionMilestone extends Milestone {
@@ -40,7 +31,7 @@ public class BannerInstructionMilestone extends Milestone {
       stepBannerInstructions = routeProgress.currentLegProgress().currentStep().bannerInstructions();
     }
     for (BannerInstructions instructions : stepBannerInstructions) {
-      if (shouldBeVoiced(routeProgress, instructions)) {
+      if (shouldBeShown(routeProgress, instructions)) {
         buildInstructions(instructions);
         stepBannerInstructions.remove(instructions);
         return true;
@@ -49,35 +40,21 @@ public class BannerInstructionMilestone extends Milestone {
     return false;
   }
 
-  private void buildInstructions(BannerInstructions instructions) {
-    primaryInstruction = SpanUtils.combineSpans(buildSpanItems(instructions.primary()));
-    secondaryInstruction = SpanUtils.combineSpans(buildSpanItems(instructions.secondary()));
-  }
-
-  private List<SpanItem> buildSpanItems(BannerText bannerText) {
-    List<SpanItem> spanItems = new ArrayList<>();
-    if (hasComponents(bannerText)) {
-      for (BannerComponents components : bannerText.components()) {
-        if (!TextUtils.isEmpty(components.imageBaseUrl())) {
-          spanItems.add(new ImageSpanItem(components.imageBaseUrl()));
-        } else {
-          spanItems.add(new TextSpanItem(new StyleSpan(Typeface.BOLD), components.text()));
-        }
-      }
-    }
-    return spanItems;
-  }
-
-  private boolean hasComponents(BannerText text) {
-    return text.components() != null && !text.components().isEmpty();
-  }
-
-  SpannableStringBuilder getPrimaryInstruction() {
+  public SpannableStringBuilder getPrimaryInstruction() {
     return primaryInstruction;
   }
 
-  SpannableStringBuilder getSecondaryInstruction() {
+  public SpannableStringBuilder getSecondaryInstruction() {
     return secondaryInstruction;
+  }
+
+  private void buildInstructions(BannerInstructions instructions) {
+    if (instructions.primary() != null) {
+      primaryInstruction = SpanUtils.buildInstructionSpanItems(instructions.primary());
+    }
+    if (instructions.secondary() != null) {
+      secondaryInstruction = SpanUtils.buildInstructionSpanItems(instructions.secondary());
+    }
   }
 
   /**
@@ -132,7 +109,7 @@ public class BannerInstructionMilestone extends Milestone {
    * @param bannerInstructions given banner instructions from the list of step instructions
    * @return true if time to show the instructions, false if not
    */
-  private boolean shouldBeVoiced(RouteProgress routeProgress, BannerInstructions bannerInstructions) {
+  private boolean shouldBeShown(RouteProgress routeProgress, BannerInstructions bannerInstructions) {
     return bannerInstructions.distanceAlongGeometry()
       >= routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
   }
