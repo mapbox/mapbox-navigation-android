@@ -69,10 +69,8 @@ public class MetricsRouteProgress {
   }
 
   private void obtainLegData(RouteLegProgress legProgress) {
-    currentStepDistance = legProgress.currentStep().distance() != null
-      ? legProgress.currentStep().distance().intValue() : 0;
-    currentStepDuration = legProgress.currentStep().duration() != null
-      ? legProgress.currentStep().duration().intValue() : 0;
+    currentStepDistance = (int) legProgress.currentStep().distance();
+    currentStepDuration = (int) legProgress.currentStep().duration();
     currentStepDistanceRemaining = (int) legProgress.currentStepProgress().distanceRemaining();
     currentStepDurationRemaining = (int) legProgress.currentStepProgress().durationRemaining();
     currentStepName = hasStepName(legProgress) ? legProgress.currentStep().name() : "";

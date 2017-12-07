@@ -6,6 +6,7 @@ import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 
 import com.mapbox.services.android.navigation.v5.utils.span.SpanItem;
+import com.mapbox.services.android.navigation.v5.utils.span.TextSpanItem;
 import com.mapbox.services.android.navigation.v5.utils.span.SpanUtils;
 
 import java.util.ArrayList;
@@ -49,26 +50,26 @@ public class TimeUtils {
       minutes = minutes + 1;
     }
 
-    List<SpanItem> spanItems = new ArrayList<>();
+    List<SpanItem> textSpanItems = new ArrayList<>();
     if (days != 0) {
       String dayFormat = days > 1 ? DAYS : DAY;
-      spanItems.add(new SpanItem(new StyleSpan(Typeface.BOLD), String.valueOf(days)));
-      spanItems.add(new SpanItem(new RelativeSizeSpan(1f), dayFormat));
+      textSpanItems.add(new TextSpanItem(new StyleSpan(Typeface.BOLD), String.valueOf(days)));
+      textSpanItems.add(new TextSpanItem(new RelativeSizeSpan(1f), dayFormat));
     }
     if (hours != 0) {
-      spanItems.add(new SpanItem(new StyleSpan(Typeface.BOLD), String.valueOf(hours)));
-      spanItems.add(new SpanItem(new RelativeSizeSpan(1f), HOUR));
+      textSpanItems.add(new TextSpanItem(new StyleSpan(Typeface.BOLD), String.valueOf(hours)));
+      textSpanItems.add(new TextSpanItem(new RelativeSizeSpan(1f), HOUR));
     }
     if (minutes != 0) {
-      spanItems.add(new SpanItem(new StyleSpan(Typeface.BOLD), String.valueOf(minutes)));
-      spanItems.add(new SpanItem(new RelativeSizeSpan(1f), MINUTE));
+      textSpanItems.add(new TextSpanItem(new StyleSpan(Typeface.BOLD), String.valueOf(minutes)));
+      textSpanItems.add(new TextSpanItem(new RelativeSizeSpan(1f), MINUTE));
     }
     if (days == 0 && hours == 0 && minutes == 0) {
-      spanItems.add(new SpanItem(new StyleSpan(Typeface.BOLD), String.valueOf(1)));
-      spanItems.add(new SpanItem(new RelativeSizeSpan(1f), MINUTE));
+      textSpanItems.add(new TextSpanItem(new StyleSpan(Typeface.BOLD), String.valueOf(1)));
+      textSpanItems.add(new TextSpanItem(new RelativeSizeSpan(1f), MINUTE));
     }
 
-    return SpanUtils.combineSpans(spanItems);
+    return SpanUtils.combineSpans(textSpanItems);
   }
 
   public static long dateDiff(Date date1, Date date2, TimeUnit timeUnit) {
