@@ -11,6 +11,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListeners;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -53,6 +54,8 @@ public class NavigationEventDispatcherTest extends BaseTest {
   NavigationEventListener navigationEventListener;
   @Mock
   Location location;
+  @Mock
+  Milestone milestone;
 
   private NavigationEventDispatcher navigationEventDispatcher;
   private MapboxNavigation navigation;
@@ -89,32 +92,32 @@ public class NavigationEventDispatcherTest extends BaseTest {
 
   @Test
   public void addMilestoneEventListener_didAddListener() throws Exception {
-    navigationEventDispatcher.onMilestoneEvent(routeProgress, "", 0);
-    verify(milestoneEventListener, times(0)).onMilestoneEvent(routeProgress, "", 0);
+    navigationEventDispatcher.onMilestoneEvent(routeProgress, "", milestone);
+    verify(milestoneEventListener, times(0)).onMilestoneEvent(routeProgress, "", milestone);
 
     navigation.addMilestoneEventListener(milestoneEventListener);
-    navigationEventDispatcher.onMilestoneEvent(routeProgress, "", 0);
-    verify(milestoneEventListener, times(1)).onMilestoneEvent(routeProgress, "", 0);
+    navigationEventDispatcher.onMilestoneEvent(routeProgress, "", milestone);
+    verify(milestoneEventListener, times(1)).onMilestoneEvent(routeProgress, "", milestone);
   }
 
   @Test
   public void addMilestoneEventListener_onlyAddsListenerOnce() throws Exception {
-    navigationEventDispatcher.onMilestoneEvent(routeProgress, "", 0);
-    verify(milestoneEventListener, times(0)).onMilestoneEvent(routeProgress, "", 0);
+    navigationEventDispatcher.onMilestoneEvent(routeProgress, "", milestone);
+    verify(milestoneEventListener, times(0)).onMilestoneEvent(routeProgress, "", milestone);
 
     navigation.addMilestoneEventListener(milestoneEventListener);
     navigation.addMilestoneEventListener(milestoneEventListener);
     navigation.addMilestoneEventListener(milestoneEventListener);
-    navigationEventDispatcher.onMilestoneEvent(routeProgress, "", 0);
-    verify(milestoneEventListener, times(1)).onMilestoneEvent(routeProgress, "", 0);
+    navigationEventDispatcher.onMilestoneEvent(routeProgress, "", milestone);
+    verify(milestoneEventListener, times(1)).onMilestoneEvent(routeProgress, "", milestone);
   }
 
   @Test
   public void removeMilestoneEventListener_didRemoveListener() throws Exception {
     navigation.addMilestoneEventListener(milestoneEventListener);
     navigation.removeMilestoneEventListener(milestoneEventListener);
-    navigationEventDispatcher.onMilestoneEvent(routeProgress, "", 0);
-    verify(milestoneEventListener, times(0)).onMilestoneEvent(routeProgress, "", 0);
+    navigationEventDispatcher.onMilestoneEvent(routeProgress, "", milestone);
+    verify(milestoneEventListener, times(0)).onMilestoneEvent(routeProgress, "", milestone);
   }
 
   @Test
@@ -125,8 +128,8 @@ public class NavigationEventDispatcherTest extends BaseTest {
     navigation.addMilestoneEventListener(mock(MilestoneEventListener.class));
 
     navigation.removeMilestoneEventListener(null);
-    navigationEventDispatcher.onMilestoneEvent(routeProgress, "", 0);
-    verify(milestoneEventListener, times(0)).onMilestoneEvent(routeProgress, "", 0);
+    navigationEventDispatcher.onMilestoneEvent(routeProgress, "", milestone);
+    verify(milestoneEventListener, times(0)).onMilestoneEvent(routeProgress, "", milestone);
   }
 
   @Test
