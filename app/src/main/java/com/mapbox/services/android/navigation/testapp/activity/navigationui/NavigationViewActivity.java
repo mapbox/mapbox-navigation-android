@@ -270,7 +270,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
-    return response.body() != null && response.body().routes().size() > 0;
+    return response.body() != null && !response.body().routes().isEmpty();
   }
 
   private void hideLoading() {
