@@ -4,6 +4,7 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListeners;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -104,9 +105,9 @@ class NavigationEventDispatcher {
     }
   }
 
-  void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
+  void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
     for (MilestoneEventListener milestoneEventListener : milestoneEventListeners) {
-      milestoneEventListener.onMilestoneEvent(routeProgress, instruction, identifier);
+      milestoneEventListener.onMilestoneEvent(routeProgress, instruction, milestone);
     }
   }
 
