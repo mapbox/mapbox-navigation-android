@@ -33,6 +33,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private Point origin;
   private Location rawLocation;
   private boolean extractLaunchData = true;
+  private String routeProfile;
   private String unitType;
 
   public RouteViewModel(@NonNull Application application) {
@@ -71,7 +72,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   /**
    * Checks the options used to launch this {@link com.mapbox.services.android.navigation.ui.v5.NavigationView}.
    * <p>
-   * Will launch with either a {@link DirectionsRoute} or pair of {@link Point}s
+   * Will launch with either a {@link DirectionsRoute} or pair of {@link Point}s.
    *
    * @param options holds either a set of {@link Point} coordinates or a {@link DirectionsRoute}
    */
@@ -127,6 +128,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
         .accessToken(Mapbox.getAccessToken())
         .origin(origin, bearing, 90d)
         .voiceUnits(unitType)
+        .profile(routeProfile)
         .destination(destination).build().getRoute(this);
     }
   }
@@ -157,6 +159,8 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private void extractRoute(NavigationViewOptions options) {
     DirectionsRoute route = options.directionsRoute();
     if (route != null) {
+      String profile = options.directionsProfile();
+      routeProfile = profile != null ? profile : route.routeOptions().profile();
       RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
       LegStep lastStep = lastLeg.steps().get(lastLeg.steps().size() - 1);
       destination.setValue(lastStep.maneuver().location());
@@ -173,6 +177,8 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    */
   private void extractCoordinates(NavigationViewOptions options) {
     if (options.origin() != null && options.destination() != null) {
+      String profile = options.directionsProfile();
+      routeProfile = profile != null ? profile : DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
       origin = options.origin();
       destination.setValue(options.destination());
       fetchRouteFromCoordinates();
@@ -189,6 +195,6 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
     return response.body() != null
       && response.body().routes() != null
-      && response.body().routes().size() > 0;
+      && !response.body().routes().isEmpty();
   }
 }

@@ -34,6 +34,7 @@ public class DistanceUtils {
                                                          int unitType) {
 
     boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
+
     String largeUnitFormat = isImperialUnitType ? MILE : KILOMETER;
     String smallUnitFormat = isImperialUnitType ? FEET : METER;
     String largeFinalUnit = isImperialUnitType ? TurfConstants.UNIT_MILES : TurfConstants.UNIT_KILOMETERS;

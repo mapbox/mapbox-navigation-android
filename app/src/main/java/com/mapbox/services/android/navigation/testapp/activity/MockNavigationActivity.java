@@ -30,6 +30,7 @@ import com.mapbox.services.android.navigation.testapp.activity.notification.Cust
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.RouteMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Trigger;
@@ -226,8 +227,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
    */
 
   @Override
-  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
-    Timber.d("Milestone Event Occurred with id: %d", identifier);
+  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
+    Timber.d("Milestone Event Occurred with id: %d", milestone.getIdentifier());
     Timber.d("Voice instruction: %s", instruction);
   }
 

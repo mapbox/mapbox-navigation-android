@@ -176,7 +176,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       @Override
       public void onStyleLoaded(String style) {
         initRoute();
-        initCamera();
         initLocationLayer();
         initLifecycleObservers();
         initNavigationPresenter();
@@ -270,6 +269,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param options with containing route / coordinate data
    */
   public void startNavigation(NavigationViewOptions options) {
+    // Initialize navigation with options from NavigationViewOptions
+    navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
+      options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
+    // Initialize the camera (listens to MapboxNavigation)
+    initCamera();
+    // Everything is setup, subscribe to model updates
+    subscribeViews();
+    // Extract the route data which will begin navigation
     routeViewModel.extractLaunchData(options);
   }
 

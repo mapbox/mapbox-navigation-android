@@ -48,6 +48,8 @@ public abstract class MapboxNavigationOptions {
   @Nullable
   public abstract NavigationNotification navigationNotification();
 
+  public abstract Builder toBuilder();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
