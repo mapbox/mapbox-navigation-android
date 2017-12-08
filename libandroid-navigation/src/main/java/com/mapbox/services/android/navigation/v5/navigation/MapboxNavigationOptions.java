@@ -42,6 +42,8 @@ public abstract class MapboxNavigationOptions {
 
   public abstract int unitType();
 
+  public abstract Builder toBuilder();
+
   @AutoValue.Builder
   public abstract static class Builder {
 

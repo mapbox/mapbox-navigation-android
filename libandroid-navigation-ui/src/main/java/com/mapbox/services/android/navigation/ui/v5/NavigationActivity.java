@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 
@@ -89,7 +90,11 @@ public class NavigationActivity extends AppCompatActivity implements NavigationV
       .getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
     options.shouldSimulateRoute(preferences
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
-    options.unitType(preferences
-      .getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, NavigationUnitType.TYPE_IMPERIAL));
+
+    MapboxNavigationOptions navigationOptions = MapboxNavigationOptions.builder()
+      .unitType(preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE,
+        NavigationUnitType.TYPE_IMPERIAL))
+      .build();
+    options.navigationOptions(navigationOptions);
   }
 }

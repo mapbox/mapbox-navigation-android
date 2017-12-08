@@ -6,6 +6,7 @@ import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.OnLifecycleEvent;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.preference.PreferenceManager;
@@ -25,7 +26,6 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -46,23 +46,16 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
 
   private MapboxNavigation navigation;
   private NavigationInstructionPlayer instructionPlayer;
-  private DecimalFormat decimalFormat;
   private SharedPreferences preferences;
+  private DecimalFormat decimalFormat;
   private int unitType;
   private String feedbackId;
 
   public NavigationViewModel(Application application) {
     super(application);
     preferences = PreferenceManager.getDefaultSharedPreferences(application);
-    initUnitType();
-    initNavigation(application);
     initVoiceInstructions(application);
     initDecimalFormat();
-  }
-
-  @OnLifecycleEvent(Lifecycle.Event.ON_START)
-  public void onStart() {
-    addNavigationListeners();
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -186,6 +179,17 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
     return navigation;
   }
 
+  /**
+   * This method will pass {@link MapboxNavigationOptions} from the {@link NavigationViewOptions}
+   * to this view model to be used to initialize {@link MapboxNavigation}.
+   *
+   * @param options to init MapboxNavigation
+   */
+  void initializeNavigationOptions(Context context, MapboxNavigationOptions options) {
+    initNavigation(context, options);
+    this.unitType = options.unitType();
+  }
+
   void updateRoute(DirectionsRoute route) {
     startNavigation(route);
     isOffRoute.setValue(false);
@@ -198,20 +202,9 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   /**
    * Initializes {@link MapboxNavigation} and adds all views that implement listeners.
    */
-  private void initNavigation(Application application) {
-    navigation = new MapboxNavigation(application.getApplicationContext(), Mapbox.getAccessToken(),
-      MapboxNavigationOptions.builder()
-        .isFromNavigationUi(true)
-        .unitType(unitType)
-        .build());
-  }
-
-  /**
-   * Initializes distance unit (imperial or metric).
-   */
-  private void initUnitType() {
-    unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE,
-      NavigationUnitType.TYPE_IMPERIAL);
+  private void initNavigation(Context context, MapboxNavigationOptions options) {
+    navigation = new MapboxNavigation(context, Mapbox.getAccessToken(), options);
+    addNavigationListeners();
   }
 
   /**
