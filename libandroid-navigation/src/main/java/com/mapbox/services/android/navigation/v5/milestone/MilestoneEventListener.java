@@ -4,6 +4,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 public interface MilestoneEventListener {
 
-  void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier);
+  void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone);
 
 }

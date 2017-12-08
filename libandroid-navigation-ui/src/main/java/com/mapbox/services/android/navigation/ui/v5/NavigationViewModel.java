@@ -20,6 +20,7 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
@@ -106,11 +107,11 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    *
    * @param routeProgress ignored in this scenario
    * @param instruction   to be voiced by the {@link InstructionPlayer}
-   * @param identifier    used to determine the type of milestone
-   * @since 0.6.0
+   * @param milestone     the milestone being triggered
+   * @since 0.8.0
    */
   @Override
-  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
+  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
     instructionPlayer.play(instruction);
   }
 
