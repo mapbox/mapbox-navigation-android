@@ -195,6 +195,6 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
     return response.body() != null
       && response.body().routes() != null
-      && response.body().routes().size() > 0;
+      && !response.body().routes().isEmpty();
   }
 }

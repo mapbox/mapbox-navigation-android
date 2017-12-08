@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.milestone;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
+import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public class VoiceInstructionMilestone extends Milestone {
   private LegStep currentStep;
   private List<VoiceInstructions> stepVoiceInstructions;
 
-  public VoiceInstructionMilestone(Builder builder) {
+  VoiceInstructionMilestone(Builder builder) {
     super(builder);
   }
 
@@ -36,8 +37,14 @@ public class VoiceInstructionMilestone extends Milestone {
     return false;
   }
 
-  public String announcement() {
-    return announcement;
+  @Override
+  public Instruction getInstruction() {
+    return new Instruction() {
+      @Override
+      public String buildInstruction(RouteProgress routeProgress) {
+        return announcement;
+      }
+    };
   }
 
   /**

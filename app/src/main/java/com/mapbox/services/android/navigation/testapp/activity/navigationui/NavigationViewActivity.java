@@ -32,7 +32,6 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.testapp.R;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
@@ -263,7 +262,6 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private void launchNavigationWithRoute() {
     NavigationViewOptions.Builder optionsBuilder = NavigationViewOptions.builder()
-      .unitType(NavigationUnitType.TYPE_IMPERIAL)
       .shouldSimulateRoute(shouldSimulateRoute);
     if (route != null) {
       optionsBuilder.directionsRoute(route);
@@ -272,9 +270,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
-    return response.body() != null
-      && response.body().routes() != null
-      && response.body().routes().size() > 0;
+    return response.body() != null && !response.body().routes().isEmpty();
   }
 
   private void hideLoading() {
