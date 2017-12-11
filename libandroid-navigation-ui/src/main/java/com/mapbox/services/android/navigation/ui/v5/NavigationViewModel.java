@@ -113,8 +113,10 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    */
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
-    if (milestone instanceof VoiceInstructionMilestone) {
+    if (instructionPlayer.isPollyPlayer() && milestone instanceof VoiceInstructionMilestone) {
       instructionPlayer.play(((VoiceInstructionMilestone) milestone).getSsmlAnnouncement());
+    } else {
+      instructionPlayer.play(instruction);
     }
   }
 
