@@ -180,7 +180,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
         initLifecycleObservers();
         initNavigationPresenter();
         initClickListeners();
-        subscribeViews();
         map.setOnScrollListener(NavigationView.this);
         navigationListener.onNavigationReady();
       }
