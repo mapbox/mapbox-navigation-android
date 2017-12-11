@@ -39,9 +39,13 @@ public final class MeasurementUtils {
 
     // Make sure that the step coordinates isn't less than size 2. If the points equal each other,
     // the distance is obviously zero, so return 0 to avoid executing additional unnecessary code.
-    if (lineString.coordinates().size() < 2
+    if (lineString.coordinates().isEmpty()
       || usersRawLocation.equals(lineString.coordinates().get(0))) {
       return 0;
+    }
+    if (lineString.coordinates().size() == 1) {
+      return TurfMeasurement.distance(usersRawLocation, lineString.coordinates().get(0),
+        UNIT_METERS);
     }
 
     Feature feature = TurfMisc.pointOnLine(usersRawLocation, lineString.coordinates());

@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
-import com.mapbox.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.BaseTest;
@@ -10,7 +10,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mapbox.services.constants.Constants.PRECISION_6;
+import static com.mapbox.core.constants.Constants.PRECISION_6;
 import static junit.framework.Assert.assertEquals;
 
 public class MeasurementUtilsTest extends BaseTest {
