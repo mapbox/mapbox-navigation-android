@@ -22,6 +22,7 @@ import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -112,7 +113,11 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    */
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
-    instructionPlayer.play(instruction);
+    if (instructionPlayer.isPollyPlayer() && milestone instanceof VoiceInstructionMilestone) {
+      instructionPlayer.play(((VoiceInstructionMilestone) milestone).getSsmlAnnouncement());
+    } else {
+      instructionPlayer.play(instruction);
+    }
   }
 
   /**

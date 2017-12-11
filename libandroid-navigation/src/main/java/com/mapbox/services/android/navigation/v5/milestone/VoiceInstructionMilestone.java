@@ -11,6 +11,7 @@ import java.util.List;
 public class VoiceInstructionMilestone extends Milestone {
 
   private String announcement;
+  private String ssmlAnnouncement;
   private DirectionsRoute currentRoute;
   private LegStep currentStep;
   private List<VoiceInstructions> stepVoiceInstructions;
@@ -30,6 +31,7 @@ public class VoiceInstructionMilestone extends Milestone {
     for (VoiceInstructions voice : stepVoiceInstructions) {
       if (shouldBeVoiced(routeProgress, voice)) {
         announcement = voice.announcement();
+        ssmlAnnouncement = voice.ssmlAnnouncement();
         stepVoiceInstructions.remove(voice);
         return true;
       }
@@ -45,6 +47,19 @@ public class VoiceInstructionMilestone extends Milestone {
         return announcement;
       }
     };
+  }
+
+  /**
+   * Provide the SSML instruction that can be used with Amazon's AWS Polly.
+   * <p>
+   * This String will provide special markup denoting how certain portions of the announcement
+   * should be pronounced.
+   *
+   * @return announcement with SSML markup
+   * @since 0.8.0
+   */
+  public String getSsmlAnnouncement() {
+    return ssmlAnnouncement;
   }
 
   /**

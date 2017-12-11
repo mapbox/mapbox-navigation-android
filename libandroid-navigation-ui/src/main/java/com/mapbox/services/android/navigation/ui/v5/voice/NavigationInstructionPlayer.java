@@ -17,12 +17,14 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
   private AudioFocusRequest instructionFocusRequest;
   private InstructionPlayer instructionPlayer;
   private InstructionListener instructionListener;
+  private boolean isPollyPlayer;
 
   public NavigationInstructionPlayer(@NonNull Context context, @Nullable String awsPoolId) {
     initAudioManager(context);
     initAudioFocusRequest();
     if (!TextUtils.isEmpty(awsPoolId)) {
       instructionPlayer = new PollyPlayer(context, awsPoolId);
+      isPollyPlayer = true;
     } else {
       instructionPlayer = new DefaultPlayer(context);
     }
@@ -92,6 +94,10 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
     if (instructionListener != null) {
       instructionListener.onError();
     }
+  }
+
+  public boolean isPollyPlayer() {
+    return isPollyPlayer;
   }
 
   private void initAudioManager(Context context) {
