@@ -12,8 +12,8 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
+import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -23,7 +23,6 @@ import java.util.List;
 
 import timber.log.Timber;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
 
 /**
@@ -45,8 +44,8 @@ public class NavigationService extends Service implements LocationEngineListener
 
   private RingBuffer<Integer> recentDistancesFromManeuverInMeters;
   private final IBinder localBinder = new LocalBinder();
-  private NavigationNotification navNotificationManager;
 
+  private NavigationNotification navigationNotification;
   private MapboxNavigation mapboxNavigation;
   private LocationEngine locationEngine;
   private NavigationEngine thread;
@@ -89,72 +88,6 @@ public class NavigationService extends Service implements LocationEngineListener
     super.onDestroy();
   }
 
-  /**
-   * This gets called when {@link MapboxNavigation#startNavigation(DirectionsRoute)} is called and
-   * setups variables among other things on the Navigation Service side.
-   */
-  void startNavigation(MapboxNavigation mapboxNavigation) {
-    this.mapboxNavigation = mapboxNavigation;
-    if (mapboxNavigation.options().enableNotification()) {
-      initializeNotification();
-    }
-    acquireLocationEngine();
-    forceLocationUpdate();
-  }
-
-  /**
-   * builds a new navigation notification instance and attaches it to this service.
-   */
-  private void initializeNotification() {
-    navNotificationManager = new NavigationNotification(this, mapboxNavigation);
-    Notification notifyBuilder
-      = navNotificationManager.buildPersistentNotification(R.layout.layout_notification_default,
-      R.layout.layout_notification_default_big);
-
-    notifyBuilder.flags = Notification.FLAG_FOREGROUND_SERVICE;
-    startForeground(NAVIGATION_NOTIFICATION_ID, notifyBuilder);
-  }
-
-  /**
-   * Specifically removes this locationEngine listener which was added at the very beginning, quits
-   * the thread, and finally stops this service from running in the background.
-   */
-  void endNavigation() {
-    locationEngine.removeLocationEngineListener(this);
-    if (navNotificationManager != null) {
-      navNotificationManager.unregisterReceiver();
-    }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-      thread.quitSafely();
-    } else {
-      thread.quit();
-    }
-  }
-
-  /**
-   * Location engine already checks if the listener isn't already added so no need to check here.
-   * If the user decides to call {@link MapboxNavigation#setLocationEngine(LocationEngine)} during
-   * the navigation session, this gets called again in order to attach the location listener to the
-   * new engine.
-   */
-  void acquireLocationEngine() {
-    locationEngine = mapboxNavigation.getLocationEngine();
-    locationEngine.addLocationEngineListener(this);
-  }
-
-  /**
-   * At the very beginning of navigation session, a forced location update occurs so that the
-   * developer can immediately get a routeProgress object to display information.
-   */
-  @SuppressWarnings("MissingPermission")
-  private void forceLocationUpdate() {
-    Location lastLocation = locationEngine.getLastLocation();
-    if (lastLocation != null) {
-      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(lastLocation, mapboxNavigation,
-        recentDistancesFromManeuverInMeters));
-    }
-  }
-
   @Override
   @SuppressWarnings("MissingPermission")
   public void onConnected() {
@@ -171,22 +104,6 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
-
-  /**
-   * Runs several checks on the actual rawLocation object itself in order to ensure that we are
-   * performing navigation progress on a accurate/valid rawLocation update.
-   */
-  @SuppressWarnings("MissingPermission")
-  private boolean validLocationUpdate(Location location) {
-    if (locationEngine.getLastLocation() == null) {
-      return true;
-    }
-    // If the locations the same as previous, no need to recalculate things
-    return !(location.equals(locationEngine.getLastLocation())
-      || (location.getSpeed() <= 0 && location.hasSpeed())
-      || location.getAccuracy() >= 100);
-  }
-
   /**
    * Corresponds to ProgressChangeListener object, updating the notification and passing information
    * to the navigation event dispatcher.
@@ -194,7 +111,7 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onNewRouteProgress(Location location, RouteProgress routeProgress) {
     if (mapboxNavigation.options().enableNotification()) {
-      navNotificationManager.updateDefaultNotification(routeProgress);
+      navigationNotification.updateNotification(routeProgress);
     }
     mapboxNavigation.getEventDispatcher().onProgressChange(location, routeProgress);
   }
@@ -222,6 +139,121 @@ public class NavigationService extends Service implements LocationEngineListener
       recentDistancesFromManeuverInMeters.clear();
       // Send off route event with current location
       mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
+    }
+  }
+
+  /**
+   * This gets called when {@link MapboxNavigation#startNavigation(DirectionsRoute)} is called and
+   * setups variables among other things on the Navigation Service side.
+   */
+  void startNavigation(MapboxNavigation mapboxNavigation) {
+    this.mapboxNavigation = mapboxNavigation;
+    initNotification(mapboxNavigation);
+    acquireLocationEngine();
+    forceLocationUpdate();
+  }
+
+  /**
+   * Specifically removes this locationEngine listener which was added at the very beginning, quits
+   * the thread, and finally stops this service from running in the background.
+   */
+  void endNavigation() {
+    locationEngine.removeLocationEngineListener(this);
+    unregisterMapboxNotificationReceiver();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+      thread.quitSafely();
+    } else {
+      thread.quit();
+    }
+  }
+
+  /**
+   * Location engine already checks if the listener isn't already added so no need to check here.
+   * If the user decides to call {@link MapboxNavigation#setLocationEngine(LocationEngine)} during
+   * the navigation session, this gets called again in order to attach the location listener to the
+   * new engine.
+   */
+  void acquireLocationEngine() {
+    locationEngine = mapboxNavigation.getLocationEngine();
+    locationEngine.addLocationEngineListener(this);
+  }
+
+  /**
+   * Initializes a notification for this service based on whether it's
+   * enabled in {@link MapboxNavigationOptions} or if the current Android API is
+   * Android O or above (in which case it's required for a foreground service).
+   *
+   * @param mapboxNavigation to retrieve the options
+   */
+  private void initNotification(MapboxNavigation mapboxNavigation) {
+    if (mapboxNavigation.options().enableNotification() || Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      initializeNotification(mapboxNavigation.options());
+    }
+  }
+
+  /**
+   * Builds a new navigation notification instance (either custom or our default implementation)
+   * and attaches it to this service.
+   */
+  private void initializeNotification(MapboxNavigationOptions options) {
+    if (options.navigationNotification() != null) {
+      navigationNotification = options.navigationNotification();
+      Notification notification = navigationNotification.getNotification();
+      int notificationId = navigationNotification.getNotificationId();
+      startForegroundNotification(notification, notificationId);
+    } else {
+      navigationNotification = new MapboxNavigationNotification(this, mapboxNavigation);
+      Notification notification = navigationNotification.getNotification();
+      int notificationId = navigationNotification.getNotificationId();
+      startForegroundNotification(notification, notificationId);
+    }
+  }
+
+  /**
+   * Starts the given notification flagged as a foreground service.
+   *
+   * @param notification   to be started
+   * @param notificationId for the provided notification
+   */
+  private void startForegroundNotification(Notification notification, int notificationId) {
+    notification.flags = Notification.FLAG_FOREGROUND_SERVICE;
+    startForeground(notificationId, notification);
+  }
+
+  /**
+   * Runs several checks on the actual rawLocation object itself in order to ensure that we are
+   * performing navigation progress on a accurate/valid rawLocation update.
+   */
+  @SuppressWarnings("MissingPermission")
+  private boolean validLocationUpdate(Location location) {
+    if (locationEngine.getLastLocation() == null) {
+      return true;
+    }
+    // If the locations the same as previous, no need to recalculate things
+    return !(location.equals(locationEngine.getLastLocation())
+      || (location.getSpeed() <= 0 && location.hasSpeed())
+      || location.getAccuracy() >= 100);
+  }
+
+  /**
+   * At the very beginning of navigation session, a forced location update occurs so that the
+   * developer can immediately get a routeProgress object to display information.
+   */
+  @SuppressWarnings("MissingPermission")
+  private void forceLocationUpdate() {
+    Location lastLocation = locationEngine.getLastLocation();
+    if (lastLocation != null) {
+      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(lastLocation, mapboxNavigation,
+        recentDistancesFromManeuverInMeters));
+    }
+  }
+
+  /**
+   * Unregisters the receiver used to end navigation for the Mapbox custom notification.
+   */
+  private void unregisterMapboxNotificationReceiver() {
+    if (navigationNotification != null && navigationNotification instanceof MapboxNavigationNotification) {
+      ((MapboxNavigationNotification) navigationNotification).unregisterReceiver(this);
     }
   }
 

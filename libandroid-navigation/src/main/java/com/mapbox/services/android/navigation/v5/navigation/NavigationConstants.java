@@ -24,12 +24,22 @@ public final class NavigationConstants {
    */
   public static final int VOICE_INSTRUCTION_MILESTONE_ID = 1;
 
+
+  /**
+   * String channel used to post the navigation notification (custom or default).
+   * <p>
+   * If > Android O, a notification channel needs to be created to properly post the notification.
+   *
+   * @since 0.8.0
+   */
+  public static final String NAVIGATION_NOTIFICATION_CHANNEL = "NAVIGATION_NOTIFICATION_CHANNEL";
+
   /**
    * Random integer value used for identifying the navigation notification.
    *
    * @since 0.5.0
    */
-  static final int NAVIGATION_NOTIFICATION_ID = 5678;
+  public static final int NAVIGATION_NOTIFICATION_ID = 5678;
 
   /**
    * Threshold user must be within to count as completing a step. One of two heuristics used to know
