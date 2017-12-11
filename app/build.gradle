@@ -57,6 +57,9 @@ dependencies {
   implementation dependenciesList.butterKnife
   annotationProcessor dependenciesList.butterKnifeProcessor
 
+  // Picasso
+  implementation dependenciesList.picasso
+
   // Leak Canary
   debugImplementation dependenciesList.leakCanaryDebug
   releaseImplementation dependenciesList.leakCanaryRelease

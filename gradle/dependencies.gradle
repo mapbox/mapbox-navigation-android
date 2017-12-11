@@ -29,7 +29,8 @@ ext {
       spoonRunner        : '1.6.2',
       commonsIO          : '2.5',
       robolectric        : '3.5.1',
-      lifecycle          : '1.0.0'
+      lifecycle          : '1.0.0',
+      picasso            : '2.5.2'
   ]
 
   pluginVersion = [
@@ -76,6 +77,7 @@ ext {
 
       // square crew
       timber                 : "com.jakewharton.timber:timber:${version.timber}",
+      picasso                : "com.squareup.picasso:picasso:${version.picasso}",
       leakCanaryDebug        : "com.squareup.leakcanary:leakcanary-android:${version.leakCanaryVersion}",
       leakCanaryRelease      : "com.squareup.leakcanary:leakcanary-android-no-op:${version.leakCanaryVersion}",
       leakCanaryTest         : "com.squareup.leakcanary:leakcanary-android-no-op:${version.leakCanaryVersion}",

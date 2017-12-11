@@ -21,9 +21,6 @@ public class SpanUtils {
       if (item instanceof TextSpanItem) {
         appendTextSpan(builder, item.getSpan(), ((TextSpanItem) item).getSpanText());
       }
-      if (item instanceof ImageSpanItem) {
-        appendImageSpan(builder, item);
-      }
     }
     return builder;
   }
@@ -33,7 +30,7 @@ public class SpanUtils {
     if (hasComponents(bannerText)) {
       for (BannerComponents components : bannerText.components()) {
         if (!TextUtils.isEmpty(components.imageBaseUrl())) {
-          spanItems.add(new ImageSpanItem(components.imageBaseUrl()));
+//          spanItems.add(new ImageSpanItem(components.imageBaseUrl()));
         } else {
           spanItems.add(new TextSpanItem(new StyleSpan(Typeface.BOLD), components.text()));
         }
@@ -51,12 +48,6 @@ public class SpanUtils {
       builder.append(spanText, span, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     } else {
       builder.append(spanText);
-    }
-  }
-
-  private static void appendImageSpan(SpannableStringBuilder builder, SpanItem item) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      builder.append("Image text", item.getSpan(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
   }
 }

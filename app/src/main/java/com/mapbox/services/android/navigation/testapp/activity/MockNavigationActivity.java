@@ -1,17 +1,19 @@
 package com.mapbox.services.android.navigation.testapp.activity;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.text.SpannableStringBuilder;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ImageSpan;
-import android.text.style.URLSpan;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -34,6 +36,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification;
+import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionLoader;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
@@ -49,10 +52,11 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.span.SpanUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -226,10 +230,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
             for (LegStep step : directionsRoute.legs().get(0).steps()) {
               String url = step.bannerInstructions().get(0).primary().components().get(0).imageBaseUrl();
               if (url != null) {
+                url = url + "@3x.png";
                 Timber.d("Image URL: " + url);
-                SpannableStringBuilder builder = new SpannableStringBuilder("Shield URL: ");
-                builder.append("Shield URL", new ImageSpan(MockNavigationActivity.this, Uri.parse(url)), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                bannerText.setText(builder);
+                InstructionLoader.loadInstruction(bannerText, step.bannerInstructions().get(0).primary());
                 return;
               }
             }

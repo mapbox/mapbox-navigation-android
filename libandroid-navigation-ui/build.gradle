@@ -69,6 +69,9 @@ dependencies {
   // AWS Polly
   implementation dependenciesList.polly
 
+  // Picasso
+  implementation dependenciesList.picasso
+
   // Mapbox Map SDK Javadoc
   javadocDeps dependenciesList.mapboxMapSdk
 
