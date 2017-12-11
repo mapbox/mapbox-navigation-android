@@ -24,6 +24,7 @@ import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
 
 /**
@@ -31,7 +32,6 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  */
 class MapboxNavigationNotification implements NavigationNotification {
 
-  private static final String NAVIGATION_NOTIFICATION_CHANNEL = "NAVIGATION_NOTIFICATION_CHANNEL";
   private static final String END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION";
 
   private NotificationCompat.Builder notificationBuilder;

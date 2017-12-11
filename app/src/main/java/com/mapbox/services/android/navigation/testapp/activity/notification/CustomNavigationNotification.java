@@ -9,10 +9,11 @@ import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL;
+
 public class CustomNavigationNotification implements NavigationNotification {
 
   private static final int CUSTOM_NOTIFICATION_ID = 91234821;
-  private static final String CUSTOM_CHANNEL_ID = "custom_notification_channel_id";
 
   private Notification customNotification;
   private NotificationCompat.Builder customNotificationBuilder;
@@ -24,7 +25,7 @@ public class CustomNavigationNotification implements NavigationNotification {
     notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
     // Store the builder to update later
-    customNotificationBuilder = new NotificationCompat.Builder(context, CUSTOM_CHANNEL_ID)
+    customNotificationBuilder = new NotificationCompat.Builder(context, NAVIGATION_NOTIFICATION_CHANNEL)
       .setSmallIcon(R.drawable.ic_navigation)
       .setContentTitle("Custom Navigation Notification")
       .setContentText("Display your own content here!");
