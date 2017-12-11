@@ -3,16 +3,18 @@ apply plugin: 'checkstyle'
 checkstyle.toolVersion = '7.1.1'
 
 task checkstyle(type: Checkstyle) {
-  description 'Checks if the code adheres to coding standards'
-  group 'verification'
+    description 'Checks if the code adheres to coding standards'
+    group 'verification'
 
-  configFile = new File(rootDir, "config/checkstyle/checkstyle.xml")
-  source 'src'
-  include '**/*.java'
-  exclude '**/gen/**'
-  exclude '**/*Test.java'
-  exclude '**/*FeatureOverviewActivity.java'
+    configFile = new File(rootDir, "config/checkstyle/checkstyle.xml")
+    source 'src'
+    include '**/*.java'
+    exclude '**/gen/**'
+    exclude '**/*Test.java'
+    exclude '**/*FeatureOverviewActivity.java'
+    exclude '**/*ManeuversStyleKit.java'
+    exclude '**/*LanesStyleKit.java'
 
-  classpath = files()
-  ignoreFailures = false
+    classpath = files()
+    ignoreFailures = false
 }

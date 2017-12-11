@@ -1,11 +1,12 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
-import com.mapbox.directions.v5.models.LegStep;
+
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.core.constants.Constants;
+import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.constants.Constants;
-import com.mapbox.services.utils.TextUtils;
 import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
 
@@ -14,7 +15,7 @@ import static com.mapbox.turf.TurfConstants.UNIT_METERS;
 public final class MeasurementUtils {
 
   private MeasurementUtils() {
-    // Util classes aren't allowed to be initialized.
+    throw new AssertionError("No Instance.");
   }
 
   /**

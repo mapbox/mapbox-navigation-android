@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.support.annotation.StringDef;
+
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 
 /**
@@ -20,14 +22,24 @@ public final class NavigationConstants {
    *
    * @since 0.7.0
    */
-  public static final int DEFAULT_MILESTONE_IDENTIFIER = 1;
+  public static final int VOICE_INSTRUCTION_MILESTONE_ID = 1;
+
+
+  /**
+   * String channel used to post the navigation notification (custom or default).
+   * <p>
+   * If > Android O, a notification channel needs to be created to properly post the notification.
+   *
+   * @since 0.8.0
+   */
+  public static final String NAVIGATION_NOTIFICATION_CHANNEL = "NAVIGATION_NOTIFICATION_CHANNEL";
 
   /**
    * Random integer value used for identifying the navigation notification.
    *
    * @since 0.5.0
    */
-  static final int NAVIGATION_NOTIFICATION_ID = 5678;
+  public static final int NAVIGATION_NOTIFICATION_ID = 5678;
 
   /**
    * Threshold user must be within to count as completing a step. One of two heuristics used to know
@@ -46,7 +58,7 @@ public final class NavigationConstants {
    *
    * @since 0.1.0
    */
-  static final int MANEUVER_ZONE_RADIUS = 40;
+  public static final int MANEUVER_ZONE_RADIUS = 40;
 
   /**
    * Maximum number of meters the user can travel away from step before the
@@ -89,11 +101,31 @@ public final class NavigationConstants {
    * Meter radius which the user must be inside for an arrival milestone to be triggered and
    * navigation to end.
    */
-  static final double METERS_REMAINING_TILL_ARRIVAL = 40;
+  public static final double METERS_REMAINING_TILL_ARRIVAL = 40;
 
   public static final double MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE = 50;
 
   public static final double MINIMUM_DISTANCE_BEFORE_REROUTING = 50;
+
+  /**
+   * Text to be shown in AlertView during off-route scenario.
+   */
+  public static final String REPORT_PROBLEM = "Report Problem";
+
+  /**
+   * Duration in which the AlertView is shown with the "Report Problem" text.
+   */
+  public static final long ALERT_VIEW_PROBLEM_DURATION = 10000;
+
+  /**
+   * Duration in which the feedback BottomSheet is shown.
+   */
+  public static final long FEEDBACK_BOTTOM_SHEET_DURATION = 10000;
+
+  /**
+   * Shown in AlertView after a particular feedback item has been selected.
+   */
+  public static final String FEEDBACK_SUBMITTED = "Feedback Submitted";
 
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat";
@@ -105,6 +137,7 @@ public final class NavigationConstants {
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
   public static final String NAVIGATION_VIEW_LAUNCH_ROUTE = "launch_with_route";
   public static final String NAVIGATION_VIEW_AWS_POOL_ID = "navigation_view_aws_pool_id";
+  public static final String NAVIGATION_VIEW_UNIT_TYPE = "navigation_view_unit_type";
   public static final String NAVIGATION_VIEW_REROUTING = "Rerouting";
   public static final String ROUTE_BELOW_LAYER = "admin-3-4-boundaries-bg";
   public static final String DECIMAL_FORMAT = "#.#";
@@ -125,6 +158,25 @@ public final class NavigationConstants {
   public static final String STEP_MANEUVER_TYPE_ROUNDABOUT_TURN = "roundabout turn";
   public static final String STEP_MANEUVER_TYPE_NOTIFICATION = "notification";
 
+  @StringDef( {
+    STEP_MANEUVER_TYPE_TURN,
+    STEP_MANEUVER_TYPE_NEW_NAME,
+    STEP_MANEUVER_TYPE_DEPART,
+    STEP_MANEUVER_TYPE_ARRIVE,
+    STEP_MANEUVER_TYPE_MERGE,
+    STEP_MANEUVER_TYPE_ON_RAMP,
+    STEP_MANEUVER_TYPE_OFF_RAMP,
+    STEP_MANEUVER_TYPE_FORK,
+    STEP_MANEUVER_TYPE_END_OF_ROAD,
+    STEP_MANEUVER_TYPE_CONTINUE,
+    STEP_MANEUVER_TYPE_ROUNDABOUT,
+    STEP_MANEUVER_TYPE_ROTARY,
+    STEP_MANEUVER_TYPE_ROUNDABOUT_TURN,
+    STEP_MANEUVER_TYPE_NOTIFICATION
+  })
+  public @interface ManeuverType {
+  }
+
   // Step Maneuver Modifiers
   public static final String STEP_MANEUVER_MODIFIER_UTURN = "uturn";
   public static final String STEP_MANEUVER_MODIFIER_SHARP_RIGHT = "sharp right";
@@ -135,14 +187,24 @@ public final class NavigationConstants {
   public static final String STEP_MANEUVER_MODIFIER_LEFT = "left";
   public static final String STEP_MANEUVER_MODIFIER_SHARP_LEFT = "sharp left";
 
+  @StringDef( {
+    STEP_MANEUVER_MODIFIER_UTURN,
+    STEP_MANEUVER_MODIFIER_SHARP_RIGHT,
+    STEP_MANEUVER_MODIFIER_RIGHT,
+    STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT,
+    STEP_MANEUVER_MODIFIER_STRAIGHT,
+    STEP_MANEUVER_MODIFIER_SLIGHT_LEFT,
+    STEP_MANEUVER_MODIFIER_LEFT,
+    STEP_MANEUVER_MODIFIER_SHARP_LEFT
+  })
+  public @interface ManeuverModifier {
+  }
+
   // Turn Lane Indication
   public static final String TURN_LANE_INDICATION_LEFT = "left";
-  public static final String TURN_LANE_INDICATION_SHARP_LEFT = "sharp left";
   public static final String TURN_LANE_INDICATION_SLIGHT_LEFT = "slight left";
   public static final String TURN_LANE_INDICATION_STRAIGHT = "straight";
-  public static final String TURN_LANE_INDICATION_NONE = "none";
   public static final String TURN_LANE_INDICATION_RIGHT = "right";
-  public static final String TURN_LANE_INDICATION_SHARP_RIGHT = "sharp right";
   public static final String TURN_LANE_INDICATION_SLIGHT_RIGHT = "slight right";
   public static final String TURN_LANE_INDICATION_UTURN = "uturn";
   public static final String NAVIGATION_VIEW_SIMULATE_ROUTE = "navigation_view_simulate_route";

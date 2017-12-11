@@ -2,9 +2,9 @@ package com.mapbox.services.android.navigation.v5.milestone;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mapbox.directions.v5.DirectionsAdapterFactory;
-import com.mapbox.directions.v5.models.DirectionsResponse;
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -20,7 +20,6 @@ import org.robolectric.annotation.Config;
 import java.io.IOException;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class)
 public class StepMilestoneTest extends BaseTest {
 
   // Fixtures

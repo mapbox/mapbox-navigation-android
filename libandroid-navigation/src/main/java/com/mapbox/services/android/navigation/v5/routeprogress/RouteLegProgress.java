@@ -4,8 +4,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
-import com.mapbox.directions.v5.models.LegStep;
-import com.mapbox.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 
 /**
  * This is a progress object specific to the current leg the user is on. If there is only one leg
@@ -38,8 +38,12 @@ public abstract class RouteLegProgress {
    */
   static RouteLegProgress create(RouteLeg routeLeg, int stepIndex, double legDistanceRemaining,
                                  double stepDistanceRemaining) {
+
+    LegStep nextStep
+      = stepIndex == (routeLeg.steps().size() - 1) ? null : routeLeg.steps().get(stepIndex + 1);
+
     RouteStepProgress stepProgress = RouteStepProgress.create(
-      routeLeg.steps().get(stepIndex), stepDistanceRemaining);
+      routeLeg.steps().get(stepIndex), nextStep, stepDistanceRemaining);
     return new AutoValue_RouteLegProgress(
       routeLeg, stepIndex, legDistanceRemaining, stepProgress);
   }

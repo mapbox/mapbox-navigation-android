@@ -1,6 +1,9 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.support.annotation.Nullable;
+
 import com.google.auto.value.AutoValue;
+import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 
 /**
  * Immutable and can't be changed after passing into {@link MapboxNavigation}.
@@ -40,6 +43,13 @@ public abstract class MapboxNavigationOptions {
 
   public abstract boolean isDebugLoggingEnabled();
 
+  public abstract int unitType();
+
+  @Nullable
+  public abstract NavigationNotification navigationNotification();
+
+  public abstract Builder toBuilder();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -75,6 +85,10 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder isDebugLoggingEnabled(boolean debugLoggingEnabled);
 
+    public abstract Builder unitType(@NavigationUnitType.UnitType int unitType);
+
+    public abstract Builder navigationNotification(NavigationNotification notification);
+
     public abstract MapboxNavigationOptions build();
   }
 
@@ -95,6 +109,7 @@ public abstract class MapboxNavigationOptions {
       .metersRemainingTillArrival(NavigationConstants.METERS_REMAINING_TILL_ARRIVAL)
       .enableNotification(true)
       .isFromNavigationUi(false)
-      .isDebugLoggingEnabled(false);
+      .isDebugLoggingEnabled(false)
+      .unitType(NavigationUnitType.TYPE_IMPERIAL);
   }
 }

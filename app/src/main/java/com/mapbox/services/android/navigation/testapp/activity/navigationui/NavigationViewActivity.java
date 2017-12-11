@@ -14,8 +14,8 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import com.mapbox.directions.v5.models.DirectionsResponse;
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -25,7 +25,6 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.exceptions.InvalidLatLngBoundsException;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
-import com.mapbox.mapboxsdk.location.LocationSource;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -34,10 +33,13 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
+import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +55,8 @@ import timber.log.Timber;
 import static com.mapbox.services.android.telemetry.location.LocationEnginePriority.HIGH_ACCURACY;
 
 public class NavigationViewActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, LocationEngineListener, Callback<DirectionsResponse> {
+  MapboxMap.OnMapLongClickListener, LocationEngineListener, Callback<DirectionsResponse>,
+  OnRouteSelectionChangeListener {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
 
@@ -94,7 +97,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     });
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  @SuppressWarnings( {"MissingPermission"})
   @Override
   protected void onStart() {
     super.onStart();
@@ -104,7 +107,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  @SuppressWarnings( {"MissingPermission"})
   @Override
   public void onResume() {
     super.onResume();
@@ -182,7 +185,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  @SuppressWarnings( {"MissingPermission"})
   @Override
   public void onConnected() {
     locationEngine.requestLocationUpdates();
@@ -197,11 +200,11 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (validRouteResponse(response)) {
-      route = response.body().routes().get(0);
       hideLoading();
+      route = response.body().routes().get(0);
       if (route.distance() > 25d) {
         launchRouteBtn.setEnabled(true);
-        mapRoute.addRoute(route);
+        mapRoute.addRoutes(response.body().routes());
         boundCameraToRoute();
       } else {
         Snackbar.make(mapView, "Please select a longer route", BaseTransientBottomBar.LENGTH_SHORT).show();
@@ -214,9 +217,14 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     Timber.e(throwable.getMessage());
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  @Override
+  public void onNewPrimaryRouteSelected(DirectionsRoute directionsRoute) {
+    route = directionsRoute;
+  }
+
+  @SuppressWarnings( {"MissingPermission"})
   private void initLocationEngine() {
-    locationEngine = new LocationSource(this);
+    locationEngine = new LostLocationEngine(this);
     locationEngine.setPriority(HIGH_ACCURACY);
     locationEngine.setInterval(0);
     locationEngine.setFastestInterval(1000);
@@ -225,18 +233,20 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
     if (locationEngine.getLastLocation() != null) {
       Location lastLocation = locationEngine.getLastLocation();
+      onLocationChanged(lastLocation);
       currentLocation = Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude());
     }
   }
 
-  @SuppressWarnings({"MissingPermission"})
+  @SuppressWarnings( {"MissingPermission"})
   private void initLocationLayer() {
     locationLayer = new LocationLayerPlugin(mapView, mapboxMap, locationEngine);
     locationLayer.setLocationLayerEnabled(LocationLayerMode.COMPASS);
   }
 
   private void initMapRoute() {
-    mapRoute = new NavigationMapRoute(mapView, mapboxMap);
+    mapRoute = new NavigationMapRoute(mapView, mapboxMap, "admin-3-4-boundaries-bg");
+    mapRoute.setOnRouteSelectionChangeListener(this);
   }
 
   private void fetchRoute() {
@@ -244,22 +254,23 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       .accessToken(Mapbox.getAccessToken())
       .origin(currentLocation)
       .destination(destination)
+      .alternatives(true)
       .build()
       .getRoute(this);
     loading.setVisibility(View.VISIBLE);
   }
 
   private void launchNavigationWithRoute() {
+    NavigationViewOptions.Builder optionsBuilder = NavigationViewOptions.builder()
+      .shouldSimulateRoute(shouldSimulateRoute);
     if (route != null) {
-      NavigationLauncher.startNavigation(this, route,
-        null, shouldSimulateRoute);
+      optionsBuilder.directionsRoute(route);
+      NavigationLauncher.startNavigation(this, optionsBuilder.build());
     }
   }
 
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
-    return response.body() != null
-      && response.body().routes() != null
-      && response.body().routes().size() > 0;
+    return response.body() != null && !response.body().routes().isEmpty();
   }
 
   private void hideLoading() {
