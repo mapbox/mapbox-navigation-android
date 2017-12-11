@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
@@ -60,12 +61,15 @@ public class ManeuverView extends View {
   @Override
   protected void onFinishInflate() {
     super.onFinishInflate();
+    setLayerType(LAYER_TYPE_SOFTWARE, null);
     initManeuverColor();
   }
 
   private void initManeuverColor() {
-    this.primaryColor = ThemeSwitcher.retrieveNavigationViewBannerManeuverPrimaryColor(getContext());
-    this.secondaryColor = ThemeSwitcher.retrieveNavigationViewBannerManeuverSecondaryColor(getContext());
+    this.primaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+      R.attr.navigationViewBannerManeuverPrimary);
+    this.secondaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+      R.attr.navigationViewBannerManeuverSecondary);
   }
 
   public void setManeuverType(String maneuverType) {
@@ -119,7 +123,7 @@ public class ManeuverView extends View {
         break;
 
       case STEP_MANEUVER_TYPE_OFF_RAMP:
-        ManeuversStyleKit.drawOfframp(canvas, primaryColor, secondaryColor, size);
+        ManeuversStyleKit.drawOffRamp(canvas, primaryColor, secondaryColor, size);
         flip = shouldFlip(maneuverModifier);
         break;
 
@@ -131,7 +135,7 @@ public class ManeuverView extends View {
       case STEP_MANEUVER_TYPE_ROUNDABOUT:
       case STEP_MANEUVER_TYPE_ROUNDABOUT_TURN:
       case STEP_MANEUVER_TYPE_ROTARY:
-        ManeuversStyleKit.drawRoundabout(canvas, primaryColor, secondaryColor, size, 90);
+        ManeuversStyleKit.drawRoundabout(canvas, primaryColor, secondaryColor, size, 90f);
         break;
 
       case STEP_MANEUVER_TYPE_ARRIVE:
@@ -204,9 +208,9 @@ public class ManeuverView extends View {
   }
 
   private boolean shouldFlip(String modifier) {
-    return modifier.contains(STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT)
-      || modifier.contains(STEP_MANEUVER_MODIFIER_RIGHT)
-      || modifier.contains(STEP_MANEUVER_MODIFIER_SHARP_RIGHT);
+    return modifier.contains(STEP_MANEUVER_MODIFIER_SLIGHT_LEFT)
+      || modifier.contains(STEP_MANEUVER_MODIFIER_LEFT)
+      || modifier.contains(STEP_MANEUVER_MODIFIER_SHARP_LEFT);
   }
 
   private boolean isRoundabout() {

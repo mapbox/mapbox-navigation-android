@@ -10,27 +10,27 @@ import com.mapbox.services.android.navigation.ui.v5.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_CONFUSING_INSTRUCTION;
-import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE;
-import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_NOT_ALLOWED;
-import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_REPORT_TRAFFIC;
-import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_ROAD_CLOSED;
-import static com.mapbox.services.android.navigation.v5.navigation.FeedbackEvent.FEEDBACK_TYPE_ROUTING_ERROR;
+import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_CONFUSING_INSTRUCTION;
+import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE;
+import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_NOT_ALLOWED;
+import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_REPORT_TRAFFIC;
+import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_ROAD_CLOSED;
+import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_ROUTING_ERROR;
 
 public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
 
   private List<FeedbackItem> feedbackItems = new ArrayList<>();
 
   FeedbackAdapter() {
-    feedbackItems.add(new FeedbackItem("Road\nClosed",
-      R.drawable.ic_road_closed, FEEDBACK_TYPE_ROAD_CLOSED, ""));
     feedbackItems.add(new FeedbackItem("Not\nAllowed",
       R.drawable.ic_no_turn_allowed, FEEDBACK_TYPE_NOT_ALLOWED, ""));
+    feedbackItems.add(new FeedbackItem("Road\nClosed",
+      R.drawable.ic_road_closed, FEEDBACK_TYPE_ROAD_CLOSED, ""));
     feedbackItems.add(new FeedbackItem("Report\nTraffic",
       R.drawable.ic_traffic, FEEDBACK_TYPE_REPORT_TRAFFIC, ""));
     feedbackItems.add(new FeedbackItem("Confusing\nInstruction",
       R.drawable.ic_confusing_directions, FEEDBACK_TYPE_CONFUSING_INSTRUCTION, ""));
-    feedbackItems.add(new FeedbackItem("General\nIssue",
+    feedbackItems.add(new FeedbackItem("Other\nMap Issue",
       R.drawable.ic_map_error, FEEDBACK_TYPE_GENERAL_ISSUE, ""));
     feedbackItems.add(new FeedbackItem("Bad\nRoute",
       R.drawable.ic_wrong_directions, FEEDBACK_TYPE_ROUTING_ERROR, ""));

@@ -6,10 +6,12 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -20,7 +22,6 @@ import android.transition.TransitionManager;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewParent;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -28,17 +29,24 @@ import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.mapbox.services.android.navigation.ui.v5.NavigationView;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
+import com.mapbox.services.android.navigation.ui.v5.alert.AlertView;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheetListener;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -60,28 +68,34 @@ import java.text.DecimalFormat;
  *
  * @since 0.6.0
  */
-public class InstructionView extends RelativeLayout {
+public class InstructionView extends RelativeLayout implements FeedbackBottomSheetListener {
 
-  private ManeuverView maneuverView;
-  private TextView stepDistanceText;
-  private TextView stepPrimaryText;
-  private TextView stepSecondaryText;
+  private ManeuverView upcomingManeuverView;
+  private TextView upcomingDistanceText;
+  private TextView upcomingPrimaryText;
+  private TextView upcomingSecondaryText;
+  private ManeuverView thenManeuverView;
+  private TextView thenStepText;
   private TextView soundChipText;
   private FloatingActionButton soundFab;
+  private FloatingActionButton feedbackFab;
+  private AlertView alertView;
   private View rerouteLayout;
   private View turnLaneLayout;
+  private View thenStepLayout;
   private RecyclerView rvTurnLanes;
   private RecyclerView rvInstructions;
   private TurnLaneAdapter turnLaneAdapter;
-  private View soundLayout;
-  private View feedbackLayout;
   private ConstraintLayout instructionLayout;
+  private LinearLayout instructionLayoutText;
   private View instructionListLayout;
   private InstructionListAdapter instructionListAdapter;
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
   private AnimationSet fadeInSlowOut;
   private DecimalFormat decimalFormat;
+  private LegStep currentStep;
+  private NavigationViewModel navigationViewModel;
   private boolean isRerouting;
   public boolean isMuted;
 
@@ -113,7 +127,17 @@ public class InstructionView extends RelativeLayout {
     initDirectionsRecyclerView();
     initDecimalFormat();
     initAnimations();
-    initClickListener();
+  }
+
+  @Override
+  public void onFeedbackSelected(FeedbackItem feedbackItem) {
+    navigationViewModel.updateFeedback(feedbackItem);
+    alertView.show(NavigationConstants.FEEDBACK_SUBMITTED, 3000, false);
+  }
+
+  @Override
+  public void onFeedbackDismissed() {
+    navigationViewModel.cancelFeedback();
   }
 
   /**
@@ -126,15 +150,19 @@ public class InstructionView extends RelativeLayout {
    * @since 0.6.2
    */
   public void subscribe(NavigationViewModel navigationViewModel) {
+    this.navigationViewModel = navigationViewModel;
     navigationViewModel.instructionModel.observe((LifecycleOwner) getContext(), new Observer<InstructionModel>() {
       @Override
-      public void onChanged(@Nullable InstructionModel instructionModel) {
-        if (instructionModel != null) {
-          updateManeuverView(instructionModel);
-          addDistanceText(instructionModel);
-          addTextInstruction(instructionModel);
-          addTurnLanes(instructionModel);
-          updateSteps(instructionModel.getProgress());
+      public void onChanged(@Nullable InstructionModel model) {
+        if (model != null) {
+          updateManeuverView(model);
+          addDistanceText(model);
+          addTextInstruction(model);
+          updateInstructionList(model);
+          if (newStep(model.getProgress())) {
+            checkTurnLanes(model);
+            updateThenStep(model);
+          }
         }
       }
     });
@@ -142,34 +170,53 @@ public class InstructionView extends RelativeLayout {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {
-          isRerouting = isOffRoute;
-          if (isRerouting) {
+          if (isOffRoute) {
             showRerouteState();
             instructionListAdapter.clear();
-          } else {
+          } else if (isRerouting) {
             hideRerouteState();
+            showAlertView();
           }
+          isRerouting = isOffRoute;
         }
       }
     });
+
+    // ViewModel set - click listeners can be set now
+    initClickListeners();
   }
 
   /**
    * Called in {@link ProgressChangeListener}, creates a new model and then
    * uses it to update the views.
    *
-   * @param routeProgress used to provide navigation / progress data
+   * @param routeProgress used to provide navigation / routeProgress data
+   * @param unitType      either imperial or metric
    * @since 0.6.2
    */
   @SuppressWarnings("UnusedDeclaration")
-  public void update(RouteProgress routeProgress) {
+  public void update(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
     if (routeProgress != null && !isRerouting) {
-      InstructionModel model = new InstructionModel(routeProgress, decimalFormat);
+      InstructionModel model = new InstructionModel(routeProgress, decimalFormat, unitType);
       updateManeuverView(model);
       addDistanceText(model);
       addTextInstruction(model);
-      addTurnLanes(model);
+      updateInstructionList(model);
+      if (newStep(model.getProgress())) {
+        checkTurnLanes(model);
+        updateThenStep(model);
+      }
     }
+  }
+
+  /**
+   * Shows {@link FeedbackBottomSheet} and adds a listener so
+   * the proper feedback information is collected or the user dismisses the UI.
+   */
+  public void showFeedbackBottomSheet() {
+    FeedbackBottomSheet.newInstance(this,
+      NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION).show(
+      ((FragmentActivity) getContext()).getSupportFragmentManager(), FeedbackBottomSheet.TAG);
   }
 
   /**
@@ -233,20 +280,12 @@ public class InstructionView extends RelativeLayout {
       }
       collapsed.applyTo(instructionLayout);
       instructionListLayout.setVisibility(INVISIBLE);
-      soundLayout.setVisibility(VISIBLE);
-      feedbackLayout.setVisibility(VISIBLE);
     } else {
-      Animation slideInRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_right);
       Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.slide_up_top);
       slideUp.setInterpolator(new AccelerateInterpolator());
-      soundLayout.setVisibility(VISIBLE);
-      soundLayout.startAnimation(slideInRight);
-      feedbackLayout.setVisibility(VISIBLE);
-      feedbackLayout.startAnimation(slideInRight);
       instructionListLayout.startAnimation(slideUp);
       instructionListLayout.setVisibility(INVISIBLE);
     }
-    showNavigationViewRecenterBtn();
   }
 
   /**
@@ -265,41 +304,11 @@ public class InstructionView extends RelativeLayout {
       }
       expanded.applyTo(instructionLayout);
       instructionListLayout.setVisibility(VISIBLE);
-      soundLayout.setVisibility(INVISIBLE);
-      feedbackLayout.setVisibility(INVISIBLE);
     } else {
       Animation slideDown = AnimationUtils.loadAnimation(getContext(), R.anim.slide_down_top);
       slideDown.setInterpolator(new DecelerateInterpolator());
-      Animation slideOutRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_right);
       instructionListLayout.setVisibility(VISIBLE);
       instructionListLayout.startAnimation(slideDown);
-      soundLayout.startAnimation(slideOutRight);
-      soundLayout.setVisibility(INVISIBLE);
-      feedbackLayout.startAnimation(slideOutRight);
-      feedbackLayout.setVisibility(INVISIBLE);
-    }
-    hideNavigationViewRecenterBtn();
-  }
-
-  /**
-   * If the parent is an instance of {@link NavigationView},
-   * show the recenter button.
-   */
-  private void showNavigationViewRecenterBtn() {
-    ViewParent parent = getParent().getParent();
-    if (parent instanceof NavigationView) {
-      ((NavigationView) parent).showRecenterBtn();
-    }
-  }
-
-  /**
-   * If the parent is an instance of {@link NavigationView},
-   * hide the recenter button.
-   */
-  private void hideNavigationViewRecenterBtn() {
-    ViewParent parent = getParent().getParent();
-    if (parent instanceof NavigationView) {
-      ((NavigationView) parent).hideRecenterBtn();
     }
   }
 
@@ -314,18 +323,22 @@ public class InstructionView extends RelativeLayout {
    * Finds and binds all necessary views
    */
   private void bind() {
-    maneuverView = findViewById(R.id.maneuverView);
-    stepDistanceText = findViewById(R.id.stepDistanceText);
-    stepPrimaryText = findViewById(R.id.stepPrimaryText);
-    stepSecondaryText = findViewById(R.id.stepSecondaryText);
+    upcomingManeuverView = findViewById(R.id.maneuverView);
+    upcomingDistanceText = findViewById(R.id.stepDistanceText);
+    upcomingPrimaryText = findViewById(R.id.stepPrimaryText);
+    upcomingSecondaryText = findViewById(R.id.stepSecondaryText);
+    thenManeuverView = findViewById(R.id.thenManeuverView);
+    thenStepText = findViewById(R.id.thenStepText);
     soundChipText = findViewById(R.id.soundText);
     soundFab = findViewById(R.id.soundFab);
+    feedbackFab = findViewById(R.id.feedbackFab);
+    alertView = findViewById(R.id.alertView);
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
+    thenStepLayout = findViewById(R.id.thenStepLayout);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
-    soundLayout = findViewById(R.id.soundLayout);
-    feedbackLayout = findViewById(R.id.feedbackLayout);
     instructionLayout = findViewById(R.id.instructionLayout);
+    instructionLayoutText = findViewById(R.id.instructionLayoutText);
     instructionListLayout = findViewById(R.id.instructionListLayout);
     rvInstructions = findViewById(R.id.rvInstructions);
     initInstructionAutoSize();
@@ -337,28 +350,19 @@ public class InstructionView extends RelativeLayout {
    */
   private void initBackground() {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-      int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewPrimaryColor(getContext());
-      int navigationViewSecondaryColor = ThemeSwitcher.retrieveNavigationViewSecondaryColor(getContext());
-      int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveNavigationViewBannerBackgroundColor(getContext());
-      // Instruction Layout banner - banner background
+      int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+        R.attr.navigationViewPrimary);
+      int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+        R.attr.navigationViewBannerBackground);
+      // Instruction Layout landscape - banner background
       if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        View instructionLayoutText = findViewById(R.id.instructionLayoutText);
-        View instructionLayoutManeuver = findViewById(R.id.instructionLayoutManeuver);
-        Drawable textBackground = DrawableCompat.wrap(instructionLayoutText.getBackground()).mutate();
+        View instructionLayoutManeuver = findViewById(R.id.instructionManeuverLayout);
         Drawable maneuverBackground = DrawableCompat.wrap(instructionLayoutManeuver.getBackground()).mutate();
-        DrawableCompat.setTint(textBackground, navigationViewBannerBackgroundColor);
         DrawableCompat.setTint(maneuverBackground, navigationViewBannerBackgroundColor);
-      } else {
-        View instructionLayout = findViewById(R.id.instructionLayout);
-        Drawable instructionBackground = DrawableCompat.wrap(instructionLayout.getBackground()).mutate();
-        DrawableCompat.setTint(instructionBackground, navigationViewBannerBackgroundColor);
       }
       // Sound chip text - primary
       Drawable soundChipBackground = DrawableCompat.wrap(soundChipText.getBackground()).mutate();
       DrawableCompat.setTint(soundChipBackground, navigationViewPrimaryColor);
-      // Reroute Layout - secondary
-      Drawable rerouteBackground = DrawableCompat.wrap(rerouteLayout.getBackground()).mutate();
-      DrawableCompat.setTint(rerouteBackground, navigationViewSecondaryColor);
     }
   }
 
@@ -433,15 +437,29 @@ public class InstructionView extends RelativeLayout {
   }
 
   /**
+   * Show AlertView with "Report Problem" text for 10 seconds - after waiting 2 seconds.
+   */
+  private void showAlertView() {
+    final Handler handler = new Handler();
+    handler.postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        alertView.show(NavigationConstants.REPORT_PROBLEM,
+          NavigationConstants.ALERT_VIEW_PROBLEM_DURATION, true);
+      }
+    }, 3000);
+  }
+
+  /**
    * Called after we bind the views, this will allow the step instruction {@link TextView}
    * to automatically re-size based on the length of the text.
    */
   private void initInstructionAutoSize() {
-    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepPrimaryText,
-      24, 30, 1, TypedValue.COMPLEX_UNIT_SP);
-    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepSecondaryText,
+    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(upcomingPrimaryText,
+      26, 30, 1, TypedValue.COMPLEX_UNIT_SP);
+    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(upcomingSecondaryText,
       20, 26, 1, TypedValue.COMPLEX_UNIT_SP);
-    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(stepDistanceText,
+    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(upcomingDistanceText,
       16, 20, 1, TypedValue.COMPLEX_UNIT_SP);
   }
 
@@ -498,19 +516,42 @@ public class InstructionView extends RelativeLayout {
     fadeInSlowOut.addAnimation(fadeOut);
   }
 
-  private void initClickListener() {
+  private void initClickListeners() {
     if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      initLandscapeClickListener();
+      initLandscapeListListener();
     } else {
-      initPortraitClickListener();
+      initPortraitListListener();
     }
+    alertView.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        if (((AlertView) view).getAlertText().equals(NavigationConstants.REPORT_PROBLEM)) {
+          navigationViewModel.recordFeedback(FeedbackEvent.FEEDBACK_SOURCE_REROUTE);
+          showFeedbackBottomSheet();
+        }
+        alertView.hide();
+      }
+    });
+    soundFab.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        navigationViewModel.setMuted(toggleMute());
+      }
+    });
+    feedbackFab.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        navigationViewModel.recordFeedback(FeedbackEvent.FEEDBACK_SOURCE_UI);
+        showFeedbackBottomSheet();
+      }
+    });
   }
 
   /**
    * For portrait orientation, attach the listener to the whole layout
    * and use custom animations to hide and show the instructions /sound layout
    */
-  private void initPortraitClickListener() {
+  private void initPortraitListListener() {
     instructionLayout.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View instructionView) {
@@ -528,8 +569,8 @@ public class InstructionView extends RelativeLayout {
    * For landscape orientation, the click listener is attached to
    * the instruction text layout and the constraints are adjusted before animating
    */
-  private void initLandscapeClickListener() {
-    findViewById(R.id.instructionLayoutText).setOnClickListener(new OnClickListener() {
+  private void initLandscapeListListener() {
+    instructionLayoutText.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View instructionLayoutText) {
         boolean instructionsVisible = instructionListLayout.getVisibility() == VISIBLE;
@@ -549,8 +590,8 @@ public class InstructionView extends RelativeLayout {
    * @param model provides maneuver modifier / type
    */
   private void updateManeuverView(InstructionModel model) {
-    maneuverView.setManeuverModifier(model.getManeuverModifier());
-    maneuverView.setManeuverType(model.getManeuverType());
+    upcomingManeuverView.setManeuverModifier(model.getManeuverViewModifier());
+    upcomingManeuverView.setManeuverType(model.getManeuverViewType());
   }
 
   /**
@@ -562,7 +603,7 @@ public class InstructionView extends RelativeLayout {
   private void addDistanceText(InstructionModel model) {
     if (newDistanceText(model)) {
       distanceText(model);
-    } else if (stepDistanceText.getText().toString().isEmpty()) {
+    } else if (upcomingDistanceText.getText().toString().isEmpty()) {
       distanceText(model);
     }
   }
@@ -573,9 +614,9 @@ public class InstructionView extends RelativeLayout {
    * @param model provides distance text
    */
   private boolean newDistanceText(InstructionModel model) {
-    return !stepDistanceText.getText().toString().isEmpty()
+    return !upcomingDistanceText.getText().toString().isEmpty()
       && !TextUtils.isEmpty(model.getStepDistanceRemaining())
-      && !stepDistanceText.getText().toString()
+      && !upcomingDistanceText.getText().toString()
       .contentEquals(model.getStepDistanceRemaining().toString());
   }
 
@@ -585,7 +626,7 @@ public class InstructionView extends RelativeLayout {
    * @param model provides distance text
    */
   private void distanceText(InstructionModel model) {
-    stepDistanceText.setText(model.getStepDistanceRemaining());
+    upcomingDistanceText.setText(model.getStepDistanceRemaining());
   }
 
   /**
@@ -597,10 +638,22 @@ public class InstructionView extends RelativeLayout {
   private void addTextInstruction(InstructionModel model) {
     if (newPrimaryText(model) || newSecondaryText(model)) {
       textInstructions(model);
-    } else if (stepPrimaryText.getText().toString().isEmpty()
-      || stepSecondaryText.getText().toString().isEmpty()) {
+    } else if (upcomingPrimaryText.getText().toString().isEmpty()
+      || upcomingSecondaryText.getText().toString().isEmpty()) {
       textInstructions(model);
     }
+  }
+
+  /**
+   * Looks to see if we have a new step.
+   *
+   * @param routeProgress provides updated step information
+   * @return true if new step, false if not
+   */
+  private boolean newStep(RouteProgress routeProgress) {
+    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().currentStep());
+    currentStep = routeProgress.currentLegProgress().currentStep();
+    return newStep;
   }
 
   /**
@@ -610,7 +663,7 @@ public class InstructionView extends RelativeLayout {
    */
   private boolean newPrimaryText(InstructionModel model) {
     // New primaryText instruction
-    String currentPrimaryText = stepPrimaryText.getText().toString();
+    String currentPrimaryText = upcomingPrimaryText.getText().toString();
     return !currentPrimaryText.isEmpty()
       && !TextUtils.isEmpty(model.getPrimaryText())
       && !currentPrimaryText.contentEquals(model.getPrimaryText());
@@ -623,7 +676,7 @@ public class InstructionView extends RelativeLayout {
    */
   private boolean newSecondaryText(InstructionModel model) {
     // New primaryText instruction
-    String currentSecondaryText = stepSecondaryText.getText().toString();
+    String currentSecondaryText = upcomingSecondaryText.getText().toString();
     return !currentSecondaryText.isEmpty()
       && !TextUtils.isEmpty(model.getSecondaryText())
       && !currentSecondaryText.contentEquals(model.getSecondaryText());
@@ -636,17 +689,19 @@ public class InstructionView extends RelativeLayout {
    */
   private void textInstructions(InstructionModel model) {
     if (!TextUtils.isEmpty(model.getPrimaryText())) {
-      stepPrimaryText.setText(StringAbbreviator.abbreviate(model.getPrimaryText()));
+      upcomingPrimaryText.setText(StringAbbreviator.abbreviate(model.getPrimaryText()));
     }
     if (!TextUtils.isEmpty(model.getSecondaryText())) {
-      if (stepSecondaryText.getVisibility() == GONE) {
-        stepSecondaryText.setVisibility(VISIBLE);
-        stepPrimaryText.setMaxLines(1);
+      if (upcomingSecondaryText.getVisibility() == GONE) {
+        upcomingSecondaryText.setVisibility(VISIBLE);
+        upcomingPrimaryText.setMaxLines(1);
+        adjustBannerTextVerticalBias(0.65f);
       }
-      stepSecondaryText.setText(StringAbbreviator.abbreviate(model.getSecondaryText()));
+      upcomingSecondaryText.setText(StringAbbreviator.abbreviate(model.getSecondaryText()));
     } else {
-      stepPrimaryText.setMaxLines(2);
-      stepSecondaryText.setVisibility(GONE);
+      upcomingPrimaryText.setMaxLines(2);
+      upcomingSecondaryText.setVisibility(GONE);
+      adjustBannerTextVerticalBias(0.5f);
     }
   }
 
@@ -656,10 +711,10 @@ public class InstructionView extends RelativeLayout {
    *
    * @param model created with new {@link RouteProgress} holding turn lane data
    */
-  private void addTurnLanes(InstructionModel model) {
+  private void checkTurnLanes(InstructionModel model) {
     if (model.getTurnLanes() != null
-      && !TextUtils.isEmpty(model.getManeuverModifier())) {
-      turnLaneAdapter.addTurnLanes(model.getTurnLanes(), model.getManeuverModifier());
+      && !TextUtils.isEmpty(model.getManeuverViewModifier())) {
+      turnLaneAdapter.addTurnLanes(model.getTurnLanes(), model.getManeuverViewModifier());
       showTurnLanes();
     } else {
       hideTurnLanes();
@@ -671,6 +726,9 @@ public class InstructionView extends RelativeLayout {
    */
   private void showTurnLanes() {
     if (turnLaneLayout.getVisibility() == GONE) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        TransitionManager.beginDelayedTransition(this);
+      }
       turnLaneLayout.setVisibility(VISIBLE);
     }
   }
@@ -680,16 +738,88 @@ public class InstructionView extends RelativeLayout {
    */
   private void hideTurnLanes() {
     if (turnLaneLayout.getVisibility() == VISIBLE) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        TransitionManager.beginDelayedTransition(this);
+      }
       turnLaneLayout.setVisibility(GONE);
     }
   }
 
   /**
+   * Check if the the then step should be shown.
+   * If true, update the "then" maneuver and the "then" step text.
+   * If false, hide the then layout.
+   *
+   * @param model to determine if the then step layout should be shown
+   */
+  private void updateThenStep(InstructionModel model) {
+    if (shouldShowThenStep(model)) {
+      thenManeuverView.setManeuverType(model.getThenStepManeuverType());
+      thenManeuverView.setManeuverModifier(model.getThenStepManeuverModifier());
+      thenStepText.setText(model.getThenStepText());
+      showThenStepLayout();
+    } else {
+      hideThenStepLayout();
+    }
+  }
+
+  /**
+   * First, checks if the turn lanes are visible (if they are, don't show then step).
+   * Second, checks if the upcoming step is less than 15 seconds long.
+   * This is our cue to show the thenStep.
+   *
+   * @param model to check the upcoming step
+   * @return true if should show, false if not
+   */
+  private boolean shouldShowThenStep(InstructionModel model) {
+    return turnLaneLayout.getVisibility() != VISIBLE && model.shouldShowThenStep();
+  }
+
+  /**
+   * Shows then step layout
+   */
+  private void showThenStepLayout() {
+    if (thenStepLayout.getVisibility() == GONE) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        TransitionManager.beginDelayedTransition(this);
+      }
+      thenStepLayout.setVisibility(VISIBLE);
+    }
+  }
+
+  /**
+   * Hides then step layout
+   */
+  private void hideThenStepLayout() {
+    if (thenStepLayout.getVisibility() == VISIBLE) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        TransitionManager.beginDelayedTransition(this);
+      }
+      thenStepLayout.setVisibility(GONE);
+    }
+  }
+
+  /**
+   * Adjust the banner text layout {@link ConstraintLayout} vertical bias.
+   *
+   * @param percentBias to be set to the text layout
+   */
+  private void adjustBannerTextVerticalBias(float percentBias) {
+    int orientation = getContext().getResources().getConfiguration().orientation;
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+      ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) instructionLayoutText.getLayoutParams();
+      params.verticalBias = percentBias;
+      instructionLayoutText.setLayoutParams(params);
+    }
+  }
+
+
+  /**
    * Used to update the instructions list with the current steps.
    *
-   * @param routeProgress to provide the current steps
+   * @param model to provide the current steps and unit type
    */
-  private void updateSteps(RouteProgress routeProgress) {
-    instructionListAdapter.updateSteps(routeProgress);
+  private void updateInstructionList(InstructionModel model) {
+    instructionListAdapter.updateSteps(model.getProgress(), model.getUnitType());
   }
 }

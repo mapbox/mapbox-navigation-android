@@ -11,8 +11,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.mapbox.directions.v5.models.DirectionsResponse;
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -26,14 +26,17 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.Utils;
+import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.RouteMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Trigger;
 import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -88,7 +91,13 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
 
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
+    // Use a custom notification
+    CustomNavigationNotification customNavigationNotification = new CustomNavigationNotification(this);
+    MapboxNavigationOptions options = MapboxNavigationOptions.builder()
+      .navigationNotification(customNavigationNotification)
+      .build();
+
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken(), options);
 
     navigation.addMilestone(new RouteMilestone.Builder()
       .setIdentifier(BEGIN_ROUTE_MILESTONE)
@@ -100,8 +109,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
           Trigger.gte(TriggerProperty.STEP_DISTANCE_TRAVELED_METERS, 75)
         )
       ).build());
-
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
   }
 
   @OnClick(R.id.startRouteButton)
@@ -187,7 +194,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       return;
     }
 
-    NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder()
+    final NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder()
       .accessToken(Mapbox.getAccessToken());
     navigationRouteBuilder.origin(origin);
     navigationRouteBuilder.destination(destination);
@@ -203,12 +210,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
           if (!response.body().routes().isEmpty()) {
             DirectionsRoute directionsRoute = response.body().routes().get(0);
             MockNavigationActivity.this.route = directionsRoute;
-            navigationMapRoute.addRoute(directionsRoute);
-
-            /*for (LegStep step: route.getLegs().get(0).getSteps()) {
-              mapboxMap.addMarker(new MarkerOptions().position(new LatLng(
-                  step.getManeuver().asPosition().getLatitude(), step.getManeuver().asPosition().getLongitude())));
-             }*/
+            navigationMapRoute.addRoutes(response.body().routes());
           }
         }
       }
@@ -225,8 +227,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
    */
 
   @Override
-  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
-    Timber.d("Milestone Event Occurred with id: %d", identifier);
+  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
+    Timber.d("Milestone Event Occurred with id: %d", milestone.getIdentifier());
     Timber.d("Voice instruction: %s", instruction);
   }
 

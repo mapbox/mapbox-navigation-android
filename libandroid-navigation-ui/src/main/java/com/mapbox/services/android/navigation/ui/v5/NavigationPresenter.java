@@ -2,7 +2,7 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.support.design.widget.BottomSheetBehavior;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 
 class NavigationPresenter {
@@ -11,10 +11,6 @@ class NavigationPresenter {
 
   NavigationPresenter(NavigationContract.View view) {
     this.view = view;
-  }
-
-  void onMuteClick(boolean isMuted) {
-    view.setMuted(isMuted);
   }
 
   void onRecenterClick() {
@@ -44,9 +40,5 @@ class NavigationPresenter {
 
   void onDestinationUpdate(Point point) {
     view.addMarker(point);
-  }
-
-  void onFeedbackClick() {
-    view.showFeedbackBottomSheet();
   }
 }

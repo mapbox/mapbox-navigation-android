@@ -4,41 +4,29 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.location.LostLocationEngine;
-import com.mapbox.services.android.navigation.BuildConfig;
-import com.mapbox.services.android.navigation.v5.exception.NavigationException;
-import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 import com.mapbox.services.android.navigation.v5.utils.ValidationUtils;
-import com.mapbox.services.android.telemetry.MapboxEvent;
-import com.mapbox.services.android.telemetry.MapboxTelemetry;
-import com.mapbox.services.android.telemetry.constants.TelemetryConstants;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
-import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
-import com.mapbox.services.utils.TextUtils;
+import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import retrofit2.Callback;
 import timber.log.Timber;
@@ -53,24 +41,20 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  * @see <a href="https://www.mapbox.com/android-docs/navigation/">Navigation documentation</a>
  * @since 0.1.0
  */
-public class MapboxNavigation implements ServiceConnection, ProgressChangeListener {
-
-  private static final String MAPBOX_NAVIGATION_SDK_IDENTIFIER = "mapbox-navigation-android";
-  private static final String MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER = "mapbox-navigation-ui-android";
+public class MapboxNavigation implements ServiceConnection {
 
   private NavigationEventDispatcher navigationEventDispatcher;
   private NavigationService navigationService;
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
-  private LocationEngine locationEngine;
+  private LocationEngine locationEngine = null;
   private List<Milestone> milestones;
-  private SessionState sessionState;
   private final String accessToken;
   private OffRoute offRouteEngine;
   private Snap snapEngine;
   private Context context;
   private boolean isBound;
-  private boolean isFromNavigationUi = false;
+  private NavigationTelemetry navigationTelemetry = null;
 
   /**
    * Constructs a new instance of this class using the default options. This should be used over
@@ -113,8 +97,30 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     this.accessToken = accessToken;
     this.context = context;
     this.options = options;
-    this.isFromNavigationUi = options.isFromNavigationUi();
-    initialize(options.isDebugLoggingEnabled());
+    initialize();
+  }
+
+  // Package private (no modifier) for testing purposes
+  MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
+                   @NonNull MapboxNavigationOptions options, NavigationTelemetry navigationTelemetry,
+                   LocationEngine locationEngine) {
+    this.accessToken = accessToken;
+    this.context = context;
+    this.options = options;
+    this.navigationTelemetry = navigationTelemetry;
+    this.locationEngine = locationEngine;
+    initialize();
+  }
+
+  // Package private (no modifier) for testing purposes
+  MapboxNavigation(@NonNull Context context, @NonNull String accessToken, NavigationTelemetry navigationTelemetry,
+                   LocationEngine locationEngine) {
+    this.context = context;
+    this.accessToken = accessToken;
+    this.options = MapboxNavigationOptions.builder().build();
+    this.navigationTelemetry = navigationTelemetry;
+    this.locationEngine = locationEngine;
+    initialize();
   }
 
   /**
@@ -122,22 +128,18 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    * be changed later on using their corresponding setter. An internal progressChangeListeners used
    * to prevent users from removing it.
    */
-  private void initialize(boolean debugLoggingEnabled) {
-    initializeTelemetry(debugLoggingEnabled);
-
+  private void initialize() {
     // Initialize event dispatcher and add internal listeners
     navigationEventDispatcher = new NavigationEventDispatcher();
-    if (!options.manuallyEndNavigationUponCompletion()) {
-      navigationEventDispatcher.setInternalProgressChangeListener(this);
-    }
+
+    initializeDefaultLocationEngine();
+    initializeTelemetry();
 
     // Create and add default milestones if enabled.
     milestones = new ArrayList<>();
     if (options.defaultMilestonesEnabled()) {
       addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
     }
-
-    initializeDefaultLocationEngine();
 
     if (options.snapToRoute()) {
       snapEngine = new SnapToRoute();
@@ -147,38 +149,16 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     }
   }
 
-  private void initializeTelemetry(boolean debugLoggingEnabled) {
-    validateAccessToken(accessToken);
-    String sdkIdentifier = MAPBOX_NAVIGATION_SDK_IDENTIFIER;
-    if (isFromNavigationUi) {
-      sdkIdentifier = MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER;
-    }
-    String userAgent = String.format("%s/%s", sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
-    MapboxTelemetry.getInstance().initialize(context, accessToken, userAgent, sdkIdentifier,
-      BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
-    MapboxTelemetry.getInstance().newUserAgent(userAgent);
-
-    // Enable extra logging in debug mode
-    MapboxTelemetry.getInstance().setDebugLoggingEnabled(debugLoggingEnabled);
-
-    NavigationMetricsWrapper.sdkIdentifier = sdkIdentifier;
-    NavigationMetricsWrapper.turnstileEvent();
-    // TODO This should be removed when we figure out a solution in Telemetry
-    // Force pushing a TYPE_MAP_LOAD event to ensure that the Nav turnstile event is sent
-    MapboxTelemetry.getInstance().pushEvent(MapboxEvent.buildMapLoadEvent());
+  private void initializeTelemetry() {
+    navigationTelemetry = obtainTelemetry();
+    navigationTelemetry.initialize(context, accessToken, this, locationEngine);
   }
 
-  /**
-   * Runtime validation of access token.
-   *
-   * @throws NavigationException exception thrown when not using a valid accessToken
-   */
-  private static void validateAccessToken(String accessToken) {
-    if (TextUtils.isEmpty(accessToken) || (!accessToken.toLowerCase(Locale.US).startsWith("pk.")
-      && !accessToken.toLowerCase(Locale.US).startsWith("sk."))) {
-      throw new NavigationException("A valid access token must be passed in when first initializing"
-        + " MapboxNavigation");
+  private NavigationTelemetry obtainTelemetry() {
+    if (navigationTelemetry == null) {
+      return NavigationTelemetry.getInstance();
     }
+    return navigationTelemetry;
   }
 
   /**
@@ -186,11 +166,19 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    * which we can use to get information. Therefore, by default we build one.
    */
   private void initializeDefaultLocationEngine() {
-    locationEngine = new LostLocationEngine(context);
+    locationEngine = obtainLocationEngine();
     locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
     locationEngine.setFastestInterval(1000);
     locationEngine.setInterval(0);
     locationEngine.activate();
+  }
+
+  private LocationEngine obtainLocationEngine() {
+    if (locationEngine == null) {
+      return new LostLocationEngine(context);
+    }
+
+    return locationEngine;
   }
 
   /**
@@ -315,6 +303,8 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
    */
   public void setLocationEngine(@NonNull LocationEngine locationEngine) {
     this.locationEngine = locationEngine;
+    // Setup telemetry with new engine
+    navigationTelemetry.updateLocationEngine(locationEngine);
     // Notify service to get new location engine.
     if (isServiceAvailable()) {
       navigationService.acquireLocationEngine();
@@ -359,34 +349,23 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     this.directionsRoute = directionsRoute;
     Timber.d("MapboxNavigation startNavigation called.");
     if (!isBound) {
-      // Navigation sessions initially starting
-      sessionState = SessionState.builder()
-        .originalDirectionRoute(directionsRoute)
-        .currentDirectionRoute(directionsRoute)
-        .sessionIdentifier(TelemetryUtils.buildUUID())
-        .previousRouteDistancesCompleted(0)
-        .startTimestamp(new Date())
-        .rerouteCount(0)
-        .mockLocation(locationEngine instanceof MockLocationEngine)
-        .build();
+      // Begin telemetry session
+      navigationTelemetry.startSession(directionsRoute);
 
+      // Start the NavigationService
       Intent intent = getServiceIntent();
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         context.startForegroundService(intent);
       } else {
         context.startService(intent);
       }
-
       context.bindService(intent, this, Context.BIND_AUTO_CREATE);
+
+      // Send navigation event running: true
       navigationEventDispatcher.onNavigationEvent(true);
     } else {
-      // New directionRoute provided
-      sessionState = sessionState.toBuilder()
-        .currentDirectionRoute(directionsRoute)
-        .rerouteCount(sessionState.rerouteCount() + 1)
-        .build();
-
-      navigationService.rerouteOccurred();
+      // Update telemetry directions route
+      navigationTelemetry.updateSessionRoute(directionsRoute);
     }
   }
 
@@ -411,6 +390,7 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
       context.unbindService(this);
       isBound = false;
       navigationEventDispatcher.onNavigationEvent(false);
+      navigationTelemetry.endSession();
     }
   }
 
@@ -632,32 +612,48 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     return offRouteEngine;
   }
 
-  // Service
-
-  @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    Timber.v("Arrived event occurred");
-    sessionState = sessionState.toBuilder().arrivalTimestamp(new Date()).build();
-    String locationEngineName = obtainLocationEngineName();
-    NavigationMetricsWrapper.arriveEvent(sessionState, routeProgress, location, locationEngineName);
-    // Remove all listeners except the onProgressChange by passing in null.
-    navigationEventDispatcher.removeOffRouteListener(null);
-    // Remove this listener so that the arrival event only occurs once.
-    navigationEventDispatcher.removeInternalProgressChangeListener();
-  }
-
+  /**
+   * Creates a new {@link FeedbackEvent} with a given type, description, and source.
+   * <p>
+   * Returns a {@link String} feedbackId that can be used to update or cancel this feedback event.
+   * There is a 20 second time period set after this method is called to do so.
+   *
+   * @param feedbackType from list of set feedback types
+   * @param description  an option description to provide more detail about the feedback
+   * @param source       either from the drop-in UI or a reroute
+   * @return String feedbackId
+   * @since 0.7.0
+   */
   public String recordFeedback(@FeedbackEvent.FeedbackType String feedbackType,
                                String description, @FeedbackEvent.FeedbackSource String source) {
-    return navigationService.recordFeedbackEvent(feedbackType, description, source);
+    return navigationTelemetry.recordFeedbackEvent(feedbackType, description, source);
   }
 
+  /**
+   * Updates an existing feedback event generated by {@link MapboxNavigation#recordFeedback(String, String, String)}.
+   * <p>
+   * Uses a feedback ID to find the correct event and then adjusts the feedbackType and description.
+   *
+   * @param feedbackId   generated from {@link MapboxNavigation#recordFeedback(String, String, String)}
+   * @param feedbackType from list of set feedback types
+   * @param description  an optional description to provide more detail about the feedback
+   * @since 0.7.0
+   */
   public void updateFeedback(String feedbackId,
                              @FeedbackEvent.FeedbackType String feedbackType, String description) {
-    navigationService.updateFeedbackEvent(feedbackId, feedbackType, description);
+    navigationTelemetry.updateFeedbackEvent(feedbackId, feedbackType, description);
   }
 
+  /**
+   * Cancels an existing feedback event generated by {@link MapboxNavigation#recordFeedback(String, String, String)}.
+   * <p>
+   * Uses a feedback ID to find the correct event and then cancels it (will no longer be recorded).
+   *
+   * @param feedbackId generated from {@link MapboxNavigation#recordFeedback(String, String, String)}
+   * @since 0.7.0
+   */
   public void cancelFeedback(String feedbackId) {
-    navigationService.cancelFeedback(feedbackId);
+    navigationTelemetry.cancelFeedback(feedbackId);
   }
 
   DirectionsRoute getRoute() {
@@ -676,25 +672,12 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     return navigationEventDispatcher;
   }
 
-  SessionState getSessionState() {
-    return sessionState;
-  }
-
-  void setSessionState(SessionState sessionState) {
-    this.sessionState = sessionState;
-  }
-
   private Intent getServiceIntent() {
     return new Intent(context, NavigationService.class);
   }
 
   private boolean isServiceAvailable() {
     return navigationService != null && isBound;
-  }
-
-  String obtainVendorId() {
-    SharedPreferences prefs = TelemetryUtils.getSharedPreferences(context.getApplicationContext());
-    return prefs.getString(TelemetryConstants.MAPBOX_SHARED_PREFERENCE_KEY_VENDOR_ID, "");
   }
 
   @Override
@@ -711,9 +694,5 @@ public class MapboxNavigation implements ServiceConnection, ProgressChangeListen
     Timber.d("Disconnected from service.");
     navigationService = null;
     isBound = false;
-  }
-
-  private String obtainLocationEngineName() {
-    return locationEngine.getClass().getSimpleName();
   }
 }

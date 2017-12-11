@@ -3,6 +3,6 @@
 
     <!-- Notification Strings -->
     <string name="end_navigation">End Navigation</string>
-  <string name="channel_name">Navigation Notifications</string>
-  <string name="notification_arrival_time_format">Arrive at %s</string>
+    <string name="channel_name">Navigation Notifications</string>
+    <string name="notification_arrival_time_format">Arrive at %s</string>
 </resources>

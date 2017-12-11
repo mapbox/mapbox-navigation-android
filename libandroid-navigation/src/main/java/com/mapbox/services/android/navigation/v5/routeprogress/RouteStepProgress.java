@@ -5,8 +5,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
-import com.mapbox.directions.v5.models.LegStep;
-import com.mapbox.directions.v5.models.StepIntersection;
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.StepIntersection;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -18,8 +18,14 @@ public interface InstructionPlayer {
   void play(String instruction);
 
   /**
+   * @return true if currently muted, false if not
+   * @since 0.6.0
+   */
+  boolean isMuted();
+
+  /**
    * Will determine if voice instructions will be played or not.
-   *
+   * <p>
    * If called while an instruction is currently playing, the instruction should end immediately and any
    * instructions queued should be cleared.
    *
@@ -27,12 +33,6 @@ public interface InstructionPlayer {
    * @since 0.6.0
    */
   void setMuted(boolean isMuted);
-
-  /**
-   * @return true if currently muted, false if not
-   * @since 0.6.0
-   */
-  boolean isMuted();
 
   /**
    * Used in off-route scenarios to stop current
@@ -48,4 +48,11 @@ public interface InstructionPlayer {
    * @since 0.6.0
    */
   void onDestroy();
+
+  /**
+   * Used to add listener for when instructions begin / end.
+   *
+   * @since 0.8.0
+   */
+  void addInstructionListener(InstructionListener instructionListener);
 }

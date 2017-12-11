@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 
 public interface NavigationContract {
@@ -24,9 +24,5 @@ public interface NavigationContract {
     void addMarker(Point point);
 
     void finishNavigationView();
-
-    void setMuted(boolean isMuted);
-
-    void showFeedbackBottomSheet();
   }
 }

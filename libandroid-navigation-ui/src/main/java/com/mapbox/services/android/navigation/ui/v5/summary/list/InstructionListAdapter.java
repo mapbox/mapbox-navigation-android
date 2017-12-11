@@ -1,16 +1,19 @@
 package com.mapbox.services.android.navigation.ui.v5.summary.list;
 
+import android.content.res.Configuration;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.mapbox.directions.v5.models.LegStep;
-import com.mapbox.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.ui.v5.instruction.TextInstruction;
+import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionText;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
@@ -26,6 +29,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   private RouteLeg currentLeg;
   private LegStep currentStep;
   private LegStep currentUpcomingStep;
+  private int unitType;
 
   public InstructionListAdapter() {
     stepList = new ArrayList<>();
@@ -43,12 +47,12 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   public void onBindViewHolder(InstructionViewHolder holder, int position) {
     if (stepList.get(position) != null) {
       LegStep step = stepList.get(position);
-      TextInstruction textInstruction = new TextInstruction(stepList.get(position));
-      updatePrimaryText(holder, textInstruction.getPrimaryText());
-      updateSecondaryText(holder, textInstruction.getSecondaryText());
+      InstructionText instructionText = new InstructionText(stepList.get(position));
+      updatePrimaryText(holder, instructionText.getPrimaryText());
+      updateSecondaryText(holder, instructionText.getSecondaryText());
       updateManeuverView(holder, step);
       holder.stepDistanceText.setText(DistanceUtils
-        .distanceFormatterBold(textInstruction.getStepDistance(), decimalFormat));
+        .distanceFormatter(instructionText.getStepDistance(), decimalFormat, true, unitType));
     }
   }
 
@@ -57,7 +61,8 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     return stepList.size();
   }
 
-  public void updateSteps(RouteProgress routeProgress) {
+  public void updateSteps(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
+    this.unitType = unitType;
     addLegSteps(routeProgress);
     updateStepList(routeProgress);
   }
@@ -77,9 +82,26 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
       holder.stepPrimaryText.setMaxLines(1);
       holder.stepSecondaryText.setVisibility(View.VISIBLE);
       holder.stepSecondaryText.setText(secondaryText);
+      adjustBannerTextVerticalBias(holder, 0.65f);
     } else {
       holder.stepPrimaryText.setMaxLines(2);
       holder.stepSecondaryText.setVisibility(View.GONE);
+      adjustBannerTextVerticalBias(holder, 0.5f);
+    }
+  }
+
+  /**
+   * Adjust the banner text layout {@link ConstraintLayout} vertical bias.
+   *
+   * @param percentBias to be set to the text layout
+   */
+  private void adjustBannerTextVerticalBias(InstructionViewHolder holder, float percentBias) {
+    int orientation = holder.itemView.getResources().getConfiguration().orientation;
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+      ConstraintLayout.LayoutParams params =
+        (ConstraintLayout.LayoutParams) holder.instructionLayoutText.getLayoutParams();
+      params.verticalBias = percentBias;
+      holder.instructionLayoutText.setLayoutParams(params);
     }
   }
 
@@ -91,7 +113,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   }
 
   private void addLegSteps(RouteProgress routeProgress) {
-    if ((newLeg(routeProgress) || stepList.size() == 0) && hasLegSteps(routeProgress)) {
+    if ((newLeg(routeProgress) || rerouteTriggered(routeProgress)) && hasLegSteps(routeProgress)) {
       List<LegStep> steps = routeProgress.directionsRoute().legs().get(0).steps();
       stepList.clear();
       stepList.addAll(steps);
@@ -134,8 +156,14 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     return newLeg;
   }
 
+  private boolean rerouteTriggered(RouteProgress routeProgress) {
+    return stepList.size() == 0
+      && !routeProgress.currentLegProgress().currentStep().maneuver().type()
+      .equals(NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE);
+  }
+
   private boolean newStep(RouteProgress routeProgress) {
-    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().stepIndex());
+    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().currentStep());
     currentStep = routeProgress.currentLegProgress().currentStep();
     currentUpcomingStep = routeProgress.currentLegProgress().upComingStep();
     return newStep;
