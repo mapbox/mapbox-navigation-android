@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
+import com.mapbox.services.android.navigation.v5.utils.span.CenteredImageSpan;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -22,6 +23,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+
+import timber.log.Timber;
 
 /**
  * Utility class that can be used to load a given {@link BannerText} into the provided
@@ -37,7 +40,8 @@ public class InstructionLoader {
 
   static final int BANNER_TEXT_TYPE_PRIMARY = 0;
   static final int BANNER_TEXT_TYPE_SECONDARY = 1;
-  private static final String SPACE_PLACEHOLDER = "  ";
+  private static final String IMAGE_SPACE_PLACEHOLDER = "  ";
+  private static final String SINGLE_SPACE = " ";
 
   /**
    * Takes the given components from the {@link BannerText} and creates
@@ -58,7 +62,10 @@ public class InstructionLoader {
         if (hasBaseUrl(components)) {
           addShieldInfo(textView, instructionStringBuilder, shieldUrls, components);
         } else {
-          instructionStringBuilder.append(bannerText.text());
+          String text = bannerText.text();
+          boolean emptyText = TextUtils.isEmpty(instructionStringBuilder.toString());
+          String instructionText = emptyText ? text : SINGLE_SPACE.concat(text);
+          instructionStringBuilder.append(instructionText);
         }
       }
 
@@ -111,9 +118,12 @@ public class InstructionLoader {
 
   private static void addShieldInfo(TextView textView, StringBuilder instructionStringBuilder,
                                     List<BannerShieldInfo> shieldUrls, BannerComponents components) {
+    boolean instructionBuilderEmpty = TextUtils.isEmpty(instructionStringBuilder.toString());
+    int instructionLength = instructionStringBuilder.length();
+    int startIndex = instructionBuilderEmpty ? instructionLength : instructionLength + 1;
     shieldUrls.add(new BannerShieldInfo(textView.getContext(), components.imageBaseUrl(),
-      instructionStringBuilder.length(), components.text()));
-    instructionStringBuilder.append(SPACE_PLACEHOLDER);
+      startIndex, components.text()));
+    instructionStringBuilder.append(IMAGE_SPACE_PLACEHOLDER);
   }
 
   private static void fetchShieldImages(final TextView textView, StringBuilder instructionStringBuilder,
@@ -121,31 +131,34 @@ public class InstructionLoader {
 
     final Spannable instructionSpannable = new SpannableString(instructionStringBuilder);
     final Context context = textView.getContext();
-
+    Picasso picassoImageLoader = Picasso.with(context);
+    picassoImageLoader.setLoggingEnabled(true);
     // Use Picasso to load a Drawable from the given url
     for (final BannerShieldInfo shield : shields) {
-      Picasso.with(context)
+      picassoImageLoader
         .load(shield.getUrl())
         .into(new Target() {
           @Override
           public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
             // Create a new Drawable with intrinsic bounds
             Drawable drawable = new BitmapDrawable(context.getResources(), bitmap);
-            drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+            drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), textView.getLineHeight());
 
             // Create and set a new ImageSpan at the given index with the Drawable
-            instructionSpannable.setSpan(new ImageSpan(drawable, ImageSpan.ALIGN_BOTTOM),
+            instructionSpannable.setSpan(new CenteredImageSpan(drawable, ImageSpan.ALIGN_BASELINE),
               shield.getStartIndex(), shield.getEndIndex(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
             // Check if last in array, if so, set the text with the spannable
             if (shields.indexOf(shield) == shields.size() - 1) {
-              textView.setText(instructionSpannable);
+              // Make sure cut-off images aren't displayed at the end of the spannable
+              CharSequence truncatedSequence = truncateImageSpan(instructionSpannable, textView);
+              textView.setText(truncatedSequence);
             }
           }
 
           @Override
           public void onBitmapFailed(Drawable errorDrawable) {
-
+            Timber.e("Shield bitmap failed to load.");
           }
 
           @Override
@@ -154,6 +167,11 @@ public class InstructionLoader {
           }
         });
     }
+  }
+
+  private static CharSequence truncateImageSpan(Spannable instructionSpannable, TextView textView) {
+    int availableSpace = textView.getWidth() - textView.getPaddingRight() - textView.getPaddingLeft();
+    return TextUtils.ellipsize(instructionSpannable, textView.getPaint(), availableSpace, TextUtils.TruncateAt.END);
   }
 
   @Retention(RetentionPolicy.SOURCE)

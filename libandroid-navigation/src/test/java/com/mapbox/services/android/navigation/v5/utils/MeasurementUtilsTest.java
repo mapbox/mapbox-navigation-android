@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.StepManeuver;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.BaseTest;
@@ -21,10 +22,7 @@ public class MeasurementUtilsTest extends BaseTest {
 
     List<Point> geometryPoints = new ArrayList<>();
     geometryPoints.add(futurePoint);
-    LegStep step = LegStep.builder()
-      .geometry(PolylineUtils.encode(geometryPoints, PRECISION_6))
-      .mode("driving")
-      .build();
+    LegStep step = createTestStep(geometryPoints);
 
     double distance = MeasurementUtils.userTrueDistanceFromStep(futurePoint, step);
     assertEquals(0d, distance, DELTA);
@@ -36,10 +34,7 @@ public class MeasurementUtilsTest extends BaseTest {
 
     List<Point> geometryPoints = new ArrayList<>();
     geometryPoints.add(Point.fromLngLat(-95.8427, 29.7757));
-    LegStep step = LegStep.builder()
-      .geometry(PolylineUtils.encode(geometryPoints, PRECISION_6))
-      .mode("driving")
-      .build();
+    LegStep step = createTestStep(geometryPoints);
 
     double distance = MeasurementUtils.userTrueDistanceFromStep(futurePoint, step);
     assertEquals(45900.73617999494, distance, DELTA);
@@ -52,12 +47,25 @@ public class MeasurementUtilsTest extends BaseTest {
     List<Point> geometryPoints = new ArrayList<>();
     geometryPoints.add(Point.fromLngLat(-95.8427, 29.7757));
     geometryPoints.add(futurePoint);
-    LegStep step = LegStep.builder()
-      .geometry(PolylineUtils.encode(geometryPoints, PRECISION_6))
-      .mode("driving")
-      .build();
+    LegStep step = createTestStep(geometryPoints);
 
     double distance = MeasurementUtils.userTrueDistanceFromStep(futurePoint, step);
     assertEquals(0.04457271773629306d, distance, DELTA);
+  }
+
+  private LegStep createTestStep(List<Point> geometryPoints) {
+    double[] location = {0d, 0d};
+    StepManeuver maneuver = StepManeuver.builder()
+      .rawLocation(location)
+      .build();
+
+    return LegStep.builder()
+      .geometry(PolylineUtils.encode(geometryPoints, PRECISION_6))
+      .mode("driving")
+      .distance(2000d)
+      .duration(1000d)
+      .maneuver(maneuver)
+      .weight(0d)
+      .build();
   }
 }
