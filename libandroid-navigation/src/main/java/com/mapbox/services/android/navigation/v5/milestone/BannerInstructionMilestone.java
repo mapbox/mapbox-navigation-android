@@ -1,19 +1,17 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-import android.text.SpannableStringBuilder;
-
 import com.mapbox.api.directions.v5.models.BannerInstructions;
+import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.span.SpanUtils;
 
 import java.util.List;
 
 public class BannerInstructionMilestone extends Milestone {
 
-  private SpannableStringBuilder primaryInstruction;
-  private SpannableStringBuilder secondaryInstruction;
+  private BannerText primaryInstruction;
+  private BannerText secondaryInstruction;
   private DirectionsRoute currentRoute;
   private LegStep currentStep;
   private List<BannerInstructions> stepBannerInstructions;
@@ -40,20 +38,20 @@ public class BannerInstructionMilestone extends Milestone {
     return false;
   }
 
-  public SpannableStringBuilder getPrimaryInstruction() {
+  public BannerText getPrimaryInstruction() {
     return primaryInstruction;
   }
 
-  public SpannableStringBuilder getSecondaryInstruction() {
+  public BannerText getSecondaryInstruction() {
     return secondaryInstruction;
   }
 
   private void buildInstructions(BannerInstructions instructions) {
     if (instructions.primary() != null) {
-      primaryInstruction = SpanUtils.buildInstructionSpanItems(instructions.primary());
+      primaryInstruction = instructions.primary();
     }
     if (instructions.secondary() != null) {
-      secondaryInstruction = SpanUtils.buildInstructionSpanItems(instructions.secondary());
+      secondaryInstruction = instructions.secondary();
     }
   }
 
