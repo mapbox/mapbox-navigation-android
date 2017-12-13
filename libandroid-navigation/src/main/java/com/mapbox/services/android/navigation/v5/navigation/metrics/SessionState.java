@@ -105,6 +105,8 @@ public abstract class SessionState {
 
   public abstract int percentInForeground();
 
+  public abstract int percentInPortrait();
+
   public abstract Builder toBuilder();
 
   public static Builder builder() {
@@ -116,7 +118,8 @@ public abstract class SessionState {
       .secondsSinceLastReroute(-1)
       .eventRouteProgress(new MetricsRouteProgress(null))
       .locationEngineName("")
-      .percentInForeground(100);
+      .percentInForeground(100)
+      .percentInPortrait(100);
   }
 
   @AutoValue.Builder
@@ -157,6 +160,8 @@ public abstract class SessionState {
     public abstract Builder locationEngineName(String locationEngineName);
 
     public abstract Builder percentInForeground(int percentInForeground);
+
+    public abstract Builder percentInPortrait(int percentInPortrait);
 
     public abstract SessionState build();
   }

@@ -52,7 +52,7 @@ final class NavigationMetricsWrapper {
     int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, metricsRouteProgress);
 
     MapboxTelemetry.getInstance().addPercentTimeInForeground(sessionState.percentInForeground(), arriveEvent);
-    MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, arriveEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInPortrait(sessionState.percentInPortrait(), arriveEvent);
     MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, arriveEvent);
     MapboxTelemetry.getInstance().addLocationEngineName(sessionState.locationEngineName(), arriveEvent);
     MapboxTelemetry.getInstance().pushEvent(arriveEvent);
@@ -81,7 +81,7 @@ final class NavigationMetricsWrapper {
     int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, metricProgress);
 
     MapboxTelemetry.getInstance().addPercentTimeInForeground(sessionState.percentInForeground(), cancelEvent);
-    MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, cancelEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInPortrait(sessionState.percentInPortrait(), cancelEvent);
     MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, cancelEvent);
     MapboxTelemetry.getInstance().addLocationEngineName(sessionState.locationEngineName(), cancelEvent);
     MapboxTelemetry.getInstance().pushEvent(cancelEvent);
@@ -106,7 +106,7 @@ final class NavigationMetricsWrapper {
     int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, metricProgress);
 
     MapboxTelemetry.getInstance().addPercentTimeInForeground(sessionState.percentInForeground(), departEvent);
-    MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, departEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInPortrait(sessionState.percentInPortrait(), departEvent);
     MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, departEvent);
     MapboxTelemetry.getInstance().addLocationEngineName(sessionState.locationEngineName(), departEvent);
     MapboxTelemetry.getInstance().pushEvent(departEvent);
@@ -149,7 +149,7 @@ final class NavigationMetricsWrapper {
     int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, metricProgress);
 
     MapboxTelemetry.getInstance().addPercentTimeInForeground(sessionState.percentInForeground(), navRerouteEvent);
-    MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, navRerouteEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInPortrait(sessionState.percentInPortrait(), navRerouteEvent);
     MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, navRerouteEvent);
     MapboxTelemetry.getInstance().addLocationEngineName(sessionState.locationEngineName(), navRerouteEvent);
     MapboxTelemetry.getInstance().pushEvent(navRerouteEvent);
@@ -188,7 +188,7 @@ final class NavigationMetricsWrapper {
     int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, metricProgress);
 
     MapboxTelemetry.getInstance().addPercentTimeInForeground(sessionState.percentInForeground(), feedbackEvent);
-    MapboxTelemetry.getInstance().addPercentTimeInPortrait(0, feedbackEvent);
+    MapboxTelemetry.getInstance().addPercentTimeInPortrait(sessionState.percentInPortrait(), feedbackEvent);
     MapboxTelemetry.getInstance().addAbsoluteDistanceToDestination(absoluteDistance, feedbackEvent);
     feedbackEvent.put(MapboxNavigationEvent.KEY_CREATED, TelemetryUtils.generateCreateDate(location));
     MapboxTelemetry.getInstance().addLocationEngineName(sessionState.locationEngineName(), feedbackEvent);
