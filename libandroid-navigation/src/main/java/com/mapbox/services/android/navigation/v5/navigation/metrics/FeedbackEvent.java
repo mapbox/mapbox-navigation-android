@@ -51,6 +51,7 @@ public class FeedbackEvent implements TelemetryEvent {
 
   private String feedbackType;
   private String feedbackSource;
+  private String screenshot;
   private String eventId;
   private String description;
   private SessionState feedbackSessionState;
@@ -60,6 +61,7 @@ public class FeedbackEvent implements TelemetryEvent {
     this.feedbackSource = feedbackSource;
     this.feedbackType = FEEDBACK_TYPE_GENERAL_ISSUE; // Default until updated
     this.eventId = TelemetryUtils.buildUUID();
+    this.screenshot = "";
   }
 
   @Override
@@ -80,6 +82,14 @@ public class FeedbackEvent implements TelemetryEvent {
   @FeedbackSource
   public String getFeedbackSource() {
     return feedbackSource;
+  }
+
+  public String getScreenshot() {
+    return screenshot;
+  }
+
+  public void setScreenshot(String screenshot) {
+    this.screenshot = screenshot;
   }
 
   public void setFeedbackType(@FeedbackType String feedbackType) {

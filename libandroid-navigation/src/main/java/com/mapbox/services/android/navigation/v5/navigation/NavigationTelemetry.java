@@ -283,14 +283,16 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
    * @param feedbackId   generated from {@link MapboxNavigation#recordFeedback(String, String, String)}
    * @param feedbackType from list of set feedback types
    * @param description  an optional description to provide more detail about the feedback
+   * @param screenshot   an optional encoded screenshot to provide more detail about the feedback
    */
   void updateFeedbackEvent(String feedbackId, @FeedbackEvent.FeedbackType String feedbackType,
-                           String description) {
+                           String description, String screenshot) {
     // Find the event and update
     FeedbackEvent feedbackEvent = (FeedbackEvent) findQueuedTelemetryEvent(feedbackId);
     if (feedbackEvent != null) {
       feedbackEvent.setFeedbackType(feedbackType);
       feedbackEvent.setDescription(description);
+      feedbackEvent.setScreenshot(screenshot);
     }
   }
 
@@ -507,7 +509,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
     NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, metricProgress,
       feedbackEvent.getSessionState().eventLocation(), feedbackEvent.getDescription(),
-      feedbackEvent.getFeedbackType(), "", feedbackEvent.getEventId(), vendorId);
+      feedbackEvent.getFeedbackType(), feedbackEvent.getScreenshot(), feedbackEvent.getEventId(), vendorId);
   }
 
   private TelemetryEvent findQueuedTelemetryEvent(String eventId) {
