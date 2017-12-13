@@ -176,8 +176,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (!isConfigurationChange) {
       navigationSessionState = navigationSessionState.toBuilder()
         .originalDirectionRoute(directionsRoute)
-        .originalRequestIdentifier(directionsRoute.routeOptions() != null
-          ? directionsRoute.routeOptions().requestUuid() : null)
+        .originalRequestIdentifier(directionsRoute.routeOptions().requestUuid())
+        .requestIdentifier(directionsRoute.routeOptions().requestUuid())
         .currentDirectionRoute(directionsRoute)
         .sessionIdentifier(TelemetryUtils.buildUUID())
         .eventRouteDistanceCompleted(0)
