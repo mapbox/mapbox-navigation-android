@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationLifecycleMonitor;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
@@ -46,6 +47,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private final IBinder localBinder = new LocalBinder();
 
   private NavigationNotification navigationNotification;
+  private NavigationLifecycleMonitor navigationLifecycleMonitor;
   private MapboxNavigation mapboxNavigation;
   private LocationEngine locationEngine;
   private NavigationEngine thread;
@@ -76,6 +78,9 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
+    navigationLifecycleMonitor = new NavigationLifecycleMonitor();
+    getApplication().registerActivityLifecycleCallbacks(navigationLifecycleMonitor);
+    NavigationTelemetry.getInstance().initializeLifecycleMonitor(navigationLifecycleMonitor);
     return START_STICKY;
   }
 
@@ -85,6 +90,7 @@ public class NavigationService extends Service implements LocationEngineListener
       stopForeground(true);
     }
     endNavigation();
+    getApplication().unregisterActivityLifecycleCallbacks(navigationLifecycleMonitor);
     super.onDestroy();
   }
 

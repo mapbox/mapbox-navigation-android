@@ -14,6 +14,7 @@ import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.location.MetricsLocation;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationLifecycleMonitor;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListeners;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.RerouteEvent;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.SessionState;
@@ -56,6 +57,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   private MetricsLocation metricLocation;
 
   private NavigationEventDispatcher eventDispatcher;
+  private NavigationLifecycleMonitor lifecycleMonitor;
   private LocationEngine navigationLocationEngine;
   private SessionState navigationSessionState;
   private RingBuffer<Location> locationBuffer;
@@ -103,6 +105,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       navigationSessionState = navigationSessionState.toBuilder()
         .startTimestamp(new Date())
         .build();
+      updatePercentForeground();
       // Send departure event for the start of this session
       NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
     }
@@ -121,6 +124,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   public void onArrival(Location location, RouteProgress routeProgress) {
     // Update arrival time stamp
     navigationSessionState = navigationSessionState.toBuilder().arrivalTimestamp(new Date()).build();
+    updatePercentForeground();
     // Send arrival event
     NavigationMetricsWrapper.arriveEvent(navigationSessionState, routeProgress, metricLocation.getLocation());
 
@@ -167,6 +171,16 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   }
 
   /**
+   * Added once created in the {@link NavigationService}, this class
+   * provides data regarding the {@link android.app.Activity} lifecycle.
+   *
+   * @param lifecycleMonitor to provide lifecycle data
+   */
+  void initializeLifecycleMonitor(NavigationLifecycleMonitor lifecycleMonitor) {
+    this.lifecycleMonitor = lifecycleMonitor;
+  }
+
+  /**
    * Called when navigation is starting for the first time.
    * Initializes the {@link SessionState}.
    *
@@ -197,6 +211,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (!isConfigurationChange) {
       if (navigationSessionState.startTimestamp() != null) {
         flushEventQueues();
+        updatePercentForeground();
         NavigationMetricsWrapper.cancelEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
       }
       isInitialized = false;
@@ -436,6 +451,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   }
 
   private void queueRerouteEvent() {
+    updatePercentForeground();
     // Create a new session state given the current navigation session
     Date eventDate = new Date();
     SessionState rerouteEventSessionState = navigationSessionState.toBuilder()
@@ -453,6 +469,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   @NonNull
   private FeedbackEvent queueFeedbackEvent(@FeedbackEvent.FeedbackType String feedbackType,
                                            String description, @FeedbackEvent.FeedbackSource String feedbackSource) {
+    updatePercentForeground();
     // Distance completed = previous distance completed + current RouteProgress distance traveled
     double distanceCompleted = navigationSessionState.eventRouteDistanceCompleted()
       + metricProgress.getDistanceTraveled();
@@ -524,6 +541,14 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       }
     }
     return null;
+  }
+
+  private void updatePercentForeground() {
+    if (lifecycleMonitor != null) {
+      navigationSessionState = navigationSessionState.toBuilder()
+        .percentInForeground(lifecycleMonitor.obtainForegroundPercentage())
+        .build();
+    }
   }
 
   private void updateLastRerouteEvent(DirectionsRoute newDirectionsRoute) {
