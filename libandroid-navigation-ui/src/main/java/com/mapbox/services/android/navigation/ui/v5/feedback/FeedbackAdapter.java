@@ -6,12 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_CONFUSING_INSTRUCTION;
-import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE;
 import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_NOT_ALLOWED;
 import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_REPORT_TRAFFIC;
 import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_ROAD_CLOSED;
@@ -31,7 +31,7 @@ public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
     feedbackItems.add(new FeedbackItem("Confusing\nInstruction",
       R.drawable.ic_confusing_directions, FEEDBACK_TYPE_CONFUSING_INSTRUCTION, ""));
     feedbackItems.add(new FeedbackItem("Other\nMap Issue",
-      R.drawable.ic_map_error, FEEDBACK_TYPE_GENERAL_ISSUE, ""));
+      R.drawable.ic_map_error, FeedbackEvent.FEEDBACK_TYPE_OTHER_MAP_ISSUE, ""));
     feedbackItems.add(new FeedbackItem("Bad\nRoute",
       R.drawable.ic_wrong_directions, FEEDBACK_TYPE_ROUTING_ERROR, ""));
   }

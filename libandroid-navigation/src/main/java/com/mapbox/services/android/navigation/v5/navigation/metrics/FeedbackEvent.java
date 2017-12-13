@@ -12,6 +12,7 @@ public class FeedbackEvent implements TelemetryEvent {
   @Retention(RetentionPolicy.SOURCE)
   @StringDef({
     FEEDBACK_TYPE_GENERAL_ISSUE,
+    FEEDBACK_TYPE_OTHER_MAP_ISSUE,
     FEEDBACK_TYPE_ACCIDENT,
     FEEDBACK_TYPE_HAZARD,
     FEEDBACK_TYPE_ROAD_CLOSED,
@@ -35,6 +36,7 @@ public class FeedbackEvent implements TelemetryEvent {
   }
 
   public static final String FEEDBACK_TYPE_GENERAL_ISSUE = "general";
+  public static final String FEEDBACK_TYPE_OTHER_MAP_ISSUE = "other_map_issue";
   public static final String FEEDBACK_TYPE_ACCIDENT = "accident";
   public static final String FEEDBACK_TYPE_HAZARD = "hazard";
   public static final String FEEDBACK_TYPE_ROAD_CLOSED = "road_closed";
