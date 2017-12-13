@@ -39,7 +39,6 @@ import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
 import com.mapbox.services.android.navigation.ui.v5.utils.ViewUtils;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 
@@ -369,8 +368,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   private void initRoute() {
     int routeStyleRes = ThemeSwitcher.retrieveNavigationViewRouteStyle(getContext());
-    mapRoute = new NavigationMapRoute(null, mapView, map,
-      routeStyleRes, NavigationConstants.ROUTE_BELOW_LAYER);
+    mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes);
   }
 
   /**
