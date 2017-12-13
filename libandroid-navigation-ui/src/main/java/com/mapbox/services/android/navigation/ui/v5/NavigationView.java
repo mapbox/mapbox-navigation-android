@@ -83,6 +83,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private LocationLayerPlugin locationLayer;
   private NavigationViewListener navigationListener;
   private boolean resumeState;
+  private RouteListener routeListener;
 
   public NavigationView(Context context) {
     this(context, null);
@@ -349,6 +350,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void getNavigationAsync(NavigationViewListener navigationViewListener) {
     this.navigationListener = navigationViewListener;
     mapView.getMapAsync(this);
+  }
+
+  /**
+   * Sets the route listener
+   * @param routeListener to listen for routing events
+   */
+  public void setRouteListener(RouteListener routeListener) {
+    this.routeListener = routeListener;
   }
 
   private void init() {
