@@ -4,25 +4,27 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListeners;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import timber.log.Timber;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.METERS_REMAINING_TILL_ARRIVAL;
-
 class NavigationEventDispatcher {
 
   private List<NavigationEventListener> navigationEventListeners;
-  private ProgressChangeListener internalProgressChangeListener;
   private List<MilestoneEventListener> milestoneEventListeners;
   private List<ProgressChangeListener> progressChangeListeners;
   private List<OffRouteListener> offRouteListeners;
+  private NavigationMetricListeners.EventListeners metricEventListeners;
+  private NavigationMetricListeners.ArrivalListener metricArrivalListener;
 
   NavigationEventDispatcher() {
     navigationEventListeners = new ArrayList<>();
@@ -103,25 +105,30 @@ class NavigationEventDispatcher {
     }
   }
 
-  void setInternalProgressChangeListener(ProgressChangeListener internalProgressChangeListener) {
-    this.internalProgressChangeListener = internalProgressChangeListener;
-  }
-
-  void removeInternalProgressChangeListener() {
-    internalProgressChangeListener = null;
-  }
-
-  void onMilestoneEvent(RouteProgress routeProgress, String instruction, int identifier) {
+  void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
     for (MilestoneEventListener milestoneEventListener : milestoneEventListeners) {
-      milestoneEventListener.onMilestoneEvent(routeProgress, instruction, identifier);
+      milestoneEventListener.onMilestoneEvent(routeProgress, instruction, milestone);
     }
   }
 
   void onProgressChange(Location location, RouteProgress routeProgress) {
-    // Check if user has arrived and notify internal progress change listener if so.
-    if (internalProgressChangeListener != null
-      && routeProgress.distanceRemaining() <= METERS_REMAINING_TILL_ARRIVAL) {
-      internalProgressChangeListener.onProgressChange(location, routeProgress);
+    if (metricEventListeners != null) {
+      // Update RouteProgress
+      metricEventListeners.onRouteProgressUpdate(routeProgress);
+
+      // Check if user has arrived and notify metric listener if so
+      if (RouteUtils.isArrivalEvent(routeProgress) && metricArrivalListener != null) {
+        metricArrivalListener.onArrival(location, routeProgress);
+        metricArrivalListener = null;
+
+        // If a this is the last leg, navigation is ending - remove listeners
+        if (RouteUtils.isLastLeg(routeProgress)) {
+          // Remove off route listeners
+          removeOffRouteListener(null);
+          // Remove metric listener
+          metricEventListeners = null;
+        }
+      }
     }
 
     for (ProgressChangeListener progressChangeListener : progressChangeListeners) {
@@ -133,11 +140,23 @@ class NavigationEventDispatcher {
     for (OffRouteListener offRouteListener : offRouteListeners) {
       offRouteListener.userOffRoute(location);
     }
+    // Send off route event to metric listener
+    if (metricEventListeners != null) {
+      metricEventListeners.onOffRouteEvent(location);
+    }
   }
 
   void onNavigationEvent(boolean isRunning) {
     for (NavigationEventListener navigationEventListener : navigationEventListeners) {
       navigationEventListener.onRunning(isRunning);
     }
+  }
+
+  void addMetricEventListeners(NavigationMetricListeners.EventListeners eventListeners) {
+    this.metricEventListeners = eventListeners;
+  }
+
+  void addMetricArrivalListener(NavigationMetricListeners.ArrivalListener arrivalListener) {
+    this.metricArrivalListener = arrivalListener;
   }
 }

@@ -3,8 +3,8 @@ package com.mapbox.services.android.navigation.v5.routeprogress;
 import android.support.annotation.NonNull;
 
 import com.google.auto.value.AutoValue;
-import com.mapbox.directions.v5.models.DirectionsRoute;
-import com.mapbox.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 
 /**
  * This class contains all progress information at any given time during a navigation session. This
@@ -123,6 +123,8 @@ public abstract class RouteProgress {
    * @since 0.1.0
    */
   public abstract RouteLegProgress currentLegProgress();
+
+  public abstract RouteProgress.Builder toBuilder();
 
   @AutoValue.Builder
   public abstract static class Builder {

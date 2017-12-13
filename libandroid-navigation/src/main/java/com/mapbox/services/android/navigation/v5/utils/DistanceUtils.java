@@ -1,68 +1,123 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
-import android.text.Spannable;
+import android.graphics.Typeface;
+import android.location.Location;
 import android.text.SpannableStringBuilder;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 
+import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.span.SpanItem;
+import com.mapbox.services.android.navigation.v5.utils.span.SpanUtils;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfConversion;
+import com.mapbox.turf.TurfMeasurement;
 
 import java.text.DecimalFormat;
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DistanceUtils {
 
-  private static final String MILE_FORMAT = "%s mi";
-  private static final String FEET_FORMAT = "%s ft";
+  private static final int LARGE_UNIT_THRESHOLD = 10;
+  private static final int SMALL_UNIT_THRESHOLD = 401;
+  private static final String MILE = " mi";
+  private static final String FEET = " ft";
+  private static final String KILOMETER = " km";
+  private static final String METER = " m";
 
-  public static SpannableStringBuilder distanceFormatterBold(double distance, DecimalFormat decimalFormat) {
+  public static SpannableStringBuilder distanceFormatter(double distance,
+                                                         DecimalFormat decimalFormat,
+                                                         boolean spansEnabled,
+                                                         int unitType) {
+
+    boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
+
+    String largeUnitFormat = isImperialUnitType ? MILE : KILOMETER;
+    String smallUnitFormat = isImperialUnitType ? FEET : METER;
+    String largeFinalUnit = isImperialUnitType ? TurfConstants.UNIT_MILES : TurfConstants.UNIT_KILOMETERS;
+    String smallFinalUnit = isImperialUnitType ? TurfConstants.UNIT_FEET : TurfConstants.UNIT_METERS;
+
     SpannableStringBuilder formattedString;
-    if (longDistance(distance)) {
-      formattedString = roundToNearestMile(distance);
-    } else if (mediumDistance(distance)) {
-      formattedString = roundOneDecimalPlace(distance, decimalFormat);
+    if (longDistance(distance, largeFinalUnit)) {
+      formattedString = roundToNearestMile(distance, spansEnabled, largeFinalUnit, largeUnitFormat);
+    } else if (mediumDistance(distance, largeFinalUnit, smallFinalUnit)) {
+      formattedString = roundOneDecimalPlace(distance, decimalFormat, spansEnabled,
+        largeFinalUnit, largeUnitFormat);
     } else {
-      formattedString = roundByFiftyFeet(distance);
+      formattedString = roundByFiftyFeet(distance, spansEnabled, smallUnitFormat, smallFinalUnit);
     }
     return formattedString;
   }
 
-  private static SpannableStringBuilder roundByFiftyFeet(double distance) {
-    distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET);
+  private static SpannableStringBuilder roundByFiftyFeet(double distance, boolean spansEnabled,
+                                                         String smallUnitFormat, String smallFinalUnit) {
+    distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, smallFinalUnit);
+
+    // Distance value
     int roundedNumber = ((int) Math.round(distance)) / 50 * 50;
+    roundedNumber = roundedNumber < 50 ? 50 : roundedNumber;
 
-    SpannableStringBuilder formattedString
-      = new SpannableStringBuilder(String.format(Locale.getDefault(), FEET_FORMAT, roundedNumber));
-    formattedString.setSpan(
-      new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
-      0, String.valueOf(roundedNumber).length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-    return formattedString;
+    if (spansEnabled) {
+      return generateSpannedText(String.valueOf(roundedNumber), smallUnitFormat);
+    } else {
+      return new SpannableStringBuilder(String.valueOf(roundedNumber) + smallUnitFormat);
+    }
   }
 
-  private static SpannableStringBuilder roundOneDecimalPlace(double distance, DecimalFormat decimalFormat) {
-    distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES);
+  private static SpannableStringBuilder roundOneDecimalPlace(double distance, DecimalFormat decimalFormat,
+                                                             boolean spansEnabled, String largeFinalUnit,
+                                                             String largeUnitFormat) {
+    distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeFinalUnit);
+
+    // Distance value
     double roundedNumber = (distance / 100 * 100);
-    SpannableStringBuilder formattedString = new SpannableStringBuilder(String.format(Locale.getDefault(),
-      MILE_FORMAT, decimalFormat.format(roundedNumber)));
-    formattedString.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
-      0, decimalFormat.format(roundedNumber).length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-    return formattedString;
+    String roundedDecimal = decimalFormat.format(roundedNumber);
+
+    if (spansEnabled) {
+      return generateSpannedText(roundedDecimal, largeUnitFormat);
+    } else {
+      return new SpannableStringBuilder(roundedDecimal + largeUnitFormat);
+    }
   }
 
-  private static boolean mediumDistance(double distance) {
-    return TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES) < 10
-      && TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_FEET) > 401;
+  private static SpannableStringBuilder roundToNearestMile(double distance, boolean spansEnabled,
+                                                           String largeFinalUnit, String largeUnitFormat) {
+    distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeFinalUnit);
+
+    // Distance value
+    int roundedNumber = (int) Math.round(distance);
+
+    if (spansEnabled) {
+      return generateSpannedText(String.valueOf(roundedNumber), largeUnitFormat);
+    } else {
+      return new SpannableStringBuilder(String.valueOf(roundedNumber) + largeUnitFormat);
+    }
   }
 
-  private static SpannableStringBuilder roundToNearestMile(double distance) {
-    distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES);
-    SpannableStringBuilder formattedString
-      = new SpannableStringBuilder(String.format(Locale.getDefault(), MILE_FORMAT, (int) Math.round(distance)));
-    formattedString.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
-      0, String.valueOf((int) Math.round(distance)).length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-    return formattedString;
+  private static boolean mediumDistance(double distance, String largeFinalUnit, String smallFinalUnit) {
+    return TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeFinalUnit) < LARGE_UNIT_THRESHOLD
+      && TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, smallFinalUnit) > SMALL_UNIT_THRESHOLD;
   }
 
-  private static boolean longDistance(double distance) {
-    return TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, TurfConstants.UNIT_MILES) > 10;
+  private static boolean longDistance(double distance, String largeFinalUnit) {
+    return TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeFinalUnit) > LARGE_UNIT_THRESHOLD;
+  }
+
+  public static int calculateAbsoluteDistance(Location currentLocation, MetricsRouteProgress metricProgress) {
+
+    Point currentPoint = Point.fromLngLat(currentLocation.getLongitude(), currentLocation.getLatitude());
+    Point finalPoint = metricProgress.getDirectionsRouteDestination();
+
+    return (int) TurfMeasurement.distance(currentPoint, finalPoint, TurfConstants.UNIT_METERS);
+  }
+
+  private static SpannableStringBuilder generateSpannedText(String distance, String unit) {
+    List<SpanItem> spans = new ArrayList<>();
+    spans.add(new SpanItem(new StyleSpan(Typeface.BOLD), distance));
+    spans.add(new SpanItem(new RelativeSizeSpan(0.65f), unit));
+    return SpanUtils.combineSpans(spans);
   }
 }

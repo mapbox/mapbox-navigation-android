@@ -4,8 +4,6 @@ import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
@@ -15,9 +13,8 @@ import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.ui.v5.summary.list.DirectionListAdapter;
-import com.mapbox.services.android.navigation.ui.v5.summary.list.DirectionViewHolder;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -35,17 +32,13 @@ import java.text.DecimalFormat;
 public class SummaryBottomSheet extends FrameLayout {
 
   private static final String EMPTY_STRING = "";
-  private static final int SCROLL_DIRECTION_UP = -1;
 
   private TextView distanceRemainingText;
   private TextView timeRemainingText;
   private TextView arrivalTimeText;
   private ProgressBar rerouteProgressBar;
-  private RecyclerView rvDirections;
-  private View rvShadow;
 
   private DecimalFormat decimalFormat;
-  private DirectionListAdapter directionListAdapter;
   private boolean isRerouting;
 
   public SummaryBottomSheet(Context context) {
@@ -70,7 +63,6 @@ public class SummaryBottomSheet extends FrameLayout {
   protected void onFinishInflate() {
     super.onFinishInflate();
     bind();
-    initDirectionsRecyclerView();
     initDecimalFormat();
   }
 
@@ -82,8 +74,6 @@ public class SummaryBottomSheet extends FrameLayout {
           arrivalTimeText.setText(summaryModel.getArrivalTime());
           timeRemainingText.setText(summaryModel.getTimeRemaining());
           distanceRemainingText.setText(summaryModel.getDistanceRemaining());
-          updateSteps(summaryModel.getProgress());
-          updateFirstViewHolder();
         }
       }
     });
@@ -107,16 +97,16 @@ public class SummaryBottomSheet extends FrameLayout {
    * uses it to update the views.
    *
    * @param routeProgress used to provide navigation / routeProgress data
+   * @param unitType      either imperial or metric
+   * @since 0.6.2
    */
   @SuppressWarnings("UnusedDeclaration")
-  public void update(RouteProgress routeProgress) {
+  public void update(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
     if (routeProgress != null && !isRerouting) {
-      SummaryModel model = new SummaryModel(routeProgress, decimalFormat);
+      SummaryModel model = new SummaryModel(routeProgress, decimalFormat, unitType);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());
-      updateSteps(routeProgress);
-      updateFirstViewHolder();
     }
   }
 
@@ -157,27 +147,6 @@ public class SummaryBottomSheet extends FrameLayout {
     timeRemainingText = findViewById(R.id.timeRemainingText);
     arrivalTimeText = findViewById(R.id.arrivalTimeText);
     rerouteProgressBar = findViewById(R.id.rerouteProgressBar);
-    rvDirections = findViewById(R.id.rvDirections);
-    rvShadow = findViewById(R.id.rvShadow);
-  }
-
-  /**
-   * Sets up the {@link RecyclerView} that is used to display the list of directions.
-   */
-  private void initDirectionsRecyclerView() {
-    directionListAdapter = new DirectionListAdapter();
-    rvDirections.setAdapter(directionListAdapter);
-    rvDirections.setHasFixedSize(true);
-    rvDirections.setNestedScrollingEnabled(true);
-    rvDirections.setItemAnimator(new DefaultItemAnimator());
-    rvDirections.setLayoutManager(new LinearLayoutManager(getContext()));
-    rvDirections.addOnScrollListener(new RecyclerView.OnScrollListener() {
-      @Override
-      public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-        super.onScrolled(recyclerView, dx, dy);
-        rvShadow.setVisibility(rvDirections.canScrollVertically(SCROLL_DIRECTION_UP) ? View.VISIBLE : View.INVISIBLE);
-      }
-    });
   }
 
   /**
@@ -195,25 +164,5 @@ public class SummaryBottomSheet extends FrameLayout {
     arrivalTimeText.setText(EMPTY_STRING);
     timeRemainingText.setText(EMPTY_STRING);
     distanceRemainingText.setText(EMPTY_STRING);
-    directionListAdapter.clear();
-  }
-
-  /**
-   * Used to update the directions list with the current steps.
-   *
-   * @param routeProgress to provide the current steps
-   */
-  private void updateSteps(RouteProgress routeProgress) {
-    directionListAdapter.updateSteps(routeProgress);
-  }
-
-  /**
-   * Sets the first {@link android.support.v7.widget.RecyclerView.ViewHolder}
-   * to bold for emphasis.
-   */
-  private void updateFirstViewHolder() {
-    if (rvDirections.findViewHolderForAdapterPosition(0) != null) {
-      ((DirectionViewHolder) rvDirections.findViewHolderForAdapterPosition(0)).updateFirstViewHolder();
-    }
   }
 }

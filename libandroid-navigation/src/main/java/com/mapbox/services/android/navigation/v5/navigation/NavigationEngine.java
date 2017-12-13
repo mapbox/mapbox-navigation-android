@@ -5,14 +5,14 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
-import android.text.TextUtils;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
+import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.routeDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.stepDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.userSnappedToRoutePosition;
-import static com.mapbox.services.constants.Constants.PRECISION_6;
+import static com.mapbox.core.constants.Constants.PRECISION_6;
 
 /**
  * This class extends handler thread to run most of the navigation calculations on a separate
@@ -92,7 +92,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     DirectionsRoute directionsRoute = mapboxNavigation.getRoute();
     MapboxNavigationOptions options = mapboxNavigation.options();
 
-    if (newRoute(directionsRoute)) {
+    if (RouteUtils.isNewRoute(previousRouteProgress, directionsRoute)) {
       // Decode the first steps geometry and hold onto the resulting Position objects till the users
       // on the next step. Indices are both 0 since the user just started on the new route.
       stepPositions = PolylineUtils.decode(
@@ -147,20 +147,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       .stepIndex(indices.stepIndex())
       .legIndex(indices.legIndex())
       .build();
-  }
-
-  /**
-   * Check used to determine if navigation is starting for the first time (previousRouteProgress is
-   * null). Or, a new route has been found (in off-route scenarios).
-   *
-   * @param directionsRoute to check against the current route
-   * @return true if starting navigation for the first time
-   * or a new route is found, false otherwise
-   */
-  private boolean newRoute(DirectionsRoute directionsRoute) {
-    return previousRouteProgress == null
-      || !TextUtils.equals(directionsRoute.geometry(),
-      previousRouteProgress.directionsRoute().geometry());
   }
 
   /**

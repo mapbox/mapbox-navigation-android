@@ -9,6 +9,8 @@
         android:id="@+id/navigationView"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:navigationLightTheme="@style/NavigationViewLight"
+        app:navigationDarkTheme="@style/NavigationViewDark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

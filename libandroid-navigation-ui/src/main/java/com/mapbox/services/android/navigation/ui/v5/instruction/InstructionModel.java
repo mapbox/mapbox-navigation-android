@@ -1,33 +1,37 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 
-import com.mapbox.directions.v5.models.IntersectionLanes;
-import com.mapbox.directions.v5.models.LegStep;
-import com.mapbox.directions.v5.models.StepIntersection;
+import com.mapbox.api.directions.v5.models.IntersectionLanes;
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.StepIntersection;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
-import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
-import com.mapbox.services.commons.utils.TextUtils;
 
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.List;
-
-import static com.mapbox.services.android.navigation.v5.utils.ManeuverUtils.getManeuverResource;
 
 public class InstructionModel {
 
   private SpannableStringBuilder stepDistanceRemaining;
-  private String primaryText;
-  private String secondaryText;
-  private int maneuverImage;
-  private String maneuverModifier;
+  private InstructionText bannerInstructionText;
+  private InstructionText thenInstructionText;
+  private String maneuverViewModifier;
+  private String maneuverViewType;
+  private String thenStepManeuverModifier;
+  private String thenStepManeuverType;
   private List<IntersectionLanes> turnLanes;
-  private boolean isUsingInstruction;
+  private RouteProgress progress;
+  private int unitType;
+  private boolean shouldShowThenStep;
 
-  public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
-    buildInstructionModel(progress, decimalFormat);
+  public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat,
+                          @NavigationUnitType.UnitType int unitType) {
+    this.progress = progress;
+    this.unitType = unitType;
+    buildInstructionModel(progress, decimalFormat, unitType);
   }
 
   SpannableStringBuilder getStepDistanceRemaining() {
@@ -35,65 +39,121 @@ public class InstructionModel {
   }
 
   String getPrimaryText() {
-    return primaryText;
+    if (bannerInstructionText != null) {
+      return bannerInstructionText.getPrimaryText();
+    } else {
+      return "";
+    }
   }
 
   String getSecondaryText() {
-    return secondaryText;
+    if (bannerInstructionText != null) {
+      return bannerInstructionText.getSecondaryText();
+    } else {
+      return "";
+    }
   }
 
-  int getManeuverImage() {
-    return maneuverImage;
+  String getThenStepText() {
+    if (thenInstructionText != null) {
+      return thenInstructionText.getPrimaryText();
+    } else {
+      return "";
+    }
   }
 
-  String getManeuverModifier() {
-    return maneuverModifier;
+  String getManeuverViewModifier() {
+    return maneuverViewModifier;
+  }
+
+  String getManeuverViewType() {
+    return maneuverViewType;
+  }
+
+  String getThenStepManeuverModifier() {
+    return thenStepManeuverModifier;
+  }
+
+  String getThenStepManeuverType() {
+    return thenStepManeuverType;
+  }
+
+  boolean shouldShowThenStep() {
+    return shouldShowThenStep;
   }
 
   List<IntersectionLanes> getTurnLanes() {
     return turnLanes;
   }
 
-  boolean isUsingInstruction() {
-    return isUsingInstruction;
+  RouteProgress getProgress() {
+    return progress;
   }
 
-  private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat) {
-    formatStepDistance(progress, decimalFormat);
-    LegStep upComingStep = progress.currentLegProgress().upComingStep();
-    if (upComingStep != null) {
-      extractStepResources(upComingStep);
+  int getUnitType() {
+    return unitType;
+  }
+
+  private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat, int unitType) {
+    formatStepDistance(progress, decimalFormat, unitType);
+    extractStepResources(progress);
+  }
+
+  private void extractStepResources(RouteProgress progress) {
+    LegStep currentStep = progress.currentLegProgress().currentStep();
+    LegStep upcomingStep = progress.currentLegProgress().upComingStep();
+    LegStep thenStep = progress.currentLegProgress().followOnStep();
+
+    // Type / Modifier / Text
+    if (upcomingStep != null && hasManeuver(upcomingStep)) {
+      maneuverViewType = upcomingStep.maneuver().type();
+      maneuverViewModifier = upcomingStep.maneuver().modifier();
+      // Upcoming instruction text data
+      bannerInstructionText = new InstructionText(upcomingStep);
+    } else if (hasManeuver(currentStep)) {
+      maneuverViewType = currentStep.maneuver().type();
+      maneuverViewModifier = currentStep.maneuver().modifier();
+      // Current instruction text data
+      bannerInstructionText = new InstructionText(currentStep);
+    }
+
+    // Then step (step after upcoming)
+    if (thenStep != null && hasManeuver(thenStep)) {
+      thenStep(upcomingStep, thenStep);
+    }
+
+    // Turn lane data
+    if (upcomingStep != null && hasIntersections(upcomingStep)) {
+      intersectionTurnLanes(upcomingStep);
     }
   }
 
-  private void extractStepResources(LegStep upComingStep) {
-    maneuverImage = getManeuverResource(upComingStep);
-    if (hasManeuver(upComingStep)) {
-      maneuverModifier = upComingStep.maneuver().modifier();
-    }
-    if (hasIntersections(upComingStep)) {
-      intersectionTurnLanes(upComingStep);
-    }
-    buildTextInstructions(upComingStep);
+  private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat, int unitType) {
+    stepDistanceRemaining = DistanceUtils.distanceFormatter(progress.currentLegProgress()
+      .currentStepProgress().distanceRemaining(), decimalFormat, true, unitType);
   }
 
-  private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat) {
-    stepDistanceRemaining = DistanceUtils.distanceFormatterBold(progress.currentLegProgress()
-      .currentStepProgress().distanceRemaining(), decimalFormat);
+  private boolean hasManeuver(LegStep step) {
+    return step.maneuver() != null;
   }
 
-  private boolean hasManeuver(LegStep upComingStep) {
-    return upComingStep.maneuver() != null;
-  }
-
-  private void intersectionTurnLanes(LegStep upComingStep) {
-    StepIntersection intersection = upComingStep.intersections().get(0);
+  private void intersectionTurnLanes(LegStep step) {
+    StepIntersection intersection = step.intersections().get(0);
     List<IntersectionLanes> lanes = intersection.lanes();
     if (checkForNoneIndications(lanes)) {
       turnLanes = null;
       return;
     }
     turnLanes = lanes;
+  }
+
+  private void thenStep(LegStep upcomingStep, LegStep thenStep) {
+    thenStepManeuverType = thenStep.maneuver().type();
+    thenStepManeuverModifier = thenStep.maneuver().modifier();
+    thenInstructionText = new InstructionText(thenStep);
+    // Should show then step if the upcoming step is less than 25 seconds
+    shouldShowThenStep = upcomingStep.duration() <= (25d * 1.2d)
+      && !TextUtils.isEmpty(thenInstructionText.getPrimaryText());
   }
 
   private boolean checkForNoneIndications(List<IntersectionLanes> lanes) {
@@ -110,108 +170,8 @@ public class InstructionModel {
     return false;
   }
 
-  private boolean hasIntersections(LegStep upComingStep) {
-    return upComingStep.intersections() != null
-      && upComingStep.intersections().get(0) != null;
-  }
-
-  private void buildTextInstructions(LegStep upComingStep) {
-    String exitText = "";
-
-    // Extract Exit for later use
-    if (upComingStep.maneuver() != null) {
-      if (!TextUtils.isEmpty(upComingStep.exits())) {
-        exitText = "Exit " + upComingStep.exits();
-      }
-    }
-
-    // Refs
-    if (hasRefs(upComingStep)) {
-      primaryText = StringAbbreviator.deliminator(upComingStep.ref());
-      if (hasDestination(upComingStep)) {
-        secondaryText = destinations(upComingStep);
-      }
-      return;
-    }
-
-    // Multiple Destinations
-    if (hasMultipleDestinations(upComingStep)) {
-      formatMultipleStrings(upComingStep.destinations(), exitText);
-      return;
-    }
-
-    // Multiple Names
-    if (hasMultipleNames(upComingStep)) {
-      formatMultipleStrings(upComingStep.name(), exitText);
-      return;
-    }
-
-    // Destination or Street Name
-    if (hasDestination(upComingStep)) {
-      primaryText = destinations(upComingStep);
-      return;
-    } else if (hasName(upComingStep)) {
-      primaryText = names(upComingStep);
-      return;
-    }
-
-    // Instruction
-    if (hasInstruction(upComingStep)) {
-      primaryText = instruction(upComingStep);
-      isUsingInstruction = true;
-    }
-  }
-
-  private boolean hasRefs(LegStep upComingStep) {
-    return !TextUtils.isEmpty(upComingStep.ref());
-  }
-
-  private String instruction(LegStep upComingStep) {
-    return upComingStep.maneuver().instruction();
-  }
-
-  private boolean hasInstruction(LegStep upComingStep) {
-    return upComingStep.maneuver() != null
-      && !TextUtils.isEmpty(upComingStep.maneuver().instruction());
-  }
-
-  private String names(LegStep upComingStep) {
-    String instruction = upComingStep.name().trim();
-    return StringAbbreviator.deliminator(instruction);
-  }
-
-  private boolean hasName(LegStep upComingStep) {
-    return !TextUtils.isEmpty(upComingStep.name());
-  }
-
-  private String destinations(LegStep upComingStep) {
-    String instruction = upComingStep.destinations().trim();
-    return StringAbbreviator.deliminator(instruction);
-  }
-
-  private boolean hasDestination(LegStep upComingStep) {
-    return !TextUtils.isEmpty(upComingStep.destinations());
-  }
-
-  private boolean hasMultipleDestinations(LegStep upComingStep) {
-    return !TextUtils.isEmpty(upComingStep.destinations())
-      && StringAbbreviator.splitter(upComingStep.destinations()).length > 1;
-  }
-
-  private boolean hasMultipleNames(LegStep upComingStep) {
-    return !TextUtils.isEmpty(upComingStep.name())
-      && StringAbbreviator.splitter(upComingStep.name()).length > 1;
-  }
-
-  private void formatMultipleStrings(String multipleString, String exitText) {
-    String[] strings = StringAbbreviator.splitter(multipleString);
-    String[] firstString = Arrays.copyOfRange(strings, 0, 1);
-    if (!TextUtils.isEmpty(exitText)) {
-      primaryText = exitText + " " + firstString[0];
-    } else {
-      primaryText = firstString[0];
-    }
-    String[] remainingStrings = Arrays.copyOfRange(strings, 1, strings.length);
-    secondaryText = TextUtils.join(" / ", remainingStrings).trim();
+  private boolean hasIntersections(LegStep step) {
+    return step.intersections() != null
+      && step.intersections().get(0) != null;
   }
 }

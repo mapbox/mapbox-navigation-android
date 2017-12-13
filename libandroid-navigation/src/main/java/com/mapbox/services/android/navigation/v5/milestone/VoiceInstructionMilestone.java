@@ -1,8 +1,9 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-import android.text.TextUtils;
-
-import com.mapbox.directions.v5.models.VoiceInstructions;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
+import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.List;
@@ -10,21 +11,27 @@ import java.util.List;
 public class VoiceInstructionMilestone extends Milestone {
 
   private String announcement;
+  private String ssmlAnnouncement;
+  private DirectionsRoute currentRoute;
+  private LegStep currentStep;
   private List<VoiceInstructions> stepVoiceInstructions;
 
-  public VoiceInstructionMilestone(Builder builder) {
+  VoiceInstructionMilestone(Builder builder) {
     super(builder);
   }
 
   @Override
   public boolean isOccurring(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-    if (shouldAddInstructions(previousRouteProgress, routeProgress)) {
+    if (newRoute(routeProgress)) {
       clearInstructionList();
+    }
+    if (shouldAddInstructions(routeProgress)) {
       stepVoiceInstructions = routeProgress.currentLegProgress().currentStep().voiceInstructions();
     }
     for (VoiceInstructions voice : stepVoiceInstructions) {
       if (shouldBeVoiced(routeProgress, voice)) {
         announcement = voice.announcement();
+        ssmlAnnouncement = voice.ssmlAnnouncement();
         stepVoiceInstructions.remove(voice);
         return true;
       }
@@ -32,21 +39,37 @@ public class VoiceInstructionMilestone extends Milestone {
     return false;
   }
 
-  public String announcement() {
-    return announcement;
+  @Override
+  public Instruction getInstruction() {
+    return new Instruction() {
+      @Override
+      public String buildInstruction(RouteProgress routeProgress) {
+        return announcement;
+      }
+    };
+  }
+
+  /**
+   * Provide the SSML instruction that can be used with Amazon's AWS Polly.
+   * <p>
+   * This String will provide special markup denoting how certain portions of the announcement
+   * should be pronounced.
+   *
+   * @return announcement with SSML markup
+   * @since 0.8.0
+   */
+  public String getSsmlAnnouncement() {
+    return ssmlAnnouncement;
   }
 
   /**
    * Check if a new set of step instructions should be set.
    *
-   * @param previousRouteProgress most recent progress before the current progress
-   * @param routeProgress         the current route progress
+   * @param routeProgress the current route progress
    * @return true if new instructions should be added to the list, false if not
    */
-  private boolean shouldAddInstructions(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-    return newStep(previousRouteProgress, routeProgress)
-      || newRoute(previousRouteProgress, routeProgress)
-      || stepVoiceInstructions == null;
+  private boolean shouldAddInstructions(RouteProgress routeProgress) {
+    return newStep(routeProgress) || stepVoiceInstructions == null;
   }
 
   /**
@@ -61,27 +84,27 @@ public class VoiceInstructionMilestone extends Milestone {
   }
 
   /**
-   * Used to check for a new route.  Route geometries will be the same only on the first
-   * update.  This is because the previousRouteProgress is reset and the current routeProgress is generated
-   * from the previous.
+   * Looks to see if we have a new step.
    *
-   * @param previousRouteProgress most recent progress before the current progress
-   * @param routeProgress         the current route progress
-   * @return true if there's a new route, false if not
+   * @param routeProgress provides updated step information
+   * @return true if new step, false if not
    */
-  private boolean newRoute(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-    return TextUtils.equals(previousRouteProgress.directionsRoute().geometry(),
-      routeProgress.directionsRoute().geometry());
+  private boolean newStep(RouteProgress routeProgress) {
+    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().currentStep());
+    currentStep = routeProgress.currentLegProgress().currentStep();
+    return newStep;
   }
 
   /**
-   * @param previousRouteProgress most recent progress before the current progress
-   * @param routeProgress         the current route progress
-   * @return true if on a new step, false if not
+   * Looks to see if we have a new route.
+   *
+   * @param routeProgress provides updated route information
+   * @return true if new route, false if not
    */
-  private boolean newStep(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-    return previousRouteProgress.currentLegProgress().stepIndex()
-      < routeProgress.currentLegProgress().stepIndex();
+  private boolean newRoute(RouteProgress routeProgress) {
+    boolean newRoute = currentRoute == null || !currentRoute.equals(routeProgress.directionsRoute());
+    currentRoute = routeProgress.directionsRoute();
+    return newRoute;
   }
 
   /**

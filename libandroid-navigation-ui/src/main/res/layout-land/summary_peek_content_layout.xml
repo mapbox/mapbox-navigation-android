@@ -13,10 +13,9 @@
         android:id="@+id/timeRemainingText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="?attr/navigationViewSecondary"
+        android:textColor="?attr/navigationViewPrimaryText"
         android:includeFontPadding="false"
         android:textSize="26sp"
-        android:textStyle="bold"
         tools:text="5 min"/>
 
     <ImageView
@@ -33,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        android:textColor="?attr/navigationViewAccentText"
+        android:textColor="?attr/navigationViewSecondaryText"
         android:includeFontPadding="false"
         android:maxLines="1"
         android:ellipsize="end"
@@ -54,7 +53,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        android:textColor="?attr/navigationViewAccentText"
+        android:textColor="?attr/navigationViewSecondaryText"
         android:includeFontPadding="false"
         android:maxLines="1"
         android:ellipsize="end"

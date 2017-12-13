@@ -2,15 +2,15 @@ package com.mapbox.services.android.navigation.v5.location;
 
 import android.location.Location;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
+
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
-import com.mapbox.services.constants.Constants;
+import com.mapbox.core.constants.Constants;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
@@ -135,7 +135,9 @@ public class MockLocationEngine extends LocationEngine {
   @Override
   @Nullable
   public Location getLastLocation() {
-    if (lastLocation.getLongitude() != 0 && lastLocation.getLatitude() != 0) {
+    if (lastLocation != null
+      && lastLocation.getLongitude() != 0
+      && lastLocation.getLatitude() != 0) {
       return lastLocation;
     } else {
       return null;
@@ -248,6 +250,11 @@ public class MockLocationEngine extends LocationEngine {
   }
 
   public void moveToLocation(Point point) {
+
+    if (location == null) {
+      return;
+    }
+
     List<Point> pointList = new ArrayList<>();
     pointList.add(Point.fromLngLat(location.getLongitude(), location.getLatitude()));
     pointList.add(point);
@@ -267,11 +274,12 @@ public class MockLocationEngine extends LocationEngine {
     LineString route = LineString.fromLngLats(pointList);
 
     sliceRoute(route, distance);
+
     if (noisyGps) {
       addNoiseToRoute(distance);
     }
 
-    Runnable runnable = new LocationUpdateRunnable();
+    runnable = new LocationUpdateRunnable();
     handler.postDelayed(runnable, delay);
   }
 
@@ -298,7 +306,7 @@ public class MockLocationEngine extends LocationEngine {
 
     calculateStepPoints();
 
-    Runnable runnable = new LocationUpdateRunnable();
+    runnable = new LocationUpdateRunnable();
     handler.postDelayed(runnable, delay);
   }
 
@@ -352,7 +360,7 @@ public class MockLocationEngine extends LocationEngine {
     }
 
     location.setAccuracy(3f);
-    location.setTime(SystemClock.elapsedRealtime());
+    location.setTime(System.currentTimeMillis());
 
     return location;
   }
@@ -375,19 +383,24 @@ public class MockLocationEngine extends LocationEngine {
       if (!points.isEmpty()) {
         // Notify of an update
         Location location = mockLocation(points.get(0));
-        for (LocationEngineListener listener : locationListeners) {
-          listener.onLocationChanged(location);
-        }
+        sendLocationUpdate(location);
         points.remove(0);
       } else {
         Location location = getLastLocation();
-        for (LocationEngineListener listener : locationListeners) {
-          listener.onLocationChanged(location);
-        }
+        sendLocationUpdate(location);
       }
       lastLocation = location;
       // Schedule the next update
       handler.postDelayed(this, delay);
+    }
+
+    private void sendLocationUpdate(Location location) {
+      if (location == null) {
+        return;
+      }
+      for (LocationEngineListener listener : locationListeners) {
+        listener.onLocationChanged(location);
+      }
     }
   }
 }

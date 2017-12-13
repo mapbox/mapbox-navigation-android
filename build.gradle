@@ -5,9 +5,8 @@ buildscript {
   apply from: "${rootDir}/gradle/dependencies.gradle"
 
   repositories {
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     maven { url 'https://plugins.gradle.org/m2' }
-    maven { url "https://maven.google.com" }
+    google()
     jcenter()
   }
   dependencies {
@@ -25,9 +24,8 @@ task testReport(type: TestReport, group: 'Build') {
 
 allprojects {
   repositories {
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     maven { url 'https://plugins.gradle.org/m2' }
-    maven { url "https://maven.google.com" }
+    google()
     jcenter()
   }
 

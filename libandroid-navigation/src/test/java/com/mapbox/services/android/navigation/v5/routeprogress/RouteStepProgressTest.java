@@ -2,15 +2,16 @@ package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mapbox.directions.v5.DirectionsAdapterFactory;
-import com.mapbox.directions.v5.models.DirectionsResponse;
-import com.mapbox.directions.v5.models.DirectionsRoute;
-import com.mapbox.directions.v5.models.LegStep;
-import com.mapbox.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
+import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.BaseTest;
-import com.mapbox.services.constants.Constants;
+import com.mapbox.core.constants.Constants;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
@@ -22,7 +23,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
 
+import static junit.framework.Assert.*;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -326,7 +329,7 @@ public class RouteStepProgressTest extends BaseTest {
 
       RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
       double fractionRemaining = (firstStep.distance() - distance) / firstStep.distance();
-      Assert.assertEquals((1.0 - fractionRemaining) * firstStep.duration(),
+      assertEquals((1.0 - fractionRemaining) * firstStep.duration(),
         routeStepProgress.durationRemaining(), BaseTest.LARGE_DELTA);
     }
 
@@ -344,5 +347,48 @@ public class RouteStepProgressTest extends BaseTest {
       .build();
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
     assertEquals(0, routeStepProgress.durationRemaining(), BaseTest.DELTA);
+  }
+
+  @Test
+  public void stepIntersections_includesAllStepIntersectionsAndNextManeuver() throws Exception {
+    RouteProgress routeProgress = RouteProgress.builder()
+      .stepDistanceRemaining(0)
+      .legDistanceRemaining(firstLeg.distance())
+      .distanceRemaining(route.distance())
+      .directionsRoute(route)
+      .stepIndex(3)
+      .legIndex(0)
+      .build();
+    RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
+
+    int currentStepTotal = route.legs().get(0).steps().get(3).intersections().size();
+    Point maneuverLocation = route.legs().get(0).steps().get(4).maneuver().location();
+
+    assertEquals(currentStepTotal + 1, routeStepProgress.intersections().size());
+    assertEquals(routeStepProgress.intersections().get(16).location().latitude(), maneuverLocation.latitude());
+    assertEquals(routeStepProgress.intersections().get(16).location().longitude(), maneuverLocation.longitude());
+  }
+
+  @Test
+  public void stepIntersections_handlesNullNextManeuverCorrectly() throws Exception {
+    int lastStepIndex = (route.legs().get(0).steps().size() - 1);
+
+    RouteProgress routeProgress = RouteProgress.builder()
+      .stepDistanceRemaining(0)
+      .legDistanceRemaining(firstLeg.distance())
+      .distanceRemaining(route.distance())
+      .directionsRoute(route)
+      .stepIndex(lastStepIndex)
+      .legIndex(0)
+      .build();
+    RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
+
+    int currentStepTotal = route.legs().get(0).steps().get(lastStepIndex).intersections().size();
+    List<Point> lastStepLocation = PolylineUtils.decode(
+    route.legs().get(0).steps().get(lastStepIndex).geometry(), Constants.PRECISION_6);
+
+    assertEquals(currentStepTotal, routeStepProgress.intersections().size());
+    assertEquals(routeStepProgress.intersections().get(0).location().latitude(), lastStepLocation.get(0).latitude());
+    assertEquals(routeStepProgress.intersections().get(0).location().longitude(), lastStepLocation.get(0).longitude());
   }
 }
