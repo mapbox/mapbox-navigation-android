@@ -82,6 +82,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private LocationLayerPlugin locationLayer;
   private NavigationViewListener navigationListener;
   private boolean resumeState;
+  private RouteListener routeListener;
 
   public NavigationView(Context context) {
     this(context, null);
@@ -319,6 +320,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     }
   }
 
+  /**
+   * Sets the route listener
+   * @param routeListener to listen for routing events
+   */
+  public void setRouteListener(RouteListener routeListener) {
+    this.routeListener = routeListener;
+  }
+
   private void init() {
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
@@ -544,7 +553,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     navigationViewModel.navigationLocation.observe((LifecycleOwner) getContext(), new Observer<Location>() {
       @Override
       public void onChanged(@Nullable Location location) {
-        if (location != null && location.getLongitude() != 0 && location.getLatitude() != 0) {
+        boolean shouldReroute = routeListener == null ? true : routeListener.allowRerouteFrom(location);
+        if (location != null && shouldReroute && location.getLongitude() != 0 && location.getLatitude() != 0) {
+          if (routeListener != null) {
+            routeListener.onRerouteFrom(location);
+          }
           locationLayer.forceLocationUpdate(location);
           resumeCamera(location);
         }
