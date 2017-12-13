@@ -44,6 +44,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
   final MutableLiveData<Point> newOrigin = new MutableLiveData<>();
   final MutableLiveData<Boolean> isRunning = new MutableLiveData<>();
+  final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
   private NavigationInstructionPlayer instructionPlayer;
@@ -51,6 +52,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   private DecimalFormat decimalFormat;
   private int unitType;
   private String feedbackId;
+  private String screenshot;
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -143,6 +145,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    */
   public void recordFeedback(@FeedbackEvent.FeedbackSource String feedbackSource) {
     feedbackId = navigation.recordFeedback(FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE, "", feedbackSource);
+    shouldRecordScreenshot.setValue(true);
   }
 
   /**
@@ -156,8 +159,9 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    */
   public void updateFeedback(FeedbackItem feedbackItem) {
     if (!TextUtils.isEmpty(feedbackId)) {
-      navigation.updateFeedback(feedbackId, feedbackItem.getFeedbackType(), feedbackItem.getDescription());
+      navigation.updateFeedback(feedbackId, feedbackItem.getFeedbackType(), feedbackItem.getDescription(), screenshot);
       feedbackId = null;
+      screenshot = null;
     }
   }
 
@@ -198,6 +202,13 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   void updateRoute(DirectionsRoute route) {
     startNavigation(route);
     isOffRoute.setValue(false);
+  }
+
+  void updateFeedbackScreenshot(String screenshot) {
+    if (!TextUtils.isEmpty(feedbackId)) {
+      this.screenshot = screenshot;
+    }
+    shouldRecordScreenshot.setValue(false);
   }
 
   void updateLocationEngine(LocationEngine locationEngine) {
