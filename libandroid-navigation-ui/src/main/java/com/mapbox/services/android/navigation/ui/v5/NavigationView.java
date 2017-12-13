@@ -521,6 +521,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     routeViewModel.route.observe((LifecycleOwner) getContext(), new Observer<DirectionsRoute>() {
       @Override
       public void onChanged(@Nullable DirectionsRoute directionsRoute) {
+        if (routeListener != null) {
+          routeListener.onRerouteAlong(directionsRoute);
+        }
+
         if (directionsRoute != null) {
           navigationViewModel.updateRoute(directionsRoute);
           locationViewModel.updateRoute(directionsRoute);
