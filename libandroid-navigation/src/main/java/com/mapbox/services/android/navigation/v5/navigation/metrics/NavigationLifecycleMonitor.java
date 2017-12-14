@@ -22,6 +22,7 @@ public class NavigationLifecycleMonitor implements Application.ActivityLifecycle
     pauses = new ArrayList<>();
     orientationChanges = new ArrayList<>();
     orientation = application.getResources().getConfiguration().orientation;
+    orientationChanges.add(System.currentTimeMillis());
   }
 
   @Override
@@ -30,13 +31,13 @@ public class NavigationLifecycleMonitor implements Application.ActivityLifecycle
     // If not equal, add orientation change time
     if (orientation != newOrientation) {
       orientation = newOrientation;
-      orientationChanges.add(System.currentTimeMillis());
     }
   }
 
   @Override
   public void onActivityResumed(Activity activity) {
     resumes.add(System.currentTimeMillis());
+    orientationChanges.add(System.currentTimeMillis());
   }
 
   @Override
@@ -78,15 +79,15 @@ public class NavigationLifecycleMonitor implements Application.ActivityLifecycle
     boolean isPortrait = orientation.equals(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     // If there were no orientation changes and currently in portrait, return 100
     // Otherwise, return 0 (landscape the whole time)
-    if (orientationChanges.isEmpty()) {
+    if (orientationChanges.size() < 2) {
       return isPortrait ? 100 : 0;
     }
 
     // Find the time spent in portrait
-    long portraitTimeInMillis = 0;
+    double portraitTimeInMillis = 0;
     long lastChangeTimeInMillis = 0;
     long currentTimeMillis = System.currentTimeMillis();
-    for (int i = orientationChanges.size() - 1; i > 0; i--) {
+    for (int i = orientationChanges.size() - 1; i > -1; i--) {
       if (isPortrait) {
         long diffFromLastChange;
         // First iteration of the loop
