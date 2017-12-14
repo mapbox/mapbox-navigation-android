@@ -30,6 +30,12 @@ public abstract class NavigationViewOptions {
 
   public abstract boolean shouldSimulateRoute();
 
+  @Nullable
+  public abstract Integer lightThemeResId();
+
+  @Nullable
+  public abstract Integer darkThemeResId();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -46,6 +52,10 @@ public abstract class NavigationViewOptions {
     public abstract Builder navigationOptions(MapboxNavigationOptions navigationOptions);
 
     public abstract Builder shouldSimulateRoute(boolean shouldSimulateRoute);
+
+    public abstract Builder lightThemeResId(Integer lightThemeResId);
+
+    public abstract Builder darkThemeResId(Integer darkThemeResId);
 
     public abstract NavigationViewOptions build();
   }

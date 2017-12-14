@@ -96,7 +96,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public NavigationView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
-    ThemeSwitcher.setTheme(getContext(), attrs);
+    ThemeSwitcher.setTheme(context, attrs);
     init();
   }
 

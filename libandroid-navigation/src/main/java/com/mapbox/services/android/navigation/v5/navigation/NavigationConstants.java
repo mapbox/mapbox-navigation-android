@@ -127,6 +127,21 @@ public final class NavigationConstants {
    */
   public static final String FEEDBACK_SUBMITTED = "Feedback Submitted";
 
+  /**
+   * If a set of light / dark themes been set in {@link android.content.SharedPreferences}
+   */
+  public static final String NAVIGATION_VIEW_PREFERENCE_SET_THEME = "navigation_view_theme_preference";
+
+  /**
+   * Key for the set light theme in preferences
+   */
+  public static final String NAVIGATION_VIEW_LIGHT_THEME = "navigation_view_light_theme";
+
+  /**
+   * Key for the set dark theme in preferences
+   */
+  public static final String NAVIGATION_VIEW_DARK_THEME = "navigation_view_dark_theme";
+
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat";
   public static final String NAVIGATION_VIEW_ORIGIN_LNG_KEY = "origin_long";

@@ -55,6 +55,14 @@ public class NavigationLauncher {
     editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, options.awsPoolId());
     editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, options.shouldSimulateRoute());
     editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, options.navigationOptions().unitType());
+
+    boolean preferenceThemeSet = options.lightThemeResId() != null || options.darkThemeResId() != null;
+    int lightThemeResId = options.lightThemeResId() != null ? options.lightThemeResId() : 0;
+    int darkThemeResId = options.darkThemeResId() != null ? options.darkThemeResId() : 0;
+    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_PREFERENCE_SET_THEME, preferenceThemeSet);
+    editor.putInt(NavigationConstants.NAVIGATION_VIEW_LIGHT_THEME, lightThemeResId);
+    editor.putInt(NavigationConstants.NAVIGATION_VIEW_DARK_THEME, darkThemeResId);
+
     editor.apply();
 
     Intent navigationActivity = new Intent(activity, NavigationActivity.class);
