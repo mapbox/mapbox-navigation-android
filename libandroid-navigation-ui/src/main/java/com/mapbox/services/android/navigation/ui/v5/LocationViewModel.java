@@ -6,13 +6,10 @@ import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.OnLifecycleEvent;
-import android.content.SharedPreferences;
 import android.location.Location;
-import android.preference.PreferenceManager;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
@@ -25,11 +22,10 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
   final MutableLiveData<LocationEngine> locationEngine = new MutableLiveData<>();
   final MutableLiveData<Location> rawLocation = new MutableLiveData<>();
   private LocationEngine modelLocationEngine;
-  private SharedPreferences preferences;
+  private boolean shouldSimulateRoute;
 
   public LocationViewModel(Application application) {
     super(application);
-    preferences = PreferenceManager.getDefaultSharedPreferences(application);
     initLocation(application);
   }
 
@@ -74,13 +70,21 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
   }
 
   /**
+   * Checks {@link NavigationViewOptions} to see if the route
+   * should be simulated with a {@link MockLocationEngine}.
+   */
+  void extractLocationOptions(NavigationViewOptions options) {
+    this.shouldSimulateRoute = options.shouldSimulateRoute();
+  }
+
+  /**
    * Activates the {@link MockLocationEngine} with the
    * give {@link DirectionsRoute}.
    *
    * @param route to be mocked
    */
   void updateRoute(DirectionsRoute route) {
-    if (shouldSimulateRoute()) {
+    if (shouldSimulateRoute) {
       activateMockLocationEngine(route);
     }
   }
@@ -91,7 +95,7 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
    */
   @SuppressWarnings({"MissingPermission"})
   private void initLocation(Application application) {
-    if (!shouldSimulateRoute()) {
+    if (!shouldSimulateRoute) {
       modelLocationEngine = new LostLocationEngine(application.getApplicationContext());
       modelLocationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
       modelLocationEngine.setFastestInterval(1000);
@@ -105,15 +109,6 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
       // Fire a null location update to fetch the route if we are launching with coordinates
       onLocationChanged(null);
     }
-  }
-
-  /**
-   * Checks if the route should be simualted with a {@link MockLocationEngine}.
-   *
-   * @return true if simulation enabled, false if not
-   */
-  private boolean shouldSimulateRoute() {
-    return preferences.getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false);
   }
 
   /**
