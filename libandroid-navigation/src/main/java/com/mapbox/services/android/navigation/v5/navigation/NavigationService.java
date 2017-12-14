@@ -76,6 +76,7 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
+    NavigationTelemetry.getInstance().initializeLifecycleMonitor(getApplication());
     return START_STICKY;
   }
 
