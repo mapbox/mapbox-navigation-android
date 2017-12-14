@@ -23,6 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import timber.log.Timber;
 
@@ -131,8 +132,11 @@ public class InstructionLoader {
 
     final Spannable instructionSpannable = new SpannableString(instructionStringBuilder);
     final Context context = textView.getContext();
-    Picasso picassoImageLoader = Picasso.with(context);
-    picassoImageLoader.setLoggingEnabled(true);
+
+    Picasso.Builder builder = new Picasso.Builder(context)
+      .executor(Executors.newCachedThreadPool())
+      .loggingEnabled(true);
+    Picasso picassoImageLoader = builder.build();
     // Use Picasso to load a Drawable from the given url
     for (final BannerShieldInfo shield : shields) {
       picassoImageLoader

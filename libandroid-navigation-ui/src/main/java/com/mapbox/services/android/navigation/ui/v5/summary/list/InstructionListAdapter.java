@@ -67,6 +67,12 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     return stepList.size();
   }
 
+  @Override
+  public void onViewDetachedFromWindow(InstructionViewHolder holder) {
+    super.onViewDetachedFromWindow(holder);
+    holder.itemView.clearAnimation();
+  }
+
   public void updateSteps(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
     this.unitType = unitType;
     addLegSteps(routeProgress);
