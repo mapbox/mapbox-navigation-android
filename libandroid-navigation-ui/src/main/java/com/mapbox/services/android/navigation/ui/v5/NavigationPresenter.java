@@ -41,4 +41,8 @@ class NavigationPresenter {
   void onDestinationUpdate(Point point) {
     view.addMarker(point);
   }
+
+  void onShouldRecordScreenshot() {
+    view.takeScreenshot();
+  }
 }

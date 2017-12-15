@@ -264,6 +264,29 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     navigationListener.onNavigationFinished();
   }
 
+  @Override
+  public void takeScreenshot() {
+    map.snapshot(new MapboxMap.SnapshotReadyCallback() {
+      @Override
+      public void onSnapshotReady(Bitmap snapshot) {
+        // Make the image visible
+        ImageView screenshotView = findViewById(R.id.screenshotView);
+        screenshotView.setVisibility(View.VISIBLE);
+        screenshotView.setImageBitmap(snapshot);
+
+        // Take a screenshot without the map
+        mapView.setVisibility(View.INVISIBLE);
+        Bitmap capture = ViewUtils.captureView(mapView);
+        String encoded = ViewUtils.encodeView(capture);
+        navigationViewModel.updateFeedbackScreenshot(encoded);
+
+        // Restore visibility
+        screenshotView.setVisibility(View.INVISIBLE);
+        mapView.setVisibility(View.VISIBLE);
+      }
+    });
+  }
+
   /**
    * Should be called when this view is completely initialized.
    *
@@ -568,30 +591,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       @Override
       public void onChanged(@Nullable Boolean shouldRecordScreenshot) {
         if (shouldRecordScreenshot != null && shouldRecordScreenshot) {
-          takeScreenshot(mapView);
+          navigationPresenter.onShouldRecordScreenshot();
         }
-      }
-    });
-  }
-
-  private void takeScreenshot(final View view) {
-    map.snapshot(new MapboxMap.SnapshotReadyCallback() {
-      @Override
-      public void onSnapshotReady(Bitmap snapshot) {
-        // Make the image visible
-        ImageView screenshotView = findViewById(R.id.screenshotView);
-        screenshotView.setVisibility(View.VISIBLE);
-        screenshotView.setImageBitmap(snapshot);
-
-        // Take a screenshot without the map
-        mapView.setVisibility(View.INVISIBLE);
-        Bitmap capture = ViewUtils.captureView(view);
-        String encoded = ViewUtils.encodeView(capture);
-        navigationViewModel.updateFeedbackScreenshot(encoded);
-
-        // Restore visibility
-        screenshotView.setVisibility(View.INVISIBLE);
-        mapView.setVisibility(View.VISIBLE);
       }
     });
   }

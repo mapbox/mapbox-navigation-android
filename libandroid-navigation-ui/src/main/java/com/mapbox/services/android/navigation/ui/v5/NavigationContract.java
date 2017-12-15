@@ -24,5 +24,7 @@ public interface NavigationContract {
     void addMarker(Point point);
 
     void finishNavigationView();
+
+    void takeScreenshot();
   }
 }
