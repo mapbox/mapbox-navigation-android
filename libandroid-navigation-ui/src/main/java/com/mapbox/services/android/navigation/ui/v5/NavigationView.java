@@ -33,6 +33,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
+import com.mapbox.services.android.navigation.ui.v5.location.LocationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
@@ -288,6 +289,40 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   /**
+   * Used when starting this {@link android.app.Activity}
+   * for the first time.
+   * <p>
+   * Zooms to the beginning of the {@link DirectionsRoute}.
+   *
+   * @param directionsRoute where camera should move to
+   */
+  @Override
+  public void startCamera(DirectionsRoute directionsRoute) {
+    if (!resumeState) {
+      camera.start(directionsRoute);
+    }
+  }
+
+  /**
+   * Used after configuration changes to resume the camera
+   * to the last location update from the Navigation SDK.
+   *
+   * @param location where the camera should move to
+   */
+  @Override
+  public void resumeCamera(Location location) {
+    if (resumeState && recenterBtn.getVisibility() != View.VISIBLE) {
+      camera.resume(location);
+      resumeState = false;
+    }
+  }
+
+  @Override
+  public void updateLocationLayer(Location location) {
+    locationLayer.forceLocationUpdate(location);
+  }
+
+  /**
    * Should be called when this view is completely initialized.
    *
    * @param options with containing route / coordinate data
@@ -299,10 +334,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     // Initialize the camera (listens to MapboxNavigation)
     initCamera();
     // Everything is setup, subscribe to model updates
-    subscribeViews();
-
     locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
     routeViewModel.extractRouteOptions(options);
+    observeViewModels();
   }
 
   /**
@@ -316,33 +350,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void getNavigationAsync(NavigationViewListener navigationViewListener) {
     this.navigationListener = navigationViewListener;
     mapView.getMapAsync(this);
-  }
-
-  /**
-   * Used when starting this {@link android.app.Activity}
-   * for the first time.
-   * <p>
-   * Zooms to the beginning of the {@link DirectionsRoute}.
-   *
-   * @param directionsRoute where camera should move to
-   */
-  public void startCamera(DirectionsRoute directionsRoute) {
-    if (!resumeState) {
-      camera.start(directionsRoute);
-    }
-  }
-
-  /**
-   * Used after configuration changes to resume the camera
-   * to the last location update from the Navigation SDK.
-   *
-   * @param location where the camera should move to
-   */
-  public void resumeCamera(Location location) {
-    if (resumeState && recenterBtn.getVisibility() != View.VISIBLE) {
-      camera.resume(location);
-      resumeState = false;
-    }
   }
 
   private void init() {
@@ -512,7 +519,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   /**
    * Initiate observing of ViewModels by Views.
    */
-  private void subscribeViews() {
+  private void observeViewModels() {
     instructionView.subscribe(navigationViewModel);
     summaryBottomSheet.subscribe(navigationViewModel);
 
@@ -541,7 +548,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
           navigationViewModel.updateRoute(directionsRoute);
           locationViewModel.updateRoute(directionsRoute);
           navigationPresenter.onRouteUpdate(directionsRoute);
-          startCamera(directionsRoute);
         }
       }
     });
@@ -570,8 +576,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       @Override
       public void onChanged(@Nullable Location location) {
         if (location != null && location.getLongitude() != 0 && location.getLatitude() != 0) {
-          locationLayer.forceLocationUpdate(location);
-          resumeCamera(location);
+          navigationPresenter.onNavigationLocationUpdate(location);
         }
       }
     });

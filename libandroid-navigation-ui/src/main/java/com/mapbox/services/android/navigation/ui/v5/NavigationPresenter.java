@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
+import android.location.Location;
 import android.support.design.widget.BottomSheetBehavior;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -36,6 +37,7 @@ class NavigationPresenter {
 
   void onRouteUpdate(DirectionsRoute directionsRoute) {
     view.drawRoute(directionsRoute);
+    view.startCamera(directionsRoute);
   }
 
   void onDestinationUpdate(Point point) {
@@ -44,5 +46,10 @@ class NavigationPresenter {
 
   void onShouldRecordScreenshot() {
     view.takeScreenshot();
+  }
+
+  void onNavigationLocationUpdate(Location location) {
+    view.resumeCamera(location);
+    view.updateLocationLayer(location);
   }
 }

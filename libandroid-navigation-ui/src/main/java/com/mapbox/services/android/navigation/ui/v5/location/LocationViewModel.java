@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.ui.v5;
+package com.mapbox.services.android.navigation.ui.v5.location;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
@@ -19,8 +19,8 @@ import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 
 public class LocationViewModel extends AndroidViewModel implements LifecycleObserver, LocationEngineListener {
 
-  final MutableLiveData<LocationEngine> locationEngine = new MutableLiveData<>();
-  final MutableLiveData<Location> rawLocation = new MutableLiveData<>();
+  public final MutableLiveData<LocationEngine> locationEngine = new MutableLiveData<>();
+  public final MutableLiveData<Location> rawLocation = new MutableLiveData<>();
   private LocationEngine modelLocationEngine;
   private boolean shouldSimulateRoute;
 
@@ -73,7 +73,7 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
    * Checks {@link NavigationViewOptions} to see if the route
    * should be simulated with a {@link MockLocationEngine}.
    */
-  void updateShouldSimulateRoute(boolean shouldSimulateRoute) {
+  public void updateShouldSimulateRoute(boolean shouldSimulateRoute) {
     this.shouldSimulateRoute = shouldSimulateRoute;
   }
 
@@ -83,7 +83,7 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
    *
    * @param route to be mocked
    */
-  void updateRoute(DirectionsRoute route) {
+  public void updateRoute(DirectionsRoute route) {
     if (shouldSimulateRoute) {
       activateMockLocationEngine(route);
     }
