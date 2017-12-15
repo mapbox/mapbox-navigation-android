@@ -43,25 +43,13 @@ public class NavigationLauncher {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
     SharedPreferences.Editor editor = preferences.edit();
 
-    if (options.directionsRoute() != null) {
-      storeDirectionsRouteValue(options, editor);
-    } else if (options.origin() != null && options.destination() != null) {
-      storeCoordinateValues(options, editor);
-    } else {
-      throw new RuntimeException("A valid DirectionsRoute or origin and "
-        + "destination must be provided in NavigationViewOptions");
-    }
+    storeRouteOptions(options, editor);
 
     editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, options.awsPoolId());
     editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, options.shouldSimulateRoute());
     editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, options.navigationOptions().unitType());
 
-    boolean preferenceThemeSet = options.lightThemeResId() != null || options.darkThemeResId() != null;
-    int lightThemeResId = options.lightThemeResId() != null ? options.lightThemeResId() : 0;
-    int darkThemeResId = options.darkThemeResId() != null ? options.darkThemeResId() : 0;
-    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_PREFERENCE_SET_THEME, preferenceThemeSet);
-    editor.putInt(NavigationConstants.NAVIGATION_VIEW_LIGHT_THEME, lightThemeResId);
-    editor.putInt(NavigationConstants.NAVIGATION_VIEW_DARK_THEME, darkThemeResId);
+    setThemePreferences(options, editor);
 
     editor.apply();
 
@@ -113,6 +101,27 @@ public class NavigationLauncher {
     coordinates.put(NavigationConstants.NAVIGATION_VIEW_ORIGIN, origin);
     coordinates.put(NavigationConstants.NAVIGATION_VIEW_DESTINATION, destination);
     return coordinates;
+  }
+
+  private static void storeRouteOptions(NavigationViewOptions options, SharedPreferences.Editor editor) {
+    if (options.directionsRoute() != null) {
+      storeDirectionsRouteValue(options, editor);
+    } else if (options.origin() != null && options.destination() != null) {
+      storeCoordinateValues(options, editor);
+    } else {
+      throw new RuntimeException("A valid DirectionsRoute or origin and "
+        + "destination must be provided in NavigationViewOptions");
+    }
+  }
+
+  private static void setThemePreferences(NavigationViewOptions options, SharedPreferences.Editor editor) {
+    boolean preferenceThemeSet = options.lightThemeResId() != null || options.darkThemeResId() != null;
+    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_PREFERENCE_SET_THEME, preferenceThemeSet);
+
+    if (preferenceThemeSet) {
+      editor.putInt(NavigationConstants.NAVIGATION_VIEW_LIGHT_THEME, options.lightThemeResId());
+      editor.putInt(NavigationConstants.NAVIGATION_VIEW_DARK_THEME, options.darkThemeResId());
+    }
   }
 
   private static void storeDirectionsRouteValue(NavigationViewOptions options, SharedPreferences.Editor editor) {
