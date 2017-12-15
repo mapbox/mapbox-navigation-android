@@ -73,7 +73,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * @param options holds either a set of {@link Point} coordinates or a {@link DirectionsRoute}
    */
   public void extractRouteOptions(NavigationViewOptions options) {
-    updateUnitType(options);
+    updateUnitType(options.navigationOptions().unitType());
     if (extractRouteOptions) {
       if (launchWithRoute(options)) {
         extractRouteFromOptions(options);
@@ -87,11 +87,9 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * Updates the request unit type based on what was set in
    * {@link NavigationViewOptions}.
    *
-   * @param options to extract the
-   *                {@link com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.UnitType}
+   * @param unitType to be used for route requests
    */
-  private void updateUnitType(NavigationViewOptions options) {
-    int unitType = options.navigationOptions().unitType();
+  private void updateUnitType(int unitType) {
     boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
     this.unitType = isImperialUnitType ? DirectionsCriteria.IMPERIAL : DirectionsCriteria.METRIC;
   }
