@@ -91,7 +91,11 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    */
   private void updateUnitType(int unitType) {
     boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
-    this.unitType = isImperialUnitType ? DirectionsCriteria.IMPERIAL : DirectionsCriteria.METRIC;
+    if (isImperialUnitType) {
+      this.unitType = DirectionsCriteria.IMPERIAL;
+    } else {
+      this.unitType = DirectionsCriteria.METRIC;
+    }
   }
 
   /**
