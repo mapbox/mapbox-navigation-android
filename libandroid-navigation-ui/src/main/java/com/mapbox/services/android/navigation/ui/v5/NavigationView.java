@@ -277,8 +277,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     initCamera();
     // Everything is setup, subscribe to model updates
     subscribeViews();
-    // Extract the route data which will begin navigation
-    routeViewModel.extractLaunchData(options);
+
+    locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
+    routeViewModel.extractRouteOptions(options);
   }
 
   /**
