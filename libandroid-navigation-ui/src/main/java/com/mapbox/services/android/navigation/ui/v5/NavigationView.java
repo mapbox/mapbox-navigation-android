@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -41,7 +40,6 @@ import com.mapbox.services.android.navigation.ui.v5.utils.ViewUtils;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 /**
  * View that creates the drop-in UI.
@@ -333,10 +331,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
     // Initialize the camera (listens to MapboxNavigation)
     initCamera();
-    // Everything is setup, subscribe to model updates
+
     locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
     routeViewModel.extractRouteOptions(options);
-    observeViewModels();
+    // Everything is setup, set up the model observer
+    initViewModelObserver();
   }
 
   /**
@@ -408,6 +407,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   private void initCamera() {
     camera = new NavigationCamera(this, map, navigationViewModel.getNavigation());
+  }
+
+  private void initViewModelObserver() {
+    NavigationViewModelObserver observer = new NavigationViewModelObserver(navigationPresenter, navigationListener);
+    observer.subscribe(((LifecycleOwner) getContext()), locationViewModel, routeViewModel, navigationViewModel);
   }
 
   /**
@@ -514,91 +518,5 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
   public void onDestroy() {
     mapView.onDestroy();
-  }
-
-  /**
-   * Initiate observing of ViewModels by Views.
-   */
-  private void observeViewModels() {
-    instructionView.subscribe(navigationViewModel);
-    summaryBottomSheet.subscribe(navigationViewModel);
-
-    locationViewModel.rawLocation.observe((LifecycleOwner) getContext(), new Observer<Location>() {
-      @Override
-      public void onChanged(@Nullable Location location) {
-        if (location != null) {
-          routeViewModel.updateRawLocation(location);
-        }
-      }
-    });
-
-    locationViewModel.locationEngine.observe((LifecycleOwner) getContext(), new Observer<LocationEngine>() {
-      @Override
-      public void onChanged(@Nullable LocationEngine locationEngine) {
-        if (locationEngine != null) {
-          navigationViewModel.updateLocationEngine(locationEngine);
-        }
-      }
-    });
-
-    routeViewModel.route.observe((LifecycleOwner) getContext(), new Observer<DirectionsRoute>() {
-      @Override
-      public void onChanged(@Nullable DirectionsRoute directionsRoute) {
-        if (directionsRoute != null) {
-          navigationViewModel.updateRoute(directionsRoute);
-          locationViewModel.updateRoute(directionsRoute);
-          navigationPresenter.onRouteUpdate(directionsRoute);
-        }
-      }
-    });
-
-    routeViewModel.destination.observe((LifecycleOwner) getContext(), new Observer<Point>() {
-      @Override
-      public void onChanged(@Nullable Point point) {
-        if (point != null) {
-          navigationPresenter.onDestinationUpdate(point);
-        }
-      }
-    });
-
-    navigationViewModel.isRunning.observe((LifecycleOwner) getContext(), new Observer<Boolean>() {
-      @Override
-      public void onChanged(@Nullable Boolean isRunning) {
-        if (isRunning != null) {
-          if (!isRunning) {
-            navigationListener.onNavigationFinished();
-          }
-        }
-      }
-    });
-
-    navigationViewModel.navigationLocation.observe((LifecycleOwner) getContext(), new Observer<Location>() {
-      @Override
-      public void onChanged(@Nullable Location location) {
-        if (location != null && location.getLongitude() != 0 && location.getLatitude() != 0) {
-          navigationPresenter.onNavigationLocationUpdate(location);
-        }
-      }
-    });
-
-    navigationViewModel.newOrigin.observe((LifecycleOwner) getContext(), new Observer<Point>() {
-      @Override
-      public void onChanged(@Nullable Point newOrigin) {
-        if (newOrigin != null) {
-          routeViewModel.fetchRouteNewOrigin(newOrigin);
-          // To prevent from firing on rotation
-          navigationViewModel.newOrigin.setValue(null);
-        }
-      }
-    });
-
-    navigationViewModel.shouldRecordScreenshot.observe((LifecycleOwner) getContext(), new Observer<Boolean>() {
-      @Override
-      public void onChanged(@Nullable Boolean shouldRecordScreenshot) {
-        if (shouldRecordScreenshot != null && shouldRecordScreenshot) {
-          navigationPresenter.onShouldRecordScreenshot();
-        }
-      }
-    });
   }
 }
