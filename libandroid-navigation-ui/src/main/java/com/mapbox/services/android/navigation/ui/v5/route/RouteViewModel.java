@@ -79,9 +79,9 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   public void extractRouteOptions(NavigationViewOptions options) {
     if (extractRouteOptions) {
       if (launchWithRoute(options)) {
-        extractRoute(options);
+        extractRouteFromOptions(options);
       } else {
-        extractCoordinates(options);
+        extractCoordinatesFromOptions(options);
       }
     }
   }
@@ -156,7 +156,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    *
    * @param options containing route
    */
-  private void extractRoute(NavigationViewOptions options) {
+  private void extractRouteFromOptions(NavigationViewOptions options) {
     DirectionsRoute route = options.directionsRoute();
     if (route != null) {
       String profile = options.directionsProfile();
@@ -175,7 +175,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    *
    * @param options containing origin and destination
    */
-  private void extractCoordinates(NavigationViewOptions options) {
+  private void extractCoordinatesFromOptions(NavigationViewOptions options) {
     if (options.origin() != null && options.destination() != null) {
       String profile = options.directionsProfile();
       routeProfile = profile != null ? profile : DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
@@ -194,7 +194,6 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    */
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
     return response.body() != null
-      && response.body().routes() != null
       && !response.body().routes().isEmpty();
   }
 }

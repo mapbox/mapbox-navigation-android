@@ -73,8 +73,8 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
    * Checks {@link NavigationViewOptions} to see if the route
    * should be simulated with a {@link MockLocationEngine}.
    */
-  void extractLocationOptions(NavigationViewOptions options) {
-    this.shouldSimulateRoute = options.shouldSimulateRoute();
+  void updateShouldSimulateRoute(boolean shouldSimulateRoute) {
+    this.shouldSimulateRoute = shouldSimulateRoute;
   }
 
   /**
