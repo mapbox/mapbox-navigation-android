@@ -13,12 +13,12 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 class NavigationViewSubscriber {
 
-  private NavigationPresenter presenter;
-  private NavigationViewListener listener;
+  private NavigationPresenter navigationPresenter;
+  private NavigationViewListener navigationViewListener;
 
-  NavigationViewSubscriber(NavigationPresenter presenter, NavigationViewListener listener) {
-    this.presenter = presenter;
-    this.listener = listener;
+  NavigationViewSubscriber(NavigationPresenter navigationPresenter, NavigationViewListener navigationViewListener) {
+    this.navigationPresenter = navigationPresenter;
+    this.navigationViewListener = navigationViewListener;
   }
 
   /**
@@ -51,7 +51,7 @@ class NavigationViewSubscriber {
         if (directionsRoute != null) {
           navigationViewModel.updateRoute(directionsRoute);
           locationViewModel.updateRoute(directionsRoute);
-          presenter.onRouteUpdate(directionsRoute);
+          navigationPresenter.onRouteUpdate(directionsRoute);
         }
       }
     });
@@ -60,7 +60,7 @@ class NavigationViewSubscriber {
       @Override
       public void onChanged(@Nullable Point point) {
         if (point != null) {
-          presenter.onDestinationUpdate(point);
+          navigationPresenter.onDestinationUpdate(point);
         }
       }
     });
@@ -70,7 +70,7 @@ class NavigationViewSubscriber {
       public void onChanged(@Nullable Boolean isRunning) {
         if (isRunning != null) {
           if (!isRunning) {
-            listener.onNavigationFinished();
+            navigationViewListener.onNavigationFinished();
           }
         }
       }
@@ -80,7 +80,7 @@ class NavigationViewSubscriber {
       @Override
       public void onChanged(@Nullable Location location) {
         if (location != null && location.getLongitude() != 0 && location.getLatitude() != 0) {
-          presenter.onNavigationLocationUpdate(location);
+          navigationPresenter.onNavigationLocationUpdate(location);
         }
       }
     });
@@ -100,7 +100,7 @@ class NavigationViewSubscriber {
       @Override
       public void onChanged(@Nullable Boolean shouldRecordScreenshot) {
         if (shouldRecordScreenshot != null && shouldRecordScreenshot) {
-          presenter.onShouldRecordScreenshot();
+          navigationPresenter.onShouldRecordScreenshot();
         }
       }
     });
