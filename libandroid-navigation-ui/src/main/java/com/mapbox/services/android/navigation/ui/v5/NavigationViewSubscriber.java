@@ -11,12 +11,12 @@ import com.mapbox.services.android.navigation.ui.v5.location.LocationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 
-class NavigationViewModelObserver {
+class NavigationViewSubscriber {
 
   private NavigationPresenter presenter;
   private NavigationViewListener listener;
 
-  NavigationViewModelObserver(NavigationPresenter presenter, NavigationViewListener listener) {
+  NavigationViewSubscriber(NavigationPresenter presenter, NavigationViewListener listener) {
     this.presenter = presenter;
     this.listener = listener;
   }
