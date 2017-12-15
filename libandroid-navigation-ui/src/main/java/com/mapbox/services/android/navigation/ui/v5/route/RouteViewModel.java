@@ -3,9 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.route;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
-import android.content.SharedPreferences;
 import android.location.Location;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -17,7 +15,6 @@ import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 
@@ -38,7 +35,6 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
 
   public RouteViewModel(@NonNull Application application) {
     super(application);
-    initUnitType(PreferenceManager.getDefaultSharedPreferences(application));
   }
 
   /**
@@ -77,12 +73,28 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * @param options holds either a set of {@link Point} coordinates or a {@link DirectionsRoute}
    */
   public void extractRouteOptions(NavigationViewOptions options) {
+    updateUnitType(options.navigationOptions().unitType());
     if (extractRouteOptions) {
       if (launchWithRoute(options)) {
         extractRouteFromOptions(options);
       } else {
         extractCoordinatesFromOptions(options);
       }
+    }
+  }
+
+  /**
+   * Updates the request unit type based on what was set in
+   * {@link NavigationViewOptions}.
+   *
+   * @param unitType to be used for route requests
+   */
+  private void updateUnitType(int unitType) {
+    boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
+    if (isImperialUnitType) {
+      this.unitType = DirectionsCriteria.IMPERIAL;
+    } else {
+      this.unitType = DirectionsCriteria.METRIC;
     }
   }
 
@@ -96,16 +108,6 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
     if (newOrigin != null && destination.getValue() != null) {
       fetchRoute(newOrigin, destination.getValue());
     }
-  }
-
-  /**
-   * Initializes distance unit (imperial or metric).
-   */
-  private void initUnitType(SharedPreferences preferences) {
-    int unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE,
-      NavigationUnitType.TYPE_IMPERIAL);
-    boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
-    this.unitType = isImperialUnitType ? DirectionsCriteria.IMPERIAL : DirectionsCriteria.METRIC;
   }
 
   /**
