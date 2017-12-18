@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.support.annotation.NonNull;
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 
@@ -67,6 +68,18 @@ class NavigationViewEventDispatcher {
   void onOffRoute(Point point) {
     if (routeListener != null) {
       routeListener.onOffRoute(point);
+    }
+  }
+
+  void onRerouteAlong(DirectionsRoute directionsRoute) {
+    if (routeListener != null) {
+      routeListener.onRerouteAlong(directionsRoute);
+    }
+  }
+
+  void onFailedReroute() {
+    if (routeListener != null) {
+      routeListener.onFailedReroute();
     }
   }
 }

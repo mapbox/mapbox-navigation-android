@@ -12,5 +12,5 @@ public interface RouteListener {
 
   void onRerouteAlong(DirectionsRoute directionsRoute);
 
-  void onFailedReroute(String error);
+  void onFailedReroute();
 }

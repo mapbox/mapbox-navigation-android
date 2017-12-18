@@ -14,6 +14,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 class NavigationViewSubscriber {
 
+  private boolean isOffRoute;
   private NavigationPresenter navigationPresenter;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
 
@@ -47,9 +48,21 @@ class NavigationViewSubscriber {
       }
     });
 
+    routeViewModel.isSuccessful.observe(owner, new Observer<Boolean>() {
+      @Override
+      public void onChanged(@Nullable Boolean isSuccessful) {
+        if (isOffRoute && !isSuccessful) {
+          navigationViewEventDispatcher.onFailedReroute();
+        }
+      }
+    });
+
     routeViewModel.route.observe(owner, new Observer<DirectionsRoute>() {
       @Override
       public void onChanged(@Nullable DirectionsRoute directionsRoute) {
+        if (isOffRoute) {
+          navigationViewEventDispatcher.onRerouteAlong(directionsRoute);
+        }
         if (directionsRoute != null) {
           navigationViewModel.updateRoute(directionsRoute);
           locationViewModel.updateRoute(directionsRoute);
@@ -134,6 +147,13 @@ class NavigationViewSubscriber {
         if (feedbackItem != null) {
           navigationViewEventDispatcher.onFeedbackSent(feedbackItem);
         }
+      }
+    });
+
+    navigationViewModel.isOffRoute.observe(owner, new Observer<Boolean>() {
+      @Override
+      public void onChanged(@Nullable Boolean isOffRoute) {
+        NavigationViewSubscriber.this.isOffRoute = isOffRoute;
       }
     });
   }

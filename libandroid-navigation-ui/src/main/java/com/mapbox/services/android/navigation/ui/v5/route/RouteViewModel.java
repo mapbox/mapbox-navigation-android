@@ -26,7 +26,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
 
   public final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
   public final MutableLiveData<Point> destination = new MutableLiveData<>();
-  private MutableLiveData<Boolean> isSuccessful = new MutableLiveData<>();
+  public final MutableLiveData<Boolean> isSuccessful = new MutableLiveData<>();
   private Point origin;
   private Location rawLocation;
   private boolean extractRouteOptions = true;
