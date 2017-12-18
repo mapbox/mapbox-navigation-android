@@ -119,8 +119,12 @@ public class NavigationLauncher {
     editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_PREFERENCE_SET_THEME, preferenceThemeSet);
 
     if (preferenceThemeSet) {
-      editor.putInt(NavigationConstants.NAVIGATION_VIEW_LIGHT_THEME, options.lightThemeResId());
-      editor.putInt(NavigationConstants.NAVIGATION_VIEW_DARK_THEME, options.darkThemeResId());
+      if (options.lightThemeResId() != null) {
+        editor.putInt(NavigationConstants.NAVIGATION_VIEW_LIGHT_THEME, options.lightThemeResId());
+      }
+      if (options.darkThemeResId() != null) {
+        editor.putInt(NavigationConstants.NAVIGATION_VIEW_DARK_THEME, options.darkThemeResId());
+      }
     }
   }
 
