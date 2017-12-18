@@ -2,6 +2,21 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.8.0-beta.1 - December 15, 2017
+
+* Allow theme setting from NavigationViewOptions  [#595](https://github.com/mapbox/mapbox-navigation-android/pull/595)
+* Fix issue NavigationView simulation  [#594](https://github.com/mapbox/mapbox-navigation-android/pull/594)
+* Remove preference setup for unit type in RouteViewModel  [#593](https://github.com/mapbox/mapbox-navigation-android/pull/593)
+* Create other map issue in feedback adapter [#592](https://github.com/mapbox/mapbox-navigation-android/pull/592)
+* Remove specified layer for map route [#590](https://github.com/mapbox/mapbox-navigation-android/pull/590)
+* Guard against IndexOutOfBounds when updating last reroute event [#589](https://github.com/mapbox/mapbox-navigation-android/pull/589)
+* Set original and current request identifier [#585](https://github.com/mapbox/mapbox-navigation-android/pull/585)
+* Add SSML announcement option for VoiceInstructionMilestone [#584](https://github.com/mapbox/mapbox-navigation-android/pull/584)
+* Remove duplicate subscriptions to the ViewModels  [#583](https://github.com/mapbox/mapbox-navigation-android/pull/583)
+* Return Milestone instead of identifier  [#579](https://github.com/mapbox/mapbox-navigation-android/pull/579)
+* DirectionsProfile for reroutes in NavigationView [#575](https://github.com/mapbox/mapbox-navigation-android/pull/575)
+* Add custom notification support  [#564](https://github.com/mapbox/mapbox-navigation-android/pull/564)
+
 ### v0.7.1 - December 6, 2017
 
 * Fix NPE with reroute metric events [#565](https://github.com/mapbox/mapbox-navigation-android/pull/565)

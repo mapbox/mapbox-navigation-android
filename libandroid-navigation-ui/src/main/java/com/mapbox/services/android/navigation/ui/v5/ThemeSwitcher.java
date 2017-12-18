@@ -14,6 +14,7 @@ import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
 /**
  * This class is used to switch theme colors in {@link NavigationView}.
@@ -49,6 +50,16 @@ public class ThemeSwitcher {
       & Configuration.UI_MODE_NIGHT_MASK;
     boolean darkThemeEnabled = uiMode == Configuration.UI_MODE_NIGHT_YES;
     updatePreferencesDarkEnabled(context, darkThemeEnabled);
+
+    // Check for custom theme from NavigationLauncher
+    if (shouldSetThemeFromPreferences(context)) {
+      int prefLightTheme = retrieveThemeResIdFromPreferences(context, NavigationConstants.NAVIGATION_VIEW_LIGHT_THEME);
+      int prefDarkTheme = retrieveThemeResIdFromPreferences(context, NavigationConstants.NAVIGATION_VIEW_DARK_THEME);
+      prefLightTheme = prefLightTheme == 0 ?  R.style.NavigationViewLight : prefLightTheme;
+      prefDarkTheme = prefLightTheme == 0 ?  R.style.NavigationViewDark : prefDarkTheme;
+      context.setTheme(darkThemeEnabled ? prefDarkTheme : prefLightTheme);
+      return;
+    }
 
     TypedArray styledAttributes = context.obtainStyledAttributes(attrs, R.styleable.NavigationView);
     int lightTheme = styledAttributes.getResourceId(R.styleable.NavigationView_navigationLightTheme,
@@ -109,5 +120,15 @@ public class ThemeSwitcher {
     SharedPreferences.Editor editor = preferences.edit();
     editor.putBoolean(context.getString(R.string.dark_theme_enabled), darkThemeEnabled);
     editor.apply();
+  }
+
+  private static boolean shouldSetThemeFromPreferences(Context context) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    return preferences.getBoolean(NavigationConstants.NAVIGATION_VIEW_PREFERENCE_SET_THEME, false);
+  }
+
+  private static int retrieveThemeResIdFromPreferences(Context context, String key) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    return preferences.getInt(key, 0);
   }
 }

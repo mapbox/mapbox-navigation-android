@@ -637,11 +637,12 @@ public class MapboxNavigation implements ServiceConnection {
    * @param feedbackId   generated from {@link MapboxNavigation#recordFeedback(String, String, String)}
    * @param feedbackType from list of set feedback types
    * @param description  an optional description to provide more detail about the feedback
-   * @since 0.7.0
+   * @param screenshot   an optional encoded screenshot to provide more detail about the feedback
+   * @since 0.8.0
    */
-  public void updateFeedback(String feedbackId,
-                             @FeedbackEvent.FeedbackType String feedbackType, String description) {
-    navigationTelemetry.updateFeedbackEvent(feedbackId, feedbackType, description);
+  public void updateFeedback(String feedbackId, @FeedbackEvent.FeedbackType String feedbackType,
+                             String description, String screenshot) {
+    navigationTelemetry.updateFeedbackEvent(feedbackId, feedbackType, description, screenshot);
   }
 
   /**

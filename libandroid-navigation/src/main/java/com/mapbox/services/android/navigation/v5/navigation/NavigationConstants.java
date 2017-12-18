@@ -127,6 +127,21 @@ public final class NavigationConstants {
    */
   public static final String FEEDBACK_SUBMITTED = "Feedback Submitted";
 
+  /**
+   * If a set of light / dark themes been set in {@link android.content.SharedPreferences}
+   */
+  public static final String NAVIGATION_VIEW_PREFERENCE_SET_THEME = "navigation_view_theme_preference";
+
+  /**
+   * Key for the set light theme in preferences
+   */
+  public static final String NAVIGATION_VIEW_LIGHT_THEME = "navigation_view_light_theme";
+
+  /**
+   * Key for the set dark theme in preferences
+   */
+  public static final String NAVIGATION_VIEW_DARK_THEME = "navigation_view_dark_theme";
+
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat";
   public static final String NAVIGATION_VIEW_ORIGIN_LNG_KEY = "origin_long";
@@ -135,11 +150,9 @@ public final class NavigationConstants {
   public static final String NAVIGATION_VIEW_DESTINATION_LNG_KEY = "destination_long";
   public static final String NAVIGATION_VIEW_DESTINATION = "destination";
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
-  public static final String NAVIGATION_VIEW_LAUNCH_ROUTE = "launch_with_route";
   public static final String NAVIGATION_VIEW_AWS_POOL_ID = "navigation_view_aws_pool_id";
   public static final String NAVIGATION_VIEW_UNIT_TYPE = "navigation_view_unit_type";
   public static final String NAVIGATION_VIEW_REROUTING = "Rerouting";
-  public static final String ROUTE_BELOW_LAYER = "admin-3-4-boundaries-bg";
   public static final String DECIMAL_FORMAT = "#.#";
 
   // Step Maneuver Types

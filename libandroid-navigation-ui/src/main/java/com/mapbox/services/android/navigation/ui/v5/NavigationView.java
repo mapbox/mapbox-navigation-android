@@ -8,6 +8,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -19,6 +20,7 @@ import android.support.v7.app.AppCompatDelegate;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -34,9 +36,9 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
+import com.mapbox.services.android.navigation.ui.v5.utils.ViewUtils;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 
@@ -96,7 +98,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public NavigationView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
-    ThemeSwitcher.setTheme(getContext(), attrs);
+    ThemeSwitcher.setTheme(context, attrs);
     init();
   }
 
@@ -277,8 +279,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     initCamera();
     // Everything is setup, subscribe to model updates
     subscribeViews();
-    // Extract the route data which will begin navigation
-    routeViewModel.extractLaunchData(options);
+
+    locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
+    routeViewModel.extractRouteOptions(options);
   }
 
   /**
@@ -384,8 +387,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   private void initRoute() {
     int routeStyleRes = ThemeSwitcher.retrieveNavigationViewRouteStyle(getContext());
-    mapRoute = new NavigationMapRoute(null, mapView, map,
-      routeStyleRes, NavigationConstants.ROUTE_BELOW_LAYER);
+    mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes);
   }
 
   /**
@@ -586,6 +588,37 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
           // To prevent from firing on rotation
           navigationViewModel.newOrigin.setValue(null);
         }
+      }
+    });
+
+    navigationViewModel.shouldRecordScreenshot.observe((LifecycleOwner) getContext(), new Observer<Boolean>() {
+      @Override
+      public void onChanged(@Nullable Boolean shouldRecordScreenshot) {
+        if (shouldRecordScreenshot != null && shouldRecordScreenshot) {
+          takeScreenshot(mapView);
+        }
+      }
+    });
+  }
+
+  private void takeScreenshot(final View view) {
+    map.snapshot(new MapboxMap.SnapshotReadyCallback() {
+      @Override
+      public void onSnapshotReady(Bitmap snapshot) {
+        // Make the image visible
+        ImageView screenshotView = findViewById(R.id.screenshotView);
+        screenshotView.setVisibility(View.VISIBLE);
+        screenshotView.setImageBitmap(snapshot);
+
+        // Take a screenshot without the map
+        mapView.setVisibility(View.INVISIBLE);
+        Bitmap capture = ViewUtils.captureView(view);
+        String encoded = ViewUtils.encodeView(capture);
+        navigationViewModel.updateFeedbackScreenshot(encoded);
+
+        // Restore visibility
+        screenshotView.setVisibility(View.INVISIBLE);
+        mapView.setVisibility(View.VISIBLE);
       }
     });
   }

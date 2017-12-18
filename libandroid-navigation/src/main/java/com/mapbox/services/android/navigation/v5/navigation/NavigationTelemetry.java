@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -14,6 +15,7 @@ import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.location.MetricsLocation;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationLifecycleMonitor;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListeners;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.RerouteEvent;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.SessionState;
@@ -56,6 +58,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   private MetricsLocation metricLocation;
 
   private NavigationEventDispatcher eventDispatcher;
+  private NavigationLifecycleMonitor lifecycleMonitor;
   private LocationEngine navigationLocationEngine;
   private SessionState navigationSessionState;
   private RingBuffer<Location> locationBuffer;
@@ -103,6 +106,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       navigationSessionState = navigationSessionState.toBuilder()
         .startTimestamp(new Date())
         .build();
+      updateLifecyclePercentages();
       // Send departure event for the start of this session
       NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
     }
@@ -121,6 +125,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   public void onArrival(Location location, RouteProgress routeProgress) {
     // Update arrival time stamp
     navigationSessionState = navigationSessionState.toBuilder().arrivalTimestamp(new Date()).build();
+    updateLifecyclePercentages();
     // Send arrival event
     NavigationMetricsWrapper.arriveEvent(navigationSessionState, routeProgress, metricLocation.getLocation());
 
@@ -167,6 +172,18 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   }
 
   /**
+   * Added once created in the {@link NavigationService}, this class
+   * provides data regarding the {@link android.app.Activity} lifecycle.
+   *
+   * @param application to register the callbacks
+   */
+  void initializeLifecycleMonitor(Application application) {
+    if (lifecycleMonitor == null) {
+      lifecycleMonitor = new NavigationLifecycleMonitor(application);
+    }
+  }
+
+  /**
    * Called when navigation is starting for the first time.
    * Initializes the {@link SessionState}.
    *
@@ -176,8 +193,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (!isConfigurationChange) {
       navigationSessionState = navigationSessionState.toBuilder()
         .originalDirectionRoute(directionsRoute)
-        .originalRequestIdentifier(directionsRoute.routeOptions() != null
-          ? directionsRoute.routeOptions().requestUuid() : null)
+        .originalRequestIdentifier(directionsRoute.routeOptions().requestUuid())
+        .requestIdentifier(directionsRoute.routeOptions().requestUuid())
         .currentDirectionRoute(directionsRoute)
         .sessionIdentifier(TelemetryUtils.buildUUID())
         .eventRouteDistanceCompleted(0)
@@ -197,8 +214,10 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (!isConfigurationChange) {
       if (navigationSessionState.startTimestamp() != null) {
         flushEventQueues();
+        updateLifecyclePercentages();
         NavigationMetricsWrapper.cancelEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
       }
+      lifecycleMonitor = null;
       isInitialized = false;
     }
   }
@@ -283,14 +302,16 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
    * @param feedbackId   generated from {@link MapboxNavigation#recordFeedback(String, String, String)}
    * @param feedbackType from list of set feedback types
    * @param description  an optional description to provide more detail about the feedback
+   * @param screenshot   an optional encoded screenshot to provide more detail about the feedback
    */
   void updateFeedbackEvent(String feedbackId, @FeedbackEvent.FeedbackType String feedbackType,
-                           String description) {
+                           String description, String screenshot) {
     // Find the event and update
     FeedbackEvent feedbackEvent = (FeedbackEvent) findQueuedTelemetryEvent(feedbackId);
     if (feedbackEvent != null) {
       feedbackEvent.setFeedbackType(feedbackType);
       feedbackEvent.setDescription(description);
+      feedbackEvent.setScreenshot(screenshot);
     }
   }
 
@@ -434,6 +455,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   }
 
   private void queueRerouteEvent() {
+    updateLifecyclePercentages();
     // Create a new session state given the current navigation session
     Date eventDate = new Date();
     SessionState rerouteEventSessionState = navigationSessionState.toBuilder()
@@ -451,6 +473,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   @NonNull
   private FeedbackEvent queueFeedbackEvent(@FeedbackEvent.FeedbackType String feedbackType,
                                            String description, @FeedbackEvent.FeedbackSource String feedbackSource) {
+    updateLifecyclePercentages();
     // Distance completed = previous distance completed + current RouteProgress distance traveled
     double distanceCompleted = navigationSessionState.eventRouteDistanceCompleted()
       + metricProgress.getDistanceTraveled();
@@ -507,7 +530,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
     NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, metricProgress,
       feedbackEvent.getSessionState().eventLocation(), feedbackEvent.getDescription(),
-      feedbackEvent.getFeedbackType(), "", feedbackEvent.getEventId(), vendorId);
+      feedbackEvent.getFeedbackType(), feedbackEvent.getScreenshot(), feedbackEvent.getEventId(), vendorId);
   }
 
   private TelemetryEvent findQueuedTelemetryEvent(String eventId) {
@@ -524,15 +547,26 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     return null;
   }
 
+  private void updateLifecyclePercentages() {
+    if (lifecycleMonitor != null) {
+      navigationSessionState = navigationSessionState.toBuilder()
+        .percentInForeground(lifecycleMonitor.obtainForegroundPercentage())
+        .percentInPortrait(lifecycleMonitor.obtainPortraitPercentage())
+        .build();
+    }
+  }
+
   private void updateLastRerouteEvent(DirectionsRoute newDirectionsRoute) {
-    RerouteEvent rerouteEvent = queuedRerouteEvents.get(queuedRerouteEvents.size() - 1);
-    List<Point> geometryPositions = PolylineUtils.decode(newDirectionsRoute.geometry(), Constants.PRECISION_6);
-    PolylineUtils.encode(geometryPositions, Constants.PRECISION_5);
-    rerouteEvent.setNewRouteGeometry(PolylineUtils.encode(geometryPositions, Constants.PRECISION_5));
-    int newDistanceRemaining = newDirectionsRoute.distance() == null ? 0 : newDirectionsRoute.distance().intValue();
-    rerouteEvent.setNewDistanceRemaining(newDistanceRemaining);
-    int newDurationRemaining = newDirectionsRoute.duration() == null ? 0 : newDirectionsRoute.duration().intValue();
-    rerouteEvent.setNewDurationRemaining(newDurationRemaining);
+    if (!queuedRerouteEvents.isEmpty()) {
+      RerouteEvent rerouteEvent = queuedRerouteEvents.get(queuedRerouteEvents.size() - 1);
+      List<Point> geometryPositions = PolylineUtils.decode(newDirectionsRoute.geometry(), Constants.PRECISION_6);
+      PolylineUtils.encode(geometryPositions, Constants.PRECISION_5);
+      rerouteEvent.setNewRouteGeometry(PolylineUtils.encode(geometryPositions, Constants.PRECISION_5));
+      int newDistanceRemaining = newDirectionsRoute.distance() == null ? 0 : newDirectionsRoute.distance().intValue();
+      rerouteEvent.setNewDistanceRemaining(newDistanceRemaining);
+      int newDurationRemaining = newDirectionsRoute.duration() == null ? 0 : newDirectionsRoute.duration().intValue();
+      rerouteEvent.setNewDurationRemaining(newDurationRemaining);
+    }
   }
 
   private int getSecondsSinceLastReroute(Date eventDate) {

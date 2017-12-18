@@ -63,6 +63,4 @@ public final class MapUtils {
       mapboxMap.addLayerBelow(layer, idBelowLayer);
     }
   }
-
-
 }

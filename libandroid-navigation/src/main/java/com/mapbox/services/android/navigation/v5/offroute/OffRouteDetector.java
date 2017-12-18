@@ -3,19 +3,16 @@ package com.mapbox.services.android.navigation.v5.offroute;
 import android.location.Location;
 
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.navigation.v5.utils.ToleranceUtils;
-import com.mapbox.core.constants.Constants;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
-import com.mapbox.turf.TurfMisc;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
+import static com.mapbox.services.android.navigation.v5.utils.MeasurementUtils.userTrueDistanceFromStep;
 
 public class OffRouteDetector extends OffRoute {
 
@@ -141,27 +138,6 @@ public class OffRouteDetector extends OffRoute {
       recentDistancesFromManeuverInMeters.clear();
     }
     return false;
-  }
-
-  /**
-   * Gets the distance from the users predicted {@link Point} to the
-   * closest point on the given {@link LegStep}.
-   *
-   * @param futurePoint {@link Point} where the user is predicted to be
-   * @param step        {@link LegStep} to calculate the closest point on the step to our predicted location
-   * @return double in distance meters
-   * @since 0.2.0
-   */
-  private static double userTrueDistanceFromStep(Point futurePoint, LegStep step) {
-    LineString lineString = LineString.fromPolyline(step.geometry(), Constants.PRECISION_6);
-    Feature feature = TurfMisc.pointOnLine(futurePoint, lineString.coordinates());
-
-    Point snappedPoint = (Point) feature.geometry();
-
-    return TurfMeasurement.distance(
-      futurePoint,
-      snappedPoint,
-      TurfConstants.UNIT_METERS);
   }
 
   private void updateLastReroutePoint(Location location) {

@@ -135,7 +135,9 @@ public class MockLocationEngine extends LocationEngine {
   @Override
   @Nullable
   public Location getLastLocation() {
-    if (lastLocation.getLongitude() != 0 && lastLocation.getLatitude() != 0) {
+    if (lastLocation != null
+      && lastLocation.getLongitude() != 0
+      && lastLocation.getLatitude() != 0) {
       return lastLocation;
     } else {
       return null;
