@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -109,6 +110,29 @@ class NavigationViewSubscriber {
       public void onChanged(@Nullable Boolean shouldRecordScreenshot) {
         if (shouldRecordScreenshot != null && shouldRecordScreenshot) {
           navigationPresenter.onShouldRecordScreenshot();
+        }
+      }
+    });
+
+    navigationViewModel.isFeedbackShowing.observe(owner, new Observer<Boolean>() {
+      @Override
+      public void onChanged(@Nullable Boolean isFeedbackShowing) {
+        if (isFeedbackShowing != null) {
+          if (isFeedbackShowing) {
+//            navigationViewEventDispatcher.onFeedbackOpened();
+          } else {
+            // If not showing, a user has cancelled / dismissed the feedback UI
+//            navigationViewEventDispatcher.onFeedbackCancelled();
+          }
+        }
+      }
+    });
+
+    navigationViewModel.selectedFeedbackItem.observe(owner, new Observer<FeedbackItem>() {
+      @Override
+      public void onChanged(@Nullable FeedbackItem feedbackItem) {
+        if (feedbackItem != null) {
+//          navigationViewEventDispatcher.onFeedbackSent(feedbackItem);
         }
       }
     });

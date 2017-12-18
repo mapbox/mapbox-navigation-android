@@ -41,6 +41,8 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   public final MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
   public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
+  public final MutableLiveData<Boolean> isFeedbackShowing = new MutableLiveData<>();
+  final MutableLiveData<FeedbackItem> selectedFeedbackItem = new MutableLiveData<>();
   final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
   final MutableLiveData<Point> newOrigin = new MutableLiveData<>();
   final MutableLiveData<Boolean> isRunning = new MutableLiveData<>();
@@ -160,6 +162,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   public void updateFeedback(FeedbackItem feedbackItem) {
     if (!TextUtils.isEmpty(feedbackId)) {
       navigation.updateFeedback(feedbackId, feedbackItem.getFeedbackType(), feedbackItem.getDescription(), screenshot);
+      selectedFeedbackItem.setValue(feedbackItem);
       feedbackId = null;
       screenshot = null;
     }
@@ -174,6 +177,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    */
   public void cancelFeedback() {
     if (!TextUtils.isEmpty(feedbackId)) {
+      isFeedbackShowing.setValue(false);
       navigation.cancelFeedback(feedbackId);
       feedbackId = null;
     }
