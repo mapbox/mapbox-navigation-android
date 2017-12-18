@@ -507,7 +507,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       @Override
       public void onClick(View view) {
         navigationPresenter.onCancelBtnClick();
-        // TODO fire cancel event from dispatcher
+        navigationViewEventDispatcher.onCancelNavigation();
       }
     });
     recenterBtn.setOnClickListener(new View.OnClickListener() {
