@@ -4,11 +4,17 @@ package com.mapbox.services.android.navigation.ui.v5;
 import android.support.annotation.NonNull;
 
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 
 class NavigationViewEventDispatcher {
 
+  private FeedbackListener feedbackListener;
   private NavigationListener navigationListener;
   private RouteListener routeListener;
+
+  void setFeedbackListener(@NonNull FeedbackListener feedbackListener) {
+    this.feedbackListener = feedbackListener;
+  }
 
   void setNavigationListener(@NonNull NavigationListener navigationListener) {
     this.navigationListener = navigationListener;
@@ -16,6 +22,24 @@ class NavigationViewEventDispatcher {
 
   void setRouteListener(@NonNull RouteListener routeListener) {
     this.routeListener = routeListener;
+  }
+
+  void onFeedbackOpened() {
+    if (feedbackListener != null) {
+      feedbackListener.onFeedbackOpened();
+    }
+  }
+
+  void onFeedbackCancelled() {
+    if (feedbackListener != null) {
+      feedbackListener.onFeedbackCancelled();
+    }
+  }
+
+  void onFeedbackSent(FeedbackItem feedbackItem) {
+    if (feedbackListener != null) {
+      feedbackListener.onFeedbackSent(feedbackItem);
+    }
   }
 
   void onNavigationFinished() {

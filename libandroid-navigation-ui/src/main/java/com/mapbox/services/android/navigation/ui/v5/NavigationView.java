@@ -358,11 +358,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   /**
    * Sets the route listener.
    *
-   * @param routeListener to listen for routing events
+   * @param feedbackListener to listen for routing events
    * @since 0.8.0
    */
-  public void setRouteListener(RouteListener routeListener) {
-    navigationViewEventDispatcher.setRouteListener(routeListener);
+  public void setFeedbackListener(FeedbackListener feedbackListener) {
+    navigationViewEventDispatcher.setFeedbackListener(feedbackListener);
   }
 
   /**
@@ -373,6 +373,16 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   public void setNavigationListener(NavigationListener navigationListener) {
     navigationViewEventDispatcher.setNavigationListener(navigationListener);
+  }
+
+  /**
+   * Sets the route listener.
+   *
+   * @param routeListener to listen for routing events
+   * @since 0.8.0
+   */
+  public void setRouteListener(RouteListener routeListener) {
+    navigationViewEventDispatcher.setRouteListener(routeListener);
   }
 
   /**

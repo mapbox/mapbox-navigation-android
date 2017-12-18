@@ -119,10 +119,10 @@ class NavigationViewSubscriber {
       public void onChanged(@Nullable Boolean isFeedbackShowing) {
         if (isFeedbackShowing != null) {
           if (isFeedbackShowing) {
-//            navigationViewEventDispatcher.onFeedbackOpened();
+            navigationViewEventDispatcher.onFeedbackOpened();
           } else {
             // If not showing, a user has cancelled / dismissed the feedback UI
-//            navigationViewEventDispatcher.onFeedbackCancelled();
+            navigationViewEventDispatcher.onFeedbackCancelled();
           }
         }
       }
@@ -132,7 +132,7 @@ class NavigationViewSubscriber {
       @Override
       public void onChanged(@Nullable FeedbackItem feedbackItem) {
         if (feedbackItem != null) {
-//          navigationViewEventDispatcher.onFeedbackSent(feedbackItem);
+          navigationViewEventDispatcher.onFeedbackSent(feedbackItem);
         }
       }
     });
