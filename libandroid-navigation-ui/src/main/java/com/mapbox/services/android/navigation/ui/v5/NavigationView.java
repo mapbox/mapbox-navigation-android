@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -33,6 +32,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
+import com.mapbox.services.android.navigation.ui.v5.location.LocationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
@@ -40,7 +40,6 @@ import com.mapbox.services.android.navigation.ui.v5.utils.ViewUtils;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 /**
  * View that creates the drop-in UI.
@@ -266,6 +265,63 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     navigationViewListener.onNavigationFinished();
   }
 
+  @Override
+  public void takeScreenshot() {
+    map.snapshot(new MapboxMap.SnapshotReadyCallback() {
+      @Override
+      public void onSnapshotReady(Bitmap snapshot) {
+        // Make the image visible
+        ImageView screenshotView = findViewById(R.id.screenshotView);
+        screenshotView.setVisibility(View.VISIBLE);
+        screenshotView.setImageBitmap(snapshot);
+
+        // Take a screenshot without the map
+        mapView.setVisibility(View.INVISIBLE);
+        Bitmap capture = ViewUtils.captureView(mapView);
+        String encoded = ViewUtils.encodeView(capture);
+        navigationViewModel.updateFeedbackScreenshot(encoded);
+
+        // Restore visibility
+        screenshotView.setVisibility(View.INVISIBLE);
+        mapView.setVisibility(View.VISIBLE);
+      }
+    });
+  }
+
+  /**
+   * Used when starting this {@link android.app.Activity}
+   * for the first time.
+   * <p>
+   * Zooms to the beginning of the {@link DirectionsRoute}.
+   *
+   * @param directionsRoute where camera should move to
+   */
+  @Override
+  public void startCamera(DirectionsRoute directionsRoute) {
+    if (!resumeState) {
+      camera.start(directionsRoute);
+    }
+  }
+
+  /**
+   * Used after configuration changes to resume the camera
+   * to the last location update from the Navigation SDK.
+   *
+   * @param location where the camera should move to
+   */
+  @Override
+  public void resumeCamera(Location location) {
+    if (resumeState && recenterBtn.getVisibility() != View.VISIBLE) {
+      camera.resume(location);
+      resumeState = false;
+    }
+  }
+
+  @Override
+  public void updateLocationLayer(Location location) {
+    locationLayer.forceLocationUpdate(location);
+  }
+
   /**
    * Should be called when this view is completely initialized.
    *
@@ -277,11 +333,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
     // Initialize the camera (listens to MapboxNavigation)
     initCamera();
-    // Everything is setup, subscribe to model updates
-    subscribeViews();
 
     locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
     routeViewModel.extractRouteOptions(options);
+    // Everything is setup, subscribe to the view models
+    subscribeViewModels();
   }
 
   /**
@@ -295,33 +351,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void getNavigationAsync(NavigationViewListener navigationViewListener) {
     this.navigationViewListener = navigationViewListener;
     mapView.getMapAsync(this);
-  }
-
-  /**
-   * Used when starting this {@link android.app.Activity}
-   * for the first time.
-   * <p>
-   * Zooms to the beginning of the {@link DirectionsRoute}.
-   *
-   * @param directionsRoute where camera should move to
-   */
-  public void startCamera(DirectionsRoute directionsRoute) {
-    if (!resumeState) {
-      camera.start(directionsRoute);
-    }
-  }
-
-  /**
-   * Used after configuration changes to resume the camera
-   * to the last location update from the Navigation SDK.
-   *
-   * @param location where the camera should move to
-   */
-  public void resumeCamera(Location location) {
-    if (resumeState && recenterBtn.getVisibility() != View.VISIBLE) {
-      camera.resume(location);
-      resumeState = false;
-    }
   }
 
   /**
@@ -396,6 +425,22 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   private void initCamera() {
     camera = new NavigationCamera(this, map, navigationViewModel.getNavigation());
+  }
+
+  /**
+   * Subscribes the {@link InstructionView} and {@link SummaryBottomSheet} to the {@link NavigationViewModel}.
+   * <p>
+   * Then, creates an instance of {@link NavigationViewSubscriber}, which takes a presenter and listener.
+   * <p>
+   * The subscriber then subscribes to the view models, setting up the appropriate presenter / listener
+   * method calls based on the {@link android.arch.lifecycle.LiveData} updates.
+   */
+  private void subscribeViewModels() {
+    instructionView.subscribe(navigationViewModel);
+    summaryBottomSheet.subscribe(navigationViewModel);
+
+    NavigationViewSubscriber subscriber = new NavigationViewSubscriber(navigationPresenter, navigationViewListener);
+    subscriber.subscribe(((LifecycleOwner) getContext()), locationViewModel, routeViewModel, navigationViewModel);
   }
 
   /**
@@ -503,123 +548,5 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
   public void onDestroy() {
     mapView.onDestroy();
-  }
-
-  /**
-   * Initiate observing of ViewModels by Views.
-   */
-  private void subscribeViews() {
-    instructionView.subscribe(navigationViewModel);
-    summaryBottomSheet.subscribe(navigationViewModel);
-
-    locationViewModel.rawLocation.observe((LifecycleOwner) getContext(), new Observer<Location>() {
-      @Override
-      public void onChanged(@Nullable Location location) {
-        if (location != null) {
-          routeViewModel.updateRawLocation(location);
-        }
-      }
-    });
-
-    locationViewModel.locationEngine.observe((LifecycleOwner) getContext(), new Observer<LocationEngine>() {
-      @Override
-      public void onChanged(@Nullable LocationEngine locationEngine) {
-        if (locationEngine != null) {
-          navigationViewModel.updateLocationEngine(locationEngine);
-        }
-      }
-    });
-
-    routeViewModel.route.observe((LifecycleOwner) getContext(), new Observer<DirectionsRoute>() {
-      @Override
-      public void onChanged(@Nullable DirectionsRoute directionsRoute) {
-        if (routeListener != null) {
-          routeListener.onRerouteAlong(directionsRoute);
-        }
-
-        if (directionsRoute != null) {
-          navigationViewModel.updateRoute(directionsRoute);
-          locationViewModel.updateRoute(directionsRoute);
-          navigationPresenter.onRouteUpdate(directionsRoute);
-          startCamera(directionsRoute);
-        }
-      }
-    });
-
-    routeViewModel.destination.observe((LifecycleOwner) getContext(), new Observer<Point>() {
-      @Override
-      public void onChanged(@Nullable Point point) {
-        if (point != null) {
-          navigationPresenter.onDestinationUpdate(point);
-        }
-      }
-    });
-
-    navigationViewModel.isRunning.observe((LifecycleOwner) getContext(), new Observer<Boolean>() {
-      @Override
-      public void onChanged(@Nullable Boolean isRunning) {
-        if (isRunning != null) {
-          if (!isRunning) {
-            navigationViewListener.onNavigationFinished();
-          }
-        }
-      }
-    });
-
-    navigationViewModel.navigationLocation.observe((LifecycleOwner) getContext(), new Observer<Location>() {
-      @Override
-      public void onChanged(@Nullable Location location) {
-        boolean shouldReroute = routeListener == null ? true : routeListener.allowRerouteFrom(location);
-        if (location != null && shouldReroute && location.getLongitude() != 0 && location.getLatitude() != 0) {
-          if (routeListener != null) {
-            routeListener.onRerouteFrom(location);
-          }
-          locationLayer.forceLocationUpdate(location);
-          resumeCamera(location);
-        }
-      }
-    });
-
-    navigationViewModel.newOrigin.observe((LifecycleOwner) getContext(), new Observer<Point>() {
-      @Override
-      public void onChanged(@Nullable Point newOrigin) {
-        if (newOrigin != null) {
-          routeViewModel.fetchRouteNewOrigin(newOrigin);
-          // To prevent from firing on rotation
-          navigationViewModel.newOrigin.setValue(null);
-        }
-      }
-    });
-
-    navigationViewModel.shouldRecordScreenshot.observe((LifecycleOwner) getContext(), new Observer<Boolean>() {
-      @Override
-      public void onChanged(@Nullable Boolean shouldRecordScreenshot) {
-        if (shouldRecordScreenshot != null && shouldRecordScreenshot) {
-          takeScreenshot(mapView);
-        }
-      }
-    });
-  }
-
-  private void takeScreenshot(final View view) {
-    map.snapshot(new MapboxMap.SnapshotReadyCallback() {
-      @Override
-      public void onSnapshotReady(Bitmap snapshot) {
-        // Make the image visible
-        ImageView screenshotView = findViewById(R.id.screenshotView);
-        screenshotView.setVisibility(View.VISIBLE);
-        screenshotView.setImageBitmap(snapshot);
-
-        // Take a screenshot without the map
-        mapView.setVisibility(View.INVISIBLE);
-        Bitmap capture = ViewUtils.captureView(view);
-        String encoded = ViewUtils.encodeView(capture);
-        navigationViewModel.updateFeedbackScreenshot(encoded);
-
-        // Restore visibility
-        screenshotView.setVisibility(View.INVISIBLE);
-        mapView.setVisibility(View.VISIBLE);
-      }
-    });
   }
 }
