@@ -38,8 +38,10 @@ import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
 import com.mapbox.services.android.navigation.ui.v5.utils.ViewUtils;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 
 /**
  * View that creates the drop-in UI.
@@ -262,7 +264,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   @Override
   public void finishNavigationView() {
-    // TODO fire listener when navigation has finished
+    //    navigationViewEventDispatcher.onNavigationFinished();
   }
 
   @Override
@@ -354,7 +356,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   /**
-   * Sets the route listener
+   * Sets the route listener.
    *
    * @param routeListener to listen for routing events
    * @since 0.8.0
@@ -364,13 +366,35 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   /**
-   * Sets the navigation listener
+   * Sets the navigation listener.
    *
    * @param navigationListener to listen for routing events
    * @since 0.8.0
    */
   public void setNavigationListener(NavigationListener navigationListener) {
     navigationViewEventDispatcher.addNavigationListener(navigationListener);
+  }
+
+  /**
+   * Adds a {@link ProgressChangeListener} to the list of progress listeners that
+   * {@link MapboxNavigation} updates.
+   *
+   * @param progressChangeListener to listen for progress updates
+   * @since 0.8.0
+   */
+  public void addProgressChangeListener(ProgressChangeListener progressChangeListener) {
+    navigationViewModel.getNavigation().addProgressChangeListener(progressChangeListener);
+  }
+
+  /**
+   * Adds a {@link MilestoneEventListener} to the list of milestone listeners that
+   * {@link MapboxNavigation} updates.
+   *
+   * @param milestoneEventListener to listen for milestone updates
+   * @since 0.8.0
+   */
+  public void addMilestoneEventListener(MilestoneEventListener milestoneEventListener) {
+    navigationViewModel.getNavigation().addMilestoneEventListener(milestoneEventListener);
   }
 
   private void init() {
@@ -507,7 +531,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       @Override
       public void onClick(View view) {
         navigationPresenter.onCancelBtnClick();
-        // TODO fire cancel event from dispatcher
+        // navigationViewEventDispatcher.onCancelNavigation();
       }
     });
     recenterBtn.setOnClickListener(new View.OnClickListener() {
