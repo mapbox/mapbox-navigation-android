@@ -10,9 +10,6 @@ class NavigationViewEventDispatcher {
   private NavigationListener navigationListener;
   private RouteListener routeListener;
 
-  NavigationViewEventDispatcher() {
-  }
-
   void setNavigationListener(@NonNull NavigationListener navigationListener) {
     this.navigationListener = navigationListener;
   }

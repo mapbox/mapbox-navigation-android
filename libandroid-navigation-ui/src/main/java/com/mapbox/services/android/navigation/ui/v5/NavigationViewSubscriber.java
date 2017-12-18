@@ -73,7 +73,7 @@ class NavigationViewSubscriber {
           if (!isRunning) {
             navigationViewEventDispatcher.onNavigationFinished();
           } else {
-            navigationViewEventDispatcher.onNavigationFinished();
+            navigationViewEventDispatcher.onNavigationRunning();
           }
         }
       }
