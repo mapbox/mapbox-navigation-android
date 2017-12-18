@@ -8,26 +8,17 @@ import java.util.List;
 
 import timber.log.Timber;
 
-public class NavigationViewEventDispatcher {
-  private List<NavigationViewListener> navigationViewListeners;
+class NavigationViewEventDispatcher {
+
   private List<NavigationListener> navigationListeners;
   private List<RouteListener> routeListeners;
 
   NavigationViewEventDispatcher() {
-    navigationViewListeners = new ArrayList<>();
     navigationListeners = new ArrayList<>();
     routeListeners = new ArrayList<>();
   }
 
-  void addHNavigationViewListener(@NonNull NavigationViewListener navigationViewListener) {
-    if (navigationViewListeners.contains(navigationViewListener)) {
-      Timber.w("The specified NavigationViewListener has already been added to the stack.");
-      return;
-    }
-    navigationViewListeners.add(navigationViewListener);
-  }
-
-  void addHNavigationVListener(@NonNull NavigationListener navigationListener) {
+  void addNavigationListener(@NonNull NavigationListener navigationListener) {
     if (navigationListeners.contains(navigationListener)) {
       Timber.w("The specified NavigationListener has already been added to the stack.");
       return;

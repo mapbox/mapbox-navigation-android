@@ -18,7 +18,7 @@ import java.util.HashMap;
  * <p>
  * Demonstrates the proper setup and usage of the view, including all lifecycle methods.
  */
-public class NavigationActivity extends AppCompatActivity implements NavigationViewListener {
+public class NavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener {
 
   private NavigationView navigationView;
 
@@ -30,6 +30,7 @@ public class NavigationActivity extends AppCompatActivity implements NavigationV
     navigationView = findViewById(R.id.navigationView);
     navigationView.onCreate(savedInstanceState);
     navigationView.getNavigationAsync(this);
+    navigationView.setNavigationListener(this);
   }
 
   @Override
@@ -68,7 +69,8 @@ public class NavigationActivity extends AppCompatActivity implements NavigationV
   }
 
   @Override
-  public void onNavigationFinished() {
+  public void onCancelNavigation() {
+    // Navigation canceled, finish the activity
     finish();
   }
 

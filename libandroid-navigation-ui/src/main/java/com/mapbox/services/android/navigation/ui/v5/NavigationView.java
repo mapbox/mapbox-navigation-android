@@ -74,6 +74,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private RecenterButton recenterBtn;
 
   private NavigationPresenter navigationPresenter;
+  private NavigationViewEventDispatcher navigationViewEventDispatcher;
   private NavigationViewModel navigationViewModel;
   private RouteViewModel routeViewModel;
   private LocationViewModel locationViewModel;
@@ -81,10 +82,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private NavigationMapRoute mapRoute;
   private NavigationCamera camera;
   private LocationLayerPlugin locationLayer;
-  private NavigationViewListener navigationViewListener;
+  private OnNavigationReadyCallback onNavigationReadyCallback;
   private boolean resumeState;
-  private RouteListener routeListener;
-  private NavigationListener navigationListener;
 
   public NavigationView(Context context) {
     this(context, null);
@@ -182,9 +181,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
         initLocationLayer();
         initLifecycleObservers();
         initNavigationPresenter();
+        initNavigationEventDispatcher();
         initClickListeners();
         map.setOnScrollListener(NavigationView.this);
-        navigationViewListener.onNavigationReady();
+        onNavigationReadyCallback.onNavigationReady();
       }
     });
   }
@@ -262,7 +262,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   @Override
   public void finishNavigationView() {
-    navigationViewListener.onNavigationFinished();
+    // TODO fire listener when navigation has finished
   }
 
   @Override
@@ -343,30 +343,34 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   /**
    * Should be called after {@link NavigationView#onCreate(Bundle)}.
    * <p>
-   * This method adds the {@link NavigationViewListener},
+   * This method adds the {@link OnNavigationReadyCallback},
    * which will fire ready / cancel events for this view.
    *
-   * @param navigationViewListener to be set to this view
+   * @param onNavigationReadyCallback to be set to this view
    */
-  public void getNavigationAsync(NavigationViewListener navigationViewListener) {
-    this.navigationViewListener = navigationViewListener;
+  public void getNavigationAsync(OnNavigationReadyCallback onNavigationReadyCallback) {
+    this.onNavigationReadyCallback = onNavigationReadyCallback;
     mapView.getMapAsync(this);
   }
 
   /**
    * Sets the route listener
+   *
    * @param routeListener to listen for routing events
+   * @since 0.8.0
    */
   public void setRouteListener(RouteListener routeListener) {
-    this.routeListener = routeListener;
+    navigationViewEventDispatcher.addRouteListener(routeListener);
   }
 
   /**
    * Sets the navigation listener
+   *
    * @param navigationListener to listen for routing events
+   * @since 0.8.0
    */
   public void setNavigationListener(NavigationListener navigationListener) {
-    this.navigationListener = navigationListener;
+    navigationViewEventDispatcher.addNavigationListener(navigationListener);
   }
 
   private void init() {
@@ -439,7 +443,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     instructionView.subscribe(navigationViewModel);
     summaryBottomSheet.subscribe(navigationViewModel);
 
-    NavigationViewSubscriber subscriber = new NavigationViewSubscriber(navigationPresenter, navigationViewListener);
+    NavigationViewSubscriber subscriber = new NavigationViewSubscriber(navigationPresenter,
+      navigationViewEventDispatcher);
     subscriber.subscribe(((LifecycleOwner) getContext()), locationViewModel, routeViewModel, navigationViewModel);
   }
 
@@ -480,6 +485,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   /**
+   * Initialize a new event dispatcher in charge of firing all navigation
+   * listener updates to the classes that have implemented these listeners.
+   */
+  private void initNavigationEventDispatcher() {
+    navigationViewEventDispatcher = new NavigationViewEventDispatcher();
+  }
+
+  /**
    * Initialize a new presenter for this Activity.
    */
   private void initNavigationPresenter() {
@@ -494,7 +507,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       @Override
       public void onClick(View view) {
         navigationPresenter.onCancelBtnClick();
-        navigationListener.onCancelNavigation();
+        // TODO fire cancel event from dispatcher
       }
     });
     recenterBtn.setOnClickListener(new View.OnClickListener() {

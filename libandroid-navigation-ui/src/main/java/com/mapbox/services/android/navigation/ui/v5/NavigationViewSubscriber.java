@@ -14,11 +14,12 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 class NavigationViewSubscriber {
 
   private NavigationPresenter navigationPresenter;
-  private NavigationViewListener navigationViewListener;
+  private NavigationViewEventDispatcher navigationViewEventDispatcher;
 
-  NavigationViewSubscriber(NavigationPresenter navigationPresenter, NavigationViewListener navigationViewListener) {
+  NavigationViewSubscriber(NavigationPresenter navigationPresenter,
+                           NavigationViewEventDispatcher navigationViewEventDispatcher) {
     this.navigationPresenter = navigationPresenter;
-    this.navigationViewListener = navigationViewListener;
+    this.navigationViewEventDispatcher = navigationViewEventDispatcher;
   }
 
   /**
@@ -70,7 +71,9 @@ class NavigationViewSubscriber {
       public void onChanged(@Nullable Boolean isRunning) {
         if (isRunning != null) {
           if (!isRunning) {
-            navigationViewListener.onNavigationFinished();
+            // TODO NavigationListener.onNavigationFinished()
+          } else {
+            // TODO NavigationListener.onNavigationRunning()
           }
         }
       }
