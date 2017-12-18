@@ -264,7 +264,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   @Override
   public void finishNavigationView() {
-    //    navigationViewEventDispatcher.onNavigationFinished();
+    navigationViewEventDispatcher.onNavigationFinished();
   }
 
   @Override
@@ -362,7 +362,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @since 0.8.0
    */
   public void setRouteListener(RouteListener routeListener) {
-    navigationViewEventDispatcher.addRouteListener(routeListener);
+    navigationViewEventDispatcher.setRouteListener(routeListener);
   }
 
   /**
@@ -372,7 +372,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @since 0.8.0
    */
   public void setNavigationListener(NavigationListener navigationListener) {
-    navigationViewEventDispatcher.addNavigationListener(navigationListener);
+    navigationViewEventDispatcher.setNavigationListener(navigationListener);
   }
 
   /**
@@ -531,7 +531,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       @Override
       public void onClick(View view) {
         navigationPresenter.onCancelBtnClick();
-        // navigationViewEventDispatcher.onCancelNavigation();
+        navigationViewEventDispatcher.onCancelNavigation();
       }
     });
     recenterBtn.setOnClickListener(new View.OnClickListener() {

@@ -72,9 +72,9 @@ class NavigationViewSubscriber {
       public void onChanged(@Nullable Boolean isRunning) {
         if (isRunning != null) {
           if (!isRunning) {
-            // TODO NavigationListener.onNavigationFinished()
+            navigationViewEventDispatcher.onNavigationFinished();
           } else {
-            // TODO NavigationListener.onNavigationRunning()
+            navigationViewEventDispatcher.onNavigationRunning();
           }
         }
       }
@@ -93,14 +93,14 @@ class NavigationViewSubscriber {
       @Override
       public void onChanged(@Nullable Point newOrigin) {
         if (newOrigin != null) {
-//          if (navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
-//            // Send off route event with new origin
-//            navigationViewEventDispatcher.onOffRoute(newOrigin);
-//            // Fetch a new route with the given origin
-//            routeViewModel.fetchRouteNewOrigin(newOrigin);
-//            // To prevent from firing on rotation
-//            navigationViewModel.newOrigin.setValue(null);
-//          }
+          if (navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
+            // Send off route event with new origin
+            navigationViewEventDispatcher.onOffRoute(newOrigin);
+            // Fetch a new route with the given origin
+            routeViewModel.fetchRouteNewOrigin(newOrigin);
+            // To prevent from firing on rotation
+            navigationViewModel.newOrigin.setValue(null);
+          }
         }
       }
     });

@@ -74,6 +74,17 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     finish();
   }
 
+  @Override
+  public void onNavigationFinished() {
+    // Navigation finished, finish the activity
+    finish();
+  }
+
+  @Override
+  public void onNavigationRunning() {
+    // Intentionally empty
+  }
+
   private void extractRoute(NavigationViewOptions.Builder options) {
     options.directionsRoute(NavigationLauncher.extractRoute(this));
   }
