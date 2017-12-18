@@ -6,6 +6,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.polly.AmazonPollyPresigningClient;
 import com.amazonaws.services.polly.model.OutputFormat;
 import com.amazonaws.services.polly.model.SynthesizeSpeechPresignRequest;
+import com.amazonaws.services.polly.model.TextType;
 import com.amazonaws.services.polly.model.VoiceId;
 
 public class InstructionTask extends AsyncTask<String, Void, String> {
@@ -32,6 +33,7 @@ public class InstructionTask extends AsyncTask<String, Void, String> {
     SynthesizeSpeechPresignRequest synthesizeSpeechPresignRequest =
       new SynthesizeSpeechPresignRequest()
         .withText(instruction)
+        .withTextType(TextType.Ssml)
         .withVoiceId(VoiceId.Joanna)
         .withOutputFormat(OutputFormat.Mp3);
     try {
