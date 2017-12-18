@@ -3,34 +3,49 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.support.annotation.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import timber.log.Timber;
+import com.mapbox.geojson.Point;
 
 class NavigationViewEventDispatcher {
 
-  private List<NavigationListener> navigationListeners;
-  private List<RouteListener> routeListeners;
+  private NavigationListener navigationListener;
+  private RouteListener routeListener;
 
   NavigationViewEventDispatcher() {
-    navigationListeners = new ArrayList<>();
-    routeListeners = new ArrayList<>();
   }
 
-  void addNavigationListener(@NonNull NavigationListener navigationListener) {
-    if (navigationListeners.contains(navigationListener)) {
-      Timber.w("The specified NavigationListener has already been added to the stack.");
-      return;
-    }
-    navigationListeners.add(navigationListener);
+  void setNavigationListener(@NonNull NavigationListener navigationListener) {
+    this.navigationListener = navigationListener;
   }
 
-  void addRouteListener(@NonNull RouteListener routeListener) {
-    if (routeListeners.contains(routeListener)) {
-      Timber.w("The specified RouteListener has already been added to the stack.");
-      return;
+  void setRouteListener(@NonNull RouteListener routeListener) {
+    this.routeListener = routeListener;
+  }
+
+  void onNavigationFinished() {
+    if (navigationListener != null) {
+      navigationListener.onNavigationFinished();
     }
-    routeListeners.add(routeListener);
+  }
+
+  void onCancelNavigation() {
+    if (navigationListener != null) {
+      navigationListener.onCancelNavigation();
+    }
+  }
+
+  void onNavigationRunning() {
+    if (navigationListener != null) {
+      navigationListener.onNavigationRunning();
+    }
+  }
+
+  boolean allowRerouteFrom(Point point) {
+    return routeListener == null ? true : routeListener.allowRerouteFrom(point);
+  }
+
+  void onOffRoute(Point point) {
+    if (routeListener != null) {
+      routeListener.onOffRoute(point);
+    }
   }
 }

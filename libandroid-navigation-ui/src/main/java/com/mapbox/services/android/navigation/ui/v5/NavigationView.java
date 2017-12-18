@@ -360,7 +360,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @since 0.8.0
    */
   public void setRouteListener(RouteListener routeListener) {
-    navigationViewEventDispatcher.addRouteListener(routeListener);
+    navigationViewEventDispatcher.setRouteListener(routeListener);
   }
 
   /**
@@ -370,7 +370,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @since 0.8.0
    */
   public void setNavigationListener(NavigationListener navigationListener) {
-    navigationViewEventDispatcher.addNavigationListener(navigationListener);
+    navigationViewEventDispatcher.setNavigationListener(navigationListener);
   }
 
   private void init() {
