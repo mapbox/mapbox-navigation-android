@@ -262,7 +262,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   @Override
   public void finishNavigationView() {
-    // TODO fire listener when navigation has finished
+    navigationViewEventDispatcher.onNavigationFinished();
   }
 
   @Override
