@@ -70,7 +70,7 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
   }
 
   /**
-   * Checks {@link NavigationViewOptions} to see if the route
+   * Checks {@link com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions} to see if the route
    * should be simulated with a {@link MockLocationEngine}.
    */
   public void updateShouldSimulateRoute(boolean shouldSimulateRoute) {
