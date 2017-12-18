@@ -92,9 +92,14 @@ class NavigationViewSubscriber {
       @Override
       public void onChanged(@Nullable Point newOrigin) {
         if (newOrigin != null) {
-          routeViewModel.fetchRouteNewOrigin(newOrigin);
-          // To prevent from firing on rotation
-          navigationViewModel.newOrigin.setValue(null);
+//          if (navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
+//            // Send off route event with new origin
+//            navigationViewEventDispatcher.onOffRoute(newOrigin);
+//            // Fetch a new route with the given origin
+//            routeViewModel.fetchRouteNewOrigin(newOrigin);
+//            // To prevent from firing on rotation
+//            navigationViewModel.newOrigin.setValue(null);
+//          }
         }
       }
     });
