@@ -7,6 +7,11 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 
+/**
+ * In charge of holding any {@link NavigationView} related listeners {@link NavigationListener},
+ * {@link RouteListener}, or {@link FeedbackListener} and firing listener events when
+ * triggered by the {@link NavigationView}.
+ */
 class NavigationViewEventDispatcher {
 
   private FeedbackListener feedbackListener;
@@ -24,6 +29,10 @@ class NavigationViewEventDispatcher {
   void setRouteListener(@NonNull RouteListener routeListener) {
     this.routeListener = routeListener;
   }
+
+  /*
+   * Feedback listeners
+   */
 
   void onFeedbackOpened() {
     if (feedbackListener != null) {
@@ -43,6 +52,10 @@ class NavigationViewEventDispatcher {
     }
   }
 
+  /*
+   * Navigation listeners
+   */
+
   void onNavigationFinished() {
     if (navigationListener != null) {
       navigationListener.onNavigationFinished();
@@ -61,8 +74,12 @@ class NavigationViewEventDispatcher {
     }
   }
 
+  /*
+   * Route listeners
+   */
+
   boolean allowRerouteFrom(Point point) {
-    return routeListener == null ? true : routeListener.allowRerouteFrom(point);
+    return routeListener == null || routeListener.allowRerouteFrom(point);
   }
 
   void onOffRoute(Point point) {

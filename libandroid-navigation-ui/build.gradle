@@ -75,6 +75,7 @@ dependencies {
   // Unit testing
   testImplementation dependenciesList.junit
   testImplementation dependenciesList.mockito
+  testImplementation dependenciesList.robolectric
 }
 
 apply from: 'javadoc.gradle'
