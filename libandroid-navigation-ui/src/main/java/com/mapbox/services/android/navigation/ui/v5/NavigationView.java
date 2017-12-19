@@ -336,6 +336,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     // Initialize the camera (listens to MapboxNavigation)
     initCamera();
 
+    setupListeners(options);
+
     locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
     routeViewModel.extractRouteOptions(options);
     // Everything is setup, subscribe to the view models
@@ -356,16 +358,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   /**
-   * Sets the route listener.
-   *
-   * @param feedbackListener to listen for routing events
-   * @since 0.8.0
-   */
-  public void setFeedbackListener(FeedbackListener feedbackListener) {
-    navigationViewEventDispatcher.setFeedbackListener(feedbackListener);
-  }
-
-  /**
    * Sets the navigation listener.
    *
    * @param navigationListener to listen for routing events
@@ -373,38 +365,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   public void setNavigationListener(NavigationListener navigationListener) {
     navigationViewEventDispatcher.setNavigationListener(navigationListener);
-  }
-
-  /**
-   * Sets the route listener.
-   *
-   * @param routeListener to listen for routing events
-   * @since 0.8.0
-   */
-  public void setRouteListener(RouteListener routeListener) {
-    navigationViewEventDispatcher.setRouteListener(routeListener);
-  }
-
-  /**
-   * Adds a {@link ProgressChangeListener} to the list of progress listeners that
-   * {@link MapboxNavigation} updates.
-   *
-   * @param progressChangeListener to listen for progress updates
-   * @since 0.8.0
-   */
-  public void addProgressChangeListener(ProgressChangeListener progressChangeListener) {
-    navigationViewModel.getNavigation().addProgressChangeListener(progressChangeListener);
-  }
-
-  /**
-   * Adds a {@link MilestoneEventListener} to the list of milestone listeners that
-   * {@link MapboxNavigation} updates.
-   *
-   * @param milestoneEventListener to listen for milestone updates
-   * @since 0.8.0
-   */
-  public void addMilestoneEventListener(MilestoneEventListener milestoneEventListener) {
-    navigationViewModel.getNavigation().addMilestoneEventListener(milestoneEventListener);
   }
 
   private void init() {
@@ -524,6 +484,24 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   private void initNavigationEventDispatcher() {
     navigationViewEventDispatcher = new NavigationViewEventDispatcher();
+  }
+
+  /**
+   * Sets up the listeners in the dispatcher, as well as the listeners in the {@link MapboxNavigation}
+   * @param navigationViewOptions that contains all listeners to attach
+   */
+  private void setupListeners(NavigationViewOptions navigationViewOptions) {
+    navigationViewEventDispatcher.setFeedbackListener(navigationViewOptions.feedbackListener());
+    navigationViewEventDispatcher.setNavigationListener(navigationViewOptions.navigationListener());
+    navigationViewEventDispatcher.setRouteListener(navigationViewOptions.routeListener());
+
+    if (navigationViewOptions.progressChangeListener() != null) {
+      navigationViewModel.getNavigation().addProgressChangeListener(navigationViewOptions.progressChangeListener());
+    }
+
+    if (navigationViewOptions.milestoneEventListener() != null) {
+      navigationViewModel.getNavigation().addMilestoneEventListener(navigationViewOptions.milestoneEventListener());
+    }
   }
 
   /**

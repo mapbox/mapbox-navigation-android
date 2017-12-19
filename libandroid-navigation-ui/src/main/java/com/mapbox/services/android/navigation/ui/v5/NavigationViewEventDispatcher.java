@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -18,15 +19,15 @@ class NavigationViewEventDispatcher {
   private NavigationListener navigationListener;
   private RouteListener routeListener;
 
-  void setFeedbackListener(@NonNull FeedbackListener feedbackListener) {
+  void setFeedbackListener(@Nullable FeedbackListener feedbackListener) {
     this.feedbackListener = feedbackListener;
   }
 
-  void setNavigationListener(@NonNull NavigationListener navigationListener) {
+  void setNavigationListener(@Nullable NavigationListener navigationListener) {
     this.navigationListener = navigationListener;
   }
 
-  void setRouteListener(@NonNull RouteListener routeListener) {
+  void setRouteListener(@Nullable RouteListener routeListener) {
     this.routeListener = routeListener;
   }
 
