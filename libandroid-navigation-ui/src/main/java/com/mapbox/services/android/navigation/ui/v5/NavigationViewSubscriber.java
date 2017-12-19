@@ -51,7 +51,7 @@ class NavigationViewSubscriber {
     routeViewModel.isSuccessful.observe(owner, new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isSuccessful) {
-        if (isOffRoute && !isSuccessful) {
+        if (isOffRoute && isSuccessful != null && !isSuccessful) {
           navigationViewEventDispatcher.onFailedReroute();
         }
       }
@@ -153,7 +153,9 @@ class NavigationViewSubscriber {
     navigationViewModel.isOffRoute.observe(owner, new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
-        NavigationViewSubscriber.this.isOffRoute = isOffRoute;
+        if (isOffRoute != null) {
+          NavigationViewSubscriber.this.isOffRoute = isOffRoute;
+        }
       }
     });
   }

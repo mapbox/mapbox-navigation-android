@@ -1,12 +1,14 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
+import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
 
 /**
  * In charge of holding any {@link NavigationView} related listeners {@link NavigationListener},
