@@ -31,7 +31,6 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     navigationView = findViewById(R.id.navigationView);
     navigationView.onCreate(savedInstanceState);
     navigationView.getNavigationAsync(this);
-    navigationView.setNavigationListener(this);
   }
 
   @Override
@@ -63,6 +62,7 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   @Override
   public void onNavigationReady() {
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
+    options.navigationListener(this);
     extractRoute(options);
     extractCoordinates(options);
     extractConfiguration(options);

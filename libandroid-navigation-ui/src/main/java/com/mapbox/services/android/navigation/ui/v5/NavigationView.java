@@ -32,7 +32,6 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
-import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
@@ -354,16 +353,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void getNavigationAsync(OnNavigationReadyCallback onNavigationReadyCallback) {
     this.onNavigationReadyCallback = onNavigationReadyCallback;
     mapView.getMapAsync(this);
-  }
-
-  /**
-   * Sets the navigation listener.
-   *
-   * @param navigationListener to listen for routing events
-   * @since 0.8.0
-   */
-  public void setNavigationListener(NavigationListener navigationListener) {
-    navigationViewEventDispatcher.setNavigationListener(navigationListener);
   }
 
   private void init() {
