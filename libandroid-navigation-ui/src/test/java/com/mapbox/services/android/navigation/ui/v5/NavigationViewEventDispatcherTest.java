@@ -108,9 +108,10 @@ public class NavigationViewEventDispatcherTest {
 
   @Test
   public void setRouteListener_failedRerouteListenerIsCalled() throws Exception {
+    String errorMessage = "errorMessage";
     eventDispatcher.setRouteListener(routeListener);
-    eventDispatcher.onFailedReroute();
-    verify(routeListener, times(1)).onFailedReroute();
+    eventDispatcher.onFailedReroute(errorMessage);
+    verify(routeListener, times(1)).onFailedReroute(errorMessage);
   }
 
   @Test
@@ -141,8 +142,9 @@ public class NavigationViewEventDispatcherTest {
 
   @Test
   public void onRouteListenerNotSet_failedListenerIsNotCalled() throws Exception {
-    eventDispatcher.onFailedReroute();
-    verify(routeListener, times(0)).onFailedReroute();
+    String errorMessage = "errorMessage";
+    eventDispatcher.onFailedReroute(errorMessage);
+    verify(routeListener, times(0)).onFailedReroute(errorMessage);
   }
 
   @Test
