@@ -97,9 +97,9 @@ class NavigationViewEventDispatcher {
     }
   }
 
-  void onFailedReroute() {
+  void onFailedReroute(String errorMessage) {
     if (routeListener != null) {
-      routeListener.onFailedReroute();
+      routeListener.onFailedReroute(errorMessage);
     }
   }
 }

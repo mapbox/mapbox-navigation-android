@@ -52,5 +52,5 @@ public interface RouteListener {
    *
    * @since 0.8.0
    */
-  void onFailedReroute();
+  void onFailedReroute(String errorMessage);
 }

@@ -48,11 +48,13 @@ class NavigationViewSubscriber {
       }
     });
 
-    routeViewModel.isSuccessful.observe(owner, new Observer<Boolean>() {
+    routeViewModel.requestErrorMessage.observe(owner, new Observer<String>() {
       @Override
-      public void onChanged(@Nullable Boolean isSuccessful) {
-        if (isOffRoute && isSuccessful != null && !isSuccessful) {
-          navigationViewEventDispatcher.onFailedReroute();
+      public void onChanged(@Nullable String requestErrorMessage) {
+        if (isOffRoute && requestErrorMessage != null) {
+          navigationViewEventDispatcher.onFailedReroute(requestErrorMessage);
+          // Discard message after firing the listener
+          routeViewModel.requestErrorMessage.setValue(null);
         }
       }
     });
