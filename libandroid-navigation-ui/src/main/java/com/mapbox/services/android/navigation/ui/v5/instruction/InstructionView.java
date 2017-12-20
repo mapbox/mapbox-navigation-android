@@ -217,6 +217,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     FeedbackBottomSheet.newInstance(this,
       NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION).show(
       ((FragmentActivity) getContext()).getSupportFragmentManager(), FeedbackBottomSheet.TAG);
+    navigationViewModel.isFeedbackShowing.setValue(true);
   }
 
   /**

@@ -26,7 +26,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
 
   public final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
   public final MutableLiveData<Point> destination = new MutableLiveData<>();
-  private MutableLiveData<Boolean> isSuccessful = new MutableLiveData<>();
+  public final MutableLiveData<String> requestErrorMessage = new MutableLiveData<>();
   private Point origin;
   private Location rawLocation;
   private boolean extractRouteOptions = true;
@@ -52,13 +52,12 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (validRouteResponse(response)) {
       route.setValue(response.body().routes().get(0));
-      isSuccessful.setValue(true);
     }
   }
 
   @Override
   public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-    isSuccessful.setValue(false);
+    requestErrorMessage.setValue(throwable.getMessage());
   }
 
   public void updateRawLocation(@NonNull Location rawLocation) {

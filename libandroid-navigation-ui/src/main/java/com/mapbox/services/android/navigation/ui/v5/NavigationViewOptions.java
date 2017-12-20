@@ -6,7 +6,12 @@ import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 
 @AutoValue
 public abstract class NavigationViewOptions {
@@ -36,6 +41,21 @@ public abstract class NavigationViewOptions {
   @Nullable
   public abstract Integer darkThemeResId();
 
+  @Nullable
+  public abstract FeedbackListener feedbackListener();
+
+  @Nullable
+  public abstract RouteListener routeListener();
+
+  @Nullable
+  public abstract NavigationListener navigationListener();
+
+  @Nullable
+  public abstract ProgressChangeListener progressChangeListener();
+
+  @Nullable
+  public abstract MilestoneEventListener milestoneEventListener();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -56,6 +76,16 @@ public abstract class NavigationViewOptions {
     public abstract Builder lightThemeResId(Integer lightThemeResId);
 
     public abstract Builder darkThemeResId(Integer darkThemeResId);
+
+    public abstract Builder feedbackListener(FeedbackListener feedbackListener);
+
+    public abstract Builder routeListener(RouteListener routeListener);
+
+    public abstract Builder navigationListener(NavigationListener navigationListener);
+
+    public abstract Builder progressChangeListener(ProgressChangeListener progressChangeListener);
+
+    public abstract Builder milestoneEventListener(MilestoneEventListener milestoneEventListener);
 
     public abstract NavigationViewOptions build();
   }

@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
@@ -18,7 +19,7 @@ import java.util.HashMap;
  * <p>
  * Demonstrates the proper setup and usage of the view, including all lifecycle methods.
  */
-public class NavigationActivity extends AppCompatActivity implements NavigationViewListener {
+public class NavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener {
 
   private NavigationView navigationView;
 
@@ -61,6 +62,7 @@ public class NavigationActivity extends AppCompatActivity implements NavigationV
   @Override
   public void onNavigationReady() {
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
+    options.navigationListener(this);
     extractRoute(options);
     extractCoordinates(options);
     extractConfiguration(options);
@@ -68,8 +70,20 @@ public class NavigationActivity extends AppCompatActivity implements NavigationV
   }
 
   @Override
-  public void onNavigationFinished() {
+  public void onCancelNavigation() {
+    // Navigation canceled, finish the activity
     finish();
+  }
+
+  @Override
+  public void onNavigationFinished() {
+    // Navigation finished, finish the activity
+    finish();
+  }
+
+  @Override
+  public void onNavigationRunning() {
+    // Intentionally empty
   }
 
   private void extractRoute(NavigationViewOptions.Builder options) {
