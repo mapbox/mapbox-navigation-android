@@ -2,11 +2,18 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.8.0 - December 20, 2017
+
+* Update Maps SDK to 5.3.0 [#617](https://github.com/mapbox/mapbox-navigation-android/pull/617)
+* Expose listeners in the NavigationView [#614](https://github.com/mapbox/mapbox-navigation-android/pull/614)
+* Null check light / dark theme from NavigationLauncher [#613](https://github.com/mapbox/mapbox-navigation-android/pull/613)
+* Add SSML parameter to Polly request [#612](https://github.com/mapbox/mapbox-navigation-android/pull/612)
+
 ### v0.8.0-beta.1 - December 15, 2017
 
-* Allow theme setting from NavigationViewOptions  [#595](https://github.com/mapbox/mapbox-navigation-android/pull/595)
-* Fix issue NavigationView simulation  [#594](https://github.com/mapbox/mapbox-navigation-android/pull/594)
-* Remove preference setup for unit type in RouteViewModel  [#593](https://github.com/mapbox/mapbox-navigation-android/pull/593)
+* Allow theme setting from NavigationViewOptions [#595](https://github.com/mapbox/mapbox-navigation-android/pull/595)
+* Fix issue NavigationView simulation [#594](https://github.com/mapbox/mapbox-navigation-android/pull/594)
+* Remove preference setup for unit type in RouteViewModel [#593](https://github.com/mapbox/mapbox-navigation-android/pull/593)
 * Create other map issue in feedback adapter [#592](https://github.com/mapbox/mapbox-navigation-android/pull/592)
 * Remove specified layer for map route [#590](https://github.com/mapbox/mapbox-navigation-android/pull/590)
 * Guard against IndexOutOfBounds when updating last reroute event [#589](https://github.com/mapbox/mapbox-navigation-android/pull/589)
