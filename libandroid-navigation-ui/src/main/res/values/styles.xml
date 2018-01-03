@@ -32,6 +32,8 @@
 
         <item name="navigationViewRouteStyle">@style/NavigationMapRoute</item>
 
+        <item name="navigationViewLocationLayerStyle">@style/LocationLayer</item>
+
         <item name="navigationViewMapStyle">@string/navigation_guidance_day_v2</item>
     </style>
 
@@ -54,6 +56,8 @@
         <item name="navigationViewProgressBackground">@color/mapbox_navigation_view_color_progress_background_dark</item>
 
         <item name="navigationViewRouteStyle">@style/NavigationMapRoute</item>
+
+        <item name="navigationViewLocationLayerStyle">@style/LocationLayer</item>
 
         <item name="navigationViewMapStyle">@string/navigation_guidance_night_v2</item>
     </style>

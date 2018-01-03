@@ -97,14 +97,15 @@ public class ThemeSwitcher {
   }
 
   /**
-   * Looks are current theme and retrieves the route style
-   * for the given set theme.
+   * Looks are current theme and retrieves the style
+   * for the given resId set in the theme.
    *
    * @param context to retrieve the resolved attribute
-   * @return style resource Id for the route
+   * @param styleResId for the given style
+   * @return resolved style resource Id
    */
-  static int retrieveNavigationViewRouteStyle(Context context) {
-    TypedValue outValue = obtainTypedValue(context, R.attr.navigationViewRouteStyle);
+  static int retrieveNavigationViewStyle(Context context, int styleResId) {
+    TypedValue outValue = obtainTypedValue(context, styleResId);
     return outValue.resourceId;
   }
 
