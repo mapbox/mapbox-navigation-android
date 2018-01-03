@@ -111,7 +111,9 @@ public class NavigationLifecycleMonitor implements Application.ActivityLifecycle
     }
     long resumePauseDiff = 0;
     for (int i = 0; i < tempResumes.size(); i++) {
-      resumePauseDiff = resumePauseDiff + (tempResumes.get(i) - pauses.get(i));
+      if (i < pauses.size()) {
+        resumePauseDiff = resumePauseDiff + (tempResumes.get(i) - pauses.get(i));
+      }
     }
     return currentTime - resumePauseDiff - startSessionTime;
   }
