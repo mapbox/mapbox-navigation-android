@@ -150,21 +150,16 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   public void subscribe(NavigationViewModel navigationViewModel) {
     this.navigationViewModel = navigationViewModel;
-    navigationViewModel.instructionModel.observe((LifecycleOwner) getContext(), new Observer<InstructionModel>() {
+    LifecycleOwner owner = (LifecycleOwner) getContext();
+    navigationViewModel.instructionModel.observe(owner, new Observer<InstructionModel>() {
       @Override
       public void onChanged(@Nullable InstructionModel model) {
         if (model != null) {
-          updateManeuverView(model);
-          updateDistanceText(model);
-          updateInstructionList(model);
-          if (newStep(model.getProgress())) {
-            updateTurnLanes(model);
-            updateThenStep(model);
-          }
+          updateViews(model);
         }
       }
     });
-    navigationViewModel.bannerInstructionModel.observe((LifecycleOwner) getContext(), new Observer<BannerInstructionModel>() {
+    navigationViewModel.bannerInstructionModel.observe(owner, new Observer<BannerInstructionModel>() {
       @Override
       public void onChanged(@Nullable BannerInstructionModel bannerInstructionModel) {
         if (bannerInstructionModel != null) {
@@ -172,7 +167,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         }
       }
     });
-    navigationViewModel.isOffRoute.observe((LifecycleOwner) getContext(), new Observer<Boolean>() {
+    navigationViewModel.isOffRoute.observe(owner, new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {
@@ -204,14 +199,21 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   public void update(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
     if (routeProgress != null && !isRerouting) {
       InstructionModel model = new InstructionModel(routeProgress, decimalFormat, unitType);
-      updateManeuverView(model);
-      updateDistanceText(model);
+      updateViews(model);
       updateTextInstruction(model);
-      updateInstructionList(model);
-      if (newStep(model.getProgress())) {
-        updateTurnLanes(model);
-        updateThenStep(model);
-      }
+    }
+  }
+
+  private void updateViews(InstructionModel model) {
+    updateManeuverView(model);
+    updateDistanceText(model);
+    updateInstructionList(model);
+    if (newStep(model.getProgress())) {
+      updateTurnLanes(model);
+      updateThenStep(model);
+      // Pre-fetch the image URLs for the upcoming step
+      LegStep upComingStep = model.getProgress().currentLegProgress().upComingStep();
+      InstructionLoader.getInstance().prefetchImageCache(upComingStep);
     }
   }
 

@@ -8,13 +8,13 @@ import android.text.style.ImageSpan;
 import android.widget.TextView;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
+import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import timber.log.Timber;
 
 /**
  * Utility class that can be used to load a given {@link BannerText} into the provided
@@ -32,6 +32,7 @@ public class InstructionLoader {
   private boolean isInitialized;
   private Picasso picassoImageLoader;
   private List<InstructionTarget> targets;
+  private UrlDensityMap urlDensityMap;
   private static final String IMAGE_SPACE_PLACEHOLDER = "  ";
   private static final String SINGLE_SPACE = " ";
 
@@ -51,15 +52,51 @@ public class InstructionLoader {
     return instance;
   }
 
+  /**
+   * Must be called before loading images.
+   * <p>
+   * Initializes a new {@link Picasso} instance as well as the
+   * {@link ArrayList} of {@link InstructionTarget}.
+   *
+   * @param context to init Picasso
+   */
   public void initialize(Context context) {
     if (!isInitialized) {
       Picasso.Builder builder = new Picasso.Builder(context)
         .loggingEnabled(true);
       picassoImageLoader = builder.build();
 
+      this.urlDensityMap = new UrlDensityMap(context);
       targets = new ArrayList<>();
 
       isInitialized = true;
+    }
+  }
+
+  /**
+   * Will pre-fetch images for a given {@link LegStep}.
+   * <p>
+   * If loaded successfully, this will allow the images to be displayed
+   * without delay in the {@link InstructionView}.
+   *
+   * @param step providing the image Urls
+   */
+  public void prefetchImageCache(LegStep step) {
+
+    checkIsInitialized();
+
+    if (step.bannerInstructions() == null || step.bannerInstructions().isEmpty()) {
+      return;
+    }
+
+    List<BannerInstructions> bannerInstructionList = new ArrayList<>(step.bannerInstructions());
+    for (BannerInstructions instructions : bannerInstructionList) {
+      if (hasComponents(instructions.primary())) {
+        fetchImageBaseUrls(instructions.primary());
+      }
+      if (hasComponents(instructions.secondary())) {
+        fetchImageBaseUrls(instructions.secondary());
+      }
     }
   }
 
@@ -74,9 +111,11 @@ public class InstructionLoader {
    *
    * @param textView   target for the banner text
    * @param bannerText with components to be extracted
-   * @since 0.8.0
+   * @since 0.9.0
    */
   public void loadInstruction(TextView textView, BannerText bannerText) {
+
+    checkIsInitialized();
 
     if (hasComponents(bannerText)) {
       StringBuilder instructionStringBuilder = new StringBuilder();
@@ -104,7 +143,21 @@ public class InstructionLoader {
   }
 
   private static boolean hasComponents(BannerText bannerText) {
-    return bannerText.components() != null && !bannerText.components().isEmpty();
+    return bannerText != null && bannerText.components() != null && !bannerText.components().isEmpty();
+  }
+
+  /**
+   * Takes a given {@link BannerText} and fetches a valid
+   * imageBaseUrl if one is found.
+   *
+   * @param bannerText to provide the base URL
+   */
+  private void fetchImageBaseUrls(BannerText bannerText) {
+    for (BannerComponents components : bannerText.components()) {
+      if (hasBaseUrl(components)) {
+        picassoImageLoader.load(urlDensityMap.get(components.imageBaseUrl())).fetch();
+      }
+    }
   }
 
   private static boolean hasBaseUrl(BannerComponents components) {
@@ -125,8 +178,8 @@ public class InstructionLoader {
                              List<BannerShieldInfo> shields) {
     Spannable instructionSpannable = new SpannableString(instructionStringBuilder);
     for (final BannerShieldInfo shield : shields) {
-        targets.add(new InstructionTarget(textView, instructionSpannable, shields, shield,
-          new InstructionTarget.InstructionLoadedCallback() {
+      targets.add(new InstructionTarget(textView, instructionSpannable, shields, shield,
+        new InstructionTarget.InstructionLoadedCallback() {
           @Override
           public void onInstructionLoaded(InstructionTarget target) {
             targets.remove(target);
@@ -139,6 +192,12 @@ public class InstructionLoader {
     for (InstructionTarget target : new ArrayList<>(targets)) {
       picassoImageLoader.load(target.getShield().getUrl())
         .into(target);
+    }
+  }
+
+  private void checkIsInitialized() {
+    if (!isInitialized) {
+      throw new RuntimeException("InstructionLoader must be initialized prior to loading image URLs");
     }
   }
 }
