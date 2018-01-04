@@ -16,19 +16,22 @@ import java.util.List;
 
 import timber.log.Timber;
 
-public class InstructionTextTarget implements Target {
+public class InstructionTarget implements Target {
 
   private TextView textView;
   private Spannable instructionSpannable;
   private List<BannerShieldInfo> shields;
   private BannerShieldInfo shield;
+  private InstructionLoadedCallback instructionLoadedCallback;
 
-  InstructionTextTarget(TextView textView, Spannable instructionSpannable,
-                               List<BannerShieldInfo> shields, BannerShieldInfo shield) {
+  InstructionTarget(TextView textView, Spannable instructionSpannable,
+                    List<BannerShieldInfo> shields, BannerShieldInfo shield,
+                    InstructionLoadedCallback instructionLoadedCallback) {
     this.textView = textView;
     this.instructionSpannable = instructionSpannable;
     this.shields = shields;
     this.shield = shield;
+    this.instructionLoadedCallback = instructionLoadedCallback;
   }
 
   BannerShieldInfo getShield() {
@@ -51,18 +54,30 @@ public class InstructionTextTarget implements Target {
       CharSequence truncatedSequence = truncateImageSpan(instructionSpannable, textView);
       textView.setText(truncatedSequence);
     }
+    sendInstructionLoadedCallback();
   }
 
   @Override
   public void onBitmapFailed(Drawable errorDrawable) {
     // Set the backup text
     textView.setText(shield.getText());
+    sendInstructionLoadedCallback();
     Timber.e("Shield bitmap failed to load.");
   }
 
   @Override
   public void onPrepareLoad(Drawable placeHolderDrawable) {
 
+  }
+
+  interface InstructionLoadedCallback {
+    void onInstructionLoaded(InstructionTarget target);
+  }
+
+  private void sendInstructionLoadedCallback() {
+    if (instructionLoadedCallback != null) {
+      instructionLoadedCallback.onInstructionLoaded(this);
+    }
   }
 
   private static CharSequence truncateImageSpan(Spannable instructionSpannable, TextView textView) {

@@ -14,6 +14,8 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
+
 /**
  * Utility class that can be used to load a given {@link BannerText} into the provided
  * {@link TextView}.
@@ -29,7 +31,7 @@ public class InstructionLoader {
   private static InstructionLoader instance;
   private boolean isInitialized;
   private Picasso picassoImageLoader;
-  private List<InstructionTextTarget> targets;
+  private List<InstructionTarget> targets;
   private static final String IMAGE_SPACE_PLACEHOLDER = "  ";
   private static final String SINGLE_SPACE = " ";
 
@@ -123,12 +125,18 @@ public class InstructionLoader {
                              List<BannerShieldInfo> shields) {
     Spannable instructionSpannable = new SpannableString(instructionStringBuilder);
     for (final BannerShieldInfo shield : shields) {
-        targets.add(new InstructionTextTarget(textView, instructionSpannable, shields, shield));
+        targets.add(new InstructionTarget(textView, instructionSpannable, shields, shield,
+          new InstructionTarget.InstructionLoadedCallback() {
+          @Override
+          public void onInstructionLoaded(InstructionTarget target) {
+            targets.remove(target);
+          }
+        }));
     }
   }
 
   private void loadTargets() {
-    for (InstructionTextTarget target : targets) {
+    for (InstructionTarget target : new ArrayList<>(targets)) {
       picassoImageLoader.load(target.getShield().getUrl())
         .into(target);
     }
