@@ -56,6 +56,9 @@ public abstract class NavigationViewOptions {
   @Nullable
   public abstract MilestoneEventListener milestoneEventListener();
 
+  @Nullable
+  public abstract String baseUrl();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -86,6 +89,8 @@ public abstract class NavigationViewOptions {
     public abstract Builder progressChangeListener(ProgressChangeListener progressChangeListener);
 
     public abstract Builder milestoneEventListener(MilestoneEventListener milestoneEventListener);
+
+    public abstract Builder baseUrl(String baseUrl);
 
     public abstract NavigationViewOptions build();
   }

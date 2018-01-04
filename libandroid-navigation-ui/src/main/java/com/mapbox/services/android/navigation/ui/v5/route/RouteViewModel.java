@@ -32,6 +32,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private boolean extractRouteOptions = true;
   private String routeProfile;
   private String unitType;
+  private String baseUrl;
 
   public RouteViewModel(@NonNull Application application) {
     super(application);
@@ -128,6 +129,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
       NavigationRoute.builder()
         .accessToken(Mapbox.getAccessToken())
         .origin(origin, bearing, 90d)
+        .baseUrl(baseUrl)
         .voiceUnits(unitType)
         .profile(routeProfile)
         .destination(destination).build().getRoute(this);
@@ -167,6 +169,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
       destination.setValue(lastStep.maneuver().location());
       this.route.setValue(route);
       extractRouteOptions = false;
+      baseUrl = options.baseUrl();
     }
   }
 
