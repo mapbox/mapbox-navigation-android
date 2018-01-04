@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.testapp;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -24,6 +25,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements PermissionsListener {
+
+  private static final String[] PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION,
+    Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_NETWORK_STATE};
 
   private RecyclerView recyclerView;
   private PermissionsManager permissionsManager;
@@ -72,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     permissionsManager = new PermissionsManager(this);
     if (!PermissionsManager.areLocationPermissionsGranted(this)) {
       recyclerView.setEnabled(false);
-      permissionsManager.requestLocationPermissions(this);
+      permissionsManager.requestPermissions(this, PERMISSIONS);
     }
   }
 
