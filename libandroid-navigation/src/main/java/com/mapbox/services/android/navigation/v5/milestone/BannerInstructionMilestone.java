@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
 import com.mapbox.api.directions.v5.models.BannerInstructions;
-import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -10,8 +9,7 @@ import java.util.List;
 
 public class BannerInstructionMilestone extends Milestone {
 
-  private BannerText primaryInstruction;
-  private BannerText secondaryInstruction;
+  private BannerInstructions instructions;
   private DirectionsRoute currentRoute;
   private LegStep currentStep;
   private List<BannerInstructions> stepBannerInstructions;
@@ -30,7 +28,7 @@ public class BannerInstructionMilestone extends Milestone {
     }
     for (BannerInstructions instructions : stepBannerInstructions) {
       if (shouldBeShown(routeProgress, instructions)) {
-        buildInstructions(instructions);
+        this.instructions = instructions;
         stepBannerInstructions.remove(instructions);
         return true;
       }
@@ -38,21 +36,8 @@ public class BannerInstructionMilestone extends Milestone {
     return false;
   }
 
-  public BannerText getPrimaryInstruction() {
-    return primaryInstruction;
-  }
-
-  public BannerText getSecondaryInstruction() {
-    return secondaryInstruction;
-  }
-
-  private void buildInstructions(BannerInstructions instructions) {
-    if (instructions.primary() != null) {
-      primaryInstruction = instructions.primary();
-    }
-    if (instructions.secondary() != null) {
-      secondaryInstruction = instructions.secondary();
-    }
+  public BannerInstructions getBannerInstructions() {
+    return instructions;
   }
 
   /**

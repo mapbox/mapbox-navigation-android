@@ -13,8 +13,8 @@ public class CenteredImageSpan extends ImageSpan {
 
   private WeakReference<Drawable> drawableWeakReference;
 
-  public CenteredImageSpan(Drawable drawable, final int verticalAlignment) {
-    super(drawable, verticalAlignment);
+  public CenteredImageSpan(Drawable drawable) {
+    super(drawable, ALIGN_BASELINE);
   }
 
   @Override

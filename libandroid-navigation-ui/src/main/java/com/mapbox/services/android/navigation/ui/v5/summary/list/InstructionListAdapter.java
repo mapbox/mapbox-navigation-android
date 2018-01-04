@@ -12,7 +12,6 @@ import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionLoader;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -90,14 +89,14 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   }
 
   private void updatePrimaryText(InstructionViewHolder holder, BannerText primaryText) {
-    InstructionLoader.loadInstruction(holder.stepPrimaryText, primaryText);
+    holder.stepPrimaryText.setText(primaryText.text());
   }
 
   private void updateSecondaryText(InstructionViewHolder holder, BannerText secondaryText) {
     if (secondaryText != null) {
       holder.stepPrimaryText.setMaxLines(1);
       holder.stepSecondaryText.setVisibility(View.VISIBLE);
-      InstructionLoader.loadInstruction(holder.stepSecondaryText, secondaryText);
+      holder.stepSecondaryText.setText(secondaryText.text());
       adjustBannerTextVerticalBias(holder, 0.65f);
     } else {
       holder.stepPrimaryText.setMaxLines(2);

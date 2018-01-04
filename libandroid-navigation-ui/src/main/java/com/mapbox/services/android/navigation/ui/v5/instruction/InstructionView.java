@@ -156,12 +156,19 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         if (model != null) {
           updateManeuverView(model);
           updateDistanceText(model);
-          updateTextInstruction(model);
           updateInstructionList(model);
           if (newStep(model.getProgress())) {
             updateTurnLanes(model);
             updateThenStep(model);
           }
+        }
+      }
+    });
+    navigationViewModel.bannerInstructionModel.observe((LifecycleOwner) getContext(), new Observer<BannerInstructionModel>() {
+      @Override
+      public void onChanged(@Nullable BannerInstructionModel bannerInstructionModel) {
+        if (bannerInstructionModel != null) {
+          updateTextInstruction(bannerInstructionModel);
         }
       }
     });
@@ -637,7 +644,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void updateTextInstruction(InstructionModel model) {
     if (model.getPrimaryBannerText() != null) {
-      InstructionLoader.loadInstruction(upcomingPrimaryText, model.getPrimaryBannerText());
+      InstructionLoader.getInstance().loadInstruction(upcomingPrimaryText, model.getPrimaryBannerText());
     }
     if (model.getSecondaryBannerText() != null) {
       if (upcomingSecondaryText.getVisibility() == GONE) {
@@ -645,7 +652,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         upcomingPrimaryText.setMaxLines(1);
         adjustBannerTextVerticalBias(0.65f);
       }
-      InstructionLoader.loadInstruction(upcomingSecondaryText, model.getSecondaryBannerText());
+      InstructionLoader.getInstance().loadInstruction(upcomingSecondaryText, model.getSecondaryBannerText());
     } else {
       upcomingPrimaryText.setMaxLines(2);
       upcomingSecondaryText.setVisibility(GONE);
@@ -717,7 +724,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     if (shouldShowThenStep(model)) {
       thenManeuverView.setManeuverType(model.getStepResources().getThenStepManeuverType());
       thenManeuverView.setManeuverModifier(model.getStepResources().getThenStepManeuverModifier());
-      InstructionLoader.loadInstruction(thenStepText, model.getThenBannerText());
+      thenStepText.setText(model.getThenBannerText().text());
       showThenStepLayout();
     } else {
       hideThenStepLayout();
