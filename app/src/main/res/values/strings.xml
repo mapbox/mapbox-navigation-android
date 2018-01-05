@@ -13,4 +13,7 @@
 
     <string name="title_navigation_view_ui">Navigation Views</string>
     <string name="description_navigation_view_ui">Drop-in UI experience</string>
+
+    <string name="title_waypoint_navigation">Waypoint Navigation</string>
+    <string name="description_waypoint_navigation">Navigation with waypoints between destinations</string>
 </resources>
