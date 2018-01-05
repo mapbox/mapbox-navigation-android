@@ -125,7 +125,7 @@ public class InstructionLoader {
         if (hasBaseUrl(components)) {
           addShieldInfo(textView, instructionStringBuilder, shieldUrls, components);
         } else {
-          String text = bannerText.text();
+          String text = components.text();
           boolean emptyText = TextUtils.isEmpty(instructionStringBuilder.toString());
           String instructionText = emptyText ? text : SINGLE_SPACE.concat(text);
           instructionStringBuilder.append(instructionText);

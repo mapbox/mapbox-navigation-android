@@ -79,7 +79,7 @@ public class InstructionModel {
 
   private BannerText retrieveThenInstructionText(RouteProgress progress) {
     if (progress.currentLegProgress().followOnStep() != null) {
-      List<BannerInstructions> bannerInstructions = progress.currentLegProgress().followOnStep().bannerInstructions();
+      List<BannerInstructions> bannerInstructions = progress.currentLegProgress().upComingStep().bannerInstructions();
       if (hasInstructions(bannerInstructions)) {
         return bannerInstructions.get(0).primary();
       } else {
