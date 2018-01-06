@@ -60,6 +60,12 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   }
 
   @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    navigationView.onDestroy();
+  }
+
+  @Override
   public void onNavigationReady() {
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
     options.navigationListener(this);
