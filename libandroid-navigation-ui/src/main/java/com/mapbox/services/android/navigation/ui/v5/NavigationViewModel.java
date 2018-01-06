@@ -9,6 +9,8 @@ import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
@@ -50,6 +52,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
 
   private MapboxNavigation navigation;
   private NavigationInstructionPlayer instructionPlayer;
+  private ConnectivityManager connectivityManager;
   private SharedPreferences preferences;
   private DecimalFormat decimalFormat;
   private int unitType;
@@ -60,6 +63,7 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
     super(application);
     preferences = PreferenceManager.getDefaultSharedPreferences(application);
     initVoiceInstructions(application);
+    initConnectivityManager(application);
     initDecimalFormat();
   }
 
@@ -99,9 +103,11 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
    */
   @Override
   public void userOffRoute(Location location) {
-    Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    this.newOrigin.setValue(newOrigin);
-    isOffRoute.setValue(true);
+    if (hasNetworkConnection()) {
+      Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+      this.newOrigin.setValue(newOrigin);
+      isOffRoute.setValue(true);
+    }
   }
 
   /**
@@ -236,6 +242,13 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
   }
 
   /**
+   * Initializes the {@link ConnectivityManager}.
+   */
+  private void initConnectivityManager(Application application) {
+    connectivityManager = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
+  }
+
+  /**
    * Initializes decimal format to be used to populate views with
    * distance remaining.
    */
@@ -285,5 +298,20 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
     if (instructionPlayer != null) {
       instructionPlayer.onDestroy();
     }
+  }
+
+  /**
+   * Checks for active network connection.
+   *
+   * @return true if connected, false otherwise
+   */
+  @SuppressWarnings( {"MissingPermission"})
+  private boolean hasNetworkConnection() {
+    if (connectivityManager == null) {
+      return false;
+    }
+
+    NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+    return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
   }
 }
