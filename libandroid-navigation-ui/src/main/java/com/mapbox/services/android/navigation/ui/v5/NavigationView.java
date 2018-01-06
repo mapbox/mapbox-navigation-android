@@ -196,7 +196,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
         initLifecycleObservers();
         initNavigationPresenter();
         initClickListeners();
-        map.setOnScrollListener(NavigationView.this);
+        map.addOnScrollListener(NavigationView.this);
         onNavigationReadyCallback.onNavigationReady();
       }
     });
