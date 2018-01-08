@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
@@ -161,6 +162,19 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     resetBottomSheetState(bottomSheetState);
   }
 
+
+  /**
+   * Called to ensure the {@link MapView} is destroyed
+   * properly.
+   * <p>
+   * In an {@link Activity} this should be in {@link Activity#onDestroy()}.
+   * <p>
+   * In a {@link android.app.Fragment}, this should be in {@link Fragment#onDestroyView()}.
+   */
+  public void onDestroy() {
+    mapView.onDestroy();
+  }
+
   /**
    * Fired after the map is ready, this is our cue to finish
    * setting up the rest of the plugins / location engine.
@@ -182,7 +196,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
         initLifecycleObservers();
         initNavigationPresenter();
         initClickListeners();
-        map.setOnScrollListener(NavigationView.this);
+        map.addOnScrollListener(NavigationView.this);
         onNavigationReadyCallback.onNavigationReady();
       }
     });
@@ -401,7 +415,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * route.
    */
   private void initRoute() {
-    int routeStyleRes = ThemeSwitcher.retrieveNavigationViewRouteStyle(getContext());
+    int routeStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(getContext(), R.attr.navigationViewRouteStyle);
     mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes);
   }
 
@@ -436,7 +450,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   @SuppressWarnings( {"MissingPermission"})
   private void initLocationLayer() {
-    locationLayer = new LocationLayerPlugin(mapView, map, null);
+    int locationLayerStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(getContext(),
+      R.attr.navigationViewLocationLayerStyle);
+    locationLayer = new LocationLayerPlugin(mapView, map, null, locationLayerStyleRes);
     locationLayer.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
   }
 
@@ -476,6 +492,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   /**
    * Sets up the listeners in the dispatcher, as well as the listeners in the {@link MapboxNavigation}
+   *
    * @param navigationViewOptions that contains all listeners to attach
    */
   private void setupListeners(NavigationViewOptions navigationViewOptions) {
@@ -556,10 +573,5 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
   public void onStop() {
     mapView.onStop();
-  }
-
-  @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-  public void onDestroy() {
-    mapView.onDestroy();
   }
 }
