@@ -57,25 +57,25 @@ class InstructionStepResources {
   private void extractStepResources(RouteProgress progress) {
     LegStep currentStep = progress.currentLegProgress().currentStep();
     LegStep upcomingStep = progress.currentLegProgress().upComingStep();
-    LegStep thenStep = progress.currentLegProgress().followOnStep();
+    LegStep followOnStep = progress.currentLegProgress().followOnStep();
 
     // Type / Modifier / Text
     if (upcomingStep != null) {
       maneuverViewType = upcomingStep.maneuver().type();
       maneuverViewModifier = upcomingStep.maneuver().modifier();
+
+      // Then step (step after upcoming)
+      if (followOnStep != null) {
+        thenStep(upcomingStep, followOnStep);
+      }
+
+      // Turn lane data
+      if (hasIntersections(upcomingStep)) {
+        intersectionTurnLanes(upcomingStep);
+      }
     } else {
       maneuverViewType = currentStep.maneuver().type();
       maneuverViewModifier = currentStep.maneuver().modifier();
-    }
-
-    // Then step (step after upcoming)
-    if (thenStep != null) {
-      thenStep(upcomingStep, thenStep);
-    }
-
-    // Turn lane data
-    if (upcomingStep != null && hasIntersections(upcomingStep)) {
-      intersectionTurnLanes(upcomingStep);
     }
   }
 
@@ -94,9 +94,9 @@ class InstructionStepResources {
     turnLanes = lanes;
   }
 
-  private void thenStep(LegStep upcomingStep, LegStep thenStep) {
-    thenStepManeuverType = thenStep.maneuver().type();
-    thenStepManeuverModifier = thenStep.maneuver().modifier();
+  private void thenStep(LegStep upcomingStep, LegStep followOnStep) {
+    thenStepManeuverType = followOnStep.maneuver().type();
+    thenStepManeuverModifier = followOnStep.maneuver().modifier();
     // Should show then step if the upcoming step is less than 25 seconds
     shouldShowThenStep = upcomingStep.duration() <= (25d * 1.2d);
   }
