@@ -165,17 +165,43 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
     }
   }
 
+  /**
+   * Looks at the given {@link DirectionsRoute} and extracts the destination based on
+   * the last {@link LegStep} maneuver.
+   *
+   * @param route to extract destination from
+   */
   private void cacheRouteDestination(DirectionsRoute route) {
     RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
     LegStep lastStep = lastLeg.steps().get(lastLeg.steps().size() - 1);
     destination.setValue(lastStep.maneuver().location());
   }
 
+  /**
+   * Looks for a route profile provided by {@link NavigationViewOptions} to be
+   * stored for reroute requests.
+   * <p>
+   * If not found, look at the {@link com.mapbox.api.directions.v5.models.RouteOptions} for
+   * the profile from the original route.
+   *
+   * @param options to look for set profile
+   * @param route   as backup if view options profile not found
+   */
   private void cacheRouteProfile(NavigationViewOptions options, DirectionsRoute route) {
     String profile = options.directionsProfile();
     routeProfile = profile != null ? profile : route.routeOptions().profile();
   }
 
+  /**
+   * Looks for a route language provided by {@link NavigationViewOptions} to be
+   * stored for reroute requests.
+   * <p>
+   * If not found, look at the {@link com.mapbox.api.directions.v5.models.RouteOptions} for
+   * the language from the original route.
+   *
+   * @param options to look for set language
+   * @param route   as backup if view options language not found
+   */
   private void cacheRouteLanguage(NavigationViewOptions options, DirectionsRoute route) {
     Locale language = options.directionsLanguage();
     this.language = language != null ? language : new Locale(route.routeOptions().language());
