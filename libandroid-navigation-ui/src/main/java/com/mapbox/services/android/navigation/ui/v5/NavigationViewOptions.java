@@ -13,6 +13,8 @@ import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListene
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 
+import java.util.Locale;
+
 @AutoValue
 public abstract class NavigationViewOptions {
 
@@ -23,7 +25,7 @@ public abstract class NavigationViewOptions {
   public abstract String directionsProfile();
 
   @Nullable
-  public abstract String directionsLanguage();
+  public abstract Locale directionsLanguage();
 
   @Nullable
   public abstract Point origin();
@@ -66,7 +68,7 @@ public abstract class NavigationViewOptions {
 
     public abstract Builder directionsProfile(@DirectionsCriteria.ProfileCriteria String directionsProfile);
 
-    public abstract Builder directionsLanguage(String directionsLanguage);
+    public abstract Builder directionsLanguage(Locale directionsLanguage);
 
     public abstract Builder origin(Point origin);
 

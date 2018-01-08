@@ -18,6 +18,8 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 
+import java.util.Locale;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -31,7 +33,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private Location rawLocation;
   private String routeProfile;
   private String unitType;
-  private String language;
+  private Locale language;
 
   public RouteViewModel(@NonNull Application application) {
     super(application);
@@ -128,6 +130,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
         .origin(origin, bearing, 90d)
         .voiceUnits(unitType)
         .profile(routeProfile)
+        .language(language)
         .destination(destination).build().getRoute(this);
     }
   }
@@ -174,8 +177,8 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   }
 
   private void cacheRouteLanguage(NavigationViewOptions options, DirectionsRoute route) {
-    String language = options.directionsLanguage();
-    this.language = language != null ? language : route.routeOptions().language();
+    Locale language = options.directionsLanguage();
+    this.language = language != null ? language : new Locale(route.routeOptions().language());
   }
 
   /**
