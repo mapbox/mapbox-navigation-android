@@ -121,8 +121,14 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   }
 
   private void updateManeuverView(InstructionViewHolder holder, LegStep step) {
-    holder.maneuverView.setManeuverModifier(step.maneuver().modifier());
-    holder.maneuverView.setManeuverType(step.maneuver().type());
+    LegStep maneuverStep = step;
+    // Get the upcoming LegStep for the ManeuverView if there is one
+    int upcomingStepIndex = stepList.indexOf(step) + 1;
+    if (upcomingStepIndex < stepList.size()) {
+      maneuverStep = stepList.get(upcomingStepIndex);
+    }
+    holder.maneuverView.setManeuverModifier(maneuverStep.maneuver().modifier());
+    holder.maneuverView.setManeuverType(maneuverStep.maneuver().type());
   }
 
   private void addLegSteps(RouteProgress routeProgress) {
@@ -137,7 +143,6 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   private void updateStepList(RouteProgress routeProgress) {
     if (newStep(routeProgress)) {
       removeCurrentStep();
-      removeCurrentUpcomingStep();
     }
   }
 
@@ -146,14 +151,6 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     if (currentStepPosition >= 0) {
       stepList.remove(currentStepPosition);
       notifyItemRemoved(currentStepPosition);
-    }
-  }
-
-  private void removeCurrentUpcomingStep() {
-    int currentUpcomingStepPosition = stepList.indexOf(currentUpcomingStep);
-    if (currentUpcomingStepPosition >= 0) {
-      stepList.remove(currentUpcomingStepPosition);
-      notifyItemRemoved(currentUpcomingStepPosition);
     }
   }
 
