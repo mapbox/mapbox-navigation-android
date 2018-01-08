@@ -56,8 +56,8 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         NavigationMapRouteActivity.class
       ),
       new SampleItem(
-        getString(R.string.title_navigation_route_ui),
-        getString(R.string.description_navigation_route_ui),
+        getString(R.string.title_waypoint_navigation),
+        getString(R.string.description_waypoint_navigation),
         WaypointNavigationActivity.class
       )
     ));
