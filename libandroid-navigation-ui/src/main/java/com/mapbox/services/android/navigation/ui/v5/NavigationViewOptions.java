@@ -23,6 +23,9 @@ public abstract class NavigationViewOptions {
   public abstract String directionsProfile();
 
   @Nullable
+  public abstract String directionsLanguage();
+
+  @Nullable
   public abstract Point origin();
 
   @Nullable
@@ -62,6 +65,8 @@ public abstract class NavigationViewOptions {
     public abstract Builder directionsRoute(DirectionsRoute directionsRoute);
 
     public abstract Builder directionsProfile(@DirectionsCriteria.ProfileCriteria String directionsProfile);
+
+    public abstract Builder directionsLanguage(String directionsLanguage);
 
     public abstract Builder origin(Point origin);
 

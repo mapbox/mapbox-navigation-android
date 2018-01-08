@@ -31,6 +31,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private Location rawLocation;
   private String routeProfile;
   private String unitType;
+  private String language;
 
   public RouteViewModel(@NonNull Application application) {
     super(application);
@@ -154,13 +155,27 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private void extractRouteFromOptions(NavigationViewOptions options) {
     DirectionsRoute route = options.directionsRoute();
     if (route != null) {
-      String profile = options.directionsProfile();
-      routeProfile = profile != null ? profile : route.routeOptions().profile();
-      RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
-      LegStep lastStep = lastLeg.steps().get(lastLeg.steps().size() - 1);
-      destination.setValue(lastStep.maneuver().location());
+      cacheRouteProfile(options, route);
+      cacheRouteLanguage(options, route);
+      cacheRouteDestination(route);
       this.route.setValue(route);
     }
+  }
+
+  private void cacheRouteDestination(DirectionsRoute route) {
+    RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
+    LegStep lastStep = lastLeg.steps().get(lastLeg.steps().size() - 1);
+    destination.setValue(lastStep.maneuver().location());
+  }
+
+  private void cacheRouteProfile(NavigationViewOptions options, DirectionsRoute route) {
+    String profile = options.directionsProfile();
+    routeProfile = profile != null ? profile : route.routeOptions().profile();
+  }
+
+  private void cacheRouteLanguage(NavigationViewOptions options, DirectionsRoute route) {
+    String language = options.directionsLanguage();
+    this.language = language != null ? language : route.routeOptions().language();
   }
 
   /**
