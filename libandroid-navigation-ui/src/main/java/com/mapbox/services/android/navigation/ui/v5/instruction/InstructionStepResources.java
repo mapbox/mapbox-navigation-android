@@ -66,7 +66,7 @@ class InstructionStepResources {
 
       // Then step (step after upcoming)
       if (followOnStep != null) {
-        thenStep(upcomingStep, followOnStep);
+        thenStep(upcomingStep, followOnStep, progress.currentLegProgress().currentStepProgress().durationRemaining());
       }
 
       // Turn lane data
@@ -94,11 +94,11 @@ class InstructionStepResources {
     turnLanes = lanes;
   }
 
-  private void thenStep(LegStep upcomingStep, LegStep followOnStep) {
+  private void thenStep(LegStep upcomingStep, LegStep followOnStep, double currentDurationRemaining) {
     thenStepManeuverType = followOnStep.maneuver().type();
     thenStepManeuverModifier = followOnStep.maneuver().modifier();
     // Should show then step if the upcoming step is less than 25 seconds
-    shouldShowThenStep = upcomingStep.duration() <= (25d * 1.2d);
+    shouldShowThenStep = upcomingStep.duration() <= (25d * 1.2d) && currentDurationRemaining <= (70d * 1.2d);
   }
 
   private boolean checkForNoneIndications(List<IntersectionLanes> lanes) {
