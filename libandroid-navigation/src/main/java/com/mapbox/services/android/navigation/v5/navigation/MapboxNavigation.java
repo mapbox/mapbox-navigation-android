@@ -18,6 +18,7 @@ import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEven
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
+import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
@@ -53,6 +54,7 @@ public class MapboxNavigation implements ServiceConnection {
   private List<Milestone> milestones;
   private final String accessToken;
   private OffRoute offRouteEngine;
+  private FasterRoute fasterRouteEngine;
   private Snap snapEngine;
   private Context context;
   private boolean isBound;
@@ -143,7 +145,6 @@ public class MapboxNavigation implements ServiceConnection {
       addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
       addMilestone(new BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build());
     }
-
     if (options.snapToRoute()) {
       snapEngine = new SnapToRoute();
     }
@@ -612,6 +613,38 @@ public class MapboxNavigation implements ServiceConnection {
   @NonNull
   public OffRoute getOffRouteEngine() {
     return offRouteEngine;
+  }
+
+  /**
+   * This API is used to pass in a custom implementation of the faster-route detection logic, A default
+   * faster-route detection engine is attached when this class is first initialized; setting a custom
+   * one will replace it with your own implementation.
+   * <p>
+   * The engine can be changed at anytime, even during a navigation session.
+   * </p>
+   *
+   * @param fasterRouteEngine a custom implementation of the {@link FasterRoute} class
+   * @see FasterRoute
+   * @since 0.9.0
+   */
+  @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  public void setFasterRouteEngine(@NonNull FasterRoute fasterRouteEngine) {
+    this.fasterRouteEngine = fasterRouteEngine;
+  }
+
+  /**
+   * This will return the currently set faster-route engine which will or is being used during the
+   * navigation session. If no faster-route engine has been set yet, the default engine will be
+   * returned.
+   *
+   * @return the faster-route engine currently set and will/is being used for the navigation session
+   * @see FasterRoute
+   * @since 0.9.0
+   */
+  @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  @NonNull
+  public FasterRoute getFasterRouteEngine() {
+    return fasterRouteEngine;
   }
 
   /**

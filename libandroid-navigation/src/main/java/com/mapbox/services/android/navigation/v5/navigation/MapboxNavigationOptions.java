@@ -31,6 +31,8 @@ public abstract class MapboxNavigationOptions {
 
   public abstract boolean enableOffRouteDetection();
 
+  public abstract boolean enableFasterRouteDetection();
+
   public abstract boolean manuallyEndNavigationUponCompletion();
 
   public abstract boolean enableNotification();
@@ -73,6 +75,8 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder enableOffRouteDetection(boolean enableOffRouteDetection);
 
+    public abstract Builder enableFasterRouteDetection(boolean enableFasterRouteDetection);
+
     public abstract Builder manuallyEndNavigationUponCompletion(boolean manuallyEndNavigation);
 
     public abstract Builder enableNotification(boolean enableNotification);
@@ -102,6 +106,7 @@ public abstract class MapboxNavigationOptions {
       .userLocationSnapDistance(NavigationConstants.USER_LOCATION_SNAPPING_DISTANCE)
       .secondsBeforeReroute(NavigationConstants.SECONDS_BEFORE_REROUTE)
       .enableOffRouteDetection(true)
+      .enableFasterRouteDetection(false)
       .snapToRoute(true)
       .manuallyEndNavigationUponCompletion(false)
       .defaultMilestonesEnabled(true)

@@ -10,6 +10,7 @@ import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
+import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
@@ -183,6 +184,11 @@ class NavigationHelper {
     return offRoute.isUserOffRoute(newLocationModel.location(), routeProgress,
       newLocationModel.mapboxNavigation().options(),
       newLocationModel.recentDistancesFromManeuverInMeters());
+  }
+
+  static boolean shouldCheckFasterRoute(NewLocationModel newLocationModel) {
+    FasterRoute fasterRoute = newLocationModel.mapboxNavigation().getFasterRouteEngine();
+    return fasterRoute.shouldCheckFasterRoute(newLocationModel.location());
   }
 
   static Location getSnappedLocation(MapboxNavigation mapboxNavigation, Location location,

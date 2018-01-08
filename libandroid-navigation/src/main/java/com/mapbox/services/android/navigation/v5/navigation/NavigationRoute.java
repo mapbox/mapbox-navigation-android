@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.DirectionsCriteria.AnnotationCriteria;
@@ -12,6 +13,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria.VoiceUnitCriteria;
 import com.mapbox.api.directions.v5.MapboxDirections;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.core.exceptions.ServicesException;
 import com.mapbox.geojson.Point;
 
@@ -417,6 +419,43 @@ public final class NavigationRoute {
      */
     public Builder baseUrl(String baseUrl) {
       directionsBuilder.baseUrl(baseUrl);
+      return this;
+    }
+
+    /**
+     * Optionally create a {@link Builder} based on all variables
+     * from given {@link RouteOptions}.
+     *
+     * @param options containing all variables for request
+     * @return this builder for chaining options together
+     * @since 0.9.0
+     */
+    public Builder routeOptions(RouteOptions options) {
+      directionsBuilder.language(new Locale(options.language()));
+      directionsBuilder.alternatives(options.alternatives());
+
+      if (!TextUtils.isEmpty(options.profile())) {
+        directionsBuilder.profile(options.profile());
+      }
+
+      if (options.bannerInstructions() != null) {
+        directionsBuilder.bannerInstructions(options.bannerInstructions());
+      }
+
+      if (options.continueStraight() != null) {
+        directionsBuilder.continueStraight(options.continueStraight());
+      }
+
+      if (options.alternatives() != null) {
+        directionsBuilder.alternatives(options.alternatives());
+      }
+
+      if (!TextUtils.isEmpty(options.voiceUnits())) {
+        directionsBuilder.voiceUnits(options.voiceUnits());
+      }
+
+      // TODO add missing options here
+
       return this;
     }
 

@@ -23,6 +23,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.isUserOffRoute;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.legDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.routeDistanceRemaining;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.shouldCheckFasterRoute;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.stepDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.userSnappedToRoutePosition;
 import static com.mapbox.core.constants.Constants.PRECISION_6;
@@ -67,13 +68,22 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     final RouteProgress routeProgress = generateNewRouteProgress(
       newLocationModel.mapboxNavigation(), newLocationModel.location(),
       newLocationModel.recentDistancesFromManeuverInMeters());
+
+    // Check milestone list to see if any should be triggered
     final List<Milestone> milestones = checkMilestones(
       previousRouteProgress, routeProgress, newLocationModel.mapboxNavigation());
+
+    // Check if user has gone off-route
     final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress);
+
+    // Create snapped location
     final Location location = !userOffRoute && newLocationModel.mapboxNavigation().options().snapToRoute()
       ? getSnappedLocation(newLocationModel.mapboxNavigation(), newLocationModel.location(),
       routeProgress, stepPositions)
       : newLocationModel.location();
+
+    // Check for faster route only if not off-route
+    final boolean checkFasterRoute = !userOffRoute && shouldCheckFasterRoute(newLocationModel);
 
     previousRouteProgress = routeProgress;
 
@@ -83,6 +93,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
         callback.onNewRouteProgress(location, routeProgress);
         callback.onMilestoneTrigger(milestones, routeProgress);
         callback.onUserOffRoute(location, userOffRoute);
+        callback.onCheckFasterRoute(location, checkFasterRoute);
       }
     });
   }
@@ -161,5 +172,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     void onMilestoneTrigger(List<Milestone> triggeredMilestones, RouteProgress routeProgress);
 
     void onUserOffRoute(Location location, boolean userOffRoute);
+
+    void onCheckFasterRoute(Location location, boolean checkFasterRoute);
   }
 }
