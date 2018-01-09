@@ -160,6 +160,14 @@ public final class NavigationConstants {
    */
   public static final int NAVIGATION_CHECK_FASTER_ROUTE_INTERVAL = 120;
 
+  /**
+   * 70 seconds remaining is considered a medium alert level when
+   * navigating along a {@link com.mapbox.api.directions.v5.models.LegStep}.
+   *
+   * @since 0.9.0
+   */
+  public static final int NAVIGATION_MEDIUM_ALERT_DURATION = 70;
+
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat";
   public static final String NAVIGATION_VIEW_ORIGIN_LNG_KEY = "origin_long";

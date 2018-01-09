@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -22,6 +23,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 
 import java.util.List;
 
+import retrofit2.Response;
 import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
@@ -139,19 +141,35 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
-  // TODO add javadoc
+
+  /**
+   * Callback from the {@link NavigationEngine} - if fired with checkFasterRoute set
+   * to true, a new {@link DirectionsRoute} should be fetched with {@link RouteEngine}.
+   *
+   * @param location to create a new origin
+   * @param routeProgress for various {@link com.mapbox.api.directions.v5.models.LegStep} data
+   * @param checkFasterRoute true if should check for faster route, false otherwise
+   */
   @Override
-  public void onCheckFasterRoute(Location location, boolean checkFasterRoute) {
+  public void onCheckFasterRoute(Location location, RouteProgress routeProgress, boolean checkFasterRoute) {
     if (checkFasterRoute) {
       Point origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-      routeEngine.fetchFasterRoute(origin, mapboxNavigation.getRoute().routeOptions());
+      routeEngine.fetchRoute(origin, routeProgress);
     }
   }
 
-  // TODO add javadoc
+  /**
+   * Callback from the {@link RouteEngine} - if fired, a new and valid
+   * {@link DirectionsRoute} has been successfully retrieved.
+   *
+   * @param response with the new route
+   * @param routeProgress holding necessary leg / step information
+   */
   @Override
-  public void onFasterRouteFound(DirectionsRoute route) {
-    mapboxNavigation.startNavigation(route);
+  public void onResponseReceived(Response<DirectionsResponse> response, RouteProgress routeProgress) {
+    if (mapboxNavigation.getFasterRouteEngine().isFasterRoute(response, routeProgress)) {
+      mapboxNavigation.getEventDispatcher().onFasterRouteEvent(response.body().routes().get(0));
+    }
   }
 
   /**

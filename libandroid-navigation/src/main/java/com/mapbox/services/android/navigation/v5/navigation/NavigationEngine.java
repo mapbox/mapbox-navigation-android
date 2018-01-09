@@ -16,6 +16,7 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
 
+import static com.mapbox.core.constants.Constants.PRECISION_6;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.bearingMatchesManeuverFinalHeading;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getSnappedLocation;
@@ -26,7 +27,6 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.shouldCheckFasterRoute;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.stepDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.userSnappedToRoutePosition;
-import static com.mapbox.core.constants.Constants.PRECISION_6;
 
 /**
  * This class extends handler thread to run most of the navigation calculations on a separate
@@ -93,7 +93,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
         callback.onNewRouteProgress(location, routeProgress);
         callback.onMilestoneTrigger(milestones, routeProgress);
         callback.onUserOffRoute(location, userOffRoute);
-        callback.onCheckFasterRoute(location, checkFasterRoute);
+        callback.onCheckFasterRoute(location, routeProgress, checkFasterRoute);
       }
     });
   }
@@ -173,6 +173,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
 
     void onUserOffRoute(Location location, boolean userOffRoute);
 
-    void onCheckFasterRoute(Location location, boolean checkFasterRoute);
+    void onCheckFasterRoute(Location location, RouteProgress routeProgress, boolean checkFasterRoute);
   }
 }

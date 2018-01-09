@@ -20,6 +20,7 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteDetector;
+import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
@@ -549,6 +550,44 @@ public class MapboxNavigation implements ServiceConnection {
    */
   public void removeNavigationEventListener(@Nullable NavigationEventListener navigationEventListener) {
     navigationEventDispatcher.removeNavigationEventListener(navigationEventListener);
+  }
+
+  /**
+   * This adds a new faster route listener which is invoked when a new, faster {@link DirectionsRoute}
+   * has been retrieved by the specified criteria in {@link FasterRoute}.
+   * <p>
+   * The behavior that causes this listeners callback to get invoked vary depending on whether a
+   * custom faster route engine has been set using {@link #setFasterRouteEngine(FasterRoute)}.
+   * </p><p>
+   * It is not possible to add the same listener implementation more then once and a warning will be
+   * printed in the log if attempted.
+   * </p>
+   *
+   * @param fasterRouteListener an implementation of {@code FasterRouteListener}
+   * @see FasterRouteListener
+   * @since 0.9.0
+   */
+  public void addFasterRouteListener(@NonNull FasterRouteListener fasterRouteListener) {
+    navigationEventDispatcher.addFasterRouteListener(fasterRouteListener);
+  }
+
+  /**
+   * This removes a specific faster route listener by passing in the instance of it or you can pass in
+   * null to remove all the listeners. When {@link #onDestroy()} is called, all listeners
+   * get removed automatically, removing the requirement for developers to manually handle this.
+   * <p>
+   * If the listener you are trying to remove does not exist in the list, a warning will be printed
+   * in the log.
+   * </p>
+   *
+   * @param fasterRouteListener an implementation of {@code FasterRouteListener} which currently exist in
+   *                            the fasterRouteListeners list
+   * @see FasterRouteListener
+   * @since 0.9.0
+   */
+  @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  public void removeFasterRouteListener(@Nullable FasterRouteListener fasterRouteListener) {
+    navigationEventDispatcher.removeFasterRouteListener(fasterRouteListener);
   }
 
   // Custom engines
