@@ -1,39 +1,44 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Serves as a launching point for the custom drop-in UI, {@link NavigationView}.
  * <p>
  * Demonstrates the proper setup and usage of the view, including all lifecycle methods.
  */
-public class WaypointNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener, ProgressChangeListener {
+public class WaypointNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
+  NavigationListener, ProgressChangeListener {
 
   private NavigationView navigationView;
   private boolean dropoffDialogShown;
+  private Location lastKnownLocation;
+
+  private List<Point> points = new ArrayList<>();
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_AppCompat_NoActionBar);
     super.onCreate(savedInstanceState);
+    points.add(Point.fromLngLat(-77.04012393951416, 38.9111117447887));
+    points.add(Point.fromLngLat(-77.03847169876099, 38.91113678979344));
+    points.add(Point.fromLngLat(-77.03848242759705, 38.91040213277608));
+    points.add(Point.fromLngLat(-77.03850388526917, 38.909650771013034));
+    points.add(Point.fromLngLat(-77.03651905059814, 38.90894949285854));
     setContentView(R.layout.activity_navigation);
     navigationView = findViewById(R.id.navigationView);
     navigationView.onCreate(savedInstanceState);
@@ -68,13 +73,19 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
 
   @Override
   public void onNavigationReady() {
+    navigationView.startNavigation(setupOptions(points.remove(0)));
+  }
+
+  private NavigationViewOptions setupOptions(Point origin) {
+    dropoffDialogShown = false;
+
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
     options.navigationListener(this);
     options.progressChangeListener(this);
-    extractRoute(options);
-    extractCoordinates(options);
-    extractConfiguration(options);
-    navigationView.startNavigation(options.build());
+    options.origin(origin);
+    options.destination(points.remove(0));
+    options.shouldSimulateRoute(true);
+    return options.build();
   }
 
   @Override
@@ -94,39 +105,13 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
     // Intentionally empty
   }
 
-  private void extractRoute(NavigationViewOptions.Builder options) {
-    options.directionsRoute(NavigationLauncher.extractRoute(this));
-  }
-
-  private void extractCoordinates(NavigationViewOptions.Builder options) {
-    HashMap<String, Point> coordinates = NavigationLauncher.extractCoordinates(this);
-    if (coordinates.size() > 0) {
-      options.origin(coordinates.get(NavigationConstants.NAVIGATION_VIEW_ORIGIN));
-      options.destination(coordinates.get(NavigationConstants.NAVIGATION_VIEW_DESTINATION));
-    }
-  }
-
-  private void extractConfiguration(NavigationViewOptions.Builder options) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-    options.awsPoolId(preferences
-      .getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
-    options.shouldSimulateRoute(preferences
-      .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
-
-    MapboxNavigationOptions navigationOptions = MapboxNavigationOptions.builder()
-      .unitType(preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE,
-        NavigationUnitType.TYPE_IMPERIAL))
-      .build();
-    options.navigationOptions(navigationOptions);
-  }
-
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     if (RouteUtils.isArrivalEvent(routeProgress)) {
-
-      if (!dropoffDialogShown) {
+      lastKnownLocation = location; // Accounts for driver moving after dialog was triggered
+      if (!dropoffDialogShown && !points.isEmpty()) {
         showDropoffDialog();
-        dropoffDialogShown = true;
+        dropoffDialogShown = true; // Accounts for multiple arrival events
       }
     }
   }
@@ -136,14 +121,15 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
     alertDialog.setMessage("Do you want to navigate to next destination?");
     alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Start Next", new DialogInterface.OnClickListener() {
       @Override
-      public void onClick(DialogInterface dialogInterface, int i) {
-
+      public void onClick(DialogInterface dialogInterface, int in) {
+        navigationView.startNavigation(
+          setupOptions(Point.fromLngLat(lastKnownLocation.getLongitude(), lastKnownLocation.getLatitude())));
       }
     });
     alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
       @Override
-      public void onClick(DialogInterface dialogInterface, int i) {
-
+      public void onClick(DialogInterface dialogInterface, int in) {
+        // Do nothing
       }
     });
 
