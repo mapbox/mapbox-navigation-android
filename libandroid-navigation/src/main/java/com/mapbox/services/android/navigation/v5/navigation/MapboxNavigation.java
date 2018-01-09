@@ -19,6 +19,7 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
+import com.mapbox.services.android.navigation.v5.route.FasterRouteDetector;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
@@ -150,6 +151,9 @@ public class MapboxNavigation implements ServiceConnection {
     }
     if (options.enableOffRouteDetection()) {
       offRouteEngine = new OffRouteDetector();
+    }
+    if (options().enableFasterRouteDetection()) {
+      fasterRouteEngine = new FasterRouteDetector();
     }
   }
 
