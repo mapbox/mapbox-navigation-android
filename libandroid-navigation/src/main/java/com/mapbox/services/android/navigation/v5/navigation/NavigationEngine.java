@@ -83,7 +83,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       : newLocationModel.location();
 
     // Check for faster route only if not off-route
-    final boolean checkFasterRoute = !userOffRoute && shouldCheckFasterRoute(newLocationModel);
+    final boolean checkFasterRoute = !userOffRoute && shouldCheckFasterRoute(newLocationModel, routeProgress);
 
     previousRouteProgress = routeProgress;
 
