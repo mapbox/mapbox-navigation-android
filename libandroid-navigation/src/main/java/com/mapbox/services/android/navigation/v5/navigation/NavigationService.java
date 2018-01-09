@@ -167,7 +167,7 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @Override
   public void onResponseReceived(Response<DirectionsResponse> response, RouteProgress routeProgress) {
-    if (mapboxNavigation.getFasterRouteEngine().isFasterRoute(response, routeProgress)) {
+    if (mapboxNavigation.getFasterRouteEngine().isFasterRoute(response.body(), routeProgress)) {
       mapboxNavigation.getEventDispatcher().onFasterRouteEvent(response.body().routes().get(0));
     }
   }

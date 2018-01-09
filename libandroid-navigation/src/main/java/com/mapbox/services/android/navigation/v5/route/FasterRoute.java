@@ -5,8 +5,6 @@ import android.location.Location;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import retrofit2.Response;
-
 /**
  * This class can be subclassed to provide custom logic for checking / determining
  * new / faster routes while navigating.
@@ -17,7 +15,7 @@ import retrofit2.Response;
  * {@link FasterRoute#shouldCheckFasterRoute(Location, RouteProgress)} determines how quickly a
  * new route will be fetched by {@link RouteEngine}.
  * <p>
- * {@link FasterRoute#isFasterRoute(Response, RouteProgress)} determines if the new route
+ * {@link FasterRoute#isFasterRoute(DirectionsResponse, RouteProgress)} determines if the new route
  * retrieved by {@link RouteEngine} is actually faster than the current route.
  *
  * @since 0.9.0
@@ -50,5 +48,5 @@ public abstract class FasterRoute {
    * @param routeProgress current route progress
    * @return true if the new route is considered faster, false if not
    */
-  public abstract boolean isFasterRoute(Response<DirectionsResponse> response, RouteProgress routeProgress);
+  public abstract boolean isFasterRoute(DirectionsResponse response, RouteProgress routeProgress);
 }

@@ -13,8 +13,6 @@ import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import retrofit2.Response;
-
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_CHECK_FASTER_ROUTE_INTERVAL;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MEDIUM_ALERT_DURATION;
 
@@ -45,11 +43,11 @@ public class FasterRouteDetector extends FasterRoute {
   }
 
   @Override
-  public boolean isFasterRoute(Response<DirectionsResponse> response, RouteProgress routeProgress) {
+  public boolean isFasterRoute(DirectionsResponse response, RouteProgress routeProgress) {
     if (validRouteResponse(response)) {
 
       double currentDurationRemaining = routeProgress.durationRemaining();
-      DirectionsRoute newRoute = response.body().routes().get(0);
+      DirectionsRoute newRoute = response.routes().get(0);
 
       if (hasLegs(newRoute)) {
         // Extract the first leg
@@ -111,9 +109,9 @@ public class FasterRouteDetector extends FasterRoute {
    * @param response to be checked
    * @return true if valid, false if not
    */
-  private boolean validRouteResponse(Response<DirectionsResponse> response) {
-    return response.body() != null
-      && !response.body().routes().isEmpty();
+  private boolean validRouteResponse(DirectionsResponse response) {
+    return response != null
+      && !response.routes().isEmpty();
   }
 
   private boolean validRouteDurationRemaining(RouteProgress routeProgress) {
