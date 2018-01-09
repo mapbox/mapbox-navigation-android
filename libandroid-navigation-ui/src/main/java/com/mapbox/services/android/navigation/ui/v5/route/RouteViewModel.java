@@ -29,7 +29,6 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   public final MutableLiveData<String> requestErrorMessage = new MutableLiveData<>();
   private Point origin;
   private Location rawLocation;
-  private boolean extractRouteOptions = true;
   private String routeProfile;
   private String unitType;
 
@@ -73,12 +72,10 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    */
   public void extractRouteOptions(NavigationViewOptions options) {
     updateUnitType(options.navigationOptions().unitType());
-    if (extractRouteOptions) {
-      if (launchWithRoute(options)) {
-        extractRouteFromOptions(options);
-      } else {
-        extractCoordinatesFromOptions(options);
-      }
+    if (launchWithRoute(options)) {
+      extractRouteFromOptions(options);
+    } else {
+      extractCoordinatesFromOptions(options);
     }
   }
 
@@ -135,10 +132,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   }
 
   private void fetchRouteFromCoordinates() {
-    if (extractRouteOptions) {
-      fetchRoute(origin, destination.getValue());
-      extractRouteOptions = false;
-    }
+    fetchRoute(origin, destination.getValue());
   }
 
   /**
@@ -166,7 +160,6 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
       LegStep lastStep = lastLeg.steps().get(lastLeg.steps().size() - 1);
       destination.setValue(lastStep.maneuver().location());
       this.route.setValue(route);
-      extractRouteOptions = false;
     }
   }
 
