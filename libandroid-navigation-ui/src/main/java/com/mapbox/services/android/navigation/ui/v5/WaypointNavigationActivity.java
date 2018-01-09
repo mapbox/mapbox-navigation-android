@@ -16,11 +16,6 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Serves as a launching point for the custom drop-in UI, {@link NavigationView}.
- * <p>
- * Demonstrates the proper setup and usage of the view, including all lifecycle methods.
- */
 public class WaypointNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
   NavigationListener, ProgressChangeListener {
 
@@ -96,8 +91,7 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
 
   @Override
   public void onNavigationFinished() {
-    // Navigation finished, finish the activity
-    finish();
+    // Intentionally empty
   }
 
   @Override
