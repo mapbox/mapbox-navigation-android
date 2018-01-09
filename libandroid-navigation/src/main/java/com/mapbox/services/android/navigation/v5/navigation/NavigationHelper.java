@@ -186,9 +186,9 @@ class NavigationHelper {
       newLocationModel.recentDistancesFromManeuverInMeters());
   }
 
-  static boolean shouldCheckFasterRoute(NewLocationModel newLocationModel) {
+  static boolean shouldCheckFasterRoute(NewLocationModel newLocationModel, RouteProgress routeProgress) {
     FasterRoute fasterRoute = newLocationModel.mapboxNavigation().getFasterRouteEngine();
-    return fasterRoute.shouldCheckFasterRoute(newLocationModel.location());
+    return fasterRoute.shouldCheckFasterRoute(newLocationModel.location(), routeProgress);
   }
 
   static Location getSnappedLocation(MapboxNavigation mapboxNavigation, Location location,
