@@ -425,25 +425,27 @@ public final class NavigationRoute {
     /**
      * Optionally create a {@link Builder} based on all variables
      * from given {@link RouteOptions}.
+     * <p>
+     * Note: {@link RouteOptions#bearings()} are excluded because it's better
+     * to recalculate these at the time of the request, as your location bearing
+     * is constantly changing.
      *
      * @param options containing all variables for request
      * @return this builder for chaining options together
      * @since 0.9.0
      */
     public Builder routeOptions(RouteOptions options) {
-      directionsBuilder.language(new Locale(options.language()));
-      directionsBuilder.alternatives(options.alternatives());
+
+      if (!TextUtils.isEmpty(options.language())) {
+        directionsBuilder.language(new Locale(options.language()));
+      }
+
+      if (options.alternatives() != null) {
+        directionsBuilder.alternatives(options.alternatives());
+      }
 
       if (!TextUtils.isEmpty(options.profile())) {
         directionsBuilder.profile(options.profile());
-      }
-
-      if (options.bannerInstructions() != null) {
-        directionsBuilder.bannerInstructions(options.bannerInstructions());
-      }
-
-      if (options.continueStraight() != null) {
-        directionsBuilder.continueStraight(options.continueStraight());
       }
 
       if (options.alternatives() != null) {
@@ -454,7 +456,17 @@ public final class NavigationRoute {
         directionsBuilder.voiceUnits(options.voiceUnits());
       }
 
-      // TODO add missing options here
+      if (!TextUtils.isEmpty(options.user())) {
+        directionsBuilder.user(options.user());
+      }
+
+      if (!TextUtils.isEmpty(options.accessToken())) {
+        directionsBuilder.accessToken(options.accessToken());
+      }
+
+      if (!TextUtils.isEmpty(options.annotations())) {
+        directionsBuilder.annotations(options.annotations());
+      }
 
       return this;
     }
