@@ -195,6 +195,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
         initLocationLayer();
         initLifecycleObservers();
         initNavigationPresenter();
+        initNavigationEventDispatcher();
         initClickListeners();
         map.addOnScrollListener(NavigationView.this);
         onNavigationReadyCallback.onNavigationReady();
@@ -374,7 +375,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     initViewModels();
     initNavigationViewObserver();
     initSummaryBottomSheet();
-    initNavigationEventDispatcher();
   }
 
   /**

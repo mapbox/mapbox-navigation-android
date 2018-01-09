@@ -48,7 +48,7 @@ public class NavigationLauncher {
     editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, options.awsPoolId());
     editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, options.shouldSimulateRoute());
     editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, options.navigationOptions().unitType());
-
+    editor.putString("baseUrl", options.baseUrl());
     setThemePreferences(options, editor);
 
     editor.apply();

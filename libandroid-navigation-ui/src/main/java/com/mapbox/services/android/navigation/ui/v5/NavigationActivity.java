@@ -110,7 +110,8 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
       .getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
     options.shouldSimulateRoute(preferences
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
-
+    options.baseUrl(preferences
+      .getString("baseUrl", null));
     MapboxNavigationOptions navigationOptions = MapboxNavigationOptions.builder()
       .unitType(preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE,
         NavigationUnitType.TYPE_IMPERIAL))
