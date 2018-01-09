@@ -14,8 +14,8 @@ import retrofit2.Response;
  * To provide your implementation,
  * use {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation#setFasterRouteEngine(FasterRoute)}.
  * <p>
- * {@link FasterRoute#shouldCheckFasterRoute(Location, RouteProgress)} determines how quickly a new route will be fetched
- * by {@link RouteEngine}.
+ * {@link FasterRoute#shouldCheckFasterRoute(Location, RouteProgress)} determines how quickly a
+ * new route will be fetched by {@link RouteEngine}.
  * <p>
  * {@link FasterRoute#isFasterRoute(Response, RouteProgress)} determines if the new route
  * retrieved by {@link RouteEngine} is actually faster than the current route.
