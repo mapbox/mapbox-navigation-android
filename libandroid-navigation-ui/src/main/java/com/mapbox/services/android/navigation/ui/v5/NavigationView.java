@@ -346,9 +346,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param options with containing route / coordinate data
    */
   public void startNavigation(NavigationViewOptions options) {
-    for (Marker marker : markers) {
-      map.removeMarker(marker);
-      markers.remove(marker);
+    for (int i = 0; i < markers.size(); i++) {
+      map.removeMarker(markers.remove(i));
     }
 
     // Initialize navigation with options from NavigationViewOptions
