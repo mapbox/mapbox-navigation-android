@@ -89,6 +89,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private LocationLayerPlugin locationLayer;
   private OnNavigationReadyCallback onNavigationReadyCallback;
   private boolean resumeState;
+  private boolean isInitialized;
   private List<Marker> markers = new ArrayList<>();
 
   public NavigationView(Context context) {
@@ -349,17 +350,20 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     clearMarkers();
 
     // Initialize navigation with options from NavigationViewOptions
-    navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
-      options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
-    // Initialize the camera (listens to MapboxNavigation)
-    initCamera();
-
-    setupListeners(options);
-
+    if (!isInitialized) {
+      navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
+        options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
+      // Initialize the camera (listens to MapboxNavigation)
+      initCamera();
+      setupListeners(options);
+      // Everything is setup, subscribe to the view models
+      subscribeViewModels();
+      // Initialized and navigating at this point
+      isInitialized = true;
+    }
+    // Update the view models
     locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
     routeViewModel.extractRouteOptions(options);
-    // Everything is setup, subscribe to the view models
-    subscribeViewModels();
   }
 
   /**
