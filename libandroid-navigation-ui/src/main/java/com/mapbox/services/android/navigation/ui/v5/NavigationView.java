@@ -349,18 +349,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       // Initialize the camera (listens to MapboxNavigation)
       initCamera();
       setupListeners(options);
-      // Update the view models
-      locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
-      routeViewModel.extractRouteOptions(options);
       // Everything is setup, subscribe to the view models
       subscribeViewModels();
       // Initialized and navigating at this point
       isInitialized = true;
-    } else {
-      // Only need to update the view models
-      locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
-      routeViewModel.extractRouteOptions(options);
     }
+    // Update the view models
+    locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
+    routeViewModel.extractRouteOptions(options);
   }
 
   /**
