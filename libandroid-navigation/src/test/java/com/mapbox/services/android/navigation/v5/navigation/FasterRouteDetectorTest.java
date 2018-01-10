@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.content.Context;
+import android.location.Location;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,14 +11,11 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteDetector;
-import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
 
@@ -31,14 +29,10 @@ public class FasterRouteDetectorTest extends BaseTest {
 
   private static final String PRECISION_6 = "directions_v5_precision_6.json";
 
-  @Mock
-  FasterRouteListener fasterRouteListener;
-
   private MapboxNavigation navigation;
 
   @Before
   public void setup() throws IOException {
-    MockitoAnnotations.initMocks(this);
     navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, mock(NavigationTelemetry.class),
       mock(LocationEngine.class));
   }
@@ -63,13 +57,12 @@ public class FasterRouteDetectorTest extends BaseTest {
 
   @Test
   public void onFasterRouteResponse_isFasterRouteIsTrue() throws Exception {
-    navigation.addFasterRouteListener(fasterRouteListener);
     FasterRoute fasterRouteEngine = navigation.getFasterRouteEngine();
 
     // Create current progress
     RouteProgress currentProgress = obtainDefaultRouteProgress();
     DirectionsRoute longerRoute = currentProgress.directionsRoute().toBuilder()
-      .duration(10000000d)
+      .duration(10000000d) // Current route duration is very long
       .build();
     currentProgress = currentProgress.toBuilder()
       .directionsRoute(longerRoute)
@@ -84,13 +77,12 @@ public class FasterRouteDetectorTest extends BaseTest {
 
   @Test
   public void onSlowerRouteResponse_isFasterRouteIsFalse() throws Exception {
-    navigation.addFasterRouteListener(fasterRouteListener);
     FasterRoute fasterRouteEngine = navigation.getFasterRouteEngine();
 
     // Create current progress
     RouteProgress currentProgress = obtainDefaultRouteProgress();
     DirectionsRoute longerRoute = currentProgress.directionsRoute().toBuilder()
-      .duration(1000d)
+      .duration(1000d) // Current route duration is very short
       .build();
     currentProgress = currentProgress.toBuilder()
       .directionsRoute(longerRoute)
@@ -101,6 +93,22 @@ public class FasterRouteDetectorTest extends BaseTest {
 
     boolean isFasterRoute = fasterRouteEngine.isFasterRoute(response, currentProgress);
     assertFalse(isFasterRoute);
+  }
+
+  @Test
+  public void onNullLocationPassed_shouldCheckFasterRouteIsFalse() throws Exception {
+    FasterRoute fasterRouteEngine = navigation.getFasterRouteEngine();
+
+    boolean checkFasterRoute = fasterRouteEngine.shouldCheckFasterRoute(null, obtainDefaultRouteProgress());
+    assertFalse(checkFasterRoute);
+  }
+
+  @Test
+  public void onNullRouteProgressPassed_shouldCheckFasterRouteIsFalse() throws Exception {
+    FasterRoute fasterRouteEngine = navigation.getFasterRouteEngine();
+
+    boolean checkFasterRoute = fasterRouteEngine.shouldCheckFasterRoute(mock(Location.class), null);
+    assertFalse(checkFasterRoute);
   }
 
   private RouteProgress obtainDefaultRouteProgress() throws Exception {
