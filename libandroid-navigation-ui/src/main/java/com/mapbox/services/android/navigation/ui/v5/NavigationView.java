@@ -346,9 +346,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param options with containing route / coordinate data
    */
   public void startNavigation(NavigationViewOptions options) {
-    for (int i = 0; i < markers.size(); i++) {
-      map.removeMarker(markers.remove(i));
-    }
+    clearMarkers();
 
     // Initialize navigation with options from NavigationViewOptions
     navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
@@ -562,6 +560,15 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       public void onSlide(@NonNull View bottomSheet, float slideOffset) {
       }
     });
+  }
+
+  /**
+   * Removes any markers on the map that were added using addMarker()
+   */
+  private void clearMarkers() {
+    for (int i = 0; i < markers.size(); i++) {
+      map.removeMarker(markers.remove(i));
+    }
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_START)
