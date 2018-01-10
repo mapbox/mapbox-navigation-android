@@ -55,6 +55,12 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    navigationView.onDestroy();
+  }
+
+  @Override
   protected void onSaveInstanceState(Bundle outState) {
     navigationView.onSaveInstanceState(outState);
     super.onSaveInstanceState(outState);
