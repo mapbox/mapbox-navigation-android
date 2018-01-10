@@ -85,6 +85,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private LocationLayerPlugin locationLayer;
   private OnNavigationReadyCallback onNavigationReadyCallback;
   private boolean resumeState;
+  private boolean isInitialized;
 
   public NavigationView(Context context) {
     this(context, null);
@@ -342,17 +343,24 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   public void startNavigation(NavigationViewOptions options) {
     // Initialize navigation with options from NavigationViewOptions
-    navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
-      options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
-    // Initialize the camera (listens to MapboxNavigation)
-    initCamera();
-
-    setupListeners(options);
-
-    locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
-    routeViewModel.extractRouteOptions(options);
-    // Everything is setup, subscribe to the view models
-    subscribeViewModels();
+    if (!isInitialized) {
+      navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
+        options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
+      // Initialize the camera (listens to MapboxNavigation)
+      initCamera();
+      setupListeners(options);
+      // Update the view models
+      locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
+      routeViewModel.extractRouteOptions(options);
+      // Everything is setup, subscribe to the view models
+      subscribeViewModels();
+      // Initialized and navigating at this point
+      isInitialized = true;
+    } else {
+      // Only need to update the view models
+      locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
+      routeViewModel.extractRouteOptions(options);
+    }
   }
 
   /**
