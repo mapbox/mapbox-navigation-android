@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
 import android.location.Location;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -54,6 +55,10 @@ public abstract class SessionState {
   }
 
   public String currentGeometry() {
+    if (currentDirectionRoute() == null || TextUtils.isEmpty(currentDirectionRoute().geometry())) {
+      return "";
+    }
+
     List<Point> geometryPositions
       = PolylineUtils.decode(currentDirectionRoute().geometry(), Constants.PRECISION_6);
     return PolylineUtils.encode(geometryPositions, Constants.PRECISION_5);
