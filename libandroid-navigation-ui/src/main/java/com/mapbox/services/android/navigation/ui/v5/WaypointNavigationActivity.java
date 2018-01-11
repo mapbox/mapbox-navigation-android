@@ -119,19 +119,21 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   private void showDropoffDialog() {
     AlertDialog alertDialog = new AlertDialog.Builder(this).create();
     alertDialog.setMessage(getString(R.string.dropoff_dialog_text));
-    alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.dropoff_dialog_positive_text), new DialogInterface.OnClickListener() {
-      @Override
-      public void onClick(DialogInterface dialogInterface, int in) {
-        navigationView.startNavigation(
-          setupOptions(Point.fromLngLat(lastKnownLocation.getLongitude(), lastKnownLocation.getLatitude())));
-      }
-    });
-    alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.dropoff_dialog_negative_text), new DialogInterface.OnClickListener() {
-      @Override
-      public void onClick(DialogInterface dialogInterface, int in) {
-        // Do nothing
-      }
-    });
+    alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.dropoff_dialog_positive_text),
+      new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialogInterface, int in) {
+          navigationView.startNavigation(
+            setupOptions(Point.fromLngLat(lastKnownLocation.getLongitude(), lastKnownLocation.getLatitude())));
+        }
+      });
+    alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.dropoff_dialog_negative_text),
+      new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialogInterface, int in) {
+          // Do nothing
+        }
+      });
 
     alertDialog.show();
   }
