@@ -2,10 +2,7 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -37,7 +34,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 import java.text.DecimalFormat;
 
-public class NavigationViewModel extends AndroidViewModel implements LifecycleObserver, ProgressChangeListener,
+public class NavigationViewModel extends AndroidViewModel implements ProgressChangeListener,
   OffRouteListener, MilestoneEventListener, NavigationEventListener {
 
   public final MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
@@ -67,7 +64,6 @@ public class NavigationViewModel extends AndroidViewModel implements LifecycleOb
     initDecimalFormat();
   }
 
-  @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
   public void onDestroy() {
     endNavigation();
     deactivateInstructionPlayer();
