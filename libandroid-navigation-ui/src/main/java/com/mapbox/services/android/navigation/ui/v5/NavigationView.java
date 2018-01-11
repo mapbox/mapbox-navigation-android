@@ -174,6 +174,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   public void onDestroy() {
     mapView.onDestroy();
+    navigationViewModel.onDestroy();
   }
 
   /**
@@ -480,7 +481,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     try {
       ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationLayer);
       ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationViewModel);
-      ((LifecycleOwner) getContext()).getLifecycle().addObserver(navigationViewModel);
     } catch (ClassCastException exception) {
       throw new ClassCastException("Please ensure that the provided Context is a valid LifecycleOwner");
     }
