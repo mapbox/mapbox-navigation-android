@@ -36,8 +36,11 @@ class NavigationHelper {
    * need to snap to the route in order to get the most accurate information.
    */
   static Point userSnappedToRoutePosition(Location location, List<Point> coordinates) {
-    Point locationToPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    if (coordinates.size() < 2) {
+      return Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    }
 
+    Point locationToPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
 
     // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
     // Point on the LineString.
