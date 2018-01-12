@@ -382,9 +382,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   /**
    * Gives the ability to manipulate the map directly for anything that might not currently be
-   * supported.
+   * supported. This returns null until the view is initialized
    *
-   * @return mapbox map object
+   * @return mapbox map object, or null if view has not been initialized
    */
   public MapboxMap getMapboxMap() {
     return map;
