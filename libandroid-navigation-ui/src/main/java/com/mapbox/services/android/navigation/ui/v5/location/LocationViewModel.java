@@ -84,7 +84,9 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
    * @param route to be mocked
    */
   public void updateRoute(DirectionsRoute route) {
+    // MockLocationEngine is deactivated first to avoid weird behavior with subsequent navigation sessions
     if (shouldSimulateRoute) {
+      deactivateLocationEngine();
       activateMockLocationEngine(route);
     }
   }

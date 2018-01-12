@@ -24,6 +24,7 @@ import android.widget.ImageView;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -41,6 +42,9 @@ import com.mapbox.services.android.navigation.ui.v5.utils.ViewUtils;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * View that creates the drop-in UI.
@@ -85,6 +89,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private LocationLayerPlugin locationLayer;
   private OnNavigationReadyCallback onNavigationReadyCallback;
   private boolean resumeState;
+  private boolean isInitialized;
+  private List<Marker> markers = new ArrayList<>();
 
   public NavigationView(Context context) {
     this(context, null);
@@ -173,6 +179,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   public void onDestroy() {
     mapView.onDestroy();
+    navigationViewModel.onDestroy();
   }
 
   /**
@@ -264,9 +271,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void addMarker(Point position) {
     LatLng markerPosition = new LatLng(position.latitude(),
       position.longitude());
-    map.addMarker(new MarkerOptions()
+    markers.add(map.addMarker(new MarkerOptions()
       .position(markerPosition)
-      .icon(ThemeSwitcher.retrieveMapMarker(getContext())));
+      .icon(ThemeSwitcher.retrieveMapMarker(getContext()))));
   }
 
   /**
@@ -341,18 +348,23 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param options with containing route / coordinate data
    */
   public void startNavigation(NavigationViewOptions options) {
+    clearMarkers();
+
     // Initialize navigation with options from NavigationViewOptions
-    navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
-      options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
-    // Initialize the camera (listens to MapboxNavigation)
-    initCamera();
-
-    setupListeners(options);
-
+    if (!isInitialized) {
+      navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
+        options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
+      // Initialize the camera (listens to MapboxNavigation)
+      initCamera();
+      setupListeners(options);
+      // Everything is setup, subscribe to the view models
+      subscribeViewModels();
+      // Initialized and navigating at this point
+      isInitialized = true;
+    }
+    // Update the view models
     locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
     routeViewModel.extractRouteOptions(options);
-    // Everything is setup, subscribe to the view models
-    subscribeViewModels();
   }
 
   /**
@@ -476,7 +488,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     try {
       ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationLayer);
       ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationViewModel);
-      ((LifecycleOwner) getContext()).getLifecycle().addObserver(navigationViewModel);
     } catch (ClassCastException exception) {
       throw new ClassCastException("Please ensure that the provided Context is a valid LifecycleOwner");
     }
@@ -553,6 +564,15 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       public void onSlide(@NonNull View bottomSheet, float slideOffset) {
       }
     });
+  }
+
+  /**
+   * Removes any markers on the map that were added using addMarker()
+   */
+  private void clearMarkers() {
+    for (int i = 0; i < markers.size(); i++) {
+      map.removeMarker(markers.remove(i));
+    }
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_START)

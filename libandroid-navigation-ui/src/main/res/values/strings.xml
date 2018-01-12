@@ -19,4 +19,7 @@
             translatable="false">recenter_btn_visible</string>
     <string name="bottom_sheet_state"
             translatable="false">bottom_sheet_state</string>
+    <string name="dropoff_dialog_text">Do you want to navigate to next destination?</string>
+    <string name="dropoff_dialog_positive_text">Start next</string>
+    <string name="dropoff_dialog_negative_text">Cancel</string>
 </resources>
