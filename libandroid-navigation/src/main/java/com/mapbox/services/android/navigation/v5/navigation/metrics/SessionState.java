@@ -11,6 +11,7 @@ import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
+import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -117,7 +118,7 @@ public abstract class SessionState {
   public static Builder builder() {
     return new AutoValue_SessionState.Builder()
       .eventRouteDistanceCompleted(0d)
-      .sessionIdentifier("")
+      .sessionIdentifier(TelemetryUtils.buildUUID())
       .mockLocation(false)
       .rerouteCount(0)
       .secondsSinceLastReroute(-1)

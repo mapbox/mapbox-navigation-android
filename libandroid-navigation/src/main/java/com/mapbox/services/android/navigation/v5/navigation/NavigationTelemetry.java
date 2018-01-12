@@ -196,7 +196,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
         .originalRequestIdentifier(directionsRoute.routeOptions().requestUuid())
         .requestIdentifier(directionsRoute.routeOptions().requestUuid())
         .currentDirectionRoute(directionsRoute)
-        .sessionIdentifier(TelemetryUtils.buildUUID())
         .eventRouteDistanceCompleted(0)
         .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
         .rerouteCount(0)
