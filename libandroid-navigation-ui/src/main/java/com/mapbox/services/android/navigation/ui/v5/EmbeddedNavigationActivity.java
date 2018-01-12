@@ -4,7 +4,9 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.TextView;
 
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
@@ -25,11 +27,17 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
-    setTheme(R.style.Theme_AppCompat_NoActionBar);
+    setTheme(R.style.Theme_AppCompat_Light_NoActionBar);
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_navigation);
+    setContentView(R.layout.activity_embedded_navigation);
     navigationView = findViewById(R.id.navigationView);
     navigationView.onCreate(savedInstanceState);
+
+    TextView driverCard = findViewById(R.id.speed_limit);
+    CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) driverCard.getLayoutParams();
+    layoutParams.setAnchorId(R.id.summaryBottomSheet);
+    driverCard.setLayoutParams(layoutParams);
+
     navigationView.getNavigationAsync(this);
   }
 
