@@ -42,8 +42,10 @@ public class InstructionTarget implements Target {
   public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
     // Create a new Drawable with intrinsic bounds
     Drawable drawable = new BitmapDrawable(textView.getContext().getResources(), bitmap);
-    int right = textView.getLineHeight();
-    int bottom = right * bitmap.getWidth() / bitmap.getHeight();
+
+    // width == (right - left), and height == (bottom - top)
+    int bottom = textView.getLineHeight();
+    int right = bottom * bitmap.getWidth() / bitmap.getHeight();
     drawable.setBounds(0, 0, right, bottom);
 
     // Create and set a new ImageSpan at the given index with the Drawable
