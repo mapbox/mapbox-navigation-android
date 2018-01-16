@@ -41,7 +41,7 @@ public class RouteEngine implements Callback<DirectionsResponse> {
 
     // Build new route request with current route options
     RouteOptions currentOptions = routeProgress.directionsRoute().routeOptions();
-     NavigationRoute.Builder builder = NavigationRoute.builder()
+    NavigationRoute.Builder builder = NavigationRoute.builder()
       .origin(origin)
       .routeOptions(currentOptions);
 
