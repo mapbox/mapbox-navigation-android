@@ -83,11 +83,12 @@ public class InstructionLoader {
    */
   public void prefetchImageCache(LegStep step) {
 
-    checkIsInitialized();
-
-    if (step.bannerInstructions() == null || step.bannerInstructions().isEmpty()) {
+    if (step == null || step.bannerInstructions() == null
+      || step.bannerInstructions().isEmpty()) {
       return;
     }
+
+    checkIsInitialized();
 
     List<BannerInstructions> bannerInstructionList = new ArrayList<>(step.bannerInstructions());
     for (BannerInstructions instructions : bannerInstructionList) {
