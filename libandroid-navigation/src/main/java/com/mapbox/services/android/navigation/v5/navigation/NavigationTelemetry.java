@@ -146,9 +146,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
       validateAccessToken(accessToken);
 
-      // Setup the listeners
-      initEventDispatcherListeners(navigation);
-
       MapboxNavigationOptions options = navigation.options();
       // Set sdkIdentifier based on if from UI or not
       String sdkIdentifier = updateSdkIdentifier(options);
@@ -168,6 +165,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
       isInitialized = true;
     }
+    // Setup the listeners
+    initEventDispatcherListeners(navigation);
   }
 
   /**
@@ -200,16 +199,16 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
         .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
         .rerouteCount(0)
         .build();
-    } else {
-      isConfigurationChange = false;
     }
+    isConfigurationChange = false;
   }
 
   /**
    * Flushes any remaining events from the reroute / feedback queue and fires
    * a cancel event indicating a terminated session.
    */
-  void endSession() {
+  void endSession(boolean isConfigurationChange) {
+    this.isConfigurationChange = isConfigurationChange;
     if (!isConfigurationChange) {
       if (navigationSessionState.startTimestamp() != null) {
         flushEventQueues();
@@ -272,10 +271,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       String locationEngineName = locationEngine.getClass().getName();
       navigationSessionState.toBuilder().locationEngineName(locationEngineName);
     }
-  }
-
-  void onConfigurationChange() {
-    isConfigurationChange = true;
   }
 
   /**

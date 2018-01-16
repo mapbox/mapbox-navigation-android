@@ -54,10 +54,8 @@ public class NavigationLifecycleMonitor implements Application.ActivityLifecycle
 
   @Override
   public void onActivityDestroyed(Activity activity) {
-    if (activity.isChangingConfigurations()) {
-      NavigationTelemetry.getInstance().onConfigurationChange();
-    }
     if (activity.isFinishing()) {
+      NavigationTelemetry.getInstance().endSession(activity.isChangingConfigurations());
       activity.getApplication().unregisterActivityLifecycleCallbacks(this);
     }
   }
