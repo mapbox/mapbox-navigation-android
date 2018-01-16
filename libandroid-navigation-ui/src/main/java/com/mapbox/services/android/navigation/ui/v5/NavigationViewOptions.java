@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -56,6 +57,9 @@ public abstract class NavigationViewOptions {
   @Nullable
   public abstract MilestoneEventListener milestoneEventListener();
 
+  @Nullable
+  public abstract BottomSheetCallback bottomSheetCallback();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -86,6 +90,8 @@ public abstract class NavigationViewOptions {
     public abstract Builder progressChangeListener(ProgressChangeListener progressChangeListener);
 
     public abstract Builder milestoneEventListener(MilestoneEventListener milestoneEventListener);
+
+    public abstract Builder bottomSheetCallback(BottomSheetCallback bottomSheetCallback);
 
     public abstract NavigationViewOptions build();
   }

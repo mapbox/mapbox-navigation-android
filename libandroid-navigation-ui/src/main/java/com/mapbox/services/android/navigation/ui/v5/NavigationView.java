@@ -510,6 +510,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     navigationViewEventDispatcher.setFeedbackListener(navigationViewOptions.feedbackListener());
     navigationViewEventDispatcher.setNavigationListener(navigationViewOptions.navigationListener());
     navigationViewEventDispatcher.setRouteListener(navigationViewOptions.routeListener());
+    navigationViewEventDispatcher.setBottomSheetCallback(navigationViewOptions.bottomSheetCallback());
 
     if (navigationViewOptions.progressChangeListener() != null) {
       navigationViewModel.getNavigation().addProgressChangeListener(navigationViewOptions.progressChangeListener());
@@ -557,6 +558,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       public void onStateChanged(@NonNull View bottomSheet, int newState) {
         if (newState == BottomSheetBehavior.STATE_HIDDEN && navigationPresenter != null) {
           navigationPresenter.onSummaryBottomSheetHidden();
+          navigationViewEventDispatcher.onBottomSheetStateChanged(bottomSheet, newState);
         }
       }
 

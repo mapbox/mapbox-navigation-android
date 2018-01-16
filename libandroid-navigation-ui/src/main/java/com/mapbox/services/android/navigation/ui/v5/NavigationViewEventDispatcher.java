@@ -2,6 +2,8 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
+import android.view.View;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -20,6 +22,7 @@ class NavigationViewEventDispatcher {
   private FeedbackListener feedbackListener;
   private NavigationListener navigationListener;
   private RouteListener routeListener;
+  private BottomSheetCallback bottomSheetCallback;
 
   void setFeedbackListener(@Nullable FeedbackListener feedbackListener) {
     this.feedbackListener = feedbackListener;
@@ -31,6 +34,10 @@ class NavigationViewEventDispatcher {
 
   void setRouteListener(@Nullable RouteListener routeListener) {
     this.routeListener = routeListener;
+  }
+
+  void setBottomSheetCallback(@Nullable BottomSheetCallback bottomSheetCallback) {
+    this.bottomSheetCallback = bottomSheetCallback;
   }
 
   /*
@@ -100,6 +107,16 @@ class NavigationViewEventDispatcher {
   void onFailedReroute(String errorMessage) {
     if (routeListener != null) {
       routeListener.onFailedReroute(errorMessage);
+    }
+  }
+
+  /*
+   * BottomSheetCallbacks
+   */
+
+  void onBottomSheetStateChanged(View bottomSheet, int newState) {
+    if (bottomSheetCallback != null) {
+      bottomSheetCallback.onStateChanged(bottomSheet, newState);
     }
   }
 }
