@@ -17,7 +17,6 @@ import com.mapbox.services.android.navigation.testapp.activity.MockNavigationAct
 import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationViewActivity;
-import com.mapbox.services.android.navigation.ui.v5.EmbeddedNavigationActivity;
 import com.mapbox.services.android.navigation.ui.v5.WaypointNavigationActivity;
 import com.mapbox.services.android.telemetry.permissions.PermissionsListener;
 import com.mapbox.services.android.telemetry.permissions.PermissionsManager;

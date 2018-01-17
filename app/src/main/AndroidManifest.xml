@@ -59,7 +59,7 @@
         </activity>
 
         <activity
-            android:name="com.mapbox.services.android.navigation.ui.v5.EmbeddedNavigationActivity"
+            android:name=".EmbeddedNavigationActivity"
             android:label="@string/title_embedded_navigation">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
