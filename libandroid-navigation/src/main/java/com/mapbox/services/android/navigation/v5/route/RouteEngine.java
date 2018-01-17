@@ -8,6 +8,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -30,23 +31,28 @@ public class RouteEngine implements Callback<DirectionsResponse> {
   public void fetchRoute(Point origin, RouteProgress routeProgress) {
     if (routeProgress == null) {
       return;
-    } else {
-      this.routeProgress = routeProgress;
     }
+    this.routeProgress = routeProgress;
 
     // Calculate remaining waypoints
-    List<Point> coordinates = routeProgress.directionsRoute().routeOptions().coordinates();
-    List<Point> remainingCoordinates = coordinates.subList(0, routeProgress.remainingWaypoints());
-    Point destination = remainingCoordinates.remove(remainingCoordinates.size() - 1);
+    List<Point> coordinates = new ArrayList<>(routeProgress.directionsRoute().routeOptions().coordinates());
 
-    // Build new route request with current route options
+    if (coordinates.size() < routeProgress.remainingWaypoints()) {
+      return;
+    }
+    // Remove any waypoints that have been passed
+    coordinates.subList(0, routeProgress.remainingWaypoints()).clear();
+    // Get the destination waypoint (last in the list)
+    Point destination = coordinates.remove(coordinates.size() - 1);
+
+    // Build new route request with the given origin and current route options
     RouteOptions currentOptions = routeProgress.directionsRoute().routeOptions();
     NavigationRoute.Builder builder = NavigationRoute.builder()
       .origin(origin)
       .routeOptions(currentOptions);
 
     // Add waypoints with the remaining coordinate values
-    addWaypoints(remainingCoordinates, builder);
+    addWaypoints(coordinates, builder);
 
     builder.destination(destination);
     builder.build().getRoute(this);

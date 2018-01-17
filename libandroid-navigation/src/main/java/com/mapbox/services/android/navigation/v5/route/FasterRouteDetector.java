@@ -32,7 +32,7 @@ public class FasterRouteDetector extends FasterRoute {
       lastCheckedLocation = location;
     }
     // Check if the faster route time interval has been exceeded
-    if (secondsSinceLastCheck(location) > NAVIGATION_CHECK_FASTER_ROUTE_INTERVAL) {
+    if (secondsSinceLastCheck(location) >= NAVIGATION_CHECK_FASTER_ROUTE_INTERVAL) {
       lastCheckedLocation = location;
       // Check for both valid route and step durations remaining
       if (validRouteDurationRemaining(routeProgress) && validStepDurationRemaining(routeProgress)) {
