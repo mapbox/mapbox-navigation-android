@@ -11,17 +11,16 @@
         android:layout_height="match_parent"
         app:navigationLightTheme="@style/NavigationViewLight"
         app:navigationDarkTheme="@style/NavigationViewDark"/>
-    <TextView
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/speed_limit"
         android:text="25"
         android:textSize="50sp"
-        android:layout_margin="6dp"
         android:padding="6dp"
-        android:elevation="3dp"
         app:layout_anchorGravity="top"
         android:layout_gravity="top"
+        android:elevation="3dp"
         android:textColor="@android:color/black"
         android:background="@android:color/white"/>
 </android.support.design.widget.CoordinatorLayout>
