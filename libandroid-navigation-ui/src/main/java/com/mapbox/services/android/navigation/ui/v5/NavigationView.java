@@ -380,6 +380,16 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     mapView.getMapAsync(this);
   }
 
+  /**
+   * Gives the ability to manipulate the map directly for anything that might not currently be
+   * supported. This returns null until the view is initialized
+   *
+   * @return mapbox map object, or null if view has not been initialized
+   */
+  public MapboxMap getMapboxMap() {
+    return map;
+  }
+
   private void init() {
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
