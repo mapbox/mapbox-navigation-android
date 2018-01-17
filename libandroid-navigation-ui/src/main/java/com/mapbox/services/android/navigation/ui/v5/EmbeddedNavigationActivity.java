@@ -1,8 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,16 +8,10 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
-
-import java.util.HashMap;
 
 /**
  * Serves as a launching point for the custom drop-in UI, {@link NavigationView}.
@@ -30,6 +22,8 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
   private NavigationView navigationView;
   private TextView currentSpeedWidget;
+  private Point origin = Point.fromLngLat(-77.04012393951416, 38.9111117447887);
+  private Point destination = Point.fromLngLat(-77.03847169876099, 38.91113678979344);
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,44 +46,12 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public void onLowMemory() {
-    super.onLowMemory();
-    navigationView.onLowMemory();
-  }
-
-  @Override
-  public void onBackPressed() {
-    // If the navigation view didn't need to do anything, call super
-    if (!navigationView.onBackPressed()) {
-      super.onBackPressed();
-    }
-  }
-
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    navigationView.onSaveInstanceState(outState);
-    super.onSaveInstanceState(outState);
-  }
-
-  @Override
-  protected void onRestoreInstanceState(Bundle savedInstanceState) {
-    super.onRestoreInstanceState(savedInstanceState);
-    navigationView.onRestoreInstanceState(savedInstanceState);
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    navigationView.onDestroy();
-  }
-
-  @Override
   public void onNavigationReady() {
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
     options.navigationListener(this);
-    extractRoute(options);
-    extractCoordinates(options);
-    extractConfiguration(options);
+    options.origin(origin);
+    options.destination(destination);
+    options.shouldSimulateRoute(true);
     setBottomSheetCallback(options);
 
     navigationView.startNavigation(options.build());
@@ -117,6 +79,38 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
+  public void onLowMemory() {
+    super.onLowMemory();
+    navigationView.onLowMemory();
+  }
+
+  @Override
+  public void onBackPressed() {
+    // If the navigation view didn't need to do anything, call super
+    if (!navigationView.onBackPressed()) {
+      super.onBackPressed();
+    }
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    navigationView.onDestroy();
+  }
+
+  @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    navigationView.onSaveInstanceState(outState);
+    super.onSaveInstanceState(outState);
+  }
+
+  @Override
+  protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
+    navigationView.onRestoreInstanceState(savedInstanceState);
+  }
+
+  @Override
   public void onCancelNavigation() {
     // Navigation canceled, finish the activity
     finish();
@@ -124,38 +118,11 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
   @Override
   public void onNavigationFinished() {
-    // Navigation finished, finish the activity
-    finish();
+    // Intentionally empty
   }
 
   @Override
   public void onNavigationRunning() {
     // Intentionally empty
-  }
-
-  private void extractRoute(NavigationViewOptions.Builder options) {
-    options.directionsRoute(NavigationLauncher.extractRoute(this));
-  }
-
-  private void extractCoordinates(NavigationViewOptions.Builder options) {
-    HashMap<String, Point> coordinates = NavigationLauncher.extractCoordinates(this);
-    if (coordinates.size() > 0) {
-      options.origin(coordinates.get(NavigationConstants.NAVIGATION_VIEW_ORIGIN));
-      options.destination(coordinates.get(NavigationConstants.NAVIGATION_VIEW_DESTINATION));
-    }
-  }
-
-  private void extractConfiguration(NavigationViewOptions.Builder options) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-    options.awsPoolId(preferences
-      .getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
-    options.shouldSimulateRoute(preferences
-      .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
-
-    MapboxNavigationOptions navigationOptions = MapboxNavigationOptions.builder()
-      .unitType(preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE,
-        NavigationUnitType.TYPE_IMPERIAL))
-      .build();
-    options.navigationOptions(navigationOptions);
   }
 }
