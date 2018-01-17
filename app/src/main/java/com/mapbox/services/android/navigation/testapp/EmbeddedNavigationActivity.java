@@ -10,7 +10,6 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.text.style.AbsoluteSizeSpan;
 import android.view.View;
 import android.widget.TextView;
@@ -145,15 +144,13 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   }
 
   private void setSpeed(Location location) {
-    String string1 = Integer.toString((int)(location.getSpeed() * 2.2369));
-    String string2 = "\nMPH";
-    SpannableString spannableString1 = new SpannableString(string1);
-    spannableString1.setSpan(new AbsoluteSizeSpan(getResources().getDimensionPixelSize(R.dimen.speed_text_size)), 0, string1.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-    SpannableString spannableString2 = new SpannableString(string2);
-    spannableString2.setSpan(new AbsoluteSizeSpan(getResources().getDimensionPixelSize(R.dimen.mph_text_size)), 0, string2.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+    String string = String.format("%d\nMPH", (int) (location.getSpeed() * 2.2369));
 
+    SpannableString spannableString = new SpannableString(string);
+    spannableString.setSpan(new AbsoluteSizeSpan(getResources().getDimensionPixelSize(R.dimen.mph_text_size)), string.length() - 4, string.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+    spannableString.setSpan(new AbsoluteSizeSpan(getResources().getDimensionPixelSize(R.dimen.speed_text_size)), 0, string.length() - 3, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
-    speedWidget.setText(TextUtils.concat(spannableString1, spannableString2));
+    speedWidget.setText(spannableString);
     speedWidget.setVisibility(View.VISIBLE);
   }
 }
