@@ -1,27 +1,21 @@
 package com.mapbox.services.android.navigation.ui.v5.camera;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.support.annotation.NonNull;
-import android.util.SparseArray;
 import android.view.View;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.core.constants.Constants;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
+import com.mapbox.services.android.navigation.v5.navigation.camera.RouteInformation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.commons.geojson.LineString;
-import com.mapbox.turf.TurfConstants;
-import com.mapbox.turf.TurfMeasurement;
-
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 /**
  * Updates the map camera while navigating.
@@ -33,14 +27,12 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
  */
 public class NavigationCamera implements ProgressChangeListener {
 
-  private static final int CAMERA_TILT = 45;
-  private static int CAMERA_ZOOM = 17;
-
   private MapboxMap mapboxMap;
   private MapboxNavigation navigation;
   private CameraPosition currentCameraPosition;
   private double targetDistance;
   private boolean trackingEnabled = true;
+  private Configuration configuration;
 
   /**
    * Creates an instance of {@link NavigationCamera}.
@@ -187,35 +179,9 @@ public class NavigationCamera implements ProgressChangeListener {
    */
   @NonNull
   private CameraPosition buildCameraPositionFromRoute(DirectionsRoute route) {
-    LineString lineString = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
-
-    double initialBearing = TurfMeasurement.bearing(
-      Point.fromLngLat(
-        lineString.getCoordinates().get(0).getLongitude(), lineString.getCoordinates().get(0).getLatitude()
-      ),
-      Point.fromLngLat(
-        lineString.getCoordinates().get(1).getLongitude(), lineString.getCoordinates().get(1).getLatitude()
-      )
-    );
-
-    Point targetPoint = TurfMeasurement.destination(
-      Point.fromLngLat(
-        lineString.getCoordinates().get(0).getLongitude(), lineString.getCoordinates().get(0).getLatitude()
-      ),
-      targetDistance, initialBearing, TurfConstants.UNIT_METERS
-    );
-
-    LatLng target = new LatLng(
-      targetPoint.latitude(),
-      targetPoint.longitude()
-    );
-
-    return new CameraPosition.Builder()
-      .tilt(CAMERA_TILT)
-      .zoom(CAMERA_ZOOM)
-      .target(target)
-      .bearing(initialBearing)
-      .build();
+    RouteInformation routeInformation = RouteInformation.create(configuration, targetDistance,
+            route, null, null);
+    return buildCameraPositionFromRouteInformation(routeInformation);
   }
 
   /**
@@ -229,22 +195,24 @@ public class NavigationCamera implements ProgressChangeListener {
    */
   @NonNull
   private CameraPosition buildCameraPositionFromLocation(Location location) {
-    Point targetPoint = TurfMeasurement.destination(
-      Point.fromLngLat(location.getLongitude(), location.getLatitude()),
-      targetDistance, location.getBearing(), TurfConstants.UNIT_METERS
-    );
+    RouteInformation routeInformation = RouteInformation.create(configuration, targetDistance,
+            null, location, null);
+    return buildCameraPositionFromRouteInformation(routeInformation);
+  }
 
-    LatLng target = new LatLng(
-      targetPoint.latitude(),
-      targetPoint.longitude()
-    );
+  private CameraPosition buildCameraPositionFromRouteInformation(RouteInformation routeInformation) {
+    Camera cameraEngine = navigation.getCameraEngine();
+    double tilt = cameraEngine.tilt(routeInformation);
+    double zoom = cameraEngine.zoom(routeInformation);
+    LatLng target = cameraEngine.target(routeInformation);
+    double initialBearing = cameraEngine.bearing(routeInformation);
 
     return new CameraPosition.Builder()
-      .tilt(CAMERA_TILT)
-      .zoom(CAMERA_ZOOM)
-      .target(target)
-      .bearing(location.getBearing())
-      .build();
+            .tilt(tilt)
+            .zoom(zoom)
+            .target(target)
+            .bearing(initialBearing)
+            .build();
   }
 
   /**
@@ -272,24 +240,7 @@ public class NavigationCamera implements ProgressChangeListener {
     targetDistance = (viewHeight / screenHeight) * 100;
   }
 
-  /**
-   * Defines the camera zoom level given the screen orientation.
-   *
-   * @param context used for getting current orientation
-   */
   private void initializeScreenOrientation(Context context) {
-    CAMERA_ZOOM = new OrientationMap().get(context.getResources().getConfiguration().orientation);
-  }
-
-  /**
-   * Holds the two different screen orientations
-   * and their corresponding zoom levels.
-   */
-  private static class OrientationMap extends SparseArray<Integer> {
-
-    OrientationMap() {
-      put(ORIENTATION_PORTRAIT, 17);
-      put(ORIENTATION_LANDSCAPE, 16);
-    }
+    configuration = context.getResources().getConfiguration();
   }
 }
