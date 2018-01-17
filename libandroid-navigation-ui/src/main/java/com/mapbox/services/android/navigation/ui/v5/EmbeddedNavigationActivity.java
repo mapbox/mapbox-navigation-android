@@ -3,9 +3,13 @@ package com.mapbox.services.android.navigation.ui.v5;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.IdRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.TextView;
 
 import com.mapbox.geojson.Point;
@@ -24,6 +28,7 @@ import java.util.HashMap;
 public class EmbeddedNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener {
 
   private NavigationView navigationView;
+  private TextView currentSpeedWidget;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -33,12 +38,16 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
     navigationView = findViewById(R.id.navigationView);
     navigationView.onCreate(savedInstanceState);
 
-    TextView driverCard = findViewById(R.id.speed_limit);
-    CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) driverCard.getLayoutParams();
-    layoutParams.setAnchorId(R.id.summaryBottomSheet);
-    driverCard.setLayoutParams(layoutParams);
+    currentSpeedWidget = findViewById(R.id.speed_limit);
+    setSpeedWidgetAnchor(R.id.summaryBottomSheet);
 
     navigationView.getNavigationAsync(this);
+  }
+
+  private void setSpeedWidgetAnchor(@IdRes int res) {
+    CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) currentSpeedWidget.getLayoutParams();
+    layoutParams.setAnchorId(res);
+    currentSpeedWidget.setLayoutParams(layoutParams);
   }
 
   @Override
@@ -80,7 +89,30 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
     extractRoute(options);
     extractCoordinates(options);
     extractConfiguration(options);
+    setBottomSheetCallback(options);
+
     navigationView.startNavigation(options.build());
+  }
+
+  private void setBottomSheetCallback(NavigationViewOptions.Builder options) {
+    options.bottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+      @Override
+      public void onStateChanged(@NonNull View bottomSheet, int newState) {
+        switch (newState) {
+          case BottomSheetBehavior.STATE_HIDDEN:
+            setSpeedWidgetAnchor(R.id.recenterBtn);
+            break;
+          case BottomSheetBehavior.STATE_EXPANDED:
+          case BottomSheetBehavior.STATE_COLLAPSED:
+            setSpeedWidgetAnchor(R.id.summaryBottomSheet);
+        }
+      }
+
+      @Override
+      public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+      }
+    });
   }
 
   @Override
