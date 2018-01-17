@@ -50,6 +50,12 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
     navigationView.getNavigationAsync(this);
   }
 
+  /**
+   * Sets the anchor of the spacer for the speed widget, thus setting the anchor for the speed widget
+   * (The speed widget is anchored to the spacer, which is there because padding between items and
+   * their anchors in CoordinatorLayouts is finicky.
+   * @param res resource for view of which to anchor the spacer
+   */
   private void setSpeedWidgetAnchor(@IdRes int res) {
     CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) spacer.getLayoutParams();
     layoutParams.setAnchorId(res);
