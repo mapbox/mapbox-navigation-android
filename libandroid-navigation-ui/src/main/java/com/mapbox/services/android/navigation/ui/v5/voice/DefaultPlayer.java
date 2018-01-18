@@ -3,6 +3,8 @@ package com.mapbox.services.android.navigation.ui.v5.voice;
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import java.util.HashMap;
@@ -30,30 +32,10 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
    * @param context used to create an instance of {@link TextToSpeech}
    * @since 0.6.0
    */
-  DefaultPlayer(Context context) {
+  DefaultPlayer(@NonNull Context context, @Nullable Locale language) {
     textToSpeech = new TextToSpeech(context, this);
-    textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-      @Override
-      public void onStart(String utteranceId) {
-        if (instructionListener != null) {
-          instructionListener.onStart();
-        }
-      }
-
-      @Override
-      public void onDone(String utteranceId) {
-        if (instructionListener != null) {
-          instructionListener.onDone();
-        }
-      }
-
-      @Override
-      public void onError(String utteranceId) {
-        if (instructionListener != null) {
-          instructionListener.onError();
-        }
-      }
-    });
+    initLanguage(language);
+    initProgressListener();
   }
 
   /**
@@ -110,6 +92,36 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
     if (status != TextToSpeech.ERROR) {
       textToSpeech.setLanguage(Locale.getDefault());
     }
+  }
+
+  private void initLanguage(@Nullable Locale language) {
+    Locale ttsLanguage = language != null ? language : Locale.getDefault();
+    textToSpeech.setLanguage(ttsLanguage);
+  }
+
+  private void initProgressListener() {
+    textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+      @Override
+      public void onStart(String utteranceId) {
+        if (instructionListener != null) {
+          instructionListener.onStart();
+        }
+      }
+
+      @Override
+      public void onDone(String utteranceId) {
+        if (instructionListener != null) {
+          instructionListener.onDone();
+        }
+      }
+
+      @Override
+      public void onError(String utteranceId) {
+        if (instructionListener != null) {
+          instructionListener.onError();
+        }
+      }
+    });
   }
 
   /**

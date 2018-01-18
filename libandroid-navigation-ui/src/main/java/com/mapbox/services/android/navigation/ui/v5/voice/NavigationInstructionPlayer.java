@@ -11,6 +11,8 @@ import android.text.TextUtils;
 import com.mapbox.services.android.navigation.ui.v5.voice.polly.PollyPlayer;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
+import java.util.Locale;
+
 public class NavigationInstructionPlayer implements InstructionPlayer, InstructionListener {
 
   private AudioManager instructionAudioManager;
@@ -19,23 +21,11 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
   private InstructionListener instructionListener;
   private boolean isPollyPlayer;
 
-  public NavigationInstructionPlayer(@NonNull Context context, @Nullable String awsPoolId) {
+  public NavigationInstructionPlayer(@NonNull Context context, @Nullable Locale language, @Nullable String awsPoolId) {
     initAudioManager(context);
     initAudioFocusRequest();
-    if (!TextUtils.isEmpty(awsPoolId)) {
-      instructionPlayer = new PollyPlayer(context, awsPoolId);
-      isPollyPlayer = true;
-    } else {
-      instructionPlayer = new DefaultPlayer(context);
-    }
+    initInstructionPlayer(context, language, awsPoolId);
     instructionPlayer.addInstructionListener(this);
-  }
-
-  private void initAudioFocusRequest() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      instructionFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
-        .build();
-    }
   }
 
   @Override
@@ -102,6 +92,22 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
 
   private void initAudioManager(Context context) {
     instructionAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+  }
+
+  private void initInstructionPlayer(Context context, Locale language, String awsPoolId) {
+    if (!TextUtils.isEmpty(awsPoolId)) {
+      instructionPlayer = new PollyPlayer(context, language, awsPoolId);
+      isPollyPlayer = true;
+    } else {
+      instructionPlayer = new DefaultPlayer(context, language);
+    }
+  }
+
+  private void initAudioFocusRequest() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      instructionFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+        .build();
+    }
   }
 
   private void requestAudioFocus() {

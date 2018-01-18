@@ -4,6 +4,8 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
@@ -15,6 +17,7 @@ import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import timber.log.Timber;
 
@@ -41,8 +44,8 @@ public class PollyPlayer implements InstructionPlayer {
    * @param context   to initialize {@link CognitoCachingCredentialsProvider} and {@link AudioManager}
    * @param awsPoolId to initialize {@link CognitoCachingCredentialsProvider}
    */
-  public PollyPlayer(Context context, String awsPoolId) {
-    initPollyClient(context, awsPoolId);
+  public PollyPlayer(@NonNull Context context, @Nullable Locale language, @NonNull String awsPoolId) {
+    initPollyClient(context, language, awsPoolId);
   }
 
   /**
@@ -82,7 +85,7 @@ public class PollyPlayer implements InstructionPlayer {
     this.instructionListener = instructionListener;
   }
 
-  private void initPollyClient(Context context, String awsPoolId) {
+  private void initPollyClient(Context context, Locale language, String awsPoolId) {
     CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
       context,
       awsPoolId,

@@ -352,8 +352,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
     // Initialize navigation with options from NavigationViewOptions
     if (!isInitialized) {
-      navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
-        options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
+      // Set options from nav ui to true for telem
+      options.navigationOptions().toBuilder().isFromNavigationUi(true).build();
+      // Initialize the navigation view model
+      navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(), options);
       // Initialize the camera (listens to MapboxNavigation)
       initCamera();
       setupListeners(options);

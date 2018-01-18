@@ -33,6 +33,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 import java.text.DecimalFormat;
+import java.util.Locale;
 
 public class NavigationViewModel extends AndroidViewModel implements ProgressChangeListener,
   OffRouteListener, MilestoneEventListener, NavigationEventListener {
@@ -59,7 +60,6 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   public NavigationViewModel(Application application) {
     super(application);
     preferences = PreferenceManager.getDefaultSharedPreferences(application);
-    initVoiceInstructions(application);
     initConnectivityManager(application);
     initDecimalFormat();
   }
@@ -200,9 +200,10 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    *
    * @param options to init MapboxNavigation
    */
-  void initializeNavigationOptions(Context context, MapboxNavigationOptions options) {
-    initNavigation(context, options);
-    this.unitType = options.unitType();
+  void initializeNavigationOptions(Context context, NavigationViewOptions options) {
+    initNavigation(context, options.navigationOptions());
+    initVoiceInstructions(context, options);
+    this.unitType = options.navigationOptions().unitType();
   }
 
   void updateRoute(DirectionsRoute route) {
@@ -232,9 +233,10 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   /**
    * Initializes the {@link InstructionPlayer}.
    */
-  private void initVoiceInstructions(Application application) {
-    instructionPlayer = new NavigationInstructionPlayer(application.getBaseContext(),
-      preferences.getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
+  private void initVoiceInstructions(Context context, NavigationViewOptions options) {
+    String awsPoolId = options.awsPoolId();
+    Locale language = options.directionsLanguage();
+    instructionPlayer = new NavigationInstructionPlayer(context, language, awsPoolId);
   }
 
   /**
