@@ -2,8 +2,15 @@
 host = https://www.transifex.com
 minimum_perc = 80
 
-[mapbox-navigation-sdk-for-android.stringsxml]
+[mapbox-navigation-sdk-libandroid.stringsxml]
 file_filter = libandroid-navigation/src/main/res/values-<lang>/strings.xml
 source_file = libandroid-navigation/src/main/res/values/strings.xml
 source_lang = en
 type = ANDROID
+
+[mapbox-navigation-sdk-libandroid-ui.stringsxml]
+file_filter = libandroid-navigation-ui/src/main/res/values-<lang>/strings.xml
+source_file = libandroid-navigation-ui/src/main/res/values/strings.xml
+source_lang = en
+type = ANDROID
+
