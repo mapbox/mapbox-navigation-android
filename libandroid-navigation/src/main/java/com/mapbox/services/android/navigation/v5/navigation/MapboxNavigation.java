@@ -390,7 +390,6 @@ public class MapboxNavigation implements ServiceConnection {
       context.unbindService(this);
       isBound = false;
       navigationEventDispatcher.onNavigationEvent(false);
-      navigationTelemetry.endSession();
     }
   }
 

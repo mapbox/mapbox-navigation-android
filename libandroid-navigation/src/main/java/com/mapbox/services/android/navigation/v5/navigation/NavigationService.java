@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Build;
@@ -62,12 +61,6 @@ public class NavigationService extends Service implements LocationEngineListener
     thread.start();
     thread.prepareHandler();
     recentDistancesFromManeuverInMeters = new RingBuffer<>(3);
-  }
-
-  @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    NavigationTelemetry.getInstance().onConfigurationChange();
   }
 
   /**

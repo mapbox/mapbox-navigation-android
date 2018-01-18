@@ -15,7 +15,6 @@ import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.location.MetricsLocation;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationLifecycleMonitor;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListeners;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.RerouteEvent;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.SessionState;
@@ -147,9 +146,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
       validateAccessToken(accessToken);
 
-      // Setup the listeners
-      initEventDispatcherListeners(navigation);
-
       MapboxNavigationOptions options = navigation.options();
       // Set sdkIdentifier based on if from UI or not
       String sdkIdentifier = updateSdkIdentifier(options);
@@ -169,6 +165,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
       isInitialized = true;
     }
+    // Setup the listeners
+    initEventDispatcherListeners(navigation);
   }
 
   /**
@@ -192,25 +190,25 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   void startSession(DirectionsRoute directionsRoute) {
     if (!isConfigurationChange) {
       navigationSessionState = navigationSessionState.toBuilder()
+        .sessionIdentifier(TelemetryUtils.buildUUID())
         .originalDirectionRoute(directionsRoute)
         .originalRequestIdentifier(directionsRoute.routeOptions().requestUuid())
         .requestIdentifier(directionsRoute.routeOptions().requestUuid())
         .currentDirectionRoute(directionsRoute)
-        .sessionIdentifier(TelemetryUtils.buildUUID())
         .eventRouteDistanceCompleted(0)
         .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
         .rerouteCount(0)
         .build();
-    } else {
-      isConfigurationChange = false;
     }
+    isConfigurationChange = false;
   }
 
   /**
    * Flushes any remaining events from the reroute / feedback queue and fires
    * a cancel event indicating a terminated session.
    */
-  void endSession() {
+  void endSession(boolean isConfigurationChange) {
+    this.isConfigurationChange = isConfigurationChange;
     if (!isConfigurationChange) {
       if (navigationSessionState.startTimestamp() != null) {
         flushEventQueues();
@@ -273,10 +271,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       String locationEngineName = locationEngine.getClass().getName();
       navigationSessionState.toBuilder().locationEngineName(locationEngineName);
     }
-  }
-
-  void onConfigurationChange() {
-    isConfigurationChange = true;
   }
 
   /**
