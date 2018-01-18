@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.ui.v5.camera;
+package com.mapbox.services.android.navigation.ui.v5;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -26,7 +26,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
  *
  * @since 0.6.0
  */
-public class NavigationCamera implements ProgressChangeListener {
+class NavigationCamera implements ProgressChangeListener {
 
   private MapboxMap mapboxMap;
   private MapboxNavigation navigation;
@@ -43,7 +43,7 @@ public class NavigationCamera implements ProgressChangeListener {
    * @param navigation for listening to location updates
    * @since 0.6.0
    */
-  public NavigationCamera(@NonNull View view, @NonNull MapboxMap mapboxMap,
+  NavigationCamera(@NonNull View view, @NonNull MapboxMap mapboxMap,
                           @NonNull MapboxNavigation navigation) {
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
