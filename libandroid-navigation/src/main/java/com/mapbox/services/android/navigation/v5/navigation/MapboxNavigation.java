@@ -343,10 +343,23 @@ public class MapboxNavigation implements ServiceConnection {
     return locationEngine;
   }
 
+  /**
+   * Navigation uses a camera engine to determine the camera position while routing.
+   * By default, it uses a {@link SimpleCamera}. If you would like to customize how the camera is
+   * positioned, create a new {@link Camera} and set it here.
+   * @param cameraEngine camera engine used to configure camera position while routing
+   * @since 0.8.0
+   */
   public void setCameraEngine(@NonNull Camera cameraEngine) {
     this.cameraEngine = cameraEngine;
   }
 
+  /**
+   * Returns the current camera engine used to configure the camera position while routing. By default,
+   * a {@link SimpleCamera} is used.
+   * @return camera engine used to configure camera position while routing
+   * @since 0.8.0
+   */
   public Camera getCameraEngine() {
     return cameraEngine;
   }

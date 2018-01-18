@@ -12,6 +12,11 @@ import com.mapbox.turf.TurfMeasurement;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
+/**
+ * The default camera used by {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
+ *
+ * @since 0.8.1
+ */
 public class SimpleCamera extends Camera {
 
   private static final int CAMERA_TILT = 45;
@@ -30,8 +35,7 @@ public class SimpleCamera extends Camera {
     if (routeInformation.route() != null) {
       setupLineStringAndBearing(routeInformation.route());
       return initialBearing;
-    }
-    else if (routeInformation.location() != null) {
+    } else if (routeInformation.location() != null) {
       return routeInformation.location().getBearing();
     }
     return 0;

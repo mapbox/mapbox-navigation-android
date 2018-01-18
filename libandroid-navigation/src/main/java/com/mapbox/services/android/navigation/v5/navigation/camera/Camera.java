@@ -2,6 +2,15 @@ package com.mapbox.services.android.navigation.v5.navigation.camera;
 
 import com.mapbox.geojson.Point;
 
+/**
+ * This class handles calculating all properties necessary to configure the camera position while
+ * routing. The {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation} uses
+ * a {@link SimpleCamera} by default. If you would like to customize the camera position, create a
+ * concrete implementation of this class or subclass {@link SimpleCamera} and update
+ * {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation#setCameraEngine(Camera)}.
+ *
+ * @since 0.8.1
+ */
 public abstract class Camera {
 
   /**
