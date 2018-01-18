@@ -22,18 +22,15 @@ import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-/**
- * Serves as a launching point for the custom drop-in UI, {@link com.mapbox.services.android.navigation.ui.v5.NavigationView}.
- * <p>
- * Demonstrates the proper setup and usage of the view, including all lifecycle methods.
- */
-public class EmbeddedNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener, ProgressChangeListener {
+public class EmbeddedNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
+  NavigationListener, ProgressChangeListener {
 
   private NavigationView navigationView;
   private View spacer;
   private TextView speedWidget;
   private Point origin = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
   private Point destination = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
+  private boolean bottomSheetVisible = true;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -81,11 +78,19 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
       public void onStateChanged(@NonNull View bottomSheet, int newState) {
         switch (newState) {
           case BottomSheetBehavior.STATE_HIDDEN:
+            bottomSheetVisible = false;
             setSpeedWidgetAnchor(R.id.recenterBtn);
             break;
           case BottomSheetBehavior.STATE_EXPANDED:
-          case BottomSheetBehavior.STATE_COLLAPSED:
-            setSpeedWidgetAnchor(R.id.summaryBottomSheet);
+            bottomSheetVisible = true;
+            break;
+          case BottomSheetBehavior.STATE_SETTLING:
+            if (!bottomSheetVisible) {
+              setSpeedWidgetAnchor(R.id.summaryBottomSheet);
+            }
+            break;
+          default:
+            return;
         }
       }
 
@@ -151,10 +156,15 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
   private void setSpeed(Location location) {
     String string = String.format("%d\nMPH", (int) (location.getSpeed() * 2.2369));
+    int mphTextSize = getResources().getDimensionPixelSize(R.dimen.mph_text_size);
+    int speedTextSize = getResources().getDimensionPixelSize(R.dimen.speed_text_size);
 
     SpannableString spannableString = new SpannableString(string);
-    spannableString.setSpan(new AbsoluteSizeSpan(getResources().getDimensionPixelSize(R.dimen.mph_text_size)), string.length() - 4, string.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-    spannableString.setSpan(new AbsoluteSizeSpan(getResources().getDimensionPixelSize(R.dimen.speed_text_size)), 0, string.length() - 3, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+    spannableString.setSpan(new AbsoluteSizeSpan(mphTextSize),
+      string.length() - 4, string.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+    spannableString.setSpan(new AbsoluteSizeSpan(speedTextSize),
+      0, string.length() - 3, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
     speedWidget.setText(spannableString);
     speedWidget.setVisibility(View.VISIBLE);
