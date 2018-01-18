@@ -86,6 +86,8 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
             break;
           case BottomSheetBehavior.STATE_SETTLING:
             if (!bottomSheetVisible) {
+              // View needs to be anchored to the bottom sheet before it is finished expanding
+              // because of the animation
               setSpeedWidgetAnchor(R.id.summaryBottomSheet);
             }
             break;
@@ -96,7 +98,6 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
       @Override
       public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-
       }
     });
   }
