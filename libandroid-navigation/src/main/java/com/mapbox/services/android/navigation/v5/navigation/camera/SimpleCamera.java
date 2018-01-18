@@ -5,7 +5,6 @@ import android.util.SparseArray;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
-import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
@@ -39,7 +38,7 @@ public class SimpleCamera extends Camera {
   }
 
   @Override
-  public LatLng target(RouteInformation routeInformation) {
+  public Point target(RouteInformation routeInformation) {
     double lng = 0;
     double lat = 0;
     double bearing = 0;
@@ -58,12 +57,8 @@ public class SimpleCamera extends Camera {
             Point.fromLngLat(lng, lat),
             routeInformation.targetDistance(), bearing, TurfConstants.UNIT_METERS
     );
-    LatLng target = new LatLng(
-            targetPoint.latitude(),
-            targetPoint.longitude()
-    );
 
-    return target;
+    return targetPoint;
   }
 
   @Override

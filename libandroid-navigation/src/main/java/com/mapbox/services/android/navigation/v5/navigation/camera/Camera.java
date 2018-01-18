@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation.camera;
 
-
-import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.geojson.Point;
 
 public abstract class Camera {
 
@@ -13,7 +12,7 @@ public abstract class Camera {
   /**
    * The location that the camera is pointing at.
    */
-  public abstract LatLng target(RouteInformation routeInformation);
+  public abstract Point target(RouteInformation routeInformation);
 
   /**
    * The angle, in degrees, of the camera angle from the nadir (directly facing the Earth).
@@ -26,4 +25,5 @@ public abstract class Camera {
    * zoom level.
    */
   public abstract double zoom(RouteInformation routeInformation);
+
 }

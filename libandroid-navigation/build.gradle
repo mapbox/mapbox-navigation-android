@@ -46,7 +46,7 @@ dependencies {
   api (dependenciesList.mapboxServices) {
     transitive = true
   }
-  api dependenciesList.mapboxMapSdk
+
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
 

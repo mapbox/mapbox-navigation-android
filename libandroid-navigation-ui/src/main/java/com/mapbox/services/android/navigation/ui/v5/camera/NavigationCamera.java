@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.view.View;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -79,7 +80,7 @@ public class NavigationCamera implements ProgressChangeListener {
    */
   public void resume(Location location) {
     if (location != null) {
-      currentCameraPosition = buildCameraPositionFromLocation(location);
+      currentCameraPosition = buildCameraPositionFromLocation(location, null);
       animateCameraToPosition(currentCameraPosition);
     } else {
       navigation.addProgressChangeListener(NavigationCamera.this);
@@ -99,7 +100,7 @@ public class NavigationCamera implements ProgressChangeListener {
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     if (location.getLongitude() != 0 && location.getLatitude() != 0) {
-      easeCameraToLocation(location);
+      easeCameraToLocation(location, routeProgress);
     }
   }
 
@@ -161,8 +162,8 @@ public class NavigationCamera implements ProgressChangeListener {
       });
   }
 
-  private void easeCameraToLocation(Location location) {
-    currentCameraPosition = buildCameraPositionFromLocation(location);
+  private void easeCameraToLocation(Location location, RouteProgress routeProgress) {
+    currentCameraPosition = buildCameraPositionFromLocation(location, routeProgress);
     if (trackingEnabled) {
       mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(currentCameraPosition), 1000, false);
     }
@@ -194,9 +195,9 @@ public class NavigationCamera implements ProgressChangeListener {
    * @return camera position to be animated to
    */
   @NonNull
-  private CameraPosition buildCameraPositionFromLocation(Location location) {
+  private CameraPosition buildCameraPositionFromLocation(Location location, RouteProgress routeProgress) {
     RouteInformation routeInformation = RouteInformation.create(configuration, targetDistance,
-            null, location, null);
+            null, location, routeProgress);
     return buildCameraPositionFromRouteInformation(routeInformation);
   }
 
@@ -204,7 +205,11 @@ public class NavigationCamera implements ProgressChangeListener {
     Camera cameraEngine = navigation.getCameraEngine();
     double tilt = cameraEngine.tilt(routeInformation);
     double zoom = cameraEngine.zoom(routeInformation);
-    LatLng target = cameraEngine.target(routeInformation);
+    Point targetPoint = cameraEngine.target(routeInformation);
+    LatLng target = new LatLng(
+            targetPoint.latitude(),
+            targetPoint.longitude()
+    );
     double initialBearing = cameraEngine.bearing(routeInformation);
 
     return new CameraPosition.Builder()
