@@ -5,6 +5,7 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -203,8 +204,13 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * @param route   as backup if view options language not found
    */
   private void cacheRouteLanguage(NavigationViewOptions options, DirectionsRoute route) {
-    Locale language = options.directionsLanguage();
-    this.language = language != null ? language : new Locale(route.routeOptions().language());
+    if (options.directionsLanguage() != null) {
+      language = options.directionsLanguage();
+    } else if (!TextUtils.isEmpty(route.routeOptions().language())) {
+      language = new Locale(route.routeOptions().language());
+    } else {
+      language = Locale.getDefault();
+    }
   }
 
   /**
