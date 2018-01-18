@@ -93,8 +93,8 @@ public class SimpleCamera extends Camera {
   static class OrientationMap extends SparseArray<Integer> {
 
     OrientationMap() {
-      put(ORIENTATION_PORTRAIT, 17);
-      put(ORIENTATION_LANDSCAPE, 16);
+      put(ORIENTATION_PORTRAIT, 16);
+      put(ORIENTATION_LANDSCAPE, 15);
     }
   }
 }
