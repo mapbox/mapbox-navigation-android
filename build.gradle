@@ -25,6 +25,7 @@ task testReport(type: TestReport, group: 'Build') {
 allprojects {
   repositories {
     maven { url 'https://plugins.gradle.org/m2' }
+    maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
     google()
     jcenter()
   }

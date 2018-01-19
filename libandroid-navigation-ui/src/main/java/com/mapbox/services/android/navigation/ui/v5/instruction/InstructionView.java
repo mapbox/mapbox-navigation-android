@@ -44,13 +44,12 @@ import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.abbreviation.StringAbbreviator;
 
 import java.text.DecimalFormat;
 
@@ -70,6 +69,7 @@ import java.text.DecimalFormat;
  */
 public class InstructionView extends RelativeLayout implements FeedbackBottomSheetListener {
 
+  public boolean isMuted;
   private ManeuverView upcomingManeuverView;
   private TextView upcomingDistanceText;
   private TextView upcomingPrimaryText;
@@ -97,7 +97,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private LegStep currentStep;
   private NavigationViewModel navigationViewModel;
   private boolean isRerouting;
-  public boolean isMuted;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -151,22 +150,24 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   public void subscribe(NavigationViewModel navigationViewModel) {
     this.navigationViewModel = navigationViewModel;
-    navigationViewModel.instructionModel.observe((LifecycleOwner) getContext(), new Observer<InstructionModel>() {
+    LifecycleOwner owner = (LifecycleOwner) getContext();
+    navigationViewModel.instructionModel.observe(owner, new Observer<InstructionModel>() {
       @Override
       public void onChanged(@Nullable InstructionModel model) {
         if (model != null) {
-          updateManeuverView(model);
-          addDistanceText(model);
-          addTextInstruction(model);
-          updateInstructionList(model);
-          if (newStep(model.getProgress())) {
-            checkTurnLanes(model);
-            updateThenStep(model);
-          }
+          updateViews(model);
         }
       }
     });
-    navigationViewModel.isOffRoute.observe((LifecycleOwner) getContext(), new Observer<Boolean>() {
+    navigationViewModel.bannerInstructionModel.observe(owner, new Observer<BannerInstructionModel>() {
+      @Override
+      public void onChanged(@Nullable BannerInstructionModel bannerInstructionModel) {
+        if (bannerInstructionModel != null) {
+          updateTextInstruction(bannerInstructionModel);
+        }
+      }
+    });
+    navigationViewModel.isOffRoute.observe(owner, new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {
@@ -198,14 +199,21 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   public void update(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
     if (routeProgress != null && !isRerouting) {
       InstructionModel model = new InstructionModel(routeProgress, decimalFormat, unitType);
-      updateManeuverView(model);
-      addDistanceText(model);
-      addTextInstruction(model);
-      updateInstructionList(model);
-      if (newStep(model.getProgress())) {
-        checkTurnLanes(model);
-        updateThenStep(model);
-      }
+      updateViews(model);
+      updateTextInstruction(model);
+    }
+  }
+
+  private void updateViews(InstructionModel model) {
+    updateManeuverView(model);
+    updateDistanceText(model);
+    updateInstructionList(model);
+    if (newStep(model.getProgress())) {
+      updateTurnLanes(model);
+      updateThenStep(model);
+      // Pre-fetch the image URLs for the upcoming step
+      LegStep upComingStep = model.getProgress().currentLegProgress().upComingStep();
+      InstructionLoader.getInstance().prefetchImageCache(upComingStep);
     }
   }
 
@@ -591,8 +599,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model provides maneuver modifier / type
    */
   private void updateManeuverView(InstructionModel model) {
-    upcomingManeuverView.setManeuverModifier(model.getManeuverViewModifier());
-    upcomingManeuverView.setManeuverType(model.getManeuverViewType());
+    upcomingManeuverView.setManeuverModifier(model.getStepResources().getManeuverViewModifier());
+    upcomingManeuverView.setManeuverType(model.getStepResources().getManeuverViewType());
   }
 
   /**
@@ -601,7 +609,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    *
    * @param model provides distance text
    */
-  private void addDistanceText(InstructionModel model) {
+  private void updateDistanceText(InstructionModel model) {
     if (newDistanceText(model)) {
       distanceText(model);
     } else if (upcomingDistanceText.getText().toString().isEmpty()) {
@@ -616,9 +624,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private boolean newDistanceText(InstructionModel model) {
     return !upcomingDistanceText.getText().toString().isEmpty()
-      && !TextUtils.isEmpty(model.getStepDistanceRemaining())
+      && !TextUtils.isEmpty(model.getStepResources().getStepDistanceRemaining())
       && !upcomingDistanceText.getText().toString()
-      .contentEquals(model.getStepDistanceRemaining().toString());
+      .contentEquals(model.getStepResources().getStepDistanceRemaining().toString());
   }
 
   /**
@@ -627,7 +635,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model provides distance text
    */
   private void distanceText(InstructionModel model) {
-    upcomingDistanceText.setText(model.getStepDistanceRemaining());
+    upcomingDistanceText.setText(model.getStepResources().getStepDistanceRemaining());
   }
 
   /**
@@ -636,12 +644,21 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    *
    * @param model provides instruction text
    */
-  private void addTextInstruction(InstructionModel model) {
-    if (newPrimaryText(model) || newSecondaryText(model)) {
-      textInstructions(model);
-    } else if (upcomingPrimaryText.getText().toString().isEmpty()
-      || upcomingSecondaryText.getText().toString().isEmpty()) {
-      textInstructions(model);
+  private void updateTextInstruction(InstructionModel model) {
+    if (model.getPrimaryBannerText() != null) {
+      InstructionLoader.getInstance().loadInstruction(upcomingPrimaryText, model.getPrimaryBannerText());
+    }
+    if (model.getSecondaryBannerText() != null) {
+      if (upcomingSecondaryText.getVisibility() == GONE) {
+        upcomingSecondaryText.setVisibility(VISIBLE);
+        upcomingPrimaryText.setMaxLines(1);
+        adjustBannerTextVerticalBias(0.65f);
+      }
+      InstructionLoader.getInstance().loadInstruction(upcomingSecondaryText, model.getSecondaryBannerText());
+    } else {
+      upcomingPrimaryText.setMaxLines(2);
+      upcomingSecondaryText.setVisibility(GONE);
+      adjustBannerTextVerticalBias(0.5f);
     }
   }
 
@@ -658,64 +675,16 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   /**
-   * Looks to see if we have a new primary instruction text.
-   *
-   * @param model provides primary instruction text
-   */
-  private boolean newPrimaryText(InstructionModel model) {
-    // New primaryText instruction
-    String currentPrimaryText = upcomingPrimaryText.getText().toString();
-    return !currentPrimaryText.isEmpty()
-      && !TextUtils.isEmpty(model.getPrimaryText())
-      && !currentPrimaryText.contentEquals(model.getPrimaryText());
-  }
-
-  /**
-   * Looks to see if we have a new secondary instruction text.
-   *
-   * @param model provides secondary instruction text
-   */
-  private boolean newSecondaryText(InstructionModel model) {
-    // New primaryText instruction
-    String currentSecondaryText = upcomingSecondaryText.getText().toString();
-    return !currentSecondaryText.isEmpty()
-      && !TextUtils.isEmpty(model.getSecondaryText())
-      && !currentSecondaryText.contentEquals(model.getSecondaryText());
-  }
-
-  /**
-   * Sets current instruction text.
-   *
-   * @param model provides instruction text
-   */
-  private void textInstructions(InstructionModel model) {
-    if (!TextUtils.isEmpty(model.getPrimaryText())) {
-      upcomingPrimaryText.setText(StringAbbreviator.abbreviate(model.getPrimaryText()));
-    }
-    if (!TextUtils.isEmpty(model.getSecondaryText())) {
-      if (upcomingSecondaryText.getVisibility() == GONE) {
-        upcomingSecondaryText.setVisibility(VISIBLE);
-        upcomingPrimaryText.setMaxLines(1);
-        adjustBannerTextVerticalBias(0.65f);
-      }
-      upcomingSecondaryText.setText(StringAbbreviator.abbreviate(model.getSecondaryText()));
-    } else {
-      upcomingPrimaryText.setMaxLines(2);
-      upcomingSecondaryText.setVisibility(GONE);
-      adjustBannerTextVerticalBias(0.5f);
-    }
-  }
-
-  /**
    * Looks for turn lane data and populates / shows the turn lane view if found.
    * If not, hides the turn lane view.
    *
    * @param model created with new {@link RouteProgress} holding turn lane data
    */
-  private void checkTurnLanes(InstructionModel model) {
-    if (model.getTurnLanes() != null
-      && !TextUtils.isEmpty(model.getManeuverViewModifier())) {
-      turnLaneAdapter.addTurnLanes(model.getTurnLanes(), model.getManeuverViewModifier());
+  private void updateTurnLanes(InstructionModel model) {
+    if (model.getStepResources().getTurnLanes() != null
+      && !TextUtils.isEmpty(model.getStepResources().getManeuverViewModifier())) {
+      turnLaneAdapter.addTurnLanes(model.getStepResources().getTurnLanes(),
+        model.getStepResources().getManeuverViewModifier());
       showTurnLanes();
     } else {
       hideTurnLanes();
@@ -755,9 +724,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void updateThenStep(InstructionModel model) {
     if (shouldShowThenStep(model)) {
-      thenManeuverView.setManeuverType(model.getThenStepManeuverType());
-      thenManeuverView.setManeuverModifier(model.getThenStepManeuverModifier());
-      thenStepText.setText(model.getThenStepText());
+      thenManeuverView.setManeuverType(model.getStepResources().getThenStepManeuverType());
+      thenManeuverView.setManeuverModifier(model.getStepResources().getThenStepManeuverModifier());
+      thenStepText.setText(model.getThenBannerText().text());
       showThenStepLayout();
     } else {
       hideThenStepLayout();
@@ -773,7 +742,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @return true if should show, false if not
    */
   private boolean shouldShowThenStep(InstructionModel model) {
-    return turnLaneLayout.getVisibility() != VISIBLE && model.shouldShowThenStep();
+    return turnLaneLayout.getVisibility() != VISIBLE
+      && model.getThenBannerText() != null
+      && model.getStepResources().shouldShowThenStep();
   }
 
   /**

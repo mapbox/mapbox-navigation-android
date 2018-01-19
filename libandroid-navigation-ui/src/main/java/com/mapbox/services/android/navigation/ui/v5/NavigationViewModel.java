@@ -15,10 +15,12 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
+import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
+import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
@@ -38,6 +40,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   OffRouteListener, MilestoneEventListener, NavigationEventListener {
 
   public final MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
+  public final MutableLiveData<BannerInstructionModel> bannerInstructionModel = new MutableLiveData<>();
   public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isFeedbackShowing = new MutableLiveData<>();
@@ -124,6 +127,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
     } else {
       instructionPlayer.play(instruction);
     }
+    updateBannerInstruction(routeProgress, milestone);
   }
 
   /**
@@ -309,5 +313,12 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
 
     NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
     return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+  }
+
+  private void updateBannerInstruction(RouteProgress routeProgress, Milestone milestone) {
+    if (milestone instanceof BannerInstructionMilestone) {
+      bannerInstructionModel.setValue(new BannerInstructionModel((BannerInstructionMilestone) milestone,
+        routeProgress, decimalFormat, unitType));
+    }
   }
 }

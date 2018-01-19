@@ -35,6 +35,15 @@ public final class NavigationConstants {
   public static final String NAVIGATION_NOTIFICATION_CHANNEL = "NAVIGATION_NOTIFICATION_CHANNEL";
 
   /**
+   * This identifier will be used to
+   * differentiate the {@link com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone}
+   * from custom milestones in the {@link com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener}.
+   *
+   * @since 0.8.0
+   */
+  public static final int BANNER_INSTRUCTION_MILESTONE_ID = 2;
+
+  /**
    * Random integer value used for identifying the navigation notification.
    *
    * @since 0.5.0
