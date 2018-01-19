@@ -56,22 +56,6 @@ public class MeasurementUtilsTest extends BaseTest {
     assertEquals(0.04457271773629306d, distance, DELTA);
   }
 
-  private LegStep createTestStep(List<Point> geometryPoints) {
-    double[] location = {0d, 0d};
-    StepManeuver maneuver = StepManeuver.builder()
-      .rawLocation(location)
-      .build();
-
-    return LegStep.builder()
-      .geometry(PolylineUtils.encode(geometryPoints, PRECISION_6))
-      .mode("driving")
-      .distance(2000d)
-      .duration(1000d)
-      .maneuver(maneuver)
-      .weight(0d)
-      .build();
-  }
-
   private LegStep getLegStep(double[] rawLocation, List<Point> geometryPoints) {
     return LegStep.builder()
       .geometry(PolylineUtils.encode(geometryPoints, PRECISION_6))
