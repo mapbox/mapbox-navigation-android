@@ -82,8 +82,9 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       routeProgress, stepPositions)
       : newLocationModel.location();
 
-    // Check for faster route only if not off-route
-    final boolean checkFasterRoute = !userOffRoute && shouldCheckFasterRoute(newLocationModel, routeProgress);
+    // Check for faster route only if enabled and not off-route
+    final boolean checkFasterRoute = newLocationModel.mapboxNavigation().options().enableFasterRouteDetection()
+      && !userOffRoute && shouldCheckFasterRoute(newLocationModel, routeProgress);
 
     previousRouteProgress = routeProgress;
 
