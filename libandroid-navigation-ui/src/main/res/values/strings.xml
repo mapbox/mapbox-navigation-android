@@ -3,8 +3,8 @@
     <!-- Indicates that rerouting is in progress -->
     <string name="rerouting">Rerouting…</string>
 
-    <!-- Button title for resume tracking -->
-    <string name="resume">Resume</string>
+    <!-- Button title for re-centering tracking -->
+    <string name="re_center">Re-center</string>
 
     <!-- Indicates voice instructions are muted -->
     <string name="muted">Muted</string>
