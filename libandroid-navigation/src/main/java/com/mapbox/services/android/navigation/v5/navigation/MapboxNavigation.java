@@ -18,6 +18,9 @@ import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEven
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
+import com.mapbox.services.android.navigation.v5.route.FasterRoute;
+import com.mapbox.services.android.navigation.v5.route.FasterRouteDetector;
+import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
@@ -53,6 +56,7 @@ public class MapboxNavigation implements ServiceConnection {
   private List<Milestone> milestones;
   private final String accessToken;
   private OffRoute offRouteEngine;
+  private FasterRoute fasterRouteEngine;
   private Snap snapEngine;
   private Context context;
   private boolean isBound;
@@ -143,12 +147,14 @@ public class MapboxNavigation implements ServiceConnection {
       addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
       addMilestone(new BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build());
     }
-
     if (options.snapToRoute()) {
       snapEngine = new SnapToRoute();
     }
     if (options.enableOffRouteDetection()) {
       offRouteEngine = new OffRouteDetector();
+    }
+    if (options().enableFasterRouteDetection()) {
+      fasterRouteEngine = new FasterRouteDetector();
     }
   }
 
@@ -546,6 +552,44 @@ public class MapboxNavigation implements ServiceConnection {
     navigationEventDispatcher.removeNavigationEventListener(navigationEventListener);
   }
 
+  /**
+   * This adds a new faster route listener which is invoked when a new, faster {@link DirectionsRoute}
+   * has been retrieved by the specified criteria in {@link FasterRoute}.
+   * <p>
+   * The behavior that causes this listeners callback to get invoked vary depending on whether a
+   * custom faster route engine has been set using {@link #setFasterRouteEngine(FasterRoute)}.
+   * </p><p>
+   * It is not possible to add the same listener implementation more then once and a warning will be
+   * printed in the log if attempted.
+   * </p>
+   *
+   * @param fasterRouteListener an implementation of {@code FasterRouteListener}
+   * @see FasterRouteListener
+   * @since 0.9.0
+   */
+  public void addFasterRouteListener(@NonNull FasterRouteListener fasterRouteListener) {
+    navigationEventDispatcher.addFasterRouteListener(fasterRouteListener);
+  }
+
+  /**
+   * This removes a specific faster route listener by passing in the instance of it or you can pass in
+   * null to remove all the listeners. When {@link #onDestroy()} is called, all listeners
+   * get removed automatically, removing the requirement for developers to manually handle this.
+   * <p>
+   * If the listener you are trying to remove does not exist in the list, a warning will be printed
+   * in the log.
+   * </p>
+   *
+   * @param fasterRouteListener an implementation of {@code FasterRouteListener} which currently exist in
+   *                            the fasterRouteListeners list
+   * @see FasterRouteListener
+   * @since 0.9.0
+   */
+  @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  public void removeFasterRouteListener(@Nullable FasterRouteListener fasterRouteListener) {
+    navigationEventDispatcher.removeFasterRouteListener(fasterRouteListener);
+  }
+
   // Custom engines
 
   /**
@@ -612,6 +656,38 @@ public class MapboxNavigation implements ServiceConnection {
   @NonNull
   public OffRoute getOffRouteEngine() {
     return offRouteEngine;
+  }
+
+  /**
+   * This API is used to pass in a custom implementation of the faster-route detection logic, A default
+   * faster-route detection engine is attached when this class is first initialized; setting a custom
+   * one will replace it with your own implementation.
+   * <p>
+   * The engine can be changed at anytime, even during a navigation session.
+   * </p>
+   *
+   * @param fasterRouteEngine a custom implementation of the {@link FasterRoute} class
+   * @see FasterRoute
+   * @since 0.9.0
+   */
+  @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  public void setFasterRouteEngine(@NonNull FasterRoute fasterRouteEngine) {
+    this.fasterRouteEngine = fasterRouteEngine;
+  }
+
+  /**
+   * This will return the currently set faster-route engine which will or is being used during the
+   * navigation session. If no faster-route engine has been set yet, the default engine will be
+   * returned.
+   *
+   * @return the faster-route engine currently set and will/is being used for the navigation session
+   * @see FasterRoute
+   * @since 0.9.0
+   */
+  @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  @NonNull
+  public FasterRoute getFasterRouteEngine() {
+    return fasterRouteEngine;
   }
 
   /**

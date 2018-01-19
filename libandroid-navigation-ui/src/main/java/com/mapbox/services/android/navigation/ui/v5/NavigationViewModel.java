@@ -30,6 +30,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
+import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -37,7 +38,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 import java.text.DecimalFormat;
 
 public class NavigationViewModel extends AndroidViewModel implements ProgressChangeListener,
-  OffRouteListener, MilestoneEventListener, NavigationEventListener {
+  OffRouteListener, MilestoneEventListener, NavigationEventListener, FasterRouteListener {
 
   public final MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
   public final MutableLiveData<BannerInstructionModel> bannerInstructionModel = new MutableLiveData<>();
@@ -46,6 +47,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   public final MutableLiveData<Boolean> isFeedbackShowing = new MutableLiveData<>();
   final MutableLiveData<FeedbackItem> selectedFeedbackItem = new MutableLiveData<>();
   final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
+  final MutableLiveData<DirectionsRoute> fasterRoute = new MutableLiveData<>();
   final MutableLiveData<Point> newOrigin = new MutableLiveData<>();
   final MutableLiveData<Boolean> isRunning = new MutableLiveData<>();
   final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
@@ -142,6 +144,18 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   @Override
   public void onRunning(boolean running) {
     isRunning.setValue(running);
+  }
+
+  /**
+   * Listener that will be fired if a faster {@link DirectionsRoute} is found
+   * while navigating.
+   *
+   * @param directionsRoute faster route retrieved
+   * @since 0.9.0
+   */
+  @Override
+  public void fasterRouteFound(DirectionsRoute directionsRoute) {
+    fasterRoute.setValue(directionsRoute);
   }
 
   public void setMuted(boolean isMuted) {
@@ -266,6 +280,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
       navigation.addOffRouteListener(this);
       navigation.addMilestoneEventListener(this);
       navigation.addNavigationEventListener(this);
+      navigation.addFasterRouteListener(this);
     }
   }
 

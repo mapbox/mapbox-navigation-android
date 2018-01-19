@@ -10,9 +10,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
+import com.mapbox.services.android.navigation.v5.route.RouteEngine;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -20,6 +23,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 
 import java.util.List;
 
+import retrofit2.Response;
 import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
@@ -36,7 +40,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
  * </p>
  */
 public class NavigationService extends Service implements LocationEngineListener,
-  NavigationEngine.Callback {
+  NavigationEngine.Callback, RouteEngine.Callback {
 
   // Message id used when a new location update occurs and we send to the thread.
   private static final int MSG_LOCATION_UPDATED = 1001;
@@ -46,6 +50,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
   private NavigationNotification navigationNotification;
   private MapboxNavigation mapboxNavigation;
+  private RouteEngine routeEngine;
   private LocationEngine locationEngine;
   private NavigationEngine thread;
 
@@ -136,6 +141,37 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
+
+  /**
+   * Callback from the {@link NavigationEngine} - if fired with checkFasterRoute set
+   * to true, a new {@link DirectionsRoute} should be fetched with {@link RouteEngine}.
+   *
+   * @param location to create a new origin
+   * @param routeProgress for various {@link com.mapbox.api.directions.v5.models.LegStep} data
+   * @param checkFasterRoute true if should check for faster route, false otherwise
+   */
+  @Override
+  public void onCheckFasterRoute(Location location, RouteProgress routeProgress, boolean checkFasterRoute) {
+    if (checkFasterRoute) {
+      Point origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+      routeEngine.fetchRoute(origin, routeProgress);
+    }
+  }
+
+  /**
+   * Callback from the {@link RouteEngine} - if fired, a new and valid
+   * {@link DirectionsRoute} has been successfully retrieved.
+   *
+   * @param response with the new route
+   * @param routeProgress holding necessary leg / step information
+   */
+  @Override
+  public void onResponseReceived(Response<DirectionsResponse> response, RouteProgress routeProgress) {
+    if (mapboxNavigation.getFasterRouteEngine().isFasterRoute(response.body(), routeProgress)) {
+      mapboxNavigation.getEventDispatcher().onFasterRouteEvent(response.body().routes().get(0));
+    }
+  }
+
   /**
    * This gets called when {@link MapboxNavigation#startNavigation(DirectionsRoute)} is called and
    * setups variables among other things on the Navigation Service side.
@@ -143,6 +179,7 @@ public class NavigationService extends Service implements LocationEngineListener
   void startNavigation(MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
     initNotification(mapboxNavigation);
+    initRouteEngine(mapboxNavigation);
     acquireLocationEngine();
     forceLocationUpdate();
   }
@@ -200,6 +237,20 @@ public class NavigationService extends Service implements LocationEngineListener
       Notification notification = navigationNotification.getNotification();
       int notificationId = navigationNotification.getNotificationId();
       startForegroundNotification(notification, notificationId);
+    }
+  }
+
+  /**
+   * Builds a new route engine which can be used to find faster routes
+   * during a navigation session based on traffic.
+   * <p>
+   * Check to see if this functionality is enabled / disabled first.
+   *
+   * @param mapboxNavigation for options to check if enabled / disabled
+   */
+  private void initRouteEngine(MapboxNavigation mapboxNavigation) {
+    if (mapboxNavigation.options().enableFasterRouteDetection()) {
+      routeEngine = new RouteEngine(this);
     }
   }
 

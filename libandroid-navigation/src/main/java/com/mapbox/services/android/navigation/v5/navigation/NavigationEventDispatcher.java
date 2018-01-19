@@ -4,10 +4,12 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListeners;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
+import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
@@ -23,6 +25,7 @@ class NavigationEventDispatcher {
   private List<MilestoneEventListener> milestoneEventListeners;
   private List<ProgressChangeListener> progressChangeListeners;
   private List<OffRouteListener> offRouteListeners;
+  private List<FasterRouteListener> fasterRouteListeners;
   private NavigationMetricListeners.EventListeners metricEventListeners;
   private NavigationMetricListeners.ArrivalListener metricArrivalListener;
 
@@ -31,6 +34,7 @@ class NavigationEventDispatcher {
     milestoneEventListeners = new ArrayList<>();
     progressChangeListeners = new ArrayList<>();
     offRouteListeners = new ArrayList<>();
+    fasterRouteListeners = new ArrayList<>();
   }
 
   void addMilestoneEventListener(@NonNull MilestoneEventListener milestoneEventListener) {
@@ -105,6 +109,24 @@ class NavigationEventDispatcher {
     }
   }
 
+  void addFasterRouteListener(@NonNull FasterRouteListener fasterRouteListener) {
+    if (fasterRouteListeners.contains(fasterRouteListener)) {
+      Timber.w("The specified FasterRouteListener has already been added to the stack.");
+      return;
+    }
+    fasterRouteListeners.add(fasterRouteListener);
+  }
+
+  void removeFasterRouteListener(@Nullable FasterRouteListener fasterRouteListener) {
+    if (fasterRouteListener == null) {
+      fasterRouteListeners.clear();
+    } else if (!fasterRouteListeners.contains(fasterRouteListener)) {
+      Timber.w("The specified FasterRouteListener isn't found in stack, therefore, cannot be removed.");
+    } else {
+      fasterRouteListeners.remove(fasterRouteListener);
+    }
+  }
+
   void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
     for (MilestoneEventListener milestoneEventListener : milestoneEventListeners) {
       milestoneEventListener.onMilestoneEvent(routeProgress, instruction, milestone);
@@ -149,6 +171,12 @@ class NavigationEventDispatcher {
   void onNavigationEvent(boolean isRunning) {
     for (NavigationEventListener navigationEventListener : navigationEventListeners) {
       navigationEventListener.onRunning(isRunning);
+    }
+  }
+
+  void onFasterRouteEvent(DirectionsRoute directionsRoute) {
+    for (FasterRouteListener fasterRouteListener : fasterRouteListeners) {
+      fasterRouteListener.fasterRouteFound(directionsRoute);
     }
   }
 

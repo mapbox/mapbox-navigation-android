@@ -22,7 +22,8 @@ public class MeasurementUtilsTest extends BaseTest {
 
     List<Point> geometryPoints = new ArrayList<>();
     geometryPoints.add(futurePoint);
-    LegStep step = createTestStep(geometryPoints);
+    double[] rawLocation = {0, 0};
+    LegStep step = getLegStep(rawLocation, geometryPoints);
 
     double distance = MeasurementUtils.userTrueDistanceFromStep(futurePoint, step);
     assertEquals(0d, distance, DELTA);
@@ -34,7 +35,8 @@ public class MeasurementUtilsTest extends BaseTest {
 
     List<Point> geometryPoints = new ArrayList<>();
     geometryPoints.add(Point.fromLngLat(-95.8427, 29.7757));
-    LegStep step = createTestStep(geometryPoints);
+    double[] rawLocation = {0, 0};
+    LegStep step = getLegStep(rawLocation, geometryPoints);
 
     double distance = MeasurementUtils.userTrueDistanceFromStep(futurePoint, step);
     assertEquals(45900.73617999494, distance, DELTA);
@@ -47,25 +49,21 @@ public class MeasurementUtilsTest extends BaseTest {
     List<Point> geometryPoints = new ArrayList<>();
     geometryPoints.add(Point.fromLngLat(-95.8427, 29.7757));
     geometryPoints.add(futurePoint);
-    LegStep step = createTestStep(geometryPoints);
+    double[] rawLocation = {0, 0};
+    LegStep step = getLegStep(rawLocation, geometryPoints);
 
     double distance = MeasurementUtils.userTrueDistanceFromStep(futurePoint, step);
     assertEquals(0.04457271773629306d, distance, DELTA);
   }
 
-  private LegStep createTestStep(List<Point> geometryPoints) {
-    double[] location = {0d, 0d};
-    StepManeuver maneuver = StepManeuver.builder()
-      .rawLocation(location)
-      .build();
-
+  private LegStep getLegStep(double[] rawLocation, List<Point> geometryPoints) {
     return LegStep.builder()
       .geometry(PolylineUtils.encode(geometryPoints, PRECISION_6))
       .mode("driving")
-      .distance(2000d)
-      .duration(1000d)
-      .maneuver(maneuver)
-      .weight(0d)
+      .distance(0)
+      .duration(0)
+      .maneuver(StepManeuver.builder().rawLocation(rawLocation).build())
+      .weight(0)
       .build();
   }
 }
