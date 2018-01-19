@@ -33,7 +33,10 @@ public class FasterRouteDetectorTest extends BaseTest {
 
   @Before
   public void setup() throws IOException {
-    navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, mock(NavigationTelemetry.class),
+    MapboxNavigationOptions options = MapboxNavigationOptions.builder()
+      .enableFasterRouteDetection(true)
+      .build();
+    navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
       mock(LocationEngine.class));
   }
 
