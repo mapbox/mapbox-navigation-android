@@ -106,7 +106,7 @@ public abstract class MapboxNavigationOptions {
       .userLocationSnapDistance(NavigationConstants.USER_LOCATION_SNAPPING_DISTANCE)
       .secondsBeforeReroute(NavigationConstants.SECONDS_BEFORE_REROUTE)
       .enableOffRouteDetection(true)
-      .enableFasterRouteDetection(true)
+      .enableFasterRouteDetection(false)
       .snapToRoute(true)
       .manuallyEndNavigationUponCompletion(false)
       .defaultMilestonesEnabled(true)
