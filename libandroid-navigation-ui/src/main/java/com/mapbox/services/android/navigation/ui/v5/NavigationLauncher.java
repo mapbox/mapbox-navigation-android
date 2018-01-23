@@ -68,9 +68,8 @@ public class NavigationLauncher {
    */
   static DirectionsRoute extractRoute(Context context) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    String directionsRoute = preferences.getString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, "");
-    return new GsonBuilder().registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create()
-      .fromJson(directionsRoute, DirectionsRoute.class);
+    String directionsRouteJson = preferences.getString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, "");
+    return DirectionsRoute.fromJson(directionsRouteJson);
   }
 
   /**

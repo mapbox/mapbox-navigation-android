@@ -62,13 +62,14 @@ class NavigationViewSubscriber {
     routeViewModel.route.observe(owner, new Observer<DirectionsRoute>() {
       @Override
       public void onChanged(@Nullable DirectionsRoute directionsRoute) {
-        if (isOffRoute) {
-          navigationViewEventDispatcher.onRerouteAlong(directionsRoute);
-        }
         if (directionsRoute != null) {
           navigationViewModel.updateRoute(directionsRoute);
           locationViewModel.updateRoute(directionsRoute);
           navigationPresenter.onRouteUpdate(directionsRoute);
+
+          if (isOffRoute) {
+            navigationViewEventDispatcher.onRerouteAlong(directionsRoute);
+          }
         }
       }
     });
@@ -100,6 +101,19 @@ class NavigationViewSubscriber {
       public void onChanged(@Nullable Location location) {
         if (location != null && location.getLongitude() != 0 && location.getLatitude() != 0) {
           navigationPresenter.onNavigationLocationUpdate(location);
+        }
+      }
+    });
+
+    navigationViewModel.fasterRoute.observe(owner, new Observer<DirectionsRoute>() {
+      @Override
+      public void onChanged(@Nullable DirectionsRoute directionsRoute) {
+        if (directionsRoute != null) {
+          navigationViewModel.updateRoute(directionsRoute);
+          locationViewModel.updateRoute(directionsRoute);
+          navigationPresenter.onRouteUpdate(directionsRoute);
+          // To prevent from firing on rotation
+          navigationViewModel.fasterRoute.setValue(null);
         }
       }
     });

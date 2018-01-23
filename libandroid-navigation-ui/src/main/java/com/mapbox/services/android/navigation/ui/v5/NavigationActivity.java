@@ -22,6 +22,7 @@ import java.util.HashMap;
 public class NavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener {
 
   private NavigationView navigationView;
+  private boolean isConfigurationChange;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -31,6 +32,7 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     navigationView = findViewById(R.id.navigationView);
     navigationView.onCreate(savedInstanceState);
     navigationView.getNavigationAsync(this);
+    isConfigurationChange = savedInstanceState != null;
   }
 
   @Override
@@ -69,8 +71,10 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   public void onNavigationReady() {
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
     options.navigationListener(this);
-    extractRoute(options);
-    extractCoordinates(options);
+    if (!isConfigurationChange) {
+      extractRoute(options);
+      extractCoordinates(options);
+    }
     extractConfiguration(options);
     navigationView.startNavigation(options.build());
   }

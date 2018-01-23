@@ -1,31 +1,21 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.text.SpannableStringBuilder;
-import android.text.TextUtils;
-
-import com.mapbox.api.directions.v5.models.IntersectionLanes;
-import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.api.directions.v5.models.StepIntersection;
+import com.mapbox.api.directions.v5.models.BannerInstructions;
+import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
 import java.text.DecimalFormat;
 import java.util.List;
 
 public class InstructionModel {
 
-  private SpannableStringBuilder stepDistanceRemaining;
-  private InstructionText bannerInstructionText;
-  private InstructionText thenInstructionText;
-  private String maneuverViewModifier;
-  private String maneuverViewType;
-  private String thenStepManeuverModifier;
-  private String thenStepManeuverType;
-  private List<IntersectionLanes> turnLanes;
+  private BannerText primaryBannerText;
+  private BannerText secondaryBannerText;
+  private BannerText thenBannerText;
+  private InstructionStepResources stepResources;
   private RouteProgress progress;
   private int unitType;
-  private boolean shouldShowThenStep;
 
   public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat,
                           @NavigationUnitType.UnitType int unitType) {
@@ -34,56 +24,20 @@ public class InstructionModel {
     buildInstructionModel(progress, decimalFormat, unitType);
   }
 
-  SpannableStringBuilder getStepDistanceRemaining() {
-    return stepDistanceRemaining;
+  BannerText getPrimaryBannerText() {
+    return primaryBannerText;
   }
 
-  String getPrimaryText() {
-    if (bannerInstructionText != null) {
-      return bannerInstructionText.getPrimaryText();
-    } else {
-      return "";
-    }
+  BannerText getSecondaryBannerText() {
+    return secondaryBannerText;
   }
 
-  String getSecondaryText() {
-    if (bannerInstructionText != null) {
-      return bannerInstructionText.getSecondaryText();
-    } else {
-      return "";
-    }
+  BannerText getThenBannerText() {
+    return thenBannerText;
   }
 
-  String getThenStepText() {
-    if (thenInstructionText != null) {
-      return thenInstructionText.getPrimaryText();
-    } else {
-      return "";
-    }
-  }
-
-  String getManeuverViewModifier() {
-    return maneuverViewModifier;
-  }
-
-  String getManeuverViewType() {
-    return maneuverViewType;
-  }
-
-  String getThenStepManeuverModifier() {
-    return thenStepManeuverModifier;
-  }
-
-  String getThenStepManeuverType() {
-    return thenStepManeuverType;
-  }
-
-  boolean shouldShowThenStep() {
-    return shouldShowThenStep;
-  }
-
-  List<IntersectionLanes> getTurnLanes() {
-    return turnLanes;
+  InstructionStepResources getStepResources() {
+    return stepResources;
   }
 
   RouteProgress getProgress() {
@@ -95,83 +49,47 @@ public class InstructionModel {
   }
 
   private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat, int unitType) {
-    formatStepDistance(progress, decimalFormat, unitType);
-    extractStepResources(progress);
+    stepResources = new InstructionStepResources(progress, decimalFormat, unitType);
+    extractStepInstructions(progress);
   }
 
-  private void extractStepResources(RouteProgress progress) {
-    LegStep currentStep = progress.currentLegProgress().currentStep();
-    LegStep upcomingStep = progress.currentLegProgress().upComingStep();
-    LegStep thenStep = progress.currentLegProgress().followOnStep();
+  private void extractStepInstructions(RouteProgress progress) {
+    primaryBannerText = retrievePrimaryInstructionText(progress);
+    secondaryBannerText = retrieveSecondaryInstructionText(progress);
+    thenBannerText = retrieveThenInstructionText(progress);
+  }
 
-    // Type / Modifier / Text
-    if (upcomingStep != null && hasManeuver(upcomingStep)) {
-      maneuverViewType = upcomingStep.maneuver().type();
-      maneuverViewModifier = upcomingStep.maneuver().modifier();
-      // Upcoming instruction text data
-      bannerInstructionText = new InstructionText(upcomingStep);
-    } else if (hasManeuver(currentStep)) {
-      maneuverViewType = currentStep.maneuver().type();
-      maneuverViewModifier = currentStep.maneuver().modifier();
-      // Current instruction text data
-      bannerInstructionText = new InstructionText(currentStep);
-    }
-
-    // Then step (step after upcoming)
-    if (thenStep != null && hasManeuver(thenStep)) {
-      thenStep(upcomingStep, thenStep);
-    }
-
-    // Turn lane data
-    if (upcomingStep != null && hasIntersections(upcomingStep)) {
-      intersectionTurnLanes(upcomingStep);
+  private BannerText retrievePrimaryInstructionText(RouteProgress progress) {
+    List<BannerInstructions> bannerInstructions = progress.currentLegProgress().currentStep().bannerInstructions();
+    if (hasInstructions(bannerInstructions)) {
+      return bannerInstructions.get(0).primary();
+    } else {
+      return null;
     }
   }
 
-  private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat, int unitType) {
-    stepDistanceRemaining = DistanceUtils.distanceFormatter(progress.currentLegProgress()
-      .currentStepProgress().distanceRemaining(), decimalFormat, true, unitType);
-  }
-
-  private boolean hasManeuver(LegStep step) {
-    return step.maneuver() != null;
-  }
-
-  private void intersectionTurnLanes(LegStep step) {
-    StepIntersection intersection = step.intersections().get(0);
-    List<IntersectionLanes> lanes = intersection.lanes();
-    if (checkForNoneIndications(lanes)) {
-      turnLanes = null;
-      return;
+  private BannerText retrieveSecondaryInstructionText(RouteProgress progress) {
+    List<BannerInstructions> bannerInstructions = progress.currentLegProgress().currentStep().bannerInstructions();
+    if (hasInstructions(bannerInstructions)) {
+      return bannerInstructions.get(0).secondary();
+    } else {
+      return null;
     }
-    turnLanes = lanes;
   }
 
-  private void thenStep(LegStep upcomingStep, LegStep thenStep) {
-    thenStepManeuverType = thenStep.maneuver().type();
-    thenStepManeuverModifier = thenStep.maneuver().modifier();
-    thenInstructionText = new InstructionText(thenStep);
-    // Should show then step if the upcoming step is less than 25 seconds
-    shouldShowThenStep = upcomingStep.duration() <= (25d * 1.2d)
-      && !TextUtils.isEmpty(thenInstructionText.getPrimaryText());
-  }
-
-  private boolean checkForNoneIndications(List<IntersectionLanes> lanes) {
-    if (lanes == null) {
-      return true;
-    }
-    for (IntersectionLanes lane : lanes) {
-      for (String indication : lane.indications()) {
-        if (indication.contains("none")) {
-          return true;
-        }
+  private BannerText retrieveThenInstructionText(RouteProgress progress) {
+    if (progress.currentLegProgress().upComingStep() != null) {
+      List<BannerInstructions> bannerInstructions = progress.currentLegProgress().upComingStep().bannerInstructions();
+      if (hasInstructions(bannerInstructions)) {
+        return bannerInstructions.get(0).primary();
+      } else {
+        return null;
       }
     }
-    return false;
+    return null;
   }
 
-  private boolean hasIntersections(LegStep step) {
-    return step.intersections() != null
-      && step.intersections().get(0) != null;
+  private boolean hasInstructions(List<BannerInstructions> bannerInstructions) {
+    return bannerInstructions != null && !bannerInstructions.isEmpty();
   }
 }

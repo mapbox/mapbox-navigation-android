@@ -3,15 +3,15 @@ package com.mapbox.services.android.navigation.ui.v5.summary.list;
 import android.content.res.Configuration;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
+import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionText;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -47,18 +47,29 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   public void onBindViewHolder(InstructionViewHolder holder, int position) {
     if (stepList.get(position) != null) {
       LegStep step = stepList.get(position);
-      InstructionText instructionText = new InstructionText(stepList.get(position));
-      updatePrimaryText(holder, instructionText.getPrimaryText());
-      updateSecondaryText(holder, instructionText.getSecondaryText());
+      if (hasBannerInstructions(step)) {
+        updatePrimaryText(holder, step.bannerInstructions().get(0).primary());
+        updateSecondaryText(holder, step.bannerInstructions().get(0).secondary());
+      } else {
+        holder.stepPrimaryText.setText(step.maneuver().instruction());
+        updateSecondaryText(holder, null);
+      }
       updateManeuverView(holder, step);
-      holder.stepDistanceText.setText(DistanceUtils
-        .distanceFormatter(instructionText.getStepDistance(), decimalFormat, true, unitType));
+      SpannableStringBuilder distanceText = DistanceUtils
+        .distanceFormatter(step.distance(), decimalFormat, true, unitType);
+      holder.stepDistanceText.setText(distanceText);
     }
   }
 
   @Override
   public int getItemCount() {
     return stepList.size();
+  }
+
+  @Override
+  public void onViewDetachedFromWindow(InstructionViewHolder holder) {
+    super.onViewDetachedFromWindow(holder);
+    holder.itemView.clearAnimation();
   }
 
   public void updateSteps(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
@@ -73,15 +84,19 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     notifyDataSetChanged();
   }
 
-  private void updatePrimaryText(InstructionViewHolder holder, String primaryText) {
-    holder.stepPrimaryText.setText(primaryText);
+  private boolean hasBannerInstructions(LegStep step) {
+    return step.bannerInstructions() != null && !step.bannerInstructions().isEmpty();
   }
 
-  private void updateSecondaryText(InstructionViewHolder holder, String secondaryText) {
-    if (!TextUtils.isEmpty(secondaryText)) {
+  private void updatePrimaryText(InstructionViewHolder holder, BannerText primaryText) {
+    holder.stepPrimaryText.setText(primaryText.text());
+  }
+
+  private void updateSecondaryText(InstructionViewHolder holder, BannerText secondaryText) {
+    if (secondaryText != null) {
       holder.stepPrimaryText.setMaxLines(1);
       holder.stepSecondaryText.setVisibility(View.VISIBLE);
-      holder.stepSecondaryText.setText(secondaryText);
+      holder.stepSecondaryText.setText(secondaryText.text());
       adjustBannerTextVerticalBias(holder, 0.65f);
     } else {
       holder.stepPrimaryText.setMaxLines(2);
@@ -106,10 +121,14 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   }
 
   private void updateManeuverView(InstructionViewHolder holder, LegStep step) {
-    if (step.maneuver() != null) {
-      holder.maneuverView.setManeuverModifier(step.maneuver().modifier());
-      holder.maneuverView.setManeuverType(step.maneuver().type());
+    LegStep maneuverStep = step;
+    // Get the upcoming LegStep for the ManeuverView if there is one
+    int upcomingStepIndex = stepList.indexOf(step) + 1;
+    if (upcomingStepIndex < stepList.size()) {
+      maneuverStep = stepList.get(upcomingStepIndex);
     }
+    holder.maneuverView.setManeuverModifier(maneuverStep.maneuver().modifier());
+    holder.maneuverView.setManeuverType(maneuverStep.maneuver().type());
   }
 
   private void addLegSteps(RouteProgress routeProgress) {
@@ -124,7 +143,6 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   private void updateStepList(RouteProgress routeProgress) {
     if (newStep(routeProgress)) {
       removeCurrentStep();
-      removeCurrentUpcomingStep();
     }
   }
 
@@ -133,14 +151,6 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     if (currentStepPosition >= 0) {
       stepList.remove(currentStepPosition);
       notifyItemRemoved(currentStepPosition);
-    }
-  }
-
-  private void removeCurrentUpcomingStep() {
-    int currentUpcomingStepPosition = stepList.indexOf(currentUpcomingStep);
-    if (currentUpcomingStepPosition >= 0) {
-      stepList.remove(currentUpcomingStepPosition);
-      notifyItemRemoved(currentUpcomingStepPosition);
     }
   }
 

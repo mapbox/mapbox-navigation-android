@@ -10,6 +10,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.span.SpanItem;
+import com.mapbox.services.android.navigation.v5.utils.span.TextSpanItem;
 import com.mapbox.services.android.navigation.v5.utils.span.SpanUtils;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfConversion;
@@ -116,8 +117,8 @@ public class DistanceUtils {
 
   private static SpannableStringBuilder generateSpannedText(String distance, String unit) {
     List<SpanItem> spans = new ArrayList<>();
-    spans.add(new SpanItem(new StyleSpan(Typeface.BOLD), distance));
-    spans.add(new SpanItem(new RelativeSizeSpan(0.65f), unit));
+    spans.add(new TextSpanItem(new StyleSpan(Typeface.BOLD), distance));
+    spans.add(new TextSpanItem(new RelativeSizeSpan(0.65f), unit));
     return SpanUtils.combineSpans(spans);
   }
 }
