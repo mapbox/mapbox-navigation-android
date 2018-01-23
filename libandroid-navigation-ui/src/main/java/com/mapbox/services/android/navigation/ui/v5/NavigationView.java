@@ -33,6 +33,7 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
+import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionLoader;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
@@ -180,6 +181,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void onDestroy() {
     mapView.onDestroy();
     navigationViewModel.onDestroy();
+    InstructionLoader.getInstance().shutdown();
   }
 
   /**
@@ -391,6 +393,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void init() {
+    InstructionLoader.getInstance().initialize(getContext());
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
     initViewModels();

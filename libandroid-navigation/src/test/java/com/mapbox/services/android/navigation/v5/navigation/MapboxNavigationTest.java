@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.BANNER_INSTRUCTION_MILESTONE_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -46,9 +47,14 @@ public class MapboxNavigationTest extends BaseTest {
 
   @Test
   public void voiceMilestone_onInitializationDoesGetAdded() throws Exception {
-    assertTrue(navigation.getMilestones().size() == 1
-      && navigation.getMilestones().get(0).getIdentifier() == VOICE_INSTRUCTION_MILESTONE_ID);
+    assertTrue(navigation.getMilestones().get(0).getIdentifier() == VOICE_INSTRUCTION_MILESTONE_ID);
   }
+
+  @Test
+  public void bannerMilestone_onInitializationDoesGetAdded() throws Exception {
+    assertTrue(navigation.getMilestones().get(1).getIdentifier() == BANNER_INSTRUCTION_MILESTONE_ID);
+  }
+
 
   @Test
   public void defaultMilestones_onInitializationDoNotGetAdded() throws Exception {

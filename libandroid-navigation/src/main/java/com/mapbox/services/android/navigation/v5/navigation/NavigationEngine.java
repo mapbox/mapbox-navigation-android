@@ -16,6 +16,7 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
 
+import static com.mapbox.core.constants.Constants.PRECISION_6;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.bearingMatchesManeuverFinalHeading;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getSnappedLocation;
@@ -23,9 +24,9 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.isUserOffRoute;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.legDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.routeDistanceRemaining;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.shouldCheckFasterRoute;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.stepDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.userSnappedToRoutePosition;
-import static com.mapbox.core.constants.Constants.PRECISION_6;
 
 /**
  * This class extends handler thread to run most of the navigation calculations on a separate
@@ -67,13 +68,23 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     final RouteProgress routeProgress = generateNewRouteProgress(
       newLocationModel.mapboxNavigation(), newLocationModel.location(),
       newLocationModel.recentDistancesFromManeuverInMeters());
+
+    // Check milestone list to see if any should be triggered
     final List<Milestone> milestones = checkMilestones(
       previousRouteProgress, routeProgress, newLocationModel.mapboxNavigation());
+
+    // Check if user has gone off-route
     final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress);
+
+    // Create snapped location
     final Location location = !userOffRoute && newLocationModel.mapboxNavigation().options().snapToRoute()
       ? getSnappedLocation(newLocationModel.mapboxNavigation(), newLocationModel.location(),
       routeProgress, stepPositions)
       : newLocationModel.location();
+
+    // Check for faster route only if enabled and not off-route
+    final boolean checkFasterRoute = newLocationModel.mapboxNavigation().options().enableFasterRouteDetection()
+      && !userOffRoute && shouldCheckFasterRoute(newLocationModel, routeProgress);
 
     previousRouteProgress = routeProgress;
 
@@ -83,6 +94,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
         callback.onNewRouteProgress(location, routeProgress);
         callback.onMilestoneTrigger(milestones, routeProgress);
         callback.onUserOffRoute(location, userOffRoute);
+        callback.onCheckFasterRoute(location, routeProgress, checkFasterRoute);
       }
     });
   }
@@ -161,5 +173,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     void onMilestoneTrigger(List<Milestone> triggeredMilestones, RouteProgress routeProgress);
 
     void onUserOffRoute(Location location, boolean userOffRoute);
+
+    void onCheckFasterRoute(Location location, RouteProgress routeProgress, boolean checkFasterRoute);
   }
 }

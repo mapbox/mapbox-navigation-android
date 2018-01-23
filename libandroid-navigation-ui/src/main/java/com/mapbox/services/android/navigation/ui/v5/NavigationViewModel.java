@@ -15,10 +15,12 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
+import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
+import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
@@ -28,6 +30,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
+import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -35,14 +38,16 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 import java.text.DecimalFormat;
 
 public class NavigationViewModel extends AndroidViewModel implements ProgressChangeListener,
-  OffRouteListener, MilestoneEventListener, NavigationEventListener {
+  OffRouteListener, MilestoneEventListener, NavigationEventListener, FasterRouteListener {
 
   public final MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
+  public final MutableLiveData<BannerInstructionModel> bannerInstructionModel = new MutableLiveData<>();
   public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isFeedbackShowing = new MutableLiveData<>();
   final MutableLiveData<FeedbackItem> selectedFeedbackItem = new MutableLiveData<>();
   final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
+  final MutableLiveData<DirectionsRoute> fasterRoute = new MutableLiveData<>();
   final MutableLiveData<Point> newOrigin = new MutableLiveData<>();
   final MutableLiveData<Boolean> isRunning = new MutableLiveData<>();
   final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
@@ -124,6 +129,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
     } else {
       instructionPlayer.play(instruction);
     }
+    updateBannerInstruction(routeProgress, milestone);
   }
 
   /**
@@ -138,6 +144,18 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   @Override
   public void onRunning(boolean running) {
     isRunning.setValue(running);
+  }
+
+  /**
+   * Listener that will be fired if a faster {@link DirectionsRoute} is found
+   * while navigating.
+   *
+   * @param directionsRoute faster route retrieved
+   * @since 0.9.0
+   */
+  @Override
+  public void fasterRouteFound(DirectionsRoute directionsRoute) {
+    fasterRoute.setValue(directionsRoute);
   }
 
   public void setMuted(boolean isMuted) {
@@ -262,6 +280,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
       navigation.addOffRouteListener(this);
       navigation.addMilestoneEventListener(this);
       navigation.addNavigationEventListener(this);
+      navigation.addFasterRouteListener(this);
     }
   }
 
@@ -309,5 +328,12 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
 
     NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
     return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+  }
+
+  private void updateBannerInstruction(RouteProgress routeProgress, Milestone milestone) {
+    if (milestone instanceof BannerInstructionMilestone) {
+      bannerInstructionModel.setValue(new BannerInstructionModel((BannerInstructionMilestone) milestone,
+        routeProgress, decimalFormat, unitType));
+    }
   }
 }
