@@ -168,7 +168,7 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   private void updateDistanceText(RouteProgress routeProgress) {
     if (currentDistanceText == null || newDistanceText(routeProgress)) {
-      currentDistanceText = DistanceUtils.distanceFormatter(
+      currentDistanceText = DistanceUtils.formatDistance(
         routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
         decimalFormat, true, distanceUnitType);
       notificationRemoteViews.setTextViewText(R.id.notificationDistanceText, currentDistanceText);
@@ -177,7 +177,7 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   private boolean newDistanceText(RouteProgress routeProgress) {
     return currentDistanceText != null
-      && !currentDistanceText.toString().equals(DistanceUtils.distanceFormatter(
+      && !currentDistanceText.toString().equals(DistanceUtils.formatDistance(
       routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
       decimalFormat, true, distanceUnitType).toString());
   }

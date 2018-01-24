@@ -7,7 +7,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.text.DecimalFormat;
 
-import static com.mapbox.services.android.navigation.v5.utils.DistanceUtils.distanceFormatter;
+import static com.mapbox.services.android.navigation.v5.utils.DistanceUtils.formatDistance;
 import static com.mapbox.services.android.navigation.v5.utils.time.TimeUtils.formatArrivalTime;
 import static com.mapbox.services.android.navigation.v5.utils.time.TimeUtils.formatTimeRemaining;
 
@@ -19,7 +19,7 @@ public class SummaryModel {
 
   public SummaryModel(RouteProgress progress, DecimalFormat decimalFormat,
                       @NavigationUnitType.UnitType int unitType) {
-    distanceRemaining = distanceFormatter(progress.distanceRemaining(),
+    distanceRemaining = formatDistance(progress.distanceRemaining(),
       decimalFormat, false, unitType);
     timeRemaining = formatTimeRemaining(progress.durationRemaining());
     arrivalTime = formatArrivalTime(progress.durationRemaining());

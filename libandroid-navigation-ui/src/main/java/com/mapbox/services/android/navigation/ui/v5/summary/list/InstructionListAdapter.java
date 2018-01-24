@@ -56,7 +56,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
       }
       updateManeuverView(holder, step);
       SpannableStringBuilder distanceText = DistanceUtils
-        .distanceFormatter(step.distance(), decimalFormat, true, unitType);
+        .formatDistance(step.distance(), decimalFormat, true, unitType);
       holder.stepDistanceText.setText(distanceText);
     }
   }

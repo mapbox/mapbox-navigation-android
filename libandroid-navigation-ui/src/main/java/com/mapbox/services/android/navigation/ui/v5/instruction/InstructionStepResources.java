@@ -80,7 +80,7 @@ class InstructionStepResources {
   }
 
   private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat, int unitType) {
-    stepDistanceRemaining = DistanceUtils.distanceFormatter(progress.currentLegProgress()
+    stepDistanceRemaining = DistanceUtils.formatDistance(progress.currentLegProgress()
       .currentStepProgress().distanceRemaining(), decimalFormat, true, unitType);
   }
 
