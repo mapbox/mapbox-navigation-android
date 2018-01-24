@@ -17,23 +17,21 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class InstructionListAdapter extends RecyclerView.Adapter<InstructionViewHolder> {
-
+  private final Locale locale;
   private List<LegStep> stepList;
-  private DecimalFormat decimalFormat;
-
   private RouteLeg currentLeg;
   private LegStep currentStep;
-  private LegStep currentUpcomingStep;
   private int unitType;
 
-  public InstructionListAdapter() {
+  public InstructionListAdapter(Locale locale) {
     stepList = new ArrayList<>();
-    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
+    this.locale = locale;
+
   }
 
   @Override
@@ -55,8 +53,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
         updateSecondaryText(holder, null);
       }
       updateManeuverView(holder, step);
-      SpannableString distanceText = DistanceUtils
-        .formatDistance(step.distance(), decimalFormat, true, unitType);
+      SpannableString distanceText = DistanceUtils.formatDistance(step.distance(), locale, unitType);
       holder.stepDistanceText.setText(distanceText);
     }
   }
@@ -175,7 +172,6 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   private boolean newStep(RouteProgress routeProgress) {
     boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().currentStep());
     currentStep = routeProgress.currentLegProgress().currentStep();
-    currentUpcomingStep = routeProgress.currentLegProgress().upComingStep();
     return newStep;
   }
 }
