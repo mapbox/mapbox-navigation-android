@@ -121,6 +121,7 @@ public abstract class MapboxNavigationOptions {
       .enableNotification(true)
       .isFromNavigationUi(false)
       .isDebugLoggingEnabled(false)
-      .unitType(NavigationUnitType.TYPE_IMPERIAL);
+      .unitType(NavigationUnitType.TYPE_IMPERIAL)
+      .locale(Locale.US);
   }
 }

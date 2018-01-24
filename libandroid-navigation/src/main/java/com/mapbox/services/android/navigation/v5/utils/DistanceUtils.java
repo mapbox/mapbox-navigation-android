@@ -39,6 +39,8 @@ public class DistanceUtils {
 
   private static NumberFormat numberFormat;
 
+
+
   /**
    * Returns a formatted SpannableString with bold and size formatting. I.e., "10 mi", "350 m"
    * @param distance in meters
@@ -49,7 +51,7 @@ public class DistanceUtils {
    */
   public static SpannableString formatDistance(double distance,
                                                Locale locale,
-                                               int unitType) {
+                                               @NavigationUnitType.UnitType int unitType) {
     numberFormat = NumberFormat.getNumberInstance(locale);
 
     boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
@@ -105,7 +107,7 @@ public class DistanceUtils {
     SpannableString spannableString = new SpannableString(String.format("%s %s", distance, UNIT_STRINGS.get(unit)));
 
     spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, distance.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-    spannableString.setSpan(new RelativeSizeSpan(0.65f), distance.length() + 1, spannableString.length() - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    spannableString.setSpan(new RelativeSizeSpan(0.65f), distance.length() + 1, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
     return spannableString;
   }

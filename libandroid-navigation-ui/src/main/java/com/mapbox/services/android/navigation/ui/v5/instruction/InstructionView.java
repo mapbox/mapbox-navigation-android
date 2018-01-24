@@ -51,7 +51,7 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import java.text.DecimalFormat;
+import java.util.Locale;
 
 /**
  * A view that can be used to display upcoming maneuver information and control
@@ -93,10 +93,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
   private AnimationSet fadeInSlowOut;
-  private DecimalFormat decimalFormat;
   private LegStep currentStep;
   private NavigationViewModel navigationViewModel;
   private boolean isRerouting;
+  private Locale locale;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -108,6 +108,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
   public InstructionView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
+    locale = context.getResources().getConfiguration().locale;
     init();
   }
 
@@ -124,7 +125,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     initBackground();
     initTurnLaneRecyclerView();
     initDirectionsRecyclerView();
-    initDecimalFormat();
     initAnimations();
   }
 
@@ -198,7 +198,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
     if (routeProgress != null && !isRerouting) {
-      InstructionModel model = new InstructionModel(routeProgress, decimalFormat, unitType);
+      InstructionModel model = new InstructionModel(routeProgress, locale, unitType);
       updateViews(model);
       updateTextInstruction(model);
     }
@@ -487,20 +487,12 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
   private void initDirectionsRecyclerView() {
-    instructionListAdapter = new InstructionListAdapter();
+    instructionListAdapter = new InstructionListAdapter(locale);
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
     rvInstructions.setNestedScrollingEnabled(true);
     rvInstructions.setItemAnimator(new DefaultItemAnimator());
     rvInstructions.setLayoutManager(new LinearLayoutManager(getContext()));
-  }
-
-  /**
-   * Initializes decimal format to be used to populate views with
-   * distance remaining.
-   */
-  private void initDecimalFormat() {
-    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
   }
 
   /**

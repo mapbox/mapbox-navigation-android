@@ -5,8 +5,8 @@ import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class InstructionModel {
 
@@ -17,11 +17,11 @@ public class InstructionModel {
   private RouteProgress progress;
   private int unitType;
 
-  public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat,
+  public InstructionModel(RouteProgress progress, Locale locale,
                           @NavigationUnitType.UnitType int unitType) {
     this.progress = progress;
     this.unitType = unitType;
-    buildInstructionModel(progress, decimalFormat, unitType);
+    buildInstructionModel(progress, locale);
   }
 
   BannerText getPrimaryBannerText() {
@@ -48,8 +48,8 @@ public class InstructionModel {
     return unitType;
   }
 
-  private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat, int unitType) {
-    stepResources = new InstructionStepResources(progress, decimalFormat, unitType);
+  private void buildInstructionModel(RouteProgress progress, Locale locale) {
+    stepResources = new InstructionStepResources(progress, locale, unitType);
     extractStepInstructions(progress);
   }
 
