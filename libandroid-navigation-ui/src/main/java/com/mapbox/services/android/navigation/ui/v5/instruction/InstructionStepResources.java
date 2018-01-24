@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.text.SpannableStringBuilder;
+import android.text.SpannableString;
 
 import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
@@ -13,7 +13,7 @@ import java.util.List;
 
 class InstructionStepResources {
 
-  private SpannableStringBuilder stepDistanceRemaining;
+  private SpannableString stepDistanceRemaining;
   private String maneuverViewModifier;
   private String maneuverViewType;
   private String thenStepManeuverModifier;
@@ -26,7 +26,7 @@ class InstructionStepResources {
     extractStepResources(progress);
   }
 
-  SpannableStringBuilder getStepDistanceRemaining() {
+  SpannableString getStepDistanceRemaining() {
     return stepDistanceRemaining;
   }
 
