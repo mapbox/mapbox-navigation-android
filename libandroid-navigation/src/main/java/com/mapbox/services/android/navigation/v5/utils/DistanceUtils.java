@@ -29,10 +29,18 @@ public class DistanceUtils {
   private static final String KILOMETER = " km";
   private static final String METER = " m";
 
-  public static SpannableStringBuilder distanceFormatter(double distance,
-                                                         DecimalFormat decimalFormat,
-                                                         boolean spansEnabled,
-                                                         int unitType) {
+  /**
+   *
+   * @param distance in meters
+   * @param decimalFormat
+   * @param spansEnabled
+   * @param unitType
+   * @return
+   */
+  public static SpannableStringBuilder formatDistance(double distance,
+                                                      DecimalFormat decimalFormat,
+                                                      boolean spansEnabled,
+                                                      int unitType) {
 
     boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
 
@@ -52,6 +60,8 @@ public class DistanceUtils {
     }
     return formattedString;
   }
+
+
 
   private static SpannableStringBuilder roundByFiftyFeet(double distance, boolean spansEnabled,
                                                          String smallUnitFormat, String smallFinalUnit) {
