@@ -107,7 +107,8 @@ public class DistanceUtils {
     SpannableString spannableString = new SpannableString(String.format("%s %s", distance, UNIT_STRINGS.get(unit)));
 
     spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, distance.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-    spannableString.setSpan(new RelativeSizeSpan(0.65f), distance.length() + 1, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    spannableString.setSpan(new RelativeSizeSpan(0.65f),distance.length() + 1,
+      spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
     return spannableString;
   }
