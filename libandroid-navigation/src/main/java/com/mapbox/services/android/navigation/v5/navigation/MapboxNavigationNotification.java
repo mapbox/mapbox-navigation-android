@@ -10,7 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
-import android.text.SpannableStringBuilder;
+import android.text.SpannableString;
 import android.widget.RemoteViews;
 
 import com.mapbox.api.directions.v5.models.LegStep;
@@ -40,7 +40,7 @@ class MapboxNavigationNotification implements NavigationNotification {
   private RemoteViews notificationRemoteViews;
   private MapboxNavigation mapboxNavigation;
 
-  private SpannableStringBuilder currentDistanceText;
+  private SpannableString currentDistanceText;
   private DecimalFormat decimalFormat;
   private String currentArrivalTime;
   private String instructionText;

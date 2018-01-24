@@ -3,7 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.summary.list;
 import android.content.res.Configuration;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
-import android.text.SpannableStringBuilder;
+import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,7 +55,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
         updateSecondaryText(holder, null);
       }
       updateManeuverView(holder, step);
-      SpannableStringBuilder distanceText = DistanceUtils
+      SpannableString distanceText = DistanceUtils
         .formatDistance(step.distance(), decimalFormat, true, unitType);
       holder.stepDistanceText.setText(distanceText);
     }
