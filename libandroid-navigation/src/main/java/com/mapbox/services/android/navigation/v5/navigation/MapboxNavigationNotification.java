@@ -46,6 +46,7 @@ class MapboxNavigationNotification implements NavigationNotification {
   private String instructionText;
   private int currentManeuverId;
   private int distanceUnitType;
+  private Locale locale;
 
   private BroadcastReceiver endNavigationBtnReceiver = new BroadcastReceiver() {
     @Override
@@ -57,6 +58,7 @@ class MapboxNavigationNotification implements NavigationNotification {
   MapboxNavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
     this.distanceUnitType = mapboxNavigation.options().unitType();
+    this.locale = mapboxNavigation.options().locale();
     initialize(context);
   }
 
@@ -170,7 +172,7 @@ class MapboxNavigationNotification implements NavigationNotification {
     if (currentDistanceText == null || newDistanceText(routeProgress)) {
       currentDistanceText = DistanceUtils.formatDistance(
         routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
-        decimalFormat, true, distanceUnitType);
+        locale, distanceUnitType);
       notificationRemoteViews.setTextViewText(R.id.notificationDistanceText, currentDistanceText);
     }
   }
@@ -179,7 +181,7 @@ class MapboxNavigationNotification implements NavigationNotification {
     return currentDistanceText != null
       && !currentDistanceText.toString().equals(DistanceUtils.formatDistance(
       routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
-      decimalFormat, true, distanceUnitType).toString());
+      locale, distanceUnitType).toString());
   }
 
   private void updateArrivalTime(RouteProgress routeProgress) {

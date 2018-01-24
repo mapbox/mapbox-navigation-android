@@ -118,6 +118,7 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     MapboxNavigationOptions navigationOptions = MapboxNavigationOptions.builder()
       .unitType(preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE,
         NavigationUnitType.TYPE_IMPERIAL))
+      .locale(getResources().getConfiguration().locale)
       .build();
     options.navigationOptions(navigationOptions);
   }
