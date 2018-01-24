@@ -20,7 +20,7 @@ public class SummaryModel {
   public SummaryModel(RouteProgress progress, DecimalFormat decimalFormat,
                       @NavigationUnitType.UnitType int unitType) {
     distanceRemaining = formatDistance(progress.distanceRemaining(),
-      decimalFormat, false, unitType);
+      decimalFormat, true, unitType);
     timeRemaining = formatTimeRemaining(progress.durationRemaining());
     arrivalTime = formatArrivalTime(progress.durationRemaining());
   }
