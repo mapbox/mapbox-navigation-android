@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">SDK Điều hướng của Mapbox</string>
+
+    <!-- Notification Strings -->
+    <string name="end_navigation">Kết thúc Điều hướng</string>
+    <string name="channel_name">Thông báo Điều hướng</string>
+    <string name="notification_arrival_time_format">Đến nơi %s</string>
+</resources>

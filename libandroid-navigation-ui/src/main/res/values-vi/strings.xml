@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that rerouting is in progress -->
+    <string name="rerouting">Đang Tìm Đường đi Mới…</string>
+
+    <!-- Indicates voice instructions are muted -->
+    <string name="muted">Tiếng Tắt</string>
+
+    <!-- Indicates voice instructions are unmuted -->
+    <string name="unmuted">Tiếng Mở</string>
+
+    <!-- Test app dialog text -->
+    <string name="dropoff_dialog_text">Bạn có muốn đi tiếp đến nơi sau?</string>
+
+    <!-- Test app dialog text start next route -->
+    <string name="dropoff_dialog_positive_text">Đi tiếp</string>
+
+    <!-- Test app dialog text cancel navigation -->
+    <string name="dropoff_dialog_negative_text">Hủy bỏ</string>
+
+</resources>
