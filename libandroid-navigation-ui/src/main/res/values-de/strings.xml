@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that rerouting is in progress -->
+    <string name="rerouting">Routenneuberechnung...</string>
+
+    <!-- Indicates voice instructions are muted -->
+    <string name="muted">Stumm</string>
+
+    <!-- Indicates voice instructions are unmuted -->
+    <string name="unmuted">Ton an</string>
+
+    <!-- Test app dialog text -->
+    <string name="dropoff_dialog_text">Möchtest Du zum nächsten Ziel navigieren?</string>
+
+    <!-- Test app dialog text start next route -->
+    <string name="dropoff_dialog_positive_text">Nächste starten</string>
+
+    <!-- Test app dialog text cancel navigation -->
+    <string name="dropoff_dialog_negative_text">Abbrechen</string>
+
+</resources>
