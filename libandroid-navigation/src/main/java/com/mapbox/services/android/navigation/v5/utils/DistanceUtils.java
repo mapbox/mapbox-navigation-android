@@ -1,8 +1,10 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.location.Location;
+import android.preference.PreferenceManager;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
@@ -10,6 +12,7 @@ import android.text.style.StyleSpan;
 
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.R;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.turf.TurfConstants;

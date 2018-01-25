@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
+import android.content.Context;
+
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
@@ -17,11 +19,11 @@ public class InstructionModel {
   private RouteProgress progress;
   private int unitType;
 
-  public InstructionModel(RouteProgress progress, Locale locale,
+  public InstructionModel(Context context, RouteProgress progress, Locale locale,
                           @NavigationUnitType.UnitType int unitType) {
     this.progress = progress;
     this.unitType = unitType;
-    buildInstructionModel(progress, locale);
+    buildInstructionModel(context, progress, locale);
   }
 
   BannerText getPrimaryBannerText() {
@@ -48,8 +50,8 @@ public class InstructionModel {
     return unitType;
   }
 
-  private void buildInstructionModel(RouteProgress progress, Locale locale) {
-    stepResources = new InstructionStepResources(progress, locale, unitType);
+  private void buildInstructionModel(Context context, RouteProgress progress, Locale locale) {
+    stepResources = new InstructionStepResources(context, progress, locale, unitType);
     extractStepInstructions(progress);
   }
 

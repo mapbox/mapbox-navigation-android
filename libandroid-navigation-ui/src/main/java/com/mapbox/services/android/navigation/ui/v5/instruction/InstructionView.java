@@ -198,7 +198,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
     if (routeProgress != null && !isRerouting) {
-      InstructionModel model = new InstructionModel(routeProgress, locale, unitType);
+      InstructionModel model = new InstructionModel(getContext(), routeProgress, locale, unitType);
       updateViews(model);
       updateTextInstruction(model);
     }
@@ -487,7 +487,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
   private void initDirectionsRecyclerView() {
-    instructionListAdapter = new InstructionListAdapter(locale);
+    instructionListAdapter = new InstructionListAdapter(getContext(), locale);
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
     rvInstructions.setNestedScrollingEnabled(true);

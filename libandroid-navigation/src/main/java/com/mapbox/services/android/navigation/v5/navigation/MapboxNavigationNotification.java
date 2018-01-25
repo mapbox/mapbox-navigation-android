@@ -31,7 +31,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  */
 class MapboxNavigationNotification implements NavigationNotification {
   private static final String END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION";
-  private final Locale locale;
+  private final DistanceUtils distanceUtils;
   private NotificationCompat.Builder notificationBuilder;
   private NotificationManager notificationManager;
   private Notification notification;
@@ -41,7 +41,6 @@ class MapboxNavigationNotification implements NavigationNotification {
   private String currentArrivalTime;
   private String instructionText;
   private int currentManeuverId;
-  private int distanceUnitType;
 
   private BroadcastReceiver endNavigationBtnReceiver = new BroadcastReceiver() {
     @Override
@@ -52,8 +51,7 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   MapboxNavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
-    this.distanceUnitType = mapboxNavigation.options().unitType();
-    this.locale = mapboxNavigation.options().locale();
+    this.distanceUtils = new DistanceUtils(context, mapboxNavigation.options().locale(), mapboxNavigation.options().unitType());
     initialize(context);
   }
 
@@ -164,18 +162,16 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   private void updateDistanceText(RouteProgress routeProgress) {
     if (currentDistanceText == null || newDistanceText(routeProgress)) {
-      currentDistanceText = DistanceUtils.formatDistance(
-        routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
-        locale, distanceUnitType);
+      currentDistanceText = distanceUtils.formatDistance(
+        routeProgress.currentLegProgress().currentStepProgress().distanceRemaining());
       notificationRemoteViews.setTextViewText(R.id.notificationDistanceText, currentDistanceText);
     }
   }
 
   private boolean newDistanceText(RouteProgress routeProgress) {
     return currentDistanceText != null
-      && !currentDistanceText.toString().equals(DistanceUtils.formatDistance(
-      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
-      locale, distanceUnitType).toString());
+      && !currentDistanceText.toString().equals(distanceUtils.formatDistance(
+      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining()).toString());
   }
 
   private void updateArrivalTime(RouteProgress routeProgress) {

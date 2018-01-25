@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.summary.list;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
@@ -23,14 +24,17 @@ import java.util.Locale;
 
 public class InstructionListAdapter extends RecyclerView.Adapter<InstructionViewHolder> {
   private final Locale locale;
+  private final Context context;
   private List<LegStep> stepList;
   private RouteLeg currentLeg;
   private LegStep currentStep;
   private int unitType;
+  private DistanceUtils distanceUtils;
 
-  public InstructionListAdapter(Locale locale) {
+  public InstructionListAdapter(Context context, Locale locale) {
     stepList = new ArrayList<>();
     this.locale = locale;
+    this.context = context;
   }
 
   @Override
@@ -52,7 +56,11 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
         updateSecondaryText(holder, null);
       }
       updateManeuverView(holder, step);
-      SpannableString distanceText = DistanceUtils.formatDistance(step.distance(), locale, unitType);
+      if (distanceUtils == null) {
+        distanceUtils = new DistanceUtils(context, locale, unitType);
+      }
+
+      SpannableString distanceText = distanceUtils.formatDistance(step.distance());
       holder.stepDistanceText.setText(distanceText);
     }
   }
