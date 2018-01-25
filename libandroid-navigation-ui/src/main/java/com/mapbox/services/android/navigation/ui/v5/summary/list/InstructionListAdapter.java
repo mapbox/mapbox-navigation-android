@@ -14,7 +14,6 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
@@ -23,17 +22,14 @@ import java.util.List;
 import java.util.Locale;
 
 public class InstructionListAdapter extends RecyclerView.Adapter<InstructionViewHolder> {
-  private final Locale locale;
   private final Context context;
   private List<LegStep> stepList;
   private RouteLeg currentLeg;
   private LegStep currentStep;
-  private int unitType;
   private DistanceUtils distanceUtils;
 
   public InstructionListAdapter(Context context, Locale locale) {
     stepList = new ArrayList<>();
-    this.locale = locale;
     this.context = context;
   }
 
@@ -57,7 +53,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
       }
       updateManeuverView(holder, step);
       if (distanceUtils == null) {
-        distanceUtils = new DistanceUtils(context, locale, unitType);
+        distanceUtils = new DistanceUtils(context);
       }
 
       SpannableString distanceText = distanceUtils.formatDistance(step.distance());
@@ -76,8 +72,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     holder.itemView.clearAnimation();
   }
 
-  public void updateSteps(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
-    this.unitType = unitType;
+  public void updateSteps(RouteProgress routeProgress) {
     addLegSteps(routeProgress);
     updateStepList(routeProgress);
   }

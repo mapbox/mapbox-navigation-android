@@ -45,7 +45,6 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.Maneuve
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -192,13 +191,12 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * uses it to update the views.
    *
    * @param routeProgress used to provide navigation / routeProgress data
-   * @param unitType      either imperial or metric
    * @since 0.6.2
    */
   @SuppressWarnings("UnusedDeclaration")
-  public void update(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
+  public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      InstructionModel model = new InstructionModel(getContext(), routeProgress, locale, unitType);
+      InstructionModel model = new InstructionModel(getContext(), routeProgress);
       updateViews(model);
       updateTextInstruction(model);
     }
@@ -784,6 +782,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model to provide the current steps and unit type
    */
   private void updateInstructionList(InstructionModel model) {
-    instructionListAdapter.updateSteps(model.getProgress(), model.getUnitType());
+    instructionListAdapter.updateSteps(model.getProgress());
   }
 }

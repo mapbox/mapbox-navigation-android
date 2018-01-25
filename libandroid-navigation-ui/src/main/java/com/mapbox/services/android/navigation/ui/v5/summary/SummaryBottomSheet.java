@@ -13,12 +13,10 @@ import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.text.DecimalFormat;
-import java.util.Locale;
 
 /**
  * A view with {@link android.support.design.widget.BottomSheetBehavior}
@@ -32,7 +30,6 @@ import java.util.Locale;
 public class SummaryBottomSheet extends FrameLayout {
 
   private static final String EMPTY_STRING = "";
-  private final Locale locale;
   private TextView distanceRemainingText;
   private TextView timeRemainingText;
   private TextView arrivalTimeText;
@@ -49,7 +46,6 @@ public class SummaryBottomSheet extends FrameLayout {
 
   public SummaryBottomSheet(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
-    locale = context.getResources().getConfiguration().locale;
     init();
   }
 
@@ -95,13 +91,12 @@ public class SummaryBottomSheet extends FrameLayout {
    * uses it to update the views.
    *
    * @param routeProgress used to provide navigation / routeProgress data
-   * @param unitType      either imperial or metric
    * @since 0.6.2
    */
   @SuppressWarnings("UnusedDeclaration")
-  public void update(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
+  public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      SummaryModel model = new SummaryModel(getContext(), routeProgress, locale, unitType);
+      SummaryModel model = new SummaryModel(getContext(), routeProgress);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());
