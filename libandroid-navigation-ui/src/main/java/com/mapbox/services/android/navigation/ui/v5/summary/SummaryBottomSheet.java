@@ -32,13 +32,11 @@ import java.util.Locale;
 public class SummaryBottomSheet extends FrameLayout {
 
   private static final String EMPTY_STRING = "";
-
+  private final Locale locale;
   private TextView distanceRemainingText;
   private TextView timeRemainingText;
   private TextView arrivalTimeText;
   private ProgressBar rerouteProgressBar;
-  private final Locale locale;
-
   private boolean isRerouting;
 
   public SummaryBottomSheet(Context context) {
