@@ -13,9 +13,9 @@ import static com.mapbox.services.android.navigation.v5.utils.time.TimeUtils.for
 
 public class SummaryModel {
 
-  private String distanceRemaining;
-  private SpannableStringBuilder timeRemaining;
-  private String arrivalTime;
+  private final String distanceRemaining;
+  private final SpannableStringBuilder timeRemaining;
+  private final String arrivalTime;
 
   public SummaryModel(RouteProgress progress, Locale locale, @NavigationUnitType.UnitType int unitType) {
     distanceRemaining = formatDistance(progress.distanceRemaining(), locale, unitType).toString();
