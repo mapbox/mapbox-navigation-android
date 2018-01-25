@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
+import android.content.Context;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.text.SpannableString;
@@ -8,6 +9,7 @@ import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.turf.TurfConstants;
@@ -19,45 +21,44 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_METRIC;
 import static com.mapbox.turf.TurfConstants.UNIT_FEET;
 import static com.mapbox.turf.TurfConstants.UNIT_KILOMETERS;
 import static com.mapbox.turf.TurfConstants.UNIT_METERS;
 import static com.mapbox.turf.TurfConstants.UNIT_MILES;
 
 public class DistanceUtils {
-  private static final Map<String, String> UNIT_STRINGS = new HashMap<>();
+  private final int LARGE_UNIT_THRESHOLD = 10;
+  private final int SMALL_UNIT_THRESHOLD = 401;
+  private final Map<String, String> UNIT_STRINGS = new HashMap<>();
+  private final NumberFormat numberFormat;
+  private final String largeUnit;
+  private final String smallUnit;
 
-  static {
-    UNIT_STRINGS.put(UNIT_KILOMETERS, "km");
-    UNIT_STRINGS.put(UNIT_METERS, "m");
-    UNIT_STRINGS.put(UNIT_MILES, "mi");
-    UNIT_STRINGS.put(UNIT_FEET, "ft");
+  /**
+   * Creates a DistanceUtils object with information about how to format distances
+   * @param context from which to get localized strings from
+   * @param locale from which to format numbers
+   * @param unitType NavigationUnitType.TYPE_IMPERIAL or NavigationUnitType.TYPE_METRIC
+   */
+  public DistanceUtils(Context context, Locale locale, @NavigationUnitType.UnitType int unitType) {
+    numberFormat = NumberFormat.getNumberInstance(locale);
+    UNIT_STRINGS.put(UNIT_KILOMETERS, context.getString(R.string.kilometers));
+    UNIT_STRINGS.put(UNIT_METERS, context.getString(R.string.meters));
+    UNIT_STRINGS.put(UNIT_MILES, context.getString(R.string.miles));
+    UNIT_STRINGS.put(UNIT_FEET, context.getString(R.string.feet));
+
+    largeUnit = unitType == TYPE_METRIC ? UNIT_KILOMETERS : UNIT_MILES;
+    smallUnit = unitType == TYPE_METRIC ? UNIT_METERS : UNIT_FEET;
   }
-
-  private static final int LARGE_UNIT_THRESHOLD = 10;
-  private static final int SMALL_UNIT_THRESHOLD = 401;
-
-  private static NumberFormat numberFormat;
-
-
 
   /**
    * Returns a formatted SpannableString with bold and size formatting. I.e., "10 mi", "350 m"
    * @param distance in meters
-   * @param locale from which to format numbers
-   * @param unitType NavigationUnitType.TYPE_IMPERIAL or NavigationUnitType.TYPE_METRIC
    * @return SpannableString representation which has a bolded number and units which have a
    * relative size of .65 times the size of the number
    */
-  public static SpannableString formatDistance(double distance,
-                                               Locale locale,
-                                               @NavigationUnitType.UnitType int unitType) {
-    numberFormat = NumberFormat.getNumberInstance(locale);
-
-    boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
-    String largeUnit = isImperialUnitType ? UNIT_MILES : TurfConstants.UNIT_KILOMETERS;
-    String smallUnit = isImperialUnitType ? TurfConstants.UNIT_FEET : TurfConstants.UNIT_METERS;
-
+  public SpannableString formatDistance(double distance) {
     double distanceSmallUnit = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, smallUnit);
     double distanceLargeUnit = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeUnit);
 
@@ -78,7 +79,7 @@ public class DistanceUtils {
    * @param distance to round to closest fifty
    * @return number rounded to closest fifty, or fifty if distance is less than fifty
    */
-  private static String roundToClosestFifty(double distance) {
+  private String roundToClosestFifty(double distance) {
     int roundedNumber = ((int) Math.round(distance)) / 50 * 50;
 
     return String.valueOf(roundedNumber < 50 ? 50 : roundedNumber);
@@ -90,7 +91,7 @@ public class DistanceUtils {
    * @param decimalPlace number of decimal places to round
    * @return distance rounded to given decimal places
    */
-  private static String roundToDecimalPlace(double distance, int decimalPlace) {
+  private String roundToDecimalPlace(double distance, int decimalPlace) {
     numberFormat.setMaximumFractionDigits(decimalPlace);
 
     return numberFormat.format(distance);
@@ -103,7 +104,7 @@ public class DistanceUtils {
    * @param unit string from TurfConstants. This will be converted to the abbreviated form.
    * @return String with bolded distance and shrunken units
    */
-  private static SpannableString getDistanceString(String distance, String unit) {
+  private SpannableString getDistanceString(String distance, String unit) {
     SpannableString spannableString = new SpannableString(String.format("%s %s", distance, UNIT_STRINGS.get(unit)));
 
     spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, distance.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
