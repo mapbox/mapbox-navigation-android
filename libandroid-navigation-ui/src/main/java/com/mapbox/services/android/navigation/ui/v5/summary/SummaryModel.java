@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5.summary;
 
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
@@ -14,17 +13,17 @@ import static com.mapbox.services.android.navigation.v5.utils.time.TimeUtils.for
 
 public class SummaryModel {
 
-  private SpannableString distanceRemaining;
+  private String distanceRemaining;
   private SpannableStringBuilder timeRemaining;
   private String arrivalTime;
 
   public SummaryModel(RouteProgress progress, Locale locale, @NavigationUnitType.UnitType int unitType) {
-    distanceRemaining = formatDistance(progress.distanceRemaining(), locale, unitType);
+    distanceRemaining = formatDistance(progress.distanceRemaining(), locale, unitType).toString();
     timeRemaining = formatTimeRemaining(progress.durationRemaining());
     arrivalTime = formatArrivalTime(progress.durationRemaining());
   }
 
-  SpannableString getDistanceRemaining() {
+  String getDistanceRemaining() {
     return distanceRemaining;
   }
 
