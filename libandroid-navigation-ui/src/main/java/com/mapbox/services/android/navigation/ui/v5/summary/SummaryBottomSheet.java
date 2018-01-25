@@ -73,7 +73,7 @@ public class SummaryBottomSheet extends FrameLayout {
         if (summaryModel != null && !isRerouting) {
           arrivalTimeText.setText(summaryModel.getArrivalTime());
           timeRemainingText.setText(summaryModel.getTimeRemaining());
-          distanceRemainingText.setText(summaryModel.getDistanceRemaining().toString());
+          distanceRemainingText.setText(summaryModel.getDistanceRemaining());
         }
       }
     });
