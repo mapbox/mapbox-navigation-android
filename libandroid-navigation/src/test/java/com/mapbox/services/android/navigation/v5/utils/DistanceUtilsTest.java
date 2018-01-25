@@ -15,7 +15,7 @@ public class DistanceUtilsTest {
 
   @Test
   public void testFormatDistance_largeMiles() {
-    assertOutput("11 mi", 18024.65, NavigationUnitType.TYPE_IMPERIAL, Locale.US);
+    assertOutput("11 mi", 18124.65, NavigationUnitType.TYPE_IMPERIAL, Locale.US);
   }
 
   @Test
@@ -32,7 +32,6 @@ public class DistanceUtilsTest {
   public void testFormatDistance_largeFeet() {
     assertOutput("350 ft", 109.73, NavigationUnitType.TYPE_IMPERIAL, Locale.US);
   }
-
 
   @Test
   public void testFormatDistance_largeKilometers() {
