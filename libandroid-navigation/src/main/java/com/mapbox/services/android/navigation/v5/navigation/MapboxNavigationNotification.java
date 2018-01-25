@@ -31,7 +31,6 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  */
 class MapboxNavigationNotification implements NavigationNotification {
   private static final String END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION";
-
   private final Locale locale;
   private NotificationCompat.Builder notificationBuilder;
   private NotificationManager notificationManager;
