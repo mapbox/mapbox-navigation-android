@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_IMPERIAL;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_METRIC;
 import static com.mapbox.turf.TurfConstants.UNIT_FEET;
 import static com.mapbox.turf.TurfConstants.UNIT_KILOMETERS;
@@ -41,10 +42,32 @@ public class DistanceUtils {
   /**
    * Creates a DistanceUtils object with information about how to format distances
    * @param context from which to get localized strings from
-   * @param locale from which to format numbers
-   * @param unitType NavigationUnitType.TYPE_IMPERIAL or NavigationUnitType.TYPE_METRIC
    */
-  public DistanceUtils(Context context, Locale locale, @NavigationUnitType.UnitType int unitType) {
+  public DistanceUtils(Context context) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+    int unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, -1);
+
+    String localeLanguage = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, Locale.US.getLanguage());
+    String localeCountry = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, Locale.US.getCountry());
+    Locale locale = new Locale(localeLanguage, localeCountry);
+
+    if (locale == null) { // If locale isn't specified, use device locale
+      locale = context.getResources().getConfiguration().locale;
+    }
+
+    if (unitType == -1) { // If unit type isn't specified, use default for locale
+      switch (locale.getCountry()) {
+        case "US": // US
+        case "LR": // Liberia
+        case "MM": // Burma
+          unitType = TYPE_IMPERIAL;
+          break;
+        default:
+          unitType = TYPE_METRIC;
+      }
+    }
+
     numberFormat = NumberFormat.getNumberInstance(locale);
     UNIT_STRINGS.put(UNIT_KILOMETERS, context.getString(R.string.kilometers));
     UNIT_STRINGS.put(UNIT_METERS, context.getString(R.string.meters));

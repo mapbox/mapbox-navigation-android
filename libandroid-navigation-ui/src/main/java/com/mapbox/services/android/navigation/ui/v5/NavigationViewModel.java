@@ -35,8 +35,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 
-import java.util.Locale;
-
 public class NavigationViewModel extends AndroidViewModel implements ProgressChangeListener,
   OffRouteListener, MilestoneEventListener, NavigationEventListener, FasterRouteListener {
 
@@ -53,18 +51,15 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
 
   private final SharedPreferences preferences;
-  private final Locale locale;
   private MapboxNavigation navigation;
   private NavigationInstructionPlayer instructionPlayer;
   private ConnectivityManager connectivityManager;
-  private int unitType;
   private String feedbackId;
   private String screenshot;
 
   public NavigationViewModel(Application application) {
     super(application);
     preferences = PreferenceManager.getDefaultSharedPreferences(application);
-    locale = application.getResources().getConfiguration().locale;
     initVoiceInstructions(application);
     initConnectivityManager(application);
   }
@@ -86,8 +81,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    */
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    instructionModel.setValue(new InstructionModel(getApplication(), routeProgress, locale, unitType));
-    summaryModel.setValue(new SummaryModel(getApplication(), routeProgress, locale, unitType));
+    instructionModel.setValue(new InstructionModel(getApplication(), routeProgress));
+    summaryModel.setValue(new SummaryModel(getApplication(), routeProgress));
     navigationLocation.setValue(location);
   }
 
@@ -219,8 +214,17 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    * @param options to init MapboxNavigation
    */
   void initializeNavigationOptions(Context context, MapboxNavigationOptions options) {
+    SharedPreferences.Editor editor = preferences.edit();
+
+    editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, options.unitType());
+    if (options.locale() != null) {
+      editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, options.locale().getLanguage());
+      editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, options.locale().getCountry());
+    }
+
+    editor.apply();
+
     initNavigation(context, options);
-    this.unitType = options.unitType();
   }
 
   void updateRoute(DirectionsRoute route) {
@@ -324,8 +328,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
 
   private void updateBannerInstruction(RouteProgress routeProgress, Milestone milestone) {
     if (milestone instanceof BannerInstructionMilestone) {
-      bannerInstructionModel.setValue(new BannerInstructionModel(getApplication(), (BannerInstructionMilestone) milestone,
-        routeProgress, locale, unitType));
+      bannerInstructionModel.setValue(
+        new BannerInstructionModel(getApplication(), (BannerInstructionMilestone) milestone, routeProgress));
     }
   }
 }

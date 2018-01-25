@@ -10,7 +10,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
 import java.util.List;
-import java.util.Locale;
 
 class InstructionStepResources {
 
@@ -22,8 +21,8 @@ class InstructionStepResources {
   private boolean shouldShowThenStep;
   private List<IntersectionLanes> turnLanes;
 
-  InstructionStepResources(Context context, RouteProgress progress, Locale locale, int unitType) {
-    formatStepDistance(context, progress, locale, unitType);
+  InstructionStepResources(Context context, RouteProgress progress) {
+    formatStepDistance(context, progress);
     extractStepResources(progress);
   }
 
@@ -80,8 +79,8 @@ class InstructionStepResources {
     }
   }
 
-  private void formatStepDistance(Context context, RouteProgress progress, Locale locale, int unitType) {
-    stepDistanceRemaining = new DistanceUtils(context, locale, unitType)
+  private void formatStepDistance(Context context, RouteProgress progress) {
+    stepDistanceRemaining = new DistanceUtils(context)
       .formatDistance(progress.currentLegProgress().currentStepProgress().distanceRemaining());
   }
 
