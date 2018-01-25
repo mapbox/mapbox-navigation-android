@@ -1,9 +1,7 @@
-package com.mapbox.services.android.navigation.ui.v5;
+package com.mapbox.services.android.navigation.ui.v5.camera;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
-import android.animation.TimeInterpolator;
-import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -30,14 +28,14 @@ public class MapAnimator {
     animatorSet.start();
   }
 
-  public void playSequentially() {
-    animatorSet.playSequentially(animators);
-    animatorSet.start();
-  }
-
   public void playTogether(@Nullable Animator.AnimatorListener listener) {
     animatorSet.addListener(listener);
     playTogether();
+  }
+
+  public void playSequentially() {
+    animatorSet.playSequentially(animators);
+    animatorSet.start();
   }
 
   public void playSequentially(@Nullable Animator.AnimatorListener listener) {
@@ -66,21 +64,14 @@ public class MapAnimator {
       currentPosition = mapboxMap.getCameraPosition();
     }
 
-    public Builder addLatLngAnimator(@NonNull LatLng target, @Nullable TimeInterpolator interpolator, long duration) {
+    public Builder addLatLngAnimator(@NonNull LatLngAnimator latLngAnimator) {
 
       LatLng currentTarget = currentPosition.target;
-
-      if (currentTarget == target) {
+      if (currentTarget == latLngAnimator.getTarget()) {
         return this;
       }
 
-      ValueAnimator latLngAnimator = ValueAnimator.ofObject(new LatLngEvaluator(), currentTarget, target);
-      latLngAnimator.setDuration(duration);
-
-      if (interpolator != null) {
-        latLngAnimator.setInterpolator(interpolator);
-      }
-
+      latLngAnimator.setObjectValues(currentTarget, latLngAnimator.getTarget());
       latLngAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
@@ -89,25 +80,17 @@ public class MapAnimator {
       });
 
       animators.add(latLngAnimator);
-
       return this;
     }
 
-    public Builder addZoomAnimator(double targetZoom, @Nullable TimeInterpolator interpolator, long duration) {
+    public Builder addZoomAnimator(@NonNull ZoomAnimator zoomAnimator) {
 
-      double currentZoom = currentPosition.zoom;
-
-      if (currentZoom == targetZoom) {
+      float currentZoom = (float) currentPosition.zoom;
+      if (currentZoom == zoomAnimator.getTargetZoom()) {
         return this;
       }
 
-      ValueAnimator zoomAnimator = ValueAnimator.ofFloat((float) currentZoom, (float) targetZoom);
-      zoomAnimator.setDuration(duration);
-
-      if (interpolator != null) {
-        zoomAnimator.setInterpolator(interpolator);
-      }
-
+      zoomAnimator.setFloatValues(currentZoom, zoomAnimator.getTargetZoom());
       zoomAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
@@ -116,27 +99,18 @@ public class MapAnimator {
       });
 
       animators.add(zoomAnimator);
-
       return this;
     }
 
-    public Builder addBearingAnimator(double targetBearing, @Nullable TimeInterpolator interpolator, long duration) {
+    public Builder addBearingAnimator(@NonNull BearingAnimator bearingAnimator) {
 
       float currentBearing = (float) currentPosition.bearing;
-
-      float normalizedBearing = normalizeBearing(currentBearing, (float) targetBearing);
-
-      if (currentBearing == normalizedBearing) {
+      float normalizedTargetBearing = normalizeBearing(currentBearing, bearingAnimator.getTargetBearing());
+      if (currentBearing == normalizedTargetBearing) {
         return this;
       }
 
-      ValueAnimator bearingAnimator = ValueAnimator.ofFloat(currentBearing, normalizedBearing);
-      bearingAnimator.setDuration(duration);
-
-      if (interpolator != null) {
-        bearingAnimator.setInterpolator(interpolator);
-      }
-
+      bearingAnimator.setFloatValues(currentBearing, normalizedTargetBearing);
       bearingAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
@@ -145,25 +119,17 @@ public class MapAnimator {
       });
 
       animators.add(bearingAnimator);
-
       return this;
     }
 
-    public Builder addTiltAnimator(float targetTilt, @Nullable TimeInterpolator interpolator, long duration) {
+    public Builder addTiltAnimator(@NonNull TiltAnimator tiltAnimator) {
 
       float currentTilt = (float) currentPosition.tilt;
-
-      if (currentTilt == targetTilt) {
+      if (currentTilt == tiltAnimator.getTargetTilt()) {
         return this;
       }
 
-      ValueAnimator tiltAnimator = ValueAnimator.ofFloat(currentTilt, targetTilt);
-      tiltAnimator.setDuration(duration);
-
-      if (interpolator != null) {
-        tiltAnimator.setInterpolator(interpolator);
-      }
-
+      tiltAnimator.setFloatValues(currentTilt, tiltAnimator.getTargetTilt());
       tiltAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
@@ -172,7 +138,6 @@ public class MapAnimator {
       });
 
       animators.add(tiltAnimator);
-
       return this;
     }
 
@@ -180,20 +145,6 @@ public class MapAnimator {
 
     public MapAnimator build() {
       return new MapAnimator(animators);
-    }
-  }
-
-  private static class LatLngEvaluator implements TypeEvaluator<LatLng> {
-
-    private final LatLng latLng = new LatLng();
-
-    @Override
-    public LatLng evaluate(float fraction, LatLng startValue, LatLng endValue) {
-      latLng.setLatitude(startValue.getLatitude()
-        + ((endValue.getLatitude() - startValue.getLatitude()) * fraction));
-      latLng.setLongitude(startValue.getLongitude()
-        + ((endValue.getLongitude() - startValue.getLongitude()) * fraction));
-      return latLng;
     }
   }
 

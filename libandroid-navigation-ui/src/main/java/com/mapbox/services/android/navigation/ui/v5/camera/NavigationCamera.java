@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.ui.v5;
+package com.mapbox.services.android.navigation.ui.v5.camera;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -27,7 +27,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
  *
  * @since 0.6.0
  */
-class NavigationCamera implements ProgressChangeListener {
+public class NavigationCamera implements ProgressChangeListener {
 
   private MapboxMap mapboxMap;
   private MapboxNavigation navigation;
@@ -44,7 +44,7 @@ class NavigationCamera implements ProgressChangeListener {
    * @param navigation for listening to location updates
    * @since 0.6.0
    */
-  NavigationCamera(@NonNull View view, @NonNull MapboxMap mapboxMap,
+  public NavigationCamera(@NonNull View view, @NonNull MapboxMap mapboxMap,
                           @NonNull MapboxNavigation navigation) {
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
@@ -177,21 +177,34 @@ class NavigationCamera implements ProgressChangeListener {
   }
 
   private void animateCameraFromRouteInformation(RouteInformation routeInformation, long duration) {
+
     Camera cameraEngine = navigation.getCameraEngine();
-    float tilt = (float) cameraEngine.tilt(routeInformation);
-    double zoom = cameraEngine.zoom(routeInformation);
+
     Point targetPoint = cameraEngine.target(routeInformation);
     LatLng target = new LatLng(
             targetPoint.latitude(),
             targetPoint.longitude()
     );
-    double initialBearing = cameraEngine.bearing(routeInformation);
+    LatLngAnimator latLngAnimator = new LatLngAnimator(target, duration);
+    latLngAnimator.setInterpolator(new LinearInterpolator());
+
+    double bearing = cameraEngine.bearing(routeInformation);
+    BearingAnimator bearingAnimator = new BearingAnimator(bearing, duration);
+    bearingAnimator.setInterpolator(new DecelerateInterpolator());
+
+    float tilt = (float) cameraEngine.tilt(routeInformation);
+    TiltAnimator tiltAnimator = new TiltAnimator(tilt, duration);
+    tiltAnimator.setInterpolator(new LinearInterpolator());
+
+    double zoom = cameraEngine.zoom(routeInformation);
+    ZoomAnimator zoomAnimator = new ZoomAnimator(zoom, duration);
+    zoomAnimator.setInterpolator(new LinearInterpolator());
 
     MapAnimator.builder(mapboxMap)
-      .addLatLngAnimator(target, new LinearInterpolator(), duration)
-      .addBearingAnimator(initialBearing, new DecelerateInterpolator(), duration)
-      .addTiltAnimator(tilt, new LinearInterpolator(), duration)
-      .addZoomAnimator(zoom, new LinearInterpolator(), duration)
+      .addLatLngAnimator(latLngAnimator)
+      .addBearingAnimator(bearingAnimator)
+      .addTiltAnimator(tiltAnimator)
+      .addZoomAnimator(zoomAnimator)
       .build()
       .playTogether();
   }
