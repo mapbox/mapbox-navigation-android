@@ -101,7 +101,7 @@ public class SummaryBottomSheet extends FrameLayout {
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
     if (routeProgress != null && !isRerouting) {
-      SummaryModel model = new SummaryModel(routeProgress, locale, unitType);
+      SummaryModel model = new SummaryModel(getContext(), routeProgress, locale, unitType);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());

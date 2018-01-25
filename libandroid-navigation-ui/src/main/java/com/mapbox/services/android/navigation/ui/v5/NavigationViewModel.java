@@ -86,8 +86,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    */
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    instructionModel.setValue(new InstructionModel(routeProgress, locale, unitType));
-    summaryModel.setValue(new SummaryModel(routeProgress, locale, unitType));
+    instructionModel.setValue(new InstructionModel(getApplication(), routeProgress, locale, unitType));
+    summaryModel.setValue(new SummaryModel(getApplication(), routeProgress, locale, unitType));
     navigationLocation.setValue(location);
   }
 
@@ -324,7 +324,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
 
   private void updateBannerInstruction(RouteProgress routeProgress, Milestone milestone) {
     if (milestone instanceof BannerInstructionMilestone) {
-      bannerInstructionModel.setValue(new BannerInstructionModel((BannerInstructionMilestone) milestone,
+      bannerInstructionModel.setValue(new BannerInstructionModel(getApplication(), (BannerInstructionMilestone) milestone,
         routeProgress, locale, unitType));
     }
   }
