@@ -16,4 +16,7 @@
 
     <string name="title_waypoint_navigation">Waypoint Navigation</string>
     <string name="description_waypoint_navigation">Navigation with waypoints between destinations</string>
+
+    <string name="title_embedded_navigation">Embedded Navigation</string>
+    <string name="description_embedded_navigation">Navigation in a view which contains other views</string>
 </resources>

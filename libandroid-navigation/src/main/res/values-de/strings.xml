@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Mapbox Navigation SDK für Android</string>
+
+    <!-- Notification Strings -->
+    <string name="end_navigation">Navigation beenden</string>
+    <string name="channel_name">Navigationsbenachrichtigungen</string>
+    <string name="notification_arrival_time_format">Komme um %s an</string>
+</resources>

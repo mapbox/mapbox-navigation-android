@@ -63,6 +63,11 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         getString(R.string.title_waypoint_navigation),
         getString(R.string.description_waypoint_navigation),
         WaypointNavigationActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_embedded_navigation),
+        getString(R.string.description_embedded_navigation),
+        EmbeddedNavigationActivity.class
       )
     ));
 

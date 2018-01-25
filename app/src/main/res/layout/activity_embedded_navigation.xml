@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.mapbox.services.android.navigation.ui.v5.NavigationView
+        android:id="@+id/navigationView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:navigationLightTheme="@style/NavigationViewLight"
+        app:navigationDarkTheme="@style/NavigationViewDark"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/speed_limit"
+        android:textSize="35sp"
+        android:padding="6dp"
+        app:layout_anchorGravity="top"
+        android:layout_gravity="top"
+        android:gravity="center"
+        android:layout_marginLeft="16dp"
+        android:elevation="3dp"
+        app:layout_anchor="@id/spacer"
+        android:textColor="@android:color/black"
+        android:background="@android:color/white"
+        android:visibility="gone"/>
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="6dp"
+        android:id="@+id/spacer"
+        android:background="@android:color/transparent"
+        app:layout_anchorGravity="top"
+        android:layout_gravity="top"/>
+</android.support.design.widget.CoordinatorLayout>

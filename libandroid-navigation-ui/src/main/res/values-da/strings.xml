@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that rerouting is in progress -->
+    <string name="rerouting">Omdirigere</string>
+
+    <!-- Indicates voice instructions are muted -->
+    <string name="muted">Dæmpet </string>
+
+    <!-- Indicates voice instructions are unmuted -->
+    <string name="unmuted">Genaktiveret </string>
+
+</resources>
