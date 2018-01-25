@@ -16,8 +16,10 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
 
+import timber.log.Timber;
+
 import static com.mapbox.core.constants.Constants.PRECISION_6;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.bearingMatchesManeuverFinalHeading;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.bearingMatchesManeuverFinalBearing;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getSnappedLocation;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.increaseIndex;
@@ -101,10 +103,16 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
 
   private RouteProgress generateNewRouteProgress(MapboxNavigation mapboxNavigation, Location location,
                                                  RingBuffer recentDistances) {
+
+    Timber.d("NAV-DEBUG ***** ***** ***** Generating new RouteProgress ***** ***** *****");
+
     DirectionsRoute directionsRoute = mapboxNavigation.getRoute();
     MapboxNavigationOptions options = mapboxNavigation.options();
 
     if (RouteUtils.isNewRoute(previousRouteProgress, directionsRoute)) {
+
+      Timber.d("NAV-DEBUG ** New route, resetting values");
+
       // Decode the first steps geometry and hold onto the resulting Position objects till the users
       // on the next step. Indices are both 0 since the user just started on the new route.
       stepPositions = PolylineUtils.decode(
@@ -121,8 +129,10 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
 
       indices = NavigationIndices.create(0, 0);
     }
+    Timber.d("NAV-DEBUG ** legIndex %s, stepIndex %s", indices.legIndex(), indices.stepIndex());
 
     Point snappedPosition = userSnappedToRoutePosition(location, stepPositions);
+
     double stepDistanceRemaining = stepDistanceRemaining(
       snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute, stepPositions);
     double legDistanceRemaining = legDistanceRemaining(
@@ -130,11 +140,25 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     double routeDistanceRemaining = routeDistanceRemaining(
       legDistanceRemaining, indices.legIndex(), directionsRoute);
 
-    if (bearingMatchesManeuverFinalHeading(location, previousRouteProgress, options.maxTurnCompletionOffset())
-      && stepDistanceRemaining < options.maneuverZoneRadius()) {
+    Timber.d("NAV-DEBUG ** stepDistanceRemaining pre- heading check %s", stepDistanceRemaining);
+
+    boolean bearingMatch = bearingMatchesManeuverFinalBearing(location, previousRouteProgress, options.maxTurnCompletionOffset());
+    if (!bearingMatch && stepDistanceRemaining == 0) {
+      Timber.d("NAV-DEBUG ** ALERT No bearing match and step distance remaining 0");
+    }
+
+    if (bearingMatch && (stepDistanceRemaining < options.maneuverZoneRadius())) {
+
+      if (stepDistanceRemaining != 0) {
+        Timber.d("NAV-DEBUG ** ALERT Advancing step with stepDistanceRemaining: %s", stepDistanceRemaining);
+      }
+
+      Timber.d("NAV-DEBUG ** Bearing matches final maneuver heading + stepDistanceRemaining < maneuverZone");
       // First increase the indices and then update the majority of information for the new
       // routeProgress.
       indices = increaseIndex(previousRouteProgress, indices);
+      Timber.d("NAV-DEBUG ** legIndex %s, stepIndex %s", indices.legIndex(), indices.stepIndex());
+      // First increase the indices and then update the majority of information for the new
       stepPositions = PolylineUtils.decode(
         directionsRoute.legs().get(
           indices.legIndex()).steps().get(indices.stepIndex()).geometry(), PRECISION_6);
@@ -149,6 +173,8 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       // Remove all distance values from recentDistancesFromManeuverInMeters
       recentDistances.clear();
     }
+
+    Timber.d("NAV-DEBUG ** stepDistanceRemaining %s", stepDistanceRemaining);
 
     // Create a RouteProgress.create object using the latest user location
     return RouteProgress.builder()

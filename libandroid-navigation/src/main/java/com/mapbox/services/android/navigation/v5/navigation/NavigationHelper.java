@@ -4,6 +4,7 @@ import android.location.Location;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.StepManeuver;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.LineString;
@@ -20,6 +21,8 @@ import com.mapbox.turf.TurfMisc;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import timber.log.Timber;
 
 /**
  * This contains several single purpose methods that help out when a new location update occurs and
@@ -125,20 +128,39 @@ class NavigationHelper {
    * @return boolean true if the user location matches (using a tolerance) the final heading
    * @since 0.2.0
    */
-  static boolean bearingMatchesManeuverFinalHeading(Location userLocation,
+  static boolean bearingMatchesManeuverFinalBearing(Location userLocation,
                                                     RouteProgress routeProgress,
                                                     double maxTurnCompletionOffset) {
+
     if (routeProgress.currentLegProgress().upComingStep() == null) {
       return false;
     }
 
     // Bearings need to be normalized so when the bearingAfter is 359 and the user heading is 1, we
     // count this as within the MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION.
-    double finalHeading = routeProgress.currentLegProgress().upComingStep().maneuver().bearingAfter();
-    double finalHeadingNormalized = MathUtils.wrap(finalHeading, 0, 360);
-    double userHeadingNormalized = MathUtils.wrap(userLocation.getBearing(), 0, 360);
-    return MathUtils.differenceBetweenAngles(finalHeadingNormalized, userHeadingNormalized)
-      <= maxTurnCompletionOffset;
+    StepManeuver maneuver = routeProgress.currentLegProgress().upComingStep().maneuver();
+    double initialBearing = maneuver.bearingBefore();
+    double initialBearingNormalized = MathUtils.wrap(initialBearing, 0, 360);
+    
+    double finalBearing = maneuver.bearingAfter();
+    double finalBearingNormalized = MathUtils.wrap(finalBearing, 0, 360);
+
+    double expectedTurnAngle =  MathUtils.differenceBetweenAngles(initialBearingNormalized, finalBearingNormalized);
+
+    Timber.d("NAV-DEBUG ** Expected turn angle %s", expectedTurnAngle);
+
+    double userBearingNormalized = MathUtils.wrap(userLocation.getBearing(), 0, 360);
+    double userAngleFromFinalBearing = MathUtils.differenceBetweenAngles(finalBearingNormalized, userBearingNormalized);
+
+    Timber.d("NAV-DEBUG ** Difference between current bearing and maneuver bearing %s", userAngleFromFinalBearing);
+
+    if (expectedTurnAngle <= maxTurnCompletionOffset) {
+      double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+      Timber.d("NAV-DEBUG ** Expected turn angle <= turnCompletionOffset - stepDistanceRemaining %s", stepDistanceRemaining);
+      return stepDistanceRemaining == 0;
+    } else {
+      return userAngleFromFinalBearing <= maxTurnCompletionOffset;
+    }
   }
 
   /**

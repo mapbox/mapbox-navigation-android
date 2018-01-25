@@ -11,6 +11,8 @@ import com.mapbox.services.android.navigation.v5.utils.ToleranceUtils;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
+import timber.log.Timber;
+
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
 import static com.mapbox.services.android.navigation.v5.utils.MeasurementUtils.userTrueDistanceFromStep;
 
@@ -25,29 +27,49 @@ public class OffRouteDetector extends OffRoute {
    * @since 0.2.0
    */
   @Override
-  public boolean isUserOffRoute(Location location, RouteProgress routeProgress,
-                                MapboxNavigationOptions options,
+  public boolean isUserOffRoute(Location location, RouteProgress routeProgress, MapboxNavigationOptions options,
                                 RingBuffer<Integer> recentDistancesFromManeuverInMeters) {
 
+    Timber.d("NAV-DEBUG xxxxx xxxxx xxxxx Detecting Off Route xxxxx xxxxx xxxxx");
+
     if (!validOffRoute(location, options)) {
+      Timber.d("NAV-DEBUG xx invalid off-route");
       return false;
     }
 
+    Point currentUserPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+
+    double offRouteRadius = ToleranceUtils.dynamicRerouteDistanceTolerance(currentUserPoint, routeProgress);
+    Timber.d("NAV-DEBUG xx Radius: %s", offRouteRadius);
+
+    // Get interpolated point based on our current speed
     Point futurePoint = getFuturePosition(location, options);
 
-    double radius = ToleranceUtils.dynamicRerouteDistanceTolerance(
-      Point.fromLngLat(location.getLongitude(), location.getLatitude()), routeProgress);
-
+    // Get distance from the current step to future point
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
-    boolean isOffRoute = userTrueDistanceFromStep(futurePoint, currentStep) > radius;
+    double distanceFromStep = userTrueDistanceFromStep(futurePoint, currentStep);
 
-    // Check to see if the user is moving away from the maneuver. Here, we store an array of
-    // distances. If the current distance is greater than the last distance, add it to the array. If
-    // the array grows larger than x, reroute the user.
-    if (movingAwayFromManeuver(routeProgress, recentDistancesFromManeuverInMeters, futurePoint)) {
-      updateLastReroutePoint(location);
-      return true;
+    // Off route if this distance is greater than our offRouteRadius
+    boolean isOffRoute = distanceFromStep > offRouteRadius;
+
+    Timber.d("NAV-DEBUG xx Distance from step: %s", distanceFromStep);
+
+    // If not offRoute at this point, don't continue with remaining logic
+    if (!isOffRoute) {
+      Timber.d("NAV-DEBUG xx Off route: false -- returning false...");
+      return false;
+    } else {
+      Timber.d("NAV-DEBUG xx Off route: true -- logic continues...");
     }
+
+//    // Check to see if the user is moving away from the maneuver. Here, we store an array of
+//    // distances. If the current distance is greater than the last distance, add it to the array. If
+//    // the array grows larger than x, reroute the user.
+//    if (movingAwayFromManeuver(routeProgress, recentDistancesFromManeuverInMeters, futurePoint)) {
+//      updateLastReroutePoint(location);
+//      return true;
+//    }
+
 
     // If the user is moving away from the maneuver location and they are close to the next step we
     // can safely say they have completed the maneuver. This is intended to be a fallback case when
@@ -56,18 +78,20 @@ public class OffRouteDetector extends OffRoute {
 
     LegStep upComingStep = routeProgress.currentLegProgress().upComingStep();
     if (upComingStep != null) {
-      isCloseToUpcomingStep = userTrueDistanceFromStep(futurePoint, upComingStep) < radius;
-      if (isOffRoute && isCloseToUpcomingStep) {
+      double distanceFromUpcomingStep = userTrueDistanceFromStep(currentUserPoint, upComingStep);
+      Timber.d("NAV-DEBUG xx Distance from upComingStep: %s", distanceFromStep);
+      isCloseToUpcomingStep = distanceFromUpcomingStep < offRouteRadius;
+      if (isCloseToUpcomingStep) {
         // TODO increment step index
+        // TODO this needs to happen or the movement will just stop
+        Timber.d("NAV-DEBUG xx isCloseToUpcomingStep: %s", true);
         return false;
       }
     }
 
-    if (isOffRoute) {
-      updateLastReroutePoint(location);
-    }
-
-    return isOffRoute;
+    // All checks have run, return true
+    Timber.d("NAV-DEBUG xxxxx xxxxx xxxxx Off route: TRUE xxxxx xxxxx xxxxx xxxxx");
+    return true;
   }
 
   /**
