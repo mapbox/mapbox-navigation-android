@@ -21,7 +21,6 @@ import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
 import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 
-import java.text.DecimalFormat;
 import java.util.Locale;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL;
@@ -31,22 +30,19 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  * This is in charge of creating the persistent navigation session notification and updating it.
  */
 class MapboxNavigationNotification implements NavigationNotification {
-
   private static final String END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION";
 
+  private final Locale locale;
   private NotificationCompat.Builder notificationBuilder;
   private NotificationManager notificationManager;
   private Notification notification;
   private RemoteViews notificationRemoteViews;
   private MapboxNavigation mapboxNavigation;
-
   private SpannableString currentDistanceText;
-  private DecimalFormat decimalFormat;
   private String currentArrivalTime;
   private String instructionText;
   private int currentManeuverId;
   private int distanceUnitType;
-  private Locale locale;
 
   private BroadcastReceiver endNavigationBtnReceiver = new BroadcastReceiver() {
     @Override
@@ -88,7 +84,6 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   private void initialize(Context context) {
     notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
     createNotificationChannel(context);
     buildNotification(context);
     registerReceiver(context);

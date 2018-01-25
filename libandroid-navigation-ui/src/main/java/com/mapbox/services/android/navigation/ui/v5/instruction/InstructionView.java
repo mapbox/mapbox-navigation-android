@@ -70,6 +70,7 @@ import java.util.Locale;
 public class InstructionView extends RelativeLayout implements FeedbackBottomSheetListener {
 
   public boolean isMuted;
+  private final Locale locale;
   private ManeuverView upcomingManeuverView;
   private TextView upcomingDistanceText;
   private TextView upcomingPrimaryText;
@@ -96,7 +97,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private LegStep currentStep;
   private NavigationViewModel navigationViewModel;
   private boolean isRerouting;
-  private Locale locale;
 
   public InstructionView(Context context) {
     this(context, null);

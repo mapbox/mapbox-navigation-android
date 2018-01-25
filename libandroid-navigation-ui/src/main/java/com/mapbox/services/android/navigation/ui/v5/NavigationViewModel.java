@@ -45,6 +45,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isFeedbackShowing = new MutableLiveData<>();
+
   final MutableLiveData<FeedbackItem> selectedFeedbackItem = new MutableLiveData<>();
   final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
   final MutableLiveData<DirectionsRoute> fasterRoute = new MutableLiveData<>();
@@ -52,14 +53,14 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   final MutableLiveData<Boolean> isRunning = new MutableLiveData<>();
   final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
 
+  private final SharedPreferences preferences;
+  private final Locale locale;
   private MapboxNavigation navigation;
   private NavigationInstructionPlayer instructionPlayer;
   private ConnectivityManager connectivityManager;
-  private SharedPreferences preferences;
   private int unitType;
   private String feedbackId;
   private String screenshot;
-  private Locale locale;
 
   public NavigationViewModel(Application application) {
     super(application);

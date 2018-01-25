@@ -31,7 +31,6 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   public InstructionListAdapter(Locale locale) {
     stepList = new ArrayList<>();
     this.locale = locale;
-
   }
 
   @Override
