@@ -1,10 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Message;
-import android.os.Process;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -31,39 +27,33 @@ import static com.mapbox.core.constants.Constants.PRECISION_6;
  * This class extends handler thread to run most of the navigation calculations on a separate
  * background thread.
  */
-class NavigationEngine extends HandlerThread implements Handler.Callback {
+class NavigationEngine {
 
   private static final String THREAD_NAME = "NavThread";
   private RouteProgress previousRouteProgress;
   private List<Point> stepPositions;
   private NavigationIndices indices;
-  private Handler responseHandler;
-  private Handler workerHandler;
-  private Callback callback;
 
-  NavigationEngine(Handler responseHandler, Callback callback) {
-    super(THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
-    this.responseHandler = responseHandler;
-    this.callback = callback;
+    private final RouteStateWrapper mRouteStateWrapper = new RouteStateWrapper();
+    class RouteStateWrapper {
+        Location mCurrentLocation;
+        RouteProgress mRouteProgress;
+        List<Milestone> mMilestones;
+        boolean mIsUserOffRoute;
+
+        private void setProgress(Location location, RouteProgress routeProgress, List<Milestone> milestones, boolean userOffRoute) {
+            mCurrentLocation = location;
+            mRouteProgress = routeProgress;
+            mMilestones = milestones;
+            mIsUserOffRoute = userOffRoute;
+        }
+    }
+
+    NavigationEngine() {
     indices = NavigationIndices.create(0, 0);
   }
 
-  void queueTask(int msgIdentifier, NewLocationModel newLocationModel) {
-    workerHandler.obtainMessage(msgIdentifier, newLocationModel).sendToTarget();
-  }
-
-  void prepareHandler() {
-    workerHandler = new Handler(getLooper(), this);
-  }
-
-  @Override
-  public boolean handleMessage(Message msg) {
-    NewLocationModel newLocationModel = (NewLocationModel) msg.obj;
-    handleRequest(newLocationModel);
-    return true;
-  }
-
-  private void handleRequest(final NewLocationModel newLocationModel) {
+  RouteStateWrapper handleRequest(final NewLocationModel newLocationModel) {
     final RouteProgress routeProgress = generateNewRouteProgress(
       newLocationModel.mapboxNavigation(), newLocationModel.location(),
       newLocationModel.recentDistancesFromManeuverInMeters());
@@ -77,14 +67,9 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
 
     previousRouteProgress = routeProgress;
 
-    responseHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        callback.onNewRouteProgress(location, routeProgress);
-        callback.onMilestoneTrigger(milestones, routeProgress);
-        callback.onUserOffRoute(location, userOffRoute);
-      }
-    });
+    mRouteStateWrapper.setProgress(location, routeProgress, milestones, userOffRoute) ;
+
+    return mRouteStateWrapper;
   }
 
   private RouteProgress generateNewRouteProgress(MapboxNavigation mapboxNavigation, Location location,

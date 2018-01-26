@@ -245,7 +245,7 @@ public class MockLocationEngine extends LocationEngine {
   private double calculateDistancePerSec() {
     //speed = 30 Miles/hour * 1.609344km/1mile * 1/60min * 1/60s
     double speed = (this.speed * 1.609344) / (60 * 60); // converted to km/s
-    double time = delay / 1000; // convert to seconds
+    double time = delay / 1000f; // convert to seconds
     return speed * time;
   }
 
