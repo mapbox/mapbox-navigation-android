@@ -28,7 +28,7 @@ public class OffRouteDetector extends OffRoute {
    */
   @Override
   public boolean isUserOffRoute(Location location, RouteProgress routeProgress, MapboxNavigationOptions options,
-                                RingBuffer<Integer> recentDistancesFromManeuverInMeters) {
+                                RingBuffer<Integer> distancesAwayFromManeuver, IncreaseStepIndexCallback callback) {
 
     Timber.d("NAV-DEBUG xxxxx xxxxx xxxxx Detecting Off Route xxxxx xxxxx xxxxx");
 
@@ -37,24 +37,20 @@ public class OffRouteDetector extends OffRoute {
       return false;
     }
 
-    Point currentUserPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    Point currentPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    // Get distance from the current step to future point
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    double distanceFromCurrentStep = userTrueDistanceFromStep(currentPoint, currentStep);
 
-    double dynamicTolerance = ToleranceUtils.dynamicRerouteDistanceTolerance(currentUserPoint, routeProgress);
+    double dynamicTolerance = ToleranceUtils.dynamicRerouteDistanceTolerance(currentPoint, routeProgress);
     double accuracyTolerance = location.getSpeed() * options.deadReckoningTimeInterval();
     double offRouteRadius = Math.max(dynamicTolerance, accuracyTolerance);
     Timber.d("NAV-DEBUG xx Radius: %s", offRouteRadius);
 
-    // Get interpolated point based on our current speed
-    Point futurePoint = getFuturePosition(location, options);
-
-    // Get distance from the current step to future point
-    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
-    double distanceFromStep = userTrueDistanceFromStep(futurePoint, currentStep);
-
     // Off route if this distance is greater than our offRouteRadius
-    boolean isOffRoute = distanceFromStep > offRouteRadius;
+    boolean isOffRoute = distanceFromCurrentStep > offRouteRadius;
 
-    Timber.d("NAV-DEBUG xx Distance from step: %s", distanceFromStep);
+    Timber.d("NAV-DEBUG xx Distance from current step: %s", distanceFromCurrentStep);
 
     // If not offRoute at this point, don't continue with remaining logic
     if (!isOffRoute) {
@@ -64,15 +60,6 @@ public class OffRouteDetector extends OffRoute {
       Timber.d("NAV-DEBUG xx Off route: true -- logic continues...");
     }
 
-//    // Check to see if the user is moving away from the maneuver. Here, we store an array of
-//    // distances. If the current distance is greater than the last distance, add it to the array. If
-//    // the array grows larger than x, reroute the user.
-//    if (movingAwayFromManeuver(routeProgress, recentDistancesFromManeuverInMeters, futurePoint)) {
-//      updateLastReroutePoint(location);
-//      return true;
-//    }
-
-
     // If the user is moving away from the maneuver location and they are close to the next step we
     // can safely say they have completed the maneuver. This is intended to be a fallback case when
     // we do find that the users course matches the exit bearing.
@@ -80,22 +67,34 @@ public class OffRouteDetector extends OffRoute {
 
     LegStep upComingStep = routeProgress.currentLegProgress().upComingStep();
     if (upComingStep != null) {
-      double distanceFromUpcomingStep = userTrueDistanceFromStep(currentUserPoint, upComingStep);
-      Timber.d("NAV-DEBUG xx Distance from upComingStep: %s", distanceFromStep);
+      double distanceFromUpcomingStep = userTrueDistanceFromStep(currentPoint, upComingStep);
+      Timber.d("NAV-DEBUG xx Distance from upComingStep: %s", distanceFromUpcomingStep);
       double maneuverZoneRadius = options.maneuverZoneRadius();
       Timber.d("NAV-DEBUG xx Maneuver zone radius: %s", maneuverZoneRadius);
       isCloseToUpcomingStep = distanceFromUpcomingStep < maneuverZoneRadius;
       if (isCloseToUpcomingStep) {
-        // TODO increment step index
-        // TODO this needs to happen or the movement will just stop
+        // Callback to the NavigationEngine to increase the step index
+        callback.onShouldIncreaseIndex();
         Timber.d("NAV-DEBUG xx isCloseToUpcomingStep: %s", true);
         return false;
       }
     }
 
+//    // Check to see if the user is moving away from the maneuver. Here, we store an array of
+//    // distances. If the current distance is greater than the last distance, add it to the array. If
+//    // the array grows larger than x, reroute the user.
+//    if (movingAwayFromManeuver(routeProgress, distancesAwayFromManeuver, futurePoint)) {
+//      updateLastReroutePoint(location);
+//      return true;
+//    }
+
     // All checks have run, return true
     Timber.d("NAV-DEBUG xxxxx xxxxx xxxxx Off route: TRUE xxxxx xxxxx xxxxx xxxxx");
     return true;
+  }
+
+  public interface IncreaseStepIndexCallback {
+    void onShouldIncreaseIndex();
   }
 
   /**
@@ -138,8 +137,8 @@ public class OffRouteDetector extends OffRoute {
   }
 
   private static boolean movingAwayFromManeuver(RouteProgress routeProgress,
-                                                RingBuffer<Integer> recentDistancesFromManeuverInMeters,
-                                                Point futurePosition) {
+                                                RingBuffer<Integer> distancesAwayFromManeuver,
+                                                Point currentPoint) {
 
     if (routeProgress.currentLegProgress().upComingStep() == null) {
       return false;
@@ -147,23 +146,23 @@ public class OffRouteDetector extends OffRoute {
 
     double userDistanceToManeuver = TurfMeasurement.distance(
       routeProgress.currentLegProgress().upComingStep().maneuver().location(),
-      futurePosition, TurfConstants.UNIT_METERS
+      currentPoint, TurfConstants.UNIT_METERS
     );
 
-    if (!recentDistancesFromManeuverInMeters.isEmpty()
-      && recentDistancesFromManeuverInMeters.peekLast()
-      - recentDistancesFromManeuverInMeters.peekFirst() < MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE
-      && recentDistancesFromManeuverInMeters.size() >= 3) {
+    if (!distancesAwayFromManeuver.isEmpty()
+      && distancesAwayFromManeuver.peekLast()
+      - distancesAwayFromManeuver.peekFirst() < MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE
+      && distancesAwayFromManeuver.size() >= 3) {
       // User's moving away from maneuver position, thus offRoute.
       return true;
     }
-    if (recentDistancesFromManeuverInMeters.isEmpty()) {
-      recentDistancesFromManeuverInMeters.push((int) userDistanceToManeuver);
-    } else if (userDistanceToManeuver > recentDistancesFromManeuverInMeters.peek()) {
-      recentDistancesFromManeuverInMeters.push((int) userDistanceToManeuver);
+    if (distancesAwayFromManeuver.isEmpty()) {
+      distancesAwayFromManeuver.push((int) userDistanceToManeuver);
+    } else if (userDistanceToManeuver > distancesAwayFromManeuver.peek()) {
+      distancesAwayFromManeuver.push((int) userDistanceToManeuver);
     } else {
       // If we get a descending distance, reset the counter
-      recentDistancesFromManeuverInMeters.clear();
+      distancesAwayFromManeuver.clear();
     }
     return false;
   }

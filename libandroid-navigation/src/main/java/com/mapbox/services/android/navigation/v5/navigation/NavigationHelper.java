@@ -11,6 +11,7 @@ import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
@@ -201,11 +202,11 @@ class NavigationHelper {
     return milestones;
   }
 
-  static boolean isUserOffRoute(NewLocationModel newLocationModel, RouteProgress routeProgress) {
+  static boolean isUserOffRoute(NewLocationModel newLocationModel, RouteProgress routeProgress,
+                                OffRouteDetector.IncreaseStepIndexCallback callback) {
     OffRoute offRoute = newLocationModel.mapboxNavigation().getOffRouteEngine();
     return offRoute.isUserOffRoute(newLocationModel.location(), routeProgress,
-      newLocationModel.mapboxNavigation().options(),
-      newLocationModel.recentDistancesFromManeuverInMeters());
+      newLocationModel.mapboxNavigation().options(), newLocationModel.distancesAwayFromManeuver(), callback);
   }
 
   static boolean shouldCheckFasterRoute(NewLocationModel newLocationModel, RouteProgress routeProgress) {

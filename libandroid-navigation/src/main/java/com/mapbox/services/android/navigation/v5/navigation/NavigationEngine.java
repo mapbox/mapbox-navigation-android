@@ -10,6 +10,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
@@ -34,7 +35,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
  * This class extends handler thread to run most of the navigation calculations on a separate
  * background thread.
  */
-class NavigationEngine extends HandlerThread implements Handler.Callback {
+class NavigationEngine extends HandlerThread implements Handler.Callback, OffRouteDetector.IncreaseStepIndexCallback {
 
   private static final String THREAD_NAME = "NavThread";
   private RouteProgress previousRouteProgress;
@@ -51,19 +52,31 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     indices = NavigationIndices.create(0, 0);
   }
 
+  @Override
+  public boolean handleMessage(Message msg) {
+    NewLocationModel newLocationModel = (NewLocationModel) msg.obj;
+    handleRequest(newLocationModel);
+    return true;
+  }
+
+  /**
+   * This callback will fire when the {@link OffRouteDetector} determines that the user
+   * location is close enough to the upcoming {@link com.mapbox.api.directions.v5.models.LegStep}.
+   * <p>
+   * In this case, the step index needs to be increased for the next {@link RouteProgress} generation.
+   */
+  @Override
+  public void onShouldIncreaseIndex() {
+    //    indices = increaseIndex(previousRouteProgress, indices);
+    Timber.d("NAV-DEBUG ** SHOULD INCREASE INDEX");
+  }
+
   void queueTask(int msgIdentifier, NewLocationModel newLocationModel) {
     workerHandler.obtainMessage(msgIdentifier, newLocationModel).sendToTarget();
   }
 
   void prepareHandler() {
     workerHandler = new Handler(getLooper(), this);
-  }
-
-  @Override
-  public boolean handleMessage(Message msg) {
-    NewLocationModel newLocationModel = (NewLocationModel) msg.obj;
-    handleRequest(newLocationModel);
-    return true;
   }
 
   private void handleRequest(final NewLocationModel newLocationModel) {
@@ -73,7 +86,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     boolean fasterRouteDetectionEnabled = mapboxNavigation.options().enableFasterRouteDetection();
 
     Location rawLocation = newLocationModel.location();
-    RingBuffer recentDistances = newLocationModel.recentDistancesFromManeuverInMeters();
+    RingBuffer recentDistances = newLocationModel.distancesAwayFromManeuver();
 
     // Generate a new route progress given the raw location update
     final RouteProgress routeProgress = generateNewRouteProgress(mapboxNavigation, rawLocation, recentDistances);
@@ -83,7 +96,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       previousRouteProgress, routeProgress, mapboxNavigation);
 
     // Check if user has gone off-route
-    final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress);
+    final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress, this);
 
     // Create snapped location if enabled, otherwise return raw location
     final Location location;
@@ -179,7 +192,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       routeDistanceRemaining = routeDistanceRemaining(
         legDistanceRemaining, indices.legIndex(), directionsRoute);
 
-      // Remove all distance values from recentDistancesFromManeuverInMeters
+      // Remove all distance values from distancesAwayFromManeuver
       recentDistances.clear();
     }
 
