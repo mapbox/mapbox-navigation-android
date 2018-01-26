@@ -39,7 +39,9 @@ public class OffRouteDetector extends OffRoute {
 
     Point currentUserPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
 
-    double offRouteRadius = ToleranceUtils.dynamicRerouteDistanceTolerance(currentUserPoint, routeProgress);
+    double dynamicTolerance = ToleranceUtils.dynamicRerouteDistanceTolerance(currentUserPoint, routeProgress);
+    double accuracyTolerance = location.getSpeed() * options.deadReckoningTimeInterval();
+    double offRouteRadius = Math.max(dynamicTolerance, accuracyTolerance);
     Timber.d("NAV-DEBUG xx Radius: %s", offRouteRadius);
 
     // Get interpolated point based on our current speed
@@ -80,7 +82,9 @@ public class OffRouteDetector extends OffRoute {
     if (upComingStep != null) {
       double distanceFromUpcomingStep = userTrueDistanceFromStep(currentUserPoint, upComingStep);
       Timber.d("NAV-DEBUG xx Distance from upComingStep: %s", distanceFromStep);
-      isCloseToUpcomingStep = distanceFromUpcomingStep < offRouteRadius;
+      double maneuverZoneRadius = options.maneuverZoneRadius();
+      Timber.d("NAV-DEBUG xx Maneuver zone radius: %s", maneuverZoneRadius);
+      isCloseToUpcomingStep = distanceFromUpcomingStep < maneuverZoneRadius;
       if (isCloseToUpcomingStep) {
         // TODO increment step index
         // TODO this needs to happen or the movement will just stop

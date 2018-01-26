@@ -67,26 +67,35 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
   }
 
   private void handleRequest(final NewLocationModel newLocationModel) {
-    final RouteProgress routeProgress = generateNewRouteProgress(
-      newLocationModel.mapboxNavigation(), newLocationModel.location(),
-      newLocationModel.recentDistancesFromManeuverInMeters());
+
+    MapboxNavigation mapboxNavigation = newLocationModel.mapboxNavigation();
+    boolean snapToRouteEnabled = mapboxNavigation.options().snapToRoute();
+    boolean fasterRouteDetectionEnabled = mapboxNavigation.options().enableFasterRouteDetection();
+
+    Location rawLocation = newLocationModel.location();
+    RingBuffer recentDistances = newLocationModel.recentDistancesFromManeuverInMeters();
+
+    // Generate a new route progress given the raw location update
+    final RouteProgress routeProgress = generateNewRouteProgress(mapboxNavigation, rawLocation, recentDistances);
 
     // Check milestone list to see if any should be triggered
     final List<Milestone> milestones = checkMilestones(
-      previousRouteProgress, routeProgress, newLocationModel.mapboxNavigation());
+      previousRouteProgress, routeProgress, mapboxNavigation);
 
     // Check if user has gone off-route
     final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress);
 
-    // Create snapped location
-    final Location location = !userOffRoute && newLocationModel.mapboxNavigation().options().snapToRoute()
-      ? getSnappedLocation(newLocationModel.mapboxNavigation(), newLocationModel.location(),
-      routeProgress, stepPositions)
-      : newLocationModel.location();
+    // Create snapped location if enabled, otherwise return raw location
+    final Location location;
+    if (!userOffRoute && snapToRouteEnabled) {
+      location = getSnappedLocation(mapboxNavigation, rawLocation, routeProgress, stepPositions);
+    } else {
+      location = rawLocation;
+    }
 
     // Check for faster route only if enabled and not off-route
-    final boolean checkFasterRoute = newLocationModel.mapboxNavigation().options().enableFasterRouteDetection()
-      && !userOffRoute && shouldCheckFasterRoute(newLocationModel, routeProgress);
+    final boolean checkFasterRoute = fasterRouteDetectionEnabled && !userOffRoute
+      && shouldCheckFasterRoute(newLocationModel, routeProgress);
 
     previousRouteProgress = routeProgress;
 
