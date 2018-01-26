@@ -19,7 +19,6 @@ import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class InstructionListAdapter extends RecyclerView.Adapter<InstructionViewHolder> {
   private final Context context;
@@ -28,7 +27,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   private LegStep currentStep;
   private DistanceUtils distanceUtils;
 
-  public InstructionListAdapter(Context context, Locale locale) {
+  public InstructionListAdapter(Context context) {
     stepList = new ArrayList<>();
     this.context = context;
   }

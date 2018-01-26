@@ -50,8 +50,6 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import java.util.Locale;
-
 /**
  * A view that can be used to display upcoming maneuver information and control
  * voice instruction mute / unmute.
@@ -69,7 +67,6 @@ import java.util.Locale;
 public class InstructionView extends RelativeLayout implements FeedbackBottomSheetListener {
 
   public boolean isMuted;
-  private final Locale locale;
   private ManeuverView upcomingManeuverView;
   private TextView upcomingDistanceText;
   private TextView upcomingPrimaryText;
@@ -107,7 +104,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
   public InstructionView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
-    locale = context.getResources().getConfiguration().locale;
     init();
   }
 
@@ -485,7 +481,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
   private void initDirectionsRecyclerView() {
-    instructionListAdapter = new InstructionListAdapter(getContext(), locale);
+    instructionListAdapter = new InstructionListAdapter(getContext());
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
     rvInstructions.setNestedScrollingEnabled(true);
