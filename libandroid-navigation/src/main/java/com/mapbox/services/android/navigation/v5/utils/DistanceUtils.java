@@ -31,9 +31,9 @@ import static com.mapbox.turf.TurfConstants.UNIT_METERS;
 import static com.mapbox.turf.TurfConstants.UNIT_MILES;
 
 public class DistanceUtils {
-  private final int LARGE_UNIT_THRESHOLD = 10;
-  private final int SMALL_UNIT_THRESHOLD = 401;
-  private final Map<String, String> UNIT_STRINGS = new HashMap<>();
+  private static final int LARGE_UNIT_THRESHOLD = 10;
+  private static final int SMALL_UNIT_THRESHOLD = 401;
+  private final Map<String, String> unitStrings = new HashMap<>();
   private final NumberFormat numberFormat;
   private final String largeUnit;
   private final String smallUnit;
@@ -47,8 +47,10 @@ public class DistanceUtils {
 
     int unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, -1);
 
-    String localeLanguage = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, Locale.getDefault().getLanguage());
-    String localeCountry = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, Locale.getDefault().getCountry());
+    String localeLanguage = preferences.getString(
+      NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, Locale.getDefault().getLanguage());
+    String localeCountry = preferences.getString(
+      NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, Locale.getDefault().getCountry());
 
     Locale locale;
 
@@ -75,10 +77,10 @@ public class DistanceUtils {
     }
 
     numberFormat = NumberFormat.getNumberInstance(locale);
-    UNIT_STRINGS.put(UNIT_KILOMETERS, context.getString(R.string.kilometers));
-    UNIT_STRINGS.put(UNIT_METERS, context.getString(R.string.meters));
-    UNIT_STRINGS.put(UNIT_MILES, context.getString(R.string.miles));
-    UNIT_STRINGS.put(UNIT_FEET, context.getString(R.string.feet));
+    unitStrings.put(UNIT_KILOMETERS, context.getString(R.string.kilometers));
+    unitStrings.put(UNIT_METERS, context.getString(R.string.meters));
+    unitStrings.put(UNIT_MILES, context.getString(R.string.miles));
+    unitStrings.put(UNIT_FEET, context.getString(R.string.feet));
 
     largeUnit = unitType == TYPE_METRIC ? UNIT_KILOMETERS : UNIT_MILES;
     smallUnit = unitType == TYPE_METRIC ? UNIT_METERS : UNIT_FEET;
@@ -137,7 +139,7 @@ public class DistanceUtils {
    * @return String with bolded distance and shrunken units
    */
   private SpannableString getDistanceString(String distance, String unit) {
-    SpannableString spannableString = new SpannableString(String.format("%s %s", distance, UNIT_STRINGS.get(unit)));
+    SpannableString spannableString = new SpannableString(String.format("%s %s", distance, unitStrings.get(unit)));
 
     spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, distance.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
     spannableString.setSpan(new RelativeSizeSpan(0.65f),distance.length() + 1,
