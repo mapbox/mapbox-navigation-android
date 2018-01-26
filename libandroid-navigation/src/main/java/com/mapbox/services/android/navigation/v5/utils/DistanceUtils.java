@@ -13,7 +13,6 @@ import android.text.style.StyleSpan;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfConversion;
@@ -48,9 +47,16 @@ public class DistanceUtils {
 
     int unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, -1);
 
-    String localeLanguage = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, Locale.US.getLanguage());
-    String localeCountry = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, Locale.US.getCountry());
-    Locale locale = new Locale(localeLanguage, localeCountry);
+    String localeLanguage = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, Locale.getDefault().getLanguage());
+    String localeCountry = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, Locale.getDefault().getCountry());
+
+    Locale locale;
+
+    if (localeCountry.isEmpty()) { // Country is not required for a locale
+      locale = new Locale(localeLanguage);
+    } else {
+      locale = new Locale(localeLanguage, localeCountry);
+    }
 
     if (locale == null) { // If locale isn't specified, use device locale
       locale = context.getResources().getConfiguration().locale;

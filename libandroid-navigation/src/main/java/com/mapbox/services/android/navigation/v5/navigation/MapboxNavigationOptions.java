@@ -47,8 +47,7 @@ public abstract class MapboxNavigationOptions {
 
   public abstract boolean isDebugLoggingEnabled();
 
-  @Nullable
-  public abstract Integer unitType();
+  public abstract int unitType();
 
   @Nullable
   public abstract Locale locale();
@@ -95,7 +94,7 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder isDebugLoggingEnabled(boolean debugLoggingEnabled);
 
-    public abstract Builder unitType(@NavigationUnitType.UnitType Integer unitType);
+    public abstract Builder unitType(int unitType);
 
     public abstract Builder navigationNotification(NavigationNotification notification);
 
@@ -122,6 +121,7 @@ public abstract class MapboxNavigationOptions {
       .metersRemainingTillArrival(NavigationConstants.METERS_REMAINING_TILL_ARRIVAL)
       .enableNotification(true)
       .isFromNavigationUi(false)
-      .isDebugLoggingEnabled(false);
+      .isDebugLoggingEnabled(false)
+      .unitType(-1);
   }
 }
