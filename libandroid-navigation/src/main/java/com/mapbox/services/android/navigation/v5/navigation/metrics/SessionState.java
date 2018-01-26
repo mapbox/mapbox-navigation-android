@@ -22,16 +22,26 @@ public abstract class SessionState {
    * Original route values
    */
   public String originalGeometry() {
+    if (originalDirectionRoute() == null || TextUtils.isEmpty(originalDirectionRoute().geometry())) {
+      return "";
+    }
+
     List<Point> geometryPositions
       = PolylineUtils.decode(originalDirectionRoute().geometry(), Constants.PRECISION_6);
     return PolylineUtils.encode(geometryPositions, Constants.PRECISION_5);
   }
 
   public int originalDistance() {
+    if (originalDirectionRoute() == null) {
+      return 0;
+    }
     return originalDirectionRoute().distance().intValue();
   }
 
   public int originalStepCount() {
+    if (originalDirectionRoute() == null) {
+      return 0;
+    }
     int stepCount = 0;
     for (RouteLeg leg : originalDirectionRoute().legs()) {
       stepCount += leg.steps().size();
@@ -40,6 +50,9 @@ public abstract class SessionState {
   }
 
   public int originalDuration() {
+    if (originalDirectionRoute() == null) {
+      return 0;
+    }
     return originalDirectionRoute().duration().intValue();
   }
 
@@ -47,6 +60,9 @@ public abstract class SessionState {
    * Current route values
    */
   public int currentStepCount() {
+    if (currentDirectionRoute() == null) {
+      return 0;
+    }
     int stepCount = 0;
     for (RouteLeg leg : currentDirectionRoute().legs()) {
       stepCount += leg.steps().size();

@@ -5,6 +5,7 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -17,6 +18,8 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -31,6 +34,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private Location rawLocation;
   private String routeProfile;
   private String unitType;
+  private Locale language;
 
   public RouteViewModel(@NonNull Application application) {
     super(application);
@@ -127,6 +131,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
         .origin(origin, bearing, 90d)
         .voiceUnits(unitType)
         .profile(routeProfile)
+        .language(language)
         .destination(destination).build().getRoute(this);
     }
   }
@@ -154,12 +159,57 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private void extractRouteFromOptions(NavigationViewOptions options) {
     DirectionsRoute route = options.directionsRoute();
     if (route != null) {
-      String profile = options.directionsProfile();
-      routeProfile = profile != null ? profile : route.routeOptions().profile();
-      RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
-      LegStep lastStep = lastLeg.steps().get(lastLeg.steps().size() - 1);
-      destination.setValue(lastStep.maneuver().location());
+      cacheRouteProfile(options, route);
+      cacheRouteLanguage(options, route);
+      cacheRouteDestination(route);
       this.route.setValue(route);
+    }
+  }
+
+  /**
+   * Looks at the given {@link DirectionsRoute} and extracts the destination based on
+   * the last {@link LegStep} maneuver.
+   *
+   * @param route to extract destination from
+   */
+  private void cacheRouteDestination(DirectionsRoute route) {
+    RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
+    LegStep lastStep = lastLeg.steps().get(lastLeg.steps().size() - 1);
+    destination.setValue(lastStep.maneuver().location());
+  }
+
+  /**
+   * Looks for a route profile provided by {@link NavigationViewOptions} to be
+   * stored for reroute requests.
+   * <p>
+   * If not found, look at the {@link com.mapbox.api.directions.v5.models.RouteOptions} for
+   * the profile from the original route.
+   *
+   * @param options to look for set profile
+   * @param route   as backup if view options profile not found
+   */
+  private void cacheRouteProfile(NavigationViewOptions options, DirectionsRoute route) {
+    String profile = options.directionsProfile();
+    routeProfile = profile != null ? profile : route.routeOptions().profile();
+  }
+
+  /**
+   * Looks for a route language provided by {@link NavigationViewOptions} to be
+   * stored for reroute requests.
+   * <p>
+   * If not found, look at the {@link com.mapbox.api.directions.v5.models.RouteOptions} for
+   * the language from the original route.
+   *
+   * @param options to look for set language
+   * @param route   as backup if view options language not found
+   */
+  private void cacheRouteLanguage(NavigationViewOptions options, DirectionsRoute route) {
+    if (options.directionsLanguage() != null) {
+      language = options.directionsLanguage();
+    } else if (!TextUtils.isEmpty(route.routeOptions().language())) {
+      language = new Locale(route.routeOptions().language());
+    } else {
+      language = Locale.getDefault();
     }
   }
 

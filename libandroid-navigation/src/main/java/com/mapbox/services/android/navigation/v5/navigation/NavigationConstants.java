@@ -35,6 +35,15 @@ public final class NavigationConstants {
   public static final String NAVIGATION_NOTIFICATION_CHANNEL = "NAVIGATION_NOTIFICATION_CHANNEL";
 
   /**
+   * This identifier will be used to
+   * differentiate the {@link com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone}
+   * from custom milestones in the {@link com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener}.
+   *
+   * @since 0.8.0
+   */
+  public static final int BANNER_INSTRUCTION_MILESTONE_ID = 2;
+
+  /**
    * Random integer value used for identifying the navigation notification.
    *
    * @since 0.5.0
@@ -142,6 +151,23 @@ public final class NavigationConstants {
    */
   public static final String NAVIGATION_VIEW_DARK_THEME = "navigation_view_dark_theme";
 
+  /**
+   * In seconds, how quickly {@link com.mapbox.services.android.navigation.v5.route.FasterRouteDetector}
+   * will tell {@link NavigationEngine} to check
+   * for a faster {@link com.mapbox.api.directions.v5.models.DirectionsRoute}.
+   *
+   * @since 0.9.0
+   */
+  public static final int NAVIGATION_CHECK_FASTER_ROUTE_INTERVAL = 120;
+
+  /**
+   * 70 seconds remaining is considered a medium alert level when
+   * navigating along a {@link com.mapbox.api.directions.v5.models.LegStep}.
+   *
+   * @since 0.9.0
+   */
+  public static final int NAVIGATION_MEDIUM_ALERT_DURATION = 70;
+
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat";
   public static final String NAVIGATION_VIEW_ORIGIN_LNG_KEY = "origin_long";
@@ -168,6 +194,7 @@ public final class NavigationConstants {
   public static final String STEP_MANEUVER_TYPE_CONTINUE = "continue";
   public static final String STEP_MANEUVER_TYPE_ROUNDABOUT = "roundabout";
   public static final String STEP_MANEUVER_TYPE_ROTARY = "rotary";
+  public static final String STEP_MANEUVER_TYPE_EXIT_ROTARY = "exit rotary";
   public static final String STEP_MANEUVER_TYPE_ROUNDABOUT_TURN = "roundabout turn";
   public static final String STEP_MANEUVER_TYPE_NOTIFICATION = "notification";
 

@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.StepManeuver;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.BaseTest;
@@ -21,10 +22,8 @@ public class MeasurementUtilsTest extends BaseTest {
 
     List<Point> geometryPoints = new ArrayList<>();
     geometryPoints.add(futurePoint);
-    LegStep step = LegStep.builder()
-      .geometry(PolylineUtils.encode(geometryPoints, PRECISION_6))
-      .mode("driving")
-      .build();
+    double[] rawLocation = {0, 0};
+    LegStep step = getLegStep(rawLocation, geometryPoints);
 
     double distance = MeasurementUtils.userTrueDistanceFromStep(futurePoint, step);
     assertEquals(0d, distance, DELTA);
@@ -36,10 +35,8 @@ public class MeasurementUtilsTest extends BaseTest {
 
     List<Point> geometryPoints = new ArrayList<>();
     geometryPoints.add(Point.fromLngLat(-95.8427, 29.7757));
-    LegStep step = LegStep.builder()
-      .geometry(PolylineUtils.encode(geometryPoints, PRECISION_6))
-      .mode("driving")
-      .build();
+    double[] rawLocation = {0, 0};
+    LegStep step = getLegStep(rawLocation, geometryPoints);
 
     double distance = MeasurementUtils.userTrueDistanceFromStep(futurePoint, step);
     assertEquals(45900.73617999494, distance, DELTA);
@@ -52,12 +49,21 @@ public class MeasurementUtilsTest extends BaseTest {
     List<Point> geometryPoints = new ArrayList<>();
     geometryPoints.add(Point.fromLngLat(-95.8427, 29.7757));
     geometryPoints.add(futurePoint);
-    LegStep step = LegStep.builder()
-      .geometry(PolylineUtils.encode(geometryPoints, PRECISION_6))
-      .mode("driving")
-      .build();
+    double[] rawLocation = {0, 0};
+    LegStep step = getLegStep(rawLocation, geometryPoints);
 
     double distance = MeasurementUtils.userTrueDistanceFromStep(futurePoint, step);
     assertEquals(0.04457271773629306d, distance, DELTA);
+  }
+
+  private LegStep getLegStep(double[] rawLocation, List<Point> geometryPoints) {
+    return LegStep.builder()
+      .geometry(PolylineUtils.encode(geometryPoints, PRECISION_6))
+      .mode("driving")
+      .distance(0)
+      .duration(0)
+      .maneuver(StepManeuver.builder().rawLocation(rawLocation).build())
+      .weight(0)
+      .build();
   }
 }

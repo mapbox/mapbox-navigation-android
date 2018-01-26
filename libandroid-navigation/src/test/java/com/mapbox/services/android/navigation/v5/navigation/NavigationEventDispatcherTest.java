@@ -15,6 +15,7 @@ import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListeners;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
+import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -52,6 +53,8 @@ public class NavigationEventDispatcherTest extends BaseTest {
   OffRouteListener offRouteListener;
   @Mock
   NavigationEventListener navigationEventListener;
+  @Mock
+  FasterRouteListener fasterRouteListener;
   @Mock
   Location location;
   @Mock
@@ -259,6 +262,50 @@ public class NavigationEventDispatcherTest extends BaseTest {
     navigationEventDispatcher.onNavigationEvent(true);
     verify(navigationEventListener, times(0)).onRunning(true);
   }
+
+  @Test
+  public void addFasterRouteListener_didAddListener() throws Exception {
+    navigationEventDispatcher.onFasterRouteEvent(route);
+    verify(fasterRouteListener, times(0)).fasterRouteFound(route);
+
+    navigation.addFasterRouteListener(fasterRouteListener);
+    navigationEventDispatcher.onFasterRouteEvent(route);
+    verify(fasterRouteListener, times(1)).fasterRouteFound(route);
+  }
+
+  @Test
+  public void addFasterRouteListener_onlyAddsListenerOnce() throws Exception {
+    navigationEventDispatcher.onFasterRouteEvent(route);
+    verify(fasterRouteListener, times(0)).fasterRouteFound(route);
+
+    navigation.addFasterRouteListener(fasterRouteListener);
+    navigation.addFasterRouteListener(fasterRouteListener);
+    navigation.addFasterRouteListener(fasterRouteListener);
+    navigationEventDispatcher.onFasterRouteEvent(route);
+    verify(fasterRouteListener, times(1)).fasterRouteFound(route);
+  }
+
+  @Test
+  public void removeFasterRouteListener_didRemoveListener() throws Exception {
+    navigation.addFasterRouteListener(fasterRouteListener);
+    navigation.removeFasterRouteListener(fasterRouteListener);
+    navigationEventDispatcher.onFasterRouteEvent(route);
+    verify(fasterRouteListener, times(0)).fasterRouteFound(route);
+  }
+
+  @Test
+  public void removeFasterRouteListener_nullRemovesAllListeners() throws Exception {
+    navigation.addFasterRouteListener(fasterRouteListener);
+    navigation.addFasterRouteListener(mock(FasterRouteListener.class));
+    navigation.addFasterRouteListener(mock(FasterRouteListener.class));
+    navigation.addFasterRouteListener(mock(FasterRouteListener.class));
+    navigation.addFasterRouteListener(mock(FasterRouteListener.class));
+
+    navigation.removeFasterRouteListener(null);
+    navigationEventDispatcher.onFasterRouteEvent(route);
+    verify(fasterRouteListener, times(0)).fasterRouteFound(route);
+  }
+
 
   @Test
   public void setNavigationMetricListener_didGetSet() throws Exception {

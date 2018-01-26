@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">MapBox SDK навигация за Android</string>
+
+    <!-- Notification Strings -->
+    <string name="end_navigation">Крайна навигация</string>
+</resources>

@@ -17,7 +17,7 @@ import com.mapbox.services.android.navigation.testapp.activity.MockNavigationAct
 import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationViewActivity;
-import com.mapbox.services.android.navigation.ui.v5.WaypointNavigationActivity;
+import com.mapbox.services.android.navigation.testapp.activity.WaypointNavigationActivity;
 import com.mapbox.services.android.telemetry.permissions.PermissionsListener;
 import com.mapbox.services.android.telemetry.permissions.PermissionsManager;
 
@@ -63,6 +63,11 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         getString(R.string.title_waypoint_navigation),
         getString(R.string.description_waypoint_navigation),
         WaypointNavigationActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_embedded_navigation),
+        getString(R.string.description_embedded_navigation),
+        EmbeddedNavigationActivity.class
       )
     ));
 

@@ -33,6 +33,7 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
+import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionLoader;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
@@ -180,6 +181,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void onDestroy() {
     mapView.onDestroy();
     navigationViewModel.onDestroy();
+    InstructionLoader.getInstance().shutdown();
   }
 
   /**
@@ -380,7 +382,18 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     mapView.getMapAsync(this);
   }
 
+  /**
+   * Gives the ability to manipulate the map directly for anything that might not currently be
+   * supported. This returns null until the view is initialized
+   *
+   * @return mapbox map object, or null if view has not been initialized
+   */
+  public MapboxMap getMapboxMap() {
+    return map;
+  }
+
   private void init() {
+    InstructionLoader.getInstance().initialize(getContext());
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
     initViewModels();
@@ -510,6 +523,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     navigationViewEventDispatcher.setFeedbackListener(navigationViewOptions.feedbackListener());
     navigationViewEventDispatcher.setNavigationListener(navigationViewOptions.navigationListener());
     navigationViewEventDispatcher.setRouteListener(navigationViewOptions.routeListener());
+    navigationViewEventDispatcher.setBottomSheetCallback(navigationViewOptions.bottomSheetCallback());
 
     if (navigationViewOptions.progressChangeListener() != null) {
       navigationViewModel.getNavigation().addProgressChangeListener(navigationViewOptions.progressChangeListener());
@@ -555,6 +569,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
       @Override
       public void onStateChanged(@NonNull View bottomSheet, int newState) {
+        navigationViewEventDispatcher.onBottomSheetStateChanged(bottomSheet, newState);
+
         if (newState == BottomSheetBehavior.STATE_HIDDEN && navigationPresenter != null) {
           navigationPresenter.onSummaryBottomSheetHidden();
         }

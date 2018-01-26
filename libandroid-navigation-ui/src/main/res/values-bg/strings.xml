@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that rerouting is in progress -->
+    <string name="rerouting">Пренасочване...</string>
+
+    <!-- Indicates voice instructions are muted -->
+    <string name="muted">Заглушено</string>
+
+    <!-- Indicates voice instructions are unmuted -->
+    <string name="unmuted">Незаглушено</string>
+
+</resources>

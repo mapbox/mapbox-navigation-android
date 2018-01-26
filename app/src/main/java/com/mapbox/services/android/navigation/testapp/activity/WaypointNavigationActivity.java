@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.ui.v5;
+package com.mapbox.services.android.navigation.testapp.activity;
 
 import android.content.DialogInterface;
 import android.location.Location;
@@ -8,6 +8,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.ui.v5.NavigationView;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
+import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;

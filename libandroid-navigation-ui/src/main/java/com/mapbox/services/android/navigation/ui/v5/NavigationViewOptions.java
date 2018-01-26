@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -13,6 +14,8 @@ import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListene
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 
+import java.util.Locale;
+
 @AutoValue
 public abstract class NavigationViewOptions {
 
@@ -21,6 +24,9 @@ public abstract class NavigationViewOptions {
 
   @Nullable
   public abstract String directionsProfile();
+
+  @Nullable
+  public abstract Locale directionsLanguage();
 
   @Nullable
   public abstract Point origin();
@@ -56,12 +62,17 @@ public abstract class NavigationViewOptions {
   @Nullable
   public abstract MilestoneEventListener milestoneEventListener();
 
+  @Nullable
+  public abstract BottomSheetCallback bottomSheetCallback();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
     public abstract Builder directionsRoute(DirectionsRoute directionsRoute);
 
     public abstract Builder directionsProfile(@DirectionsCriteria.ProfileCriteria String directionsProfile);
+
+    public abstract Builder directionsLanguage(Locale directionsLanguage);
 
     public abstract Builder origin(Point origin);
 
@@ -86,6 +97,8 @@ public abstract class NavigationViewOptions {
     public abstract Builder progressChangeListener(ProgressChangeListener progressChangeListener);
 
     public abstract Builder milestoneEventListener(MilestoneEventListener milestoneEventListener);
+
+    public abstract Builder bottomSheetCallback(BottomSheetCallback bottomSheetCallback);
 
     public abstract NavigationViewOptions build();
   }

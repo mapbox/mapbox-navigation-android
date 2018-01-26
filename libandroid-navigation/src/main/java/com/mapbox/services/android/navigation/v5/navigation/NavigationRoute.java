@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.DirectionsCriteria.AnnotationCriteria;
@@ -12,6 +13,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria.VoiceUnitCriteria;
 import com.mapbox.api.directions.v5.MapboxDirections;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.core.exceptions.ServicesException;
 import com.mapbox.geojson.Point;
 
@@ -417,6 +419,55 @@ public final class NavigationRoute {
      */
     public Builder baseUrl(String baseUrl) {
       directionsBuilder.baseUrl(baseUrl);
+      return this;
+    }
+
+    /**
+     * Optionally create a {@link Builder} based on all variables
+     * from given {@link RouteOptions}.
+     * <p>
+     * Note: {@link RouteOptions#bearings()} are excluded because it's better
+     * to recalculate these at the time of the request, as your location bearing
+     * is constantly changing.
+     *
+     * @param options containing all variables for request
+     * @return this builder for chaining options together
+     * @since 0.9.0
+     */
+    public Builder routeOptions(RouteOptions options) {
+
+      if (!TextUtils.isEmpty(options.language())) {
+        directionsBuilder.language(new Locale(options.language()));
+      }
+
+      if (options.alternatives() != null) {
+        directionsBuilder.alternatives(options.alternatives());
+      }
+
+      if (!TextUtils.isEmpty(options.profile())) {
+        directionsBuilder.profile(options.profile());
+      }
+
+      if (options.alternatives() != null) {
+        directionsBuilder.alternatives(options.alternatives());
+      }
+
+      if (!TextUtils.isEmpty(options.voiceUnits())) {
+        directionsBuilder.voiceUnits(options.voiceUnits());
+      }
+
+      if (!TextUtils.isEmpty(options.user())) {
+        directionsBuilder.user(options.user());
+      }
+
+      if (!TextUtils.isEmpty(options.accessToken())) {
+        directionsBuilder.accessToken(options.accessToken());
+      }
+
+      if (!TextUtils.isEmpty(options.annotations())) {
+        directionsBuilder.annotations(options.annotations());
+      }
+
       return this;
     }
 

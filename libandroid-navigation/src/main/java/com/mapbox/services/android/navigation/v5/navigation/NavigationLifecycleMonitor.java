@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation.metrics;
+package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.app.Activity;
 import android.app.Application;
@@ -18,7 +18,7 @@ public class NavigationLifecycleMonitor implements Application.ActivityLifecycle
   private long portraitStartTime = 0;
   private double portraitTimeInMillis = 0;
 
-  public NavigationLifecycleMonitor(Application application) {
+  NavigationLifecycleMonitor(Application application) {
     application.registerActivityLifecycleCallbacks(this);
     startSessionTime = System.currentTimeMillis();
     resumes = new ArrayList<>();
@@ -54,6 +54,7 @@ public class NavigationLifecycleMonitor implements Application.ActivityLifecycle
 
   @Override
   public void onActivityDestroyed(Activity activity) {
+    NavigationTelemetry.getInstance().endSession(activity.isChangingConfigurations());
     if (activity.isFinishing()) {
       activity.getApplication().unregisterActivityLifecycleCallbacks(this);
     }
@@ -78,7 +79,7 @@ public class NavigationLifecycleMonitor implements Application.ActivityLifecycle
 
   //endregion
 
-  public int obtainPortraitPercentage() {
+  int obtainPortraitPercentage() {
     // If no changes to landscape
     if (currentOrientation.equals(Configuration.ORIENTATION_PORTRAIT) && portraitTimeInMillis == 0) {
       return ONE_HUNDRED_PERCENT;
@@ -88,7 +89,7 @@ public class NavigationLifecycleMonitor implements Application.ActivityLifecycle
     return (int) (ONE_HUNDRED_PERCENT * portraitFraction);
   }
 
-  public int obtainForegroundPercentage() {
+  int obtainForegroundPercentage() {
     long currentTime = System.currentTimeMillis();
     double foregroundTime = calculateForegroundTime(currentTime);
     return (int) (100 * (foregroundTime / (currentTime - startSessionTime)));

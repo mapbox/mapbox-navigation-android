@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SDK de Navegação Mapbox para Android</string>
+
+    <!-- Notification Strings -->
+    <string name="end_navigation">Finalizar navegação</string>
+</resources>
