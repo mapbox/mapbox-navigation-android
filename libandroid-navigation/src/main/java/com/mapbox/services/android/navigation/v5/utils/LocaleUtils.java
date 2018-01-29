@@ -69,6 +69,6 @@ public class LocaleUtils {
    * @return unit type
    */
   public static @NavigationUnitType.UnitType int getUnitType(Context context) {
-    getUnitType(context, getLocale(context));
+    return getUnitType(context, getLocale(context));
   }
 }
