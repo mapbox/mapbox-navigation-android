@@ -94,7 +94,7 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder isDebugLoggingEnabled(boolean debugLoggingEnabled);
 
-    public abstract Builder unitType(int unitType);
+    public abstract Builder unitType(@NavigationUnitType.UnitType int unitType);
 
     public abstract Builder navigationNotification(NavigationNotification notification);
 
@@ -122,6 +122,6 @@ public abstract class MapboxNavigationOptions {
       .enableNotification(true)
       .isFromNavigationUi(false)
       .isDebugLoggingEnabled(false)
-      .unitType(-1);
+      .unitType(NavigationUnitType.NONE_SPECIFIED);
   }
 }
