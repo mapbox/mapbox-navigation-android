@@ -175,7 +175,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
         Timber.d("NAV-DEBUG ** ALERT Advancing step with stepDistanceRemaining: %s", stepDistanceRemaining);
       }
 
-      Timber.d("NAV-DEBUG ** Bearing matches final maneuver heading + stepDistanceRemaining < maneuverZone");
+      Timber.d("NAV-DEBUG ** Advancing step index --> Bearing matches final maneuver heading + stepDistanceRemaining < maneuverZone");
       // First increase the indices and then update the majority of information for the new
       // routeProgress.
       indices = increaseIndex(previousRouteProgress, indices);
