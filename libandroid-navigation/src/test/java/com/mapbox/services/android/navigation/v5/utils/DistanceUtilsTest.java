@@ -2,6 +2,8 @@ package com.mapbox.services.android.navigation.v5.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -33,12 +35,21 @@ public class DistanceUtilsTest {
   private SharedPreferences sharedPreferences;
   @Mock
   private Context context;
+  @Mock
+  private Resources resources;
+  @Mock
+  private Configuration configuration;
 
   @Before
   public void setup() {
     sharedPreferences = Mockito.mock(SharedPreferences.class);
     context = Mockito.mock(Context.class);
+    resources = Mockito.mock(Resources.class);
+    configuration = Mockito.mock(Configuration.class);
     when(context.getSharedPreferences(anyString(), anyInt())).thenReturn(sharedPreferences);
+    when(context.getResources()).thenReturn(resources);
+    when(resources.getConfiguration()).thenReturn(configuration);
+    configuration.locale = Locale.getDefault();
     when(context.getString(R.string.kilometers)).thenReturn("km");
     when(context.getString(R.string.meters)).thenReturn("m");
     when(context.getString(R.string.miles)).thenReturn("mi");
@@ -46,9 +57,9 @@ public class DistanceUtilsTest {
   }
 
   private void setupSharedPreferences(Locale locale, int navigationUnitType) {
-    when(sharedPreferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, Locale.getDefault().getLanguage())).thenReturn(locale.getLanguage());
-    when(sharedPreferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, Locale.getDefault().getCountry())).thenReturn(locale.getCountry());
-    when(sharedPreferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, -1)).thenReturn(navigationUnitType);
+    when(sharedPreferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, "")).thenReturn(locale.getLanguage());
+    when(sharedPreferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, "")).thenReturn(locale.getCountry());
+    when(sharedPreferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, NavigationUnitType.NONE_SPECIFIED)).thenReturn(navigationUnitType);
   }
 
   @Test
