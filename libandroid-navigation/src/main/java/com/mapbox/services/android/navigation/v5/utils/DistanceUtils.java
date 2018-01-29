@@ -1,10 +1,8 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.location.Location;
-import android.preference.PreferenceManager;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
@@ -12,7 +10,6 @@ import android.text.style.StyleSpan;
 
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.R;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfConversion;
@@ -23,7 +20,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_IMPERIAL;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_METRIC;
 import static com.mapbox.turf.TurfConstants.UNIT_FEET;
 import static com.mapbox.turf.TurfConstants.UNIT_KILOMETERS;
@@ -43,44 +39,15 @@ public class DistanceUtils {
    * @param context from which to get localized strings from
    */
   public DistanceUtils(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-
-    int unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, -1);
-
-    String localeLanguage = preferences.getString(
-      NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, Locale.getDefault().getLanguage());
-    String localeCountry = preferences.getString(
-      NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, Locale.getDefault().getCountry());
-
-    Locale locale;
-
-    if (localeCountry.isEmpty()) { // Country is not required for a locale
-      locale = new Locale(localeLanguage);
-    } else {
-      locale = new Locale(localeLanguage, localeCountry);
-    }
-
-    if (locale == null) { // If locale isn't specified, use device locale
-      locale = context.getResources().getConfiguration().locale;
-    }
-
-    if (unitType == -1) { // If unit type isn't specified, use default for locale
-      switch (locale.getCountry()) {
-        case "US": // US
-        case "LR": // Liberia
-        case "MM": // Burma
-          unitType = TYPE_IMPERIAL;
-          break;
-        default:
-          unitType = TYPE_METRIC;
-      }
-    }
-
-    numberFormat = NumberFormat.getNumberInstance(locale);
     unitStrings.put(UNIT_KILOMETERS, context.getString(R.string.kilometers));
     unitStrings.put(UNIT_METERS, context.getString(R.string.meters));
     unitStrings.put(UNIT_MILES, context.getString(R.string.miles));
     unitStrings.put(UNIT_FEET, context.getString(R.string.feet));
+
+    Locale locale = LocaleUtils.getLocale(context);
+    int unitType = LocaleUtils.getUnitType(context, locale);
+
+    numberFormat = NumberFormat.getNumberInstance(locale);
 
     largeUnit = unitType == TYPE_METRIC ? UNIT_KILOMETERS : UNIT_MILES;
     smallUnit = unitType == TYPE_METRIC ? UNIT_METERS : UNIT_FEET;
