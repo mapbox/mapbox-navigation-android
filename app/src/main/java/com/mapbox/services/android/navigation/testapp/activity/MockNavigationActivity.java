@@ -126,7 +126,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       ((MockLocationEngine) locationEngine).setRoute(route);
       navigation.setLocationEngine(locationEngine);
       navigation.startNavigation(route);
-      mapboxMap.setOnMapClickListener(null);
+      mapboxMap.addOnMapClickListener(null);
     }
   }
 
@@ -156,7 +156,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
     navigationMapRoute = new NavigationMapRoute(navigation, mapView, mapboxMap);
 
-    mapboxMap.setOnMapClickListener(this);
+    mapboxMap.addOnMapClickListener(this);
     Snackbar.make(mapView, "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
 
     locationEngine = new MockLocationEngine(1000, 50, true);
@@ -297,6 +297,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     navigation.onDestroy();
     locationEngine.removeLocationUpdates();
     locationEngine.deactivate();
+    if (mapboxMap != null) {
+      mapboxMap.removeOnMapClickListener(this);
+    }
     mapView.onDestroy();
   }
 
