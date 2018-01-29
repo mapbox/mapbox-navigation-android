@@ -9,7 +9,7 @@ import com.mapbox.geojson.Point;
  * concrete implementation of this class or subclass {@link SimpleCamera} and update
  * {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation#setCameraEngine(Camera)}.
  *
- * @since 0.8.1
+ * @since 0.10.0
  */
 public abstract class Camera {
 

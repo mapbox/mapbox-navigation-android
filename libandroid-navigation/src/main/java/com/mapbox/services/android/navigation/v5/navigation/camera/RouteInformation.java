@@ -14,7 +14,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
  * also provides useful information (screen configuration and target distance) which can be used to
  * make additional configuration changes to the map's camera.
  *
- * @since 0.8.1
+ * @since 0.10.0
  */
 @AutoValue
 public abstract class RouteInformation {
@@ -23,7 +23,7 @@ public abstract class RouteInformation {
    * The device's current configuration which can be used to return different zoom values given
    * it's orientation.
    * @return device's current configuration
-   * @since 0.8.1
+   * @since 0.10.0
    */
   @NonNull
   public abstract Configuration configuration();
@@ -40,7 +40,7 @@ public abstract class RouteInformation {
    * and it will be null if the {@link RouteInformation} is generated from an update to route
    * progress or from an orientation change.
    * @return current route
-   * @since 0.8.1
+   * @since 0.10.0
    */
   @Nullable
   public abstract DirectionsRoute route();
@@ -49,7 +49,7 @@ public abstract class RouteInformation {
    * The user's current location along the route. This value will update when orientation changes
    * occur as well as when progress along a route changes.
    * @return current location
-   * @since 0.8.1
+   * @since 0.10.0
    */
   @Nullable
   public abstract Location location();
@@ -57,7 +57,7 @@ public abstract class RouteInformation {
   /**
    * The user's current progress along the route.
    * @return current progress along the route.
-   * @since 0.8.1
+   * @since 0.10.0
    */
   @Nullable
   public abstract RouteProgress routeProgress();

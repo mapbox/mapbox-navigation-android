@@ -15,7 +15,7 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 /**
  * The default camera used by {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
  *
- * @since 0.8.1
+ * @since 0.10.0
  */
 public class SimpleCamera extends Camera {
 
