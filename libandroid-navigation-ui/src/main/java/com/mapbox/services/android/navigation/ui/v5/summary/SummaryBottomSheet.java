@@ -13,8 +13,6 @@ import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -32,13 +30,10 @@ import java.text.DecimalFormat;
 public class SummaryBottomSheet extends FrameLayout {
 
   private static final String EMPTY_STRING = "";
-
   private TextView distanceRemainingText;
   private TextView timeRemainingText;
   private TextView arrivalTimeText;
   private ProgressBar rerouteProgressBar;
-
-  private DecimalFormat decimalFormat;
   private boolean isRerouting;
 
   public SummaryBottomSheet(Context context) {
@@ -63,7 +58,6 @@ public class SummaryBottomSheet extends FrameLayout {
   protected void onFinishInflate() {
     super.onFinishInflate();
     bind();
-    initDecimalFormat();
   }
 
   public void subscribe(NavigationViewModel navigationViewModel) {
@@ -97,13 +91,12 @@ public class SummaryBottomSheet extends FrameLayout {
    * uses it to update the views.
    *
    * @param routeProgress used to provide navigation / routeProgress data
-   * @param unitType      either imperial or metric
    * @since 0.6.2
    */
   @SuppressWarnings("UnusedDeclaration")
-  public void update(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
+  public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      SummaryModel model = new SummaryModel(routeProgress, decimalFormat, unitType);
+      SummaryModel model = new SummaryModel(getContext(), routeProgress);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());
@@ -147,14 +140,6 @@ public class SummaryBottomSheet extends FrameLayout {
     timeRemainingText = findViewById(R.id.timeRemainingText);
     arrivalTimeText = findViewById(R.id.arrivalTimeText);
     rerouteProgressBar = findViewById(R.id.rerouteProgressBar);
-  }
-
-  /**
-   * Initializes decimal format to be used to populate views with
-   * distance remaining.
-   */
-  private void initDecimalFormat() {
-    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
   }
 
   /**

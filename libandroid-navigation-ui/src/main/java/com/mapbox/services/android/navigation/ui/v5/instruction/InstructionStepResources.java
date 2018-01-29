@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.text.SpannableStringBuilder;
+import android.content.Context;
+import android.text.SpannableString;
 
 import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
@@ -8,12 +9,11 @@ import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
-import java.text.DecimalFormat;
 import java.util.List;
 
 class InstructionStepResources {
 
-  private SpannableStringBuilder stepDistanceRemaining;
+  private SpannableString stepDistanceRemaining;
   private String maneuverViewModifier;
   private String maneuverViewType;
   private String thenStepManeuverModifier;
@@ -21,12 +21,12 @@ class InstructionStepResources {
   private boolean shouldShowThenStep;
   private List<IntersectionLanes> turnLanes;
 
-  InstructionStepResources(RouteProgress progress, DecimalFormat decimalFormat, int unitType) {
-    formatStepDistance(progress, decimalFormat, unitType);
+  InstructionStepResources(Context context, RouteProgress progress) {
+    formatStepDistance(context, progress);
     extractStepResources(progress);
   }
 
-  SpannableStringBuilder getStepDistanceRemaining() {
+  SpannableString getStepDistanceRemaining() {
     return stepDistanceRemaining;
   }
 
@@ -79,9 +79,9 @@ class InstructionStepResources {
     }
   }
 
-  private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat, int unitType) {
-    stepDistanceRemaining = DistanceUtils.distanceFormatter(progress.currentLegProgress()
-      .currentStepProgress().distanceRemaining(), decimalFormat, true, unitType);
+  private void formatStepDistance(Context context, RouteProgress progress) {
+    stepDistanceRemaining = new DistanceUtils(context)
+      .formatDistance(progress.currentLegProgress().currentStepProgress().distanceRemaining());
   }
 
   private void intersectionTurnLanes(LegStep step) {
