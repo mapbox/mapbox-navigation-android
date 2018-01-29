@@ -427,6 +427,7 @@ public class MapboxNavigation implements ServiceConnection {
       navigationService.stopSelf();
       context.unbindService(this);
       isBound = false;
+      cameraEngine = null;
       navigationEventDispatcher.onNavigationEvent(false);
     }
   }
