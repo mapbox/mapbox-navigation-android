@@ -5,8 +5,10 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.METERS_REMAINING_TILL_ARRIVAL;
@@ -72,6 +74,26 @@ public final class RouteUtils {
     List<RouteLeg> legs = routeProgress.directionsRoute().legs();
     RouteLeg currentLeg = routeProgress.currentLeg();
     return currentLeg.equals(legs.get(legs.size() - 1));
+  }
+
+  /**
+   * Given a {@link RouteProgress}, this method will calculate the remaining coordinates
+   * along the given route based on total route coordinates and the progress remaining waypoints.
+   *
+   * @param routeProgress for route coordinates and remaining waypoints
+   * @return list of remaining waypoints as {@link Point}s
+   * @since 0.10.0
+   */
+  @Nullable
+  public static List<Point> calculateRemainingWaypoints(RouteProgress routeProgress) {
+    List<Point> coordinates = new ArrayList<>(routeProgress.directionsRoute().routeOptions().coordinates());
+
+    if (coordinates.size() < routeProgress.remainingWaypoints()) {
+      return null;
+    }
+    // Remove any waypoints that have been passed
+    coordinates.subList(0, routeProgress.remainingWaypoints()).clear();
+    return coordinates;
   }
 
   private static boolean upcomingStepIsArrival(@NonNull RouteProgress routeProgress) {
