@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 
@@ -34,7 +35,11 @@ public class LocaleUtils {
     } else if (!localeLanguage.isEmpty()) { // Country is not required for a locale
       return new Locale(localeLanguage);
     } else { // If locale isn't specified, use device locale
-      return context.getResources().getConfiguration().locale;
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        return context.getResources().getConfiguration().getLocales().get(0);
+      } else {
+        return context.getResources().getConfiguration().locale;
+      }
     }
   }
 
