@@ -102,7 +102,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   public NavigationView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
-    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
+    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
     ThemeSwitcher.setTheme(context, attrs);
     init();
   }
@@ -349,8 +349,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param options with containing route / coordinate data
    */
   public void startNavigation(NavigationViewOptions options) {
+    // Clear any existing markers
     clearMarkers();
-
     // Initialize navigation with options from NavigationViewOptions
     if (!isInitialized) {
       navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),

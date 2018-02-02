@@ -168,6 +168,13 @@ public final class NavigationConstants {
    */
   public static final int NAVIGATION_MEDIUM_ALERT_DURATION = 70;
 
+  /**
+   * Constant used to store running state in navigation view.
+   *
+   * @since 0.10.0
+   */
+  public static final String NAVIGATION_VIEW_RUNNING = "navigation_view_running";
+
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat";
   public static final String NAVIGATION_VIEW_ORIGIN_LNG_KEY = "origin_long";
