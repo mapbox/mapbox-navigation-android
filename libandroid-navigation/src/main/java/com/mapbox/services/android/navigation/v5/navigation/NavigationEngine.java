@@ -7,20 +7,20 @@ import android.os.Message;
 import android.os.Process;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
-import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteCallback;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
 
-import timber.log.Timber;
-
 import static com.mapbox.core.constants.Constants.PRECISION_6;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.bearingMatchesManeuverFinalBearing;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkBearingForStepCompletion;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getSnappedLocation;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.increaseIndex;
@@ -35,7 +35,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
  * This class extends handler thread to run most of the navigation calculations on a separate
  * background thread.
  */
-class NavigationEngine extends HandlerThread implements Handler.Callback, OffRouteDetector.IncreaseStepIndexCallback {
+class NavigationEngine extends HandlerThread implements Handler.Callback, OffRouteCallback {
 
   private static final String THREAD_NAME = "NavThread";
   private RouteProgress previousRouteProgress;
@@ -44,6 +44,9 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
   private Handler responseHandler;
   private Handler workerHandler;
   private Callback callback;
+
+  private boolean shouldIncreaseStepIndex;
+  private boolean shouldClearRecentDistances;
 
   NavigationEngine(Handler responseHandler, Callback callback) {
     super(THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
@@ -59,16 +62,9 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
     return true;
   }
 
-  /**
-   * This callback will fire when the {@link OffRouteDetector} determines that the user
-   * location is close enough to the upcoming {@link com.mapbox.api.directions.v5.models.LegStep}.
-   * <p>
-   * In this case, the step index needs to be increased for the next {@link RouteProgress} generation.
-   */
   @Override
   public void onShouldIncreaseIndex() {
-    //    indices = increaseIndex(previousRouteProgress, indices);
-    Timber.d("NAV-DEBUG ** SHOULD INCREASE INDEX");
+    shouldIncreaseStepIndex = true;
   }
 
   void queueTask(int msgIdentifier, NewLocationModel newLocationModel) {
@@ -81,22 +77,26 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
 
   private void handleRequest(final NewLocationModel newLocationModel) {
 
-    MapboxNavigation mapboxNavigation = newLocationModel.mapboxNavigation();
+    final MapboxNavigation mapboxNavigation = newLocationModel.mapboxNavigation();
     boolean snapToRouteEnabled = mapboxNavigation.options().snapToRoute();
-    boolean fasterRouteDetectionEnabled = mapboxNavigation.options().enableFasterRouteDetection();
 
-    Location rawLocation = newLocationModel.location();
-    RingBuffer recentDistances = newLocationModel.distancesAwayFromManeuver();
+    final Location rawLocation = newLocationModel.location();
 
     // Generate a new route progress given the raw location update
-    final RouteProgress routeProgress = generateNewRouteProgress(mapboxNavigation, rawLocation, recentDistances);
+    RouteProgress routeProgress = generateNewRouteProgress(mapboxNavigation, rawLocation);
+
+    // Check if user has gone off-route
+    final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress, this);
+
+    // If needed, increase step index and generate new route progress
+    checkIncreaseStepIndex(mapboxNavigation.getRoute());
+
+    // Check if recent distances from the maneuver should be cleared
+    checkRecentDistances(newLocationModel);
 
     // Check milestone list to see if any should be triggered
     final List<Milestone> milestones = checkMilestones(
       previousRouteProgress, routeProgress, mapboxNavigation);
-
-    // Check if user has gone off-route
-    final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress, this);
 
     // Create snapped location if enabled, otherwise return raw location
     final Location location;
@@ -107,38 +107,114 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
     }
 
     // Check for faster route only if enabled and not off-route
-    final boolean checkFasterRoute = fasterRouteDetectionEnabled && !userOffRoute
+    boolean fasterRouteEnabled = mapboxNavigation.options().enableFasterRouteDetection();
+    final boolean checkFasterRoute = fasterRouteEnabled && !userOffRoute
       && shouldCheckFasterRoute(newLocationModel, routeProgress);
 
-    previousRouteProgress = routeProgress;
+    // Copy route progress to final object for callback
+    final RouteProgress finalRouteProgress = routeProgress;
+    previousRouteProgress = finalRouteProgress;
 
     responseHandler.post(new Runnable() {
       @Override
       public void run() {
-        callback.onNewRouteProgress(location, routeProgress);
-        callback.onMilestoneTrigger(milestones, routeProgress);
+        callback.onNewRouteProgress(location, finalRouteProgress);
+        callback.onMilestoneTrigger(milestones, finalRouteProgress);
         callback.onUserOffRoute(location, userOffRoute);
-        callback.onCheckFasterRoute(location, routeProgress, checkFasterRoute);
+        callback.onCheckFasterRoute(location, finalRouteProgress, checkFasterRoute);
       }
     });
   }
 
-  private RouteProgress generateNewRouteProgress(MapboxNavigation mapboxNavigation, Location location,
-                                                 RingBuffer recentDistances) {
+  private void checkIncreaseStepIndex(DirectionsRoute route) {
+    if (shouldIncreaseStepIndex) {
+      advanceStepIndex(route);
+      shouldIncreaseStepIndex = false;
+    }
+  }
 
-    Timber.d("NAV-DEBUG ***** ***** ***** Generating new RouteProgress ***** ***** *****");
+  private void checkRecentDistances(NewLocationModel newLocationModel) {
+    RingBuffer recentDistances = newLocationModel.distancesAwayFromManeuver();
+    if (shouldClearRecentDistances && !recentDistances.isEmpty()) {
+      recentDistances.clear();
+      shouldClearRecentDistances = false;
+    }
+  }
+
+  private RouteProgress generateNewRouteProgress(MapboxNavigation mapboxNavigation, Location location) {
 
     DirectionsRoute directionsRoute = mapboxNavigation.getRoute();
     MapboxNavigationOptions options = mapboxNavigation.options();
+    double completionOffset = options.maxTurnCompletionOffset();
+    double maneuverZoneRadius = options.maneuverZoneRadius();
 
+    // Check if a new route has been provided
+    checkNewRoute(directionsRoute);
+
+    double stepDistanceRemaining = calculateStepDistanceRemaining(location, directionsRoute);
+    boolean withinManeuverRadius = stepDistanceRemaining < maneuverZoneRadius;
+    boolean bearingMatchesManeuver = checkBearingForStepCompletion(
+      location, previousRouteProgress, stepDistanceRemaining, completionOffset
+    );
+
+    if (bearingMatchesManeuver && withinManeuverRadius) {
+      // Advance the step index and create new step distance remaining
+      advanceStepIndex(directionsRoute);
+      // Re-calculate the step distance remaining based on the new index
+      stepDistanceRemaining = calculateStepDistanceRemaining(location, directionsRoute);
+      // Clear any recent distances from the maneuver (maneuver has now changed)
+      shouldClearRecentDistances = true;
+    }
+
+    int legIndex = indices.legIndex();
+    int stepIndex = indices.stepIndex();
+    double legDistanceRemaining = legDistanceRemaining(stepDistanceRemaining, legIndex, stepIndex, directionsRoute);
+    double routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, legIndex, directionsRoute);
+
+    // Create a RouteProgress.create object using the latest user location
+    return RouteProgress.builder()
+      .stepDistanceRemaining(stepDistanceRemaining)
+      .legDistanceRemaining(legDistanceRemaining)
+      .distanceRemaining(routeDistanceRemaining)
+      .directionsRoute(directionsRoute)
+      .stepIndex(stepIndex)
+      .legIndex(legIndex)
+      .build();
+  }
+
+  private void advanceStepIndex(DirectionsRoute directionsRoute) {
+    // First increase the indices and then update the majority of information for the new
+    // routeProgress.
+    indices = increaseIndex(previousRouteProgress, indices);
+
+    // First increase the indices and then update the majority of information for the new
+    stepPositions = decodeStepPositions(directionsRoute, indices.legIndex(), indices.stepIndex());
+  }
+
+  private List<Point> decodeStepPositions(DirectionsRoute directionsRoute, int legIndex, int stepIndex) {
+    // Check for valid legs
+    List<RouteLeg> legs = directionsRoute.legs();
+    if (legs == null || legs.isEmpty()) {
+      return stepPositions;
+    }
+    // Check for valid steps
+    List<LegStep> steps = legs.get(legIndex).steps();
+    if (steps == null || steps.isEmpty()) {
+      return stepPositions;
+    }
+
+    String stepGeometry = steps.get(stepIndex).geometry();
+    if (stepGeometry != null) {
+      return PolylineUtils.decode(stepGeometry, PRECISION_6);
+    }
+    return stepPositions;
+  }
+
+  private void checkNewRoute(DirectionsRoute directionsRoute) {
     if (RouteUtils.isNewRoute(previousRouteProgress, directionsRoute)) {
-
-      Timber.d("NAV-DEBUG ** New route, resetting values");
-
       // Decode the first steps geometry and hold onto the resulting Position objects till the users
       // on the next step. Indices are both 0 since the user just started on the new route.
-      stepPositions = PolylineUtils.decode(
-        directionsRoute.legs().get(0).steps().get(0).geometry(), PRECISION_6);
+      stepPositions = decodeStepPositions(directionsRoute, 0, 0);
 
       previousRouteProgress = RouteProgress.builder()
         .stepDistanceRemaining(directionsRoute.legs().get(0).steps().get(0).distance())
@@ -151,62 +227,13 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
 
       indices = NavigationIndices.create(0, 0);
     }
-    Timber.d("NAV-DEBUG ** legIndex %s, stepIndex %s", indices.legIndex(), indices.stepIndex());
+  }
 
+  private double calculateStepDistanceRemaining(Location location, DirectionsRoute directionsRoute) {
     Point snappedPosition = userSnappedToRoutePosition(location, stepPositions);
-
-    double stepDistanceRemaining = stepDistanceRemaining(
-      snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute, stepPositions);
-    double legDistanceRemaining = legDistanceRemaining(
-      stepDistanceRemaining, indices.legIndex(), indices.stepIndex(), directionsRoute);
-    double routeDistanceRemaining = routeDistanceRemaining(
-      legDistanceRemaining, indices.legIndex(), directionsRoute);
-
-    Timber.d("NAV-DEBUG ** stepDistanceRemaining pre- heading check %s", stepDistanceRemaining);
-
-    boolean bearingMatch = bearingMatchesManeuverFinalBearing(location, previousRouteProgress, options.maxTurnCompletionOffset());
-    if (!bearingMatch && stepDistanceRemaining == 0) {
-      Timber.d("NAV-DEBUG ** ALERT No bearing match and step distance remaining 0");
-    }
-
-    if (bearingMatch && (stepDistanceRemaining < options.maneuverZoneRadius())) {
-
-      if (stepDistanceRemaining != 0) {
-        Timber.d("NAV-DEBUG ** ALERT Advancing step with stepDistanceRemaining: %s", stepDistanceRemaining);
-      }
-
-      Timber.d("NAV-DEBUG ** Advancing step index --> Bearing matches final maneuver heading + stepDistanceRemaining < maneuverZone");
-      // First increase the indices and then update the majority of information for the new
-      // routeProgress.
-      indices = increaseIndex(previousRouteProgress, indices);
-      Timber.d("NAV-DEBUG ** legIndex %s, stepIndex %s", indices.legIndex(), indices.stepIndex());
-      // First increase the indices and then update the majority of information for the new
-      stepPositions = PolylineUtils.decode(
-        directionsRoute.legs().get(
-          indices.legIndex()).steps().get(indices.stepIndex()).geometry(), PRECISION_6);
-      snappedPosition = userSnappedToRoutePosition(location, stepPositions);
-      stepDistanceRemaining = stepDistanceRemaining(
-        snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute, stepPositions);
-      legDistanceRemaining = legDistanceRemaining(
-        stepDistanceRemaining, indices.legIndex(), indices.stepIndex(), directionsRoute);
-      routeDistanceRemaining = routeDistanceRemaining(
-        legDistanceRemaining, indices.legIndex(), directionsRoute);
-
-      // Remove all distance values from distancesAwayFromManeuver
-      recentDistances.clear();
-    }
-
-    Timber.d("NAV-DEBUG ** stepDistanceRemaining %s", stepDistanceRemaining);
-
-    // Create a RouteProgress.create object using the latest user location
-    return RouteProgress.builder()
-      .stepDistanceRemaining(stepDistanceRemaining)
-      .legDistanceRemaining(legDistanceRemaining)
-      .distanceRemaining(routeDistanceRemaining)
-      .directionsRoute(directionsRoute)
-      .stepIndex(indices.stepIndex())
-      .legIndex(indices.legIndex())
-      .build();
+    return stepDistanceRemaining(
+      snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute, stepPositions
+    );
   }
 
   /**

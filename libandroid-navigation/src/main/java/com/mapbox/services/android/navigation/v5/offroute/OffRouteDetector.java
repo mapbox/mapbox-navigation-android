@@ -11,8 +11,6 @@ import com.mapbox.services.android.navigation.v5.utils.ToleranceUtils;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
-import timber.log.Timber;
-
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
 import static com.mapbox.services.android.navigation.v5.utils.MeasurementUtils.userTrueDistanceFromStep;
 
@@ -28,73 +26,49 @@ public class OffRouteDetector extends OffRoute {
    */
   @Override
   public boolean isUserOffRoute(Location location, RouteProgress routeProgress, MapboxNavigationOptions options,
-                                RingBuffer<Integer> distancesAwayFromManeuver, IncreaseStepIndexCallback callback) {
-
-    Timber.d("NAV-DEBUG xxxxx xxxxx xxxxx Detecting Off Route xxxxx xxxxx xxxxx");
+                                RingBuffer<Integer> distancesAwayFromManeuver, OffRouteCallback callback) {
 
     if (!validOffRoute(location, options)) {
-      Timber.d("NAV-DEBUG xx invalid off-route");
       return false;
     }
 
     Point currentPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+
     // Get distance from the current step to future point
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     double distanceFromCurrentStep = userTrueDistanceFromStep(currentPoint, currentStep);
 
+    // Create off-route radius from the max of our dynamic or accuracy based tolerances
     double dynamicTolerance = ToleranceUtils.dynamicRerouteDistanceTolerance(currentPoint, routeProgress);
     double accuracyTolerance = location.getSpeed() * options.deadReckoningTimeInterval();
     double offRouteRadius = Math.max(dynamicTolerance, accuracyTolerance);
-    Timber.d("NAV-DEBUG xx Radius: %s", offRouteRadius);
 
     // Off route if this distance is greater than our offRouteRadius
     boolean isOffRoute = distanceFromCurrentStep > offRouteRadius;
 
-    Timber.d("NAV-DEBUG xx Distance from current step: %s", distanceFromCurrentStep);
-
     // If not offRoute at this point, don't continue with remaining logic
     if (!isOffRoute) {
-      Timber.d("NAV-DEBUG xx Off route: false -- returning false...");
       return false;
-    } else {
-      Timber.d("NAV-DEBUG xx Off route: true -- logic continues...");
     }
 
     // If the user is moving away from the maneuver location and they are close to the next step we
     // can safely say they have completed the maneuver. This is intended to be a fallback case when
     // we do find that the users course matches the exit bearing.
-    boolean isCloseToUpcomingStep;
-
     LegStep upComingStep = routeProgress.currentLegProgress().upComingStep();
-    if (upComingStep != null) {
-      double distanceFromUpcomingStep = userTrueDistanceFromStep(currentPoint, upComingStep);
-      Timber.d("NAV-DEBUG xx Distance from upComingStep: %s", distanceFromUpcomingStep);
-      double maneuverZoneRadius = options.maneuverZoneRadius();
-      Timber.d("NAV-DEBUG xx Maneuver zone radius: %s", maneuverZoneRadius);
-      isCloseToUpcomingStep = distanceFromUpcomingStep < maneuverZoneRadius;
-      if (isCloseToUpcomingStep) {
-        // Callback to the NavigationEngine to increase the step index
-        callback.onShouldIncreaseIndex();
-        Timber.d("NAV-DEBUG xx isCloseToUpcomingStep: %s", true);
-        return false;
-      }
+    if (closeToUpcomingStep(options, callback, currentPoint, upComingStep)) {
+      return false;
     }
 
-//    // Check to see if the user is moving away from the maneuver. Here, we store an array of
-//    // distances. If the current distance is greater than the last distance, add it to the array. If
-//    // the array grows larger than x, reroute the user.
-//    if (movingAwayFromManeuver(routeProgress, distancesAwayFromManeuver, futurePoint)) {
-//      updateLastReroutePoint(location);
-//      return true;
-//    }
+    // Check to see if the user is moving away from the maneuver. Here, we store an array of
+    // distances. If the current distance is greater than the last distance, add it to the array. If
+    // the array grows larger than x, reroute the user.
+    if (movingAwayFromManeuver(routeProgress, distancesAwayFromManeuver, currentPoint)) {
+      updateLastReroutePoint(location);
+      return true;
+    }
 
     // All checks have run, return true
-    Timber.d("NAV-DEBUG xxxxx xxxxx xxxxx Off route: TRUE xxxxx xxxxx xxxxx xxxxx");
     return true;
-  }
-
-  public interface IncreaseStepIndexCallback {
-    void onShouldIncreaseIndex();
   }
 
   /**
@@ -121,19 +95,20 @@ public class OffRouteDetector extends OffRoute {
     return distanceFromLastReroute > options.minimumDistanceBeforeRerouting();
   }
 
-  /**
-   * uses dead reckoning to find the users future location.
-   *
-   * @return a {@link Point}
-   * @since 0.2.0
-   */
-  private static Point getFuturePosition(Location location, MapboxNavigationOptions options) {
-    // Find future location of user
-    Point locationToPosition = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    double metersInFrontOfUser = location.getSpeed() * options.deadReckoningTimeInterval();
-    return TurfMeasurement.destination(
-      locationToPosition, metersInFrontOfUser, location.getBearing(), TurfConstants.UNIT_METERS
-    );
+  private boolean closeToUpcomingStep(MapboxNavigationOptions options, OffRouteCallback callback,
+                                      Point currentPoint, LegStep upComingStep) {
+    boolean isCloseToUpcomingStep;
+    if (upComingStep != null) {
+      double distanceFromUpcomingStep = userTrueDistanceFromStep(currentPoint, upComingStep);
+      double maneuverZoneRadius = options.maneuverZoneRadius();
+      isCloseToUpcomingStep = distanceFromUpcomingStep < maneuverZoneRadius;
+      if (isCloseToUpcomingStep) {
+        // Callback to the NavigationEngine to increase the step index
+        callback.onShouldIncreaseIndex();
+        return true;
+      }
+    }
+    return false;
   }
 
   private static boolean movingAwayFromManeuver(RouteProgress routeProgress,
