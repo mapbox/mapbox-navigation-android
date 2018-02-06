@@ -7,12 +7,12 @@ import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
-import com.mapbox.services.android.navigation.v5.utils.ToleranceUtils;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
 import static com.mapbox.services.android.navigation.v5.utils.MeasurementUtils.userTrueDistanceFromStep;
+import static com.mapbox.services.android.navigation.v5.utils.ToleranceUtils.dynamicRerouteDistanceTolerance;
 
 public class OffRouteDetector extends OffRoute {
 
@@ -39,7 +39,7 @@ public class OffRouteDetector extends OffRoute {
     double distanceFromCurrentStep = userTrueDistanceFromStep(currentPoint, currentStep);
 
     // Create off-route radius from the max of our dynamic or accuracy based tolerances
-    double dynamicTolerance = ToleranceUtils.dynamicRerouteDistanceTolerance(currentPoint, routeProgress);
+    double dynamicTolerance = dynamicRerouteDistanceTolerance(currentPoint, routeProgress);
     double accuracyTolerance = location.getSpeed() * options.deadReckoningTimeInterval();
     double offRouteRadius = Math.max(dynamicTolerance, accuracyTolerance);
 
@@ -95,7 +95,7 @@ public class OffRouteDetector extends OffRoute {
     return distanceFromLastReroute > options.minimumDistanceBeforeRerouting();
   }
 
-  private boolean closeToUpcomingStep(MapboxNavigationOptions options, OffRouteCallback callback,
+  private static boolean closeToUpcomingStep(MapboxNavigationOptions options, OffRouteCallback callback,
                                       Point currentPoint, LegStep upComingStep) {
     boolean isCloseToUpcomingStep;
     if (upComingStep != null) {
