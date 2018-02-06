@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.LocaleList;
 
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -49,7 +50,7 @@ public class DistanceUtilsTest {
     when(context.getSharedPreferences(anyString(), anyInt())).thenReturn(sharedPreferences);
     when(context.getResources()).thenReturn(resources);
     when(resources.getConfiguration()).thenReturn(configuration);
-    configuration.locale = Locale.getDefault();
+    when(configuration.getLocales()).thenReturn(LocaleList.getDefault());
     when(context.getString(R.string.kilometers)).thenReturn("km");
     when(context.getString(R.string.meters)).thenReturn("m");
     when(context.getString(R.string.miles)).thenReturn("mi");
