@@ -18,6 +18,7 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.Locale;
 
@@ -209,7 +210,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
     } else if (!TextUtils.isEmpty(route.routeOptions().language())) {
       language = new Locale(route.routeOptions().language());
     } else {
-      language = Locale.getDefault();
+      language = LocaleUtils.getLocale(this.getApplication());
     }
   }
 
