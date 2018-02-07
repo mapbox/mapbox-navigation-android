@@ -40,34 +40,32 @@ public class OffRouteDetector extends OffRoute {
 
     // Create off-route radius from the max of our dynamic or accuracy based tolerances
     double dynamicTolerance = dynamicRerouteDistanceTolerance(currentPoint, routeProgress);
-    double accuracyTolerance = location.getSpeed() * options.deadReckoningTimeInterval();
+    double accuracyTolerance = location.getAccuracy() * options.deadReckoningTimeInterval();
     double offRouteRadius = Math.max(dynamicTolerance, accuracyTolerance);
 
     // Off route if this distance is greater than our offRouteRadius
     boolean isOffRoute = distanceFromCurrentStep > offRouteRadius;
 
-    // If not offRoute at this point, don't continue with remaining logic
+    // If not offRoute at this point, do not continue with remaining logic
     if (!isOffRoute) {
+      // Even though the current point is not considered off-route, check to see if the user is
+      // moving away from the maneuver.
+      if (movingAwayFromManeuver(routeProgress, distancesAwayFromManeuver, currentPoint)) {
+        updateLastReroutePoint(location);
+        return true;
+      }
       return false;
     }
 
-    // If the user is moving away from the maneuver location and they are close to the next step we
-    // can safely say they have completed the maneuver. This is intended to be a fallback case when
-    // we do find that the users course matches the exit bearing.
+    // If the user is considered off-route at this point, but they are close to the upcoming step,
+    // do not send an off-route event and increment the step index to the upcoming step
     LegStep upComingStep = routeProgress.currentLegProgress().upComingStep();
     if (closeToUpcomingStep(options, callback, currentPoint, upComingStep)) {
       return false;
     }
 
-    // Check to see if the user is moving away from the maneuver. Here, we store an array of
-    // distances. If the current distance is greater than the last distance, add it to the array. If
-    // the array grows larger than x, reroute the user.
-    if (movingAwayFromManeuver(routeProgress, distancesAwayFromManeuver, currentPoint)) {
-      updateLastReroutePoint(location);
-      return true;
-    }
-
     // All checks have run, return true
+    updateLastReroutePoint(location);
     return true;
   }
 
