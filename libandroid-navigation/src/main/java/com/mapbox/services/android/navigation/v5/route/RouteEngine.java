@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.v5.route;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -8,7 +7,6 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,11 +23,9 @@ public class RouteEngine implements Callback<DirectionsResponse> {
 
   private Callback engineCallback;
   private RouteProgress routeProgress;
-  private Context context;
 
-  public RouteEngine(Callback engineCallback, Context context) {
+  public RouteEngine(Callback engineCallback) {
     this.engineCallback = engineCallback;
-    this.context = context;
   }
 
   public void fetchRoute(Point origin, RouteProgress routeProgress) {
@@ -53,7 +49,6 @@ public class RouteEngine implements Callback<DirectionsResponse> {
     RouteOptions currentOptions = routeProgress.directionsRoute().routeOptions();
     NavigationRoute.Builder builder = NavigationRoute.builder()
       .origin(origin)
-      .language(LocaleUtils.getLocale(context))
       .routeOptions(currentOptions);
 
     // Add waypoints with the remaining coordinate values

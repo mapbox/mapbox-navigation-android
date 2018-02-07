@@ -5,6 +5,8 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.text.TextUtils;
 
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
+
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -23,6 +25,7 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
   private InstructionListener instructionListener;
   private TextToSpeech textToSpeech;
   private boolean isMuted;
+  private Locale locale;
 
   /**
    * Creates an instance of {@link DefaultPlayer}.
@@ -31,6 +34,7 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
    * @since 0.6.0
    */
   DefaultPlayer(Context context) {
+    this.locale = LocaleUtils.getLocale(context);
     textToSpeech = new TextToSpeech(context, this);
     textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
       @Override
@@ -108,7 +112,7 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
   @Override
   public void onInit(int status) {
     if (status != TextToSpeech.ERROR) {
-      textToSpeech.setLanguage(Locale.getDefault());
+      textToSpeech.setLanguage(locale);
     }
   }
 
