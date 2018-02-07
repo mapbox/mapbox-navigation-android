@@ -19,7 +19,25 @@ public class OffRouteDetector extends OffRoute {
   private Point lastReroutePoint;
 
   /**
-   * Detects if the user is off route or not.
+   * Method in charge of running a series of test based on the device current location
+   * and the user progress along the route.
+   * <p>
+   * Test #1:
+   * Valid or invalid off-route.  An off-route check can only continue if the device has received
+   * at least 1 location update (for comparison) and the user has traveled passed
+   * the {@link MapboxNavigationOptions#minimumDistanceBeforeRerouting()} checked against the last re-route location.
+   * <p>
+   * Test #2:
+   * Distance from the step. This test is checked against the max of the dynamic rerouting tolerance or the
+   * accuracy based tolerance.  If this test passes, this method then also checks if there have been >= 3
+   * location updates moving away from the maneuver point.  If false, this method will return false early.
+   * <p>
+   * Test #3:
+   * Checks if the user is close the upcoming step.  At this point, the user is considered off-route.
+   * But, if the location update is within the {@link MapboxNavigationOptions#maneuverZoneRadius()} of the
+   * upcoming step, this method will return false as well as send fire {@link OffRouteCallback#onShouldIncreaseIndex()}
+   * to let the {@link com.mapbox.services.android.navigation.v5.navigation.NavigationEngine} know that the
+   * step index should be increased on the next location update.
    *
    * @return true if the users off-route, else false.
    * @since 0.2.0
@@ -93,8 +111,22 @@ public class OffRouteDetector extends OffRoute {
     return distanceFromLastReroute > options.minimumDistanceBeforeRerouting();
   }
 
+  /**
+   * If the upcoming step is not null, detect if the current point
+   * is within the maneuver radius.
+   * <p>
+   * If it is, fire {@link OffRouteCallback#onShouldIncreaseIndex()} to increase the step
+   * index in the {@link com.mapbox.services.android.navigation.v5.navigation.NavigationEngine}
+   * and return true.
+   *
+   * @param options      for maneuver zone radius
+   * @param callback     to increase step index
+   * @param currentPoint for distance from upcoming step
+   * @param upComingStep for distance from current point
+   * @return true if close to upcoming step, false if not
+   */
   private static boolean closeToUpcomingStep(MapboxNavigationOptions options, OffRouteCallback callback,
-                                      Point currentPoint, LegStep upComingStep) {
+                                             Point currentPoint, LegStep upComingStep) {
     boolean isCloseToUpcomingStep;
     if (upComingStep != null) {
       double distanceFromUpcomingStep = userTrueDistanceFromStep(currentPoint, upComingStep);
@@ -109,6 +141,20 @@ public class OffRouteDetector extends OffRoute {
     return false;
   }
 
+  /**
+   * Checks to see if the current point is moving away from the maneuver.
+   * <p>
+   * If the current point is farther away from the maneuver than the last point in the
+   * stack, add it to the stack.
+   * <p>
+   * If the stack if >= 3 distances, return true to fire an off-route event as it
+   * can be considered that the user is no longer going in the right direction.
+   *
+   * @param routeProgress             for the upcoming step maneuver
+   * @param distancesAwayFromManeuver current stack of distances away
+   * @param currentPoint              to determine if moving away or not
+   * @return true if moving away from maneuver, false if not
+   */
   private static boolean movingAwayFromManeuver(RouteProgress routeProgress,
                                                 RingBuffer<Integer> distancesAwayFromManeuver,
                                                 Point currentPoint) {
