@@ -10,7 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
-import android.text.SpannableStringBuilder;
+import android.text.SpannableString;
 import android.widget.RemoteViews;
 
 import com.mapbox.api.directions.v5.models.LegStep;
@@ -21,7 +21,6 @@ import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
 import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 
-import java.text.DecimalFormat;
 import java.util.Locale;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL;
@@ -31,21 +30,17 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  * This is in charge of creating the persistent navigation session notification and updating it.
  */
 class MapboxNavigationNotification implements NavigationNotification {
-
   private static final String END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION";
-
+  private final DistanceUtils distanceUtils;
   private NotificationCompat.Builder notificationBuilder;
   private NotificationManager notificationManager;
   private Notification notification;
   private RemoteViews notificationRemoteViews;
   private MapboxNavigation mapboxNavigation;
-
-  private SpannableStringBuilder currentDistanceText;
-  private DecimalFormat decimalFormat;
+  private SpannableString currentDistanceText;
   private String currentArrivalTime;
   private String instructionText;
   private int currentManeuverId;
-  private int distanceUnitType;
 
   private BroadcastReceiver endNavigationBtnReceiver = new BroadcastReceiver() {
     @Override
@@ -56,7 +51,7 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   MapboxNavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
-    this.distanceUnitType = mapboxNavigation.options().unitType();
+    this.distanceUtils = new DistanceUtils(context);
     initialize(context);
   }
 
@@ -86,7 +81,6 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   private void initialize(Context context) {
     notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
     createNotificationChannel(context);
     buildNotification(context);
     registerReceiver(context);
@@ -168,18 +162,16 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   private void updateDistanceText(RouteProgress routeProgress) {
     if (currentDistanceText == null || newDistanceText(routeProgress)) {
-      currentDistanceText = DistanceUtils.distanceFormatter(
-        routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
-        decimalFormat, true, distanceUnitType);
+      currentDistanceText = distanceUtils.formatDistance(
+        routeProgress.currentLegProgress().currentStepProgress().distanceRemaining());
       notificationRemoteViews.setTextViewText(R.id.notificationDistanceText, currentDistanceText);
     }
   }
 
   private boolean newDistanceText(RouteProgress routeProgress) {
     return currentDistanceText != null
-      && !currentDistanceText.toString().equals(DistanceUtils.distanceFormatter(
-      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining(),
-      decimalFormat, true, distanceUnitType).toString());
+      && !currentDistanceText.toString().equals(distanceUtils.formatDistance(
+      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining()).toString());
   }
 
   private void updateArrivalTime(RouteProgress routeProgress) {

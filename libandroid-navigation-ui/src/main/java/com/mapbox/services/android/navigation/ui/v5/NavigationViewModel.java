@@ -33,9 +33,8 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
-
-import java.text.DecimalFormat;
 
 public class NavigationViewModel extends AndroidViewModel implements ProgressChangeListener,
   OffRouteListener, MilestoneEventListener, NavigationEventListener, FasterRouteListener {
@@ -52,12 +51,10 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   final MutableLiveData<Boolean> isRunning = new MutableLiveData<>();
   final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
 
+  private final SharedPreferences preferences;
   private MapboxNavigation navigation;
   private NavigationInstructionPlayer instructionPlayer;
   private ConnectivityManager connectivityManager;
-  private SharedPreferences preferences;
-  private DecimalFormat decimalFormat;
-  private int unitType;
   private String feedbackId;
   private String screenshot;
 
@@ -66,7 +63,6 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
     preferences = PreferenceManager.getDefaultSharedPreferences(application);
     initVoiceInstructions(application);
     initConnectivityManager(application);
-    initDecimalFormat();
   }
 
   public void onDestroy() {
@@ -86,8 +82,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    */
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    instructionModel.setValue(new InstructionModel(routeProgress, decimalFormat, unitType));
-    summaryModel.setValue(new SummaryModel(routeProgress, decimalFormat, unitType));
+    instructionModel.setValue(new InstructionModel(getApplication(), routeProgress));
+    summaryModel.setValue(new SummaryModel(getApplication(), routeProgress));
     navigationLocation.setValue(location);
   }
 
@@ -219,8 +215,9 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    * @param options to init MapboxNavigation
    */
   void initializeNavigationOptions(Context context, MapboxNavigationOptions options) {
+    LocaleUtils.setLocale(context, options.locale(), options.unitType());
+
     initNavigation(context, options);
-    this.unitType = options.unitType();
   }
 
   void updateRoute(DirectionsRoute route) {
@@ -260,14 +257,6 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    */
   private void initConnectivityManager(Application application) {
     connectivityManager = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
-  }
-
-  /**
-   * Initializes decimal format to be used to populate views with
-   * distance remaining.
-   */
-  private void initDecimalFormat() {
-    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
   }
 
   /**
@@ -332,8 +321,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
 
   private void updateBannerInstruction(RouteProgress routeProgress, Milestone milestone) {
     if (milestone instanceof BannerInstructionMilestone) {
-      bannerInstructionModel.setValue(new BannerInstructionModel((BannerInstructionMilestone) milestone,
-        routeProgress, decimalFormat, unitType));
+      bannerInstructionModel.setValue(
+        new BannerInstructionModel(getApplication(), (BannerInstructionMilestone) milestone, routeProgress));
     }
   }
 }

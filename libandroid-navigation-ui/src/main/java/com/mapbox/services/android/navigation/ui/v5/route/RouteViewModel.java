@@ -204,8 +204,8 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * @param route   as backup if view options language not found
    */
   private void cacheRouteLanguage(NavigationViewOptions options, DirectionsRoute route) {
-    if (options.directionsLanguage() != null) {
-      language = options.directionsLanguage();
+    if (options.navigationOptions().locale() != null) {
+      language = options.navigationOptions().locale();
     } else if (!TextUtils.isEmpty(route.routeOptions().language())) {
       language = new Locale(route.routeOptions().language());
     } else {
