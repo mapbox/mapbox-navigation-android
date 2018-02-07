@@ -33,6 +33,7 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 public class NavigationViewModel extends AndroidViewModel implements ProgressChangeListener,
@@ -214,15 +215,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    * @param options to init MapboxNavigation
    */
   void initializeNavigationOptions(Context context, MapboxNavigationOptions options) {
-    SharedPreferences.Editor editor = preferences.edit();
-
-    editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, options.unitType());
-    if (options.locale() != null) {
-      editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, options.locale().getLanguage());
-      editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, options.locale().getCountry());
-    }
-
-    editor.apply();
+    LocaleUtils.setLocale(context, options.locale(), options.unitType());
 
     initNavigation(context, options);
   }

@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InstructionListAdapter extends RecyclerView.Adapter<InstructionViewHolder> {
-  private final Context context;
   private List<LegStep> stepList;
   private RouteLeg currentLeg;
   private LegStep currentStep;
@@ -29,7 +28,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
 
   public InstructionListAdapter(Context context) {
     stepList = new ArrayList<>();
-    this.context = context;
+    distanceUtils = new DistanceUtils(context);
   }
 
   @Override
@@ -51,9 +50,6 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
         updateSecondaryText(holder, null);
       }
       updateManeuverView(holder, step);
-      if (distanceUtils == null) {
-        distanceUtils = new DistanceUtils(context);
-      }
 
       SpannableString distanceText = distanceUtils.formatDistance(step.distance());
       holder.stepDistanceText.setText(distanceText);
