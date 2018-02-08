@@ -36,7 +36,6 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
@@ -44,7 +43,6 @@ import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -252,12 +250,10 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void fetchRoute() {
-//    LocaleUtils.setLocale(this, Locale.FRANCE, NavigationUnitType.NONE_SPECIFIED);
     NavigationRoute.builder()
       .accessToken(Mapbox.getAccessToken())
       .origin(currentLocation)
       .destination(destination)
-      .language(Locale.FRANCE)
       .alternatives(true)
       .build()
       .getRoute(this);
@@ -266,7 +262,6 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private void launchNavigationWithRoute() {
     NavigationViewOptions.Builder optionsBuilder = NavigationViewOptions.builder()
-      .navigationOptions(MapboxNavigationOptions.builder().locale(Locale.FRANCE).build())
       .shouldSimulateRoute(shouldSimulateRoute);
     if (route != null) {
       optionsBuilder.directionsRoute(route);
