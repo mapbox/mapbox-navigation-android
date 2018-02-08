@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.route;
 
+import android.location.Location;
 import android.support.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -28,11 +29,16 @@ public class RouteEngine implements Callback<DirectionsResponse> {
     this.engineCallback = engineCallback;
   }
 
-  public void fetchRoute(Point origin, RouteProgress routeProgress) {
+  public void fetchRoute(Location location, RouteProgress routeProgress) {
     if (routeProgress == null) {
       return;
     }
     this.routeProgress = routeProgress;
+
+    // Get the bearing from the location provided
+    Double bearing = location.hasBearing() ? Float.valueOf(location.getBearing()).doubleValue() : null;
+    // Convert the location to point for the builder
+    Point origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
 
     // Calculate remaining waypoints
     List<Point> coordinates = new ArrayList<>(routeProgress.directionsRoute().routeOptions().coordinates());
@@ -48,7 +54,7 @@ public class RouteEngine implements Callback<DirectionsResponse> {
     // Build new route request with the given origin and current route options
     RouteOptions currentOptions = routeProgress.directionsRoute().routeOptions();
     NavigationRoute.Builder builder = NavigationRoute.builder()
-      .origin(origin)
+      .origin(origin, bearing, 90d)
       .routeOptions(currentOptions);
 
     // Add waypoints with the remaining coordinate values
@@ -69,11 +75,13 @@ public class RouteEngine implements Callback<DirectionsResponse> {
 
   @Override
   public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
-    // No-op - fail silently
+    engineCallback.onErrorReceived(throwable);
   }
 
   public interface Callback {
     void onResponseReceived(Response<DirectionsResponse> response, RouteProgress routeProgress);
+
+    void onErrorReceived(Throwable throwable);
   }
 
   private void addWaypoints(List<Point> remainingCoordinates, NavigationRoute.Builder builder) {
