@@ -154,7 +154,7 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onCheckFasterRoute(Location location, RouteProgress routeProgress, boolean checkFasterRoute) {
     if (checkFasterRoute) {
       Point origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-      routeEngine.fetchRoute(origin, routeProgress);
+      routeEngine.fetchRoute(getApplicationContext(), origin, routeProgress);
     }
   }
 

@@ -215,8 +215,6 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    * @param options to init MapboxNavigation
    */
   void initializeNavigationOptions(Context context, MapboxNavigationOptions options) {
-    LocaleUtils.setLocale(context, options.locale(), options.unitType());
-
     initNavigation(context, options);
   }
 

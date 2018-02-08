@@ -44,6 +44,15 @@ public class LocaleUtils {
   }
 
   /**
+   * Sets locale into SharedPreferences for later use
+   * @param context where SharedPreferences exist
+   * @param locale to set language
+   */
+  public static void setLocale(Context context, Locale locale) {
+    setLocale(context, locale, NavigationUnitType.NONE_SPECIFIED);
+  }
+
+  /**
    * Sets locale and unitType into SharedPreferences for later use
    * @param context where SharedPreferences exist
    * @param locale to set language
@@ -52,13 +61,23 @@ public class LocaleUtils {
   public static void setLocale(Context context, Locale locale, @NavigationUnitType.UnitType int unitType) {
     SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
 
+    setLocale(editor, locale, unitType);
+
+    editor.apply();
+  }
+
+  /**
+   * Sets locale and unitType into SharedPreferences for later use
+   * @param editor to add locale and unitType to
+   * @param locale to set language
+   * @param unitType to set unitType to use
+   */
+  public static void setLocale(SharedPreferences.Editor editor, Locale locale, @NavigationUnitType.UnitType int unitType) {
     editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, unitType);
     if (locale != null) {
       editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, locale.getLanguage());
       editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, locale.getCountry());
     }
-
-    editor.apply();
   }
 
   /**

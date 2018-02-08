@@ -8,9 +8,12 @@ import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -36,13 +39,17 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -73,6 +80,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   ProgressBar loading;
   @BindView(R.id.demoSwitch)
   Switch demoSwitch;
+  @BindView(R.id.languageSpinner)
+  Spinner spinner;
 
   private Marker currentMarker;
   private Point currentLocation;
@@ -81,6 +90,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private boolean locationFound;
   private boolean shouldSimulateRoute;
+  private final List<Locale> localeList = new ArrayList<>(
+    Arrays.asList(Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN));
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,6 +106,23 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
         shouldSimulateRoute = checked;
       }
     });
+    ArrayAdapter adapter = ArrayAdapter.createFromResource(this,
+      R.array.languages_array, android.R.layout.simple_spinner_dropdown_item);
+    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    spinner.setAdapter(adapter);
+
+    spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        LocaleUtils.setLocale(NavigationViewActivity.this, localeList.get(i));
+      }
+
+      @Override
+      public void onNothingSelected(AdapterView<?> adapterView) {
+      }
+    });
+
+    spinner.setSelection(localeList.indexOf(LocaleUtils.getLocale(this)));
   }
 
   @SuppressWarnings( {"MissingPermission"})
@@ -250,7 +278,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void fetchRoute() {
-    NavigationRoute.builder()
+    NavigationRoute.builder(this)
       .accessToken(Mapbox.getAccessToken())
       .origin(currentLocation)
       .destination(destination)
@@ -264,7 +292,14 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     NavigationViewOptions.Builder optionsBuilder = NavigationViewOptions.builder()
       .shouldSimulateRoute(shouldSimulateRoute);
     if (route != null) {
-      optionsBuilder.directionsRoute(route);
+      Locale locale = LocaleUtils.getLocale(this);
+      if (route.routeOptions().language().equals(locale.getLanguage())) {
+        optionsBuilder.directionsRoute(route);
+      } else {
+        optionsBuilder.origin(currentLocation);
+        optionsBuilder.destination(destination);
+        optionsBuilder.navigationOptions(MapboxNavigationOptions.builder().locale(locale).build());
+      }
       NavigationLauncher.startNavigation(this, optionsBuilder.build());
     }
   }
