@@ -113,8 +113,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
     spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
-      public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        LocaleUtils.setLocale(NavigationViewActivity.this, localeList.get(i));
+      public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+        LocaleUtils.setLocale(NavigationViewActivity.this, localeList.get(position));
       }
 
       @Override
