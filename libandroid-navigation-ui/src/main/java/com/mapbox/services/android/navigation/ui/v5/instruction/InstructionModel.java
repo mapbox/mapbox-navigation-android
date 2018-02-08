@@ -1,11 +1,11 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
+import android.content.Context;
+
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import java.text.DecimalFormat;
 import java.util.List;
 
 public class InstructionModel {
@@ -15,13 +15,10 @@ public class InstructionModel {
   private BannerText thenBannerText;
   private InstructionStepResources stepResources;
   private RouteProgress progress;
-  private int unitType;
 
-  public InstructionModel(RouteProgress progress, DecimalFormat decimalFormat,
-                          @NavigationUnitType.UnitType int unitType) {
+  public InstructionModel(Context context, RouteProgress progress) {
     this.progress = progress;
-    this.unitType = unitType;
-    buildInstructionModel(progress, decimalFormat, unitType);
+    buildInstructionModel(context, progress);
   }
 
   BannerText getPrimaryBannerText() {
@@ -44,12 +41,8 @@ public class InstructionModel {
     return progress;
   }
 
-  int getUnitType() {
-    return unitType;
-  }
-
-  private void buildInstructionModel(RouteProgress progress, DecimalFormat decimalFormat, int unitType) {
-    stepResources = new InstructionStepResources(progress, decimalFormat, unitType);
+  private void buildInstructionModel(Context context, RouteProgress progress) {
+    stepResources = new InstructionStepResources(context, progress);
     extractStepInstructions(progress);
   }
 

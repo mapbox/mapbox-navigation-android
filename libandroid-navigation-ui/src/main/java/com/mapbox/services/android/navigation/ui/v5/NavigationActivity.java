@@ -10,7 +10,6 @@ import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 
 import java.util.HashMap;
 
@@ -116,8 +115,6 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
 
     MapboxNavigationOptions navigationOptions = MapboxNavigationOptions.builder()
-      .unitType(preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE,
-        NavigationUnitType.TYPE_IMPERIAL))
       .build();
     options.navigationOptions(navigationOptions);
   }

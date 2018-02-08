@@ -5,8 +5,9 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
@@ -16,7 +17,6 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
@@ -31,11 +31,9 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   public final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
   public final MutableLiveData<Point> destination = new MutableLiveData<>();
   public final MutableLiveData<String> requestErrorMessage = new MutableLiveData<>();
-  private Point origin;
   private Location rawLocation;
   private RouteOptions routeOptions;
   private String routeProfile;
-  private String unitType;
   private Locale language;
 
   public RouteViewModel(@NonNull Application application) {
@@ -54,14 +52,14 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * @since 0.6.0
    */
   @Override
-  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+  public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
     if (validRouteResponse(response)) {
       route.setValue(response.body().routes().get(0));
     }
   }
 
   @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+  public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
     requestErrorMessage.setValue(throwable.getMessage());
   }
 
@@ -77,26 +75,10 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * @param options holds either a set of {@link Point} coordinates or a {@link DirectionsRoute}
    */
   public void extractRouteOptions(NavigationViewOptions options) {
-    updateUnitType(options.navigationOptions().unitType());
     if (launchWithRoute(options)) {
       extractRouteFromOptions(options);
     } else {
       extractCoordinatesFromOptions(options);
-    }
-  }
-
-  /**
-   * Updates the request unit type based on what was set in
-   * {@link NavigationViewOptions}.
-   *
-   * @param unitType to be used for route requests
-   */
-  private void updateUnitType(int unitType) {
-    boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
-    if (isImperialUnitType) {
-      this.unitType = DirectionsCriteria.IMPERIAL;
-    } else {
-      this.unitType = DirectionsCriteria.METRIC;
     }
   }
 
@@ -170,7 +152,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
     if (route != null) {
       cacheRouteOptions(route.routeOptions());
       cacheRouteProfile(options);
-      cacheRouteLanguage(options);
+      cacheRouteLanguage(options, route);
       this.route.setValue(route);
     }
   }
@@ -184,8 +166,8 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private void extractCoordinatesFromOptions(NavigationViewOptions options) {
     if (options.origin() != null && options.destination() != null) {
       cacheRouteProfile(options);
-      cacheRouteLanguage(options);
-      origin = options.origin();
+      cacheRouteLanguage(options, null);
+      Point origin = options.origin();
       destination.setValue(options.destination());
       fetchRouteFromCoordinates(origin, destination.getValue());
     }
@@ -223,9 +205,16 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * stored for reroute requests.
    *
    * @param options to look for set language
+   * @param route   as backup if view options language not found
    */
-  private void cacheRouteLanguage(NavigationViewOptions options) {
-    language = options.directionsLanguage();
+  private void cacheRouteLanguage(NavigationViewOptions options, @Nullable DirectionsRoute route) {
+    if (options.navigationOptions().locale() != null) {
+      language = options.navigationOptions().locale();
+    } else if (route != null && !TextUtils.isEmpty(route.routeOptions().language())) {
+      language = new Locale(route.routeOptions().language());
+    } else {
+      language = Locale.getDefault();
+    }
   }
 
   /**

@@ -178,8 +178,9 @@ public final class NavigationConstants {
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
   public static final String NAVIGATION_VIEW_AWS_POOL_ID = "navigation_view_aws_pool_id";
   public static final String NAVIGATION_VIEW_UNIT_TYPE = "navigation_view_unit_type";
+  public static final String NAVIGATION_VIEW_LOCALE_LANGUAGE = "navigation_view_locale_language";
+  public static final String NAVIGATION_VIEW_LOCALE_COUNTRY = "navigation_view_locale_country";
   public static final String NAVIGATION_VIEW_REROUTING = "Rerouting";
-  public static final String DECIMAL_FORMAT = "#.#";
 
   // Step Maneuver Types
   public static final String STEP_MANEUVER_TYPE_TURN = "turn";

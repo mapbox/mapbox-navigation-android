@@ -9,11 +9,12 @@ public class NavigationUnitType {
 
   @Retention(RetentionPolicy.SOURCE)
 
-  @IntDef( {TYPE_IMPERIAL, TYPE_METRIC})
+  @IntDef( {NONE_SPECIFIED, TYPE_IMPERIAL, TYPE_METRIC})
 
   public @interface UnitType {
   }
 
+  public static final int NONE_SPECIFIED = -1;
   public static final int TYPE_IMPERIAL = 0;
   public static final int TYPE_METRIC = 1;
 }

@@ -1,9 +1,10 @@
 package com.mapbox.services.android.navigation.ui.v5.summary.list;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
-import android.text.SpannableStringBuilder;
+import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,27 +14,21 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class InstructionListAdapter extends RecyclerView.Adapter<InstructionViewHolder> {
-
   private List<LegStep> stepList;
-  private DecimalFormat decimalFormat;
-
   private RouteLeg currentLeg;
   private LegStep currentStep;
-  private LegStep currentUpcomingStep;
-  private int unitType;
+  private DistanceUtils distanceUtils;
 
-  public InstructionListAdapter() {
+  public InstructionListAdapter(Context context) {
     stepList = new ArrayList<>();
-    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
+    distanceUtils = new DistanceUtils(context);
   }
 
   @Override
@@ -55,8 +50,8 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
         updateSecondaryText(holder, null);
       }
       updateManeuverView(holder, step);
-      SpannableStringBuilder distanceText = DistanceUtils
-        .distanceFormatter(step.distance(), decimalFormat, true, unitType);
+
+      SpannableString distanceText = distanceUtils.formatDistance(step.distance());
       holder.stepDistanceText.setText(distanceText);
     }
   }
@@ -72,8 +67,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     holder.itemView.clearAnimation();
   }
 
-  public void updateSteps(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
-    this.unitType = unitType;
+  public void updateSteps(RouteProgress routeProgress) {
     addLegSteps(routeProgress);
     updateStepList(routeProgress);
   }
@@ -175,7 +169,6 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   private boolean newStep(RouteProgress routeProgress) {
     boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().currentStep());
     currentStep = routeProgress.currentLegProgress().currentStep();
-    currentUpcomingStep = routeProgress.currentLegProgress().upComingStep();
     return newStep;
   }
 }
