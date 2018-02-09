@@ -55,11 +55,10 @@ public final class NavigationRoute {
    * @return a {@link Builder} object for creating this object
    * @since 0.5.0
    */
-  public static Builder builder(Locale locale) {
+  public static Builder builder() {
     return new Builder()
       .annotations(DirectionsCriteria.ANNOTATION_CONGESTION)
-      .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-      .language(locale);
+      .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
   }
 
   /**

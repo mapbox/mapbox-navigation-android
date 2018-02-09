@@ -127,7 +127,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
         bearing = rawLocation.hasBearing() ? Float.valueOf(rawLocation.getBearing()).doubleValue() : null;
       }
 
-      NavigationRoute.builder(LocaleUtils.getLocale(this.getApplication()))
+      NavigationRoute.builder()
         .accessToken(Mapbox.getAccessToken())
         .origin(origin, bearing, 90d)
         .voiceUnits(unitType)

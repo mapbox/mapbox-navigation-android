@@ -250,7 +250,8 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   private void getRoute(Point origin, Point destination, Float bearing) {
     Double heading = bearing == null ? null : bearing.doubleValue();
-    NavigationRoute.builder(LocaleUtils.getLocale(this))
+    NavigationRoute.builder()
+      .language(LocaleUtils.getLocale(this))
       .origin(origin, heading, 90d)
       .destination(destination)
       .accessToken(Mapbox.getAccessToken())
