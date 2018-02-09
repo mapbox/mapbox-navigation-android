@@ -7,19 +7,15 @@ import com.mapbox.services.android.navigation.v5.BaseTest;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.Locale;
-
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 
 public class NavigationRouteTest extends BaseTest {
 
-  Locale locale = Locale.ENGLISH;
-
   @Test
   public void sanityTest() throws Exception {
-    NavigationRoute navigationRoute = NavigationRoute.builder(locale)
+    NavigationRoute navigationRoute = NavigationRoute.builder()
       .accessToken(ACCESS_TOKEN)
       .origin(Point.fromLngLat(1.0, 2.0))
       .destination(Point.fromLngLat(1.0, 5.0))
@@ -29,7 +25,7 @@ public class NavigationRouteTest extends BaseTest {
 
   @Test
   public void changingDefaultValueToCustomWorksProperly() throws Exception {
-    NavigationRoute navigationRoute = NavigationRoute.builder(locale)
+    NavigationRoute navigationRoute = NavigationRoute.builder()
       .accessToken(ACCESS_TOKEN)
       .origin(Point.fromLngLat(1.0, 2.0))
       .destination(Point.fromLngLat(1.0, 5.0))
@@ -42,7 +38,7 @@ public class NavigationRouteTest extends BaseTest {
 
   @Test
   public void addingPointAndBearingKeepsCorrectOrder() throws Exception {
-    NavigationRoute navigationRoute = NavigationRoute.builder(locale)
+    NavigationRoute navigationRoute = NavigationRoute.builder()
       .accessToken(ACCESS_TOKEN)
       .origin(Point.fromLngLat(1.0, 2.0), 90d, 90d)
       .addBearing(2.0, 3.0)
@@ -56,7 +52,7 @@ public class NavigationRouteTest extends BaseTest {
   @Test
   @Ignore
   public void reverseOriginDestinationDoesntMessUpBearings() throws Exception {
-    NavigationRoute navigationRoute = NavigationRoute.builder(locale)
+    NavigationRoute navigationRoute = NavigationRoute.builder()
       .accessToken(ACCESS_TOKEN)
       .destination(Point.fromLngLat(1.0, 5.0), 1d, 5d)
       .origin(Point.fromLngLat(1.0, 2.0), 90d, 90d)
