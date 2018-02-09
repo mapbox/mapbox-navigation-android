@@ -5,7 +5,6 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
 import android.location.Location;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -77,6 +76,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    */
   public void extractRouteOptions(NavigationViewOptions options) {
     updateUnitType(options.navigationOptions().unitType());
+    cacheLanguage(options);
     if (launchWithRoute(options)) {
       extractRouteFromOptions(options);
     } else {
@@ -161,7 +161,6 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
     DirectionsRoute route = options.directionsRoute();
     if (route != null) {
       cacheRouteProfile(options, route);
-      cacheRouteLanguage(options, route);
       cacheRouteDestination(route);
       this.route.setValue(route);
     }
@@ -197,18 +196,12 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   /**
    * Looks for a route language provided by {@link NavigationViewOptions} to be
    * stored for reroute requests.
-   * <p>
-   * If not found, look at the {@link com.mapbox.api.directions.v5.models.RouteOptions} for
-   * the language from the original route.
    *
    * @param options to look for set language
-   * @param route   as backup if view options language not found
    */
-  private void cacheRouteLanguage(NavigationViewOptions options, DirectionsRoute route) {
+  private void cacheLanguage(NavigationViewOptions options) {
     if (options.navigationOptions().locale() != null) {
       language = options.navigationOptions().locale();
-    } else if (!TextUtils.isEmpty(route.routeOptions().language())) {
-      language = new Locale(route.routeOptions().language());
     } else {
       language = LocaleUtils.getLocale(this.getApplication());
     }
