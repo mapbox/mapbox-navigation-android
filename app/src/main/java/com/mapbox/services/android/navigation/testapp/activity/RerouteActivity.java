@@ -37,6 +37,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 
 import java.util.ArrayList;
@@ -249,7 +250,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   private void getRoute(Point origin, Point destination, Float bearing) {
     Double heading = bearing == null ? null : bearing.doubleValue();
-    NavigationRoute.builder(this)
+    NavigationRoute.builder(LocaleUtils.getLocale(this))
       .origin(origin, heading, 90d)
       .destination(destination)
       .accessToken(Mapbox.getAccessToken())

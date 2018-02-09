@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.content.Context;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,7 +16,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.core.exceptions.ServicesException;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.Locale;
 
@@ -57,11 +55,11 @@ public final class NavigationRoute {
    * @return a {@link Builder} object for creating this object
    * @since 0.5.0
    */
-  public static Builder builder(Context context) {
+  public static Builder builder(Locale locale) {
     return new Builder()
       .annotations(DirectionsCriteria.ANNOTATION_CONGESTION)
       .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-      .language(LocaleUtils.getLocale(context));
+      .language(locale);
   }
 
   /**

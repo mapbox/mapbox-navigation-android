@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,7 @@ public class RouteEngine implements Callback<DirectionsResponse> {
 
     // Build new route request with the given origin and current route options
     RouteOptions currentOptions = routeProgress.directionsRoute().routeOptions();
-    NavigationRoute.Builder builder = NavigationRoute.builder(context)
+    NavigationRoute.Builder builder = NavigationRoute.builder(LocaleUtils.getLocale(context))
       .origin(origin)
       .routeOptions(currentOptions);
 

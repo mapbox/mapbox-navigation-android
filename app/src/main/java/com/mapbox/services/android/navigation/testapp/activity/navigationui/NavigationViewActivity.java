@@ -278,7 +278,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void fetchRoute() {
-    NavigationRoute.builder(this)
+    NavigationRoute.builder(LocaleUtils.getLocale(this))
       .accessToken(Mapbox.getAccessToken())
       .origin(currentLocation)
       .destination(destination)
