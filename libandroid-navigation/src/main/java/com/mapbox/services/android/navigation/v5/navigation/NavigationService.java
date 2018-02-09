@@ -12,7 +12,7 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.v5.location.LocationValidator;
+import com.mapbox.services.android.navigation.v5.location.LocationProcessor;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.route.RouteEngine;
