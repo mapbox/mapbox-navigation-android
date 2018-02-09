@@ -22,7 +22,7 @@ import java.util.HashMap;
 public class NavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener {
 
   private NavigationView navigationView;
-  private boolean isConfigurationChange;
+  private boolean isRunning;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -32,7 +32,6 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     navigationView = findViewById(R.id.navigationView);
     navigationView.onCreate(savedInstanceState);
     navigationView.getNavigationAsync(this);
-    isConfigurationChange = savedInstanceState != null;
   }
 
   @Override
@@ -52,6 +51,7 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   @Override
   protected void onSaveInstanceState(Bundle outState) {
     navigationView.onSaveInstanceState(outState);
+    outState.putBoolean(NavigationConstants.NAVIGATION_VIEW_RUNNING, isRunning);
     super.onSaveInstanceState(outState);
   }
 
@@ -59,6 +59,7 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   protected void onRestoreInstanceState(Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
     navigationView.onRestoreInstanceState(savedInstanceState);
+    isRunning = savedInstanceState.getBoolean(NavigationConstants.NAVIGATION_VIEW_RUNNING);
   }
 
   @Override
@@ -71,13 +72,14 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   public void onNavigationReady() {
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
     options.navigationListener(this);
-    if (!isConfigurationChange) {
+    if (!isRunning) {
       extractRoute(options);
       extractCoordinates(options);
     }
     extractConfiguration(options);
     options.navigationOptions(MapboxNavigationOptions.builder().locale(LocaleUtils.getLocale(this)).build());
     navigationView.startNavigation(options.build());
+    isRunning = true;
   }
 
   @Override
