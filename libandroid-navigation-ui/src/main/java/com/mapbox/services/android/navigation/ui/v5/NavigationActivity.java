@@ -10,6 +10,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.HashMap;
 
@@ -75,6 +76,7 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
       extractCoordinates(options);
     }
     extractConfiguration(options);
+    options.navigationOptions(MapboxNavigationOptions.builder().locale(LocaleUtils.getLocale(this)).build());
     navigationView.startNavigation(options.build());
   }
 
