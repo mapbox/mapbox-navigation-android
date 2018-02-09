@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.Locale;
@@ -43,10 +44,7 @@ public class DistanceUtilsTest {
 
   @Before
   public void setup() {
-    sharedPreferences = Mockito.mock(SharedPreferences.class);
-    context = Mockito.mock(Context.class);
-    resources = Mockito.mock(Resources.class);
-    configuration = Mockito.mock(Configuration.class);
+    MockitoAnnotations.initMocks(this);
     when(context.getSharedPreferences(anyString(), anyInt())).thenReturn(sharedPreferences);
     when(context.getResources()).thenReturn(resources);
     when(resources.getConfiguration()).thenReturn(configuration);
