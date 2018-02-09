@@ -48,7 +48,6 @@ public class NavigationLauncher {
 
     editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, options.awsPoolId());
     editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, options.shouldSimulateRoute());
-
     LocaleUtils.setLocale(editor, options.navigationOptions().locale(), options.navigationOptions().unitType());
 
     setThemePreferences(options, editor);

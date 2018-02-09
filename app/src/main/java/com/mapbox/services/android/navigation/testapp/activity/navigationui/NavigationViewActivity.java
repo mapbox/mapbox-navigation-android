@@ -90,8 +90,9 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private boolean locationFound;
   private boolean shouldSimulateRoute;
-  private final List<Locale> localeList = new ArrayList<>(
+  private final List<Locale> locales = new ArrayList<>(
     Arrays.asList(Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN));
+  private Locale locale;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -114,7 +115,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
       public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-        LocaleUtils.setLocale(NavigationViewActivity.this, localeList.get(position));
+        locale = locales.get(position);
+        LocaleUtils.setLocale(NavigationViewActivity.this, locale);
       }
 
       @Override
@@ -122,7 +124,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       }
     });
 
-    spinner.setSelection(localeList.indexOf(LocaleUtils.getLocale(this)));
+    spinner.setSelection(locales.indexOf(LocaleUtils.getLocale(this)));
   }
 
   @SuppressWarnings( {"MissingPermission"})
@@ -280,7 +282,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private void fetchRoute() {
     NavigationRoute.builder()
       .accessToken(Mapbox.getAccessToken())
-      .language(LocaleUtils.getLocale(this))
+      .language(locale)
       .origin(currentLocation)
       .destination(destination)
       .alternatives(true)
@@ -293,7 +295,6 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     NavigationViewOptions.Builder optionsBuilder = NavigationViewOptions.builder()
       .shouldSimulateRoute(shouldSimulateRoute);
     if (route != null) {
-      Locale locale = LocaleUtils.getLocale(this);
       if (route.routeOptions().language().equals(locale.getLanguage())) {
         optionsBuilder.directionsRoute(route);
       } else {

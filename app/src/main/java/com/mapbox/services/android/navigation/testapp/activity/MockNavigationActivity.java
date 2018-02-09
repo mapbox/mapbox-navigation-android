@@ -42,7 +42,6 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
@@ -195,8 +194,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     }
 
     final NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder()
-      .accessToken(Mapbox.getAccessToken())
-      .language(LocaleUtils.getLocale(this));
+      .accessToken(Mapbox.getAccessToken());
     navigationRouteBuilder.origin(origin);
     navigationRouteBuilder.destination(destination);
     if (waypoint != null) {
