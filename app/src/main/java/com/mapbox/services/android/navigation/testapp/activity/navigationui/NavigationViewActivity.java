@@ -123,7 +123,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       public void onNothingSelected(AdapterView<?> adapterView) {
       }
     });
-
+    locale = LocaleUtils.getLocale(this);
     spinner.setSelection(locales.indexOf(LocaleUtils.getLocale(this)));
   }
 
@@ -292,6 +292,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void launchNavigationWithRoute() {
+    LocaleUtils.setLocale(this, locale);
     NavigationViewOptions.Builder optionsBuilder = NavigationViewOptions.builder()
       .shouldSimulateRoute(shouldSimulateRoute);
     if (route != null) {
