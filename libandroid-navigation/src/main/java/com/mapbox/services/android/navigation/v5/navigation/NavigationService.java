@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.android.navigation.v5.location.LocationValidator;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.route.RouteEngine;
@@ -287,9 +288,7 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @SuppressWarnings("MissingPermission")
   private boolean isValidLocationUpdate(Location location) {
-    return location != null
-      && location.hasSpeed()
-      && location.getAccuracy() <= HORIZONTAL_ACCURACY_THRESHOLD_IN_METERS;
+    return location != null && LocationValidator.getInstance().isValidUpdate(location);
   }
 
   /**
