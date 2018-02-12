@@ -16,6 +16,10 @@ import android.support.v4.content.ContextCompat;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.core.constants.Constants;
+import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.LineString;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -33,11 +37,6 @@ import com.mapbox.services.android.navigation.ui.v5.utils.MapUtils;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.commons.geojson.Feature;
-import com.mapbox.services.commons.geojson.FeatureCollection;
-import com.mapbox.services.commons.geojson.LineString;
-import com.mapbox.services.commons.geojson.Point;
-import com.mapbox.services.commons.models.Position;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
@@ -306,11 +305,11 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     for (int i = featureCollections.size() - 1; i >= 0; i--) {
       MapUtils.updateMapSourceFromFeatureCollection(
         mapboxMap, featureCollections.get(i),
-        featureCollections.get(i).getFeatures().get(0).getStringProperty(SOURCE_KEY)
+        featureCollections.get(i).features().get(0).getStringProperty(SOURCE_KEY)
       );
 
       // Get some required information for the next step
-      String sourceId = featureCollections.get(i).getFeatures()
+      String sourceId = featureCollections.get(i).features()
         .get(0).getStringProperty(SOURCE_KEY);
       int index = featureCollections.indexOf(featureCollections.get(i));
 
@@ -350,8 +349,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private static FeatureCollection waypointFeatureCollection(DirectionsRoute route) {
     final List<Feature> waypointFeatures = new ArrayList<>();
     for (RouteLeg leg : route.legs()) {
-      waypointFeatures.add(getPointFromLineString(leg, 0));
-      waypointFeatures.add(getPointFromLineString(leg, leg.steps().size() - 1));
+      waypointFeatures.add(getPointFromLineString(route, 0));
+      waypointFeatures.add(getPointFromLineString(route, leg.steps().size() - 1));
     }
     return FeatureCollection.fromFeatures(waypointFeatures);
   }
@@ -580,15 +579,13 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     }
   }
 
-  private static Feature getPointFromLineString(RouteLeg leg, int stepIndex) {
-    Feature feature = Feature.fromGeometry(Point.fromCoordinates(
-      new double[] {
-        leg.steps().get(stepIndex).maneuver().location().longitude(),
-        leg.steps().get(stepIndex).maneuver().location().latitude()
-      }));
+  private static Feature getPointFromLineString(DirectionsRoute route, int index) {
+    List<Point> coordinates = route.routeOptions().coordinates();
+    Point waypoint = coordinates.get(index);
+    Feature feature = Feature.fromGeometry(waypoint);
     feature.addStringProperty(SOURCE_KEY, WAYPOINT_SOURCE_ID);
     feature.addStringProperty("waypoint",
-      stepIndex == 0 ? "origin" : "destination"
+      index == 0 ? "origin" : "destination"
     );
     return feature;
   }
@@ -666,9 +663,9 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
 
   private com.mapbox.geojson.Point findPointOnLine(com.mapbox.geojson.Point clickPoint, LineString lineString) {
     List<com.mapbox.geojson.Point> linePoints = new ArrayList<>();
-    List<Position> positions = lineString.getCoordinates();
-    for (Position pos : positions) {
-      linePoints.add(com.mapbox.geojson.Point.fromLngLat(pos.getLongitude(), pos.getLatitude()));
+    List<Point> positions = lineString.coordinates();
+    for (Point pos : positions) {
+      linePoints.add(com.mapbox.geojson.Point.fromLngLat(pos.longitude(), pos.latitude()));
     }
 
     com.mapbox.geojson.Feature feature = TurfMisc.nearestPointOnLine(clickPoint, linePoints);
@@ -690,8 +687,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     // Update all route geometries to reflect their appropriate colors depending on if they are
     // alternative or primary.
     for (FeatureCollection featureCollection : featureCollections) {
-      if (!(featureCollection.getFeatures().get(0).getGeometry() instanceof Point)) {
-        int index = featureCollection.getFeatures().get(0).getNumberProperty(INDEX_KEY).intValue();
+      if (!(featureCollection.features().get(0).geometry() instanceof Point)) {
+        int index = featureCollection.features().get(0).getNumberProperty(INDEX_KEY).intValue();
         updatePrimaryShieldRoute(String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_SHIELD_LAYER_ID,
           index), index);
         updatePrimaryRoute(String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_LAYER_ID,
@@ -764,12 +761,13 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       if (leg.annotation() != null && leg.annotation().congestion() != null) {
         for (int i = 0; i < leg.annotation().congestion().size(); i++) {
           // See https://github.com/mapbox/mapbox-navigation-android/issues/353
-          if (leg.annotation().congestion().size() + 1 <= lineString.getCoordinates().size()) {
-            double[] startCoord = lineString.getCoordinates().get(i).getCoordinates();
-            double[] endCoord = lineString.getCoordinates().get(i + 1).getCoordinates();
+          if (leg.annotation().congestion().size() + 1 <= lineString.coordinates().size()) {
 
-            LineString congestionLineString = LineString.fromCoordinates(new double[][] {startCoord,
-              endCoord});
+            List<Point> points = new ArrayList<>();
+            points.add(lineString.coordinates().get(i));
+            points.add(lineString.coordinates().get(i + 1));
+
+            LineString congestionLineString = LineString.fromLngLats(points);
             Feature feature = Feature.fromGeometry(congestionLineString);
             feature.addStringProperty(CONGESTION_KEY, leg.annotation().congestion().get(i));
             feature.addStringProperty(SOURCE_KEY, String.format(Locale.US, ID_FORMAT,
