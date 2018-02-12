@@ -86,6 +86,10 @@ public final class RouteUtils {
    */
   @Nullable
   public static List<Point> calculateRemainingWaypoints(RouteProgress routeProgress) {
+    if (routeProgress.directionsRoute().routeOptions() == null) {
+      return null;
+    }
+
     List<Point> coordinates = new ArrayList<>(routeProgress.directionsRoute().routeOptions().coordinates());
 
     if (coordinates.size() < routeProgress.remainingWaypoints()) {
@@ -98,12 +102,10 @@ public final class RouteUtils {
 
   private static boolean upcomingStepIsArrival(@NonNull RouteProgress routeProgress) {
     return routeProgress.currentLegProgress().upComingStep() != null
-      && routeProgress.currentLegProgress().upComingStep().maneuver() != null
       && routeProgress.currentLegProgress().upComingStep().maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE);
   }
 
   private static boolean currentStepIsArrival(@NonNull RouteProgress routeProgress) {
-    return routeProgress.currentLegProgress().currentStep().maneuver() != null
-      && routeProgress.currentLegProgress().currentStep().maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE);
+    return routeProgress.currentLegProgress().currentStep().maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE);
   }
 }

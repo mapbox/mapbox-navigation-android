@@ -25,6 +25,7 @@ import java.util.Locale;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
 public class RouteViewModel extends AndroidViewModel implements Callback<DirectionsResponse> {
 
@@ -108,7 +109,12 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
 
       // Calculate the remaining waypoints based on the route progress
       List<Point> remainingWaypoints = RouteUtils.calculateRemainingWaypoints(offRouteEvent.getRouteProgress());
-      if (remainingWaypoints != null && !remainingWaypoints.isEmpty()) {
+      if (remainingWaypoints == null) {
+        Timber.e("An error occurred fetching a new route");
+        return;
+      }
+
+      if (!remainingWaypoints.isEmpty()) {
         builder.destination(remainingWaypoints.remove(remainingWaypoints.size() - 1));
         addWaypoints(remainingWaypoints, builder);
       }

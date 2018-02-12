@@ -39,7 +39,7 @@ public class RouteEngine implements Callback<DirectionsResponse> {
     List<Point> waypoints = RouteUtils.calculateRemainingWaypoints(routeProgress);
 
     if (waypoints == null) {
-      Timber.d("An error occurred fetching a new route");
+      Timber.e("An error occurred fetching a new route");
       return;
     }
 
