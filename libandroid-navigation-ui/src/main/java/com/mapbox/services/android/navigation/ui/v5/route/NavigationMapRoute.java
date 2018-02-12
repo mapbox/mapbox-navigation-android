@@ -14,6 +14,7 @@ import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -25,6 +26,7 @@ import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
+import com.mapbox.core.constants.Constants;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.utils.MapImageUtils;
 import com.mapbox.services.android.navigation.ui.v5.utils.MapUtils;
@@ -33,6 +35,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.commons.geojson.Feature;
 import com.mapbox.services.commons.geojson.FeatureCollection;
+import com.mapbox.services.commons.geojson.LineString;
 import com.mapbox.services.commons.geojson.Point;
 import com.mapbox.services.commons.models.Position;
 import com.mapbox.turf.TurfConstants;
@@ -46,11 +49,6 @@ import java.util.Locale;
 import static com.mapbox.mapboxsdk.style.functions.stops.Stop.stop;
 import static com.mapbox.mapboxsdk.style.functions.stops.Stops.categorical;
 import static com.mapbox.mapboxsdk.style.functions.stops.Stops.exponential;
-import static com.mapbox.services.android.navigation.ui.v5.route.ProcessRouteTask.CONGESTION_KEY;
-import static com.mapbox.services.android.navigation.ui.v5.route.ProcessRouteTask.ID_FORMAT;
-import static com.mapbox.services.android.navigation.ui.v5.route.ProcessRouteTask.INDEX_KEY;
-import static com.mapbox.services.android.navigation.ui.v5.route.ProcessRouteTask.SOURCE_KEY;
-import static com.mapbox.services.android.navigation.ui.v5.route.ProcessRouteTask.WAYPOINT_SOURCE_ID;
 
 /**
  * Provide a route using {@link NavigationMapRoute#addRoutes(List)} and a route will be drawn using
@@ -71,9 +69,16 @@ import static com.mapbox.services.android.navigation.ui.v5.route.ProcessRouteTas
 public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMapChangedListener,
   MapboxMap.OnMapClickListener {
 
+  private static final String CONGESTION_KEY = "congestion";
+  private static final String SOURCE_KEY = "source";
+  private static final String INDEX_KEY = "index";
+
   private static final int ROUTE_CLICK_PADDING = 250;
+  private static final String GENERIC_ROUTE_SOURCE_ID = "mapbox-navigation-route-source";
   private static final String GENERIC_ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
+  private static final String WAYPOINT_SOURCE_ID = "mapbox-navigation-waypoint-source";
   private static final String WAYPOINT_LAYER_ID = "mapbox-navigation-waypoint-layer";
+  private static final String ID_FORMAT = "%s-%d";
   private static final String GENERIC_ROUTE_SHIELD_LAYER_ID
     = "mapbox-navigation-route-shield-layer";
 
@@ -106,13 +111,12 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private List<String> layerIds;
   private final MapView mapView;
   private int primaryRouteIndex;
-  private List<FeatureCollection> featureCollections;
+  private final List<FeatureCollection> featureCollections;
   private float routeScale;
   private float alternativeRouteScale;
   private String belowLayer;
   private boolean alternativesVisible;
   private OnRouteSelectionChangeListener onRouteSelectionChangeListener;
-  private OnRouteDrawnListener onRouteDrawnListener;
 
   /**
    * Construct an instance of {@link NavigationMapRoute}.
@@ -245,14 +249,9 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       }
     }
     featureCollections.clear();
-    new ProcessRouteTask(new ProcessRouteListener() {
-      @Override
-      public void onRouteProcessed(List<FeatureCollection> featureCollections) {
-        NavigationMapRoute.this.featureCollections = featureCollections;
-        drawRoutes();
-        addDirectionWaypoints();
-      }
-    }, primaryRouteIndex).execute(directionsRoutes);
+    generateFeatureCollectionList(directionsRoutes);
+    drawRoutes();
+    addDirectionWaypoints();
   }
 
   /**
@@ -267,18 +266,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   public void setOnRouteSelectionChangeListener(
     @Nullable OnRouteSelectionChangeListener onRouteSelectionChangeListener) {
     this.onRouteSelectionChangeListener = onRouteSelectionChangeListener;
-  }
-
-  /**
-   * Add a {@link OnRouteDrawnListener} to know when your {@link DirectionsRoute} has been processed and
-   * drawn after {@link NavigationMapRoute#addRoute(DirectionsRoute)} has been called.
-   *
-   * @param onRouteDrawnListener a listener which lets you know when the route has
-   *                             been processed and successfully drawn on the map
-   * @since 0.11.0
-   */
-  public void setOnRouteDrawnListener(@Nullable OnRouteDrawnListener onRouteDrawnListener) {
-    this.onRouteDrawnListener = onRouteDrawnListener;
   }
 
   /**
@@ -345,12 +332,32 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       // bottom.
       addRouteShieldLayer(layerIds.get(layerIds.size() - 2), sourceId, index);
       addRouteLayer(layerIds.get(layerIds.size() - 1), sourceId, index);
-
-      // Notify the route drawn listener if found
-      if (onRouteDrawnListener != null) {
-        onRouteDrawnListener.onNavigationRouteDrawn();
-      }
     }
+  }
+
+  private void generateFeatureCollectionList(List<DirectionsRoute> directionsRoutes) {
+    // Each route contains traffic information and should be recreated considering this traffic
+    // information.
+    for (int i = 0; i < directionsRoutes.size(); i++) {
+      featureCollections.add(addTrafficToSource(directionsRoutes.get(i), i));
+    }
+
+    // Add the waypoint geometries to represent them as an icon
+    featureCollections.add(
+      waypointFeatureCollection(directionsRoutes.get(primaryRouteIndex))
+    );
+  }
+
+  /**
+   * The routes also display an icon for each waypoint in the route, we use symbol layers for this.
+   */
+  private static FeatureCollection waypointFeatureCollection(DirectionsRoute route) {
+    final List<Feature> waypointFeatures = new ArrayList<>();
+    for (RouteLeg leg : route.legs()) {
+      waypointFeatures.add(getPointFromLineString(leg, 0));
+      waypointFeatures.add(getPointFromLineString(leg, leg.steps().size() - 1));
+    }
+    return FeatureCollection.fromFeatures(waypointFeatures);
   }
 
   private void addDirectionWaypoints() {
@@ -557,11 +564,24 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     }
   }
 
+  private static Feature getPointFromLineString(RouteLeg leg, int stepIndex) {
+    Feature feature = Feature.fromGeometry(Point.fromCoordinates(
+      new double[] {
+        leg.steps().get(stepIndex).maneuver().location().longitude(),
+        leg.steps().get(stepIndex).maneuver().location().latitude()
+      }));
+    feature.addStringProperty(SOURCE_KEY, WAYPOINT_SOURCE_ID);
+    feature.addStringProperty("waypoint",
+      stepIndex == 0 ? "origin" : "destination"
+    );
+    return feature;
+  }
+
   /**
    * Adds the necessary listeners
    */
   private void addListeners() {
-    mapboxMap.addOnMapClickListener(this);
+    mapboxMap.setOnMapClickListener(this);
     if (navigation != null) {
       navigation.addProgressChangeListener(this);
     }
@@ -599,7 +619,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
         }
         double dis = TurfMeasurement.distance(com.mapbox.geojson
           .Point.fromLngLat(point.getLongitude(),
-            point.getLatitude()), pointAlong, TurfConstants.UNIT_METERS);
+          point.getLatitude()), pointAlong, TurfConstants.UNIT_METERS);
         if (dis <= ROUTE_CLICK_PADDING) {
           primaryRouteIndex = featureCollection.getFeatures()
             .get(0).getNumberProperty(INDEX_KEY).intValue();
@@ -676,5 +696,46 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       drawRoutes();
       addDirectionWaypoints();
     }
+  }
+
+  /**
+   * If the {@link DirectionsRoute} request contains congestion information via annotations, breakup
+   * the source into pieces so data-driven styling can be used to change the route colors
+   * accordingly.
+   */
+  private static FeatureCollection addTrafficToSource(DirectionsRoute route, int index) {
+    final List<Feature> features = new ArrayList<>();
+    LineString originalGeometry = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
+    Feature feat = Feature.fromGeometry(originalGeometry);
+    feat.addStringProperty(SOURCE_KEY, String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_SOURCE_ID,
+      index));
+    feat.addNumberProperty(INDEX_KEY, index);
+    features.add(feat);
+
+    LineString lineString = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
+    for (RouteLeg leg : route.legs()) {
+      if (leg.annotation() != null && leg.annotation().congestion() != null) {
+        for (int i = 0; i < leg.annotation().congestion().size(); i++) {
+          // See https://github.com/mapbox/mapbox-navigation-android/issues/353
+          if (leg.annotation().congestion().size() + 1 <= lineString.getCoordinates().size()) {
+            double[] startCoord = lineString.getCoordinates().get(i).getCoordinates();
+            double[] endCoord = lineString.getCoordinates().get(i + 1).getCoordinates();
+
+            LineString congestionLineString = LineString.fromCoordinates(new double[][] {startCoord,
+              endCoord});
+            Feature feature = Feature.fromGeometry(congestionLineString);
+            feature.addStringProperty(CONGESTION_KEY, leg.annotation().congestion().get(i));
+            feature.addStringProperty(SOURCE_KEY, String.format(Locale.US, ID_FORMAT,
+              GENERIC_ROUTE_SOURCE_ID, index));
+            feature.addNumberProperty(INDEX_KEY, index);
+            features.add(feature);
+          }
+        }
+      } else {
+        Feature feature = Feature.fromGeometry(lineString);
+        features.add(feature);
+      }
+    }
+    return FeatureCollection.fromFeatures(features);
   }
 }
