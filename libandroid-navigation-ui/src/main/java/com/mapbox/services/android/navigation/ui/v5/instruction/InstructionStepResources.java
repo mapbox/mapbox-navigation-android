@@ -98,7 +98,7 @@ class InstructionStepResources {
     thenStepManeuverType = followOnStep.maneuver().type();
     thenStepManeuverModifier = followOnStep.maneuver().modifier();
     // Should show then step if the upcoming step is less than 25 seconds
-    shouldShowThenStep = upcomingStep.duration() <= (25d * 1.2d) && currentDurationRemaining <= (70d * 1.2d);
+    shouldShowThenStep = upcomingStep.duration() <= (25d * 1.2d) && currentDurationRemaining <= 70d;
   }
 
   private boolean checkForNoneIndications(List<IntersectionLanes> lanes) {

@@ -33,6 +33,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
@@ -49,6 +50,8 @@ import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEven
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+
+import java.util.List;
 
 /**
  * A view that can be used to display upcoming maneuver information and control
@@ -202,9 +205,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     updateManeuverView(model);
     updateDistanceText(model);
     updateInstructionList(model);
+    updateThenStep(model);
+    updateTurnLanes(model);
     if (newStep(model.getProgress())) {
-      updateTurnLanes(model);
-      updateThenStep(model);
       // Pre-fetch the image URLs for the upcoming step
       LegStep upComingStep = model.getProgress().currentLegProgress().upComingStep();
       InstructionLoader.getInstance().prefetchImageCache(upComingStep);
@@ -667,10 +670,12 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model created with new {@link RouteProgress} holding turn lane data
    */
   private void updateTurnLanes(InstructionModel model) {
-    if (model.getStepResources().getTurnLanes() != null
-      && !TextUtils.isEmpty(model.getStepResources().getManeuverViewModifier())) {
-      turnLaneAdapter.addTurnLanes(model.getStepResources().getTurnLanes(),
-        model.getStepResources().getManeuverViewModifier());
+    List<IntersectionLanes> turnLanes = model.getStepResources().getTurnLanes();
+    String maneuverViewModifier = model.getStepResources().getManeuverViewModifier();
+    double durationRemaining = model.getProgress().currentLegProgress().currentStepProgress().durationRemaining();
+
+    if (turnLanes != null && !TextUtils.isEmpty(maneuverViewModifier) && durationRemaining <= 70d) {
+      turnLaneAdapter.addTurnLanes(turnLanes, maneuverViewModifier);
       showTurnLanes();
     } else {
       hideTurnLanes();
