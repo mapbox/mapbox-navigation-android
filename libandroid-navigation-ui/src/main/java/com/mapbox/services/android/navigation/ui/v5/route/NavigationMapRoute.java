@@ -79,8 +79,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private static final String WAYPOINT_SOURCE_ID = "mapbox-navigation-waypoint-source";
   private static final String WAYPOINT_LAYER_ID = "mapbox-navigation-waypoint-layer";
   private static final String ID_FORMAT = "%s-%d";
-  private static final String GENERIC_ROUTE_SHIELD_LAYER_ID
-    = "mapbox-navigation-route-shield-layer";
+  private static final String GENERIC_ROUTE_SHIELD_LAYER_ID = "mapbox-navigation-route-shield-layer";
 
   @StyleRes
   private int styleRes;
@@ -485,8 +484,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    */
   private void getAttributes() {
     Context context = mapView.getContext();
-    TypedArray typedArray
-      = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute);
+    TypedArray typedArray = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute);
 
     // Primary Route attributes
     routeDefaultColor = typedArray.getColor(R.styleable.NavigationMapRoute_routeColor,
@@ -633,8 +631,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private boolean findClickedRoute(@NonNull LatLng point) {
     HashMap<Double, DirectionsRoute> routeDistancesAwayFromClick = new HashMap<>();
 
-    com.mapbox.geojson.Point clickPoint
-      = com.mapbox.geojson.Point.fromLngLat(point.getLongitude(), point.getLatitude());
+    Point clickPoint = Point.fromLngLat(point.getLongitude(), point.getLatitude());
 
     if (calculateClickDistancesFromRoutes(routeDistancesAwayFromClick, clickPoint)) {
       return true;
@@ -648,9 +645,9 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   }
 
   private boolean calculateClickDistancesFromRoutes(HashMap<Double, DirectionsRoute> routeDistancesAwayFromClick,
-                                                    com.mapbox.geojson.Point clickPoint) {
+                                                    Point clickPoint) {
     for (LineString lineString : routeLineStrings.keySet()) {
-      com.mapbox.geojson.Point pointOnLine = findPointOnLine(clickPoint, lineString);
+      Point pointOnLine = findPointOnLine(clickPoint, lineString);
 
       if (pointOnLine == null) {
         return true;
@@ -661,15 +658,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     return false;
   }
 
-  private com.mapbox.geojson.Point findPointOnLine(com.mapbox.geojson.Point clickPoint, LineString lineString) {
-    List<com.mapbox.geojson.Point> linePoints = new ArrayList<>();
-    List<Point> positions = lineString.coordinates();
-    for (Point pos : positions) {
-      linePoints.add(com.mapbox.geojson.Point.fromLngLat(pos.longitude(), pos.latitude()));
-    }
-
-    com.mapbox.geojson.Feature feature = TurfMisc.nearestPointOnLine(clickPoint, linePoints);
-    return (com.mapbox.geojson.Point) feature.geometry();
+  private Point findPointOnLine(Point clickPoint, LineString lineString) {
+    List<Point> linePoints = lineString.coordinates();
+    Feature feature = TurfMisc.nearestPointOnLine(clickPoint, linePoints);
+    return (Point) feature.geometry();
   }
 
   private void checkNewRouteFound(int currentRouteIndex) {
@@ -749,8 +741,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
 
   private void buildRouteFeatureFromGeometry(int index, List<Feature> features, LineString originalGeometry) {
     Feature feat = Feature.fromGeometry(originalGeometry);
-    feat.addStringProperty(SOURCE_KEY, String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_SOURCE_ID,
-      index));
+    feat.addStringProperty(SOURCE_KEY, String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_SOURCE_ID, index));
     feat.addNumberProperty(INDEX_KEY, index);
     features.add(feat);
   }
