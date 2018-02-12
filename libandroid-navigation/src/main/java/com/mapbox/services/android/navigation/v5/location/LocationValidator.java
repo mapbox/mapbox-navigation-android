@@ -100,6 +100,19 @@ public class LocationValidator {
     this.loggingEnabled = loggingEnabled;
   }
 
+  /**
+   * Uses dead reckoning to find a future location.
+   *
+   * @return a {@link Point}
+   */
+  private static Point getFuturePosition(Location location) {
+    Point locationToPosition = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    double metersInFrontOfUser = location.getSpeed() * 1.0;
+    return TurfMeasurement.destination(
+      locationToPosition, metersInFrontOfUser, location.getBearing(), TurfConstants.UNIT_METERS
+    );
+  }
+
   private void log(String message, Object... args) {
     if (loggingEnabled) {
       Timber.d(message, args);
