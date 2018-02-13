@@ -13,6 +13,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * Serves as a launching point for the custom drop-in UI, {@link NavigationView}.
@@ -77,7 +78,7 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
       extractCoordinates(options);
     }
     extractConfiguration(options);
-    options.navigationOptions(MapboxNavigationOptions.builder().locale(LocaleUtils.getLocale(this)).build());
+    extractLocale(options);
     navigationView.startNavigation(options.build());
     isRunning = true;
   }
@@ -121,5 +122,10 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     MapboxNavigationOptions navigationOptions = MapboxNavigationOptions.builder()
       .build();
     options.navigationOptions(navigationOptions);
+  }
+
+  private void extractLocale(NavigationViewOptions.Builder options) {
+    Locale locale = LocaleUtils.getLocale(this);
+    options.navigationOptions(MapboxNavigationOptions.builder().locale(locale).build());
   }
 }

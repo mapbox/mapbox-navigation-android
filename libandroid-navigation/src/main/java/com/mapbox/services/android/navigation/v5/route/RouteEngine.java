@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.v5.route;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -8,10 +7,10 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -23,14 +22,16 @@ import retrofit2.Response;
  */
 public class RouteEngine implements Callback<DirectionsResponse> {
 
-  private Callback engineCallback;
   private RouteProgress routeProgress;
+  private final Callback engineCallback;
+  private final Locale locale;
 
-  public RouteEngine(Callback engineCallback) {
+  public RouteEngine(Locale locale, Callback engineCallback) {
     this.engineCallback = engineCallback;
+    this.locale = locale;
   }
 
-  public void fetchRoute(Context context, Point origin, RouteProgress routeProgress) {
+  public void fetchRoute(Point origin, RouteProgress routeProgress) {
     if (routeProgress == null) {
       return;
     }
@@ -50,7 +51,7 @@ public class RouteEngine implements Callback<DirectionsResponse> {
     // Build new route request with the given origin and current route options
     RouteOptions currentOptions = routeProgress.directionsRoute().routeOptions();
     NavigationRoute.Builder builder = NavigationRoute.builder()
-      .language(LocaleUtils.getLocale(context))
+      .language(locale)
       .origin(origin)
       .routeOptions(currentOptions);
 

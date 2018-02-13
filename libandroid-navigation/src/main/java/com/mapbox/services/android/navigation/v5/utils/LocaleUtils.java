@@ -49,53 +49,60 @@ public class LocaleUtils {
    * @param locale to set language
    */
   public static void setLocale(Context context, Locale locale) {
-    setLocale(context, locale, NavigationUnitType.NONE_SPECIFIED);
-  }
-
-  /**
-   * Sets locale and unitType into SharedPreferences for later use
-   * @param context where SharedPreferences exist
-   * @param locale to set language
-   * @param unitType to set unitType to use
-   */
-  public static void setLocale(Context context, Locale locale, @NavigationUnitType.UnitType int unitType) {
     SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
 
-    setLocale(editor, locale, unitType);
+    if (locale != null) {
+      editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, locale.getLanguage());
+      editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, locale.getCountry());
+    }
 
     editor.apply();
   }
 
   /**
-   * Sets locale and unitType into SharedPreferences for later use
-   * @param editor to add locale and unitType to
-   * @param locale to set language
-   * @param unitType to set unitType to use
+   * Returns the unit type to use based on the value stored in SharedPreferences
+   * @param context where SharedPreferences are stored
+   * @return unit type
    */
-  public static void setLocale(
-    SharedPreferences.Editor editor, Locale locale, @NavigationUnitType.UnitType int unitType) {
-    editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, unitType);
-    if (locale != null) {
-      editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, locale.getLanguage());
-      editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, locale.getCountry());
-    }
+  public static @NavigationUnitType.UnitType int getUnitType(Context context) {
+    return PreferenceManager.getDefaultSharedPreferences(context)
+      .getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, NONE_SPECIFIED);
   }
 
   /**
-   * Returns the unit type to use, or the unit type for specified locale if no unit type is specified
+   * Returns the unit type to use based on the value stored in SharedPreferences or the unit type
+   * for specified locale if no unit type is specified
    * @param context where SharedPreferences are stored
    * @param locale to use for default
    * @return unit type
    */
-  public static @NavigationUnitType.UnitType int getUnitType(Context context, @NonNull Locale locale) {
-    int unitType = PreferenceManager.getDefaultSharedPreferences(context)
-      .getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, NONE_SPECIFIED);
+  public static @NavigationUnitType.UnitType int getUnitType(Context context, Locale locale) {
+    int unitType = getUnitType(context);
 
     if (unitType != NONE_SPECIFIED) {
       return unitType;
     }
 
-    // If unit type isn't specified, use default for locale
+    return getUnitTypeForLocale(locale);
+  }
+
+  /**
+   * Sets unitType into SharedPreferences for later use
+   * @param context where SharedPreferences exist
+   * @param unitType to set unitType to use
+   */
+  public static void setUnitType(Context context, @NavigationUnitType.UnitType int unitType) {
+    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+    editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, unitType);
+    editor.apply();
+  }
+
+  /**
+   * Returns the unit type for the specified locale
+   * @param locale for which to return the default unit type
+   * @return unit type for specified locale
+   */
+  public static @NavigationUnitType.UnitType int getUnitTypeForLocale(@NonNull Locale locale) {
     switch (locale.getCountry()) {
       case "US": // US
       case "LR": // Liberia
@@ -104,14 +111,5 @@ public class LocaleUtils {
       default:
         return TYPE_METRIC;
     }
-  }
-
-  /**
-   * Returns the unit type to use, or the unit type for specified locale if no unit type is specified
-   * @param context where SharedPreferences are stored
-   * @return unit type
-   */
-  public static @NavigationUnitType.UnitType int getUnitType(Context context) {
-    return getUnitType(context, getLocale(context));
   }
 }
