@@ -12,6 +12,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -126,6 +127,17 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     initTurnLaneRecyclerView();
     initDirectionsRecyclerView();
     initAnimations();
+  }
+
+  @Override
+  protected void onAttachedToWindow() {
+    super.onAttachedToWindow();
+    // Attach the listener to the FeedbackBottomSheet if it is showing
+    FragmentManager mgr = ((FragmentActivity) getContext()).getSupportFragmentManager();
+    FeedbackBottomSheet feedbackBottomSheet = (FeedbackBottomSheet) mgr.findFragmentByTag(FeedbackBottomSheet.TAG);
+    if (feedbackBottomSheet != null) {
+      feedbackBottomSheet.setFeedbackBottomSheetListener(this);
+    }
   }
 
   @Override

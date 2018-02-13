@@ -28,7 +28,8 @@ import android.widget.ProgressBar;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 
-public class FeedbackBottomSheet extends BottomSheetDialogFragment implements FeedbackClickListener.ClickCallback {
+public class FeedbackBottomSheet extends BottomSheetDialogFragment implements FeedbackClickListener.ClickCallback,
+  Animator.AnimatorListener {
 
   public static final String TAG = FeedbackBottomSheet.class.getSimpleName();
 
@@ -44,6 +45,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
     FeedbackBottomSheet feedbackBottomSheet = new FeedbackBottomSheet();
     feedbackBottomSheet.setFeedbackBottomSheetListener(feedbackBottomSheetListener);
     feedbackBottomSheet.setDuration(duration);
+    feedbackBottomSheet.setRetainInstance(true);
     return feedbackBottomSheet;
   }
 
@@ -87,6 +89,30 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   }
 
   @Override
+  public void onDismiss(DialogInterface dialog) {
+    super.onDismiss(dialog);
+    feedbackBottomSheetListener.onFeedbackDismissed();
+  }
+
+  @Override
+  public void onDestroyView() {
+    // Prevent listener leak
+    feedbackBottomSheetListener = null;
+
+    // Maintains visibility on rotation
+    Dialog dialog = getDialog();
+    if (dialog != null && getRetainInstance()) {
+      dialog.setDismissMessage(null);
+    }
+    // Cancel the animation
+    if (countdownAnimation != null) {
+      countdownAnimation.removeAllListeners();
+      countdownAnimation.cancel();
+    }
+    super.onDestroyView();
+  }
+
+  @Override
   public void onFeedbackItemClick(int feedbackPosition) {
     FeedbackItem feedbackItem = feedbackAdapter.getFeedbackItem(feedbackPosition);
     feedbackBottomSheetListener.onFeedbackSelected(feedbackItem);
@@ -94,18 +120,28 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   }
 
   @Override
-  public void onDismiss(DialogInterface dialog) {
-    super.onDismiss(dialog);
-    feedbackBottomSheetListener.onFeedbackDismissed();
+  public void onAnimationEnd(Animator animation) {
+    FeedbackBottomSheet.this.dismiss();
+  }
+
+  //region Unused Listener Methods
+
+  @Override
+  public void onAnimationStart(Animator animation) {
+
   }
 
   @Override
-  public void onStop() {
-    super.onStop();
-    if (countdownAnimation != null) {
-      countdownAnimation.cancel();
-    }
+  public void onAnimationCancel(Animator animation) {
+
   }
+
+  @Override
+  public void onAnimationRepeat(Animator animation) {
+
+  }
+
+  //endregion
 
   public void setFeedbackBottomSheetListener(FeedbackBottomSheetListener feedbackBottomSheetListener) {
     this.feedbackBottomSheetListener = feedbackBottomSheetListener;
@@ -141,27 +177,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
       "progress", 0);
     countdownAnimation.setInterpolator(new LinearInterpolator());
     countdownAnimation.setDuration(duration);
-    countdownAnimation.addListener(new Animator.AnimatorListener() {
-      @Override
-      public void onAnimationStart(Animator animation) {
-
-      }
-
-      @Override
-      public void onAnimationEnd(Animator animation) {
-        FeedbackBottomSheet.this.dismiss();
-      }
-
-      @Override
-      public void onAnimationCancel(Animator animation) {
-
-      }
-
-      @Override
-      public void onAnimationRepeat(Animator animation) {
-
-      }
-    });
+    countdownAnimation.addListener(this);
     countdownAnimation.start();
   }
 
