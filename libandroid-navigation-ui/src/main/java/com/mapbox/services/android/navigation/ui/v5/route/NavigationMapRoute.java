@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.core.constants.Constants;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -26,7 +27,6 @@ import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
-import com.mapbox.core.constants.Constants;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.utils.MapImageUtils;
 import com.mapbox.services.android.navigation.ui.v5.utils.MapUtils;
@@ -390,7 +390,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       );
       if (index == primaryRouteIndex) {
         mapboxMap.removeLayer(layer);
-        mapboxMap.addLayerBelow(layer, belowLayer);
+        mapboxMap.addLayerBelow(layer, WAYPOINT_LAYER_ID);
       }
     }
   }
@@ -404,7 +404,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       );
       if (index == primaryRouteIndex) {
         mapboxMap.removeLayer(layer);
-        mapboxMap.addLayerBelow(layer, belowLayer);
+        mapboxMap.addLayerBelow(layer, WAYPOINT_LAYER_ID);
       }
     }
   }
@@ -581,7 +581,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    * Adds the necessary listeners
    */
   private void addListeners() {
-    mapboxMap.setOnMapClickListener(this);
+    mapboxMap.addOnMapClickListener(this);
     if (navigation != null) {
       navigation.addProgressChangeListener(this);
     }
@@ -604,7 +604,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     if (directionsRoutes == null || directionsRoutes.isEmpty() || !alternativesVisible) {
       return;
     }
-    // determine which feature collections are alternative routes
+    // Cache current route index
+    int currentRouteIndex = primaryRouteIndex;
+
+    // Determine which feature collections are alternative routes
     for (FeatureCollection featureCollection : featureCollections) {
       if (!(featureCollection.getFeatures().get(0).getGeometry() instanceof Point)) {
         List<com.mapbox.geojson.Point> linePoints = calculateLinePoints(featureCollection);
@@ -619,17 +622,30 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
         }
         double dis = TurfMeasurement.distance(com.mapbox.geojson
           .Point.fromLngLat(point.getLongitude(),
-          point.getLatitude()), pointAlong, TurfConstants.UNIT_METERS);
+            point.getLatitude()), pointAlong, TurfConstants.UNIT_METERS);
+
         if (dis <= ROUTE_CLICK_PADDING) {
+          // Set the new primary route index
           primaryRouteIndex = featureCollection.getFeatures()
             .get(0).getNumberProperty(INDEX_KEY).intValue();
+
+          // If the new index is different from the current index, break the loop
+          if (primaryRouteIndex != currentRouteIndex) {
+            break;
+          }
         }
       }
     }
-    updateRoute();
-    if (onRouteSelectionChangeListener != null) {
-      onRouteSelectionChangeListener.onNewPrimaryRouteSelected(
-        directionsRoutes.get(primaryRouteIndex));
+
+    // If the current index has changed from the primary, update the route and listener
+    if (currentRouteIndex != primaryRouteIndex) {
+      // Update the route and waypoints
+      updateRoute();
+      // Update the listener with the new route
+      if (onRouteSelectionChangeListener != null) {
+        onRouteSelectionChangeListener.onNewPrimaryRouteSelected(
+          directionsRoutes.get(primaryRouteIndex));
+      }
     }
   }
 
@@ -655,8 +671,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
         int index = featureCollection.getFeatures().get(0).getNumberProperty(INDEX_KEY).intValue();
         updatePrimaryShieldRoute(String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_SHIELD_LAYER_ID,
           index), index);
-        updatePrimaryRoute(String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_LAYER_ID, index),
-          index);
+        updatePrimaryRoute(String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_LAYER_ID,
+          index), index);
       }
     }
   }
