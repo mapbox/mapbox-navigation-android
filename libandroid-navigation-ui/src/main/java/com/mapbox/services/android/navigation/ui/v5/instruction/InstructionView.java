@@ -72,7 +72,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
   private static final double VALID_DURATION_REMAINING = 70d;
 
-  public boolean isMuted;
   private ManeuverView upcomingManeuverView;
   private TextView upcomingDistanceText;
   private TextView upcomingPrimaryText;
@@ -99,6 +98,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private LegStep currentStep;
   private NavigationViewModel navigationViewModel;
   private boolean isRerouting;
+  public boolean isMuted;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -280,51 +280,47 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   /**
-   * Hide the instruction list and show the sound button.
+   * Hide the instruction list.
    * <p>
    * This is based on orientation so the different layouts (for portrait vs. landscape)
    * can be animated appropriately.
    */
   public void hideInstructionList() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      TransitionManager.beginDelayedTransition(InstructionView.this);
+    }
     int orientation = getContext().getResources().getConfiguration().orientation;
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
       ConstraintSet collapsed = new ConstraintSet();
       collapsed.clone(getContext(), R.layout.instruction_layout);
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        TransitionManager.beginDelayedTransition(InstructionView.this);
-      }
       collapsed.applyTo(instructionLayout);
-      instructionListLayout.setVisibility(INVISIBLE);
+      instructionListLayout.setVisibility(GONE);
     } else {
-      Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.slide_up_top);
-      slideUp.setInterpolator(new AccelerateInterpolator());
-      instructionListLayout.startAnimation(slideUp);
-      instructionListLayout.setVisibility(INVISIBLE);
+      instructionListLayout.setVisibility(GONE);
     }
   }
 
   /**
-   * Show the instruction list and hide the sound button.
+   * Show the instruction list.
    * <p>
    * This is based on orientation so the different layouts (for portrait vs. landscape)
    * can be animated appropriately.
    */
   public void showInstructionList() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      TransitionManager.beginDelayedTransition(InstructionView.this);
+    }
     int orientation = getContext().getResources().getConfiguration().orientation;
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
       ConstraintSet expanded = new ConstraintSet();
       expanded.clone(getContext(), R.layout.instruction_layout_alt);
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        TransitionManager.beginDelayedTransition(InstructionView.this);
-      }
       expanded.applyTo(instructionLayout);
       instructionListLayout.setVisibility(VISIBLE);
     } else {
-      Animation slideDown = AnimationUtils.loadAnimation(getContext(), R.anim.slide_down_top);
-      slideDown.setInterpolator(new DecelerateInterpolator());
       instructionListLayout.setVisibility(VISIBLE);
-      instructionListLayout.startAnimation(slideDown);
     }
+    // Scroll to top of directions list
+    rvInstructions.scrollToPosition(0);
   }
 
   /**
