@@ -100,10 +100,10 @@ class InstructionStepResources {
   private void thenStep(LegStep upcomingStep, LegStep followOnStep, double currentDurationRemaining) {
     thenStepManeuverType = followOnStep.maneuver().type();
     thenStepManeuverModifier = followOnStep.maneuver().modifier();
-    shouldShowThenStep = validStepDuration(upcomingStep, currentDurationRemaining);
+    shouldShowThenStep = isValidStepDuration(upcomingStep, currentDurationRemaining);
   }
 
-  private boolean validStepDuration(LegStep upcomingStep, double currentDurationRemaining) {
+  private boolean isValidStepDuration(LegStep upcomingStep, double currentDurationRemaining) {
     return upcomingStep.duration() <= VALID_UPCOMING_DURATION
       && currentDurationRemaining <= VALID_CURRENT_DURATION;
   }
