@@ -43,6 +43,8 @@ import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -73,7 +75,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private static final String SOURCE_KEY = "source";
   private static final String INDEX_KEY = "index";
 
-  private static final int ROUTE_CLICK_PADDING = 250;
   private static final String GENERIC_ROUTE_SOURCE_ID = "mapbox-navigation-route-source";
   private static final String GENERIC_ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
   private static final String WAYPOINT_SOURCE_ID = "mapbox-navigation-waypoint-source";
@@ -106,6 +107,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private int destinationWaypointIcon;
 
   private List<DirectionsRoute> directionsRoutes;
+  private HashMap<LineString, DirectionsRoute> routeLineStrings;
   private final MapboxNavigation navigation;
   private final MapboxMap mapboxMap;
   private List<String> layerIds;
@@ -214,6 +216,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    */
   private void initialize() {
     layerIds = new ArrayList<>();
+    routeLineStrings = new HashMap<>();
     getAttributes();
     placeRouteBelow();
   }
@@ -247,6 +250,9 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       for (String id : layerIds) {
         mapboxMap.removeLayer(id);
       }
+    }
+    if (directionsRoutes.size() == 1) {
+      alternativesVisible = false;
     }
     featureCollections.clear();
     generateFeatureCollectionList(directionsRoutes);
@@ -601,41 +607,27 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
 
   @Override
   public void onMapClick(@NonNull LatLng point) {
-    if (directionsRoutes == null || directionsRoutes.isEmpty() || !alternativesVisible) {
+    if (routeLineStrings == null || routeLineStrings.isEmpty() || !alternativesVisible) {
       return;
     }
     // Cache current route index
     int currentRouteIndex = primaryRouteIndex;
 
-    // Determine which feature collections are alternative routes
-    for (FeatureCollection featureCollection : featureCollections) {
-      if (!(featureCollection.getFeatures().get(0).getGeometry() instanceof Point)) {
-        List<com.mapbox.geojson.Point> linePoints = calculateLinePoints(featureCollection);
+    HashMap<Double, DirectionsRoute> routeDistancesAwayFromClick = new HashMap<>();
 
-        com.mapbox.geojson.Feature feature = TurfMisc.pointOnLine(
-          com.mapbox.geojson.Point.fromLngLat(point.getLongitude(), point.getLatitude()),
-          linePoints);
-        com.mapbox.geojson.Point pointAlong = (com.mapbox.geojson.Point) feature.geometry();
-        // No linestring to get point on line, thus we just return.
-        if (pointAlong == null) {
-          return;
-        }
-        double dis = TurfMeasurement.distance(com.mapbox.geojson
-          .Point.fromLngLat(point.getLongitude(),
-            point.getLatitude()), pointAlong, TurfConstants.UNIT_METERS);
+    com.mapbox.geojson.Point clickPoint
+      = com.mapbox.geojson.Point.fromLngLat(point.getLongitude(), point.getLatitude());
 
-        if (dis <= ROUTE_CLICK_PADDING) {
-          // Set the new primary route index
-          primaryRouteIndex = featureCollection.getFeatures()
-            .get(0).getNumberProperty(INDEX_KEY).intValue();
-
-          // If the new index is different from the current index, break the loop
-          if (primaryRouteIndex != currentRouteIndex) {
-            break;
-          }
-        }
-      }
+    if (calculateClickDistancesFromRoutes(routeDistancesAwayFromClick, clickPoint)) {
+      return;
     }
+
+    List<Double> distancesAwayFromClick = new ArrayList<>(routeDistancesAwayFromClick.keySet());
+    Collections.sort(distancesAwayFromClick);
+
+    // Get the route with corresponding shortest distance
+    DirectionsRoute clickedRoute = routeDistancesAwayFromClick.get(distancesAwayFromClick.get(0));
+    primaryRouteIndex = directionsRoutes.indexOf(clickedRoute);
 
     // If the current index has changed from the primary, update the route and listener
     if (currentRouteIndex != primaryRouteIndex) {
@@ -649,18 +641,30 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     }
   }
 
-  @SuppressWarnings("unchecked")
-  private static List<com.mapbox.geojson.Point> calculateLinePoints(
-    FeatureCollection featureCollection) {
-    List<com.mapbox.geojson.Point> linePoints = new ArrayList<>();
-    for (Feature feature : featureCollection.getFeatures()) {
-      List<Position> positions = (List<Position>) feature.getGeometry().getCoordinates();
+  private boolean calculateClickDistancesFromRoutes(HashMap<Double, DirectionsRoute> routeDistancesAwayFromClick,
+                                                    com.mapbox.geojson.Point clickPoint) {
+    for (LineString lineString : routeLineStrings.keySet()) {
+
+      // Convert Positions to Points (will be removed with MAS 3.0)
+      List<com.mapbox.geojson.Point> linePoints = new ArrayList<>();
+      List<Position> positions = lineString.getCoordinates();
       for (Position pos : positions) {
-        linePoints.add(com.mapbox.geojson
-          .Point.fromLngLat(pos.getLongitude(), pos.getLatitude()));
+        linePoints.add(com.mapbox.geojson.Point.fromLngLat(pos.getLongitude(), pos.getLatitude()));
       }
+
+      com.mapbox.geojson.Feature feature = TurfMisc.pointOnLine(clickPoint, linePoints);
+      com.mapbox.geojson.Point pointOnLine = (com.mapbox.geojson.Point) feature.geometry();
+
+      if (pointOnLine == null) {
+        return true;
+      }
+
+      double distance = TurfMeasurement.distance(clickPoint, pointOnLine, TurfConstants.UNIT_METERS);
+
+      // Put the current route and corresponding distance away from click into the map
+      routeDistancesAwayFromClick.put(distance, routeLineStrings.get(lineString));
     }
-    return linePoints;
+    return false;
   }
 
   private void updateRoute() {
@@ -719,7 +723,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    * the source into pieces so data-driven styling can be used to change the route colors
    * accordingly.
    */
-  private static FeatureCollection addTrafficToSource(DirectionsRoute route, int index) {
+  private FeatureCollection addTrafficToSource(DirectionsRoute route, int index) {
     final List<Feature> features = new ArrayList<>();
     LineString originalGeometry = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
     Feature feat = Feature.fromGeometry(originalGeometry);
@@ -727,6 +731,9 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       index));
     feat.addNumberProperty(INDEX_KEY, index);
     features.add(feat);
+
+    // Store geometry and corresponding route for click logic
+    routeLineStrings.put(originalGeometry, route);
 
     LineString lineString = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
     for (RouteLeg leg : route.legs()) {
