@@ -69,6 +69,8 @@ import java.util.List;
  */
 public class InstructionView extends RelativeLayout implements FeedbackBottomSheetListener {
 
+  private static final double VALID_DURATION_REMAINING = 70d;
+
   public boolean isMuted;
   private ManeuverView upcomingManeuverView;
   private TextView upcomingDistanceText;
@@ -674,12 +676,18 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     String maneuverViewModifier = model.getStepResources().getManeuverViewModifier();
     double durationRemaining = model.getProgress().currentLegProgress().currentStepProgress().durationRemaining();
 
-    if (turnLanes != null && !TextUtils.isEmpty(maneuverViewModifier) && durationRemaining <= 70d) {
+    if (shouldShowTurnLanes(turnLanes, maneuverViewModifier, durationRemaining)) {
       turnLaneAdapter.addTurnLanes(turnLanes, maneuverViewModifier);
       showTurnLanes();
     } else {
       hideTurnLanes();
     }
+  }
+
+  private boolean shouldShowTurnLanes(List<IntersectionLanes> turnLanes,
+                                      String maneuverViewModifier, double durationRemaining) {
+    return turnLanes != null && !TextUtils.isEmpty(maneuverViewModifier)
+      && durationRemaining <= VALID_DURATION_REMAINING;
   }
 
   /**
