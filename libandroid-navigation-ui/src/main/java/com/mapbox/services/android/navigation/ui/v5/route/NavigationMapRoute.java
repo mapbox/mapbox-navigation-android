@@ -607,16 +607,18 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
 
   @Override
   public void onMapClick(@NonNull LatLng point) {
+
     if (routeLineStrings == null || routeLineStrings.isEmpty() || !alternativesVisible) {
       return;
     }
-    // Cache current route index
-    int currentRouteIndex = primaryRouteIndex;
 
     HashMap<Double, DirectionsRoute> routeDistancesAwayFromClick = new HashMap<>();
 
     com.mapbox.geojson.Point clickPoint
       = com.mapbox.geojson.Point.fromLngLat(point.getLongitude(), point.getLatitude());
+
+    // Cache current route index
+    final int currentRouteIndex = primaryRouteIndex;
 
     if (calculateClickDistancesFromRoutes(routeDistancesAwayFromClick, clickPoint)) {
       return;
