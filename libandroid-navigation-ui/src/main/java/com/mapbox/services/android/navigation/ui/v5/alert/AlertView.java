@@ -35,7 +35,7 @@ public class AlertView extends CardView {
 
   private Animation fadeOut;
   private Animation slideDownTop;
-  private  ObjectAnimator countdownAnimation;
+  private ObjectAnimator countdownAnimation;
 
   public AlertView(Context context) {
     this(context, null);
