@@ -132,12 +132,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   @Override
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
-    // Attach the listener to the FeedbackBottomSheet if it is showing
-    FragmentManager mgr = ((FragmentActivity) getContext()).getSupportFragmentManager();
-    FeedbackBottomSheet feedbackBottomSheet = (FeedbackBottomSheet) mgr.findFragmentByTag(FeedbackBottomSheet.TAG);
-    if (feedbackBottomSheet != null) {
-      feedbackBottomSheet.setFeedbackBottomSheetListener(this);
-    }
+    addBottomSheetListener();
   }
 
   @Override
@@ -526,6 +521,14 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     fadeInSlowOut = new AnimationSet(false);
     fadeInSlowOut.addAnimation(fadeIn);
     fadeInSlowOut.addAnimation(fadeOut);
+  }
+
+  private void addBottomSheetListener() {
+    FragmentManager mgr = ((FragmentActivity) getContext()).getSupportFragmentManager();
+    FeedbackBottomSheet feedbackBottomSheet = (FeedbackBottomSheet) mgr.findFragmentByTag(FeedbackBottomSheet.TAG);
+    if (feedbackBottomSheet != null) {
+      feedbackBottomSheet.setFeedbackBottomSheetListener(this);
+    }
   }
 
   private void initClickListeners() {

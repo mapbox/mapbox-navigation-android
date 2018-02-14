@@ -96,19 +96,9 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
 
   @Override
   public void onDestroyView() {
-    // Prevent listener leak
-    feedbackBottomSheetListener = null;
-
-    // Maintains visibility on rotation
-    Dialog dialog = getDialog();
-    if (dialog != null && getRetainInstance()) {
-      dialog.setDismissMessage(null);
-    }
-    // Cancel the animation
-    if (countdownAnimation != null) {
-      countdownAnimation.removeAllListeners();
-      countdownAnimation.cancel();
-    }
+    removeListener();
+    removeDialogDismissMessage();
+    cancelCountdownAnimation();
     super.onDestroyView();
   }
 
@@ -194,6 +184,24 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
       LayerDrawable progressBarBackground = (LayerDrawable) feedbackProgressBar.getProgressDrawable();
       Drawable progressDrawable = progressBarBackground.getDrawable(1);
       progressDrawable.setColorFilter(navigationViewSecondaryColor, PorterDuff.Mode.SRC_IN);
+    }
+  }
+
+  private void removeListener() {
+    feedbackBottomSheetListener = null;
+  }
+
+  private void removeDialogDismissMessage() {
+    Dialog dialog = getDialog();
+    if (dialog != null && getRetainInstance()) {
+      dialog.setDismissMessage(null);
+    }
+  }
+
+  private void cancelCountdownAnimation() {
+    if (countdownAnimation != null) {
+      countdownAnimation.removeAllListeners();
+      countdownAnimation.cancel();
     }
   }
 }
