@@ -290,7 +290,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     beginDelayedTransition();
     int orientation = getContext().getResources().getConfiguration().orientation;
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      updateLandscapeConstraints(R.layout.instruction_layout);
+      updateLandscapeConstraintsTo(R.layout.instruction_layout);
     }
     instructionListLayout.setVisibility(GONE);
   }
@@ -305,7 +305,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     beginDelayedTransition();
     int orientation = getContext().getResources().getConfiguration().orientation;
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      updateLandscapeConstraints(R.layout.instruction_layout_alt);
+      updateLandscapeConstraintsTo(R.layout.instruction_layout_alt);
     }
     instructionListLayout.setVisibility(VISIBLE);
     rvInstructions.scrollToPosition(TOP);
@@ -781,9 +781,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     }
   }
 
-  private void updateLandscapeConstraints(int newLayoutResId) {
+  private void updateLandscapeConstraintsTo(int layoutRes) {
     ConstraintSet collapsed = new ConstraintSet();
-    collapsed.clone(getContext(), newLayoutResId);
+    collapsed.clone(getContext(), layoutRes);
     collapsed.applyTo(instructionLayout);
   }
 
