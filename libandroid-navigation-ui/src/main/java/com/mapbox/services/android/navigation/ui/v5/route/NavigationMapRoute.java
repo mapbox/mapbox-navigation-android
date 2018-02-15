@@ -610,13 +610,11 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     if (invalidMapClick()) {
       return;
     }
-
     final int currentRouteIndex = primaryRouteIndex;
 
     if (findClickedRoute(point)) {
       return;
     }
-
     checkNewRouteFound(currentRouteIndex);
   }
 
@@ -633,7 +631,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     if (calculateClickDistancesFromRoutes(routeDistancesAwayFromClick, clickPoint)) {
       return true;
     }
-
     List<Double> distancesAwayFromClick = new ArrayList<>(routeDistancesAwayFromClick.keySet());
     Collections.sort(distancesAwayFromClick);
 
@@ -645,16 +642,12 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private boolean calculateClickDistancesFromRoutes(HashMap<Double, DirectionsRoute> routeDistancesAwayFromClick,
                                                     com.mapbox.geojson.Point clickPoint) {
     for (LineString lineString : routeLineStrings.keySet()) {
-
       com.mapbox.geojson.Point pointOnLine = findPointOnLine(clickPoint, lineString);
 
       if (pointOnLine == null) {
         return true;
       }
-
       double distance = TurfMeasurement.distance(clickPoint, pointOnLine, TurfConstants.UNIT_METERS);
-
-      // Put the current route and corresponding distance away from click into the map
       routeDistancesAwayFromClick.put(distance, routeLineStrings.get(lineString));
     }
     return false;
@@ -741,8 +734,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     final List<Feature> features = new ArrayList<>();
     LineString originalGeometry = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
     buildRouteFeatureFromGeometry(index, features, originalGeometry);
-
-    // Store geometry and corresponding route for click logic
     routeLineStrings.put(originalGeometry, route);
 
     LineString lineString = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
