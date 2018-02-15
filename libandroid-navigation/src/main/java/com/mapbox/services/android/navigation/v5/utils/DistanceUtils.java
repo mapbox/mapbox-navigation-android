@@ -50,7 +50,9 @@ public class DistanceUtils {
     numberFormat = NumberFormat.getNumberInstance(locale);
 
     if (unitType == NavigationUnitType.NONE_SPECIFIED) {
-      unitType = LocaleUtils.getUnitTypeForLocale(locale.getCountry() == null ? LocaleUtils.getDeviceLocale(context) : locale);
+      // If given locale does not include a country, use the device locale to get the default unitType
+      unitType = LocaleUtils.getUnitTypeForLocale(
+        locale.getCountry() == null ? LocaleUtils.getDeviceLocale(context) : locale);
     }
 
     largeUnit = unitType == NavigationUnitType.TYPE_IMPERIAL ? UNIT_MILES : UNIT_KILOMETERS;
