@@ -607,55 +607,46 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
 
   @Override
   public void onMapClick(@NonNull LatLng point) {
-
-    if (routeLineStrings == null || routeLineStrings.isEmpty() || !alternativesVisible) {
+    if (invalidMapClick()) {
       return;
     }
 
+    final int currentRouteIndex = primaryRouteIndex;
+
+    if (findClickedRoute(point)) {
+      return;
+    }
+
+    checkNewRouteFound(currentRouteIndex);
+  }
+
+  private boolean invalidMapClick() {
+    return routeLineStrings == null || routeLineStrings.isEmpty() || !alternativesVisible;
+  }
+
+  private boolean findClickedRoute(@NonNull LatLng point) {
     HashMap<Double, DirectionsRoute> routeDistancesAwayFromClick = new HashMap<>();
 
     com.mapbox.geojson.Point clickPoint
       = com.mapbox.geojson.Point.fromLngLat(point.getLongitude(), point.getLatitude());
 
-    // Cache current route index
-    final int currentRouteIndex = primaryRouteIndex;
-
     if (calculateClickDistancesFromRoutes(routeDistancesAwayFromClick, clickPoint)) {
-      return;
+      return true;
     }
 
     List<Double> distancesAwayFromClick = new ArrayList<>(routeDistancesAwayFromClick.keySet());
     Collections.sort(distancesAwayFromClick);
 
-    // Get the route with corresponding shortest distance
     DirectionsRoute clickedRoute = routeDistancesAwayFromClick.get(distancesAwayFromClick.get(0));
     primaryRouteIndex = directionsRoutes.indexOf(clickedRoute);
-
-    // If the current index has changed from the primary, update the route and listener
-    if (currentRouteIndex != primaryRouteIndex) {
-      // Update the route and waypoints
-      updateRoute();
-      // Update the listener with the new route
-      if (onRouteSelectionChangeListener != null) {
-        onRouteSelectionChangeListener.onNewPrimaryRouteSelected(
-          directionsRoutes.get(primaryRouteIndex));
-      }
-    }
+    return false;
   }
 
   private boolean calculateClickDistancesFromRoutes(HashMap<Double, DirectionsRoute> routeDistancesAwayFromClick,
                                                     com.mapbox.geojson.Point clickPoint) {
     for (LineString lineString : routeLineStrings.keySet()) {
 
-      // Convert Positions to Points (will be removed with MAS 3.0)
-      List<com.mapbox.geojson.Point> linePoints = new ArrayList<>();
-      List<Position> positions = lineString.getCoordinates();
-      for (Position pos : positions) {
-        linePoints.add(com.mapbox.geojson.Point.fromLngLat(pos.getLongitude(), pos.getLatitude()));
-      }
-
-      com.mapbox.geojson.Feature feature = TurfMisc.pointOnLine(clickPoint, linePoints);
-      com.mapbox.geojson.Point pointOnLine = (com.mapbox.geojson.Point) feature.geometry();
+      com.mapbox.geojson.Point pointOnLine = findPointOnLine(clickPoint, lineString);
 
       if (pointOnLine == null) {
         return true;
@@ -667,6 +658,27 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       routeDistancesAwayFromClick.put(distance, routeLineStrings.get(lineString));
     }
     return false;
+  }
+
+  private com.mapbox.geojson.Point findPointOnLine(com.mapbox.geojson.Point clickPoint, LineString lineString) {
+    List<com.mapbox.geojson.Point> linePoints = new ArrayList<>();
+    List<Position> positions = lineString.getCoordinates();
+    for (Position pos : positions) {
+      linePoints.add(com.mapbox.geojson.Point.fromLngLat(pos.getLongitude(), pos.getLatitude()));
+    }
+
+    com.mapbox.geojson.Feature feature = TurfMisc.pointOnLine(clickPoint, linePoints);
+    return (com.mapbox.geojson.Point) feature.geometry();
+  }
+
+  private void checkNewRouteFound(int currentRouteIndex) {
+    if (currentRouteIndex != primaryRouteIndex) {
+      updateRoute();
+      if (onRouteSelectionChangeListener != null) {
+        onRouteSelectionChangeListener.onNewPrimaryRouteSelected(
+          directionsRoutes.get(primaryRouteIndex));
+      }
+    }
   }
 
   private void updateRoute() {
@@ -728,16 +740,26 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private FeatureCollection addTrafficToSource(DirectionsRoute route, int index) {
     final List<Feature> features = new ArrayList<>();
     LineString originalGeometry = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
-    Feature feat = Feature.fromGeometry(originalGeometry);
-    feat.addStringProperty(SOURCE_KEY, String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_SOURCE_ID,
-      index));
-    feat.addNumberProperty(INDEX_KEY, index);
-    features.add(feat);
+    buildRouteFeatureFromGeometry(index, features, originalGeometry);
 
     // Store geometry and corresponding route for click logic
     routeLineStrings.put(originalGeometry, route);
 
     LineString lineString = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
+    buildTrafficFeaturesFromRoute(route, index, features, lineString);
+    return FeatureCollection.fromFeatures(features);
+  }
+
+  private void buildRouteFeatureFromGeometry(int index, List<Feature> features, LineString originalGeometry) {
+    Feature feat = Feature.fromGeometry(originalGeometry);
+    feat.addStringProperty(SOURCE_KEY, String.format(Locale.US, ID_FORMAT, GENERIC_ROUTE_SOURCE_ID,
+      index));
+    feat.addNumberProperty(INDEX_KEY, index);
+    features.add(feat);
+  }
+
+  private void buildTrafficFeaturesFromRoute(DirectionsRoute route, int index,
+                                             List<Feature> features, LineString lineString) {
     for (RouteLeg leg : route.legs()) {
       if (leg.annotation() != null && leg.annotation().congestion() != null) {
         for (int i = 0; i < leg.annotation().congestion().size(); i++) {
@@ -761,6 +783,5 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
         features.add(feature);
       }
     }
-    return FeatureCollection.fromFeatures(features);
   }
 }
