@@ -15,13 +15,16 @@ import java.util.Locale;
 
 class InstructionStepResources {
 
+  private static final double VALID_UPCOMING_DURATION = 25d * 1.2d;
+  private static final double VALID_CURRENT_DURATION = 70d;
+
   private SpannableString stepDistanceRemaining;
   private String maneuverViewModifier;
   private String maneuverViewType;
   private String thenStepManeuverModifier;
   private String thenStepManeuverType;
-  private boolean shouldShowThenStep;
   private List<IntersectionLanes> turnLanes;
+  private boolean shouldShowThenStep;
 
   InstructionStepResources(Context context, RouteProgress progress, Locale locale,
                            @NavigationUnitType.UnitType int unitType) {
@@ -101,8 +104,12 @@ class InstructionStepResources {
   private void thenStep(LegStep upcomingStep, LegStep followOnStep, double currentDurationRemaining) {
     thenStepManeuverType = followOnStep.maneuver().type();
     thenStepManeuverModifier = followOnStep.maneuver().modifier();
-    // Should show then step if the upcoming step is less than 25 seconds
-    shouldShowThenStep = upcomingStep.duration() <= (25d * 1.2d) && currentDurationRemaining <= (70d * 1.2d);
+    shouldShowThenStep = isValidStepDuration(upcomingStep, currentDurationRemaining);
+  }
+
+  private boolean isValidStepDuration(LegStep upcomingStep, double currentDurationRemaining) {
+    return upcomingStep.duration() <= VALID_UPCOMING_DURATION
+      && currentDurationRemaining <= VALID_CURRENT_DURATION;
   }
 
   private boolean checkForNoneIndications(List<IntersectionLanes> lanes) {
