@@ -91,7 +91,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private boolean locationFound;
   private boolean shouldSimulateRoute;
   private final List<Locale> locales = new ArrayList<>(
-    Arrays.asList(Locale.US, Locale.FRANCE, Locale.GERMANY));
+    Arrays.asList(Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN));
   private Locale locale;
 
   @Override
@@ -123,7 +123,6 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       }
     });
     locale = LocaleUtils.getDeviceLocale(this);
-    // check contains?
     spinner.setSelection(locales.indexOf(locale));
   }
 

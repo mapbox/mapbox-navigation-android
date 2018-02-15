@@ -95,7 +95,8 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
     int unitType = options.navigationOptions().unitType();
 
     if (unitType == NavigationUnitType.NONE_SPECIFIED) {
-      unitType = LocaleUtils.getUnitTypeForLocale(locale);
+      unitType = LocaleUtils.getUnitTypeForLocale(
+        locale.getCountry() == null ? LocaleUtils.getDeviceLocale(this.getApplication().getBaseContext()) : locale);
     }
     this.unitType = unitType == NavigationUnitType.TYPE_IMPERIAL
       ? DirectionsCriteria.IMPERIAL : DirectionsCriteria.METRIC;
