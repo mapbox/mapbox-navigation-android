@@ -9,7 +9,6 @@ import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.List;
 import java.util.Locale;
@@ -24,7 +23,8 @@ class InstructionStepResources {
   private boolean shouldShowThenStep;
   private List<IntersectionLanes> turnLanes;
 
-  InstructionStepResources(Context context, RouteProgress progress, Locale locale, @NavigationUnitType.UnitType int unitType) {
+  InstructionStepResources(Context context, RouteProgress progress, Locale locale,
+                           @NavigationUnitType.UnitType int unitType) {
     formatStepDistance(context, progress, locale, unitType);
     extractStepResources(progress);
   }

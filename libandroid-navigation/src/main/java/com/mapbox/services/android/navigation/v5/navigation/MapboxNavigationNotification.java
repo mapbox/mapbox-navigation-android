@@ -51,7 +51,8 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   MapboxNavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
-    this.distanceUtils = new DistanceUtils(context, mapboxNavigation.options().locale(), mapboxNavigation.options().unitType());
+    this.distanceUtils = new DistanceUtils(
+      context, mapboxNavigation.options().locale(), mapboxNavigation.options().unitType());
     initialize(context);
   }
 

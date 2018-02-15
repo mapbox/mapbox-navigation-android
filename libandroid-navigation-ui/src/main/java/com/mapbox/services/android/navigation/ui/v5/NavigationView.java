@@ -377,7 +377,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private void initLocale(NavigationViewOptions options) {
     locale = options.navigationOptions().locale();
     if (locale == null) {
-      LocaleUtils.getDeviceLocale(getContext());
+      locale = LocaleUtils.getDeviceLocale(getContext());
     }
     unitType = options.navigationOptions().unitType();
   }

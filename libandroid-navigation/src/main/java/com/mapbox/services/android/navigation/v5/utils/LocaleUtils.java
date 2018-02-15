@@ -30,9 +30,9 @@ public class LocaleUtils {
   }
 
   /**
-   *
-   * @param context
-   * @return
+   * Returns the device locale to default to if no locale was specified
+   * @param context to check configuration
+   * @return locale of device
    */
   public static Locale getDeviceLocale(Context context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

@@ -124,7 +124,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     bind();
     initBackground();
     initTurnLaneRecyclerView();
-    initDirectionsRecyclerView();
     initAnimations();
   }
 
@@ -151,6 +150,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   public void subscribe(NavigationViewModel navigationViewModel,
                         Locale locale, @NavigationUnitType.UnitType int unitType) {
     this.navigationViewModel = navigationViewModel;
+    this.locale = locale;
+    this.unitType = unitType;
     LifecycleOwner owner = (LifecycleOwner) getContext();
     navigationViewModel.instructionModel.observe(owner, new Observer<InstructionModel>() {
       @Override
@@ -186,6 +187,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
     // ViewModel set - click listeners can be set now
     initClickListeners();
+    initDirectionsRecyclerView();
   }
 
   /**

@@ -5,9 +5,6 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.text.TextUtils;
 
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
-
 import java.util.HashMap;
 import java.util.Locale;
 

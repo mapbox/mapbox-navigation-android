@@ -66,7 +66,6 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   public NavigationViewModel(Application application) {
     super(application);
     preferences = PreferenceManager.getDefaultSharedPreferences(application);
-    initVoiceInstructions(application);
     initConnectivityManager(application);
   }
 
@@ -221,6 +220,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    */
   void initializeNavigationOptions(Context context, MapboxNavigationOptions options) {
     initLocale(options);
+    initVoiceInstructions();
     initNavigation(context, options);
   }
 
@@ -255,11 +255,12 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
     }
     unitType = options.unitType();
   }
+
   /**
    * Initializes the {@link InstructionPlayer}.
    */
-  private void initVoiceInstructions(Application application) {
-    instructionPlayer = new NavigationInstructionPlayer(application.getBaseContext(),
+  private void initVoiceInstructions() {
+    instructionPlayer = new NavigationInstructionPlayer(this.getApplication().getBaseContext(),
       preferences.getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null), locale);
   }
 
@@ -333,7 +334,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   private void updateBannerInstruction(RouteProgress routeProgress, Milestone milestone) {
     if (milestone instanceof BannerInstructionMilestone) {
       bannerInstructionModel.setValue(
-        new BannerInstructionModel(getApplication(), (BannerInstructionMilestone) milestone, routeProgress, locale, unitType));
+        new BannerInstructionModel(
+          getApplication(), (BannerInstructionMilestone) milestone, routeProgress, locale, unitType));
     }
   }
 }

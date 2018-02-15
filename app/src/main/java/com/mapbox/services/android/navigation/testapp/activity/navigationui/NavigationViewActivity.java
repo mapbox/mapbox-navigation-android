@@ -91,7 +91,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private boolean locationFound;
   private boolean shouldSimulateRoute;
   private final List<Locale> locales = new ArrayList<>(
-    Arrays.asList(Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN));
+    Arrays.asList(Locale.US, Locale.FRANCE, Locale.GERMANY));
   private Locale locale;
 
   @Override
@@ -292,16 +292,16 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void launchNavigationWithRoute() {
-//    LocaleUtils.setLocale(this, locale);
     NavigationViewOptions.Builder optionsBuilder = NavigationViewOptions.builder()
-      .shouldSimulateRoute(shouldSimulateRoute);
+      .shouldSimulateRoute(shouldSimulateRoute)
+      .navigationOptions(MapboxNavigationOptions.builder().locale(locale).build());
     if (route != null) {
       if (route.routeOptions().language().equals(locale.getLanguage())) {
         optionsBuilder.directionsRoute(route);
       } else {
-        optionsBuilder.origin(currentLocation);
-        optionsBuilder.destination(destination);
-        optionsBuilder.navigationOptions(MapboxNavigationOptions.builder().locale(locale).build());
+        optionsBuilder
+          .origin(currentLocation)
+          .destination(destination);
       }
       NavigationLauncher.startNavigation(this, optionsBuilder.build());
     }
