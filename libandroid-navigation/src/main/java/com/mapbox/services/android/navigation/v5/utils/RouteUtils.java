@@ -79,6 +79,9 @@ public final class RouteUtils {
   /**
    * Given a {@link RouteProgress}, this method will calculate the remaining coordinates
    * along the given route based on total route coordinates and the progress remaining waypoints.
+   * <p>
+   * If the coordinate size is less than the remaining waypoints, this method
+   * will return null.
    *
    * @param routeProgress for route coordinates and remaining waypoints
    * @return list of remaining waypoints as {@link Point}s
@@ -95,7 +98,6 @@ public final class RouteUtils {
     if (coordinates.size() < routeProgress.remainingWaypoints()) {
       return null;
     }
-    // Remove any waypoints that have been passed
     coordinates.subList(0, routeProgress.remainingWaypoints()).clear();
     return coordinates;
   }

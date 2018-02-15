@@ -125,12 +125,9 @@ class NavigationViewSubscriber {
         if (offRouteEvent != null) {
           Point newOrigin = offRouteEvent.getNewOrigin();
           if (navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
-            // Send off route event with new origin
             navigationViewEventDispatcher.onOffRoute(newOrigin);
-            // Fetch a new route with the given origin
             routeViewModel.fetchRouteFromOffRouteEvent(offRouteEvent);
-            // To prevent from firing on rotation
-            navigationViewModel.offRouteEvent.setValue(null);
+            preventDuplicateOffRouteEvents(navigationViewModel);
           }
         }
       }
@@ -176,5 +173,9 @@ class NavigationViewSubscriber {
         }
       }
     });
+  }
+
+  private void preventDuplicateOffRouteEvents(NavigationViewModel navigationViewModel) {
+    navigationViewModel.offRouteEvent.setValue(null);
   }
 }

@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.route;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.RouteOptions;
@@ -34,29 +35,10 @@ public class RouteEngine implements Callback<DirectionsResponse> {
       return;
     }
     this.routeProgress = routeProgress;
-
-    // Calculate remaining waypoints
-    List<Point> waypoints = RouteUtils.calculateRemainingWaypoints(routeProgress);
-
-    if (waypoints == null) {
-      Timber.e("An error occurred fetching a new route");
-      return;
+    NavigationRoute.Builder builder = buildRouteRequestFromCurrentLocation(origin, null, routeProgress);
+    if (builder != null) {
+      builder.build().getRoute(this);
     }
-
-    // Get the destination waypoint (last in the list)
-    Point destination = waypoints.remove(waypoints.size() - 1);
-
-    // Build new route request with the given origin and current route options
-    RouteOptions currentOptions = routeProgress.directionsRoute().routeOptions();
-    NavigationRoute.Builder builder = NavigationRoute.builder()
-      .origin(origin)
-      .routeOptions(currentOptions);
-
-    // Add waypoints with the remaining coordinate values
-    addWaypoints(waypoints, builder);
-
-    builder.destination(destination);
-    builder.build().getRoute(this);
   }
 
   @Override
@@ -77,7 +59,36 @@ public class RouteEngine implements Callback<DirectionsResponse> {
     void onResponseReceived(Response<DirectionsResponse> response, RouteProgress routeProgress);
   }
 
-  private void addWaypoints(List<Point> remainingCoordinates, NavigationRoute.Builder builder) {
+  @Nullable
+  public static NavigationRoute.Builder buildRouteRequestFromCurrentLocation(Point origin, Double bearing,
+                                                                             RouteProgress progress) {
+    RouteOptions options = progress.directionsRoute().routeOptions();
+    NavigationRoute.Builder builder = NavigationRoute.builder()
+      .origin(origin, bearing, 90d)
+      .routeOptions(options);
+
+    List<Point> remainingWaypoints = RouteUtils.calculateRemainingWaypoints(progress);
+    if (remainingWaypoints == null) {
+      Timber.e("An error occurred fetching a new route");
+      return null;
+    }
+    addDestination(remainingWaypoints, builder);
+    addWaypoints(remainingWaypoints, builder);
+    return builder;
+  }
+
+  private static void addDestination(List<Point> remainingWaypoints, NavigationRoute.Builder builder) {
+    if (!remainingWaypoints.isEmpty()) {
+      builder.destination(retrieveDestinationWaypoint(remainingWaypoints));
+    }
+  }
+
+  private static Point retrieveDestinationWaypoint(List<Point> remainingWaypoints) {
+    int lastWaypoint = remainingWaypoints.size() - 1;
+    return remainingWaypoints.remove(lastWaypoint);
+  }
+
+  private static void addWaypoints(List<Point> remainingCoordinates, NavigationRoute.Builder builder) {
     if (!remainingCoordinates.isEmpty()) {
       for (Point coordinate : remainingCoordinates) {
         builder.addWaypoint(coordinate);

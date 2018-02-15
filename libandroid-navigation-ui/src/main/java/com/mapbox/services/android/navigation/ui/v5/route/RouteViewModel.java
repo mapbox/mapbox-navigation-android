@@ -17,7 +17,7 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.List;
 import java.util.Locale;
@@ -25,7 +25,8 @@ import java.util.Locale;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
+
+import static com.mapbox.services.android.navigation.v5.route.RouteEngine.buildRouteRequestFromCurrentLocation;
 
 public class RouteViewModel extends AndroidViewModel implements Callback<DirectionsResponse> {
 
@@ -99,30 +100,13 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
       if (rawLocation != null) {
         bearing = rawLocation.hasBearing() ? Float.valueOf(rawLocation.getBearing()).doubleValue() : null;
       }
-
-      NavigationRoute.Builder builder = NavigationRoute.builder()
-        .accessToken(Mapbox.getAccessToken())
-        .origin(offRouteEvent.getNewOrigin(), bearing, 90d);
-
-      // Set build options with cached configuration
-      builder.routeOptions(routeOptions);
-
-      // Calculate the remaining waypoints based on the route progress
-      List<Point> remainingWaypoints = RouteUtils.calculateRemainingWaypoints(offRouteEvent.getRouteProgress());
-      if (remainingWaypoints == null) {
-        Timber.e("An error occurred fetching a new route");
-        return;
+      Point origin = offRouteEvent.getNewOrigin();
+      RouteProgress progress = offRouteEvent.getRouteProgress();
+      NavigationRoute.Builder builder = buildRouteRequestFromCurrentLocation(origin, bearing, progress);
+      if (builder != null) {
+        addNavigationViewOptions(builder);
+        builder.build().getRoute(this);
       }
-
-      if (!remainingWaypoints.isEmpty()) {
-        builder.destination(remainingWaypoints.remove(remainingWaypoints.size() - 1));
-        addWaypoints(remainingWaypoints, builder);
-      }
-
-      // Add any overridden values based on NavigationViewOptions
-      addNavigationViewOptions(builder);
-
-      builder.build().getRoute(this);
     }
   }
 
@@ -131,9 +115,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
       .accessToken(Mapbox.getAccessToken())
       .origin(origin)
       .destination(destination);
-    // Add any overridden values based on NavigationViewOptions
     addNavigationViewOptions(builder);
-
     builder.build().getRoute(this);
   }
 
@@ -156,9 +138,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private void extractRouteFromOptions(NavigationViewOptions options) {
     DirectionsRoute route = options.directionsRoute();
     if (route != null) {
-      cacheRouteOptions(route.routeOptions());
-      cacheRouteProfile(options);
-      cacheRouteLanguage(options, route);
+      cacheRouteInformation(options, route);
       this.route.setValue(route);
     }
   }
@@ -179,9 +159,46 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
     }
   }
 
+  /**
+   * Checks if we have at least one {@link DirectionsRoute} in the given
+   * {@link DirectionsResponse}.
+   *
+   * @param response to be checked
+   * @return true if valid, false if not
+   */
+  private static boolean validRouteResponse(Response<DirectionsResponse> response) {
+    return response.body() != null
+      && !response.body().routes().isEmpty();
+  }
+
+  private void addNavigationViewOptions(NavigationRoute.Builder builder) {
+    if (routeProfile != null) {
+      builder.profile(routeProfile);
+    }
+    if (language != null) {
+      builder.language(language);
+    }
+  }
+
+  private void cacheRouteInformation(NavigationViewOptions options, DirectionsRoute route) {
+    cacheRouteOptions(route.routeOptions());
+    cacheRouteProfile(options);
+    cacheRouteLanguage(options, route);
+  }
+
   private void cacheRouteOptions(RouteOptions routeOptions) {
     this.routeOptions = routeOptions;
     cacheRouteDestination();
+  }
+
+  /**
+   * Looks for a route profile provided by {@link NavigationViewOptions} to be
+   * stored for reroute requests.
+   *
+   * @param options to look for set profile
+   */
+  private void cacheRouteProfile(NavigationViewOptions options) {
+    routeProfile = options.directionsProfile();
   }
 
   /**
@@ -194,16 +211,6 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
       Point destinationPoint = coordinates.get(coordinates.size() - 1);
       destination.setValue(destinationPoint);
     }
-  }
-
-  /**
-   * Looks for a route profile provided by {@link NavigationViewOptions} to be
-   * stored for reroute requests.
-   *
-   * @param options to look for set profile
-   */
-  private void cacheRouteProfile(NavigationViewOptions options) {
-    routeProfile = options.directionsProfile();
   }
 
   /**
@@ -220,35 +227,6 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
       language = new Locale(route.routeOptions().language());
     } else {
       language = Locale.getDefault();
-    }
-  }
-
-  /**
-   * Checks if we have at least one {@link DirectionsRoute} in the given
-   * {@link DirectionsResponse}.
-   *
-   * @param response to be checked
-   * @return true if valid, false if not
-   */
-  private boolean validRouteResponse(Response<DirectionsResponse> response) {
-    return response.body() != null
-      && !response.body().routes().isEmpty();
-  }
-
-  private void addWaypoints(List<Point> remainingCoordinates, NavigationRoute.Builder builder) {
-    if (!remainingCoordinates.isEmpty()) {
-      for (Point coordinate : remainingCoordinates) {
-        builder.addWaypoint(coordinate);
-      }
-    }
-  }
-
-  private void addNavigationViewOptions(NavigationRoute.Builder builder) {
-    if (routeProfile != null) {
-      builder.profile(routeProfile);
-    }
-    if (language != null) {
-      builder.language(language);
     }
   }
 }
