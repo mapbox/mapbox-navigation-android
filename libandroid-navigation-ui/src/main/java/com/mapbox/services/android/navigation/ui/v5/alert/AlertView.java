@@ -35,6 +35,7 @@ public class AlertView extends CardView {
 
   private Animation fadeOut;
   private Animation slideDownTop;
+  private ObjectAnimator countdownAnimation;
 
   public AlertView(Context context) {
     this(context, null);
@@ -55,6 +56,14 @@ public class AlertView extends CardView {
     bind();
     initAnimations();
     initBackground();
+  }
+
+  @Override
+  protected void onDetachedFromWindow() {
+    super.onDetachedFromWindow();
+    if (countdownAnimation != null) {
+      countdownAnimation.cancel();
+    }
   }
 
   /**
@@ -148,7 +157,7 @@ public class AlertView extends CardView {
   }
 
   private void startCountdown(long duration) {
-    ObjectAnimator countdownAnimation = ObjectAnimator.ofInt(alertProgressBar,
+    countdownAnimation = ObjectAnimator.ofInt(alertProgressBar,
       "progress", 0);
     countdownAnimation.setInterpolator(new LinearInterpolator());
     countdownAnimation.setDuration(duration);
