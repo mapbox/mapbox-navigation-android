@@ -18,6 +18,7 @@ import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
 import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 
@@ -51,8 +52,12 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   MapboxNavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
+    Locale locale = mapboxNavigation.options().locale();
+    if (locale == null) {
+      locale = LocaleUtils.getDeviceLocale(context);
+    }
     this.distanceUtils = new DistanceUtils(
-      context, mapboxNavigation.options().locale(), mapboxNavigation.options().unitType());
+      context, locale, mapboxNavigation.options().unitType());
     initialize(context);
   }
 
