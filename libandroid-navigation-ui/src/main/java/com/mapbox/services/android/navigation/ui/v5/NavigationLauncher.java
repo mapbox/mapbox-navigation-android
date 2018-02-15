@@ -57,8 +57,6 @@ public class NavigationLauncher {
 
     editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, locale.getLanguage());
     editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, locale.getCountry());
-
-
     editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, options.navigationOptions().unitType());
 
     setThemePreferences(options, editor);
