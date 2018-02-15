@@ -34,7 +34,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private Location rawLocation;
   private String routeProfile;
   private String unitType;
-  private Locale language;
+  private Locale locale;
 
   public RouteViewModel(@NonNull Application application) {
     super(application);
@@ -75,8 +75,9 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * @param options holds either a set of {@link Point} coordinates or a {@link DirectionsRoute}
    */
   public void extractRouteOptions(NavigationViewOptions options) {
-    updateUnitType(options.navigationOptions().unitType());
-    cacheLanguage(options);
+    extractLocale(options);
+    extractUnitType(options);
+
     if (launchWithRoute(options)) {
       extractRouteFromOptions(options);
     } else {
@@ -88,15 +89,16 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * Updates the request unit type based on what was set in
    * {@link NavigationViewOptions}.
    *
-   * @param unitType to be used for route requests
+   * @param options possibly containing unitType
    */
-  private void updateUnitType(int unitType) {
-    boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
-    if (isImperialUnitType) {
-      this.unitType = DirectionsCriteria.IMPERIAL;
-    } else {
-      this.unitType = DirectionsCriteria.METRIC;
+  private void extractUnitType(NavigationViewOptions options) {
+    int unitType = options.navigationOptions().unitType();
+
+    if (unitType == NavigationUnitType.NONE_SPECIFIED) {
+      unitType = LocaleUtils.getUnitTypeForLocale(locale);
     }
+    this.unitType = unitType == NavigationUnitType.TYPE_IMPERIAL ?
+      DirectionsCriteria.IMPERIAL : DirectionsCriteria.METRIC;
   }
 
   /**
@@ -132,7 +134,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
         .origin(origin, bearing, 90d)
         .voiceUnits(unitType)
         .profile(routeProfile)
-        .language(language)
+        .language(locale)
         .destination(destination).build().getRoute(this);
     }
   }
@@ -194,16 +196,16 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   }
 
   /**
-   * Looks for a route language provided by {@link NavigationViewOptions} to be
+   * Looks for a route locale provided by {@link NavigationViewOptions} to be
    * stored for reroute requests.
    *
-   * @param options to look for set language
+   * @param options to look for set locale
    */
-  private void cacheLanguage(NavigationViewOptions options) {
+  private void extractLocale(NavigationViewOptions options) {
     if (options.navigationOptions().locale() != null) {
-      language = options.navigationOptions().locale();
+      locale = options.navigationOptions().locale();
     } else {
-      language = LocaleUtils.getLocale(this.getApplication());
+      locale = LocaleUtils.getDeviceLocale(this.getApplication());
     }
   }
 

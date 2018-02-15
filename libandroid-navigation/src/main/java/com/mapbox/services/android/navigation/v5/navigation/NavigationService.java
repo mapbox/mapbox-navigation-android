@@ -23,6 +23,7 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Response;
 import timber.log.Timber;
@@ -54,6 +55,8 @@ public class NavigationService extends Service implements LocationEngineListener
   private RouteEngine routeEngine;
   private LocationEngine locationEngine;
   private NavigationEngine thread;
+  private Locale locale;
+  private @NavigationUnitType.UnitType int unitType;
 
   @Nullable
   @Override
@@ -180,6 +183,7 @@ public class NavigationService extends Service implements LocationEngineListener
   void startNavigation(MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
     initNotification(mapboxNavigation);
+    initLocale(mapboxNavigation);
     initRouteEngine(mapboxNavigation);
     acquireLocationEngine();
     forceLocationUpdate();
@@ -241,6 +245,16 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
+  private void initLocale(MapboxNavigation mapboxNavigation) {
+    locale = mapboxNavigation.options().locale();
+
+    if (locale == null) {
+      locale = LocaleUtils.getDeviceLocale(getApplicationContext());
+    }
+
+    unitType = mapboxNavigation.options().unitType();
+  }
+
   /**
    * Builds a new route engine which can be used to find faster routes
    * during a navigation session based on traffic.
@@ -251,7 +265,7 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   private void initRouteEngine(MapboxNavigation mapboxNavigation) {
     if (mapboxNavigation.options().enableFasterRouteDetection()) {
-      routeEngine = new RouteEngine(LocaleUtils.getLocale(getApplicationContext()), this);
+      routeEngine = new RouteEngine(locale, this);
     }
   }
 

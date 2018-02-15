@@ -116,15 +116,15 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       @Override
       public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
         locale = locales.get(position);
-        LocaleUtils.setLocale(NavigationViewActivity.this, locale);
       }
 
       @Override
       public void onNothingSelected(AdapterView<?> adapterView) {
       }
     });
-    locale = LocaleUtils.getLocale(this);
-    spinner.setSelection(locales.indexOf(LocaleUtils.getLocale(this)));
+    locale = LocaleUtils.getDeviceLocale(this);
+    // check contains?
+    spinner.setSelection(locales.indexOf(locale));
   }
 
   @SuppressWarnings( {"MissingPermission"})
@@ -292,7 +292,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void launchNavigationWithRoute() {
-    LocaleUtils.setLocale(this, locale);
+//    LocaleUtils.setLocale(this, locale);
     NavigationViewOptions.Builder optionsBuilder = NavigationViewOptions.builder()
       .shouldSimulateRoute(shouldSimulateRoute);
     if (route != null) {

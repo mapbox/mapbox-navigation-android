@@ -5,6 +5,7 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.text.TextUtils;
 
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.HashMap;
@@ -33,8 +34,8 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
    * @param context used to create an instance of {@link TextToSpeech}
    * @since 0.6.0
    */
-  DefaultPlayer(Context context) {
-    this.locale = LocaleUtils.getLocale(context);
+  DefaultPlayer(Context context, Locale locale) {
+    this.locale = locale;
     textToSpeech = new TextToSpeech(context, this);
     textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
       @Override

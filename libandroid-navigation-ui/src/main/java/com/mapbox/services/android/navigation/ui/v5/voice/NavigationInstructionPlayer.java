@@ -10,6 +10,9 @@ import android.text.TextUtils;
 
 import com.mapbox.services.android.navigation.ui.v5.voice.polly.PollyPlayer;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+
+import java.util.Locale;
 
 public class NavigationInstructionPlayer implements InstructionPlayer, InstructionListener {
 
@@ -18,15 +21,18 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
   private InstructionPlayer instructionPlayer;
   private InstructionListener instructionListener;
   private boolean isPollyPlayer;
+  private Locale locale;
+  private @NavigationUnitType.UnitType int unitType;
 
-  public NavigationInstructionPlayer(@NonNull Context context, @Nullable String awsPoolId) {
+  public NavigationInstructionPlayer(@NonNull Context context, @Nullable String awsPoolId,
+                                     Locale locale) {
     initAudioManager(context);
     initAudioFocusRequest();
     if (!TextUtils.isEmpty(awsPoolId)) {
-      instructionPlayer = new PollyPlayer(context, awsPoolId);
+      instructionPlayer = new PollyPlayer(context, awsPoolId, locale);
       isPollyPlayer = true;
     } else {
-      instructionPlayer = new DefaultPlayer(context);
+      instructionPlayer = new DefaultPlayer(context, locale);
     }
     instructionPlayer.addInstructionListener(this);
   }

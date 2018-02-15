@@ -42,9 +42,12 @@ import com.mapbox.services.android.navigation.ui.v5.utils.ViewUtils;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * View that creates the drop-in UI.
@@ -91,6 +94,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private boolean resumeState;
   private boolean isInitialized;
   private List<Marker> markers = new ArrayList<>();
+  private Locale locale;
+  private @NavigationUnitType.UnitType int unitType;
 
   public NavigationView(Context context) {
     this(context, null);
@@ -353,6 +358,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     clearMarkers();
     // Initialize navigation with options from NavigationViewOptions
     if (!isInitialized) {
+      initLocale(options);
       navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
         options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
       // Initialize the camera (listens to MapboxNavigation)
@@ -366,6 +372,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     // Update the view models
     locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
     routeViewModel.extractRouteOptions(options);
+  }
+
+  private void initLocale(NavigationViewOptions options) {
+    locale = options.navigationOptions().locale();
+    if (locale == null) {
+      LocaleUtils.getDeviceLocale(getContext());
+    }
+    unitType = options.navigationOptions().unitType();
   }
 
   /**
@@ -460,8 +474,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * method calls based on the {@link android.arch.lifecycle.LiveData} updates.
    */
   private void subscribeViewModels() {
-    instructionView.subscribe(navigationViewModel);
-    summaryBottomSheet.subscribe(navigationViewModel);
+    instructionView.subscribe(navigationViewModel, locale, unitType);
+    summaryBottomSheet.subscribe(navigationViewModel, locale, unitType);
 
     NavigationViewSubscriber subscriber = new NavigationViewSubscriber(navigationPresenter,
       navigationViewEventDispatcher);

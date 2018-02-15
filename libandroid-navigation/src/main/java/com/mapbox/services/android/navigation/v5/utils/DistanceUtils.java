@@ -10,6 +10,7 @@ import android.text.style.StyleSpan;
 
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.R;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfConversion;
@@ -37,15 +38,30 @@ public class DistanceUtils {
   /**
    * Creates a DistanceUtils object with information about how to format distances
    * @param context from which to get localized strings from
-   */
-  public DistanceUtils(Context context) {
+//   */
+//  public DistanceUtils(Context context) {
+//    unitStrings.put(UNIT_KILOMETERS, context.getString(R.string.kilometers));
+//    unitStrings.put(UNIT_METERS, context.getString(R.string.meters));
+//    unitStrings.put(UNIT_MILES, context.getString(R.string.miles));
+//    unitStrings.put(UNIT_FEET, context.getString(R.string.feet));
+//
+//    Locale locale = LocaleUtils.getLocale(context);
+//    int unitType = LocaleUtils.getUnitType(context, locale);
+//
+//    numberFormat = NumberFormat.getNumberInstance(locale);
+//
+//    largeUnit = unitType == TYPE_METRIC ? UNIT_KILOMETERS : UNIT_MILES;
+//    smallUnit = unitType == TYPE_METRIC ? UNIT_METERS : UNIT_FEET;
+//  }
+
+  public DistanceUtils(Context context, Locale locale, @NavigationUnitType.UnitType int unitType) {
     unitStrings.put(UNIT_KILOMETERS, context.getString(R.string.kilometers));
     unitStrings.put(UNIT_METERS, context.getString(R.string.meters));
     unitStrings.put(UNIT_MILES, context.getString(R.string.miles));
     unitStrings.put(UNIT_FEET, context.getString(R.string.feet));
 
-    Locale locale = LocaleUtils.getLocale(context);
-    int unitType = LocaleUtils.getUnitType(context, locale);
+//    Locale locale = LocaleUtils.getLocale(context);
+//    int unitType = LocaleUtils.getUnitType(context, locale);
 
     numberFormat = NumberFormat.getNumberInstance(locale);
 

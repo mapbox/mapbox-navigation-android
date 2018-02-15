@@ -12,7 +12,6 @@ import com.amazonaws.services.polly.AmazonPollyPresigningClient;
 import com.amazonaws.services.polly.model.VoiceId;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionListener;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,8 +44,8 @@ public class PollyPlayer implements InstructionPlayer {
    * @param context   to initialize {@link CognitoCachingCredentialsProvider} and {@link AudioManager}
    * @param awsPoolId to initialize {@link CognitoCachingCredentialsProvider}
    */
-  public PollyPlayer(Context context, String awsPoolId) {
-    this.voiceId = getVoiceId(LocaleUtils.getLocale(context));
+  public PollyPlayer(Context context, String awsPoolId, Locale locale) {
+    this.voiceId = getVoiceId(locale);
     initPollyClient(context, awsPoolId);
   }
 

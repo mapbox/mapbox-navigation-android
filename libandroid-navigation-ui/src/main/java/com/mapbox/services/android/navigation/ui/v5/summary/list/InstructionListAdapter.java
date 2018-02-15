@@ -14,11 +14,13 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class InstructionListAdapter extends RecyclerView.Adapter<InstructionViewHolder> {
   private List<LegStep> stepList;
@@ -26,9 +28,10 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   private LegStep currentStep;
   private DistanceUtils distanceUtils;
 
-  public InstructionListAdapter(Context context) {
+  public InstructionListAdapter(Context context,
+                                Locale locale, @NavigationUnitType.UnitType int unitType) {
     stepList = new ArrayList<>();
-    distanceUtils = new DistanceUtils(context);
+    distanceUtils = new DistanceUtils(context, locale, unitType);
   }
 
   @Override
