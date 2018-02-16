@@ -16,6 +16,7 @@ import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.text.DecimalFormat;
 import java.util.Locale;
@@ -38,7 +39,7 @@ public class SummaryBottomSheet extends FrameLayout {
   private ProgressBar rerouteProgressBar;
   private boolean isRerouting;
   private Locale locale;
-  private @NavigationUnitType.UnitType int unitType;
+  private @NavigationUnitType.UnitType int unitType = NavigationUnitType.NONE_SPECIFIED;
 
   public SummaryBottomSheet(Context context) {
     this(context, null);
@@ -64,10 +65,7 @@ public class SummaryBottomSheet extends FrameLayout {
     bind();
   }
 
-  public void subscribe(NavigationViewModel navigationViewModel,
-                        Locale locale, @NavigationUnitType.UnitType int unitType) {
-    this.locale = locale;
-    this.unitType = unitType;
+  public void subscribe(NavigationViewModel navigationViewModel) {
     navigationViewModel.summaryModel.observe((LifecycleOwner) getContext(), new Observer<SummaryModel>() {
       @Override
       public void onChanged(@Nullable SummaryModel summaryModel) {
@@ -103,6 +101,7 @@ public class SummaryBottomSheet extends FrameLayout {
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
+      verifyLocale();
       SummaryModel model = new SummaryModel(getContext(), routeProgress, locale, unitType);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
@@ -156,5 +155,19 @@ public class SummaryBottomSheet extends FrameLayout {
     arrivalTimeText.setText(EMPTY_STRING);
     timeRemainingText.setText(EMPTY_STRING);
     distanceRemainingText.setText(EMPTY_STRING);
+  }
+
+  public void setLocale(Locale locale) {
+    this.locale = locale;
+  }
+
+  public void setUnitType(@NavigationUnitType.UnitType int unitType) {
+    this.unitType = unitType;
+  }
+
+  private void verifyLocale() {
+    if (locale == null) {
+      locale = LocaleUtils.getDeviceLocale(getContext());
+    }
   }
 }

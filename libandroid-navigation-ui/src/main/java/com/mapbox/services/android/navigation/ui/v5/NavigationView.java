@@ -94,8 +94,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private boolean resumeState;
   private boolean isInitialized;
   private List<Marker> markers = new ArrayList<>();
-  private Locale locale;
-  private @NavigationUnitType.UnitType int unitType;
 
   public NavigationView(Context context) {
     this(context, null);
@@ -358,7 +356,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     clearMarkers();
     // Initialize navigation with options from NavigationViewOptions
     if (!isInitialized) {
-      initLocale(options);
+      setLocale(options);
       navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
         options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
       // Initialize the camera (listens to MapboxNavigation)
@@ -374,12 +372,17 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     routeViewModel.extractRouteOptions(options);
   }
 
-  private void initLocale(NavigationViewOptions options) {
-    locale = options.navigationOptions().locale();
+  private void setLocale(NavigationViewOptions options) {
+    Locale locale = options.navigationOptions().locale();
     if (locale == null) {
       locale = LocaleUtils.getDeviceLocale(getContext());
     }
-    unitType = options.navigationOptions().unitType();
+    @NavigationUnitType.UnitType int unitType = options.navigationOptions().unitType();
+
+    instructionView.setLocale(locale);
+    instructionView.setUnitType(unitType);
+    summaryBottomSheet.setLocale(locale);
+    summaryBottomSheet.setUnitType(unitType);
   }
 
   /**
@@ -474,8 +477,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * method calls based on the {@link android.arch.lifecycle.LiveData} updates.
    */
   private void subscribeViewModels() {
-    instructionView.subscribe(navigationViewModel, locale, unitType);
-    summaryBottomSheet.subscribe(navigationViewModel, locale, unitType);
+    instructionView.subscribe(navigationViewModel);
+    summaryBottomSheet.subscribe(navigationViewModel);
 
     NavigationViewSubscriber subscriber = new NavigationViewSubscriber(navigationPresenter,
       navigationViewEventDispatcher);

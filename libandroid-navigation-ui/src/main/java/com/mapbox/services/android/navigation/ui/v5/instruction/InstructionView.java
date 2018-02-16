@@ -52,6 +52,7 @@ import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEven
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.List;
 import java.util.Locale;
@@ -101,8 +102,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private LegStep currentStep;
   private NavigationViewModel navigationViewModel;
   private boolean isRerouting;
+
   private Locale locale;
-  private @NavigationUnitType.UnitType int unitType;
+  private @NavigationUnitType.UnitType int unitType = NavigationUnitType.NONE_SPECIFIED;
   private boolean isMuted;
 
   public InstructionView(Context context) {
@@ -159,11 +161,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param navigationViewModel to which this View is subscribing
    * @since 0.6.2
    */
-  public void subscribe(NavigationViewModel navigationViewModel,
-                        Locale locale, @NavigationUnitType.UnitType int unitType) {
+  public void subscribe(NavigationViewModel navigationViewModel) {
     this.navigationViewModel = navigationViewModel;
-    this.locale = locale;
-    this.unitType = unitType;
     LifecycleOwner owner = (LifecycleOwner) getContext();
     navigationViewModel.instructionModel.observe(owner, new Observer<InstructionModel>() {
       @Override
@@ -212,10 +211,17 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
+      verifyLocale();
       InstructionModel model =
         new InstructionModel(getContext(), routeProgress, locale, unitType);
       updateViews(model);
       updateTextInstruction(model);
+    }
+  }
+
+  private void verifyLocale() {
+    if (locale == null) {
+      locale = LocaleUtils.getDeviceLocale(getContext());
     }
   }
 
@@ -485,6 +491,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
   private void initDirectionsRecyclerView() {
+    verifyLocale();
     instructionListAdapter = new InstructionListAdapter(getContext(), locale, unitType);
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
@@ -802,5 +809,13 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void updateInstructionList(InstructionModel model) {
     instructionListAdapter.updateSteps(model.getProgress());
+  }
+
+  public void setLocale(Locale locale) {
+    this.locale = locale;
+  }
+
+  public void setUnitType(@NavigationUnitType.UnitType int unitType) {
+    this.unitType = unitType;
   }
 }
