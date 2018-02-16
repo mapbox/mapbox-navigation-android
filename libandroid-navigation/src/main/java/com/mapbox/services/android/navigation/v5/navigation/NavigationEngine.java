@@ -93,7 +93,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
     final Location rawLocation = newLocationModel.location();
 
     // Generate a new route progress given the raw location update
-    RouteProgress routeProgress = generateNewRouteProgress(mapboxNavigation, rawLocation, recentDistances);
+    RouteProgress routeProgress = buildNewRouteProgress(mapboxNavigation, rawLocation, recentDistances);
 
     // Check if user has gone off-route
     final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress, this);
@@ -106,12 +106,8 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
       previousRouteProgress, routeProgress, mapboxNavigation);
 
     // Create snapped location if enabled, otherwise return raw location
-    final Location location;
-    if (!userOffRoute && snapToRouteEnabled) {
-      location = getSnappedLocation(mapboxNavigation, rawLocation, routeProgress, stepPoints);
-    } else {
-      location = rawLocation;
-    }
+    final Location location = buildSnappedLocation(mapboxNavigation, snapToRouteEnabled,
+      rawLocation, routeProgress, userOffRoute);
 
     // Check for faster route only if enabled and not off-route
     boolean fasterRouteEnabled = mapboxNavigation.options().enableFasterRouteDetection();
@@ -146,9 +142,8 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
    * @param recentDistances  for advancing the step index
    * @return new route progress along the route
    */
-  private RouteProgress generateNewRouteProgress(MapboxNavigation mapboxNavigation, Location location,
-                                                 RingBuffer recentDistances) {
-
+  private RouteProgress buildNewRouteProgress(MapboxNavigation mapboxNavigation, Location location,
+                                              RingBuffer recentDistances) {
     DirectionsRoute directionsRoute = mapboxNavigation.getRoute();
     MapboxNavigationOptions options = mapboxNavigation.options();
     double completionOffset = options.maxTurnCompletionOffset();
@@ -198,6 +193,17 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
       advanceStepIndex(route, recentDistances);
       shouldIncreaseStepIndex = false;
     }
+  }
+
+  private Location buildSnappedLocation(MapboxNavigation mapboxNavigation, boolean snapToRouteEnabled,
+                                        Location rawLocation, RouteProgress routeProgress, boolean userOffRoute) {
+    final Location location;
+    if (!userOffRoute && snapToRouteEnabled) {
+      location = getSnappedLocation(mapboxNavigation, rawLocation, routeProgress, stepPoints);
+    } else {
+      location = rawLocation;
+    }
+    return location;
   }
 
   /**

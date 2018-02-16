@@ -57,9 +57,7 @@ public class OffRouteDetector extends OffRoute {
     double distanceFromCurrentStep = userTrueDistanceFromStep(currentPoint, currentStep);
 
     // Create off-route radius from the max of our dynamic or accuracy based tolerances
-    double dynamicTolerance = dynamicRerouteDistanceTolerance(currentPoint, routeProgress);
-    double accuracyTolerance = location.getAccuracy() * options.deadReckoningTimeInterval();
-    double offRouteRadius = Math.max(dynamicTolerance, accuracyTolerance);
+    double offRouteRadius = createOffRouteRadius(location, routeProgress, options, currentPoint);
 
     // Off route if this distance is greater than our offRouteRadius
     boolean isOffRoute = distanceFromCurrentStep > offRouteRadius;
@@ -68,11 +66,7 @@ public class OffRouteDetector extends OffRoute {
     if (!isOffRoute) {
       // Even though the current point is not considered off-route, check to see if the user is
       // moving away from the maneuver.
-      if (movingAwayFromManeuver(routeProgress, distancesAwayFromManeuver, currentPoint)) {
-        updateLastReroutePoint(location);
-        return true;
-      }
-      return false;
+      return isMovingAwayFromManeuver(location, routeProgress, distancesAwayFromManeuver, currentPoint);
     }
 
     // If the user is considered off-route at this point, but they are close to the upcoming step,
@@ -109,6 +103,22 @@ public class OffRouteDetector extends OffRoute {
       updateLastReroutePoint(location);
     }
     return distanceFromLastReroute > options.minimumDistanceBeforeRerouting();
+  }
+
+  private double createOffRouteRadius(Location location, RouteProgress routeProgress,
+                                      MapboxNavigationOptions options, Point currentPoint) {
+    double dynamicTolerance = dynamicRerouteDistanceTolerance(currentPoint, routeProgress);
+    double accuracyTolerance = location.getAccuracy() * options.deadReckoningTimeInterval();
+    return Math.max(dynamicTolerance, accuracyTolerance);
+  }
+
+  private boolean isMovingAwayFromManeuver(Location location, RouteProgress routeProgress,
+                                           RingBuffer<Integer> distancesAwayFromManeuver, Point currentPoint) {
+    if (movingAwayFromManeuver(routeProgress, distancesAwayFromManeuver, currentPoint)) {
+      updateLastReroutePoint(location);
+      return true;
+    }
+    return false;
   }
 
   /**

@@ -133,7 +133,6 @@ class NavigationHelper {
    */
   static boolean checkBearingForStepCompletion(Location userLocation, RouteProgress previousRouteProgress,
                                                double stepDistanceRemaining, double maxTurnCompletionOffset) {
-
     if (previousRouteProgress.currentLegProgress().upComingStep() == null) {
       return false;
     }
