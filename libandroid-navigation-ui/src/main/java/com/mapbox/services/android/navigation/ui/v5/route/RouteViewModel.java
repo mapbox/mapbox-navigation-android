@@ -17,7 +17,9 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.List;
 import java.util.Locale;
@@ -36,7 +38,8 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private Location rawLocation;
   private RouteOptions routeOptions;
   private String routeProfile;
-  private Locale language;
+  private String unitType;
+  private Locale locale;
 
   public RouteViewModel(@NonNull Application application) {
     super(application);
@@ -77,11 +80,24 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * @param options holds either a set of {@link Point} coordinates or a {@link DirectionsRoute}
    */
   public void extractRouteOptions(NavigationViewOptions options) {
+    extractLocale(options);
+    extractUnitType(options);
+
     if (launchWithRoute(options)) {
       extractRouteFromOptions(options);
     } else {
       extractCoordinatesFromOptions(options);
     }
+  }
+
+  /**
+   * Updates the request unit type based on what was set in
+   * {@link NavigationViewOptions}.
+   *
+   * @param options possibly containing unitType
+   */
+  private void extractUnitType(NavigationViewOptions options) {
+    unitType = NavigationUnitType.getDirectionsCriteriaUnitType(options.navigationOptions().unitType());
   }
 
   /**
@@ -175,9 +191,9 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
     if (routeProfile != null) {
       builder.profile(routeProfile);
     }
-    if (language != null) {
-      builder.language(language);
-    }
+    builder
+      .language(locale)
+      .voiceUnits(unitType);
   }
 
   private void cacheRouteInformation(NavigationViewOptions options, DirectionsRoute route) {
@@ -215,19 +231,22 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   }
 
   /**
-   * Looks for a route language provided by {@link NavigationViewOptions} to be
+   * Looks for a route locale provided by {@link NavigationViewOptions} to be
    * stored for reroute requests.
    *
-   * @param options to look for set language
-   * @param route   as backup if view options language not found
+   * @param options to look for set locale
    */
+  private void extractLocale(NavigationViewOptions options) {
+    locale = LocaleUtils.getNonNullLocale(this.getApplication(), options.navigationOptions().locale());
+  }
+
   private void cacheRouteLanguage(NavigationViewOptions options, @Nullable DirectionsRoute route) {
     if (options.navigationOptions().locale() != null) {
-      language = options.navigationOptions().locale();
+      locale = options.navigationOptions().locale();
     } else if (route != null && !TextUtils.isEmpty(route.routeOptions().language())) {
-      language = new Locale(route.routeOptions().language());
+      locale = new Locale(route.routeOptions().language());
     } else {
-      language = Locale.getDefault();
+      locale = Locale.getDefault();
     }
   }
 }

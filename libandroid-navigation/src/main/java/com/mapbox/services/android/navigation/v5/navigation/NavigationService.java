@@ -16,11 +16,13 @@ import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.route.RouteEngine;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Response;
 import timber.log.Timber;
@@ -52,6 +54,8 @@ public class NavigationService extends Service implements LocationEngineListener
   private RouteEngine routeEngine;
   private LocationEngine locationEngine;
   private NavigationEngine thread;
+  private Locale locale;
+  private @NavigationUnitType.UnitType int unitType;
 
   @Nullable
   @Override
@@ -188,6 +192,7 @@ public class NavigationService extends Service implements LocationEngineListener
   void startNavigation(MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
     initNotification(mapboxNavigation);
+    initLocaleInfo(mapboxNavigation);
     initRouteEngine(mapboxNavigation);
     acquireLocationEngine();
     forceLocationUpdate();
@@ -249,6 +254,11 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
+  private void initLocaleInfo(MapboxNavigation mapboxNavigation) {
+    locale = LocaleUtils.getNonNullLocale(this.getApplication(), mapboxNavigation.options().locale());
+    unitType = mapboxNavigation.options().unitType();
+  }
+
   /**
    * Builds a new route engine which can be used to find faster routes
    * during a navigation session based on traffic.
@@ -259,7 +269,7 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   private void initRouteEngine(MapboxNavigation mapboxNavigation) {
     if (mapboxNavigation.options().enableFasterRouteDetection()) {
-      routeEngine = new RouteEngine(this);
+      routeEngine = new RouteEngine(locale, unitType, this);
     }
   }
 

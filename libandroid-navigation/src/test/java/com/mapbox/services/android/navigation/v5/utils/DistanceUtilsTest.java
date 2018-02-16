@@ -1,13 +1,11 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.LocaleList;
 
 import com.mapbox.services.android.navigation.R;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 
 import junit.framework.Assert;
@@ -16,13 +14,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.Locale;
 
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
@@ -33,8 +29,6 @@ public class DistanceUtilsTest {
   private static final double LARGE_SMALL_UNIT = 109.73;
 
   @Mock
-  private SharedPreferences sharedPreferences;
-  @Mock
   private Context context;
   @Mock
   private Resources resources;
@@ -43,11 +37,7 @@ public class DistanceUtilsTest {
 
   @Before
   public void setup() {
-    sharedPreferences = Mockito.mock(SharedPreferences.class);
-    context = Mockito.mock(Context.class);
-    resources = Mockito.mock(Resources.class);
-    configuration = Mockito.mock(Configuration.class);
-    when(context.getSharedPreferences(anyString(), anyInt())).thenReturn(sharedPreferences);
+    MockitoAnnotations.initMocks(this);
     when(context.getResources()).thenReturn(resources);
     when(resources.getConfiguration()).thenReturn(configuration);
     when(configuration.getLocales()).thenReturn(LocaleList.getDefault());
@@ -57,105 +47,73 @@ public class DistanceUtilsTest {
     when(context.getString(R.string.feet)).thenReturn("ft");
   }
 
-  private void setupSharedPreferences(Locale locale, int navigationUnitType) {
-    when(sharedPreferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, "")).thenReturn(locale.getLanguage());
-    when(sharedPreferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, "")).thenReturn(locale.getCountry());
-    when(sharedPreferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, NavigationUnitType.NONE_SPECIFIED)).thenReturn(navigationUnitType);
+  @Test
+  public void formatDistance_noLocaleCountry() {
+    assertOutput(LARGE_LARGE_UNIT, new Locale(Locale.ENGLISH.getLanguage()), NavigationUnitType.TYPE_IMPERIAL, "11 mi");
   }
 
   @Test
-  public void testFormatDistance_noLocaleCountry() {
-    setupSharedPreferences(new Locale(Locale.ENGLISH.getLanguage()), NavigationUnitType.TYPE_IMPERIAL);
-
-    assertOutput("11 mi", LARGE_LARGE_UNIT);
+  public void formatDistance_noLocale() {
+    assertOutput(LARGE_LARGE_UNIT, new Locale("", ""), NavigationUnitType.TYPE_IMPERIAL, "11 mi");
   }
 
   @Test
-  public void testFormatDistance_noLocale() {
-    setupSharedPreferences(new Locale("", ""), NavigationUnitType.TYPE_IMPERIAL);
-
-    assertOutput("11 mi", LARGE_LARGE_UNIT);
+  public void formatDistance_unitTypeDifferentFromLocale() {
+    assertOutput(LARGE_LARGE_UNIT, Locale.US, NavigationUnitType.TYPE_METRIC, "18 km");
   }
 
   @Test
-  public void testFormatDistance_unitTypeDifferentFromLocale() {
-    setupSharedPreferences(Locale.US, NavigationUnitType.TYPE_METRIC);
-
-    assertOutput("18 km", LARGE_LARGE_UNIT);
+  public void formatDistance_largeMiles() {
+    assertOutput(LARGE_LARGE_UNIT, Locale.US, NavigationUnitType.TYPE_IMPERIAL,"11 mi");
   }
 
   @Test
-  public void testFormatDistance_largeMiles() {
-    setupSharedPreferences(Locale.US, NavigationUnitType.TYPE_IMPERIAL);
-
-    assertOutput("11 mi", LARGE_LARGE_UNIT);
+  public void formatDistance_largeKilometers() {
+    assertOutput(LARGE_LARGE_UNIT, Locale.FRANCE, NavigationUnitType.TYPE_METRIC, "18 km");
   }
 
   @Test
-  public void testFormatDistance_largeKilometers() {
-    setupSharedPreferences(Locale.FRANCE, NavigationUnitType.TYPE_METRIC);
-
-    assertOutput("18 km", LARGE_LARGE_UNIT);
+  public void formatDistance_largeKilometerNoUnitTypeButMetricLocale() {
+    assertOutput(LARGE_LARGE_UNIT, Locale.FRANCE, -1,"18 km");
   }
 
   @Test
-  public void testFormatDistance_largeKilometerNoUnitTypeButMetricLocale() {
-    setupSharedPreferences(Locale.FRANCE, -1);
-
-    assertOutput("18 km", LARGE_LARGE_UNIT);
+  public void formatDistance_mediumMiles() {
+    assertOutput(MEDIUM_LARGE_UNIT, Locale.US, NavigationUnitType.TYPE_IMPERIAL, "6.1 mi");
   }
 
   @Test
-  public void testFormatDistance_mediumMiles() {
-    setupSharedPreferences(Locale.US, NavigationUnitType.TYPE_IMPERIAL);
-
-    assertOutput("6.1 mi", MEDIUM_LARGE_UNIT);
+  public void formatDistance_mediumKilometers() {
+    assertOutput(MEDIUM_LARGE_UNIT, Locale.FRANCE, NavigationUnitType.TYPE_METRIC, "9,8 km");
   }
 
   @Test
-  public void testFormatDistance_mediumKilometers() {
-    setupSharedPreferences(Locale.FRANCE, NavigationUnitType.TYPE_METRIC);
-
-    assertOutput("9,8 km", MEDIUM_LARGE_UNIT);
+  public void formatDistance_mediumKilometersUnitTypeDifferentFromLocale() {
+    assertOutput(MEDIUM_LARGE_UNIT, Locale.FRANCE, NavigationUnitType.TYPE_IMPERIAL, "6,1 mi");
   }
 
   @Test
-  public void testFormatDistance_mediumKilometersUnitTypeDifferentFromLocale() {
-    setupSharedPreferences(Locale.FRANCE, NavigationUnitType.TYPE_IMPERIAL);
-
-    assertOutput("6,1 mi", MEDIUM_LARGE_UNIT);
+  public void formatDistance_smallFeet() {
+    assertOutput(SMALL_SMALL_UNIT, Locale.US, NavigationUnitType.TYPE_IMPERIAL, "50 ft");
   }
 
   @Test
-  public void testFormatDistance_smallFeet() {
-    setupSharedPreferences(Locale.US, NavigationUnitType.TYPE_IMPERIAL);
-
-    assertOutput("50 ft", SMALL_SMALL_UNIT);
+  public void formatDistance_smallMeters() {
+    assertOutput(SMALL_SMALL_UNIT, Locale.FRANCE, NavigationUnitType.TYPE_METRIC, "50 m");
   }
 
   @Test
-  public void testFormatDistance_smallMeters() {
-    setupSharedPreferences(Locale.FRANCE, NavigationUnitType.TYPE_METRIC);
-
-    assertOutput("50 m", SMALL_SMALL_UNIT);
+  public void formatDistance_largeFeet() {
+    assertOutput(LARGE_SMALL_UNIT, Locale.US, NavigationUnitType.TYPE_IMPERIAL,"350 ft");
   }
 
   @Test
-  public void testFormatDistance_largeFeet() {
-    setupSharedPreferences(Locale.US, NavigationUnitType.TYPE_IMPERIAL);
-
-    assertOutput("350 ft", LARGE_SMALL_UNIT);
+  public void formatDistance_largeMeters() {
+    assertOutput(LARGE_SMALL_UNIT, Locale.FRANCE, NavigationUnitType.TYPE_METRIC, "100 m");
   }
 
-  @Test
-  public void testFormatDistance_largeMeters() {
-    setupSharedPreferences(Locale.FRANCE, NavigationUnitType.TYPE_METRIC);
-
-    assertOutput("100 m", LARGE_SMALL_UNIT);
-  }
-
-  private void assertOutput(String output, double distance) {
+  private void assertOutput(double distance, Locale locale, int unitType, String output) {
     Assert.assertEquals(output,
-      new DistanceUtils(context).formatDistance(distance).toString());
+      new DistanceUtils(context, locale, unitType).formatDistance(distance).toString());
   }
 }

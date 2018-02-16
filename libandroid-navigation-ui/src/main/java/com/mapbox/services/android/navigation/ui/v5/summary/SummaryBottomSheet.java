@@ -13,10 +13,13 @@ import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.text.DecimalFormat;
+import java.util.Locale;
 
 /**
  * A view with {@link android.support.design.widget.BottomSheetBehavior}
@@ -35,6 +38,8 @@ public class SummaryBottomSheet extends FrameLayout {
   private TextView arrivalTimeText;
   private ProgressBar rerouteProgressBar;
   private boolean isRerouting;
+  private Locale locale;
+  private @NavigationUnitType.UnitType int unitType = NavigationUnitType.NONE_SPECIFIED;
 
   public SummaryBottomSheet(Context context) {
     this(context, null);
@@ -96,7 +101,8 @@ public class SummaryBottomSheet extends FrameLayout {
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      SummaryModel model = new SummaryModel(getContext(), routeProgress);
+      locale = LocaleUtils.getNonNullLocale(getContext(), locale);
+      SummaryModel model = new SummaryModel(getContext(), routeProgress, locale, unitType);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());
@@ -149,5 +155,21 @@ public class SummaryBottomSheet extends FrameLayout {
     arrivalTimeText.setText(EMPTY_STRING);
     timeRemainingText.setText(EMPTY_STRING);
     distanceRemainingText.setText(EMPTY_STRING);
+  }
+
+  /**
+   * Sets the locale to use for languages and default unit type
+   * @param locale to use
+   */
+  public void setLocale(Locale locale) {
+    this.locale = locale;
+  }
+
+  /**
+   * Sets the unit type to use
+   * @param unitType to use
+   */
+  public void setUnitType(@NavigationUnitType.UnitType int unitType) {
+    this.unitType = unitType;
   }
 }

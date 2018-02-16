@@ -19,4 +19,10 @@
 
     <string name="title_embedded_navigation">Embedded Navigation</string>
     <string name="description_embedded_navigation">Navigation in a view which contains other views</string>
+
+    <string-array name="languages_array">
+        <item>English</item>
+        <item>French</item>
+        <item>German</item>
+    </string-array>
 </resources>

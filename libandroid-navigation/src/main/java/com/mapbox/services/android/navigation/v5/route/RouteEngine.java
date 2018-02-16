@@ -8,10 +8,12 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -23,14 +25,16 @@ import timber.log.Timber;
  * {@link RouteOptions} provided by a {@link RouteProgress}.
  */
 public class RouteEngine implements Callback<DirectionsResponse> {
-
   private static final double BEARING_TOLERANCE = 90d;
-
-  private Callback engineCallback;
   private RouteProgress routeProgress;
+  private final Callback engineCallback;
+  private final Locale locale;
+  private final String unitType;
 
-  public RouteEngine(Callback engineCallback) {
+  public RouteEngine(Locale locale, @NavigationUnitType.UnitType int unitType, Callback engineCallback) {
     this.engineCallback = engineCallback;
+    this.locale = locale;
+    this.unitType = NavigationUnitType.getDirectionsCriteriaUnitType(unitType);
   }
 
   /**
@@ -54,6 +58,9 @@ public class RouteEngine implements Callback<DirectionsResponse> {
     Double bearing = location.hasBearing() ? Float.valueOf(location.getBearing()).doubleValue() : null;
     NavigationRoute.Builder builder = buildRouteRequestFromCurrentLocation(origin, bearing, routeProgress);
     if (builder != null) {
+      builder
+        .language(locale)
+        .voiceUnits(unitType);
       builder.build().getRoute(this);
     }
   }

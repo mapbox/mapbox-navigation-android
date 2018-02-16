@@ -11,12 +11,14 @@ import com.amazonaws.services.polly.model.VoiceId;
 
 public class InstructionTask extends AsyncTask<String, Void, String> {
 
-  private AmazonPollyPresigningClient client;
-  private TaskListener listener;
+  private final AmazonPollyPresigningClient client;
+  private final TaskListener listener;
+  private final VoiceId voiceId;
 
-  InstructionTask(AmazonPollyPresigningClient client, TaskListener listener) {
+  InstructionTask(AmazonPollyPresigningClient client, TaskListener listener, VoiceId voiceId) {
     this.client = client;
     this.listener = listener;
+    this.voiceId = voiceId;
   }
 
   @Override
@@ -34,7 +36,7 @@ public class InstructionTask extends AsyncTask<String, Void, String> {
       new SynthesizeSpeechPresignRequest()
         .withText(instruction)
         .withTextType(TextType.Ssml)
-        .withVoiceId(VoiceId.Joanna)
+        .withVoiceId(voiceId)
         .withOutputFormat(OutputFormat.Mp3);
     try {
       return client.getPresignedSynthesizeSpeechUrl(synthesizeSpeechPresignRequest).toString();

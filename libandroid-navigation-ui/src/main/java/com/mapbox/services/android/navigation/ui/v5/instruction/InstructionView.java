@@ -47,12 +47,15 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.Maneuve
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A view that can be used to display upcoming maneuver information and control
@@ -99,6 +102,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private LegStep currentStep;
   private NavigationViewModel navigationViewModel;
   private boolean isRerouting;
+
+  private Locale locale;
+  private @NavigationUnitType.UnitType int unitType = NavigationUnitType.NONE_SPECIFIED;
   private boolean isMuted;
 
   public InstructionView(Context context) {
@@ -126,7 +132,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     bind();
     initBackground();
     initTurnLaneRecyclerView();
-    initDirectionsRecyclerView();
     initAnimations();
   }
 
@@ -193,6 +198,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
     // ViewModel set - click listeners can be set now
     initClickListeners();
+    initDirectionsRecyclerView();
   }
 
   /**
@@ -205,7 +211,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      InstructionModel model = new InstructionModel(getContext(), routeProgress);
+      locale = LocaleUtils.getNonNullLocale(getContext(), locale);
+      InstructionModel model =
+        new InstructionModel(getContext(), routeProgress, locale, unitType);
       updateViews(model);
       updateTextInstruction(model);
     }
@@ -477,7 +485,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
   private void initDirectionsRecyclerView() {
-    instructionListAdapter = new InstructionListAdapter(getContext());
+    locale = LocaleUtils.getNonNullLocale(getContext(), locale);
+    instructionListAdapter = new InstructionListAdapter(getContext(), locale, unitType);
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
     rvInstructions.setNestedScrollingEnabled(true);
@@ -794,5 +803,21 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void updateInstructionList(InstructionModel model) {
     instructionListAdapter.updateSteps(model.getProgress());
+  }
+
+  /**
+   * Sets the locale to use for languages and default unit type
+   * @param locale to use
+   */
+  public void setLocale(Locale locale) {
+    this.locale = locale;
+  }
+
+  /**
+   * Sets the unit type to use
+   * @param unitType to use
+   */
+  public void setUnitType(@NavigationUnitType.UnitType int unitType) {
+    this.unitType = unitType;
   }
 }

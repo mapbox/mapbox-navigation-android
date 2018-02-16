@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.utils;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.location.Location;
+import android.support.annotation.NonNull;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
@@ -10,6 +11,7 @@ import android.text.style.StyleSpan;
 
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.R;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfConversion;
@@ -20,7 +22,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_METRIC;
 import static com.mapbox.turf.TurfConstants.UNIT_FEET;
 import static com.mapbox.turf.TurfConstants.UNIT_KILOMETERS;
 import static com.mapbox.turf.TurfConstants.UNIT_METERS;
@@ -37,20 +38,25 @@ public class DistanceUtils {
   /**
    * Creates a DistanceUtils object with information about how to format distances
    * @param context from which to get localized strings from
+   * @param locale for which language and country
+   * @param unitType to use, or NONE_SPECIFIED to use default for locale country
    */
-  public DistanceUtils(Context context) {
+  public DistanceUtils(Context context, @NonNull Locale locale, @NavigationUnitType.UnitType int unitType) {
     unitStrings.put(UNIT_KILOMETERS, context.getString(R.string.kilometers));
     unitStrings.put(UNIT_METERS, context.getString(R.string.meters));
     unitStrings.put(UNIT_MILES, context.getString(R.string.miles));
     unitStrings.put(UNIT_FEET, context.getString(R.string.feet));
 
-    Locale locale = LocaleUtils.getLocale(context);
-    int unitType = LocaleUtils.getUnitType(context, locale);
-
     numberFormat = NumberFormat.getNumberInstance(locale);
 
-    largeUnit = unitType == TYPE_METRIC ? UNIT_KILOMETERS : UNIT_MILES;
-    smallUnit = unitType == TYPE_METRIC ? UNIT_METERS : UNIT_FEET;
+    if (unitType == NavigationUnitType.NONE_SPECIFIED) {
+      // If given locale does not include a country, use the device locale to get the default unitType
+      unitType = LocaleUtils.getUnitTypeForLocale(
+        locale.getCountry() == null ? LocaleUtils.getDeviceLocale(context) : locale);
+    }
+
+    largeUnit = unitType == NavigationUnitType.TYPE_IMPERIAL ? UNIT_MILES : UNIT_KILOMETERS;
+    smallUnit = unitType == NavigationUnitType.TYPE_IMPERIAL ? UNIT_FEET : UNIT_METERS;
   }
 
   /**

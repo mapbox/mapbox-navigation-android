@@ -10,8 +10,12 @@ import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.HashMap;
+import java.util.Locale;
+
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.NONE_SPECIFIED;
 
 /**
  * Serves as a launching point for the custom drop-in UI, {@link NavigationView}.
@@ -76,6 +80,7 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
       extractCoordinates(options);
     }
     extractConfiguration(options);
+    extractLocale(options);
     navigationView.startNavigation(options.build());
     isRunning = true;
   }
@@ -115,8 +120,25 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
       .getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
     options.shouldSimulateRoute(preferences
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
+  }
+
+  private void extractLocale(NavigationViewOptions.Builder options) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+    String country = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, "");
+    String language = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, "");
+    int unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, NONE_SPECIFIED);
+
+    Locale locale;
+    if (!language.isEmpty()) {
+      locale = new Locale(language, country);
+    } else {
+      locale = LocaleUtils.getDeviceLocale(this);
+    }
 
     MapboxNavigationOptions navigationOptions = MapboxNavigationOptions.builder()
+      .locale(locale)
+      .unitType(unitType)
       .build();
     options.navigationOptions(navigationOptions);
   }

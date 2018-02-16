@@ -8,9 +8,12 @@ import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -36,13 +39,17 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -73,6 +80,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   ProgressBar loading;
   @BindView(R.id.demoSwitch)
   Switch demoSwitch;
+  @BindView(R.id.languageSpinner)
+  Spinner spinner;
 
   private Marker currentMarker;
   private Point currentLocation;
@@ -81,6 +90,9 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private boolean locationFound;
   private boolean shouldSimulateRoute;
+  private final List<Locale> locales = new ArrayList<>(
+    Arrays.asList(Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN));
+  private Locale locale;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,6 +107,23 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
         shouldSimulateRoute = checked;
       }
     });
+    ArrayAdapter adapter = ArrayAdapter.createFromResource(this,
+      R.array.languages_array, android.R.layout.simple_spinner_dropdown_item);
+    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    spinner.setAdapter(adapter);
+
+    spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+        locale = locales.get(position);
+      }
+
+      @Override
+      public void onNothingSelected(AdapterView<?> adapterView) {
+      }
+    });
+    locale = LocaleUtils.getDeviceLocale(this);
+    spinner.setSelection(locales.indexOf(locale));
   }
 
   @SuppressWarnings( {"MissingPermission"})
@@ -252,6 +281,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private void fetchRoute() {
     NavigationRoute.builder()
       .accessToken(Mapbox.getAccessToken())
+      .language(locale)
       .origin(currentLocation)
       .destination(destination)
       .alternatives(true)
@@ -262,9 +292,16 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private void launchNavigationWithRoute() {
     NavigationViewOptions.Builder optionsBuilder = NavigationViewOptions.builder()
-      .shouldSimulateRoute(shouldSimulateRoute);
+      .shouldSimulateRoute(shouldSimulateRoute)
+      .navigationOptions(MapboxNavigationOptions.builder().locale(locale).build());
     if (route != null) {
-      optionsBuilder.directionsRoute(route);
+      if (route.routeOptions().language().equals(locale.getLanguage())) {
+        optionsBuilder.directionsRoute(route);
+      } else {
+        optionsBuilder
+          .origin(currentLocation)
+          .destination(destination);
+      }
       NavigationLauncher.startNavigation(this, optionsBuilder.build());
     }
   }

@@ -29,6 +29,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
@@ -36,6 +37,8 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
+
+import java.util.Locale;
 
 public class NavigationViewModel extends AndroidViewModel implements ProgressChangeListener,
   OffRouteListener, MilestoneEventListener, NavigationEventListener, FasterRouteListener {
@@ -59,11 +62,12 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   private RouteProgress routeProgress;
   private String feedbackId;
   private String screenshot;
+  private Locale locale;
+  private @NavigationUnitType.UnitType int unitType;
 
   public NavigationViewModel(Application application) {
     super(application);
     preferences = PreferenceManager.getDefaultSharedPreferences(application);
-    initVoiceInstructions(application);
     initConnectivityManager(application);
   }
 
@@ -85,8 +89,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     this.routeProgress = routeProgress;
-    instructionModel.setValue(new InstructionModel(getApplication(), routeProgress));
-    summaryModel.setValue(new SummaryModel(getApplication(), routeProgress));
+    instructionModel.setValue(new InstructionModel(getApplication(), routeProgress, locale, unitType));
+    summaryModel.setValue(new SummaryModel(getApplication(), routeProgress, locale, unitType));
     navigationLocation.setValue(location);
   }
 
@@ -218,8 +222,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    * @param options to init MapboxNavigation
    */
   void initializeNavigationOptions(Context context, MapboxNavigationOptions options) {
-    LocaleUtils.setLocale(context, options.locale(), options.unitType());
-
+    initLocaleInfo(options);
+    initVoiceInstructions();
     initNavigation(context, options);
   }
 
@@ -247,12 +251,17 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
     addNavigationListeners();
   }
 
+  private void initLocaleInfo(MapboxNavigationOptions options) {
+    locale = LocaleUtils.getNonNullLocale(this.getApplication(), options.locale());
+    unitType = options.unitType();
+  }
+
   /**
    * Initializes the {@link InstructionPlayer}.
    */
-  private void initVoiceInstructions(Application application) {
-    instructionPlayer = new NavigationInstructionPlayer(application.getBaseContext(),
-      preferences.getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
+  private void initVoiceInstructions() {
+    instructionPlayer = new NavigationInstructionPlayer(this.getApplication().getBaseContext(),
+      preferences.getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null), locale);
   }
 
   /**
@@ -325,7 +334,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   private void updateBannerInstruction(RouteProgress routeProgress, Milestone milestone) {
     if (milestone instanceof BannerInstructionMilestone) {
       bannerInstructionModel.setValue(
-        new BannerInstructionModel(getApplication(), (BannerInstructionMilestone) milestone, routeProgress));
+        new BannerInstructionModel(
+          getApplication(), (BannerInstructionMilestone) milestone, routeProgress, locale, unitType));
     }
   }
 }

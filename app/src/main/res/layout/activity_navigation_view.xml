@@ -44,6 +44,11 @@
             android:enabled="false"
             android:text="Launch Navigation"/>
 
+        <Spinner
+            android:id="@+id/languageSpinner"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>
