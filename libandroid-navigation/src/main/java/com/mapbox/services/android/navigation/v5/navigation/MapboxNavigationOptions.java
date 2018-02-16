@@ -1,11 +1,9 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.Locale;
 
