@@ -5,8 +5,10 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.METERS_REMAINING_TILL_ARRIVAL;
@@ -74,14 +76,38 @@ public final class RouteUtils {
     return currentLeg.equals(legs.get(legs.size() - 1));
   }
 
+  /**
+   * Given a {@link RouteProgress}, this method will calculate the remaining coordinates
+   * along the given route based on total route coordinates and the progress remaining waypoints.
+   * <p>
+   * If the coordinate size is less than the remaining waypoints, this method
+   * will return null.
+   *
+   * @param routeProgress for route coordinates and remaining waypoints
+   * @return list of remaining waypoints as {@link Point}s
+   * @since 0.10.0
+   */
+  @Nullable
+  public static List<Point> calculateRemainingWaypoints(RouteProgress routeProgress) {
+    if (routeProgress.directionsRoute().routeOptions() == null) {
+      return null;
+    }
+
+    List<Point> coordinates = new ArrayList<>(routeProgress.directionsRoute().routeOptions().coordinates());
+
+    if (coordinates.size() < routeProgress.remainingWaypoints()) {
+      return null;
+    }
+    coordinates.subList(0, routeProgress.remainingWaypoints()).clear();
+    return coordinates;
+  }
+
   private static boolean upcomingStepIsArrival(@NonNull RouteProgress routeProgress) {
     return routeProgress.currentLegProgress().upComingStep() != null
-      && routeProgress.currentLegProgress().upComingStep().maneuver() != null
       && routeProgress.currentLegProgress().upComingStep().maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE);
   }
 
   private static boolean currentStepIsArrival(@NonNull RouteProgress routeProgress) {
-    return routeProgress.currentLegProgress().currentStep().maneuver() != null
-      && routeProgress.currentLegProgress().currentStep().maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE);
+    return routeProgress.currentLegProgress().currentStep().maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE);
   }
 }

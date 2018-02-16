@@ -268,7 +268,7 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   private void initRouteEngine(MapboxNavigation mapboxNavigation) {
     if (mapboxNavigation.options().enableFasterRouteDetection()) {
-      routeEngine = new RouteEngine(locale, this);
+      routeEngine = new RouteEngine(locale, unitType, this);
     }
   }
 
