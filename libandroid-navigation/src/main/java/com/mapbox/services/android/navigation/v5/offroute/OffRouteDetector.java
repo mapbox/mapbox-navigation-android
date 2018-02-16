@@ -44,7 +44,9 @@ public class OffRouteDetector extends OffRoute {
     // Check to see if the user is moving away from the maneuver. Here, we store an array of
     // distances. If the current distance is greater than the last distance, add it to the array. If
     // the array grows larger than x, reroute the user.
-    if (movingAwayFromManeuver(routeProgress, recentDistancesFromManeuverInMeters, futurePoint)) {
+    if (movingAwayFromManeuver(routeProgress, recentDistancesFromManeuverInMeters, futurePoint) &&
+            !routeProgress.currentLegProgress().currentStep().maneuver().type().equals("roundabout") &&
+            !routeProgress.currentLegProgress().currentStep().maneuver().type().equals("rotary")) {
       updateLastReroutePoint(location);
       return true;
     }
