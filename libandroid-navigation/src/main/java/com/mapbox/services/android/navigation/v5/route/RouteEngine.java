@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.route;
 
+import android.location.Location;
 import android.support.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -17,7 +18,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * This class can be used to fetch new routes given a {@link Point} origin and
+ * This class can be used to fetch new routes given a {@link Location} origin and
  * {@link RouteOptions} provided by a {@link RouteProgress}.
  */
 public class RouteEngine implements Callback<DirectionsResponse> {
@@ -31,11 +32,27 @@ public class RouteEngine implements Callback<DirectionsResponse> {
     this.locale = locale;
   }
 
-  public void fetchRoute(Point origin, RouteProgress routeProgress) {
+  /**
+   * Calculates a new {@link com.mapbox.api.directions.v5.models.DirectionsRoute} given
+   * the current {@link Location} and {@link RouteProgress} along the route.
+   * <p>
+   * Uses {@link RouteOptions#coordinates()} and {@link RouteProgress#remainingWaypoints()}
+   * to determine the amount of remaining waypoints there are along the given route.
+   *
+   * @param location      current location of the device
+   * @param routeProgress for remaining waypoints along the route
+   * @since 0.10.0
+   */
+  public void fetchRoute(Location location, RouteProgress routeProgress) {
     if (routeProgress == null) {
       return;
     }
     this.routeProgress = routeProgress;
+
+    // Get the bearing from the location provided
+    Double bearing = location.hasBearing() ? Float.valueOf(location.getBearing()).doubleValue() : null;
+    // Convert the location to point for the builder
+    Point origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
 
     // Calculate remaining waypoints
     List<Point> coordinates = new ArrayList<>(routeProgress.directionsRoute().routeOptions().coordinates());
@@ -52,7 +69,7 @@ public class RouteEngine implements Callback<DirectionsResponse> {
     RouteOptions currentOptions = routeProgress.directionsRoute().routeOptions();
     NavigationRoute.Builder builder = NavigationRoute.builder()
       .language(locale)
-      .origin(origin)
+      .origin(origin, bearing, 90d)
       .routeOptions(currentOptions);
 
     // Add waypoints with the remaining coordinate values
@@ -73,11 +90,18 @@ public class RouteEngine implements Callback<DirectionsResponse> {
 
   @Override
   public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
-    // No-op - fail silently
+    engineCallback.onErrorReceived(throwable);
   }
 
+  /**
+   * Callback to be passed into the constructor of {@link RouteEngine}.
+   * <p>
+   * Will fire when either a successful / failed response is received.
+   */
   public interface Callback {
     void onResponseReceived(Response<DirectionsResponse> response, RouteProgress routeProgress);
+
+    void onErrorReceived(Throwable throwable);
   }
 
   private void addWaypoints(List<Point> remainingCoordinates, NavigationRoute.Builder builder) {
