@@ -48,67 +48,67 @@ public class DistanceUtilsTest {
   }
 
   @Test
-  public void testFormatDistance_noLocaleCountry() {
+  public void formatDistance_noLocaleCountry() {
     assertOutput(LARGE_LARGE_UNIT, new Locale(Locale.ENGLISH.getLanguage()), NavigationUnitType.TYPE_IMPERIAL, "11 mi");
   }
 
   @Test
-  public void testFormatDistance_noLocale() {
+  public void formatDistance_noLocale() {
     assertOutput(LARGE_LARGE_UNIT, new Locale("", ""), NavigationUnitType.TYPE_IMPERIAL, "11 mi");
   }
 
   @Test
-  public void testFormatDistance_unitTypeDifferentFromLocale() {
+  public void formatDistance_unitTypeDifferentFromLocale() {
     assertOutput(LARGE_LARGE_UNIT, Locale.US, NavigationUnitType.TYPE_METRIC, "18 km");
   }
 
   @Test
-  public void testFormatDistance_largeMiles() {
+  public void formatDistance_largeMiles() {
     assertOutput(LARGE_LARGE_UNIT, Locale.US, NavigationUnitType.TYPE_IMPERIAL,"11 mi");
   }
 
   @Test
-  public void testFormatDistance_largeKilometers() {
+  public void formatDistance_largeKilometers() {
     assertOutput(LARGE_LARGE_UNIT, Locale.FRANCE, NavigationUnitType.TYPE_METRIC, "18 km");
   }
 
   @Test
-  public void testFormatDistance_largeKilometerNoUnitTypeButMetricLocale() {
+  public void formatDistance_largeKilometerNoUnitTypeButMetricLocale() {
     assertOutput(LARGE_LARGE_UNIT, Locale.FRANCE, -1,"18 km");
   }
 
   @Test
-  public void testFormatDistance_mediumMiles() {
+  public void formatDistance_mediumMiles() {
     assertOutput(MEDIUM_LARGE_UNIT, Locale.US, NavigationUnitType.TYPE_IMPERIAL, "6.1 mi");
   }
 
   @Test
-  public void testFormatDistance_mediumKilometers() {
+  public void formatDistance_mediumKilometers() {
     assertOutput(MEDIUM_LARGE_UNIT, Locale.FRANCE, NavigationUnitType.TYPE_METRIC, "9,8 km");
   }
 
   @Test
-  public void testFormatDistance_mediumKilometersUnitTypeDifferentFromLocale() {
+  public void formatDistance_mediumKilometersUnitTypeDifferentFromLocale() {
     assertOutput(MEDIUM_LARGE_UNIT, Locale.FRANCE, NavigationUnitType.TYPE_IMPERIAL, "6,1 mi");
   }
 
   @Test
-  public void testFormatDistance_smallFeet() {
+  public void formatDistance_smallFeet() {
     assertOutput(SMALL_SMALL_UNIT, Locale.US, NavigationUnitType.TYPE_IMPERIAL, "50 ft");
   }
 
   @Test
-  public void testFormatDistance_smallMeters() {
+  public void formatDistance_smallMeters() {
     assertOutput(SMALL_SMALL_UNIT, Locale.FRANCE, NavigationUnitType.TYPE_METRIC, "50 m");
   }
 
   @Test
-  public void testFormatDistance_largeFeet() {
+  public void formatDistance_largeFeet() {
     assertOutput(LARGE_SMALL_UNIT, Locale.US, NavigationUnitType.TYPE_IMPERIAL,"350 ft");
   }
 
   @Test
-  public void testFormatDistance_largeMeters() {
+  public void formatDistance_largeMeters() {
     assertOutput(LARGE_SMALL_UNIT, Locale.FRANCE, NavigationUnitType.TYPE_METRIC, "100 m");
   }
 

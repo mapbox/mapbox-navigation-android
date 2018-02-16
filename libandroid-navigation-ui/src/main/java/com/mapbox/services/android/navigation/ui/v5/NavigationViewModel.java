@@ -34,7 +34,6 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 import java.util.Locale;
@@ -219,7 +218,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    * @param options to init MapboxNavigation
    */
   void initializeNavigationOptions(Context context, MapboxNavigationOptions options) {
-    initLocale(options);
+    initLocaleInfo(options);
     initVoiceInstructions();
     initNavigation(context, options);
   }
@@ -248,11 +247,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
     addNavigationListeners();
   }
 
-  private void initLocale(MapboxNavigationOptions options) {
-    locale = options.locale();
-    if (locale == null) {
-      locale = LocaleUtils.getDeviceLocale(this.getApplication());
-    }
+  private void initLocaleInfo(MapboxNavigationOptions options) {
+    locale = options.getNonNullLocale(this.getApplication());
     unitType = options.unitType();
   }
 

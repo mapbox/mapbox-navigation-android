@@ -203,11 +203,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * @param options to look for set locale
    */
   private void extractLocale(NavigationViewOptions options) {
-    if (options.navigationOptions().locale() != null) {
-      locale = options.navigationOptions().locale();
-    } else {
-      locale = LocaleUtils.getDeviceLocale(this.getApplication());
-    }
+    locale = options.navigationOptions().getNonNullLocale(this.getApplication());
   }
 
   /**

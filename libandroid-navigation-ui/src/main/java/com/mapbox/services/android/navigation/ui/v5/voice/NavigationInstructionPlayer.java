@@ -25,13 +25,7 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
                                      Locale locale) {
     initAudioManager(context);
     initAudioFocusRequest();
-    if (!TextUtils.isEmpty(awsPoolId)) {
-      instructionPlayer = new PollyPlayer(context, awsPoolId, locale);
-      isPollyPlayer = true;
-    } else {
-      instructionPlayer = new DefaultPlayer(context, locale);
-    }
-    instructionPlayer.addInstructionListener(this);
+    initInstructionPlayer(context, awsPoolId, locale);
   }
 
   private void initAudioFocusRequest() {
@@ -39,6 +33,17 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
       instructionFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
         .build();
     }
+  }
+
+  private void initInstructionPlayer(Context context, @Nullable String awsPoolId,
+                                     Locale locale) {
+    if (!TextUtils.isEmpty(awsPoolId)) {
+      instructionPlayer = new PollyPlayer(context, awsPoolId, locale);
+      isPollyPlayer = true;
+    } else {
+      instructionPlayer = new DefaultPlayer(context, locale);
+    }
+    instructionPlayer.addInstructionListener(this);
   }
 
   @Override
