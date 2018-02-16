@@ -157,10 +157,18 @@ public class SummaryBottomSheet extends FrameLayout {
     distanceRemainingText.setText(EMPTY_STRING);
   }
 
+  /**
+   * Sets the locale to use for languages and default unit type
+   * @param locale to use
+   */
   public void setLocale(Locale locale) {
     this.locale = locale;
   }
 
+  /**
+   * Sets the unit type to use
+   * @param unitType to use
+   */
   public void setUnitType(@NavigationUnitType.UnitType int unitType) {
     this.unitType = unitType;
   }
