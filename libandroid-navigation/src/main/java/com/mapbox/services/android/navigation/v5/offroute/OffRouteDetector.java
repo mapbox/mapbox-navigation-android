@@ -178,10 +178,12 @@ public class OffRouteDetector extends OffRoute {
       currentPoint, TurfConstants.UNIT_METERS
     );
 
-    if (!distancesAwayFromManeuver.isEmpty()
-      && distancesAwayFromManeuver.peekLast()
-      - distancesAwayFromManeuver.peekFirst() < MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE
-      && distancesAwayFromManeuver.size() >= 3) {
+    boolean hasDistances = !distancesAwayFromManeuver.isEmpty();
+    boolean validOffRouteDistanceTraveled = distancesAwayFromManeuver.peekLast()
+      - distancesAwayFromManeuver.peekFirst() < MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
+    boolean exceedsManeuverDistancesThreshold = distancesAwayFromManeuver.size() >= 3;
+
+    if (hasDistances && validOffRouteDistanceTraveled && exceedsManeuverDistancesThreshold) {
       // User's moving away from maneuver position, thus offRoute.
       return true;
     }
