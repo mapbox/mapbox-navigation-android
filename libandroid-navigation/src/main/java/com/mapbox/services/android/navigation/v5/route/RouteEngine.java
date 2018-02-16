@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.route;
 
+import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -18,7 +19,7 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 /**
- * This class can be used to fetch new routes given a {@link Point} origin and
+ * This class can be used to fetch new routes given a {@link Location} origin and
  * {@link RouteOptions} provided by a {@link RouteProgress}.
  */
 public class RouteEngine implements Callback<DirectionsResponse> {
@@ -32,12 +33,26 @@ public class RouteEngine implements Callback<DirectionsResponse> {
     this.engineCallback = engineCallback;
   }
 
-  public void fetchRoute(Point origin, RouteProgress routeProgress) {
-    if (routeProgress == null) {
+  /**
+   * Calculates a new {@link com.mapbox.api.directions.v5.models.DirectionsRoute} given
+   * the current {@link Location} and {@link RouteProgress} along the route.
+   * <p>
+   * Uses {@link RouteOptions#coordinates()} and {@link RouteProgress#remainingWaypoints()}
+   * to determine the amount of remaining waypoints there are along the given route.
+   *
+   * @param location      current location of the device
+   * @param routeProgress for remaining waypoints along the route
+   * @since 0.10.0
+   */
+  public void fetchRoute(Location location, RouteProgress routeProgress) {
+    if (location == null || routeProgress == null) {
       return;
     }
     this.routeProgress = routeProgress;
-    NavigationRoute.Builder builder = buildRouteRequestFromCurrentLocation(origin, null, routeProgress);
+
+    Point origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    Double bearing = location.hasBearing() ? Float.valueOf(location.getBearing()).doubleValue() : null;
+    NavigationRoute.Builder builder = buildRouteRequestFromCurrentLocation(origin, bearing, routeProgress);
     if (builder != null) {
       builder.build().getRoute(this);
     }
@@ -54,11 +69,18 @@ public class RouteEngine implements Callback<DirectionsResponse> {
 
   @Override
   public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
-    // No-op - fail silently
+    engineCallback.onErrorReceived(throwable);
   }
 
+  /**
+   * Callback to be passed into the constructor of {@link RouteEngine}.
+   * <p>
+   * Will fire when either a successful / failed response is received.
+   */
   public interface Callback {
     void onResponseReceived(Response<DirectionsResponse> response, RouteProgress routeProgress);
+
+    void onErrorReceived(Throwable throwable);
   }
 
   @Nullable
