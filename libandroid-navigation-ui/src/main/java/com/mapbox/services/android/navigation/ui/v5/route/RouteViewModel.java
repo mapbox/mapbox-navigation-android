@@ -92,16 +92,16 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * Called when an off-route event is fired and a new {@link DirectionsRoute}
    * is needed to continue navigating.
    *
-   * @param offRouteEvent found from off-route event
+   * @param event found from off-route event
    */
-  public void fetchRouteFromOffRouteEvent(OffRouteEvent offRouteEvent) {
-    if (OffRouteEvent.isValid(offRouteEvent)) {
+  public void fetchRouteFromOffRouteEvent(OffRouteEvent event) {
+    if (OffRouteEvent.isValid(event)) {
       Double bearing = null;
       if (rawLocation != null) {
         bearing = rawLocation.hasBearing() ? Float.valueOf(rawLocation.getBearing()).doubleValue() : null;
       }
-      Point origin = offRouteEvent.getNewOrigin();
-      RouteProgress progress = offRouteEvent.getRouteProgress();
+      Point origin = event.getNewOrigin();
+      RouteProgress progress = event.getRouteProgress();
       NavigationRoute.Builder builder = buildRouteRequestFromCurrentLocation(origin, bearing, progress);
       if (builder != null) {
         addNavigationViewOptions(builder);
@@ -208,7 +208,8 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private void cacheRouteDestination() {
     if (routeOptions != null && !routeOptions.coordinates().isEmpty()) {
       List<Point> coordinates = routeOptions.coordinates();
-      Point destinationPoint = coordinates.get(coordinates.size() - 1);
+      int destinationCoordinate = coordinates.size() - 1;
+      Point destinationPoint = coordinates.get(destinationCoordinate);
       destination.setValue(destinationPoint);
     }
   }

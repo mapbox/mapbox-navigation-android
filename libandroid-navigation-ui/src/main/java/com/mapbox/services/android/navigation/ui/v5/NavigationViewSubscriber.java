@@ -121,12 +121,12 @@ class NavigationViewSubscriber {
 
     navigationViewModel.offRouteEvent.observe(owner, new Observer<OffRouteEvent>() {
       @Override
-      public void onChanged(@Nullable OffRouteEvent offRouteEvent) {
-        if (offRouteEvent != null) {
-          Point newOrigin = offRouteEvent.getNewOrigin();
+      public void onChanged(@Nullable OffRouteEvent event) {
+        if (event != null) {
+          Point newOrigin = event.getNewOrigin();
           if (navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
             navigationViewEventDispatcher.onOffRoute(newOrigin);
-            routeViewModel.fetchRouteFromOffRouteEvent(offRouteEvent);
+            routeViewModel.fetchRouteFromOffRouteEvent(event);
             preventDuplicateOffRouteEvents(navigationViewModel);
           }
         }

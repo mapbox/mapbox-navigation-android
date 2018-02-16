@@ -23,6 +23,8 @@ import timber.log.Timber;
  */
 public class RouteEngine implements Callback<DirectionsResponse> {
 
+  private static final double BEARING_TOLERANCE = 90d;
+
   private Callback engineCallback;
   private RouteProgress routeProgress;
 
@@ -64,7 +66,7 @@ public class RouteEngine implements Callback<DirectionsResponse> {
                                                                              RouteProgress progress) {
     RouteOptions options = progress.directionsRoute().routeOptions();
     NavigationRoute.Builder builder = NavigationRoute.builder()
-      .origin(origin, bearing, 90d)
+      .origin(origin, bearing, BEARING_TOLERANCE)
       .routeOptions(options);
 
     List<Point> remainingWaypoints = RouteUtils.calculateRemainingWaypoints(progress);
