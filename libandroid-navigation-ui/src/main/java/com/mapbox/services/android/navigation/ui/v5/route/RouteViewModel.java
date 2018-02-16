@@ -19,6 +19,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.List;
 import java.util.Locale;
@@ -236,7 +237,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * @param options to look for set locale
    */
   private void extractLocale(NavigationViewOptions options) {
-    locale = options.navigationOptions().getNonNullLocale(this.getApplication());
+    locale = LocaleUtils.getNonNullLocale(this.getApplication(), options.navigationOptions().locale());
   }
 
   private void cacheRouteLanguage(NavigationViewOptions options, @Nullable DirectionsRoute route) {

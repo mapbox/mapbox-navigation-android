@@ -16,6 +16,7 @@ import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.route.RouteEngine;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
@@ -254,7 +255,7 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   private void initLocaleInfo(MapboxNavigation mapboxNavigation) {
-    locale = mapboxNavigation.options().getNonNullLocale(getBaseContext());
+    locale = LocaleUtils.getNonNullLocale(this.getApplication(), mapboxNavigation.options().locale());
     unitType = mapboxNavigation.options().unitType();
   }
 

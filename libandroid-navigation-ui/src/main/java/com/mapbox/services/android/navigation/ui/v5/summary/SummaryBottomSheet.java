@@ -101,7 +101,7 @@ public class SummaryBottomSheet extends FrameLayout {
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      verifyLocale();
+      locale = LocaleUtils.getNonNullLocale(getContext(), locale);
       SummaryModel model = new SummaryModel(getContext(), routeProgress, locale, unitType);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
@@ -163,11 +163,5 @@ public class SummaryBottomSheet extends FrameLayout {
 
   public void setUnitType(@NavigationUnitType.UnitType int unitType) {
     this.unitType = unitType;
-  }
-
-  private void verifyLocale() {
-    if (locale == null) {
-      locale = LocaleUtils.getDeviceLocale(getContext());
-    }
   }
 }

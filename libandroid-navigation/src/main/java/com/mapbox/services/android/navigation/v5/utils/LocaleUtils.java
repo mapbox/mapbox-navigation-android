@@ -41,4 +41,17 @@ public class LocaleUtils {
       return context.getResources().getConfiguration().locale;
     }
   }
+
+  /**
+   * Returns the locale passed in if it is not null, otherwise returns the device locale
+   * @param context to get device locale
+   * @param locale to check if it is null
+   * @return a non-null locale, either the one passed in, or the device locale
+   */
+  public static Locale getNonNullLocale(Context context, Locale locale) {
+    if (locale == null) {
+      return getDeviceLocale(context);
+    }
+    return locale;
+  }
 }

@@ -126,8 +126,4 @@ public abstract class MapboxNavigationOptions {
       .isDebugLoggingEnabled(false)
       .unitType(NavigationUnitType.NONE_SPECIFIED);
   }
-
-  public Locale getNonNullLocale(Context context) {
-    return locale() == null ? LocaleUtils.getDeviceLocale(context) : locale();
-  }
 }
