@@ -4,12 +4,14 @@ import android.location.Location;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.StepManeuver;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteCallback;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
@@ -119,26 +121,40 @@ class NavigationHelper {
    * Checks whether the user's bearing matches the next step's maneuver provided bearingAfter
    * variable. This is one of the criteria's required for the user location to be recognized as
    * being on the next step or potentially arriving.
+   * <p>
+   * If the expected turn angle is less than the max turn completion offset, this method will
+   * wait for the step distance remaining to be 0.  This way, the step index does not increase
+   * prematurely.
    *
-   * @param userLocation  the location of the user
-   * @param routeProgress used for getting route information
+   * @param userLocation          the location of the user
+   * @param previousRouteProgress used for getting the most recent route information
    * @return boolean true if the user location matches (using a tolerance) the final heading
    * @since 0.2.0
    */
-  static boolean bearingMatchesManeuverFinalHeading(Location userLocation,
-                                                    RouteProgress routeProgress,
-                                                    double maxTurnCompletionOffset) {
-    if (routeProgress.currentLegProgress().upComingStep() == null) {
+  static boolean checkBearingForStepCompletion(Location userLocation, RouteProgress previousRouteProgress,
+                                               double stepDistanceRemaining, double maxTurnCompletionOffset) {
+    if (previousRouteProgress.currentLegProgress().upComingStep() == null) {
       return false;
     }
 
     // Bearings need to be normalized so when the bearingAfter is 359 and the user heading is 1, we
     // count this as within the MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION.
-    double finalHeading = routeProgress.currentLegProgress().upComingStep().maneuver().bearingAfter();
-    double finalHeadingNormalized = MathUtils.wrap(finalHeading, 0, 360);
-    double userHeadingNormalized = MathUtils.wrap(userLocation.getBearing(), 0, 360);
-    return MathUtils.differenceBetweenAngles(finalHeadingNormalized, userHeadingNormalized)
-      <= maxTurnCompletionOffset;
+    StepManeuver maneuver = previousRouteProgress.currentLegProgress().upComingStep().maneuver();
+    double initialBearing = maneuver.bearingBefore();
+    double initialBearingNormalized = MathUtils.wrap(initialBearing, 0, 360);
+    double finalBearing = maneuver.bearingAfter();
+    double finalBearingNormalized = MathUtils.wrap(finalBearing, 0, 360);
+
+    double expectedTurnAngle = MathUtils.differenceBetweenAngles(initialBearingNormalized, finalBearingNormalized);
+
+    double userBearingNormalized = MathUtils.wrap(userLocation.getBearing(), 0, 360);
+    double userAngleFromFinalBearing = MathUtils.differenceBetweenAngles(finalBearingNormalized, userBearingNormalized);
+
+    if (expectedTurnAngle <= maxTurnCompletionOffset) {
+      return stepDistanceRemaining == 0;
+    } else {
+      return userAngleFromFinalBearing <= maxTurnCompletionOffset;
+    }
   }
 
   /**
@@ -179,11 +195,11 @@ class NavigationHelper {
     return milestones;
   }
 
-  static boolean isUserOffRoute(NewLocationModel newLocationModel, RouteProgress routeProgress) {
+  static boolean isUserOffRoute(NewLocationModel newLocationModel, RouteProgress routeProgress,
+                                OffRouteCallback callback) {
     OffRoute offRoute = newLocationModel.mapboxNavigation().getOffRouteEngine();
     return offRoute.isUserOffRoute(newLocationModel.location(), routeProgress,
-      newLocationModel.mapboxNavigation().options(),
-      newLocationModel.recentDistancesFromManeuverInMeters());
+      newLocationModel.mapboxNavigation().options(), newLocationModel.distancesAwayFromManeuver(), callback);
   }
 
   static boolean shouldCheckFasterRoute(NewLocationModel newLocationModel, RouteProgress routeProgress) {

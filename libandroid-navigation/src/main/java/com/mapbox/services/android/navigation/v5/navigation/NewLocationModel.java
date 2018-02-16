@@ -9,14 +9,14 @@ import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 abstract class NewLocationModel {
 
   static NewLocationModel create(Location location, MapboxNavigation mapboxNavigation,
-                                 RingBuffer recentDistancesFromManeuverInMeters) {
+                                 RingBuffer distancesAwayFromManeuver) {
     return new AutoValue_NewLocationModel(location, mapboxNavigation,
-      recentDistancesFromManeuverInMeters);
+      distancesAwayFromManeuver);
   }
 
   abstract Location location();
 
   abstract MapboxNavigation mapboxNavigation();
 
-  abstract RingBuffer recentDistancesFromManeuverInMeters();
+  abstract RingBuffer distancesAwayFromManeuver();
 }
