@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
@@ -20,7 +19,6 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.List;
 import java.util.Locale;
@@ -98,14 +96,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * @param options possibly containing unitType
    */
   private void extractUnitType(NavigationViewOptions options) {
-    int unitType = options.navigationOptions().unitType();
-
-    if (unitType == NavigationUnitType.NONE_SPECIFIED) {
-      unitType = LocaleUtils.getUnitTypeForLocale(
-        locale.getCountry() == null ? LocaleUtils.getDeviceLocale(this.getApplication().getBaseContext()) : locale);
-    }
-    this.unitType = unitType == NavigationUnitType.TYPE_IMPERIAL
-      ? DirectionsCriteria.IMPERIAL : DirectionsCriteria.METRIC;
+    unitType = NavigationUnitType.getDirectionsCriteriaUnitType(options.navigationOptions().unitType());
   }
 
   /**
@@ -199,8 +190,9 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
     if (routeProfile != null) {
       builder.profile(routeProfile);
     }
-    builder.language(locale);
-    builder.voiceUnits(unitType);
+    builder
+      .language(locale)
+      .voiceUnits(unitType);
   }
 
   private void cacheRouteInformation(NavigationViewOptions options, DirectionsRoute route) {

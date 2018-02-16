@@ -29,12 +29,12 @@ public class RouteEngine implements Callback<DirectionsResponse> {
   private RouteProgress routeProgress;
   private final Callback engineCallback;
   private final Locale locale;
-  private final int unitType;
+  private final String unitType;
 
   public RouteEngine(Locale locale, @NavigationUnitType.UnitType int unitType, Callback engineCallback) {
     this.engineCallback = engineCallback;
     this.locale = locale;
-    this.unitType = unitType;
+    this.unitType = NavigationUnitType.getDirectionsCriteriaUnitType(unitType);
   }
 
   /**
@@ -58,7 +58,9 @@ public class RouteEngine implements Callback<DirectionsResponse> {
     Double bearing = location.hasBearing() ? Float.valueOf(location.getBearing()).doubleValue() : null;
     NavigationRoute.Builder builder = buildRouteRequestFromCurrentLocation(origin, bearing, routeProgress);
     if (builder != null) {
-      builder.language(locale);
+      builder
+        .language(locale)
+        .voiceUnits(unitType);
       builder.build().getRoute(this);
     }
   }
