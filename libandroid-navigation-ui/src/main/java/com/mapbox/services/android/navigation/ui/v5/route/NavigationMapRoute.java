@@ -246,15 +246,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   public void addRoutes(@NonNull @Size(min = 1) List<DirectionsRoute> directionsRoutes) {
     this.directionsRoutes = directionsRoutes;
     primaryRouteIndex = 0;
-    if (!layerIds.isEmpty()) {
-      for (String id : layerIds) {
-        mapboxMap.removeLayer(id);
-      }
-    }
+    clearRoutes();
     if (directionsRoutes.size() == 1) {
       alternativesVisible = false;
     }
-    featureCollections.clear();
     generateFeatureCollectionList(directionsRoutes);
     drawRoutes();
     addDirectionWaypoints();
@@ -339,6 +334,15 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       addRouteShieldLayer(layerIds.get(layerIds.size() - 2), sourceId, index);
       addRouteLayer(layerIds.get(layerIds.size() - 1), sourceId, index);
     }
+  }
+
+  private void clearRoutes() {
+    if (!layerIds.isEmpty()) {
+      for (String id : layerIds) {
+        mapboxMap.removeLayer(id);
+      }
+    }
+    featureCollections.clear();
   }
 
   private void generateFeatureCollectionList(List<DirectionsRoute> directionsRoutes) {
@@ -600,9 +604,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    * @since 0.4.0
    */
   public void removeRoute() {
-    for (String layerId : layerIds) {
-      mapboxMap.removeLayer(layerId);
-    }
+    clearRoutes();
   }
 
   @Override
