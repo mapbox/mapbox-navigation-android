@@ -179,11 +179,12 @@ public class OffRouteDetector extends OffRoute {
     );
 
     boolean hasDistances = !distancesAwayFromManeuver.isEmpty();
-    boolean validOffRouteDistanceTraveled = distancesAwayFromManeuver.peekLast()
+    boolean validOffRouteDistanceTraveled = hasDistances && distancesAwayFromManeuver.peekLast()
       - distancesAwayFromManeuver.peekFirst() < MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
-    boolean exceedsManeuverDistancesThreshold = distancesAwayFromManeuver.size() >= 3;
+    boolean exceedsManeuverDistancesThreshold = validOffRouteDistanceTraveled
+      && distancesAwayFromManeuver.size() >= 3;
 
-    if (hasDistances && validOffRouteDistanceTraveled && exceedsManeuverDistancesThreshold) {
+    if (exceedsManeuverDistancesThreshold) {
       // User's moving away from maneuver position, thus offRoute.
       return true;
     }
