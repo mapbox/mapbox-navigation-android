@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
@@ -21,6 +20,13 @@ import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 
 import java.util.List;
+
+import rx.Observer;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
 
 import retrofit2.Response;
 import timber.log.Timber;
@@ -51,7 +57,10 @@ public class NavigationService extends Service implements LocationEngineListener
   private MapboxNavigation mapboxNavigation;
   private RouteEngine routeEngine;
   private LocationEngine locationEngine;
-  private NavigationEngine thread;
+
+  private NavigationEngine navigationEngine;
+  private PublishSubject<Location> mNavigationSubject;
+  private Subscription mNavigationSubscription;
 
   @Nullable
   @Override
@@ -61,11 +70,54 @@ public class NavigationService extends Service implements LocationEngineListener
 
   @Override
   public void onCreate() {
-    thread = new NavigationEngine(new Handler(), this);
-    thread.start();
-    thread.prepareHandler();
-    recentDistancesFromManeuverInMeters = new RingBuffer<>(3);
+      navigationEngine = new NavigationEngine();
+      initRx();
+      recentDistancesFromManeuverInMeters = new RingBuffer<>(3);
   }
+
+    private void initRx() {
+        mNavigationSubject = PublishSubject.create();
+        mNavigationSubscription = mNavigationSubject
+                .observeOn(Schedulers.computation())
+                .map(new Func1<Location, NavigationEngine.RouteStateWrapper>() {
+                    @Override
+                    public NavigationEngine.RouteStateWrapper call(final Location location) {
+                        return navigationEngine.handleRequest(NewLocationModel.create(location, mapboxNavigation,
+                                recentDistancesFromManeuverInMeters));
+                    }
+                })
+                /*
+                .switchMap(new Func1<Location, Observable<NavigationEngine.RouteStateWrapper>>() {
+                    @Override
+                    public Observable<NavigationEngine.RouteStateWrapper> call(final Location location) {
+                        return Observable.fromCallable(new Callable<NavigationEngine.RouteStateWrapper>() {
+                            @Override
+                            public NavigationEngine.RouteStateWrapper call() {
+                                return navigationEngine.handleRequest(NewLocationModel.create(location, mapboxNavigation,
+                                        recentDistancesFromManeuverInMeters));
+                            }
+                        });
+                    }
+                })*/
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<NavigationEngine.RouteStateWrapper>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onNext(NavigationEngine.RouteStateWrapper routeState) {
+                        onNewRouteProgress(routeState.mCurrentLocation, routeState.mRouteProgress);
+                        onMilestoneTrigger(routeState.mMilestones, routeState.mRouteProgress);
+                        onUserOffRoute(routeState.mCurrentLocation, routeState.mIsUserOffRoute);
+                      onCheckFasterRoute(routeState.mCurrentLocation, routeState.mRouteProgress, routeState.mCheckFasterRoute);
+                    }
+                });
+    }
 
   /**
    * Only should be called once since we want the service to continue running until the navigation
@@ -79,6 +131,10 @@ public class NavigationService extends Service implements LocationEngineListener
 
   @Override
   public void onDestroy() {
+      if (mNavigationSubscription != null && !mNavigationSubscription.isUnsubscribed()) {
+          mNavigationSubscription.unsubscribe();
+      }
+
     if (mapboxNavigation.options().enableNotification()) {
       stopForeground(true);
     }
@@ -97,8 +153,7 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onLocationChanged(Location location) {
     Timber.d("onLocationChanged");
     if (location != null && validLocationUpdate(location)) {
-      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation,
-        recentDistancesFromManeuverInMeters));
+        mNavigationSubject.onNext(location);
     }
   }
 
@@ -200,11 +255,6 @@ public class NavigationService extends Service implements LocationEngineListener
   void endNavigation() {
     locationEngine.removeLocationEngineListener(this);
     unregisterMapboxNotificationReceiver();
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-      thread.quitSafely();
-    } else {
-      thread.quit();
-    }
   }
 
   /**
@@ -297,8 +347,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private void forceLocationUpdate() {
     Location lastLocation = locationEngine.getLastLocation();
     if (lastLocation != null) {
-      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(lastLocation, mapboxNavigation,
-        recentDistancesFromManeuverInMeters));
+        mNavigationSubject.onNext(lastLocation);
     }
   }
 

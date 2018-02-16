@@ -42,6 +42,7 @@ android {
 }
 
 dependencies {
+  implementation 'io.reactivex:rxandroid:1.1.0'
   // Mapbox Android Services
   api (dependenciesList.mapboxServices) {
     transitive = true
