@@ -69,7 +69,6 @@ public class NavigationRouteTest extends BaseTest {
 
   @Test
   public void addRouteOptionsIncludedInRequest() throws Exception {
-
     List<Point> coordinates = new ArrayList<>();
     coordinates.add(Point.fromLngLat(1.0, 2.0));
     coordinates.add(Point.fromLngLat(1.0, 5.0));
