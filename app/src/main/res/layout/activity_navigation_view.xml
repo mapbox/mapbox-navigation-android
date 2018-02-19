@@ -29,12 +29,6 @@
         android:elevation="2dp"
         android:layout_gravity="center_horizontal|top">
 
-        <Switch
-            android:id="@+id/demoSwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Simulate Route"/>
-
         <Button
             android:id="@+id/launchRouteBtn"
             android:layout_width="wrap_content"
@@ -44,11 +38,6 @@
             android:enabled="false"
             android:text="Launch Navigation"/>
 
-        <Spinner
-            android:id="@+id/languageSpinner"
-            android:visibility="gone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
     </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -51,6 +51,14 @@
         </activity>
 
         <activity
+            android:name=".activity.navigationui.NavigationViewSettingsActivity"
+            android:label="@string/settings">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.navigationui.NavigationViewActivity"/>
+        </activity>
+
+        <activity
             android:name=".activity.WaypointNavigationActivity"
             android:label="@string/title_waypoint_navigation">
             <meta-data

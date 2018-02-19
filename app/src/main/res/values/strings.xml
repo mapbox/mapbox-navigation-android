@@ -19,10 +19,8 @@
 
     <string name="title_embedded_navigation">Embedded Navigation</string>
     <string name="description_embedded_navigation">Navigation in a view which contains other views</string>
-
-    <string-array name="languages_array">
-        <item>English</item>
-        <item>French</item>
-        <item>German</item>
-    </string-array>
+    <string name="settings">Settings</string>
+    <string name="simulate_route">Simulate Route</string>
+    <string name="language">Language</string>
+    <string name="unit_type">Unit Type</string>
 </resources>

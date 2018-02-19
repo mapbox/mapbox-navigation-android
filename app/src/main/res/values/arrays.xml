@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="language_array">
+        <item>English</item>
+        <item>French</item>
+        <item>German</item>
+    </string-array>
+
+    <string-array name="language_values_array">
+        <item>EN</item>
+        <item>FR</item>
+        <item>DE</item>
+    </string-array>
+
+
+    <string-array name="unit_type_array">
+        <item>Metric</item>
+        <item>Imperial</item>
+    </string-array>
+
+    <string-array name="unit_type_values_array">
+        <item>1</item>
+        <item>0</item>
+    </string-array>
+</resources>
