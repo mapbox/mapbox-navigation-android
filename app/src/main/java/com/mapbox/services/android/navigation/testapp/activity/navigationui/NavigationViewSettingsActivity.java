@@ -12,7 +12,8 @@ public class NavigationViewSettingsActivity extends PreferenceActivity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    getFragmentManager().beginTransaction().replace(android.R.id.content, new NavigationViewPreferenceFragment()).commit();
+    getFragmentManager().beginTransaction().replace(
+      android.R.id.content, new NavigationViewPreferenceFragment()).commit();
   }
 
   public static class NavigationViewPreferenceFragment extends PreferenceFragment {
