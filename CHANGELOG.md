@@ -2,6 +2,25 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.10.0-beta.1 - February 16, 2018
+
+* Clear features so DirectionsRoute isn't redrawn when new style loads [#706](https://github.com/mapbox/mapbox-navigation-android/pull/706)
+* Fix bug with MapRoute onClick [#703](https://github.com/mapbox/mapbox-navigation-android/pull/703)
+* Fix flashing InstructionView list during re-routes [#700](https://github.com/mapbox/mapbox-navigation-android/pull/700)
+* Fix FeedbackBottomSheet rotation bug [#699](https://github.com/mapbox/mapbox-navigation-android/pull/699)
+* Check Turn / Then Banner on each update [#696](https://github.com/mapbox/mapbox-navigation-android/pull/696)
+* Instructions based on locale [#691](https://github.com/mapbox/mapbox-navigation-android/pull/691)
+* Cancel animation if AlertView detaches while running [#689](https://github.com/mapbox/mapbox-navigation-android/pull/689)
+* Add bearing to RouteEngine requests [#687](https://github.com/mapbox/mapbox-navigation-android/pull/687)
+* LocationViewModel obtain best LocationEngine [#685](https://github.com/mapbox/mapbox-navigation-android/pull/685)
+* Dependencies Bump [#684](https://github.com/mapbox/mapbox-navigation-android/pull/684)
+* Fix issue with startup in Night Mode [#683](https://github.com/mapbox/mapbox-navigation-android/pull/683)
+* Cache route options / calculate remaining waypoints [#680](https://github.com/mapbox/mapbox-navigation-android/pull/680)
+* Switched setOnMapClickListener() to addOnMapClickListener() [#672](https://github.com/mapbox/mapbox-navigation-android/pull/672)
+* Locale distance formatter [#668](https://github.com/mapbox/mapbox-navigation-android/pull/668)
+* Off-Route Bug Fixes [#667](https://github.com/mapbox/mapbox-navigation-android/pull/667)
+* Update Default Zoom Level [#655](https://github.com/mapbox/mapbox-navigation-android/pull/655)
+
 ### v0.9.0 - January 23, 2018
 
 * Update Maps and Services dependencies [#661](https://github.com/mapbox/mapbox-navigation-android/pull/661)
