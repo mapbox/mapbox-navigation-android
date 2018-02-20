@@ -18,6 +18,7 @@ android {
         project.VERSION_NAME
     )
   }
+
   configurations {
     javadocDeps
   }
@@ -34,37 +35,31 @@ dependencies {
   api project(':libandroid-navigation')
 
   // Mapbox Map SDK
-  api(dependenciesList.mapboxMapSdk) {
-    transitive = true
+  implementation(dependenciesList.mapboxMapSdk) {
     exclude module: 'lost'
     exclude module: 'mapbox-java-geojson'
     exclude module: 'mapbox-android-telemetry'
   }
 
   // Support libraries
-  api dependenciesList.supportAppcompatV7
-  api dependenciesList.supportDesign
-  api dependenciesList.supportRecyclerView
-  api dependenciesList.supportConstraintLayout
-  api dependenciesList.supportCardView
+  implementation dependenciesList.supportDesign
+  implementation dependenciesList.supportRecyclerView
+  implementation dependenciesList.supportConstraintLayout
+  implementation dependenciesList.supportCardView
 
   // Architecture libraries
   implementation dependenciesList.lifecycleExtensions
   annotationProcessor dependenciesList.lifecycleCompiler
 
   // Mapbox plugins
-  api(dependenciesList.locationLayerPlugin) {
+  implementation(dependenciesList.locationLayerPlugin) {
     exclude module: 'mapbox-android-services'
     exclude module: 'mapbox-android-sdk'
   }
-  api dependenciesList.mapboxJavaServices
 
   // AutoValues
   annotationProcessor dependenciesList.autoValue
   compileOnly dependenciesList.autoValue
-
-  // Logging
-  implementation dependenciesList.timber
 
   // AWS Polly
   implementation dependenciesList.polly
