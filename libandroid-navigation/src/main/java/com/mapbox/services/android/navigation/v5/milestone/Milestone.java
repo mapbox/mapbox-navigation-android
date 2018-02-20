@@ -20,7 +20,7 @@ public abstract class Milestone {
 
   /**
    * Milestone specific identifier as an {@code int} value, useful for deciphering which milestone
-   * invoked {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}.
+   * invoked {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, Milestone)}.
    *
    * @return {@code int} representing the identifier
    * @since 0.4.0
@@ -34,7 +34,7 @@ public abstract class Milestone {
    * instruction specified by the superclass.
    *
    * @return {@link Instruction} to be used to build the {@link String} passed to
-   * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
+   * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, Milestone)}
    * @since 0.4.0
    */
   public Instruction getInstruction() {
@@ -70,7 +70,7 @@ public abstract class Milestone {
 
     /**
      * Milestone specific identifier as an {@code int} value, useful for deciphering which milestone
-     * invoked {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}.
+     * invoked {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, Milestone)}.
      *
      * @return {@code int} representing the identifier
      * @since 0.4.0
@@ -81,7 +81,7 @@ public abstract class Milestone {
 
     /**
      * Milestone specific identifier as an {@code int} value, useful for deciphering which milestone
-     * invoked {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}.
+     * invoked {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, Milestone)}.
      *
      * @param identifier an {@code int} used to identify this milestone instance
      * @return this builder
@@ -110,7 +110,7 @@ public abstract class Milestone {
 
     /**
      * The list of triggers that are used to determine whether this milestone should invoke
-     * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
+     * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, Milestone)}
      *
      * @param trigger a single simple statement or compound statement found in {@link Trigger}
      * @return this builder

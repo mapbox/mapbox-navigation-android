@@ -28,7 +28,7 @@ public final class NavigationConstants {
   /**
    * String channel used to post the navigation notification (custom or default).
    * <p>
-   * If > Android O, a notification channel needs to be created to properly post the notification.
+   * If &gt; Android O, a notification channel needs to be created to properly post the notification.
    *
    * @since 0.8.0
    */
