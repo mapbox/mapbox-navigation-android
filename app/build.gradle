@@ -41,14 +41,15 @@ sonarqube {
 dependencies {
   // Mapbox Navigation SDK
   implementation project(':libandroid-navigation-ui')
+  implementation dependenciesList.mapboxMapSdk
+  implementation dependenciesList.locationLayerPlugin
 
   // Support libraries
   implementation dependenciesList.supportAppcompatV7
+  implementation dependenciesList.supportDesign
+  implementation dependenciesList.supportRecyclerView
   implementation dependenciesList.supportConstraintLayout
-
-  // Architecture libraries
-  implementation dependenciesList.lifecycleExtensions
-  annotationProcessor dependenciesList.lifecycleCompiler
+  implementation dependenciesList.supportCardView
 
   // Logging
   implementation dependenciesList.timber
