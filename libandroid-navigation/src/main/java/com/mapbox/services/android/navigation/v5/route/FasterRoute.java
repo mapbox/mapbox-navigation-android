@@ -27,8 +27,7 @@ public abstract class FasterRoute {
    * be retrieved by {@link RouteEngine}.
    * <p>
    * It will also be called every time
-   * the {@link com.mapbox.services.android.navigation.v5.navigation.NavigationEngine} gets a valid
-   * {@link Location} update.
+   * the <tt>NavigationEngine</tt> gets a valid {@link Location} update.
    * <p>
    * The most recent snapped location and route progress are provided.  Both can be used to
    * determine if a new route should be fetched or not.

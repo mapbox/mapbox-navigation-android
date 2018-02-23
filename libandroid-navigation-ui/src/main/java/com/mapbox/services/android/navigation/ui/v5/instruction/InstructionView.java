@@ -156,7 +156,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Subscribes to a {@link NavigationViewModel} for
    * updates from {@link android.arch.lifecycle.LiveData}.
    * <p>
-   * Updates all views with fresh data / shows & hides re-route state.
+   * Updates all views with fresh data / shows &amp; hides re-route state.
    *
    * @param navigationViewModel to which this View is subscribing
    * @since 0.6.2
