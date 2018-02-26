@@ -2,6 +2,12 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.10.0 - February 26, 2018
+
+* Fix NPE with MapRoute click listener [#721](https://github.com/mapbox/mapbox-navigation-android/pull/721)
+* Null check camera tracking [#719](https://github.com/mapbox/mapbox-navigation-android/pull/719)
+* Initialize metric session state in constructor [#718](https://github.com/mapbox/mapbox-navigation-android/pull/718)
+
 ### v0.10.0-beta.1 - February 16, 2018
 
 * Clear features so DirectionsRoute isn't redrawn when new style loads [#706](https://github.com/mapbox/mapbox-navigation-android/pull/706)
