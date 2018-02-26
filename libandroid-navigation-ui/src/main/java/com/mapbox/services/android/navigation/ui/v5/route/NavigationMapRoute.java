@@ -327,20 +327,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   }
 
   private void clearRoutes() {
-    if (!layerIds.isEmpty()) {
-      for (String id : layerIds) {
-        mapboxMap.removeLayer(id);
-      }
-    }
-    if (!directionsRoutes.isEmpty()) {
-      directionsRoutes.clear();
-    }
-    if (!routeLineStrings.isEmpty()) {
-      routeLineStrings.clear();
-    }
-    if (!featureCollections.isEmpty()) {
-      featureCollections.clear();
-    }
+    removeLayerIds();
+    clearRouteListData();
   }
 
   private void generateFeatureCollectionList(List<DirectionsRoute> directionsRoutes) {
@@ -447,6 +435,26 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
           index == primaryRouteIndex ? routeDefaultColor : alternativeRouteDefaultColor)))
     );
     MapUtils.addLayerToMap(mapboxMap, routeLayer, belowLayer);
+  }
+
+  private void removeLayerIds() {
+    if (!layerIds.isEmpty()) {
+      for (String id : layerIds) {
+        mapboxMap.removeLayer(id);
+      }
+    }
+  }
+
+  private void clearRouteListData() {
+    if (!directionsRoutes.isEmpty()) {
+      directionsRoutes.clear();
+    }
+    if (!routeLineStrings.isEmpty()) {
+      routeLineStrings.clear();
+    }
+    if (!featureCollections.isEmpty()) {
+      featureCollections.clear();
+    }
   }
 
   /**
@@ -670,11 +678,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private void checkNewRouteFound(int currentRouteIndex) {
     if (currentRouteIndex != primaryRouteIndex) {
       updateRoute();
-      if (onRouteSelectionChangeListener != null) {
-        if (primaryRouteIndex > 0 && primaryRouteIndex < directionsRoutes.size()) {
-          DirectionsRoute selectedRoute = directionsRoutes.get(primaryRouteIndex);
-          onRouteSelectionChangeListener.onNewPrimaryRouteSelected(selectedRoute);
-        }
+      boolean isValidPrimaryIndex = primaryRouteIndex > 0 && primaryRouteIndex < directionsRoutes.size();
+      if (isValidPrimaryIndex && onRouteSelectionChangeListener != null) {
+        DirectionsRoute selectedRoute = directionsRoutes.get(primaryRouteIndex);
+        onRouteSelectionChangeListener.onNewPrimaryRouteSelected(selectedRoute);
       }
     }
   }
