@@ -214,15 +214,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   }
 
   /**
-   * Adds source and layers to the map.
-   */
-  private void initialize() {
-    alternativesVisible = true;
-    getAttributes();
-    placeRouteBelow();
-  }
-
-  /**
    * Allows adding a single primary route for the user to traverse along. No alternative routes will
    * be drawn on top of the map.
    *
@@ -594,9 +585,12 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     return feature;
   }
 
-  /**
-   * Adds the necessary listeners
-   */
+  private void initialize() {
+    alternativesVisible = true;
+    getAttributes();
+    placeRouteBelow();
+  }
+
   private void addListeners() {
     mapboxMap.addOnMapClickListener(this);
     if (navigation != null) {
