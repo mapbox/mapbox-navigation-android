@@ -9,12 +9,14 @@ import android.text.TextUtils;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.polly.AmazonPollyPresigningClient;
+import com.amazonaws.services.polly.model.VoiceId;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionListener;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import timber.log.Timber;
 
@@ -34,6 +36,7 @@ public class PollyPlayer implements InstructionPlayer {
   private List<String> instructionUrls = new ArrayList<>();
   private InstructionListener instructionListener;
   private boolean isMuted;
+  private final VoiceId voiceId;
 
   /**
    * Construct an instance of {@link PollyPlayer}
@@ -41,7 +44,8 @@ public class PollyPlayer implements InstructionPlayer {
    * @param context   to initialize {@link CognitoCachingCredentialsProvider} and {@link AudioManager}
    * @param awsPoolId to initialize {@link CognitoCachingCredentialsProvider}
    */
-  public PollyPlayer(Context context, String awsPoolId) {
+  public PollyPlayer(Context context, String awsPoolId, Locale locale) {
+    this.voiceId = getVoiceId(locale);
     initPollyClient(context, awsPoolId);
   }
 
@@ -128,7 +132,60 @@ public class PollyPlayer implements InstructionPlayer {
           instructionListener.onError();
         }
       }
-    }).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, instruction);
+    }, voiceId).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, instruction);
+  }
+
+  private VoiceId getVoiceId(Locale locale) {
+    switch (locale.getLanguage()) {
+      case "da":
+        return VoiceId.Naja;
+      case "de":
+        return VoiceId.Marlene;
+      case "en":
+        switch (locale.getCountry()) {
+          case "GB":
+            return VoiceId.Brian;
+          case "AU":
+            return VoiceId.Nicole;
+          case "IN":
+            return VoiceId.Raveena;
+          case "CA":
+          default:
+            return VoiceId.Joanna;
+        }
+      case "es":
+        switch (locale.getCountry()) {
+          case "ES":
+            return VoiceId.Enrique;
+          default:
+            return VoiceId.Miguel;
+        }
+      case "fr":
+        return VoiceId.Celine;
+      case "it":
+        return VoiceId.Giorgio;
+      case "nl":
+        return VoiceId.Lotte;
+      case "pl":
+        return VoiceId.Ewa;
+      case "pt":
+        switch (locale.getCountry()) {
+          case "BR":
+            return VoiceId.Vitoria;
+          default:
+            return VoiceId.Ines;
+        }
+      case "ro":
+        return VoiceId.Carmen;
+      case "ru":
+        return VoiceId.Maxim;
+      case "sv":
+        return VoiceId.Astrid;
+      case "tr":
+        return VoiceId.Filiz;
+      default:
+        return VoiceId.Joanna;
+    }
   }
 
   private void playInstruction(String instruction) {

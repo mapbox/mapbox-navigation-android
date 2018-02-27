@@ -23,6 +23,7 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
   private InstructionListener instructionListener;
   private TextToSpeech textToSpeech;
   private boolean isMuted;
+  private Locale locale;
 
   /**
    * Creates an instance of {@link DefaultPlayer}.
@@ -30,7 +31,8 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
    * @param context used to create an instance of {@link TextToSpeech}
    * @since 0.6.0
    */
-  DefaultPlayer(Context context) {
+  DefaultPlayer(Context context, Locale locale) {
+    this.locale = locale;
     textToSpeech = new TextToSpeech(context, this);
     textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
       @Override
@@ -108,7 +110,7 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
   @Override
   public void onInit(int status) {
     if (status != TextToSpeech.ERROR) {
-      textToSpeech.setLanguage(Locale.getDefault());
+      textToSpeech.setLanguage(locale);
     }
   }
 

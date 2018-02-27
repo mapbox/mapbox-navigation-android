@@ -1,32 +1,38 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.text.SpannableStringBuilder;
+import android.content.Context;
+import android.text.SpannableString;
 
 import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.StepIntersection;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
-import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Locale;
 
 class InstructionStepResources {
 
-  private SpannableStringBuilder stepDistanceRemaining;
+  private static final double VALID_UPCOMING_DURATION = 25d * 1.2d;
+  private static final double VALID_CURRENT_DURATION = 70d;
+
+  private SpannableString stepDistanceRemaining;
   private String maneuverViewModifier;
   private String maneuverViewType;
   private String thenStepManeuverModifier;
   private String thenStepManeuverType;
-  private boolean shouldShowThenStep;
   private List<IntersectionLanes> turnLanes;
+  private boolean shouldShowThenStep;
 
-  InstructionStepResources(RouteProgress progress, DecimalFormat decimalFormat, int unitType) {
-    formatStepDistance(progress, decimalFormat, unitType);
+  InstructionStepResources(Context context, RouteProgress progress, Locale locale,
+                           @NavigationUnitType.UnitType int unitType) {
+    formatStepDistance(context, progress, locale, unitType);
     extractStepResources(progress);
   }
 
-  SpannableStringBuilder getStepDistanceRemaining() {
+  SpannableString getStepDistanceRemaining() {
     return stepDistanceRemaining;
   }
 
@@ -79,9 +85,10 @@ class InstructionStepResources {
     }
   }
 
-  private void formatStepDistance(RouteProgress progress, DecimalFormat decimalFormat, int unitType) {
-    stepDistanceRemaining = DistanceUtils.distanceFormatter(progress.currentLegProgress()
-      .currentStepProgress().distanceRemaining(), decimalFormat, true, unitType);
+  private void formatStepDistance(Context context, RouteProgress progress,
+                                  Locale locale, @NavigationUnitType.UnitType int unitType) {
+    stepDistanceRemaining = new DistanceUtils(context, locale, unitType)
+      .formatDistance(progress.currentLegProgress().currentStepProgress().distanceRemaining());
   }
 
   private void intersectionTurnLanes(LegStep step) {
@@ -97,8 +104,12 @@ class InstructionStepResources {
   private void thenStep(LegStep upcomingStep, LegStep followOnStep, double currentDurationRemaining) {
     thenStepManeuverType = followOnStep.maneuver().type();
     thenStepManeuverModifier = followOnStep.maneuver().modifier();
-    // Should show then step if the upcoming step is less than 25 seconds
-    shouldShowThenStep = upcomingStep.duration() <= (25d * 1.2d) && currentDurationRemaining <= (70d * 1.2d);
+    shouldShowThenStep = isValidStepDuration(upcomingStep, currentDurationRemaining);
+  }
+
+  private boolean isValidStepDuration(LegStep upcomingStep, double currentDurationRemaining) {
+    return upcomingStep.duration() <= VALID_UPCOMING_DURATION
+      && currentDurationRemaining <= VALID_CURRENT_DURATION;
   }
 
   private boolean checkForNoneIndications(List<IntersectionLanes> lanes) {

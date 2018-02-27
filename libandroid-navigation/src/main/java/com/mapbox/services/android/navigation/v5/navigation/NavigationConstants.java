@@ -28,7 +28,7 @@ public final class NavigationConstants {
   /**
    * String channel used to post the navigation notification (custom or default).
    * <p>
-   * If > Android O, a notification channel needs to be created to properly post the notification.
+   * If &gt; Android O, a notification channel needs to be created to properly post the notification.
    *
    * @since 0.8.0
    */
@@ -168,6 +168,13 @@ public final class NavigationConstants {
    */
   public static final int NAVIGATION_MEDIUM_ALERT_DURATION = 70;
 
+  /**
+   * Constant used to store running state in navigation view.
+   *
+   * @since 0.10.0
+   */
+  public static final String NAVIGATION_VIEW_RUNNING = "navigation_view_running";
+
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat";
   public static final String NAVIGATION_VIEW_ORIGIN_LNG_KEY = "origin_long";
@@ -178,8 +185,9 @@ public final class NavigationConstants {
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
   public static final String NAVIGATION_VIEW_AWS_POOL_ID = "navigation_view_aws_pool_id";
   public static final String NAVIGATION_VIEW_UNIT_TYPE = "navigation_view_unit_type";
+  public static final String NAVIGATION_VIEW_LOCALE_LANGUAGE = "navigation_view_locale_language";
+  public static final String NAVIGATION_VIEW_LOCALE_COUNTRY = "navigation_view_locale_country";
   public static final String NAVIGATION_VIEW_REROUTING = "Rerouting";
-  public static final String DECIMAL_FORMAT = "#.#";
 
   // Step Maneuver Types
   public static final String STEP_MANEUVER_TYPE_TURN = "turn";

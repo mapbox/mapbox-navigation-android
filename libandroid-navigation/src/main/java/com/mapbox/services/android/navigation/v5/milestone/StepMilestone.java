@@ -4,7 +4,8 @@ import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 /**
- * Using a Step Milestone will result in {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)}
+ * Using a Step Milestone will result in
+ * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, Milestone)}
  * being invoked every step if the condition validation returns true.
  *
  * @since 0.4.0

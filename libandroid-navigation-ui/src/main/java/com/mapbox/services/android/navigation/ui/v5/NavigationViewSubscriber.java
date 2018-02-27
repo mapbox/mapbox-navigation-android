@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationViewModel;
+import com.mapbox.services.android.navigation.ui.v5.route.OffRouteEvent;
 import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 
@@ -118,17 +119,15 @@ class NavigationViewSubscriber {
       }
     });
 
-    navigationViewModel.newOrigin.observe(owner, new Observer<Point>() {
+    navigationViewModel.offRouteEvent.observe(owner, new Observer<OffRouteEvent>() {
       @Override
-      public void onChanged(@Nullable Point newOrigin) {
-        if (newOrigin != null) {
+      public void onChanged(@Nullable OffRouteEvent event) {
+        if (event != null) {
+          Point newOrigin = event.getNewOrigin();
           if (navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
-            // Send off route event with new origin
             navigationViewEventDispatcher.onOffRoute(newOrigin);
-            // Fetch a new route with the given origin
-            routeViewModel.fetchRouteNewOrigin(newOrigin);
-            // To prevent from firing on rotation
-            navigationViewModel.newOrigin.setValue(null);
+            routeViewModel.fetchRouteFromOffRouteEvent(event);
+            preventDuplicateOffRouteEvents(navigationViewModel);
           }
         }
       }
@@ -174,5 +173,9 @@ class NavigationViewSubscriber {
         }
       }
     });
+  }
+
+  private void preventDuplicateOffRouteEvents(NavigationViewModel navigationViewModel) {
+    navigationViewModel.offRouteEvent.setValue(null);
   }
 }

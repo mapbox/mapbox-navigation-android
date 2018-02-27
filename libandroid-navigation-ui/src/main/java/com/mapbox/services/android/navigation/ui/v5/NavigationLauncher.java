@@ -12,8 +12,10 @@ import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * Use this class to launch the navigation UI
@@ -47,6 +49,14 @@ public class NavigationLauncher {
 
     editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, options.awsPoolId());
     editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, options.shouldSimulateRoute());
+
+    Locale locale = options.navigationOptions().locale();
+    if (locale == null) {
+      locale = LocaleUtils.getDeviceLocale(activity);
+    }
+
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, locale.getLanguage());
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, locale.getCountry());
     editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, options.navigationOptions().unitType());
 
     setThemePreferences(options, editor);

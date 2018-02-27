@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 
+import java.util.Locale;
+
 /**
  * Immutable and can't be changed after passing into {@link MapboxNavigation}.
  */
@@ -46,6 +48,9 @@ public abstract class MapboxNavigationOptions {
   public abstract boolean isDebugLoggingEnabled();
 
   public abstract int unitType();
+
+  @Nullable
+  public abstract Locale locale();
 
   @Nullable
   public abstract NavigationNotification navigationNotification();
@@ -93,6 +98,8 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder navigationNotification(NavigationNotification notification);
 
+    public abstract Builder locale(Locale locale);
+
     public abstract MapboxNavigationOptions build();
   }
 
@@ -115,6 +122,6 @@ public abstract class MapboxNavigationOptions {
       .enableNotification(true)
       .isFromNavigationUi(false)
       .isDebugLoggingEnabled(false)
-      .unitType(NavigationUnitType.TYPE_IMPERIAL);
+      .unitType(NavigationUnitType.NONE_SPECIFIED);
   }
 }

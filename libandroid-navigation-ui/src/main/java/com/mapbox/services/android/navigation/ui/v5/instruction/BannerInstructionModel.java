@@ -1,18 +1,21 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
+import android.content.Context;
+
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import java.text.DecimalFormat;
+import java.util.Locale;
 
 public class BannerInstructionModel extends InstructionModel {
 
   private BannerInstructionMilestone milestone;
 
-  public BannerInstructionModel(BannerInstructionMilestone milestone, RouteProgress progress,
-                                DecimalFormat decimalFormat, int unitType) {
-    super(progress, decimalFormat, unitType);
+  public BannerInstructionModel(Context context, BannerInstructionMilestone milestone,
+                                RouteProgress progress, Locale locale, @NavigationUnitType.UnitType int unitType) {
+    super(context, progress, locale, unitType);
     this.milestone = milestone;
   }
 

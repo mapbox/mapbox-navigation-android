@@ -5,36 +5,41 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
+import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.mapbox.services.android.navigation.v5.route.RouteEngine.buildRouteRequestFromCurrentLocation;
+
 public class RouteViewModel extends AndroidViewModel implements Callback<DirectionsResponse> {
 
   public final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
   public final MutableLiveData<Point> destination = new MutableLiveData<>();
   public final MutableLiveData<String> requestErrorMessage = new MutableLiveData<>();
-  private Point origin;
   private Location rawLocation;
+  private RouteOptions routeOptions;
   private String routeProfile;
   private String unitType;
-  private Locale language;
+  private Locale locale;
 
   public RouteViewModel(@NonNull Application application) {
     super(application);
@@ -52,14 +57,14 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * @since 0.6.0
    */
   @Override
-  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+  public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
     if (validRouteResponse(response)) {
       route.setValue(response.body().routes().get(0));
     }
   }
 
   @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+  public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
     requestErrorMessage.setValue(throwable.getMessage());
   }
 
@@ -75,7 +80,9 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * @param options holds either a set of {@link Point} coordinates or a {@link DirectionsRoute}
    */
   public void extractRouteOptions(NavigationViewOptions options) {
-    updateUnitType(options.navigationOptions().unitType());
+    extractLocale(options);
+    extractUnitType(options);
+
     if (launchWithRoute(options)) {
       extractRouteFromOptions(options);
     } else {
@@ -87,57 +94,45 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * Updates the request unit type based on what was set in
    * {@link NavigationViewOptions}.
    *
-   * @param unitType to be used for route requests
+   * @param options possibly containing unitType
    */
-  private void updateUnitType(int unitType) {
-    boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
-    if (isImperialUnitType) {
-      this.unitType = DirectionsCriteria.IMPERIAL;
-    } else {
-      this.unitType = DirectionsCriteria.METRIC;
-    }
-  }
-
-  /**
-   * Called when an off-route event is fired and a new {@link DirectionsRoute}
-   * is needed to continue navigating.
-   *
-   * @param newOrigin found from off-route event
-   */
-  public void fetchRouteNewOrigin(Point newOrigin) {
-    if (newOrigin != null && destination.getValue() != null) {
-      fetchRoute(newOrigin, destination.getValue());
-    }
+  private void extractUnitType(NavigationViewOptions options) {
+    unitType = NavigationUnitType.getDirectionsCriteriaUnitType(options.navigationOptions().unitType());
   }
 
   /**
    * Requests a new {@link DirectionsRoute}.
    * <p>
    * Will use {@link Location} bearing if we have a rawLocation with bearing.
+   * <p>
+   * Called when an off-route event is fired and a new {@link DirectionsRoute}
+   * is needed to continue navigating.
    *
-   * @param origin      start point
-   * @param destination end point
+   * @param event found from off-route event
    */
-  private void fetchRoute(Point origin, Point destination) {
-    if (origin != null && destination != null) {
-
+  public void fetchRouteFromOffRouteEvent(OffRouteEvent event) {
+    if (OffRouteEvent.isValid(event)) {
       Double bearing = null;
       if (rawLocation != null) {
         bearing = rawLocation.hasBearing() ? Float.valueOf(rawLocation.getBearing()).doubleValue() : null;
       }
-
-      NavigationRoute.builder()
-        .accessToken(Mapbox.getAccessToken())
-        .origin(origin, bearing, 90d)
-        .voiceUnits(unitType)
-        .profile(routeProfile)
-        .language(language)
-        .destination(destination).build().getRoute(this);
+      Point origin = event.getNewOrigin();
+      RouteProgress progress = event.getRouteProgress();
+      NavigationRoute.Builder builder = buildRouteRequestFromCurrentLocation(origin, bearing, progress);
+      if (builder != null) {
+        addNavigationViewOptions(builder);
+        builder.build().getRoute(this);
+      }
     }
   }
 
-  private void fetchRouteFromCoordinates() {
-    fetchRoute(origin, destination.getValue());
+  private void fetchRouteFromCoordinates(Point origin, Point destination) {
+    NavigationRoute.Builder builder = NavigationRoute.builder()
+      .accessToken(Mapbox.getAccessToken())
+      .origin(origin)
+      .destination(destination);
+    addNavigationViewOptions(builder);
+    builder.build().getRoute(this);
   }
 
   /**
@@ -159,57 +154,8 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private void extractRouteFromOptions(NavigationViewOptions options) {
     DirectionsRoute route = options.directionsRoute();
     if (route != null) {
-      cacheRouteProfile(options, route);
-      cacheRouteLanguage(options, route);
-      cacheRouteDestination(route);
+      cacheRouteInformation(options, route);
       this.route.setValue(route);
-    }
-  }
-
-  /**
-   * Looks at the given {@link DirectionsRoute} and extracts the destination based on
-   * the last {@link LegStep} maneuver.
-   *
-   * @param route to extract destination from
-   */
-  private void cacheRouteDestination(DirectionsRoute route) {
-    RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
-    LegStep lastStep = lastLeg.steps().get(lastLeg.steps().size() - 1);
-    destination.setValue(lastStep.maneuver().location());
-  }
-
-  /**
-   * Looks for a route profile provided by {@link NavigationViewOptions} to be
-   * stored for reroute requests.
-   * <p>
-   * If not found, look at the {@link com.mapbox.api.directions.v5.models.RouteOptions} for
-   * the profile from the original route.
-   *
-   * @param options to look for set profile
-   * @param route   as backup if view options profile not found
-   */
-  private void cacheRouteProfile(NavigationViewOptions options, DirectionsRoute route) {
-    String profile = options.directionsProfile();
-    routeProfile = profile != null ? profile : route.routeOptions().profile();
-  }
-
-  /**
-   * Looks for a route language provided by {@link NavigationViewOptions} to be
-   * stored for reroute requests.
-   * <p>
-   * If not found, look at the {@link com.mapbox.api.directions.v5.models.RouteOptions} for
-   * the language from the original route.
-   *
-   * @param options to look for set language
-   * @param route   as backup if view options language not found
-   */
-  private void cacheRouteLanguage(NavigationViewOptions options, DirectionsRoute route) {
-    if (options.directionsLanguage() != null) {
-      language = options.directionsLanguage();
-    } else if (!TextUtils.isEmpty(route.routeOptions().language())) {
-      language = new Locale(route.routeOptions().language());
-    } else {
-      language = Locale.getDefault();
     }
   }
 
@@ -221,11 +167,11 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    */
   private void extractCoordinatesFromOptions(NavigationViewOptions options) {
     if (options.origin() != null && options.destination() != null) {
-      String profile = options.directionsProfile();
-      routeProfile = profile != null ? profile : DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
-      origin = options.origin();
+      cacheRouteProfile(options);
+      cacheRouteLanguage(options, null);
+      Point origin = options.origin();
       destination.setValue(options.destination());
-      fetchRouteFromCoordinates();
+      fetchRouteFromCoordinates(origin, destination.getValue());
     }
   }
 
@@ -236,8 +182,71 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
    * @param response to be checked
    * @return true if valid, false if not
    */
-  private boolean validRouteResponse(Response<DirectionsResponse> response) {
+  private static boolean validRouteResponse(Response<DirectionsResponse> response) {
     return response.body() != null
       && !response.body().routes().isEmpty();
+  }
+
+  private void addNavigationViewOptions(NavigationRoute.Builder builder) {
+    if (routeProfile != null) {
+      builder.profile(routeProfile);
+    }
+    builder
+      .language(locale)
+      .voiceUnits(unitType);
+  }
+
+  private void cacheRouteInformation(NavigationViewOptions options, DirectionsRoute route) {
+    cacheRouteOptions(route.routeOptions());
+    cacheRouteProfile(options);
+    cacheRouteLanguage(options, route);
+  }
+
+  private void cacheRouteOptions(RouteOptions routeOptions) {
+    this.routeOptions = routeOptions;
+    cacheRouteDestination();
+  }
+
+  /**
+   * Looks for a route profile provided by {@link NavigationViewOptions} to be
+   * stored for reroute requests.
+   *
+   * @param options to look for set profile
+   */
+  private void cacheRouteProfile(NavigationViewOptions options) {
+    routeProfile = options.directionsProfile();
+  }
+
+  /**
+   * Looks at the given {@link DirectionsRoute} and extracts the destination based on
+   * the last {@link LegStep} maneuver.
+   */
+  private void cacheRouteDestination() {
+    if (routeOptions != null && !routeOptions.coordinates().isEmpty()) {
+      List<Point> coordinates = routeOptions.coordinates();
+      int destinationCoordinate = coordinates.size() - 1;
+      Point destinationPoint = coordinates.get(destinationCoordinate);
+      destination.setValue(destinationPoint);
+    }
+  }
+
+  /**
+   * Looks for a route locale provided by {@link NavigationViewOptions} to be
+   * stored for reroute requests.
+   *
+   * @param options to look for set locale
+   */
+  private void extractLocale(NavigationViewOptions options) {
+    locale = LocaleUtils.getNonNullLocale(this.getApplication(), options.navigationOptions().locale());
+  }
+
+  private void cacheRouteLanguage(NavigationViewOptions options, @Nullable DirectionsRoute route) {
+    if (options.navigationOptions().locale() != null) {
+      locale = options.navigationOptions().locale();
+    } else if (route != null && !TextUtils.isEmpty(route.routeOptions().language())) {
+      locale = new Locale(route.routeOptions().language());
+    } else {
+      locale = Locale.getDefault();
+    }
   }
 }

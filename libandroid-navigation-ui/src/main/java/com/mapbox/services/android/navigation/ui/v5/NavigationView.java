@@ -43,9 +43,12 @@ import com.mapbox.services.android.navigation.ui.v5.utils.ViewUtils;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * View that creates the drop-in UI.
@@ -238,7 +241,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   @Override
   public void setCameraTrackingEnabled(boolean isEnabled) {
-    camera.setCameraTrackingLocation(isEnabled);
+    if (camera != null) {
+      camera.setCameraTrackingLocation(isEnabled);
+    }
   }
 
   @Override
@@ -350,10 +355,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param options with containing route / coordinate data
    */
   public void startNavigation(NavigationViewOptions options) {
+    // Clear any existing markers
     clearMarkers();
-
     // Initialize navigation with options from NavigationViewOptions
     if (!isInitialized) {
+      setLocale(options);
       navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
         options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
       // Initialize the camera (listens to MapboxNavigation)
@@ -367,6 +373,19 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     // Update the view models
     locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
     routeViewModel.extractRouteOptions(options);
+  }
+
+  private void setLocale(NavigationViewOptions options) {
+    Locale locale = options.navigationOptions().locale();
+    if (locale == null) {
+      locale = LocaleUtils.getDeviceLocale(getContext());
+    }
+    @NavigationUnitType.UnitType int unitType = options.navigationOptions().unitType();
+
+    instructionView.setLocale(locale);
+    instructionView.setUnitType(unitType);
+    summaryBottomSheet.setLocale(locale);
+    summaryBottomSheet.setUnitType(unitType);
   }
 
   /**

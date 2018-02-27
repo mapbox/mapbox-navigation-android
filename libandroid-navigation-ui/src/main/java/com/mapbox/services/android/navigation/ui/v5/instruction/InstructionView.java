@@ -12,6 +12,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -33,6 +34,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
@@ -50,8 +52,10 @@ import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEven
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
-import java.text.DecimalFormat;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * A view that can be used to display upcoming maneuver information and control
@@ -69,7 +73,9 @@ import java.text.DecimalFormat;
  */
 public class InstructionView extends RelativeLayout implements FeedbackBottomSheetListener {
 
-  public boolean isMuted;
+  private static final double VALID_DURATION_REMAINING = 70d;
+  private static final int TOP = 0;
+
   private ManeuverView upcomingManeuverView;
   private TextView upcomingDistanceText;
   private TextView upcomingPrimaryText;
@@ -93,10 +99,13 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
   private AnimationSet fadeInSlowOut;
-  private DecimalFormat decimalFormat;
   private LegStep currentStep;
   private NavigationViewModel navigationViewModel;
   private boolean isRerouting;
+
+  private Locale locale;
+  private @NavigationUnitType.UnitType int unitType = NavigationUnitType.NONE_SPECIFIED;
+  private boolean isMuted;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -123,9 +132,13 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     bind();
     initBackground();
     initTurnLaneRecyclerView();
-    initDirectionsRecyclerView();
-    initDecimalFormat();
     initAnimations();
+  }
+
+  @Override
+  protected void onAttachedToWindow() {
+    super.onAttachedToWindow();
+    addBottomSheetListener();
   }
 
   @Override
@@ -143,7 +156,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Subscribes to a {@link NavigationViewModel} for
    * updates from {@link android.arch.lifecycle.LiveData}.
    * <p>
-   * Updates all views with fresh data / shows & hides re-route state.
+   * Updates all views with fresh data / shows &amp; hides re-route state.
    *
    * @param navigationViewModel to which this View is subscribing
    * @since 0.6.2
@@ -185,6 +198,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
     // ViewModel set - click listeners can be set now
     initClickListeners();
+    initDirectionsRecyclerView();
   }
 
   /**
@@ -192,13 +206,14 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * uses it to update the views.
    *
    * @param routeProgress used to provide navigation / routeProgress data
-   * @param unitType      either imperial or metric
    * @since 0.6.2
    */
   @SuppressWarnings("UnusedDeclaration")
-  public void update(RouteProgress routeProgress, @NavigationUnitType.UnitType int unitType) {
+  public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      InstructionModel model = new InstructionModel(routeProgress, decimalFormat, unitType);
+      locale = LocaleUtils.getNonNullLocale(getContext(), locale);
+      InstructionModel model =
+        new InstructionModel(getContext(), routeProgress, locale, unitType);
       updateViews(model);
       updateTextInstruction(model);
     }
@@ -208,9 +223,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     updateManeuverView(model);
     updateDistanceText(model);
     updateInstructionList(model);
+    updateTurnLanes(model);
+    updateThenStep(model);
     if (newStep(model.getProgress())) {
-      updateTurnLanes(model);
-      updateThenStep(model);
       // Pre-fetch the image URLs for the upcoming step
       LegStep upComingStep = model.getProgress().currentLegProgress().upComingStep();
       InstructionLoader.getInstance().prefetchImageCache(upComingStep);
@@ -274,51 +289,34 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   /**
-   * Hide the instruction list and show the sound button.
+   * Hide the instruction list.
    * <p>
    * This is based on orientation so the different layouts (for portrait vs. landscape)
    * can be animated appropriately.
    */
   public void hideInstructionList() {
+    beginDelayedTransition();
     int orientation = getContext().getResources().getConfiguration().orientation;
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      ConstraintSet collapsed = new ConstraintSet();
-      collapsed.clone(getContext(), R.layout.instruction_layout);
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        TransitionManager.beginDelayedTransition(InstructionView.this);
-      }
-      collapsed.applyTo(instructionLayout);
-      instructionListLayout.setVisibility(INVISIBLE);
-    } else {
-      Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.slide_up_top);
-      slideUp.setInterpolator(new AccelerateInterpolator());
-      instructionListLayout.startAnimation(slideUp);
-      instructionListLayout.setVisibility(INVISIBLE);
+      updateLandscapeConstraintsTo(R.layout.instruction_layout);
     }
+    instructionListLayout.setVisibility(GONE);
   }
 
   /**
-   * Show the instruction list and hide the sound button.
+   * Show the instruction list.
    * <p>
    * This is based on orientation so the different layouts (for portrait vs. landscape)
    * can be animated appropriately.
    */
   public void showInstructionList() {
+    beginDelayedTransition();
     int orientation = getContext().getResources().getConfiguration().orientation;
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      ConstraintSet expanded = new ConstraintSet();
-      expanded.clone(getContext(), R.layout.instruction_layout_alt);
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        TransitionManager.beginDelayedTransition(InstructionView.this);
-      }
-      expanded.applyTo(instructionLayout);
-      instructionListLayout.setVisibility(VISIBLE);
-    } else {
-      Animation slideDown = AnimationUtils.loadAnimation(getContext(), R.anim.slide_down_top);
-      slideDown.setInterpolator(new DecelerateInterpolator());
-      instructionListLayout.setVisibility(VISIBLE);
-      instructionListLayout.startAnimation(slideDown);
+      updateLandscapeConstraintsTo(R.layout.instruction_layout_alt);
     }
+    instructionListLayout.setVisibility(VISIBLE);
+    rvInstructions.scrollToPosition(TOP);
   }
 
   /**
@@ -487,20 +485,13 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
   private void initDirectionsRecyclerView() {
-    instructionListAdapter = new InstructionListAdapter();
+    locale = LocaleUtils.getNonNullLocale(getContext(), locale);
+    instructionListAdapter = new InstructionListAdapter(getContext(), locale, unitType);
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
     rvInstructions.setNestedScrollingEnabled(true);
     rvInstructions.setItemAnimator(new DefaultItemAnimator());
     rvInstructions.setLayoutManager(new LinearLayoutManager(getContext()));
-  }
-
-  /**
-   * Initializes decimal format to be used to populate views with
-   * distance remaining.
-   */
-  private void initDecimalFormat() {
-    decimalFormat = new DecimalFormat(NavigationConstants.DECIMAL_FORMAT);
   }
 
   /**
@@ -523,6 +514,14 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     fadeInSlowOut = new AnimationSet(false);
     fadeInSlowOut.addAnimation(fadeIn);
     fadeInSlowOut.addAnimation(fadeOut);
+  }
+
+  private void addBottomSheetListener() {
+    FragmentManager mgr = ((FragmentActivity) getContext()).getSupportFragmentManager();
+    FeedbackBottomSheet feedbackBottomSheet = (FeedbackBottomSheet) mgr.findFragmentByTag(FeedbackBottomSheet.TAG);
+    if (feedbackBottomSheet != null) {
+      feedbackBottomSheet.setFeedbackBottomSheetListener(this);
+    }
   }
 
   private void initClickListeners() {
@@ -681,14 +680,22 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model created with new {@link RouteProgress} holding turn lane data
    */
   private void updateTurnLanes(InstructionModel model) {
-    if (model.getStepResources().getTurnLanes() != null
-      && !TextUtils.isEmpty(model.getStepResources().getManeuverViewModifier())) {
-      turnLaneAdapter.addTurnLanes(model.getStepResources().getTurnLanes(),
-        model.getStepResources().getManeuverViewModifier());
+    List<IntersectionLanes> turnLanes = model.getStepResources().getTurnLanes();
+    String maneuverViewModifier = model.getStepResources().getManeuverViewModifier();
+    double durationRemaining = model.getProgress().currentLegProgress().currentStepProgress().durationRemaining();
+
+    if (shouldShowTurnLanes(turnLanes, maneuverViewModifier, durationRemaining)) {
+      turnLaneAdapter.addTurnLanes(turnLanes, maneuverViewModifier);
       showTurnLanes();
     } else {
       hideTurnLanes();
     }
+  }
+
+  private boolean shouldShowTurnLanes(List<IntersectionLanes> turnLanes,
+                                      String maneuverViewModifier, double durationRemaining) {
+    return turnLanes != null && !TextUtils.isEmpty(maneuverViewModifier)
+      && durationRemaining <= VALID_DURATION_REMAINING;
   }
 
   /**
@@ -696,9 +703,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void showTurnLanes() {
     if (turnLaneLayout.getVisibility() == GONE) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        TransitionManager.beginDelayedTransition(this);
-      }
+      beginDelayedTransition();
       turnLaneLayout.setVisibility(VISIBLE);
     }
   }
@@ -708,9 +713,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void hideTurnLanes() {
     if (turnLaneLayout.getVisibility() == VISIBLE) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        TransitionManager.beginDelayedTransition(this);
-      }
+      beginDelayedTransition();
       turnLaneLayout.setVisibility(GONE);
     }
   }
@@ -752,9 +755,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void showThenStepLayout() {
     if (thenStepLayout.getVisibility() == GONE) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        TransitionManager.beginDelayedTransition(this);
-      }
+      beginDelayedTransition();
       thenStepLayout.setVisibility(VISIBLE);
     }
   }
@@ -764,9 +765,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void hideThenStepLayout() {
     if (thenStepLayout.getVisibility() == VISIBLE) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        TransitionManager.beginDelayedTransition(this);
-      }
+      beginDelayedTransition();
       thenStepLayout.setVisibility(GONE);
     }
   }
@@ -785,6 +784,17 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     }
   }
 
+  private void beginDelayedTransition() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      TransitionManager.beginDelayedTransition(InstructionView.this);
+    }
+  }
+
+  private void updateLandscapeConstraintsTo(int layoutRes) {
+    ConstraintSet collapsed = new ConstraintSet();
+    collapsed.clone(getContext(), layoutRes);
+    collapsed.applyTo(instructionLayout);
+  }
 
   /**
    * Used to update the instructions list with the current steps.
@@ -792,6 +802,22 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model to provide the current steps and unit type
    */
   private void updateInstructionList(InstructionModel model) {
-    instructionListAdapter.updateSteps(model.getProgress(), model.getUnitType());
+    instructionListAdapter.updateSteps(model.getProgress());
+  }
+
+  /**
+   * Sets the locale to use for languages and default unit type
+   * @param locale to use
+   */
+  public void setLocale(Locale locale) {
+    this.locale = locale;
+  }
+
+  /**
+   * Sets the unit type to use
+   * @param unitType to use
+   */
+  public void setUnitType(@NavigationUnitType.UnitType int unitType) {
+    this.unitType = unitType;
   }
 }

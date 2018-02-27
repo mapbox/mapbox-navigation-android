@@ -11,6 +11,8 @@ import android.text.TextUtils;
 import com.mapbox.services.android.navigation.ui.v5.voice.polly.PollyPlayer;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
+import java.util.Locale;
+
 public class NavigationInstructionPlayer implements InstructionPlayer, InstructionListener {
 
   private AudioManager instructionAudioManager;
@@ -19,16 +21,11 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
   private InstructionListener instructionListener;
   private boolean isPollyPlayer;
 
-  public NavigationInstructionPlayer(@NonNull Context context, @Nullable String awsPoolId) {
+  public NavigationInstructionPlayer(@NonNull Context context, @Nullable String awsPoolId,
+                                     Locale locale) {
     initAudioManager(context);
     initAudioFocusRequest();
-    if (!TextUtils.isEmpty(awsPoolId)) {
-      instructionPlayer = new PollyPlayer(context, awsPoolId);
-      isPollyPlayer = true;
-    } else {
-      instructionPlayer = new DefaultPlayer(context);
-    }
-    instructionPlayer.addInstructionListener(this);
+    initInstructionPlayer(context, awsPoolId, locale);
   }
 
   private void initAudioFocusRequest() {
@@ -36,6 +33,17 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
       instructionFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
         .build();
     }
+  }
+
+  private void initInstructionPlayer(Context context, @Nullable String awsPoolId,
+                                     Locale locale) {
+    if (!TextUtils.isEmpty(awsPoolId)) {
+      instructionPlayer = new PollyPlayer(context, awsPoolId, locale);
+      isPollyPlayer = true;
+    } else {
+      instructionPlayer = new DefaultPlayer(context, locale);
+    }
+    instructionPlayer.addInstructionListener(this);
   }
 
   @Override

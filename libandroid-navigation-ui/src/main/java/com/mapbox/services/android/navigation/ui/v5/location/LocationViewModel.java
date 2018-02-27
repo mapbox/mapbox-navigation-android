@@ -14,7 +14,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
-import com.mapbox.services.android.telemetry.location.LostLocationEngine;
+import com.mapbox.services.android.telemetry.location.LocationEngineProvider;
 
 
 public class LocationViewModel extends AndroidViewModel implements LifecycleObserver, LocationEngineListener {
@@ -98,7 +98,8 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
   @SuppressWarnings({"MissingPermission"})
   private void initLocation(Application application) {
     if (!shouldSimulateRoute) {
-      modelLocationEngine = new LostLocationEngine(application.getApplicationContext());
+      LocationEngineProvider locationEngineProvider = new LocationEngineProvider(application.getApplicationContext());
+      modelLocationEngine = locationEngineProvider.obtainBestLocationEngineAvailable();
       modelLocationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
       modelLocationEngine.setFastestInterval(1000);
       modelLocationEngine.setInterval(0);

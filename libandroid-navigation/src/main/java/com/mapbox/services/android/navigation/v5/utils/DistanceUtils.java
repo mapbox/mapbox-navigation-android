@@ -1,124 +1,130 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
+import android.content.Context;
 import android.graphics.Typeface;
 import android.location.Location;
-import android.text.SpannableStringBuilder;
+import android.support.annotation.NonNull;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.span.SpanItem;
-import com.mapbox.services.android.navigation.v5.utils.span.TextSpanItem;
-import com.mapbox.services.android.navigation.v5.utils.span.SpanUtils;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfConversion;
 import com.mapbox.turf.TurfMeasurement;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.NumberFormat;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+import static com.mapbox.turf.TurfConstants.UNIT_FEET;
+import static com.mapbox.turf.TurfConstants.UNIT_KILOMETERS;
+import static com.mapbox.turf.TurfConstants.UNIT_METERS;
+import static com.mapbox.turf.TurfConstants.UNIT_MILES;
 
 public class DistanceUtils {
-
   private static final int LARGE_UNIT_THRESHOLD = 10;
   private static final int SMALL_UNIT_THRESHOLD = 401;
-  private static final String MILE = " mi";
-  private static final String FEET = " ft";
-  private static final String KILOMETER = " km";
-  private static final String METER = " m";
+  private final Map<String, String> unitStrings = new HashMap<>();
+  private final NumberFormat numberFormat;
+  private final String largeUnit;
+  private final String smallUnit;
 
-  public static SpannableStringBuilder distanceFormatter(double distance,
-                                                         DecimalFormat decimalFormat,
-                                                         boolean spansEnabled,
-                                                         int unitType) {
+  /**
+   * Creates a DistanceUtils object with information about how to format distances
+   * @param context from which to get localized strings from
+   * @param locale for which language and country
+   * @param unitType to use, or NONE_SPECIFIED to use default for locale country
+   */
+  public DistanceUtils(Context context, @NonNull Locale locale, @NavigationUnitType.UnitType int unitType) {
+    unitStrings.put(UNIT_KILOMETERS, context.getString(R.string.kilometers));
+    unitStrings.put(UNIT_METERS, context.getString(R.string.meters));
+    unitStrings.put(UNIT_MILES, context.getString(R.string.miles));
+    unitStrings.put(UNIT_FEET, context.getString(R.string.feet));
 
-    boolean isImperialUnitType = unitType == NavigationUnitType.TYPE_IMPERIAL;
+    numberFormat = NumberFormat.getNumberInstance(locale);
 
-    String largeUnitFormat = isImperialUnitType ? MILE : KILOMETER;
-    String smallUnitFormat = isImperialUnitType ? FEET : METER;
-    String largeFinalUnit = isImperialUnitType ? TurfConstants.UNIT_MILES : TurfConstants.UNIT_KILOMETERS;
-    String smallFinalUnit = isImperialUnitType ? TurfConstants.UNIT_FEET : TurfConstants.UNIT_METERS;
-
-    SpannableStringBuilder formattedString;
-    if (longDistance(distance, largeFinalUnit)) {
-      formattedString = roundToNearestMile(distance, spansEnabled, largeFinalUnit, largeUnitFormat);
-    } else if (mediumDistance(distance, largeFinalUnit, smallFinalUnit)) {
-      formattedString = roundOneDecimalPlace(distance, decimalFormat, spansEnabled,
-        largeFinalUnit, largeUnitFormat);
-    } else {
-      formattedString = roundByFiftyFeet(distance, spansEnabled, smallUnitFormat, smallFinalUnit);
+    if (unitType == NavigationUnitType.NONE_SPECIFIED) {
+      // If given locale does not include a country, use the device locale to get the default unitType
+      unitType = LocaleUtils.getUnitTypeForLocale(
+        locale.getCountry() == null ? LocaleUtils.getDeviceLocale(context) : locale);
     }
-    return formattedString;
+
+    largeUnit = unitType == NavigationUnitType.TYPE_IMPERIAL ? UNIT_MILES : UNIT_KILOMETERS;
+    smallUnit = unitType == NavigationUnitType.TYPE_IMPERIAL ? UNIT_FEET : UNIT_METERS;
   }
 
-  private static SpannableStringBuilder roundByFiftyFeet(double distance, boolean spansEnabled,
-                                                         String smallUnitFormat, String smallFinalUnit) {
-    distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, smallFinalUnit);
+  /**
+   * Returns a formatted SpannableString with bold and size formatting. I.e., "10 mi", "350 m"
+   * @param distance in meters
+   * @return SpannableString representation which has a bolded number and units which have a
+   * relative size of .65 times the size of the number
+   */
+  public SpannableString formatDistance(double distance) {
+    double distanceSmallUnit = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, smallUnit);
+    double distanceLargeUnit = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeUnit);
 
-    // Distance value
+    // If the distance is greater than 10 miles/kilometers, then round to nearest mile/kilometer
+    if (distanceLargeUnit > LARGE_UNIT_THRESHOLD) {
+      return getDistanceString(roundToDecimalPlace(distanceLargeUnit, 0), largeUnit);
+      // If the distance is less than 401 feet/meters, round by fifty feet/meters
+    } else if (distanceSmallUnit < SMALL_UNIT_THRESHOLD) {
+      return getDistanceString(roundToClosestFifty(distanceSmallUnit), smallUnit);
+      // If the distance is between 401 feet/meters and 10 miles/kilometers, then round to one decimal place
+    } else {
+      return getDistanceString(roundToDecimalPlace(distanceLargeUnit, 1), largeUnit);
+    }
+  }
+
+  /**
+   * Returns number rounded to closest fifty, unless the number is less than fifty, then fifty is returned
+   * @param distance to round to closest fifty
+   * @return number rounded to closest fifty, or fifty if distance is less than fifty
+   */
+  private String roundToClosestFifty(double distance) {
     int roundedNumber = ((int) Math.round(distance)) / 50 * 50;
-    roundedNumber = roundedNumber < 50 ? 50 : roundedNumber;
 
-    if (spansEnabled) {
-      return generateSpannedText(String.valueOf(roundedNumber), smallUnitFormat);
-    } else {
-      return new SpannableStringBuilder(String.valueOf(roundedNumber) + smallUnitFormat);
-    }
+    return String.valueOf(roundedNumber < 50 ? 50 : roundedNumber);
   }
 
-  private static SpannableStringBuilder roundOneDecimalPlace(double distance, DecimalFormat decimalFormat,
-                                                             boolean spansEnabled, String largeFinalUnit,
-                                                             String largeUnitFormat) {
-    distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeFinalUnit);
+  /**
+   * Rounds given number to the given decimal place
+   * @param distance to round
+   * @param decimalPlace number of decimal places to round
+   * @return distance rounded to given decimal places
+   */
+  private String roundToDecimalPlace(double distance, int decimalPlace) {
+    numberFormat.setMaximumFractionDigits(decimalPlace);
 
-    // Distance value
-    double roundedNumber = (distance / 100 * 100);
-    String roundedDecimal = decimalFormat.format(roundedNumber);
-
-    if (spansEnabled) {
-      return generateSpannedText(roundedDecimal, largeUnitFormat);
-    } else {
-      return new SpannableStringBuilder(roundedDecimal + largeUnitFormat);
-    }
+    return numberFormat.format(distance);
   }
 
-  private static SpannableStringBuilder roundToNearestMile(double distance, boolean spansEnabled,
-                                                           String largeFinalUnit, String largeUnitFormat) {
-    distance = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeFinalUnit);
+  /**
+   * Takes in a distance and units and returns a formatted SpannableString where the number is bold
+   * and the unit is shrunked to .65 times the size
+   * @param distance formatted with appropriate decimal places
+   * @param unit string from TurfConstants. This will be converted to the abbreviated form.
+   * @return String with bolded distance and shrunken units
+   */
+  private SpannableString getDistanceString(String distance, String unit) {
+    SpannableString spannableString = new SpannableString(String.format("%s %s", distance, unitStrings.get(unit)));
 
-    // Distance value
-    int roundedNumber = (int) Math.round(distance);
+    spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, distance.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    spannableString.setSpan(new RelativeSizeSpan(0.65f),distance.length() + 1,
+      spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-    if (spansEnabled) {
-      return generateSpannedText(String.valueOf(roundedNumber), largeUnitFormat);
-    } else {
-      return new SpannableStringBuilder(String.valueOf(roundedNumber) + largeUnitFormat);
-    }
-  }
-
-  private static boolean mediumDistance(double distance, String largeFinalUnit, String smallFinalUnit) {
-    return TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeFinalUnit) < LARGE_UNIT_THRESHOLD
-      && TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, smallFinalUnit) > SMALL_UNIT_THRESHOLD;
-  }
-
-  private static boolean longDistance(double distance, String largeFinalUnit) {
-    return TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeFinalUnit) > LARGE_UNIT_THRESHOLD;
+    return spannableString;
   }
 
   public static int calculateAbsoluteDistance(Location currentLocation, MetricsRouteProgress metricProgress) {
-
     Point currentPoint = Point.fromLngLat(currentLocation.getLongitude(), currentLocation.getLatitude());
     Point finalPoint = metricProgress.getDirectionsRouteDestination();
 
     return (int) TurfMeasurement.distance(currentPoint, finalPoint, TurfConstants.UNIT_METERS);
-  }
-
-  private static SpannableStringBuilder generateSpannedText(String distance, String unit) {
-    List<SpanItem> spans = new ArrayList<>();
-    spans.add(new TextSpanItem(new StyleSpan(Typeface.BOLD), distance));
-    spans.add(new TextSpanItem(new RelativeSizeSpan(0.65f), unit));
-    return SpanUtils.combineSpans(spans);
   }
 }

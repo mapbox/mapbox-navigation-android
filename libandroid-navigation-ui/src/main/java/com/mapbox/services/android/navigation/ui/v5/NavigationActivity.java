@@ -10,9 +10,12 @@ import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.HashMap;
+import java.util.Locale;
+
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.NONE_SPECIFIED;
 
 /**
  * Serves as a launching point for the custom drop-in UI, {@link NavigationView}.
@@ -22,7 +25,7 @@ import java.util.HashMap;
 public class NavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener {
 
   private NavigationView navigationView;
-  private boolean isConfigurationChange;
+  private boolean isRunning;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -32,7 +35,6 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     navigationView = findViewById(R.id.navigationView);
     navigationView.onCreate(savedInstanceState);
     navigationView.getNavigationAsync(this);
-    isConfigurationChange = savedInstanceState != null;
   }
 
   @Override
@@ -52,6 +54,7 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   @Override
   protected void onSaveInstanceState(Bundle outState) {
     navigationView.onSaveInstanceState(outState);
+    outState.putBoolean(NavigationConstants.NAVIGATION_VIEW_RUNNING, isRunning);
     super.onSaveInstanceState(outState);
   }
 
@@ -59,6 +62,7 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   protected void onRestoreInstanceState(Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
     navigationView.onRestoreInstanceState(savedInstanceState);
+    isRunning = savedInstanceState.getBoolean(NavigationConstants.NAVIGATION_VIEW_RUNNING);
   }
 
   @Override
@@ -71,12 +75,14 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   public void onNavigationReady() {
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
     options.navigationListener(this);
-    if (!isConfigurationChange) {
+    if (!isRunning) {
       extractRoute(options);
       extractCoordinates(options);
     }
     extractConfiguration(options);
+    extractLocale(options);
     navigationView.startNavigation(options.build());
+    isRunning = true;
   }
 
   @Override
@@ -114,10 +120,25 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
       .getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
     options.shouldSimulateRoute(preferences
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
+  }
+
+  private void extractLocale(NavigationViewOptions.Builder options) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+    String country = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, "");
+    String language = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, "");
+    int unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, NONE_SPECIFIED);
+
+    Locale locale;
+    if (!language.isEmpty()) {
+      locale = new Locale(language, country);
+    } else {
+      locale = LocaleUtils.getDeviceLocale(this);
+    }
 
     MapboxNavigationOptions navigationOptions = MapboxNavigationOptions.builder()
-      .unitType(preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE,
-        NavigationUnitType.TYPE_IMPERIAL))
+      .locale(locale)
+      .unitType(unitType)
       .build();
     options.navigationOptions(navigationOptions);
   }

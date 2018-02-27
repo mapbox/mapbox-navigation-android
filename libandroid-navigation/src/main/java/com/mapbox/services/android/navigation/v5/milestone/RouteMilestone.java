@@ -4,7 +4,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 /**
  * Using a Route Milestone will result in
- * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, int)} being invoked only
+ * {@link MilestoneEventListener#onMilestoneEvent(RouteProgress, String, Milestone)} being invoked only
  * once during a navigation session.
  *
  * @since 0.4.0
