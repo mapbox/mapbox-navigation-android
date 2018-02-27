@@ -15,14 +15,14 @@ ext {
       autoValue          : '1.5',
       autoValueParcel    : '0.2.5',
       junit              : '4.12',
-      supportLibVersion  : '27.0.0',
+      supportLibVersion  : '27.0.2',
       constraintLayout   : '1.0.2',
       mockito            : '2.11.0',
       hamcrest           : '2.0.0.0',
       errorprone         : '2.0.21',
       butterknife        : '8.8.1',
       leakCanaryVersion  : '1.5.4',
-      timber             : '4.5.1',
+      timber             : '4.6.0',
       awsPolly           : '2.3.8',
       testRunnerVersion  : '1.0.1',
       espressoVersion    : '3.0.1',
@@ -46,8 +46,8 @@ ext {
 
   dependenciesList = [
       // mapbox
-      mapboxMapSdk           : "com.mapbox.mapboxsdk:mapbox-android-sdk:${version.mapboxMapSdk}@aar",
-      mapboxServices         : "com.mapbox.mapboxsdk:mapbox-android-services:${version.mapboxServices}@aar",
+      mapboxMapSdk           : "com.mapbox.mapboxsdk:mapbox-android-sdk:${version.mapboxMapSdk}",
+      mapboxServices         : "com.mapbox.mapboxsdk:mapbox-android-services:${version.mapboxServices}",
       mapboxJavaServices     : "com.mapbox.mapboxsdk:mapbox-java-services:${version.mapboxServices}",
       mapboxSdkServices      : "com.mapbox.mapboxsdk:mapbox-sdk-services:${version.mapboxSdkServices}",
       mapboxSdkTurf          : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${version.mapboxSdkServices}",

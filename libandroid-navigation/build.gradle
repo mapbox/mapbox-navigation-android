@@ -43,9 +43,7 @@ android {
 
 dependencies {
   // Mapbox Android Services
-  api (dependenciesList.mapboxServices) {
-    transitive = true
-  }
+  api dependenciesList.mapboxServices
 
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
