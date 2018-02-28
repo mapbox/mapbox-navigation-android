@@ -293,7 +293,6 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private void launchNavigationWithRoute() {
     NavigationViewOptions.Builder optionsBuilder = NavigationViewOptions.builder()
       .shouldSimulateRoute(shouldSimulateRoute)
-      .awsPoolId("us-east-1:9f5d6efc-9dd0-4b94-997d-938a1f6cb9cf")
       .navigationOptions(MapboxNavigationOptions.builder().locale(locale).build());
     if (route != null) {
       if (route.routeOptions().language().equals(locale.getLanguage())) {

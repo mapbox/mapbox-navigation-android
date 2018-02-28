@@ -35,7 +35,7 @@ import timber.log.Timber;
  * sequentially up until the queue is empty.
  * </p>
  */
-public class PollyPlayer implements InstructionPlayer, MapboxSpeech.InstructionDownloadListener {
+public class PollyPlayer implements InstructionPlayer {
   private MapboxSpeech mapboxSpeech;
   private MediaPlayer pollyMediaPlayer;
   private List<String> instructionUrls = new ArrayList<>();
@@ -51,12 +51,11 @@ public class PollyPlayer implements InstructionPlayer, MapboxSpeech.InstructionD
    */
   public PollyPlayer(Context context, String awsPoolId, Locale locale) {
     this.cacheDirectory = context.getCacheDir().toString();
-    mapboxSpeech = new MapboxSpeech(context,
+    mapboxSpeech = new MapboxSpeech(
       SpeechOptions.builder()
-        .awsPoolId(awsPoolId)
         .language(locale.getLanguage())
         .textType("ssml")
-        .build(), this);
+        .build());
   }
 
   /**
@@ -118,8 +117,7 @@ public class PollyPlayer implements InstructionPlayer, MapboxSpeech.InstructionD
   }
 
   private void getVoiceFile(final String instruction) {
-    mapboxSpeech.getInstruction(instruction);
-    call.enqueue(new Callback<ResponseBody>() {
+    mapboxSpeech.getInstruction(instruction).enqueue(new Callback<ResponseBody>() {
       @Override
       public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
         if (response.isSuccessful()) {
@@ -249,15 +247,5 @@ public class PollyPlayer implements InstructionPlayer, MapboxSpeech.InstructionD
     if (instructionUrls.size() > 0) {
       instructionUrls.clear();
     }
-  }
-
-  @Override
-  public void onSuccess(File file) {
-
-  }
-
-  @Override
-  public void onFailure() {
-
   }
 }

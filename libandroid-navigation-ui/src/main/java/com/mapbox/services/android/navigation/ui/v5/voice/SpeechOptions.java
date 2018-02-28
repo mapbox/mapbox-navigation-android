@@ -16,8 +16,6 @@ public abstract class SpeechOptions {
   @Nullable
   public abstract String outputType();
 
-  public abstract String awsPoolId();
-
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder language(String language);
@@ -26,13 +24,10 @@ public abstract class SpeechOptions {
 
     public abstract Builder outputType(String outputType);
 
-    public abstract Builder awsPoolId(String awsPoolId);
-
     public abstract SpeechOptions build();
   }
 
   public static Builder builder() {
     return new AutoValue_SpeechOptions.Builder();
   }
-
 }
