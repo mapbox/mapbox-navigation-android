@@ -161,12 +161,28 @@ public final class NavigationConstants {
   public static final int NAVIGATION_CHECK_FASTER_ROUTE_INTERVAL = 120;
 
   /**
+   * 125 seconds remaining is considered a low alert level when
+   * navigating along a {@link com.mapbox.api.directions.v5.models.LegStep}.
+   *
+   * @since 0.9.0
+   */
+  public static final int NAVIGATION_LOW_ALERT_DURATION = 125;
+
+  /**
    * 70 seconds remaining is considered a medium alert level when
    * navigating along a {@link com.mapbox.api.directions.v5.models.LegStep}.
    *
    * @since 0.9.0
    */
   public static final int NAVIGATION_MEDIUM_ALERT_DURATION = 70;
+
+  /**
+   * 15 seconds remaining is considered a high alert level when
+   * navigating along a {@link com.mapbox.api.directions.v5.models.LegStep}.
+   *
+   * @since 0.10.1
+   */
+  public static final int NAVIGATION_HIGH_ALERT_DURATION = 15;
 
   /**
    * Constant used to store running state in navigation view.

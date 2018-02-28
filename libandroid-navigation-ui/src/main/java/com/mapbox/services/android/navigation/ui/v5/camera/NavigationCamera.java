@@ -2,7 +2,6 @@ package com.mapbox.services.android.navigation.ui.v5.camera;
 
 import android.location.Location;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -41,7 +40,7 @@ public class NavigationCamera implements ProgressChangeListener {
   public NavigationCamera(@NonNull MapboxMap mapboxMap, @NonNull MapboxNavigation navigation) {
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
-    navigation.setCameraEngine(new DynamicCamera(mapboxMap));
+    initialize();
   }
 
   /**
@@ -132,6 +131,11 @@ public class NavigationCamera implements ProgressChangeListener {
     }
   }
 
+  private void initialize() {
+    mapboxMap.setMinZoomPreference(7d);
+    navigation.setCameraEngine(new DynamicCamera(mapboxMap));
+  }
+
   /**
    * Creates a camera position based on the given route.
    * <p>
@@ -163,15 +167,21 @@ public class NavigationCamera implements ProgressChangeListener {
   /**
    * Will animate the {@link MapboxMap} to the given {@link CameraPosition} with the given duration.
    *
-   * @param position   to which the camera should animate
-   * @param durationMs determines how long the animation will take
-   * @param callback   that will fire if the animation is cancelled or finished
+   * @param position to which the camera should animate
+   * @param callback that will fire if the animation is cancelled or finished
    */
-  private void updateMapCameraPosition(CameraPosition position, int durationMs,
-                                       @Nullable MapboxMap.CancelableCallback callback) {
-    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), durationMs, callback);
+  private void updateMapCameraPosition(CameraPosition position, MapboxMap.CancelableCallback callback) {
+    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 1000, callback);
   }
 
+  /**
+   * Will ease the {@link MapboxMap} to the given {@link CameraPosition} with the given duration.
+   *
+   * @param position to which the camera should animate
+   */
+  private void easeMapCameraPosition(CameraPosition position) {
+    mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(position), 1000, false, null);
+  }
 
   /**
    * Creates an initial animation with the given {@link RouteInformation#route()}.
@@ -197,12 +207,7 @@ public class NavigationCamera implements ProgressChangeListener {
       .zoom(zoom)
       .build();
 
-    double bearing = cameraEngine.bearing(routeInformation);
-    float tilt = (float) cameraEngine.tilt(routeInformation);
-
-    // TODO animate bearing and tilt after initial animation
-
-    updateMapCameraPosition(position, 1000, new MapboxMap.CancelableCallback() {
+    updateMapCameraPosition(position, new MapboxMap.CancelableCallback() {
       @Override
       public void onCancel() {
         navigation.addProgressChangeListener(NavigationCamera.this);
@@ -210,14 +215,18 @@ public class NavigationCamera implements ProgressChangeListener {
 
       @Override
       public void onFinish() {
-
-        // TODO animate bearing and tilt after initial animation
-
         navigation.addProgressChangeListener(NavigationCamera.this);
       }
     });
   }
 
+  /**
+   * Creates an animation with the given {@link RouteInformation#location()}.
+   * <p>
+   * This animation that fires for new progress update.
+   *
+   * @param routeInformation with location data
+   */
   private void animateCameraFromLocation(RouteInformation routeInformation) {
 
     Camera cameraEngine = navigation.getCameraEngine();
@@ -235,6 +244,6 @@ public class NavigationCamera implements ProgressChangeListener {
       .zoom(zoom)
       .build();
 
-    updateMapCameraPosition(position, 1000, null);
+    easeMapCameraPosition(position);
   }
 }

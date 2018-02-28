@@ -199,7 +199,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
-    map.setPadding(0, 0, 0, summaryBottomSheet.getHeight());
+    initMapPadding();
     ThemeSwitcher.setMapStyle(getContext(), map, new MapboxMap.OnStyleLoadedListener() {
       @Override
       public void onStyleLoaded(String style) {
@@ -355,22 +355,16 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param options with containing route / coordinate data
    */
   public void startNavigation(NavigationViewOptions options) {
-    // Clear any existing markers
     clearMarkers();
-    // Initialize navigation with options from NavigationViewOptions
     if (!isInitialized) {
       setLocale(options);
       navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
         options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
-      // Initialize the camera (listens to MapboxNavigation)
       initCamera();
       setupListeners(options);
-      // Everything is setup, subscribe to the view models
       subscribeViewModels();
-      // Initialized and navigating at this point
       isInitialized = true;
     }
-    // Update the view models
     locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
     routeViewModel.extractRouteOptions(options);
   }
@@ -452,6 +446,17 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     boolean isShowing = bottomSheetState == BottomSheetBehavior.STATE_EXPANDED;
     summaryBehavior.setHideable(!isShowing);
     summaryBehavior.setState(bottomSheetState);
+  }
+
+  /**
+   * Create a top map padding value that pushes the focal point
+   * of the map to the bottom of the screen (above the bottom sheet).
+   */
+  private void initMapPadding() {
+    int mapViewHeight = mapView.getHeight();
+    int bottomSheetHeight = summaryBottomSheet.getHeight();
+    int topPadding = mapViewHeight - (bottomSheetHeight * 4);
+    map.setPadding(0, topPadding, 0, 0);
   }
 
   /**
