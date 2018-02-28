@@ -468,7 +468,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * the {@link Location} updates from {@link MapboxNavigation}.
    */
   private void initCamera() {
-    camera = new NavigationCamera(this, map, navigationViewModel.getNavigation());
+    camera = new NavigationCamera(map, navigationViewModel.getNavigation());
   }
 
   /**

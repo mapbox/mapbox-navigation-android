@@ -1,16 +1,10 @@
 package com.mapbox.services.android.navigation.v5.navigation.camera;
 
-import android.util.SparseArray;
-
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
-import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
-
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 /**
  * The default camera used by {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
@@ -19,16 +13,12 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
  */
 public class SimpleCamera extends Camera {
 
-  private static final int CAMERA_TILT = 45;
+  private static final int CAMERA_TILT = 50;
+  private static final double CAMERA_ZOOM = 15d;
 
-  LineString lineString;
-  double initialBearing;
-  DirectionsRoute initialRoute;
-  OrientationMap orientationMap;
-
-  public SimpleCamera() {
-    orientationMap = new OrientationMap();
-  }
+  private LineString lineString;
+  private double initialBearing;
+  private DirectionsRoute initialRoute;
 
   @Override
   public double bearing(RouteInformation routeInformation) {
@@ -43,9 +33,8 @@ public class SimpleCamera extends Camera {
 
   @Override
   public Point target(RouteInformation routeInformation) {
-    double lng = 0;
-    double lat = 0;
-    double bearing = 0;
+    double lng;
+    double lat;
     Point targetPoint = null;
     if (routeInformation.route() != null) {
       setupLineStringAndBearing(routeInformation.route());
@@ -55,11 +44,7 @@ public class SimpleCamera extends Camera {
     } else if (routeInformation.location() != null) {
       lng = routeInformation.location().getLongitude();
       lat = routeInformation.location().getLatitude();
-      bearing = routeInformation.location().getBearing();
-      targetPoint = TurfMeasurement.destination(
-        Point.fromLngLat(lng, lat),
-        routeInformation.targetDistance(), bearing, TurfConstants.UNIT_METERS
-      );
+      targetPoint = Point.fromLngLat(lng, lat);
     }
     return targetPoint;
   }
@@ -71,7 +56,7 @@ public class SimpleCamera extends Camera {
 
   @Override
   public double zoom(RouteInformation routeInformation) {
-    return orientationMap.get(routeInformation.configuration().orientation);
+    return CAMERA_ZOOM;
   }
 
   private void setupLineStringAndBearing(DirectionsRoute route) {
@@ -89,17 +74,5 @@ public class SimpleCamera extends Camera {
         lineString.coordinates().get(1).longitude(), lineString.coordinates().get(1).latitude()
       )
     );
-  }
-
-  /**
-   * Holds the two different screen orientations
-   * and their corresponding zoom levels.
-   */
-  static class OrientationMap extends SparseArray<Integer> {
-
-    OrientationMap() {
-      put(ORIENTATION_PORTRAIT, 16);
-      put(ORIENTATION_LANDSCAPE, 15);
-    }
   }
 }

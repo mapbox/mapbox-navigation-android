@@ -56,8 +56,6 @@ public class DynamicCamera extends SimpleCamera {
     return super.zoom(routeInformation);
   }
 
-
-
   private double createTilt(double distanceRemaining) {
     double tilt = distanceRemaining / 5;
     if (tilt > MAX_CAMERA_TILT) {
@@ -72,9 +70,10 @@ public class DynamicCamera extends SimpleCamera {
 
   private void createCameraPosition(Location location, RouteProgress routeProgress) {
     LegStep upComingStep = routeProgress.currentLegProgress().upComingStep();
-    if (upComingStep != null) {
 
+    if (upComingStep != null) {
       Point stepManeuverPoint = upComingStep.maneuver().location();
+
       List<LatLng> latLngs = new ArrayList<>();
       latLngs.add(new LatLng(stepManeuverPoint.latitude(), stepManeuverPoint.longitude()));
       latLngs.add(new LatLng(location));
@@ -83,13 +82,11 @@ public class DynamicCamera extends SimpleCamera {
         return;
       }
 
-      // Create LatLngBounds from the current and step maneuver locations
       LatLngBounds cameraBounds = new LatLngBounds.Builder()
         .includes(latLngs)
         .build();
 
-      // left, top, right, bottom
-      int[] padding = {0, 500, 0, 100};
+      int[] padding = {0, 0, 0, 0};
       cameraPosition = mapboxMap.getCameraForLatLngBounds(cameraBounds, padding);
     }
   }

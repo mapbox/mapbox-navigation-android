@@ -1,8 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation.camera;
 
-import android.content.res.Configuration;
 import android.location.Location;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
@@ -18,22 +16,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
  */
 @AutoValue
 public abstract class RouteInformation {
-
-  /**
-   * The device's current configuration which can be used to return different zoom values given
-   * it's orientation.
-   * @return device's current configuration
-   * @since 0.10.0
-   */
-  @NonNull
-  public abstract Configuration configuration();
-
-  /**
-   * The camera target distance as a percentage of the total phone screen the view uses.
-   * @return camera target distance
-   * @since 0.8.1
-   */
-  public abstract double targetDistance();
 
   /**
    * The current route the user is navigating along. This value will update when reroutes occur
@@ -62,10 +44,8 @@ public abstract class RouteInformation {
   @Nullable
   public abstract RouteProgress routeProgress();
 
-  public static RouteInformation create(@NonNull Configuration configuration, double targetDistance,
-                                        @Nullable DirectionsRoute route, @Nullable Location location,
+  public static RouteInformation create(@Nullable DirectionsRoute route, @Nullable Location location,
                                         @Nullable RouteProgress routeProgress) {
-    return new AutoValue_RouteInformation(configuration, targetDistance, route, location,
-            routeProgress);
+    return new AutoValue_RouteInformation(route, location, routeProgress);
   }
 }
