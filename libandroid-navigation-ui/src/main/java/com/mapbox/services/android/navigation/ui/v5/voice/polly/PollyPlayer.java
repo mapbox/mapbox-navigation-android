@@ -144,7 +144,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
         outputStream.flush();
         return file;
 
-      } catch (IOException e) {
+      } catch (IOException exception) {
         return null;
 
       } finally {
@@ -157,7 +157,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
         }
       }
 
-    } catch (IOException e) {
+    } catch (IOException exception) {
       return null;
     }
   }
@@ -226,6 +226,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
       instructionUrls.clear();
     }
   }
+
   @Override
   public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
     if (response.isSuccessful()) {
@@ -242,7 +243,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
   }
 
   @Override
-  public void onFailure(Call<ResponseBody> call, Throwable t) {
+  public void onFailure(Call<ResponseBody> call, Throwable throwable) {
     if (instructionListener != null) {
       instructionListener.onError();
     }
