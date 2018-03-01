@@ -132,7 +132,10 @@ public class DynamicCamera extends SimpleCamera {
         .build();
 
       int[] padding = {0, 0, 0, 0};
-      return mapboxMap.getCameraForLatLngBounds(cameraBounds, padding);
+      CameraPosition positionForLatLngBounds = mapboxMap.getCameraForLatLngBounds(cameraBounds, padding);
+      if (positionForLatLngBounds != null) {
+        return positionForLatLngBounds;
+      }
     }
     return mapboxMap.getCameraPosition();
   }
