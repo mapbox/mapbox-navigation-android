@@ -32,9 +32,9 @@ jobs:
       - run:
           name: Run unit-test and generate Jacoco test report
           command: ./gradlew createDebugUnitTestCoverageReport
-      - run:
-          name: Sonarcloud upload
-          command: make sonarqube
+#      - run:
+#          name: Sonarcloud upload
+#          command: make sonarqube
       - run:
           name: Build testapp APK
           command: |
