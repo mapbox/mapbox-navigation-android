@@ -29,9 +29,6 @@ public abstract class NavigationViewOptions {
   @Nullable
   public abstract Point destination();
 
-  @Nullable
-  public abstract String awsPoolId();
-
   public abstract MapboxNavigationOptions navigationOptions();
 
   public abstract boolean shouldSimulateRoute();
@@ -71,8 +68,6 @@ public abstract class NavigationViewOptions {
 
     public abstract Builder destination(Point destination);
 
-    public abstract Builder awsPoolId(String awsPoolId);
-
     public abstract Builder navigationOptions(MapboxNavigationOptions navigationOptions);
 
     public abstract Builder shouldSimulateRoute(boolean shouldSimulateRoute);
@@ -98,7 +93,6 @@ public abstract class NavigationViewOptions {
 
   public static Builder builder() {
     return new AutoValue_NavigationViewOptions.Builder()
-      .awsPoolId(null)
       .navigationOptions(MapboxNavigationOptions.builder().build())
       .shouldSimulateRoute(false);
   }

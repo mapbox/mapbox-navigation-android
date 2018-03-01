@@ -47,7 +47,6 @@ public class NavigationLauncher {
 
     storeRouteOptions(options, editor);
 
-    editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, options.awsPoolId());
     editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, options.shouldSimulateRoute());
 
     Locale locale = options.navigationOptions().locale();

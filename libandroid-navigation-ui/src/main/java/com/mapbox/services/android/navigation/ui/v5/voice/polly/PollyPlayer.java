@@ -47,9 +47,8 @@ public class PollyPlayer implements InstructionPlayer {
    * Construct an instance of {@link PollyPlayer}
    *
    * @param context   to initialize {@link CognitoCachingCredentialsProvider} and {@link AudioManager}
-   * @param awsPoolId to initialize {@link CognitoCachingCredentialsProvider}
    */
-  public PollyPlayer(Context context, String awsPoolId, Locale locale) {
+  public PollyPlayer(Context context, Locale locale) {
     this.cacheDirectory = context.getCacheDir().toString();
     mapboxSpeech = new MapboxSpeech(
       SpeechOptions.builder()

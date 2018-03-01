@@ -27,7 +27,6 @@ import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListene
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
@@ -260,8 +259,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    * Initializes the {@link InstructionPlayer}.
    */
   private void initVoiceInstructions() {
-    instructionPlayer = new NavigationInstructionPlayer(this.getApplication().getBaseContext(),
-      preferences.getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null), locale);
+    instructionPlayer = new NavigationInstructionPlayer(this.getApplication().getBaseContext(), locale);
   }
 
   /**

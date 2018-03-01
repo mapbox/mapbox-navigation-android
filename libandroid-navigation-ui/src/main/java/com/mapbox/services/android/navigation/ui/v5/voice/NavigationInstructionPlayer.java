@@ -5,8 +5,6 @@ import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import com.mapbox.services.android.navigation.ui.v5.voice.polly.PollyPlayer;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -21,11 +19,10 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
   private InstructionListener instructionListener;
   private boolean isPollyPlayer;
 
-  public NavigationInstructionPlayer(@NonNull Context context, @Nullable String awsPoolId,
-                                     Locale locale) {
+  public NavigationInstructionPlayer(@NonNull Context context, Locale locale) {
     initAudioManager(context);
     initAudioFocusRequest();
-    initInstructionPlayer(context, awsPoolId, locale);
+    initInstructionPlayer(context, locale);
   }
 
   private void initAudioFocusRequest() {
@@ -35,14 +32,10 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
     }
   }
 
-  private void initInstructionPlayer(Context context, @Nullable String awsPoolId,
-                                     Locale locale) {
-    if (!TextUtils.isEmpty(awsPoolId)) {
-      instructionPlayer = new PollyPlayer(context, awsPoolId, locale);
-      isPollyPlayer = true;
-    } else {
-      instructionPlayer = new DefaultPlayer(context, locale);
-    }
+  private void initInstructionPlayer(Context context, Locale locale) {
+    // todo: use DefaultPlayer for languages not supported by Polly
+    instructionPlayer = new PollyPlayer(context, locale);
+    isPollyPlayer = true;
     instructionPlayer.addInstructionListener(this);
   }
 
