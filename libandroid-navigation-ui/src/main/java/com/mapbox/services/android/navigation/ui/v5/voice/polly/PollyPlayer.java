@@ -35,7 +35,7 @@ import timber.log.Timber;
  * sequentially up until the queue is empty.
  * </p>
  */
-public class PollyPlayer implements InstructionPlayer {
+public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
   private MapboxSpeech mapboxSpeech;
   private MediaPlayer pollyMediaPlayer;
   private List<String> instructionUrls = new ArrayList<>();
@@ -54,7 +54,8 @@ public class PollyPlayer implements InstructionPlayer {
       SpeechOptions.builder()
         .language(locale.getLanguage())
         .textType("ssml")
-        .build());
+        .build(),
+      this);
   }
 
   /**
@@ -116,29 +117,7 @@ public class PollyPlayer implements InstructionPlayer {
   }
 
   private void getVoiceFile(final String instruction) {
-    mapboxSpeech.getInstruction(instruction).enqueue(new Callback<ResponseBody>() {
-      @Override
-      public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-        if (response.isSuccessful()) {
-          String instructionUrl = saveAsFile(response.body()).getPath();
-
-          if (instructionUrls.size() == 0) {
-            instructionUrls.add(instructionUrl);
-            playInstruction(instructionUrls.get(0));
-
-          } else {
-            instructionUrls.add(instructionUrl);
-          }
-        }
-      }
-
-      @Override
-      public void onFailure(Call<ResponseBody> call, Throwable t) {
-        if (instructionListener != null) {
-          instructionListener.onError();
-        }
-      }
-    });
+    mapboxSpeech.getInstruction(instruction);
   }
 
   /**
@@ -245,6 +224,27 @@ public class PollyPlayer implements InstructionPlayer {
   private void clearInstructionUrls() {
     if (instructionUrls.size() > 0) {
       instructionUrls.clear();
+    }
+  }
+  @Override
+  public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+    if (response.isSuccessful()) {
+      String instructionUrl = saveAsFile(response.body()).getPath();
+
+      if (instructionUrls.size() == 0) {
+        instructionUrls.add(instructionUrl);
+        playInstruction(instructionUrls.get(0));
+
+      } else {
+        instructionUrls.add(instructionUrl);
+      }
+    }
+  }
+
+  @Override
+  public void onFailure(Call<ResponseBody> call, Throwable t) {
+    if (instructionListener != null) {
+      instructionListener.onError();
     }
   }
 }
