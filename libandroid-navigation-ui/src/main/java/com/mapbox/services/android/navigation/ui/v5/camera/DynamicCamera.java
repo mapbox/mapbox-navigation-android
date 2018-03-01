@@ -29,6 +29,7 @@ public class DynamicCamera extends SimpleCamera {
   private boolean hasPassedLowAlertLevel;
   private boolean hasPassedMediumAlertLevel;
   private boolean hasPassedHighAlertLevel;
+  private boolean forceUpdateZoom;
 
   public DynamicCamera(@NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
@@ -59,12 +60,22 @@ public class DynamicCamera extends SimpleCamera {
 
   @Override
   public double zoom(RouteInformation routeInformation) {
-    if (validLocationAndProgress(routeInformation) && shouldUpdateZoom(routeInformation)) {
+    RouteInformation information = routeInformation;
+    if (validLocationAndProgress(information) && shouldUpdateZoom(information)) {
       return createZoom(routeInformation);
     } else if (routeInformation.route() != null) {
       return super.zoom(routeInformation);
     }
     return mapboxMap.getCameraPosition().zoom;
+  }
+
+
+  /**
+   * Called when the zoom level should force update on the next usage
+   * of {@link DynamicCamera#zoom(RouteInformation)}.
+   */
+  public void forceResetZoomLevel() {
+    forceUpdateZoom = true;
   }
 
   /**
@@ -140,13 +151,21 @@ public class DynamicCamera extends SimpleCamera {
     return mapboxMap.getCameraPosition();
   }
 
+  private boolean isForceUpdate() {
+    if (forceUpdateZoom) {
+      forceUpdateZoom = false;
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Looks to see if we have a new step.
    *
    * @param routeProgress provides updated step information
    * @return true if new step, false if not
    */
-  private boolean newStep(RouteProgress routeProgress) {
+  private boolean isNewStep(RouteProgress routeProgress) {
     boolean isNewStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().currentStep());
     currentStep = routeProgress.currentLegProgress().currentStep();
     resetAlertLevels(isNewStep);
@@ -167,7 +186,8 @@ public class DynamicCamera extends SimpleCamera {
 
   private boolean shouldUpdateZoom(RouteInformation routeInformation) {
     RouteProgress progress = routeInformation.routeProgress();
-    return newStep(progress)
+    return isForceUpdate()
+      || isNewStep(progress)
       || isLowAlert(progress)
       || isMediumAlert(progress)
       || isHighAlert(progress);

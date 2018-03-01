@@ -75,6 +75,7 @@ public class NavigationCamera implements ProgressChangeListener {
     if (location != null) {
       currentRouteInformation = buildRouteInformationFromLocation(location, null);
       animateCameraFromLocation(currentRouteInformation);
+      navigation.addProgressChangeListener(NavigationCamera.this);
     } else {
       navigation.addProgressChangeListener(NavigationCamera.this);
     }
@@ -127,6 +128,9 @@ public class NavigationCamera implements ProgressChangeListener {
   public void resetCameraPosition() {
     this.trackingEnabled = true;
     if (currentRouteInformation != null) {
+      if (navigation.getCameraEngine() instanceof DynamicCamera) {
+        ((DynamicCamera) navigation.getCameraEngine()).forceResetZoomLevel();
+      }
       animateCameraFromLocation(currentRouteInformation);
     }
   }
@@ -200,10 +204,12 @@ public class NavigationCamera implements ProgressChangeListener {
 
     Point targetPoint = cameraEngine.target(routeInformation);
     LatLng targetLatLng = new LatLng(targetPoint.latitude(), targetPoint.longitude());
+    double bearing = cameraEngine.bearing(routeInformation);
     double zoom = cameraEngine.zoom(routeInformation);
 
     CameraPosition position = new CameraPosition.Builder()
       .target(targetLatLng)
+      .bearing(bearing)
       .zoom(zoom)
       .build();
 
