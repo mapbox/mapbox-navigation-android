@@ -4,11 +4,9 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -57,7 +55,6 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   private MapboxNavigation navigation;
   private NavigationInstructionPlayer instructionPlayer;
   private ConnectivityManager connectivityManager;
-  private SharedPreferences preferences;
   private RouteProgress routeProgress;
   private String feedbackId;
   private String screenshot;
@@ -66,7 +63,6 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
 
   public NavigationViewModel(Application application) {
     super(application);
-    preferences = PreferenceManager.getDefaultSharedPreferences(application);
     initConnectivityManager(application);
   }
 
