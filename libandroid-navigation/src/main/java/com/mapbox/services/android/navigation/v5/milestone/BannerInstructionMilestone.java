@@ -105,7 +105,7 @@ public class BannerInstructionMilestone extends Milestone {
   /**
    * Used to determine if the user is currently on the first step instruction.
    * <p>
-   * In this case, the instructions should be should immediately, rather than waiting for the
+   * In this case, the instructions should be shown immediately, rather than waiting for the
    * valid distance.
    *
    * @param routeProgress for current list of instructions
