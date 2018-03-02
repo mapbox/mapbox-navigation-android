@@ -56,9 +56,13 @@ public class BannerInstructionMilestone extends Milestone {
    * Make sure old announcements are not called (can happen in reroute scenarios).
    */
   private void clearInstructionList() {
-    if (stepBannerInstructions != null && !stepBannerInstructions.isEmpty()) {
+    if (validInstructions(stepBannerInstructions)) {
       stepBannerInstructions.clear();
     }
+  }
+
+  private boolean validInstructions(List<BannerInstructions> instructions) {
+    return instructions != null && !instructions.isEmpty();
   }
 
   /**
@@ -93,8 +97,25 @@ public class BannerInstructionMilestone extends Milestone {
    * @return true if time to show the instructions, false if not
    */
   private boolean shouldBeShown(RouteProgress routeProgress, BannerInstructions bannerInstructions) {
-    return bannerInstructions.distanceAlongGeometry()
-      >= routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    return (bannerInstructions.distanceAlongGeometry()
+      >= routeProgress.currentLegProgress().currentStepProgress().distanceRemaining())
+      || isFirstInstruction(routeProgress);
+  }
+
+  /**
+   * Used to determine if the user is currently on the first step instruction.
+   * <p>
+   * In this case, the instructions should be shown immediately, rather than waiting for the
+   * valid distance.
+   *
+   * @param routeProgress for current list of instructions
+   * @return true if the first instruction on the step, false otherwise
+   */
+  private boolean isFirstInstruction(RouteProgress routeProgress) {
+    List<BannerInstructions> instructions = routeProgress.currentLegProgress().currentStep().bannerInstructions();
+    return validInstructions(stepBannerInstructions)
+      && validInstructions(instructions)
+      && instructions.get(0).equals(stepBannerInstructions.get(0));
   }
 
   public static final class Builder extends Milestone.Builder {
