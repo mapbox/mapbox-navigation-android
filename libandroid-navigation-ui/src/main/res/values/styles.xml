@@ -32,7 +32,7 @@
 
         <item name="navigationViewRouteStyle">@style/NavigationMapRoute</item>
 
-        <item name="navigationViewLocationLayerStyle">@style/LocationLayer</item>
+        <item name="navigationViewLocationLayerStyle">@style/mapbox_LocationLayer</item>
 
         <item name="navigationViewMapStyle">@string/navigation_guidance_day_v2</item>
     </style>
@@ -57,7 +57,7 @@
 
         <item name="navigationViewRouteStyle">@style/NavigationMapRoute</item>
 
-        <item name="navigationViewLocationLayerStyle">@style/LocationLayer</item>
+        <item name="navigationViewLocationLayerStyle">@style/mapbox_LocationLayer</item>
 
         <item name="navigationViewMapStyle">@string/navigation_guidance_night_v2</item>
     </style>
