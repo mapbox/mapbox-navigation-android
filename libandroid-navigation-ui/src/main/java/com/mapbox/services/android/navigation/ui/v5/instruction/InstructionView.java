@@ -685,8 +685,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     double durationRemaining = model.getProgress().currentLegProgress().currentStepProgress().durationRemaining();
 
     if (shouldShowTurnLanes(turnLanes, maneuverViewModifier, durationRemaining)) {
-      turnLaneAdapter.addTurnLanes(turnLanes, maneuverViewModifier);
-      showTurnLanes();
+      if (turnLaneLayout.getVisibility() == GONE) {
+        turnLaneAdapter.addTurnLanes(turnLanes, maneuverViewModifier);
+        showTurnLanes();
+      }
     } else {
       hideTurnLanes();
     }
