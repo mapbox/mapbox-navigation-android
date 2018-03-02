@@ -71,6 +71,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     locationBuffer = new RingBuffer<>(40);
     metricLocation = new MetricsLocation(null);
     metricProgress = new MetricsRouteProgress(null);
+    navigationSessionState = SessionState.builder().build();
   }
 
   /**
@@ -136,11 +137,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
   void initialize(@NonNull Context context, @NonNull String accessToken,
                   MapboxNavigation navigation, LocationEngine locationEngine) {
-
     if (!isInitialized) {
-      // Initial session state
-      navigationSessionState = SessionState.builder().build();
-
       // Setup the location engine
       updateLocationEngine(locationEngine);
 

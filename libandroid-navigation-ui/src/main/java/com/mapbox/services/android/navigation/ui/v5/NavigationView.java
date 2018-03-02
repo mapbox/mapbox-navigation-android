@@ -32,6 +32,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
+import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionLoader;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationViewModel;
@@ -198,7 +199,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
-    map.setPadding(0, 0, 0, summaryBottomSheet.getHeight());
+    initMapPadding();
     ThemeSwitcher.setMapStyle(getContext(), map, new MapboxMap.OnStyleLoadedListener() {
       @Override
       public void onStyleLoaded(String style) {
@@ -240,7 +241,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   @Override
   public void setCameraTrackingEnabled(boolean isEnabled) {
-    camera.setCameraTrackingLocation(isEnabled);
+    if (camera != null) {
+      camera.setCameraTrackingLocation(isEnabled);
+    }
   }
 
   @Override
@@ -352,22 +355,16 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param options with containing route / coordinate data
    */
   public void startNavigation(NavigationViewOptions options) {
-    // Clear any existing markers
     clearMarkers();
-    // Initialize navigation with options from NavigationViewOptions
     if (!isInitialized) {
       setLocale(options);
       navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
         options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
-      // Initialize the camera (listens to MapboxNavigation)
       initCamera();
       setupListeners(options);
-      // Everything is setup, subscribe to the view models
       subscribeViewModels();
-      // Initialized and navigating at this point
       isInitialized = true;
     }
-    // Update the view models
     locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
     routeViewModel.extractRouteOptions(options);
   }
@@ -452,6 +449,17 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   /**
+   * Create a top map padding value that pushes the focal point
+   * of the map to the bottom of the screen (above the bottom sheet).
+   */
+  private void initMapPadding() {
+    int mapViewHeight = mapView.getHeight();
+    int bottomSheetHeight = summaryBottomSheet.getHeight();
+    int topPadding = mapViewHeight - (bottomSheetHeight * 4);
+    map.setPadding(0, topPadding, 0, 0);
+  }
+
+  /**
    * Initializes the {@link NavigationMapRoute} to be used to draw the
    * route.
    */
@@ -465,7 +473,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * the {@link Location} updates from {@link MapboxNavigation}.
    */
   private void initCamera() {
-    camera = new NavigationCamera(this, map, navigationViewModel.getNavigation());
+    camera = new NavigationCamera(map, navigationViewModel.getNavigation());
   }
 
   /**

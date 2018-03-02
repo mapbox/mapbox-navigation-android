@@ -43,11 +43,11 @@ public class OffRouteDetectorTest extends BaseTest {
 
   private static final String DIRECTIONS_PRECISION_6 = "directions_v5_precision_6.json";
   @Mock
-  Location mockLocation;
+  private Location mockLocation;
   @Mock
-  RouteProgress mockProgress;
+  private RouteProgress mockProgress;
   @Mock
-  OffRouteCallback mockCallback;
+  private OffRouteCallback mockCallback;
   private OffRoute offRouteDetector;
   private MapboxNavigationOptions options;
   private RingBuffer<Integer> distances;

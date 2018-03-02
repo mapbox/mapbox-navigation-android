@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+    <CheckBoxPreference
+        android:key="simulate_route"
+        android:title="@string/simulate_route"
+        android:defaultValue="false" />
+    <ListPreference
+        android:key="language"
+        android:title="@string/language"
+        android:entries="@array/language_array"
+        android:entryValues="@array/language_values_array"
+        android:defaultValue="EN"/>
+    <ListPreference
+        android:key="unit_type"
+        android:title="@string/unit_type"
+        android:entries="@array/unit_type_array"
+        android:entryValues="@array/unit_type_values_array"
+        android:defaultValue="1"/>
+</PreferenceScreen>

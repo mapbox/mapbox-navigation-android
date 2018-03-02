@@ -106,14 +106,14 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   @DrawableRes
   private int destinationWaypointIcon;
 
-  private List<DirectionsRoute> directionsRoutes;
-  private HashMap<LineString, DirectionsRoute> routeLineStrings;
   private final MapboxNavigation navigation;
   private final MapboxMap mapboxMap;
-  private List<String> layerIds;
+  private final HashMap<LineString, DirectionsRoute> routeLineStrings;
+  private final List<FeatureCollection> featureCollections;
+  private final List<DirectionsRoute> directionsRoutes;
+  private final List<String> layerIds;
   private final MapView mapView;
   private int primaryRouteIndex;
-  private final List<FeatureCollection> featureCollections;
   private float routeScale;
   private float alternativeRouteScale;
   private String belowLayer;
@@ -206,19 +206,11 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     this.navigation = navigation;
     this.belowLayer = belowLayer;
     featureCollections = new ArrayList<>();
-    alternativesVisible = true;
-    addListeners();
-    initialize();
-  }
-
-  /**
-   * Adds source and layers to the map.
-   */
-  private void initialize() {
-    layerIds = new ArrayList<>();
+    directionsRoutes = new ArrayList<>();
     routeLineStrings = new HashMap<>();
-    getAttributes();
-    placeRouteBelow();
+    layerIds = new ArrayList<>();
+    initialize();
+    addListeners();
   }
 
   /**
@@ -244,12 +236,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
    * @since 0.8.0
    */
   public void addRoutes(@NonNull @Size(min = 1) List<DirectionsRoute> directionsRoutes) {
-    this.directionsRoutes = directionsRoutes;
-    primaryRouteIndex = 0;
     clearRoutes();
-    if (directionsRoutes.size() == 1) {
-      alternativesVisible = false;
-    }
+    this.directionsRoutes.addAll(directionsRoutes);
+    primaryRouteIndex = 0;
+    alternativesVisible = directionsRoutes.size() > 1;
     generateFeatureCollectionList(directionsRoutes);
     drawRoutes();
     addDirectionWaypoints();
@@ -337,12 +327,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   }
 
   private void clearRoutes() {
-    if (!layerIds.isEmpty()) {
-      for (String id : layerIds) {
-        mapboxMap.removeLayer(id);
-      }
-    }
-    featureCollections.clear();
+    removeLayerIds();
+    clearRouteListData();
   }
 
   private void generateFeatureCollectionList(List<DirectionsRoute> directionsRoutes) {
@@ -449,6 +435,26 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
           index == primaryRouteIndex ? routeDefaultColor : alternativeRouteDefaultColor)))
     );
     MapUtils.addLayerToMap(mapboxMap, routeLayer, belowLayer);
+  }
+
+  private void removeLayerIds() {
+    if (!layerIds.isEmpty()) {
+      for (String id : layerIds) {
+        mapboxMap.removeLayer(id);
+      }
+    }
+  }
+
+  private void clearRouteListData() {
+    if (!directionsRoutes.isEmpty()) {
+      directionsRoutes.clear();
+    }
+    if (!routeLineStrings.isEmpty()) {
+      routeLineStrings.clear();
+    }
+    if (!featureCollections.isEmpty()) {
+      featureCollections.clear();
+    }
   }
 
   /**
@@ -587,9 +593,12 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     return feature;
   }
 
-  /**
-   * Adds the necessary listeners
-   */
+  private void initialize() {
+    alternativesVisible = true;
+    getAttributes();
+    placeRouteBelow();
+  }
+
   private void addListeners() {
     mapboxMap.addOnMapClickListener(this);
     if (navigation != null) {
@@ -669,9 +678,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private void checkNewRouteFound(int currentRouteIndex) {
     if (currentRouteIndex != primaryRouteIndex) {
       updateRoute();
-      if (onRouteSelectionChangeListener != null) {
-        onRouteSelectionChangeListener.onNewPrimaryRouteSelected(
-          directionsRoutes.get(primaryRouteIndex));
+      boolean isValidPrimaryIndex = primaryRouteIndex > 0 && primaryRouteIndex < directionsRoutes.size();
+      if (isValidPrimaryIndex && onRouteSelectionChangeListener != null) {
+        DirectionsRoute selectedRoute = directionsRoutes.get(primaryRouteIndex);
+        onRouteSelectionChangeListener.onNewPrimaryRouteSelected(selectedRoute);
       }
     }
   }
@@ -720,8 +730,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     // Check if the route's the same as the route currently drawn
     if (!routeProgress.directionsRoute().equals(directionsRoutes.get(primaryRouteIndex))) {
-      directionsRoutes.clear();
-      directionsRoutes.add(routeProgress.directionsRoute());
+      addRoute(routeProgress.directionsRoute());
       drawRoutes();
       addDirectionWaypoints();
     }
