@@ -3,12 +3,17 @@ package com.mapbox.services.android.navigation.v5.offroute;
 import android.location.Location;
 
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
+import com.mapbox.turf.TurfMisc;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
 import static com.mapbox.services.android.navigation.v5.utils.MeasurementUtils.userTrueDistanceFromStep;
@@ -17,6 +22,9 @@ import static com.mapbox.services.android.navigation.v5.utils.ToleranceUtils.dyn
 public class OffRouteDetector extends OffRoute {
 
   private Point lastReroutePoint;
+  private OffRouteCallback callback;
+  private RingBuffer<Integer> distancesAwayFromManeuver = new RingBuffer<>(3);
+  private List<Point> stepPoints = new ArrayList<>();
 
   /**
    * Method in charge of running a series of test based on the device current location
@@ -43,8 +51,7 @@ public class OffRouteDetector extends OffRoute {
    * @since 0.2.0
    */
   @Override
-  public boolean isUserOffRoute(Location location, RouteProgress routeProgress, MapboxNavigationOptions options,
-                                RingBuffer<Integer> distancesAwayFromManeuver, OffRouteCallback callback) {
+  public boolean isUserOffRoute(Location location, RouteProgress routeProgress, MapboxNavigationOptions options) {
 
     if (!validOffRoute(location, options)) {
       return false;
@@ -82,6 +89,40 @@ public class OffRouteDetector extends OffRoute {
   }
 
   /**
+   * Sets a callback that is fired for different off-route scenarios.
+   * <p>
+   * Right now, the only scenario is when the step index should be increased with
+   * {@link OffRouteCallback#onShouldIncreaseIndex()}.
+   *
+   * @param callback to be fired
+   * @since 0.11.0
+   */
+  public void setOffRouteCallback(OffRouteCallback callback) {
+    this.callback = callback;
+  }
+
+  /**
+   * Updates this class with decoded step points.
+   *
+   * @param stepPoints decoded in the NavigationEngine
+   * @since 0.11.0
+   */
+  public void updateStepPoints(List<Point> stepPoints) {
+    this.stepPoints.clear();
+    this.stepPoints.addAll(stepPoints);
+  }
+
+  /**
+   * Clears the {@link RingBuffer} used for tracking our recent
+   * distances away from the maneuver that is being driven towards.
+   *
+   * @since 0.11.0
+   */
+  public void clearDistancesAwayFromManeuver() {
+    distancesAwayFromManeuver.clear();
+  }
+
+  /**
    * Method to check if the user has passed either the set (in {@link MapboxNavigationOptions})
    * minimum amount of seconds or minimum amount of meters since the last reroute.
    * <p>
@@ -114,7 +155,7 @@ public class OffRouteDetector extends OffRoute {
 
   private boolean isMovingAwayFromManeuver(Location location, RouteProgress routeProgress,
                                            RingBuffer<Integer> distancesAwayFromManeuver, Point currentPoint) {
-    if (movingAwayFromManeuver(routeProgress, distancesAwayFromManeuver, currentPoint)) {
+    if (movingAwayFromManeuver(routeProgress, distancesAwayFromManeuver, stepPoints, currentPoint)) {
       updateLastReroutePoint(location);
       return true;
     }
@@ -136,6 +177,10 @@ public class OffRouteDetector extends OffRoute {
    */
   private static boolean closeToUpcomingStep(MapboxNavigationOptions options, OffRouteCallback callback,
                                              Point currentPoint, LegStep upComingStep) {
+    if (callback == null) {
+      return false;
+    }
+
     boolean isCloseToUpcomingStep;
     if (upComingStep != null) {
       double distanceFromUpcomingStep = userTrueDistanceFromStep(currentPoint, upComingStep);
@@ -161,21 +206,29 @@ public class OffRouteDetector extends OffRoute {
    *
    * @param routeProgress             for the upcoming step maneuver
    * @param distancesAwayFromManeuver current stack of distances away
+   * @param stepPoints                current step points being traveled along
    * @param currentPoint              to determine if moving away or not
    * @return true if moving away from maneuver, false if not
    */
   private static boolean movingAwayFromManeuver(RouteProgress routeProgress,
                                                 RingBuffer<Integer> distancesAwayFromManeuver,
+                                                List<Point> stepPoints,
                                                 Point currentPoint) {
 
-    if (routeProgress.currentLegProgress().upComingStep() == null) {
+    if (routeProgress.currentLegProgress().upComingStep() == null || stepPoints.isEmpty()) {
       return false;
     }
 
-    double userDistanceToManeuver = TurfMeasurement.distance(
-      routeProgress.currentLegProgress().upComingStep().maneuver().location(),
-      currentPoint, TurfConstants.UNIT_METERS
-    );
+    LineString stepLineString = LineString.fromLngLats(stepPoints);
+    Point maneuverPoint = stepPoints.get(stepPoints.size() - 1);
+    Point userPointOnStep = (Point) TurfMisc.pointOnLine(currentPoint, stepPoints).geometry();
+
+    if (userPointOnStep == null || maneuverPoint.equals(userPointOnStep)) {
+      return false;
+    }
+
+    LineString remainingStepLineString = TurfMisc.lineSlice(userPointOnStep, maneuverPoint, stepLineString);
+    double userDistanceToManeuver = TurfMeasurement.lineDistance(remainingStepLineString, TurfConstants.UNIT_METERS);
 
     boolean hasDistances = !distancesAwayFromManeuver.isEmpty();
     boolean validOffRouteDistanceTraveled = hasDistances && distancesAwayFromManeuver.peekLast()

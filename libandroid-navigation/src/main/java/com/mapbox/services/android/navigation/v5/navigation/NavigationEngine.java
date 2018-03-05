@@ -12,9 +12,10 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
+import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteCallback;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
@@ -88,22 +89,20 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
 
     final MapboxNavigation mapboxNavigation = newLocationModel.mapboxNavigation();
     boolean snapToRouteEnabled = mapboxNavigation.options().snapToRoute();
-    RingBuffer recentDistances = newLocationModel.distancesAwayFromManeuver();
 
     final Location rawLocation = newLocationModel.location();
 
     // Generate a new route progress given the raw location update
-    RouteProgress routeProgress = buildNewRouteProgress(mapboxNavigation, rawLocation, recentDistances);
+    RouteProgress routeProgress = buildNewRouteProgress(mapboxNavigation, rawLocation);
 
     // Check if user has gone off-route
     final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress, this);
 
     // If needed, increase step index and generate new route progress
-    checkIncreaseStepIndex(mapboxNavigation.getRoute(), recentDistances);
+    checkIncreaseStepIndex(mapboxNavigation);
 
     // Check milestone list to see if any should be triggered
-    final List<Milestone> milestones = checkMilestones(
-      previousRouteProgress, routeProgress, mapboxNavigation);
+    final List<Milestone> milestones = checkMilestones(previousRouteProgress, routeProgress, mapboxNavigation);
 
     // Create snapped location if enabled, otherwise return raw location
     final Location location = buildSnappedLocation(mapboxNavigation, snapToRouteEnabled,
@@ -134,23 +133,21 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
    * based on our calculations of the distances remaining.
    * <p>
    * Also in charge of detecting if a step / leg has finished and incrementing the
-   * indices if needed ({@link NavigationEngine#advanceStepIndex(DirectionsRoute, RingBuffer)} handles
+   * indices if needed ({@link NavigationEngine#advanceStepIndex(MapboxNavigation)} handles
    * the decoding of the next step point list).
    *
    * @param mapboxNavigation for the current route / options
    * @param location         for step / leg / route distance remaining
-   * @param recentDistances  for advancing the step index
    * @return new route progress along the route
    */
-  private RouteProgress buildNewRouteProgress(MapboxNavigation mapboxNavigation, Location location,
-                                              RingBuffer recentDistances) {
+  private RouteProgress buildNewRouteProgress(MapboxNavigation mapboxNavigation, Location location) {
     DirectionsRoute directionsRoute = mapboxNavigation.getRoute();
     MapboxNavigationOptions options = mapboxNavigation.options();
     double completionOffset = options.maxTurnCompletionOffset();
     double maneuverZoneRadius = options.maneuverZoneRadius();
 
     // Check if a new route has been provided
-    checkNewRoute(directionsRoute);
+    checkNewRoute(mapboxNavigation);
 
     double stepDistanceRemaining = calculateStepDistanceRemaining(location, directionsRoute);
     boolean withinManeuverRadius = stepDistanceRemaining < maneuverZoneRadius;
@@ -160,7 +157,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
 
     if (bearingMatchesManeuver && withinManeuverRadius) {
       // Advance the step index and create new step distance remaining
-      advanceStepIndex(directionsRoute, recentDistances);
+      advanceStepIndex(mapboxNavigation);
       // Re-calculate the step distance remaining based on the new index
       stepDistanceRemaining = calculateStepDistanceRemaining(location, directionsRoute);
     }
@@ -181,16 +178,28 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
       .build();
   }
 
+  private void clearRecentDistancesFromManeuver(OffRoute offRouteEngine) {
+    if (offRouteEngine instanceof OffRouteDetector) {
+      ((OffRouteDetector) offRouteEngine).clearDistancesAwayFromManeuver();
+    }
+  }
+
+  private void updateOffRouteDetectorStepPoints(OffRoute offRoute, List<Point> stepPoints) {
+    if (offRoute instanceof OffRouteDetector) {
+      ((OffRouteDetector) offRoute).updateStepPoints(stepPoints);
+    }
+  }
+
   /**
    * If the {@link OffRouteCallback#onShouldIncreaseIndex()} has been called by the
    * {@link com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector}, shouldIncreaseStepIndex
    * will be true and the {@link NavigationIndices} step index needs to be increased by one.
    *
-   * @param route to get the next {@link LegStep#geometry()}
+   * @param navigation to get the next {@link LegStep#geometry()} and off-route engine
    */
-  private void checkIncreaseStepIndex(DirectionsRoute route, RingBuffer recentDistances) {
+  private void checkIncreaseStepIndex(MapboxNavigation navigation) {
     if (shouldIncreaseStepIndex) {
-      advanceStepIndex(route, recentDistances);
+      advanceStepIndex(navigation);
       shouldIncreaseStepIndex = false;
     }
   }
@@ -212,20 +221,16 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
    * Decodes the step points for the new step and clears the distances from
    * maneuver stack, as the maneuver has now changed.
    *
-   * @param directionsRoute to get the next {@link LegStep#geometry()}
-   * @param recentDistances should be cleared as a result of advancing the index
+   * @param mapboxNavigation to get the next {@link LegStep#geometry()} and {@link OffRoute}
    */
-  private void advanceStepIndex(DirectionsRoute directionsRoute, RingBuffer recentDistances) {
+  private void advanceStepIndex(MapboxNavigation mapboxNavigation) {
     // First increase the indices and then update the majority of information for the new routeProgress
     indices = increaseIndex(previousRouteProgress, indices);
+    clearRecentDistancesFromManeuver(mapboxNavigation.getOffRouteEngine());
 
     // First increase the indices and then update the majority of information for the new
-    stepPoints = decodeStepPoints(directionsRoute, indices.legIndex(), indices.stepIndex());
-
-    // Clear any recent distances from the maneuver (maneuver has now changed)
-    if (!recentDistances.isEmpty()) {
-      recentDistances.clear();
-    }
+    stepPoints = decodeStepPoints(mapboxNavigation.getRoute(), indices.legIndex(), indices.stepIndex());
+    updateOffRouteDetectorStepPoints(mapboxNavigation.getOffRouteEngine(), stepPoints);
   }
 
   /**
@@ -263,13 +268,15 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
    * Checks if the route provided is a new route.  If it is, all {@link RouteProgress}
    * data and {@link NavigationIndices} needs to be reset.
    *
-   * @param directionsRoute to check against the current route
+   * @param mapboxNavigation to get the current route and off-route engine
    */
-  private void checkNewRoute(DirectionsRoute directionsRoute) {
+  private void checkNewRoute(MapboxNavigation mapboxNavigation) {
+    DirectionsRoute directionsRoute = mapboxNavigation.getRoute();
     if (RouteUtils.isNewRoute(previousRouteProgress, directionsRoute)) {
       // Decode the first steps geometry and hold onto the resulting Position objects till the users
       // on the next step. Indices are both 0 since the user just started on the new route.
       stepPoints = decodeStepPoints(directionsRoute, 0, 0);
+      updateOffRouteDetectorStepPoints(mapboxNavigation.getOffRouteEngine(), stepPoints);
 
       previousRouteProgress = RouteProgress.builder()
         .stepDistanceRemaining(directionsRoute.legs().get(0).steps().get(0).distance())
