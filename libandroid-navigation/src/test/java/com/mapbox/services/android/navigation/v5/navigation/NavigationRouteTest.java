@@ -50,8 +50,8 @@ public class NavigationRouteTest extends BaseTest {
       .destination(Point.fromLngLat(1.0, 5.0))
       .build();
 
-    assertThat(navigationRoute.getCall().request().url().toString(),
-      containsString("bearings=90,90;2,3;"));
+    String requestUrl = navigationRoute.getCall().request().url().toString();
+    assertThat(requestUrl, containsString("bearings=90%2C90%3B2%2C3%3B"));
   }
 
   @Test
