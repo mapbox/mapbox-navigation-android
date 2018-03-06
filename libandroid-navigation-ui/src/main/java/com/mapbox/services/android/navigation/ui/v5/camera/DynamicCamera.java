@@ -131,10 +131,12 @@ public class DynamicCamera extends SimpleCamera {
       Point stepManeuverPoint = upComingStep.maneuver().location();
 
       List<LatLng> latLngs = new ArrayList<>();
-      latLngs.add(new LatLng(stepManeuverPoint.latitude(), stepManeuverPoint.longitude()));
-      latLngs.add(new LatLng(location));
+      LatLng currentLatLng = new LatLng(location);
+      LatLng maneuverLatLng = new LatLng(stepManeuverPoint.latitude(), stepManeuverPoint.longitude());
+      latLngs.add(currentLatLng);
+      latLngs.add(maneuverLatLng);
 
-      if (latLngs.size() < 1) {
+      if (latLngs.size() < 1 || currentLatLng.equals(maneuverLatLng)) {
         return mapboxMap.getCameraPosition();
       }
 
