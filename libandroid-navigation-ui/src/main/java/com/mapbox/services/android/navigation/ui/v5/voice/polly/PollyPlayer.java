@@ -9,7 +9,7 @@ import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionListener;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
-import com.mapbox.services.android.navigation.ui.v5.voice.MapboxSpeech;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxSpeech;
 
 import java.io.File;
 import java.io.FileOutputStream;

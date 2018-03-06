@@ -1,9 +1,8 @@
-package com.mapbox.services.android.navigation.ui.v5.voice;
+package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
-import com.mapbox.services.android.navigation.ui.v5.voice.polly.VoiceService;
 
 import java.io.File;
 
@@ -17,6 +16,17 @@ import static com.mapbox.core.constants.Constants.BASE_API_URL;
 
 @AutoValue
 public abstract class MapboxSpeech {
+  protected static MapboxSpeech mapboxSpeech;
+
+  protected MapboxSpeech() {
+    mapboxSpeech = this;
+  }
+
+  @Nullable
+  public static MapboxSpeech getInstance() {
+    return mapboxSpeech;
+  }
+
   public void getInstruction(String text) {
     voiceService().getInstruction(
       text, textType(),
@@ -59,7 +69,7 @@ public abstract class MapboxSpeech {
 
     abstract Builder voiceService(VoiceService voiceService);
 
-    abstract File cacheDirectory();
+    abstract File cacheDirectory(); // doesn't reset cache directory if service alredy created
 
     abstract MapboxSpeech autoBuild();
 
@@ -69,6 +79,7 @@ public abstract class MapboxSpeech {
     }
 
     private VoiceService getVoiceService() {
+
       int cacheSize = 10 * 1024 * 1024; // 10 MB
       Cache cache = new Cache(cacheDirectory(), cacheSize);
 

@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.ui.v5.voice.polly;
+package com.mapbox.services.android.navigation.v5.navigation;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
