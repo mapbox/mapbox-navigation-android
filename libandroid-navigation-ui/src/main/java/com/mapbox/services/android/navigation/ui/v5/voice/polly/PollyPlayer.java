@@ -6,10 +6,10 @@ import android.media.MediaPlayer;
 import android.text.TextUtils;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionListener;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.MapboxSpeech;
-import com.mapbox.services.android.navigation.ui.v5.voice.SpeechOptions;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -50,12 +50,13 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
    */
   public PollyPlayer(Context context, Locale locale) {
     this.cacheDirectory = context.getCacheDir().toString();
-    mapboxSpeech = new MapboxSpeech(
-      SpeechOptions.builder()
-        .language(locale.getLanguage())
-        .textType("ssml")
-        .build(),
-      this);
+    mapboxSpeech = MapboxSpeech.builder()
+      .textType("ssml")
+      .language(locale.toString())
+      .cacheDirectory(context.getCacheDir())
+      .accessToken(Mapbox.getAccessToken())
+      .callback(this)
+      .build();
   }
 
   /**
