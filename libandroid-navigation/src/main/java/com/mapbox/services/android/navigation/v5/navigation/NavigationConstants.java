@@ -199,7 +199,6 @@ public final class NavigationConstants {
   public static final String NAVIGATION_VIEW_DESTINATION_LNG_KEY = "destination_long";
   public static final String NAVIGATION_VIEW_DESTINATION = "destination";
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
-  public static final String NAVIGATION_VIEW_AWS_POOL_ID = "navigation_view_aws_pool_id";
   public static final String NAVIGATION_VIEW_UNIT_TYPE = "navigation_view_unit_type";
   public static final String NAVIGATION_VIEW_LOCALE_LANGUAGE = "navigation_view_locale_language";
   public static final String NAVIGATION_VIEW_LOCALE_COUNTRY = "navigation_view_locale_country";
