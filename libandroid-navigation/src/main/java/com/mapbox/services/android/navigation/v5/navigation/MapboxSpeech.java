@@ -9,7 +9,9 @@ import java.io.File;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
+import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import static com.mapbox.core.constants.Constants.BASE_API_URL;
@@ -23,16 +25,40 @@ public abstract class MapboxSpeech {
   }
 
   @Nullable
-  public static MapboxSpeech getInstance() {
+  private static MapboxSpeech getInstance() {
     return mapboxSpeech;
   }
 
-  public void getInstruction(String text) {
+  public void getInstruction(String instruction) {
     voiceService().getInstruction(
-      text, textType(),
+      instruction, textType(),
       language(),
       outputType(),
       accessToken()).enqueue(callback());
+  }
+
+  public void getInstruction(String instruction, Callback<ResponseBody> callback) {
+    voiceService().getInstruction(
+      instruction, textType(),
+      language(),
+      outputType(),
+      accessToken()).enqueue(callback);
+  }
+
+  public static void cacheInstruction(String instruction) {
+    if (mapboxSpeech != null) {
+      mapboxSpeech.getInstruction(instruction, new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+        }
+      });
+    }
   }
 
   @Nullable

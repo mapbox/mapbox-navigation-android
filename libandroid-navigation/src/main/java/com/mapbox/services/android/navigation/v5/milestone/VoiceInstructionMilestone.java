@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
+import android.util.Log;
+
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
@@ -16,11 +18,9 @@ public class VoiceInstructionMilestone extends Milestone {
   private DirectionsRoute currentRoute;
   private LegStep currentStep;
   private List<VoiceInstructions> stepVoiceInstructions;
-  private MapboxSpeech mapboxSpeech;
 
   VoiceInstructionMilestone(Builder builder) {
     super(builder);
-    mapboxSpeech = MapboxSpeech.getInstance();
   }
 
   @Override
@@ -28,18 +28,48 @@ public class VoiceInstructionMilestone extends Milestone {
     if (newRoute(routeProgress)) {
       clearInstructionList();
     }
+
+    boolean isFirst = false;
     if (shouldAddInstructions(routeProgress)) {
+      MapboxSpeech.cacheInstruction(ssmlAnnouncement);
       stepVoiceInstructions = routeProgress.currentLegProgress().currentStep().voiceInstructions();
+      isFirst = true;
+      cacheThree(routeProgress);
     }
     for (VoiceInstructions voice : stepVoiceInstructions) {
       if (shouldBeVoiced(routeProgress, voice)) {
+        if (!isFirst) {
+          cacheOne(routeProgress);
+        }
         announcement = voice.announcement();
         ssmlAnnouncement = voice.ssmlAnnouncement();
+
         stepVoiceInstructions.remove(voice);
         return true;
       }
     }
     return false;
+  }
+
+  private void cacheThree(RouteProgress routeProgress) {
+    int stepIndex = routeProgress.currentLegProgress().stepIndex();
+    int indexInStep = 0;
+
+    List<LegStep> steps = routeProgress.currentLeg().steps();
+    List<VoiceInstructions> voiceInstructions = steps.get(stepIndex).voiceInstructions();
+    int numberCached = 0;
+    while (numberCached < 3 && stepIndex < steps.size()) {
+      if (voiceInstructions.size() > indexInStep) {
+        MapboxSpeech.cacheInstruction(voiceInstructions.get(indexInStep++).ssmlAnnouncement());
+        numberCached++;
+      } else {
+        voiceInstructions = steps.get(++stepIndex).voiceInstructions();
+      }
+    }
+  }
+
+  private void cacheOne(RouteProgress routeProgress) {
+    // todo
   }
 
   @Override
