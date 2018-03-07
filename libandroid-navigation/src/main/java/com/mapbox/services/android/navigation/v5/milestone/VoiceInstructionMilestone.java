@@ -1,7 +1,5 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-import android.util.Log;
-
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
@@ -9,6 +7,7 @@ import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxSpeech;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class VoiceInstructionMilestone extends Milestone {
@@ -34,12 +33,12 @@ public class VoiceInstructionMilestone extends Milestone {
       MapboxSpeech.cacheInstruction(ssmlAnnouncement);
       stepVoiceInstructions = routeProgress.currentLegProgress().currentStep().voiceInstructions();
       isFirst = true;
-      cacheThree(routeProgress);
+      cacheInstructions(routeProgress, true);
     }
     for (VoiceInstructions voice : stepVoiceInstructions) {
       if (shouldBeVoiced(routeProgress, voice)) {
         if (!isFirst) {
-          cacheOne(routeProgress);
+          cacheInstructions(routeProgress, false);
         }
         announcement = voice.announcement();
         ssmlAnnouncement = voice.ssmlAnnouncement();
@@ -51,26 +50,31 @@ public class VoiceInstructionMilestone extends Milestone {
     return false;
   }
 
-  private void cacheThree(RouteProgress routeProgress) {
+  private void cacheInstructions(RouteProgress routeProgress, boolean first) {
     int stepIndex = routeProgress.currentLegProgress().stepIndex();
-    int indexInStep = 0;
-
     List<LegStep> steps = routeProgress.currentLeg().steps();
-    List<VoiceInstructions> voiceInstructions = steps.get(stepIndex).voiceInstructions();
-    int numberCached = 0;
-    while (numberCached < 3 && stepIndex < steps.size()) {
-      if (voiceInstructions.size() > indexInStep) {
-        MapboxSpeech.cacheInstruction(voiceInstructions.get(indexInStep++).ssmlAnnouncement());
-        numberCached++;
-      } else {
-        voiceInstructions = steps.get(++stepIndex).voiceInstructions();
+    List<VoiceInstructions> instructions = new ArrayList<>();
+
+    while (instructions.size() < 3 && stepIndex < steps.size()) { // add check for large number of instructions?
+      instructions.addAll(steps.get(stepIndex++).voiceInstructions());
+    }
+
+    if (first) {
+      if (instructions.size() > 0) {
+        MapboxSpeech.cacheInstruction(instructions.get(0).ssmlAnnouncement());
       }
+
+      if (instructions.size() > 1) {
+        MapboxSpeech.cacheInstruction(instructions.get(1).ssmlAnnouncement());
+      }
+    }
+
+    if (instructions.size() > 2) {
+      MapboxSpeech.cacheInstruction(instructions.get(2).ssmlAnnouncement());
     }
   }
 
-  private void cacheOne(RouteProgress routeProgress) {
-    // todo
-  }
+
 
   @Override
   public Instruction getInstruction() {
