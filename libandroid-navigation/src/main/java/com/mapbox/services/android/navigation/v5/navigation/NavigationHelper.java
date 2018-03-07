@@ -12,6 +12,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteCallback;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
@@ -197,9 +198,11 @@ class NavigationHelper {
 
   static boolean isUserOffRoute(NewLocationModel newLocationModel, RouteProgress routeProgress,
                                 OffRouteCallback callback) {
+    MapboxNavigationOptions options = newLocationModel.mapboxNavigation().options();
+    Location location = newLocationModel.location();
     OffRoute offRoute = newLocationModel.mapboxNavigation().getOffRouteEngine();
-    return offRoute.isUserOffRoute(newLocationModel.location(), routeProgress,
-      newLocationModel.mapboxNavigation().options(), newLocationModel.distancesAwayFromManeuver(), callback);
+    setOffRouteDetectorCallback(offRoute, callback);
+    return offRoute.isUserOffRoute(location, routeProgress, options);
   }
 
   static boolean shouldCheckFasterRoute(NewLocationModel newLocationModel, RouteProgress routeProgress) {
@@ -223,5 +226,11 @@ class NavigationHelper {
       return steps.get(stepIndex + 1).maneuver().location();
     }
     return !coords.isEmpty() ? coords.get(coords.size() - 1) : coords.get(coords.size());
+  }
+
+  private static void setOffRouteDetectorCallback(OffRoute offRoute, OffRouteCallback callback) {
+    if (offRoute instanceof OffRouteDetector) {
+      ((OffRouteDetector) offRoute).setOffRouteCallback(callback);
+    }
   }
 }

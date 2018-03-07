@@ -16,7 +16,6 @@ import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
@@ -48,17 +47,18 @@ public class OffRouteDetectorTest extends BaseTest {
   private RouteProgress mockProgress;
   @Mock
   private OffRouteCallback mockCallback;
-  private OffRoute offRouteDetector;
+  private OffRouteDetector offRouteDetector;
   private MapboxNavigationOptions options;
-  private RingBuffer<Integer> distances;
 
   @Before
   public void setup() throws Exception {
     MockitoAnnotations.initMocks(this);
 
-    offRouteDetector = new OffRouteDetector();
     options = MapboxNavigationOptions.builder().build();
-    distances = new RingBuffer<>(3);
+
+    offRouteDetector = new OffRouteDetector();
+    offRouteDetector.setOffRouteCallback(mockCallback);
+    setupStepPoints(offRouteDetector);
   }
 
   @Test
@@ -68,9 +68,7 @@ public class OffRouteDetectorTest extends BaseTest {
 
   @Test
   public void invalidOffRoute_onFirstLocationUpdate() throws Exception {
-    boolean isUserOffRoute = offRouteDetector.isUserOffRoute(
-      mockLocation, mockProgress, options, distances, mockCallback
-    );
+    boolean isUserOffRoute = offRouteDetector.isUserOffRoute(mockLocation, mockProgress, options);
     assertFalse(isUserOffRoute);
   }
 
@@ -79,16 +77,12 @@ public class OffRouteDetectorTest extends BaseTest {
     Location mapboxOffice = buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637);
     RouteProgress routeProgress = buildDefaultRouteProgress();
 
-    offRouteDetector.isUserOffRoute(
-      mapboxOffice, mockProgress, options, distances, mockCallback
-    );
+    offRouteDetector.isUserOffRoute(mockLocation, mockProgress, options);
 
     Point target = buildPointAwayFromLocation(mapboxOffice, options.minimumDistanceBeforeRerouting() + 1);
 
     Location locationOverMinimumDistance = buildDefaultLocationUpdate(target.longitude(), target.latitude());
-    boolean validOffRoute = offRouteDetector.isUserOffRoute(
-      locationOverMinimumDistance, routeProgress, options, distances, mockCallback
-    );
+    boolean validOffRoute = offRouteDetector.isUserOffRoute(locationOverMinimumDistance, routeProgress, options);
     assertTrue(validOffRoute);
   }
 
@@ -98,14 +92,12 @@ public class OffRouteDetectorTest extends BaseTest {
     Point stepManeuverPoint = routeProgress.directionsRoute().legs().get(0).steps().get(0).maneuver().location();
 
     Location firstUpdate = buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637);
-    offRouteDetector.isUserOffRoute(firstUpdate, routeProgress, options, distances, mockCallback);
+    offRouteDetector.isUserOffRoute(firstUpdate, routeProgress, options);
 
     Point offRoutePoint = buildPointAwayFromPoint(stepManeuverPoint, 100, 90);
     Location secondUpdate = buildDefaultLocationUpdate(offRoutePoint.longitude(), offRoutePoint.latitude());
 
-    boolean isUserOffRoute = offRouteDetector.isUserOffRoute(
-      secondUpdate, routeProgress, options, distances, mockCallback
-    );
+    boolean isUserOffRoute = offRouteDetector.isUserOffRoute(secondUpdate, routeProgress, options);
     assertTrue(isUserOffRoute);
   }
 
@@ -115,14 +107,12 @@ public class OffRouteDetectorTest extends BaseTest {
     Point stepManeuverPoint = routeProgress.directionsRoute().legs().get(0).steps().get(0).maneuver().location();
 
     Location firstUpdate = buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637);
-    offRouteDetector.isUserOffRoute(firstUpdate, routeProgress, options, distances, mockCallback);
+    offRouteDetector.isUserOffRoute(firstUpdate, routeProgress, options);
 
     Point offRoutePoint = buildPointAwayFromPoint(stepManeuverPoint, 10, 90);
     Location secondUpdate = buildDefaultLocationUpdate(offRoutePoint.longitude(), offRoutePoint.latitude());
 
-    boolean isUserOffRoute = offRouteDetector.isUserOffRoute(
-      secondUpdate, routeProgress, options, distances, mockCallback
-    );
+    boolean isUserOffRoute = offRouteDetector.isUserOffRoute(secondUpdate, routeProgress, options);
     assertFalse(isUserOffRoute);
   }
 
@@ -132,15 +122,13 @@ public class OffRouteDetectorTest extends BaseTest {
     Point stepManeuverPoint = routeProgress.directionsRoute().legs().get(0).steps().get(0).maneuver().location();
 
     Location firstUpdate = buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637);
-    offRouteDetector.isUserOffRoute(firstUpdate, routeProgress, options, distances, mockCallback);
+    offRouteDetector.isUserOffRoute(firstUpdate, routeProgress, options);
 
     Point offRoutePoint = buildPointAwayFromPoint(stepManeuverPoint, 250, 90);
     Location secondUpdate = buildDefaultLocationUpdate(offRoutePoint.longitude(), offRoutePoint.latitude());
     secondUpdate.setAccuracy(300f);
 
-    boolean isUserOffRoute = offRouteDetector.isUserOffRoute(
-      secondUpdate, routeProgress, options, distances, mockCallback
-    );
+    boolean isUserOffRoute = offRouteDetector.isUserOffRoute(secondUpdate, routeProgress, options);
     assertFalse(isUserOffRoute);
   }
 
@@ -150,14 +138,12 @@ public class OffRouteDetectorTest extends BaseTest {
     Point upcomingStepManeuverPoint = routeProgress.currentLegProgress().upComingStep().maneuver().location();
 
     Location firstUpdate = buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637);
-    offRouteDetector.isUserOffRoute(firstUpdate, routeProgress, options, distances, mockCallback);
+    offRouteDetector.isUserOffRoute(firstUpdate, routeProgress, options);
 
     Point offRoutePoint = buildPointAwayFromPoint(upcomingStepManeuverPoint, 30, 180);
     Location secondUpdate = buildDefaultLocationUpdate(offRoutePoint.longitude(), offRoutePoint.latitude());
 
-    boolean isUserOffRoute = offRouteDetector.isUserOffRoute(
-      secondUpdate, routeProgress, options, distances, mockCallback
-    );
+    boolean isUserOffRoute = offRouteDetector.isUserOffRoute(secondUpdate, routeProgress, options);
     assertFalse(isUserOffRoute);
     verify(mockCallback, times(1)).onShouldIncreaseIndex();
   }
@@ -171,43 +157,42 @@ public class OffRouteDetectorTest extends BaseTest {
     List<Point> coordinates = lineString.coordinates();
 
     Location firstLocationUpdate = buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637);
-    offRouteDetector.isUserOffRoute(firstLocationUpdate, routeProgress, options, distances, mockCallback);
+    offRouteDetector.isUserOffRoute(firstLocationUpdate, routeProgress, options);
 
     Point lastPointInCurrentStep = coordinates.remove(coordinates.size() - 1);
     Location secondLocationUpdate = buildDefaultLocationUpdate(
       lastPointInCurrentStep.longitude(), lastPointInCurrentStep.latitude()
     );
-    boolean isUserOffRouteFirstTry = offRouteDetector.isUserOffRoute(
-      secondLocationUpdate, routeProgress, options, distances, mockCallback
-    );
+    boolean isUserOffRouteFirstTry = offRouteDetector.isUserOffRoute(secondLocationUpdate, routeProgress, options);
     assertFalse(isUserOffRouteFirstTry);
 
     Point secondLastPointInCurrentStep = coordinates.remove(coordinates.size() - 1);
     Location thirdLocationUpdate = buildDefaultLocationUpdate(
       secondLastPointInCurrentStep.longitude(), secondLastPointInCurrentStep.latitude()
     );
-    boolean isUserOffRouteSecondTry = offRouteDetector.isUserOffRoute(
-      thirdLocationUpdate, routeProgress, options, distances, mockCallback
-    );
+    boolean isUserOffRouteSecondTry = offRouteDetector.isUserOffRoute(thirdLocationUpdate, routeProgress, options);
     assertFalse(isUserOffRouteSecondTry);
 
     Point thirdLastPointInCurrentStep = coordinates.remove(coordinates.size() - 1);
     Location fourthLocationUpdate = buildDefaultLocationUpdate(
       thirdLastPointInCurrentStep.longitude(), thirdLastPointInCurrentStep.latitude()
     );
-    boolean isUserOffRouteThirdTry = offRouteDetector.isUserOffRoute(
-      fourthLocationUpdate, routeProgress, options, distances, mockCallback
-    );
+    boolean isUserOffRouteThirdTry = offRouteDetector.isUserOffRoute(fourthLocationUpdate, routeProgress, options);
     assertFalse(isUserOffRouteThirdTry);
 
     Point fourthLastPointInCurrentStep = coordinates.remove(coordinates.size() - 1);
     Location fifthLocationUpdate = buildDefaultLocationUpdate(
       fourthLastPointInCurrentStep.longitude(), fourthLastPointInCurrentStep.latitude()
     );
-    boolean isUserOffRouteFourthTry = offRouteDetector.isUserOffRoute(
-      fifthLocationUpdate, routeProgress, options, distances, mockCallback
+    boolean isUserOffRouteFourthTry = offRouteDetector.isUserOffRoute(fifthLocationUpdate, routeProgress, options);
+    assertFalse(isUserOffRouteFourthTry);
+
+    Point fifthLastPointInCurrentStep = coordinates.remove(coordinates.size() - 1);
+    Location sixthLocationUpdate = buildDefaultLocationUpdate(
+      fifthLastPointInCurrentStep.longitude(), fifthLastPointInCurrentStep.latitude()
     );
-    assertTrue(isUserOffRouteFourthTry);
+    boolean isUserOffRouteFifthTry = offRouteDetector.isUserOffRoute(sixthLocationUpdate, routeProgress, options);
+    assertTrue(isUserOffRouteFifthTry);
   }
 
   @Test
@@ -219,33 +204,36 @@ public class OffRouteDetectorTest extends BaseTest {
     List<Point> coordinates = lineString.coordinates();
 
     Location firstLocationUpdate = buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637);
-    offRouteDetector.isUserOffRoute(firstLocationUpdate, routeProgress, options, distances, mockCallback);
+    offRouteDetector.isUserOffRoute(firstLocationUpdate, routeProgress, options);
 
     Point lastPointInCurrentStep = coordinates.remove(coordinates.size() - 1);
     Location secondLocationUpdate = buildDefaultLocationUpdate(
       lastPointInCurrentStep.longitude(), lastPointInCurrentStep.latitude()
     );
-    boolean isUserOffRouteFirstTry = offRouteDetector.isUserOffRoute(
-      secondLocationUpdate, routeProgress, options, distances, mockCallback
-    );
+    boolean isUserOffRouteFirstTry = offRouteDetector.isUserOffRoute(secondLocationUpdate, routeProgress, options);
     assertFalse(isUserOffRouteFirstTry);
 
     Point secondLastPointInCurrentStep = coordinates.remove(coordinates.size() - 1);
     Location thirdLocationUpdate = buildDefaultLocationUpdate(
       secondLastPointInCurrentStep.longitude(), secondLastPointInCurrentStep.latitude()
     );
-    boolean isUserOffRouteSecondTry = offRouteDetector.isUserOffRoute(
-      thirdLocationUpdate, routeProgress, options, distances, mockCallback
-    );
+    boolean isUserOffRouteSecondTry = offRouteDetector.isUserOffRoute(thirdLocationUpdate, routeProgress, options);
     assertFalse(isUserOffRouteSecondTry);
 
     Location fourthLocationUpdate = buildDefaultLocationUpdate(
       lastPointInCurrentStep.longitude(), lastPointInCurrentStep.latitude()
     );
-    boolean isUserOffRouteThirdTry = offRouteDetector.isUserOffRoute(
-      fourthLocationUpdate, routeProgress, options, distances, mockCallback
-    );
+    boolean isUserOffRouteThirdTry = offRouteDetector.isUserOffRoute(fourthLocationUpdate, routeProgress, options);
     assertFalse(isUserOffRouteThirdTry);
+  }
+
+  private void setupStepPoints(OffRouteDetector offRouteDetector) throws Exception {
+    RouteProgress routeProgress = buildDefaultRouteProgress();
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+
+    LineString lineString = LineString.fromPolyline(currentStep.geometry(), Constants.PRECISION_6);
+    List<Point> stepPoints = lineString.coordinates();
+    offRouteDetector.updateStepPoints(stepPoints);
   }
 
   /**
