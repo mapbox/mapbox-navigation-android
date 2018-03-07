@@ -2,6 +2,18 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.11.0 - March 7, 2018
+
+* Fix same point being added twice for LatLngBounds [#741](https://github.com/mapbox/mapbox-navigation-android/pull/741)
+* Fix Recent Distances from maneuver Off-Route [#739](https://github.com/mapbox/mapbox-navigation-android/pull/739)
+* Update MAS Dependencies [#738](https://github.com/mapbox/mapbox-navigation-android/pull/738)
+* Update LocationLayerPlugin to 0.4.0 [#734](https://github.com/mapbox/mapbox-navigation-android/pull/734)
+* Fix visibility bug with TurnLanes [#733](https://github.com/mapbox/mapbox-navigation-android/pull/733)
+* Update Maps SDK 5.5.0 [#732](https://github.com/mapbox/mapbox-navigation-android/pull/732)
+* Show first BannerInstruction immediately [#731](https://github.com/mapbox/mapbox-navigation-android/pull/731)
+* Fix initialization of directions list [#728](https://github.com/mapbox/mapbox-navigation-android/pull/728)
+* Default Dynamic Camera for Navigation UI [#679](https://github.com/mapbox/mapbox-navigation-android/pull/679)
+
 ### v0.10.0 - February 26, 2018
 
 * Fix NPE with MapRoute click listener [#721](https://github.com/mapbox/mapbox-navigation-android/pull/721)
