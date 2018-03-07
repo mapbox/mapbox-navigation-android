@@ -32,6 +32,7 @@ compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.11.0'
 
 ```
 
+To run the [sample code](#sample-code) on a device or emulator, include your [developer access token](https://www.mapbox.com/help/define-access-token/) in `developer-config.xml` found in the project. 
 ## Documentation
 
 You'll find all of the documentation for this SDK on [our Mapbox Navigation page](https://www.mapbox.com/android-docs/navigation/overview/). This includes information on installation, using the API, and links to the API reference.
@@ -57,7 +58,7 @@ dependencies {
 }
 ```
 
-## Sample code
+## <a name="sample-code">Sample code
 
 [We've added several navigation examples to this repo's test app](https://github.com/mapbox/mapbox-navigation-android/tree/master/app/src/main/java/com/mapbox/services/android/navigation/testapp/activity) to help you get started with the SDK and to inspire you.
 
