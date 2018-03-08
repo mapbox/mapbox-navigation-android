@@ -17,7 +17,6 @@ import com.mapbox.services.android.navigation.v5.navigation.notification.Navigat
 import com.mapbox.services.android.navigation.v5.route.RouteEngine;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
-import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 
@@ -46,7 +45,6 @@ public class NavigationService extends Service implements LocationEngineListener
   // Message id used when a new location update occurs and we send to the thread.
   private static final int MSG_LOCATION_UPDATED = 1001;
 
-  private RingBuffer<Integer> recentDistancesFromManeuverInMeters;
   private final IBinder localBinder = new LocalBinder();
 
   private NavigationNotification navigationNotification;
@@ -68,7 +66,6 @@ public class NavigationService extends Service implements LocationEngineListener
     thread = new NavigationEngine(new Handler(), this);
     thread.start();
     thread.prepareHandler();
-    recentDistancesFromManeuverInMeters = new RingBuffer<>(3);
   }
 
   /**
@@ -101,8 +98,7 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onLocationChanged(Location location) {
     Timber.d("onLocationChanged");
     if (location != null && validLocationUpdate(location)) {
-      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation,
-        recentDistancesFromManeuverInMeters));
+      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation));
     }
   }
 
@@ -138,7 +134,6 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onUserOffRoute(Location location, boolean userOffRoute) {
     if (userOffRoute) {
-      recentDistancesFromManeuverInMeters.clear();
       // Send off route event with current location
       mapboxNavigation.getEventDispatcher().onUserOffRoute(location);
     }
@@ -307,8 +302,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private void forceLocationUpdate() {
     Location lastLocation = locationEngine.getLastLocation();
     if (lastLocation != null) {
-      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(lastLocation, mapboxNavigation,
-        recentDistancesFromManeuverInMeters));
+      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(lastLocation, mapboxNavigation));
     }
   }
 
