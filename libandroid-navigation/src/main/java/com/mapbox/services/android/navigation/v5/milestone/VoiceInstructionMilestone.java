@@ -24,22 +24,18 @@ public class VoiceInstructionMilestone extends Milestone {
 
   @Override
   public boolean isOccurring(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-    if (newRoute(routeProgress)) {
+    boolean newRoute = newRoute(routeProgress);
+    if (newRoute) {
       clearInstructionList();
+      cacheInstructions(routeProgress, true);
     }
 
-    boolean isFirst = false;
     if (shouldAddInstructions(routeProgress)) {
-      MapboxSpeech.cacheInstruction(ssmlAnnouncement);
       stepVoiceInstructions = routeProgress.currentLegProgress().currentStep().voiceInstructions();
-      isFirst = true;
-      cacheInstructions(routeProgress, true);
     }
     for (VoiceInstructions voice : stepVoiceInstructions) {
       if (shouldBeVoiced(routeProgress, voice)) {
-        if (!isFirst) {
-          cacheInstructions(routeProgress, false);
-        }
+        cacheInstructions(routeProgress, false);
         announcement = voice.announcement();
         ssmlAnnouncement = voice.ssmlAnnouncement();
 
@@ -67,10 +63,10 @@ public class VoiceInstructionMilestone extends Milestone {
       if (instructions.size() > 1) {
         MapboxSpeech.cacheInstruction(instructions.get(1).ssmlAnnouncement());
       }
-    }
-
-    if (instructions.size() > 2) {
-      MapboxSpeech.cacheInstruction(instructions.get(2).ssmlAnnouncement());
+    } else {
+      if (instructions.size() > 2) {
+        MapboxSpeech.cacheInstruction(instructions.get(2).ssmlAnnouncement());
+      }
     }
   }
 
