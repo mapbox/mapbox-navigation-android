@@ -49,8 +49,6 @@ public abstract class MapboxSpeech {
   @Nullable
   abstract String outputType();
 
-  abstract File cacheDirectory();
-
   abstract String accessToken();
 
   abstract VoiceService voiceService();
@@ -59,6 +57,7 @@ public abstract class MapboxSpeech {
   @AutoValue.Builder
   public abstract static class Builder {
     long cacheSize;
+    File cacheDirectory;
 
     public abstract Builder language(String language);
 
@@ -79,9 +78,14 @@ public abstract class MapboxSpeech {
 
     abstract Builder voiceService(VoiceService voiceService);
 
-    public abstract Builder cacheDirectory(File cacheDirectory);
+    public Builder cacheDirectory(File cacheDirectory) {
+      this.cacheDirectory = cacheDirectory;
+      return this;
+    }
 
-    abstract File cacheDirectory();
+    File cacheDirectory() {
+      return cacheDirectory;
+    }
 
     abstract MapboxSpeech autoBuild();
 
