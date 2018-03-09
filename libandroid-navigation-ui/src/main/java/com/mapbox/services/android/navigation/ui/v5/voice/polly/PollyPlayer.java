@@ -10,6 +10,7 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionListener;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxSpeech;
+import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoader;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,7 +37,7 @@ import timber.log.Timber;
  * </p>
  */
 public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
-  private MapboxSpeech mapboxSpeech;
+  VoiceInstructionLoader voiceInstructionLoader;
   private MediaPlayer pollyMediaPlayer;
   private List<String> instructionUrls = new ArrayList<>();
   private InstructionListener instructionListener;
@@ -50,13 +51,13 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
    */
   public PollyPlayer(Context context, Locale locale) {
     this.cacheDirectory = context.getCacheDir().toString();
-    mapboxSpeech = MapboxSpeech.builder()
-      .textType("ssml")
-      .language(locale.toString())
-      .cacheDirectory(context.getCacheDir())
-      .accessToken(Mapbox.getAccessToken())
-      .callback(this)
-      .build();
+    voiceInstructionLoader = VoiceInstructionLoader.getInstance();
+    voiceInstructionLoader.initialize(
+      MapboxSpeech.builder()
+        .textType("ssml")
+        .language(locale.toString())
+        .cacheDirectory(context.getCacheDir())
+        .accessToken(Mapbox.getAccessToken()));
   }
 
   /**
@@ -68,8 +69,6 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
       getVoiceFile(instruction);
     }
   }
-
-
 
   @Override
   public boolean isMuted() {
@@ -118,7 +117,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
   }
 
   private void getVoiceFile(final String instruction) {
-    mapboxSpeech.getInstruction(instruction);
+    voiceInstructionLoader.getInstruction(instruction, this);
   }
 
   /**

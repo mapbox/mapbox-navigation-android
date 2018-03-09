@@ -18,20 +18,6 @@ import static com.mapbox.core.constants.Constants.BASE_API_URL;
 
 @AutoValue
 public abstract class MapboxSpeech {
-  protected static MapboxSpeech mapboxSpeech;
-
-  protected MapboxSpeech() {
-    mapboxSpeech = this;
-  }
-
-  public void getInstruction(String instruction) {
-    voiceService().getInstruction(
-      instruction, textType(),
-      language(),
-      outputType(),
-      accessToken()).enqueue(callback());
-  }
-
   public void getInstruction(String instruction, Callback<ResponseBody> callback) {
     voiceService().getInstruction(
       instruction, textType(),
@@ -40,20 +26,18 @@ public abstract class MapboxSpeech {
       accessToken()).enqueue(callback);
   }
 
-  public static void cacheInstruction(String instruction) {
-    if (mapboxSpeech != null) {
-      mapboxSpeech.getInstruction(instruction, new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+  public void cacheInstruction(String instruction) {
+    getInstruction(instruction, new Callback<ResponseBody>() {
+      @Override
+      public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
 
-        }
+      }
 
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable throwable) {
+      @Override
+      public void onFailure(Call<ResponseBody> call, Throwable throwable) {
 
-        }
-      });
-    }
+      }
+    });
   }
 
   @Nullable
@@ -69,13 +53,13 @@ public abstract class MapboxSpeech {
 
   abstract String accessToken();
 
-  abstract Callback<ResponseBody> callback();
-
   abstract VoiceService voiceService();
 
 
   @AutoValue.Builder
   public abstract static class Builder {
+    long cacheSize;
+
     public abstract Builder language(String language);
 
     public abstract Builder textType(String textType);
@@ -84,13 +68,20 @@ public abstract class MapboxSpeech {
 
     public abstract Builder accessToken(String accessToken);
 
-    public abstract Builder callback(Callback<ResponseBody> callback);
+    public Builder cacheSize(long cacheSize) {
+      this.cacheSize = cacheSize;
+      return this;
+    }
+
+    long cacheSize() {
+      return cacheSize;
+    }
 
     abstract Builder voiceService(VoiceService voiceService);
 
     public abstract Builder cacheDirectory(File cacheDirectory);
 
-    abstract File cacheDirectory(); // doesn't reset cache directory if service alredy created
+    abstract File cacheDirectory();
 
     abstract MapboxSpeech autoBuild();
 
@@ -100,8 +91,7 @@ public abstract class MapboxSpeech {
     }
 
     private VoiceService getVoiceService() {
-      int cacheSize = 10 * 1024 * 1024; // 10 MB
-      Cache cache = new Cache(cacheDirectory(), cacheSize);
+      Cache cache = new Cache(cacheDirectory(), cacheSize());
 
       OkHttpClient okHttpClient = new OkHttpClient.Builder()
         .cache(cache)
@@ -118,8 +108,6 @@ public abstract class MapboxSpeech {
 
   public static Builder builder() {
     return new AutoValue_MapboxSpeech.Builder()
-      .language("en-us")
-      .textType("text")
-      .outputType("mp3");
+      .cacheSize(10 * 1024 * 1024); // default cache size is 10 MB
   }
 }

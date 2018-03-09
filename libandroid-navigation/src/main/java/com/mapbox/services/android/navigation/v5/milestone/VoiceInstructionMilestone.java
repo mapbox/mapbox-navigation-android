@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxSpeech;
+import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoader;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.ArrayList;
@@ -17,9 +17,11 @@ public class VoiceInstructionMilestone extends Milestone {
   private DirectionsRoute currentRoute;
   private LegStep currentStep;
   private List<VoiceInstructions> stepVoiceInstructions;
+  private final VoiceInstructionLoader voiceInstructionLoader;
 
   VoiceInstructionMilestone(Builder builder) {
     super(builder);
+    voiceInstructionLoader = VoiceInstructionLoader.getInstance();
   }
 
   @Override
@@ -51,21 +53,26 @@ public class VoiceInstructionMilestone extends Milestone {
     List<LegStep> steps = routeProgress.currentLeg().steps();
     List<VoiceInstructions> instructions = new ArrayList<>();
 
-    while (instructions.size() < 3 && stepIndex < steps.size()) { // add check for large number of instructions?
-      instructions.addAll(steps.get(stepIndex++).voiceInstructions());
+    while (instructions.size() < 3 && stepIndex < steps.size()) {
+      List<VoiceInstructions> currentStepInstructions = steps.get(stepIndex++).voiceInstructions();
+      if (currentStepInstructions.size() < 4) {
+        instructions.addAll(currentStepInstructions);
+      } else { // in case there are a large number of instructions
+        instructions.addAll(currentStepInstructions.subList(0, 3));
+      }
     }
 
     if (first) {
       if (instructions.size() > 0) {
-        MapboxSpeech.cacheInstruction(instructions.get(0).ssmlAnnouncement());
+        voiceInstructionLoader.cacheInstruction(instructions.get(0).ssmlAnnouncement());
       }
 
       if (instructions.size() > 1) {
-        MapboxSpeech.cacheInstruction(instructions.get(1).ssmlAnnouncement());
+        voiceInstructionLoader.cacheInstruction(instructions.get(1).ssmlAnnouncement());
       }
     } else {
       if (instructions.size() > 2) {
-        MapboxSpeech.cacheInstruction(instructions.get(2).ssmlAnnouncement());
+        voiceInstructionLoader.cacheInstruction(instructions.get(2).ssmlAnnouncement());
       }
     }
   }
