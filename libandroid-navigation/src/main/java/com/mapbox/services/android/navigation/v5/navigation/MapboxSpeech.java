@@ -24,11 +24,6 @@ public abstract class MapboxSpeech {
     mapboxSpeech = this;
   }
 
-  @Nullable
-  private static MapboxSpeech getInstance() {
-    return mapboxSpeech;
-  }
-
   public void getInstruction(String instruction) {
     voiceService().getInstruction(
       instruction, textType(),
@@ -54,7 +49,7 @@ public abstract class MapboxSpeech {
         }
 
         @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
+        public void onFailure(Call<ResponseBody> call, Throwable throwable) {
 
         }
       });
@@ -87,13 +82,13 @@ public abstract class MapboxSpeech {
 
     public abstract Builder outputType(String outputType);
 
-    public abstract Builder cacheDirectory(File cacheDirectory);
-
     public abstract Builder accessToken(String accessToken);
 
     public abstract Builder callback(Callback<ResponseBody> callback);
 
     abstract Builder voiceService(VoiceService voiceService);
+
+    public abstract Builder cacheDirectory(File cacheDirectory);
 
     abstract File cacheDirectory(); // doesn't reset cache directory if service alredy created
 
@@ -105,7 +100,6 @@ public abstract class MapboxSpeech {
     }
 
     private VoiceService getVoiceService() {
-
       int cacheSize = 10 * 1024 * 1024; // 10 MB
       Cache cache = new Cache(cacheDirectory(), cacheSize);
 
