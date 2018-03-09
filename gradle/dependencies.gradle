@@ -30,7 +30,8 @@ ext {
       commonsIO          : '2.5',
       robolectric        : '3.5.1',
       lifecycle          : '1.0.0',
-      picasso            : '2.5.2'
+      picasso            : '2.5.2',
+      dokkaJavadocVersion: '0.9.16'
   ]
 
   pluginVersion = [
@@ -109,6 +110,7 @@ ext {
       spotbugs  : "gradle.plugin.com.github.spotbugs:gradlePlugin:${pluginVersion.spotbugs}",
       sonarqube : "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${pluginVersion.sonarqube}",
       coveralls : "org.kt3k.gradle.plugin:coveralls-gradle-plugin:${pluginVersion.coveralls}",
-      errorprone: "net.ltgt.gradle:gradle-errorprone-plugin:${pluginVersion.errorprone}"
+      errorprone: "net.ltgt.gradle:gradle-errorprone-plugin:${pluginVersion.errorprone}",
+      androidGradleDokkaJavadoc: "org.jetbrains.dokka:dokka-android-gradle-plugin:${pluginVersion.dokkaJavadocVersion}",
   ]
 }
