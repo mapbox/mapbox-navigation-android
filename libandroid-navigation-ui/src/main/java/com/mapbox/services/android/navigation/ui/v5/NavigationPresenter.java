@@ -10,11 +10,37 @@ import com.mapbox.geojson.Point;
 
 class NavigationPresenter {
 
+  private static final int RECENTER_MAX_TIME = 15000;
+  private static final Object lock = new Object();
+  private final Handler recenterHandler = new Handler();
+  private final Runnable recenterRunnable;
+
   private NavigationContract.View view;
   private int bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED;
+  private int millisToRecenter = RECENTER_MAX_TIME;
+  private long lastScrollTimestamp = -1;
+  private boolean timerIsRunning = false;
+  private boolean isViewAttached = false;
 
   NavigationPresenter(NavigationContract.View view) {
     this.view = view;
+    recenterRunnable = new Runnable() {
+      @Override
+      public void run() {
+        synchronized (lock) {
+          if (isViewAttached) {
+            if (lastScrollTimestamp != -1 && System.currentTimeMillis() - lastScrollTimestamp > millisToRecenter) {
+              lastScrollTimestamp = -1;
+              millisToRecenter = RECENTER_MAX_TIME;
+              timerIsRunning = false;
+              onRecenterClick();
+              return;
+            }
+            recenterHandler.postDelayed(recenterRunnable, 1000);
+          }
+        }
+      }
+    };
   }
 
   // in case of you need to to something after map init
@@ -23,10 +49,19 @@ class NavigationPresenter {
 
   @UiThread
   void resume() {
+    isViewAttached = true;
+    if (timerIsRunning) {
+      recenterHandler.postDelayed(recenterRunnable, 1000);
+    }
   }
 
   @UiThread
   void pause() {
+    synchronized (lock) {
+      isViewAttached = false;
+      //stop handler when view not visible
+      recenterHandler.removeCallbacks(recenterRunnable);
+    }
   }
 
   void onRecenterClick() {
@@ -42,6 +77,9 @@ class NavigationPresenter {
   }
 
   void onMapScroll() {
+    lastScrollTimestamp = System.currentTimeMillis();
+    startRecenterTimer();
+
     if (bottomSheetState != BottomSheetBehavior.STATE_HIDDEN) {
       view.setSummaryBehaviorHideable(true);
       bottomSheetState = BottomSheetBehavior.STATE_HIDDEN;
@@ -85,5 +123,15 @@ class NavigationPresenter {
   void onNavigationLocationUpdate(Location location) {
     view.resumeCamera(location);
     view.updateLocationLayer(location);
+  }
+
+  @UiThread
+  private void startRecenterTimer() {
+    synchronized (lock) {
+      if (!timerIsRunning) {
+        timerIsRunning = true;
+        recenterHandler.postDelayed(recenterRunnable, 1000);
+      }
+    }
   }
 }
