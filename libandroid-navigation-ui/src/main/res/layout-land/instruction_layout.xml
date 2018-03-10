@@ -36,8 +36,8 @@
 
         <TextView
             android:id="@+id/stepDistanceText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:layout_marginBottom="4dp"
             android:layout_marginEnd="4dp"
             android:layout_marginStart="4dp"
@@ -100,19 +100,25 @@
         android:id="@+id/turnLaneLayout"
         layout="@layout/turn_lane_layout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/instructionManeuverLayout"
+        app:layout_constraintEnd_toStartOf="@+id/soundLayout"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/instructionManeuverLayout"
         app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText"/>
 
     <include
         android:id="@+id/thenStepLayout"
         layout="@layout/then_instruction_layout"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/instructionManeuverLayout"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/soundLayout"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/instructionManeuverLayout"
         app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText"/>
 
@@ -148,7 +154,6 @@
         layout="@layout/sound_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText"/>
 
