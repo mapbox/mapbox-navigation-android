@@ -104,8 +104,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private boolean isRerouting;
 
   private Locale locale;
-  private @NavigationUnitType.UnitType
-  int unitType = NavigationUnitType.NONE_SPECIFIED;
+  private @NavigationUnitType.UnitType int unitType = NavigationUnitType.NONE_SPECIFIED;
   private boolean isMuted;
 
   public InstructionView(Context context) {
