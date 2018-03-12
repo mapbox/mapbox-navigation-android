@@ -23,9 +23,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.style.functions.Function;
-import com.mapbox.mapboxsdk.style.functions.stops.Stop;
-import com.mapbox.mapboxsdk.style.functions.stops.Stops;
+import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.Property;
@@ -47,9 +45,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import static com.mapbox.mapboxsdk.style.functions.stops.Stop.stop;
-import static com.mapbox.mapboxsdk.style.functions.stops.Stops.categorical;
-import static com.mapbox.mapboxsdk.style.functions.stops.Stops.exponential;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.color;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.exponential;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.interpolate;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.match;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.stop;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.zoom;
 
 /**
  * Provide a route using {@link NavigationMapRoute#addRoutes(List)} and a route will be drawn using
@@ -348,8 +351,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private static FeatureCollection waypointFeatureCollection(DirectionsRoute route) {
     final List<Feature> waypointFeatures = new ArrayList<>();
     for (RouteLeg leg : route.legs()) {
-      waypointFeatures.add(getPointFromLineString(route, 0));
-      waypointFeatures.add(getPointFromLineString(route, leg.steps().size() - 1));
+      waypointFeatures.add(getPointFromLineString(leg, 0));
+      waypointFeatures.add(getPointFromLineString(leg, leg.steps().size() - 1));
     }
     return FeatureCollection.fromFeatures(waypointFeatures);
   }
@@ -371,16 +374,14 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     Layer layer = mapboxMap.getLayer(layerId);
     if (layer != null) {
       layer.setProperties(
-        PropertyFactory.lineColor(
-          Function.property(CONGESTION_KEY, categorical(
-            stop("moderate", PropertyFactory.lineColor(
-              index == primaryRouteIndex ? routeModerateColor : alternativeRouteModerateColor)),
-            stop("heavy", PropertyFactory.lineColor(
-              index == primaryRouteIndex ? routeSevereColor : alternativeRouteSevereColor)),
-            stop("severe", PropertyFactory.lineColor(
-              index == primaryRouteIndex ? routeSevereColor : alternativeRouteSevereColor))
-          )).withDefaultValue(PropertyFactory.lineColor(
-            index == primaryRouteIndex ? routeDefaultColor : alternativeRouteDefaultColor)))
+        PropertyFactory.lineColor(match(
+          Expression.toString(get(CONGESTION_KEY)),
+          color(index == primaryRouteIndex ? routeDefaultColor : alternativeRouteDefaultColor),
+          stop("moderate", color(index == primaryRouteIndex ? routeModerateColor : alternativeRouteModerateColor)),
+          stop("heavy", color(index == primaryRouteIndex ? routeSevereColor : alternativeRouteSevereColor)),
+          stop("severe", color(index == primaryRouteIndex ? routeSevereColor : alternativeRouteSevereColor))
+          )
+        )
       );
       if (index == primaryRouteIndex) {
         mapboxMap.removeLayer(layer);
@@ -393,8 +394,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     Layer layer = mapboxMap.getLayer(layerId);
     if (layer != null) {
       layer.setProperties(
-        PropertyFactory.lineColor(
-          index == primaryRouteIndex ? routeShieldColor : alternativeRouteShieldColor)
+        PropertyFactory.lineColor(index == primaryRouteIndex ? routeShieldColor : alternativeRouteShieldColor)
       );
       if (index == primaryRouteIndex) {
         mapboxMap.removeLayer(layer);
@@ -411,26 +411,24 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     Layer routeLayer = new LineLayer(layerId, sourceId).withProperties(
       PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
       PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-      PropertyFactory.lineWidth(Function.zoom(
-        exponential(
-          stop(4f, PropertyFactory.lineWidth(3f * scale)),
-          stop(10f, PropertyFactory.lineWidth(4f * scale)),
-          stop(13f, PropertyFactory.lineWidth(6f * scale)),
-          stop(16f, PropertyFactory.lineWidth(10f * scale)),
-          stop(19f, PropertyFactory.lineWidth(14f * scale)),
-          stop(22f, PropertyFactory.lineWidth(18f * scale))
-        ).withBase(1.5f))
+      PropertyFactory.lineWidth(interpolate(
+        exponential(1.5f), zoom(),
+        stop(4f, 3f * scale),
+        stop(10f, 4f * scale),
+        stop(13f, 6f * scale),
+        stop(16f, 10f * scale),
+        stop(19f, 14f * scale),
+        stop(22f, 18f * scale)
+        )
       ),
-      PropertyFactory.lineColor(
-        Function.property(CONGESTION_KEY, categorical(
-          stop("moderate", PropertyFactory.lineColor(
-            index == primaryRouteIndex ? routeModerateColor : alternativeRouteModerateColor)),
-          stop("heavy", PropertyFactory.lineColor(
-            index == primaryRouteIndex ? routeSevereColor : alternativeRouteSevereColor)),
-          stop("severe", PropertyFactory.lineColor(
-            index == primaryRouteIndex ? routeSevereColor : alternativeRouteSevereColor))
-        )).withDefaultValue(PropertyFactory.lineColor(
-          index == primaryRouteIndex ? routeDefaultColor : alternativeRouteDefaultColor)))
+      PropertyFactory.lineColor(match(
+        Expression.toString(get(CONGESTION_KEY)),
+        color(index == primaryRouteIndex ? routeDefaultColor : alternativeRouteDefaultColor),
+        stop("moderate", color(index == primaryRouteIndex ? routeModerateColor : alternativeRouteModerateColor)),
+        stop("heavy", color(index == primaryRouteIndex ? routeSevereColor : alternativeRouteSevereColor)),
+        stop("severe", color(index == primaryRouteIndex ? routeSevereColor : alternativeRouteSevereColor))
+        )
+      )
     );
     MapUtils.addLayerToMap(mapboxMap, routeLayer, belowLayer);
   }
@@ -463,14 +461,14 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     Layer routeLayer = new LineLayer(layerId, sourceId).withProperties(
       PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
       PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-      PropertyFactory.lineWidth(Function.zoom(
-        exponential(
-          stop(10f, PropertyFactory.lineWidth(7f)),
-          stop(14f, PropertyFactory.lineWidth(10.5f * scale)),
-          stop(16.5f, PropertyFactory.lineWidth(15.5f * scale)),
-          stop(19f, PropertyFactory.lineWidth(24f * scale)),
-          stop(22f, PropertyFactory.lineWidth(29f * scale))
-        ).withBase(1.5f))
+      PropertyFactory.lineWidth(interpolate(
+        exponential(1.5f), zoom(),
+        stop(10f, 7f),
+        stop(14f, 10.5f * scale),
+        stop(16.5f, 15.5f * scale),
+        stop(19f, 24f * scale),
+        stop(22f, 29f * scale)
+        )
       ),
       PropertyFactory.lineColor(
         index == primaryRouteIndex ? routeShieldColor : alternativeRouteShieldColor)
@@ -554,20 +552,19 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       mapboxMap.addImage("destinationMarker", bitmap);
 
       waypointLayer = new SymbolLayer(WAYPOINT_LAYER_ID, WAYPOINT_SOURCE_ID).withProperties(
-        PropertyFactory.iconImage(Function.property(
-          "waypoint",
-          categorical(
-            stop("origin", PropertyFactory.iconImage("originMarker")),
-            stop("destination", PropertyFactory.iconImage("destinationMarker"))
+        PropertyFactory.iconImage(match(
+          Expression.toString(get("waypoint")), literal("originMarker"),
+          stop("origin", literal("originMarker")),
+          stop("destination", literal("destinationMarker"))
           )
+        ),
+        PropertyFactory.iconSize(interpolate(
+          exponential(1.5f), zoom(),
+          stop(22f, 2.8f),
+          stop(12f, 1.3f),
+          stop(10f, 0.8f),
+          stop(0f, 0.6f)
         )),
-        PropertyFactory.iconSize(Function.zoom(
-          Stops.exponential(
-            Stop.stop(22f, PropertyFactory.iconSize(2.8f)),
-            Stop.stop(12f, PropertyFactory.iconSize(1.3f)),
-            Stop.stop(10f, PropertyFactory.iconSize(0.8f)),
-            Stop.stop(0f, PropertyFactory.iconSize(0.6f))
-          ).withBase(1.5f))),
         PropertyFactory.iconPitchAlignment(Property.ANCHOR_MAP),
         PropertyFactory.iconAllowOverlap(true),
         PropertyFactory.iconIgnorePlacement(true)
@@ -577,10 +574,11 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     }
   }
 
-  private static Feature getPointFromLineString(DirectionsRoute route, int index) {
-    List<Point> coordinates = route.routeOptions().coordinates();
-    Point waypoint = coordinates.get(index);
-    Feature feature = Feature.fromGeometry(waypoint);
+  private static Feature getPointFromLineString(RouteLeg leg, int index) {
+    Feature feature = Feature.fromGeometry(Point.fromLngLat(
+      leg.steps().get(index).maneuver().location().longitude(),
+      leg.steps().get(index).maneuver().location().latitude()
+    ));
     feature.addStringProperty(SOURCE_KEY, WAYPOINT_SOURCE_ID);
     feature.addStringProperty("waypoint",
       index == 0 ? "origin" : "destination"

@@ -54,6 +54,9 @@ dependencies {
   implementation dependenciesList.supportRecyclerView
   implementation dependenciesList.supportConstraintLayout
   implementation dependenciesList.supportCardView
+  implementation dependenciesList.lifecycleExtensions
+
+  implementation dependenciesList.gmsLocation
 
   // Logging
   implementation dependenciesList.timber

@@ -30,8 +30,8 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
+import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionLoader;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
@@ -200,12 +200,12 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
-    initMapPadding();
     ThemeSwitcher.setMapStyle(getContext(), map, new MapboxMap.OnStyleLoadedListener() {
       @Override
       public void onStyleLoaded(String style) {
         initRoute();
         initLocationLayer();
+        initMapPadding();
         initLifecycleObservers();
         initNavigationPresenter();
         initClickListeners();
@@ -514,7 +514,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     int locationLayerStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(getContext(),
       R.attr.navigationViewLocationLayerStyle);
     locationLayer = new LocationLayerPlugin(mapView, map, null, locationLayerStyleRes);
-    locationLayer.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
+    locationLayer.setRenderMode(RenderMode.GPS);
   }
 
   /**

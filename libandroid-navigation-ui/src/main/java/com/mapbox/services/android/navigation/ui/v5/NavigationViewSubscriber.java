@@ -5,13 +5,13 @@ import android.arch.lifecycle.Observer;
 import android.location.Location;
 import android.support.annotation.Nullable;
 
+import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.route.OffRouteEvent;
 import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
-import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 class NavigationViewSubscriber {
 

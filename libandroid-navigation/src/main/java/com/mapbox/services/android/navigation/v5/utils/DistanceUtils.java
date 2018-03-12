@@ -37,8 +37,9 @@ public class DistanceUtils {
 
   /**
    * Creates a DistanceUtils object with information about how to format distances
-   * @param context from which to get localized strings from
-   * @param locale for which language and country
+   *
+   * @param context  from which to get localized strings from
+   * @param locale   for which language and country
    * @param unitType to use, or NONE_SPECIFIED to use default for locale country
    */
   public DistanceUtils(Context context, @NonNull Locale locale, @NavigationUnitType.UnitType int unitType) {
@@ -61,6 +62,7 @@ public class DistanceUtils {
 
   /**
    * Returns a formatted SpannableString with bold and size formatting. I.e., "10 mi", "350 m"
+   *
    * @param distance in meters
    * @return SpannableString representation which has a bolded number and units which have a
    * relative size of .65 times the size of the number
@@ -83,6 +85,7 @@ public class DistanceUtils {
 
   /**
    * Returns number rounded to closest fifty, unless the number is less than fifty, then fifty is returned
+   *
    * @param distance to round to closest fifty
    * @return number rounded to closest fifty, or fifty if distance is less than fifty
    */
@@ -94,7 +97,8 @@ public class DistanceUtils {
 
   /**
    * Rounds given number to the given decimal place
-   * @param distance to round
+   *
+   * @param distance     to round
    * @param decimalPlace number of decimal places to round
    * @return distance rounded to given decimal places
    */
@@ -107,15 +111,16 @@ public class DistanceUtils {
   /**
    * Takes in a distance and units and returns a formatted SpannableString where the number is bold
    * and the unit is shrunked to .65 times the size
+   *
    * @param distance formatted with appropriate decimal places
-   * @param unit string from TurfConstants. This will be converted to the abbreviated form.
+   * @param unit     string from TurfConstants. This will be converted to the abbreviated form.
    * @return String with bolded distance and shrunken units
    */
   private SpannableString getDistanceString(String distance, String unit) {
     SpannableString spannableString = new SpannableString(String.format("%s %s", distance, unitStrings.get(unit)));
 
     spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, distance.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-    spannableString.setSpan(new RelativeSizeSpan(0.65f),distance.length() + 1,
+    spannableString.setSpan(new RelativeSizeSpan(0.65f), distance.length() + 1,
       spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
     return spannableString;
