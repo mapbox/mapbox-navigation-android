@@ -188,7 +188,8 @@ public class NavigationCamera implements ProgressChangeListener {
    * @param position to which the camera should animate
    */
   private void easeMapCameraPosition(CameraPosition position) {
-    mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(position), (int) getLocationUpdateDuration(), false, null);
+    mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(position),
+      (int) getLocationUpdateDuration(), false, null);
   }
 
   /**
@@ -258,7 +259,7 @@ public class NavigationCamera implements ProgressChangeListener {
   }
 
   private long getLocationUpdateDuration() {
-    // calculate updateLatLng time + add some extra offset to improve animation
+    // Calculate updateLatLng time + add some extra offset to improve animation
     long previousUpdateTimeStamp = locationUpdateTimestamp;
     locationUpdateTimestamp = SystemClock.elapsedRealtime();
     long duration = locationUpdateTimestamp - previousUpdateTimeStamp;
