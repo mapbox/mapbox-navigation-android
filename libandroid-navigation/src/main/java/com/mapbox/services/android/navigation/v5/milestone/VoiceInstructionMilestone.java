@@ -35,12 +35,12 @@ public class VoiceInstructionMilestone extends Milestone {
     if (shouldAddInstructions(routeProgress)) {
       stepVoiceInstructions = routeProgress.currentLegProgress().currentStep().voiceInstructions();
     }
+
     for (VoiceInstructions voice : stepVoiceInstructions) {
       if (shouldBeVoiced(routeProgress, voice)) {
         cacheInstructions(routeProgress, false);
         announcement = voice.announcement();
         ssmlAnnouncement = voice.ssmlAnnouncement();
-
         stepVoiceInstructions.remove(voice);
         return true;
       }
@@ -76,8 +76,6 @@ public class VoiceInstructionMilestone extends Milestone {
       }
     }
   }
-
-
 
   @Override
   public Instruction getInstruction() {
