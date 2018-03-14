@@ -17,6 +17,7 @@ import com.mapbox.services.android.navigation.v5.navigation.notification.Navigat
 import com.mapbox.services.android.navigation.v5.route.RouteEngine;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
+import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 
@@ -97,7 +98,7 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onLocationChanged(Location location) {
     Timber.d("onLocationChanged");
-    if (location != null && validLocationUpdate(location)) {
+    if (location != null && isValidLocationUpdate(location)) {
       thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation));
     }
   }
@@ -284,7 +285,7 @@ public class NavigationService extends Service implements LocationEngineListener
    * performing navigation progress on a accurate/valid rawLocation update.
    */
   @SuppressWarnings("MissingPermission")
-  private boolean validLocationUpdate(Location location) {
+  private boolean isValidLocationUpdate(Location location) {
     if (locationEngine.getLastLocation() == null) {
       return true;
     }
@@ -301,8 +302,11 @@ public class NavigationService extends Service implements LocationEngineListener
   @SuppressWarnings("MissingPermission")
   private void forceLocationUpdate() {
     Location lastLocation = locationEngine.getLastLocation();
-    if (lastLocation != null) {
-      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(lastLocation, mapboxNavigation));
+    if (lastLocation != null && isValidLocationUpdate(lastLocation)) {
+      onLocationChanged(lastLocation);
+    } else {
+      Location forcedLocation = RouteUtils.createFirstLocationFromRoute(mapboxNavigation.getRoute());
+      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(forcedLocation, mapboxNavigation));
     }
   }
 
