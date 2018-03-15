@@ -311,14 +311,11 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @SuppressWarnings("MissingPermission")
   private void forceLocationUpdate() {
-    Location forcedLocation;
-    Location lastLocation = locationEngine.getLastLocation();
-    if (isValidLocationUpdate(lastLocation)) {
-      forcedLocation = lastLocation;
-    } else {
-      forcedLocation = RouteUtils.createFirstLocationFromRoute(mapboxNavigation.getRoute());
+    Location location = locationEngine.getLastLocation();
+    if (!isValidLocationUpdate(location)) {
+      location = RouteUtils.createFirstLocationFromRoute(mapboxNavigation.getRoute());
     }
-    queueLocationUpdateTask(forcedLocation);
+    queueLocationUpdateTask(location);
   }
 
   /**
