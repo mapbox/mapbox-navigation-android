@@ -286,9 +286,6 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @SuppressWarnings("MissingPermission")
   private boolean isValidLocationUpdate(Location location) {
-    if (locationEngine.getLastLocation() == null) {
-      return true;
-    }
     // If the locations the same as previous, no need to recalculate things
     return !(location.equals(locationEngine.getLastLocation())
       || (location.getSpeed() <= 0 && location.hasSpeed())
