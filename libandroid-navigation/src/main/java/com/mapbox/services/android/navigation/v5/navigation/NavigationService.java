@@ -98,7 +98,7 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onLocationChanged(Location location) {
     Timber.d("onLocationChanged");
-    if (location != null && isValidLocationUpdate(location)) {
+    if (isValidLocationUpdate(location)) {
       queueLocationUpdateTask(location);
     }
   }
@@ -286,6 +286,9 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @SuppressWarnings("MissingPermission")
   private boolean isValidLocationUpdate(Location location) {
+    if (location == null) {
+      return false;
+    }
     // If the locations the same as previous, no need to recalculate things
     return !(location.equals(locationEngine.getLastLocation())
       || (location.getSpeed() <= 0 && location.hasSpeed())
@@ -310,7 +313,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private void forceLocationUpdate() {
     Location forcedLocation;
     Location lastLocation = locationEngine.getLastLocation();
-    if (lastLocation != null && isValidLocationUpdate(lastLocation)) {
+    if (isValidLocationUpdate(lastLocation)) {
       forcedLocation = lastLocation;
     } else {
       forcedLocation = RouteUtils.createFirstLocationFromRoute(mapboxNavigation.getRoute());
