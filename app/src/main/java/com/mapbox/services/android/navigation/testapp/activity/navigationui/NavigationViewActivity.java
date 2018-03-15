@@ -107,8 +107,9 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       case R.id.settings:
         showSettings();
         return true;
+      default:
+        return super.onOptionsItemSelected(item);
     }
-    return super.onOptionsItemSelected(item);
   }
 
   private void showSettings() {
