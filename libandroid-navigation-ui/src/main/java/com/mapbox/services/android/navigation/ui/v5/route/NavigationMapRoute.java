@@ -671,7 +671,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       linePoints.add(com.mapbox.geojson.Point.fromLngLat(pos.getLongitude(), pos.getLatitude()));
     }
 
-    com.mapbox.geojson.Feature feature = TurfMisc.pointOnLine(clickPoint, linePoints);
+    com.mapbox.geojson.Feature feature = TurfMisc.nearestPointOnLine(clickPoint, linePoints);
     return (com.mapbox.geojson.Point) feature.geometry();
   }
 
