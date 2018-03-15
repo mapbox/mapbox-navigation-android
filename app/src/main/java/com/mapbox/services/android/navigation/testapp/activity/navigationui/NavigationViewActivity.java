@@ -106,11 +106,9 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     switch (item.getItemId()) {
       case R.id.settings:
         showSettings();
-        break;
-      default:
-        break;
+        return true;
     }
-    return true;
+    return super.onOptionsItemSelected(item);
   }
 
   private void showSettings() {
