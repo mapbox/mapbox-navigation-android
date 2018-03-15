@@ -66,8 +66,8 @@ public class DistanceUtils {
    * relative size of .65 times the size of the number
    */
   public SpannableString formatDistance(double distance) {
-    double distanceSmallUnit = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, smallUnit);
-    double distanceLargeUnit = TurfConversion.convertDistance(distance, TurfConstants.UNIT_METERS, largeUnit);
+    double distanceSmallUnit = TurfConversion.convertLength(distance, TurfConstants.UNIT_METERS, smallUnit);
+    double distanceLargeUnit = TurfConversion.convertLength(distance, TurfConstants.UNIT_METERS, largeUnit);
 
     // If the distance is greater than 10 miles/kilometers, then round to nearest mile/kilometer
     if (distanceLargeUnit > LARGE_UNIT_THRESHOLD) {

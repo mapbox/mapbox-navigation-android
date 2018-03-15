@@ -53,7 +53,7 @@ public class SnapToRoute extends Snap {
     // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
     // Point on the LineString.
     if (stepCoordinates.size() > 1) {
-      Feature feature = TurfMisc.pointOnLine(locationToPoint, stepCoordinates);
+      Feature feature = TurfMisc.nearestPointOnLine(locationToPoint, stepCoordinates);
       Point point = ((Point) feature.geometry());
       snappedLocation.setLongitude(point.longitude());
       snappedLocation.setLatitude(point.latitude());
