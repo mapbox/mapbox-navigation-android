@@ -99,7 +99,7 @@ public class NavigationService extends Service implements LocationEngineListener
   public void onLocationChanged(Location location) {
     Timber.d("onLocationChanged");
     if (location != null && isValidLocationUpdate(location)) {
-      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation));
+      queueLocationUpdateTask(location);
     }
   }
 
@@ -293,18 +293,29 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   /**
+   * Queues a new task created from a location update to be sent
+   * to {@link NavigationEngine} for processing.
+   *
+   * @param location to be processed
+   */
+  private void queueLocationUpdateTask(Location location) {
+    thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(location, mapboxNavigation));
+  }
+
+  /**
    * At the very beginning of navigation session, a forced location update occurs so that the
    * developer can immediately get a routeProgress object to display information.
    */
   @SuppressWarnings("MissingPermission")
   private void forceLocationUpdate() {
+    Location forcedLocation;
     Location lastLocation = locationEngine.getLastLocation();
     if (lastLocation != null && isValidLocationUpdate(lastLocation)) {
-      onLocationChanged(lastLocation);
+      forcedLocation = lastLocation;
     } else {
-      Location forcedLocation = RouteUtils.createFirstLocationFromRoute(mapboxNavigation.getRoute());
-      thread.queueTask(MSG_LOCATION_UPDATED, NewLocationModel.create(forcedLocation, mapboxNavigation));
+      forcedLocation = RouteUtils.createFirstLocationFromRoute(mapboxNavigation.getRoute());
     }
+    queueLocationUpdateTask(forcedLocation);
   }
 
   /**

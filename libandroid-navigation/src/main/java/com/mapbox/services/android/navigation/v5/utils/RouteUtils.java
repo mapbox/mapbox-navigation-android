@@ -18,6 +18,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 public final class RouteUtils {
 
   private static final String FORCED_LOCATION = "Forced Location";
+  private static final int FIRST_COORDINATE = 0;
 
   private RouteUtils() {
     // Utils class therefore, shouldn't be initialized.
@@ -118,7 +119,7 @@ public final class RouteUtils {
    */
   public static Location createFirstLocationFromRoute(DirectionsRoute route) {
     List<Point> coordinates = route.routeOptions().coordinates();
-    Point origin = coordinates.get(0);
+    Point origin = coordinates.get(FIRST_COORDINATE);
     Location forcedLocation = new Location(FORCED_LOCATION);
     forcedLocation.setLatitude(origin.latitude());
     forcedLocation.setLongitude(origin.longitude());
