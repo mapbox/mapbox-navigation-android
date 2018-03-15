@@ -48,7 +48,7 @@ class NavigationHelper {
 
     // Uses Turf's pointOnLine, which takes a Point and a LineString to calculate the closest
     // Point on the LineString.
-    Feature feature = TurfMisc.pointOnLine(locationToPoint, coordinates);
+    Feature feature = TurfMisc.nearestPointOnLine(locationToPoint, coordinates);
     return ((Point) feature.geometry());
   }
 
@@ -81,7 +81,7 @@ class NavigationHelper {
       return 0;
     }
     LineString slicedLine = TurfMisc.lineSlice(snappedPosition, nextManeuverPosition, lineString);
-    return TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+    return TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
   }
 
   /**

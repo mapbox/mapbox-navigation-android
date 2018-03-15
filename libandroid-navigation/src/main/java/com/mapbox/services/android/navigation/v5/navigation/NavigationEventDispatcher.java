@@ -14,27 +14,26 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import timber.log.Timber;
 
 class NavigationEventDispatcher {
 
-  private List<NavigationEventListener> navigationEventListeners;
-  private List<MilestoneEventListener> milestoneEventListeners;
-  private List<ProgressChangeListener> progressChangeListeners;
-  private List<OffRouteListener> offRouteListeners;
-  private List<FasterRouteListener> fasterRouteListeners;
+  private CopyOnWriteArrayList<NavigationEventListener> navigationEventListeners;
+  private CopyOnWriteArrayList<MilestoneEventListener> milestoneEventListeners;
+  private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
+  private CopyOnWriteArrayList<OffRouteListener> offRouteListeners;
+  private CopyOnWriteArrayList<FasterRouteListener> fasterRouteListeners;
   private NavigationMetricListeners.EventListeners metricEventListeners;
   private NavigationMetricListeners.ArrivalListener metricArrivalListener;
 
   NavigationEventDispatcher() {
-    navigationEventListeners = new ArrayList<>();
-    milestoneEventListeners = new ArrayList<>();
-    progressChangeListeners = new ArrayList<>();
-    offRouteListeners = new ArrayList<>();
-    fasterRouteListeners = new ArrayList<>();
+    navigationEventListeners = new CopyOnWriteArrayList<>();
+    milestoneEventListeners = new CopyOnWriteArrayList<>();
+    progressChangeListeners = new CopyOnWriteArrayList<>();
+    offRouteListeners = new CopyOnWriteArrayList<>();
+    fasterRouteListeners = new CopyOnWriteArrayList<>();
   }
 
   void addMilestoneEventListener(@NonNull MilestoneEventListener milestoneEventListener) {

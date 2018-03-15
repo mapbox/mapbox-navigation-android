@@ -75,6 +75,7 @@ public class NavigationRouteTest extends BaseTest {
 
     RouteOptions routeOptions = RouteOptions.builder()
       .accessToken(ACCESS_TOKEN)
+      .baseUrl("https://api-directions-traf.com")
       .requestUuid("XYZ_UUID")
       .alternatives(true)
       .language(Locale.US.getLanguage())
@@ -91,6 +92,7 @@ public class NavigationRouteTest extends BaseTest {
       .build();
 
     String request = navigationRoute.getCall().request().url().toString();
+    assertThat(request, containsString("https://api-directions-traf.com"));
     assertThat(request, containsString("alternatives=true"));
     assertThat(request, containsString(ACCESS_TOKEN));
     assertThat(request, containsString("voice_units=metric"));

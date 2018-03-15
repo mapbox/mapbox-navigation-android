@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
+import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -15,6 +16,9 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
 
 public final class RouteUtils {
+
+  private static final String FORCED_LOCATION = "Forced Location";
+  private static final int FIRST_COORDINATE = 0;
 
   private RouteUtils() {
     // Utils class therefore, shouldn't be initialized.
@@ -100,6 +104,26 @@ public final class RouteUtils {
     }
     coordinates.subList(0, routeProgress.remainingWaypoints()).clear();
     return coordinates;
+  }
+
+  /**
+   * If navigation begins, a location update is sometimes needed to force a
+   * progress change update as soon as navigation is started.
+   * <p>
+   * This method creates a location update from the first coordinate (origin) that created
+   * the route.
+   *
+   * @param route with list of coordinates
+   * @return {@link Location} from first coordinate
+   * @since 0.10.0
+   */
+  public static Location createFirstLocationFromRoute(DirectionsRoute route) {
+    List<Point> coordinates = route.routeOptions().coordinates();
+    Point origin = coordinates.get(FIRST_COORDINATE);
+    Location forcedLocation = new Location(FORCED_LOCATION);
+    forcedLocation.setLatitude(origin.latitude());
+    forcedLocation.setLongitude(origin.longitude());
+    return forcedLocation;
   }
 
   private static boolean upcomingStepIsArrival(@NonNull RouteProgress routeProgress) {

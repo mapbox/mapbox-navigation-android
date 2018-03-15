@@ -361,11 +361,21 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         R.attr.navigationViewPrimary);
       int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
         R.attr.navigationViewBannerBackground);
+      int navigationViewListBackgroundColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+        R.attr.navigationViewListBackground);
       // Instruction Layout landscape - banner background
       if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
         View instructionLayoutManeuver = findViewById(R.id.instructionManeuverLayout);
         Drawable maneuverBackground = DrawableCompat.wrap(instructionLayoutManeuver.getBackground()).mutate();
         DrawableCompat.setTint(maneuverBackground, navigationViewBannerBackgroundColor);
+
+        View thenStepLayout = findViewById(R.id.thenStepLayout);
+        Drawable thenStepBackground = DrawableCompat.wrap(thenStepLayout.getBackground()).mutate();
+        DrawableCompat.setTint(thenStepBackground, navigationViewListBackgroundColor);
+
+        View turnLaneLayout = findViewById(R.id.turnLaneLayout);
+        Drawable turnLaneBackground = DrawableCompat.wrap(turnLaneLayout.getBackground()).mutate();
+        DrawableCompat.setTint(turnLaneBackground, navigationViewListBackgroundColor);
       }
       // Sound chip text - primary
       Drawable soundChipBackground = DrawableCompat.wrap(soundChipText.getBackground()).mutate();
@@ -809,6 +819,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
   /**
    * Sets the locale to use for languages and default unit type
+   *
    * @param locale to use
    */
   public void setLocale(Locale locale) {
@@ -817,6 +828,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
   /**
    * Sets the unit type to use
+   *
    * @param unitType to use
    */
   public void setUnitType(@NavigationUnitType.UnitType int unitType) {
