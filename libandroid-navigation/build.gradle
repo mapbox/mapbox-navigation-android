@@ -67,8 +67,18 @@ dependencies {
 }
 
 task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
-  outputFormat = 'html'
+  moduleName = 'libandroid-navigation'
+  outputFormat = 'javadoc'
   outputDirectory = "$buildDir/javadoc"
+
+  // Do not output deprecated members. Applies globally, can be overridden by packageOptions
+  skipDeprecated = false
+
+  // Emit warnings about not documented members. Applies globally, also can be overridden by packageOptions
+  reportUndocumented = true
+
+
+  skipEmptyPackages = true // Do not create index pages for empty packages
 }
 
 apply from: 'javadoc.gradle'
