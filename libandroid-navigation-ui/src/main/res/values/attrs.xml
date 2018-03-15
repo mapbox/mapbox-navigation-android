@@ -54,6 +54,9 @@
     <!-- Location layer style -->
     <attr name="navigationViewLocationLayerStyle" format="reference"/>
 
+    <!-- Destination marker drawable -->
+    <attr name="navigationViewDestinationMarker" format="reference"/>
+
     <!-- For setting the styles in XML -->
     <attr name="navigationLightTheme" format="reference"/>
     <attr name="navigationDarkTheme" format="reference"/>
