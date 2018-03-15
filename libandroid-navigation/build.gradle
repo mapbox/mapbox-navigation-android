@@ -66,7 +66,13 @@ dependencies {
   testImplementation dependenciesList.robolectric
 }
 
+task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+  outputFormat = 'html'
+  outputDirectory = "$buildDir/javadoc"
+}
+
 apply from: 'javadoc.gradle'
 apply from: "${rootDir}/gradle/mvn-push-android.gradle"
 apply from: "${rootDir}/gradle/checkstyle.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
+apply plugin: 'org.jetbrains.dokka-android'

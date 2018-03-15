@@ -31,7 +31,7 @@ ext {
       robolectric        : '3.5.1',
       lifecycle          : '1.0.0',
       picasso            : '2.5.2',
-      dokkaJavadocVersion: '0.9.16'
+
   ]
 
   pluginVersion = [
@@ -42,7 +42,8 @@ ext {
       coveralls : '2.8.1',
       spotbugs  : '1.3',
       sonarqube : '2.6-rc1',
-      gradle    : '3.0.1'
+      gradle    : '3.0.1',
+      dokka     : '0.9.16'
   ]
 
   dependenciesList = [
@@ -111,6 +112,6 @@ ext {
       sonarqube : "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${pluginVersion.sonarqube}",
       coveralls : "org.kt3k.gradle.plugin:coveralls-gradle-plugin:${pluginVersion.coveralls}",
       errorprone: "net.ltgt.gradle:gradle-errorprone-plugin:${pluginVersion.errorprone}",
-      androidGradleDokkaJavadoc: "org.jetbrains.dokka:dokka-android-gradle-plugin:${pluginVersion.dokkaJavadocVersion}",
+      dokka     : "org.jetbrains.dokka:dokka-android-gradle-plugin:${pluginVersion.dokka}",
   ]
 }
