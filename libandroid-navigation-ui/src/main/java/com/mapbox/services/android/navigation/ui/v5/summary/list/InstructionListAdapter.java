@@ -27,11 +27,11 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   private RouteLeg currentLeg;
   private LegStep currentStep;
   private DistanceUtils distanceUtils;
+  private Locale locale;
+  private @NavigationUnitType.UnitType int unitType;
 
-  public InstructionListAdapter(Context context,
-                                Locale locale, @NavigationUnitType.UnitType int unitType) {
+  public InstructionListAdapter() {
     stepList = new ArrayList<>();
-    distanceUtils = new DistanceUtils(context, locale, unitType);
   }
 
   @Override
@@ -70,7 +70,13 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     holder.itemView.clearAnimation();
   }
 
-  public void updateSteps(RouteProgress routeProgress) {
+  public void updateSteps(Context context, RouteProgress routeProgress,
+                          Locale locale, @NavigationUnitType.UnitType int unitType) {
+    if (distanceUtils == null || this.locale != locale || this.unitType != unitType) {
+      distanceUtils = new DistanceUtils(context, locale, unitType);
+      this.locale = locale;
+      this.unitType = unitType;
+    }
     addLegSteps(routeProgress);
     updateStepList(routeProgress);
   }

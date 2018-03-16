@@ -370,10 +370,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void setLocale(NavigationViewOptions options) {
-    Locale locale = options.navigationOptions().locale();
-    if (locale == null) {
-      locale = LocaleUtils.getDeviceLocale(getContext());
-    }
+    Locale locale = LocaleUtils.getNonNullLocale(getContext(), options.navigationOptions().locale());
     @NavigationUnitType.UnitType int unitType = options.navigationOptions().unitType();
 
     instructionView.setLocale(locale);

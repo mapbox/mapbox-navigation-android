@@ -26,7 +26,7 @@ public final class ToleranceUtils {
       intersectionsPoints.add(intersection.location());
     }
 
-    Point closestIntersection = TurfClassification.nearest(snappedPoint, intersectionsPoints);
+    Point closestIntersection = TurfClassification.nearestPoint(snappedPoint, intersectionsPoints);
 
     if (closestIntersection.equals(snappedPoint)) {
       return NavigationConstants.MINIMUM_DISTANCE_BEFORE_REROUTING;
