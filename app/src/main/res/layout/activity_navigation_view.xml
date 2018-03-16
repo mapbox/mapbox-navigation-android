@@ -20,6 +20,7 @@
         android:visibility="visible"/>
 
     <FrameLayout
+        android:id="@+id/launch_btn_frame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
@@ -30,7 +31,7 @@
         android:layout_gravity="center_horizontal|top">
 
         <Button
-            android:id="@+id/launchRouteBtn"
+            android:id="@+id/launch_route_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
