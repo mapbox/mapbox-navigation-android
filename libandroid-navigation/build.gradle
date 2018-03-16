@@ -77,7 +77,6 @@ task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaAndroidTask) {
   // Emit warnings about not documented members. Applies globally, also can be overridden by packageOptions
   reportUndocumented = true
 
-
   skipEmptyPackages = true // Do not create index pages for empty packages
 }
 

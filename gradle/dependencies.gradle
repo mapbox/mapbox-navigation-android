@@ -113,7 +113,7 @@ ext {
       sonarqube : "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${pluginVersion.sonarqube}",
       coveralls : "org.kt3k.gradle.plugin:coveralls-gradle-plugin:${pluginVersion.coveralls}",
       errorprone: "net.ltgt.gradle:gradle-errorprone-plugin:${pluginVersion.errorprone}",
-      dokkaAndroid     : "org.jetbrains.dokka:dokka-android-gradle-plugin:${pluginVersion.dokka}",
-      dokkaKotlin     : "org.jetbrains.kotlin:kotlin-gradle-plugin:${pluginVersion.kotlin}",
+      dokkaAndroid : "org.jetbrains.dokka:dokka-android-gradle-plugin:${pluginVersion.dokka}",
+      dokkaKotlin : "org.jetbrains.kotlin:kotlin-gradle-plugin:${pluginVersion.kotlin}",
   ]
 }
