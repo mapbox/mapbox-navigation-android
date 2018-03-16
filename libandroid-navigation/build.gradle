@@ -66,7 +66,7 @@ dependencies {
   testImplementation dependenciesList.robolectric
 }
 
-task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaAndroidTask) {
   moduleName = 'libandroid-navigation'
   outputFormat = 'javadoc'
   outputDirectory = "$buildDir/javadoc"

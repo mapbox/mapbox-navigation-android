@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.dokka-android'
 
 android {
   compileSdkVersion androidVersions.compileSdkVersion
@@ -76,7 +77,7 @@ dependencies {
   testImplementation dependenciesList.robolectric
 }
 
-task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaAndroidTask) {
   moduleName = 'libandroid-navigation-ui'
   outputFormat = 'javadoc'
   outputDirectory = "$buildDir/javadoc"
@@ -96,4 +97,3 @@ apply from: 'javadoc.gradle'
 apply from: "${rootDir}/gradle/mvn-push-android.gradle"
 apply from: "${rootDir}/gradle/checkstyle.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
-apply plugin: 'org.jetbrains.dokka-android'

@@ -1,5 +1,7 @@
 apply plugin: 'com.github.kt3k.coveralls'
 apply plugin: 'jacoco'
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.dokka-android'
 
 buildscript {
   apply from: "${rootDir}/gradle/dependencies.gradle"
@@ -14,7 +16,8 @@ buildscript {
     classpath pluginDependencies.sonarqube
     classpath pluginDependencies.coveralls
     classpath pluginDependencies.errorprone
-    classpath pluginDependencies.dokka
+    classpath pluginDependencies.dokkaAndroid
+    classpath pluginDependencies.dokkaKotlin
   }
 }
 
@@ -44,9 +47,11 @@ subprojects {
   }
 }
 
+/*
 task clean(type: Delete) {
   delete rootProject.buildDir
 }
+*/
 
 apply from: "${rootDir}/gradle/sonarqube.gradle"
-apply plugin: 'org.jetbrains.dokka-android'
+
