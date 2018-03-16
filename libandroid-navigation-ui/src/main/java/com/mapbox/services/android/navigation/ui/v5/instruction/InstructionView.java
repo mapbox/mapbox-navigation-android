@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -211,7 +212,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      locale = LocaleUtils.getNonNullLocale(getContext(), locale);
       InstructionModel model =
         new InstructionModel(getContext(), routeProgress, locale, unitType);
       updateViews(model);
@@ -321,9 +321,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   /**
-   * Inflates this layout needed for this view.
+   * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void init() {
+    locale = LocaleUtils.getDeviceLocale(getContext());
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
 
@@ -496,8 +497,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
   private void initDirectionsRecyclerView() {
-    locale = LocaleUtils.getNonNullLocale(getContext(), locale);
-    instructionListAdapter = new InstructionListAdapter(getContext(), locale, unitType);
+    instructionListAdapter = new InstructionListAdapter();
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
     rvInstructions.setItemAnimator(new DefaultItemAnimator());
@@ -814,7 +814,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model to provide the current steps and unit type
    */
   private void updateInstructionList(InstructionModel model) {
-    instructionListAdapter.updateSteps(model.getProgress());
+    instructionListAdapter.updateSteps(getContext(), model.getProgress(), locale, unitType);
   }
 
   /**
@@ -822,7 +822,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    *
    * @param locale to use
    */
-  public void setLocale(Locale locale) {
+  public void setLocale(@NonNull Locale locale) {
     this.locale = locale;
   }
 
