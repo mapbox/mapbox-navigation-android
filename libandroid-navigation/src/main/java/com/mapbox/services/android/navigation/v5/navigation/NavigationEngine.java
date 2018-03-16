@@ -20,6 +20,8 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
 
+import timber.log.Timber;
+
 import static com.mapbox.core.constants.Constants.PRECISION_6;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkBearingForStepCompletion;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
@@ -65,6 +67,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
 
   @Override
   public void onShouldIncreaseIndex() {
+    Timber.d("*** NAV_DEBUG *** onShouldIncreaseStepIndex");
     shouldIncreaseStepIndex = true;
   }
 
@@ -155,6 +158,10 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
       location, previousRouteProgress, stepDistanceRemaining, completionOffset
     );
 
+    if (stepDistanceRemaining == 0 && !bearingMatchesManeuver) {
+      Timber.d("*** NAV_DEBUG *** Step distance remaining == 0, bearing does not match");
+    }
+
     if (bearingMatchesManeuver && withinManeuverRadius) {
       // Advance the step index and create new step distance remaining
       advanceStepIndex(mapboxNavigation);
@@ -178,15 +185,10 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
       .build();
   }
 
-  private void clearRecentDistancesFromManeuver(OffRoute offRouteEngine) {
-    if (offRouteEngine instanceof OffRouteDetector) {
-      ((OffRouteDetector) offRouteEngine).clearDistancesAwayFromManeuver();
-    }
-  }
-
   private void updateOffRouteDetectorStepPoints(OffRoute offRoute, List<Point> stepPoints) {
     if (offRoute instanceof OffRouteDetector) {
       ((OffRouteDetector) offRoute).updateStepPoints(stepPoints);
+      ((OffRouteDetector) offRoute).clearDistancesAwayFromManeuver();
     }
   }
 
@@ -199,6 +201,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
    */
   private void checkIncreaseStepIndex(MapboxNavigation navigation) {
     if (shouldIncreaseStepIndex) {
+      Timber.d("*** NAV_DEBUG *** Increasing step index");
       advanceStepIndex(navigation);
       shouldIncreaseStepIndex = false;
     }
@@ -226,7 +229,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
   private void advanceStepIndex(MapboxNavigation mapboxNavigation) {
     // First increase the indices and then update the majority of information for the new routeProgress
     indices = increaseIndex(previousRouteProgress, indices);
-    clearRecentDistancesFromManeuver(mapboxNavigation.getOffRouteEngine());
 
     // First increase the indices and then update the majority of information for the new
     stepPoints = decodeStepPoints(mapboxNavigation.getRoute(), indices.legIndex(), indices.stepIndex());
@@ -273,6 +275,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
   private void checkNewRoute(MapboxNavigation mapboxNavigation) {
     DirectionsRoute directionsRoute = mapboxNavigation.getRoute();
     if (RouteUtils.isNewRoute(previousRouteProgress, directionsRoute)) {
+      Timber.d("*** NAV_DEBUG *** Confirmed new route");
       // Decode the first steps geometry and hold onto the resulting Position objects till the users
       // on the next step. Indices are both 0 since the user just started on the new route.
       stepPoints = decodeStepPoints(directionsRoute, 0, 0);
