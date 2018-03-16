@@ -90,10 +90,10 @@ public class ThemeSwitcher {
    * @return {@link Icon} map marker dark or light
    */
   static Icon retrieveMapMarker(Context context) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    boolean darkThemeEnabled = preferences.getBoolean(context.getString(R.string.dark_theme_enabled), false);
+    TypedValue destinationMarkerResId = obtainTypedValue(context, R.attr.navigationViewDestinationMarker);
+    int markerResId = destinationMarkerResId.resourceId;
     IconFactory iconFactory = IconFactory.getInstance(context);
-    return iconFactory.fromResource(darkThemeEnabled ? R.drawable.map_marker_dark : R.drawable.map_marker_light);
+    return iconFactory.fromResource(markerResId);
   }
 
   /**
