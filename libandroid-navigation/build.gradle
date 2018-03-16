@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.dokka-android'
 
 android {
   compileSdkVersion androidVersions.compileSdkVersion
@@ -77,11 +78,12 @@ task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaAndroidTask) {
   // Emit warnings about not documented members. Applies globally, also can be overridden by packageOptions
   reportUndocumented = true
 
+  sourceDirs = project.files('src/main/java')
+
   skipEmptyPackages = true // Do not create index pages for empty packages
 }
 
-apply from: 'javadoc.gradle'
+
 apply from: "${rootDir}/gradle/mvn-push-android.gradle"
 apply from: "${rootDir}/gradle/checkstyle.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
-apply plugin: 'org.jetbrains.dokka-android'

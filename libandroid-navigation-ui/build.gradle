@@ -88,9 +88,15 @@ task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaAndroidTask) {
   reportUndocumented = true
 
   skipEmptyPackages = true // Do not create index pages for empty packages
+
+  sourceDirs = project.files('src/main/java')
+
+  externalDocumentationLink {
+    // Root URL of the generated documentation to link with. The trailing slash is required!
+    url = new URL("https://example.com/docs/")
+  }
 }
 
-apply from: 'javadoc.gradle'
 apply from: "${rootDir}/gradle/mvn-push-android.gradle"
 apply from: "${rootDir}/gradle/checkstyle.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"

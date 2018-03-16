@@ -1,7 +1,6 @@
 apply plugin: 'com.github.kt3k.coveralls'
 apply plugin: 'jacoco'
 apply plugin: 'com.android.library'
-apply plugin: 'org.jetbrains.dokka-android'
 
 buildscript {
   apply from: "${rootDir}/gradle/dependencies.gradle"
@@ -52,4 +51,5 @@ subprojects {
 }*/
 
 apply from: "${rootDir}/gradle/sonarqube.gradle"
+apply plugin: 'org.jetbrains.dokka-android'
 
