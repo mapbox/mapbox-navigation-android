@@ -20,8 +20,6 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
 
-import timber.log.Timber;
-
 import static com.mapbox.core.constants.Constants.PRECISION_6;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkBearingForStepCompletion;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
@@ -67,7 +65,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
 
   @Override
   public void onShouldIncreaseIndex() {
-    Timber.d("*** NAV_DEBUG *** onShouldIncreaseStepIndex");
     shouldIncreaseStepIndex = true;
   }
 
@@ -157,12 +154,9 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
     boolean bearingMatchesManeuver = checkBearingForStepCompletion(
       location, previousRouteProgress, stepDistanceRemaining, completionOffset
     );
+    boolean forceIncreaseStepIndex = stepDistanceRemaining == 0 && !bearingMatchesManeuver;
 
-    if (stepDistanceRemaining == 0 && !bearingMatchesManeuver) {
-      Timber.d("*** NAV_DEBUG *** Step distance remaining == 0, bearing does not match");
-    }
-
-    if (bearingMatchesManeuver && withinManeuverRadius) {
+    if ((bearingMatchesManeuver && withinManeuverRadius) || forceIncreaseStepIndex) {
       // Advance the step index and create new step distance remaining
       advanceStepIndex(mapboxNavigation);
       // Re-calculate the step distance remaining based on the new index
@@ -201,7 +195,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
    */
   private void checkIncreaseStepIndex(MapboxNavigation navigation) {
     if (shouldIncreaseStepIndex) {
-      Timber.d("*** NAV_DEBUG *** Increasing step index");
       advanceStepIndex(navigation);
       shouldIncreaseStepIndex = false;
     }
@@ -275,7 +268,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
   private void checkNewRoute(MapboxNavigation mapboxNavigation) {
     DirectionsRoute directionsRoute = mapboxNavigation.getRoute();
     if (RouteUtils.isNewRoute(previousRouteProgress, directionsRoute)) {
-      Timber.d("*** NAV_DEBUG *** Confirmed new route");
       // Decode the first steps geometry and hold onto the resulting Position objects till the users
       // on the next step. Indices are both 0 since the user just started on the new route.
       stepPoints = decodeStepPoints(directionsRoute, 0, 0);

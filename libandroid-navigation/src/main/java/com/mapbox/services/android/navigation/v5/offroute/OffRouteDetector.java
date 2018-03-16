@@ -15,8 +15,6 @@ import com.mapbox.turf.TurfMisc;
 import java.util.ArrayList;
 import java.util.List;
 
-import timber.log.Timber;
-
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
 import static com.mapbox.services.android.navigation.v5.utils.MeasurementUtils.userTrueDistanceFromStep;
 import static com.mapbox.services.android.navigation.v5.utils.ToleranceUtils.dynamicRerouteDistanceTolerance;
@@ -159,7 +157,6 @@ public class OffRouteDetector extends OffRoute {
                                            RingBuffer<Integer> distancesAwayFromManeuver, Point currentPoint) {
     if (movingAwayFromManeuver(routeProgress, distancesAwayFromManeuver, stepPoints, currentPoint)) {
       updateLastReroutePoint(location);
-      Timber.d("*** NAV_DEBUG *** Is moving away from maneuver: true");
       return true;
     }
     return false;
@@ -187,11 +184,9 @@ public class OffRouteDetector extends OffRoute {
     boolean isCloseToUpcomingStep;
     if (upComingStep != null) {
       double distanceFromUpcomingStep = userTrueDistanceFromStep(currentPoint, upComingStep);
-      Timber.d("*** NAV_DEBUG *** Distance from upcoming step: %s", distanceFromUpcomingStep);
       double maneuverZoneRadius = options.maneuverZoneRadius();
       isCloseToUpcomingStep = distanceFromUpcomingStep < maneuverZoneRadius;
       if (isCloseToUpcomingStep) {
-        Timber.d("*** NAV_DEBUG *** Is close to upcoming step: true");
         // Callback to the NavigationEngine to increase the step index
         callback.onShouldIncreaseIndex();
         return true;
