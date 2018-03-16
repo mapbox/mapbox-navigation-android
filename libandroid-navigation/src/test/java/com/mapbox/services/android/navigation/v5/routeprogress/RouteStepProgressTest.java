@@ -7,25 +7,21 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.BaseTest;
-import com.mapbox.core.constants.Constants;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
 
-import junit.framework.Assert;
-
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
 
-import static junit.framework.Assert.*;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -93,7 +89,7 @@ public class RouteStepProgressTest extends BaseTest {
   public void distanceRemaining_equalsStepDistanceAtBeginning() {
     LineString lineString
       = LineString.fromPolyline(firstLeg.steps().get(5).geometry(), Constants.PRECISION_6);
-    double stepDistance = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_METERS);
+    double stepDistance = TurfMeasurement.length(lineString, TurfConstants.UNIT_METERS);
 
     RouteProgress routeProgress = RouteProgress.builder()
       .stepDistanceRemaining(firstLeg.steps().get(5).distance())
@@ -112,7 +108,7 @@ public class RouteStepProgressTest extends BaseTest {
   public void distanceRemaining_equalsCorrectValueAtIntervals() {
     LineString lineString
       = LineString.fromPolyline(firstStep.geometry(), Constants.PRECISION_6);
-    double stepDistance = TurfMeasurement.lineDistance(lineString, TurfConstants.UNIT_METERS);
+    double stepDistance = TurfMeasurement.length(lineString, TurfConstants.UNIT_METERS);
 
     double stepSegments = 5; // meters
 
@@ -127,7 +123,7 @@ public class RouteStepProgressTest extends BaseTest {
       LineString slicedLine = TurfMisc.lineSlice(point,
         route.legs().get(0).steps().get(1).maneuver().location(), lineString);
 
-      double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+      double distance = TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
       RouteProgress routeProgress = RouteProgress.builder()
         .stepDistanceRemaining(distance)
         .legDistanceRemaining(firstLeg.distance())
@@ -185,7 +181,7 @@ public class RouteStepProgressTest extends BaseTest {
       LineString slicedLine = TurfMisc.lineSlice(point,
         route.legs().get(0).steps().get(1).maneuver().location(), lineString);
 
-      double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+      double distance = TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
       distance = firstStep.distance() - distance;
       if (distance < 0) {
         distance = 0;
@@ -250,7 +246,7 @@ public class RouteStepProgressTest extends BaseTest {
       LineString slicedLine = TurfMisc.lineSlice(point,
         route.legs().get(0).steps().get(1).maneuver().location(), lineString);
 
-      double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+      double distance = TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
 
       RouteProgress routeProgress = RouteProgress.builder()
         .stepDistanceRemaining(distance)
@@ -316,7 +312,7 @@ public class RouteStepProgressTest extends BaseTest {
       LineString slicedLine = TurfMisc.lineSlice(point,
         route.legs().get(0).steps().get(1).maneuver().location(), lineString);
 
-      double distance = TurfMeasurement.lineDistance(slicedLine, TurfConstants.UNIT_METERS);
+      double distance = TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
 
       RouteProgress routeProgress = RouteProgress.builder()
         .stepDistanceRemaining(distance)

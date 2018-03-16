@@ -436,6 +436,10 @@ public final class NavigationRoute {
      */
     public Builder routeOptions(RouteOptions options) {
 
+      if (!TextUtils.isEmpty(options.baseUrl())) {
+        directionsBuilder.baseUrl(options.baseUrl());
+      }
+
       if (!TextUtils.isEmpty(options.language())) {
         directionsBuilder.language(new Locale(options.language()));
       }

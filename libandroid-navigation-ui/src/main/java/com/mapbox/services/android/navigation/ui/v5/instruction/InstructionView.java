@@ -295,6 +295,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * can be animated appropriately.
    */
   public void hideInstructionList() {
+    rvInstructions.stopScroll();
     beginDelayedTransition();
     int orientation = getContext().getResources().getConfiguration().orientation;
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -316,7 +317,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       updateLandscapeConstraintsTo(R.layout.instruction_layout_alt);
     }
     instructionListLayout.setVisibility(VISIBLE);
-    rvInstructions.scrollToPosition(TOP);
+    rvInstructions.smoothScrollToPosition(TOP);
   }
 
   /**
@@ -499,7 +500,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     instructionListAdapter = new InstructionListAdapter();
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
-    rvInstructions.setNestedScrollingEnabled(true);
     rvInstructions.setItemAnimator(new DefaultItemAnimator());
     rvInstructions.setLayoutManager(new LinearLayoutManager(getContext()));
   }
