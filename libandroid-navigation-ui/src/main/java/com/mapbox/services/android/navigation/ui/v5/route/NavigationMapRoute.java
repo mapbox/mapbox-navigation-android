@@ -678,7 +678,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private void checkNewRouteFound(int currentRouteIndex) {
     if (currentRouteIndex != primaryRouteIndex) {
       updateRoute();
-      boolean isValidPrimaryIndex = primaryRouteIndex > 0 && primaryRouteIndex < directionsRoutes.size();
+      boolean isValidPrimaryIndex = primaryRouteIndex >= 0 && primaryRouteIndex < directionsRoutes.size();
       if (isValidPrimaryIndex && onRouteSelectionChangeListener != null) {
         DirectionsRoute selectedRoute = directionsRoutes.get(primaryRouteIndex);
         onRouteSelectionChangeListener.onNewPrimaryRouteSelected(selectedRoute);

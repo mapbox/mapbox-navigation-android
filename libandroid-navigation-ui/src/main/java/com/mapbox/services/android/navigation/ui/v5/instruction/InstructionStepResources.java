@@ -25,6 +25,9 @@ class InstructionStepResources {
   private String thenStepManeuverType;
   private List<IntersectionLanes> turnLanes;
   private boolean shouldShowThenStep;
+  private DistanceUtils distanceUtils;
+  private Locale locale;
+  private @NavigationUnitType.UnitType int unitType;
 
   InstructionStepResources(Context context, RouteProgress progress, Locale locale,
                            @NavigationUnitType.UnitType int unitType) {
@@ -87,8 +90,13 @@ class InstructionStepResources {
 
   private void formatStepDistance(Context context, RouteProgress progress,
                                   Locale locale, @NavigationUnitType.UnitType int unitType) {
-    stepDistanceRemaining = new DistanceUtils(context, locale, unitType)
-      .formatDistance(progress.currentLegProgress().currentStepProgress().distanceRemaining());
+    if (distanceUtils == null || this.locale != locale || this.unitType != unitType) {
+      distanceUtils = new DistanceUtils(context, locale, unitType);
+      this.locale = locale;
+      this.unitType = unitType;
+    }
+    stepDistanceRemaining = distanceUtils.formatDistance(
+      progress.currentLegProgress().currentStepProgress().distanceRemaining());
   }
 
   private void intersectionTurnLanes(LegStep step) {
