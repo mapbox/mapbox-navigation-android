@@ -199,6 +199,9 @@ class NavigationHelper {
   static boolean isUserOffRoute(NewLocationModel newLocationModel, RouteProgress routeProgress,
                                 OffRouteCallback callback) {
     MapboxNavigationOptions options = newLocationModel.mapboxNavigation().options();
+    if (!options.enableOffRouteDetection()) {
+      return false;
+    }
     Location location = newLocationModel.location();
     OffRoute offRoute = newLocationModel.mapboxNavigation().getOffRouteEngine();
     setOffRouteDetectorCallback(offRoute, callback);
