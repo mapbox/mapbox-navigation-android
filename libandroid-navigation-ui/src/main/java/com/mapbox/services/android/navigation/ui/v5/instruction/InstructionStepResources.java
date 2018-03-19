@@ -90,7 +90,7 @@ class InstructionStepResources {
 
   private void formatStepDistance(Context context, RouteProgress progress,
                                   Locale locale, @NavigationUnitType.UnitType int unitType) {
-    if (distanceUtils == null || this.locale != locale || this.unitType != unitType) {
+    if (distanceUtils == null || this.locale.equals(locale) || this.unitType != unitType) {
       distanceUtils = new DistanceUtils(context, locale, unitType);
       this.locale = locale;
       this.unitType = unitType;

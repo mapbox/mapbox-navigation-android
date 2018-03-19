@@ -27,6 +27,7 @@
     <string name="simulate_route">Simulate Route</string>
     <string name="language">Language</string>
     <string name="unit_type">Unit Type</string>
+    <string name="route_profile">Route Profile</string>
 
     <string name="unit_type_key">unit_type</string>
     <string name="simulate_route_key">simulate_route</string>

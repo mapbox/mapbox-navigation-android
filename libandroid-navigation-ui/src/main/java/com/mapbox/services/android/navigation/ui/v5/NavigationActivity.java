@@ -132,7 +132,7 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
 
   private void extractCoordinates(NavigationViewOptions.Builder options) {
     HashMap<String, Point> coordinates = NavigationLauncher.extractCoordinates(this);
-    if (coordinates.size() > 0) {
+    if (options.build().directionsRoute() == null && coordinates.size() > 0) {
       options.origin(coordinates.get(NavigationConstants.NAVIGATION_VIEW_ORIGIN));
       options.destination(coordinates.get(NavigationConstants.NAVIGATION_VIEW_DESTINATION));
     }
@@ -144,6 +144,8 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
       .getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
     options.shouldSimulateRoute(preferences
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
+    options.directionsProfile(preferences
+      .getString(NavigationConstants.NAVIGATION_VIEW_ROUTE_PROFILE_KEY, ""));
   }
 
   private void extractLocale(NavigationViewOptions.Builder options) {

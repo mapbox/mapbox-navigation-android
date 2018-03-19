@@ -201,6 +201,8 @@ public final class NavigationConstants {
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
   public static final String NAVIGATION_VIEW_AWS_POOL_ID = "navigation_view_aws_pool_id";
   public static final String NAVIGATION_VIEW_UNIT_TYPE = "navigation_view_unit_type";
+  public static final String NAVIGATION_VIEW_SIMULATE_ROUTE = "navigation_view_simulate_route";
+  public static final String NAVIGATION_VIEW_ROUTE_PROFILE_KEY = "navigation_view_route_profile";
   public static final String NAVIGATION_VIEW_LOCALE_LANGUAGE = "navigation_view_locale_language";
   public static final String NAVIGATION_VIEW_LOCALE_COUNTRY = "navigation_view_locale_country";
   public static final String NAVIGATION_VIEW_REROUTING = "Rerouting";
@@ -271,5 +273,4 @@ public final class NavigationConstants {
   public static final String TURN_LANE_INDICATION_RIGHT = "right";
   public static final String TURN_LANE_INDICATION_SLIGHT_RIGHT = "slight right";
   public static final String TURN_LANE_INDICATION_UTURN = "uturn";
-  public static final String NAVIGATION_VIEW_SIMULATE_ROUTE = "navigation_view_simulate_route";
 }

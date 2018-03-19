@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -38,10 +37,9 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
-import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
@@ -231,7 +229,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
         mapRoute.addRoutes(response.body().routes());
         boundCameraToRoute();
       } else {
-        Snackbar.make(mapView, "Please select a longer route", BaseTransientBottomBar.LENGTH_SHORT).show();
+        Snackbar.make(mapView, "Please select a longer route", Snackbar.LENGTH_SHORT).show();
       }
     }
   }
@@ -310,27 +308,26 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     return sharedPreferences.getBoolean(getString(R.string.simulate_route_key), false);
   }
 
-  private void launchNavigationWithRoute() {
-    Locale locale = getLocale();
-    MapboxNavigationOptions navigationOptions =
-      MapboxNavigationOptions.builder()
-        .locale(locale)
-        .unitType(getUnitType())
-        .build();
+  private String getRouteProfile() {
+    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    return sharedPreferences.getString("route_profile", "");
+  }
 
-    NavigationViewOptions.Builder optionsBuilder = NavigationViewOptions.builder()
-      .shouldSimulateRoute(getShouldSimulateRoute())
-      .navigationOptions(navigationOptions);
-    if (route != null) {
-      if (route.routeOptions().language().equals(locale.getLanguage())) {
-        optionsBuilder.directionsRoute(route);
-      } else {
-        optionsBuilder
-          .origin(currentLocation)
-          .destination(destination);
-      }
-      NavigationLauncher.startNavigation(this, optionsBuilder.build());
+  private void launchNavigationWithRoute() {
+    if (route == null) {
+      Snackbar.make(mapView, "Current route is not available", Snackbar.LENGTH_SHORT).show();
+      return;
     }
+
+    Locale locale = getLocale();
+    NavigationLauncherOptions.Builder optionsBuilder = NavigationLauncherOptions.builder()
+      .shouldSimulateRoute(getShouldSimulateRoute())
+      .locale(locale)
+      .unitType(getUnitType())
+      .directionsProfile(getRouteProfile())
+      .directionsRoute(route);
+
+    NavigationLauncher.startNavigation(this, optionsBuilder.build());
   }
 
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
@@ -346,7 +343,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private void onLocationFound(Location location) {
     if (!locationFound) {
       animateCamera(new LatLng(location.getLatitude(), location.getLongitude()));
-      Snackbar.make(mapView, "Long press map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
+      Snackbar.make(mapView, "Long press map to place waypoint", Snackbar.LENGTH_LONG).show();
       locationFound = true;
       hideLoading();
     }
