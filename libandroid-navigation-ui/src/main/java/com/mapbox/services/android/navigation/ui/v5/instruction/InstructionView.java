@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -211,7 +212,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      locale = LocaleUtils.getNonNullLocale(getContext(), locale);
       InstructionModel model =
         new InstructionModel(getContext(), routeProgress, locale, unitType);
       updateViews(model);
@@ -295,6 +295,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * can be animated appropriately.
    */
   public void hideInstructionList() {
+    rvInstructions.stopScroll();
     beginDelayedTransition();
     int orientation = getContext().getResources().getConfiguration().orientation;
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -316,13 +317,14 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       updateLandscapeConstraintsTo(R.layout.instruction_layout_alt);
     }
     instructionListLayout.setVisibility(VISIBLE);
-    rvInstructions.scrollToPosition(TOP);
+    rvInstructions.smoothScrollToPosition(TOP);
   }
 
   /**
-   * Inflates this layout needed for this view.
+   * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void init() {
+    locale = LocaleUtils.getDeviceLocale(getContext());
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
 
@@ -361,11 +363,21 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         R.attr.navigationViewPrimary);
       int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
         R.attr.navigationViewBannerBackground);
+      int navigationViewListBackgroundColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+        R.attr.navigationViewListBackground);
       // Instruction Layout landscape - banner background
       if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
         View instructionLayoutManeuver = findViewById(R.id.instructionManeuverLayout);
         Drawable maneuverBackground = DrawableCompat.wrap(instructionLayoutManeuver.getBackground()).mutate();
         DrawableCompat.setTint(maneuverBackground, navigationViewBannerBackgroundColor);
+
+        View thenStepLayout = findViewById(R.id.thenStepLayout);
+        Drawable thenStepBackground = DrawableCompat.wrap(thenStepLayout.getBackground()).mutate();
+        DrawableCompat.setTint(thenStepBackground, navigationViewListBackgroundColor);
+
+        View turnLaneLayout = findViewById(R.id.turnLaneLayout);
+        Drawable turnLaneBackground = DrawableCompat.wrap(turnLaneLayout.getBackground()).mutate();
+        DrawableCompat.setTint(turnLaneBackground, navigationViewListBackgroundColor);
       }
       // Sound chip text - primary
       Drawable soundChipBackground = DrawableCompat.wrap(soundChipText.getBackground()).mutate();
@@ -485,11 +497,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
   private void initDirectionsRecyclerView() {
-    locale = LocaleUtils.getNonNullLocale(getContext(), locale);
-    instructionListAdapter = new InstructionListAdapter(getContext(), locale, unitType);
+    instructionListAdapter = new InstructionListAdapter();
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
-    rvInstructions.setNestedScrollingEnabled(true);
     rvInstructions.setItemAnimator(new DefaultItemAnimator());
     rvInstructions.setLayoutManager(new LinearLayoutManager(getContext()));
   }
@@ -804,19 +814,21 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model to provide the current steps and unit type
    */
   private void updateInstructionList(InstructionModel model) {
-    instructionListAdapter.updateSteps(model.getProgress());
+    instructionListAdapter.updateSteps(getContext(), model.getProgress(), locale, unitType);
   }
 
   /**
    * Sets the locale to use for languages and default unit type
+   *
    * @param locale to use
    */
-  public void setLocale(Locale locale) {
+  public void setLocale(@NonNull Locale locale) {
     this.locale = locale;
   }
 
   /**
    * Sets the unit type to use
+   *
    * @param unitType to use
    */
   public void setUnitType(@NavigationUnitType.UnitType int unitType) {

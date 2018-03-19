@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.summary;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -101,7 +102,6 @@ public class SummaryBottomSheet extends FrameLayout {
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      locale = LocaleUtils.getNonNullLocale(getContext(), locale);
       SummaryModel model = new SummaryModel(getContext(), routeProgress, locale, unitType);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
@@ -132,9 +132,10 @@ public class SummaryBottomSheet extends FrameLayout {
   }
 
   /**
-   * Inflates this layout needed for this view.
+   * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void init() {
+    locale = LocaleUtils.getDeviceLocale(getContext());
     inflate(getContext(), R.layout.summary_bottomsheet_layout, this);
   }
 
@@ -161,7 +162,7 @@ public class SummaryBottomSheet extends FrameLayout {
    * Sets the locale to use for languages and default unit type
    * @param locale to use
    */
-  public void setLocale(Locale locale) {
+  public void setLocale(@NonNull Locale locale) {
     this.locale = locale;
   }
 

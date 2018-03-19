@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.camera;
 
 import android.location.Location;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -25,10 +26,13 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
  */
 public class NavigationCamera implements ProgressChangeListener {
 
+  private static final long MAX_ANIMATION_DURATION_MS = 1500;
+
   private MapboxMap mapboxMap;
   private MapboxNavigation navigation;
   private RouteInformation currentRouteInformation;
   private boolean trackingEnabled = true;
+  private long locationUpdateTimestamp;
 
   /**
    * Creates an instance of {@link NavigationCamera}.
@@ -184,7 +188,8 @@ public class NavigationCamera implements ProgressChangeListener {
    * @param position to which the camera should animate
    */
   private void easeMapCameraPosition(CameraPosition position) {
-    mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(position), 1000, false, null);
+    mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(position),
+      obtainLocationUpdateDuration(), false, null);
   }
 
   /**
@@ -251,5 +256,12 @@ public class NavigationCamera implements ProgressChangeListener {
       .build();
 
     easeMapCameraPosition(position);
+  }
+
+  private int obtainLocationUpdateDuration() {
+    long previousUpdateTimeStamp = locationUpdateTimestamp;
+    locationUpdateTimestamp = SystemClock.elapsedRealtime();
+    long duration = locationUpdateTimestamp - previousUpdateTimeStamp;
+    return (int) (duration < MAX_ANIMATION_DURATION_MS ? duration : MAX_ANIMATION_DURATION_MS);
   }
 }

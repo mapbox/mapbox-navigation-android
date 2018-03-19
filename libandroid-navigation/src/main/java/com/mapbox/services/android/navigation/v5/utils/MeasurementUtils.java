@@ -48,7 +48,7 @@ public final class MeasurementUtils {
         UNIT_METERS);
     }
 
-    Feature feature = TurfMisc.pointOnLine(usersRawLocation, lineString.coordinates());
+    Feature feature = TurfMisc.nearestPointOnLine(usersRawLocation, lineString.coordinates());
     Point snappedPoint = (Point) feature.geometry();
 
     if (snappedPoint == null) {

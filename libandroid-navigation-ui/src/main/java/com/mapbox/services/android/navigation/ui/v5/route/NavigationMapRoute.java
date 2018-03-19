@@ -671,14 +671,14 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       linePoints.add(com.mapbox.geojson.Point.fromLngLat(pos.getLongitude(), pos.getLatitude()));
     }
 
-    com.mapbox.geojson.Feature feature = TurfMisc.pointOnLine(clickPoint, linePoints);
+    com.mapbox.geojson.Feature feature = TurfMisc.nearestPointOnLine(clickPoint, linePoints);
     return (com.mapbox.geojson.Point) feature.geometry();
   }
 
   private void checkNewRouteFound(int currentRouteIndex) {
     if (currentRouteIndex != primaryRouteIndex) {
       updateRoute();
-      boolean isValidPrimaryIndex = primaryRouteIndex > 0 && primaryRouteIndex < directionsRoutes.size();
+      boolean isValidPrimaryIndex = primaryRouteIndex >= 0 && primaryRouteIndex < directionsRoutes.size();
       if (isValidPrimaryIndex && onRouteSelectionChangeListener != null) {
         DirectionsRoute selectedRoute = directionsRoutes.get(primaryRouteIndex);
         onRouteSelectionChangeListener.onNewPrimaryRouteSelected(selectedRoute);

@@ -2,6 +2,21 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.11.1 - March 16, 2018
+
+* Adjust sound layout margin [#775](https://github.com/mapbox/mapbox-navigation-android/pull/775)
+* Fix distancesFromManeuver not being cleared [#773](https://github.com/mapbox/mapbox-navigation-android/pull/773)
+* Allow setting of custom destination marker in theme [#763](https://github.com/mapbox/mapbox-navigation-android/pull/763)
+* Fixed back button in NavigationViewActivity [#768](https://github.com/mapbox/mapbox-navigation-android/pull/768)
+* Fixed unit type bug [#769](https://github.com/mapbox/mapbox-navigation-android/pull/769)
+* Fix MapRoute listener not firing for index 0 [#772](https://github.com/mapbox/mapbox-navigation-android/pull//772)
+* Stop scroll of InstructionList before hiding [#766](https://github.com/mapbox/mapbox-navigation-android/pull/766)
+* Add baseUrl to NavigationRoute and Turf conversion [#767](https://github.com/mapbox/mapbox-navigation-android/pull/767)
+* Force first location update without last location [#756](https://github.com/mapbox/mapbox-navigation-android/pull/756)
+* Update EventListener Thread Safe [#762](https://github.com/mapbox/mapbox-navigation-android/pull/762)
+* Create camera animation from time between updates [#753](https://github.com/mapbox/mapbox-navigation-android/pull/753)
+* NavigationView Landscape Optimizations [#749](https://github.com/mapbox/mapbox-navigation-android/pull/749)
+
 ### v0.11.0 - March 7, 2018
 
 * Fix same point being added twice for LatLngBounds [#741](https://github.com/mapbox/mapbox-navigation-android/pull/741)
