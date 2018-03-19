@@ -1,9 +1,5 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
-import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.v5.BaseTest;
@@ -18,14 +14,12 @@ import static junit.framework.Assert.assertTrue;
 
 public class RouteUtilsTest extends BaseTest {
 
-  private static final String PRECISION_6 = "directions_v5_precision_6.json";
-
   @Test
   public void isNewRoute_returnsTrueWhenPreviousGeometriesNull() throws Exception {
-    RouteProgress defaultRouteProgress = obtainDefaultRouteProgress();
+    RouteProgress defaultRouteProgress = buildDefaultRouteProgress();
     boolean isNewRoute = RouteUtils.isNewRoute(null, defaultRouteProgress);
     assertTrue(isNewRoute);
-    RouteProgress previousRouteProgress = obtainDefaultRouteProgress();
+    RouteProgress previousRouteProgress = buildDefaultRouteProgress();
 
     isNewRoute = RouteUtils.isNewRoute(previousRouteProgress, defaultRouteProgress);
 
@@ -34,7 +28,7 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void isNewRoute_returnsFalseWhenGeometriesEqualEachOther() throws Exception {
-    RouteProgress previousRouteProgress = obtainDefaultRouteProgress();
+    RouteProgress previousRouteProgress = buildDefaultRouteProgress();
 
     boolean isNewRoute = RouteUtils.isNewRoute(previousRouteProgress, previousRouteProgress);
 
@@ -43,8 +37,8 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void isNewRoute_returnsTrueWhenGeometriesDoNotEqual() throws Exception {
-    DirectionsRoute aRoute = obtainADirectionsRoute();
-    RouteProgress defaultRouteProgress = obtainDefaultRouteProgress();
+    DirectionsRoute aRoute = buildDirectionsRoute();
+    RouteProgress defaultRouteProgress = buildDefaultRouteProgress();
     RouteProgress previousRouteProgress = defaultRouteProgress.toBuilder()
       .directionsRoute(aRoute.toBuilder().geometry("vfejnqiv").build())
       .build();
@@ -56,9 +50,9 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void isArrivalEvent_returnsTrueWhenManeuverTypeIsArrival_andIsValidMetersRemaining() throws Exception {
-    DirectionsRoute aRoute = obtainADirectionsRoute();
+    DirectionsRoute aRoute = buildDirectionsRoute();
     int lastStepIndex = obtainLastStepIndex(aRoute);
-    RouteProgress defaultRouteProgress = obtainDefaultRouteProgress();
+    RouteProgress defaultRouteProgress = buildDefaultRouteProgress();
     RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
       .stepDistanceRemaining(30)
       .legDistanceRemaining(30)
@@ -73,9 +67,9 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void isArrivalEvent_returnsFalseWhenManeuverTypeIsArrival_andIsNotValidMetersRemaining() throws Exception {
-    DirectionsRoute aRoute = obtainADirectionsRoute();
+    DirectionsRoute aRoute = buildDirectionsRoute();
     int lastStepIndex = obtainLastStepIndex(aRoute);
-    RouteProgress defaultRouteProgress = obtainDefaultRouteProgress();
+    RouteProgress defaultRouteProgress = buildDefaultRouteProgress();
     RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
       .stepIndex(lastStepIndex)
       .legDistanceRemaining(100)
@@ -88,9 +82,9 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void isArrivalEvent_returnsTrueWhenUpcomingManeuverTypeIsArrival_andIsValidMetersRemaining() throws Exception {
-    DirectionsRoute aRoute = obtainADirectionsRoute();
+    DirectionsRoute aRoute = buildDirectionsRoute();
     int lastStepIndex = obtainLastStepIndex(aRoute);
-    RouteProgress defaultRouteProgress = obtainDefaultRouteProgress();
+    RouteProgress defaultRouteProgress = buildDefaultRouteProgress();
     RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
       .legDistanceRemaining(30)
       .stepIndex(lastStepIndex - 1)
@@ -103,9 +97,9 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void isArrivalEvent_returnsFalseWhenManeuverTypeIsNotArrival_andIsNotValidMetersRemaining() throws Exception {
-    DirectionsRoute aRoute = obtainADirectionsRoute();
+    DirectionsRoute aRoute = buildDirectionsRoute();
     int lastStepIndex = obtainLastStepIndex(aRoute);
-    RouteProgress defaultRouteProgress = obtainDefaultRouteProgress();
+    RouteProgress defaultRouteProgress = buildDefaultRouteProgress();
     RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
       .stepDistanceRemaining(200)
       .legDistanceRemaining(300)
@@ -116,30 +110,6 @@ public class RouteUtilsTest extends BaseTest {
     boolean isArrivalEvent = RouteUtils.isArrivalEvent(theRouteProgress);
 
     assertFalse(isArrivalEvent);
-  }
-
-  private RouteProgress obtainDefaultRouteProgress() throws Exception {
-    DirectionsRoute aRoute = obtainADirectionsRoute();
-    RouteProgress defaultRouteProgress = RouteProgress.builder()
-      .stepDistanceRemaining(100)
-      .legDistanceRemaining(100)
-      .distanceRemaining(100)
-      .directionsRoute(aRoute)
-      .stepIndex(0)
-      .legIndex(0)
-      .build();
-
-    return defaultRouteProgress;
-  }
-
-  private DirectionsRoute obtainADirectionsRoute() throws IOException {
-    Gson gson = new GsonBuilder()
-      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
-    String body = loadJsonFixture(PRECISION_6);
-    DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
-    DirectionsRoute aRoute = response.routes().get(0);
-
-    return aRoute;
   }
 
   private int obtainLastStepIndex(DirectionsRoute route) throws IOException {
