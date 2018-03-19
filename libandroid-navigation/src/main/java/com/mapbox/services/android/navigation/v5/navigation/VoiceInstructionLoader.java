@@ -1,11 +1,13 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import okhttp3.ResponseBody;
+import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 
 public class VoiceInstructionLoader {
   private static VoiceInstructionLoader instance;
-  private MapboxSpeech mapboxSpeech;
+  private MapboxSpeech.Builder mapboxSpeech;
 
   private VoiceInstructionLoader() {
 
@@ -20,14 +22,24 @@ public class VoiceInstructionLoader {
   }
 
   public void initialize(MapboxSpeech.Builder builder) {
-    mapboxSpeech = builder.build();
+    mapboxSpeech = builder;
   }
 
   public void getInstruction(String instruction, Callback<ResponseBody> callback) {
-    mapboxSpeech.getInstruction(instruction, callback);
+    mapboxSpeech.instruction(instruction).build().enqueueCall(callback);
   }
 
   public void cacheInstruction(String instruction) {
-    mapboxSpeech.cacheInstruction(instruction);
+    mapboxSpeech.instruction(instruction).build().enqueueCall(new Callback<ResponseBody>() {
+      @Override
+      public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+      }
+
+      @Override
+      public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+      }
+    });
   }
 }
