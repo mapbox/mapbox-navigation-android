@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -24,6 +25,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.exceptions.InvalidLatLngBoundsException;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -73,10 +75,12 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   @BindView(R.id.mapView)
   MapView mapView;
-  @BindView(R.id.launchRouteBtn)
+  @BindView(R.id.launch_route_btn)
   Button launchRouteBtn;
   @BindView(R.id.loading)
   ProgressBar loading;
+  @BindView(R.id.launch_btn_frame)
+  FrameLayout launchBtnFrame;
 
   private Marker currentMarker;
   private Point currentLocation;
@@ -179,7 +183,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     mapView.onSaveInstanceState(outState);
   }
 
-  @OnClick(R.id.launchRouteBtn)
+  @OnClick(R.id.launch_route_btn)
   public void onRouteLaunchClick() {
     launchNavigationWithRoute();
   }
@@ -264,7 +268,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void initMapRoute() {
-    mapRoute = new NavigationMapRoute(mapView, mapboxMap, "admin-3-4-boundaries-bg");
+    mapRoute = new NavigationMapRoute(mapView, mapboxMap);
     mapRoute.setOnRouteSelectionChangeListener(this);
   }
 
@@ -354,7 +358,9 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       if (bboxPoints.size() > 1) {
         try {
           LatLngBounds bounds = new LatLngBounds.Builder().includes(bboxPoints).build();
-          animateCameraBbox(bounds, CAMERA_ANIMATION_DURATION, new int[] {50, 500, 50, 335});
+          // left, top, right, bottom
+          int topPadding = launchBtnFrame.getHeight() * 2;
+          animateCameraBbox(bounds, CAMERA_ANIMATION_DURATION, new int[] {50, topPadding, 50, 100});
         } catch (InvalidLatLngBoundsException exception) {
           Toast.makeText(this, "Valid route not found.", Toast.LENGTH_SHORT).show();
         }
@@ -363,8 +369,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void animateCameraBbox(LatLngBounds bounds, int animationTime, int[] padding) {
-    mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,
-      padding[0], padding[1], padding[2], padding[3]), animationTime);
+    CameraPosition position = mapboxMap.getCameraForLatLngBounds(bounds, padding);
+    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), animationTime);
   }
 
   private void animateCamera(LatLng point) {

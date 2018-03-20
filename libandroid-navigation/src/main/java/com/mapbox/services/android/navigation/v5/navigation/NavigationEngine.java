@@ -154,8 +154,9 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
     boolean bearingMatchesManeuver = checkBearingForStepCompletion(
       location, previousRouteProgress, stepDistanceRemaining, completionOffset
     );
+    boolean forceIncreaseStepIndex = stepDistanceRemaining == 0 && !bearingMatchesManeuver;
 
-    if (bearingMatchesManeuver && withinManeuverRadius) {
+    if ((bearingMatchesManeuver && withinManeuverRadius) || forceIncreaseStepIndex) {
       // Advance the step index and create new step distance remaining
       advanceStepIndex(mapboxNavigation);
       // Re-calculate the step distance remaining based on the new index
@@ -178,15 +179,10 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
       .build();
   }
 
-  private void clearRecentDistancesFromManeuver(OffRoute offRouteEngine) {
-    if (offRouteEngine instanceof OffRouteDetector) {
-      ((OffRouteDetector) offRouteEngine).clearDistancesAwayFromManeuver();
-    }
-  }
-
   private void updateOffRouteDetectorStepPoints(OffRoute offRoute, List<Point> stepPoints) {
     if (offRoute instanceof OffRouteDetector) {
       ((OffRouteDetector) offRoute).updateStepPoints(stepPoints);
+      ((OffRouteDetector) offRoute).clearDistancesAwayFromManeuver();
     }
   }
 
@@ -226,7 +222,6 @@ class NavigationEngine extends HandlerThread implements Handler.Callback, OffRou
   private void advanceStepIndex(MapboxNavigation mapboxNavigation) {
     // First increase the indices and then update the majority of information for the new routeProgress
     indices = increaseIndex(previousRouteProgress, indices);
-    clearRecentDistancesFromManeuver(mapboxNavigation.getOffRouteEngine());
 
     // First increase the indices and then update the majority of information for the new
     stepPoints = decodeStepPoints(mapboxNavigation.getRoute(), indices.legIndex(), indices.stepIndex());
