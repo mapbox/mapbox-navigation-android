@@ -101,7 +101,9 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   public void onRouteProgressUpdate(RouteProgress routeProgress) {
     this.metricProgress = new MetricsRouteProgress(routeProgress);
 
-    if (navigationSessionState.startTimestamp() == null) {
+    boolean isValidDeparture = navigationSessionState.startTimestamp() == null
+      && routeProgress.currentLegProgress().distanceTraveled() > 0;
+    if (isValidDeparture) {
       // Set departure timestamp
       navigationSessionState = navigationSessionState.toBuilder()
         .startTimestamp(new Date())
