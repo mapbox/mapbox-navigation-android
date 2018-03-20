@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.v5.offroute;
 
 import android.location.Location;
-import android.support.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.core.constants.Constants;
@@ -11,8 +10,6 @@ import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.turf.TurfConstants;
-import com.mapbox.turf.TurfMeasurement;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -227,34 +224,5 @@ public class OffRouteDetectorTest extends BaseTest {
     LineString lineString = LineString.fromPolyline(currentStep.geometry(), Constants.PRECISION_6);
     List<Point> stepPoints = lineString.coordinates();
     offRouteDetector.updateStepPoints(stepPoints);
-  }
-
-  /**
-   * @return {@link Location} with Mapbox DC coordinates
-   */
-  private Location buildDefaultLocationUpdate(double lng, double lat) {
-    return buildLocationUpdate(lng, lat, 30f, 10f, System.currentTimeMillis());
-  }
-
-  private Location buildLocationUpdate(double lng, double lat, float speed, float horizontalAccuracy, long time) {
-    Location location = new Location(OffRouteDetectorTest.class.getSimpleName());
-    location.setLongitude(lng);
-    location.setLatitude(lat);
-    location.setSpeed(speed);
-    location.setAccuracy(horizontalAccuracy);
-    location.setTime(time);
-    return location;
-  }
-
-  @NonNull
-  private Point buildPointAwayFromLocation(Location location, double distanceAway) {
-    Point fromLocation = Point.fromLngLat(
-      location.getLongitude(), location.getLatitude());
-    return TurfMeasurement.destination(fromLocation, distanceAway, 90, TurfConstants.UNIT_METERS);
-  }
-
-  @NonNull
-  private Point buildPointAwayFromPoint(Point point, double distanceAway, double bearing) {
-    return TurfMeasurement.destination(point, distanceAway, bearing, TurfConstants.UNIT_METERS);
   }
 }

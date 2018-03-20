@@ -1,12 +1,19 @@
 package com.mapbox.services.android.navigation.v5;
 
+import android.location.Location;
+import android.support.annotation.NonNull;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetectorTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.turf.TurfConstants;
+import com.mapbox.turf.TurfMeasurement;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,5 +64,31 @@ public class BaseTest {
     DirectionsRoute aRoute = response.routes().get(0);
 
     return aRoute;
+  }
+
+  protected Location buildDefaultLocationUpdate(double lng, double lat) {
+    return buildLocationUpdate(lng, lat, 30f, 10f, System.currentTimeMillis());
+  }
+
+  protected Location buildLocationUpdate(double lng, double lat, float speed, float horizontalAccuracy, long time) {
+    Location location = new Location(OffRouteDetectorTest.class.getSimpleName());
+    location.setLongitude(lng);
+    location.setLatitude(lat);
+    location.setSpeed(speed);
+    location.setAccuracy(horizontalAccuracy);
+    location.setTime(time);
+    return location;
+  }
+
+  @NonNull
+  protected Point buildPointAwayFromLocation(Location location, double distanceAway) {
+    Point fromLocation = Point.fromLngLat(
+      location.getLongitude(), location.getLatitude());
+    return TurfMeasurement.destination(fromLocation, distanceAway, 90, TurfConstants.UNIT_METERS);
+  }
+
+  @NonNull
+  protected Point buildPointAwayFromPoint(Point point, double distanceAway, double bearing) {
+    return TurfMeasurement.destination(point, distanceAway, bearing, TurfConstants.UNIT_METERS);
   }
 }
