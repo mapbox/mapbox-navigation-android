@@ -62,6 +62,6 @@ dependencies {
 
 [We've added several navigation examples to this repo's test app](https://github.com/mapbox/mapbox-navigation-android/tree/master/app/src/main/java/com/mapbox/services/android/navigation/testapp/activity) to help you get started with the SDK and to inspire you.
 
-## Translations
+## Contributing
 
-This project uses Transifex for translating the SDKs `string.xml` files. To help contribute or add support for a new language, visit the [Transifex project page](https://www.transifex.com/mapbox/mapbox-navigation-sdk-for-android/).
+We welcome feedback, translations, and code contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
