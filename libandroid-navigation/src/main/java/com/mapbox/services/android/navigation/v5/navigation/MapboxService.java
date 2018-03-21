@@ -1,7 +1,5 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.util.Log;
-
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
@@ -61,17 +59,12 @@ public abstract class MapboxService<T, S> {
   protected abstract Call<T> initializeCall();
 
   /**
-   * Get call if already created, otherwise get it from subclass implementation
+   * Get call if already created, otherwise get it from subclass implementation.
    *
    * @return call
    * @since 3.0.0
    */
   protected Call<T> getCall() {
-    Log.d("MapboxService", "hit count: " + okHttpClient.cache().hitCount());
-    Log.d("MapboxService", "network count: " + okHttpClient.cache().networkCount());
-    Log.d("MapboxService", "request count: " + okHttpClient.cache().requestCount());
-    Log.d("MapboxService", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ");
-
     if (call == null) {
       call = initializeCall();
     }
@@ -142,11 +135,11 @@ public abstract class MapboxService<T, S> {
     if (getCallFactory() != null) {
       retrofitBuilder.callFactory(getCallFactory());
     } else {
-      okHttpClient = okHttpClient == null ? initializeOkHttpClient() : okHttpClient;
-      retrofitBuilder.client(okHttpClient);
+      retrofitBuilder.client(getOkHttpClient());
     }
 
     retrofit = retrofitBuilder.build();
+
     service = (S) retrofit.create(serviceType);
     return service;
   }
@@ -172,7 +165,7 @@ public abstract class MapboxService<T, S> {
   }
 
   /**
-   * Returns if debug logging is enabled in Okhttp
+   * Returns if debug logging is enabled in Okhttp.
    *
    * @return whether enableDebug is true
    * @since 3.0.0
@@ -217,16 +210,18 @@ public abstract class MapboxService<T, S> {
    * @return OkHttpClient
    * @since 1.0.0
    */
-  protected synchronized OkHttpClient initializeOkHttpClient() {
-    if (isEnableDebug()) {
-      HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-      logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+  protected synchronized OkHttpClient getOkHttpClient() {
+    if (okHttpClient == null) {
       OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-      httpClient.addInterceptor(logging);
-      return httpClient.build();
-    } else {
-      return new OkHttpClient();
+      if (isEnableDebug()) {
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+        httpClient.addInterceptor(logging);
+        okHttpClient = httpClient.build();
+      } else {
+        okHttpClient = new OkHttpClient();
+      }
     }
+    return okHttpClient;
   }
 }
-

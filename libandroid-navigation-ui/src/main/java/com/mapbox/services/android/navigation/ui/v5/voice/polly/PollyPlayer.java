@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import okhttp3.Cache;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -56,7 +57,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
       MapboxSpeech.builder()
         .textType("ssml")
         .language(locale.toString())
-        .cacheDirectory(context.getCacheDir())
+        .cache(new Cache(context.getCacheDir(), 10 * 1098 * 1098))
         .accessToken(Mapbox.getAccessToken()));
   }
 
