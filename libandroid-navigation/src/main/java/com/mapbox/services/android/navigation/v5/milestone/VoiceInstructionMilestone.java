@@ -7,7 +7,6 @@ import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoader;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class VoiceInstructionMilestone extends Milestone {
@@ -29,7 +28,7 @@ public class VoiceInstructionMilestone extends Milestone {
     boolean newRoute = newRoute(routeProgress);
     if (newRoute) {
       clearInstructionList();
-      cacheInstructions(routeProgress, true);
+      voiceInstructionLoader.cacheInstructions(routeProgress, true);
     }
 
     if (shouldAddInstructions(routeProgress)) {
@@ -38,7 +37,7 @@ public class VoiceInstructionMilestone extends Milestone {
 
     for (VoiceInstructions voice : stepVoiceInstructions) {
       if (shouldBeVoiced(routeProgress, voice)) {
-        cacheInstructions(routeProgress, false);
+        voiceInstructionLoader.cacheInstructions(routeProgress, false);
         announcement = voice.announcement();
         ssmlAnnouncement = voice.ssmlAnnouncement();
         stepVoiceInstructions.remove(voice);
@@ -48,34 +47,7 @@ public class VoiceInstructionMilestone extends Milestone {
     return false;
   }
 
-  private void cacheInstructions(RouteProgress routeProgress, boolean first) {
-    int stepIndex = routeProgress.currentLegProgress().stepIndex();
-    List<LegStep> steps = routeProgress.currentLeg().steps();
-    List<VoiceInstructions> instructions = new ArrayList<>();
 
-    while (instructions.size() < 3 && stepIndex < steps.size()) {
-      List<VoiceInstructions> currentStepInstructions = steps.get(stepIndex++).voiceInstructions();
-      if (currentStepInstructions.size() < 4) {
-        instructions.addAll(currentStepInstructions);
-      } else { // in case there are a large number of instructions
-        instructions.addAll(currentStepInstructions.subList(0, 3));
-      }
-    }
-
-    if (first) {
-      if (instructions.size() > 0) {
-        voiceInstructionLoader.cacheInstruction(instructions.get(0).ssmlAnnouncement());
-      }
-
-      if (instructions.size() > 1) {
-        voiceInstructionLoader.cacheInstruction(instructions.get(1).ssmlAnnouncement());
-      }
-    } else {
-      if (instructions.size() > 2) {
-        voiceInstructionLoader.cacheInstruction(instructions.get(2).ssmlAnnouncement());
-      }
-    }
-  }
 
   @Override
   public Instruction getInstruction() {
