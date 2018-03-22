@@ -31,8 +31,9 @@ public class MapboxNavigationTest extends BaseTest {
   private MapboxNavigation navigation;
 
   @Before
-  public void setUp() throws Exception {
-    initDefaultNavigation();
+  public void before() throws Exception {
+    navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, mock(NavigationTelemetry.class),
+      mock(LocationEngine.class));
   }
 
   @Test
@@ -77,7 +78,6 @@ public class MapboxNavigationTest extends BaseTest {
     navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
       mock(LocationEngine.class));
     assertNull(navigation.getOffRouteEngine());
-    initDefaultNavigation();
   }
 
   @Test
@@ -88,7 +88,6 @@ public class MapboxNavigationTest extends BaseTest {
     navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
       mock(LocationEngine.class));
     assertNull(navigation.getSnapEngine());
-    initDefaultNavigation();
   }
 
   @Test
@@ -99,7 +98,6 @@ public class MapboxNavigationTest extends BaseTest {
     navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
       mock(LocationEngine.class));
     assertNull(navigation.getFasterRouteEngine());
-    initDefaultNavigation();
   }
 
   @Test
@@ -224,10 +222,5 @@ public class MapboxNavigationTest extends BaseTest {
     navigation.setOffRouteEngine(offRoute);
     assertTrue(!(navigation.getOffRouteEngine() instanceof OffRouteDetector));
     assertTrue(navigation.getOffRouteEngine() instanceof OffRoute);
-  }
-
-  private void initDefaultNavigation() {
-    navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, mock(NavigationTelemetry.class),
-      mock(LocationEngine.class));
   }
 }
