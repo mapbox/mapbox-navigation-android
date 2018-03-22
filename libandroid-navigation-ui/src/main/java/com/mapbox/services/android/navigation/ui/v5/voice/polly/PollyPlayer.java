@@ -17,9 +17,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import okhttp3.Cache;
 import okhttp3.ResponseBody;
@@ -40,10 +40,11 @@ import timber.log.Timber;
 public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
   VoiceInstructionLoader voiceInstructionLoader;
   private MediaPlayer pollyMediaPlayer;
-  private List<String> instructionUrls = new ArrayList<>();
   private InstructionListener instructionListener;
   private boolean isMuted;
   private String cacheDirectory;
+  private int instructionNamingInt;
+  Queue<File> instructionQueue;
 
   /**
    * Construct an instance of {@link PollyPlayer}
@@ -52,6 +53,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
    */
   public PollyPlayer(Context context, Locale locale) {
     this.cacheDirectory = context.getCacheDir().toString();
+    instructionQueue = new ConcurrentLinkedQueue();
     voiceInstructionLoader = VoiceInstructionLoader.getInstance();
     voiceInstructionLoader.initialize(
       MapboxSpeech.builder()
@@ -59,6 +61,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
         .language(locale.toString())
         .cache(new Cache(context.getCacheDir(), 10 * 1098 * 1098))
         .accessToken(Mapbox.getAccessToken()));
+    instructionNamingInt = 0;
   }
 
   /**
@@ -128,7 +131,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
    */
   private File saveAsFile(ResponseBody responseBody) {
     try {
-      File file = new File(cacheDirectory + File.separator + "instruction.mp3");
+      File file = new File(cacheDirectory + File.separator + instructionNamingInt++ + ".mp3");
       InputStream inputStream = null;
       OutputStream outputStream = null;
 
@@ -214,31 +217,26 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
   }
 
   private void onInstructionFinished() {
-    if (instructionUrls.size() > 0) {
-      instructionUrls.remove(0);
-      if (instructionUrls.size() > 0) {
-        playInstruction(instructionUrls.get(0));
-      }
+    instructionQueue.poll().delete(); // delete the file for the instruction that just finished
+    File nextInstruction = instructionQueue.poll();
+    if (nextInstruction != null) {
+      playInstruction(nextInstruction.getPath());
     }
   }
 
   private void clearInstructionUrls() {
-    if (instructionUrls.size() > 0) {
-      instructionUrls.clear();
+    while (!instructionQueue.isEmpty()) {
+      instructionQueue.remove().delete();
     }
   }
 
   @Override
   public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
     if (response.isSuccessful()) {
-      String instructionUrl = saveAsFile(response.body()).getPath();
+      instructionQueue.add(saveAsFile(response.body()));
 
-      if (instructionUrls.size() == 0) {
-        instructionUrls.add(instructionUrl);
-        playInstruction(instructionUrls.get(0));
-
-      } else {
-        instructionUrls.add(instructionUrl);
+      if (instructionQueue.size() == 1) {
+        playInstruction(instructionQueue.poll().getPath());
       }
     }
   }
