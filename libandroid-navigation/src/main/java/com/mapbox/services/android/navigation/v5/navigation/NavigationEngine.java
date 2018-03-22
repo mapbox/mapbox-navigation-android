@@ -66,29 +66,22 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
 
     final Location rawLocation = newLocationModel.location();
 
-    // Generate a new route progress given the raw location update
     RouteProgress routeProgress = routeProcessor.buildNewRouteProgress(mapboxNavigation, rawLocation);
 
-    // Check if user has gone off-route
     final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress, routeProcessor);
 
-    // If needed, increase step index and generate new route progress
     routeProcessor.checkIncreaseStepIndex(mapboxNavigation);
 
-    // Check milestone list to see if any should be triggered
     RouteProgress previousRouteProgress = routeProcessor.getPreviousRouteProgress();
     final List<Milestone> milestones = checkMilestones(previousRouteProgress, routeProgress, mapboxNavigation);
 
-    // Create snapped location if enabled, otherwise return raw location
     final Location location = routeProcessor.buildSnappedLocation(mapboxNavigation, snapToRouteEnabled,
       rawLocation, routeProgress, userOffRoute);
 
-    // Check for faster route only if enabled and not off-route
     boolean fasterRouteEnabled = mapboxNavigation.options().enableFasterRouteDetection();
     final boolean checkFasterRoute = fasterRouteEnabled && !userOffRoute
       && shouldCheckFasterRoute(newLocationModel, routeProgress);
 
-    // Copy route progress to final object for callback
     final RouteProgress finalRouteProgress = routeProgress;
     routeProcessor.setPreviousRouteProgress(finalRouteProgress);
 

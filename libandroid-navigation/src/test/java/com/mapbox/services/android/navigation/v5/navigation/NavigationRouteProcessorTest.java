@@ -66,7 +66,6 @@ public class NavigationRouteProcessorTest extends BaseTest {
 
   @Test
   public void onSnapToRouteEnabledAndUserOnRoute_snappedLocationReturns() throws Exception {
-    // Decode step points for snap-to-route logic
     RouteProgress progress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
 
     boolean snapEnabled = true;
@@ -91,7 +90,6 @@ public class NavigationRouteProcessorTest extends BaseTest {
 
   @Test
   public void onSnapToRouteDisabledAndUserOnRoute_rawLocationReturns() throws Exception {
-    // Decode step points for snap-to-route logic
     RouteProgress progress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
 
     boolean snapEnabled = false;
@@ -116,7 +114,6 @@ public class NavigationRouteProcessorTest extends BaseTest {
 
   @Test
   public void onSnapToRouteEnabledAndUserOffRoute_rawLocationReturns() throws Exception {
-    // Decode step points for snap-to-route logic
     RouteProgress progress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
 
     boolean snapEnabled = false;
