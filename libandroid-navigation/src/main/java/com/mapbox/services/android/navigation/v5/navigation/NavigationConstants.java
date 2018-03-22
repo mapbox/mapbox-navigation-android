@@ -203,6 +203,7 @@ public final class NavigationConstants {
   public static final String NAVIGATION_VIEW_UNIT_TYPE = "navigation_view_unit_type";
   public static final String NAVIGATION_VIEW_SIMULATE_ROUTE = "navigation_view_simulate_route";
   public static final String NAVIGATION_VIEW_ROUTE_PROFILE_KEY = "navigation_view_route_profile";
+  public static final String NAVIGATION_VIEW_OFF_ROUTE_ENABLED_KEY = "navigation_view_off_route_enabled";
   public static final String NAVIGATION_VIEW_LOCALE_LANGUAGE = "navigation_view_locale_language";
   public static final String NAVIGATION_VIEW_LOCALE_COUNTRY = "navigation_view_locale_country";
   public static final String NAVIGATION_VIEW_REROUTING = "Rerouting";

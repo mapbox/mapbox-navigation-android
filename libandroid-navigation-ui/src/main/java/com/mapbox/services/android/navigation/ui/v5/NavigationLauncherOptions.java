@@ -19,6 +19,8 @@ public abstract class NavigationLauncherOptions extends NavigationOptions {
   @Nullable
   public abstract Integer unitType();
 
+  public abstract boolean enableOffRouteDetection();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -42,12 +44,15 @@ public abstract class NavigationLauncherOptions extends NavigationOptions {
 
     public abstract Builder unitType(@NavigationUnitType.UnitType Integer unitType);
 
+    public abstract Builder enableOffRouteDetection(boolean enableOffRouteDetection);
+
     public abstract NavigationLauncherOptions build();
   }
 
   public static NavigationLauncherOptions.Builder builder() {
     return new AutoValue_NavigationLauncherOptions.Builder()
       .awsPoolId(null)
-      .shouldSimulateRoute(false);
+      .shouldSimulateRoute(false)
+      .enableOffRouteDetection(true);
   }
 }

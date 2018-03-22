@@ -97,14 +97,18 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
 
   @Override
   public void onNavigationReady() {
+    MapboxNavigationOptions.Builder navigationOptions = MapboxNavigationOptions.builder();
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
     options.navigationListener(this);
     if (!isRunning) {
       extractRoute(options);
       extractCoordinates(options);
     }
-    extractConfiguration(options);
-    extractLocale(options);
+    extractConfiguration(options, navigationOptions);
+    extractLocale(navigationOptions);
+    extractUnitType(navigationOptions);
+
+    options.navigationOptions(navigationOptions.build());
     navigationView.startNavigation(options.build());
     isRunning = true;
   }
@@ -138,7 +142,8 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     }
   }
 
-  private void extractConfiguration(NavigationViewOptions.Builder options) {
+  private void extractConfiguration(NavigationViewOptions.Builder options,
+                                    MapboxNavigationOptions.Builder navigationOptions) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
     options.awsPoolId(preferences
       .getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
@@ -146,14 +151,14 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
     options.directionsProfile(preferences
       .getString(NavigationConstants.NAVIGATION_VIEW_ROUTE_PROFILE_KEY, ""));
+    navigationOptions.enableOffRouteDetection(preferences
+      .getBoolean(NavigationConstants.NAVIGATION_VIEW_OFF_ROUTE_ENABLED_KEY, true));
   }
 
-  private void extractLocale(NavigationViewOptions.Builder options) {
+  private void extractLocale(MapboxNavigationOptions.Builder navigationOptions) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
     String country = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, "");
     String language = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, "");
-    int unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, NONE_SPECIFIED);
 
     Locale locale;
     if (!language.isEmpty()) {
@@ -162,10 +167,12 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
       locale = LocaleUtils.getDeviceLocale(this);
     }
 
-    MapboxNavigationOptions navigationOptions = MapboxNavigationOptions.builder()
-      .locale(locale)
-      .unitType(unitType)
-      .build();
-    options.navigationOptions(navigationOptions);
+    navigationOptions.locale(locale);
+  }
+
+  private void extractUnitType(MapboxNavigationOptions.Builder navigationOptions) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+    int unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, NONE_SPECIFIED);
+    navigationOptions.unitType(unitType);
   }
 }
