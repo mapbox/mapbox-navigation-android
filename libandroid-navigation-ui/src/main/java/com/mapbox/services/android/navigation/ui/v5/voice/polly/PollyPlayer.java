@@ -218,7 +218,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
 
   private void onInstructionFinished() {
     instructionQueue.poll().delete(); // delete the file for the instruction that just finished
-    File nextInstruction = instructionQueue.poll();
+    File nextInstruction = instructionQueue.peek();
     if (nextInstruction != null) {
       playInstruction(nextInstruction.getPath());
     }
@@ -236,7 +236,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
       instructionQueue.add(saveAsFile(response.body()));
 
       if (instructionQueue.size() == 1) {
-        playInstruction(instructionQueue.poll().getPath());
+        playInstruction(instructionQueue.peek().getPath());
       }
     }
   }
