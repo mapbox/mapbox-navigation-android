@@ -104,12 +104,10 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     boolean isValidDeparture = navigationSessionState.startTimestamp() == null
       && routeProgress.currentLegProgress().distanceTraveled() > 0;
     if (isValidDeparture) {
-      // Set departure timestamp
       navigationSessionState = navigationSessionState.toBuilder()
         .startTimestamp(new Date())
         .build();
       updateLifecyclePercentages();
-      // Send departure event for the start of this session
       NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
     }
   }
