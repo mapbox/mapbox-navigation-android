@@ -45,6 +45,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
   // Message id used when a new location update occurs and we send to the thread.
   private static final int MSG_LOCATION_UPDATED = 1001;
+  private static final int HORIZONTAL_ACCURACY_THRESHOLD = 100;
 
   private final IBinder localBinder = new LocalBinder();
 
@@ -286,7 +287,9 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @SuppressWarnings("MissingPermission")
   private boolean isValidLocationUpdate(Location location) {
-    return location != null && location.hasSpeed() && location.getAccuracy() <= 100;
+    return location != null
+      && location.hasSpeed()
+      && location.getAccuracy() <= HORIZONTAL_ACCURACY_THRESHOLD;
   }
 
   /**
