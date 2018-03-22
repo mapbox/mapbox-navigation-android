@@ -156,9 +156,10 @@ public abstract class MapboxSpeech extends MapboxService<ResponseBody, SpeechSer
     public abstract Builder baseUrl(@NonNull String baseUrl);
 
     /**
+     * Cache to use for OkHttp.
      *
-     * @param cache
-     * @return
+     * @param cache to use for OkHttp
+     * @return this builder
      */
     public abstract Builder cache(Cache cache);
 

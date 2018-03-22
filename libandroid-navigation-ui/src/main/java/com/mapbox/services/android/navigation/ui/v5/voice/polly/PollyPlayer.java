@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.voice.polly;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.text.TextUtils;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
@@ -13,10 +14,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxSpeech;
 import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoader;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Locale;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -43,7 +41,6 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
   private InstructionListener instructionListener;
   private boolean isMuted;
   private String cacheDirectory;
-  private int instructionNamingInt;
   Queue<File> instructionQueue;
 
   /**
@@ -61,7 +58,6 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
         .language(locale.toString())
         .cache(new Cache(context.getCacheDir(), 10 * 1098 * 1098))
         .accessToken(Mapbox.getAccessToken()));
-    instructionNamingInt = 0;
   }
 
   /**
@@ -122,48 +118,6 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
 
   private void getVoiceFile(final String instruction) {
     voiceInstructionLoader.getInstruction(instruction, this);
-  }
-
-  /**
-   * Saves the file returned in the response body as a file in the cache directory
-   * @param responseBody containing file
-   * @return resulting file, or null if there were any IO exceptions
-   */
-  private File saveAsFile(ResponseBody responseBody) {
-    try {
-      File file = new File(cacheDirectory + File.separator + instructionNamingInt++ + ".mp3");
-      InputStream inputStream = null;
-      OutputStream outputStream = null;
-
-      try {
-        inputStream = responseBody.byteStream();
-        outputStream = new FileOutputStream(file);
-        byte[] buffer = new byte[4096];
-        int numOfBytes;
-
-        while ((numOfBytes = inputStream.read(buffer)) != -1) { // -1 denotes end of file
-          outputStream.write(buffer, 0, numOfBytes);
-        }
-
-        outputStream.flush();
-        return file;
-
-      } catch (IOException exception) {
-        return null;
-
-      } finally {
-        if (inputStream != null) {
-          inputStream.close();
-        }
-
-        if (outputStream != null) {
-          outputStream.close();
-        }
-      }
-
-    } catch (IOException exception) {
-      return null;
-    }
   }
 
   private void playInstruction(String instruction) {
@@ -233,11 +187,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
   @Override
   public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
     if (response.isSuccessful()) {
-      instructionQueue.add(saveAsFile(response.body()));
-
-      if (instructionQueue.size() == 1) {
-        playInstruction(instructionQueue.peek().getPath());
-      }
+      executeInstructionTask(response.body());
     }
   }
 
@@ -246,5 +196,25 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
     if (instructionListener != null) {
       instructionListener.onError();
     }
+  }
+
+  private void executeInstructionTask(ResponseBody responseBody) {
+    new InstructionTask(cacheDirectory, new InstructionTask.TaskListener() {
+      @Override
+      public void onFinished(File instructionFile) {
+        instructionQueue.add(instructionFile);
+
+        if (instructionQueue.size() == 1) {
+          playInstruction(instructionQueue.peek().getPath());
+        }
+      }
+
+      @Override
+      public void onError() {
+        if (instructionListener != null) {
+          instructionListener.onError();
+        }
+      }
+    }).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, responseBody);
   }
 }
