@@ -140,7 +140,7 @@ public abstract class MapboxSpeech extends MapboxService<ResponseBody, SpeechSer
     public abstract Builder accessToken(String accessToken);
 
     /**
-     * @param instruction
+     * @param instruction text to speak
      * @return this builder for chaining options together
      * @since 3.0.0
      */
