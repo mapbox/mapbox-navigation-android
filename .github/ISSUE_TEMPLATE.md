@@ -1,7 +1,20 @@
-What kind of issue is this?
+<!--
+Hello and thanks for contributing! To help us diagnose your problem quickly, please:
 
- - [ ] Question. This issue tracker is not the place for questions. If you want to ask how to do something, or to understand why something isn't working the way you expect it to, use Stack Overflow. https://stackoverflow.com/questions/tagged/mapbox+android
-       
- - [ ] Bug report. If you’ve found a bug, spend the time to write a failing test. Bugs with tests get fixed. In addition, please include device models, API level, SDK version, code samples, and any other additional information.
+ - Include a minimal demonstration of the bug, including code, logs, and screenshots.
+ - Ensure you can reproduce the bug using the latest release.
+ - Only post to report a bug or request a feature; direct all other questions to: https://stackoverflow.com/questions/tagged/mapbox
+-->
 
- - [ ] Feature Request. Start by telling us what problem you’re trying to solve. Often a solution already exists! Don’t send pull requests to implement new features without first getting our support. Sometimes we leave features out on purpose to keep the project small.
+**Android API:**
+**Mapbox Navigation SDK version:**
+
+### Steps to trigger behavior
+
+ 1.
+ 2.
+ 3.
+
+### Expected behavior
+
+### Actual behavior
