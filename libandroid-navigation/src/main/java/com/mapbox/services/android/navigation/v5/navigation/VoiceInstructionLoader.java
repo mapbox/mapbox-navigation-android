@@ -32,8 +32,11 @@ public class VoiceInstructionLoader {
     mapboxSpeech = builder;
   }
 
-  public void getInstruction(String instruction, Callback<ResponseBody> callback) {
-    mapboxSpeech.instruction(instruction).build().enqueueCall(callback);
+  public void getInstruction(String instruction, String textType, Callback<ResponseBody> callback) {
+    mapboxSpeech.instruction(instruction)
+      .textType(textType)
+      .build()
+      .enqueueCall(callback);
   }
 
   public void cacheInstruction(String instruction) {

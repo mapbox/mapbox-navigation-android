@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Pair;
 
-import com.mapbox.services.android.navigation.ui.v5.voice.polly.MapboxSpeechPlayer;
+import com.mapbox.services.android.navigation.ui.v5.voice.speech.MapboxSpeechPlayer;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
@@ -50,7 +50,7 @@ public class NavigationInstructionPlayer implements InstructionListener {
     if (voiceInstructionMilestone != null) {
       mapboxSpeechPlayer.play(voiceInstructionMilestone.getSsmlAnnouncement());
     } else {
-      androidSpeechPlayer.play(instruction);
+      mapboxSpeechPlayer.play(instruction, "text"); // For cases like offroute
     }
   }
 

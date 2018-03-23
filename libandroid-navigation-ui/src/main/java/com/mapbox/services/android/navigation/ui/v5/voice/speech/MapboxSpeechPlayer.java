@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.ui.v5.voice.polly;
+package com.mapbox.services.android.navigation.ui.v5.voice.speech;
 
 import android.content.Context;
 import android.media.AudioManager;
@@ -28,16 +28,12 @@ import timber.log.Timber;
 
 /**
  * <p>
- * Will retrieve synthesized speech mp3s from Amazon's AWS Polly Service
- * (Requires a valid AWS Cognito Pool ID)
- * </p><p>
- * Will queue each instruction and play them
- * sequentially up until the queue is empty.
+ * Will retrieve synthesized speech mp3s from Mapbox's API Voice.
  * </p>
  */
 public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseBody> {
   VoiceInstructionLoader voiceInstructionLoader;
-  private MediaPlayer pollyMediaPlayer;
+  private MediaPlayer mediaPlayer;
   private InstructionListener instructionListener;
   private boolean isMuted;
   private String cacheDirectory;
@@ -55,7 +51,6 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
     voiceInstructionLoader = VoiceInstructionLoader.getInstance();
     voiceInstructionLoader.initialize(
       MapboxSpeech.builder()
-        .textType("ssml")
         .language(locale.toString())
         .cache(new Cache(context.getCacheDir(), 10 * 1098 * 1098))
         .accessToken(Mapbox.getAccessToken()));
@@ -64,10 +59,13 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
   /**
    * @param instruction voice instruction to be synthesized and played.
    */
-  @Override
   public void play(String instruction) {
+    play(instruction, "ssml");
+  }
+
+  public void play(String instruction, String textType) {
     if (!isMuted && !TextUtils.isEmpty(instruction)) {
-      getVoiceFile(instruction);
+      getVoiceFile(instruction, textType);
     }
   }
 
@@ -90,21 +88,21 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
 
   @Override
   public void onDestroy() {
-    stopPollyMediaPlayerPlaying();
+    stopMediaPlayerPlaying();
   }
 
   private void muteSpeech() {
     if (isMuted) {
-      stopPollyMediaPlayerPlaying();
+      stopMediaPlayerPlaying();
       clearInstructionUrls();
     }
   }
 
-  private void stopPollyMediaPlayerPlaying() {
+  private void stopMediaPlayerPlaying() {
     try {
-      if (pollyMediaPlayer != null && pollyMediaPlayer.isPlaying()) {
-        pollyMediaPlayer.stop();
-        pollyMediaPlayer.release();
+      if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+        mediaPlayer.stop();
+        mediaPlayer.release();
         instructionListener.onDone();
       }
     } catch (IllegalStateException exception) {
@@ -112,23 +110,23 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
     }
   }
 
-  private void getVoiceFile(final String instruction) {
-    voiceInstructionLoader.getInstruction(instruction, this);
+  private void getVoiceFile(final String instruction, String textType) {
+    voiceInstructionLoader.getInstruction(instruction, textType, this);
   }
 
   private void playInstruction(String instruction) {
     if (!TextUtils.isEmpty(instruction)) {
-      pollyMediaPlayer = new MediaPlayer();
+      mediaPlayer = new MediaPlayer();
       setDataSource(instruction);
-      pollyMediaPlayer.prepareAsync();
+      mediaPlayer.prepareAsync();
       setListeners();
     }
   }
 
   private void pauseInstruction() {
     try {
-      if (pollyMediaPlayer != null && pollyMediaPlayer.isPlaying()) {
-        pollyMediaPlayer.stop();
+      if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+        mediaPlayer.stop();
       }
     } catch (IllegalStateException exception) {
       Timber.e(exception.getMessage());
@@ -137,15 +135,15 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
 
   private void setDataSource(String instruction) {
     try {
-      pollyMediaPlayer.setDataSource(instruction);
+      mediaPlayer.setDataSource(instruction);
     } catch (IOException ioException) {
-      Timber.e("Unable to set data source for the media pollyMediaPlayer! %s",
+      Timber.e("Unable to set data source for the media mediaPlayer! %s",
         ioException.getMessage());
     }
   }
 
   private void setListeners() {
-    pollyMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+    mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
       @Override
       public void onPrepared(MediaPlayer mp) {
         if (instructionListener != null) {
@@ -154,7 +152,7 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
         mp.start();
       }
     });
-    pollyMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
       @Override
       public void onCompletion(MediaPlayer mp) {
         mp.release();
