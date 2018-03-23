@@ -9,6 +9,9 @@ import com.google.gson.JsonParser;
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.core.constants.Constants;
+import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.turf.TurfConstants;
@@ -16,6 +19,7 @@ import com.mapbox.turf.TurfMeasurement;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Scanner;
 
 import static junit.framework.Assert.assertEquals;
@@ -91,5 +95,12 @@ public class BaseTest {
   @NonNull
   protected Point buildPointAwayFromPoint(Point point, double distanceAway, double bearing) {
     return TurfMeasurement.destination(point, distanceAway, bearing, TurfConstants.UNIT_METERS);
+  }
+
+  @NonNull
+  protected List<Point> createCoordinatesFromCurrentStep(RouteProgress progress) {
+    LegStep currentStep = progress.currentLegProgress().currentStep();
+    LineString lineString = LineString.fromPolyline(currentStep.geometry(), Constants.PRECISION_6);
+    return lineString.coordinates();
   }
 }

@@ -70,7 +70,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
 
     final boolean userOffRoute = isUserOffRoute(newLocationModel, routeProgress, routeProcessor);
 
-    routeProcessor.checkIncreaseStepIndex(mapboxNavigation);
+    routeProcessor.checkIncreaseIndex(mapboxNavigation);
 
     RouteProgress previousRouteProgress = routeProcessor.getPreviousRouteProgress();
     final List<Milestone> milestones = checkMilestones(previousRouteProgress, routeProgress, mapboxNavigation);
