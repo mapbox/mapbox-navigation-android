@@ -10,7 +10,6 @@ import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetectorTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
@@ -21,6 +20,8 @@ import java.util.Scanner;
 
 import static junit.framework.Assert.assertEquals;
 import static okhttp3.internal.Util.UTF_8;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class BaseTest {
 
@@ -71,12 +72,12 @@ public class BaseTest {
   }
 
   protected Location buildLocationUpdate(double lng, double lat, float speed, float horizontalAccuracy, long time) {
-    Location location = new Location(OffRouteDetectorTest.class.getSimpleName());
-    location.setLongitude(lng);
-    location.setLatitude(lat);
-    location.setSpeed(speed);
-    location.setAccuracy(horizontalAccuracy);
-    location.setTime(time);
+    Location location = mock(Location.class);
+    when(location.getLongitude()).thenReturn(lng);
+    when(location.getLatitude()).thenReturn(lat);
+    when(location.getSpeed()).thenReturn(speed);
+    when(location.getAccuracy()).thenReturn(horizontalAccuracy);
+    when(location.getTime()).thenReturn(time);
     return location;
   }
 
