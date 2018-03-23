@@ -35,7 +35,7 @@ import timber.log.Timber;
  * sequentially up until the queue is empty.
  * </p>
  */
-public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
+public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseBody> {
   VoiceInstructionLoader voiceInstructionLoader;
   private MediaPlayer pollyMediaPlayer;
   private InstructionListener instructionListener;
@@ -44,11 +44,12 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
   Queue<File> instructionQueue;
 
   /**
-   * Construct an instance of {@link PollyPlayer}
+   * Construct an instance of {@link MapboxSpeechPlayer}
    *
    * @param context   to initialize {@link CognitoCachingCredentialsProvider} and {@link AudioManager}
    */
-  public PollyPlayer(Context context, Locale locale) {
+  public MapboxSpeechPlayer(Context context, Locale locale, InstructionListener instructionListener) {
+    this.instructionListener = instructionListener;
     this.cacheDirectory = context.getCacheDir().toString();
     instructionQueue = new ConcurrentLinkedQueue();
     voiceInstructionLoader = VoiceInstructionLoader.getInstance();
@@ -78,7 +79,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
   @Override
   public void setMuted(boolean isMuted) {
     this.isMuted = isMuted;
-    mutePolly(isMuted);
+    muteSpeech();
   }
 
   @Override
@@ -92,12 +93,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
     stopPollyMediaPlayerPlaying();
   }
 
-  @Override
-  public void addInstructionListener(InstructionListener instructionListener) {
-    this.instructionListener = instructionListener;
-  }
-
-  private void mutePolly(boolean isMuted) {
+  private void muteSpeech() {
     if (isMuted) {
       stopPollyMediaPlayerPlaying();
       clearInstructionUrls();
@@ -194,7 +190,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
   @Override
   public void onFailure(Call<ResponseBody> call, Throwable throwable) {
     if (instructionListener != null) {
-      instructionListener.onError();
+      instructionListener.onError(true);
     }
   }
 
@@ -212,7 +208,7 @@ public class PollyPlayer implements InstructionPlayer, Callback<ResponseBody> {
       @Override
       public void onError() {
         if (instructionListener != null) {
-          instructionListener.onError();
+          instructionListener.onError(true);
         }
       }
     }).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, responseBody);

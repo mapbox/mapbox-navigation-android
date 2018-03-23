@@ -5,24 +5,32 @@ import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.Pair;
 
-import com.mapbox.services.android.navigation.ui.v5.voice.polly.PollyPlayer;
+import com.mapbox.services.android.navigation.ui.v5.voice.polly.MapboxSpeechPlayer;
+import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
 import java.util.Locale;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class NavigationInstructionPlayer implements InstructionPlayer, InstructionListener {
+public class NavigationInstructionPlayer implements InstructionListener {
 
   private AudioManager instructionAudioManager;
   private AudioFocusRequest instructionFocusRequest;
-  private InstructionPlayer instructionPlayer;
+  private MapboxSpeechPlayer mapboxSpeechPlayer;
+  private AndroidSpeechPlayer androidSpeechPlayer;
   private InstructionListener instructionListener;
-  private boolean isPollyPlayer;
+  private Queue<Pair<String, VoiceInstructionMilestone>> instructionQueue;
+  private boolean isMuted;
 
   public NavigationInstructionPlayer(@NonNull Context context, Locale locale) {
     initAudioManager(context);
     initAudioFocusRequest();
-    initInstructionPlayer(context, locale);
+    initInstructionPlayers(context, locale);
+    instructionQueue = new ConcurrentLinkedQueue<>();
   }
 
   private void initAudioFocusRequest() {
@@ -32,40 +40,41 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
     }
   }
 
-  private void initInstructionPlayer(Context context, Locale locale) {
-    // todo: use DefaultPlayer for languages not supported by Polly
-    instructionPlayer = new PollyPlayer(context, locale);
-    isPollyPlayer = true;
-    instructionPlayer.addInstructionListener(this);
+  private void initInstructionPlayers(Context context, Locale locale) {
+    mapboxSpeechPlayer = new MapboxSpeechPlayer(context, locale, this);
+    androidSpeechPlayer = new AndroidSpeechPlayer(context, locale, this);
   }
 
-  @Override
-  public void play(String instruction) {
-    instructionPlayer.play(instruction);
+  public void play(@NonNull String instruction, @Nullable VoiceInstructionMilestone voiceInstructionMilestone) {
+    instructionQueue.add(Pair.create(instruction, voiceInstructionMilestone));
+    if (voiceInstructionMilestone != null) {
+      mapboxSpeechPlayer.play(voiceInstructionMilestone.getSsmlAnnouncement());
+    } else {
+      androidSpeechPlayer.play(instruction);
+    }
   }
 
-  @Override
   public boolean isMuted() {
-    return instructionPlayer.isMuted();
+    return isMuted;
   }
 
-  @Override
   public void setMuted(boolean isMuted) {
-    instructionPlayer.setMuted(isMuted);
+    this.isMuted = isMuted;
+    mapboxSpeechPlayer.setMuted(isMuted);
+    androidSpeechPlayer.setMuted(isMuted);
   }
 
-  @Override
   public void onOffRoute() {
-    instructionPlayer.onOffRoute();
-    play(NavigationConstants.NAVIGATION_VIEW_REROUTING);
+    mapboxSpeechPlayer.onOffRoute();
+    androidSpeechPlayer.onOffRoute();
+    play(NavigationConstants.NAVIGATION_VIEW_REROUTING, null);
   }
 
-  @Override
   public void onDestroy() {
-    instructionPlayer.onDestroy();
+    mapboxSpeechPlayer.onDestroy();
+    androidSpeechPlayer.onDestroy();
   }
 
-  @Override
   public void addInstructionListener(InstructionListener instructionListener) {
     this.instructionListener = instructionListener;
   }
@@ -78,6 +87,7 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
 
     // Request audio focus
     requestAudioFocus();
+    instructionQueue.remove();
   }
 
   @Override
@@ -91,14 +101,17 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
   }
 
   @Override
-  public void onError() {
+  public void onError(boolean isMapboxPlayer) {
     if (instructionListener != null) {
-      instructionListener.onError();
+      instructionListener.onError(isMapboxPlayer);
     }
-  }
 
-  public boolean isPollyPlayer() {
-    return isPollyPlayer;
+    if (isMapboxPlayer) { // If mapbox player failed, try android speech player
+      androidSpeechPlayer.play(instructionQueue.peek().first);
+    }
+
+    // If android speech player fails, just drop the instruction
+    instructionQueue.remove();
   }
 
   private void initAudioManager(Context context) {

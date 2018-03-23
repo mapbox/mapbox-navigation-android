@@ -122,10 +122,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    */
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
-    if (instructionPlayer.isPollyPlayer() && milestone instanceof VoiceInstructionMilestone) {
-      instructionPlayer.play(((VoiceInstructionMilestone) milestone).getSsmlAnnouncement());
-    } else {
-      instructionPlayer.play(instruction);
+    if (milestone instanceof VoiceInstructionMilestone) {
+      instructionPlayer.play(instruction, (VoiceInstructionMilestone) milestone);
     }
     updateBannerInstruction(routeProgress, milestone);
   }

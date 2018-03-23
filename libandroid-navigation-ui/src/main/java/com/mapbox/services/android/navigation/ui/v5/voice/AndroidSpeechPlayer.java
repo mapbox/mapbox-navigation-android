@@ -16,7 +16,7 @@ import java.util.Locale;
  *
  * @since 0.6.0
  */
-public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitListener {
+public class AndroidSpeechPlayer implements InstructionPlayer, TextToSpeech.OnInitListener {
 
   private static final String DEFAULT_UTTERANCE_ID = "default_id";
 
@@ -26,33 +26,34 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
   private Locale locale;
 
   /**
-   * Creates an instance of {@link DefaultPlayer}.
+   * Creates an instance of {@link AndroidSpeechPlayer}.
    *
    * @param context used to create an instance of {@link TextToSpeech}
    * @since 0.6.0
    */
-  DefaultPlayer(Context context, Locale locale) {
+  AndroidSpeechPlayer(Context context, Locale locale, InstructionListener instructionListener) {
     this.locale = locale;
+    this.instructionListener = instructionListener;
     textToSpeech = new TextToSpeech(context, this);
     textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
       @Override
       public void onStart(String utteranceId) {
-        if (instructionListener != null) {
-          instructionListener.onStart();
+        if (AndroidSpeechPlayer.this.instructionListener != null) {
+          AndroidSpeechPlayer.this.instructionListener.onStart();
         }
       }
 
       @Override
       public void onDone(String utteranceId) {
-        if (instructionListener != null) {
-          instructionListener.onDone();
+        if (AndroidSpeechPlayer.this.instructionListener != null) {
+          AndroidSpeechPlayer.this.instructionListener.onDone();
         }
       }
 
       @Override
       public void onError(String utteranceId) {
-        if (instructionListener != null) {
-          instructionListener.onError();
+        if (AndroidSpeechPlayer.this.instructionListener != null) {
+          AndroidSpeechPlayer.this.instructionListener.onError(false);
         }
       }
     });
@@ -100,11 +101,6 @@ public class DefaultPlayer implements InstructionPlayer, TextToSpeech.OnInitList
       textToSpeech.stop();
       textToSpeech.shutdown();
     }
-  }
-
-  @Override
-  public void addInstructionListener(InstructionListener instructionListener) {
-    this.instructionListener = instructionListener;
   }
 
   @Override
