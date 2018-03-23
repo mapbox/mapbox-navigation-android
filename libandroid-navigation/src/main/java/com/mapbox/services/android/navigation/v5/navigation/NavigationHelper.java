@@ -174,14 +174,23 @@ class NavigationHelper {
    */
   static NavigationIndices increaseIndex(RouteProgress routeProgress,
                                          NavigationIndices previousIndices) {
-    // Check if we are in the last step in the current routeLeg and iterate it if needed.
-    if (previousIndices.stepIndex()
-      >= routeProgress.directionsRoute().legs().get(routeProgress.legIndex())
-      .steps().size() - 2
-      && previousIndices.legIndex() < routeProgress.directionsRoute().legs().size() - 1) {
-      return NavigationIndices.create((previousIndices.legIndex() + 1), 0);
+    DirectionsRoute route = routeProgress.directionsRoute();
+    int previousStepIndex = previousIndices.stepIndex();
+    int previousLegIndex = previousIndices.legIndex();
+    int routeLegSize = route.legs().size();
+    int legStepSize = route.legs().get(routeProgress.legIndex()).steps().size();
+
+    boolean isOnLastLeg = previousLegIndex == routeLegSize - 1;
+    boolean isOnLastStep = previousStepIndex == legStepSize - 1;
+
+    if (isOnLastStep && !isOnLastLeg) {
+      return NavigationIndices.create((previousLegIndex + 1), 0);
     }
-    return NavigationIndices.create(previousIndices.legIndex(), (previousIndices.stepIndex() + 1));
+
+    if (isOnLastStep) {
+      return previousIndices;
+    }
+    return NavigationIndices.create(previousLegIndex, (previousStepIndex + 1));
   }
 
   static List<Milestone> checkMilestones(RouteProgress previousRouteProgress,

@@ -32,7 +32,7 @@ class NavigationRouteProcessor implements OffRouteCallback {
   private RouteProgress previousRouteProgress;
   private List<Point> stepPoints;
   private NavigationIndices indices;
-  private boolean shouldIncreaseStepIndex;
+  private boolean shouldIncreaseIndex;
 
   NavigationRouteProcessor() {
     indices = NavigationIndices.create(FIRST_LEG_INDEX, FIRST_STEP_INDEX);
@@ -40,7 +40,7 @@ class NavigationRouteProcessor implements OffRouteCallback {
 
   @Override
   public void onShouldIncreaseIndex() {
-    shouldIncreaseStepIndex = true;
+    shouldIncreaseIndex = true;
   }
 
   /**
@@ -48,7 +48,7 @@ class NavigationRouteProcessor implements OffRouteCallback {
    * based on our calculations of the distances remaining.
    * <p>
    * Also in charge of detecting if a step / leg has finished and incrementing the
-   * indices if needed ({@link NavigationRouteProcessor#advanceStepIndex(MapboxNavigation)} handles
+   * indices if needed ({@link NavigationRouteProcessor#advanceIndices(MapboxNavigation)} handles
    * the decoding of the next step point list).
    *
    * @param mapboxNavigation for the current route / options
@@ -68,10 +68,10 @@ class NavigationRouteProcessor implements OffRouteCallback {
     boolean bearingMatchesManeuver = checkBearingForStepCompletion(
       location, previousRouteProgress, stepDistanceRemaining, completionOffset
     );
-    boolean forceIncreaseStepIndex = stepDistanceRemaining == 0 && !bearingMatchesManeuver;
+    boolean forceIncreaseIndices = stepDistanceRemaining == 0 && !bearingMatchesManeuver;
 
-    if ((bearingMatchesManeuver && withinManeuverRadius) || forceIncreaseStepIndex) {
-      advanceStepIndex(mapboxNavigation);
+    if ((bearingMatchesManeuver && withinManeuverRadius) || forceIncreaseIndices) {
+      advanceIndices(mapboxNavigation);
       stepDistanceRemaining = calculateStepDistanceRemaining(location, directionsRoute);
     }
 
@@ -109,21 +109,21 @@ class NavigationRouteProcessor implements OffRouteCallback {
     return legs == null || legs.isEmpty();
   }
 
-  private boolean hasInvalidSteps(int stepIndex, List<LegStep> steps) {
-    return steps == null || steps.isEmpty() || stepIndex >= steps.size();
+  private boolean hasInvalidSteps(List<LegStep> steps) {
+    return steps == null || steps.isEmpty();
   }
 
   /**
    * If the {@link OffRouteCallback#onShouldIncreaseIndex()} has been called by the
-   * {@link com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector}, shouldIncreaseStepIndex
-   * will be true and the {@link NavigationIndices} step index needs to be increased by one.
+   * {@link com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector}, shouldIncreaseIndex
+   * will be true and the {@link NavigationIndices} index needs to be increased by one.
    *
    * @param navigation to get the next {@link LegStep#geometry()} and off-route engine
    */
-  void checkIncreaseStepIndex(MapboxNavigation navigation) {
-    if (shouldIncreaseStepIndex) {
-      advanceStepIndex(navigation);
-      shouldIncreaseStepIndex = false;
+  void checkIncreaseIndex(MapboxNavigation navigation) {
+    if (shouldIncreaseIndex) {
+      advanceIndices(navigation);
+      shouldIncreaseIndex = false;
     }
   }
 
@@ -146,7 +146,7 @@ class NavigationRouteProcessor implements OffRouteCallback {
    *
    * @param mapboxNavigation to get the next {@link LegStep#geometry()} and {@link OffRoute}
    */
-  private void advanceStepIndex(MapboxNavigation mapboxNavigation) {
+  private void advanceIndices(MapboxNavigation mapboxNavigation) {
     indices = increaseIndex(previousRouteProgress, indices);
 
     stepPoints = decodeStepPoints(mapboxNavigation.getRoute(), indices.legIndex(), indices.stepIndex());
@@ -171,7 +171,7 @@ class NavigationRouteProcessor implements OffRouteCallback {
       return stepPoints;
     }
     List<LegStep> steps = legs.get(legIndex).steps();
-    if (hasInvalidSteps(stepIndex, steps)) {
+    if (hasInvalidSteps(steps)) {
       return stepPoints;
     }
 

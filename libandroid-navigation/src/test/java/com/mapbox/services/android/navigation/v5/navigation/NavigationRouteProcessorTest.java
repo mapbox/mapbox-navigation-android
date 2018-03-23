@@ -53,9 +53,11 @@ public class NavigationRouteProcessorTest extends BaseTest {
     RouteProgress progress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
     int currentStepIndex = progress.currentLegProgress().stepIndex();
     routeProcessor.onShouldIncreaseIndex();
-    routeProcessor.checkIncreaseStepIndex(navigation);
+    routeProcessor.checkIncreaseIndex(navigation);
+
     RouteProgress secondProgress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
     int secondStepIndex = secondProgress.currentLegProgress().stepIndex();
+
     assertTrue(currentStepIndex != secondStepIndex);
   }
 
@@ -135,6 +137,34 @@ public class NavigationRouteProcessorTest extends BaseTest {
     int secondProgressIndex = secondProgress.currentLegProgress().stepIndex();
 
     assertTrue(firstProgressIndex != secondProgressIndex);
+  }
+
+  @Test
+  public void onInvalidNextLeg_indexIsNotIncreased() throws Exception {
+    routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
+    int legSize = navigation.getRoute().legs().size();
+
+    for (int i = 0; i < legSize; i++) {
+      routeProcessor.onShouldIncreaseIndex();
+      routeProcessor.checkIncreaseIndex(navigation);
+    }
+    RouteProgress progress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
+
+    assertTrue(progress.legIndex() == legSize - 1);
+  }
+
+  @Test
+  public void onInvalidNextStep_indexIsNotIncreased() throws Exception {
+    routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
+    int stepSize = navigation.getRoute().legs().get(0).steps().size();
+
+    for (int i = 0; i < stepSize; i++) {
+      routeProcessor.onShouldIncreaseIndex();
+      routeProcessor.checkIncreaseIndex(navigation);
+    }
+    RouteProgress progress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
+
+    assertTrue(progress.currentLegProgress().stepIndex() == stepSize - 1);
   }
 
   @Test
