@@ -1,33 +1,20 @@
 package com.mapbox.services.android.navigation.v5.offroute;
 
 import android.location.Location;
-import android.support.annotation.NonNull;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
-import com.mapbox.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.turf.TurfConstants;
-import com.mapbox.turf.TurfMeasurement;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
-import java.io.IOException;
 import java.util.List;
 
 import static junit.framework.Assert.assertFalse;
@@ -35,12 +22,10 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, manifest = Config.DEFAULT_MANIFEST_NAME)
 public class OffRouteDetectorTest extends BaseTest {
 
-  private static final String DIRECTIONS_PRECISION_6 = "directions_v5_precision_6.json";
   @Mock
   private Location mockLocation;
   @Mock
@@ -126,7 +111,7 @@ public class OffRouteDetectorTest extends BaseTest {
 
     Point offRoutePoint = buildPointAwayFromPoint(stepManeuverPoint, 250, 90);
     Location secondUpdate = buildDefaultLocationUpdate(offRoutePoint.longitude(), offRoutePoint.latitude());
-    secondUpdate.setAccuracy(300f);
+    when(secondUpdate.getAccuracy()).thenReturn(300f);
 
     boolean isUserOffRoute = offRouteDetector.isUserOffRoute(secondUpdate, routeProgress, options);
     assertFalse(isUserOffRoute);
@@ -234,58 +219,5 @@ public class OffRouteDetectorTest extends BaseTest {
     LineString lineString = LineString.fromPolyline(currentStep.geometry(), Constants.PRECISION_6);
     List<Point> stepPoints = lineString.coordinates();
     offRouteDetector.updateStepPoints(stepPoints);
-  }
-
-  /**
-   * @return {@link Location} with Mapbox DC coordinates
-   */
-  private Location buildDefaultLocationUpdate(double lng, double lat) {
-    return buildLocationUpdate(lng, lat, 30f, 10f, System.currentTimeMillis());
-  }
-
-  private Location buildLocationUpdate(double lng, double lat, float speed, float horizontalAccuracy, long time) {
-    Location location = new Location(OffRouteDetectorTest.class.getSimpleName());
-    location.setLongitude(lng);
-    location.setLatitude(lat);
-    location.setSpeed(speed);
-    location.setAccuracy(horizontalAccuracy);
-    location.setTime(time);
-    return location;
-  }
-
-  @NonNull
-  private Point buildPointAwayFromLocation(Location location, double distanceAway) {
-    Point fromLocation = Point.fromLngLat(
-      location.getLongitude(), location.getLatitude());
-    return TurfMeasurement.destination(fromLocation, distanceAway, 90, TurfConstants.UNIT_METERS);
-  }
-
-  @NonNull
-  private Point buildPointAwayFromPoint(Point point, double distanceAway, double bearing) {
-    return TurfMeasurement.destination(point, distanceAway, bearing, TurfConstants.UNIT_METERS);
-  }
-
-  private RouteProgress buildDefaultRouteProgress() throws Exception {
-    DirectionsRoute aRoute = buildDirectionsRoute();
-    RouteProgress defaultRouteProgress = RouteProgress.builder()
-      .stepDistanceRemaining(100)
-      .legDistanceRemaining(100)
-      .distanceRemaining(100)
-      .directionsRoute(aRoute)
-      .stepIndex(0)
-      .legIndex(0)
-      .build();
-
-    return defaultRouteProgress;
-  }
-
-  private DirectionsRoute buildDirectionsRoute() throws IOException {
-    Gson gson = new GsonBuilder()
-      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
-    String body = loadJsonFixture(DIRECTIONS_PRECISION_6);
-    DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
-    DirectionsRoute aRoute = response.routes().get(0);
-
-    return aRoute;
   }
 }

@@ -101,13 +101,13 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   public void onRouteProgressUpdate(RouteProgress routeProgress) {
     this.metricProgress = new MetricsRouteProgress(routeProgress);
 
-    if (navigationSessionState.startTimestamp() == null) {
-      // Set departure timestamp
+    boolean isValidDeparture = navigationSessionState.startTimestamp() == null
+      && routeProgress.currentLegProgress().distanceTraveled() > 0;
+    if (isValidDeparture) {
       navigationSessionState = navigationSessionState.toBuilder()
         .startTimestamp(new Date())
         .build();
       updateLifecyclePercentages();
-      // Send departure event for the start of this session
       NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
     }
   }
