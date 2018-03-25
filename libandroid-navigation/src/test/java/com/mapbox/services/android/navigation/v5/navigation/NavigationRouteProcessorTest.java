@@ -3,9 +3,6 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.content.Context;
 import android.location.Location;
 
-import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.core.constants.Constants;
-import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -53,9 +50,11 @@ public class NavigationRouteProcessorTest extends BaseTest {
     RouteProgress progress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
     int currentStepIndex = progress.currentLegProgress().stepIndex();
     routeProcessor.onShouldIncreaseIndex();
-    routeProcessor.checkIncreaseStepIndex(navigation);
+    routeProcessor.checkIncreaseIndex(navigation);
+
     RouteProgress secondProgress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
     int secondStepIndex = secondProgress.currentLegProgress().stepIndex();
+
     assertTrue(currentStepIndex != secondStepIndex);
   }
 
@@ -64,9 +63,7 @@ public class NavigationRouteProcessorTest extends BaseTest {
     RouteProgress progress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
     boolean snapEnabled = true;
     boolean userOffRoute = false;
-    LegStep currentStep = progress.currentLegProgress().currentStep();
-    LineString lineString = LineString.fromPolyline(currentStep.geometry(), Constants.PRECISION_6);
-    List<Point> coordinates = lineString.coordinates();
+    List<Point> coordinates = createCoordinatesFromCurrentStep(progress);
     Point lastPointInCurrentStep = coordinates.remove(coordinates.size() - 1);
     Location rawLocation = buildDefaultLocationUpdate(
       lastPointInCurrentStep.longitude(), lastPointInCurrentStep.latitude()
@@ -84,9 +81,7 @@ public class NavigationRouteProcessorTest extends BaseTest {
     RouteProgress progress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
     boolean snapEnabled = false;
     boolean userOffRoute = false;
-    LegStep currentStep = progress.currentLegProgress().currentStep();
-    LineString lineString = LineString.fromPolyline(currentStep.geometry(), Constants.PRECISION_6);
-    List<Point> coordinates = lineString.coordinates();
+    List<Point> coordinates = createCoordinatesFromCurrentStep(progress);
     Point lastPointInCurrentStep = coordinates.remove(coordinates.size() - 1);
     Location rawLocation = buildDefaultLocationUpdate(
       lastPointInCurrentStep.longitude(), lastPointInCurrentStep.latitude()
@@ -104,9 +99,7 @@ public class NavigationRouteProcessorTest extends BaseTest {
     RouteProgress progress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
     boolean snapEnabled = false;
     boolean userOffRoute = false;
-    LegStep currentStep = progress.currentLegProgress().currentStep();
-    LineString lineString = LineString.fromPolyline(currentStep.geometry(), Constants.PRECISION_6);
-    List<Point> coordinates = lineString.coordinates();
+    List<Point> coordinates = createCoordinatesFromCurrentStep(progress);
     Point lastPointInCurrentStep = coordinates.remove(coordinates.size() - 1);
     Location rawLocation = buildDefaultLocationUpdate(
       lastPointInCurrentStep.longitude(), lastPointInCurrentStep.latitude()
@@ -123,9 +116,7 @@ public class NavigationRouteProcessorTest extends BaseTest {
   public void onStepDistanceRemainingZeroAndNoBearingMatch_stepIndexForceIncreased() throws Exception {
     RouteProgress firstProgress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
     int firstProgressIndex = firstProgress.currentLegProgress().stepIndex();
-    LegStep currentStep = firstProgress.currentLegProgress().currentStep();
-    LineString lineString = LineString.fromPolyline(currentStep.geometry(), Constants.PRECISION_6);
-    List<Point> coordinates = lineString.coordinates();
+    List<Point> coordinates = createCoordinatesFromCurrentStep(firstProgress);
     Point lastPointInCurrentStep = coordinates.remove(coordinates.size() - 1);
     Location rawLocation = buildDefaultLocationUpdate(
       lastPointInCurrentStep.longitude(), lastPointInCurrentStep.latitude()
@@ -138,12 +129,38 @@ public class NavigationRouteProcessorTest extends BaseTest {
   }
 
   @Test
+  public void onInvalidNextLeg_indexIsNotIncreased() throws Exception {
+    routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
+    int legSize = navigation.getRoute().legs().size();
+
+    for (int i = 0; i < legSize; i++) {
+      routeProcessor.onShouldIncreaseIndex();
+      routeProcessor.checkIncreaseIndex(navigation);
+    }
+    RouteProgress progress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
+
+    assertTrue(progress.legIndex() == legSize - 1);
+  }
+
+  @Test
+  public void onInvalidNextStep_indexIsNotIncreased() throws Exception {
+    routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
+    int stepSize = navigation.getRoute().legs().get(0).steps().size();
+
+    for (int i = 0; i < stepSize; i++) {
+      routeProcessor.onShouldIncreaseIndex();
+      routeProcessor.checkIncreaseIndex(navigation);
+    }
+    RouteProgress progress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
+
+    assertTrue(progress.currentLegProgress().stepIndex() == stepSize - 1);
+  }
+
+  @Test
   public void withinManeuverRadiusAndBearingMatches_stepIndexIsIncreased() throws Exception {
     RouteProgress firstProgress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
     int firstProgressIndex = firstProgress.currentLegProgress().stepIndex();
-    LegStep currentStep = firstProgress.currentLegProgress().currentStep();
-    LineString lineString = LineString.fromPolyline(currentStep.geometry(), Constants.PRECISION_6);
-    List<Point> coordinates = lineString.coordinates();
+    List<Point> coordinates = createCoordinatesFromCurrentStep(firstProgress);
     Point lastPointInCurrentStep = coordinates.remove(coordinates.size() - 2);
     Location rawLocation = buildDefaultLocationUpdate(
       lastPointInCurrentStep.longitude(), lastPointInCurrentStep.latitude()
