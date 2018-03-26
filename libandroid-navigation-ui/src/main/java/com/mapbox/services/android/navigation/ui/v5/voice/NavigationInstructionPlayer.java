@@ -25,6 +25,7 @@ public class NavigationInstructionPlayer implements InstructionListener {
   private InstructionListener instructionListener;
   private Queue<Pair<String, VoiceInstructionMilestone>> instructionQueue;
   private boolean isMuted;
+  private static final String TEXT_TYPE_TEXT = "text";
 
   public NavigationInstructionPlayer(@NonNull Context context, Locale locale) {
     initAudioManager(context);
@@ -50,7 +51,7 @@ public class NavigationInstructionPlayer implements InstructionListener {
     if (voiceInstructionMilestone != null) {
       mapboxSpeechPlayer.play(voiceInstructionMilestone.getSsmlAnnouncement());
     } else {
-      mapboxSpeechPlayer.play(instruction, "text"); // For cases like offroute
+      mapboxSpeechPlayer.play(instruction, TEXT_TYPE_TEXT); // For cases like offroute
     }
   }
 

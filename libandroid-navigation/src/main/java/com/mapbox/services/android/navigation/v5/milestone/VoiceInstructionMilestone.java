@@ -47,8 +47,6 @@ public class VoiceInstructionMilestone extends Milestone {
     return false;
   }
 
-
-
   @Override
   public Instruction getInstruction() {
     return new Instruction() {
