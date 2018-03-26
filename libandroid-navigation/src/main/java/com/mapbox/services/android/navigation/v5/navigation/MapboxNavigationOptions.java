@@ -47,13 +47,17 @@ public abstract class MapboxNavigationOptions {
 
   public abstract boolean isDebugLoggingEnabled();
 
+  @NavigationUnitType.UnitType
   public abstract int unitType();
+
+  @Nullable
+  public abstract NavigationNotification navigationNotification();
 
   @Nullable
   public abstract Locale locale();
 
-  @Nullable
-  public abstract NavigationNotification navigationNotification();
+  @NavigationTimeFormat.Type
+  public abstract int timeFormatType();
 
   public abstract Builder toBuilder();
 
@@ -100,6 +104,8 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder locale(Locale locale);
 
+    public abstract Builder timeFormatType(@NavigationTimeFormat.Type int type);
+
     public abstract MapboxNavigationOptions build();
   }
 
@@ -122,6 +128,7 @@ public abstract class MapboxNavigationOptions {
       .enableNotification(true)
       .isFromNavigationUi(false)
       .isDebugLoggingEnabled(false)
-      .unitType(NavigationUnitType.NONE_SPECIFIED);
+      .unitType(NavigationUnitType.NONE_SPECIFIED)
+      .timeFormatType(NavigationTimeFormat.NONE_SPECIFIED);
   }
 }

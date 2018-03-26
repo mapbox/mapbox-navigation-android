@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -40,7 +41,10 @@ public class SummaryBottomSheet extends FrameLayout {
   private ProgressBar rerouteProgressBar;
   private boolean isRerouting;
   private Locale locale;
-  private @NavigationUnitType.UnitType int unitType = NavigationUnitType.NONE_SPECIFIED;
+  @NavigationUnitType.UnitType
+  private int unitType;
+  @NavigationTimeFormat.Type
+  private int timeFormatType;
 
   public SummaryBottomSheet(Context context) {
     this(context, null);
@@ -102,7 +106,7 @@ public class SummaryBottomSheet extends FrameLayout {
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      SummaryModel model = new SummaryModel(getContext(), routeProgress, locale, unitType);
+      SummaryModel model = new SummaryModel(getContext(), routeProgress, locale, unitType, timeFormatType);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());
@@ -132,6 +136,33 @@ public class SummaryBottomSheet extends FrameLayout {
   }
 
   /**
+   * Sets the locale to use for languages and default unit type
+   *
+   * @param locale to use
+   */
+  public void setLocale(@NonNull Locale locale) {
+    this.locale = locale;
+  }
+
+  /**
+   * Sets the unit type to use
+   *
+   * @param unitType to use
+   */
+  public void setUnitType(@NavigationUnitType.UnitType int unitType) {
+    this.unitType = unitType;
+  }
+
+  /**
+   * Sets the time format type to use
+   *
+   * @param type to use
+   */
+  public void setTimeFormat(@NavigationTimeFormat.Type int type) {
+    this.timeFormatType = type;
+  }
+
+  /**
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void init() {
@@ -156,21 +187,5 @@ public class SummaryBottomSheet extends FrameLayout {
     arrivalTimeText.setText(EMPTY_STRING);
     timeRemainingText.setText(EMPTY_STRING);
     distanceRemainingText.setText(EMPTY_STRING);
-  }
-
-  /**
-   * Sets the locale to use for languages and default unit type
-   * @param locale to use
-   */
-  public void setLocale(@NonNull Locale locale) {
-    this.locale = locale;
-  }
-
-  /**
-   * Sets the unit type to use
-   * @param unitType to use
-   */
-  public void setUnitType(@NavigationUnitType.UnitType int unitType) {
-    this.unitType = unitType;
   }
 }

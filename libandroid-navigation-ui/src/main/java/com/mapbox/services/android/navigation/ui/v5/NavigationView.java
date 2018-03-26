@@ -43,6 +43,7 @@ import com.mapbox.services.android.navigation.ui.v5.utils.ViewUtils;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
@@ -357,7 +358,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void startNavigation(NavigationViewOptions options) {
     clearMarkers();
     if (!isInitialized) {
-      setLocale(options);
+      establish(options);
       navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
         options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
       initCamera();
@@ -369,29 +370,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     routeViewModel.extractRouteOptions(options);
   }
 
-  private void setLocale(NavigationViewOptions options) {
-    Locale locale = LocaleUtils.getNonNullLocale(getContext(), options.navigationOptions().locale());
-    @NavigationUnitType.UnitType int unitType = options.navigationOptions().unitType();
-
-    instructionView.setLocale(locale);
-    instructionView.setUnitType(unitType);
-    summaryBottomSheet.setLocale(locale);
-    summaryBottomSheet.setUnitType(unitType);
-  }
-
-  /**
-   * Should be called after {@link NavigationView#onCreate(Bundle)}.
-   * <p>
-   * This method adds the {@link OnNavigationReadyCallback},
-   * which will fire ready / cancel events for this view.
-   *
-   * @param onNavigationReadyCallback to be set to this view
-   */
-  public void getNavigationAsync(OnNavigationReadyCallback onNavigationReadyCallback) {
-    this.onNavigationReadyCallback = onNavigationReadyCallback;
-    mapView.getMapAsync(this);
-  }
-
   /**
    * Gives the ability to manipulate the map directly for anything that might not currently be
    * supported. This returns null until the view is initialized
@@ -400,6 +378,26 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   public MapboxMap getMapboxMap() {
     return map;
+  }
+
+  @OnLifecycleEvent(Lifecycle.Event.ON_START)
+  public void onStart() {
+    mapView.onStart();
+  }
+
+  @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+  public void onResume() {
+    mapView.onResume();
+  }
+
+  @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+  public void onPause() {
+    mapView.onPause();
+  }
+
+  @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+  public void onStop() {
+    mapView.onStop();
   }
 
   private void init() {
@@ -431,6 +429,48 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     } catch (ClassCastException exception) {
       throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
     }
+  }
+
+  /**
+   * Adds this view as a lifecycle observer.
+   * This needs to be done earlier than the other observers (prior to the style loading).
+   */
+  private void initNavigationViewObserver() {
+    try {
+      ((LifecycleOwner) getContext()).getLifecycle().addObserver(this);
+    } catch (ClassCastException exception) {
+      throw new ClassCastException("Please ensure that the provided Context is a valid LifecycleOwner");
+    }
+  }
+
+  /**
+   * Initializes the {@link BottomSheetBehavior} for {@link SummaryBottomSheet}.
+   */
+  private void initSummaryBottomSheet() {
+    summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
+    summaryBehavior.setHideable(false);
+    summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+      @Override
+      public void onStateChanged(@NonNull View bottomSheet, int newState) {
+        navigationViewEventDispatcher.onBottomSheetStateChanged(bottomSheet, newState);
+
+        if (newState == BottomSheetBehavior.STATE_HIDDEN && navigationPresenter != null) {
+          navigationPresenter.onSummaryBottomSheetHidden();
+        }
+      }
+
+      @Override
+      public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+      }
+    });
+  }
+
+  /**
+   * Initialize a new event dispatcher in charge of firing all navigation
+   * listener updates to the classes that have implemented these listeners.
+   */
+  private void initNavigationEventDispatcher() {
+    navigationViewEventDispatcher = new NavigationViewEventDispatcher();
   }
 
   /**
@@ -466,31 +506,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   /**
-   * Initializes the {@link NavigationCamera} that will be used to follow
-   * the {@link Location} updates from {@link MapboxNavigation}.
-   */
-  private void initCamera() {
-    camera = new NavigationCamera(map, navigationViewModel.getNavigation());
-  }
-
-  /**
-   * Subscribes the {@link InstructionView} and {@link SummaryBottomSheet} to the {@link NavigationViewModel}.
-   * <p>
-   * Then, creates an instance of {@link NavigationViewSubscriber}, which takes a presenter and listener.
-   * <p>
-   * The subscriber then subscribes to the view models, setting up the appropriate presenter / listener
-   * method calls based on the {@link android.arch.lifecycle.LiveData} updates.
-   */
-  private void subscribeViewModels() {
-    instructionView.subscribe(navigationViewModel);
-    summaryBottomSheet.subscribe(navigationViewModel);
-
-    NavigationViewSubscriber subscriber = new NavigationViewSubscriber(navigationPresenter,
-      navigationViewEventDispatcher);
-    subscriber.subscribe(((LifecycleOwner) getContext()), locationViewModel, routeViewModel, navigationViewModel);
-  }
-
-  /**
    * Initializes the {@link LocationLayerPlugin} to be used to draw the current
    * location.
    */
@@ -503,18 +518,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   /**
-   * Adds this view as a lifecycle observer.
-   * This needs to be done earlier than the other observers (prior to the style loading).
-   */
-  private void initNavigationViewObserver() {
-    try {
-      ((LifecycleOwner) getContext()).getLifecycle().addObserver(this);
-    } catch (ClassCastException exception) {
-      throw new ClassCastException("Please ensure that the provided Context is a valid LifecycleOwner");
-    }
-  }
-
-  /**
    * Add lifecycle observers to ensure these objects properly
    * start / stop based on the Android lifecycle.
    */
@@ -524,34 +527,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationViewModel);
     } catch (ClassCastException exception) {
       throw new ClassCastException("Please ensure that the provided Context is a valid LifecycleOwner");
-    }
-  }
-
-  /**
-   * Initialize a new event dispatcher in charge of firing all navigation
-   * listener updates to the classes that have implemented these listeners.
-   */
-  private void initNavigationEventDispatcher() {
-    navigationViewEventDispatcher = new NavigationViewEventDispatcher();
-  }
-
-  /**
-   * Sets up the listeners in the dispatcher, as well as the listeners in the {@link MapboxNavigation}
-   *
-   * @param navigationViewOptions that contains all listeners to attach
-   */
-  private void setupListeners(NavigationViewOptions navigationViewOptions) {
-    navigationViewEventDispatcher.setFeedbackListener(navigationViewOptions.feedbackListener());
-    navigationViewEventDispatcher.setNavigationListener(navigationViewOptions.navigationListener());
-    navigationViewEventDispatcher.setRouteListener(navigationViewOptions.routeListener());
-    navigationViewEventDispatcher.setBottomSheetCallback(navigationViewOptions.bottomSheetCallback());
-
-    if (navigationViewOptions.progressChangeListener() != null) {
-      navigationViewModel.getNavigation().addProgressChangeListener(navigationViewOptions.progressChangeListener());
-    }
-
-    if (navigationViewOptions.milestoneEventListener() != null) {
-      navigationViewModel.getNavigation().addMilestoneEventListener(navigationViewOptions.milestoneEventListener());
     }
   }
 
@@ -582,28 +557,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   /**
-   * Initializes the {@link BottomSheetBehavior} for {@link SummaryBottomSheet}.
-   */
-  private void initSummaryBottomSheet() {
-    summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
-    summaryBehavior.setHideable(false);
-    summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-      @Override
-      public void onStateChanged(@NonNull View bottomSheet, int newState) {
-        navigationViewEventDispatcher.onBottomSheetStateChanged(bottomSheet, newState);
-
-        if (newState == BottomSheetBehavior.STATE_HIDDEN && navigationPresenter != null) {
-          navigationPresenter.onSummaryBottomSheetHidden();
-        }
-      }
-
-      @Override
-      public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-      }
-    });
-  }
-
-  /**
    * Removes any markers on the map that were added using addMarker()
    */
   private void clearMarkers() {
@@ -612,23 +565,86 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     }
   }
 
-  @OnLifecycleEvent(Lifecycle.Event.ON_START)
-  public void onStart() {
-    mapView.onStart();
+  private void establish(NavigationViewOptions options) {
+    establishLocale(options);
+    establishUnitType(options);
+    establishTimeFormat(options);
   }
 
-  @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-  public void onResume() {
-    mapView.onResume();
+  private void establishLocale(NavigationViewOptions options) {
+    Locale locale = LocaleUtils.getNonNullLocale(getContext(), options.navigationOptions().locale());
+    instructionView.setLocale(locale);
+    summaryBottomSheet.setLocale(locale);
   }
 
-  @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-  public void onPause() {
-    mapView.onPause();
+  private void establishUnitType(NavigationViewOptions options) {
+    @NavigationUnitType.UnitType
+    int unitType = options.navigationOptions().unitType();
+    instructionView.setUnitType(unitType);
+    summaryBottomSheet.setUnitType(unitType);
   }
 
-  @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-  public void onStop() {
-    mapView.onStop();
+  private void establishTimeFormat(NavigationViewOptions options) {
+    @NavigationTimeFormat.Type
+    int timeFormatType = options.navigationOptions().timeFormatType();
+    summaryBottomSheet.setTimeFormat(timeFormatType);
+  }
+
+  /**
+   * Initializes the {@link NavigationCamera} that will be used to follow
+   * the {@link Location} updates from {@link MapboxNavigation}.
+   */
+  private void initCamera() {
+    camera = new NavigationCamera(map, navigationViewModel.getNavigation());
+  }
+
+  /**
+   * Sets up the listeners in the dispatcher, as well as the listeners in the {@link MapboxNavigation}
+   *
+   * @param navigationViewOptions that contains all listeners to attach
+   */
+  private void setupListeners(NavigationViewOptions navigationViewOptions) {
+    navigationViewEventDispatcher.setFeedbackListener(navigationViewOptions.feedbackListener());
+    navigationViewEventDispatcher.setNavigationListener(navigationViewOptions.navigationListener());
+    navigationViewEventDispatcher.setRouteListener(navigationViewOptions.routeListener());
+    navigationViewEventDispatcher.setBottomSheetCallback(navigationViewOptions.bottomSheetCallback());
+
+    if (navigationViewOptions.progressChangeListener() != null) {
+      navigationViewModel.getNavigation().addProgressChangeListener(navigationViewOptions.progressChangeListener());
+    }
+
+    if (navigationViewOptions.milestoneEventListener() != null) {
+      navigationViewModel.getNavigation().addMilestoneEventListener(navigationViewOptions.milestoneEventListener());
+    }
+  }
+
+  /**
+   * Subscribes the {@link InstructionView} and {@link SummaryBottomSheet} to the {@link NavigationViewModel}.
+   * <p>
+   * Then, creates an instance of {@link NavigationViewSubscriber}, which takes a presenter and listener.
+   * <p>
+   * The subscriber then subscribes to the view models, setting up the appropriate presenter / listener
+   * method calls based on the {@link android.arch.lifecycle.LiveData} updates.
+   */
+  private void subscribeViewModels() {
+    instructionView.subscribe(navigationViewModel);
+    summaryBottomSheet.subscribe(navigationViewModel);
+
+    NavigationViewSubscriber subscriber = new NavigationViewSubscriber(navigationPresenter,
+      navigationViewEventDispatcher);
+    subscriber.subscribe(((LifecycleOwner) getContext()), locationViewModel, routeViewModel, navigationViewModel);
+  }
+
+  /**
+   * Should be called after {@link NavigationView#onCreate(Bundle)}.
+   * <p>
+   * This method adds the {@link OnNavigationReadyCallback},
+   * which will fire ready / cancel events for this view.
+   *
+   * @param onNavigationReadyCallback to be set to this view
+   */
+  public void getNavigationAsync(OnNavigationReadyCallback onNavigationReadyCallback) {
+    this.onNavigationReadyCallback = onNavigationReadyCallback;
+    mapView.getMapAsync(this);
   }
 }
