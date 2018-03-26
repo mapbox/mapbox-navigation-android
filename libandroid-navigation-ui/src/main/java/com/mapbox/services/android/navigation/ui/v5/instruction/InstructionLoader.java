@@ -14,6 +14,8 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -121,6 +123,14 @@ public class InstructionLoader {
     if (hasComponents(bannerText)) {
       StringBuilder instructionStringBuilder = new StringBuilder();
       List<BannerShieldInfo> shieldUrls = new ArrayList<>();
+
+      List<BannerComponents> bannerComponents = bannerText.components();
+      Collections.sort(bannerComponents, new Comparator<BannerComponents>() {
+        @Override
+        public int compare(BannerComponents bannerComponents, BannerComponents t1) {
+          return bannerComponents.abbreviationPriority().compareTo(t1.abbreviationPriority());
+        }
+      });
 
       for (BannerComponents components : bannerText.components()) {
         if (hasBaseUrl(components)) {
