@@ -44,6 +44,7 @@ import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChange
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.android.telemetry.location.LostLocationEngine;
@@ -292,12 +293,13 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private Locale getLocale() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    return new Locale(sharedPreferences.getString("language", ""));
+    String localeString = sharedPreferences.getString("language", "device_locale");
+    return localeString.equals("device_locale") ? LocaleUtils.getDeviceLocale(this) : new Locale(localeString);
   }
 
   private @NavigationUnitType.UnitType int getUnitType() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    return Integer.parseInt(sharedPreferences.getString("unit_type", "1"));
+    return Integer.parseInt(sharedPreferences.getString("unit_type", "-1"));
   }
 
   private boolean getShouldSimulateRoute() {
