@@ -58,7 +58,7 @@ public class VoiceInstructionMilestone extends Milestone {
   }
 
   /**
-   * Provide the SSML instruction that can be used with Amazon's AWS Polly.
+   * Provide the SSML instruction that can be used with Mapbox's API Voice.
    * <p>
    * This String will provide special markup denoting how certain portions of the announcement
    * should be pronounced.
@@ -68,6 +68,18 @@ public class VoiceInstructionMilestone extends Milestone {
    */
   public String getSsmlAnnouncement() {
     return ssmlAnnouncement;
+  }
+
+  /**
+   * Provide the instruction that can be used with Android's TextToSpeech.
+   * <p>
+   * This string will be in plain text.
+   *
+   * @return announcement in plain text
+   * @since 0.12.0
+   */
+  public String getAnnouncement() {
+    return announcement;
   }
 
   /**

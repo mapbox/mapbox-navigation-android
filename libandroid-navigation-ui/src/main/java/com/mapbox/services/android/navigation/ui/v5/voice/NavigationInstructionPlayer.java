@@ -5,12 +5,9 @@ import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.util.Pair;
 
 import com.mapbox.services.android.navigation.ui.v5.voice.speech.MapboxSpeechPlayer;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
 import java.util.Locale;
 import java.util.Queue;
@@ -23,9 +20,8 @@ public class NavigationInstructionPlayer implements InstructionListener {
   private MapboxSpeechPlayer mapboxSpeechPlayer;
   private AndroidSpeechPlayer androidSpeechPlayer;
   private InstructionListener instructionListener;
-  private Queue<Pair<String, VoiceInstructionMilestone>> instructionQueue;
+  private Queue<VoiceInstructionMilestone> instructionQueue;
   private boolean isMuted;
-  private static final String TEXT_TYPE_TEXT = "text";
 
   public NavigationInstructionPlayer(@NonNull Context context, Locale locale) {
     initAudioManager(context);
@@ -46,13 +42,9 @@ public class NavigationInstructionPlayer implements InstructionListener {
     androidSpeechPlayer = new AndroidSpeechPlayer(context, locale, this);
   }
 
-  public void play(@NonNull String instruction, @Nullable VoiceInstructionMilestone voiceInstructionMilestone) {
-    instructionQueue.add(Pair.create(instruction, voiceInstructionMilestone));
-    if (voiceInstructionMilestone != null) {
-      mapboxSpeechPlayer.play(voiceInstructionMilestone.getSsmlAnnouncement());
-    } else {
-      mapboxSpeechPlayer.play(instruction, TEXT_TYPE_TEXT); // For cases like offroute
-    }
+  public void play(VoiceInstructionMilestone voiceInstructionMilestone) {
+    instructionQueue.add(voiceInstructionMilestone);
+    mapboxSpeechPlayer.play(voiceInstructionMilestone.getSsmlAnnouncement());
   }
 
   public boolean isMuted() {
@@ -68,7 +60,6 @@ public class NavigationInstructionPlayer implements InstructionListener {
   public void onOffRoute() {
     mapboxSpeechPlayer.onOffRoute();
     androidSpeechPlayer.onOffRoute();
-    play(NavigationConstants.NAVIGATION_VIEW_REROUTING, null);
   }
 
   public void onDestroy() {
@@ -108,7 +99,7 @@ public class NavigationInstructionPlayer implements InstructionListener {
     }
 
     if (isMapboxPlayer) { // If mapbox player failed, try android speech player
-      androidSpeechPlayer.play(instructionQueue.peek().first);
+      androidSpeechPlayer.play(instructionQueue.peek().getAnnouncement());
     }
 
     // If android speech player fails, just drop the instruction
