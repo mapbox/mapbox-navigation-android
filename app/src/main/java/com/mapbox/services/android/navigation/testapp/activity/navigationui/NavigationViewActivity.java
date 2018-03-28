@@ -44,6 +44,7 @@ import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChange
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.android.telemetry.location.LostLocationEngine;
@@ -292,17 +293,21 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private Locale getLocale() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    return new Locale(sharedPreferences.getString("language", ""));
+    String defaultString = getString(R.string.language_default_value_device_locale);
+    String localeString = sharedPreferences.getString(getString(R.string.language_key), defaultString);
+    return localeString.equals(defaultString) ? LocaleUtils.getDeviceLocale(this) : new Locale(localeString);
   }
 
+  @NavigationUnitType.UnitType
   private int getUnitType() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    return Integer.parseInt(sharedPreferences.getString("unit_type", "0"));
+    return Integer.parseInt(sharedPreferences.getString(getString(R.string.unit_type_key),
+            Integer.toString(NavigationUnitType.NONE_SPECIFIED)));
   }
 
   private boolean getShouldSimulateRoute() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    return sharedPreferences.getBoolean("simulate_route", false);
+    return sharedPreferences.getBoolean(getString(R.string.simulate_route_key), false);
   }
 
   private void launchNavigationWithRoute() {
