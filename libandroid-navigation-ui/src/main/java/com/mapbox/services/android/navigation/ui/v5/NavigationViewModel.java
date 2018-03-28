@@ -29,6 +29,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -63,7 +64,10 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   private String feedbackId;
   private String screenshot;
   private Locale locale;
-  private @NavigationUnitType.UnitType int unitType;
+  @NavigationUnitType.UnitType
+  private int unitType;
+  @NavigationTimeFormat.Type
+  private int timeFormatType;
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -90,7 +94,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     this.routeProgress = routeProgress;
     instructionModel.setValue(new InstructionModel(getApplication(), routeProgress, locale, unitType));
-    summaryModel.setValue(new SummaryModel(getApplication(), routeProgress, locale, unitType));
+    summaryModel.setValue(new SummaryModel(getApplication(), routeProgress, locale, unitType, timeFormatType));
     navigationLocation.setValue(location);
   }
 
@@ -225,6 +229,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
     initLocaleInfo(options);
     initVoiceInstructions();
     initNavigation(context, options);
+    initTimeFormat(options);
   }
 
   void updateRoute(DirectionsRoute route) {
@@ -244,58 +249,10 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   }
 
   /**
-   * Initializes {@link MapboxNavigation} and adds all views that implement listeners.
-   */
-  private void initNavigation(Context context, MapboxNavigationOptions options) {
-    navigation = new MapboxNavigation(context, Mapbox.getAccessToken(), options);
-    addNavigationListeners();
-  }
-
-  private void initLocaleInfo(MapboxNavigationOptions options) {
-    locale = LocaleUtils.getNonNullLocale(this.getApplication(), options.locale());
-    unitType = options.unitType();
-  }
-
-  /**
-   * Initializes the {@link InstructionPlayer}.
-   */
-  private void initVoiceInstructions() {
-    instructionPlayer = new NavigationInstructionPlayer(this.getApplication().getBaseContext(),
-      preferences.getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null), locale);
-  }
-
-  /**
    * Initializes the {@link ConnectivityManager}.
    */
   private void initConnectivityManager(Application application) {
     connectivityManager = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
-  }
-
-  /**
-   * Adds this class as a listener for progress,
-   * milestones, and off route events.
-   */
-  private void addNavigationListeners() {
-    if (navigation != null) {
-      navigation.addProgressChangeListener(this);
-      navigation.addOffRouteListener(this);
-      navigation.addMilestoneEventListener(this);
-      navigation.addNavigationEventListener(this);
-      navigation.addFasterRouteListener(this);
-    }
-  }
-
-  /**
-   * Starts navigation and sets isRunning to true.
-   * <p>
-   * This will notify any observer of isRunning that navigation has begun.
-   *
-   * @param route that is being navigated
-   */
-  private void startNavigation(DirectionsRoute route) {
-    if (route != null) {
-      navigation.startNavigation(route);
-    }
   }
 
   /**
@@ -336,6 +293,58 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
       bannerInstructionModel.setValue(
         new BannerInstructionModel(
           getApplication(), (BannerInstructionMilestone) milestone, routeProgress, locale, unitType));
+    }
+  }
+
+  private void initLocaleInfo(MapboxNavigationOptions options) {
+    locale = LocaleUtils.getNonNullLocale(this.getApplication(), options.locale());
+    unitType = options.unitType();
+  }
+
+  /**
+   * Initializes the {@link InstructionPlayer}.
+   */
+  private void initVoiceInstructions() {
+    instructionPlayer = new NavigationInstructionPlayer(this.getApplication().getBaseContext(),
+      preferences.getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null), locale);
+  }
+
+  /**
+   * Initializes {@link MapboxNavigation} and adds all views that implement listeners.
+   */
+  private void initNavigation(Context context, MapboxNavigationOptions options) {
+    navigation = new MapboxNavigation(context, Mapbox.getAccessToken(), options);
+    addNavigationListeners();
+  }
+
+  private void initTimeFormat(MapboxNavigationOptions options) {
+    timeFormatType = options.timeFormatType();
+  }
+
+  /**
+   * Adds this class as a listener for progress,
+   * milestones, and off route events.
+   */
+  private void addNavigationListeners() {
+    if (navigation != null) {
+      navigation.addProgressChangeListener(this);
+      navigation.addOffRouteListener(this);
+      navigation.addMilestoneEventListener(this);
+      navigation.addNavigationEventListener(this);
+      navigation.addFasterRouteListener(this);
+    }
+  }
+
+  /**
+   * Starts navigation and sets isRunning to true.
+   * <p>
+   * This will notify any observer of isRunning that navigation has begun.
+   *
+   * @param route that is being navigated
+   */
+  private void startNavigation(DirectionsRoute route) {
+    if (route != null) {
+      navigation.startNavigation(route);
     }
   }
 }

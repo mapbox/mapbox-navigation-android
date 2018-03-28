@@ -6,8 +6,8 @@ import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 
 import com.mapbox.services.android.navigation.v5.utils.span.SpanItem;
-import com.mapbox.services.android.navigation.v5.utils.span.TextSpanItem;
 import com.mapbox.services.android.navigation.v5.utils.span.SpanUtils;
+import com.mapbox.services.android.navigation.v5.utils.span.TextSpanItem;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -30,6 +30,13 @@ public class TimeUtils {
 
     return String.format(Locale.getDefault(), ARRIVAL_TIME_STRING_FORMAT,
       calendar, calendar, calendar);
+  }
+
+  public static String formatTime(Calendar time, double routeDuration, int type, boolean isDeviceTwentyFourHourFormat) {
+    time.add(Calendar.SECOND, (int) routeDuration);
+    TimeFormattingChain chain = new TimeFormattingChain();
+    String formattedTime = chain.setup(isDeviceTwentyFourHourFormat).obtainTimeFormatted(type, time);
+    return formattedTime;
   }
 
   public static SpannableStringBuilder formatTimeRemaining(double routeDuration) {
