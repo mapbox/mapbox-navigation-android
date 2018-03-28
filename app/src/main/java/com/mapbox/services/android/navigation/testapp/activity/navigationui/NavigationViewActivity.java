@@ -293,18 +293,20 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private Locale getLocale() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    String localeString = sharedPreferences.getString("language", "device_locale");
-    return localeString.equals("device_locale") ? LocaleUtils.getDeviceLocale(this) : new Locale(localeString);
+    String defaultString = getString(R.string.language_default_value_device_locale);
+    String localeString = sharedPreferences.getString(getString(R.string.language_key), defaultString);
+    return localeString.equals(defaultString) ? LocaleUtils.getDeviceLocale(this) : new Locale(localeString);
   }
 
-  private @NavigationUnitType.UnitType int getUnitType() {
+  @NavigationUnitType.UnitType
+  private int getUnitType() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    return Integer.parseInt(sharedPreferences.getString("unit_type", "-1"));
+    return Integer.parseInt(sharedPreferences.getString(getString(R.string.unit_type_key), Integer.toString(NavigationUnitType.NONE_SPECIFIED)));
   }
 
   private boolean getShouldSimulateRoute() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    return sharedPreferences.getBoolean("simulate_route", false);
+    return sharedPreferences.getBoolean(getString(R.string.simulate_route_key), false);
   }
 
   private void launchNavigationWithRoute() {
