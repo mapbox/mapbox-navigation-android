@@ -2,24 +2,28 @@
 <resources>
 
     <string-array name="language_array">
-        <item>English</item>
-        <item>French</item>
-        <item>German</item>
+        <item>Device Locale</item>
+        <item>English (US)</item>
+        <item>French (France)</item>
+        <item>German (German)</item>
     </string-array>
 
     <string-array name="language_values_array">
-        <item>EN</item>
-        <item>FR</item>
-        <item>DE</item>
+        <item>device_locale</item>
+        <item>en_US</item>
+        <item>fr_FR</item>
+        <item>de_DE</item>
     </string-array>
 
 
     <string-array name="unit_type_array">
+        <item>Default for Locale</item>
         <item>Metric</item>
         <item>Imperial</item>
     </string-array>
 
     <string-array name="unit_type_values_array">
+        <item>-1</item>
         <item>1</item>
         <item>0</item>
     </string-array>

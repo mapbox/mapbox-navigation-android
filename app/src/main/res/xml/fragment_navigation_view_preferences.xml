@@ -4,19 +4,19 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent">
     <CheckBoxPreference
-        android:key="simulate_route"
+        android:key="@string/simulate_route_key"
         android:title="@string/simulate_route"
         android:defaultValue="false" />
     <ListPreference
-        android:key="language"
+        android:key="@string/language_key"
         android:title="@string/language"
         android:entries="@array/language_array"
         android:entryValues="@array/language_values_array"
-        android:defaultValue="EN"/>
+        android:defaultValue="@string/language_default_value_device_locale"/>
     <ListPreference
-        android:key="unit_type"
+        android:key="@string/unit_type_key"
         android:title="@string/unit_type"
         android:entries="@array/unit_type_array"
         android:entryValues="@array/unit_type_values_array"
-        android:defaultValue="1"/>
+        android:defaultValue="-1"/>
 </PreferenceScreen>
