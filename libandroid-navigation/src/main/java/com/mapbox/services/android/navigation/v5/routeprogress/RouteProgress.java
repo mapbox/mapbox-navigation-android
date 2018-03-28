@@ -1,10 +1,14 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.geojson.Point;
+
+import java.util.List;
 
 /**
  * This class contains all progress information at any given time during a navigation session. This
@@ -124,6 +128,26 @@ public abstract class RouteProgress {
    */
   public abstract RouteLegProgress currentLegProgress();
 
+  /**
+   * Provides a list of points that represent the current step
+   * step geometry.
+   *
+   * @return list of points representing the current step
+   * @since 0.12.0
+   */
+  @Nullable
+  public abstract List<Point> currentStepPoints();
+
+  /**
+   * Provides a list of points that represent the upcoming step
+   * step geometry.
+   *
+   * @return list of points representing the upcoming step
+   * @since 0.12.0
+   */
+  @Nullable
+  public abstract List<Point> upcomingStepPoints();
+
   public abstract RouteProgress.Builder toBuilder();
 
   @AutoValue.Builder
@@ -142,6 +166,10 @@ public abstract class RouteProgress {
     public abstract Builder legIndex(int legIndex);
 
     public abstract Builder distanceRemaining(double distanceRemaining);
+
+    public abstract Builder currentStepPoints(@Nullable List<Point> currentStepPoints);
+
+    public abstract Builder upcomingStepPoints(@Nullable List<Point> upcomingStepPoints);
 
     public Builder stepIndex(int stepIndex) {
       this.stepIndex = stepIndex;

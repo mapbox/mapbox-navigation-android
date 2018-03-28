@@ -25,10 +25,21 @@ import java.util.List;
 @AutoValue
 public abstract class RouteStepProgress {
 
+  private static final String CLASS_TUNNEL = "tunnel";
+
   abstract LegStep step();
 
   @Nullable
   abstract LegStep nextStep();
+
+  /**
+   * Total distance in meters from user to end of step.
+   *
+   * @return double value representing the distance the user has remaining till they reach the end
+   * of the current step. Uses unit meters.
+   * @since 0.1.0
+   */
+  public abstract double distanceRemaining();
 
   public static RouteStepProgress create(@NonNull LegStep step, @Nullable LegStep nextStep,
                                          double stepDistanceRemaining) {
@@ -49,15 +60,6 @@ public abstract class RouteStepProgress {
     }
     return distanceTraveled;
   }
-
-  /**
-   * Total distance in meters from user to end of step.
-   *
-   * @return double value representing the distance the user has remaining till they reach the end
-   * of the current step. Uses unit meters.
-   * @since 0.1.0
-   */
-  public abstract double distanceRemaining();
 
   /**
    * Get the fraction traveled along the current step, this is a float value between 0 and 1 and
@@ -104,5 +106,29 @@ public abstract class RouteStepProgress {
       intersectionsWithNextManeuver.add(nextStep().intersections().get(0));
     }
     return intersectionsWithNextManeuver;
+  }
+
+  /**
+   * Provides a list of intersections that have tunnel classes for
+   * the current step.
+   * <p>
+   * The returned list will be empty if not intersections are found.
+   *
+   * @return list of intersections containing a tunnel class
+   * @since 0.12.0
+   */
+  public List<StepIntersection> tunnelIntersections() {
+    List<StepIntersection> tunnelIntersections = new ArrayList<>();
+    if (step().intersections().isEmpty()) {
+      return tunnelIntersections;
+    }
+    for (StepIntersection intersection : step().intersections()) {
+      for (String intersectionClass : intersection.classes()) {
+        if (intersectionClass.contentEquals(CLASS_TUNNEL)) {
+          tunnelIntersections.add(intersection);
+        }
+      }
+    }
+    return tunnelIntersections;
   }
 }

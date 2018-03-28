@@ -148,7 +148,10 @@ class NavigationRouteProcessor implements OffRouteCallback {
    */
   private void advanceIndices(MapboxNavigation mapboxNavigation) {
     indices = increaseIndex(previousRouteProgress, indices);
+    updateStepPoints(mapboxNavigation);
+  }
 
+  private void updateStepPoints(MapboxNavigation mapboxNavigation) {
     stepPoints = decodeStepPoints(mapboxNavigation.getRoute(), indices.legIndex(), indices.stepIndex());
     updateOffRouteDetectorStepPoints(mapboxNavigation.getOffRouteEngine(), stepPoints);
   }
