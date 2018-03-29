@@ -30,9 +30,8 @@ import static com.mapbox.core.constants.Constants.PRECISION_6;
 public class SnapToRoute extends Snap {
 
   @Override
-  public Location getSnappedLocation(Location location, RouteProgress routeProgress,
-                                     @Nullable List<Point> stepCoordinates) {
-    Location snappedLocation = snapLocationLatLng(location, stepCoordinates);
+  public Location getSnappedLocation(Location location, RouteProgress routeProgress) {
+    Location snappedLocation = snapLocationLatLng(location, routeProgress.currentStepPoints());
     snappedLocation.setBearing(snapLocationBearing(routeProgress));
     return snappedLocation;
   }

@@ -8,6 +8,8 @@ import com.google.gson.GsonBuilder;
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteDetector;
@@ -18,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -116,11 +119,14 @@ public class FasterRouteDetectorTest extends BaseTest {
 
   private RouteProgress obtainDefaultRouteProgress() throws Exception {
     DirectionsRoute aRoute = obtainADirectionsRoute();
+    LegStep step = getFirstStep(aRoute);
+    List<Point> currentStepPoints = buildStepPointsFromGeometry(step.geometry());
     RouteProgress defaultRouteProgress = RouteProgress.builder()
       .stepDistanceRemaining(100)
       .legDistanceRemaining(700)
       .distanceRemaining(1000)
       .directionsRoute(aRoute)
+      .currentStepPoints(currentStepPoints)
       .stepIndex(0)
       .legIndex(0)
       .build();

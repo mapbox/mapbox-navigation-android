@@ -223,9 +223,9 @@ class NavigationHelper {
   }
 
   static Location getSnappedLocation(MapboxNavigation mapboxNavigation, Location location,
-                                     RouteProgress routeProgress, List<Point> stepCoordinates) {
+                                     RouteProgress routeProgress) {
     Snap snap = mapboxNavigation.getSnapEngine();
-    return snap.getSnappedLocation(location, routeProgress, stepCoordinates);
+    return snap.getSnappedLocation(location, routeProgress);
   }
 
   /**

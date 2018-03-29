@@ -8,7 +8,9 @@ import com.google.gson.GsonBuilder;
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -29,6 +31,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -77,11 +80,14 @@ public class NavigationEventDispatcherTest extends BaseTest {
     String body = loadJsonFixture(PRECISION_6);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     route = response.routes().get(0);
+    LegStep step = getFirstStep(route);
+    List<Point> currentStepPoints = buildStepPointsFromGeometry(step.geometry());
     routeProgress = RouteProgress.builder()
       .stepDistanceRemaining(100)
       .legDistanceRemaining(100)
       .distanceRemaining(100)
       .directionsRoute(route)
+      .currentStepPoints(currentStepPoints)
       .stepIndex(0)
       .legIndex(0)
       .build();
@@ -324,12 +330,15 @@ public class NavigationEventDispatcherTest extends BaseTest {
     navigationEventDispatcher.addMetricArrivalListener(arrivalListener);
 
     // Progress that hasn't arrived
+    LegStep step = getFirstStep(route);
+    List<Point> currentStepPoints = buildStepPointsFromGeometry(step.geometry());
     RouteProgress routeProgressDidNotArrive = RouteProgress.builder()
       .stepDistanceRemaining(100)
       .legDistanceRemaining(100)
       .distanceRemaining(100)
       .directionsRoute(route)
       .stepIndex(lastStepIndex)
+      .currentStepPoints(currentStepPoints)
       .legIndex(0)
       .build();
 
@@ -344,6 +353,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
       .distanceRemaining(30)
       .directionsRoute(route)
       .stepIndex(lastStepIndex)
+      .currentStepPoints(currentStepPoints)
       .legIndex(0)
       .build();
 

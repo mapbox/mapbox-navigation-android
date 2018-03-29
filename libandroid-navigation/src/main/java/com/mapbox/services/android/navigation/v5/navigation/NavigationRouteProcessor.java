@@ -28,9 +28,11 @@ class NavigationRouteProcessor implements OffRouteCallback {
 
   private static final int FIRST_LEG_INDEX = 0;
   private static final int FIRST_STEP_INDEX = 0;
+  private static final int SECOND_STEP_INDEX = 1;
 
-  private RouteProgress previousRouteProgress;
-  private List<Point> stepPoints;
+  private RouteProgress routeProgress;
+  private List<Point> currentStepPoints;
+  private List<Point> upcomingStepPoints;
   private NavigationIndices indices;
   private boolean shouldIncreaseIndex;
 
@@ -66,7 +68,7 @@ class NavigationRouteProcessor implements OffRouteCallback {
     double stepDistanceRemaining = calculateStepDistanceRemaining(location, directionsRoute);
     boolean withinManeuverRadius = stepDistanceRemaining < maneuverZoneRadius;
     boolean bearingMatchesManeuver = checkBearingForStepCompletion(
-      location, previousRouteProgress, stepDistanceRemaining, completionOffset
+      location, routeProgress, stepDistanceRemaining, completionOffset
     );
     boolean forceIncreaseIndices = stepDistanceRemaining == 0 && !bearingMatchesManeuver;
 
@@ -80,27 +82,32 @@ class NavigationRouteProcessor implements OffRouteCallback {
     double legDistanceRemaining = legDistanceRemaining(stepDistanceRemaining, legIndex, stepIndex, directionsRoute);
     double routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, legIndex, directionsRoute);
 
-    return RouteProgress.builder()
+    RouteProgress.Builder progressBuilder = RouteProgress.builder()
       .stepDistanceRemaining(stepDistanceRemaining)
       .legDistanceRemaining(legDistanceRemaining)
       .distanceRemaining(routeDistanceRemaining)
       .directionsRoute(directionsRoute)
+      .currentStepPoints(currentStepPoints)
+      .upcomingStepPoints(upcomingStepPoints)
       .stepIndex(stepIndex)
-      .legIndex(legIndex)
-      .build();
+      .legIndex(legIndex);
+
+    if (upcomingStepPoints != null && !upcomingStepPoints.isEmpty()) {
+      progressBuilder.upcomingStepPoints(upcomingStepPoints);
+    }
+    return progressBuilder.build();
   }
 
-  RouteProgress getPreviousRouteProgress() {
-    return previousRouteProgress;
+  RouteProgress getRouteProgress() {
+    return routeProgress;
   }
 
-  void setPreviousRouteProgress(RouteProgress previousRouteProgress) {
-    this.previousRouteProgress = previousRouteProgress;
+  void setRouteProgress(RouteProgress routeProgress) {
+    this.routeProgress = routeProgress;
   }
 
-  private void updateOffRouteDetectorStepPoints(OffRoute offRoute, List<Point> stepPoints) {
+  private void clearManeuverDistances(OffRoute offRoute) {
     if (offRoute instanceof OffRouteDetector) {
-      ((OffRouteDetector) offRoute).updateStepPoints(stepPoints);
       ((OffRouteDetector) offRoute).clearDistancesAwayFromManeuver();
     }
   }
@@ -131,7 +138,7 @@ class NavigationRouteProcessor implements OffRouteCallback {
                                 Location rawLocation, RouteProgress routeProgress, boolean userOffRoute) {
     final Location location;
     if (!userOffRoute && snapToRouteEnabled) {
-      location = getSnappedLocation(mapboxNavigation, rawLocation, routeProgress, stepPoints);
+      location = getSnappedLocation(mapboxNavigation, rawLocation, routeProgress);
     } else {
       location = rawLocation;
     }
@@ -147,13 +154,16 @@ class NavigationRouteProcessor implements OffRouteCallback {
    * @param mapboxNavigation to get the next {@link LegStep#geometry()} and {@link OffRoute}
    */
   private void advanceIndices(MapboxNavigation mapboxNavigation) {
-    indices = increaseIndex(previousRouteProgress, indices);
+    indices = increaseIndex(routeProgress, indices);
     updateStepPoints(mapboxNavigation);
   }
 
   private void updateStepPoints(MapboxNavigation mapboxNavigation) {
-    stepPoints = decodeStepPoints(mapboxNavigation.getRoute(), indices.legIndex(), indices.stepIndex());
-    updateOffRouteDetectorStepPoints(mapboxNavigation.getOffRouteEngine(), stepPoints);
+    DirectionsRoute route = mapboxNavigation.getRoute();
+    currentStepPoints = decodeStepPoints(route, currentStepPoints, indices.legIndex(), indices.stepIndex());
+    int upcomingStepIndex = indices.stepIndex() + 1;
+    upcomingStepPoints = decodeStepPoints(route, upcomingStepPoints, indices.legIndex(), upcomingStepIndex);
+    clearManeuverDistances(mapboxNavigation.getOffRouteEngine());
   }
 
   /**
@@ -162,27 +172,37 @@ class NavigationRouteProcessor implements OffRouteCallback {
    * <p>
    * This method is only used on a per-step basis as {@link PolylineUtils#decode(String, int)}
    * can be a heavy operation based on the length of the step.
+   * <p>
+   * Returns null if index is invalid.
    *
    * @param directionsRoute for list of steps
    * @param legIndex        to get current step list
    * @param stepIndex       to get current step
    * @return list of {@link Point} representing the current step
    */
-  private List<Point> decodeStepPoints(DirectionsRoute directionsRoute, int legIndex, int stepIndex) {
+  private List<Point> decodeStepPoints(DirectionsRoute directionsRoute, List<Point> currentPoints,
+                                       int legIndex, int stepIndex) {
     List<RouteLeg> legs = directionsRoute.legs();
     if (hasInvalidLegs(legs)) {
-      return stepPoints;
+      return currentPoints;
     }
     List<LegStep> steps = legs.get(legIndex).steps();
     if (hasInvalidSteps(steps)) {
-      return stepPoints;
+      return currentPoints;
     }
-
-    String stepGeometry = steps.get(stepIndex).geometry();
+    boolean invalidStepIndex = stepIndex < 0 || stepIndex > steps.size() - 1;
+    if (invalidStepIndex) {
+      return currentPoints;
+    }
+    LegStep step = steps.get(stepIndex);
+    if (step == null) {
+      return currentPoints;
+    }
+    String stepGeometry = step.geometry();
     if (stepGeometry != null) {
       return PolylineUtils.decode(stepGeometry, PRECISION_6);
     }
-    return stepPoints;
+    return currentPoints;
   }
 
   /**
@@ -193,16 +213,19 @@ class NavigationRouteProcessor implements OffRouteCallback {
    */
   private void checkNewRoute(MapboxNavigation mapboxNavigation) {
     DirectionsRoute directionsRoute = mapboxNavigation.getRoute();
-    if (RouteUtils.isNewRoute(previousRouteProgress, directionsRoute)) {
+    if (RouteUtils.isNewRoute(routeProgress, directionsRoute)) {
 
-      stepPoints = decodeStepPoints(directionsRoute, FIRST_LEG_INDEX, FIRST_STEP_INDEX);
-      updateOffRouteDetectorStepPoints(mapboxNavigation.getOffRouteEngine(), stepPoints);
+      currentStepPoints = decodeStepPoints(directionsRoute, currentStepPoints, FIRST_LEG_INDEX, FIRST_STEP_INDEX);
+      upcomingStepPoints = decodeStepPoints(directionsRoute, currentStepPoints, FIRST_LEG_INDEX, SECOND_STEP_INDEX);
+      clearManeuverDistances(mapboxNavigation.getOffRouteEngine());
 
-      previousRouteProgress = RouteProgress.builder()
+      routeProgress = RouteProgress.builder()
         .stepDistanceRemaining(directionsRoute.legs().get(FIRST_LEG_INDEX).steps().get(FIRST_STEP_INDEX).distance())
         .legDistanceRemaining(directionsRoute.legs().get(FIRST_LEG_INDEX).distance())
         .distanceRemaining(directionsRoute.distance())
         .directionsRoute(directionsRoute)
+        .currentStepPoints(currentStepPoints)
+        .upcomingStepPoints(upcomingStepPoints)
         .stepIndex(FIRST_STEP_INDEX)
         .legIndex(FIRST_LEG_INDEX)
         .build();
@@ -219,9 +242,9 @@ class NavigationRouteProcessor implements OffRouteCallback {
    * @return distance remaining in meters
    */
   private double calculateStepDistanceRemaining(Location location, DirectionsRoute directionsRoute) {
-    Point snappedPosition = userSnappedToRoutePosition(location, stepPoints);
+    Point snappedPosition = userSnappedToRoutePosition(location, currentStepPoints);
     return stepDistanceRemaining(
-      snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute, stepPoints
+      snappedPosition, indices.legIndex(), indices.stepIndex(), directionsRoute, currentStepPoints
     );
   }
 }

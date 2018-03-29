@@ -1,11 +1,17 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import com.google.gson.JsonParser;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.geojson.Point;
+import com.mapbox.geojson.utils.PolylineUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Scanner;
 
+import static com.mapbox.core.constants.Constants.PRECISION_6;
 import static junit.framework.Assert.assertEquals;
 import static okhttp3.internal.Util.UTF_8;
 
@@ -26,5 +32,13 @@ public class BaseTest {
     InputStream inputStream = classLoader.getResourceAsStream(filename);
     Scanner scanner = new Scanner(inputStream, UTF_8.name()).useDelimiter("\\A");
     return scanner.hasNext() ? scanner.next() : "";
+  }
+
+  protected LegStep getFirstStep(DirectionsRoute route) {
+    return route.legs().get(0).steps().get(0);
+  }
+
+  protected List<Point> buildStepPointsFromGeometry(String stepGeometry) {
+    return PolylineUtils.decode(stepGeometry, PRECISION_6);
   }
 }

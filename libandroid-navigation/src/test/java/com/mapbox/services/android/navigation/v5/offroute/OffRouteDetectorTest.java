@@ -43,7 +43,6 @@ public class OffRouteDetectorTest extends BaseTest {
 
     offRouteDetector = new OffRouteDetector();
     offRouteDetector.setOffRouteCallback(mockCallback);
-    setupStepPoints(offRouteDetector);
   }
 
   @Test
@@ -210,14 +209,5 @@ public class OffRouteDetectorTest extends BaseTest {
     );
     boolean isUserOffRouteThirdTry = offRouteDetector.isUserOffRoute(fourthLocationUpdate, routeProgress, options);
     assertFalse(isUserOffRouteThirdTry);
-  }
-
-  private void setupStepPoints(OffRouteDetector offRouteDetector) throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
-    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
-
-    LineString lineString = LineString.fromPolyline(currentStep.geometry(), Constants.PRECISION_6);
-    List<Point> stepPoints = lineString.coordinates();
-    offRouteDetector.updateStepPoints(stepPoints);
   }
 }

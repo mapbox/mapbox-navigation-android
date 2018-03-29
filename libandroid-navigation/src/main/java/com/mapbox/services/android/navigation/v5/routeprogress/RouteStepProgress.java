@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.StepIntersection;
+import com.mapbox.geojson.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +30,115 @@ public abstract class RouteStepProgress {
 
   abstract LegStep step();
 
+  abstract List<Point> stepPoints();
+
   @Nullable
   abstract LegStep nextStep();
+
+  @AutoValue.Builder
+  abstract static class Builder {
+
+    abstract Builder step(@NonNull LegStep step);
+
+    abstract LegStep step();
+
+    abstract Builder stepPoints(List<Point> stepPoints);
+
+    abstract List<Point> stepPoints();
+
+    abstract Builder nextStep(@Nullable LegStep nextStep);
+
+    abstract LegStep nextStep();
+
+    abstract Builder distanceRemaining(double distanceRemaining);
+
+    abstract double distanceRemaining();
+
+    abstract Builder distanceTraveled(double distanceTraveled);
+
+    abstract Builder fractionTraveled(float fractionTraveled);
+
+    abstract Builder durationRemaining(double durationRemaining);
+
+    abstract Builder intersections(@NonNull List<StepIntersection> intersections);
+
+    abstract Builder tunnelIntersections(@NonNull List<StepIntersection> tunnelIntersections);
+
+    RouteStepProgress build() {
+      LegStep step = step();
+      List<Point> stepPoints = stepPoints();
+      double distanceRemaining = distanceRemaining();
+      double distanceTraveled = calculateDistanceTraveled(step, distanceRemaining);
+      distanceTraveled(distanceTraveled);
+      float fractionTraveled = calculateFractionTraveled(step, distanceTraveled);
+      fractionTraveled(fractionTraveled);
+      durationRemaining(calculateDurationRemaining(step, fractionTraveled));
+      LegStep nextStep = nextStep();
+      intersections(createIntersectionsList(step, nextStep));
+      tunnelIntersections(createTunnelIntersectionsList(step));
+
+      return autoBuild();
+    }
+
+    abstract RouteStepProgress autoBuild();
+
+    private double calculateDistanceTraveled(LegStep step, double distanceRemaining) {
+      double distanceTraveled = step.distance() - distanceRemaining;
+      if (distanceTraveled < 0) {
+        distanceTraveled = 0;
+      }
+      return distanceTraveled;
+    }
+
+    private float calculateFractionTraveled(LegStep step, double distanceTraveled) {
+      float fractionTraveled = 1;
+
+      if (step.distance() > 0) {
+        fractionTraveled = (float) (distanceTraveled / step.distance());
+        if (fractionTraveled < 0) {
+          fractionTraveled = 0;
+        }
+      }
+      return fractionTraveled;
+    }
+
+    private double calculateDurationRemaining(LegStep step, float fractionTraveled) {
+      return (1 - fractionTraveled) * step.duration();
+    }
+
+    @NonNull
+    private List<StepIntersection> createIntersectionsList(@NonNull LegStep step, LegStep nextStep) {
+      List<StepIntersection> intersectionsWithNextManeuver = new ArrayList<>();
+      intersectionsWithNextManeuver.addAll(step.intersections());
+      if (nextStep != null && !nextStep.intersections().isEmpty()) {
+        intersectionsWithNextManeuver.add(nextStep.intersections().get(0));
+      }
+      return intersectionsWithNextManeuver;
+    }
+
+    @NonNull
+    private List<StepIntersection> createTunnelIntersectionsList(LegStep step) {
+      List<StepIntersection> tunnelIntersections = new ArrayList<>();
+      if (step.intersections().isEmpty()) {
+        return tunnelIntersections;
+      }
+      for (StepIntersection intersection : step.intersections()) {
+        boolean hasValidClasses = intersection.classes() != null && !intersection.classes().isEmpty();
+        if (hasValidClasses) {
+          for (String intersectionClass : intersection.classes()) {
+            if (intersectionClass.contentEquals(CLASS_TUNNEL)) {
+              tunnelIntersections.add(intersection);
+            }
+          }
+        }
+      }
+      return tunnelIntersections;
+    }
+  }
+
+  public static Builder builder() {
+    return new AutoValue_RouteStepProgress.Builder();
+  }
 
   /**
    * Total distance in meters from user to end of step.
@@ -41,11 +149,6 @@ public abstract class RouteStepProgress {
    */
   public abstract double distanceRemaining();
 
-  public static RouteStepProgress create(@NonNull LegStep step, @Nullable LegStep nextStep,
-                                         double stepDistanceRemaining) {
-    return new AutoValue_RouteStepProgress(step, nextStep, stepDistanceRemaining);
-  }
-
   /**
    * Returns distance user has traveled along current step in unit meters.
    *
@@ -53,13 +156,7 @@ public abstract class RouteStepProgress {
    * step. Uses unit meters.
    * @since 0.1.0
    */
-  public double distanceTraveled() {
-    double distanceTraveled = step().distance() - distanceRemaining();
-    if (distanceTraveled < 0) {
-      distanceTraveled = 0;
-    }
-    return distanceTraveled;
-  }
+  public abstract double distanceTraveled();
 
   /**
    * Get the fraction traveled along the current step, this is a float value between 0 and 1 and
@@ -69,17 +166,7 @@ public abstract class RouteStepProgress {
    * the current step.
    * @since 0.1.0
    */
-  public float fractionTraveled() {
-    float fractionTraveled = 1;
-
-    if (step().distance() > 0) {
-      fractionTraveled = (float) (distanceTraveled() / step().distance());
-      if (fractionTraveled < 0) {
-        fractionTraveled = 0;
-      }
-    }
-    return fractionTraveled;
-  }
+  public abstract float fractionTraveled();
 
   /**
    * Provides the duration remaining in seconds till the user reaches the end of the current step.
@@ -87,9 +174,7 @@ public abstract class RouteStepProgress {
    * @return {@code long} value representing the duration remaining till end of step, in unit seconds.
    * @since 0.1.0
    */
-  public double durationRemaining() {
-    return (1 - fractionTraveled()) * step().duration();
-  }
+  public abstract double durationRemaining();
 
   /**
    * A collection of all the current steps intersections and the next steps maneuver location
@@ -99,14 +184,7 @@ public abstract class RouteStepProgress {
    * intersection if it exist
    * @since 0.7.0
    */
-  public List<StepIntersection> intersections() {
-    List<StepIntersection> intersectionsWithNextManeuver = new ArrayList<>();
-    intersectionsWithNextManeuver.addAll(step().intersections());
-    if (nextStep() != null && !nextStep().intersections().isEmpty()) {
-      intersectionsWithNextManeuver.add(nextStep().intersections().get(0));
-    }
-    return intersectionsWithNextManeuver;
-  }
+  public abstract List<StepIntersection> intersections();
 
   /**
    * Provides a list of intersections that have tunnel classes for
@@ -117,18 +195,5 @@ public abstract class RouteStepProgress {
    * @return list of intersections containing a tunnel class
    * @since 0.12.0
    */
-  public List<StepIntersection> tunnelIntersections() {
-    List<StepIntersection> tunnelIntersections = new ArrayList<>();
-    if (step().intersections().isEmpty()) {
-      return tunnelIntersections;
-    }
-    for (StepIntersection intersection : step().intersections()) {
-      for (String intersectionClass : intersection.classes()) {
-        if (intersectionClass.contentEquals(CLASS_TUNNEL)) {
-          tunnelIntersections.add(intersection);
-        }
-      }
-    }
-    return tunnelIntersections;
-  }
+  public abstract List<StepIntersection> tunnelIntersections();
 }

@@ -51,6 +51,7 @@ public class TriggerTest extends BaseTest {
       .distanceRemaining(route.distance())
       .legDistanceRemaining(route.legs().get(0).distance())
       .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
+      .currentStepPoints(coords)
       .legIndex(0)
       .stepIndex(1)
       .build();

@@ -72,7 +72,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
 
     routeProcessor.checkIncreaseIndex(mapboxNavigation);
 
-    RouteProgress previousRouteProgress = routeProcessor.getPreviousRouteProgress();
+    RouteProgress previousRouteProgress = routeProcessor.getRouteProgress();
     final List<Milestone> milestones = checkMilestones(previousRouteProgress, routeProgress, mapboxNavigation);
 
     final Location location = routeProcessor.buildSnappedLocation(mapboxNavigation, snapToRouteEnabled,
@@ -83,7 +83,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
       && shouldCheckFasterRoute(newLocationModel, routeProgress);
 
     final RouteProgress finalRouteProgress = routeProgress;
-    routeProcessor.setPreviousRouteProgress(finalRouteProgress);
+    routeProcessor.setRouteProgress(finalRouteProgress);
 
     responseHandler.post(new Runnable() {
       @Override

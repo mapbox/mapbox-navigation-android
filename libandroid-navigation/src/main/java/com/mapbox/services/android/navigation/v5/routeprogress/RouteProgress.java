@@ -135,7 +135,6 @@ public abstract class RouteProgress {
    * @return list of points representing the current step
    * @since 0.12.0
    */
-  @Nullable
   public abstract List<Point> currentStepPoints();
 
   /**
@@ -157,19 +156,21 @@ public abstract class RouteProgress {
     private double legDistanceRemaining;
     private double stepDistanceRemaining;
 
-    abstract DirectionsRoute directionsRoute();
-
     public abstract Builder directionsRoute(DirectionsRoute directionsRoute);
 
-    abstract int legIndex();
+    abstract DirectionsRoute directionsRoute();
 
     public abstract Builder legIndex(int legIndex);
 
+    abstract int legIndex();
+
     public abstract Builder distanceRemaining(double distanceRemaining);
 
-    public abstract Builder currentStepPoints(@Nullable List<Point> currentStepPoints);
-
     public abstract Builder upcomingStepPoints(@Nullable List<Point> upcomingStepPoints);
+
+    public abstract Builder currentStepPoints(List<Point> currentStepPoints);
+
+    abstract List<Point> currentStepPoints();
 
     public Builder stepIndex(int stepIndex) {
       this.stepIndex = stepIndex;
@@ -191,10 +192,12 @@ public abstract class RouteProgress {
     abstract RouteProgress autoBuild(); // not public
 
     public RouteProgress build() {
+      RouteLeg currentLeg = directionsRoute().legs().get(legIndex());
       RouteLegProgress legProgress = RouteLegProgress.create(
-        directionsRoute().legs().get(legIndex()),
+        currentLeg,
         stepIndex,
         legDistanceRemaining,
+        currentStepPoints(),
         stepDistanceRemaining
       );
       currentLegProgress(legProgress);

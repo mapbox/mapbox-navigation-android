@@ -6,6 +6,9 @@ import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.geojson.Point;
+
+import java.util.List;
 
 /**
  * This is a progress object specific to the current leg the user is on. If there is only one leg
@@ -37,15 +40,22 @@ public abstract class RouteLegProgress {
    * @since 0.1.0
    */
   static RouteLegProgress create(RouteLeg routeLeg, int stepIndex, double legDistanceRemaining,
-                                 double stepDistanceRemaining) {
+                                 List<Point> stepPoints, double stepDistanceRemaining) {
 
-    LegStep nextStep
-      = stepIndex == (routeLeg.steps().size() - 1) ? null : routeLeg.steps().get(stepIndex + 1);
+    int lastStepIndex = routeLeg.steps().size() - 1;
+    boolean isOnLastStep = stepIndex == lastStepIndex;
+    int nextStepIndex = stepIndex + 1;
+    LegStep nextStep = isOnLastStep ? null : routeLeg.steps().get(nextStepIndex);
 
-    RouteStepProgress stepProgress = RouteStepProgress.create(
-      routeLeg.steps().get(stepIndex), nextStep, stepDistanceRemaining);
-    return new AutoValue_RouteLegProgress(
-      routeLeg, stepIndex, legDistanceRemaining, stepProgress);
+    LegStep currentStep = routeLeg.steps().get(stepIndex);
+    RouteStepProgress stepProgress = RouteStepProgress.builder()
+      .step(currentStep)
+      .stepPoints(stepPoints)
+      .nextStep(nextStep)
+      .distanceRemaining(stepDistanceRemaining)
+      .build();
+
+    return new AutoValue_RouteLegProgress(routeLeg, stepIndex, legDistanceRemaining, stepProgress);
   }
 
   /**

@@ -66,6 +66,7 @@ public class NavigationHelperTest extends BaseTest {
       .distanceRemaining(1000)
       .stepDistanceRemaining(1000)
       .legDistanceRemaining(1000)
+      .currentStepPoints(coords)
       .stepIndex(0)
       .legIndex(0);
   }
