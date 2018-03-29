@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.dokka-android'
 
 android {
   compileSdkVersion androidVersions.compileSdkVersion
@@ -76,7 +77,26 @@ dependencies {
   testImplementation dependenciesList.robolectric
 }
 
-apply from: 'javadoc.gradle'
+task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaAndroidTask) {
+  moduleName = 'libandroid-navigation-ui'
+  outputFormat = 'javadoc'
+  outputDirectory = "$buildDir/javadoc"
+  // Do not output deprecated members. Applies globally, can be overridden by packageOptions
+  skipDeprecated = false
+
+  // Emit warnings about not documented members. Applies globally, also can be overridden by packageOptions
+  reportUndocumented = true
+
+  skipEmptyPackages = true // Do not create index pages for empty packages
+
+  sourceDirs = project.files('src/main/java')
+
+  externalDocumentationLink {
+    // Root URL of the generated documentation to link with. The trailing slash is required!
+    url = new URL("https://example.com/docs/")
+  }
+}
+
 apply from: "${rootDir}/gradle/mvn-push-android.gradle"
 apply from: "${rootDir}/gradle/checkstyle.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"

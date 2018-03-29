@@ -4,6 +4,9 @@ checkstyle:
 sonarqube:
 	./gradlew sonarqube
 
+dokka:
+	./gradlew dokka
+
 test:
 	# See libandroid-navigation/build.gradle for details
 	./gradlew :libandroid-navigation:test
