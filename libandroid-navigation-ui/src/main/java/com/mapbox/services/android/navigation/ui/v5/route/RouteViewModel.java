@@ -16,6 +16,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -92,12 +93,15 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
 
   /**
    * Updates the request unit type based on what was set in
-   * {@link NavigationViewOptions}.
+   * {@link NavigationViewOptions}. Must be called after extractLocale.
+   *
    *
    * @param options possibly containing unitType
    */
   private void extractUnitType(NavigationViewOptions options) {
-    unitType = NavigationUnitType.getDirectionsCriteriaUnitType(options.navigationOptions().unitType());
+    MapboxNavigationOptions navigationOptions = options.navigationOptions();
+    unitType = NavigationUnitType.getDirectionsCriteriaUnitType(
+      navigationOptions.unitType(), locale);
   }
 
   /**

@@ -286,9 +286,10 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void setFieldsFromSharedPreferences(NavigationRoute.Builder builder) {
+    Locale locale = getLocale();
     builder
-      .language(getLocale())
-      .voiceUnits(NavigationUnitType.getDirectionsCriteriaUnitType(getUnitType()));
+      .language(locale)
+      .voiceUnits(NavigationUnitType.getDirectionsCriteriaUnitType(getUnitType(), locale));
   }
 
   private Locale getLocale() {
@@ -302,7 +303,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private int getUnitType() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     return Integer.parseInt(sharedPreferences.getString(getString(R.string.unit_type_key),
-            Integer.toString(NavigationUnitType.NONE_SPECIFIED)));
+      Integer.toString(NavigationUnitType.NONE_SPECIFIED)));
   }
 
   private boolean getShouldSimulateRoute() {

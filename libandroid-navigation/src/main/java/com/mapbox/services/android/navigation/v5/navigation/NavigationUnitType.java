@@ -3,9 +3,11 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.support.annotation.IntDef;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Locale;
 
 public class NavigationUnitType {
 
@@ -20,7 +22,11 @@ public class NavigationUnitType {
   public static final int TYPE_IMPERIAL = 0;
   public static final int TYPE_METRIC = 1;
 
-  public static String getDirectionsCriteriaUnitType(int unitType) {
+  public static String getDirectionsCriteriaUnitType(int unitType, Locale locale) {
+    if (unitType == NONE_SPECIFIED) {
+      unitType = LocaleUtils.getUnitTypeForLocale(locale);
+    }
+
     return unitType == NavigationUnitType.TYPE_IMPERIAL
       ? DirectionsCriteria.IMPERIAL : DirectionsCriteria.METRIC;
   }
