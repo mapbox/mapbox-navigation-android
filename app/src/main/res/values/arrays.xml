@@ -27,4 +27,16 @@
         <item>1</item>
         <item>0</item>
     </string-array>
+
+    <string-array name="route_profile_array">
+        <item>Driving</item>
+        <item>Cycling</item>
+        <item>Walking</item>
+    </string-array>
+
+    <string-array name="route_profile_values_array">
+        <item>driving-traffic</item>
+        <item>cycling</item>
+        <item>walking</item>
+    </string-array>
 </resources>

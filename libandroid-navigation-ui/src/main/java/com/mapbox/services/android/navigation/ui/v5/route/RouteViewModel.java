@@ -295,6 +295,8 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
     if (routeProfile != null) {
       builder.profile(routeProfile);
     }
-    builder.language(locale).voiceUnits(unitType);
+    builder
+      .language(locale)
+      .voiceUnits(unitType);
   }
 }
