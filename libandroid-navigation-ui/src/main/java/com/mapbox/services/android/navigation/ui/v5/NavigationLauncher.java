@@ -24,7 +24,7 @@ import java.util.Locale;
  * You can launch the UI with either a route you have already retrieved from
  * {@link com.mapbox.services.android.navigation.v5.navigation.NavigationRoute} or you can pass a
  * {@link Point} origin and {@link Point} destination and the UI will request the {@link DirectionsRoute}
- * while initializing.`
+ * while initializing.
  * </p><p>
  * You have an option to include a AWS Cognito Pool ID, which will initialize the UI with AWS Polly Voice instructions
  * </p><p>
