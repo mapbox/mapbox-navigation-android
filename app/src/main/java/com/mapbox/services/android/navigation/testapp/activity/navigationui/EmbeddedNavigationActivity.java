@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.testapp;
+package com.mapbox.services.android.navigation.testapp.activity.navigationui;
 
 import android.location.Location;
 import android.os.Bundle;
@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;

@@ -15,9 +15,11 @@ import android.widget.Toast;
 
 import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.EmbeddedNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationViewActivity;
-import com.mapbox.services.android.navigation.testapp.activity.WaypointNavigationActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.WaypointNavigationActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.fragment.FragmentNavigationActivity;
 import com.mapbox.services.android.telemetry.permissions.PermissionsListener;
 import com.mapbox.services.android.telemetry.permissions.PermissionsManager;
 
@@ -68,6 +70,11 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         getString(R.string.title_embedded_navigation),
         getString(R.string.description_embedded_navigation),
         EmbeddedNavigationActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_fragment_navigation),
+        getString(R.string.description_fragment_navigation),
+        FragmentNavigationActivity.class
       )
     ));
 

@@ -38,6 +38,18 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   }
 
   @Override
+  public void onStart() {
+    super.onStart();
+    navigationView.onStart();
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+    navigationView.onResume();
+  }
+
+  @Override
   public void onLowMemory() {
     super.onLowMemory();
     navigationView.onLowMemory();
@@ -63,6 +75,18 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     super.onRestoreInstanceState(savedInstanceState);
     navigationView.onRestoreInstanceState(savedInstanceState);
     isRunning = savedInstanceState.getBoolean(NavigationConstants.NAVIGATION_VIEW_RUNNING);
+  }
+
+  @Override
+  public void onPause() {
+    super.onPause();
+    navigationView.onPause();
+  }
+
+  @Override
+  public void onStop() {
+    super.onStop();
+    navigationView.onStop();
   }
 
   @Override
