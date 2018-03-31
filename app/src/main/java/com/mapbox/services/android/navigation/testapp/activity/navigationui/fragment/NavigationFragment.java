@@ -17,6 +17,11 @@ import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener
 
 public class NavigationFragment extends Fragment implements OnNavigationReadyCallback, NavigationListener {
 
+  private static final double ORIGIN_LONGITUDE = -77.04012393951416;
+  private static final double ORIGIN_LATITUDE = 38.9111117447887;
+  private static final double DESTINATION_LONGITUDE = -77.03847169876099;
+  private static final double DESTINATION_LATITUDE = 38.91113678979344;
+
   private NavigationView navigationView;
 
   @Nullable
@@ -86,8 +91,8 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
 
   @Override
   public void onNavigationReady() {
-    Point origin = Point.fromLngLat(-77.04012393951416, 38.9111117447887);
-    Point destination = Point.fromLngLat(-77.03847169876099, 38.91113678979344);
+    Point origin = Point.fromLngLat(ORIGIN_LONGITUDE, ORIGIN_LATITUDE);
+    Point destination = Point.fromLngLat(DESTINATION_LONGITUDE, DESTINATION_LATITUDE);
     NavigationViewOptions options = NavigationViewOptions.builder()
       .origin(origin)
       .destination(destination)
