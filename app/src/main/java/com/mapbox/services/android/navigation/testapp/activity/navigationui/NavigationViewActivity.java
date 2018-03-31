@@ -66,6 +66,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   OnRouteSelectionChangeListener {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
+  private static final int DEFAULT_CAMERA_ZOOM = 16;
 
   private LocationLayerPlugin locationLayer;
   private LocationEngine locationEngine;
@@ -229,7 +230,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
         mapRoute.addRoutes(response.body().routes());
         boundCameraToRoute();
       } else {
-        Snackbar.make(mapView, "Please select a longer route", Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(mapView, R.string.error_select_longer_route, Snackbar.LENGTH_SHORT).show();
       }
     }
   }
@@ -300,7 +301,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private int getUnitType() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     return Integer.parseInt(sharedPreferences.getString(getString(R.string.unit_type_key),
-            Integer.toString(NavigationUnitType.NONE_SPECIFIED)));
+      Integer.toString(NavigationUnitType.NONE_SPECIFIED)));
   }
 
   private boolean getShouldSimulateRoute() {
@@ -310,12 +311,12 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private String getRouteProfile() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    return sharedPreferences.getString("route_profile", "");
+    return sharedPreferences.getString(getString(R.string.route_profile_key), "");
   }
 
   private void launchNavigationWithRoute() {
     if (route == null) {
-      Snackbar.make(mapView, "Current route is not available", Snackbar.LENGTH_SHORT).show();
+      Snackbar.make(mapView, R.string.error_route_not_available, Snackbar.LENGTH_SHORT).show();
       return;
     }
 
@@ -324,8 +325,15 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       .shouldSimulateRoute(getShouldSimulateRoute())
       .locale(locale)
       .unitType(getUnitType())
-      .directionsProfile(getRouteProfile())
-      .directionsRoute(route);
+      .directionsProfile(getRouteProfile());
+
+    if (route.routeOptions().language().equals(locale.getLanguage())) {
+      optionsBuilder.directionsRoute(route);
+    } else {
+      optionsBuilder
+        .origin(currentLocation)
+        .destination(destination);
+    }
 
     NavigationLauncher.startNavigation(this, optionsBuilder.build());
   }
@@ -343,7 +351,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private void onLocationFound(Location location) {
     if (!locationFound) {
       animateCamera(new LatLng(location.getLatitude(), location.getLongitude()));
-      Snackbar.make(mapView, "Long press map to place waypoint", Snackbar.LENGTH_LONG).show();
+      Snackbar.make(mapView, R.string.explanation_long_press_waypoint, Snackbar.LENGTH_LONG).show();
       locationFound = true;
       hideLoading();
     }
@@ -364,7 +372,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
           int topPadding = launchBtnFrame.getHeight() * 2;
           animateCameraBbox(bounds, CAMERA_ANIMATION_DURATION, new int[] {50, topPadding, 50, 100});
         } catch (InvalidLatLngBoundsException exception) {
-          Toast.makeText(this, "Valid route not found.", Toast.LENGTH_SHORT).show();
+          Toast.makeText(this, R.string.error_valid_route_not_found, Toast.LENGTH_SHORT).show();
         }
       }
     }
@@ -376,7 +384,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void animateCamera(LatLng point) {
-    mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(point, 16), CAMERA_ANIMATION_DURATION);
+    mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(point, DEFAULT_CAMERA_ZOOM), CAMERA_ANIMATION_DURATION);
   }
 
   private void setCurrentMarkerPosition(LatLng position) {

@@ -23,6 +23,6 @@
         android:defaultValue="1"
         android:entries="@array/route_profile_array"
         android:entryValues="@array/route_profile_values_array"
-        android:key="route_profile"
+        android:key="@string/route_profile_key"
         android:title="@string/route_profile"/>
 </PreferenceScreen>

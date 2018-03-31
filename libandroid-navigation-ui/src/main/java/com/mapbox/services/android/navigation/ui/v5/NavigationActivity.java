@@ -24,6 +24,8 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationUni
  */
 public class NavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener {
 
+  private static final String EMPTY_STRING = "";
+
   private NavigationView navigationView;
   private boolean isRunning;
 
@@ -150,15 +152,15 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     options.shouldSimulateRoute(preferences
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
     options.directionsProfile(preferences
-      .getString(NavigationConstants.NAVIGATION_VIEW_ROUTE_PROFILE_KEY, ""));
+      .getString(NavigationConstants.NAVIGATION_VIEW_ROUTE_PROFILE_KEY, EMPTY_STRING));
     navigationOptions.enableOffRouteDetection(preferences
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_OFF_ROUTE_ENABLED_KEY, true));
   }
 
   private void extractLocale(MapboxNavigationOptions.Builder navigationOptions) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-    String country = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, "");
-    String language = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, "");
+    String country = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, EMPTY_STRING);
+    String language = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, EMPTY_STRING);
 
     Locale locale;
     if (!language.isEmpty()) {

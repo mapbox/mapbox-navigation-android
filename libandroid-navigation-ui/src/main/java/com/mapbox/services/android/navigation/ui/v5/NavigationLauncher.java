@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -13,6 +12,7 @@ import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.HashMap;
@@ -49,8 +49,8 @@ public class NavigationLauncher {
     storeRouteOptions(options, editor);
     storeConfiguration(options, editor);
 
-    Locale locale = storeLocale(activity, options, editor);
-    storeUnitType(options, editor, locale);
+    storeLocale(activity, options, editor);
+    storeUnitType(options, editor);
     storeThemePreferences(options, editor);
 
     editor.apply();
@@ -136,25 +136,22 @@ public class NavigationLauncher {
     }
   }
 
-  private static void storeUnitType(NavigationLauncherOptions options, SharedPreferences.Editor editor,
-                                    Locale locale) {
+  private static void storeUnitType(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
     Integer unitType = options.unitType();
     if (unitType == null) {
-      unitType = LocaleUtils.getUnitTypeForLocale(locale);
+      unitType = NavigationUnitType.NONE_SPECIFIED;
     }
     editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, unitType);
   }
 
-  @NonNull
-  private static Locale storeLocale(Activity activity, NavigationLauncherOptions options,
-                                    SharedPreferences.Editor editor) {
+  private static void storeLocale(Activity activity, NavigationLauncherOptions options,
+                                  SharedPreferences.Editor editor) {
     Locale locale = options.locale();
     if (locale == null) {
       locale = LocaleUtils.getDeviceLocale(activity);
     }
     editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, locale.getLanguage());
     editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, locale.getCountry());
-    return locale;
   }
 
   private static void storeDirectionsRouteValue(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
