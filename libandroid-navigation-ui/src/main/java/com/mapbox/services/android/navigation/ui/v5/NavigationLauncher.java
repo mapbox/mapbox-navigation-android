@@ -12,6 +12,7 @@ import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.HashMap;
@@ -41,25 +42,16 @@ public class NavigationLauncher {
    * @param activity must be launched from another {@link Activity}
    * @param options  with fields to customize the navigation view
    */
-  public static void startNavigation(Activity activity, NavigationViewOptions options) {
+  public static void startNavigation(Activity activity, NavigationLauncherOptions options) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
     SharedPreferences.Editor editor = preferences.edit();
 
     storeRouteOptions(options, editor);
+    storeConfiguration(options, editor);
 
-    editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, options.awsPoolId());
-    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, options.shouldSimulateRoute());
-
-    Locale locale = options.navigationOptions().locale();
-    if (locale == null) {
-      locale = LocaleUtils.getDeviceLocale(activity);
-    }
-
-    editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, locale.getLanguage());
-    editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, locale.getCountry());
-    editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, options.navigationOptions().unitType());
-
-    setThemePreferences(options, editor);
+    storeLocale(activity, options, editor);
+    storeUnitType(options, editor);
+    storeThemePreferences(options, editor);
 
     editor.apply();
 
@@ -112,7 +104,7 @@ public class NavigationLauncher {
     return coordinates;
   }
 
-  private static void storeRouteOptions(NavigationViewOptions options, SharedPreferences.Editor editor) {
+  private static void storeRouteOptions(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
     if (options.directionsRoute() != null) {
       storeDirectionsRouteValue(options, editor);
     } else if (options.origin() != null && options.destination() != null) {
@@ -123,7 +115,14 @@ public class NavigationLauncher {
     }
   }
 
-  private static void setThemePreferences(NavigationViewOptions options, SharedPreferences.Editor editor) {
+  private static void storeConfiguration(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, options.awsPoolId());
+    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, options.shouldSimulateRoute());
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_PROFILE_KEY, options.directionsProfile());
+    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_OFF_ROUTE_ENABLED_KEY, options.enableOffRouteDetection());
+  }
+
+  private static void storeThemePreferences(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
     boolean preferenceThemeSet = options.lightThemeResId() != null || options.darkThemeResId() != null;
     editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_PREFERENCE_SET_THEME, preferenceThemeSet);
 
@@ -137,12 +136,30 @@ public class NavigationLauncher {
     }
   }
 
-  private static void storeDirectionsRouteValue(NavigationViewOptions options, SharedPreferences.Editor editor) {
+  private static void storeUnitType(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
+    Integer unitType = options.unitType();
+    if (unitType == null) {
+      unitType = NavigationUnitType.NONE_SPECIFIED;
+    }
+    editor.putInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, unitType);
+  }
+
+  private static void storeLocale(Activity activity, NavigationLauncherOptions options,
+                                  SharedPreferences.Editor editor) {
+    Locale locale = options.locale();
+    if (locale == null) {
+      locale = LocaleUtils.getDeviceLocale(activity);
+    }
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, locale.getLanguage());
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, locale.getCountry());
+  }
+
+  private static void storeDirectionsRouteValue(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
     editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, new GsonBuilder()
       .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create().toJson(options.directionsRoute()));
   }
 
-  private static void storeCoordinateValues(NavigationViewOptions options, SharedPreferences.Editor editor) {
+  private static void storeCoordinateValues(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
     // Reset any previous value for the route json
     editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, "");
     // Store the coordinates

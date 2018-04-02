@@ -24,6 +24,8 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationUni
  */
 public class NavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener {
 
+  private static final String EMPTY_STRING = "";
+
   private NavigationView navigationView;
   private boolean isRunning;
 
@@ -35,6 +37,18 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     navigationView = findViewById(R.id.navigationView);
     navigationView.onCreate(savedInstanceState);
     navigationView.getNavigationAsync(this);
+  }
+
+  @Override
+  public void onStart() {
+    super.onStart();
+    navigationView.onStart();
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+    navigationView.onResume();
   }
 
   @Override
@@ -66,6 +80,18 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   }
 
   @Override
+  public void onPause() {
+    super.onPause();
+    navigationView.onPause();
+  }
+
+  @Override
+  public void onStop() {
+    super.onStop();
+    navigationView.onStop();
+  }
+
+  @Override
   protected void onDestroy() {
     super.onDestroy();
     navigationView.onDestroy();
@@ -73,14 +99,18 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
 
   @Override
   public void onNavigationReady() {
+    MapboxNavigationOptions.Builder navigationOptions = MapboxNavigationOptions.builder();
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
     options.navigationListener(this);
     if (!isRunning) {
       extractRoute(options);
       extractCoordinates(options);
     }
-    extractConfiguration(options);
-    extractLocale(options);
+    extractConfiguration(options, navigationOptions);
+    extractLocale(navigationOptions);
+    extractUnitType(navigationOptions);
+
+    options.navigationOptions(navigationOptions.build());
     navigationView.startNavigation(options.build());
     isRunning = true;
   }
@@ -108,26 +138,29 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
 
   private void extractCoordinates(NavigationViewOptions.Builder options) {
     HashMap<String, Point> coordinates = NavigationLauncher.extractCoordinates(this);
-    if (coordinates.size() > 0) {
+    if (options.build().directionsRoute() == null && coordinates.size() > 0) {
       options.origin(coordinates.get(NavigationConstants.NAVIGATION_VIEW_ORIGIN));
       options.destination(coordinates.get(NavigationConstants.NAVIGATION_VIEW_DESTINATION));
     }
   }
 
-  private void extractConfiguration(NavigationViewOptions.Builder options) {
+  private void extractConfiguration(NavigationViewOptions.Builder options,
+                                    MapboxNavigationOptions.Builder navigationOptions) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
     options.awsPoolId(preferences
       .getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
     options.shouldSimulateRoute(preferences
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
+    options.directionsProfile(preferences
+      .getString(NavigationConstants.NAVIGATION_VIEW_ROUTE_PROFILE_KEY, EMPTY_STRING));
+    navigationOptions.enableOffRouteDetection(preferences
+      .getBoolean(NavigationConstants.NAVIGATION_VIEW_OFF_ROUTE_ENABLED_KEY, true));
   }
 
-  private void extractLocale(NavigationViewOptions.Builder options) {
+  private void extractLocale(MapboxNavigationOptions.Builder navigationOptions) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-    String country = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, "");
-    String language = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, "");
-    int unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, NONE_SPECIFIED);
+    String country = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, EMPTY_STRING);
+    String language = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, EMPTY_STRING);
 
     Locale locale;
     if (!language.isEmpty()) {
@@ -136,10 +169,12 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
       locale = LocaleUtils.getDeviceLocale(this);
     }
 
-    MapboxNavigationOptions navigationOptions = MapboxNavigationOptions.builder()
-      .locale(locale)
-      .unitType(unitType)
-      .build();
-    options.navigationOptions(navigationOptions);
+    navigationOptions.locale(locale);
+  }
+
+  private void extractUnitType(MapboxNavigationOptions.Builder navigationOptions) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+    int unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, NONE_SPECIFIED);
+    navigationOptions.unitType(unitType);
   }
 }

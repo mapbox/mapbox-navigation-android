@@ -59,7 +59,7 @@
         </activity>
 
         <activity
-            android:name=".activity.WaypointNavigationActivity"
+            android:name=".activity.navigationui.WaypointNavigationActivity"
             android:label="@string/title_waypoint_navigation">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -67,7 +67,15 @@
         </activity>
 
         <activity
-            android:name=".EmbeddedNavigationActivity"
+            android:name=".activity.navigationui.EmbeddedNavigationActivity"
+            android:label="@string/title_embedded_navigation">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
+        <activity
+            android:name=".activity.navigationui.fragment.FragmentNavigationActivity"
             android:label="@string/title_embedded_navigation">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
