@@ -285,9 +285,10 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void setFieldsFromSharedPreferences(NavigationRoute.Builder builder) {
+    Locale locale = getLocale();
     builder
-      .language(getLocale())
-      .voiceUnits(NavigationUnitType.getDirectionsCriteriaUnitType(getUnitType()));
+      .language(locale)
+      .voiceUnits(NavigationUnitType.getDirectionsCriteriaUnitType(getUnitType(), locale));
   }
 
   private Locale getLocale() {
