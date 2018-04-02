@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
+import com.mapbox.api.speech.v1.MapboxSpeech;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.ArrayList;

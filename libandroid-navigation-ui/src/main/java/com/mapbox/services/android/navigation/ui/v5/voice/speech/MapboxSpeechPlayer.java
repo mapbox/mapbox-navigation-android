@@ -7,10 +7,10 @@ import android.os.AsyncTask;
 import android.text.TextUtils;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.mapbox.api.speech.v1.MapboxSpeech;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionListener;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxSpeech;
 import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoader;
 
 import java.io.File;
