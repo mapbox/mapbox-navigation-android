@@ -19,7 +19,8 @@ public class LocaleUtils {
    * @param locale for which to return the default unit type
    * @return unit type for specified locale
    */
-  public static @NavigationUnitType.UnitType int getUnitTypeForLocale(@NonNull Locale locale) {
+  @NavigationUnitType.UnitType
+  public static int getUnitTypeForLocale(@NonNull Locale locale) {
     switch (locale.getCountry()) {
       case "US": // US
       case "LR": // Liberia
