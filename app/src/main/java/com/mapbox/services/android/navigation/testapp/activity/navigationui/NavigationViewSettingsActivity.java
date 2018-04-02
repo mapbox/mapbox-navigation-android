@@ -9,11 +9,17 @@ import android.preference.PreferenceManager;
 import com.mapbox.services.android.navigation.testapp.R;
 
 public class NavigationViewSettingsActivity extends PreferenceActivity {
+
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     getFragmentManager().beginTransaction().replace(
       android.R.id.content, new NavigationViewPreferenceFragment()).commit();
+  }
+
+  @Override
+  protected boolean isValidFragment(String fragmentName) {
+    return super.isValidFragment(fragmentName);
   }
 
   public static class NavigationViewPreferenceFragment extends PreferenceFragment {

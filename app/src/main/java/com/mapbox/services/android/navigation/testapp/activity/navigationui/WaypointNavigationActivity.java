@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.testapp.activity;
+package com.mapbox.services.android.navigation.testapp.activity.navigationui;
 
 import android.content.DialogInterface;
 import android.location.Location;

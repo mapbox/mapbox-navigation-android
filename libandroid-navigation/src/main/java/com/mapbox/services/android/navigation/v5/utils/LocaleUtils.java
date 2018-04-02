@@ -14,11 +14,13 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationUni
 public class LocaleUtils {
 
   /**
-   * Returns the unit type for the specified locale
+   * Returns the unit type for the specified locale. Try to avoid using this unnecessarily because
+   * all methods consuming unit type are able to handle the NONE_SPECIFIED type
    * @param locale for which to return the default unit type
    * @return unit type for specified locale
    */
-  public static @NavigationUnitType.UnitType int getUnitTypeForLocale(@NonNull Locale locale) {
+  @NavigationUnitType.UnitType
+  public static int getUnitTypeForLocale(@NonNull Locale locale) {
     switch (locale.getCountry()) {
       case "US": // US
       case "LR": // Liberia

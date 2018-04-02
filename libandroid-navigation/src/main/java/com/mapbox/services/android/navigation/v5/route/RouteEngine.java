@@ -34,7 +34,7 @@ public class RouteEngine implements Callback<DirectionsResponse> {
   public RouteEngine(Locale locale, @NavigationUnitType.UnitType int unitType, Callback engineCallback) {
     this.engineCallback = engineCallback;
     this.locale = locale;
-    this.unitType = NavigationUnitType.getDirectionsCriteriaUnitType(unitType);
+    this.unitType = NavigationUnitType.getDirectionsCriteriaUnitType(unitType, locale);
   }
 
   /**
