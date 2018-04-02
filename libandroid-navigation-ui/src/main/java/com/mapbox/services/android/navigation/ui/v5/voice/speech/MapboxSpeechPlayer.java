@@ -32,6 +32,8 @@ import timber.log.Timber;
  * </p>
  */
 public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseBody> {
+  private static final long CACHE_SIZE = 10 * 1098 * 1098;
+  private static final String SSML_TEXT_TYPE = "ssml";
   VoiceInstructionLoader voiceInstructionLoader;
   private MediaPlayer mediaPlayer;
   private InstructionListener instructionListener;
@@ -52,7 +54,7 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
     voiceInstructionLoader.initialize(
       MapboxSpeech.builder()
         .language(locale.toString())
-        .cache(new Cache(context.getCacheDir(), 10 * 1098 * 1098))
+        .cache(new Cache(context.getCacheDir(), CACHE_SIZE))
         .accessToken(Mapbox.getAccessToken()));
   }
 
@@ -60,7 +62,7 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
    * @param instruction voice instruction to be synthesized and played.
    */
   public void play(String instruction) {
-    play(instruction, "ssml");
+    play(instruction, SSML_TEXT_TYPE);
   }
 
   public void play(String instruction, String textType) {

@@ -58,6 +58,7 @@ public class NavigationInstructionPlayer implements InstructionListener {
   }
 
   public void onOffRoute() {
+    instructionQueue.clear();
     mapboxSpeechPlayer.onOffRoute();
     androidSpeechPlayer.onOffRoute();
   }
