@@ -61,6 +61,7 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
   /**
    * @param instruction voice instruction to be synthesized and played.
    */
+  @Override
   public void play(String instruction) {
     play(instruction, SSML_TEXT_TYPE);
   }
