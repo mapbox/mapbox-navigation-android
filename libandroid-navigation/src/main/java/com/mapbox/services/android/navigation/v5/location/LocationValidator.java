@@ -9,12 +9,21 @@ import com.mapbox.turf.TurfMeasurement;
 
 public class LocationValidator {
 
-  private static final int FIVE_SECONDS_IN_MILLIS_UPDATE_THRESHOLD = 5000;
-  private static final int TEN_PERCENT_ACCURACY_THRESHOLD = 10;
-  private static final int TWO_HUNDRED_METERS_PER_SECOND_VELOCITY_THRESHOLD = 200;
   private static final int ONE_SECOND_IN_MILLIS = 1000;
 
   private Location lastValidLocation;
+  private int locationAcceptableAccuracyInMetersThreshold;
+  private int locationAccuracyPercentThreshold;
+  private int locationUpdateTimeInMillisThreshold;
+  private int locationVelocityInMetersPerSecondThreshold;
+
+  public LocationValidator(int locationAcceptableAccuracyInMetersThreshold, int locationAccuracyPercentThreshold,
+                           int locationUpdateTimeInMillisThreshold, int locationVelocityInMetersPerSecondThreshold) {
+    this.locationAcceptableAccuracyInMetersThreshold = locationAcceptableAccuracyInMetersThreshold;
+    this.locationAccuracyPercentThreshold = locationAccuracyPercentThreshold;
+    this.locationUpdateTimeInMillisThreshold = locationUpdateTimeInMillisThreshold;
+    this.locationVelocityInMetersPerSecondThreshold = locationVelocityInMetersPerSecondThreshold;
+  }
 
   public boolean isValidUpdate(@NonNull Location location) {
     if (checkLastValidLocation(location)) {
@@ -51,21 +60,29 @@ public class LocationValidator {
   }
 
   /**
-   * New location update is acceptable, even with worse accuracy, if it is from
-   * the same provider and is no more than {@link LocationValidator#TEN_PERCENT_ACCURACY_THRESHOLD} worse.
+   * New location accuracy is acceptable if it is less than or equal to
+   * {@link LocationValidator#locationAcceptableAccuracyInMetersThreshold}.
+   * <p>
+   * Otherwise, new location update is acceptable, even with worse accuracy, if it is from
+   * the same provider and is no more than {@link LocationValidator#locationAccuracyPercentThreshold} worse.
    *
    * @param location new location received
    * @return true if acceptable accuracy, false otherwise
    */
   private boolean isAccuracyAcceptable(@NonNull Location location) {
     float currentAccuracy = location.getAccuracy();
+    if (currentAccuracy <= locationAcceptableAccuracyInMetersThreshold) {
+      return true;
+    }
+
     float previousAccuracy = lastValidLocation.getAccuracy();
     float accuracyDifference = Math.abs(previousAccuracy - currentAccuracy);
 
     boolean improvedAccuracy = currentAccuracy <= previousAccuracy;
     boolean currentAccuracyWorse = currentAccuracy > previousAccuracy;
     boolean hasSameProvider = lastValidLocation.getProvider().equals(location.getProvider());
-    boolean lessThanPercentThreshold = (accuracyDifference <= (previousAccuracy / TEN_PERCENT_ACCURACY_THRESHOLD));
+    double percentThreshold = locationAccuracyPercentThreshold / 100.0;
+    boolean lessThanPercentThreshold = (accuracyDifference <= (previousAccuracy * percentThreshold));
     boolean lessAccuracyAcceptable = currentAccuracyWorse && hasSameProvider && lessThanPercentThreshold;
 
     return improvedAccuracy || lessAccuracyAcceptable;
@@ -88,7 +105,7 @@ public class LocationValidator {
 
     double velocityInMetersPerSecond = distanceInMeters / (timeSinceLastValidUpdate / ONE_SECOND_IN_MILLIS);
 
-    return velocityInMetersPerSecond <= TWO_HUNDRED_METERS_PER_SECOND_VELOCITY_THRESHOLD;
+    return velocityInMetersPerSecond <= locationVelocityInMetersPerSecondThreshold;
   }
 
   /**
@@ -100,6 +117,6 @@ public class LocationValidator {
    * @return true if valid location, false otherwise
    */
   private boolean isValidLocation(boolean accuracyAcceptable, long timeSinceLastValidUpdate) {
-    return accuracyAcceptable || timeSinceLastValidUpdate > FIVE_SECONDS_IN_MILLIS_UPDATE_THRESHOLD;
+    return accuracyAcceptable || timeSinceLastValidUpdate > locationUpdateTimeInMillisThreshold;
   }
 }
