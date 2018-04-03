@@ -3,11 +3,16 @@ package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.StepIntersection;
+import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
+import com.mapbox.turf.TurfConstants;
+import com.mapbox.turf.TurfMeasurement;
+import com.mapbox.turf.TurfMisc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +32,7 @@ import java.util.List;
 public abstract class RouteStepProgress {
 
   private static final String CLASS_TUNNEL = "tunnel";
+  public static final int FIRST_STEP_POINT = 0;
 
   abstract LegStep step();
 
@@ -64,9 +70,10 @@ public abstract class RouteStepProgress {
 
     abstract Builder tunnelIntersections(@NonNull List<StepIntersection> tunnelIntersections);
 
+    abstract Builder tunnelIntersectionDistances(@NonNull List<Pair<Double, Double>> tunnelIntersectionDistances);
+
     RouteStepProgress build() {
       LegStep step = step();
-      List<Point> stepPoints = stepPoints();
       double distanceRemaining = distanceRemaining();
       double distanceTraveled = calculateDistanceTraveled(step, distanceRemaining);
       distanceTraveled(distanceTraveled);
@@ -76,6 +83,7 @@ public abstract class RouteStepProgress {
       LegStep nextStep = nextStep();
       intersections(createIntersectionsList(step, nextStep));
       tunnelIntersections(createTunnelIntersectionsList(step));
+
 
       return autoBuild();
     }
@@ -133,6 +141,42 @@ public abstract class RouteStepProgress {
         }
       }
       return tunnelIntersections;
+    }
+
+    @NonNull
+    private List<Pair<Double, Double>> createDistancesToTunnelIntersections(LegStep step,
+                                                                            List<Point> stepPoints,
+                                                                            List<StepIntersection> tunnels) {
+      List<Pair<Double, Double>> distancesToTunnelIntersections = new ArrayList<>();
+      if (stepPoints.isEmpty()) {
+        return distancesToTunnelIntersections;
+      }
+      if (tunnels.isEmpty()) {
+        return distancesToTunnelIntersections;
+      }
+      List<StepIntersection> stepIntersections = step.intersections();
+      if (stepIntersections == null || stepIntersections.isEmpty()) {
+        return distancesToTunnelIntersections;
+      }
+
+      LineString stepLineString = LineString.fromLngLats(stepPoints);
+      Point firstStepPoint = stepPoints.get(FIRST_STEP_POINT);
+
+      for (int i = 0; i <= tunnels.size(); i++) {
+        StepIntersection tunnelIntersection = tunnels.get(i);
+
+        Point tunnelBeginningPoint = tunnelIntersection.location();
+        LineString beginningLineString = TurfMisc.lineSlice(firstStepPoint, tunnelBeginningPoint, stepLineString);
+        double distanceToBeginningOfTunnel = TurfMeasurement.length(beginningLineString, TurfConstants.UNIT_METERS);
+
+        int tunnelIntersectionIndex = stepIntersections.indexOf(tunnelIntersection);
+        Point tunnelEndingPoint = stepIntersections.get(tunnelIntersectionIndex + 1).location();
+        LineString endLineString = TurfMisc.lineSlice(firstStepPoint, tunnelEndingPoint, stepLineString);
+        double distanceToEndOfTunnel = TurfMeasurement.length(endLineString, TurfConstants.UNIT_METERS);
+
+        distancesToTunnelIntersections.add(new Pair<>(distanceToBeginningOfTunnel, distanceToEndOfTunnel));
+      }
+      return distancesToTunnelIntersections;
     }
   }
 
