@@ -192,17 +192,16 @@ public final class NavigationConstants {
   public static final String NAVIGATION_VIEW_RUNNING = "navigation_view_running";
 
   /**
-   * Default location time threshold
+   * Default location acceptable accuracy threshold
    * used in {@link com.mapbox.services.android.navigation.v5.location.LocationValidator}.
    * <p>
-   * If a device receives invalid updates for more than 5 seconds, the next location update will
-   * be considered valid, even if it does not meet the other validation criteria.
-   * <p>
-   * This is used as a last effort to push data to the SDK.
+   * If a new {@link android.location.Location} update is received from the LocationEngine that has
+   * an accuracy less than this threshold, the update will be considered valid and all other validation
+   * is not considered.
    *
    * @since 0.12.0
    */
-  static final int FIVE_SECONDS_IN_MILLIS_UPDATE_THRESHOLD = 5000;
+  static final int FIFTY_METER_ACCEPTABLE_ACCURACY_THRESHOLD = 50;
 
   /**
    * Default location accuracy threshold
@@ -214,6 +213,19 @@ public final class NavigationConstants {
    * @since 0.12.0
    */
   static final int TEN_PERCENT_ACCURACY_THRESHOLD = 10;
+
+  /**
+   * Default location time threshold
+   * used in {@link com.mapbox.services.android.navigation.v5.location.LocationValidator}.
+   * <p>
+   * If a device receives invalid updates for more than 5 seconds, the next location update will
+   * be considered valid, even if it does not meet the other validation criteria.
+   * <p>
+   * This is used as a last effort to push data to the SDK.
+   *
+   * @since 0.12.0
+   */
+  static final int FIVE_SECONDS_IN_MILLIS_UPDATE_THRESHOLD = 5000;
 
   /**
    * Default location velocity threshold

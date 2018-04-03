@@ -12,12 +12,14 @@ public class LocationValidator {
   private static final int ONE_SECOND_IN_MILLIS = 1000;
 
   private Location lastValidLocation;
+  private int locationAcceptableAccuracyThreshold;
   private int locationPercentAccuracyThreshold;
   private int locationUpdateTimeThreshold;
   private int locationVelocityThreshold;
 
-  public LocationValidator(int locationPercentAccuracyThreshold, int locationUpdateTimeThreshold,
-                           int locationVelocityThreshold) {
+  public LocationValidator(int locationAcceptableAccuracyThreshold, int locationPercentAccuracyThreshold,
+                           int locationUpdateTimeThreshold, int locationVelocityThreshold) {
+    this.locationAcceptableAccuracyThreshold = locationAcceptableAccuracyThreshold;
     this.locationPercentAccuracyThreshold = locationPercentAccuracyThreshold;
     this.locationUpdateTimeThreshold = locationUpdateTimeThreshold;
     this.locationVelocityThreshold = locationVelocityThreshold;
@@ -58,7 +60,10 @@ public class LocationValidator {
   }
 
   /**
-   * New location update is acceptable, even with worse accuracy, if it is from
+   * New location accuracy is acceptable if it is less than or equal to
+   * {@link LocationValidator#locationAcceptableAccuracyThreshold}.
+   * <p>
+   * Otherwise, new location update is acceptable, even with worse accuracy, if it is from
    * the same provider and is no more than {@link LocationValidator#locationPercentAccuracyThreshold} worse.
    *
    * @param location new location received
@@ -66,6 +71,10 @@ public class LocationValidator {
    */
   private boolean isAccuracyAcceptable(@NonNull Location location) {
     float currentAccuracy = location.getAccuracy();
+    if (currentAccuracy <= locationAcceptableAccuracyThreshold) {
+      return true;
+    }
+
     float previousAccuracy = lastValidLocation.getAccuracy();
     float accuracyDifference = Math.abs(previousAccuracy - currentAccuracy);
 

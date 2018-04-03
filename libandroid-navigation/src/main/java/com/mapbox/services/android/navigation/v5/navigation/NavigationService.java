@@ -278,10 +278,12 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   private void initLocationValidator() {
     MapboxNavigationOptions options = mapboxNavigation.options();
-    int accuracyThreshold = options.locationPercentAccuracyThreshold();
+    int accuracyAcceptableThreshold = options.locationAcceptableAccuracyThreshold();
+    int accuracyPercentThreshold = options.locationPercentAccuracyThreshold();
     int timeThreshold = options.locationUpdateTimeThreshold();
     int velocityThreshold = options.locationVelocityThreshold();
-    this.locationValidator = new LocationValidator(accuracyThreshold, timeThreshold, velocityThreshold);
+    this.locationValidator = new LocationValidator(accuracyAcceptableThreshold, accuracyPercentThreshold,
+      timeThreshold, velocityThreshold);
   }
 
   /**

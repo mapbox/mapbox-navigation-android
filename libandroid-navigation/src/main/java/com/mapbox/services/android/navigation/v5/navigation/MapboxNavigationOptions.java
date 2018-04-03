@@ -59,6 +59,8 @@ public abstract class MapboxNavigationOptions {
   @NavigationTimeFormat.Type
   public abstract int timeFormatType();
 
+  public abstract int locationAcceptableAccuracyThreshold();
+
   public abstract int locationPercentAccuracyThreshold();
 
   public abstract int locationUpdateTimeThreshold();
@@ -112,6 +114,8 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder timeFormatType(@NavigationTimeFormat.Type int type);
 
+    public abstract Builder locationAcceptableAccuracyThreshold(int locationAcceptableAccuracyThreshold);
+
     public abstract Builder locationPercentAccuracyThreshold(int locationPercentAccuracyThreshold);
 
     public abstract Builder locationUpdateTimeThreshold(int locationUpdateTimeThreshold);
@@ -142,6 +146,7 @@ public abstract class MapboxNavigationOptions {
       .isDebugLoggingEnabled(false)
       .unitType(NavigationUnitType.NONE_SPECIFIED)
       .timeFormatType(NavigationTimeFormat.NONE_SPECIFIED)
+      .locationAcceptableAccuracyThreshold(NavigationConstants.FIFTY_METER_ACCEPTABLE_ACCURACY_THRESHOLD)
       .locationPercentAccuracyThreshold(NavigationConstants.TEN_PERCENT_ACCURACY_THRESHOLD)
       .locationUpdateTimeThreshold(NavigationConstants.FIVE_SECONDS_IN_MILLIS_UPDATE_THRESHOLD)
       .locationVelocityThreshold(NavigationConstants.TWO_HUNDRED_METERS_PER_SECOND_VELOCITY_THRESHOLD);
