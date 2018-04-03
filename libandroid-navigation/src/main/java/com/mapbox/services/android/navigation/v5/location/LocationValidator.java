@@ -81,7 +81,8 @@ public class LocationValidator {
     boolean improvedAccuracy = currentAccuracy <= previousAccuracy;
     boolean currentAccuracyWorse = currentAccuracy > previousAccuracy;
     boolean hasSameProvider = lastValidLocation.getProvider().equals(location.getProvider());
-    boolean lessThanPercentThreshold = (accuracyDifference <= (previousAccuracy / locationPercentAccuracyThreshold));
+    double percentThreshold = locationPercentAccuracyThreshold / 100.0;
+    boolean lessThanPercentThreshold = (accuracyDifference <= (previousAccuracy * percentThreshold));
     boolean lessAccuracyAcceptable = currentAccuracyWorse && hasSameProvider && lessThanPercentThreshold;
 
     return improvedAccuracy || lessAccuracyAcceptable;
