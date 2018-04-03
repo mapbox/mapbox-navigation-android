@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.android.navigation.v5.location.LocationValidator;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.route.RouteEngine;
@@ -45,7 +46,6 @@ public class NavigationService extends Service implements LocationEngineListener
 
   // Message id used when a new location update occurs and we send to the thread.
   private static final int MSG_LOCATION_UPDATED = 1001;
-  private static final int HORIZONTAL_ACCURACY_THRESHOLD_IN_METERS = 100;
 
   private final IBinder localBinder = new LocalBinder();
 
@@ -53,6 +53,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private MapboxNavigation mapboxNavigation;
   private RouteEngine routeEngine;
   private LocationEngine locationEngine;
+  private LocationValidator locationValidator;
   private NavigationEngine thread;
   private Locale locale;
   private @NavigationUnitType.UnitType int unitType;
@@ -191,6 +192,7 @@ public class NavigationService extends Service implements LocationEngineListener
     initNotification(mapboxNavigation);
     initLocaleInfo(mapboxNavigation);
     initRouteEngine(mapboxNavigation);
+    initLocationValidator();
     acquireLocationEngine();
     forceLocationUpdate();
   }
@@ -271,6 +273,14 @@ public class NavigationService extends Service implements LocationEngineListener
   }
 
   /**
+   * Creates a new location validator used to filter incoming
+   * location updates from the location engine.
+   */
+  private void initLocationValidator() {
+    this.locationValidator = new LocationValidator();
+  }
+
+  /**
    * Starts the given notification flagged as a foreground service.
    *
    * @param notification   to be started
@@ -287,9 +297,7 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @SuppressWarnings("MissingPermission")
   private boolean isValidLocationUpdate(Location location) {
-    return location != null
-      && location.hasSpeed()
-      && location.getAccuracy() <= HORIZONTAL_ACCURACY_THRESHOLD_IN_METERS;
+    return location != null && locationValidator.isValidUpdate(location);
   }
 
   /**
