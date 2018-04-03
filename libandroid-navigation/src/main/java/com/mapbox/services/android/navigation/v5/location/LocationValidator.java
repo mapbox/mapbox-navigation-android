@@ -12,17 +12,17 @@ public class LocationValidator {
   private static final int ONE_SECOND_IN_MILLIS = 1000;
 
   private Location lastValidLocation;
-  private int locationAcceptableAccuracyThreshold;
-  private int locationPercentAccuracyThreshold;
-  private int locationUpdateTimeThreshold;
-  private int locationVelocityThreshold;
+  private int locationAcceptableAccuracyInMetersThreshold;
+  private int locationAccuracyPercentThreshold;
+  private int locationUpdateTimeInMillisThreshold;
+  private int locationVelocityInMetersPerSecondThreshold;
 
-  public LocationValidator(int locationAcceptableAccuracyThreshold, int locationPercentAccuracyThreshold,
-                           int locationUpdateTimeThreshold, int locationVelocityThreshold) {
-    this.locationAcceptableAccuracyThreshold = locationAcceptableAccuracyThreshold;
-    this.locationPercentAccuracyThreshold = locationPercentAccuracyThreshold;
-    this.locationUpdateTimeThreshold = locationUpdateTimeThreshold;
-    this.locationVelocityThreshold = locationVelocityThreshold;
+  public LocationValidator(int locationAcceptableAccuracyInMetersThreshold, int locationAccuracyPercentThreshold,
+                           int locationUpdateTimeInMillisThreshold, int locationVelocityInMetersPerSecondThreshold) {
+    this.locationAcceptableAccuracyInMetersThreshold = locationAcceptableAccuracyInMetersThreshold;
+    this.locationAccuracyPercentThreshold = locationAccuracyPercentThreshold;
+    this.locationUpdateTimeInMillisThreshold = locationUpdateTimeInMillisThreshold;
+    this.locationVelocityInMetersPerSecondThreshold = locationVelocityInMetersPerSecondThreshold;
   }
 
   public boolean isValidUpdate(@NonNull Location location) {
@@ -61,17 +61,17 @@ public class LocationValidator {
 
   /**
    * New location accuracy is acceptable if it is less than or equal to
-   * {@link LocationValidator#locationAcceptableAccuracyThreshold}.
+   * {@link LocationValidator#locationAcceptableAccuracyInMetersThreshold}.
    * <p>
    * Otherwise, new location update is acceptable, even with worse accuracy, if it is from
-   * the same provider and is no more than {@link LocationValidator#locationPercentAccuracyThreshold} worse.
+   * the same provider and is no more than {@link LocationValidator#locationAccuracyPercentThreshold} worse.
    *
    * @param location new location received
    * @return true if acceptable accuracy, false otherwise
    */
   private boolean isAccuracyAcceptable(@NonNull Location location) {
     float currentAccuracy = location.getAccuracy();
-    if (currentAccuracy <= locationAcceptableAccuracyThreshold) {
+    if (currentAccuracy <= locationAcceptableAccuracyInMetersThreshold) {
       return true;
     }
 
@@ -81,7 +81,7 @@ public class LocationValidator {
     boolean improvedAccuracy = currentAccuracy <= previousAccuracy;
     boolean currentAccuracyWorse = currentAccuracy > previousAccuracy;
     boolean hasSameProvider = lastValidLocation.getProvider().equals(location.getProvider());
-    double percentThreshold = locationPercentAccuracyThreshold / 100.0;
+    double percentThreshold = locationAccuracyPercentThreshold / 100.0;
     boolean lessThanPercentThreshold = (accuracyDifference <= (previousAccuracy * percentThreshold));
     boolean lessAccuracyAcceptable = currentAccuracyWorse && hasSameProvider && lessThanPercentThreshold;
 
@@ -105,7 +105,7 @@ public class LocationValidator {
 
     double velocityInMetersPerSecond = distanceInMeters / (timeSinceLastValidUpdate / ONE_SECOND_IN_MILLIS);
 
-    return velocityInMetersPerSecond <= locationVelocityThreshold;
+    return velocityInMetersPerSecond <= locationVelocityInMetersPerSecondThreshold;
   }
 
   /**
@@ -117,6 +117,6 @@ public class LocationValidator {
    * @return true if valid location, false otherwise
    */
   private boolean isValidLocation(boolean accuracyAcceptable, long timeSinceLastValidUpdate) {
-    return accuracyAcceptable || timeSinceLastValidUpdate > locationUpdateTimeThreshold;
+    return accuracyAcceptable || timeSinceLastValidUpdate > locationUpdateTimeInMillisThreshold;
   }
 }

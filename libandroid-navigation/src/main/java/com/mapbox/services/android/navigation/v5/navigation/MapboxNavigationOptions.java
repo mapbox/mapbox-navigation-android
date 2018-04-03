@@ -59,13 +59,13 @@ public abstract class MapboxNavigationOptions {
   @NavigationTimeFormat.Type
   public abstract int timeFormatType();
 
-  public abstract int locationAcceptableAccuracyThreshold();
+  public abstract int locationAcceptableAccuracyInMetersThreshold();
 
-  public abstract int locationPercentAccuracyThreshold();
+  public abstract int locationAccuracyPercentThreshold();
 
-  public abstract int locationUpdateTimeThreshold();
+  public abstract int locationUpdateTimeInMillisThreshold();
 
-  public abstract int locationVelocityThreshold();
+  public abstract int locationVelocityInMetersPerSecondThreshold();
 
   public abstract Builder toBuilder();
 
@@ -114,13 +114,13 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder timeFormatType(@NavigationTimeFormat.Type int type);
 
-    public abstract Builder locationAcceptableAccuracyThreshold(int locationAcceptableAccuracyThreshold);
+    public abstract Builder locationAcceptableAccuracyInMetersThreshold(int accuracyInMetersThreshold);
 
-    public abstract Builder locationPercentAccuracyThreshold(int locationPercentAccuracyThreshold);
+    public abstract Builder locationAccuracyPercentThreshold(int accuracyPercentThreshold);
 
-    public abstract Builder locationUpdateTimeThreshold(int locationUpdateTimeThreshold);
+    public abstract Builder locationUpdateTimeInMillisThreshold(int timeInMillisThreshold);
 
-    public abstract Builder locationVelocityThreshold(int locationVelocityThreshold);
+    public abstract Builder locationVelocityInMetersPerSecondThreshold(int metersPerSecondThreshold);
 
     public abstract MapboxNavigationOptions build();
   }
@@ -146,9 +146,9 @@ public abstract class MapboxNavigationOptions {
       .isDebugLoggingEnabled(false)
       .unitType(NavigationUnitType.NONE_SPECIFIED)
       .timeFormatType(NavigationTimeFormat.NONE_SPECIFIED)
-      .locationAcceptableAccuracyThreshold(NavigationConstants.FIFTY_METER_ACCEPTABLE_ACCURACY_THRESHOLD)
-      .locationPercentAccuracyThreshold(NavigationConstants.TEN_PERCENT_ACCURACY_THRESHOLD)
-      .locationUpdateTimeThreshold(NavigationConstants.FIVE_SECONDS_IN_MILLIS_UPDATE_THRESHOLD)
-      .locationVelocityThreshold(NavigationConstants.TWO_HUNDRED_METERS_PER_SECOND_VELOCITY_THRESHOLD);
+      .locationAcceptableAccuracyInMetersThreshold(NavigationConstants.FIFTY_METER_ACCEPTABLE_ACCURACY_THRESHOLD)
+      .locationAccuracyPercentThreshold(NavigationConstants.TEN_PERCENT_ACCURACY_THRESHOLD)
+      .locationUpdateTimeInMillisThreshold(NavigationConstants.FIVE_SECONDS_IN_MILLIS_UPDATE_THRESHOLD)
+      .locationVelocityInMetersPerSecondThreshold(NavigationConstants.TWO_HUNDRED_METERS_PER_SECOND_VELOCITY_THRESHOLD);
   }
 }
