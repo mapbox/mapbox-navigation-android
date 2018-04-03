@@ -70,6 +70,8 @@ public abstract class RouteStepProgress {
 
     abstract Builder tunnelIntersections(@NonNull List<StepIntersection> tunnelIntersections);
 
+    abstract List<StepIntersection> tunnelIntersections();
+
     abstract Builder tunnelIntersectionDistances(@NonNull List<Pair<Double, Double>> tunnelIntersectionDistances);
 
     RouteStepProgress build() {
@@ -83,7 +85,7 @@ public abstract class RouteStepProgress {
       LegStep nextStep = nextStep();
       intersections(createIntersectionsList(step, nextStep));
       tunnelIntersections(createTunnelIntersectionsList(step));
-
+      tunnelIntersectionDistances(createDistancesToTunnelIntersections(step, stepPoints(), tunnelIntersections()));
 
       return autoBuild();
     }
@@ -162,7 +164,7 @@ public abstract class RouteStepProgress {
       LineString stepLineString = LineString.fromLngLats(stepPoints);
       Point firstStepPoint = stepPoints.get(FIRST_STEP_POINT);
 
-      for (int i = 0; i <= tunnels.size(); i++) {
+      for (int i = 0; i < tunnels.size(); i++) {
         StepIntersection tunnelIntersection = tunnels.get(i);
 
         Point tunnelBeginningPoint = tunnelIntersection.location();
@@ -237,7 +239,18 @@ public abstract class RouteStepProgress {
    * The returned list will be empty if not intersections are found.
    *
    * @return list of intersections containing a tunnel class
-   * @since 0.12.0
+   * @since 0.13.0
    */
   public abstract List<StepIntersection> tunnelIntersections();
+
+  /**
+   * Provides a list of pairs containing two distances, in meters, along the route.
+   * <p>
+   * The first distance in the pair is the tunnel entrance along the step geometry.
+   * The second distance is the tunnel exit along the step geometry.
+   *
+   * @return list of pairs containing tunnnel entrance and exit distances
+   * @since 0.13.0
+   */
+  public abstract List<Pair<Double, Double>> tunnelIntersectionDistances();
 }
