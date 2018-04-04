@@ -10,12 +10,12 @@ import java.io.OutputStream;
 
 import okhttp3.ResponseBody;
 
-class InstructionTask extends AsyncTask<ResponseBody, Void, File> {
+class InstructionDownloadTask extends AsyncTask<ResponseBody, Void, File> {
   private static int instructionNamingInt = 1;
   private final String cacheDirectory;
   private final TaskListener taskListener;
 
-  InstructionTask(String cacheDirectory, TaskListener taskListener) {
+  InstructionDownloadTask(String cacheDirectory, TaskListener taskListener) {
     this.cacheDirectory = cacheDirectory;
     this.taskListener = taskListener;
   }
@@ -64,19 +64,19 @@ class InstructionTask extends AsyncTask<ResponseBody, Void, File> {
       }
 
     } catch (IOException exception) {
-      taskListener.onError();
+      taskListener.onErrorDownloading();
       return null;
     }
   }
 
   @Override
   protected void onPostExecute(File instructionFile) {
-    taskListener.onFinished(instructionFile);
+    taskListener.onFinishedDownloading(instructionFile);
   }
 
   public interface TaskListener {
-    void onFinished(File file);
+    void onFinishedDownloading(File file);
 
-    void onError();
+    void onErrorDownloading();
   }
 }

@@ -34,6 +34,7 @@ import timber.log.Timber;
 public class MapboxSpeechPlayer implements InstructionPlayer {
   private static final long TEN_MB_CACHE_SIZE = 10 * 1098 * 1098;
   private static final String SSML_TEXT_TYPE = "ssml";
+  private static final String ERROR_TEXT = "Unable to set data source for the media mediaPlayer! %s";
   private Queue<File> instructionQueue;
   private VoiceInstructionLoader voiceInstructionLoader;
   private MediaPlayer mediaPlayer;
@@ -172,8 +173,7 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
     try {
       mediaPlayer.setDataSource(instruction);
     } catch (IOException ioException) {
-      Timber.e("Unable to set data source for the media mediaPlayer! %s",
-        ioException.getMessage());
+      Timber.e(ERROR_TEXT, ioException.getMessage());
     }
   }
 
@@ -194,16 +194,16 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
         if (instructionListener != null) {
           instructionListener.onDone();
         }
-        onInstructionFinished();
+        onInstructionFinishedPlaying();
       }
     });
   }
 
-  private void onInstructionFinished() {
-    instructionQueue.poll().delete(); // delete the file for the instruction that just finishe
-    File nextInstruction = instructionQueue.peek();
-    if (nextInstruction != null) {
-      playInstruction(nextInstruction.getPath());
+  private void onInstructionFinishedPlaying() {
+    instructionQueue.poll().delete(); // delete the file for the instruction that just finished
+
+    if (!instructionQueue.isEmpty()) {
+      playInstruction(instructionQueue.peek().getPath());
     }
   }
 
@@ -214,18 +214,18 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
   }
 
   private void executeInstructionTask(ResponseBody responseBody) {
-    new InstructionTask(cacheDirectory, new InstructionTask.TaskListener() {
+    new InstructionDownloadTask(cacheDirectory, new InstructionDownloadTask.TaskListener() {
       @Override
-      public void onFinished(File instructionFile) {
-        instructionQueue.add(instructionFile);
-
-        if (instructionQueue.size() == 1) {
-          playInstruction(instructionQueue.peek().getPath());
+      public void onFinishedDownloading(File instructionFile) {
+        if (instructionQueue.isEmpty()) {
+          playInstruction(instructionFile.getPath());
         }
+
+        instructionQueue.add(instructionFile);
       }
 
       @Override
-      public void onError() {
+      public void onErrorDownloading() {
         if (instructionListener != null) {
           instructionListener.onError(true);
         }
