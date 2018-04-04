@@ -30,20 +30,6 @@ public class NavigationInstructionPlayer implements InstructionListener {
     instructionQueue = new ConcurrentLinkedQueue<>();
   }
 
-  private void initAudioFocusRequest() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      instructionFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
-        .build();
-    }
-  }
-
-  private void initInstructionPlayers(Context context, Locale locale) {
-    mapboxSpeechPlayer = new MapboxSpeechPlayer(context, locale);
-    mapboxSpeechPlayer.setInstructionListener(this);
-    androidSpeechPlayer = new AndroidSpeechPlayer(context, locale);
-    androidSpeechPlayer.setInstructionListener(this);
-  }
-
   public void play(VoiceInstructionMilestone voiceInstructionMilestone) {
     instructionQueue.add(voiceInstructionMilestone);
     mapboxSpeechPlayer.play(voiceInstructionMilestone.getSsmlAnnouncement());
@@ -80,7 +66,6 @@ public class NavigationInstructionPlayer implements InstructionListener {
       instructionListener.onStart();
     }
 
-    // Request audio focus
     requestAudioFocus();
     instructionQueue.remove();
   }
@@ -91,7 +76,6 @@ public class NavigationInstructionPlayer implements InstructionListener {
       instructionListener.onDone();
     }
 
-    // Abandon audio focus
     abandonAudioFocus();
   }
 
@@ -103,10 +87,22 @@ public class NavigationInstructionPlayer implements InstructionListener {
 
     if (isMapboxPlayer) { // If mapbox player failed, try android speech player
       androidSpeechPlayer.play(instructionQueue.peek().getAnnouncement());
+    } else { // If android speech player fails, just drop the instruction
+      instructionQueue.remove();
     }
+  }
 
-    // If android speech player fails, just drop the instruction
-    instructionQueue.remove();
+  private void initAudioFocusRequest() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      instructionFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK).build();
+    }
+  }
+
+  private void initInstructionPlayers(Context context, Locale locale) {
+    mapboxSpeechPlayer = new MapboxSpeechPlayer(context, locale);
+    mapboxSpeechPlayer.setInstructionListener(this);
+    androidSpeechPlayer = new AndroidSpeechPlayer(context, locale);
+    androidSpeechPlayer.setInstructionListener(this);
   }
 
   private void initAudioManager(Context context) {

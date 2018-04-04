@@ -298,8 +298,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    * Initializes the {@link InstructionPlayer}.
    */
   private void initVoiceInstructions() {
-    instructionPlayer = new NavigationInstructionPlayer(this.getApplication().getBaseContext(),
-      locale);
+    instructionPlayer = new NavigationInstructionPlayer(this.getApplication().getBaseContext(), locale);
   }
 
   /**

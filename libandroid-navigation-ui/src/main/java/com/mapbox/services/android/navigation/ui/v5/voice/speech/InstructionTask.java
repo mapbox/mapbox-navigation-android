@@ -10,7 +10,7 @@ import java.io.OutputStream;
 
 import okhttp3.ResponseBody;
 
-public class InstructionTask extends AsyncTask<ResponseBody, Void, File> {
+class InstructionTask extends AsyncTask<ResponseBody, Void, File> {
   private static int instructionNamingInt = 1;
   private final String cacheDirectory;
   private final TaskListener taskListener;
@@ -41,10 +41,10 @@ public class InstructionTask extends AsyncTask<ResponseBody, Void, File> {
         inputStream = responseBody.byteStream();
         outputStream = new FileOutputStream(file);
         byte[] buffer = new byte[4096];
-        int numOfBytes;
+        int numOfBufferedBytes;
 
-        while ((numOfBytes = inputStream.read(buffer)) != -1) { // -1 denotes end of file
-          outputStream.write(buffer, 0, numOfBytes);
+        while ((numOfBufferedBytes = inputStream.read(buffer)) != -1) { // -1 denotes end of file
+          outputStream.write(buffer, 0, numOfBufferedBytes);
         }
 
         outputStream.flush();

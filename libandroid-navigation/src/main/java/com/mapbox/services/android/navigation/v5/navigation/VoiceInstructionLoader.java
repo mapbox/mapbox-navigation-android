@@ -40,7 +40,7 @@ public class VoiceInstructionLoader {
       .enqueueCall(callback);
   }
 
-  public void cacheInstruction(String instruction) {
+  private void cacheInstruction(String instruction) {
     mapboxSpeech.instruction(instruction).build().enqueueCall(new Callback<ResponseBody>() {
       @Override
       public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {

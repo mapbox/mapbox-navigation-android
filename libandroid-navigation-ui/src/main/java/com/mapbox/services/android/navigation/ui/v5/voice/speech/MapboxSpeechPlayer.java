@@ -31,44 +31,57 @@ import timber.log.Timber;
  * Will retrieve synthesized speech mp3s from Mapbox's API Voice.
  * </p>
  */
-public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseBody> {
-  private static final long CACHE_SIZE = 10 * 1098 * 1098;
+public class MapboxSpeechPlayer implements InstructionPlayer {
+  private static final long TEN_MB_CACHE_SIZE = 10 * 1098 * 1098;
   private static final String SSML_TEXT_TYPE = "ssml";
-  VoiceInstructionLoader voiceInstructionLoader;
+  private Queue<File> instructionQueue;
+  private VoiceInstructionLoader voiceInstructionLoader;
   private MediaPlayer mediaPlayer;
   private InstructionListener instructionListener;
   private boolean isMuted;
   private String cacheDirectory;
-  Queue<File> instructionQueue;
 
   /**
    * Construct an instance of {@link MapboxSpeechPlayer}
    *
    * @param context   to initialize {@link CognitoCachingCredentialsProvider} and {@link AudioManager}
    */
-  public MapboxSpeechPlayer(Context context, Locale locale){
+  public MapboxSpeechPlayer(Context context, Locale locale) {
     this.cacheDirectory = context.getCacheDir().toString();
     instructionQueue = new ConcurrentLinkedQueue();
     voiceInstructionLoader = VoiceInstructionLoader.getInstance();
     voiceInstructionLoader.initialize(
       MapboxSpeech.builder()
         .language(locale.toString())
-        .cache(new Cache(context.getCacheDir(), CACHE_SIZE))
+        .cache(new Cache(context.getCacheDir(), TEN_MB_CACHE_SIZE))
         .accessToken(Mapbox.getAccessToken()));
   }
 
+  /**
+   * Sets the listener to listen for instruction events
+   *
+   * @param instructionListener listener to set
+   */
   public void setInstructionListener(InstructionListener instructionListener) {
     this.instructionListener = instructionListener;
   }
 
   /**
-   * @param instruction voice instruction to be synthesized and played.
+   * Plays the specified text instruction using MapboxSpeech API, defaulting to SSML input type
+   *
+   * @param instruction voice instruction to be synthesized and played
    */
   @Override
   public void play(String instruction) {
     play(instruction, SSML_TEXT_TYPE);
   }
 
+  /**
+   * Plays the specified text instruction using MapboxSpeech API
+   *
+   * @param instruction voice instruction to be synthesized and played
+   * @param textType either "ssml" or "text"
+   */
   public void play(String instruction, String textType) {
     if (!isMuted && !TextUtils.isEmpty(instruction)) {
       getVoiceFile(instruction, textType);
@@ -119,7 +132,21 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
   }
 
   private void getVoiceFile(final String instruction, String textType) {
-    voiceInstructionLoader.getInstruction(instruction, textType, this);
+    voiceInstructionLoader.getInstruction(instruction, textType, new Callback<ResponseBody>() {
+      @Override
+      public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+        if (response.isSuccessful()) {
+          executeInstructionTask(response.body());
+        }
+      }
+
+      @Override
+      public void onFailure(Call<ResponseBody> call, Throwable throwable) {
+        if (instructionListener != null) {
+          instructionListener.onError(true);
+        }
+      }
+    });
   }
 
   private void playInstruction(String instruction) {
@@ -173,7 +200,7 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
   }
 
   private void onInstructionFinished() {
-    instructionQueue.poll().delete(); // delete the file for the instruction that just finished
+    instructionQueue.poll().delete(); // delete the file for the instruction that just finishe
     File nextInstruction = instructionQueue.peek();
     if (nextInstruction != null) {
       playInstruction(nextInstruction.getPath());
@@ -183,20 +210,6 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
   private void clearInstructionUrls() {
     while (!instructionQueue.isEmpty()) {
       instructionQueue.remove().delete();
-    }
-  }
-
-  @Override
-  public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-    if (response.isSuccessful()) {
-      executeInstructionTask(response.body());
-    }
-  }
-
-  @Override
-  public void onFailure(Call<ResponseBody> call, Throwable throwable) {
-    if (instructionListener != null) {
-      instructionListener.onError(true);
     }
   }
 
