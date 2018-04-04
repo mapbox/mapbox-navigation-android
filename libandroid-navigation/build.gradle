@@ -19,6 +19,7 @@ android {
         "MAPBOX_NAVIGATION_EVENTS_USER_AGENT", String.format("\"mapbox-navigation-android/%s\"",
         project.VERSION_NAME
     )
+    consumerProguardFiles 'proguard-consumer.pro'
   }
 
   configurations {
@@ -28,10 +29,6 @@ android {
   buildTypes {
     debug {
       testCoverageEnabled = true
-    }
-    release {
-      minifyEnabled false
-      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
   }
 
