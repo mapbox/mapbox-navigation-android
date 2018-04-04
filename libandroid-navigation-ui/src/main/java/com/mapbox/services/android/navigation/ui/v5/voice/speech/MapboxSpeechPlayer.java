@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import android.text.TextUtils;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
-import com.mapbox.api.speech.v1.MapboxSpeech;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionListener;
 import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
@@ -50,12 +49,11 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
   public MapboxSpeechPlayer(Context context, Locale locale) {
     this.cacheDirectory = context.getCacheDir().toString();
     instructionQueue = new ConcurrentLinkedQueue();
-    voiceInstructionLoader = VoiceInstructionLoader.getInstance();
-    voiceInstructionLoader.initialize(
-      MapboxSpeech.builder()
-        .language(locale.toString())
-        .cache(new Cache(context.getCacheDir(), TEN_MB_CACHE_SIZE))
-        .accessToken(Mapbox.getAccessToken()));
+    voiceInstructionLoader = VoiceInstructionLoader.builder()
+      .language(locale.toString())
+      .cache(new Cache(context.getCacheDir(), TEN_MB_CACHE_SIZE))
+      .accessToken(Mapbox.getAccessToken())
+      .build();
   }
 
   /**

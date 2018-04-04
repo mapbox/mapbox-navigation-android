@@ -1,5 +1,9 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.api.speech.v1.MapboxSpeech;
@@ -8,36 +12,28 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.Cache;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class VoiceInstructionLoader {
+public abstract class VoiceInstructionLoader {
   private static final int NUMBER_TO_CACHE = 3;
-  private static VoiceInstructionLoader instance;
-  private MapboxSpeech.Builder mapboxSpeech;
+  private static VoiceInstructionLoader instance = null;
 
   private VoiceInstructionLoader() {
 
   }
 
-  public static synchronized VoiceInstructionLoader getInstance() {
-    if (instance == null) {
-      instance = new VoiceInstructionLoader();
-    }
-
-    return instance;
-  }
-
   /**
-   * Initializes singleton with details that will exist for all calls to MapboxSpeech, i.e. cache,
-   * locale, accessToken.
+   * Returns the singleton instance of VoiceInstructionLoader. It must first be initialized through
+   * a builder.
    *
-   * @param builder to reuse
+   * @return current instance if it's initialized, or null
    */
-  public void initialize(MapboxSpeech.Builder builder) {
-    mapboxSpeech = builder;
+  public static synchronized VoiceInstructionLoader getInstance() {
+    return instance;
   }
 
   /**
@@ -48,22 +44,25 @@ public class VoiceInstructionLoader {
    * @param callback to relay retrofit status
    */
   public void getInstruction(String instruction, String textType, Callback<ResponseBody> callback) {
-    mapboxSpeech.instruction(instruction)
+    getMapboxBuilder()
+      .instruction(instruction)
       .textType(textType)
       .build()
       .enqueueCall(callback);
   }
 
   /**
-   * Makes call to MapboxSpeech
+   * Makes call to MapboxSpeech with empty callbacks. This is so that the result is cached in the
+   * cache specified in the builder.
    *
-   * @param routeProgress
-   * @param first
+   * @param routeProgress to get instructions from
+   * @param isFirst whether this is the first call. This way, if we're caching three ahead, on the
+   *                first call the first two instructions will also be cached.
    */
-  public void cacheInstructions(RouteProgress routeProgress, boolean first) {
+  public void cacheInstructions(RouteProgress routeProgress, boolean isFirst) {
     List<VoiceInstructions> voiceInstructions = getNextInstructions(routeProgress);
 
-    if (first) {
+    if (isFirst) {
       for (int i = 0; i <= NUMBER_TO_CACHE - 1; i++) {
         if (voiceInstructions.size() > i) {
           cacheInstruction(voiceInstructions.get(i).ssmlAnnouncement());
@@ -77,7 +76,7 @@ public class VoiceInstructionLoader {
   }
 
   private void cacheInstruction(String instruction) {
-    mapboxSpeech.instruction(instruction).build().enqueueCall(new Callback<ResponseBody>() {
+    getMapboxBuilder().instruction(instruction).build().enqueueCall(new Callback<ResponseBody>() {
       @Override
       public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
 
@@ -88,6 +87,43 @@ public class VoiceInstructionLoader {
 
       }
     });
+  }
+
+  @Nullable
+  abstract String language();
+
+  @Nullable
+  abstract String textType();
+
+  @Nullable
+  abstract String outputType();
+
+  @Nullable
+  abstract Cache cache();
+
+  @NonNull
+  abstract String accessToken();
+
+  private MapboxSpeech.Builder getMapboxBuilder() {
+    MapboxSpeech.Builder builder = MapboxSpeech.builder().accessToken(accessToken());
+
+    if (language() != null) {
+      builder.language(language());
+    }
+
+    if (textType() != null) {
+      builder.textType(textType());
+    }
+
+    if (outputType() != null) {
+      builder.outputType(outputType());
+    }
+
+    if (cache() != null) {
+      builder.cache(cache());
+    }
+
+    return builder;
   }
 
   private List<VoiceInstructions> getNextInstructions(RouteProgress routeProgress) {
@@ -103,5 +139,63 @@ public class VoiceInstructionLoader {
         instructions.addAll(currentStepInstructions.subList(0, NUMBER_TO_CACHE));
       }
     }
+
+    return instructions;
+  }
+
+
+  @AutoValue.Builder
+  public abstract static class Builder {
+    /**
+     * Language of which to request the instructions be spoken. Default is "en-us"
+     *
+     * @param language as a string, i.e., "en-us"
+     * @return this builder for chaining options together
+     */
+    public abstract Builder language(String language);
+
+    /**
+     * Format which the input is specified. If not specified, default is text
+     *
+     * @param textType either text or ssml
+     * @return this builder for chaining options together
+     */
+    public abstract Builder textType(String textType);
+
+    /**
+     * Output format for spoken instructions. If not specified, default is mp3
+     *
+     * @param outputType either mp3 or json
+     * @return this builder for chaining options together
+     */
+    public abstract Builder outputType(String outputType);
+
+    /**
+     * Required to call when this is being built.
+     *
+     * @param accessToken Mapbox access token, You must have a Mapbox account in order to use
+     *                    the Optimization API
+     * @return this builder for chaining options together
+     */
+    public abstract Builder accessToken(@NonNull String accessToken);
+
+    /**
+     * Adds an optional cache to set in the OkHttp client.
+     *
+     * @param cache to set for OkHttp
+     * @return this builder for chaining options together
+     */
+    public abstract Builder cache(Cache cache);
+
+    abstract VoiceInstructionLoader autoBuild();
+
+    public VoiceInstructionLoader build() {
+      instance = autoBuild();
+      return instance;
+    }
+  }
+
+  public static Builder builder() {
+    return new AutoValue_VoiceInstructionLoader.Builder();
   }
 }
