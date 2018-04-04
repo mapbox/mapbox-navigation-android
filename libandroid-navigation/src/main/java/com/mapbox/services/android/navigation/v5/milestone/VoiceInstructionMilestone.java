@@ -25,8 +25,7 @@ public class VoiceInstructionMilestone extends Milestone {
 
   @Override
   public boolean isOccurring(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-    boolean newRoute = newRoute(routeProgress);
-    if (newRoute) {
+    if (isNewRoute(routeProgress)) {
       clearInstructionList();
       voiceInstructionLoader.cacheInstructions(routeProgress, true);
     }
@@ -121,7 +120,7 @@ public class VoiceInstructionMilestone extends Milestone {
    * @param routeProgress provides updated route information
    * @return true if new route, false if not
    */
-  private boolean newRoute(RouteProgress routeProgress) {
+  private boolean isNewRoute(RouteProgress routeProgress) {
     boolean newRoute = currentRoute == null || !currentRoute.equals(routeProgress.directionsRoute());
     currentRoute = routeProgress.directionsRoute();
     return newRoute;

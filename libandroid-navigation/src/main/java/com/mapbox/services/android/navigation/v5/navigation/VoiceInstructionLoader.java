@@ -14,6 +14,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class VoiceInstructionLoader {
+  private static final int NUMBER_TO_CACHE = 3;
   private static VoiceInstructionLoader instance;
   private MapboxSpeech.Builder mapboxSpeech;
 
@@ -29,15 +30,50 @@ public class VoiceInstructionLoader {
     return instance;
   }
 
+  /**
+   * Initializes singleton with details that will exist for all calls to MapboxSpeech, i.e. cache,
+   * locale, accessToken.
+   *
+   * @param builder to reuse
+   */
   public void initialize(MapboxSpeech.Builder builder) {
     mapboxSpeech = builder;
   }
 
+  /**
+   * Makes the call to MapboxSpeech to get the given string instruction as a sound file.
+   *
+   * @param instruction text to dictate
+   * @param textType "ssml" or "text"
+   * @param callback to relay retrofit status
+   */
   public void getInstruction(String instruction, String textType, Callback<ResponseBody> callback) {
     mapboxSpeech.instruction(instruction)
       .textType(textType)
       .build()
       .enqueueCall(callback);
+  }
+
+  /**
+   * Makes call to MapboxSpeech
+   *
+   * @param routeProgress
+   * @param first
+   */
+  public void cacheInstructions(RouteProgress routeProgress, boolean first) {
+    List<VoiceInstructions> voiceInstructions = getNextInstructions(routeProgress);
+
+    if (first) {
+      for (int i = 0; i <= NUMBER_TO_CACHE - 1; i++) {
+        if (voiceInstructions.size() > i) {
+          cacheInstruction(voiceInstructions.get(i).ssmlAnnouncement());
+        }
+      }
+    } else {
+      if (voiceInstructions.size() >= NUMBER_TO_CACHE) {
+        cacheInstruction(voiceInstructions.get(NUMBER_TO_CACHE - 1).ssmlAnnouncement());
+      }
+    }
   }
 
   private void cacheInstruction(String instruction) {
@@ -54,31 +90,17 @@ public class VoiceInstructionLoader {
     });
   }
 
-  public void cacheInstructions(RouteProgress routeProgress, boolean first) {
+  private List<VoiceInstructions> getNextInstructions(RouteProgress routeProgress) {
     int stepIndex = routeProgress.currentLegProgress().stepIndex();
     List<LegStep> steps = routeProgress.currentLeg().steps();
     List<VoiceInstructions> instructions = new ArrayList<>();
 
-    while (instructions.size() < 3 && stepIndex < steps.size()) {
+    while (instructions.size() < NUMBER_TO_CACHE && stepIndex < steps.size()) {
       List<VoiceInstructions> currentStepInstructions = steps.get(stepIndex++).voiceInstructions();
-      if (currentStepInstructions.size() < 4) {
+      if (currentStepInstructions.size() <= NUMBER_TO_CACHE) {
         instructions.addAll(currentStepInstructions);
-      } else { // in case there are a large number of instructions
-        instructions.addAll(currentStepInstructions.subList(0, 3));
-      }
-    }
-
-    if (first) {
-      if (instructions.size() > 0) {
-        cacheInstruction(instructions.get(0).ssmlAnnouncement());
-      }
-
-      if (instructions.size() > 1) {
-        cacheInstruction(instructions.get(1).ssmlAnnouncement());
-      }
-    } else {
-      if (instructions.size() > 2) {
-        cacheInstruction(instructions.get(2).ssmlAnnouncement());
+      } else {
+        instructions.addAll(currentStepInstructions.subList(0, NUMBER_TO_CACHE));
       }
     }
   }
