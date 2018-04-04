@@ -18,13 +18,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+@AutoValue
 public abstract class VoiceInstructionLoader {
   private static final int NUMBER_TO_CACHE = 3;
   private static VoiceInstructionLoader instance = null;
-
-  private VoiceInstructionLoader() {
-
-  }
 
   /**
    * Returns the singleton instance of VoiceInstructionLoader. It must first be initialized through
