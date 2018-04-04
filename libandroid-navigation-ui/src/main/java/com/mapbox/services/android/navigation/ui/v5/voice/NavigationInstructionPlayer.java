@@ -38,8 +38,10 @@ public class NavigationInstructionPlayer implements InstructionListener {
   }
 
   private void initInstructionPlayers(Context context, Locale locale) {
-    mapboxSpeechPlayer = new MapboxSpeechPlayer(context, locale, this);
-    androidSpeechPlayer = new AndroidSpeechPlayer(context, locale, this);
+    mapboxSpeechPlayer = new MapboxSpeechPlayer(context, locale);
+    mapboxSpeechPlayer.setInstructionListener(this);
+    androidSpeechPlayer = new AndroidSpeechPlayer(context, locale);
+    androidSpeechPlayer.setInstructionListener(this);
   }
 
   public void play(VoiceInstructionMilestone voiceInstructionMilestone) {
@@ -68,7 +70,7 @@ public class NavigationInstructionPlayer implements InstructionListener {
     androidSpeechPlayer.onDestroy();
   }
 
-  public void addInstructionListener(InstructionListener instructionListener) {
+  public void setInstructionListener(InstructionListener instructionListener) {
     this.instructionListener = instructionListener;
   }
 

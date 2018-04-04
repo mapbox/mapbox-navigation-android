@@ -46,8 +46,7 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
    *
    * @param context   to initialize {@link CognitoCachingCredentialsProvider} and {@link AudioManager}
    */
-  public MapboxSpeechPlayer(Context context, Locale locale, InstructionListener instructionListener) {
-    this.instructionListener = instructionListener;
+  public MapboxSpeechPlayer(Context context, Locale locale){
     this.cacheDirectory = context.getCacheDir().toString();
     instructionQueue = new ConcurrentLinkedQueue();
     voiceInstructionLoader = VoiceInstructionLoader.getInstance();
@@ -56,6 +55,10 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
         .language(locale.toString())
         .cache(new Cache(context.getCacheDir(), CACHE_SIZE))
         .accessToken(Mapbox.getAccessToken()));
+  }
+
+  public void setInstructionListener(InstructionListener instructionListener) {
+    this.instructionListener = instructionListener;
   }
 
   /**
@@ -106,7 +109,9 @@ public class MapboxSpeechPlayer implements InstructionPlayer, Callback<ResponseB
       if (mediaPlayer != null && mediaPlayer.isPlaying()) {
         mediaPlayer.stop();
         mediaPlayer.release();
-        instructionListener.onDone();
+        if (instructionListener != null) {
+          instructionListener.onDone();
+        }
       }
     } catch (IllegalStateException exception) {
       Timber.e(exception.getMessage());

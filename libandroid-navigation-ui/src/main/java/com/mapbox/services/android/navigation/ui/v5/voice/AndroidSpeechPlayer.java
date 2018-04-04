@@ -16,14 +16,12 @@ import java.util.Locale;
  *
  * @since 0.6.0
  */
-public class AndroidSpeechPlayer implements InstructionPlayer, TextToSpeech.OnInitListener {
+public class AndroidSpeechPlayer implements InstructionPlayer {
 
   private static final String DEFAULT_UTTERANCE_ID = "default_id";
 
-  private InstructionListener instructionListener;
   private TextToSpeech textToSpeech;
   private boolean isMuted;
-  private Locale locale;
 
   /**
    * Creates an instance of {@link AndroidSpeechPlayer}.
@@ -31,29 +29,12 @@ public class AndroidSpeechPlayer implements InstructionPlayer, TextToSpeech.OnIn
    * @param context used to create an instance of {@link TextToSpeech}
    * @since 0.6.0
    */
-  AndroidSpeechPlayer(Context context, Locale locale, InstructionListener instructionListener) {
-    this.locale = locale;
-    this.instructionListener = instructionListener;
-    textToSpeech = new TextToSpeech(context, this);
-    textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+  AndroidSpeechPlayer(Context context, final Locale locale) {
+    textToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
       @Override
-      public void onStart(String utteranceId) {
-        if (AndroidSpeechPlayer.this.instructionListener != null) {
-          AndroidSpeechPlayer.this.instructionListener.onStart();
-        }
-      }
-
-      @Override
-      public void onDone(String utteranceId) {
-        if (AndroidSpeechPlayer.this.instructionListener != null) {
-          AndroidSpeechPlayer.this.instructionListener.onDone();
-        }
-      }
-
-      @Override
-      public void onError(String utteranceId) {
-        if (AndroidSpeechPlayer.this.instructionListener != null) {
-          AndroidSpeechPlayer.this.instructionListener.onError(false);
+      public void onInit(int status) {
+        if (status != TextToSpeech.ERROR) {
+          textToSpeech.setLanguage(locale);
         }
       }
     });
@@ -103,13 +84,6 @@ public class AndroidSpeechPlayer implements InstructionPlayer, TextToSpeech.OnIn
     }
   }
 
-  @Override
-  public void onInit(int status) {
-    if (status != TextToSpeech.ERROR) {
-      textToSpeech.setLanguage(locale);
-    }
-  }
-
   /**
    * Called when setting muted mid-instruction.
    * Mutes TTS only if currently speaking.
@@ -118,5 +92,30 @@ public class AndroidSpeechPlayer implements InstructionPlayer, TextToSpeech.OnIn
     if (textToSpeech.isSpeaking()) {
       textToSpeech.stop();
     }
+  }
+
+  public void setInstructionListener(final InstructionListener instructionListener) {
+    textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+      @Override
+      public void onStart(String utteranceId) {
+        if (instructionListener != null) {
+          instructionListener.onStart();
+        }
+      }
+
+      @Override
+      public void onDone(String utteranceId) {
+        if (instructionListener != null) {
+          instructionListener.onDone();
+        }
+      }
+
+      @Override
+      public void onError(String utteranceId) {
+        if (instructionListener != null) {
+          instructionListener.onError(false);
+        }
+      }
+    });
   }
 }
