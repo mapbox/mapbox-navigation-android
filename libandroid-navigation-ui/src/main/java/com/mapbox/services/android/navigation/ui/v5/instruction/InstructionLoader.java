@@ -125,12 +125,7 @@ public class InstructionLoader {
       List<BannerShieldInfo> shieldUrls = new ArrayList<>();
 
       List<BannerComponents> bannerComponents = bannerText.components();
-      Collections.sort(bannerComponents, new Comparator<BannerComponents>() {
-        @Override
-        public int compare(BannerComponents bannerComponents, BannerComponents t1) {
-          return bannerComponents.abbreviationPriority().compareTo(t1.abbreviationPriority());
-        }
-      });
+      Collections.sort(bannerComponents);
 
       for (BannerComponents components : bannerText.components()) {
         if (hasBaseUrl(components)) {

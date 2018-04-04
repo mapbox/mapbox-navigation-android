@@ -19,8 +19,24 @@
 
     <string name="title_embedded_navigation">Embedded Navigation</string>
     <string name="description_embedded_navigation">Navigation in a view which contains other views</string>
+
+    <string name="title_fragment_navigation">NavigationView implemented with Fragment</string>
+    <string name="description_fragment_navigation">NavigationView implemented with Fragment</string>
+
     <string name="settings">Settings</string>
     <string name="simulate_route">Simulate Route</string>
     <string name="language">Language</string>
     <string name="unit_type">Unit Type</string>
+    <string name="route_profile">Route Profile</string>
+
+    <string name="unit_type_key">unit_type</string>
+    <string name="simulate_route_key">simulate_route</string>
+    <string name="language_key">language</string>
+    <string name="route_profile_key">route_profile</string>
+    <string name="language_default_value_device_locale">device_locale</string>
+
+    <string name="error_route_not_available">Current route is not available</string>
+    <string name="error_select_longer_route">Please select a longer route</string>
+    <string name="error_valid_route_not_found">Valid route not found.</string>
+    <string name="explanation_long_press_waypoint">Long press map to place waypoint</string>
 </resources>

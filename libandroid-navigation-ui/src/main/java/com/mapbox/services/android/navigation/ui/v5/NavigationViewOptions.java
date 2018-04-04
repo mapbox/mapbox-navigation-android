@@ -15,32 +15,9 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOpti
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 
 @AutoValue
-public abstract class NavigationViewOptions {
-
-  @Nullable
-  public abstract DirectionsRoute directionsRoute();
-
-  @Nullable
-  public abstract String directionsProfile();
-
-  @Nullable
-  public abstract Point origin();
-
-  @Nullable
-  public abstract Point destination();
-
-  @Nullable
-  public abstract String awsPoolId();
+public abstract class NavigationViewOptions extends NavigationOptions {
 
   public abstract MapboxNavigationOptions navigationOptions();
-
-  public abstract boolean shouldSimulateRoute();
-
-  @Nullable
-  public abstract Integer lightThemeResId();
-
-  @Nullable
-  public abstract Integer darkThemeResId();
 
   @Nullable
   public abstract FeedbackListener feedbackListener();
@@ -73,13 +50,13 @@ public abstract class NavigationViewOptions {
 
     public abstract Builder awsPoolId(String awsPoolId);
 
-    public abstract Builder navigationOptions(MapboxNavigationOptions navigationOptions);
-
-    public abstract Builder shouldSimulateRoute(boolean shouldSimulateRoute);
-
     public abstract Builder lightThemeResId(Integer lightThemeResId);
 
     public abstract Builder darkThemeResId(Integer darkThemeResId);
+
+    public abstract Builder shouldSimulateRoute(boolean shouldSimulateRoute);
+
+    public abstract Builder navigationOptions(MapboxNavigationOptions navigationOptions);
 
     public abstract Builder feedbackListener(FeedbackListener feedbackListener);
 
