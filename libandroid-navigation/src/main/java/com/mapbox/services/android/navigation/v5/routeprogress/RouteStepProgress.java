@@ -87,6 +87,7 @@ public abstract class RouteStepProgress {
 
   abstract LegStep step();
 
+  @Nullable
   abstract LegStep nextStep();
 
   @AutoValue.Builder
