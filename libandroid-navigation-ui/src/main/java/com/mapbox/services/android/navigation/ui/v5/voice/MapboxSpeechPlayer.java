@@ -44,7 +44,7 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
    *
    * @param context   to initialize {@link CognitoCachingCredentialsProvider} and {@link AudioManager}
    */
-  public MapboxSpeechPlayer(Context context, Locale locale) {
+  MapboxSpeechPlayer(Context context, Locale locale) {
     this.cacheDirectory = context.getCacheDir().toString();
     instructionQueue = new ConcurrentLinkedQueue();
     voiceInstructionLoader = VoiceInstructionLoader.builder()
