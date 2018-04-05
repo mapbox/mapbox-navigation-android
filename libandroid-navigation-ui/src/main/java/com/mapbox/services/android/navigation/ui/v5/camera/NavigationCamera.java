@@ -24,7 +24,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
  *
  * @since 0.6.0
  */
-public class NavigationCamera implements ProgressChangeListener {
+public class NavigationCamera {
 
   private static final long MAX_ANIMATION_DURATION_MS = 1500;
 
@@ -61,7 +61,7 @@ public class NavigationCamera implements ProgressChangeListener {
       currentRouteInformation = buildRouteInformationFromRoute(route);
       animateCameraFromRoute(currentRouteInformation);
     } else {
-      navigation.addProgressChangeListener(NavigationCamera.this);
+      navigation.addProgressChangeListener(progressChangeListener);
     }
   }
 
@@ -79,27 +79,9 @@ public class NavigationCamera implements ProgressChangeListener {
     if (location != null) {
       currentRouteInformation = buildRouteInformationFromLocation(location, null);
       animateCameraFromLocation(currentRouteInformation);
-      navigation.addProgressChangeListener(NavigationCamera.this);
+      navigation.addProgressChangeListener(progressChangeListener);
     } else {
-      navigation.addProgressChangeListener(NavigationCamera.this);
-    }
-  }
-
-  /**
-   * Used to update the camera position.
-   * <p>
-   * {@link Location} is also stored in case the user scrolls the map and the camera
-   * will eventually need to return to that last location update.
-   *
-   * @param location      used to update the camera position
-   * @param routeProgress ignored in this scenario
-   * @since 0.6.0
-   */
-  @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    if (trackingEnabled) {
-      currentRouteInformation = buildRouteInformationFromLocation(location, routeProgress);
-      animateCameraFromLocation(currentRouteInformation);
+      navigation.addProgressChangeListener(progressChangeListener);
     }
   }
 
@@ -138,6 +120,25 @@ public class NavigationCamera implements ProgressChangeListener {
       animateCameraFromLocation(currentRouteInformation);
     }
   }
+
+  /**
+   * Used to update the camera position.
+   * <p>
+   * {@link Location} is also stored in case the user scrolls the map and the camera
+   * will eventually need to return to that last location update.
+   *
+   * @param location      used to update the camera position
+   * @param routeProgress ignored in this scenario
+   */
+  ProgressChangeListener progressChangeListener = new ProgressChangeListener() {
+    @Override
+    public void onProgressChange(Location location, RouteProgress routeProgress) {
+      if (trackingEnabled) {
+        currentRouteInformation = buildRouteInformationFromLocation(location, routeProgress);
+        animateCameraFromLocation(currentRouteInformation);
+      }
+    }
+  };
 
   private void initialize() {
     mapboxMap.setMinZoomPreference(7d);
@@ -221,12 +222,12 @@ public class NavigationCamera implements ProgressChangeListener {
     updateMapCameraPosition(position, new MapboxMap.CancelableCallback() {
       @Override
       public void onCancel() {
-        navigation.addProgressChangeListener(NavigationCamera.this);
+        navigation.addProgressChangeListener(progressChangeListener);
       }
 
       @Override
       public void onFinish() {
-        navigation.addProgressChangeListener(NavigationCamera.this);
+        navigation.addProgressChangeListener(progressChangeListener);
       }
     });
   }
