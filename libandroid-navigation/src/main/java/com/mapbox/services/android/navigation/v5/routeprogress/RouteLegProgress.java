@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
 
 import java.util.List;
@@ -24,39 +25,6 @@ import java.util.List;
  */
 @AutoValue
 public abstract class RouteLegProgress {
-
-  /**
-   * Not public since developer can access same information from {@link RouteProgress}.
-   */
-  abstract RouteLeg routeLeg();
-
-  /**
-   * Constructor for the route leg progress information.
-   *
-   * @param routeLeg            the current {@link RouteLeg} the user is traversing along
-   * @param stepIndex           the current step index the user is on
-   * @param legDistanceRemaining the leg distance remaining which is calculated in navigation engine
-   * @param stepDistanceRemaining the step distance remaining which is calculated in navigation engine
-   * @since 0.1.0
-   */
-  static RouteLegProgress create(RouteLeg routeLeg, int stepIndex, double legDistanceRemaining,
-                                 List<Point> stepPoints, double stepDistanceRemaining) {
-
-    int lastStepIndex = routeLeg.steps().size() - 1;
-    boolean isOnLastStep = stepIndex == lastStepIndex;
-    int nextStepIndex = stepIndex + 1;
-    LegStep nextStep = isOnLastStep ? null : routeLeg.steps().get(nextStepIndex);
-
-    LegStep currentStep = routeLeg.steps().get(stepIndex);
-    RouteStepProgress stepProgress = RouteStepProgress.builder()
-      .step(currentStep)
-      .stepPoints(stepPoints)
-      .nextStep(nextStep)
-      .distanceRemaining(stepDistanceRemaining)
-      .build();
-
-    return new AutoValue_RouteLegProgress(routeLeg, stepIndex, legDistanceRemaining, stepProgress);
-  }
 
   /**
    * Index representing the current step the user is on.
@@ -184,4 +152,91 @@ public abstract class RouteLegProgress {
    * @since 0.1.0
    */
   public abstract RouteStepProgress currentStepProgress();
+
+  /**
+   * Provides a list of points that represent the current step
+   * step geometry.
+   *
+   * @return list of points representing the current step
+   * @since 0.12.0
+   */
+  public abstract List<Point> currentStepPoints();
+
+  /**
+   * Provides a list of points that represent the upcoming step
+   * step geometry.
+   *
+   * @return list of points representing the upcoming step
+   * @since 0.12.0
+   */
+  @Nullable
+  public abstract List<Point> upcomingStepPoints();
+
+  /**
+   * Not public since developer can access same information from {@link RouteProgress}.
+   */
+  abstract RouteLeg routeLeg();
+
+  abstract double stepDistanceRemaining();
+
+  abstract List<StepIntersection> intersections();
+
+  abstract List<Double> intersectionDistancesAlongStep();
+
+  @AutoValue.Builder
+  public abstract static class Builder {
+
+    abstract Builder routeLeg(RouteLeg routeLeg);
+
+    abstract RouteLeg routeLeg();
+
+    abstract Builder stepIndex(int stepIndex);
+
+    abstract int stepIndex();
+
+    abstract Builder stepDistanceRemaining(double stepDistanceRemaining);
+
+    abstract double stepDistanceRemaining();
+
+    abstract Builder distanceRemaining(double distanceRemaining);
+
+    abstract Builder currentStepProgress(RouteStepProgress routeStepProgress);
+
+    abstract Builder currentStepPoints(List<Point> currentStepPoints);
+
+    abstract Builder upcomingStepPoints(@Nullable List<Point> upcomingStepPoints);
+
+    abstract Builder intersections(List<StepIntersection> intersections);
+
+    abstract List<StepIntersection> intersections();
+
+    abstract Builder intersectionDistancesAlongStep(List<Double> intersectionDistancesAlongStep);
+
+    abstract List<Double> intersectionDistancesAlongStep();
+
+    abstract RouteLegProgress autoBuild(); // not public
+
+    public RouteLegProgress build() {
+      int lastStepIndex = routeLeg().steps().size() - 1;
+      boolean isOnLastStep = stepIndex() == lastStepIndex;
+      int nextStepIndex = stepIndex() + 1;
+      LegStep nextStep = isOnLastStep ? null : routeLeg().steps().get(nextStepIndex);
+
+      LegStep currentStep = routeLeg().steps().get(stepIndex());
+      RouteStepProgress stepProgress = RouteStepProgress.builder()
+        .step(currentStep)
+        .nextStep(nextStep)
+        .distanceRemaining(stepDistanceRemaining())
+        .intersections(intersections())
+        .intersectionDistancesAlongStep(intersectionDistancesAlongStep())
+        .build();
+      currentStepProgress(stepProgress);
+
+      return autoBuild();
+    }
+  }
+
+  public static Builder builder() {
+    return new AutoValue_RouteLegProgress.Builder();
+  }
 }
