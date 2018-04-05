@@ -48,38 +48,27 @@ public class RouteStepProgressTest extends BaseTest {
   }
 
   @Test
-  public void sanityTest() {
-    RouteProgress routeProgress = RouteProgress.builder()
-      .currentStepPoints(
-        PolylineUtils.decode(route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
-      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
-      .legDistanceRemaining(route.legs().get(0).distance())
-      .distanceRemaining(route.distance())
-      .directionsRoute(route)
-      .stepIndex(0)
-      .legIndex(0)
-      .build();
+  public void sanityTest() throws Exception {
+    double stepDistanceRemaining = route.legs().get(0).steps().get(0).distance();
+    double legDistanceRemaining = route.legs().get(0).distance();
+    double distanceRemaining = route.distance();
+    RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining, legDistanceRemaining,
+      distanceRemaining, 0, 0);
+
     assertNotNull("should not be null", routeProgress.currentLegProgress().currentStepProgress());
   }
 
   @Test
-  public void stepDistance_equalsZeroOnOneCoordSteps() throws IOException {
+  public void stepDistance_equalsZeroOnOneCoordSteps() throws Exception {
     Gson gson = new GsonBuilder()
       .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
     String body = loadJsonFixture(DCMAPBOX_CHIPOLTLE);
     response = gson.fromJson(body, DirectionsResponse.class);
     DirectionsRoute route = response.routes().get(0);
 
-    RouteProgress routeProgress = RouteProgress.builder()
-      .currentStepPoints(
-        PolylineUtils.decode(route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
-      .stepDistanceRemaining(0)
-      .legDistanceRemaining(0)
-      .distanceRemaining(0)
-      .directionsRoute(route)
-      .stepIndex(route.legs().get(0).steps().size() - 1)
-      .legIndex(0)
-      .build();
+    int stepIndex = route.legs().get(0).steps().size() - 1;
+    RouteProgress routeProgress = buildRouteProgress(route, 0, 0,
+      0, stepIndex, 0);
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
 
     assertNotNull("should not be null", routeStepProgress);
@@ -90,28 +79,24 @@ public class RouteStepProgressTest extends BaseTest {
   }
 
   @Test
-  public void distanceRemaining_equalsStepDistanceAtBeginning() {
+  public void distanceRemaining_equalsStepDistanceAtBeginning() throws Exception {
     LineString lineString
       = LineString.fromPolyline(firstLeg.steps().get(5).geometry(), Constants.PRECISION_6);
     double stepDistance = TurfMeasurement.length(lineString, TurfConstants.UNIT_METERS);
 
-    RouteProgress routeProgress = RouteProgress.builder()
-      .currentStepPoints(
-        PolylineUtils.decode(route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
-      .stepDistanceRemaining(firstLeg.steps().get(5).distance())
-      .legDistanceRemaining(firstLeg.distance())
-      .distanceRemaining(route.distance())
-      .directionsRoute(route)
-      .stepIndex(4)
-      .legIndex(0)
-      .build();
+    double stepDistanceRemaining = firstLeg.steps().get(5).distance();
+    double legDistanceRemaining = firstLeg.distance();
+    double distanceRemaining = route.distance();
+    int stepIndex = 4;
+    RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+      legDistanceRemaining, distanceRemaining, stepIndex, 0);
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
 
     assertEquals(stepDistance, routeStepProgress.distanceRemaining(), BaseTest.LARGE_DELTA);
   }
 
   @Test
-  public void distanceRemaining_equalsCorrectValueAtIntervals() {
+  public void distanceRemaining_equalsCorrectValueAtIntervals() throws Exception {
     LineString lineString
       = LineString.fromPolyline(firstStep.geometry(), Constants.PRECISION_6);
     double stepDistance = TurfMeasurement.length(lineString, TurfConstants.UNIT_METERS);
@@ -129,59 +114,42 @@ public class RouteStepProgressTest extends BaseTest {
       LineString slicedLine = TurfMisc.lineSlice(point,
         route.legs().get(0).steps().get(1).maneuver().location(), lineString);
 
-      double distance = TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
-      RouteProgress routeProgress = RouteProgress.builder()
-        .currentStepPoints(
-          PolylineUtils.decode(route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
-        .stepDistanceRemaining(distance)
-        .legDistanceRemaining(firstLeg.distance())
-        .distanceRemaining(route.distance())
-        .directionsRoute(route)
-        .stepIndex(0)
-        .legIndex(0)
-        .build();
+      double stepDistanceRemaining = TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
+      double legDistanceRemaining = firstLeg.distance();
+      double distanceRemaining = route.distance();
+      RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+        legDistanceRemaining, distanceRemaining, 0, 0);
       RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
-      assertEquals(distance, routeStepProgress.distanceRemaining(), BaseTest.DELTA);
+
+      assertEquals(stepDistanceRemaining, routeStepProgress.distanceRemaining(), BaseTest.DELTA);
     }
   }
 
   @Test
-  public void distanceRemaining_equalsZeroAtEndOfStep() {
-
-    RouteProgress routeProgress = RouteProgress.builder()
-      .currentStepPoints(
-        PolylineUtils.decode(route.legs().get(0).steps().get(3).geometry(), Constants.PRECISION_6))
-      .stepDistanceRemaining(0)
-      .legDistanceRemaining(0)
-      .distanceRemaining(0)
-      .directionsRoute(route)
-      .stepIndex(3)
-      .legIndex(0)
-      .build();
+  public void distanceRemaining_equalsZeroAtEndOfStep() throws Exception {
+    RouteProgress routeProgress = buildRouteProgress(route, 0,
+      0, 0, 3, 0);
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
 
     assertEquals(0, routeStepProgress.distanceRemaining(), BaseTest.DELTA);
   }
 
   @Test
-  public void distanceTraveled_equalsZeroAtBeginning() {
-    RouteProgress routeProgress = RouteProgress.builder()
-      .currentStepPoints(
-        PolylineUtils.decode(route.legs().get(0).steps().get(5).geometry(), Constants.PRECISION_6))
-      .stepDistanceRemaining(firstLeg.steps().get(5).distance())
-      .legDistanceRemaining(firstLeg.distance())
-      .distanceRemaining(route.distance())
-      .directionsRoute(route)
-      .stepIndex(5)
-      .legIndex(0)
-      .build();
-
+  public void distanceTraveled_equalsZeroAtBeginning() throws Exception {
+    int stepIndex = 5;
+    int legIndex = 0;
+    double stepDistanceRemaining = firstLeg.steps().get(stepIndex).distance();
+    double legDistanceRemaining = firstLeg.distance();
+    double distanceRemaining = route.distance();
+    RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+      legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
+
     assertEquals(0, routeStepProgress.distanceTraveled(), BaseTest.DELTA);
   }
 
   @Test
-  public void distanceTraveled_equalsCorrectValueAtIntervals() {
+  public void distanceTraveled_equalsCorrectValueAtIntervals() throws Exception {
     LineString lineString = LineString.fromPolyline(firstStep.geometry(), Constants.PRECISION_6);
 
     double stepSegments = 5; // meters
@@ -198,16 +166,13 @@ public class RouteStepProgressTest extends BaseTest {
       if (distance < 0) {
         distance = 0;
       }
-      RouteProgress routeProgress = RouteProgress.builder()
-        .stepDistanceRemaining(firstLeg.steps().get(0).distance() - distance)
-        .currentStepPoints(
-          PolylineUtils.decode(route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
-        .legDistanceRemaining(firstLeg.distance())
-        .distanceRemaining(route.distance())
-        .directionsRoute(route)
-        .stepIndex(0)
-        .legIndex(0)
-        .build();
+      int stepIndex = 0;
+      int legIndex = 0;
+      double stepDistanceRemaining = firstLeg.steps().get(0).distance() - distance;
+      double legDistanceRemaining = firstLeg.distance();
+      double distanceRemaining = route.distance();
+      RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+        legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
       RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
 
       assertEquals(distance, routeStepProgress.distanceTraveled(), BaseTest.DELTA);
@@ -215,41 +180,36 @@ public class RouteStepProgressTest extends BaseTest {
   }
 
   @Test
-  public void distanceTraveled_equalsStepDistanceAtEndOfStep() {
-    RouteProgress routeProgress = RouteProgress.builder()
-      .currentStepPoints(
-        PolylineUtils.decode(route.legs().get(0).steps().get(3).geometry(), Constants.PRECISION_6))
-      .stepDistanceRemaining(0)
-      .legDistanceRemaining(firstLeg.distance())
-      .distanceRemaining(route.distance())
-      .directionsRoute(route)
-      .stepIndex(3)
-      .legIndex(0)
-      .build();
+  public void distanceTraveled_equalsStepDistanceAtEndOfStep() throws Exception {
+    int stepIndex = 3;
+    int legIndex = 0;
+    double stepDistanceRemaining = 0;
+    double legDistanceRemaining = firstLeg.distance();
+    double distanceRemaining = route.distance();
+    RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+      legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
+
     assertEquals(firstLeg.steps().get(3).distance(),
       routeStepProgress.distanceTraveled(), BaseTest.DELTA);
   }
 
   @Test
-  public void fractionTraveled_equalsZeroAtBeginning() {
-    RouteProgress routeProgress = RouteProgress.builder()
-      .currentStepPoints(
-        PolylineUtils.decode(route.legs().get(0).steps().get(5).geometry(), Constants.PRECISION_6))
-      .stepDistanceRemaining(firstLeg.steps().get(5).distance())
-      .legDistanceRemaining(firstLeg.distance())
-      .distanceRemaining(route.distance())
-      .directionsRoute(route)
-      .stepIndex(5)
-      .legIndex(0)
-      .build();
+  public void fractionTraveled_equalsZeroAtBeginning() throws Exception {
+    int stepIndex = 5;
+    int legIndex = 0;
+    double stepDistanceRemaining = firstLeg.steps().get(stepIndex).distance();
+    double legDistanceRemaining = firstLeg.distance();
+    double distanceRemaining = route.distance();
+    RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+      legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
 
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
     assertEquals(0, routeStepProgress.fractionTraveled(), BaseTest.DELTA);
   }
 
   @Test
-  public void fractionTraveled_equalsCorrectValueAtIntervals() {
+  public void fractionTraveled_equalsCorrectValueAtIntervals() throws Exception {
     LineString lineString
       = LineString.fromPolyline(firstStep.geometry(), Constants.PRECISION_6);
 
@@ -262,66 +222,54 @@ public class RouteStepProgressTest extends BaseTest {
       LineString slicedLine = TurfMisc.lineSlice(point,
         route.legs().get(0).steps().get(1).maneuver().location(), lineString);
 
-      double distance = TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
+      double stepDistanceRemaining = TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
 
-      RouteProgress routeProgress = RouteProgress.builder()
-        .currentStepPoints(
-          PolylineUtils.decode(route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
-        .stepDistanceRemaining(distance)
-        .legDistanceRemaining(firstLeg.distance())
-        .distanceRemaining(route.distance())
-        .directionsRoute(route)
-        .stepIndex(0)
-        .legIndex(0)
-        .build();
-
+      int stepIndex = 0;
+      int legIndex = 0;
+      double legDistanceRemaining = firstLeg.distance();
+      double distanceRemaining = route.distance();
+      RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+        legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
       RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
-
-      float fractionRemaining = (float) ((firstStep.distance() - distance) / firstStep.distance());
+      float fractionRemaining = (float) ((firstStep.distance() - stepDistanceRemaining) / firstStep.distance());
       if (fractionRemaining < 0) {
         fractionRemaining = 0;
       }
+
       assertEquals(fractionRemaining, routeStepProgress.fractionTraveled(), DELTA);
     }
   }
 
   @Test
-  public void fractionTraveled_equalsOneAtEndOfStep() {
-
-    RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(0)
-      .currentStepPoints(
-        PolylineUtils.decode(route.legs().get(0).steps().get(3).geometry(), Constants.PRECISION_6))
-      .legDistanceRemaining(firstLeg.distance())
-      .distanceRemaining(route.distance())
-      .directionsRoute(route)
-      .stepIndex(3)
-      .legIndex(0)
-      .build();
-
+  public void fractionTraveled_equalsOneAtEndOfStep() throws Exception {
+    int stepIndex = 3;
+    int legIndex = 0;
+    double stepDistanceRemaining = 0;
+    double legDistanceRemaining = firstLeg.distance();
+    double distanceRemaining = route.distance();
+    RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+      legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
+
     assertEquals(1.0, routeStepProgress.fractionTraveled(), BaseTest.DELTA);
   }
 
   @Test
-  public void durationRemaining_equalsStepDurationAtBeginning() {
-    RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(firstLeg.steps().get(5).distance())
-      .currentStepPoints(
-        PolylineUtils.decode(route.legs().get(0).steps().get(5).geometry(), Constants.PRECISION_6))
-      .legDistanceRemaining(firstLeg.distance())
-      .distanceRemaining(route.distance())
-      .directionsRoute(route)
-      .stepIndex(5)
-      .legIndex(0)
-      .build();
-
+  public void durationRemaining_equalsStepDurationAtBeginning() throws Exception {
+    int stepIndex = 5;
+    int legIndex = 0;
+    double stepDistanceRemaining = firstLeg.steps().get(stepIndex).distance();
+    double legDistanceRemaining = firstLeg.distance();
+    double distanceRemaining = route.distance();
+    RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+      legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
+
     assertEquals(41.5, routeStepProgress.durationRemaining(), BaseTest.DELTA);
   }
 
   @Test
-  public void durationRemaining_equalsCorrectValueAtIntervals() {
+  public void durationRemaining_equalsCorrectValueAtIntervals() throws Exception {
     LineString lineString
       = LineString.fromPolyline(firstStep.geometry(), Constants.PRECISION_6);
 
@@ -334,21 +282,16 @@ public class RouteStepProgressTest extends BaseTest {
       LineString slicedLine = TurfMisc.lineSlice(point,
         route.legs().get(0).steps().get(1).maneuver().location(), lineString);
 
-      double distance = TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
-
-      RouteProgress routeProgress = RouteProgress.builder()
-        .stepDistanceRemaining(distance)
-        .currentStepPoints(
-          PolylineUtils.decode(route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6))
-        .legDistanceRemaining(firstLeg.distance())
-        .distanceRemaining(route.distance())
-        .directionsRoute(route)
-        .stepIndex(0)
-        .legIndex(0)
-        .build();
-
+      int stepIndex = 0;
+      int legIndex = 0;
+      double stepDistanceRemaining = TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
+      double legDistanceRemaining = firstLeg.distance();
+      double distanceRemaining = route.distance();
+      RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+        legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
       RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
-      double fractionRemaining = (firstStep.distance() - distance) / firstStep.distance();
+      double fractionRemaining = (firstStep.distance() - stepDistanceRemaining) / firstStep.distance();
+
       assertEquals((1.0 - fractionRemaining) * firstStep.duration(),
         routeStepProgress.durationRemaining(), BaseTest.LARGE_DELTA);
     }
@@ -356,35 +299,29 @@ public class RouteStepProgressTest extends BaseTest {
   }
 
   @Test
-  public void durationRemaining_equalsZeroAtEndOfStep() {
-    RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(0)
-      .currentStepPoints(
-        PolylineUtils.decode(route.legs().get(0).steps().get(3).geometry(), Constants.PRECISION_6))
-      .legDistanceRemaining(firstLeg.distance())
-      .distanceRemaining(route.distance())
-      .directionsRoute(route)
-      .stepIndex(3)
-      .legIndex(0)
-      .build();
+  public void durationRemaining_equalsZeroAtEndOfStep() throws Exception {
+    int stepIndex = 3;
+    int legIndex = 0;
+    double stepDistanceRemaining = 0;
+    double legDistanceRemaining = firstLeg.distance();
+    double distanceRemaining = route.distance();
+    RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+      legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
+
     assertEquals(0, routeStepProgress.durationRemaining(), BaseTest.DELTA);
   }
 
   @Test
   public void stepIntersections_includesAllStepIntersectionsAndNextManeuver() throws Exception {
-    RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(0)
-      .currentStepPoints(
-        PolylineUtils.decode(route.legs().get(0).steps().get(3).geometry(), Constants.PRECISION_6))
-      .legDistanceRemaining(firstLeg.distance())
-      .distanceRemaining(route.distance())
-      .directionsRoute(route)
-      .stepIndex(3)
-      .legIndex(0)
-      .build();
+    int stepIndex = 3;
+    int legIndex = 0;
+    double stepDistanceRemaining = 0;
+    double legDistanceRemaining = firstLeg.distance();
+    double distanceRemaining = route.distance();
+    RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+      legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
-
     int currentStepTotal = route.legs().get(0).steps().get(3).intersections().size();
     Point maneuverLocation = route.legs().get(0).steps().get(4).maneuver().location();
 
@@ -395,23 +332,17 @@ public class RouteStepProgressTest extends BaseTest {
 
   @Test
   public void stepIntersections_handlesNullNextManeuverCorrectly() throws Exception {
-    int lastStepIndex = (route.legs().get(0).steps().size() - 1);
-
-    RouteProgress routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(0)
-      .currentStepPoints(
-        PolylineUtils.decode(route.legs().get(0).steps().get(lastStepIndex).geometry(), Constants.PRECISION_6))
-      .legDistanceRemaining(firstLeg.distance())
-      .distanceRemaining(route.distance())
-      .directionsRoute(route)
-      .stepIndex(lastStepIndex)
-      .legIndex(0)
-      .build();
+    int stepIndex = (route.legs().get(0).steps().size() - 1);
+    int legIndex = 0;
+    double stepDistanceRemaining = 0;
+    double legDistanceRemaining = firstLeg.distance();
+    double distanceRemaining = route.distance();
+    RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+      legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
-
-    int currentStepTotal = route.legs().get(0).steps().get(lastStepIndex).intersections().size();
+    int currentStepTotal = route.legs().get(0).steps().get(stepIndex).intersections().size();
     List<Point> lastStepLocation = PolylineUtils.decode(
-      route.legs().get(0).steps().get(lastStepIndex).geometry(), Constants.PRECISION_6);
+      route.legs().get(0).steps().get(stepIndex).geometry(), Constants.PRECISION_6);
 
     assertEquals(currentStepTotal, routeStepProgress.intersections().size());
     assertEquals(routeStepProgress.intersections().get(0).location().latitude(), lastStepLocation.get(0).latitude());

@@ -7,25 +7,14 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
-import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowLocationManager;
-
-import java.io.IOException;
-import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21, shadows = {ShadowLocationManager.class})
 public class RouteProgressTest extends BaseTest {
 
   // Fixtures
@@ -38,7 +27,7 @@ public class RouteProgressTest extends BaseTest {
   private RouteProgress lastRouteProgress;
 
   @Before
-  public void setup() throws IOException {
+  public void setup() throws Exception {
     Gson gson = new GsonBuilder()
       .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
     String body = loadJsonFixture(DIRECTIONS_PRECISION_6);
@@ -55,15 +44,12 @@ public class RouteProgressTest extends BaseTest {
 
     int stepIndex = firstLeg.steps().size() - 1;
     LegStep step = route.legs().get(0).steps().get(stepIndex);
-    lastRouteProgress = RouteProgress.builder()
-      .stepDistanceRemaining(step.distance())
-      .legDistanceRemaining(route.legs().get(0).distance())
-      .distanceRemaining(0)
-      .directionsRoute(route)
-      .currentStepPoints(buildStepPointsFromGeometry(step.geometry()))
-      .stepIndex(stepIndex)
-      .legIndex(route.legs().size() - 1)
-      .build();
+    int legIndex = route.legs().size() - 1;
+    double legDistanceRemaining = route.legs().get(0).distance();
+    double stepDistanceRemaining = step.distance();
+
+    lastRouteProgress = buildRouteProgress(route, stepDistanceRemaining,
+      legDistanceRemaining, 0, stepIndex, legIndex);
   }
 
   @Test
@@ -92,18 +78,13 @@ public class RouteProgressTest extends BaseTest {
   }
 
   @Test
-  public void fractionTraveled_equalsCorrectValueAtIntervals() {
+  public void fractionTraveled_equalsCorrectValueAtIntervals() throws Exception {
     for (int stepIndex = 0; stepIndex < route.legs().get(0).steps().size(); stepIndex++) {
-      LegStep step = multiLegRoute.legs().get(0).steps().get(stepIndex);
-      RouteProgress routeProgress = RouteProgress.builder()
-        .stepDistanceRemaining(getFirstStep(multiLegRoute).distance())
-        .legDistanceRemaining(multiLegRoute.legs().get(0).distance())
-        .distanceRemaining(multiLegRoute.distance())
-        .directionsRoute(multiLegRoute)
-        .stepIndex(stepIndex)
-        .currentStepPoints(buildStepPointsFromGeometry(step.geometry()))
-        .legIndex(0)
-        .build();
+      double stepDistanceRemaining = getFirstStep(multiLegRoute).distance();
+      double legDistanceRemaining = multiLegRoute.legs().get(0).distance();
+      double distanceRemaining = multiLegRoute.distance();
+      RouteProgress routeProgress = buildRouteProgress(multiLegRoute, stepDistanceRemaining,
+        legDistanceRemaining, distanceRemaining, stepIndex, 0);
       float fractionRemaining = (float) (routeProgress.distanceTraveled() / route.distance());
 
       assertEquals(fractionRemaining, routeProgress.fractionTraveled(), BaseTest.LARGE_DELTA);
@@ -150,21 +131,21 @@ public class RouteProgressTest extends BaseTest {
    */
 
   @Test
-  public void multiLeg_distanceRemaining_equalsRouteDistanceAtBeginning() {
+  public void multiLeg_distanceRemaining_equalsRouteDistanceAtBeginning() throws Exception {
     RouteProgress routeProgress = buildBeginningOfLegRouteProgress(multiLegRoute);
 
     assertEquals(multiLegRoute.distance(), routeProgress.distanceRemaining(), LARGE_DELTA);
   }
 
   @Test
-  public void multiLeg_distanceRemaining_equalsZeroAtEndOfRoute() {
+  public void multiLeg_distanceRemaining_equalsZeroAtEndOfRoute() throws Exception {
     RouteProgress routeProgress = buildEndOfMultiRouteProgress();
 
     assertEquals(0, routeProgress.distanceRemaining(), DELTA);
   }
 
   @Test
-  public void multiLeg_fractionTraveled_equalsZeroAtBeginning() {
+  public void multiLeg_fractionTraveled_equalsZeroAtBeginning() throws Exception {
     RouteProgress routeProgress = buildBeginningOfLegRouteProgress(multiLegRoute);
 
     assertEquals(0, routeProgress.fractionTraveled(), BaseTest.LARGE_DELTA);
@@ -172,19 +153,14 @@ public class RouteProgressTest extends BaseTest {
 
   // TODO check fut
   @Test
-  public void multiLeg_getFractionTraveled_equalsCorrectValueAtIntervals() {
+  public void multiLeg_getFractionTraveled_equalsCorrectValueAtIntervals() throws Exception {
     for (RouteLeg leg : multiLegRoute.legs()) {
       for (int stepIndex = 0; stepIndex < leg.steps().size(); stepIndex++) {
-        LegStep step = multiLegRoute.legs().get(0).steps().get(stepIndex);
-        RouteProgress routeProgress = RouteProgress.builder()
-          .stepDistanceRemaining(getFirstStep(multiLegRoute).distance())
-          .legDistanceRemaining(multiLegRoute.legs().get(0).distance())
-          .distanceRemaining(multiLegRoute.distance())
-          .directionsRoute(multiLegRoute)
-          .stepIndex(stepIndex)
-          .currentStepPoints(buildStepPointsFromGeometry(step.geometry()))
-          .legIndex(0)
-          .build();
+        double stepDistanceRemaining = getFirstStep(multiLegRoute).distance();
+        double legDistanceRemaining = multiLegRoute.legs().get(0).distance();
+        double distanceRemaining = multiLegRoute.distance();
+        RouteProgress routeProgress = buildRouteProgress(multiLegRoute, stepDistanceRemaining,
+          legDistanceRemaining, distanceRemaining, stepIndex, 0);
         float fractionRemaining = (float) (routeProgress.distanceTraveled() / multiLegRoute.distance());
 
         assertEquals(fractionRemaining, routeProgress.fractionTraveled(), BaseTest.LARGE_DELTA);
@@ -193,42 +169,42 @@ public class RouteProgressTest extends BaseTest {
   }
 
   @Test
-  public void multiLeg_getFractionTraveled_equalsOneAtEndOfRoute() {
+  public void multiLeg_getFractionTraveled_equalsOneAtEndOfRoute() throws Exception {
     RouteProgress routeProgress = buildEndOfMultiRouteProgress();
 
     assertEquals(1.0, routeProgress.fractionTraveled(), DELTA);
   }
 
   @Test
-  public void multiLeg_getDurationRemaining_equalsRouteDurationAtBeginning() {
+  public void multiLeg_getDurationRemaining_equalsRouteDurationAtBeginning() throws Exception {
     RouteProgress routeProgress = buildBeginningOfLegRouteProgress(multiLegRoute);
 
     assertEquals(2858.1, routeProgress.durationRemaining(), BaseTest.LARGE_DELTA);
   }
 
   @Test
-  public void multiLeg_getDurationRemaining_equalsZeroAtEndOfRoute() {
+  public void multiLeg_getDurationRemaining_equalsZeroAtEndOfRoute() throws Exception {
     RouteProgress routeProgress = buildEndOfMultiRouteProgress();
 
     assertEquals(0, routeProgress.durationRemaining(), BaseTest.DELTA);
   }
 
   @Test
-  public void multiLeg_getDistanceTraveled_equalsZeroAtBeginning() {
+  public void multiLeg_getDistanceTraveled_equalsZeroAtBeginning() throws Exception {
     RouteProgress routeProgress = buildBeginningOfLegRouteProgress(multiLegRoute);
 
     assertEquals(0, routeProgress.distanceTraveled(), BaseTest.LARGE_DELTA);
   }
 
   @Test
-  public void multiLeg_getDistanceTraveled_equalsRouteDistanceAtEndOfRoute() {
+  public void multiLeg_getDistanceTraveled_equalsRouteDistanceAtEndOfRoute() throws Exception {
     RouteProgress routeProgress = buildEndOfMultiRouteProgress();
 
     assertEquals(multiLegRoute.distance(), routeProgress.distanceTraveled(), BaseTest.DELTA);
   }
 
   @Test
-  public void multiLeg_getLegIndex_returnsCurrentLegIndex() {
+  public void multiLeg_getLegIndex_returnsCurrentLegIndex() throws Exception {
     RouteProgress routeProgress = buildBeginningOfLegRouteProgress(multiLegRoute);
     routeProgress = routeProgress.toBuilder().legIndex(1).build();
 
@@ -242,32 +218,21 @@ public class RouteProgressTest extends BaseTest {
     assertEquals(2, routeProgress.remainingWaypoints());
   }
 
-  private RouteProgress buildBeginningOfLegRouteProgress(DirectionsRoute route) {
+  private RouteProgress buildBeginningOfLegRouteProgress(DirectionsRoute route) throws Exception {
     LegStep step = getFirstStep(route);
-    List<Point> currentStepPoints = buildStepPointsFromGeometry(step.geometry());
-    return RouteProgress.builder()
-      .stepDistanceRemaining(step.distance())
-      .legDistanceRemaining(route.legs().get(0).distance())
-      .distanceRemaining(route.distance())
-      .directionsRoute(route)
-      .currentStepPoints(currentStepPoints)
-      .stepIndex(0)
-      .legIndex(0)
-      .build();
+    double stepDistanceRemaining = step.distance();
+    double legDistanceRemaining = route.legs().get(0).distance();
+    double distanceRemaining = route.distance();
+    return buildRouteProgress(route, stepDistanceRemaining, legDistanceRemaining,
+      distanceRemaining, 0, 0);
   }
 
-  private RouteProgress buildEndOfMultiRouteProgress() {
+  private RouteProgress buildEndOfMultiRouteProgress() throws Exception {
     int legIndex = multiLegRoute.legs().size() - 1;
     int stepIndex = multiLegRoute.legs().get(legIndex).steps().size() - 1;
-    LegStep currentStep = multiLegRoute.legs().get(legIndex).steps().get(stepIndex);
-    return RouteProgress.builder()
-      .stepDistanceRemaining(multiLegRoute.legs().get(0).steps().get(stepIndex).distance())
-      .legDistanceRemaining(multiLegRoute.legs().get(0).distance())
-      .distanceRemaining(0)
-      .directionsRoute(multiLegRoute)
-      .currentStepPoints(buildStepPointsFromGeometry(currentStep.geometry()))
-      .stepIndex(stepIndex)
-      .legIndex(legIndex)
-      .build();
+    double stepDistanceRemaining = multiLegRoute.legs().get(0).steps().get(stepIndex).distance();
+    double legDistanceRemaining = multiLegRoute.legs().get(0).distance();
+    return buildRouteProgress(multiLegRoute, stepDistanceRemaining,
+      legDistanceRemaining, 0, stepIndex, legIndex);
   }
 }

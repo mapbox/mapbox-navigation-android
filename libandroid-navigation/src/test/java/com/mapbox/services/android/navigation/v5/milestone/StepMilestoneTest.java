@@ -5,9 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.core.constants.Constants;
-import com.mapbox.geojson.Point;
-import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -18,9 +15,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.io.IOException;
-import java.util.List;
-
 @RunWith(RobolectricTestRunner.class)
 public class StepMilestoneTest extends BaseTest {
 
@@ -30,25 +24,17 @@ public class StepMilestoneTest extends BaseTest {
   private RouteProgress routeProgress;
 
   @Before
-  public void setup() throws IOException {
+  public void setup() throws Exception {
     Gson gson = new GsonBuilder()
       .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
     String body = loadJsonFixture(PRECISION_6);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     DirectionsRoute route = response.routes().get(0);
-
-    List<Point> currentStepPoints = PolylineUtils.decode(
-      route.legs().get(0).steps().get(1).geometry(), Constants.PRECISION_6
-    );
-    routeProgress = RouteProgress.builder()
-      .directionsRoute(route)
-      .distanceRemaining(route.distance())
-      .legDistanceRemaining(route.legs().get(0).distance())
-      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
-      .currentStepPoints(currentStepPoints)
-      .legIndex(0)
-      .stepIndex(1)
-      .build();
+    double distanceRemaining = route.distance();
+    double legDistanceRemaining = route.legs().get(0).distance();
+    double stepDistanceRemaining = route.legs().get(0).steps().get(0).distance();
+    routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+      legDistanceRemaining, distanceRemaining, 1, 0);
   }
 
   @Test

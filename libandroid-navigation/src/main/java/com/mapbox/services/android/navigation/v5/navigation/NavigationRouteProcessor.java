@@ -1,30 +1,24 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
-import android.support.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
-import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
-import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteCallback;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
-import com.mapbox.turf.TurfConstants;
-import com.mapbox.turf.TurfMeasurement;
-import com.mapbox.turf.TurfMisc;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.mapbox.core.constants.Constants.PRECISION_6;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkBearingForStepCompletion;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.getSnappedLocation;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createDistancesToIntersections;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createIntersectionsList;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.decodeStepPoints;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.increaseIndex;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.legDistanceRemaining;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.routeDistanceRemaining;
@@ -35,7 +29,6 @@ class NavigationRouteProcessor implements OffRouteCallback {
 
   private static final int FIRST_LEG_INDEX = 0;
   private static final int FIRST_STEP_INDEX = 0;
-  private static final int FIRST_POINT = 0;
 
   private RouteProgress routeProgress;
   private List<Point> currentStepPoints;
@@ -97,20 +90,6 @@ class NavigationRouteProcessor implements OffRouteCallback {
     this.routeProgress = routeProgress;
   }
 
-  private void clearManeuverDistances(OffRoute offRoute) {
-    if (offRoute instanceof OffRouteDetector) {
-      ((OffRouteDetector) offRoute).clearDistancesAwayFromManeuver();
-    }
-  }
-
-  private boolean hasInvalidLegs(List<RouteLeg> legs) {
-    return legs == null || legs.isEmpty();
-  }
-
-  private boolean hasInvalidSteps(List<LegStep> steps) {
-    return steps == null || steps.isEmpty();
-  }
-
   /**
    * If the {@link OffRouteCallback#onShouldIncreaseIndex()} has been called by the
    * {@link com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector}, shouldIncreaseIndex
@@ -123,17 +102,6 @@ class NavigationRouteProcessor implements OffRouteCallback {
       advanceIndices(navigation);
       shouldIncreaseIndex = false;
     }
-  }
-
-  Location buildSnappedLocation(MapboxNavigation mapboxNavigation, boolean snapToRouteEnabled,
-                                Location rawLocation, RouteProgress routeProgress, boolean userOffRoute) {
-    final Location location;
-    if (!userOffRoute && snapToRouteEnabled) {
-      location = getSnappedLocation(mapboxNavigation, rawLocation, routeProgress);
-    } else {
-      location = rawLocation;
-    }
-    return location;
   }
 
   /**
@@ -189,45 +157,6 @@ class NavigationRouteProcessor implements OffRouteCallback {
   }
 
   /**
-   * Given the current {@link DirectionsRoute} and leg / step index,
-   * return a list of {@link Point} representing the current step.
-   * <p>
-   * This method is only used on a per-step basis as {@link PolylineUtils#decode(String, int)}
-   * can be a heavy operation based on the length of the step.
-   * <p>
-   * Returns null if index is invalid.
-   *
-   * @param directionsRoute for list of steps
-   * @param legIndex        to get current step list
-   * @param stepIndex       to get current step
-   * @return list of {@link Point} representing the current step
-   */
-  private List<Point> decodeStepPoints(DirectionsRoute directionsRoute, List<Point> currentPoints,
-                                       int legIndex, int stepIndex) {
-    List<RouteLeg> legs = directionsRoute.legs();
-    if (hasInvalidLegs(legs)) {
-      return currentPoints;
-    }
-    List<LegStep> steps = legs.get(legIndex).steps();
-    if (hasInvalidSteps(steps)) {
-      return currentPoints;
-    }
-    boolean invalidStepIndex = stepIndex < 0 || stepIndex > steps.size() - 1;
-    if (invalidStepIndex) {
-      return currentPoints;
-    }
-    LegStep step = steps.get(stepIndex);
-    if (step == null) {
-      return currentPoints;
-    }
-    String stepGeometry = step.geometry();
-    if (stepGeometry != null) {
-      return PolylineUtils.decode(stepGeometry, PRECISION_6);
-    }
-    return currentPoints;
-  }
-
-  /**
    * Checks if the route provided is a new route.  If it is, all {@link RouteProgress}
    * data and {@link NavigationIndices} needs to be reset.
    *
@@ -260,38 +189,9 @@ class NavigationRouteProcessor implements OffRouteCallback {
     );
   }
 
-  @NonNull
-  private List<StepIntersection> createIntersectionsList(@NonNull LegStep step, LegStep upcomingStep) {
-    List<StepIntersection> intersectionsWithNextManeuver = new ArrayList<>();
-    intersectionsWithNextManeuver.addAll(step.intersections());
-    if (upcomingStep != null && !upcomingStep.intersections().isEmpty()) {
-      intersectionsWithNextManeuver.add(upcomingStep.intersections().get(0));
+  private void clearManeuverDistances(OffRoute offRoute) {
+    if (offRoute instanceof OffRouteDetector) {
+      ((OffRouteDetector) offRoute).clearDistancesAwayFromManeuver();
     }
-    return intersectionsWithNextManeuver;
-  }
-
-  @NonNull
-  private List<Double> createDistancesToIntersections(List<Point> stepPoints, List<StepIntersection> intersections) {
-    List<Double> distancesToIntersections = new ArrayList<>();
-    List<StepIntersection> stepIntersections = new ArrayList<>(intersections);
-    if (stepPoints.isEmpty()) {
-      return distancesToIntersections;
-    }
-    if (stepIntersections.isEmpty()) {
-      return distancesToIntersections;
-    }
-
-    LineString stepLineString = LineString.fromLngLats(stepPoints);
-    Point firstStepPoint = stepPoints.get(FIRST_POINT);
-
-    for (StepIntersection intersection : stepIntersections) {
-      Point intersectionPoint = intersection.location();
-      if (!firstStepPoint.equals(intersectionPoint)) {
-        LineString beginningLineString = TurfMisc.lineSlice(firstStepPoint, intersectionPoint, stepLineString);
-        double distanceToIntersection = TurfMeasurement.length(beginningLineString, TurfConstants.UNIT_METERS);
-        distancesToIntersections.add(distanceToIntersection);
-      }
-    }
-    return distancesToIntersections;
   }
 }

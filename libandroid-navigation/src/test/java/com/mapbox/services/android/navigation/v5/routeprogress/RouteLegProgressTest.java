@@ -2,16 +2,11 @@ package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
-import com.mapbox.geojson.Point;
-import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
-
-import static com.mapbox.core.constants.Constants.PRECISION_6;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
@@ -80,7 +75,7 @@ public class RouteLegProgressTest extends BaseTest {
   }
 
   @Test
-  public void fractionTraveled_equalsZeroAtBeginning() {
+  public void fractionTraveled_equalsZeroAtBeginning() throws Exception {
     RouteProgress routeProgress = buildBeginningOfLegRouteProgress();
 
     assertEquals(0.0, routeProgress.currentLegProgress().fractionTraveled(), BaseTest.DELTA);
@@ -99,14 +94,14 @@ public class RouteLegProgressTest extends BaseTest {
   }
 
   @Test
-  public void fractionTraveled_equalsOneAtEndOfLeg() {
+  public void fractionTraveled_equalsOneAtEndOfLeg() throws Exception {
     RouteProgress routeProgress = buildEndOfLegRouteProgress();
 
     assertEquals(1.0, routeProgress.currentLegProgress().fractionTraveled(), BaseTest.DELTA);
   }
 
   @Test
-  public void distanceRemaining_equalsLegDistanceAtBeginning() {
+  public void distanceRemaining_equalsLegDistanceAtBeginning() throws Exception {
     RouteProgress routeProgress = buildBeginningOfLegRouteProgress();
 
     assertEquals(firstLeg.distance(), routeProgress.currentLegProgress().distanceRemaining(),
@@ -114,37 +109,36 @@ public class RouteLegProgressTest extends BaseTest {
   }
 
   @Test
-  public void distanceRemaining_equalsZeroAtEndOfLeg() {
+  public void distanceRemaining_equalsZeroAtEndOfLeg() throws Exception {
     RouteProgress routeProgress = buildEndOfLegRouteProgress();
 
     assertEquals(0, routeProgress.currentLegProgress().distanceRemaining(), BaseTest.DELTA);
   }
 
   @Test
-  public void distanceTraveled_equalsZeroAtBeginning() {
+  public void distanceTraveled_equalsZeroAtBeginning() throws Exception {
     RouteProgress routeProgress = buildBeginningOfLegRouteProgress();
 
     assertEquals(0, routeProgress.currentLegProgress().distanceTraveled(), BaseTest.DELTA);
   }
 
   @Test
-  public void getDistanceTraveled_equalsLegDistanceAtEndOfLeg() {
+  public void getDistanceTraveled_equalsLegDistanceAtEndOfLeg() throws Exception {
     RouteProgress routeProgress = buildEndOfLegRouteProgress();
 
     assertEquals(firstLeg.distance(), routeProgress.currentLegProgress().distanceTraveled(), BaseTest.DELTA);
   }
 
   @Test
-  public void getDurationRemaining_equalsLegDurationAtBeginning() {
+  public void getDurationRemaining_equalsLegDurationAtBeginning() throws Exception {
     RouteProgress routeProgress = buildBeginningOfLegRouteProgress();
 
     assertEquals(3535.2, routeProgress.currentLegProgress().durationRemaining(), BaseTest.DELTA);
   }
 
   @Test
-  public void getDurationRemaining_equalsZeroAtEndOfLeg() {
-    int lastStepIndex = firstLeg.steps().size() - 1;
-    routeProgress = routeProgress.toBuilder().stepIndex(lastStepIndex).build();
+  public void getDurationRemaining_equalsZeroAtEndOfLeg() throws Exception {
+    routeProgress = buildEndOfLegRouteProgress();
 
     assertEquals(0, routeProgress.currentLegProgress().durationRemaining(), BaseTest.DELTA);
   }
@@ -165,34 +159,17 @@ public class RouteLegProgressTest extends BaseTest {
     assertNull(routeProgress.currentLegProgress().followOnStep());
   }
 
-  private RouteProgress buildBeginningOfLegRouteProgress() {
-    List<Point> currentStepPoints = PolylineUtils.decode(
-      route.legs().get(0).steps().get(0).geometry(), PRECISION_6
-    );
-    return RouteProgress.builder()
-      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
-      .legDistanceRemaining(route.legs().get(0).distance())
-      .distanceRemaining(route.distance())
-      .directionsRoute(route)
-      .currentStepPoints(currentStepPoints)
-      .stepIndex(0)
-      .legIndex(0)
-      .build();
+  private RouteProgress buildBeginningOfLegRouteProgress() throws Exception {
+    double stepDistanceRemaining = route.legs().get(0).steps().get(0).distance();
+    double legDistanceRemaining = route.legs().get(0).distance();
+    double routeDistance = route.distance();
+    return buildRouteProgress(route, stepDistanceRemaining, legDistanceRemaining,
+      routeDistance, 0, 0);
   }
 
-  private RouteProgress buildEndOfLegRouteProgress() {
-    int index = firstLeg.steps().size() - 1;
-    List<Point> currentStepPoints = PolylineUtils.decode(
-      route.legs().get(0).steps().get(index).geometry(), PRECISION_6
-    );
-    return RouteProgress.builder()
-      .stepDistanceRemaining(0)
-      .legDistanceRemaining(0)
-      .distanceRemaining(0)
-      .directionsRoute(route)
-      .currentStepPoints(currentStepPoints)
-      .stepIndex(index)
-      .legIndex(0)
-      .build();
+  private RouteProgress buildEndOfLegRouteProgress() throws Exception {
+    int lastStepIndex = firstLeg.steps().size() - 1;
+    return buildRouteProgress(route, 0, 0,
+      0, lastStepIndex, 0);
   }
 }

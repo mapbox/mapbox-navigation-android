@@ -8,7 +8,6 @@ import com.google.gson.GsonBuilder;
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.services.android.navigation.BuildConfig;
@@ -25,7 +24,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
-import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -143,17 +141,9 @@ public class DynamicCameraTest extends BaseTest {
 
   private RouteProgress buildDefaultRouteProgress(@Nullable Double stepDistanceRemaining) throws Exception {
     DirectionsRoute aRoute = buildDirectionsRoute();
-    LegStep step = getFirstStep(aRoute);
-    List<Point> currentStepPoints = buildStepPointsFromGeometry(step.geometry());
-    return RouteProgress.builder()
-      .stepDistanceRemaining(stepDistanceRemaining == null ? 100 : stepDistanceRemaining)
-      .legDistanceRemaining(100)
-      .distanceRemaining(100)
-      .directionsRoute(aRoute)
-      .currentStepPoints(currentStepPoints)
-      .stepIndex(0)
-      .legIndex(0)
-      .build();
+    double stepDistanceRemainingFinal = stepDistanceRemaining == null ? 100 : stepDistanceRemaining;
+    return buildRouteProgress(aRoute, stepDistanceRemainingFinal,
+      0, 0, 0, 0);
   }
 
   private DirectionsRoute buildDirectionsRoute() throws IOException {

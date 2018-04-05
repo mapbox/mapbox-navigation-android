@@ -10,15 +10,18 @@ import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
+import com.mapbox.turf.TurfMisc;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -35,6 +38,7 @@ public class BaseTest {
 
   public static final String ACCESS_TOKEN = "pk.XXX";
   private static final String DIRECTIONS_PRECISION_6 = "directions_v5_precision_6.json";
+  private static final int FIRST_POINT = 0;
 
   public void compareJson(String json1, String json2) {
     JsonParser parser = new JsonParser();
@@ -50,18 +54,43 @@ public class BaseTest {
 
   protected RouteProgress buildDefaultRouteProgress() throws Exception {
     DirectionsRoute aRoute = buildDirectionsRoute();
-    List<Point> currentStepPoints = PolylineUtils.decode(aRoute.legs().get(0).steps().get(0).geometry(), PRECISION_6);
-    RouteProgress defaultRouteProgress = RouteProgress.builder()
-      .stepDistanceRemaining(100)
-      .legDistanceRemaining(100)
-      .distanceRemaining(100)
-      .directionsRoute(aRoute)
-      .currentStepPoints(currentStepPoints)
-      .stepIndex(0)
-      .legIndex(0)
-      .build();
+    return buildRouteProgress(aRoute, 100, 100,
+      100, 0, 0);
+  }
 
-    return defaultRouteProgress;
+  protected RouteProgress buildRouteProgress(DirectionsRoute route,
+                                             double stepDistanceRemaining,
+                                             double legDistanceRemaining,
+                                             double distanceRemaining,
+                                             int stepIndex,
+                                             int legIndex) throws Exception {
+    List<LegStep> steps = route.legs().get(legIndex).steps();
+    LegStep currentStep = steps.get(stepIndex);
+    String currentStepGeometry = currentStep.geometry();
+    List<Point> currentStepPoints = buildStepPointsFromGeometry(currentStepGeometry);
+    int upcomingStepIndex = stepIndex + 1;
+    List<Point> upcomingStepPoints = null;
+    LegStep upcomingStep = null;
+    if (upcomingStepIndex < steps.size()) {
+      upcomingStep = steps.get(upcomingStepIndex);
+      String upcomingStepGeometry = upcomingStep.geometry();
+      upcomingStepPoints = buildStepPointsFromGeometry(upcomingStepGeometry);
+    }
+    List<StepIntersection> intersections = createIntersectionsList(currentStep, upcomingStep);
+    List<Double> intersectionDistances = createDistancesToIntersections(currentStepPoints, intersections);
+
+    return RouteProgress.builder()
+      .stepDistanceRemaining(stepDistanceRemaining)
+      .legDistanceRemaining(legDistanceRemaining)
+      .distanceRemaining(distanceRemaining)
+      .directionsRoute(route)
+      .currentStepPoints(currentStepPoints)
+      .upcomingStepPoints(upcomingStepPoints)
+      .intersections(intersections)
+      .intersectionDistancesAlongStep(intersectionDistances)
+      .stepIndex(stepIndex)
+      .legIndex(legIndex)
+      .build();
   }
 
   protected DirectionsRoute buildDirectionsRoute() throws IOException {
@@ -76,16 +105,6 @@ public class BaseTest {
 
   protected Location buildDefaultLocationUpdate(double lng, double lat) {
     return buildLocationUpdate(lng, lat, 30f, 10f, System.currentTimeMillis());
-  }
-
-  protected Location buildLocationUpdate(double lng, double lat, float speed, float horizontalAccuracy, long time) {
-    Location location = mock(Location.class);
-    when(location.getLongitude()).thenReturn(lng);
-    when(location.getLatitude()).thenReturn(lat);
-    when(location.getSpeed()).thenReturn(speed);
-    when(location.getAccuracy()).thenReturn(horizontalAccuracy);
-    when(location.getTime()).thenReturn(time);
-    return location;
   }
 
   @NonNull
@@ -111,7 +130,53 @@ public class BaseTest {
     return route.legs().get(0).steps().get(0);
   }
 
-  protected List<Point> buildStepPointsFromGeometry(String stepGeometry) {
+  @NonNull
+  private static List<StepIntersection> createIntersectionsList(@NonNull LegStep currentStep, LegStep upcomingStep) {
+    List<StepIntersection> intersectionsWithNextManeuver = new ArrayList<>();
+    intersectionsWithNextManeuver.addAll(currentStep.intersections());
+    if (upcomingStep != null && !upcomingStep.intersections().isEmpty()) {
+      intersectionsWithNextManeuver.add(upcomingStep.intersections().get(FIRST_POINT));
+    }
+    return intersectionsWithNextManeuver;
+  }
+
+  @NonNull
+  private static List<Double> createDistancesToIntersections(List<Point> stepPoints,
+                                                             List<StepIntersection> intersections) {
+    List<Double> distancesToIntersections = new ArrayList<>();
+    List<StepIntersection> stepIntersections = new ArrayList<>(intersections);
+    if (stepPoints.isEmpty()) {
+      return distancesToIntersections;
+    }
+    if (stepIntersections.isEmpty()) {
+      return distancesToIntersections;
+    }
+
+    LineString stepLineString = LineString.fromLngLats(stepPoints);
+    Point firstStepPoint = stepPoints.get(FIRST_POINT);
+
+    for (StepIntersection intersection : stepIntersections) {
+      Point intersectionPoint = intersection.location();
+      if (!firstStepPoint.equals(intersectionPoint)) {
+        LineString beginningLineString = TurfMisc.lineSlice(firstStepPoint, intersectionPoint, stepLineString);
+        double distanceToIntersection = TurfMeasurement.length(beginningLineString, TurfConstants.UNIT_METERS);
+        distancesToIntersections.add(distanceToIntersection);
+      }
+    }
+    return distancesToIntersections;
+  }
+
+  private Location buildLocationUpdate(double lng, double lat, float speed, float horizontalAccuracy, long time) {
+    Location location = mock(Location.class);
+    when(location.getLongitude()).thenReturn(lng);
+    when(location.getLatitude()).thenReturn(lat);
+    when(location.getSpeed()).thenReturn(speed);
+    when(location.getAccuracy()).thenReturn(horizontalAccuracy);
+    when(location.getTime()).thenReturn(time);
+    return location;
+  }
+
+  private List<Point> buildStepPointsFromGeometry(String stepGeometry) {
     return PolylineUtils.decode(stepGeometry, PRECISION_6);
   }
 }

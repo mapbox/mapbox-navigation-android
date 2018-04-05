@@ -11,6 +11,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.List;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildSnappedLocation;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.isUserOffRoute;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.shouldCheckFasterRoute;
@@ -75,7 +76,7 @@ class NavigationEngine extends HandlerThread implements Handler.Callback {
     RouteProgress previousRouteProgress = routeProcessor.getRouteProgress();
     final List<Milestone> milestones = checkMilestones(previousRouteProgress, routeProgress, mapboxNavigation);
 
-    final Location location = routeProcessor.buildSnappedLocation(mapboxNavigation, snapToRouteEnabled,
+    final Location location = buildSnappedLocation(mapboxNavigation, snapToRouteEnabled,
       rawLocation, routeProgress, userOffRoute);
 
     boolean fasterRouteEnabled = mapboxNavigation.options().enableFasterRouteDetection();

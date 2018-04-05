@@ -7,12 +7,12 @@ import com.google.gson.GsonBuilder;
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.core.constants.Constants;
 
 import junit.framework.Assert;
 
@@ -22,7 +22,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.io.IOException;
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
@@ -35,7 +34,7 @@ public class TriggerTest extends BaseTest {
   private RouteProgress routeProgress;
 
   @Before
-  public void setup() throws IOException {
+  public void setup() throws Exception {
     Gson gson = new GsonBuilder()
       .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
     String body = loadJsonFixture(PRECISION_6);
@@ -46,15 +45,12 @@ public class TriggerTest extends BaseTest {
       Constants.PRECISION_6);
     location.setLatitude(coords.get(0).latitude());
     location.setLongitude(coords.get(0).longitude());
-    routeProgress = RouteProgress.builder()
-      .directionsRoute(route)
-      .distanceRemaining(route.distance())
-      .legDistanceRemaining(route.legs().get(0).distance())
-      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
-      .currentStepPoints(coords)
-      .legIndex(0)
-      .stepIndex(1)
-      .build();
+
+    int stepDistanceRemaining = (int) route.legs().get(0).steps().get(0).distance();
+    int legDistanceRemaining = route.legs().get(0).distance().intValue();
+    int routeDistance = route.distance().intValue();
+    routeProgress = buildRouteProgress(route, stepDistanceRemaining, legDistanceRemaining,
+      routeDistance, 1, 0);
   }
 
   /*
