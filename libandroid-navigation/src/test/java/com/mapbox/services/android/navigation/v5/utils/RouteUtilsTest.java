@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.v5.BaseTest;
@@ -110,6 +111,24 @@ public class RouteUtilsTest extends BaseTest {
     boolean isArrivalEvent = RouteUtils.isArrivalEvent(theRouteProgress);
 
     assertFalse(isArrivalEvent);
+  }
+
+  @Test
+  public void isValidRouteProfile_returnsTrueWithValidProfile() throws Exception {
+    String routeProfile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
+
+    boolean isValidProfile = RouteUtils.isValidRouteProfile(routeProfile);
+
+    assertTrue(isValidProfile);
+  }
+
+  @Test
+  public void isValidRouteProfile_returnsFalseWithInvalidProfile() throws Exception {
+    String routeProfile = "invalid_profile";
+
+    boolean isValidProfile = RouteUtils.isValidRouteProfile(routeProfile);
+
+    assertFalse(isValidProfile);
   }
 
   private int obtainLastStepIndex(DirectionsRoute route) throws IOException {

@@ -3,7 +3,9 @@ package com.mapbox.services.android.navigation.v5.utils;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.geojson.Point;
@@ -124,6 +126,22 @@ public final class RouteUtils {
     forcedLocation.setLatitude(origin.latitude());
     forcedLocation.setLongitude(origin.longitude());
     return forcedLocation;
+  }
+
+  /**
+   * Checks if the {@link String} route profile provided is a valid profile
+   * that can be used with the directions API.
+   *
+   * @param routeProfile being validated
+   * @return true if valid, false if not
+   * @since 0.13.0
+   */
+  public static boolean isValidRouteProfile(String routeProfile) {
+    return !TextUtils.isEmpty(routeProfile)
+      && routeProfile.contentEquals(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+      || routeProfile.contentEquals(DirectionsCriteria.PROFILE_DRIVING)
+      || routeProfile.contentEquals(DirectionsCriteria.PROFILE_CYCLING)
+      || routeProfile.contentEquals(DirectionsCriteria.PROFILE_WALKING);
   }
 
   private static boolean upcomingStepIsArrival(@NonNull RouteProgress routeProgress) {
