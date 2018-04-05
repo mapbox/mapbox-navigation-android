@@ -35,6 +35,7 @@ class NavigationRouteProcessor implements OffRouteCallback {
 
   private static final int FIRST_LEG_INDEX = 0;
   private static final int FIRST_STEP_INDEX = 0;
+  private static final int FIRST_POINT = 0;
 
   private RouteProgress routeProgress;
   private List<Point> currentStepPoints;
@@ -281,13 +282,15 @@ class NavigationRouteProcessor implements OffRouteCallback {
     }
 
     LineString stepLineString = LineString.fromLngLats(stepPoints);
-    Point firstStepPoint = intersections.remove(0).location();
+    Point firstStepPoint = stepPoints.get(FIRST_POINT);
 
-    for (StepIntersection intersection : intersections) {
+    for (StepIntersection intersection : stepIntersections) {
       Point intersectionPoint = intersection.location();
-      LineString beginningLineString = TurfMisc.lineSlice(firstStepPoint, intersectionPoint, stepLineString);
-      double distanceToIntersection = TurfMeasurement.length(beginningLineString, TurfConstants.UNIT_METERS);
-      distancesToIntersections.add(distanceToIntersection);
+      if (!firstStepPoint.equals(intersectionPoint)) {
+        LineString beginningLineString = TurfMisc.lineSlice(firstStepPoint, intersectionPoint, stepLineString);
+        double distanceToIntersection = TurfMeasurement.length(beginningLineString, TurfConstants.UNIT_METERS);
+        distancesToIntersections.add(distanceToIntersection);
+      }
     }
     return distancesToIntersections;
   }
