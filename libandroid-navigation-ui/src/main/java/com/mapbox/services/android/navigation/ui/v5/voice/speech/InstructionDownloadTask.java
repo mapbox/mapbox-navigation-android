@@ -11,6 +11,8 @@ import java.io.OutputStream;
 import okhttp3.ResponseBody;
 
 class InstructionDownloadTask extends AsyncTask<ResponseBody, Void, File> {
+  private static final String MP3_POSTFIX = ".mp3";
+  private static final int END_OF_FILE_DENOTER = -1;
   private static int instructionNamingInt = 1;
   private final String cacheDirectory;
   private final TaskListener taskListener;
@@ -33,7 +35,7 @@ class InstructionDownloadTask extends AsyncTask<ResponseBody, Void, File> {
    */
   private File saveAsFile(ResponseBody responseBody) {
     try {
-      File file = new File(cacheDirectory + File.separator + instructionNamingInt++ + ".mp3");
+      File file = new File(cacheDirectory + File.separator + instructionNamingInt++ + MP3_POSTFIX);
       InputStream inputStream = null;
       OutputStream outputStream = null;
 
@@ -43,7 +45,7 @@ class InstructionDownloadTask extends AsyncTask<ResponseBody, Void, File> {
         byte[] buffer = new byte[4096];
         int numOfBufferedBytes;
 
-        while ((numOfBufferedBytes = inputStream.read(buffer)) != -1) { // -1 denotes end of file
+        while ((numOfBufferedBytes = inputStream.read(buffer)) != END_OF_FILE_DENOTER) {
           outputStream.write(buffer, 0, numOfBufferedBytes);
         }
 
