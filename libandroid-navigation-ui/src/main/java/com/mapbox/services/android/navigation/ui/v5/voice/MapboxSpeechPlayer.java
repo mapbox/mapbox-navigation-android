@@ -30,7 +30,8 @@ import timber.log.Timber;
  */
 public class MapboxSpeechPlayer implements InstructionPlayer {
   private static final long TEN_MEGABYTE_CACHE_SIZE = 10 * 1098 * 1098;
-  private static final String OKHTTP_CACHE = "okhttp_cache";
+  private static final String OKHTTP_INSTRUCTION_CACHE = "okhttp_instruction_cache";
+  private static final String MAPBOX_INSTRUCTION_CACHE = "mapbox_instruction_cache";
   private static final String SSML_TEXT_TYPE = "ssml";
   private static final String ERROR_TEXT = "Unable to set data source for the media mediaPlayer! %s";
   private Queue<File> instructionQueue;
@@ -38,8 +39,8 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
   private MediaPlayer mediaPlayer;
   private InstructionListener instructionListener;
   private boolean isMuted;
-  private String cacheDirectory;
-  private Cache cache;
+  private File mapboxCache;
+  private Cache okhttpCache;
 
   /**
    * Construct an instance of {@link MapboxSpeechPlayer}
@@ -47,14 +48,21 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
    * @param context   to initialize {@link CognitoCachingCredentialsProvider} and {@link AudioManager}
    */
   MapboxSpeechPlayer(Context context, Locale locale) {
-    cache = new Cache(new File(context.getCacheDir(), OKHTTP_CACHE), TEN_MEGABYTE_CACHE_SIZE);
-    this.cacheDirectory = context.getCacheDir().toString();
+    setupCaches(context);
     instructionQueue = new ConcurrentLinkedQueue();
     voiceInstructionLoader = VoiceInstructionLoader.builder()
       .language(locale.toString())
-      .cache(cache)
+      .cache(okhttpCache)
       .accessToken(Mapbox.getAccessToken())
       .build();
+  }
+
+  private void setupCaches(Context context) {
+    File okHttpDirectory = new File(context.getCacheDir(), OKHTTP_INSTRUCTION_CACHE);
+    okHttpDirectory.mkdir();
+    okhttpCache = new Cache(okHttpDirectory, TEN_MEGABYTE_CACHE_SIZE);
+    mapboxCache = new File(context.getCacheDir(), MAPBOX_INSTRUCTION_CACHE);
+    mapboxCache.mkdir();
   }
 
   void setInstructionListener(InstructionListener instructionListener) {
@@ -103,12 +111,14 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
   @Override
   public void onDestroy() {
     stopMediaPlayerPlaying();
-    deleteCache();
+    deleteCaches();
   }
 
-  private void deleteCache() {
+  private void deleteCaches() {
     try {
-      cache.delete();
+      okhttpCache.delete();
+      mapboxCache.delete();
+
     } catch (IOException exception) {
       Timber.e(exception.getMessage());
     }
@@ -217,7 +227,7 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
   }
 
   private void executeInstructionTask(ResponseBody responseBody) {
-    new InstructionDownloadTask(cacheDirectory, new InstructionDownloadTask.TaskListener() {
+    new InstructionDownloadTask(mapboxCache.getPath(), new InstructionDownloadTask.TaskListener() {
       @Override
       public void onFinishedDownloading(File instructionFile) {
         if (instructionQueue.isEmpty()) {
