@@ -6,7 +6,6 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 
-import com.mapbox.services.android.navigation.ui.v5.voice.speech.MapboxSpeechPlayer;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 
 import java.util.Locale;

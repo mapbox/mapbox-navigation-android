@@ -94,7 +94,7 @@ public class AndroidSpeechPlayer implements InstructionPlayer {
     }
   }
 
-  public void setInstructionListener(final InstructionListener instructionListener) {
+  void setInstructionListener(final InstructionListener instructionListener) {
     textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
       @Override
       public void onStart(String utteranceId) {

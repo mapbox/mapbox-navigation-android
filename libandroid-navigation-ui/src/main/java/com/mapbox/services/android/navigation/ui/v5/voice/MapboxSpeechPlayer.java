@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.ui.v5.voice.speech;
+package com.mapbox.services.android.navigation.ui.v5.voice;
 
 import android.content.Context;
 import android.media.AudioManager;
@@ -8,8 +8,6 @@ import android.text.TextUtils;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.services.android.navigation.ui.v5.voice.InstructionListener;
-import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoader;
 
 import java.io.File;
@@ -56,12 +54,7 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
       .build();
   }
 
-  /**
-   * Sets the listener to listen for instruction events
-   *
-   * @param instructionListener listener to set
-   */
-  public void setInstructionListener(InstructionListener instructionListener) {
+  void setInstructionListener(InstructionListener instructionListener) {
     this.instructionListener = instructionListener;
   }
 
