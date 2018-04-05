@@ -20,7 +20,6 @@
         android:entryValues="@array/unit_type_values_array"
         android:defaultValue="-1"/>
     <ListPreference
-        android:defaultValue="1"
         android:entries="@array/route_profile_array"
         android:entryValues="@array/route_profile_values_array"
         android:key="@string/route_profile_key"

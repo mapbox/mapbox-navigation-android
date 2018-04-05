@@ -313,7 +313,9 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private String getRouteProfile() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    return sharedPreferences.getString(getString(R.string.route_profile_key), DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
+    return sharedPreferences.getString(
+      getString(R.string.route_profile_key), DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+    );
   }
 
   private void launchNavigationWithRoute() {
