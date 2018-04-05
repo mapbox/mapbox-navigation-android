@@ -21,6 +21,7 @@ import retrofit2.Response;
 @AutoValue
 public abstract class VoiceInstructionLoader {
   private static final int NUMBER_TO_CACHE = 3;
+  private static final int CACHE_INDEX = NUMBER_TO_CACHE - 1;
   private static VoiceInstructionLoader instance = null;
 
   /**
@@ -57,18 +58,24 @@ public abstract class VoiceInstructionLoader {
    *                first call the first two instructions will also be cached.
    */
   public void cacheInstructions(RouteProgress routeProgress, boolean isFirst) {
-    List<VoiceInstructions> voiceInstructions = getNextInstructions(routeProgress);
+    List<VoiceInstructions> voiceInstructionsList = getNextInstructions(routeProgress);
 
     if (isFirst) {
-      for (int i = 0; i <= NUMBER_TO_CACHE - 1; i++) {
-        if (voiceInstructions.size() > i) {
-          cacheInstruction(voiceInstructions.get(i).ssmlAnnouncement());
-        }
-      }
+      cacheUpToNthInstruction(voiceInstructionsList, CACHE_INDEX);
     } else {
-      if (voiceInstructions.size() >= NUMBER_TO_CACHE) {
-        cacheInstruction(voiceInstructions.get(NUMBER_TO_CACHE - 1).ssmlAnnouncement());
-      }
+      cacheNthInstruction(voiceInstructionsList, CACHE_INDEX);
+    }
+  }
+
+  private void cacheUpToNthInstruction(List<VoiceInstructions> voiceInstructionsList, int exclusiveIndex) {
+    for (int i = 0; i < exclusiveIndex; i++) {
+      cacheNthInstruction(voiceInstructionsList, i);
+    }
+  }
+
+  private void cacheNthInstruction(List<VoiceInstructions> voiceInstructionsList, int index) {
+    if (voiceInstructionsList.size() > index) {
+      cacheInstruction(voiceInstructionsList.get(index).ssmlAnnouncement());
     }
   }
 
@@ -76,12 +83,12 @@ public abstract class VoiceInstructionLoader {
     getMapboxBuilder().instruction(instruction).build().enqueueCall(new Callback<ResponseBody>() {
       @Override
       public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-
+        // Intentionally empty
       }
 
       @Override
       public void onFailure(Call<ResponseBody> call, Throwable throwable) {
-
+        // Intentionally empty
       }
     });
   }
@@ -107,15 +114,12 @@ public abstract class VoiceInstructionLoader {
     if (language() != null) {
       builder.language(language());
     }
-
     if (textType() != null) {
       builder.textType(textType());
     }
-
     if (outputType() != null) {
       builder.outputType(outputType());
     }
-
     if (cache() != null) {
       builder.cache(cache());
     }

@@ -53,6 +53,7 @@ class InstructionDownloadTask extends AsyncTask<ResponseBody, Void, File> {
         return file;
 
       } catch (IOException exception) {
+        taskListener.onErrorDownloading();
         return null;
 
       } finally {
@@ -66,7 +67,6 @@ class InstructionDownloadTask extends AsyncTask<ResponseBody, Void, File> {
       }
 
     } catch (IOException exception) {
-      taskListener.onErrorDownloading();
       return null;
     }
   }
