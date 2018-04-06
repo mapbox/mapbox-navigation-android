@@ -33,6 +33,15 @@ public class NavigationCamera {
   private RouteInformation currentRouteInformation;
   private boolean trackingEnabled = true;
   private long locationUpdateTimestamp;
+  private ProgressChangeListener progressChangeListener = new ProgressChangeListener() {
+    @Override
+    public void onProgressChange(Location location, RouteProgress routeProgress) {
+      if (trackingEnabled) {
+        currentRouteInformation = buildRouteInformationFromLocation(location, routeProgress);
+        animateCameraFromLocation(currentRouteInformation);
+      }
+    }
+  };
 
   /**
    * Creates an instance of {@link NavigationCamera}.
@@ -45,6 +54,15 @@ public class NavigationCamera {
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
     initialize();
+  }
+
+  /**
+   * Used for testing only.
+   */
+  NavigationCamera(MapboxMap mapboxMap, MapboxNavigation navigation, ProgressChangeListener progressChangeListener) {
+    this.mapboxMap = mapboxMap;
+    this.navigation = navigation;
+    this.progressChangeListener = progressChangeListener;
   }
 
   /**
@@ -120,25 +138,6 @@ public class NavigationCamera {
       animateCameraFromLocation(currentRouteInformation);
     }
   }
-
-  /**
-   * Used to update the camera position.
-   * <p>
-   * {@link Location} is also stored in case the user scrolls the map and the camera
-   * will eventually need to return to that last location update.
-   *
-   * @param location      used to update the camera position
-   * @param routeProgress ignored in this scenario
-   */
-  ProgressChangeListener progressChangeListener = new ProgressChangeListener() {
-    @Override
-    public void onProgressChange(Location location, RouteProgress routeProgress) {
-      if (trackingEnabled) {
-        currentRouteInformation = buildRouteInformationFromLocation(location, routeProgress);
-        animateCameraFromLocation(currentRouteInformation);
-      }
-    }
-  };
 
   private void initialize() {
     mapboxMap.setMinZoomPreference(7d);
