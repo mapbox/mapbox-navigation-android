@@ -111,14 +111,12 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
   @Override
   public void onDestroy() {
     stopMediaPlayerPlaying();
-    deleteCaches();
+    flushCache();
   }
 
-  private void deleteCaches() {
+  private void flushCache() {
     try {
-      okhttpCache.delete();
-      mapboxCache.delete();
-
+      okhttpCache.flush();
     } catch (IOException exception) {
       Timber.e(exception.getMessage());
     }
