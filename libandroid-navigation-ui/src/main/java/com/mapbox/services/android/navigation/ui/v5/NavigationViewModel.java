@@ -4,11 +4,9 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -27,7 +25,6 @@ import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListene
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
@@ -59,7 +56,6 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   private MapboxNavigation navigation;
   private NavigationInstructionPlayer instructionPlayer;
   private ConnectivityManager connectivityManager;
-  private SharedPreferences preferences;
   private RouteProgress routeProgress;
   private String feedbackId;
   private String screenshot;
@@ -71,7 +67,6 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
 
   public NavigationViewModel(Application application) {
     super(application);
-    preferences = PreferenceManager.getDefaultSharedPreferences(application);
     initConnectivityManager(application);
   }
 
@@ -131,10 +126,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    */
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
-    if (instructionPlayer.isPollyPlayer() && milestone instanceof VoiceInstructionMilestone) {
-      instructionPlayer.play(((VoiceInstructionMilestone) milestone).getSsmlAnnouncement());
-    } else {
-      instructionPlayer.play(instruction);
+    if (milestone instanceof VoiceInstructionMilestone) {
+      instructionPlayer.play((VoiceInstructionMilestone) milestone);
     }
     updateBannerInstruction(routeProgress, milestone);
   }
@@ -305,8 +298,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    * Initializes the {@link InstructionPlayer}.
    */
   private void initVoiceInstructions() {
-    instructionPlayer = new NavigationInstructionPlayer(this.getApplication().getBaseContext(),
-      preferences.getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null), locale);
+    instructionPlayer = new NavigationInstructionPlayer(this.getApplication().getBaseContext(), locale);
   }
 
   /**
