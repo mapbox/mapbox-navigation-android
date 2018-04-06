@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.LegStep;
@@ -83,7 +84,7 @@ public abstract class RouteStepProgress {
    * @return list of pairs containing tunnnel entrance and exit distances
    * @since 0.13.0
    */
-  public abstract List<Double> intersectionDistancesAlongStep();
+  public abstract List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep();
 
   abstract LegStep step();
 
@@ -111,7 +112,7 @@ public abstract class RouteStepProgress {
 
     abstract Builder intersections(@NonNull List<StepIntersection> intersections);
 
-    abstract Builder intersectionDistancesAlongStep(@NonNull List<Double> intersections);
+    abstract Builder intersectionDistancesAlongStep(@NonNull List<Pair<StepIntersection, Double>> intersections);
 
     abstract RouteStepProgress autoBuild();
 

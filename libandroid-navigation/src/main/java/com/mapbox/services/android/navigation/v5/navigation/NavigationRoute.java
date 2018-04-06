@@ -57,7 +57,7 @@ public final class NavigationRoute {
    */
   public static Builder builder() {
     return new Builder()
-      .annotations(DirectionsCriteria.ANNOTATION_CONGESTION)
+      .annotations(DirectionsCriteria.ANNOTATION_CONGESTION, DirectionsCriteria.ANNOTATION_DISTANCE)
       .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
   }
 

@@ -2,9 +2,13 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegAnnotation;
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.MaxSpeed;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.api.directions.v5.models.StepManeuver;
@@ -18,6 +22,7 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteCallback;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
+import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.telemetry.utils.MathUtils;
@@ -271,8 +276,9 @@ class NavigationHelper {
   }
 
   @NonNull
-  static List<Double> createDistancesToIntersections(List<Point> stepPoints, List<StepIntersection> intersections) {
-    List<Double> distancesToIntersections = new ArrayList<>();
+  static List<Pair<StepIntersection, Double>> createDistancesToIntersections(List<Point> stepPoints,
+                                                                             List<StepIntersection> intersections) {
+    List<Pair<StepIntersection, Double>> distancesToIntersections = new ArrayList<>();
     List<StepIntersection> stepIntersections = new ArrayList<>(intersections);
     if (stepPoints.isEmpty()) {
       return distancesToIntersections;
@@ -289,10 +295,97 @@ class NavigationHelper {
       if (!firstStepPoint.equals(intersectionPoint)) {
         LineString beginningLineString = TurfMisc.lineSlice(firstStepPoint, intersectionPoint, stepLineString);
         double distanceToIntersection = TurfMeasurement.length(beginningLineString, TurfConstants.UNIT_METERS);
-        distancesToIntersections.add(distanceToIntersection);
+        distancesToIntersections.add(new Pair<>(intersection, distanceToIntersection));
       }
     }
     return distancesToIntersections;
+  }
+
+  static StepIntersection findCurrentIntersection(@NonNull List<Pair<StepIntersection, Double>> measuredIntersections,
+                                                  double stepDistanceTraveled) {
+    for (Pair<StepIntersection, Double> measuredIntersection : measuredIntersections) {
+      double intersectionDistance = measuredIntersection.second;
+      int intersectionIndex = measuredIntersections.indexOf(measuredIntersection);
+
+      int nextIntersectionIndex = intersectionIndex + 1;
+      if (nextIntersectionIndex > measuredIntersections.size()) {
+        return measuredIntersection.first;
+      }
+      double nextIntersectionDistance = measuredIntersections.get(nextIntersectionIndex).second;
+
+      if (stepDistanceTraveled > intersectionDistance && stepDistanceTraveled < nextIntersectionDistance) {
+        return measuredIntersection.first;
+      }
+    }
+    return measuredIntersections.get(0).first;
+  }
+
+  static StepIntersection findUpcomingIntersection(@NonNull List<Pair<StepIntersection, Double>> measuredIntersections,
+                                                   double stepDistanceTraveled) {
+    return null;
+  }
+
+  @Nullable
+  static CurrentLegAnnotation createCurrentAnnotation(CurrentLegAnnotation currentLegAnnotation,
+                                                      RouteLeg leg, double legDistanceRemaining) {
+    LegAnnotation legAnnotation = leg.annotation();
+    if (legAnnotation == null) {
+      return null;
+    }
+    List<Double> distanceList = legAnnotation.distance();
+    if (distanceList == null || distanceList.isEmpty()) {
+      return null;
+    }
+
+    CurrentLegAnnotation.Builder annotationBuilder = CurrentLegAnnotation.builder();
+    int annotationIndex = findAnnotationIndex(
+      currentLegAnnotation, annotationBuilder, leg, legDistanceRemaining, distanceList
+    );
+
+    annotationBuilder.distance(distanceList.get(annotationIndex));
+    List<Double> durationList = legAnnotation.duration();
+    if (durationList != null) {
+      annotationBuilder.duration(durationList.get(annotationIndex));
+    }
+    List<Double> speedList = legAnnotation.speed();
+    if (speedList != null) {
+      annotationBuilder.speed(speedList.get(annotationIndex));
+    }
+    List<MaxSpeed> maxspeedList = legAnnotation.maxspeed();
+    if (maxspeedList != null) {
+      annotationBuilder.maxspeed(maxspeedList.get(annotationIndex));
+    }
+    List<String> congestionList = legAnnotation.congestion();
+    if (congestionList != null) {
+      annotationBuilder.congestion(congestionList.get(annotationIndex));
+    }
+    annotationBuilder.index(annotationIndex);
+    return annotationBuilder.build();
+  }
+
+  private static int findAnnotationIndex(CurrentLegAnnotation currentLegAnnotation,
+                                         CurrentLegAnnotation.Builder annotationBuilder, RouteLeg leg,
+                                         double legDistanceRemaining, List<Double> distanceAnnotationList) {
+    List<Double> legDistances = new ArrayList<>(distanceAnnotationList);
+    Double totalLegDistance = leg.distance();
+    double distanceTraveled = totalLegDistance - legDistanceRemaining;
+
+    int distanceIndex = 0;
+    double annotationDistancesTraveled = 0;
+    if (currentLegAnnotation != null) {
+      distanceIndex = currentLegAnnotation.index();
+      annotationDistancesTraveled = currentLegAnnotation.distanceToAnnotation();
+    }
+    for (int i = distanceIndex; i < legDistances.size(); i++) {
+      Double distance = legDistances.get(i);
+      annotationDistancesTraveled += distance;
+      if (annotationDistancesTraveled > distanceTraveled) {
+        double distanceToAnnotation = annotationDistancesTraveled - distance;
+        annotationBuilder.distanceToAnnotation(distanceToAnnotation);
+        return i;
+      }
+    }
+    return 0;
   }
 
   /**

@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
+import android.support.v4.util.Pair;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
@@ -10,12 +11,14 @@ import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteCallback;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
+import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkBearingForStepCompletion;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createCurrentAnnotation;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createDistancesToIntersections;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createIntersectionsList;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.decodeStepPoints;
@@ -34,8 +37,13 @@ class NavigationRouteProcessor implements OffRouteCallback {
   private List<Point> currentStepPoints;
   private List<Point> upcomingStepPoints;
   private List<StepIntersection> currentIntersections;
-  private List<Double> currentIntersectionDistances;
+  private List<Pair<StepIntersection, Double>> currentIntersectionDistances;
+  private RouteLeg currentLeg;
+  private CurrentLegAnnotation currentLegAnnotation;
   private NavigationIndices indices;
+  private double routeDistanceRemaining;
+  private double legDistanceRemaining;
+  private double stepDistanceRemaining;
   private boolean shouldIncreaseIndex;
 
   NavigationRouteProcessor() {
@@ -67,7 +75,8 @@ class NavigationRouteProcessor implements OffRouteCallback {
 
     checkNewRoute(mapboxNavigation);
 
-    double stepDistanceRemaining = calculateStepDistanceRemaining(location, directionsRoute);
+    stepDistanceRemaining = calculateStepDistanceRemaining(location, directionsRoute);
+
     boolean withinManeuverRadius = stepDistanceRemaining < maneuverZoneRadius;
     boolean bearingMatchesManeuver = checkBearingForStepCompletion(
       location, routeProgress, stepDistanceRemaining, completionOffset
@@ -79,7 +88,7 @@ class NavigationRouteProcessor implements OffRouteCallback {
       stepDistanceRemaining = calculateStepDistanceRemaining(location, directionsRoute);
     }
 
-    return assembleRouteProgress(directionsRoute, stepDistanceRemaining);
+    return assembleRouteProgress(directionsRoute);
   }
 
   RouteProgress getRouteProgress() {
@@ -117,23 +126,26 @@ class NavigationRouteProcessor implements OffRouteCallback {
     processNewIndex(mapboxNavigation);
   }
 
-  private RouteProgress assembleRouteProgress(DirectionsRoute directionsRoute, double stepDistanceRemaining) {
+  private RouteProgress assembleRouteProgress(DirectionsRoute route) {
     int legIndex = indices.legIndex();
     int stepIndex = indices.stepIndex();
-    double legDistanceRemaining = legDistanceRemaining(stepDistanceRemaining, legIndex, stepIndex, directionsRoute);
-    double routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, legIndex, directionsRoute);
+
+    legDistanceRemaining = legDistanceRemaining(stepDistanceRemaining, legIndex, stepIndex, route);
+    routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, legIndex, route);
+    currentLegAnnotation = createCurrentAnnotation(currentLegAnnotation, currentLeg, legDistanceRemaining);
 
     RouteProgress.Builder progressBuilder = RouteProgress.builder()
       .stepDistanceRemaining(stepDistanceRemaining)
       .legDistanceRemaining(legDistanceRemaining)
       .distanceRemaining(routeDistanceRemaining)
-      .directionsRoute(directionsRoute)
+      .directionsRoute(route)
       .currentStepPoints(currentStepPoints)
       .upcomingStepPoints(upcomingStepPoints)
       .stepIndex(stepIndex)
       .legIndex(legIndex)
       .intersections(currentIntersections)
-      .intersectionDistancesAlongStep(currentIntersectionDistances);
+      .intersectionDistancesAlongStep(currentIntersectionDistances)
+      .currentLegAnnotation(currentLegAnnotation);
 
     if (upcomingStepPoints != null && !upcomingStepPoints.isEmpty()) {
       progressBuilder.upcomingStepPoints(upcomingStepPoints);
@@ -141,12 +153,21 @@ class NavigationRouteProcessor implements OffRouteCallback {
     return progressBuilder.build();
   }
 
+  /**
+   * Called after {@link NavigationHelper#increaseIndex(RouteProgress, NavigationIndices)}.
+   * <p>
+   * Processes all new index-based data that is
+   * needed for {@link NavigationRouteProcessor#assembleRouteProgress(DirectionsRoute)}.
+   *
+   * @param mapboxNavigation for the current route
+   */
   private void processNewIndex(MapboxNavigation mapboxNavigation) {
     DirectionsRoute route = mapboxNavigation.getRoute();
     int legIndex = indices.legIndex();
     int stepIndex = indices.stepIndex();
     int upcomingStepIndex = stepIndex + 1;
-    List<LegStep> steps = route.legs().get(legIndex).steps();
+    currentLeg = route.legs().get(legIndex);
+    List<LegStep> steps = currentLeg.steps();
     LegStep currentStep = steps.get(stepIndex);
     LegStep upcomingStep = upcomingStepIndex < steps.size() ? steps.get(stepIndex) : null;
     currentStepPoints = decodeStepPoints(route, currentStepPoints, legIndex, stepIndex);
@@ -169,9 +190,7 @@ class NavigationRouteProcessor implements OffRouteCallback {
       indices = NavigationIndices.create(FIRST_LEG_INDEX, FIRST_STEP_INDEX);
       processNewIndex(mapboxNavigation);
 
-      RouteLeg firstLeg = directionsRoute.legs().get(FIRST_LEG_INDEX);
-      double stepDistanceRemaining = firstLeg.steps().get(FIRST_STEP_INDEX).distance();
-      routeProgress = assembleRouteProgress(directionsRoute, stepDistanceRemaining);
+      routeProgress = assembleRouteProgress(directionsRoute);
     }
   }
 

@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5;
 
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -77,7 +78,9 @@ public class BaseTest {
       upcomingStepPoints = buildStepPointsFromGeometry(upcomingStepGeometry);
     }
     List<StepIntersection> intersections = createIntersectionsList(currentStep, upcomingStep);
-    List<Double> intersectionDistances = createDistancesToIntersections(currentStepPoints, intersections);
+    List<Pair<StepIntersection, Double>> intersectionDistances = createDistancesToIntersections(
+      currentStepPoints, intersections
+    );
 
     return RouteProgress.builder()
       .stepDistanceRemaining(stepDistanceRemaining)
@@ -141,9 +144,9 @@ public class BaseTest {
   }
 
   @NonNull
-  private static List<Double> createDistancesToIntersections(List<Point> stepPoints,
-                                                             List<StepIntersection> intersections) {
-    List<Double> distancesToIntersections = new ArrayList<>();
+  private static List<Pair<StepIntersection, Double>> createDistancesToIntersections(List<Point> stepPoints,
+                                                                                     List<StepIntersection> intersections) {
+    List<Pair<StepIntersection, Double>> distancesToIntersections = new ArrayList<>();
     List<StepIntersection> stepIntersections = new ArrayList<>(intersections);
     if (stepPoints.isEmpty()) {
       return distancesToIntersections;
@@ -160,7 +163,7 @@ public class BaseTest {
       if (!firstStepPoint.equals(intersectionPoint)) {
         LineString beginningLineString = TurfMisc.lineSlice(firstStepPoint, intersectionPoint, stepLineString);
         double distanceToIntersection = TurfMeasurement.length(beginningLineString, TurfConstants.UNIT_METERS);
-        distancesToIntersections.add(distanceToIntersection);
+        distancesToIntersections.add(new Pair<>(intersection, distanceToIntersection));
       }
     }
     return distancesToIntersections;

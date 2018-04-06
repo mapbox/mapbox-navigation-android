@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.content.Context;
 import android.location.Location;
+import android.support.v4.util.Pair;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -195,7 +196,7 @@ public class NavigationHelperTest extends BaseTest {
     List<Point> currentStepPoints = PolylineUtils.decode(currentStep.geometry(), Constants.PRECISION_6);
     List<StepIntersection> currentStepIntersections = currentStep.intersections();
 
-    List<Double> intersectionDistances = NavigationHelper.createDistancesToIntersections(
+    List<Pair<StepIntersection, Double>> intersectionDistances = NavigationHelper.createDistancesToIntersections(
       currentStepPoints, currentStepIntersections
     );
 

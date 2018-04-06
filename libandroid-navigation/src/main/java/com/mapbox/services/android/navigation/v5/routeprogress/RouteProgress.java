@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -158,7 +159,10 @@ public abstract class RouteProgress {
 
   abstract List<StepIntersection> intersections();
 
-  abstract List<Double> intersectionDistancesAlongStep();
+  abstract List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep();
+
+  @Nullable
+  abstract CurrentLegAnnotation currentLegAnnotation();
 
   @AutoValue.Builder
   public abstract static class Builder {
@@ -197,9 +201,15 @@ public abstract class RouteProgress {
 
     abstract List<StepIntersection> intersections();
 
-    public abstract Builder intersectionDistancesAlongStep(List<Double> intersectionDistancesAlongStep);
+    public abstract Builder intersectionDistancesAlongStep(
+      List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep
+    );
 
-    abstract List<Double> intersectionDistancesAlongStep();
+    abstract List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep();
+
+    public abstract Builder currentLegAnnotation(@Nullable CurrentLegAnnotation currentLegAnnotation);
+
+    abstract CurrentLegAnnotation currentLegAnnotation();
 
     abstract Builder currentLegProgress(RouteLegProgress routeLegProgress);
 
@@ -216,6 +226,7 @@ public abstract class RouteProgress {
         .upcomingStepPoints(upcomingStepPoints())
         .intersections(intersections())
         .intersectionDistancesAlongStep(intersectionDistancesAlongStep())
+        .currentLegAnnotation(currentLegAnnotation())
         .build();
       currentLegProgress(legProgress);
 
