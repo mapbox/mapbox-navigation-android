@@ -148,8 +148,6 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   private void extractConfiguration(NavigationViewOptions.Builder options,
                                     MapboxNavigationOptions.Builder navigationOptions) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-    options.awsPoolId(preferences
-      .getString(NavigationConstants.NAVIGATION_VIEW_AWS_POOL_ID, null));
     options.shouldSimulateRoute(preferences
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
     options.directionsProfile(preferences

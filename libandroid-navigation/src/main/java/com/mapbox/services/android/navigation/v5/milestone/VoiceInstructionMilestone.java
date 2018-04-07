@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
+import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoader;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.List;
@@ -15,21 +16,27 @@ public class VoiceInstructionMilestone extends Milestone {
   private DirectionsRoute currentRoute;
   private LegStep currentStep;
   private List<VoiceInstructions> stepVoiceInstructions;
+  private final VoiceInstructionLoader voiceInstructionLoader;
 
   VoiceInstructionMilestone(Builder builder) {
     super(builder);
+    voiceInstructionLoader = VoiceInstructionLoader.getInstance();
   }
 
   @Override
   public boolean isOccurring(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-    if (newRoute(routeProgress)) {
+    if (isNewRoute(routeProgress)) {
       clearInstructionList();
+      voiceInstructionLoader.cacheInstructions(routeProgress, true);
     }
+
     if (shouldAddInstructions(routeProgress)) {
       stepVoiceInstructions = routeProgress.currentLegProgress().currentStep().voiceInstructions();
     }
+
     for (VoiceInstructions voice : stepVoiceInstructions) {
       if (shouldBeVoiced(routeProgress, voice)) {
+        voiceInstructionLoader.cacheInstructions(routeProgress, false);
         announcement = voice.announcement();
         ssmlAnnouncement = voice.ssmlAnnouncement();
         stepVoiceInstructions.remove(voice);
@@ -50,7 +57,7 @@ public class VoiceInstructionMilestone extends Milestone {
   }
 
   /**
-   * Provide the SSML instruction that can be used with Amazon's AWS Polly.
+   * Provide the SSML instruction that can be used with Mapbox's API Voice.
    * <p>
    * This String will provide special markup denoting how certain portions of the announcement
    * should be pronounced.
@@ -60,6 +67,18 @@ public class VoiceInstructionMilestone extends Milestone {
    */
   public String getSsmlAnnouncement() {
     return ssmlAnnouncement;
+  }
+
+  /**
+   * Provide the instruction that can be used with Android's TextToSpeech.
+   * <p>
+   * This string will be in plain text.
+   *
+   * @return announcement in plain text
+   * @since 0.12.0
+   */
+  public String getAnnouncement() {
+    return announcement;
   }
 
   /**
@@ -101,7 +120,7 @@ public class VoiceInstructionMilestone extends Milestone {
    * @param routeProgress provides updated route information
    * @return true if new route, false if not
    */
-  private boolean newRoute(RouteProgress routeProgress) {
+  private boolean isNewRoute(RouteProgress routeProgress) {
     boolean newRoute = currentRoute == null || !currentRoute.equals(routeProgress.directionsRoute());
     currentRoute = routeProgress.directionsRoute();
     return newRoute;

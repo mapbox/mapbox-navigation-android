@@ -5,75 +5,57 @@ import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
-import com.mapbox.services.android.navigation.ui.v5.voice.polly.PollyPlayer;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 
 import java.util.Locale;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class NavigationInstructionPlayer implements InstructionPlayer, InstructionListener {
+public class NavigationInstructionPlayer implements InstructionListener {
 
   private AudioManager instructionAudioManager;
   private AudioFocusRequest instructionFocusRequest;
-  private InstructionPlayer instructionPlayer;
+  private MapboxSpeechPlayer mapboxSpeechPlayer;
+  private AndroidSpeechPlayer androidSpeechPlayer;
   private InstructionListener instructionListener;
-  private boolean isPollyPlayer;
+  private Queue<VoiceInstructionMilestone> instructionQueue;
+  private boolean isMuted;
 
-  public NavigationInstructionPlayer(@NonNull Context context, @Nullable String awsPoolId,
-                                     Locale locale) {
+  public NavigationInstructionPlayer(@NonNull Context context, Locale locale) {
     initAudioManager(context);
     initAudioFocusRequest();
-    initInstructionPlayer(context, awsPoolId, locale);
+    initInstructionPlayers(context, locale);
+    instructionQueue = new ConcurrentLinkedQueue<>();
   }
 
-  private void initAudioFocusRequest() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      instructionFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
-        .build();
-    }
+  public void play(VoiceInstructionMilestone voiceInstructionMilestone) {
+    instructionQueue.add(voiceInstructionMilestone);
+    mapboxSpeechPlayer.play(voiceInstructionMilestone.getSsmlAnnouncement());
   }
 
-  private void initInstructionPlayer(Context context, @Nullable String awsPoolId,
-                                     Locale locale) {
-    if (!TextUtils.isEmpty(awsPoolId)) {
-      instructionPlayer = new PollyPlayer(context, awsPoolId, locale);
-      isPollyPlayer = true;
-    } else {
-      instructionPlayer = new DefaultPlayer(context, locale);
-    }
-    instructionPlayer.addInstructionListener(this);
-  }
-
-  @Override
-  public void play(String instruction) {
-    instructionPlayer.play(instruction);
-  }
-
-  @Override
   public boolean isMuted() {
-    return instructionPlayer.isMuted();
+    return isMuted;
   }
 
-  @Override
   public void setMuted(boolean isMuted) {
-    instructionPlayer.setMuted(isMuted);
+    this.isMuted = isMuted;
+    mapboxSpeechPlayer.setMuted(isMuted);
+    androidSpeechPlayer.setMuted(isMuted);
   }
 
-  @Override
   public void onOffRoute() {
-    instructionPlayer.onOffRoute();
-    play(NavigationConstants.NAVIGATION_VIEW_REROUTING);
+    instructionQueue.clear();
+    mapboxSpeechPlayer.onOffRoute();
+    androidSpeechPlayer.onOffRoute();
   }
 
-  @Override
   public void onDestroy() {
-    instructionPlayer.onDestroy();
+    mapboxSpeechPlayer.onDestroy();
+    androidSpeechPlayer.onDestroy();
   }
 
-  @Override
-  public void addInstructionListener(InstructionListener instructionListener) {
+  public void setInstructionListener(InstructionListener instructionListener) {
     this.instructionListener = instructionListener;
   }
 
@@ -83,8 +65,8 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
       instructionListener.onStart();
     }
 
-    // Request audio focus
     requestAudioFocus();
+    instructionQueue.remove();
   }
 
   @Override
@@ -93,19 +75,33 @@ public class NavigationInstructionPlayer implements InstructionPlayer, Instructi
       instructionListener.onDone();
     }
 
-    // Abandon audio focus
     abandonAudioFocus();
   }
 
   @Override
-  public void onError() {
+  public void onError(boolean isMapboxPlayer) {
     if (instructionListener != null) {
-      instructionListener.onError();
+      instructionListener.onError(isMapboxPlayer);
+    }
+
+    if (isMapboxPlayer) { // If mapbox player failed, try android speech player
+      androidSpeechPlayer.play(instructionQueue.peek().getAnnouncement());
+    } else { // If android speech player fails, just drop the instruction
+      instructionQueue.remove();
     }
   }
 
-  public boolean isPollyPlayer() {
-    return isPollyPlayer;
+  private void initAudioFocusRequest() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      instructionFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK).build();
+    }
+  }
+
+  private void initInstructionPlayers(Context context, Locale locale) {
+    mapboxSpeechPlayer = new MapboxSpeechPlayer(context, locale);
+    mapboxSpeechPlayer.setInstructionListener(this);
+    androidSpeechPlayer = new AndroidSpeechPlayer(context, locale);
+    androidSpeechPlayer.setInstructionListener(this);
   }
 
   private void initAudioManager(Context context) {

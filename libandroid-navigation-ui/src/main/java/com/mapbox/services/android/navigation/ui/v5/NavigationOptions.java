@@ -20,9 +20,6 @@ public abstract class NavigationOptions {
   public abstract Point destination();
 
   @Nullable
-  public abstract String awsPoolId();
-
-  @Nullable
   public abstract Integer lightThemeResId();
 
   @Nullable
