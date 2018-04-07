@@ -89,7 +89,9 @@ class NavigationPresenter {
   }
 
   void onSummaryBottomSheetHidden() {
-    view.showRecenterBtn();
+    if (bottomSheetState == BottomSheetBehavior.STATE_HIDDEN) {
+      view.showRecenterBtn();
+    }
   }
 
   void retrieveBottomSheetState(int bottomSheetState) {

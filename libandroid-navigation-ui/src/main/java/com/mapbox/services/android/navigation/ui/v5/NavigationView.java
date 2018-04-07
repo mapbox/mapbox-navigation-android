@@ -455,9 +455,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       public void onStateChanged(@NonNull View bottomSheet, int newState) {
         navigationViewEventDispatcher.onBottomSheetStateChanged(bottomSheet, newState);
 
-        if (newState == BottomSheetBehavior.STATE_HIDDEN && navigationPresenter != null) {
-          navigationPresenter.onSummaryBottomSheetHidden();
-        }
+        navigationPresenter.onSummaryBottomSheetHidden();
       }
 
       @Override
