@@ -32,8 +32,6 @@ public abstract class NavigationLauncherOptions extends NavigationOptions {
 
     public abstract Builder destination(Point destination);
 
-    public abstract Builder awsPoolId(String awsPoolId);
-
     public abstract Builder lightThemeResId(Integer lightThemeResId);
 
     public abstract Builder darkThemeResId(Integer darkThemeResId);
@@ -51,7 +49,6 @@ public abstract class NavigationLauncherOptions extends NavigationOptions {
 
   public static NavigationLauncherOptions.Builder builder() {
     return new AutoValue_NavigationLauncherOptions.Builder()
-      .awsPoolId(null)
       .shouldSimulateRoute(false)
       .enableOffRouteDetection(true);
   }

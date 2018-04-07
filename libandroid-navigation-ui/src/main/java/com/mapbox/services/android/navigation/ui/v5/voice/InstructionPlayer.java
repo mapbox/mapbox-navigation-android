@@ -48,11 +48,4 @@ public interface InstructionPlayer {
    * @since 0.6.0
    */
   void onDestroy();
-
-  /**
-   * Used to add listener for when instructions begin / end.
-   *
-   * @since 0.8.0
-   */
-  void addInstructionListener(InstructionListener instructionListener);
 }

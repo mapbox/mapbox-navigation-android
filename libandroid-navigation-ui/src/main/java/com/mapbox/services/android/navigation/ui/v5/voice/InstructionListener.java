@@ -6,5 +6,5 @@ public interface InstructionListener {
 
   void onDone();
 
-  void onError();
+  void onError(boolean isMapboxPlayer);
 }

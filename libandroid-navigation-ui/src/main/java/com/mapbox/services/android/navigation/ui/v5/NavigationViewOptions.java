@@ -48,8 +48,6 @@ public abstract class NavigationViewOptions extends NavigationOptions {
 
     public abstract Builder destination(Point destination);
 
-    public abstract Builder awsPoolId(String awsPoolId);
-
     public abstract Builder lightThemeResId(Integer lightThemeResId);
 
     public abstract Builder darkThemeResId(Integer darkThemeResId);
@@ -75,7 +73,6 @@ public abstract class NavigationViewOptions extends NavigationOptions {
 
   public static Builder builder() {
     return new AutoValue_NavigationViewOptions.Builder()
-      .awsPoolId(null)
       .navigationOptions(MapboxNavigationOptions.builder().build())
       .shouldSimulateRoute(false);
   }
