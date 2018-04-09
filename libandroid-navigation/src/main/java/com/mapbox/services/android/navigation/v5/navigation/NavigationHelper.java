@@ -42,6 +42,11 @@ import static com.mapbox.core.constants.Constants.PRECISION_6;
 class NavigationHelper {
 
   private static final int FIRST_POINT = 0;
+  private static final int FIRST_INTERSECTION = 0;
+  private static final int ONE_INDEX = 1;
+  private static final int INDEX_ZERO = 0;
+  private static final String EMPTY_STRING = "";
+  private static final double ZERO_METERS = 0d;
 
   private NavigationHelper() {
     // Empty private constructor to prevent users creating an instance of this class.
@@ -85,7 +90,7 @@ class NavigationHelper {
       // Create a new custom instruction based on the Instruction packaged with the Milestone
       return milestone.getInstruction().buildInstruction(routeProgress);
     }
-    return "";
+    return EMPTY_STRING;
   }
 
   /**
@@ -275,6 +280,18 @@ class NavigationHelper {
     return intersectionsWithNextManeuver;
   }
 
+  /**
+   * Creates a list of pairs {@link StepIntersection} and double distance in meters along a step.
+   * <p>
+   * Each pair represents an intersection on the given step and its distance along the step geometry.
+   * <p>
+   * The first intersection is the same point as the first point of the list of step points, so will
+   * always be zero meters.
+   *
+   * @param stepPoints    representing the step geometry
+   * @param intersections along the step to be measured
+   * @return list of measured intersection pairs
+   */
   @NonNull
   static List<Pair<StepIntersection, Double>> createDistancesToIntersections(List<Point> stepPoints,
                                                                              List<StepIntersection> intersections) {
@@ -292,39 +309,88 @@ class NavigationHelper {
 
     for (StepIntersection intersection : stepIntersections) {
       Point intersectionPoint = intersection.location();
-      if (!firstStepPoint.equals(intersectionPoint)) {
+      if (firstStepPoint.equals(intersectionPoint)) {
+        distancesToIntersections.add(new Pair<>(intersection, ZERO_METERS));
+      } else {
         LineString beginningLineString = TurfMisc.lineSlice(firstStepPoint, intersectionPoint, stepLineString);
-        double distanceToIntersection = TurfMeasurement.length(beginningLineString, TurfConstants.UNIT_METERS);
-        distancesToIntersections.add(new Pair<>(intersection, distanceToIntersection));
+        double distanceToIntersectionInMeters = TurfMeasurement.length(beginningLineString, TurfConstants.UNIT_METERS);
+        distancesToIntersections.add(new Pair<>(intersection, distanceToIntersectionInMeters));
       }
     }
     return distancesToIntersections;
   }
 
-  static StepIntersection findCurrentIntersection(@NonNull List<Pair<StepIntersection, Double>> measuredIntersections,
+  /**
+   * Based on the list of measured intersections and the step distance traveled, finds
+   * the current intersection a user is traveling along.
+   *
+   * @param intersections         along the step
+   * @param measuredIntersections measured intersections along the step
+   * @param stepDistanceTraveled  how far the user has traveled along the step
+   * @return the current step intersection
+   */
+  static StepIntersection findCurrentIntersection(@NonNull List<StepIntersection> intersections,
+                                                  @NonNull List<Pair<StepIntersection, Double>> measuredIntersections,
                                                   double stepDistanceTraveled) {
     for (Pair<StepIntersection, Double> measuredIntersection : measuredIntersections) {
       double intersectionDistance = measuredIntersection.second;
       int intersectionIndex = measuredIntersections.indexOf(measuredIntersection);
+      int nextIntersectionIndex = intersectionIndex + ONE_INDEX;
+      int measuredIntersectionSize = measuredIntersections.size() - ONE_INDEX;
+      boolean hasValidNextIntersection = nextIntersectionIndex < measuredIntersectionSize;
 
-      int nextIntersectionIndex = intersectionIndex + 1;
-      if (nextIntersectionIndex > measuredIntersections.size()) {
+      if (hasValidNextIntersection) {
+        double nextIntersectionDistance = measuredIntersections.get(nextIntersectionIndex).second;
+        if (stepDistanceTraveled > intersectionDistance && stepDistanceTraveled < nextIntersectionDistance) {
+          return measuredIntersection.first;
+        }
+      } else if (stepDistanceTraveled > measuredIntersection.second) {
         return measuredIntersection.first;
-      }
-      double nextIntersectionDistance = measuredIntersections.get(nextIntersectionIndex).second;
-
-      if (stepDistanceTraveled > intersectionDistance && stepDistanceTraveled < nextIntersectionDistance) {
-        return measuredIntersection.first;
+      } else {
+        return measuredIntersections.get(FIRST_INTERSECTION).first;
       }
     }
-    return measuredIntersections.get(0).first;
+    return intersections.get(FIRST_INTERSECTION);
   }
 
-  static StepIntersection findUpcomingIntersection(@NonNull List<Pair<StepIntersection, Double>> measuredIntersections,
-                                                   double stepDistanceTraveled) {
+  /**
+   * Based on the current intersection index, add one and try to get the upcoming.
+   * <p>
+   * If there is not an upcoming intersection on the step, check for an upcoming step and
+   * return the first intersection from the upcoming step.
+   *
+   * @param intersections       for the current step
+   * @param upcomingStep        for the first intersection if needed
+   * @param currentIntersection being traveled along
+   * @return the upcoming intersection on the step
+   */
+  static StepIntersection findUpcomingIntersection(@NonNull List<StepIntersection> intersections,
+                                                   @Nullable LegStep upcomingStep,
+                                                   StepIntersection currentIntersection) {
+    int intersectionIndex = intersections.indexOf(currentIntersection);
+    int nextIntersectionIndex = intersectionIndex + ONE_INDEX;
+    int intersectionSize = intersections.size() - ONE_INDEX;
+    boolean isValidUpcomingIntersection = nextIntersectionIndex < intersectionSize;
+    if (isValidUpcomingIntersection) {
+      return intersections.get(nextIntersectionIndex);
+    } else if (upcomingStep != null) {
+      List<StepIntersection> upcomingIntersections = upcomingStep.intersections();
+      if (upcomingIntersections != null && !upcomingIntersections.isEmpty()) {
+        return upcomingIntersections.get(FIRST_INTERSECTION);
+      }
+    }
     return null;
   }
 
+  /**
+   * Given a list of distance annotations, find the current annotation index.  This index retrieves the
+   * current annotation from any provided annotation list in {@link LegAnnotation}.
+   *
+   * @param currentLegAnnotation current annotation being traveled along
+   * @param leg                  holding each list of annotations
+   * @param legDistanceRemaining to determine the new set of annotations
+   * @return a current set of annotation data for the user's position along the route
+   */
   @Nullable
   static CurrentLegAnnotation createCurrentAnnotation(CurrentLegAnnotation currentLegAnnotation,
                                                       RouteLeg leg, double legDistanceRemaining) {
@@ -361,31 +427,6 @@ class NavigationHelper {
     }
     annotationBuilder.index(annotationIndex);
     return annotationBuilder.build();
-  }
-
-  private static int findAnnotationIndex(CurrentLegAnnotation currentLegAnnotation,
-                                         CurrentLegAnnotation.Builder annotationBuilder, RouteLeg leg,
-                                         double legDistanceRemaining, List<Double> distanceAnnotationList) {
-    List<Double> legDistances = new ArrayList<>(distanceAnnotationList);
-    Double totalLegDistance = leg.distance();
-    double distanceTraveled = totalLegDistance - legDistanceRemaining;
-
-    int distanceIndex = 0;
-    double annotationDistancesTraveled = 0;
-    if (currentLegAnnotation != null) {
-      distanceIndex = currentLegAnnotation.index();
-      annotationDistancesTraveled = currentLegAnnotation.distanceToAnnotation();
-    }
-    for (int i = distanceIndex; i < legDistances.size(); i++) {
-      Double distance = legDistances.get(i);
-      annotationDistancesTraveled += distance;
-      if (annotationDistancesTraveled > distanceTraveled) {
-        double distanceToAnnotation = annotationDistancesTraveled - distance;
-        annotationBuilder.distanceToAnnotation(distanceToAnnotation);
-        return i;
-      }
-    }
-    return 0;
   }
 
   /**
@@ -448,6 +489,31 @@ class NavigationHelper {
       return steps.get(stepIndex + 1).maneuver().location();
     }
     return !coords.isEmpty() ? coords.get(coords.size() - 1) : coords.get(coords.size());
+  }
+
+  private static int findAnnotationIndex(CurrentLegAnnotation currentLegAnnotation,
+                                         CurrentLegAnnotation.Builder annotationBuilder, RouteLeg leg,
+                                         double legDistanceRemaining, List<Double> distanceAnnotationList) {
+    List<Double> legDistances = new ArrayList<>(distanceAnnotationList);
+    Double totalLegDistance = leg.distance();
+    double distanceTraveled = totalLegDistance - legDistanceRemaining;
+
+    int distanceIndex = 0;
+    double annotationDistancesTraveled = 0;
+    if (currentLegAnnotation != null) {
+      distanceIndex = currentLegAnnotation.index();
+      annotationDistancesTraveled = currentLegAnnotation.distanceToAnnotation();
+    }
+    for (int i = distanceIndex; i < legDistances.size(); i++) {
+      Double distance = legDistances.get(i);
+      annotationDistancesTraveled += distance;
+      if (annotationDistancesTraveled > distanceTraveled) {
+        double distanceToAnnotation = annotationDistancesTraveled - distance;
+        annotationBuilder.distanceToAnnotation(distanceToAnnotation);
+        return i;
+      }
+    }
+    return INDEX_ZERO;
   }
 
   private static Location getSnappedLocation(MapboxNavigation mapboxNavigation, Location location,

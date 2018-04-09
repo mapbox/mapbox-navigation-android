@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
@@ -191,7 +192,7 @@ public class NavigationHelperTest extends BaseTest {
   }
 
   @Test
-  public void createIntersectionDistanceList_ignoresSamePointsForDistanceCalculations() throws Exception {
+  public void createIntersectionDistanceList_samePointsForDistanceCalculationsEqualZero() throws Exception {
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     List<Point> currentStepPoints = PolylineUtils.decode(currentStep.geometry(), Constants.PRECISION_6);
     List<StepIntersection> currentStepIntersections = currentStep.intersections();
@@ -200,6 +201,57 @@ public class NavigationHelperTest extends BaseTest {
       currentStepPoints, currentStepIntersections
     );
 
-    assertFalse(currentStepIntersections.size() == intersectionDistances.size());
+    assertTrue(intersectionDistances.get(0).second == 0);
+  }
+
+  @Test
+  public void createIntersectionDistanceList_intersectionListSizeEqualsDistanceListSize() throws Exception {
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    List<Point> currentStepPoints = PolylineUtils.decode(currentStep.geometry(), Constants.PRECISION_6);
+    List<StepIntersection> currentStepIntersections = currentStep.intersections();
+
+    List<Pair<StepIntersection, Double>> intersectionDistances = NavigationHelper.createDistancesToIntersections(
+      currentStepPoints, currentStepIntersections
+    );
+
+    assertTrue(currentStepIntersections.size() == intersectionDistances.size());
+  }
+
+  @Test
+  public void createIntersectionDistanceList_emptyStepPointsReturnsEmptyList() throws Exception {
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    List<Point> currentStepPoints = new ArrayList<>();
+    List<StepIntersection> currentStepIntersections = currentStep.intersections();
+
+    List<Pair<StepIntersection, Double>> intersectionDistances = NavigationHelper.createDistancesToIntersections(
+      currentStepPoints, currentStepIntersections
+    );
+
+    assertTrue(intersectionDistances.isEmpty());
+  }
+
+  @Test
+  public void createIntersectionDistanceList_emptyStepIntersectionsReturnsEmptyList() throws Exception {
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    List<Point> currentStepPoints = PolylineUtils.decode(currentStep.geometry(), Constants.PRECISION_6);
+    List<StepIntersection> currentStepIntersections = new ArrayList<>();
+
+    List<Pair<StepIntersection, Double>> intersectionDistances = NavigationHelper.createDistancesToIntersections(
+      currentStepPoints, currentStepIntersections
+    );
+
+    assertTrue(intersectionDistances.isEmpty());
+  }
+
+  @Test
+  public void findCurrentIntersection_beginningOfStepReturnsFirstIntersection() throws Exception {
+    DirectionsRoute route = buildDirectionsRoute();
+    double stepDistanceRemaining = getFirstStep(route).distance();
+    double legDistanceRemaining = getFirstLeg(route).distance();
+    RouteProgress routeProgress = buildRouteProgress(route, stepDistanceRemaining,
+      legDistanceRemaining, route.distance(), 0, 0);
+
+//    StepIntersection currentIntersection = NavigationHelper.findCurrentIntersection(routeProgress.)
+
   }
 }

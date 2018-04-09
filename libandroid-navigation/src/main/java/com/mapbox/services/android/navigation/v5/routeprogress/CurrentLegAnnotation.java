@@ -22,7 +22,8 @@ public abstract class CurrentLegAnnotation implements Serializable {
    * @since 0.13.0
    */
   public static Builder builder() {
-    return new AutoValue_CurrentLegAnnotation.Builder();
+    return new AutoValue_CurrentLegAnnotation.Builder()
+      .distanceToAnnotation(0);
   }
 
   /**
@@ -35,7 +36,7 @@ public abstract class CurrentLegAnnotation implements Serializable {
   public abstract int index();
 
   /**
-   * Distance along the {@link com.mapbox.api.directions.v5.models.LegStep} that adds
+   * Distance along the {@link com.mapbox.api.directions.v5.models.RouteLeg} that adds
    * up to this set of annotation data.
    *
    * @return distance to this set of annotation data
@@ -93,8 +94,6 @@ public abstract class CurrentLegAnnotation implements Serializable {
    */
   @Nullable
   public abstract String congestion();
-
-  public abstract CurrentLegAnnotation.Builder toBuilder();
 
   /**
    * This builder can be used to set the values describing the {@link CurrentLegAnnotation}.
@@ -155,8 +154,22 @@ public abstract class CurrentLegAnnotation implements Serializable {
      */
     public abstract Builder congestion(@Nullable String congestion);
 
+    /**
+     * The index used to retrieve the annotation values from each array in
+     * {@link com.mapbox.api.directions.v5.models.LegAnnotation}.
+     *
+     * @return this builder for chaining options together
+     * @since 0.13.0
+     */
     public abstract Builder index(int index);
 
+    /**
+     * Distance along the {@link com.mapbox.api.directions.v5.models.RouteLeg} that adds
+     * up to this set of annotation data.
+     *
+     * @return this builder for chaining options together
+     * @since 0.13.0
+     */
     public abstract Builder distanceToAnnotation(double distanceToAnnotation);
 
     /**

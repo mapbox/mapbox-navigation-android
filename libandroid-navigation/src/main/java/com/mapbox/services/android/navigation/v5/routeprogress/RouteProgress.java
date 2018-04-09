@@ -159,10 +159,15 @@ public abstract class RouteProgress {
 
   abstract List<StepIntersection> intersections();
 
-  abstract List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep();
+  abstract StepIntersection currentIntersection();
+
+  @Nullable
+  abstract StepIntersection upcomingIntersection();
 
   @Nullable
   abstract CurrentLegAnnotation currentLegAnnotation();
+
+  abstract List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep();
 
   @AutoValue.Builder
   public abstract static class Builder {
@@ -201,6 +206,14 @@ public abstract class RouteProgress {
 
     abstract List<StepIntersection> intersections();
 
+    public abstract Builder currentIntersection(StepIntersection currentIntersection);
+
+    abstract StepIntersection currentIntersection();
+
+    public abstract Builder upcomingIntersection(@Nullable StepIntersection upcomingIntersection);
+
+    abstract StepIntersection upcomingIntersection();
+
     public abstract Builder intersectionDistancesAlongStep(
       List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep
     );
@@ -225,6 +238,8 @@ public abstract class RouteProgress {
         .currentStepPoints(currentStepPoints())
         .upcomingStepPoints(upcomingStepPoints())
         .intersections(intersections())
+        .currentIntersection(currentIntersection())
+        .upcomingIntersection(upcomingIntersection())
         .intersectionDistancesAlongStep(intersectionDistancesAlongStep())
         .currentLegAnnotation(currentLegAnnotation())
         .build();

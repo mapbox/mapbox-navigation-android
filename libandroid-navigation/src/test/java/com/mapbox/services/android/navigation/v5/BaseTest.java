@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5;
 
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
 import com.google.gson.Gson;
@@ -11,6 +12,7 @@ import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
@@ -82,6 +84,10 @@ public class BaseTest {
       currentStepPoints, intersections
     );
 
+    StepIntersection currentIntersection = findCurrentIntersection(intersections,
+      intersectionDistances, currentStep.distance() - stepDistanceRemaining);
+    StepIntersection upcomingIntersection = findUpcomingIntersection(intersections, upcomingStep, currentIntersection);
+
     return RouteProgress.builder()
       .stepDistanceRemaining(stepDistanceRemaining)
       .legDistanceRemaining(legDistanceRemaining)
@@ -90,6 +96,8 @@ public class BaseTest {
       .currentStepPoints(currentStepPoints)
       .upcomingStepPoints(upcomingStepPoints)
       .intersections(intersections)
+      .currentIntersection(currentIntersection)
+      .upcomingIntersection(upcomingIntersection)
       .intersectionDistancesAlongStep(intersectionDistances)
       .stepIndex(stepIndex)
       .legIndex(legIndex)
@@ -127,6 +135,10 @@ public class BaseTest {
     LegStep currentStep = progress.currentLegProgress().currentStep();
     LineString lineString = LineString.fromPolyline(currentStep.geometry(), PRECISION_6);
     return lineString.coordinates();
+  }
+
+  protected RouteLeg getFirstLeg(DirectionsRoute route) {
+    return route.legs().get(0);
   }
 
   protected LegStep getFirstStep(DirectionsRoute route) {
@@ -167,6 +179,68 @@ public class BaseTest {
       }
     }
     return distancesToIntersections;
+  }
+
+  /**
+   * Based on the list of measured intersections and the step distance traveled, finds
+   * the current intersection a user is traveling along.
+   *
+   * @param intersections         along the step
+   * @param measuredIntersections measured intersections along the step
+   * @param stepDistanceTraveled  how far the user has traveled along the step
+   * @return the current step intersection
+   */
+  static StepIntersection findCurrentIntersection(@NonNull List<StepIntersection> intersections,
+                                                  @NonNull List<Pair<StepIntersection, Double>> measuredIntersections,
+                                                  double stepDistanceTraveled) {
+    for (Pair<StepIntersection, Double> measuredIntersection : measuredIntersections) {
+      double intersectionDistance = measuredIntersection.second;
+      int intersectionIndex = measuredIntersections.indexOf(measuredIntersection);
+      int nextIntersectionIndex = intersectionIndex + 1;
+      int measuredIntersectionSize = measuredIntersections.size() - 1;
+      boolean hasValidNextIntersection = nextIntersectionIndex < measuredIntersectionSize;
+
+      if (hasValidNextIntersection) {
+        double nextIntersectionDistance = measuredIntersections.get(nextIntersectionIndex).second;
+        if (stepDistanceTraveled > intersectionDistance && stepDistanceTraveled < nextIntersectionDistance) {
+          return measuredIntersection.first;
+        }
+      } else if (stepDistanceTraveled > measuredIntersection.second) {
+        return measuredIntersection.first;
+      } else {
+        return measuredIntersections.get(0).first;
+      }
+    }
+    return intersections.get(0);
+  }
+
+  /**
+   * Based on the current intersection index, add one and try to get the upcoming.
+   * <p>
+   * If there is not an upcoming intersection on the step, check for an upcoming step and
+   * return the first intersection from the upcoming step.
+   *
+   * @param intersections       for the current step
+   * @param upcomingStep        for the first intersection if needed
+   * @param currentIntersection being traveled along
+   * @return the upcoming intersection on the step
+   */
+  static StepIntersection findUpcomingIntersection(@NonNull List<StepIntersection> intersections,
+                                                   @Nullable LegStep upcomingStep,
+                                                   StepIntersection currentIntersection) {
+    int intersectionIndex = intersections.indexOf(currentIntersection);
+    int nextIntersectionIndex = intersectionIndex + 1;
+    int intersectionSize = intersections.size() - 1;
+    boolean isValidUpcomingIntersection = nextIntersectionIndex < intersectionSize;
+    if (isValidUpcomingIntersection) {
+      return intersections.get(nextIntersectionIndex);
+    } else if (upcomingStep != null) {
+      List<StepIntersection> upcomingIntersections = upcomingStep.intersections();
+      if (upcomingIntersections != null && !upcomingIntersections.isEmpty()) {
+        return upcomingIntersections.get(0);
+      }
+    }
+    return null;
   }
 
   private Location buildLocationUpdate(double lng, double lat, float speed, float horizontalAccuracy, long time) {
