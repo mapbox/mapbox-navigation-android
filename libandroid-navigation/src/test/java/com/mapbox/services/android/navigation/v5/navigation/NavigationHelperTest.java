@@ -48,11 +48,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 25)
+@Config(constants = BuildConfig.class, manifest = Config.DEFAULT_MANIFEST_NAME)
 public class NavigationHelperTest extends BaseTest {
 
-  private static final String MULTI_LEG_ROUTE = "directions_two_leg_route.json";
-  private static final String ANNOTATED_DISTANCE_CONGESTION_ROUTE = "directions_distance_congestion_annotation.json";
+  private static final String MULTI_LEG_ROUTE_FIXTURE = "directions_two_leg_route.json";
+  private static final String ANNOTATED_DISTANCE_CONGESTION_ROUTE_FIXTURE = "directions_distance_congestion_annotation.json";
 
   @Test
   public void increaseIndex_increasesStepByOne() throws Exception {
@@ -107,8 +107,7 @@ public class NavigationHelperTest extends BaseTest {
       .setTrigger(Trigger.eq(TriggerProperty.STEP_INDEX, 4))
       .setIdentifier(1002).build());
 
-    List<Milestone> triggeredMilestones
-      = checkMilestones(routeProgress, routeProgress, mapboxNavigation);
+    List<Milestone> triggeredMilestones = checkMilestones(routeProgress, routeProgress, mapboxNavigation);
 
     assertEquals(1, triggeredMilestones.size());
     assertEquals(1001, triggeredMilestones.get(0).getIdentifier());
@@ -134,10 +133,10 @@ public class NavigationHelperTest extends BaseTest {
     DirectionsRoute route = buildMultiLegRoute();
     Point snappedPoint = Point.fromLngLat(-77.062996, 38.798405);
     List<Point> coordinates = PolylineUtils.decode(
-      route.legs().get(0).steps().get(1).geometry(), Constants.PRECISION_6);
+      route.legs().get(0).steps().get(1).geometry(), Constants.PRECISION_6
+    );
 
-    double distance = NavigationHelper.stepDistanceRemaining(snappedPoint, 0,
-      1, route, coordinates);
+    double distance = NavigationHelper.stepDistanceRemaining(snappedPoint, 0, 1, route, coordinates);
 
     assertEquals(0.0, distance);
   }
@@ -146,7 +145,8 @@ public class NavigationHelperTest extends BaseTest {
   public void nextManeuverPosition_correctlyReturnsNextManeuverPosition() throws Exception {
     DirectionsRoute route = buildMultiLegRoute();
     List<Point> coordinates = PolylineUtils.decode(
-      route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6);
+      route.legs().get(0).steps().get(0).geometry(), Constants.PRECISION_6
+    );
 
     Point nextManeuver = NavigationHelper.nextManeuverPosition(0,
       route.legs().get(0).steps(), coordinates);
@@ -366,8 +366,7 @@ public class NavigationHelperTest extends BaseTest {
 
   @Test
   public void createCurrentAnnotation_beginningOfStep_correctAnnotationIsReturned() throws Exception {
-    RouteProgress routeProgress = buildDistanceCongestionAnnotationRouteProgress(0,
-      0, 0, 0, 0);
+    RouteProgress routeProgress = buildDistanceCongestionAnnotationRouteProgress(0, 0, 0, 0, 0);
     Double legDistanceRemaining = routeProgress.currentLeg().distance();
 
     CurrentLegAnnotation newLegAnnotation = NavigationHelper.createCurrentAnnotation(
@@ -379,8 +378,7 @@ public class NavigationHelperTest extends BaseTest {
 
   @Test
   public void createCurrentAnnotation_midStep_correctAnnotationIsReturned() throws Exception {
-    RouteProgress routeProgress = buildDistanceCongestionAnnotationRouteProgress(0,
-      0, 0, 0, 0);
+    RouteProgress routeProgress = buildDistanceCongestionAnnotationRouteProgress(0, 0, 0, 0, 0);
     Double legDistanceRemaining = routeProgress.currentLeg().distance() / 2;
 
     CurrentLegAnnotation newLegAnnotation = NavigationHelper.createCurrentAnnotation(
@@ -393,8 +391,7 @@ public class NavigationHelperTest extends BaseTest {
 
   @Test
   public void createCurrentAnnotation_usesCurrentLegAnnotationForPriorDistanceTraveled() throws Exception {
-    RouteProgress routeProgress = buildDistanceCongestionAnnotationRouteProgress(0,
-      0, 0, 0, 0);
+    RouteProgress routeProgress = buildDistanceCongestionAnnotationRouteProgress(0, 0, 0, 0, 0);
     Double legDistanceRemaining = routeProgress.currentLeg().distance() / 2;
     Double previousAnnotationDistance = routeProgress.currentLeg().distance() / 3;
     CurrentLegAnnotation currentLegAnnotation = CurrentLegAnnotation.builder()
@@ -413,27 +410,26 @@ public class NavigationHelperTest extends BaseTest {
   private RouteProgress buildMultiLegRouteProgress(double stepDistanceRemaining, double legDistanceRemaining,
                                                    double distanceRemaining, int stepIndex, int legIndex) throws Exception {
     DirectionsRoute multiLegRoute = buildMultiLegRoute();
-    return buildRouteProgress(multiLegRoute, stepDistanceRemaining,
+    return buildTestRouteProgress(multiLegRoute, stepDistanceRemaining,
       legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
   }
 
   private RouteProgress buildDistanceCongestionAnnotationRouteProgress(double stepDistanceRemaining, double legDistanceRemaining,
                                                                        double distanceRemaining, int stepIndex, int legIndex) throws Exception {
     DirectionsRoute annotatedRoute = buildDistanceCongestionAnnotationRoute();
-    return buildRouteProgress(annotatedRoute, stepDistanceRemaining,
+    return buildTestRouteProgress(annotatedRoute, stepDistanceRemaining,
       legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
   }
 
   private RouteProgress buildMultiLegRouteProgress() throws Exception {
     DirectionsRoute multiLegRoute = buildMultiLegRoute();
-    return buildRouteProgress(multiLegRoute, 1000,
-      1000, 1000, 0, 0);
+    return buildTestRouteProgress(multiLegRoute, 1000, 1000, 1000, 0, 0);
   }
 
   private DirectionsRoute buildMultiLegRoute() throws IOException {
     Gson gson = new GsonBuilder()
       .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
-    String body = loadJsonFixture(MULTI_LEG_ROUTE);
+    String body = loadJsonFixture(MULTI_LEG_ROUTE_FIXTURE);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     return response.routes().get(0);
   }
@@ -441,7 +437,7 @@ public class NavigationHelperTest extends BaseTest {
   private DirectionsRoute buildDistanceCongestionAnnotationRoute() throws IOException {
     Gson gson = new GsonBuilder()
       .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
-    String body = loadJsonFixture(ANNOTATED_DISTANCE_CONGESTION_ROUTE);
+    String body = loadJsonFixture(ANNOTATED_DISTANCE_CONGESTION_ROUTE_FIXTURE);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     return response.routes().get(0);
   }

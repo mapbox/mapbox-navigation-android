@@ -76,8 +76,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     route = response.routes().get(0);
 
-    routeProgress = buildRouteProgress(route, 100, 100,
-      100, 0, 0);
+    routeProgress = buildTestRouteProgress(route, 100, 100, 100, 0, 0);
   }
 
   @Test
@@ -316,16 +315,14 @@ public class NavigationEventDispatcherTest extends BaseTest {
     navigationEventDispatcher.addMetricEventListeners(eventListeners);
     navigationEventDispatcher.addMetricArrivalListener(arrivalListener);
 
-    // Progress that hasn't arrived
-    RouteProgress routeProgressDidNotArrive = buildRouteProgress(route, 100,
+    RouteProgress routeProgressDidNotArrive = buildTestRouteProgress(route, 100,
       100, 100, lastStepIndex, 0);
 
     navigationEventDispatcher.onProgressChange(location, routeProgressDidNotArrive);
     verify(eventListeners, times(1)).onRouteProgressUpdate(routeProgressDidNotArrive);
     verify(arrivalListener, times(0)).onArrival(location, routeProgressDidNotArrive);
 
-    // Progress that has arrived
-    RouteProgress routeProgressDidArrive = buildRouteProgress(route, 30,
+    RouteProgress routeProgressDidArrive = buildTestRouteProgress(route, 30,
       30, 30, lastStepIndex, 0);
 
     navigationEventDispatcher.onProgressChange(location, routeProgressDidArrive);

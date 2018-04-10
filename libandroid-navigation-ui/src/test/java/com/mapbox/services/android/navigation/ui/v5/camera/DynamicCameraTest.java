@@ -10,50 +10,39 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.ui.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.navigation.camera.RouteInformation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.io.IOException;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, manifest = Config.DEFAULT_MANIFEST_NAME)
 public class DynamicCameraTest extends BaseTest {
 
   private static final String DIRECTIONS_PRECISION_6 = "directions_v5_precision_6.json";
 
-  @Mock
-  private MapboxMap mapboxMap;
-
-  private DynamicCamera cameraEngine;
-
-  @Before
-  public void setup() throws Exception {
-    MockitoAnnotations.initMocks(this);
-    cameraEngine = new DynamicCamera(mapboxMap);
-  }
-
   @Test
   public void sanity() throws Exception {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    DynamicCamera cameraEngine = new DynamicCamera(mapboxMap);
+
     assertNotNull(cameraEngine);
   }
 
   @Test
   public void onInformationFromRoute_engineCreatesCorrectTarget() throws Exception {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    DynamicCamera cameraEngine = new DynamicCamera(mapboxMap);
     RouteInformation routeInformation = RouteInformation.create(buildDirectionsRoute(), null, null);
+
     Point target = cameraEngine.target(routeInformation);
+
     double lng = target.longitude();
     assertEquals(-122.416686, lng);
     double lat = target.latitude();
@@ -62,30 +51,46 @@ public class DynamicCameraTest extends BaseTest {
 
   @Test
   public void onInformationFromRoute_engineCreatesCorrectZoom() throws Exception {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    DynamicCamera cameraEngine = new DynamicCamera(mapboxMap);
     RouteInformation routeInformation = RouteInformation.create(buildDirectionsRoute(), null, null);
+
     double zoom = cameraEngine.zoom(routeInformation);
+
     assertEquals(15d, zoom);
   }
 
   @Test
   public void onInformationFromRoute_engineCreatesCorrectTilt() throws Exception {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    DynamicCamera cameraEngine = new DynamicCamera(mapboxMap);
     RouteInformation routeInformation = RouteInformation.create(buildDirectionsRoute(), null, null);
+
     double tilt = cameraEngine.tilt(routeInformation);
+
     assertEquals(50d, tilt);
   }
 
   @Test
   public void onInformationFromRoute_engineCreatesCorrectBearing() throws Exception {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    DynamicCamera cameraEngine = new DynamicCamera(mapboxMap);
     RouteInformation routeInformation = RouteInformation.create(buildDirectionsRoute(), null, null);
+
     double bearing = cameraEngine.bearing(routeInformation);
+
     assertEquals(-99, Math.round(bearing));
   }
 
   @Test
   public void onInformationFromLocationAndProgress_engineCreatesCorrectTarget() throws Exception {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    DynamicCamera cameraEngine = new DynamicCamera(mapboxMap);
     RouteInformation routeInformation = RouteInformation.create(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(null));
+
     Point target = cameraEngine.target(routeInformation);
+
     double lng = target.longitude();
     assertEquals(-77.0339782574523, lng);
     double lat = target.latitude();
@@ -94,33 +99,49 @@ public class DynamicCameraTest extends BaseTest {
 
   @Test
   public void onHighDistanceRemaining_engineCreatesCorrectTilt() throws Exception {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    DynamicCamera cameraEngine = new DynamicCamera(mapboxMap);
     RouteInformation routeInformation = RouteInformation.create(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(1000d));
+
     double tilt = cameraEngine.tilt(routeInformation);
+
     assertEquals(50d, tilt);
   }
 
   @Test
   public void onMediumDistanceRemaining_engineCreatesCorrectTilt() throws Exception {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    DynamicCamera cameraEngine = new DynamicCamera(mapboxMap);
     RouteInformation routeInformation = RouteInformation.create(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(200d));
+
     double tilt = cameraEngine.tilt(routeInformation);
+
     assertEquals(40d, tilt);
   }
 
   @Test
   public void onLowDistanceRemaining_engineCreatesCorrectTilt() throws Exception {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    DynamicCamera cameraEngine = new DynamicCamera(mapboxMap);
     RouteInformation routeInformation = RouteInformation.create(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(null));
+
     double tilt = cameraEngine.tilt(routeInformation);
+
     assertEquals(35d, tilt);
   }
 
   @Test
   public void onInformationFromLocationAndProgress_engineCreatesCorrectBearing() throws Exception {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    DynamicCamera cameraEngine = new DynamicCamera(mapboxMap);
     RouteInformation routeInformation = RouteInformation.create(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(null));
+
     double bearing = cameraEngine.bearing(routeInformation);
+
     assertEquals(100f, bearing, DELTA);
   }
 
@@ -129,21 +150,20 @@ public class DynamicCameraTest extends BaseTest {
   }
 
   private Location buildLocationUpdate(double lng, double lat, long time) {
-    Location location = new Location(DynamicCameraTest.class.getSimpleName());
-    location.setLongitude(lng);
-    location.setLatitude(lat);
-    location.setSpeed(30f);
-    location.setBearing(100f);
-    location.setAccuracy(10f);
-    location.setTime(time);
+    Location location = mock(Location.class);
+    when(location.getLongitude()).thenReturn(lng);
+    when(location.getLatitude()).thenReturn(lat);
+    when(location.getSpeed()).thenReturn(30f);
+    when(location.getBearing()).thenReturn(100f);
+    when(location.getAccuracy()).thenReturn(10f);
+    when(location.getTime()).thenReturn(time);
     return location;
   }
 
   private RouteProgress buildDefaultRouteProgress(@Nullable Double stepDistanceRemaining) throws Exception {
     DirectionsRoute aRoute = buildDirectionsRoute();
     double stepDistanceRemainingFinal = stepDistanceRemaining == null ? 100 : stepDistanceRemaining;
-    return buildRouteProgress(aRoute, stepDistanceRemainingFinal,
-      0, 0, 0, 0);
+    return buildRouteProgress(aRoute, stepDistanceRemainingFinal, 0, 0, 0, 0);
   }
 
   private DirectionsRoute buildDirectionsRoute() throws IOException {

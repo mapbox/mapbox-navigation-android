@@ -8,7 +8,11 @@ import com.mapbox.api.directions.v5.models.MaxSpeed;
 import java.io.Serializable;
 
 /**
- * TODO
+ * This class represents the current annotation being traveled along at a given time
+ * during navigation.
+ * <p>
+ * The Mapbox Directions API gives a list of annotations, each item in the list representing an
+ * annotation between two points along the leg.
  *
  * @since 0.13.0
  */
@@ -45,51 +49,46 @@ public abstract class CurrentLegAnnotation implements Serializable {
   public abstract double distanceToAnnotation();
 
   /**
-   * The distance, in meters, between each pair of coordinates.
+   * The distance, in meters, for the given annotation segment.
    *
-   * @return a list with each entry being a distance value between two of the routeLeg geometry
-   * coordinates
+   * @return distance, in meters, for the given annotation segment
    * @since 0.13.0
    */
   public abstract Double distance();
 
   /**
-   * The speed, in meters per second, between each pair of coordinates.
+   * The speed, in meters per second, for the given annotation segment.
    *
-   * @return a list with each entry being a speed value between two of the routeLeg geometry
-   * coordinates
+   * @return speed, in meters per second, for the given annotation segment
    * @since 0.13.0
    */
   @Nullable
   public abstract Double duration();
 
   /**
-   * The speed, in meters per second, between each pair of coordinates.
+   * The speed, in meters per second, for the given annotation segment.
    *
-   * @return a list with each entry being a speed value between two of the routeLeg geometry
-   * coordinates
+   * @return speed, in meters per second, for the given annotation segment
    * @since 0.13.0
    */
   @Nullable
   public abstract Double speed();
 
   /**
-   * The posted speed limit, between each pair of coordinates.
+   * The posted speed limit, for the given annotation segment.
    * Maxspeed is only available for the `mapbox/driving` and `mapbox/driving-traffic`
    * profiles, other profiles will return `unknown`s only.
    *
-   * @return a list with each entry being a {@link MaxSpeed} value between two of
-   * the routeLeg geometry coordinates
+   * @return posted speed limit, for the given annotation segment
    * @since 0.13.0
    */
   @Nullable
   public abstract MaxSpeed maxspeed();
 
   /**
-   * The congestion between each pair of coordinates.
+   * The congestion for the given annotation segment.
    *
-   * @return a list of Strings with each entry being a congestion value between two of the routeLeg
-   * geometry coordinates
+   * @return congestion for the given annotation segment
    * @since 0.13.0
    */
   @Nullable
@@ -114,41 +113,34 @@ public abstract class CurrentLegAnnotation implements Serializable {
     public abstract Builder distance(Double distance);
 
     /**
-     * The speed, in meters per second, between each pair of coordinates.
+     * The speed, in meters per second, for the given annotation segment.
      *
-     * @param duration a list with each entry being a speed value between two of the routeLeg
-     *                 geometry coordinates
      * @return this builder for chaining options together
      * @since 0.13.0
      */
     public abstract Builder duration(@Nullable Double duration);
 
     /**
-     * The speed, in meters per second, between each pair of coordinates.
+     * The speed, in meters per second, for the given annotation segment.
      *
-     * @param speed a list with each entry being a speed value between two of the routeLeg geometry
-     *              coordinates
      * @return this builder for chaining options together
      * @since 0.13.0
      */
     public abstract Builder speed(@Nullable Double speed);
 
     /**
-     * The posted speed limit, between each pair of coordinates.
+     * The posted speed limit, for the given annotation segment.
      * Maxspeed is only available for the `mapbox/driving` and `mapbox/driving-traffic`
      * profiles, other profiles will return `unknown`s only.
      *
-     * @param maxspeed list of speeds between each pair of coordinates
      * @return this builder for chaining options together
      * @since 0.13.0
      */
     public abstract Builder maxspeed(@Nullable MaxSpeed maxspeed);
 
     /**
-     * The congestion between each pair of coordinates.
+     * The congestion for the given annotation segment.
      *
-     * @param congestion a list of Strings with each entry being a congestion value between two of
-     *                   the routeLeg geometry coordinates
      * @return this builder for chaining options together
      * @since 0.13.0
      */

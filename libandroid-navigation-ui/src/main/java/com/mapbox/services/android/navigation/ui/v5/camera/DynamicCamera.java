@@ -38,7 +38,7 @@ public class DynamicCamera extends SimpleCamera {
   @Override
   public Point target(RouteInformation routeInformation) {
     if (routeInformation.location() != null) {
-      Location target = new Location(routeInformation.location());
+      Location target = routeInformation.location();
       return Point.fromLngLat(target.getLongitude(), target.getLatitude());
     } else if (routeInformation.route() != null) {
       return super.target(routeInformation);
