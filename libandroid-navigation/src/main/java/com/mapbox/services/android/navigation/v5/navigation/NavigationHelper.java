@@ -39,7 +39,7 @@ import static com.mapbox.core.constants.Constants.PRECISION_6;
  * This contains several single purpose methods that help out when a new location update occurs and
  * calculations need to be performed on it.
  */
-class NavigationHelper {
+public class NavigationHelper {
 
   private static final int FIRST_POINT = 0;
   private static final int FIRST_INTERSECTION = 0;
@@ -269,9 +269,10 @@ class NavigationHelper {
    * @param currentStep  for intersections list
    * @param upcomingStep for first intersection, if not null
    * @return complete list of intersections
+   * @since 0.13.0
    */
   @NonNull
-  static List<StepIntersection> createIntersectionsList(@NonNull LegStep currentStep, LegStep upcomingStep) {
+  public static List<StepIntersection> createIntersectionsList(@NonNull LegStep currentStep, LegStep upcomingStep) {
     List<StepIntersection> intersectionsWithNextManeuver = new ArrayList<>();
     intersectionsWithNextManeuver.addAll(currentStep.intersections());
     if (upcomingStep != null && !upcomingStep.intersections().isEmpty()) {
@@ -291,9 +292,10 @@ class NavigationHelper {
    * @param stepPoints    representing the step geometry
    * @param intersections along the step to be measured
    * @return list of measured intersection pairs
+   * @since 0.13.0
    */
   @NonNull
-  static List<Pair<StepIntersection, Double>> createDistancesToIntersections(List<Point> stepPoints,
+  public static List<Pair<StepIntersection, Double>> createDistancesToIntersections(List<Point> stepPoints,
                                                                              List<StepIntersection> intersections) {
     List<Pair<StepIntersection, Double>> distancesToIntersections = new ArrayList<>();
     List<StepIntersection> stepIntersections = new ArrayList<>(intersections);
@@ -328,15 +330,16 @@ class NavigationHelper {
    * @param measuredIntersections measured intersections along the step
    * @param stepDistanceTraveled  how far the user has traveled along the step
    * @return the current step intersection
+   * @since 0.13.0
    */
-  static StepIntersection findCurrentIntersection(@NonNull List<StepIntersection> intersections,
+  public static StepIntersection findCurrentIntersection(@NonNull List<StepIntersection> intersections,
                                                   @NonNull List<Pair<StepIntersection, Double>> measuredIntersections,
                                                   double stepDistanceTraveled) {
     for (Pair<StepIntersection, Double> measuredIntersection : measuredIntersections) {
       double intersectionDistance = measuredIntersection.second;
       int intersectionIndex = measuredIntersections.indexOf(measuredIntersection);
       int nextIntersectionIndex = intersectionIndex + ONE_INDEX;
-      int measuredIntersectionSize = measuredIntersections.size() - ONE_INDEX;
+      int measuredIntersectionSize = measuredIntersections.size();
       boolean hasValidNextIntersection = nextIntersectionIndex < measuredIntersectionSize;
 
       if (hasValidNextIntersection) {
@@ -363,13 +366,14 @@ class NavigationHelper {
    * @param upcomingStep        for the first intersection if needed
    * @param currentIntersection being traveled along
    * @return the upcoming intersection on the step
+   * @since 0.13.0
    */
-  static StepIntersection findUpcomingIntersection(@NonNull List<StepIntersection> intersections,
+  public static StepIntersection findUpcomingIntersection(@NonNull List<StepIntersection> intersections,
                                                    @Nullable LegStep upcomingStep,
                                                    StepIntersection currentIntersection) {
     int intersectionIndex = intersections.indexOf(currentIntersection);
     int nextIntersectionIndex = intersectionIndex + ONE_INDEX;
-    int intersectionSize = intersections.size() - ONE_INDEX;
+    int intersectionSize = intersections.size();
     boolean isValidUpcomingIntersection = nextIntersectionIndex < intersectionSize;
     if (isValidUpcomingIntersection) {
       return intersections.get(nextIntersectionIndex);
@@ -392,7 +396,7 @@ class NavigationHelper {
    * @return a current set of annotation data for the user's position along the route
    */
   @Nullable
-  static CurrentLegAnnotation createCurrentAnnotation(CurrentLegAnnotation currentLegAnnotation,
+  public static CurrentLegAnnotation createCurrentAnnotation(CurrentLegAnnotation currentLegAnnotation,
                                                       RouteLeg leg, double legDistanceRemaining) {
     LegAnnotation legAnnotation = leg.annotation();
     if (legAnnotation == null) {
