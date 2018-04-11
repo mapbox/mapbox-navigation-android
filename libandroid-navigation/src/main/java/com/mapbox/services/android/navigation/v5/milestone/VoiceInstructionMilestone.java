@@ -27,7 +27,9 @@ public class VoiceInstructionMilestone extends Milestone {
   public boolean isOccurring(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
     if (isNewRoute(routeProgress)) {
       clearInstructionList();
-      voiceInstructionLoader.cacheInstructions(routeProgress, true);
+      if (voiceInstructionLoader != null) {
+        voiceInstructionLoader.cacheInstructions(routeProgress, true);
+      }
     }
 
     if (shouldAddInstructions(routeProgress)) {
@@ -36,7 +38,9 @@ public class VoiceInstructionMilestone extends Milestone {
 
     for (VoiceInstructions voice : stepVoiceInstructions) {
       if (shouldBeVoiced(routeProgress, voice)) {
-        voiceInstructionLoader.cacheInstructions(routeProgress, false);
+        if (voiceInstructionLoader != null) {
+          voiceInstructionLoader.cacheInstructions(routeProgress, false);
+        }
         announcement = voice.announcement();
         ssmlAnnouncement = voice.ssmlAnnouncement();
         stepVoiceInstructions.remove(voice);
