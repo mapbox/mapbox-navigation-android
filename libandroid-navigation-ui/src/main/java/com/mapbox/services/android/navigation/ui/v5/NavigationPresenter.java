@@ -9,9 +9,14 @@ import com.mapbox.geojson.Point;
 class NavigationPresenter {
 
   private NavigationContract.View view;
+  private boolean resumeState;
 
   NavigationPresenter(NavigationContract.View view) {
     this.view = view;
+  }
+
+  void updateResumeState(boolean resumeState) {
+    this.resumeState = resumeState;
   }
 
   void onRecenterClick() {
@@ -26,18 +31,24 @@ class NavigationPresenter {
   }
 
   void onMapScroll() {
-    view.setSummaryBehaviorHideable(true);
-    view.setSummaryBehaviorState(BottomSheetBehavior.STATE_HIDDEN);
-    view.setCameraTrackingEnabled(false);
+    if (!view.isSummaryBottomSheetHidden()) {
+      view.setSummaryBehaviorHideable(true);
+      view.setSummaryBehaviorState(BottomSheetBehavior.STATE_HIDDEN);
+      view.updateCameraTrackingEnabled(false);
+    }
   }
 
   void onSummaryBottomSheetHidden() {
-    view.showRecenterBtn();
+    if (view.isSummaryBottomSheetHidden()) {
+      view.showRecenterBtn();
+    }
   }
 
   void onRouteUpdate(DirectionsRoute directionsRoute) {
     view.drawRoute(directionsRoute);
-    view.startCamera(directionsRoute);
+    if (!resumeState) {
+      view.startCamera(directionsRoute);
+    }
   }
 
   void onDestinationUpdate(Point point) {
@@ -49,7 +60,10 @@ class NavigationPresenter {
   }
 
   void onNavigationLocationUpdate(Location location) {
-    view.resumeCamera(location);
-    view.updateLocationLayer(location);
+    if (resumeState && !view.isRecenterButtonVisible()) {
+      view.resumeCamera(location);
+      resumeState = false;
+    }
+    view.updateNavigationMap(location);
   }
 }

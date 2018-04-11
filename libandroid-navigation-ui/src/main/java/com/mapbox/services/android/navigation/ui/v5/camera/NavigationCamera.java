@@ -110,7 +110,7 @@ public class NavigationCamera {
    * @param trackingEnabled true if should track, false if should not
    * @since 0.6.0
    */
-  public void setCameraTrackingLocation(boolean trackingEnabled) {
+  public void updateCameraTrackingLocation(boolean trackingEnabled) {
     this.trackingEnabled = trackingEnabled;
   }
 

@@ -31,7 +31,7 @@ class FeedbackViewHolder extends RecyclerView.ViewHolder {
 
   private void initTextColor(TextView feedbackText) {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-      int navigationViewSecondaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(feedbackText.getContext(),
+      int navigationViewSecondaryColor = ThemeSwitcher.retrieveThemeColor(feedbackText.getContext(),
         R.attr.navigationViewSecondary);
       // Text color
       feedbackText.setTextColor(navigationViewSecondaryColor);

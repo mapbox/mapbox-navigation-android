@@ -231,6 +231,11 @@ public final class NavigationConstants {
    */
   static final int TWO_HUNDRED_METERS_PER_SECOND_VELOCITY_THRESHOLD = 200;
 
+  public static final Float[] WAYNAME_OFFSET = {0.0f, 40.0f};
+  public static final String MAPBOX_LOCATION_SOURCE = "mapbox-location-source";
+  public static final String MAPBOX_WAYNAME_LAYER = "mapbox-wayname-layer";
+  public static final String MAPBOX_WAYNAME_ICON = "mapbox-wayname-icon";
+
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
   public static final String NAVIGATION_VIEW_SIMULATE_ROUTE = "navigation_view_simulate_route";
