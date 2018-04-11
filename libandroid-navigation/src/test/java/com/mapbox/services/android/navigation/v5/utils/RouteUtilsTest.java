@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.v5.BaseTest;
@@ -110,6 +111,60 @@ public class RouteUtilsTest extends BaseTest {
     boolean isArrivalEvent = RouteUtils.isArrivalEvent(theRouteProgress);
 
     assertFalse(isArrivalEvent);
+  }
+
+  @Test
+  public void isValidRouteProfile_returnsTrueWithDrivingTrafficProfile() throws Exception {
+    String routeProfileDrivingTraffic = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
+
+    boolean isValidProfile = RouteUtils.isValidRouteProfile(routeProfileDrivingTraffic);
+
+    assertTrue(isValidProfile);
+  }
+
+  @Test
+  public void isValidRouteProfile_returnsTrueWithDrivingProfile() throws Exception {
+    String routeProfileDriving = DirectionsCriteria.PROFILE_DRIVING;
+
+    boolean isValidProfile = RouteUtils.isValidRouteProfile(routeProfileDriving);
+
+    assertTrue(isValidProfile);
+  }
+
+  @Test
+  public void isValidRouteProfile_returnsTrueWithCyclingProfile() throws Exception {
+    String routeProfileCycling = DirectionsCriteria.PROFILE_CYCLING;
+
+    boolean isValidProfile = RouteUtils.isValidRouteProfile(routeProfileCycling);
+
+    assertTrue(isValidProfile);
+  }
+
+  @Test
+  public void isValidRouteProfile_returnsTrueWithWalkingProfile() throws Exception {
+    String routeProfileWalking = DirectionsCriteria.PROFILE_WALKING;
+
+    boolean isValidProfile = RouteUtils.isValidRouteProfile(routeProfileWalking);
+
+    assertTrue(isValidProfile);
+  }
+
+  @Test
+  public void isValidRouteProfile_returnsFalseWithInvalidProfile() throws Exception {
+    String invalidProfile = "invalid_profile";
+
+    boolean isValidProfile = RouteUtils.isValidRouteProfile(invalidProfile);
+
+    assertFalse(isValidProfile);
+  }
+
+  @Test
+  public void isValidRouteProfile_returnsFalseWithNullProfile() throws Exception {
+    String nullProfile = null;
+
+    boolean isValidProfile = RouteUtils.isValidRouteProfile(nullProfile);
+
+    assertFalse(isValidProfile);
   }
 
   private int obtainLastStepIndex(DirectionsRoute route) throws IOException {

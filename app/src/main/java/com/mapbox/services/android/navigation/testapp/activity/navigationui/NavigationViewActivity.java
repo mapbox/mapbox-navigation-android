@@ -17,6 +17,7 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.LineString;
@@ -312,7 +313,9 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private String getRouteProfile() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    return sharedPreferences.getString(getString(R.string.route_profile_key), "");
+    return sharedPreferences.getString(
+      getString(R.string.route_profile_key), DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+    );
   }
 
   private void launchNavigationWithRoute() {
