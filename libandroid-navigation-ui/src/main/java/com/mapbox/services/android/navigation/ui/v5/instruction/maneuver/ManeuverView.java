@@ -135,7 +135,7 @@ public class ManeuverView extends View {
       case STEP_MANEUVER_TYPE_ROUNDABOUT:
       case STEP_MANEUVER_TYPE_ROUNDABOUT_TURN:
       case STEP_MANEUVER_TYPE_ROTARY:
-        ManeuversStyleKit.drawRoundabout(canvas, primaryColor, secondaryColor, size, 90f);
+        ManeuversStyleKit.drawRoundabout(canvas, primaryColor, secondaryColor, size, roundaboutAngle);
         break;
 
       case STEP_MANEUVER_TYPE_ARRIVE:

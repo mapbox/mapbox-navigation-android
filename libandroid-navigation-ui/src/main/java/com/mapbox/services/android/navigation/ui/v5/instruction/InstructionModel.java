@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
@@ -15,6 +16,7 @@ public class InstructionModel {
   private BannerText primaryBannerText;
   private BannerText secondaryBannerText;
   private BannerText thenBannerText;
+  private Float roundaboutAngle = null;
   private InstructionStepResources stepResources;
   private RouteProgress progress;
   private Locale locale;
@@ -40,6 +42,11 @@ public class InstructionModel {
     return thenBannerText;
   }
 
+  @Nullable
+  Float getRoundaboutAngle() {
+    return roundaboutAngle;
+  }
+
   InstructionStepResources getStepResources() {
     return stepResources;
   }
@@ -57,6 +64,10 @@ public class InstructionModel {
     primaryBannerText = retrievePrimaryInstructionText(progress);
     secondaryBannerText = retrieveSecondaryInstructionText(progress);
     thenBannerText = retrieveThenInstructionText(progress);
+
+    if (primaryBannerText != null && primaryBannerText.degrees() != null) {
+      roundaboutAngle = primaryBannerText.degrees().floatValue();
+    }
   }
 
   private BannerText retrievePrimaryInstructionText(RouteProgress progress) {

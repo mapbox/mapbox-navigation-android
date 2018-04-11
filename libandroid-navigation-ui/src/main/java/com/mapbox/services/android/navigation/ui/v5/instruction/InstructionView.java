@@ -610,6 +610,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private void updateManeuverView(InstructionModel model) {
     upcomingManeuverView.setManeuverModifier(model.getStepResources().getManeuverViewModifier());
     upcomingManeuverView.setManeuverType(model.getStepResources().getManeuverViewType());
+    if (model.getRoundaboutAngle() != null) {
+      upcomingManeuverView.setRoundaboutAngle(model.getRoundaboutAngle());
+    }
   }
 
   /**
