@@ -16,20 +16,16 @@ public class VoiceInstructionMilestone extends Milestone {
   private DirectionsRoute currentRoute;
   private LegStep currentStep;
   private List<VoiceInstructions> stepVoiceInstructions;
-  private final VoiceInstructionLoader voiceInstructionLoader;
 
   VoiceInstructionMilestone(Builder builder) {
     super(builder);
-    voiceInstructionLoader = VoiceInstructionLoader.getInstance();
   }
 
   @Override
   public boolean isOccurring(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
     if (isNewRoute(routeProgress)) {
       clearInstructionList();
-      if (voiceInstructionLoader != null) {
-        voiceInstructionLoader.cacheInstructions(routeProgress, true);
-      }
+      cacheInstructions(routeProgress, true);
     }
 
     if (shouldAddInstructions(routeProgress)) {
@@ -38,9 +34,7 @@ public class VoiceInstructionMilestone extends Milestone {
 
     for (VoiceInstructions voice : stepVoiceInstructions) {
       if (shouldBeVoiced(routeProgress, voice)) {
-        if (voiceInstructionLoader != null) {
-          voiceInstructionLoader.cacheInstructions(routeProgress, false);
-        }
+        cacheInstructions(routeProgress, false);
         announcement = voice.announcement();
         ssmlAnnouncement = voice.ssmlAnnouncement();
         stepVoiceInstructions.remove(voice);
@@ -140,6 +134,19 @@ public class VoiceInstructionMilestone extends Milestone {
   private boolean shouldBeVoiced(RouteProgress routeProgress, VoiceInstructions voice) {
     return voice.distanceAlongGeometry()
       >= routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+  }
+
+  /**
+   * Caches the instructions in the VoiceInstructionLoader if it has been initialized
+   *
+   * @param routeProgress containing the instructions
+   * @param isFirst whether it's the first routeProgress of the route
+   */
+  private void cacheInstructions(RouteProgress routeProgress, boolean isFirst) {
+    VoiceInstructionLoader voiceInstructionLoader = VoiceInstructionLoader.getInstance();
+    if (voiceInstructionLoader != null) {
+      voiceInstructionLoader.cacheInstructions(routeProgress, isFirst);
+    }
   }
 
   public static final class Builder extends Milestone.Builder {
