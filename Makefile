@@ -26,6 +26,10 @@ publish-local:
 	export IS_LOCAL_DEVELOPMENT=true; ./gradlew :libandroid-navigation:uploadArchives
 	export IS_LOCAL_DEVELOPMENT=true; ./gradlew :libandroid-navigation-ui:uploadArchives
 
+graphs:
+	./gradlew :libandroid-navigation:generateDependencyGraphMapboxLibraries
+	./gradlew :libandroid-navigation-ui:generateDependencyGraphMapboxLibraries
+
 dex-count:
 	./gradlew countDebugDexMethods
 	./gradlew countReleaseDexMethods
