@@ -12,6 +12,7 @@ import com.mapbox.services.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.telemetry.navigation.MapboxNavigationEvent;
 import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -38,7 +39,7 @@ final class NavigationMetricsWrapper {
       sessionState.currentGeometry(), routeProgress.directionsRoute().routeOptions().profile(),
       routeProgress.directionsRoute().distance().intValue(),
       routeProgress.directionsRoute().duration().intValue(),
-      sessionState.rerouteCount(), sessionState.startTimestamp(),
+      sessionState.rerouteCount(), checkNullStartTimestamp(sessionState),
       (int) (sessionState.eventRouteDistanceCompleted() + routeProgress.distanceTraveled()),
       (int) routeProgress.distanceRemaining(), (int) routeProgress.durationRemaining(),
       sessionState.mockLocation(), sessionState.originalRequestIdentifier(),
@@ -67,7 +68,7 @@ final class NavigationMetricsWrapper {
       sessionState.currentGeometry(), metricProgress.getDirectionsRouteProfile(),
       metricProgress.getDirectionsRouteDistance(),
       metricProgress.getDirectionsRouteDuration(),
-      sessionState.rerouteCount(), sessionState.startTimestamp(),
+      sessionState.rerouteCount(), checkNullStartTimestamp(sessionState),
       (int) (sessionState.eventRouteDistanceCompleted() + metricProgress.getDistanceTraveled()),
       metricProgress.getDistanceRemaining(), metricProgress.getDurationRemaining(),
       sessionState.mockLocation(),
@@ -100,7 +101,7 @@ final class NavigationMetricsWrapper {
       sessionState.originalGeometry(), sessionState.originalDistance(), sessionState.originalDuration(),
       null, sessionState.currentStepCount(), sessionState.originalStepCount(),
       metricProgress.getDistanceTraveled(), metricProgress.getDistanceRemaining(),
-      metricProgress.getDurationRemaining(), sessionState.startTimestamp()
+      metricProgress.getDurationRemaining(), checkNullStartTimestamp(sessionState)
     );
 
     int absoluteDistance = DistanceUtils.calculateAbsoluteDistance(location, metricProgress);
@@ -125,7 +126,7 @@ final class NavigationMetricsWrapper {
       sessionState.currentGeometry(), metricProgress.getDirectionsRouteProfile(),
       metricProgress.getDirectionsRouteDistance(),
       metricProgress.getDirectionsRouteDuration(),
-      sessionState.rerouteCount(), sessionState.startTimestamp(),
+      sessionState.rerouteCount(), checkNullStartTimestamp(sessionState),
       convertToArray(sessionState.beforeEventLocations()),
       convertToArray(sessionState.afterEventLocations()),
       (int) sessionState.eventRouteDistanceCompleted(), // distanceCompleted
@@ -166,7 +167,7 @@ final class NavigationMetricsWrapper {
       BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME, sessionState.sessionIdentifier(), location.getLatitude(),
       location.getLongitude(), sessionState.currentGeometry(), metricProgress.getDirectionsRouteProfile(),
       metricProgress.getDirectionsRouteDistance(), metricProgress.getDirectionsRouteDuration(),
-      sessionState.rerouteCount(), sessionState.startTimestamp(), feedbackType,
+      sessionState.rerouteCount(), checkNullStartTimestamp(sessionState), feedbackType,
       convertToArray(sessionState.beforeEventLocations()),
       convertToArray(sessionState.afterEventLocations()),
       (int) sessionState.eventRouteDistanceCompleted(),
@@ -215,5 +216,12 @@ final class NavigationMetricsWrapper {
 
   private static Location[] convertToArray(List<Location> locationList) {
     return locationList.toArray(new Location[locationList.size()]);
+  }
+
+  private static Date checkNullStartTimestamp(SessionState sessionState) {
+    if (sessionState.startTimestamp() != null) {
+      return sessionState.startTimestamp();
+    }
+    return new Date();
   }
 }
