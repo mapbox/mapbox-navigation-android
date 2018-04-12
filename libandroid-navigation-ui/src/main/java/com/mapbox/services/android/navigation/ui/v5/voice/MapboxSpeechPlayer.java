@@ -211,7 +211,10 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
   }
 
   private void onInstructionFinishedPlaying() {
-    instructionQueue.poll().delete(); // delete the file for the instruction that just finished
+    File lastPlayed = instructionQueue.poll();
+    if (lastPlayed != null) {
+      lastPlayed.delete();
+    }
 
     if (!instructionQueue.isEmpty()) {
       playInstruction(instructionQueue.peek().getPath());
