@@ -17,6 +17,7 @@ android {
         "MAPBOX_NAVIGATION_EVENTS_USER_AGENT", String.format("\"mapbox-navigation-ui-android/%s\"",
         project.VERSION_NAME
     )
+    consumerProguardFiles 'proguard-consumer.pro'
   }
 
   configurations {

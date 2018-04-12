@@ -22,6 +22,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
+import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
 import java.util.Locale;
@@ -295,7 +296,7 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   }
 
   private void addNavigationViewOptions(NavigationRoute.Builder builder) {
-    if (!TextUtils.isEmpty(routeProfile)) {
+    if (RouteUtils.isValidRouteProfile(routeProfile)) {
       builder.profile(routeProfile);
     }
     builder

@@ -731,8 +731,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     // Check if the route's the same as the route currently drawn
     if (!routeProgress.directionsRoute().equals(directionsRoutes.get(primaryRouteIndex))) {
       addRoute(routeProgress.directionsRoute());
-      drawRoutes();
-      addDirectionWaypoints();
     }
   }
 

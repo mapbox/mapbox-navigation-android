@@ -3,14 +3,18 @@ package com.mapbox.services.android.navigation.v5.utils;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.METERS_REMAINING_TILL_ARRIVAL;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
@@ -19,6 +23,14 @@ public final class RouteUtils {
 
   private static final String FORCED_LOCATION = "Forced Location";
   private static final int FIRST_COORDINATE = 0;
+  private static final Set<String> VALID_PROFILES = new HashSet<String>() {
+    {
+      add(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
+      add(DirectionsCriteria.PROFILE_DRIVING);
+      add(DirectionsCriteria.PROFILE_CYCLING);
+      add(DirectionsCriteria.PROFILE_WALKING);
+    }
+  };
 
   private RouteUtils() {
     // Utils class therefore, shouldn't be initialized.
@@ -124,6 +136,18 @@ public final class RouteUtils {
     forcedLocation.setLatitude(origin.latitude());
     forcedLocation.setLongitude(origin.longitude());
     return forcedLocation;
+  }
+
+  /**
+   * Checks if the {@link String} route profile provided is a valid profile
+   * that can be used with the directions API.
+   *
+   * @param routeProfile being validated
+   * @return true if valid, false if not
+   * @since 0.13.0
+   */
+  public static boolean isValidRouteProfile(String routeProfile) {
+    return !TextUtils.isEmpty(routeProfile) && VALID_PROFILES.contains(routeProfile);
   }
 
   private static boolean upcomingStepIsArrival(@NonNull RouteProgress routeProgress) {
