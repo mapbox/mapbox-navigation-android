@@ -247,7 +247,8 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
     new InstructionDownloadTask(mapboxCache.getPath(), new InstructionDownloadTask.TaskListener() {
       @Override
       public void onFinishedDownloading(File instructionFile) {
-        queueInstructionForPlayback(instructionFile);
+        playInstructionIfUpNext(instructionFile);
+        instructionQueue.add(instructionFile);
       }
 
       @Override
@@ -259,11 +260,9 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
     }).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, responseBody);
   }
 
-  private void queueInstructionForPlayback(File instructionFile) {
+  private void playInstructionIfUpNext(File instructionFile) {
     if (instructionQueue.isEmpty()) {
       playInstruction(instructionFile);
     }
-
-    instructionQueue.add(instructionFile);
   }
 }
