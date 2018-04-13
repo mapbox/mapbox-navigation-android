@@ -15,7 +15,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -120,31 +119,34 @@ public class InstructionLoader {
 
     checkIsInitialized();
 
-    if (hasComponents(bannerText)) {
-      StringBuilder instructionStringBuilder = new StringBuilder();
-      List<BannerShieldInfo> shieldUrls = new ArrayList<>();
+    if (!hasComponents(bannerText)) {
+      return;
+    }
 
-      List<BannerComponents> bannerComponents = bannerText.components();
-      Collections.sort(bannerComponents);
+    StringBuilder instructionStringBuilder = new StringBuilder();
+    List<BannerShieldInfo> shieldUrls = new ArrayList<>();
 
-      for (BannerComponents components : bannerText.components()) {
-        if (hasBaseUrl(components)) {
-          addShieldInfo(textView, instructionStringBuilder, shieldUrls, components);
-        } else {
-          String text = components.text();
-          boolean emptyText = TextUtils.isEmpty(instructionStringBuilder.toString());
-          String instructionText = emptyText ? text : SINGLE_SPACE.concat(text);
-          instructionStringBuilder.append(instructionText);
-        }
-      }
+    List<BannerComponents> bannerComponents = bannerText.components();
+    Collections.sort(bannerComponents);
 
-      // If there are shield Urls, fetch the corresponding images
-      if (!shieldUrls.isEmpty()) {
-        createTargets(textView, instructionStringBuilder, shieldUrls);
-        loadTargets();
+    for (BannerComponents components : bannerText.components()) {
+      if (hasImageUrl(components)) {
+        addShieldInfo(textView, instructionStringBuilder, shieldUrls, components);
+
       } else {
-        textView.setText(instructionStringBuilder);
+        String text = components.text();
+        boolean emptyText = TextUtils.isEmpty(instructionStringBuilder.toString());
+        String instructionText = emptyText ? text : SINGLE_SPACE.concat(text);
+        instructionStringBuilder.append(instructionText);
       }
+    }
+
+    // If there are shield Urls, fetch the corresponding images
+    if (!shieldUrls.isEmpty()) {
+      createTargets(textView, instructionStringBuilder, shieldUrls);
+      loadTargets();
+    } else {
+      textView.setText(instructionStringBuilder);
     }
   }
 
@@ -160,13 +162,13 @@ public class InstructionLoader {
    */
   private void fetchImageBaseUrls(BannerText bannerText) {
     for (BannerComponents components : bannerText.components()) {
-      if (hasBaseUrl(components)) {
+      if (hasImageUrl(components)) {
         picassoImageLoader.load(urlDensityMap.get(components.imageBaseUrl())).fetch();
       }
     }
   }
 
-  private static boolean hasBaseUrl(BannerComponents components) {
+  private static boolean hasImageUrl(BannerComponents components) {
     return !TextUtils.isEmpty(components.imageBaseUrl());
   }
 
