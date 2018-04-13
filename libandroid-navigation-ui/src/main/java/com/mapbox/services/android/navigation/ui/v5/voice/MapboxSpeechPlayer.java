@@ -143,7 +143,8 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
   }
 
   private void downloadVoiceFile(final String instruction, String textType) {
-    if (isMuted || TextUtils.isEmpty(instruction)) {
+    boolean isInvalidInstruction = TextUtils.isEmpty(instruction);
+    if (isMuted || isInvalidInstruction) {
       return;
     }
 
