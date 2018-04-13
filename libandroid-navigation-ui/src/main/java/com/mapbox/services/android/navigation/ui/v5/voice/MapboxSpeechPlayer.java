@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
@@ -86,9 +87,7 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
    * @param textType either "ssml" or "text"
    */
   private void play(String instruction, String textType) {
-    if (!isMuted && !TextUtils.isEmpty(instruction)) {
-      getVoiceFile(instruction, textType);
-    }
+    downloadVoiceFile(instruction, textType);
   }
 
   @Override
@@ -143,7 +142,12 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
     }
   }
 
-  private void getVoiceFile(final String instruction, String textType) {
+  private void downloadVoiceFile(final String instruction, String textType) {
+    boolean isInvalidInstruction = TextUtils.isEmpty(instruction);
+    if (isMuted || isInvalidInstruction) {
+      return;
+    }
+
     voiceInstructionLoader.getInstruction(instruction, textType, new Callback<ResponseBody>() {
       @Override
       public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -161,13 +165,19 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
     });
   }
 
-  private void playInstruction(String instruction) {
-    if (!TextUtils.isEmpty(instruction)) {
-      mediaPlayer = new MediaPlayer();
-      setDataSource(instruction);
-      mediaPlayer.prepareAsync();
-      setListeners();
+  private void playInstruction(@NonNull File instruction) {
+    setupMediaPlayer(instruction.getPath());
+  }
+
+  private void setupMediaPlayer(String instructionPath) {
+    if (TextUtils.isEmpty(instructionPath)) {
+      return;
     }
+
+    mediaPlayer = new MediaPlayer();
+    setDataSource(instructionPath);
+    mediaPlayer.prepareAsync();
+    setListeners();
   }
 
   private void pauseInstruction() {
@@ -211,10 +221,19 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
   }
 
   private void onInstructionFinishedPlaying() {
-    instructionQueue.poll().delete(); // delete the file for the instruction that just finished
+    deleteLastInstructionPlayed();
+    startNextInstruction();
+  }
 
+  private void deleteLastInstructionPlayed() {
     if (!instructionQueue.isEmpty()) {
-      playInstruction(instructionQueue.peek().getPath());
+      instructionQueue.poll().delete();
+    }
+  }
+
+  private void startNextInstruction() {
+    if (!instructionQueue.isEmpty()) {
+      playInstruction(instructionQueue.peek());
     }
   }
 
@@ -228,10 +247,7 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
     new InstructionDownloadTask(mapboxCache.getPath(), new InstructionDownloadTask.TaskListener() {
       @Override
       public void onFinishedDownloading(File instructionFile) {
-        if (instructionQueue.isEmpty()) {
-          playInstruction(instructionFile.getPath());
-        }
-
+        playInstructionIfUpNext(instructionFile);
         instructionQueue.add(instructionFile);
       }
 
@@ -242,5 +258,11 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
         }
       }
     }).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, responseBody);
+  }
+
+  private void playInstructionIfUpNext(File instructionFile) {
+    if (instructionQueue.isEmpty()) {
+      playInstruction(instructionFile);
+    }
   }
 }
