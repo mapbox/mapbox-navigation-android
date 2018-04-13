@@ -154,6 +154,8 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
       .getString(NavigationConstants.NAVIGATION_VIEW_ROUTE_PROFILE_KEY, DirectionsCriteria.PROFILE_DRIVING_TRAFFIC));
     navigationOptions.enableOffRouteDetection(preferences
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_OFF_ROUTE_ENABLED_KEY, true));
+    navigationOptions.snapToRoute(preferences
+      .getBoolean(NavigationConstants.NAVIGATION_VIEW_SNAP_ENABLED_KEY, true));
   }
 
   private void extractLocale(MapboxNavigationOptions.Builder navigationOptions) {
