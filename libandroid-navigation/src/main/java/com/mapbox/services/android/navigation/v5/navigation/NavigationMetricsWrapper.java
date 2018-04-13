@@ -219,9 +219,9 @@ final class NavigationMetricsWrapper {
   }
 
   private static Date checkNullStartTimestamp(SessionState sessionState) {
-    if (sessionState.startTimestamp() != null) {
-      return sessionState.startTimestamp();
+    if (sessionState.startTimestamp() == null) {
+      return new Date();
     }
-    return new Date();
+    return sessionState.startTimestamp();
   }
 }
