@@ -21,6 +21,8 @@ public abstract class NavigationLauncherOptions extends NavigationOptions {
 
   public abstract boolean enableOffRouteDetection();
 
+  public abstract boolean snapToRoute();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -44,12 +46,15 @@ public abstract class NavigationLauncherOptions extends NavigationOptions {
 
     public abstract Builder enableOffRouteDetection(boolean enableOffRouteDetection);
 
+    public abstract Builder snapToRoute(boolean snapToRoute);
+
     public abstract NavigationLauncherOptions build();
   }
 
   public static NavigationLauncherOptions.Builder builder() {
     return new AutoValue_NavigationLauncherOptions.Builder()
       .shouldSimulateRoute(false)
-      .enableOffRouteDetection(true);
+      .enableOffRouteDetection(true)
+      .snapToRoute(true);
   }
 }
