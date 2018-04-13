@@ -5,13 +5,19 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.List;
 import java.util.Locale;
 
+import timber.log.Timber;
+
 public class InstructionModel {
+
+  private static final int ONE_INSTRUCTION_INDEX = 1;
 
   private BannerText primaryBannerText;
   private BannerText secondaryBannerText;
@@ -61,46 +67,48 @@ public class InstructionModel {
   }
 
   private void extractStepInstructions(RouteProgress progress) {
-    primaryBannerText = retrievePrimaryInstructionText(progress);
-    secondaryBannerText = retrieveSecondaryInstructionText(progress);
-    thenBannerText = retrieveThenInstructionText(progress);
+    RouteLegProgress legProgress = progress.currentLegProgress();
+    LegStep currentStep = legProgress.currentStep();
+    LegStep upComingStep = legProgress.upComingStep();
+    double stepDistanceTraveled = legProgress.currentStepProgress().distanceRemaining();
+
+    primaryBannerText = findBannerText(currentStep, stepDistanceTraveled, true);
+    secondaryBannerText = findBannerText(currentStep, stepDistanceTraveled, false);
+    thenBannerText = findBannerText(upComingStep, stepDistanceTraveled, true);
 
     if (primaryBannerText != null && primaryBannerText.degrees() != null) {
       roundaboutAngle = primaryBannerText.degrees().floatValue();
     }
   }
 
-  private BannerText retrievePrimaryInstructionText(RouteProgress progress) {
-    List<BannerInstructions> bannerInstructions = progress.currentLegProgress().currentStep().bannerInstructions();
-    if (hasInstructions(bannerInstructions)) {
-      return bannerInstructions.get(0).primary();
-    } else {
-      return null;
-    }
-  }
-
-  private BannerText retrieveSecondaryInstructionText(RouteProgress progress) {
-    List<BannerInstructions> bannerInstructions = progress.currentLegProgress().currentStep().bannerInstructions();
-    if (hasInstructions(bannerInstructions)) {
-      return bannerInstructions.get(0).secondary();
-    } else {
-      return null;
-    }
-  }
-
-  private BannerText retrieveThenInstructionText(RouteProgress progress) {
-    if (progress.currentLegProgress().upComingStep() != null) {
-      List<BannerInstructions> bannerInstructions = progress.currentLegProgress().upComingStep().bannerInstructions();
-      if (hasInstructions(bannerInstructions)) {
-        return bannerInstructions.get(0).primary();
-      } else {
-        return null;
+  @Nullable
+  private static BannerText findBannerText(LegStep step, double stepDistanceRemaining, boolean findPrimary) {
+    if (step != null && hasInstructions(step.bannerInstructions())) {
+      List<BannerInstructions> instructions = step.bannerInstructions();
+      Timber.d("Step instructions: %s", instructions.toString());
+      Timber.d("Step distance remaining: %s", stepDistanceRemaining);
+      for (BannerInstructions instruction : instructions) {
+        if (instruction.distanceAlongGeometry() < stepDistanceRemaining) {
+          int instructionIndex = instructions.indexOf(instruction);
+          int currentInstructionIndex = instructionIndex - ONE_INSTRUCTION_INDEX;
+          if (currentInstructionIndex < 0) {
+            currentInstructionIndex = 0;
+          }
+          Timber.d("Using index %s", currentInstructionIndex);
+          Timber.d("***************");
+          BannerInstructions currentInstructions = instructions.get(currentInstructionIndex);
+          return retrievePrimaryOrSecondaryBannerText(findPrimary, currentInstructions);
+        }
       }
     }
     return null;
   }
 
-  private boolean hasInstructions(List<BannerInstructions> bannerInstructions) {
+  private static boolean hasInstructions(List<BannerInstructions> bannerInstructions) {
     return bannerInstructions != null && !bannerInstructions.isEmpty();
+  }
+
+  private static BannerText retrievePrimaryOrSecondaryBannerText(boolean findPrimary, BannerInstructions instruction) {
+    return findPrimary ? instruction.primary() : instruction.secondary();
   }
 }

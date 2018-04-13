@@ -212,8 +212,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      InstructionModel model =
-        new InstructionModel(getContext(), routeProgress, locale, unitType);
+      InstructionModel model = new InstructionModel(getContext(), routeProgress, locale, unitType);
       updateViews(model);
       updateTextInstruction(model);
     }
