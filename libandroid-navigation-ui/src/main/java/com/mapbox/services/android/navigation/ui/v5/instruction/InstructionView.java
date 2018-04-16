@@ -179,7 +179,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       @Override
       public void onChanged(@Nullable BannerInstructionModel bannerInstructionModel) {
         if (bannerInstructionModel != null) {
-//          updateTextInstruction(bannerInstructionModel);
+          updateTextInstruction(bannerInstructionModel);
         }
       }
     });
