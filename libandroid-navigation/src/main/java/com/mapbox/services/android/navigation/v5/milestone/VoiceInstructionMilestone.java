@@ -7,15 +7,12 @@ import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoader;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import java.util.List;
+import static com.mapbox.services.android.navigation.v5.utils.RouteUtils.findCurrentVoiceInstructions;
 
 public class VoiceInstructionMilestone extends Milestone {
 
-  private String announcement;
-  private String ssmlAnnouncement;
+  private VoiceInstructions instructions;
   private DirectionsRoute currentRoute;
-  private LegStep currentStep;
-  private List<VoiceInstructions> stepVoiceInstructions;
 
   VoiceInstructionMilestone(Builder builder) {
     super(builder);
@@ -24,22 +21,13 @@ public class VoiceInstructionMilestone extends Milestone {
   @Override
   public boolean isOccurring(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
     if (isNewRoute(routeProgress)) {
-      clearInstructionList();
       cacheInstructions(routeProgress, true);
     }
-
-    if (shouldAddInstructions(routeProgress)) {
-      stepVoiceInstructions = routeProgress.currentLegProgress().currentStep().voiceInstructions();
-    }
-
-    for (VoiceInstructions voice : stepVoiceInstructions) {
-      if (shouldBeVoiced(routeProgress, voice)) {
-        cacheInstructions(routeProgress, false);
-        announcement = voice.announcement();
-        ssmlAnnouncement = voice.ssmlAnnouncement();
-        stepVoiceInstructions.remove(voice);
-        return true;
-      }
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    VoiceInstructions instructions = findCurrentVoiceInstructions(currentStep, stepDistanceRemaining);
+    if (shouldBeVoiced(instructions, stepDistanceRemaining)) {
+      return updateInstructions(routeProgress, instructions);
     }
     return false;
   }
@@ -49,7 +37,10 @@ public class VoiceInstructionMilestone extends Milestone {
     return new Instruction() {
       @Override
       public String buildInstruction(RouteProgress routeProgress) {
-        return announcement;
+        if (instructions == null) {
+          return routeProgress.currentLegProgress().currentStep().name();
+        }
+        return instructions.announcement();
       }
     };
   }
@@ -64,7 +55,10 @@ public class VoiceInstructionMilestone extends Milestone {
    * @since 0.8.0
    */
   public String getSsmlAnnouncement() {
-    return ssmlAnnouncement;
+    if (instructions == null) {
+      return "";
+    }
+    return instructions.ssmlAnnouncement();
   }
 
   /**
@@ -76,40 +70,10 @@ public class VoiceInstructionMilestone extends Milestone {
    * @since 0.12.0
    */
   public String getAnnouncement() {
-    return announcement;
-  }
-
-  /**
-   * Check if a new set of step instructions should be set.
-   *
-   * @param routeProgress the current route progress
-   * @return true if new instructions should be added to the list, false if not
-   */
-  private boolean shouldAddInstructions(RouteProgress routeProgress) {
-    return newStep(routeProgress) || stepVoiceInstructions == null;
-  }
-
-  /**
-   * Called when adding new instructions to the list.
-   * <p>
-   * Make sure old announcements are not called (can happen in reroute scenarios).
-   */
-  private void clearInstructionList() {
-    if (stepVoiceInstructions != null && !stepVoiceInstructions.isEmpty()) {
-      stepVoiceInstructions.clear();
+    if (instructions == null) {
+      return "";
     }
-  }
-
-  /**
-   * Looks to see if we have a new step.
-   *
-   * @param routeProgress provides updated step information
-   * @return true if new step, false if not
-   */
-  private boolean newStep(RouteProgress routeProgress) {
-    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().currentStep());
-    currentStep = routeProgress.currentLegProgress().currentStep();
-    return newStep;
+    return instructions.announcement();
   }
 
   /**
@@ -125,22 +89,30 @@ public class VoiceInstructionMilestone extends Milestone {
   }
 
   /**
-   * Uses the current step distance remaining to check against voice instruction distance.
+   * Checks if the current instructions are different from the instructions
+   * determined by the step distance remaining.
    *
-   * @param routeProgress the current route progress
-   * @param voice         a given voice instruction from the list of step instructions
+   * @param instructions          the current voice instructions from the list of step instructions
+   * @param stepDistanceRemaining the current step distance remaining
    * @return true if time to voice the announcement, false if not
    */
-  private boolean shouldBeVoiced(RouteProgress routeProgress, VoiceInstructions voice) {
-    return voice.distanceAlongGeometry()
-      >= routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+  private boolean shouldBeVoiced(VoiceInstructions instructions, double stepDistanceRemaining) {
+    boolean isNewInstruction = this.instructions == null || !this.instructions.equals(instructions);
+    boolean isValidNewInstruction = instructions != null && isNewInstruction;
+    return isValidNewInstruction && instructions.distanceAlongGeometry() >= stepDistanceRemaining;
+  }
+
+  private boolean updateInstructions(RouteProgress routeProgress, VoiceInstructions instructions) {
+    cacheInstructions(routeProgress, false);
+    this.instructions = instructions;
+    return true;
   }
 
   /**
    * Caches the instructions in the VoiceInstructionLoader if it has been initialized
    *
    * @param routeProgress containing the instructions
-   * @param isFirst whether it's the first routeProgress of the route
+   * @param isFirst       whether it's the first routeProgress of the route
    */
   private void cacheInstructions(RouteProgress routeProgress, boolean isFirst) {
     VoiceInstructionLoader voiceInstructionLoader = VoiceInstructionLoader.getInstance();

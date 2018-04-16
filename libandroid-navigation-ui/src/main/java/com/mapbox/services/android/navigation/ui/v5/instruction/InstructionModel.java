@@ -3,20 +3,17 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
-import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
-public class InstructionModel {
+import static com.mapbox.services.android.navigation.v5.utils.RouteUtils.findCurrentBannerText;
 
-  private static final int ONE_INSTRUCTION_INDEX = 1;
+public class InstructionModel {
 
   private BannerText primaryBannerText;
   private BannerText secondaryBannerText;
@@ -71,37 +68,15 @@ public class InstructionModel {
     LegStep upComingStep = legProgress.upComingStep();
     int stepDistanceRemaining = (int) legProgress.currentStepProgress().distanceRemaining();
 
-    primaryBannerText = findBannerText(currentStep, stepDistanceRemaining, true);
-    secondaryBannerText = findBannerText(currentStep, stepDistanceRemaining, false);
-    thenBannerText = findBannerText(upComingStep, stepDistanceRemaining, true);
+    primaryBannerText = findCurrentBannerText(currentStep, stepDistanceRemaining, true);
+    secondaryBannerText = findCurrentBannerText(currentStep, stepDistanceRemaining, false);
+
+    if (upComingStep != null) {
+      thenBannerText = findCurrentBannerText(upComingStep, upComingStep.distance(), true);
+    }
 
     if (primaryBannerText != null && primaryBannerText.degrees() != null) {
       roundaboutAngle = primaryBannerText.degrees().floatValue();
     }
-  }
-
-  @Nullable
-  private static BannerText findBannerText(LegStep step, final double stepDistanceRemaining, boolean findPrimary) {
-    if (step != null && hasInstructions(step.bannerInstructions())) {
-      List<BannerInstructions> instructions = new ArrayList<>(step.bannerInstructions());
-      for (int i = 0; i < instructions.size(); i++) {
-        double distanceAlongGeometry = instructions.get(i).distanceAlongGeometry();
-        if (distanceAlongGeometry < stepDistanceRemaining) {
-          instructions.remove(i);
-        }
-      }
-      int instructionIndex = instructions.size() - 1;
-      BannerInstructions currentInstructions = instructions.get(instructionIndex);
-      return retrievePrimaryOrSecondaryBannerText(findPrimary, currentInstructions);
-    }
-    return null;
-  }
-
-  private static boolean hasInstructions(List<BannerInstructions> bannerInstructions) {
-    return bannerInstructions != null && !bannerInstructions.isEmpty();
-  }
-
-  private static BannerText retrievePrimaryOrSecondaryBannerText(boolean findPrimary, BannerInstructions instruction) {
-    return findPrimary ? instruction.primary() : instruction.secondary();
   }
 }
