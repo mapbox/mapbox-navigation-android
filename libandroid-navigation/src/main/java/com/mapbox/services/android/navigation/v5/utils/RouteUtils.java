@@ -153,21 +153,18 @@ public final class RouteUtils {
   }
 
   /**
-   * This method returns the current {@link BannerText} based on the step distance
-   * remaining.
-   * <p>
-   * When called, this is the banner text that should be shown at the given point along the route.
+   * Given the current step / current step distance remaining, this function will
+   * find the current instructions to be shown.
    *
-   * @param step                  holding the current banner instructions
-   * @param stepDistanceRemaining to determine progress along the step
-   * @param findPrimary           if the primary or secondary BannerText should be retrieved
-   * @return current BannerText based on step distance remaining
+   * @param currentStep           holding the current banner instructions
+   * @param stepDistanceRemaining to determine progress along the currentStep
+   * @return the current banner instructions based on the current distance along the step
    * @since 0.13.0
    */
   @Nullable
-  public static BannerText findCurrentBannerText(LegStep step, double stepDistanceRemaining, boolean findPrimary) {
-    if (isValidStep(step)) {
-      List<BannerInstructions> instructions = new ArrayList<>(step.bannerInstructions());
+  public static BannerInstructions findCurrentBannerInstructions(LegStep currentStep, double stepDistanceRemaining) {
+    if (isValidStep(currentStep)) {
+      List<BannerInstructions> instructions = new ArrayList<>(currentStep.bannerInstructions());
       for (int i = 0; i < instructions.size(); i++) {
         double distanceAlongGeometry = instructions.get(i).distanceAlongGeometry();
         if (distanceAlongGeometry < stepDistanceRemaining) {
@@ -175,8 +172,28 @@ public final class RouteUtils {
         }
       }
       int instructionIndex = checkValidIndex(instructions);
-      BannerInstructions currentInstructions = instructions.get(instructionIndex);
-      return retrievePrimaryOrSecondaryBannerText(findPrimary, currentInstructions);
+      return instructions.get(instructionIndex);
+    }
+    return null;
+  }
+
+  /**
+   * This method returns the current {@link BannerText} based on the currentStep distance
+   * remaining.
+   * <p>
+   * When called, this is the banner text that should be shown at the given point along the route.
+   *
+   * @param currentStep           holding the current banner instructions
+   * @param stepDistanceRemaining to determine progress along the currentStep
+   * @param findPrimary           if the primary or secondary BannerText should be retrieved
+   * @return current BannerText based on currentStep distance remaining
+   * @since 0.13.0
+   */
+  @Nullable
+  public static BannerText findCurrentBannerText(LegStep currentStep, double stepDistanceRemaining, boolean findPrimary) {
+    BannerInstructions instructions = findCurrentBannerInstructions(currentStep, stepDistanceRemaining);
+    if (instructions != null) {
+      return retrievePrimaryOrSecondaryBannerText(findPrimary, instructions);
     }
     return null;
   }
