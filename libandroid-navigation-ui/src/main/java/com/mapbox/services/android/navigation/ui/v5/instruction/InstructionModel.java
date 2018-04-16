@@ -10,10 +10,9 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import timber.log.Timber;
 
 public class InstructionModel {
 
@@ -68,13 +67,13 @@ public class InstructionModel {
 
   private void extractStepInstructions(RouteProgress progress) {
     RouteLegProgress legProgress = progress.currentLegProgress();
-    LegStep currentStep = legProgress.currentStep();
+    LegStep currentStep = progress.currentLegProgress().currentStep();
     LegStep upComingStep = legProgress.upComingStep();
-    double stepDistanceTraveled = legProgress.currentStepProgress().distanceRemaining();
+    int stepDistanceRemaining = (int) legProgress.currentStepProgress().distanceRemaining();
 
-    primaryBannerText = findBannerText(currentStep, stepDistanceTraveled, true);
-    secondaryBannerText = findBannerText(currentStep, stepDistanceTraveled, false);
-    thenBannerText = findBannerText(upComingStep, stepDistanceTraveled, true);
+    primaryBannerText = findBannerText(currentStep, stepDistanceRemaining, true);
+    secondaryBannerText = findBannerText(currentStep, stepDistanceRemaining, false);
+    thenBannerText = findBannerText(upComingStep, stepDistanceRemaining, true);
 
     if (primaryBannerText != null && primaryBannerText.degrees() != null) {
       roundaboutAngle = primaryBannerText.degrees().floatValue();
@@ -82,24 +81,18 @@ public class InstructionModel {
   }
 
   @Nullable
-  private static BannerText findBannerText(LegStep step, double stepDistanceRemaining, boolean findPrimary) {
+  private static BannerText findBannerText(LegStep step, final double stepDistanceRemaining, boolean findPrimary) {
     if (step != null && hasInstructions(step.bannerInstructions())) {
-      List<BannerInstructions> instructions = step.bannerInstructions();
-      Timber.d("Step instructions: %s", instructions.toString());
-      Timber.d("Step distance remaining: %s", stepDistanceRemaining);
-      for (BannerInstructions instruction : instructions) {
-        if (instruction.distanceAlongGeometry() < stepDistanceRemaining) {
-          int instructionIndex = instructions.indexOf(instruction);
-          int currentInstructionIndex = instructionIndex - ONE_INSTRUCTION_INDEX;
-          if (currentInstructionIndex < 0) {
-            currentInstructionIndex = 0;
-          }
-          Timber.d("Using index %s", currentInstructionIndex);
-          Timber.d("***************");
-          BannerInstructions currentInstructions = instructions.get(currentInstructionIndex);
-          return retrievePrimaryOrSecondaryBannerText(findPrimary, currentInstructions);
+      List<BannerInstructions> instructions = new ArrayList<>(step.bannerInstructions());
+      for (int i = 0; i < instructions.size(); i++) {
+        double distanceAlongGeometry = instructions.get(i).distanceAlongGeometry();
+        if (distanceAlongGeometry < stepDistanceRemaining) {
+          instructions.remove(i);
         }
       }
+      int instructionIndex = instructions.size() - 1;
+      BannerInstructions currentInstructions = instructions.get(instructionIndex);
+      return retrievePrimaryOrSecondaryBannerText(findPrimary, currentInstructions);
     }
     return null;
   }

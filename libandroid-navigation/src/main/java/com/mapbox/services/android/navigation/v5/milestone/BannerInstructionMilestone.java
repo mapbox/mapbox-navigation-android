@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BannerInstructionMilestone extends Milestone {
@@ -24,7 +25,7 @@ public class BannerInstructionMilestone extends Milestone {
       clearInstructionList();
     }
     if (shouldAddInstructions(routeProgress)) {
-      stepBannerInstructions = routeProgress.currentLegProgress().currentStep().bannerInstructions();
+      stepBannerInstructions = new ArrayList<>(routeProgress.currentLegProgress().currentStep().bannerInstructions());
     }
     for (BannerInstructions instructions : stepBannerInstructions) {
       if (shouldBeShown(routeProgress, instructions)) {
