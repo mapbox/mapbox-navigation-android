@@ -7,6 +7,7 @@ import android.text.Spannable;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ImageSpan;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -47,6 +48,13 @@ public class InstructionTarget implements Target {
     int bottom = textView.getLineHeight();
     int right = bottom * bitmap.getWidth() / bitmap.getHeight();
     drawable.setBounds(0, 0, right, bottom);
+
+    String tag = "InstructionTarget";
+    Log.d(tag, "\ninstruction spannable: " + instructionSpannable);
+    Log.d(tag, "instruction spannable length: " + instructionSpannable.length());
+    Log.d(tag, "shield text: " + shield.getText());
+    Log.d(tag, "shield start/end: " + shield.getStartIndex() + ", " + shield.getEndIndex());
+    Log.d(tag, "~~~~~~~~~~~~~~");
 
     // Create and set a new ImageSpan at the given index with the Drawable
     instructionSpannable.setSpan(new ImageSpan(drawable),

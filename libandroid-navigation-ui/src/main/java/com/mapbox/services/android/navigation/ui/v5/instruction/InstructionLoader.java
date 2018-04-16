@@ -135,8 +135,8 @@ public class InstructionLoader {
 
       } else {
         String text = components.text();
-        boolean emptyText = TextUtils.isEmpty(instructionStringBuilder.toString());
-        String instructionText = emptyText ? text : SINGLE_SPACE.concat(text);
+        boolean textViewIsEmpty = TextUtils.isEmpty(instructionStringBuilder.toString());
+        String instructionText = textViewIsEmpty ? text : SINGLE_SPACE.concat(text);
         instructionStringBuilder.append(instructionText);
       }
     }
@@ -179,7 +179,7 @@ public class InstructionLoader {
     int startIndex = instructionBuilderEmpty ? instructionLength : instructionLength + 1;
     shieldUrls.add(new BannerShieldInfo(textView.getContext(), components.imageBaseUrl(),
       startIndex, components.text()));
-    instructionStringBuilder.append(IMAGE_SPACE_PLACEHOLDER);
+    instructionStringBuilder.append(components.text());
   }
 
   private void createTargets(TextView textView, StringBuilder instructionStringBuilder,

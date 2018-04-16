@@ -26,6 +26,6 @@ class BannerShieldInfo {
   }
 
   int getEndIndex() {
-    return startIndex + 1;
+    return startIndex + text.length() - 1;
   }
 }
