@@ -360,7 +360,11 @@ public class MapboxNavigation implements ServiceConnection {
    * @return camera engine used to configure camera position while routing
    * @since 0.10.0
    */
+  @NonNull
   public Camera getCameraEngine() {
+    if (cameraEngine == null) {
+      return new SimpleCamera();
+    }
     return cameraEngine;
   }
 
