@@ -17,6 +17,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -165,14 +166,18 @@ public final class RouteUtils {
   public static BannerInstructions findCurrentBannerInstructions(LegStep currentStep, double stepDistanceRemaining) {
     if (isValidStep(currentStep)) {
       List<BannerInstructions> instructions = new ArrayList<>(currentStep.bannerInstructions());
-      for (int i = 0; i < instructions.size(); i++) {
-        double distanceAlongGeometry = instructions.get(i).distanceAlongGeometry();
+      Iterator<BannerInstructions> instructionsIterator = instructions.iterator();
+      while (instructionsIterator.hasNext()) {
+        BannerInstructions instruction = instructionsIterator.next();
+        double distanceAlongGeometry = instruction.distanceAlongGeometry();
         if (distanceAlongGeometry < stepDistanceRemaining) {
-          instructions.remove(i);
+          instructionsIterator.remove();
         }
       }
       int instructionIndex = checkValidIndex(instructions);
-      return instructions.get(instructionIndex);
+      if (instructions.size() > 0) {
+        return instructions.get(instructionIndex);
+      }
     }
     return null;
   }
@@ -190,7 +195,8 @@ public final class RouteUtils {
    * @since 0.13.0
    */
   @Nullable
-  public static BannerText findCurrentBannerText(LegStep currentStep, double stepDistanceRemaining, boolean findPrimary) {
+  public static BannerText findCurrentBannerText(LegStep currentStep, double stepDistanceRemaining,
+                                                 boolean findPrimary) {
     BannerInstructions instructions = findCurrentBannerInstructions(currentStep, stepDistanceRemaining);
     if (instructions != null) {
       return retrievePrimaryOrSecondaryBannerText(findPrimary, instructions);
@@ -211,10 +217,12 @@ public final class RouteUtils {
   public static VoiceInstructions findCurrentVoiceInstructions(LegStep step, double stepDistanceRemaining) {
     if (isValidStep(step)) {
       List<VoiceInstructions> instructions = new ArrayList<>(step.voiceInstructions());
-      for (int i = 0; i < instructions.size(); i++) {
-        double distanceAlongGeometry = instructions.get(i).distanceAlongGeometry();
+      Iterator<VoiceInstructions> instructionsIterator = instructions.iterator();
+      while (instructionsIterator.hasNext()) {
+        VoiceInstructions instruction = instructionsIterator.next();
+        double distanceAlongGeometry = instruction.distanceAlongGeometry();
         if (distanceAlongGeometry < stepDistanceRemaining) {
-          instructions.remove(i);
+          instructionsIterator.remove();
         }
       }
       int instructionIndex = checkValidIndex(instructions);

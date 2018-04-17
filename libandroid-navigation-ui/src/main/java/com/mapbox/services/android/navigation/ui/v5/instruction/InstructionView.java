@@ -608,8 +608,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model provides maneuver modifier / type
    */
   private void updateManeuverView(InstructionModel model) {
-    upcomingManeuverView.setManeuverModifier(model.getStepResources().getManeuverViewModifier());
-    upcomingManeuverView.setManeuverType(model.getStepResources().getManeuverViewType());
+    String maneuverViewType = model.getStepResources().getManeuverViewType();
+    String maneuverViewModifier = model.getStepResources().getManeuverViewModifier();
+    upcomingManeuverView.setManeuverTypeAndModifier(maneuverViewType, maneuverViewModifier);
     if (model.getRoundaboutAngle() != null) {
       upcomingManeuverView.setRoundaboutAngle(model.getRoundaboutAngle());
     }
@@ -742,8 +743,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void updateThenStep(InstructionModel model) {
     if (shouldShowThenStep(model)) {
-      thenManeuverView.setManeuverType(model.getStepResources().getThenStepManeuverType());
-      thenManeuverView.setManeuverModifier(model.getStepResources().getThenStepManeuverModifier());
+      String thenStepManeuverType = model.getStepResources().getThenStepManeuverType();
+      String thenStepManeuverModifier = model.getStepResources().getThenStepManeuverModifier();
+      thenManeuverView.setManeuverTypeAndModifier(thenStepManeuverType, thenStepManeuverModifier);
       thenStepText.setText(model.getThenBannerText().text());
       showThenStepLayout();
     } else {

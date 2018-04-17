@@ -11,6 +11,8 @@ import static com.mapbox.services.android.navigation.v5.utils.RouteUtils.findCur
 
 public class VoiceInstructionMilestone extends Milestone {
 
+  private static final String EMPTY_STRING = "";
+
   private VoiceInstructions instructions;
   private DirectionsRoute currentRoute;
 
@@ -56,7 +58,7 @@ public class VoiceInstructionMilestone extends Milestone {
    */
   public String getSsmlAnnouncement() {
     if (instructions == null) {
-      return "";
+      return EMPTY_STRING;
     }
     return instructions.ssmlAnnouncement();
   }
@@ -71,7 +73,7 @@ public class VoiceInstructionMilestone extends Milestone {
    */
   public String getAnnouncement() {
     if (instructions == null) {
-      return "";
+      return EMPTY_STRING;
     }
     return instructions.announcement();
   }

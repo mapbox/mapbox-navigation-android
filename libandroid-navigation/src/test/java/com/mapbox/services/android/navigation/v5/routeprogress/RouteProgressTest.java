@@ -11,8 +11,12 @@ import com.mapbox.services.android.navigation.v5.BaseTest;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 public class RouteProgressTest extends BaseTest {
 
@@ -63,6 +67,8 @@ public class RouteProgressTest extends BaseTest {
   public void fractionTraveled_equalsCorrectValueAtIntervals() throws Exception {
     DirectionsRoute route = buildTestDirectionsRoute();
     DirectionsRoute multiLegRoute = buildMultipleLegRoute();
+    List<Float> fractionsRemaining = new ArrayList<>();
+    List<Float> routeProgressFractionsTraveled = new ArrayList<>();
 
     for (int stepIndex = 0; stepIndex < route.legs().get(0).steps().size(); stepIndex++) {
       double stepDistanceRemaining = getFirstStep(multiLegRoute).distance();
@@ -72,8 +78,11 @@ public class RouteProgressTest extends BaseTest {
         legDistanceRemaining, distanceRemaining, stepIndex, 0);
       float fractionRemaining = (float) (routeProgress.distanceTraveled() / route.distance());
 
-      assertEquals(fractionRemaining, routeProgress.fractionTraveled(), BaseTest.LARGE_DELTA);
+      fractionsRemaining.add(fractionRemaining);
+      routeProgressFractionsTraveled.add(routeProgress.fractionTraveled());
     }
+
+    assertTrue(fractionsRemaining.equals(routeProgressFractionsTraveled));
   }
 
   @Test
@@ -90,7 +99,10 @@ public class RouteProgressTest extends BaseTest {
     DirectionsRoute route = buildTestDirectionsRoute();
     RouteProgress beginningRouteProgress = buildBeginningOfLegRouteProgress(route);
 
-    assertEquals(3535.2, beginningRouteProgress.durationRemaining(), BaseTest.DELTA);
+    double durationRemaining = route.duration();
+    double progressDurationRemaining = beginningRouteProgress.durationRemaining();
+
+    assertEquals(durationRemaining, progressDurationRemaining, BaseTest.DELTA);
   }
 
   @Test
@@ -161,6 +173,8 @@ public class RouteProgressTest extends BaseTest {
   @Test
   public void multiLeg_getFractionTraveled_equalsCorrectValueAtIntervals() throws Exception {
     DirectionsRoute multiLegRoute = buildMultipleLegRoute();
+    List<Float> fractionsRemaining = new ArrayList<>();
+    List<Float> routeProgressFractionsTraveled = new ArrayList<>();
 
     for (RouteLeg leg : multiLegRoute.legs()) {
       for (int stepIndex = 0; stepIndex < leg.steps().size(); stepIndex++) {
@@ -171,9 +185,12 @@ public class RouteProgressTest extends BaseTest {
           legDistanceRemaining, distanceRemaining, stepIndex, 0);
         float fractionRemaining = (float) (routeProgress.distanceTraveled() / multiLegRoute.distance());
 
-        assertEquals(fractionRemaining, routeProgress.fractionTraveled(), BaseTest.LARGE_DELTA);
+        fractionsRemaining.add(fractionRemaining);
+        routeProgressFractionsTraveled.add(routeProgress.fractionTraveled());
       }
     }
+
+    assertTrue(fractionsRemaining.equals(routeProgressFractionsTraveled));
   }
 
   @Test

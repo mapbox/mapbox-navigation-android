@@ -22,7 +22,8 @@ public class InstructionModel {
   private InstructionStepResources stepResources;
   private RouteProgress progress;
   private Locale locale;
-  private @NavigationUnitType.UnitType int unitType;
+  @NavigationUnitType.UnitType
+  private int unitType;
 
   public InstructionModel(Context context, RouteProgress progress,
                           Locale locale, @NavigationUnitType.UnitType int unitType) {

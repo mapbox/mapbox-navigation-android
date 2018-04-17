@@ -17,6 +17,7 @@ import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 public class RouteUtilsTest extends BaseTest {
@@ -182,12 +183,12 @@ public class RouteUtilsTest extends BaseTest {
       currentStep, stepDistanceRemaining
     );
 
-    assertEquals(null, currentBannerInstructions);
+    assertNull(currentBannerInstructions);
   }
 
   @Test
   public void findCurrentBannerInstructions_returnsNullWithCurrentStepEmptyInstructions() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
     List<BannerInstructions> currentInstructions = currentStep.bannerInstructions();
@@ -197,12 +198,25 @@ public class RouteUtilsTest extends BaseTest {
       currentStep, stepDistanceRemaining
     );
 
-    assertEquals(null, currentBannerInstructions);
+    assertNull(currentBannerInstructions);
+  }
+
+  @Test
+  public void findCurrentBannerInstructions_clearsAllInvalidInstructions() throws Exception {
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    double stepDistanceRemaining = 400;
+
+    BannerInstructions currentBannerInstructions = RouteUtils.findCurrentBannerInstructions(
+      currentStep, stepDistanceRemaining
+    );
+
+    assertNull(currentBannerInstructions);
   }
 
   @Test
   public void findCurrentBannerInstructions_returnsCorrectCurrentInstruction() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
 
@@ -215,7 +229,7 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void findCurrentBannerInstructions_adjustedDistanceRemainingReturnsCorrectInstruction() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     routeProgress = routeProgress.toBuilder()
       .stepIndex(1)
       .stepDistanceRemaining(50)
@@ -232,7 +246,7 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void findCurrentBannerInstructions_adjustedDistanceRemainingRemovesCorrectInstructions() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     routeProgress = routeProgress.toBuilder()
       .stepIndex(1)
       .stepDistanceRemaining(500)
@@ -249,7 +263,7 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void findCurrentBannerText_returnsCorrectPrimaryBannerText() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     routeProgress = routeProgress.toBuilder()
       .stepIndex(1)
       .stepDistanceRemaining(50)
@@ -266,7 +280,7 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void findCurrentBannerText_returnsCorrectSecondaryBannerText() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     routeProgress = routeProgress.toBuilder()
       .stepIndex(1)
       .stepDistanceRemaining(50)
@@ -290,7 +304,7 @@ public class RouteUtilsTest extends BaseTest {
       currentStep, stepDistanceRemaining, false
     );
 
-    assertEquals(null, currentBannerText);
+    assertNull(currentBannerText);
   }
 
   @Test
@@ -302,12 +316,12 @@ public class RouteUtilsTest extends BaseTest {
       currentStep, stepDistanceRemaining
     );
 
-    assertEquals(null, currentVoiceInstructions);
+    assertNull(currentVoiceInstructions);
   }
 
   @Test
   public void findCurrentVoiceInstructions_returnsNullWithCurrentStepEmptyInstructions() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
     List<VoiceInstructions> currentInstructions = currentStep.voiceInstructions();
@@ -317,12 +331,12 @@ public class RouteUtilsTest extends BaseTest {
       currentStep, stepDistanceRemaining
     );
 
-    assertEquals(null, voiceInstructions);
+    assertNull(voiceInstructions);
   }
 
   @Test
   public void findCurrentVoiceInstructions_returnsCorrectInstructionsBeginningOfStepDistanceRemaining() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     routeProgress = routeProgress.toBuilder()
       .stepIndex(1)
       .stepDistanceRemaining(400)
@@ -338,8 +352,25 @@ public class RouteUtilsTest extends BaseTest {
   }
 
   @Test
+  public void findCurrentVoiceInstructions_returnsCorrectInstructionsNoDistanceTraveled() throws Exception {
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
+    routeProgress = routeProgress.toBuilder()
+      .stepDistanceRemaining(routeProgress.currentLegProgress().currentStep().distance())
+      .stepIndex(0)
+      .build();
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+
+    VoiceInstructions currentVoiceInstructions = RouteUtils.findCurrentVoiceInstructions(
+      currentStep, stepDistanceRemaining
+    );
+
+    assertEquals(currentStep.voiceInstructions().get(0), currentVoiceInstructions);
+  }
+
+  @Test
   public void findCurrentVoiceInstructions_returnsCorrectInstructionsEndOfStepDistanceRemaining() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     routeProgress = routeProgress.toBuilder()
       .stepIndex(1)
       .stepDistanceRemaining(50)

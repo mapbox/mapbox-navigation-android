@@ -46,23 +46,12 @@ public class BannerInstructionMilestone extends Milestone {
    * @return true if time to show the instructions, false if not
    */
   private boolean shouldBeShown(BannerInstructions instructions, double stepDistanceRemaining) {
-    boolean isNewInstruction = isFirstInstruction() || !this.instructions.equals(instructions);
+    boolean isNewInstruction = this.instructions == null || !this.instructions.equals(instructions);
     boolean isValidNewInstruction = instructions != null && isNewInstruction;
-    boolean withinDistanceAlongGeometry = instructions.distanceAlongGeometry() >= stepDistanceRemaining;
-    boolean isValidDistanceRemaining = isValidNewInstruction && withinDistanceAlongGeometry;
-    return isFirstInstruction() || isValidDistanceRemaining;
-  }
-
-  /**
-   * Used to determine if the user is currently on the first step instruction.
-   * <p>
-   * In this case, the instructions should be shown immediately, rather than waiting for the
-   * valid distance.
-   *
-   * @return true if the first instruction on the step, false otherwise
-   */
-  private boolean isFirstInstruction() {
-    return this.instructions == null;
+    boolean withinDistanceAlongGeometry = isValidNewInstruction
+      && instructions.distanceAlongGeometry() >= stepDistanceRemaining;
+    boolean isFirstInstruction = this.instructions == null && instructions != null;
+    return isFirstInstruction || withinDistanceAlongGeometry;
   }
 
   public static final class Builder extends Milestone.Builder {
