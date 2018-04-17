@@ -192,8 +192,9 @@ public class MapboxNavigationTest extends BaseTest {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
     MapboxNavigation navigationWithOptions = buildMapboxNavigationWithOptions(options);
     navigationWithOptions.addMilestone(new StepMilestone.Builder().build());
+    int removedMilestoneIdentifier = 5678;
 
-    navigationWithOptions.removeMilestone(5678);
+    navigationWithOptions.removeMilestone(removedMilestoneIdentifier);
 
     assertEquals(1, navigationWithOptions.getMilestones().size());
   }
