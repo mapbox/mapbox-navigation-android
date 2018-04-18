@@ -11,44 +11,20 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import junit.framework.Assert;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.io.IOException;
-
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
 public class TriggerPropertyTest extends BaseTest {
 
-  // Fixtures
-  private static final String PRECISION_6 = "directions_v5_precision_6.json";
-
-  private RouteProgress routeProgress;
-
-  @Before
-  public void setup() throws IOException {
-    Gson gson = new GsonBuilder()
-      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
-    String body = loadJsonFixture(PRECISION_6);
-    DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
-
-    DirectionsRoute route = response.routes().get(0);
-
-    routeProgress = RouteProgress.builder()
-      .directionsRoute(route)
-      .distanceRemaining(route.distance())
-      .legDistanceRemaining(route.legs().get(0).distance())
-      .stepDistanceRemaining(route.legs().get(0).steps().get(0).distance())
-      .legIndex(0)
-      .stepIndex(1)
-      .build();
-  }
+  private static final String ROUTE_FIXTURE = "directions_v5_precision_6.json";
 
   @Test
-  public void stepDurationRemainingProperty_onlyPassesValidationWhenEqual() {
+  public void stepDurationRemainingProperty_onlyPassesValidationWhenEqual() throws Exception {
+    RouteProgress routeProgress = buildTestRouteProgressForTrigger();
     double stepDuration = routeProgress.currentLegProgress().currentStepProgress().durationRemaining();
 
     for (int i = 10; i > 0; i--) {
@@ -67,7 +43,8 @@ public class TriggerPropertyTest extends BaseTest {
   }
 
   @Test
-  public void stepDistanceRemainingProperty_onlyPassesValidationWhenEqual() {
+  public void stepDistanceRemainingProperty_onlyPassesValidationWhenEqual() throws Exception {
+    RouteProgress routeProgress = buildTestRouteProgressForTrigger();
     double stepDistance = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
 
     for (int i = 10; i > 0; i--) {
@@ -86,7 +63,8 @@ public class TriggerPropertyTest extends BaseTest {
   }
 
   @Test
-  public void stepDistanceTotalProperty_onlyPassesValidationWhenEqual() {
+  public void stepDistanceTotalProperty_onlyPassesValidationWhenEqual() throws Exception {
+    RouteProgress routeProgress = buildTestRouteProgressForTrigger();
     double stepDistanceTotal = routeProgress.currentLegProgress().currentStep().distance();
 
     for (int i = 10; i > 0; i--) {
@@ -105,7 +83,8 @@ public class TriggerPropertyTest extends BaseTest {
   }
 
   @Test
-  public void stepDurationTotalProperty_onlyPassesValidationWhenEqual() {
+  public void stepDurationTotalProperty_onlyPassesValidationWhenEqual() throws Exception {
+    RouteProgress routeProgress = buildTestRouteProgressForTrigger();
     double stepDurationTotal = routeProgress.currentLegProgress().currentStep().duration();
 
     for (int i = 10; i > 0; i--) {
@@ -124,7 +103,8 @@ public class TriggerPropertyTest extends BaseTest {
   }
 
   @Test
-  public void stepIndexProperty_onlyPassesValidationWhenEqual() {
+  public void stepIndexProperty_onlyPassesValidationWhenEqual() throws Exception {
+    RouteProgress routeProgress = buildTestRouteProgressForTrigger();
     int stepIndex = routeProgress.currentLegProgress().stepIndex();
 
     for (int i = 10; i > 0; i--) {
@@ -140,5 +120,19 @@ public class TriggerPropertyTest extends BaseTest {
         Assert.assertFalse(result);
       }
     }
+  }
+
+  private RouteProgress buildTestRouteProgressForTrigger() throws Exception {
+    Gson gson = new GsonBuilder()
+      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
+    String body = loadJsonFixture(ROUTE_FIXTURE);
+    DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
+
+    DirectionsRoute route = response.routes().get(0);
+    double distanceRemaining = route.distance();
+    double legDistanceRemaining = route.legs().get(0).distance();
+    double stepDistanceRemaining = route.legs().get(0).steps().get(0).distance();
+    return buildTestRouteProgress(route, stepDistanceRemaining,
+      legDistanceRemaining, distanceRemaining, 1, 0);
   }
 }

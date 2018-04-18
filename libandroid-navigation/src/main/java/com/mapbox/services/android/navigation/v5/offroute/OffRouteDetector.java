@@ -12,7 +12,6 @@ import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
@@ -24,7 +23,6 @@ public class OffRouteDetector extends OffRoute {
   private Point lastReroutePoint;
   private OffRouteCallback callback;
   private RingBuffer<Integer> distancesAwayFromManeuver = new RingBuffer<>(3);
-  private List<Point> stepPoints = new ArrayList<>();
 
   /**
    * Method in charge of running a series of test based on the device current location
@@ -102,17 +100,6 @@ public class OffRouteDetector extends OffRoute {
   }
 
   /**
-   * Updates this class with decoded step points.
-   *
-   * @param stepPoints decoded in the NavigationEngine
-   * @since 0.11.0
-   */
-  public void updateStepPoints(List<Point> stepPoints) {
-    this.stepPoints.clear();
-    this.stepPoints.addAll(stepPoints);
-  }
-
-  /**
    * Clears the {@link RingBuffer} used for tracking our recent
    * distances away from the maneuver that is being driven towards.
    *
@@ -155,6 +142,7 @@ public class OffRouteDetector extends OffRoute {
 
   private boolean isMovingAwayFromManeuver(Location location, RouteProgress routeProgress,
                                            RingBuffer<Integer> distancesAwayFromManeuver, Point currentPoint) {
+    List<Point> stepPoints = routeProgress.currentStepPoints();
     if (movingAwayFromManeuver(routeProgress, distancesAwayFromManeuver, stepPoints, currentPoint)) {
       updateLastReroutePoint(location);
       return true;

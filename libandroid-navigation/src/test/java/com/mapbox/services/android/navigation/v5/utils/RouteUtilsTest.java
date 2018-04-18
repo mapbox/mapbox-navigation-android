@@ -17,10 +17,10 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void isNewRoute_returnsTrueWhenPreviousGeometriesNull() throws Exception {
-    RouteProgress defaultRouteProgress = buildDefaultRouteProgress();
+    RouteProgress defaultRouteProgress = buildDefaultTestRouteProgress();
     boolean isNewRoute = RouteUtils.isNewRoute(null, defaultRouteProgress);
     assertTrue(isNewRoute);
-    RouteProgress previousRouteProgress = buildDefaultRouteProgress();
+    RouteProgress previousRouteProgress = buildDefaultTestRouteProgress();
 
     isNewRoute = RouteUtils.isNewRoute(previousRouteProgress, defaultRouteProgress);
 
@@ -29,7 +29,7 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void isNewRoute_returnsFalseWhenGeometriesEqualEachOther() throws Exception {
-    RouteProgress previousRouteProgress = buildDefaultRouteProgress();
+    RouteProgress previousRouteProgress = buildDefaultTestRouteProgress();
 
     boolean isNewRoute = RouteUtils.isNewRoute(previousRouteProgress, previousRouteProgress);
 
@@ -38,8 +38,8 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void isNewRoute_returnsTrueWhenGeometriesDoNotEqual() throws Exception {
-    DirectionsRoute aRoute = buildDirectionsRoute();
-    RouteProgress defaultRouteProgress = buildDefaultRouteProgress();
+    DirectionsRoute aRoute = buildTestDirectionsRoute();
+    RouteProgress defaultRouteProgress = buildDefaultTestRouteProgress();
     RouteProgress previousRouteProgress = defaultRouteProgress.toBuilder()
       .directionsRoute(aRoute.toBuilder().geometry("vfejnqiv").build())
       .build();
@@ -51,9 +51,9 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void isArrivalEvent_returnsTrueWhenManeuverTypeIsArrival_andIsValidMetersRemaining() throws Exception {
-    DirectionsRoute aRoute = buildDirectionsRoute();
+    DirectionsRoute aRoute = buildTestDirectionsRoute();
     int lastStepIndex = obtainLastStepIndex(aRoute);
-    RouteProgress defaultRouteProgress = buildDefaultRouteProgress();
+    RouteProgress defaultRouteProgress = buildDefaultTestRouteProgress();
     RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
       .stepDistanceRemaining(30)
       .legDistanceRemaining(30)
@@ -68,9 +68,9 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void isArrivalEvent_returnsFalseWhenManeuverTypeIsArrival_andIsNotValidMetersRemaining() throws Exception {
-    DirectionsRoute aRoute = buildDirectionsRoute();
+    DirectionsRoute aRoute = buildTestDirectionsRoute();
     int lastStepIndex = obtainLastStepIndex(aRoute);
-    RouteProgress defaultRouteProgress = buildDefaultRouteProgress();
+    RouteProgress defaultRouteProgress = buildDefaultTestRouteProgress();
     RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
       .stepIndex(lastStepIndex)
       .legDistanceRemaining(100)
@@ -83,9 +83,9 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void isArrivalEvent_returnsTrueWhenUpcomingManeuverTypeIsArrival_andIsValidMetersRemaining() throws Exception {
-    DirectionsRoute aRoute = buildDirectionsRoute();
+    DirectionsRoute aRoute = buildTestDirectionsRoute();
     int lastStepIndex = obtainLastStepIndex(aRoute);
-    RouteProgress defaultRouteProgress = buildDefaultRouteProgress();
+    RouteProgress defaultRouteProgress = buildDefaultTestRouteProgress();
     RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
       .legDistanceRemaining(30)
       .stepIndex(lastStepIndex - 1)
@@ -98,9 +98,9 @@ public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void isArrivalEvent_returnsFalseWhenManeuverTypeIsNotArrival_andIsNotValidMetersRemaining() throws Exception {
-    DirectionsRoute aRoute = buildDirectionsRoute();
+    DirectionsRoute aRoute = buildTestDirectionsRoute();
     int lastStepIndex = obtainLastStepIndex(aRoute);
-    RouteProgress defaultRouteProgress = buildDefaultRouteProgress();
+    RouteProgress defaultRouteProgress = buildDefaultTestRouteProgress();
     RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
       .stepDistanceRemaining(200)
       .legDistanceRemaining(300)

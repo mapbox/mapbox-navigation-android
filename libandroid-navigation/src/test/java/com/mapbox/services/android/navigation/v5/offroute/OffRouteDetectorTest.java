@@ -43,7 +43,6 @@ public class OffRouteDetectorTest extends BaseTest {
 
     offRouteDetector = new OffRouteDetector();
     offRouteDetector.setOffRouteCallback(mockCallback);
-    setupStepPoints(offRouteDetector);
   }
 
   @Test
@@ -60,7 +59,7 @@ public class OffRouteDetectorTest extends BaseTest {
   @Test
   public void validOffRoute_onMinimumDistanceBeforeReroutingPassed() throws Exception {
     Location mapboxOffice = buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637);
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
 
     offRouteDetector.isUserOffRoute(mockLocation, mockProgress, options);
 
@@ -73,7 +72,7 @@ public class OffRouteDetectorTest extends BaseTest {
 
   @Test
   public void isUserOffRoute_AssertTrueWhenTooFarFromStep() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     Point stepManeuverPoint = routeProgress.directionsRoute().legs().get(0).steps().get(0).maneuver().location();
 
     Location firstUpdate = buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637);
@@ -88,7 +87,7 @@ public class OffRouteDetectorTest extends BaseTest {
 
   @Test
   public void isUserOffRoute_AssertFalseWhenOnStep() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     Point stepManeuverPoint = routeProgress.directionsRoute().legs().get(0).steps().get(0).maneuver().location();
 
     Location firstUpdate = buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637);
@@ -103,7 +102,7 @@ public class OffRouteDetectorTest extends BaseTest {
 
   @Test
   public void isUserOffRoute_AssertFalseWhenWithinRadiusAndStepLocationHasBadAccuracy() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     Point stepManeuverPoint = routeProgress.directionsRoute().legs().get(0).steps().get(0).maneuver().location();
 
     Location firstUpdate = buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637);
@@ -119,7 +118,7 @@ public class OffRouteDetectorTest extends BaseTest {
 
   @Test
   public void isUserOffRoute_AssertFalseWhenOffRouteButCloseToUpcomingStep() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     Point upcomingStepManeuverPoint = routeProgress.currentLegProgress().upComingStep().maneuver().location();
 
     Location firstUpdate = buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637);
@@ -135,7 +134,7 @@ public class OffRouteDetectorTest extends BaseTest {
 
   @Test
   public void isUserOffRoute_AssertTrueWhenOnRouteButMovingAwayFromManeuver() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
 
     LineString lineString = LineString.fromPolyline(currentStep.geometry(), Constants.PRECISION_6);
@@ -182,7 +181,7 @@ public class OffRouteDetectorTest extends BaseTest {
 
   @Test
   public void isUserOffRoute_AssertFalseTwoUpdatesAwayFromManeuverThenOneTowards() throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
 
     LineString lineString = LineString.fromPolyline(currentStep.geometry(), Constants.PRECISION_6);
@@ -210,14 +209,5 @@ public class OffRouteDetectorTest extends BaseTest {
     );
     boolean isUserOffRouteThirdTry = offRouteDetector.isUserOffRoute(fourthLocationUpdate, routeProgress, options);
     assertFalse(isUserOffRouteThirdTry);
-  }
-
-  private void setupStepPoints(OffRouteDetector offRouteDetector) throws Exception {
-    RouteProgress routeProgress = buildDefaultRouteProgress();
-    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
-
-    LineString lineString = LineString.fromPolyline(currentStep.geometry(), Constants.PRECISION_6);
-    List<Point> stepPoints = lineString.coordinates();
-    offRouteDetector.updateStepPoints(stepPoints);
   }
 }

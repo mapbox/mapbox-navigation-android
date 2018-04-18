@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildSnappedLocation;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
@@ -30,7 +31,7 @@ public class NavigationRouteProcessorTest extends BaseTest {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().build();
     navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
       mock(LocationEngine.class));
-    navigation.startNavigation(buildDirectionsRoute());
+    navigation.startNavigation(buildTestDirectionsRoute());
   }
 
   @Test
@@ -69,7 +70,7 @@ public class NavigationRouteProcessorTest extends BaseTest {
       lastPointInCurrentStep.longitude(), lastPointInCurrentStep.latitude()
     );
 
-    Location snappedLocation = routeProcessor.buildSnappedLocation(
+    Location snappedLocation = buildSnappedLocation(
       navigation, snapEnabled, rawLocation, progress, userOffRoute
     );
 
@@ -87,7 +88,7 @@ public class NavigationRouteProcessorTest extends BaseTest {
       lastPointInCurrentStep.longitude(), lastPointInCurrentStep.latitude()
     );
 
-    Location snappedLocation = routeProcessor.buildSnappedLocation(
+    Location snappedLocation = buildSnappedLocation(
       navigation, snapEnabled, rawLocation, progress, userOffRoute
     );
 
@@ -105,7 +106,7 @@ public class NavigationRouteProcessorTest extends BaseTest {
       lastPointInCurrentStep.longitude(), lastPointInCurrentStep.latitude()
     );
 
-    Location snappedLocation = routeProcessor.buildSnappedLocation(
+    Location snappedLocation = buildSnappedLocation(
       navigation, snapEnabled, rawLocation, progress, userOffRoute
     );
 
