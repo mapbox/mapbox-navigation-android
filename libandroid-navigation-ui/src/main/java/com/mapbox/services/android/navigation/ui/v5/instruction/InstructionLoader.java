@@ -126,6 +126,8 @@ public class InstructionLoader {
     StringBuilder instructionStringBuilder = new StringBuilder();
     List<BannerShieldInfo> shieldUrls = new ArrayList<>();
 
+    InstructionBuilder instructionBuilder = new InstructionBuilder(bannerText.components(), textView);
+
     List<BannerComponents> bannerComponents = bannerText.components();
     Collections.sort(bannerComponents);
 
