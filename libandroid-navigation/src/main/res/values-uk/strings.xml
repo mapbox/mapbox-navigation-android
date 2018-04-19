@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Mapbox Navigation SDK для Android</string>
+
+    <!-- Notification Strings -->
+    <string name="end_navigation">Закінчити навігацію</string>
+    <string name="channel_name">Навігаційні повідомлення</string>
+    <string name="notification_arrival_time_format">Прибуття о %s</string>
+</resources>
