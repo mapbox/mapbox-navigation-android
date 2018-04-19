@@ -125,13 +125,13 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
 
   private void updateManeuverView(InstructionViewHolder holder, LegStep step) {
     LegStep maneuverStep = step;
-    // Get the upcoming LegStep for the ManeuverView if there is one
     int upcomingStepIndex = stepList.indexOf(step) + 1;
     if (upcomingStepIndex < stepList.size()) {
       maneuverStep = stepList.get(upcomingStepIndex);
     }
-    holder.maneuverView.setManeuverModifier(maneuverStep.maneuver().modifier());
-    holder.maneuverView.setManeuverType(maneuverStep.maneuver().type());
+    String maneuverType = maneuverStep.maneuver().type();
+    String maneuverModifier = maneuverStep.maneuver().modifier();
+    holder.maneuverView.setManeuverTypeAndModifier(maneuverType, maneuverModifier);
   }
 
   private void addLegSteps(RouteProgress routeProgress) {

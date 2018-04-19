@@ -7,6 +7,9 @@ import com.mapbox.services.android.navigation.v5.BaseTest;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
@@ -24,12 +27,15 @@ public class RouteLegProgressTest extends BaseTest {
 
   @Test
   public void upComingStep_returnsNextStepInLeg() throws Exception {
+    int stepIndex = 5;
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
-
     routeProgress = routeProgress.toBuilder().stepIndex(5).build();
+    List<LegStep> steps = routeProgress.currentLeg().steps();
 
-    assertTrue(routeProgress.currentLegProgress().upComingStep().geometry()
-      .startsWith("so{gfA~}xpgFzOyNnRoOdVqXzLmQbDiGhKqQ|Vie@`X{g@dkAw{B~NcXhPoWlRmXfSeW|U"));
+    LegStep upComingStep = routeProgress.currentLegProgress().upComingStep();
+    int upComingStepIndex = steps.indexOf(upComingStep);
+
+    assertEquals(stepIndex + 1, upComingStepIndex);
   }
 
   @Test
@@ -97,12 +103,16 @@ public class RouteLegProgressTest extends BaseTest {
     DirectionsRoute route = buildTestDirectionsRoute();
     RouteLeg firstLeg = route.legs().get(0);
     double stepSegmentsInMeters = 5000;
+    List<Float> fractionsRemaining = new ArrayList<>();
+    List<Float> routeProgressFractionsTraveled = new ArrayList<>();
 
     for (double i = 0; i < firstLeg.distance(); i += stepSegmentsInMeters) {
       float fractionRemaining = (float) (routeProgress.currentLegProgress().distanceTraveled() / firstLeg.distance());
-
-      assertEquals(fractionRemaining, routeProgress.currentLegProgress().fractionTraveled(), BaseTest.DELTA);
+      fractionsRemaining.add(fractionRemaining);
+      routeProgressFractionsTraveled.add(routeProgress.currentLegProgress().fractionTraveled());
     }
+
+    assertTrue(fractionsRemaining.equals(routeProgressFractionsTraveled));
   }
 
   @Test
@@ -151,8 +161,13 @@ public class RouteLegProgressTest extends BaseTest {
   @Test
   public void getDurationRemaining_equalsLegDurationAtBeginning() throws Exception {
     RouteProgress routeProgress = buildBeginningOfLegRouteProgress();
+    DirectionsRoute route = routeProgress.directionsRoute();
+    RouteLeg firstLeg = route.legs().get(0);
 
-    assertEquals(3535.2, routeProgress.currentLegProgress().durationRemaining(), BaseTest.DELTA);
+    Double firstLegDuration = firstLeg.duration();
+    double currentLegDurationRemaining = routeProgress.currentLegProgress().durationRemaining();
+
+    assertEquals(firstLegDuration, currentLegDurationRemaining, BaseTest.DELTA);
   }
 
   @Test
@@ -164,12 +179,15 @@ public class RouteLegProgressTest extends BaseTest {
 
   @Test
   public void followOnStep_doesReturnTwoStepsAheadOfCurrent() throws Exception {
+    int stepIndex = 5;
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
+    routeProgress = routeProgress.toBuilder().stepIndex(stepIndex).build();
+    List<LegStep> steps = routeProgress.directionsRoute().legs().get(0).steps();
 
-    routeProgress = routeProgress.toBuilder().stepIndex(5).build();
+    LegStep followOnStep = routeProgress.currentLegProgress().followOnStep();
+    int followOnIndex = steps.indexOf(followOnStep);
 
-    assertTrue(routeProgress.currentLegProgress().followOnStep().geometry()
-      .startsWith("un`ffAz_dogFz`Aq^hF{B|GaB|HcAxKKlIp@lOzC|Dh@hKtAzFh@`FDvHy@bG{AjKaEfF"));
+    assertEquals(stepIndex + 2, followOnIndex);
   }
 
   @Test
