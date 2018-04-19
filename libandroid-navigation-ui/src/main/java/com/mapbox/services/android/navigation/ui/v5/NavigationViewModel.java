@@ -112,7 +112,6 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
         callback.userOffRoute(new OffRouteEvent(newOrigin, routeProgress));
         callback.onIsOffRouteChanged(isOffRoute);
       }
-
     }
   }
 
