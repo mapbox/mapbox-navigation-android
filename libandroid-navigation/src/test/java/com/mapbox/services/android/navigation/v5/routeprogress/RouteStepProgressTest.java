@@ -19,10 +19,12 @@ import com.mapbox.turf.TurfMisc;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 public class RouteStepProgressTest extends BaseTest {
 
@@ -134,13 +136,13 @@ public class RouteStepProgressTest extends BaseTest {
     LegStep firstStep = route.legs().get(0).steps().get(0);
     LineString lineString = LineString.fromPolyline(firstStep.geometry(), Constants.PRECISION_6);
     double stepSegments = 5;
+    List<Double> distances = new ArrayList<>();
+    List<Double> routeProgressDistancesTraveled = new ArrayList<>();
 
     for (double i = 0; i < firstStep.distance(); i += stepSegments) {
       Point point = TurfMeasurement.along(lineString, i, TurfConstants.UNIT_METERS);
-
       LineString slicedLine = TurfMisc.lineSlice(point,
         route.legs().get(0).steps().get(1).maneuver().location(), lineString);
-
       double distance = TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
       distance = firstStep.distance() - distance;
       if (distance < 0) {
@@ -155,8 +157,11 @@ public class RouteStepProgressTest extends BaseTest {
         legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
       RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
 
-      assertEquals(distance, routeStepProgress.distanceTraveled(), BaseTest.DELTA);
+      distances.add(distance);
+      routeProgressDistancesTraveled.add(routeStepProgress.distanceTraveled());
     }
+
+    assertTrue(distances.equals(routeProgressDistancesTraveled));
   }
 
   @Test
@@ -198,17 +203,15 @@ public class RouteStepProgressTest extends BaseTest {
     RouteLeg firstLeg = route.legs().get(0);
     LegStep firstStep = route.legs().get(0).steps().get(0);
     LineString lineString = LineString.fromPolyline(firstStep.geometry(), Constants.PRECISION_6);
-
+    List<Float> fractionsRemaining = new ArrayList<>();
+    List<Float> routeProgressFractionsTraveled = new ArrayList<>();
     double stepSegments = 5;
 
     for (double i = 0; i < firstStep.distance(); i += stepSegments) {
       Point point = TurfMeasurement.along(lineString, i, TurfConstants.UNIT_METERS);
-
       LineString slicedLine = TurfMisc.lineSlice(point,
         route.legs().get(0).steps().get(1).maneuver().location(), lineString);
-
       double stepDistanceRemaining = TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
-
       int stepIndex = 0;
       int legIndex = 0;
       double legDistanceRemaining = firstLeg.distance();
@@ -220,9 +223,11 @@ public class RouteStepProgressTest extends BaseTest {
       if (fractionRemaining < 0) {
         fractionRemaining = 0;
       }
-
-      assertEquals(fractionRemaining, routeStepProgress.fractionTraveled(), DELTA);
+      fractionsRemaining.add(fractionRemaining);
+      routeProgressFractionsTraveled.add(routeStepProgress.fractionTraveled());
     }
+
+    assertTrue(fractionsRemaining.equals(routeProgressFractionsTraveled));
   }
 
   @Test
@@ -242,9 +247,11 @@ public class RouteStepProgressTest extends BaseTest {
   }
 
   @Test
-  public void durationRemaining_equalsStepDurationAtBeginning() throws Exception {
+  public void getDurationRemaining_equalsStepDurationAtBeginning() throws Exception {
     DirectionsRoute route = buildTestDirectionsRoute();
     RouteLeg firstLeg = route.legs().get(0);
+    LegStep fourthStep = firstLeg.steps().get(5);
+    double stepDuration = fourthStep.duration();
     int stepIndex = 5;
     int legIndex = 0;
     double stepDistanceRemaining = firstLeg.steps().get(stepIndex).distance();
@@ -252,9 +259,11 @@ public class RouteStepProgressTest extends BaseTest {
     double distanceRemaining = route.distance();
     RouteProgress routeProgress = buildTestRouteProgress(route, stepDistanceRemaining,
       legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
-    RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
 
-    assertEquals(41.5, routeStepProgress.durationRemaining(), BaseTest.DELTA);
+    RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
+    double durationRemaining = routeStepProgress.durationRemaining();
+
+    assertEquals(stepDuration, durationRemaining, BaseTest.DELTA);
   }
 
   @Test
@@ -263,15 +272,14 @@ public class RouteStepProgressTest extends BaseTest {
     RouteLeg firstLeg = route.legs().get(0);
     LegStep firstStep = route.legs().get(0).steps().get(0);
     LineString lineString = LineString.fromPolyline(firstStep.geometry(), Constants.PRECISION_6);
-
     double stepSegments = 5;
+    List<Double> fractionsRemaining = new ArrayList<>();
+    List<Double> routeProgressDurationsTraveled = new ArrayList<>();
 
     for (double i = 0; i < firstStep.distance(); i += stepSegments) {
       Point point = TurfMeasurement.along(lineString, i, TurfConstants.UNIT_METERS);
-
       LineString slicedLine = TurfMisc.lineSlice(point,
         route.legs().get(0).steps().get(1).maneuver().location(), lineString);
-
       int stepIndex = 0;
       int legIndex = 0;
       double stepDistanceRemaining = TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
@@ -282,10 +290,12 @@ public class RouteStepProgressTest extends BaseTest {
       RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
       double fractionRemaining = (firstStep.distance() - stepDistanceRemaining) / firstStep.distance();
 
-      assertEquals((1.0 - fractionRemaining) * firstStep.duration(),
-        routeStepProgress.durationRemaining(), BaseTest.LARGE_DELTA);
+      double expectedFractionRemaining = (1.0 - fractionRemaining) * firstStep.duration();
+      fractionsRemaining.add(Math.round(expectedFractionRemaining * 100.0) / 100.0);
+      routeProgressDurationsTraveled.add(Math.round(routeStepProgress.durationRemaining() * 100.0) / 100.0);
     }
 
+    assertTrue(fractionsRemaining.equals(routeProgressDurationsTraveled));
   }
 
   @Test
@@ -316,12 +326,11 @@ public class RouteStepProgressTest extends BaseTest {
     RouteProgress routeProgress = buildTestRouteProgress(route, stepDistanceRemaining,
       legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
-    int currentStepTotal = route.legs().get(0).steps().get(3).intersections().size();
-    Point maneuverLocation = route.legs().get(0).steps().get(4).maneuver().location();
 
-    assertEquals(currentStepTotal + 1, routeStepProgress.intersections().size());
-    assertEquals(routeStepProgress.intersections().get(16).location().latitude(), maneuverLocation.latitude());
-    assertEquals(routeStepProgress.intersections().get(16).location().longitude(), maneuverLocation.longitude());
+    int stepIntersections = route.legs().get(0).steps().get(3).intersections().size();
+    int intersectionSize = stepIntersections + 1;
+
+    assertEquals(intersectionSize, routeStepProgress.intersections().size());
   }
 
   @Test

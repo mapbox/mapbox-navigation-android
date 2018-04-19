@@ -1,24 +1,29 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 
-import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import java.util.List;
 import java.util.Locale;
+
+import static com.mapbox.services.android.navigation.v5.utils.RouteUtils.findCurrentBannerText;
 
 public class InstructionModel {
 
   private BannerText primaryBannerText;
   private BannerText secondaryBannerText;
   private BannerText thenBannerText;
+  private Float roundaboutAngle = null;
   private InstructionStepResources stepResources;
   private RouteProgress progress;
   private Locale locale;
-  private @NavigationUnitType.UnitType int unitType;
+  @NavigationUnitType.UnitType
+  private int unitType;
 
   public InstructionModel(Context context, RouteProgress progress,
                           Locale locale, @NavigationUnitType.UnitType int unitType) {
@@ -40,6 +45,11 @@ public class InstructionModel {
     return thenBannerText;
   }
 
+  @Nullable
+  Float getRoundaboutAngle() {
+    return roundaboutAngle;
+  }
+
   InstructionStepResources getStepResources() {
     return stepResources;
   }
@@ -54,42 +64,20 @@ public class InstructionModel {
   }
 
   private void extractStepInstructions(RouteProgress progress) {
-    primaryBannerText = retrievePrimaryInstructionText(progress);
-    secondaryBannerText = retrieveSecondaryInstructionText(progress);
-    thenBannerText = retrieveThenInstructionText(progress);
-  }
+    RouteLegProgress legProgress = progress.currentLegProgress();
+    LegStep currentStep = progress.currentLegProgress().currentStep();
+    LegStep upComingStep = legProgress.upComingStep();
+    int stepDistanceRemaining = (int) legProgress.currentStepProgress().distanceRemaining();
 
-  private BannerText retrievePrimaryInstructionText(RouteProgress progress) {
-    List<BannerInstructions> bannerInstructions = progress.currentLegProgress().currentStep().bannerInstructions();
-    if (hasInstructions(bannerInstructions)) {
-      return bannerInstructions.get(0).primary();
-    } else {
-      return null;
+    primaryBannerText = findCurrentBannerText(currentStep, stepDistanceRemaining, true);
+    secondaryBannerText = findCurrentBannerText(currentStep, stepDistanceRemaining, false);
+
+    if (upComingStep != null) {
+      thenBannerText = findCurrentBannerText(upComingStep, upComingStep.distance(), true);
     }
-  }
 
-  private BannerText retrieveSecondaryInstructionText(RouteProgress progress) {
-    List<BannerInstructions> bannerInstructions = progress.currentLegProgress().currentStep().bannerInstructions();
-    if (hasInstructions(bannerInstructions)) {
-      return bannerInstructions.get(0).secondary();
-    } else {
-      return null;
+    if (primaryBannerText != null && primaryBannerText.degrees() != null) {
+      roundaboutAngle = primaryBannerText.degrees().floatValue();
     }
-  }
-
-  private BannerText retrieveThenInstructionText(RouteProgress progress) {
-    if (progress.currentLegProgress().upComingStep() != null) {
-      List<BannerInstructions> bannerInstructions = progress.currentLegProgress().upComingStep().bannerInstructions();
-      if (hasInstructions(bannerInstructions)) {
-        return bannerInstructions.get(0).primary();
-      } else {
-        return null;
-      }
-    }
-    return null;
-  }
-
-  private boolean hasInstructions(List<BannerInstructions> bannerInstructions) {
-    return bannerInstructions != null && !bannerInstructions.isEmpty();
   }
 }
