@@ -37,7 +37,6 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
 
   private static final int FIRST_ROUTE = 0;
   private static final int ONE_ROUTE = 1;
-  public final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
   public final MutableLiveData<Point> destination = new MutableLiveData<>();
   public final MutableLiveData<String> requestErrorMessage = new MutableLiveData<>();
   private Location rawLocation;
@@ -45,6 +44,8 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
   private String routeProfile;
   private String unitType;
   private Locale locale;
+  private DirectionsRoute route;
+  private Callback callback;
 
   public RouteViewModel(@NonNull Application application) {
     super(application);
@@ -120,15 +121,27 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
     }
   }
 
+  /**
+   * Sets the callback for reroute events and faster routes
+   *
+   * @param callback to set
+   */
+  public void setCallback(Callback callback) {
+    this.callback = callback;
+  }
+
   private void processRoute(@NonNull Response<DirectionsResponse> response) {
     if (isValidRoute(response)) {
       List<DirectionsRoute> routes = response.body().routes();
       DirectionsRoute bestRoute = routes.get(FIRST_ROUTE);
-      DirectionsRoute chosenRoute = route.getValue();
+      DirectionsRoute chosenRoute = route;
       if (isNavigationRunning(chosenRoute)) {
         bestRoute = obtainMostSimilarRoute(routes, bestRoute, chosenRoute);
       }
-      route.setValue(bestRoute);
+      route = bestRoute;
+      if (callback != null) {
+        callback.onRouteChanged(route);
+      }
     }
   }
 
@@ -222,7 +235,10 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
     DirectionsRoute route = options.directionsRoute();
     if (route != null) {
       cacheRouteInformation(options, route);
-      this.route.setValue(route);
+      this.route = route;
+      if (callback != null) {
+        callback.onRouteChanged(route);
+      }
     }
   }
 
@@ -302,5 +318,9 @@ public class RouteViewModel extends AndroidViewModel implements Callback<Directi
     builder
       .language(locale)
       .voiceUnits(unitType);
+  }
+
+  public interface Callback {
+    void onRouteChanged(DirectionsRoute directionsRoute);
   }
 }

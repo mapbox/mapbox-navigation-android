@@ -44,12 +44,9 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   public final MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
   public final MutableLiveData<BannerInstructionModel> bannerInstructionModel = new MutableLiveData<>();
   public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
-  public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isFeedbackShowing = new MutableLiveData<>();
   final MutableLiveData<FeedbackItem> selectedFeedbackItem = new MutableLiveData<>();
   final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
-  final MutableLiveData<DirectionsRoute> fasterRoute = new MutableLiveData<>();
-  final MutableLiveData<OffRouteEvent> offRouteEvent = new MutableLiveData<>();
   final MutableLiveData<Boolean> isRunning = new MutableLiveData<>();
   final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
 
@@ -64,6 +61,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   private int unitType;
   @NavigationTimeFormat.Type
   private int timeFormatType;
+  private boolean isOffRoute;
+  private Callback callback;
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -108,8 +107,12 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   public void userOffRoute(Location location) {
     if (hasNetworkConnection()) {
       Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-      this.offRouteEvent.setValue(new OffRouteEvent(newOrigin, routeProgress));
-      isOffRoute.setValue(true);
+      isOffRoute = true;
+      if (callback != null) {
+        callback.userOffRoute(new OffRouteEvent(newOrigin, routeProgress));
+        callback.onIsOffRouteChanged(isOffRoute);
+      }
+
     }
   }
 
@@ -155,7 +158,9 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    */
   @Override
   public void fasterRouteFound(DirectionsRoute directionsRoute) {
-    fasterRoute.setValue(directionsRoute);
+    if (callback != null) {
+      callback.fasterRouteFound(directionsRoute);
+    }
   }
 
   public void setMuted(boolean isMuted) {
@@ -213,6 +218,15 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   }
 
   /**
+   * Sets the callback for reroute events and faster routes
+   *
+   * @param callback to set
+   */
+  public void setCallback(Callback callback) {
+    this.callback = callback;
+  }
+
+  /**
    * This method will pass {@link MapboxNavigationOptions} from the {@link NavigationViewOptions}
    * to this view model to be used to initialize {@link MapboxNavigation}.
    *
@@ -227,7 +241,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
 
   void updateRoute(DirectionsRoute route) {
     startNavigation(route);
-    isOffRoute.setValue(false);
+    isOffRoute = false;
+    callback.onIsOffRouteChanged(isOffRoute);
   }
 
   void updateFeedbackScreenshot(String screenshot) {
@@ -338,5 +353,13 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
     if (route != null) {
       navigation.startNavigation(route);
     }
+  }
+
+  public interface Callback {
+    void userOffRoute(OffRouteEvent offRouteEvent);
+
+    void fasterRouteFound(DirectionsRoute directionsRoute);
+
+    void onIsOffRouteChanged(boolean isOffRoute);
   }
 }
