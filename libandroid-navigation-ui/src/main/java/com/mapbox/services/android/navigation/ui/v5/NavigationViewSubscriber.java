@@ -31,7 +31,7 @@ class NavigationViewSubscriber {
   void subscribe(LifecycleOwner owner, final LocationViewModel locationViewModel,
                  final RouteViewModel routeViewModel, final NavigationViewModel navigationViewModel) {
 
-    navigationViewModel.setCallback(new NavigationViewModel.Callback() {
+    navigationViewModel.addCallback(new NavigationViewModel.Callback() {
       @Override
       public void userOffRoute(OffRouteEvent offRouteEvent) {
         Point newOrigin = offRouteEvent.getNewOrigin();

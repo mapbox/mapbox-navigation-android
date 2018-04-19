@@ -36,7 +36,9 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class NavigationViewModel extends AndroidViewModel implements ProgressChangeListener,
   OffRouteListener, MilestoneEventListener, NavigationEventListener, FasterRouteListener {
@@ -62,10 +64,11 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   @NavigationTimeFormat.Type
   private int timeFormatType;
   private boolean isOffRoute;
-  private Callback callback;
+  private List<Callback> callbacks;
 
   public NavigationViewModel(Application application) {
     super(application);
+    callbacks = new CopyOnWriteArrayList<>();
     initConnectivityManager(application);
   }
 
@@ -108,7 +111,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
     if (hasNetworkConnection()) {
       Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
       isOffRoute = true;
-      if (callback != null) {
+      for (Callback callback : callbacks) {
         callback.userOffRoute(new OffRouteEvent(newOrigin, routeProgress));
         callback.onIsOffRouteChanged(isOffRoute);
       }
@@ -157,7 +160,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    */
   @Override
   public void fasterRouteFound(DirectionsRoute directionsRoute) {
-    if (callback != null) {
+    for (Callback callback : callbacks) {
       callback.fasterRouteFound(directionsRoute);
     }
   }
@@ -221,8 +224,8 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    *
    * @param callback to set
    */
-  public void setCallback(Callback callback) {
-    this.callback = callback;
+  public void addCallback(Callback callback) {
+    callbacks.add(callback);
   }
 
   /**
@@ -241,7 +244,9 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   void updateRoute(DirectionsRoute route) {
     startNavigation(route);
     isOffRoute = false;
-    callback.onIsOffRouteChanged(isOffRoute);
+    for (Callback callback : callbacks) {
+      callback.onIsOffRouteChanged(isOffRoute);
+    }
   }
 
   void updateFeedbackScreenshot(String screenshot) {

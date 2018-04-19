@@ -83,7 +83,7 @@ public class SummaryBottomSheet extends FrameLayout {
         }
       }
     });
-    navigationViewModel.setCallback(new NavigationViewModel.Callback() {
+    navigationViewModel.addCallback(new NavigationViewModel.Callback() {
       @Override
       public void userOffRoute(OffRouteEvent offRouteEvent) {
         // Intentionally empty
