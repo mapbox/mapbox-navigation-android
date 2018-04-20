@@ -46,3 +46,11 @@ navigation-fixtures:
 	# Intersection:
 	curl "https://api.mapbox.com/directions/v5/mapbox/driving/-101.70939001157072,33.62145406099651;-101.68721910152767,33.6213852194939?geometries=polyline6&steps=true&access_token=$(MAPBOX_ACCESS_TOKEN)" \
 		-o libandroid-navigation/src/test/resources/single_intersection.json
+
+	# Distance Congestion annotation: Mapbox DC to National Mall
+	curl "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/-77.034042,38.899949;-77.03949,38.888871?geometries=polyline6&overview=full&steps=true&annotations=congestion%2Cdistance&access_token=$(MAPBOX_ACCESS_TOKEN)" \
+		-o libandroid-navigation/src/test/resources/directions_distance_congestion_annotation.json
+
+	# Default Directions
+	curl "https://api.mapbox.com/directions/v5/mapbox/driving/-122.416686,37.783425;-121.90034,37.333317?geometries=polyline6&steps=true&banner_instructions=true&voice_instructions=true&access_token=$(MAPBOX_ACCESS_TOKEN)" \
+		-o libandroid-navigation/src/test/resources/directions_v5_precision_6.json

@@ -1,10 +1,16 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.models.StepIntersection;
+import com.mapbox.geojson.Point;
+
+import java.util.List;
 
 /**
  * This class contains all progress information at any given time during a navigation session. This
@@ -124,52 +130,121 @@ public abstract class RouteProgress {
    */
   public abstract RouteLegProgress currentLegProgress();
 
+  /**
+   * Provides a list of points that represent the current step
+   * step geometry.
+   *
+   * @return list of points representing the current step
+   * @since 0.12.0
+   */
+  public abstract List<Point> currentStepPoints();
+
+  /**
+   * Provides a list of points that represent the upcoming step
+   * step geometry.
+   *
+   * @return list of points representing the upcoming step
+   * @since 0.12.0
+   */
+  @Nullable
+  public abstract List<Point> upcomingStepPoints();
+
   public abstract RouteProgress.Builder toBuilder();
+
+  abstract int stepIndex();
+
+  abstract double legDistanceRemaining();
+
+  abstract double stepDistanceRemaining();
+
+  abstract List<StepIntersection> intersections();
+
+  abstract StepIntersection currentIntersection();
+
+  @Nullable
+  abstract StepIntersection upcomingIntersection();
+
+  @Nullable
+  abstract CurrentLegAnnotation currentLegAnnotation();
+
+  abstract List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep();
 
   @AutoValue.Builder
   public abstract static class Builder {
 
-    private int stepIndex;
-    private double legDistanceRemaining;
-    private double stepDistanceRemaining;
+    public abstract Builder directionsRoute(DirectionsRoute directionsRoute);
 
     abstract DirectionsRoute directionsRoute();
 
-    public abstract Builder directionsRoute(DirectionsRoute directionsRoute);
+    public abstract Builder legIndex(int legIndex);
 
     abstract int legIndex();
 
-    public abstract Builder legIndex(int legIndex);
+    public abstract Builder stepIndex(int stepIndex);
+
+    abstract int stepIndex();
+
+    public abstract Builder legDistanceRemaining(double legDistanceRemaining);
+
+    abstract double legDistanceRemaining();
+
+    public abstract Builder stepDistanceRemaining(double stepDistanceRemaining);
+
+    abstract double stepDistanceRemaining();
+
+    public abstract Builder currentStepPoints(List<Point> currentStepPoints);
+
+    abstract List<Point> currentStepPoints();
+
+    public abstract Builder upcomingStepPoints(@Nullable List<Point> upcomingStepPoints);
+
+    abstract List<Point> upcomingStepPoints();
 
     public abstract Builder distanceRemaining(double distanceRemaining);
 
-    public Builder stepIndex(int stepIndex) {
-      this.stepIndex = stepIndex;
-      return this;
-    }
+    public abstract Builder intersections(List<StepIntersection> intersections);
 
-    public Builder legDistanceRemaining(double legDistanceRemaining) {
-      this.legDistanceRemaining = legDistanceRemaining;
-      return this;
-    }
+    abstract List<StepIntersection> intersections();
 
-    public Builder stepDistanceRemaining(double stepDistanceRemaining) {
-      this.stepDistanceRemaining = stepDistanceRemaining;
-      return this;
-    }
+    public abstract Builder currentIntersection(StepIntersection currentIntersection);
+
+    abstract StepIntersection currentIntersection();
+
+    public abstract Builder upcomingIntersection(@Nullable StepIntersection upcomingIntersection);
+
+    abstract StepIntersection upcomingIntersection();
+
+    public abstract Builder intersectionDistancesAlongStep(
+      List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep
+    );
+
+    abstract List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep();
+
+    public abstract Builder currentLegAnnotation(@Nullable CurrentLegAnnotation currentLegAnnotation);
+
+    abstract CurrentLegAnnotation currentLegAnnotation();
 
     abstract Builder currentLegProgress(RouteLegProgress routeLegProgress);
 
     abstract RouteProgress autoBuild(); // not public
 
     public RouteProgress build() {
-      RouteLegProgress legProgress = RouteLegProgress.create(
-        directionsRoute().legs().get(legIndex()),
-        stepIndex,
-        legDistanceRemaining,
-        stepDistanceRemaining
-      );
+      RouteLeg currentLeg = directionsRoute().legs().get(legIndex());
+      RouteLegProgress legProgress = RouteLegProgress.builder()
+        .routeLeg(currentLeg)
+        .stepIndex(stepIndex())
+        .distanceRemaining(legDistanceRemaining())
+        .stepDistanceRemaining(stepDistanceRemaining())
+        .currentStepPoints(currentStepPoints())
+        .upcomingStepPoints(upcomingStepPoints())
+        .intersections(intersections())
+        .currentIntersection(currentIntersection())
+        .upcomingIntersection(upcomingIntersection())
+        .intersectionDistancesAlongStep(intersectionDistancesAlongStep())
+        .currentLegAnnotation(currentLegAnnotation())
+        .build();
       currentLegProgress(legProgress);
+
       return autoBuild();
     }
   }

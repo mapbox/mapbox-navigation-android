@@ -28,8 +28,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -66,7 +64,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
   private RouteProgress routeProgress;
 
   @Before
-  public void setup() throws IOException {
+  public void setup() throws Exception {
     MockitoAnnotations.initMocks(this);
     navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, mock(NavigationTelemetry.class),
       mock(LocationEngine.class));
@@ -77,14 +75,8 @@ public class NavigationEventDispatcherTest extends BaseTest {
     String body = loadJsonFixture(PRECISION_6);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     route = response.routes().get(0);
-    routeProgress = RouteProgress.builder()
-      .stepDistanceRemaining(100)
-      .legDistanceRemaining(100)
-      .distanceRemaining(100)
-      .directionsRoute(route)
-      .stepIndex(0)
-      .legIndex(0)
-      .build();
+
+    routeProgress = buildTestRouteProgress(route, 100, 100, 100, 0, 0);
   }
 
   @Test
@@ -323,29 +315,15 @@ public class NavigationEventDispatcherTest extends BaseTest {
     navigationEventDispatcher.addMetricEventListeners(eventListeners);
     navigationEventDispatcher.addMetricArrivalListener(arrivalListener);
 
-    // Progress that hasn't arrived
-    RouteProgress routeProgressDidNotArrive = RouteProgress.builder()
-      .stepDistanceRemaining(100)
-      .legDistanceRemaining(100)
-      .distanceRemaining(100)
-      .directionsRoute(route)
-      .stepIndex(lastStepIndex)
-      .legIndex(0)
-      .build();
+    RouteProgress routeProgressDidNotArrive = buildTestRouteProgress(route, 100,
+      100, 100, lastStepIndex, 0);
 
     navigationEventDispatcher.onProgressChange(location, routeProgressDidNotArrive);
     verify(eventListeners, times(1)).onRouteProgressUpdate(routeProgressDidNotArrive);
     verify(arrivalListener, times(0)).onArrival(location, routeProgressDidNotArrive);
 
-    // Progress that has arrived
-    RouteProgress routeProgressDidArrive = RouteProgress.builder()
-      .stepDistanceRemaining(30)
-      .legDistanceRemaining(30)
-      .distanceRemaining(30)
-      .directionsRoute(route)
-      .stepIndex(lastStepIndex)
-      .legIndex(0)
-      .build();
+    RouteProgress routeProgressDidArrive = buildTestRouteProgress(route, 30,
+      30, 30, lastStepIndex, 0);
 
     navigationEventDispatcher.onProgressChange(location, routeProgressDidArrive);
     verify(eventListeners, times(1)).onRouteProgressUpdate(routeProgressDidArrive);
