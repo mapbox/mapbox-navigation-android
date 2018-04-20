@@ -34,6 +34,7 @@ class NavigationViewSubscriber {
     navigationViewModel.addCallback(new NavigationViewModel.Callback() {
       @Override
       public void userOffRoute(OffRouteEvent offRouteEvent) {
+        isOffRoute = true;
         Point newOrigin = offRouteEvent.getNewOrigin();
         if (navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
           navigationViewEventDispatcher.onOffRoute(newOrigin);
@@ -49,11 +50,6 @@ class NavigationViewSubscriber {
           navigationPresenter.onRouteUpdate(directionsRoute);
         }
       }
-
-      @Override
-      public void onIsOffRouteChanged(boolean isOffRoute) {
-        NavigationViewSubscriber.this.isOffRoute = isOffRoute;
-      }
     });
 
     routeViewModel.setCallback(new RouteViewModel.Callback() {
@@ -66,6 +62,7 @@ class NavigationViewSubscriber {
 
           if (isOffRoute) {
             navigationViewEventDispatcher.onRerouteAlong(directionsRoute);
+            isOffRoute = false;
           }
         }
       }

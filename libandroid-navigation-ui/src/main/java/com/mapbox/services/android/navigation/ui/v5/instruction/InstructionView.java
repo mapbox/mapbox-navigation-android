@@ -35,7 +35,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
@@ -47,7 +46,6 @@ import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
-import com.mapbox.services.android.navigation.ui.v5.route.OffRouteEvent;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
@@ -185,19 +183,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         }
       }
     });
-    navigationViewModel.addCallback(new NavigationViewModel.Callback() {
-      @Override
-      public void userOffRoute(OffRouteEvent offRouteEvent) {
-        // Intentionally empty
-      }
+    navigationViewModel.isOffRoute.observe(owner, new Observer<Boolean>() {
 
       @Override
-      public void fasterRouteFound(DirectionsRoute directionsRoute) {
-        // Intentionally empty
-      }
-
-      @Override
-      public void onIsOffRouteChanged(boolean isOffRoute) {
+      public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute) {
           showRerouteState();
           instructionListAdapter.clear();

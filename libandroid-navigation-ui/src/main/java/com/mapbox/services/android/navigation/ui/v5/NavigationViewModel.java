@@ -46,6 +46,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   public final MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
   public final MutableLiveData<BannerInstructionModel> bannerInstructionModel = new MutableLiveData<>();
   public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
+  public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isFeedbackShowing = new MutableLiveData<>();
   final MutableLiveData<FeedbackItem> selectedFeedbackItem = new MutableLiveData<>();
   final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
@@ -63,7 +64,6 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   private int unitType;
   @NavigationTimeFormat.Type
   private int timeFormatType;
-  private boolean isOffRoute;
   private List<Callback> callbacks;
 
   public NavigationViewModel(Application application) {
@@ -110,10 +110,9 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   public void userOffRoute(Location location) {
     if (hasNetworkConnection()) {
       Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-      isOffRoute = true;
+      isOffRoute.setValue(true);
       for (Callback callback : callbacks) {
         callback.userOffRoute(new OffRouteEvent(newOrigin, routeProgress));
-        callback.onIsOffRouteChanged(isOffRoute);
       }
     }
   }
@@ -243,10 +242,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
 
   void updateRoute(DirectionsRoute route) {
     startNavigation(route);
-    isOffRoute = false;
-    for (Callback callback : callbacks) {
-      callback.onIsOffRouteChanged(isOffRoute);
-    }
+    isOffRoute.setValue(false);
   }
 
   void updateFeedbackScreenshot(String screenshot) {
@@ -363,7 +359,5 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
     void userOffRoute(OffRouteEvent offRouteEvent);
 
     void fasterRouteFound(DirectionsRoute directionsRoute);
-
-    void onIsOffRouteChanged(boolean isOffRoute);
   }
 }
