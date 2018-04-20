@@ -3,4 +3,6 @@
 
     <!-- Notification Strings -->
     <string name="end_navigation">Konec navigování</string>
+    <string name="channel_name">Navigační upozornění</string>
+    <string name="notification_arrival_time_format">Příjezd v %s</string>
 </resources>
