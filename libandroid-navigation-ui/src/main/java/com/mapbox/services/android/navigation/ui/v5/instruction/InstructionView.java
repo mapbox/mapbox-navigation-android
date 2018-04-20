@@ -184,17 +184,18 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       }
     });
     navigationViewModel.isOffRoute.observe(owner, new Observer<Boolean>() {
-
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
-        if (isOffRoute) {
-          showRerouteState();
-          instructionListAdapter.clear();
-        } else if (isRerouting) {
-          hideRerouteState();
-          showAlertView();
+        if (isOffRoute != null) {
+          if (isOffRoute) {
+            showRerouteState();
+            instructionListAdapter.clear();
+          } else if (isRerouting) {
+            hideRerouteState();
+            showAlertView();
+          }
+          isRerouting = isOffRoute;
         }
-        isRerouting = isOffRoute;
       }
     });
 

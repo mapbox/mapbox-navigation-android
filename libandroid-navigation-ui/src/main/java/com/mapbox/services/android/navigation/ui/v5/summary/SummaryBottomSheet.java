@@ -82,14 +82,15 @@ public class SummaryBottomSheet extends FrameLayout {
       }
     });
     navigationViewModel.isOffRoute.observe((LifecycleOwner) getContext(), new Observer<Boolean>() {
-
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
-        isRerouting = isOffRoute;
-        if (isRerouting) {
-          showRerouteState();
-        } else {
-          hideRerouteState();
+        if (isOffRoute != null) {
+          isRerouting = isOffRoute;
+          if (isRerouting) {
+            showRerouteState();
+          } else {
+            hideRerouteState();
+          }
         }
       }
     });
