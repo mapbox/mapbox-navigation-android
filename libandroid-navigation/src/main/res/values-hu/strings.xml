@@ -3,4 +3,6 @@
 
     <!-- Notification Strings -->
     <string name="end_navigation">Navigáció vége</string>
+    <string name="channel_name">Navigációs értesítések</string>
+    <string name="notification_arrival_time_format">Érkezés: %s</string>
 </resources>
