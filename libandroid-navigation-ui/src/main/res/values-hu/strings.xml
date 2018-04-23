@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that rerouting is in progress -->
+    <string name="rerouting">Újratervezés...</string>
+
+    <!-- Indicates voice instructions are muted -->
+    <string name="muted">Némítva</string>
+
+    <!-- Feedback type for Bad Route -->
+    <string name="feedback_bad_route">Rossz\nútvonal</string>
+
+    <!-- Feedback type for Confusing Instruction -->
+    <string name="feedback_confusing_instruction">Megtévesztő\nutasítás</string>
+
+    <!-- Feedback type for Other Map Issue Issue -->
+    <string name="feedback_general_issue">Egyéb\ntérképi hiba</string>
+
+    <!-- Feedback type for Missing Exit -->
+    <string name="feedback_missing_exit">Hiányzó\nkijárat</string>
+
+    <!-- Feedback type for Missing Road -->
+    <string name="feedback_missing_road">Hiányzó\nút</string>
+
+    <!-- Feedback type for a maneuver that is Not Allowed -->
+    <string name="feedback_not_allowed">Nem\nengedélyezett</string>
+
+    <!-- Feedback type for Road Closed -->
+    <string name="feedback_road_closure">Lezárt\nút</string>
+
+    <!-- Test app dialog text cancel navigation -->
+    <string name="dropoff_dialog_negative_text">Mégse</string>
+
+</resources>
