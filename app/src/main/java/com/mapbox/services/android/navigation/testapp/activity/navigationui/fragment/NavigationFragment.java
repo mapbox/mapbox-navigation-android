@@ -86,7 +86,7 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
   @Override
   public void onDestroyView() {
     super.onDestroyView();
-    navigationView.onDestroy();
+    navigationView.onDestroy(getActivity().isChangingConfigurations());
   }
 
   @Override
