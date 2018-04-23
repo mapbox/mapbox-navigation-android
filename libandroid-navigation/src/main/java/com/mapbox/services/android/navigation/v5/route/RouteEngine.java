@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.route;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.RouteOptions;
@@ -24,17 +25,37 @@ import timber.log.Timber;
  * This class can be used to fetch new routes given a {@link Location} origin and
  * {@link RouteOptions} provided by a {@link RouteProgress}.
  */
-public class RouteEngine implements Callback<DirectionsResponse> {
+public class RouteEngine {
+
   private static final double BEARING_TOLERANCE = 90d;
-  private RouteProgress routeProgress;
-  private final Callback engineCallback;
+
+  private final String accessToken;
   private final Locale locale;
   private final String unitType;
+  private final RouteEngineCallback routeEngineCallback;
+  private RouteProgress routeProgress;
+  private String routeProfile;
+  private Callback<DirectionsResponse> directionsResponseCallback = new Callback<DirectionsResponse>() {
+    @Override
+    public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
+      if (!response.isSuccessful()) {
+        return;
+      }
+      routeEngineCallback.onResponseReceived(response, routeProgress);
+    }
 
-  public RouteEngine(Locale locale, @NavigationUnitType.UnitType int unitType, Callback engineCallback) {
-    this.engineCallback = engineCallback;
+    @Override
+    public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
+      routeEngineCallback.onErrorReceived(throwable);
+    }
+  };
+
+  public RouteEngine(String accessToken, Locale locale, @NavigationUnitType.UnitType int unitType,
+                     RouteEngineCallback routeEngineCallback) {
+    this.accessToken = accessToken;
     this.locale = locale;
     this.unitType = NavigationUnitType.getDirectionsCriteriaUnitType(unitType, locale);
+    this.routeEngineCallback = routeEngineCallback;
   }
 
   /**
@@ -56,43 +77,36 @@ public class RouteEngine implements Callback<DirectionsResponse> {
 
     Point origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     Double bearing = location.hasBearing() ? Float.valueOf(location.getBearing()).doubleValue() : null;
-    NavigationRoute.Builder builder = buildRouteRequestFromCurrentLocation(origin, bearing, routeProgress);
+    NavigationRoute.Builder builder = buildRouteRequestFromCurrentLocation(
+      origin, bearing, routeProgress, routeProfile
+    );
     if (builder != null) {
-      builder
-        .language(locale)
-        .voiceUnits(unitType);
-      builder.build().getRoute(this);
+      builder.accessToken(accessToken);
+      addLocaleAndUnitType(builder);
+      builder.build().getRoute(directionsResponseCallback);
     }
   }
 
-  @Override
-  public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
-    // Check for successful response
-    if (!response.isSuccessful()) {
-      return;
+  public void fetchRouteFromCoordinates(Point origin, Point destination) {
+    NavigationRoute.Builder builder = NavigationRoute.builder()
+      .accessToken(accessToken)
+      .origin(origin)
+      .destination(destination);
+    addLocaleAndUnitType(builder);
+    addRouteProfile(routeProfile, builder);
+    builder.build().getRoute(directionsResponseCallback);
+  }
+
+  public void updateRouteProfile(String routeProfile) {
+    if (RouteUtils.isValidRouteProfile(routeProfile)) {
+      this.routeProfile = routeProfile;
     }
-    engineCallback.onResponseReceived(response, routeProgress);
-  }
-
-  @Override
-  public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
-    engineCallback.onErrorReceived(throwable);
-  }
-
-  /**
-   * Callback to be passed into the constructor of {@link RouteEngine}.
-   * <p>
-   * Will fire when either a successful / failed response is received.
-   */
-  public interface Callback {
-    void onResponseReceived(Response<DirectionsResponse> response, RouteProgress routeProgress);
-
-    void onErrorReceived(Throwable throwable);
   }
 
   @Nullable
-  public static NavigationRoute.Builder buildRouteRequestFromCurrentLocation(Point origin, Double bearing,
-                                                                             RouteProgress progress) {
+  private static NavigationRoute.Builder buildRouteRequestFromCurrentLocation(Point origin, Double bearing,
+                                                                              RouteProgress progress,
+                                                                              @Nullable String routeProfile) {
     RouteOptions options = progress.directionsRoute().routeOptions();
     NavigationRoute.Builder builder = NavigationRoute.builder()
       .origin(origin, bearing, BEARING_TOLERANCE)
@@ -103,9 +117,20 @@ public class RouteEngine implements Callback<DirectionsResponse> {
       Timber.e("An error occurred fetching a new route");
       return null;
     }
+    addRouteProfile(routeProfile, builder);
     addDestination(remainingWaypoints, builder);
     addWaypoints(remainingWaypoints, builder);
     return builder;
+  }
+
+  private void addLocaleAndUnitType(NavigationRoute.Builder builder) {
+    builder.language(locale).voiceUnits(unitType);
+  }
+
+  private static void addRouteProfile(String routeProfile, NavigationRoute.Builder builder) {
+    if (!TextUtils.isEmpty(routeProfile)) {
+      builder.profile(routeProfile);
+    }
   }
 
   private static void addDestination(List<Point> remainingWaypoints, NavigationRoute.Builder builder) {
