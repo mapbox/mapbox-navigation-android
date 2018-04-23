@@ -11,6 +11,7 @@ import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
 /**
  * In charge of holding any {@link NavigationView} related listeners {@link NavigationListener},
@@ -23,6 +24,26 @@ class NavigationViewEventDispatcher {
   private NavigationListener navigationListener;
   private RouteListener routeListener;
   private BottomSheetCallback bottomSheetCallback;
+
+  /**
+   * Initializes the listeners in the dispatcher, as well as the listeners in the {@link MapboxNavigation}
+   *
+   * @param navigationViewOptions that contains all listeners to attach
+   */
+  void initializeListeners(NavigationViewOptions navigationViewOptions, MapboxNavigation navigation) {
+    setFeedbackListener(navigationViewOptions.feedbackListener());
+    setNavigationListener(navigationViewOptions.navigationListener());
+    setRouteListener(navigationViewOptions.routeListener());
+    setBottomSheetCallback(navigationViewOptions.bottomSheetCallback());
+
+    if (navigationViewOptions.progressChangeListener() != null) {
+      navigation.addProgressChangeListener(navigationViewOptions.progressChangeListener());
+    }
+
+    if (navigationViewOptions.milestoneEventListener() != null) {
+      navigation.addMilestoneEventListener(navigationViewOptions.milestoneEventListener());
+    }
+  }
 
   void setFeedbackListener(@Nullable FeedbackListener feedbackListener) {
     this.feedbackListener = feedbackListener;

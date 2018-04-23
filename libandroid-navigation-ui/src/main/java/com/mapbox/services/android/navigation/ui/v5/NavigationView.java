@@ -2,10 +2,8 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -35,9 +33,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionLoader;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
-import com.mapbox.services.android.navigation.ui.v5.location.LocationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
-import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
 import com.mapbox.services.android.navigation.ui.v5.utils.ViewUtils;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
@@ -86,8 +82,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private NavigationPresenter navigationPresenter;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
   private NavigationViewModel navigationViewModel;
-  private RouteViewModel routeViewModel;
-  private LocationViewModel locationViewModel;
   private MapboxMap map;
   private NavigationMapRoute mapRoute;
   private NavigationCamera camera;
@@ -120,6 +114,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void onCreate(@Nullable Bundle savedInstanceState) {
     resumeState = savedInstanceState != null;
     mapView.onCreate(savedInstanceState);
+    navigationViewModel.onCreate(resumeState);
   }
 
   /**
@@ -184,8 +179,27 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   public void onDestroy() {
     mapView.onDestroy();
-    navigationViewModel.onDestroy();
+    navigationViewModel.onDestroy(isChangingConfigurations());
     InstructionLoader.getInstance().shutdown();
+    if (camera != null) {
+      camera.onDestroy();
+    }
+  }
+
+  public void onStart() {
+    mapView.onStart();
+  }
+
+  public void onResume() {
+    mapView.onResume();
+  }
+
+  public void onPause() {
+    mapView.onPause();
+  }
+
+  public void onStop() {
+    mapView.onStop();
   }
 
   /**
@@ -206,7 +220,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
         initRoute();
         initLocationLayer();
         initMapPadding();
-        initLifecycleObservers();
+        initLocationLayerObserver();
         initNavigationPresenter();
         initClickListeners();
         map.addOnScrollListener(NavigationView.this);
@@ -359,15 +373,25 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     clearMarkers();
     if (!isInitialized) {
       establish(options);
-      navigationViewModel.initializeNavigationOptions(getContext().getApplicationContext(),
-        options.navigationOptions().toBuilder().isFromNavigationUi(true).build());
-      initCamera();
-      setupListeners(options);
+      navigationViewModel.initializeNavigation(options, navigationViewEventDispatcher);
+      initNavigationListeners(options, navigationViewModel.getNavigation());
+      initNavigationCamera();
       subscribeViewModels();
       isInitialized = true;
     }
-    locationViewModel.updateShouldSimulateRoute(options.shouldSimulateRoute());
-    routeViewModel.extractRouteOptions(options);
+  }
+
+  /**
+   * Should be called after {@link NavigationView#onCreate(Bundle)}.
+   * <p>
+   * This method adds the {@link OnNavigationReadyCallback},
+   * which will fire ready / cancel events for this view.
+   *
+   * @param onNavigationReadyCallback to be set to this view
+   */
+  public void getNavigationAsync(OnNavigationReadyCallback onNavigationReadyCallback) {
+    this.onNavigationReadyCallback = onNavigationReadyCallback;
+    mapView.getMapAsync(this);
   }
 
   /**
@@ -380,39 +404,15 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     return map;
   }
 
-  @OnLifecycleEvent(Lifecycle.Event.ON_START)
-  public void onStart() {
-    mapView.onStart();
-  }
-
-  @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-  public void onResume() {
-    mapView.onResume();
-  }
-
-  @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-  public void onPause() {
-    mapView.onPause();
-  }
-
-  @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-  public void onStop() {
-    mapView.onStop();
-  }
-
   private void init() {
     InstructionLoader.getInstance().initialize(getContext());
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
     initViewModels();
-    initNavigationViewObserver();
     initSummaryBottomSheet();
     initNavigationEventDispatcher();
   }
 
-  /**
-   * Binds all necessary views.
-   */
   private void bind() {
     mapView = findViewById(R.id.mapView);
     instructionView = findViewById(R.id.instructionView);
@@ -423,29 +423,12 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   private void initViewModels() {
     try {
-      locationViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(LocationViewModel.class);
-      routeViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(RouteViewModel.class);
       navigationViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(NavigationViewModel.class);
     } catch (ClassCastException exception) {
       throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
     }
   }
 
-  /**
-   * Adds this view as a lifecycle observer.
-   * This needs to be done earlier than the other observers (prior to the style loading).
-   */
-  private void initNavigationViewObserver() {
-    try {
-      ((LifecycleOwner) getContext()).getLifecycle().addObserver(this);
-    } catch (ClassCastException exception) {
-      throw new ClassCastException("Please ensure that the provided Context is a valid LifecycleOwner");
-    }
-  }
-
-  /**
-   * Initializes the {@link BottomSheetBehavior} for {@link SummaryBottomSheet}.
-   */
   private void initSummaryBottomSheet() {
     summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
     summaryBehavior.setHideable(false);
@@ -465,10 +448,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     });
   }
 
-  /**
-   * Initialize a new event dispatcher in charge of firing all navigation
-   * listener updates to the classes that have implemented these listeners.
-   */
   private void initNavigationEventDispatcher() {
     navigationViewEventDispatcher = new NavigationViewEventDispatcher();
   }
@@ -483,6 +462,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     boolean isShowing = bottomSheetState == BottomSheetBehavior.STATE_EXPANDED;
     summaryBehavior.setHideable(!isShowing);
     summaryBehavior.setState(bottomSheetState);
+  }
+
+  private boolean isChangingConfigurations() {
+    try {
+      return ((FragmentActivity) getContext()).isChangingConfigurations();
+    } catch (ClassCastException exception) {
+      throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
+    }
   }
 
   /**
@@ -517,29 +504,18 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     locationLayer.setRenderMode(RenderMode.GPS);
   }
 
-  /**
-   * Add lifecycle observers to ensure these objects properly
-   * start / stop based on the Android lifecycle.
-   */
-  private void initLifecycleObservers() {
+  private void initLocationLayerObserver() {
     try {
       ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationLayer);
-      ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationViewModel);
     } catch (ClassCastException exception) {
       throw new ClassCastException("Please ensure that the provided Context is a valid LifecycleOwner");
     }
   }
 
-  /**
-   * Initialize a new presenter for this Activity.
-   */
   private void initNavigationPresenter() {
     navigationPresenter = new NavigationPresenter(this);
   }
 
-  /**
-   * Sets click listeners to all views that need them.
-   */
   private void initClickListeners() {
     cancelBtn.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -556,9 +532,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     });
   }
 
-  /**
-   * Removes any markers on the map that were added using addMarker()
-   */
   private void clearMarkers() {
     for (int i = 0; i < markers.size(); i++) {
       map.removeMarker(markers.remove(i));
@@ -590,38 +563,18 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     summaryBottomSheet.setTimeFormat(timeFormatType);
   }
 
-  /**
-   * Initializes the {@link NavigationCamera} that will be used to follow
-   * the {@link Location} updates from {@link MapboxNavigation}.
-   */
-  private void initCamera() {
-    camera = new NavigationCamera(map, navigationViewModel.getNavigation());
+  private void initNavigationListeners(NavigationViewOptions options, MapboxNavigation navigation) {
+    navigationViewEventDispatcher.initializeListeners(options, navigation);
   }
 
-  /**
-   * Sets up the listeners in the dispatcher, as well as the listeners in the {@link MapboxNavigation}
-   *
-   * @param navigationViewOptions that contains all listeners to attach
-   */
-  private void setupListeners(NavigationViewOptions navigationViewOptions) {
-    navigationViewEventDispatcher.setFeedbackListener(navigationViewOptions.feedbackListener());
-    navigationViewEventDispatcher.setNavigationListener(navigationViewOptions.navigationListener());
-    navigationViewEventDispatcher.setRouteListener(navigationViewOptions.routeListener());
-    navigationViewEventDispatcher.setBottomSheetCallback(navigationViewOptions.bottomSheetCallback());
-
-    if (navigationViewOptions.progressChangeListener() != null) {
-      navigationViewModel.getNavigation().addProgressChangeListener(navigationViewOptions.progressChangeListener());
-    }
-
-    if (navigationViewOptions.milestoneEventListener() != null) {
-      navigationViewModel.getNavigation().addMilestoneEventListener(navigationViewOptions.milestoneEventListener());
-    }
+  private void initNavigationCamera() {
+    camera = new NavigationCamera(map, navigationViewModel.getNavigation());
   }
 
   /**
    * Subscribes the {@link InstructionView} and {@link SummaryBottomSheet} to the {@link NavigationViewModel}.
    * <p>
-   * Then, creates an instance of {@link NavigationViewSubscriber}, which takes a presenter and listener.
+   * Then, creates an instance of {@link NavigationViewSubscriber}, which takes a presenter.
    * <p>
    * The subscriber then subscribes to the view models, setting up the appropriate presenter / listener
    * method calls based on the {@link android.arch.lifecycle.LiveData} updates.
@@ -630,21 +583,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     instructionView.subscribe(navigationViewModel);
     summaryBottomSheet.subscribe(navigationViewModel);
 
-    NavigationViewSubscriber subscriber = new NavigationViewSubscriber(navigationPresenter,
-      navigationViewEventDispatcher);
-    subscriber.subscribe(((LifecycleOwner) getContext()), locationViewModel, routeViewModel, navigationViewModel);
-  }
-
-  /**
-   * Should be called after {@link NavigationView#onCreate(Bundle)}.
-   * <p>
-   * This method adds the {@link OnNavigationReadyCallback},
-   * which will fire ready / cancel events for this view.
-   *
-   * @param onNavigationReadyCallback to be set to this view
-   */
-  public void getNavigationAsync(OnNavigationReadyCallback onNavigationReadyCallback) {
-    this.onNavigationReadyCallback = onNavigationReadyCallback;
-    mapView.getMapAsync(this);
+    NavigationViewSubscriber subscriber = new NavigationViewSubscriber(navigationPresenter);
+    subscriber.subscribe(((LifecycleOwner) getContext()), navigationViewModel);
   }
 }

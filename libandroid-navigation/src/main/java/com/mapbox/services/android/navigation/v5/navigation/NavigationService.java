@@ -18,6 +18,7 @@ import com.mapbox.services.android.navigation.v5.location.LocationValidator;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.route.RouteEngine;
+import com.mapbox.services.android.navigation.v5.route.RouteEngineCallback;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
@@ -42,13 +43,11 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
  * </p>
  */
 public class NavigationService extends Service implements LocationEngineListener,
-  NavigationEngine.Callback, RouteEngine.Callback {
+  NavigationEngine.Callback {
 
-  // Message id used when a new location update occurs and we send to the thread.
   private static final int MSG_LOCATION_UPDATED = 1001;
 
   private final IBinder localBinder = new LocalBinder();
-
   private NavigationNotification navigationNotification;
   private MapboxNavigation mapboxNavigation;
   private RouteEngine routeEngine;
@@ -145,7 +144,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
 
   /**
-   * Callback from the {@link NavigationEngine} - if fired with checkFasterRoute set
+   * RouteEngineCallback from the {@link NavigationEngine} - if fired with checkFasterRoute set
    * to true, a new {@link DirectionsRoute} should be fetched with {@link RouteEngine}.
    *
    * @param location         to create a new origin
@@ -157,31 +156,6 @@ public class NavigationService extends Service implements LocationEngineListener
     if (checkFasterRoute) {
       routeEngine.fetchRoute(location, routeProgress);
     }
-  }
-
-  /**
-   * Callback from the {@link RouteEngine} - if fired, a new and valid
-   * {@link DirectionsRoute} has been successfully retrieved.
-   *
-   * @param response      with the new route
-   * @param routeProgress holding necessary leg / step information
-   */
-  @Override
-  public void onResponseReceived(Response<DirectionsResponse> response, RouteProgress routeProgress) {
-    if (mapboxNavigation.getFasterRouteEngine().isFasterRoute(response.body(), routeProgress)) {
-      mapboxNavigation.getEventDispatcher().onFasterRouteEvent(response.body().routes().get(0));
-    }
-  }
-
-  /**
-   * Callback from the {@link RouteEngine} - if fired, an error has occurred
-   * retrieving the {@link DirectionsRoute}.
-   *
-   * @param throwable with error
-   */
-  @Override
-  public void onErrorReceived(Throwable throwable) {
-    Timber.e(throwable);
   }
 
   /**
@@ -269,7 +243,8 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   private void initRouteEngine(MapboxNavigation mapboxNavigation) {
     if (mapboxNavigation.options().enableFasterRouteDetection()) {
-      routeEngine = new RouteEngine(locale, unitType, this);
+      String accessToken = mapboxNavigation.obtainAccessToken();
+      routeEngine = new RouteEngine(accessToken, locale, unitType, routeEngineCallback);
     }
   }
 
@@ -338,6 +313,20 @@ public class NavigationService extends Service implements LocationEngineListener
       ((MapboxNavigationNotification) navigationNotification).unregisterReceiver(this);
     }
   }
+
+  private RouteEngineCallback routeEngineCallback = new RouteEngineCallback() {
+    @Override
+    public void onResponseReceived(Response<DirectionsResponse> response, RouteProgress routeProgress) {
+      if (mapboxNavigation.getFasterRouteEngine().isFasterRoute(response.body(), routeProgress)) {
+        mapboxNavigation.getEventDispatcher().onFasterRouteEvent(response.body().routes().get(0));
+      }
+    }
+
+    @Override
+    public void onErrorReceived(Throwable throwable) {
+      Timber.e(throwable);
+    }
+  };
 
   class LocalBinder extends Binder {
     NavigationService getService() {
