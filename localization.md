@@ -3,13 +3,13 @@
 | Language   | User interface | Mapbox Voice API | Android TextToSpeech
 |------------|:--------------:|:----------------:|:---------------------:
 | Catalan    | -              | —                | —
-| Chinese    | -              | ✅               | —
+| Chinese    | -              | ✅               | ✅
 | Danish     | -              | ✅               | ✅
 | Dutch      | -              | ✅               | ✅
 | English    | ✅             | ✅               | ✅
 | French     | -              | ✅               | ✅
 | German     | -              | ✅               | ✅
-| Hebrew     | -              | ✅               | —
+| Hebrew     | -              | -                | —
 | Hungarian  | -              | —                | ✅
 | Italian    | -              | ✅               | ✅
 | Portuguese | -              | ✅               | ✅
