@@ -168,9 +168,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   public void onRestoreInstanceState(Bundle savedInstanceState) {
     boolean isVisible = savedInstanceState.getBoolean(getContext().getString(R.string.recenter_btn_visible));
-    recenterBtn.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE);
+    navigationPresenter.retrieveRecenterBtn(isVisible);
     int bottomSheetState = savedInstanceState.getInt(getContext().getString(R.string.bottom_sheet_state));
-    resetBottomSheetState(bottomSheetState);
+    navigationPresenter.retrieveBottomSheetState(bottomSheetState);
   }
 
 
@@ -207,8 +207,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
         initRoute();
         initLocationLayer();
         initLifecycleObservers();
-        initNavigationPresenter();
         initClickListeners();
+        navigationPresenter.onMapReady();
         map.addOnScrollListener(NavigationView.this);
         onNavigationReadyCallback.onNavigationReady();
       }
@@ -225,9 +225,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   @Override
   public void onScroll() {
-    if (summaryBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
-      navigationPresenter.onMapScroll();
-    }
+    navigationPresenter.onMapScroll();
   }
 
   @Override
@@ -388,11 +386,13 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
   public void onResume() {
     mapView.onResume();
+    navigationPresenter.resume();
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
   public void onPause() {
     mapView.onPause();
+    navigationPresenter.pause();
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
@@ -405,6 +405,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
     initViewModels();
+    initNavigationPresenter();
     initNavigationViewObserver();
     initSummaryBottomSheet();
     initNavigationEventDispatcher();
@@ -454,9 +455,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       public void onStateChanged(@NonNull View bottomSheet, int newState) {
         navigationViewEventDispatcher.onBottomSheetStateChanged(bottomSheet, newState);
 
-        if (newState == BottomSheetBehavior.STATE_HIDDEN && navigationPresenter != null) {
-          navigationPresenter.onSummaryBottomSheetHidden();
-        }
+        navigationPresenter.onSummaryBottomSheetHidden();
       }
 
       @Override
@@ -471,18 +470,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   private void initNavigationEventDispatcher() {
     navigationViewEventDispatcher = new NavigationViewEventDispatcher();
-  }
-
-  /**
-   * Sets the {@link BottomSheetBehavior} based on the last state stored
-   * in {@link Bundle} savedInstanceState.
-   *
-   * @param bottomSheetState retrieved from savedInstanceState
-   */
-  private void resetBottomSheetState(int bottomSheetState) {
-    boolean isShowing = bottomSheetState == BottomSheetBehavior.STATE_EXPANDED;
-    summaryBehavior.setHideable(!isShowing);
-    summaryBehavior.setState(bottomSheetState);
   }
 
   /**
