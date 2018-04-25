@@ -177,9 +177,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * <p>
    * In a {@link android.app.Fragment}, this should be in {@link Fragment#onDestroyView()}.
    */
-  public void onDestroy(boolean isChangingConfigurations) {
+  public void onDestroy() {
     mapView.onDestroy();
-    navigationViewModel.onDestroy(isChangingConfigurations);
+    navigationViewModel.onDestroy(isChangingConfigurations());
     InstructionLoader.getInstance().shutdown();
   }
 
@@ -461,6 +461,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     summaryBehavior.setState(bottomSheetState);
   }
 
+  private boolean isChangingConfigurations() {
+    try {
+      return ((FragmentActivity) getContext()).isChangingConfigurations();
+    } catch (ClassCastException exception) {
+      throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
+    }
+  }
+
   /**
    * Create a top map padding value that pushes the focal point
    * of the map to the bottom of the screen (above the bottom sheet).
@@ -552,12 +560,12 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     summaryBottomSheet.setTimeFormat(timeFormatType);
   }
 
-  private void initNavigationCamera() {
-    camera = new NavigationCamera(map, navigationViewModel.getNavigation());
-  }
-
   private void initNavigationListeners(NavigationViewOptions options, MapboxNavigation navigation) {
     navigationViewEventDispatcher.initializeListeners(options, navigation);
+  }
+
+  private void initNavigationCamera() {
+    camera = new NavigationCamera(map, navigationViewModel.getNavigation());
   }
 
   /**
