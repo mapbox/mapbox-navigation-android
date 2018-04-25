@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,8 +11,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.ui.v5.route.NavigationRouteEngine;
-import com.mapbox.services.android.navigation.ui.v5.route.NavigationRouteEngineCallback;
+import com.mapbox.services.android.navigation.ui.v5.route.NavigationViewRouteEngine;
+import com.mapbox.services.android.navigation.ui.v5.route.NavigationViewRouteEngineListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 
 import org.junit.Test;
@@ -30,54 +31,62 @@ import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.DEFAULT_MANIFEST_NAME)
-public class NavigationRouteEngineTest extends BaseTest {
+public class NavigationViewRouteEngineTest extends BaseTest {
 
   private static final String DIRECTIONS_PRECISION_6 = "directions_v5_precision_6.json";
 
   @Test
   public void sanity() throws Exception {
-    NavigationRouteEngine routeEngine = new NavigationRouteEngine(mock(NavigationRouteEngineCallback.class), ACCESS_TOKEN);
+    NavigationViewRouteEngineListener routeEngineListener = mock(NavigationViewRouteEngineListener.class);
+    NavigationViewRouteEngine routeEngine = buildRouteEngine(routeEngineListener);
 
     assertNotNull(routeEngine);
   }
 
   @Test
   public void onExtractOptionsWithRoute_routeUpdateCallbackIsCalled() throws Exception {
-    NavigationRouteEngineCallback mockCallback = mock(NavigationRouteEngineCallback.class);
-    NavigationRouteEngine routeEngine = new NavigationRouteEngine(mockCallback, ACCESS_TOKEN);
+    NavigationViewRouteEngineListener routeEngineListener = mock(NavigationViewRouteEngineListener.class);
+    NavigationViewRouteEngine routeEngine = buildRouteEngine(routeEngineListener);
     NavigationViewOptions options = buildNavigationViewOptionsWithRoute();
     Context mockContext = mock(Context.class);
     DirectionsRoute directionsRoute = options.directionsRoute();
 
     routeEngine.extractRouteOptions(mockContext, options);
 
-    verify(mockCallback).onRouteUpdate(directionsRoute);
+    verify(routeEngineListener).onRouteUpdate(directionsRoute);
   }
 
   @Test
   public void onExtractOptionsWithRoute_destinationCallbackIsCalled() throws Exception {
-    NavigationRouteEngineCallback mockCallback = mock(NavigationRouteEngineCallback.class);
-    NavigationRouteEngine routeEngine = new NavigationRouteEngine(mockCallback, ACCESS_TOKEN);
+    NavigationViewRouteEngineListener routeEngineListener = mock(NavigationViewRouteEngineListener.class);
+    NavigationViewRouteEngine routeEngine = buildRouteEngine(routeEngineListener);
     NavigationViewOptions options = buildNavigationViewOptionsWithRoute();
     Point destination = findDestinationPoint(options);
     Context mockContext = mock(Context.class);
 
     routeEngine.extractRouteOptions(mockContext, options);
 
-    verify(mockCallback).onDestinationSet(destination);
+    verify(routeEngineListener).onDestinationSet(destination);
   }
 
   @Test
   public void onExtractOptionsWithCoordinates_destinationCallbackIsCalled() throws Exception {
-    NavigationRouteEngineCallback mockCallback = mock(NavigationRouteEngineCallback.class);
-    NavigationRouteEngine routeEngine = new NavigationRouteEngine(mockCallback, ACCESS_TOKEN);
+    NavigationViewRouteEngineListener routeEngineListener = mock(NavigationViewRouteEngineListener.class);
+    NavigationViewRouteEngine routeEngine = buildRouteEngine(routeEngineListener);
     NavigationViewOptions options = buildNavigationViewOptionsWithCoordinates();
     Context mockContext = mock(Context.class);
     Point destination = options.destination();
 
     routeEngine.extractRouteOptions(mockContext, options);
 
-    verify(mockCallback).onDestinationSet(destination);
+    verify(routeEngineListener).onDestinationSet(destination);
+  }
+
+  @NonNull
+  private NavigationViewRouteEngine buildRouteEngine(NavigationViewRouteEngineListener routeEngineListener) {
+    NavigationViewRouteEngine routeEngine = new NavigationViewRouteEngine(routeEngineListener);
+    routeEngine.updateAccessToken(ACCESS_TOKEN);
+    return routeEngine;
   }
 
   private NavigationViewOptions buildNavigationViewOptionsWithRoute() throws IOException {
