@@ -189,7 +189,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initNavigationRouteEngine() {
-    navigationRouteEngine = new NavigationRouteEngine(routeEngineCallback);
+    navigationRouteEngine = new NavigationRouteEngine(routeEngineCallback, accessToken);
   }
 
   private void initNavigationLocationEngine() {
