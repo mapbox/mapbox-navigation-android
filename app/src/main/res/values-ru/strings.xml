@@ -1,0 +1,17 @@
+<resources>
+    <string name="title_mock_navigation">Моделирование маршрута</string>
+    <string name="description_mock_navigation">Начать моделирование маршрута c помощью эмулятора местоположения.</string>
+
+    <string name="title_off_route_detection">Движение по бездорожью</string>
+    <string name="description_off_route_detection">Используйте класс Route Utils для обнаружения движения по бездорожью</string>
+
+    <string name="title_reroute">Объезд</string>
+    <string name="description_reroute">Проверить функциональность объезда внутри Navigation SDK</string>
+
+    <string name="title_navigation_route_ui">Маршрут на карте</string>
+    <string name="description_navigation_route_ui">Отобразить маршрут на карте</string>
+
+    <string name="title_navigation_view_ui">Отображения маршрута</string>
+    <string name="description_navigation_view_ui">Различное представление маршрута на экране</string>
+
+</resources>

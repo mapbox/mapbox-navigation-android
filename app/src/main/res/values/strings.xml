@@ -1,4 +1,6 @@
 <resources>
+    <string name="app_name">Mapbox Navigation SDK for Android</string>
+
     <string name="title_mock_navigation">Mock Navigation</string>
     <string name="description_mock_navigation">Mock a navigation session using a mock location engine.</string>
 

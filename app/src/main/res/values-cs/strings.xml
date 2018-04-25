@@ -1,0 +1,17 @@
+<resources>
+    <string name="title_mock_navigation">Simulované navigování</string>
+    <string name="description_mock_navigation">Simulované navigování využívá simulované určování polohy.</string>
+
+    <string name="title_off_route_detection">Opuštění trasy</string>
+    <string name="description_off_route_detection">Používá třídu nástrojů trasování k určení, zda uživatelé opustili trasu.</string>
+
+    <string name="title_reroute">Přepočítat</string>
+    <string name="description_reroute">Testovat funkci přepočítání trasy uvnitř navigačního SDK</string>
+
+    <string name="title_navigation_route_ui">Mapa trasy</string>
+    <string name="description_navigation_route_ui">Zobrazit trasu na mapě</string>
+
+    <string name="title_navigation_view_ui">Režim navigace</string>
+    <string name="description_navigation_view_ui">Opustit uživatelské prostředí</string>
+
+</resources>

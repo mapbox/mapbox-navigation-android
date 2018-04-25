@@ -1,0 +1,17 @@
+<resources>
+    <string name="title_mock_navigation">Simulierte Navigation</string>
+    <string name="description_mock_navigation">Simuliere eine Navigationssitzung durch Verwendung von simulierten Standorten</string>
+
+    <string name="title_off_route_detection">Abseits der Route-Erkennung</string>
+    <string name="description_off_route_detection">Verwendet die Routenwerkzeug-Klasse, um zu erkennen, ob ein Nutzer abseits der Route ist</string>
+
+    <string name="title_reroute">Routenneuberechnung</string>
+    <string name="description_reroute">Routenneuberechnung innerhalb des Navigation SDK ausprobieren</string>
+
+    <string name="title_navigation_route_ui">Navigation / Karte / Route</string>
+    <string name="description_navigation_route_ui">Zeichnet eine Route auf der Karte</string>
+
+    <string name="title_navigation_view_ui">Navigationsansichten</string>
+    <string name="description_navigation_view_ui">Eingebautes UI Erlebnis</string>
+
+</resources>

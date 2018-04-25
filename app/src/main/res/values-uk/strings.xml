@@ -1,0 +1,17 @@
+<resources>
+    <string name="title_mock_navigation">Симуляція навігації</string>
+    <string name="description_mock_navigation">Симуляція навігації за маршрутом з використанням рушія підстановки даних про місцеположення.</string>
+
+    <string name="title_off_route_detection">Визначення сходу з маршруту</string>
+    <string name="description_off_route_detection">Використовує клас Route Utils для визначення сходу з маршруту.</string>
+
+    <string name="title_reroute">Зміна маршрут</string>
+    <string name="description_reroute">Перевірка функції зміни маршруту в середині SDK навігації</string>
+
+    <string name="title_navigation_route_ui">Навігація - Маршрут на мапі</string>
+    <string name="description_navigation_route_ui">Показує маршрут поверх мапи</string>
+
+    <string name="title_navigation_view_ui">Навігація - Вид</string>
+    <string name="description_navigation_view_ui">Інтерфейс для вводу місця призначення.</string>
+
+</resources>

@@ -144,6 +144,12 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   @Override
+  protected void onDetachedFromWindow() {
+    super.onDetachedFromWindow();
+    cancelDelayedTransition();
+  }
+
+  @Override
   public void onFeedbackSelected(FeedbackItem feedbackItem) {
     navigationViewModel.updateFeedback(feedbackItem);
     alertView.show(NavigationConstants.FEEDBACK_SUBMITTED, 3000, false);
@@ -318,6 +324,24 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     }
     instructionListLayout.setVisibility(VISIBLE);
     rvInstructions.smoothScrollToPosition(TOP);
+  }
+
+  /**
+   * Sets the locale to use for languages and default unit type
+   *
+   * @param locale to use
+   */
+  public void setLocale(@NonNull Locale locale) {
+    this.locale = locale;
+  }
+
+  /**
+   * Sets the unit type to use
+   *
+   * @param unitType to use
+   */
+  public void setUnitType(@NavigationUnitType.UnitType int unitType) {
+    this.unitType = unitType;
   }
 
   /**
@@ -807,6 +831,12 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     }
   }
 
+  private void cancelDelayedTransition() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      clearAnimation();
+    }
+  }
+
   private void updateLandscapeConstraintsTo(int layoutRes) {
     ConstraintSet collapsed = new ConstraintSet();
     collapsed.clone(getContext(), layoutRes);
@@ -820,23 +850,5 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void updateInstructionList(InstructionModel model) {
     instructionListAdapter.updateSteps(getContext(), model.getProgress(), locale, unitType);
-  }
-
-  /**
-   * Sets the locale to use for languages and default unit type
-   *
-   * @param locale to use
-   */
-  public void setLocale(@NonNull Locale locale) {
-    this.locale = locale;
-  }
-
-  /**
-   * Sets the unit type to use
-   *
-   * @param unitType to use
-   */
-  public void setUnitType(@NavigationUnitType.UnitType int unitType) {
-    this.unitType = unitType;
   }
 }
