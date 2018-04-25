@@ -1,0 +1,15 @@
+<resources>
+    <string name="title_mock_navigation">Ejemplo de navegación</string>
+    <string name="description_mock_navigation">Simula una sesión de navegación usando un ejemplo del motor de localización</string>
+
+    <string name="title_off_route_detection">Apagar detección de ruta</string>
+    <string name="title_reroute">Enrutando</string>
+    <string name="description_reroute">Prueba la función de enrutación perteneciente al SDK de navegación</string>
+
+    <string name="title_navigation_route_ui">Ruta del mapa de navegación</string>
+    <string name="description_navigation_route_ui">Dibuja un ruta en el mapa</string>
+
+    <string name="title_navigation_view_ui">Vistas de navegación</string>
+    <string name="description_navigation_view_ui">Entra en la experiencia de la interfaz</string>
+
+</resources>

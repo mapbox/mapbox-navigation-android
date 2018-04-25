@@ -1,0 +1,17 @@
+<resources>
+    <string name="title_mock_navigation">Тестова навигация</string>
+    <string name="description_mock_navigation">Имитирай навигационна сесия с тестовия локализатор.</string>
+
+    <string name="title_off_route_detection">Откриване извън маршрута</string>
+    <string name="description_off_route_detection">Използва Route Utils клас за определяне дали потребител е извън маршрута.</string>
+
+    <string name="title_reroute">Пренасочване</string>
+    <string name="description_reroute">Тествай функцията за пренасочване вътре в SDK навигацията</string>
+
+    <string name="title_navigation_route_ui">Навигационен картов маршрут</string>
+    <string name="description_navigation_route_ui">Изчертава маршрут на картата</string>
+
+    <string name="title_navigation_view_ui">Навигационни изгледи</string>
+    <string name="description_navigation_view_ui">Drop-in UI experience</string>
+
+</resources>

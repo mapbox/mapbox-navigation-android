@@ -1,0 +1,17 @@
+<resources>
+    <string name="title_mock_navigation">Giả bộ Điều hướng</string>
+    <string name="description_mock_navigation">Giả bộ phiên điều hướng dùng máy định vị giả.</string>
+
+    <string name="title_off_route_detection">Nhận ra Lạc đường</string>
+    <string name="description_off_route_detection">Sử dụng lớp RouteUtils để xác định người dùng bị lạc đường.</string>
+
+    <string name="title_reroute">Tìm Đường đi Mới</string>
+    <string name="description_reroute">Thử chức năng tìm đường đi mới trong SDK Điều hướng</string>
+
+    <string name="title_navigation_route_ui">Tuyến đường trên Bản đồ Điều hướng</string>
+    <string name="description_navigation_route_ui">Vẽ tuyến đường trên bản đồ</string>
+
+    <string name="title_navigation_view_ui">Khung nhìn Điều hướng</string>
+    <string name="description_navigation_view_ui">Trải nghiệm giao diện người dùng có thể xen vào</string>
+
+</resources>

@@ -1,0 +1,17 @@
+<resources>
+    <string name="title_mock_navigation">Navegação Simulada</string>
+    <string name="description_mock_navigation">Simule uma sessão de navegação usando um serviço de localizações simuladas.</string>
+
+    <string name="title_off_route_detection">Deteção fora de percurso</string>
+    <string name="description_off_route_detection">Usa a classe Route Utils para determinar se o utilizador está fora do percurso.</string>
+
+    <string name="title_reroute">Redirecionar</string>
+    <string name="description_reroute">Teste a função de redirecionamento dentro do SDK de navegação</string>
+
+    <string name="title_navigation_route_ui">Mapa de Percurso de Navegação</string>
+    <string name="description_navigation_route_ui">Desenha um percurso no mapa</string>
+
+    <string name="title_navigation_view_ui">Vistas de Navegação</string>
+    <string name="description_navigation_view_ui">Experiência de UI Drop-In</string>
+
+</resources>
