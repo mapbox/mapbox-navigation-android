@@ -134,12 +134,11 @@ public class InstructionLoader {
       if (hasImageUrl(components)) {
         addShieldInfo(textView, components);
         nodes.add(new ShieldNode(components, length - 1));
-        length += components.text().length();
       } else if (hasAbbreviation(components)) {
         addPriorityInfo(components);
-        nodes.add(new AbbreviationNode(components));
+        nodes.add(new AbbreviationNode(components, length - 1));
       } else {
-        nodes.add(new Node(components));
+        nodes.add(new Node(components, length - 1));
       }
       length += components.text().length() + 1;
     }
@@ -161,7 +160,6 @@ public class InstructionLoader {
     abbreviations.get(abbreviationPriority).add(Integer.valueOf(nodes.size()));
   }
 
-
   public List<BannerShieldInfo> getShieldUrls() {
     for (BannerShieldInfo bannerShieldInfo : shieldUrls) {
       bannerShieldInfo.setStartIndex(nodes.get(bannerShieldInfo.getNodeIndex()).startIndex);
@@ -170,8 +168,7 @@ public class InstructionLoader {
   }
 
   private void addShieldInfo(TextView textView, BannerComponents components) {
-    shieldUrls.add(new BannerShieldInfo(textView.getContext(), components,
-      nodes.size()));
+    shieldUrls.add(new BannerShieldInfo(textView.getContext(), components, nodes.size()));
   }
 
   private static boolean hasComponents(BannerText bannerText) {
@@ -190,10 +187,11 @@ public class InstructionLoader {
 
   static class Node {
     BannerComponents bannerComponents;
-    int startIndex = -1;
+    int startIndex;
 
-    Node(BannerComponents bannerComponents) {
+    Node(BannerComponents bannerComponents, int startIndex) {
       this.bannerComponents = bannerComponents;
+      this.startIndex = startIndex;
     }
 
     @Override
@@ -207,20 +205,16 @@ public class InstructionLoader {
   }
 
   static class ShieldNode extends Node {
-    int stringIndex;
-
-
-    ShieldNode(BannerComponents bannerComponents, int stringIndex) {
-      super(bannerComponents);
-      this.stringIndex = stringIndex;
+    ShieldNode(BannerComponents bannerComponents, int startIndex) {
+      super(bannerComponents, startIndex);
     }
   }
 
   static class AbbreviationNode extends Node {
     boolean abbreviate;
 
-    AbbreviationNode(BannerComponents bannerComponents) {
-      super(bannerComponents);
+    AbbreviationNode(BannerComponents bannerComponents, int startIndex) {
+      super(bannerComponents, startIndex);
     }
 
     @Override
