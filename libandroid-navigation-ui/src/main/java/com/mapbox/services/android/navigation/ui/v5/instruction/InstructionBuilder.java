@@ -130,27 +130,16 @@ public class InstructionBuilder {
     public void setStartIndex(int startIndex) {
       this.startIndex = startIndex;
     }
-
-//    public String getText() {
-//      return text;
-//    }
   }
 
   class ShieldNode extends Node {
     int stringIndex;
 
-//    String url;
 
     public ShieldNode(BannerComponents bannerComponents, int stringIndex) {
       super(bannerComponents);
       this.stringIndex = stringIndex;
-//      this.url = bannerComponents.imageBaseUrl();
     }
-
-//
-//    String getUrl() {
-//      return url;
-//    }
   }
 
   class AbbreviationNode extends Node {
@@ -158,9 +147,6 @@ public class InstructionBuilder {
 
     public AbbreviationNode(BannerComponents bannerComponents) {
       super(bannerComponents);
-
-//      this.abbreviation = bannerComponents.abbreviation();
-//      this.abbreviationPriority = bannerComponents.abbreviationPriority();
     }
 
     @Override
@@ -168,22 +154,8 @@ public class InstructionBuilder {
       return abbreviate ? bannerComponents.abbreviation() : bannerComponents.text();
     }
 
-//    String getAbbreviation() {
-//      return abbreviation;
-//    }
-//
-//    int getAbbreviationPriority() {
-//      return abbreviationPriority;
-//    }
-
     void setAbbreviate(boolean abbreviate) {
       this.abbreviate = abbreviate;
     }
-
-//    @Override
-//    public int compareTo(@NonNull AbbreviationNode abbreviationNode) {
-//      return this.bannerComponents.compareTo(abbreviationNode.bannerComponents);
-//
-//    }
   }
 }

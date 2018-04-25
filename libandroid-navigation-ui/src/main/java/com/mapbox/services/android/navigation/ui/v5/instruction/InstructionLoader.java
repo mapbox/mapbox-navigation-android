@@ -125,25 +125,6 @@ public class InstructionLoader {
     String text = instructionBuilder.getBannerText();
     List<BannerShieldInfo> shieldUrls = instructionBuilder.getShieldUrls();
 
-//    StringBuilder instructionStringBuilder = new StringBuilder();
-//    List<BannerShieldInfo> shieldUrls = new ArrayList<>();
-//
-//    InstructionBuilder instructionBuilder = new InstructionBuilder(bannerText.components(), textView);
-//
-//    List<BannerComponents> bannerComponents = bannerText.components();
-//    Collections.sort(bannerComponents);
-//
-//    for (BannerComponents components : bannerText.components()) {
-//      if (hasImageUrl(components)) {
-//        addShieldInfo(textView, instructionStringBuilder, shieldUrls, components)
-//      } else {
-//        String text = components.text();
-//        boolean textViewIsEmpty = TextUtils.isEmpty(instructionStringBuilder.toString());
-//        String instructionText = textViewIsEmpty ? text : SINGLE_SPACE.concat(text);
-//        instructionStringBuilder.append(instructionText);
-//      }
-//    }
-
     // If there are shield Urls, fetch the corresponding images
     if (!shieldUrls.isEmpty()) {
       createTargets(textView, text, shieldUrls);
@@ -174,16 +155,6 @@ public class InstructionLoader {
   private static boolean hasImageUrl(BannerComponents components) {
     return !TextUtils.isEmpty(components.imageBaseUrl());
   }
-
-//  private static void addShieldInfo(TextView textView, StringBuilder instructionStringBuilder,
-//                                    List<BannerShieldInfo> shieldUrls, BannerComponents components) {
-//    boolean instructionBuilderEmpty = TextUtils.isEmpty(instructionStringBuilder.toString());
-//    int instructionLength = instructionStringBuilder.length();
-//    int startIndex = instructionBuilderEmpty ? instructionLength : instructionLength + 1;
-//    shieldUrls.add(new BannerShieldInfo(textView.getContext(), components.imageBaseUrl(),
-//      startIndex, components.text()));
-//    instructionStringBuilder.append(components.text());
-//  }
 
   private void createTargets(TextView textView, String text,
                              List<BannerShieldInfo> shields) {
