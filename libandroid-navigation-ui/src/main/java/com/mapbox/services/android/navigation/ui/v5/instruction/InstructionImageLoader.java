@@ -109,7 +109,6 @@ public class InstructionImageLoader {
    * into the given {@link TextView}.
    *
    * @param textView   target for the banner text
-   * @param bannerText with components to be extracted
    * @since 0.9.0
    */
   public void loadImages(TextView textView, List<BannerShieldInfo> shieldUrls) {

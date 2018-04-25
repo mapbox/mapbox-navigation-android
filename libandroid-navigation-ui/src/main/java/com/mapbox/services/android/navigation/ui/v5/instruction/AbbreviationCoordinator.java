@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class AbbreviationCoordinator {
+  private static final String SINGLE_SPACE = " ";
   Map<Integer, List<Integer>> abbreviations;
   TextView textView;
 
@@ -49,7 +50,7 @@ public class AbbreviationCoordinator {
       stringBuilder.append(node);
 
       while (iterator.hasNext()) {
-        stringBuilder.append(" ");
+        stringBuilder.append(SINGLE_SPACE);
         node = iterator.next();
         node.setStartIndex(stringBuilder.length());
         stringBuilder.append(node);
