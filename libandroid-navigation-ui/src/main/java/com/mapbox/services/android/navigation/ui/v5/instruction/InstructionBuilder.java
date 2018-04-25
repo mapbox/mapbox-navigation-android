@@ -1,84 +1,111 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.graphics.Paint;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
-import android.util.Pair;
 import android.widget.TextView;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-public class InstructionBuilder extends ArrayList<InstructionBuilder.Node> {
+public class InstructionBuilder {
   int length = 0;
-  List<AbbreviationNode> abbreviations;
-  StringBuilder instructionStringBuilder;
+  Map<Integer, List<Integer>> abbreviations;
+  List<BannerShieldInfo> shieldUrls;
+  List<Node> nodes;
+  TextView textView;
 
   public InstructionBuilder(List<BannerComponents> bannerComponents, TextView textView) {
     super();
-    instructionStringBuilder = new StringBuilder();
-    List<BannerShieldInfo> shieldUrls = new ArrayList<>();
-    abbreviations = new ArrayList<>();
-
+    this.textView = textView;
+    nodes = new ArrayList<>();
+    shieldUrls = new ArrayList<>();
+    abbreviations = new HashMap<>();
 
     for (BannerComponents components : bannerComponents) {
       if (hasImageUrl(components)) {
-        addShieldInfo(textView, instructionStringBuilder, shieldUrls, components);
-        add(new ShieldNode(components));
+        addShieldInfo(textView, components);
+        nodes.add(new ShieldNode(components, length - 1));
+        length += components.text().length();
       } else if (hasAbbreviation(components)) {
-        instructionStringBuilder.append(components.text());
-        AbbreviationNode abbreviationNode = new AbbreviationNode(components);
-        add(abbreviationNode);
-        abbreviations.add(abbreviationNode);
+        addPriorityInfo(components);
+        nodes.add(new AbbreviationNode(components));
       } else {
-        instructionStringBuilder.append(components.text());
-        add(new Node(components));
+        nodes.add(new Node(components));
       }
-
-      instructionStringBuilder.append(" ");
+      length += components.text().length() + 1;
     }
-
-    Collections.sort(abbreviations);
   }
 
-  private static boolean hasAbbreviation(BannerComponents components) {
+  public String getBannerText() {
+    String bannerText;
+    int currAbbreviationPriority = 0;
+    while (!textFits(textView, bannerText = join(nodes))) {
+      List<Integer> indices = abbreviations.get(new Integer(currAbbreviationPriority++));
+
+      for (Integer index : indices) {
+        abbreviate(index);
+      }
+    }
+
+    return bannerText;
+  }
+
+  public List<BannerShieldInfo> getShieldUrls() {
+    for (BannerShieldInfo bannerShieldInfo : shieldUrls) {
+      bannerShieldInfo.setStartIndex(nodes.get(bannerShieldInfo.getNodeIndex()).startIndex);
+    }
+    return shieldUrls;
+  }
+
+  private void abbreviate(int index) {
+    ((AbbreviationNode) nodes.get(index)).setAbbreviate(true);
+  }
+
+  private boolean hasAbbreviation(BannerComponents components) {
     return !TextUtils.isEmpty(components.abbreviation());
   }
 
-  private static boolean hasImageUrl(BannerComponents components) {
+  private boolean hasImageUrl(BannerComponents components) {
     return !TextUtils.isEmpty(components.imageBaseUrl());
   }
 
-  private static void addShieldInfo(TextView textView, StringBuilder instructionStringBuilder,
-                                    List<BannerShieldInfo> shieldUrls, BannerComponents components) {
-    boolean instructionBuilderEmpty = TextUtils.isEmpty(instructionStringBuilder.toString());
-    int instructionLength = instructionStringBuilder.length();
-    int startIndex = instructionBuilderEmpty ? instructionLength : instructionLength + 1;
-    shieldUrls.add(new BannerShieldInfo(textView.getContext(), components.imageBaseUrl(),
-      startIndex, components.text()));
-    instructionStringBuilder.append(components.text());
+  private void addPriorityInfo(BannerComponents components) {
+    int abbreviationPriority = components.abbreviationPriority();
+    if (abbreviations.get(Integer.valueOf(abbreviationPriority)) == null) {
+      abbreviations.put(abbreviationPriority, new ArrayList<Integer>());
+    }
+    abbreviations.get(abbreviationPriority).add(Integer.valueOf(nodes.size()));
   }
 
-  public void buildInstruction(TextView textView) {
-    int currAbbreviationPriority;
-    while (!textFits(textView, instructionStringBuilder.toString())) {
-      currAbbreviationPriority = abbreviations.get(0).abbreviationPriority();
-      instructionStringBuilder = new StringBuilder();
-
-
-
-    }
-
+  private void addShieldInfo(TextView textView, BannerComponents components) {
+    shieldUrls.add(new BannerShieldInfo(textView.getContext(), components,
+      nodes.size()));
   }
 
-  private void abbreviate(int abbreviationPriority) {
-    int currentIndex = 0;
-    while (abbreviations.get(currentIndex).abbreviationPriority() == abbreviationPriority) {
-      get(abbreviations.remove(currentIndex).)
+  private String join(List<Node> tokens) {
+    StringBuilder stringBuilder = new StringBuilder();
+    Iterator<Node> iterator = tokens.iterator();
+    Node node;
+
+    if (iterator.hasNext()) {
+      node = iterator.next();
+      node.setStartIndex(stringBuilder.length());
+      stringBuilder.append(node);
+
+      while (iterator.hasNext()) {
+        stringBuilder.append(" ");
+        node = iterator.next();
+        node.setStartIndex(stringBuilder.length());
+        stringBuilder.append(node);
+      }
     }
+
+    return stringBuilder.toString();
   }
 
   private boolean textFits(TextView textView, String text) {
@@ -88,53 +115,75 @@ public class InstructionBuilder extends ArrayList<InstructionBuilder.Node> {
   }
 
   class Node {
-    String text;
+    BannerComponents bannerComponents;
+    int startIndex = -1;
 
     public Node(BannerComponents bannerComponents) {
-      this.text = bannerComponents.text();
+      this.bannerComponents = bannerComponents;
     }
 
-    public String getText() {
-      return text;
+    @Override
+    public String toString() {
+      return bannerComponents.text();
     }
+
+    public void setStartIndex(int startIndex) {
+      this.startIndex = startIndex;
+    }
+
+//    public String getText() {
+//      return text;
+//    }
   }
 
   class ShieldNode extends Node {
-    String url;
+    int stringIndex;
 
-    public ShieldNode(BannerComponents bannerComponents) {
+//    String url;
+
+    public ShieldNode(BannerComponents bannerComponents, int stringIndex) {
       super(bannerComponents);
-
-      this.url = bannerComponents.imageBaseUrl();
+      this.stringIndex = stringIndex;
+//      this.url = bannerComponents.imageBaseUrl();
     }
 
-    String getUrl() {
-      return url;
-    }
+//
+//    String getUrl() {
+//      return url;
+//    }
   }
 
-  class AbbreviationNode extends Node implements Comparable {
-    String abbreviation;
-    int abbreviationPriority;
+  class AbbreviationNode extends Node {
     boolean abbreviate;
 
     public AbbreviationNode(BannerComponents bannerComponents) {
       super(bannerComponents);
 
-      this.abbreviation = bannerComponents.abbreviation();
-      this.abbreviationPriority = bannerComponents.abbreviationPriority();
+//      this.abbreviation = bannerComponents.abbreviation();
+//      this.abbreviationPriority = bannerComponents.abbreviationPriority();
     }
 
-    String getAbbreviation() {
-      return abbreviation;
+    @Override
+    public String toString() {
+      return abbreviate ? bannerComponents.abbreviation() : bannerComponents.text();
     }
 
-    int getAbbreviationPriority() {
-      return abbreviationPriority;
-    }
+//    String getAbbreviation() {
+//      return abbreviation;
+//    }
+//
+//    int getAbbreviationPriority() {
+//      return abbreviationPriority;
+//    }
 
     void setAbbreviate(boolean abbreviate) {
       this.abbreviate = abbreviate;
     }
+
+//    @Override
+//    public int compareTo(@NonNull AbbreviationNode abbreviationNode) {
+//      return this.bannerComponents.compareTo(abbreviationNode.bannerComponents);
+//
+//    }
   }
 }
