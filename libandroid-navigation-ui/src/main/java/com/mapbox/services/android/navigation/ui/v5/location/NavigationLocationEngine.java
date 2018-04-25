@@ -43,10 +43,10 @@ public class NavigationLocationEngine {
   }
 
   private void initLocationEngine(Context context, boolean simulateRoute) {
-    LocationEngineProvider locationEngineProvider = new LocationEngineProvider(context.getApplicationContext());
     if (simulateRoute) {
       locationEngine = new MockLocationEngine(1000, 30, false);
     } else {
+      LocationEngineProvider locationEngineProvider = new LocationEngineProvider(context.getApplicationContext());
       locationEngine = locationEngineProvider.obtainBestLocationEngineAvailable();
       locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
       locationEngine.setFastestInterval(1000);

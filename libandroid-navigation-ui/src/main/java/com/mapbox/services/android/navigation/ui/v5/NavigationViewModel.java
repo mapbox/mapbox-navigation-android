@@ -69,12 +69,22 @@ public class NavigationViewModel extends AndroidViewModel {
   @NavigationTimeFormat.Type
   private int timeFormatType;
   private boolean resumeState;
+  private String accessToken;
 
   public NavigationViewModel(Application application) {
     super(application);
     initConnectivityManager(application);
     initNavigationRouteEngine();
     initNavigationLocationEngine();
+    this.accessToken = Mapbox.getAccessToken();
+  }
+
+  NavigationViewModel(Application application, String accessToken) {
+    super(application);
+    initConnectivityManager(application);
+    initNavigationRouteEngine();
+    initNavigationLocationEngine();
+    this.accessToken = accessToken;
   }
 
   public void onCreate(boolean resumeState) {
@@ -192,11 +202,11 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initVoiceInstructions() {
-    instructionPlayer = new NavigationInstructionPlayer(getApplication().getBaseContext(), locale);
+    instructionPlayer = new NavigationInstructionPlayer(getApplication(), locale, accessToken);
   }
 
   private void initNavigation(Context context, MapboxNavigationOptions options) {
-    navigation = new MapboxNavigation(context, Mapbox.getAccessToken(), options);
+    navigation = new MapboxNavigation(context, accessToken, options);
     navigation.setLocationEngine(navigationLocationEngine.obtainLocationEngine());
     addNavigationListeners();
   }
