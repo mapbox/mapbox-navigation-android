@@ -61,7 +61,7 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    navigationView.onDestroy(isChangingConfigurations());
+    navigationView.onDestroy();
   }
 
   @Override
