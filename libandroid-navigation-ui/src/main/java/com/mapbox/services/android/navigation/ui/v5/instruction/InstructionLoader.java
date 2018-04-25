@@ -30,9 +30,9 @@ public class InstructionLoader {
 
   private static InstructionLoader instance;
   private static InstructionImageLoader instructionImageLoader;
-  List<BannerShieldInfo> shieldUrls;
-  List<Node> nodes;
-  Map<Integer, List<Integer>> abbreviations;
+  private List<BannerShieldInfo> shieldUrls;
+  private List<Node> nodes;
+  private Map<Integer, List<Integer>> abbreviations;
   int length = 0;
 
   private boolean isInitialized;
@@ -186,8 +186,8 @@ public class InstructionLoader {
   }
 
   static class Node {
-    BannerComponents bannerComponents;
-    int startIndex;
+    protected BannerComponents bannerComponents;
+    protected int startIndex;
 
     Node(BannerComponents bannerComponents, int startIndex) {
       this.bannerComponents = bannerComponents;
@@ -211,7 +211,7 @@ public class InstructionLoader {
   }
 
   static class AbbreviationNode extends Node {
-    boolean abbreviate;
+    protected boolean abbreviate;
 
     AbbreviationNode(BannerComponents bannerComponents, int startIndex) {
       super(bannerComponents, startIndex);
@@ -222,7 +222,7 @@ public class InstructionLoader {
       return abbreviate ? bannerComponents.abbreviation() : bannerComponents.text();
     }
 
-    void setAbbreviate(boolean abbreviate) {
+    public void setAbbreviate(boolean abbreviate) {
       this.abbreviate = abbreviate;
     }
   }

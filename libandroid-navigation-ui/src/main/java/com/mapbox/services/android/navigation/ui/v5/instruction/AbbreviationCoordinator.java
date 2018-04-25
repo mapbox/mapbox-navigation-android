@@ -9,8 +9,8 @@ import java.util.Map;
 
 public class AbbreviationCoordinator {
   private static final String SINGLE_SPACE = " ";
-  Map<Integer, List<Integer>> abbreviations;
-  TextView textView;
+  private Map<Integer, List<Integer>> abbreviations;
+  private TextView textView;
 
   public AbbreviationCoordinator(TextView textView, Map<Integer, List<Integer>> abbreviations) {
     this.textView = textView;
