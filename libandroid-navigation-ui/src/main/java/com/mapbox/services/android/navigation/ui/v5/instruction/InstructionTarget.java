@@ -25,7 +25,7 @@ public class InstructionTarget implements Target {
   private BannerShieldInfo shield;
   private InstructionLoadedCallback instructionLoadedCallback;
 
-   InstructionTarget(TextView textView, Spannable instructionSpannable,
+  InstructionTarget(TextView textView, Spannable instructionSpannable,
                     List<BannerShieldInfo> shields, BannerShieldInfo shield,
                     InstructionLoadedCallback instructionLoadedCallback) {
     this.textView = textView;

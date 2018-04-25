@@ -2,20 +2,19 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.content.Context;
 import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ImageSpan;
 import android.widget.TextView;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
-import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Utility class that can be used to load a given {@link BannerText} into the provided
@@ -30,10 +29,13 @@ import java.util.List;
 public class InstructionLoader {
 
   private static InstructionLoader instance;
+  private static InstructionImageLoader instructionImageLoader;
+  List<BannerShieldInfo> shieldUrls;
+  List<Node> nodes;
+  Map<Integer, List<Integer>> abbreviations;
+  int length = 0;
+
   private boolean isInitialized;
-  private Picasso picassoImageLoader;
-  private List<InstructionTarget> targets;
-  private UrlDensityMap urlDensityMap;
 
   private InstructionLoader() {
   }
@@ -61,12 +63,8 @@ public class InstructionLoader {
    */
   public void initialize(Context context) {
     if (!isInitialized) {
-      Picasso.Builder builder = new Picasso.Builder(context)
-        .loggingEnabled(true);
-      picassoImageLoader = builder.build();
-
-      this.urlDensityMap = new UrlDensityMap(context);
-      targets = new ArrayList<>();
+      instructionImageLoader = InstructionImageLoader.getInstance();
+      instructionImageLoader.initialize(context);
 
       isInitialized = true;
     }
@@ -81,27 +79,11 @@ public class InstructionLoader {
    * @param step providing the image Urls
    */
   public void prefetchImageCache(LegStep step) {
-
-    if (step == null || step.bannerInstructions() == null
-      || step.bannerInstructions().isEmpty()) {
-      return;
-    }
-
-    checkIsInitialized();
-
-    List<BannerInstructions> bannerInstructionList = new ArrayList<>(step.bannerInstructions());
-    for (BannerInstructions instructions : bannerInstructionList) {
-      if (hasComponents(instructions.primary())) {
-        fetchImageBaseUrls(instructions.primary());
-      }
-      if (hasComponents(instructions.secondary())) {
-        fetchImageBaseUrls(instructions.secondary());
-      }
-    }
+    instructionImageLoader.prefetchImageCache(step);
   }
 
   public void shutdown() {
-    targets.clear();
+    instructionImageLoader.shutdown();
   }
 
   /**
@@ -114,72 +96,140 @@ public class InstructionLoader {
    * @since 0.9.0
    */
   public void loadInstruction(TextView textView, BannerText bannerText) {
-
     checkIsInitialized();
 
     if (!hasComponents(bannerText)) {
       return;
     }
 
-    InstructionBuilder instructionBuilder = new InstructionBuilder(bannerText.components(), textView);
-    String text = instructionBuilder.getBannerText();
-    List<BannerShieldInfo> shieldUrls = instructionBuilder.getShieldUrls();
+    parseBannerComponents(textView, bannerText.components());
+    setText(textView);
+    loadImages(textView);
+  }
 
-    // If there are shield Urls, fetch the corresponding images
-    if (!shieldUrls.isEmpty()) {
-      createTargets(textView, text, shieldUrls);
-      loadTargets();
-    } else {
-      textView.setText(text);
+  private void loadImages(TextView textView) {
+    List<BannerShieldInfo> shieldUrls = getShieldUrls();
+
+    if (hasImages(shieldUrls)) {
+      instructionImageLoader.loadImages(textView, shieldUrls);
     }
+  }
+
+  private void setText(TextView textView) {
+    String text = getAbbreviatedBannerText(textView);
+    textView.setText(text);
+  }
+
+  private String getAbbreviatedBannerText(TextView textView) {
+    AbbreviationCoordinator abbreviationCoordinator = new AbbreviationCoordinator(textView, abbreviations);
+    return abbreviationCoordinator.abbreviateBannerText(nodes);
+  }
+
+  private void parseBannerComponents(TextView textView, List<BannerComponents> bannerComponents) {
+    nodes = new ArrayList<>();
+    shieldUrls = new ArrayList<>();
+    abbreviations = new HashMap<>();
+
+    for (BannerComponents components : bannerComponents) {
+      if (hasImageUrl(components)) {
+        addShieldInfo(textView, components);
+        nodes.add(new ShieldNode(components, length - 1));
+        length += components.text().length();
+      } else if (hasAbbreviation(components)) {
+        addPriorityInfo(components);
+        nodes.add(new AbbreviationNode(components));
+      } else {
+        nodes.add(new Node(components));
+      }
+      length += components.text().length() + 1;
+    }
+  }
+
+  private boolean hasAbbreviation(BannerComponents components) {
+    return !TextUtils.isEmpty(components.abbreviation());
+  }
+
+  private boolean hasImageUrl(BannerComponents components) {
+    return !TextUtils.isEmpty(components.imageBaseUrl());
+  }
+
+  private void addPriorityInfo(BannerComponents components) {
+    int abbreviationPriority = components.abbreviationPriority();
+    if (abbreviations.get(Integer.valueOf(abbreviationPriority)) == null) {
+      abbreviations.put(abbreviationPriority, new ArrayList<Integer>());
+    }
+    abbreviations.get(abbreviationPriority).add(Integer.valueOf(nodes.size()));
+  }
+
+
+  public List<BannerShieldInfo> getShieldUrls() {
+    for (BannerShieldInfo bannerShieldInfo : shieldUrls) {
+      bannerShieldInfo.setStartIndex(nodes.get(bannerShieldInfo.getNodeIndex()).startIndex);
+    }
+    return shieldUrls;
+  }
+
+  private void addShieldInfo(TextView textView, BannerComponents components) {
+    shieldUrls.add(new BannerShieldInfo(textView.getContext(), components,
+      nodes.size()));
   }
 
   private static boolean hasComponents(BannerText bannerText) {
     return bannerText != null && bannerText.components() != null && !bannerText.components().isEmpty();
   }
 
-  /**
-   * Takes a given {@link BannerText} and fetches a valid
-   * imageBaseUrl if one is found.
-   *
-   * @param bannerText to provide the base URL
-   */
-  private void fetchImageBaseUrls(BannerText bannerText) {
-    for (BannerComponents components : bannerText.components()) {
-      if (hasImageUrl(components)) {
-        picassoImageLoader.load(urlDensityMap.get(components.imageBaseUrl())).fetch();
-      }
-    }
-  }
-
-  private static boolean hasImageUrl(BannerComponents components) {
-    return !TextUtils.isEmpty(components.imageBaseUrl());
-  }
-
-  private void createTargets(TextView textView, String text,
-                             List<BannerShieldInfo> shields) {
-    Spannable instructionSpannable = new SpannableString(text);
-    for (final BannerShieldInfo shield : shields) {
-      targets.add(new InstructionTarget(textView, instructionSpannable, shields, shield,
-        new InstructionTarget.InstructionLoadedCallback() {
-          @Override
-          public void onInstructionLoaded(InstructionTarget target) {
-            targets.remove(target);
-          }
-        }));
-    }
-  }
-
-  private void loadTargets() {
-    for (InstructionTarget target : new ArrayList<>(targets)) {
-      picassoImageLoader.load(target.getShield().getUrl())
-        .into(target);
-    }
+  private static boolean hasImages(List<BannerShieldInfo> shieldUrls) {
+    return !shieldUrls.isEmpty();
   }
 
   private void checkIsInitialized() {
     if (!isInitialized) {
       throw new RuntimeException("InstructionLoader must be initialized prior to loading image URLs");
+    }
+  }
+
+  static class Node {
+    BannerComponents bannerComponents;
+    int startIndex = -1;
+
+    Node(BannerComponents bannerComponents) {
+      this.bannerComponents = bannerComponents;
+    }
+
+    @Override
+    public String toString() {
+      return bannerComponents.text();
+    }
+
+    public void setStartIndex(int startIndex) {
+      this.startIndex = startIndex;
+    }
+  }
+
+  static class ShieldNode extends Node {
+    int stringIndex;
+
+
+    ShieldNode(BannerComponents bannerComponents, int stringIndex) {
+      super(bannerComponents);
+      this.stringIndex = stringIndex;
+    }
+  }
+
+  static class AbbreviationNode extends Node {
+    boolean abbreviate;
+
+    AbbreviationNode(BannerComponents bannerComponents) {
+      super(bannerComponents);
+    }
+
+    @Override
+    public String toString() {
+      return abbreviate ? bannerComponents.abbreviation() : bannerComponents.text();
+    }
+
+    void setAbbreviate(boolean abbreviate) {
+      this.abbreviate = abbreviate;
     }
   }
 }
