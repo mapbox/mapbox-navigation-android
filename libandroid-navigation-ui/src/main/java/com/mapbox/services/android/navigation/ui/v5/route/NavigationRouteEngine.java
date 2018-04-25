@@ -83,23 +83,11 @@ public class NavigationRouteEngine {
     this.rawLocation = rawLocation;
   }
 
-  /**
-   * Looks for a route locale provided by {@link NavigationViewOptions} to be
-   * stored for reroute requests.
-   *
-   * @param context for
-   * @param options to look for set locale
-   */
+
   private void extractLocale(Context context, NavigationViewOptions options) {
     locale = LocaleUtils.getNonNullLocale(context, options.navigationOptions().locale());
   }
 
-  /**
-   * Updates the request unit type based on what was set in
-   * {@link NavigationViewOptions}. Must be called after extractLocale.
-   *
-   * @param options possibly containing unitType
-   */
   private void extractUnitType(NavigationViewOptions options) {
     MapboxNavigationOptions navigationOptions = options.navigationOptions();
     unitType = navigationOptions.unitType();
@@ -109,22 +97,10 @@ public class NavigationRouteEngine {
     routeEngine = new RouteEngine(accessToken, locale, unitType, routeEngineCallback);
   }
 
-  /**
-   * Check if the given {@link NavigationViewOptions} has been launched with a {@link DirectionsRoute}.
-   *
-   * @param options possibly containing route
-   * @return true if route found, false if not
-   */
   private boolean launchWithRoute(NavigationViewOptions options) {
     return options.directionsRoute() != null;
   }
 
-  /**
-   * Extracts the {@link DirectionsRoute}, adds a destination marker,
-   * and starts navigation.
-   *
-   * @param options containing route
-   */
   private void extractRouteFromOptions(NavigationViewOptions options) {
     DirectionsRoute route = options.directionsRoute();
     if (route != null) {
@@ -139,12 +115,6 @@ public class NavigationRouteEngine {
     cacheRouteLanguage(options, route);
   }
 
-  /**
-   * Looks for a route profile provided by {@link NavigationViewOptions} to be
-   * stored for reroute requests.
-   *
-   * @param options to look for set profile
-   */
   private void cacheRouteProfile(NavigationViewOptions options) {
     String routeProfile = options.directionsProfile();
     routeEngine.updateRouteProfile(routeProfile);
@@ -175,12 +145,6 @@ public class NavigationRouteEngine {
     }
   }
 
-  /**
-   * Extracts the {@link Point} coordinates, adds a destination marker,
-   * and fetches a route with the coordinates.
-   *
-   * @param options containing origin and destination
-   */
   private void extractCoordinatesFromOptions(NavigationViewOptions options) {
     Point destination = options.destination();
     if (options.origin() != null && options.destination() != null) {
@@ -209,13 +173,6 @@ public class NavigationRouteEngine {
     navigationRouteEngineCallback.onRouteUpdate(currentRoute);
   }
 
-  /**
-   * Checks if we have at least one {@link DirectionsRoute} in the given
-   * {@link DirectionsResponse}.
-   *
-   * @param response to be checked
-   * @return true if valid, false if not
-   */
   private boolean isValidRoute(Response<DirectionsResponse> response) {
     return response.body() != null && !response.body().routes().isEmpty();
   }
