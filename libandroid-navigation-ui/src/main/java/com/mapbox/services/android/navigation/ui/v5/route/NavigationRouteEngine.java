@@ -11,7 +11,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
-import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.route.RouteEngine;
@@ -36,6 +35,7 @@ public class NavigationRouteEngine {
   private Location rawLocation;
   private Locale locale;
   private int unitType;
+  private String accessToken;
   private RouteEngineCallback routeEngineCallback = new RouteEngineCallback() {
     @Override
     public void onResponseReceived(Response<DirectionsResponse> response, RouteProgress routeProgress) {
@@ -48,8 +48,9 @@ public class NavigationRouteEngine {
     }
   };
 
-  public NavigationRouteEngine(NavigationRouteEngineCallback routeEngineCallback) {
+  public NavigationRouteEngine(NavigationRouteEngineCallback routeEngineCallback, String accessToken) {
     this.navigationRouteEngineCallback = routeEngineCallback;
+    this.accessToken = accessToken;
   }
 
   /**
@@ -105,7 +106,7 @@ public class NavigationRouteEngine {
   }
 
   private void initRouteEngine() {
-    routeEngine = new RouteEngine(Mapbox.getAccessToken(), locale, unitType, routeEngineCallback);
+    routeEngine = new RouteEngine(accessToken, locale, unitType, routeEngineCallback);
   }
 
   /**
@@ -117,7 +118,6 @@ public class NavigationRouteEngine {
   private boolean launchWithRoute(NavigationViewOptions options) {
     return options.directionsRoute() != null;
   }
-
 
   /**
    * Extracts the {@link DirectionsRoute}, adds a destination marker,
