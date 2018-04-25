@@ -3,7 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.route;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 
-public interface NavigationRouteEngineCallback {
+public interface NavigationViewRouteEngineListener {
 
   void onRouteUpdate(DirectionsRoute directionsRoute);
 
