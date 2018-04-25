@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">SDK de Navegação Mapbox para Android</string>
-
     <!-- Notification Strings -->
     <string name="end_navigation">Finalizar navegação</string>
 </resources>

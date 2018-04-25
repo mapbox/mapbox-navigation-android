@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">Mapbox Navigation SDK for Android</string>
-
     <!-- Notification Strings -->
     <string name="end_navigation">Akhir Navigasi</string>
 </resources>
