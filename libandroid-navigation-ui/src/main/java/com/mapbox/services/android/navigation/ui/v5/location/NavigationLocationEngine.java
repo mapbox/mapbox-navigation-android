@@ -13,10 +13,10 @@ import com.mapbox.services.android.telemetry.location.LocationEngineProvider;
 
 public class NavigationLocationEngine {
 
-  private NavigationLocationEngineCallback locationEngineCallback;
+  private NavigationLocationEngineListener locationEngineCallback;
   private LocationEngine locationEngine;
 
-  public NavigationLocationEngine(NavigationLocationEngineCallback locationEngineCallback) {
+  public NavigationLocationEngine(NavigationLocationEngineListener locationEngineCallback) {
     this.locationEngineCallback = locationEngineCallback;
   }
 

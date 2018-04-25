@@ -13,44 +13,37 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.route.RouteEngine;
-import com.mapbox.services.android.navigation.v5.route.RouteEngineCallback;
+import com.mapbox.services.android.navigation.v5.route.NavigationRouteEngine;
+import com.mapbox.services.android.navigation.v5.route.RouteEngineListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.List;
 import java.util.Locale;
 
-import retrofit2.Response;
-
-public class NavigationRouteEngine {
+public class NavigationViewRouteEngine extends NavigationRouteEngine implements RouteEngineListener {
 
   private static final int FIRST_ROUTE = 0;
   private static final int ONE_ROUTE = 1;
 
-  private final NavigationRouteEngineCallback navigationRouteEngineCallback;
-  private RouteEngine routeEngine;
+  private final NavigationViewRouteEngineListener listener;
   private RouteOptions routeOptions;
   private DirectionsRoute currentRoute;
   private Location rawLocation;
-  private Locale locale;
-  private int unitType;
-  private String accessToken;
-  private RouteEngineCallback routeEngineCallback = new RouteEngineCallback() {
-    @Override
-    public void onResponseReceived(Response<DirectionsResponse> response, RouteProgress routeProgress) {
-      processRoute(response);
-    }
 
-    @Override
-    public void onErrorReceived(Throwable throwable) {
-      navigationRouteEngineCallback.onRouteRequestError(throwable);
-    }
-  };
+  public NavigationViewRouteEngine(NavigationViewRouteEngineListener listener) {
+    this.listener = listener;
+    addRouteEngineListener(this);
+  }
 
-  public NavigationRouteEngine(NavigationRouteEngineCallback routeEngineCallback, String accessToken) {
-    this.navigationRouteEngineCallback = routeEngineCallback;
-    this.accessToken = accessToken;
+  @Override
+  public void onResponseReceived(DirectionsResponse response, @Nullable RouteProgress routeProgress) {
+    processRoute(response);
+  }
+
+  @Override
+  public void onErrorReceived(Throwable throwable) {
+    listener.onRouteRequestError(throwable);
   }
 
   /**
@@ -63,7 +56,6 @@ public class NavigationRouteEngine {
   public void extractRouteOptions(Context context, NavigationViewOptions options) {
     extractLocale(context, options);
     extractUnitType(options);
-    initRouteEngine();
 
     if (launchWithRoute(options)) {
       extractRouteFromOptions(options);
@@ -75,7 +67,7 @@ public class NavigationRouteEngine {
   public void fetchRouteFromOffRouteEvent(OffRouteEvent event) {
     if (OffRouteEvent.isValid(event)) {
       RouteProgress routeProgress = event.getRouteProgress();
-      routeEngine.fetchRoute(rawLocation, routeProgress);
+      findRouteFromRouteProgress(rawLocation, routeProgress);
     }
   }
 
@@ -83,18 +75,13 @@ public class NavigationRouteEngine {
     this.rawLocation = rawLocation;
   }
 
-
   private void extractLocale(Context context, NavigationViewOptions options) {
-    locale = LocaleUtils.getNonNullLocale(context, options.navigationOptions().locale());
+    updateLocale(LocaleUtils.getNonNullLocale(context, options.navigationOptions().locale()));
   }
 
   private void extractUnitType(NavigationViewOptions options) {
     MapboxNavigationOptions navigationOptions = options.navigationOptions();
-    unitType = navigationOptions.unitType();
-  }
-
-  private void initRouteEngine() {
-    routeEngine = new RouteEngine(accessToken, locale, unitType, routeEngineCallback);
+    updateUnitType(navigationOptions.unitType());
   }
 
   private boolean launchWithRoute(NavigationViewOptions options) {
@@ -117,16 +104,16 @@ public class NavigationRouteEngine {
 
   private void cacheRouteProfile(NavigationViewOptions options) {
     String routeProfile = options.directionsProfile();
-    routeEngine.updateRouteProfile(routeProfile);
+    updateRouteProfile(routeProfile);
   }
 
   private void cacheRouteLanguage(NavigationViewOptions options, @Nullable DirectionsRoute route) {
     if (options.navigationOptions().locale() != null) {
-      locale = options.navigationOptions().locale();
+      updateLocale(options.navigationOptions().locale());
     } else if (route != null && !TextUtils.isEmpty(route.routeOptions().language())) {
-      locale = new Locale(route.routeOptions().language());
+      updateLocale(new Locale(route.routeOptions().language()));
     } else {
-      locale = Locale.getDefault();
+      updateLocale(Locale.getDefault());
     }
   }
 
@@ -141,7 +128,7 @@ public class NavigationRouteEngine {
       List<Point> coordinates = routeOptions.coordinates();
       int destinationCoordinate = coordinates.size() - 1;
       Point destinationPoint = coordinates.get(destinationCoordinate);
-      navigationRouteEngineCallback.onDestinationSet(destinationPoint);
+      listener.onDestinationSet(destinationPoint);
     }
   }
 
@@ -151,14 +138,14 @@ public class NavigationRouteEngine {
       cacheRouteProfile(options);
       cacheRouteLanguage(options, null);
       Point origin = options.origin();
-      navigationRouteEngineCallback.onDestinationSet(destination);
-      routeEngine.fetchRouteFromCoordinates(origin, destination);
+      listener.onDestinationSet(destination);
+      findRouteFromOriginToDestination(origin, destination);
     }
   }
 
-  private void processRoute(@NonNull Response<DirectionsResponse> response) {
+  private void processRoute(@NonNull DirectionsResponse response) {
     if (isValidRoute(response)) {
-      List<DirectionsRoute> routes = response.body().routes();
+      List<DirectionsRoute> routes = response.routes();
       DirectionsRoute bestRoute = routes.get(FIRST_ROUTE);
       DirectionsRoute chosenRoute = currentRoute;
       if (isNavigationRunning(chosenRoute)) {
@@ -170,11 +157,11 @@ public class NavigationRouteEngine {
 
   private void updateCurrentRoute(DirectionsRoute currentRoute) {
     this.currentRoute = currentRoute;
-    navigationRouteEngineCallback.onRouteUpdate(currentRoute);
+    listener.onRouteUpdate(currentRoute);
   }
 
-  private boolean isValidRoute(Response<DirectionsResponse> response) {
-    return response.body() != null && !response.body().routes().isEmpty();
+  private boolean isValidRoute(DirectionsResponse response) {
+    return response != null && !response.routes().isEmpty();
   }
 
   private boolean isNavigationRunning(DirectionsRoute chosenRoute) {

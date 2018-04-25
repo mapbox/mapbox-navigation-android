@@ -17,9 +17,9 @@ import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.location.NavigationLocationEngine;
-import com.mapbox.services.android.navigation.ui.v5.location.NavigationLocationEngineCallback;
-import com.mapbox.services.android.navigation.ui.v5.route.NavigationRouteEngine;
-import com.mapbox.services.android.navigation.ui.v5.route.NavigationRouteEngineCallback;
+import com.mapbox.services.android.navigation.ui.v5.location.NavigationLocationEngineListener;
+import com.mapbox.services.android.navigation.ui.v5.route.NavigationViewRouteEngine;
+import com.mapbox.services.android.navigation.ui.v5.route.NavigationViewRouteEngineListener;
 import com.mapbox.services.android.navigation.ui.v5.route.OffRouteEvent;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
@@ -56,7 +56,7 @@ public class NavigationViewModel extends AndroidViewModel {
   final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
-  private NavigationRouteEngine navigationRouteEngine;
+  private NavigationViewRouteEngine navigationViewRouteEngine;
   private NavigationLocationEngine navigationLocationEngine;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
   private NavigationInstructionPlayer instructionPlayer;
@@ -74,18 +74,10 @@ public class NavigationViewModel extends AndroidViewModel {
 
   public NavigationViewModel(Application application) {
     super(application);
-    initConnectivityManager(application);
-    initNavigationRouteEngine();
-    initNavigationLocationEngine();
     this.accessToken = Mapbox.getAccessToken();
-  }
-
-  NavigationViewModel(Application application, String accessToken) {
-    super(application);
     initConnectivityManager(application);
     initNavigationRouteEngine();
     initNavigationLocationEngine();
-    this.accessToken = accessToken;
   }
 
   public void onCreate(boolean resumeState) {
@@ -174,7 +166,7 @@ public class NavigationViewModel extends AndroidViewModel {
     if (!resumeState) {
       navigationLocationEngine.initializeLocationEngine(getApplication(), options.shouldSimulateRoute());
       initNavigation(getApplication(), navigationOptions);
-      navigationRouteEngine.extractRouteOptions(getApplication(), options);
+      navigationViewRouteEngine.extractRouteOptions(getApplication(), options);
     }
   }
 
@@ -190,7 +182,8 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initNavigationRouteEngine() {
-    navigationRouteEngine = new NavigationRouteEngine(routeEngineCallback, accessToken);
+    navigationViewRouteEngine = new NavigationViewRouteEngine(routeEngineCallback);
+    navigationViewRouteEngine.updateAccessToken(accessToken);
   }
 
   private void initNavigationLocationEngine() {
@@ -244,7 +237,7 @@ public class NavigationViewModel extends AndroidViewModel {
         if (navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
           navigationViewEventDispatcher.onOffRoute(newOrigin);
           OffRouteEvent event = new OffRouteEvent(newOrigin, routeProgress);
-          navigationRouteEngine.fetchRouteFromOffRouteEvent(event);
+          navigationViewRouteEngine.fetchRouteFromOffRouteEvent(event);
           isOffRoute.setValue(true);
         }
       }
@@ -279,7 +272,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };
 
-  private NavigationRouteEngineCallback routeEngineCallback = new NavigationRouteEngineCallback() {
+  private NavigationViewRouteEngineListener routeEngineCallback = new NavigationViewRouteEngineListener() {
     @Override
     public void onRouteUpdate(DirectionsRoute directionsRoute) {
       updateRoute(directionsRoute);
@@ -299,10 +292,10 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };
 
-  private NavigationLocationEngineCallback locationEngineCallback = new NavigationLocationEngineCallback() {
+  private NavigationLocationEngineListener locationEngineCallback = new NavigationLocationEngineListener() {
     @Override
     public void onLocationUpdate(Location location) {
-      navigationRouteEngine.updateRawLocation(location);
+      navigationViewRouteEngine.updateRawLocation(location);
     }
   };
 

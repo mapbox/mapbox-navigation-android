@@ -17,8 +17,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.location.LocationValidator;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
-import com.mapbox.services.android.navigation.v5.route.RouteEngine;
-import com.mapbox.services.android.navigation.v5.route.RouteEngineCallback;
+import com.mapbox.services.android.navigation.v5.route.NavigationRouteEngine;
+import com.mapbox.services.android.navigation.v5.route.RouteEngineListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
@@ -26,7 +26,6 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 import java.util.List;
 import java.util.Locale;
 
-import retrofit2.Response;
 import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
@@ -50,7 +49,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private final IBinder localBinder = new LocalBinder();
   private NavigationNotification navigationNotification;
   private MapboxNavigation mapboxNavigation;
-  private RouteEngine routeEngine;
+  private NavigationRouteEngine routeEngine;
   private LocationEngine locationEngine;
   private LocationValidator locationValidator;
   private NavigationEngine thread;
@@ -144,8 +143,8 @@ public class NavigationService extends Service implements LocationEngineListener
 
 
   /**
-   * RouteEngineCallback from the {@link NavigationEngine} - if fired with checkFasterRoute set
-   * to true, a new {@link DirectionsRoute} should be fetched with {@link RouteEngine}.
+   * RouteEngineListener from the {@link NavigationEngine} - if fired with checkFasterRoute set
+   * to true, a new {@link DirectionsRoute} should be fetched with {@link NavigationRouteEngine}.
    *
    * @param location         to create a new origin
    * @param routeProgress    for various {@link com.mapbox.api.directions.v5.models.LegStep} data
@@ -154,7 +153,7 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onCheckFasterRoute(Location location, RouteProgress routeProgress, boolean checkFasterRoute) {
     if (checkFasterRoute) {
-      routeEngine.fetchRoute(location, routeProgress);
+      routeEngine.findRouteFromRouteProgress(location, routeProgress);
     }
   }
 
@@ -178,12 +177,9 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   void endNavigation() {
     locationEngine.removeLocationEngineListener(this);
+    removeRouteEngineListener();
     unregisterMapboxNotificationReceiver();
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-      thread.quitSafely();
-    } else {
-      thread.quit();
-    }
+    quitThread();
   }
 
   /**
@@ -244,7 +240,11 @@ public class NavigationService extends Service implements LocationEngineListener
   private void initRouteEngine(MapboxNavigation mapboxNavigation) {
     if (mapboxNavigation.options().enableFasterRouteDetection()) {
       String accessToken = mapboxNavigation.obtainAccessToken();
-      routeEngine = new RouteEngine(accessToken, locale, unitType, routeEngineCallback);
+      routeEngine = new NavigationRouteEngine();
+      routeEngine.updateAccessToken(accessToken);
+      routeEngine.updateLocale(locale);
+      routeEngine.updateUnitType(unitType);
+      routeEngine.addRouteEngineListener(routeEngineListener);
     }
   }
 
@@ -305,6 +305,12 @@ public class NavigationService extends Service implements LocationEngineListener
     queueLocationUpdateTask(location);
   }
 
+  private void removeRouteEngineListener() {
+    if (routeEngine != null) {
+      routeEngine.removeRouteEngineListener(routeEngineListener);
+    }
+  }
+
   /**
    * Unregisters the receiver used to end navigation for the Mapbox custom notification.
    */
@@ -314,11 +320,19 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
-  private RouteEngineCallback routeEngineCallback = new RouteEngineCallback() {
+  private void quitThread() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+      thread.quitSafely();
+    } else {
+      thread.quit();
+    }
+  }
+
+  private RouteEngineListener routeEngineListener = new RouteEngineListener() {
     @Override
-    public void onResponseReceived(Response<DirectionsResponse> response, RouteProgress routeProgress) {
-      if (mapboxNavigation.getFasterRouteEngine().isFasterRoute(response.body(), routeProgress)) {
-        mapboxNavigation.getEventDispatcher().onFasterRouteEvent(response.body().routes().get(0));
+    public void onResponseReceived(DirectionsResponse response, RouteProgress routeProgress) {
+      if (mapboxNavigation.getFasterRouteEngine().isFasterRoute(response, routeProgress)) {
+        mapboxNavigation.getEventDispatcher().onFasterRouteEvent(response.routes().get(0));
       }
     }
 
