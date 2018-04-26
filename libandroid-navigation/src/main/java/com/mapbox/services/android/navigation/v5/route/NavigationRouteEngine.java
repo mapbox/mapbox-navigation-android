@@ -41,7 +41,7 @@ public class NavigationRouteEngine implements RouteEngine {
   @Override
   public void addRouteEngineListener(RouteEngineListener listener) {
     if (!routeEngineListeners.contains(listener)) {
-      routeEngineListeners.remove(listener);
+      routeEngineListeners.add(listener);
     }
   }
 
