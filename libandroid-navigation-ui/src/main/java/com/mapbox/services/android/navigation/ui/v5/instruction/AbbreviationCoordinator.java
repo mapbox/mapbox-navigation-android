@@ -18,9 +18,9 @@ public class AbbreviationCoordinator {
   }
 
   public String abbreviateBannerText(List<InstructionLoader.Node> nodes) {
-    String bannerText;
+    String bannerText = join(nodes);
     int currAbbreviationPriority = 0;
-    while (!textFits(textView, bannerText = join(nodes))) {
+    while (!textFits(textView, bannerText)) {
       List<Integer> indices = abbreviations.get(new Integer(currAbbreviationPriority++));
 
       if (indices == null) {
@@ -30,6 +30,8 @@ public class AbbreviationCoordinator {
       for (Integer index : indices) {
         abbreviate(nodes.get(index));
       }
+
+      bannerText = join(nodes);
     }
 
     return bannerText;
