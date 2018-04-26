@@ -16,7 +16,7 @@ import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.location.NavigationLocationEngine;
-import com.mapbox.services.android.navigation.ui.v5.location.NavigationLocationEngineCallback;
+import com.mapbox.services.android.navigation.ui.v5.location.NavigationLocationEngineListener;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationViewRouteEngine;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationViewRouteEngineListener;
 import com.mapbox.services.android.navigation.ui.v5.route.OffRouteEvent;
@@ -299,7 +299,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };
 
-  private NavigationLocationEngineCallback locationEngineCallback = new NavigationLocationEngineCallback() {
+  private NavigationLocationEngineListener locationEngineCallback = new NavigationLocationEngineListener() {
     @Override
     public void onLocationUpdate(Location location) {
       navigationViewRouteEngine.updateRawLocation(location);
