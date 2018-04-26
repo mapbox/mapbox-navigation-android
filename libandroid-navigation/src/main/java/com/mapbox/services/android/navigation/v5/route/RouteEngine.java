@@ -12,19 +12,11 @@ public interface RouteEngine {
 
   void updateAccessToken(String accessToken);
 
-  String obtainAccessToken();
-
   void updateLocale(Locale locale);
-
-  Locale obtainLocale();
 
   void updateUnitType(@NavigationUnitType.UnitType int unitType);
 
-  int obtainUnitType();
-
   void updateRouteProfile(String routeProfile);
-
-  String obtainRouteProfile();
 
   void findRouteFromRouteProgress(Location location, RouteProgress routeProgress);
 

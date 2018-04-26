@@ -10,15 +10,14 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint;
 import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationViewRouteEngine;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationViewRouteEngineListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,8 +28,6 @@ import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, manifest = Config.DEFAULT_MANIFEST_NAME)
 public class NavigationViewRouteEngineTest extends BaseTest {
 
   private static final String DIRECTIONS_PRECISION_6 = "directions_v5_precision_6.json";
@@ -82,10 +79,56 @@ public class NavigationViewRouteEngineTest extends BaseTest {
     verify(routeEngineListener).onDestinationSet(destination);
   }
 
+  @Test
+  public void onResponseReceived_routeIsProcessed() throws Exception {
+    NavigationViewRouteEngineListener routeEngineListener = mock(NavigationViewRouteEngineListener.class);
+    NavigationViewRouteEngine routeEngine = buildRouteEngine(routeEngineListener);
+    DirectionsResponse response = buildDirectionsResponse();
+    DirectionsRoute route = response.routes().get(0);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+
+    routeEngine.onResponseReceived(response, routeProgress);
+
+    verify(routeEngineListener).onRouteUpdate(route);
+  }
+
+  @Test
+  public void onSecondResponseReceived_routesAreCompared() throws Exception {
+    NavigationViewRouteEngineListener routeEngineListener = mock(NavigationViewRouteEngineListener.class);
+    NavigationViewRouteEngine routeEngine = buildNavigationEngineWithOptions(routeEngineListener);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    DirectionsResponse response = buildDirectionsResponse();
+    DirectionsRoute route = response.routes().get(0);
+
+    routeEngine.onResponseReceived(response, routeProgress);
+
+    verify(routeEngineListener).onRouteUpdate(route);
+  }
+
+  @Test
+  public void onErrorReceived_errorListenerIsTriggered() throws Exception {
+    NavigationViewRouteEngineListener routeEngineListener = mock(NavigationViewRouteEngineListener.class);
+    NavigationViewRouteEngine routeEngine = buildRouteEngine(routeEngineListener);
+    Throwable throwable = mock(Throwable.class);
+
+    routeEngine.onErrorReceived(throwable);
+
+    verify(routeEngineListener).onRouteRequestError(throwable);
+  }
+
   @NonNull
   private NavigationViewRouteEngine buildRouteEngine(NavigationViewRouteEngineListener routeEngineListener) {
     NavigationViewRouteEngine routeEngine = new NavigationViewRouteEngine(routeEngineListener);
     routeEngine.updateAccessToken(ACCESS_TOKEN);
+    return routeEngine;
+  }
+
+  @NonNull
+  private NavigationViewRouteEngine buildNavigationEngineWithOptions(NavigationViewRouteEngineListener routeEngineListener) throws IOException {
+    NavigationViewOptions options = buildNavigationViewOptionsWithRoute();
+    Context mockContext = mock(Context.class);
+    NavigationViewRouteEngine routeEngine = buildRouteEngine(routeEngineListener);
+    routeEngine.extractRouteOptions(mockContext, options);
     return routeEngine;
   }
 
@@ -112,12 +155,17 @@ public class NavigationViewRouteEngineTest extends BaseTest {
   }
 
   private DirectionsRoute buildDirectionsRoute() throws IOException {
-    Gson gson = new GsonBuilder()
-      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
+    Gson gson = new GsonBuilder().registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
     String body = loadJsonFixture(DIRECTIONS_PRECISION_6);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     RouteOptions options = buildRouteOptionsWithCoordinates(response);
     return response.routes().get(0).toBuilder().routeOptions(options).build();
+  }
+
+  private DirectionsResponse buildDirectionsResponse() throws IOException {
+    Gson gson = new GsonBuilder().registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
+    String body = loadJsonFixture(DIRECTIONS_PRECISION_6);
+    return gson.fromJson(body, DirectionsResponse.class);
   }
 
   private RouteOptions buildRouteOptionsWithCoordinates(DirectionsResponse response) {
@@ -126,7 +174,7 @@ public class NavigationViewRouteEngineTest extends BaseTest {
       coordinates.add(waypoint.location());
     }
     return RouteOptions.builder()
-      .baseUrl("base_url")
+      .baseUrl(Constants.BASE_API_URL)
       .user("user")
       .profile("profile")
       .accessToken(ACCESS_TOKEN)
