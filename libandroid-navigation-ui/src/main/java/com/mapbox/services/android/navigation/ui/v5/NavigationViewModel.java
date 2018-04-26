@@ -79,14 +79,6 @@ public class NavigationViewModel extends AndroidViewModel {
     this.accessToken = Mapbox.getAccessToken();
   }
 
-  NavigationViewModel(Application application, String accessToken) {
-    super(application);
-    initConnectivityManager(application);
-    initNavigationRouteEngine();
-    initNavigationLocationEngine();
-    this.accessToken = accessToken;
-  }
-
   public void onCreate(boolean resumeState) {
     this.resumeState = resumeState;
     if (!resumeState) {
