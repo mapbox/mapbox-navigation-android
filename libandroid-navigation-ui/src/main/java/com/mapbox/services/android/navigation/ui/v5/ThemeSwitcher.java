@@ -80,7 +80,9 @@ public class ThemeSwitcher {
   static void setMapStyle(Context context, MapboxMap map, MapboxMap.OnStyleLoadedListener listener) {
     TypedValue mapStyleAttr = obtainTypedValue(context, R.attr.navigationViewMapStyle);
     String styleUrl = mapStyleAttr.string.toString();
-    map.setStyleUrl(styleUrl, listener);
+    if (map.getStyleUrl() != null && !map.getStyleUrl().contentEquals(styleUrl)) {
+      map.setStyleUrl(styleUrl, listener);
+    }
   }
 
   /**

@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -52,6 +53,7 @@ import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -69,6 +71,17 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
+  private static final List<Pair<Point, Point>> TEST_POINT_PAIRS = new ArrayList<Pair<Point, Point>>() {
+    {
+      add(new Pair<>(Point.fromLngLat(-122.396631, 37.7831650),
+        Point.fromLngLat(-122.384369, 37.616898))); // SF > SFO
+      add(new Pair<>(Point.fromLngLat(-77.033987, 38.900123),
+        Point.fromLngLat(-77.044818, 38.848942))); // DC > DCA
+      add(new Pair<>(Point.fromLngLat(-74.025559, 40.752380),
+        Point.fromLngLat(-74.177355, 40.690982))); // NY > EWR
+    }
+  };
+
 
   private LocationLayerPlugin locationLayer;
   private LocationEngine locationEngine;
@@ -143,6 +156,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
         locationEngine.activate();
       }
     }
+    checkShouldEnableLaunchButton();
   }
 
   @Override
@@ -193,7 +207,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    this.mapboxMap.setOnMapLongClickListener(this);
+    this.mapboxMap.addOnMapLongClickListener(this);
     initLocationEngine();
     initLocationLayer();
     initMapRoute();
@@ -308,8 +322,17 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private boolean getShouldSimulateRoute() {
+    if (isTestMode()) {
+      return true;
+    }
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     return sharedPreferences.getBoolean(getString(R.string.simulate_route_key), false);
+  }
+
+  private void checkShouldEnableLaunchButton() {
+    if (!launchRouteBtn.isEnabled() && isTestMode()) {
+      launchRouteBtn.setEnabled(true);
+    }
   }
 
   private String getRouteProfile() {
@@ -320,7 +343,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void launchNavigationWithRoute() {
-    if (route == null) {
+    if (!isTestMode() && route == null) {
       Snackbar.make(mapView, R.string.error_route_not_available, Snackbar.LENGTH_SHORT).show();
       return;
     }
@@ -332,6 +355,28 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       .unitType(getUnitType())
       .directionsProfile(getRouteProfile());
 
+    if (isTestMode()) {
+      addTestCoordinates(optionsBuilder);
+    } else {
+      addRouteOptions(locale, optionsBuilder);
+    }
+
+    NavigationLauncher.startNavigation(this, optionsBuilder.build());
+  }
+
+  private void addTestCoordinates(NavigationLauncherOptions.Builder optionsBuilder) {
+    Random random = new Random();
+    Pair<Point, Point> testPointPair = TEST_POINT_PAIRS.get(random.nextInt(TEST_POINT_PAIRS.size()));
+    optionsBuilder.origin(testPointPair.first);
+    optionsBuilder.destination(testPointPair.second);
+  }
+
+  private boolean isTestMode() {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+    return preferences.getBoolean(getString(R.string.test_mode_key), false);
+  }
+
+  private void addRouteOptions(Locale locale, NavigationLauncherOptions.Builder optionsBuilder) {
     if (sameLocaleAndUnitType(route.routeOptions())) {
       optionsBuilder.directionsRoute(route);
     } else {
@@ -339,8 +384,6 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
         .origin(currentLocation)
         .destination(destination);
     }
-
-    NavigationLauncher.startNavigation(this, optionsBuilder.build());
   }
 
   private boolean sameLocaleAndUnitType(RouteOptions routeOptions) {
