@@ -73,10 +73,10 @@ public class NavigationViewModel extends AndroidViewModel {
 
   public NavigationViewModel(Application application) {
     super(application);
+    this.accessToken = Mapbox.getAccessToken();
     initConnectivityManager(application);
     initNavigationRouteEngine();
     initNavigationLocationEngine();
-    this.accessToken = Mapbox.getAccessToken();
   }
 
   public void onCreate(boolean resumeState) {
