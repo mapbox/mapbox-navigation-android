@@ -178,13 +178,9 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   void endNavigation() {
     locationEngine.removeLocationEngineListener(this);
-    routeEngine.removeRouteEngineListener(routeEngineListener);
+    removeRouteEngineListener();
     unregisterMapboxNotificationReceiver();
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-      thread.quitSafely();
-    } else {
-      thread.quit();
-    }
+    quitThread();
   }
 
   /**
@@ -310,12 +306,26 @@ public class NavigationService extends Service implements LocationEngineListener
     queueLocationUpdateTask(location);
   }
 
+  private void removeRouteEngineListener() {
+    if (routeEngine != null) {
+      routeEngine.removeRouteEngineListener(routeEngineListener);
+    }
+  }
+
   /**
    * Unregisters the receiver used to end navigation for the Mapbox custom notification.
    */
   private void unregisterMapboxNotificationReceiver() {
     if (navigationNotification != null && navigationNotification instanceof MapboxNavigationNotification) {
       ((MapboxNavigationNotification) navigationNotification).unregisterReceiver(this);
+    }
+  }
+
+  private void quitThread() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+      thread.quitSafely();
+    } else {
+      thread.quit();
     }
   }
 
