@@ -21,8 +21,6 @@ import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import java.util.List;
 import java.util.Locale;
 
-import retrofit2.Response;
-
 public class NavigationViewRouteEngine extends NavigationRouteEngine implements RouteEngineListener {
 
   private static final int FIRST_ROUTE = 0;
@@ -39,7 +37,7 @@ public class NavigationViewRouteEngine extends NavigationRouteEngine implements 
   }
 
   @Override
-  public void onResponseReceived(Response<DirectionsResponse> response, @Nullable RouteProgress routeProgress) {
+  public void onResponseReceived(DirectionsResponse response, @Nullable RouteProgress routeProgress) {
     processRoute(response);
   }
 
@@ -145,9 +143,9 @@ public class NavigationViewRouteEngine extends NavigationRouteEngine implements 
     }
   }
 
-  private void processRoute(@NonNull Response<DirectionsResponse> response) {
+  private void processRoute(@NonNull DirectionsResponse response) {
     if (isValidRoute(response)) {
-      List<DirectionsRoute> routes = response.body().routes();
+      List<DirectionsRoute> routes = response.routes();
       DirectionsRoute bestRoute = routes.get(FIRST_ROUTE);
       DirectionsRoute chosenRoute = currentRoute;
       if (isNavigationRunning(chosenRoute)) {
@@ -162,8 +160,8 @@ public class NavigationViewRouteEngine extends NavigationRouteEngine implements 
     listener.onRouteUpdate(currentRoute);
   }
 
-  private boolean isValidRoute(Response<DirectionsResponse> response) {
-    return response.body() != null && !response.body().routes().isEmpty();
+  private boolean isValidRoute(DirectionsResponse response) {
+    return response != null && !response.routes().isEmpty();
   }
 
   private boolean isNavigationRunning(DirectionsRoute chosenRoute) {

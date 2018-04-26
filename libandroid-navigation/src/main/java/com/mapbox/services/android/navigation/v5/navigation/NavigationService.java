@@ -26,7 +26,6 @@ import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import java.util.List;
 import java.util.Locale;
 
-import retrofit2.Response;
 import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
@@ -331,9 +330,9 @@ public class NavigationService extends Service implements LocationEngineListener
 
   private RouteEngineListener routeEngineListener = new RouteEngineListener() {
     @Override
-    public void onResponseReceived(Response<DirectionsResponse> response, RouteProgress routeProgress) {
-      if (mapboxNavigation.getFasterRouteEngine().isFasterRoute(response.body(), routeProgress)) {
-        mapboxNavigation.getEventDispatcher().onFasterRouteEvent(response.body().routes().get(0));
+    public void onResponseReceived(DirectionsResponse response, RouteProgress routeProgress) {
+      if (mapboxNavigation.getFasterRouteEngine().isFasterRoute(response, routeProgress)) {
+        mapboxNavigation.getEventDispatcher().onFasterRouteEvent(response.routes().get(0));
       }
     }
 

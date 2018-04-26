@@ -3,10 +3,10 @@ package com.mapbox.services.android.navigation.v5.route;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
@@ -56,18 +56,8 @@ public class NavigationRouteEngine implements RouteEngine {
   }
 
   @Override
-  public String obtainAccessToken() {
-    return accessToken;
-  }
-
-  @Override
   public void updateLocale(Locale locale) {
     this.locale = locale;
-  }
-
-  @Override
-  public Locale obtainLocale() {
-    return locale;
   }
 
   @Override
@@ -76,20 +66,10 @@ public class NavigationRouteEngine implements RouteEngine {
   }
 
   @Override
-  public int obtainUnitType() {
-    return unitType;
-  }
-
-  @Override
   public void updateRouteProfile(String routeProfile) {
     if (RouteUtils.isValidRouteProfile(routeProfile)) {
       this.routeProfile = routeProfile;
     }
-  }
-
-  @Override
-  public String obtainRouteProfile() {
-    return routeProfile;
   }
 
   /**
@@ -192,7 +172,7 @@ public class NavigationRouteEngine implements RouteEngine {
       if (!response.isSuccessful()) {
         return;
       }
-      updateListeners(response, routeProgress);
+      updateListeners(response.body(), routeProgress);
     }
 
     @Override
@@ -201,7 +181,7 @@ public class NavigationRouteEngine implements RouteEngine {
     }
   };
 
-  private void updateListeners(Response<DirectionsResponse> response, RouteProgress routeProgress) {
+  private void updateListeners(DirectionsResponse response, RouteProgress routeProgress) {
     for (RouteEngineListener listener : routeEngineListeners) {
       listener.onResponseReceived(response, routeProgress);
     }
