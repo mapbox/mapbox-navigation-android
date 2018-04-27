@@ -26,11 +26,11 @@ import timber.log.Timber;
  * This class can be used to fetch new routes given a {@link Location} origin and
  * {@link RouteOptions} provided by a {@link RouteProgress}.
  */
-public class NavigationRouteEngine implements RouteEngine {
+public class RouteFetcher {
 
   private static final double BEARING_TOLERANCE = 90d;
 
-  private List<RouteEngineListener> routeEngineListeners = new CopyOnWriteArrayList<>();
+  private List<RouteListener> routeListeners = new CopyOnWriteArrayList<>();
 
   private String accessToken;
   private String routeProfile;
@@ -38,34 +38,28 @@ public class NavigationRouteEngine implements RouteEngine {
   private Locale locale = Locale.getDefault();
   private int unitType = NavigationUnitType.NONE_SPECIFIED;
 
-  @Override
-  public void addRouteEngineListener(RouteEngineListener listener) {
-    if (!routeEngineListeners.contains(listener)) {
-      routeEngineListeners.add(listener);
+  public void addRouteListener(RouteListener listener) {
+    if (!routeListeners.contains(listener)) {
+      routeListeners.add(listener);
     }
   }
 
-  @Override
-  public void removeRouteEngineListener(RouteEngineListener listener) {
-    routeEngineListeners.remove(listener);
+  public void removeRouteEngineListener(RouteListener listener) {
+    routeListeners.remove(listener);
   }
 
-  @Override
   public void updateAccessToken(String accessToken) {
     this.accessToken = accessToken;
   }
 
-  @Override
   public void updateLocale(Locale locale) {
     this.locale = locale;
   }
 
-  @Override
   public void updateUnitType(int unitType) {
     this.unitType = unitType;
   }
 
-  @Override
   public void updateRouteProfile(String routeProfile) {
     if (RouteUtils.isValidRouteProfile(routeProfile)) {
       this.routeProfile = routeProfile;
@@ -83,25 +77,15 @@ public class NavigationRouteEngine implements RouteEngine {
    * @param routeProgress for remaining waypoints along the route
    * @since 0.13.0
    */
-  @Override
   public void findRouteFromRouteProgress(Location location, RouteProgress routeProgress) {
     if (isValidProgress(location, routeProgress)) {
       return;
     }
     this.routeProgress = routeProgress;
-    Point origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    Double bearing = location.hasBearing() ? Float.valueOf(location.getBearing()).doubleValue() : null;
-    NavigationRoute.Builder builder = buildRouteRequestFromCurrentLocation(
-      origin, bearing, routeProgress, routeProfile
-    );
-    if (builder != null) {
-      builder.accessToken(accessToken);
-      addLocaleAndUnitType(builder);
-      builder.build().getRoute(directionsResponseCallback);
-    }
+    NavigationRoute.Builder builder = buildRouteRequest(location, routeProgress);
+    executeRouteCall(builder);
   }
 
-  @Override
   public void findRouteFromOriginToDestination(Point origin, Point destination) {
     NavigationRoute.Builder builder = NavigationRoute.builder()
       .accessToken(accessToken)
@@ -113,9 +97,9 @@ public class NavigationRouteEngine implements RouteEngine {
   }
 
   @Nullable
-  private static NavigationRoute.Builder buildRouteRequestFromCurrentLocation(Point origin, Double bearing,
-                                                                              RouteProgress progress,
-                                                                              @Nullable String routeProfile) {
+  private NavigationRoute.Builder buildRouteRequestFromCurrentLocation(Point origin, Double bearing,
+                                                                       RouteProgress progress,
+                                                                       @Nullable String routeProfile) {
     RouteOptions options = progress.directionsRoute().routeOptions();
     NavigationRoute.Builder builder = NavigationRoute.builder()
       .origin(origin, bearing, BEARING_TOLERANCE)
@@ -137,24 +121,24 @@ public class NavigationRouteEngine implements RouteEngine {
     builder.language(locale).voiceUnits(voiceUnitType);
   }
 
-  private static void addRouteProfile(String routeProfile, NavigationRoute.Builder builder) {
+  private void addRouteProfile(String routeProfile, NavigationRoute.Builder builder) {
     if (!TextUtils.isEmpty(routeProfile)) {
       builder.profile(routeProfile);
     }
   }
 
-  private static void addDestination(List<Point> remainingWaypoints, NavigationRoute.Builder builder) {
+  private void addDestination(List<Point> remainingWaypoints, NavigationRoute.Builder builder) {
     if (!remainingWaypoints.isEmpty()) {
       builder.destination(retrieveDestinationWaypoint(remainingWaypoints));
     }
   }
 
-  private static Point retrieveDestinationWaypoint(List<Point> remainingWaypoints) {
+  private Point retrieveDestinationWaypoint(List<Point> remainingWaypoints) {
     int lastWaypoint = remainingWaypoints.size() - 1;
     return remainingWaypoints.remove(lastWaypoint);
   }
 
-  private static void addWaypoints(List<Point> remainingCoordinates, NavigationRoute.Builder builder) {
+  private void addWaypoints(List<Point> remainingCoordinates, NavigationRoute.Builder builder) {
     if (!remainingCoordinates.isEmpty()) {
       for (Point coordinate : remainingCoordinates) {
         builder.addWaypoint(coordinate);
@@ -164,6 +148,22 @@ public class NavigationRouteEngine implements RouteEngine {
 
   private boolean isValidProgress(Location location, RouteProgress routeProgress) {
     return location == null || routeProgress == null;
+  }
+
+  private NavigationRoute.Builder buildRouteRequest(Location location, RouteProgress routeProgress) {
+    Point origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    Double bearing = location.hasBearing() ? Float.valueOf(location.getBearing()).doubleValue() : null;
+    return buildRouteRequestFromCurrentLocation(
+      origin, bearing, routeProgress, routeProfile
+    );
+  }
+
+  private void executeRouteCall(NavigationRoute.Builder builder) {
+    if (builder != null) {
+      builder.accessToken(accessToken);
+      addLocaleAndUnitType(builder);
+      builder.build().getRoute(directionsResponseCallback);
+    }
   }
 
   private Callback<DirectionsResponse> directionsResponseCallback = new Callback<DirectionsResponse>() {
@@ -182,13 +182,13 @@ public class NavigationRouteEngine implements RouteEngine {
   };
 
   private void updateListeners(DirectionsResponse response, RouteProgress routeProgress) {
-    for (RouteEngineListener listener : routeEngineListeners) {
+    for (RouteListener listener : routeListeners) {
       listener.onResponseReceived(response, routeProgress);
     }
   }
 
   private void updateListenersWithError(Throwable throwable) {
-    for (RouteEngineListener listener : routeEngineListeners) {
+    for (RouteListener listener : routeListeners) {
       listener.onErrorReceived(throwable);
     }
   }

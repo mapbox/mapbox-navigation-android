@@ -37,7 +37,7 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     setContentView(R.layout.activity_navigation);
     navigationView = findViewById(R.id.navigationView);
     navigationView.onCreate(savedInstanceState);
-    navigationView.getNavigationAsync(this);
+    navigationView.initialize(this);
   }
 
   @Override

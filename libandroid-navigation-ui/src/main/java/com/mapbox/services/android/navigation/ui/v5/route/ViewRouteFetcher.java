@@ -13,27 +13,27 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.route.NavigationRouteEngine;
-import com.mapbox.services.android.navigation.v5.route.RouteEngineListener;
+import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
+import com.mapbox.services.android.navigation.v5.route.RouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.List;
 import java.util.Locale;
 
-public class NavigationViewRouteEngine extends NavigationRouteEngine implements RouteEngineListener {
+public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
 
   private static final int FIRST_ROUTE = 0;
   private static final int ONE_ROUTE = 1;
 
-  private final NavigationViewRouteEngineListener listener;
+  private final ViewRouteListener listener;
   private RouteOptions routeOptions;
   private DirectionsRoute currentRoute;
   private Location rawLocation;
 
-  public NavigationViewRouteEngine(NavigationViewRouteEngineListener listener) {
+  public ViewRouteFetcher(ViewRouteListener listener) {
     this.listener = listener;
-    addRouteEngineListener(this);
+    addRouteListener(this);
   }
 
   @Override

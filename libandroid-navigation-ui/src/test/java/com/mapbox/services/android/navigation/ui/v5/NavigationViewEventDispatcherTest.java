@@ -28,7 +28,7 @@ public class NavigationViewEventDispatcherTest {
   public void setNavigationListener_cancelListenerIsCalled() throws Exception {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     NavigationListener navigationListener = mock(NavigationListener.class);
-    eventDispatcher.setNavigationListener(navigationListener);
+    eventDispatcher.assignNavigationListener(navigationListener);
 
     eventDispatcher.onCancelNavigation();
 
@@ -39,7 +39,7 @@ public class NavigationViewEventDispatcherTest {
   public void setNavigationListener_finishedListenerIsCalled() throws Exception {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     NavigationListener navigationListener = mock(NavigationListener.class);
-    eventDispatcher.setNavigationListener(navigationListener);
+    eventDispatcher.assignNavigationListener(navigationListener);
 
     eventDispatcher.onNavigationFinished();
 
@@ -50,7 +50,7 @@ public class NavigationViewEventDispatcherTest {
   public void setNavigationListener_runningListenerIsCalled() throws Exception {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     NavigationListener navigationListener = mock(NavigationListener.class);
-    eventDispatcher.setNavigationListener(navigationListener);
+    eventDispatcher.assignNavigationListener(navigationListener);
 
     eventDispatcher.onNavigationRunning();
 
@@ -92,7 +92,7 @@ public class NavigationViewEventDispatcherTest {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     RouteListener routeListener = mock(RouteListener.class);
     Point point = mock(Point.class);
-    eventDispatcher.setRouteListener(routeListener);
+    eventDispatcher.assignRouteListener(routeListener);
 
     eventDispatcher.onOffRoute(point);
 
@@ -104,7 +104,7 @@ public class NavigationViewEventDispatcherTest {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     RouteListener routeListener = mock(RouteListener.class);
     DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
-    eventDispatcher.setRouteListener(routeListener);
+    eventDispatcher.assignRouteListener(routeListener);
 
     eventDispatcher.onRerouteAlong(directionsRoute);
 
@@ -116,7 +116,7 @@ public class NavigationViewEventDispatcherTest {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     RouteListener routeListener = mock(RouteListener.class);
     String errorMessage = "errorMessage";
-    eventDispatcher.setRouteListener(routeListener);
+    eventDispatcher.assignRouteListener(routeListener);
 
     eventDispatcher.onFailedReroute(errorMessage);
 
@@ -128,7 +128,7 @@ public class NavigationViewEventDispatcherTest {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     RouteListener routeListener = mock(RouteListener.class);
     Point point = mock(Point.class);
-    eventDispatcher.setRouteListener(routeListener);
+    eventDispatcher.assignRouteListener(routeListener);
 
     eventDispatcher.allowRerouteFrom(point);
 
@@ -195,7 +195,7 @@ public class NavigationViewEventDispatcherTest {
   public void setFeedbackListener_feedbackOpenIsCalled() throws Exception {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     FeedbackListener feedbackListener = mock(FeedbackListener.class);
-    eventDispatcher.setFeedbackListener(feedbackListener);
+    eventDispatcher.assignFeedbackListener(feedbackListener);
 
     eventDispatcher.onFeedbackOpened();
 
@@ -206,7 +206,7 @@ public class NavigationViewEventDispatcherTest {
   public void setFeedbackListener_feedbackCancelledIsCalled() throws Exception {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     FeedbackListener feedbackListener = mock(FeedbackListener.class);
-    eventDispatcher.setFeedbackListener(feedbackListener);
+    eventDispatcher.assignFeedbackListener(feedbackListener);
 
     eventDispatcher.onFeedbackCancelled();
 
@@ -217,9 +217,9 @@ public class NavigationViewEventDispatcherTest {
   public void setFeedbackListener_feedbackSentIsCalled() throws Exception {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     FeedbackListener feedbackListener = mock(FeedbackListener.class);
-    eventDispatcher.setFeedbackListener(feedbackListener);
+    eventDispatcher.assignFeedbackListener(feedbackListener);
     FeedbackItem item = mock(FeedbackItem.class);
-    eventDispatcher.setFeedbackListener(feedbackListener);
+    eventDispatcher.assignFeedbackListener(feedbackListener);
 
     eventDispatcher.onFeedbackSent(item);
 
@@ -240,7 +240,7 @@ public class NavigationViewEventDispatcherTest {
   public void onFeedbackListenerNotSet_feedbackCancelledIsNotCalled() throws Exception {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     FeedbackListener feedbackListener = mock(FeedbackListener.class);
-    eventDispatcher.setFeedbackListener(feedbackListener);
+    eventDispatcher.assignFeedbackListener(feedbackListener);
 
     eventDispatcher.onFeedbackOpened();
 

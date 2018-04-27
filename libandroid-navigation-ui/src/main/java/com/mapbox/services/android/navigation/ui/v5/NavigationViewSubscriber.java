@@ -33,7 +33,7 @@ class NavigationViewSubscriber {
         if (point != null) {
           navigationPresenter.onDestinationUpdate(point);
         }
-      }ø
+      }
     });
 
     navigationViewModel.navigationLocation.observe(owner, new Observer<Location>() {

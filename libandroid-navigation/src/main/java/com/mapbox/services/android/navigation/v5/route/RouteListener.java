@@ -6,11 +6,9 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 /**
- * RouteEngineListener to added to a {@link RouteEngine}.
- * <p>
  * Will fire when either a successful / failed response is received.
  */
-public interface RouteEngineListener {
+public interface RouteListener {
 
   void onResponseReceived(DirectionsResponse response, @Nullable RouteProgress routeProgress);
 

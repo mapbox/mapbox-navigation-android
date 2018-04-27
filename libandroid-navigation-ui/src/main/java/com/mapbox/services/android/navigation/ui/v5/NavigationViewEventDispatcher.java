@@ -31,33 +31,27 @@ class NavigationViewEventDispatcher {
    * @param navigationViewOptions that contains all listeners to attach
    */
   void initializeListeners(NavigationViewOptions navigationViewOptions, MapboxNavigation navigation) {
-    setFeedbackListener(navigationViewOptions.feedbackListener());
-    setNavigationListener(navigationViewOptions.navigationListener());
-    setRouteListener(navigationViewOptions.routeListener());
-    setBottomSheetCallback(navigationViewOptions.bottomSheetCallback());
-
-    if (navigationViewOptions.progressChangeListener() != null) {
-      navigation.addProgressChangeListener(navigationViewOptions.progressChangeListener());
-    }
-
-    if (navigationViewOptions.milestoneEventListener() != null) {
-      navigation.addMilestoneEventListener(navigationViewOptions.milestoneEventListener());
-    }
+    assignFeedbackListener(navigationViewOptions.feedbackListener());
+    assignNavigationListener(navigationViewOptions.navigationListener());
+    assignRouteListener(navigationViewOptions.routeListener());
+    assignBottomSheetCallback(navigationViewOptions.bottomSheetCallback());
+    assignProgressChangeListner(navigationViewOptions, navigation);
+    assignMilestoneEventListener(navigationViewOptions, navigation);
   }
 
-  void setFeedbackListener(@Nullable FeedbackListener feedbackListener) {
+  void assignFeedbackListener(@Nullable FeedbackListener feedbackListener) {
     this.feedbackListener = feedbackListener;
   }
 
-  void setNavigationListener(@Nullable NavigationListener navigationListener) {
+  void assignNavigationListener(@Nullable NavigationListener navigationListener) {
     this.navigationListener = navigationListener;
   }
 
-  void setRouteListener(@Nullable RouteListener routeListener) {
+  void assignRouteListener(@Nullable RouteListener routeListener) {
     this.routeListener = routeListener;
   }
 
-  void setBottomSheetCallback(@Nullable BottomSheetCallback bottomSheetCallback) {
+  void assignBottomSheetCallback(@Nullable BottomSheetCallback bottomSheetCallback) {
     this.bottomSheetCallback = bottomSheetCallback;
   }
 
@@ -138,6 +132,18 @@ class NavigationViewEventDispatcher {
   void onBottomSheetStateChanged(View bottomSheet, int newState) {
     if (bottomSheetCallback != null) {
       bottomSheetCallback.onStateChanged(bottomSheet, newState);
+    }
+  }
+
+  private void assignProgressChangeListner(NavigationViewOptions navigationViewOptions, MapboxNavigation navigation) {
+    if (navigationViewOptions.progressChangeListener() != null) {
+      navigation.addProgressChangeListener(navigationViewOptions.progressChangeListener());
+    }
+  }
+
+  private void assignMilestoneEventListener(NavigationViewOptions navigationViewOptions, MapboxNavigation navigation) {
+    if (navigationViewOptions.milestoneEventListener() != null) {
+      navigation.addMilestoneEventListener(navigationViewOptions.milestoneEventListener());
     }
   }
 }

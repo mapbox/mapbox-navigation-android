@@ -17,8 +17,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.location.LocationValidator;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
-import com.mapbox.services.android.navigation.v5.route.NavigationRouteEngine;
-import com.mapbox.services.android.navigation.v5.route.RouteEngineListener;
+import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
+import com.mapbox.services.android.navigation.v5.route.RouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
@@ -49,7 +49,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private final IBinder localBinder = new LocalBinder();
   private NavigationNotification navigationNotification;
   private MapboxNavigation mapboxNavigation;
-  private NavigationRouteEngine routeEngine;
+  private RouteFetcher routeEngine;
   private LocationEngine locationEngine;
   private LocationValidator locationValidator;
   private NavigationEngine thread;
@@ -143,8 +143,8 @@ public class NavigationService extends Service implements LocationEngineListener
 
 
   /**
-   * RouteEngineListener from the {@link NavigationEngine} - if fired with checkFasterRoute set
-   * to true, a new {@link DirectionsRoute} should be fetched with {@link NavigationRouteEngine}.
+   * RouteListener from the {@link NavigationEngine} - if fired with checkFasterRoute set
+   * to true, a new {@link DirectionsRoute} should be fetched with {@link RouteFetcher}.
    *
    * @param location         to create a new origin
    * @param routeProgress    for various {@link com.mapbox.api.directions.v5.models.LegStep} data
@@ -240,11 +240,11 @@ public class NavigationService extends Service implements LocationEngineListener
   private void initRouteEngine(MapboxNavigation mapboxNavigation) {
     if (mapboxNavigation.options().enableFasterRouteDetection()) {
       String accessToken = mapboxNavigation.obtainAccessToken();
-      routeEngine = new NavigationRouteEngine();
+      routeEngine = new RouteFetcher();
       routeEngine.updateAccessToken(accessToken);
       routeEngine.updateLocale(locale);
       routeEngine.updateUnitType(unitType);
-      routeEngine.addRouteEngineListener(routeEngineListener);
+      routeEngine.addRouteListener(routeListener);
     }
   }
 
@@ -307,7 +307,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
   private void removeRouteEngineListener() {
     if (routeEngine != null) {
-      routeEngine.removeRouteEngineListener(routeEngineListener);
+      routeEngine.removeRouteEngineListener(routeListener);
     }
   }
 
@@ -328,7 +328,7 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
-  private RouteEngineListener routeEngineListener = new RouteEngineListener() {
+  private RouteListener routeListener = new RouteListener() {
     @Override
     public void onResponseReceived(DirectionsResponse response, RouteProgress routeProgress) {
       if (mapboxNavigation.getFasterRouteEngine().isFasterRoute(response, routeProgress)) {

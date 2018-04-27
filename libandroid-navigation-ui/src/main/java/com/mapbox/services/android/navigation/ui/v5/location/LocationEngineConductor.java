@@ -4,20 +4,25 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Location;
 
+import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineListener;
+import com.mapbox.android.core.location.LocationEnginePriority;
+import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
-import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.android.telemetry.location.LocationEngineListener;
-import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
-import com.mapbox.services.android.telemetry.location.LocationEngineProvider;
 
-public class NavigationLocationEngine {
+public class LocationEngineConductor {
 
-  private NavigationLocationEngineListener locationEngineCallback;
+  private static final int UPDATE_DELAY_IN_MILLIS = 1000;
+  private static final int SPEED_IN_MPH = 30;
+  private static final int FASTEST_INTERVAL_IN_MILLIS = 1000;
+  private static final int INTERVAL_IN_MILLIS = 0;
+
+  private LocationEngineConductorListener listener;
   private LocationEngine locationEngine;
 
-  public NavigationLocationEngine(NavigationLocationEngineListener locationEngineCallback) {
-    this.locationEngineCallback = locationEngineCallback;
+  public LocationEngineConductor(LocationEngineConductorListener listener) {
+    this.listener = listener;
   }
 
   public void onCreate() {
@@ -44,13 +49,13 @@ public class NavigationLocationEngine {
 
   private void initLocationEngine(Context context, boolean simulateRoute) {
     if (simulateRoute) {
-      locationEngine = new MockLocationEngine(1000, 30, false);
+      locationEngine = new MockLocationEngine(UPDATE_DELAY_IN_MILLIS, SPEED_IN_MPH, false);
     } else {
       LocationEngineProvider locationEngineProvider = new LocationEngineProvider(context.getApplicationContext());
       locationEngine = locationEngineProvider.obtainBestLocationEngineAvailable();
       locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
-      locationEngine.setFastestInterval(1000);
-      locationEngine.setInterval(0);
+      locationEngine.setFastestInterval(FASTEST_INTERVAL_IN_MILLIS);
+      locationEngine.setInterval(INTERVAL_IN_MILLIS);
       updateLastLocation();
     }
     activateLocationEngine();
@@ -74,7 +79,7 @@ public class NavigationLocationEngine {
   @SuppressWarnings( {"MissingPermission"})
   private void updateLastLocation() {
     if (locationEngine.getLastLocation() != null) {
-      locationEngineCallback.onLocationUpdate(locationEngine.getLastLocation());
+      listener.onLocationUpdate(locationEngine.getLastLocation());
     }
   }
 
@@ -93,7 +98,7 @@ public class NavigationLocationEngine {
 
     @Override
     public void onLocationChanged(Location location) {
-      locationEngineCallback.onLocationUpdate(location);
+      listener.onLocationUpdate(location);
     }
   };
 }

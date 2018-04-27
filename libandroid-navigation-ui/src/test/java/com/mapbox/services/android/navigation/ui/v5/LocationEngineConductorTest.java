@@ -5,10 +5,10 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.support.annotation.NonNull;
 
-import com.mapbox.services.android.navigation.ui.v5.location.NavigationLocationEngine;
-import com.mapbox.services.android.navigation.ui.v5.location.NavigationLocationEngineListener;
+import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductor;
+import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductorListener;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
-import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 import org.junit.Test;
 
@@ -17,23 +17,24 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class NavigationLocationEngineTest extends BaseTest {
+public class LocationEngineConductorTest extends BaseTest {
 
   @Test
   public void sanity() throws Exception {
-    NavigationLocationEngineListener mockCallback = mock(NavigationLocationEngineListener.class);
-    NavigationLocationEngine navigationLocationEngine = new NavigationLocationEngine(mockCallback);
+    LocationEngineConductorListener mockCallback = mock(LocationEngineConductorListener.class);
+    LocationEngineConductor locationEngineConductor = new LocationEngineConductor(mockCallback);
 
-    assertNotNull(navigationLocationEngine);
+    assertNotNull(locationEngineConductor);
   }
 
   @Test
   public void onInitWithSimulation_mockLocationEngineIsActivated() throws Exception {
-    NavigationLocationEngineListener mockCallback = mock(NavigationLocationEngineListener.class);
-    NavigationLocationEngine navigationLocationEngine = new NavigationLocationEngine(mockCallback);
+    LocationEngineConductorListener mockCallback = mock(LocationEngineConductorListener.class);
+    LocationEngineConductor locationEngineConductor = new LocationEngineConductor(mockCallback);
+    boolean simulateRouteEnabled = true;
+    locationEngineConductor.initializeLocationEngine(createMockContext(), simulateRouteEnabled);
 
-    navigationLocationEngine.initializeLocationEngine(createMockContext(), true);
-    LocationEngine locationEngine = navigationLocationEngine.obtainLocationEngine();
+    LocationEngine locationEngine = locationEngineConductor.obtainLocationEngine();
 
     assertTrue(locationEngine instanceof MockLocationEngine);
   }
