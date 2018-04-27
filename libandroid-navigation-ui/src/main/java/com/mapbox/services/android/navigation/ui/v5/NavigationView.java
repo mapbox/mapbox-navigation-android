@@ -22,6 +22,7 @@ import android.widget.ImageView;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -43,7 +44,6 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -89,7 +89,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private OnNavigationReadyCallback onNavigationReadyCallback;
   private boolean resumeState;
   private boolean isInitialized;
-  private List<Marker> markers = new ArrayList<>();
 
   public NavigationView(Context context) {
     this(context, null);
@@ -293,9 +292,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void addMarker(Point position) {
     LatLng markerPosition = new LatLng(position.latitude(),
       position.longitude());
-    markers.add(map.addMarker(new MarkerOptions()
+    Icon marker = ThemeSwitcher.retrieveMapMarker(getContext());
+    map.addMarker(new MarkerOptions()
       .position(markerPosition)
-      .icon(ThemeSwitcher.retrieveMapMarker(getContext()))));
+      .icon(marker));
   }
 
   /**
@@ -370,7 +370,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param options with containing route / coordinate data
    */
   public void startNavigation(NavigationViewOptions options) {
-    clearMarkers();
     if (!isInitialized) {
       establish(options);
       navigationViewModel.initializeNavigation(options, navigationViewEventDispatcher);
@@ -378,6 +377,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       initNavigationCamera();
       subscribeViewModels();
       isInitialized = true;
+    } else {
+      clearMarkers();
+      navigationViewModel.updateNavigation(options);
     }
   }
 
@@ -533,8 +535,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void clearMarkers() {
-    for (int i = 0; i < markers.size(); i++) {
-      map.removeMarker(markers.remove(i));
+    List<Marker> mapMarkers = map.getMarkers();
+    for (Marker marker : mapMarkers) {
+      map.removeMarker(marker);
     }
   }
 

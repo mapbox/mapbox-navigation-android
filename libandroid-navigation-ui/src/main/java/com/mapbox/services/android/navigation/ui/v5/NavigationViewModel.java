@@ -169,6 +169,10 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
+  void updateNavigation(NavigationViewOptions options) {
+    navigationViewRouteEngine.extractRouteOptions(getApplication(), options);
+  }
+
   void updateFeedbackScreenshot(String screenshot) {
     if (!TextUtils.isEmpty(feedbackId)) {
       this.screenshot = screenshot;
