@@ -27,12 +27,14 @@
 
     <string name="settings">Settings</string>
     <string name="simulate_route">Simulate Route</string>
+    <string name="test_mode">Test Mode</string>
     <string name="language">Language</string>
     <string name="unit_type">Unit Type</string>
     <string name="route_profile">Route Profile</string>
 
     <string name="unit_type_key">unit_type</string>
     <string name="simulate_route_key">simulate_route</string>
+    <string name="test_mode_key" translatable="false">test_mode_key</string>
     <string name="language_key">language</string>
     <string name="route_profile_key">route_profile</string>
     <string name="language_default_value_device_locale">device_locale</string>
