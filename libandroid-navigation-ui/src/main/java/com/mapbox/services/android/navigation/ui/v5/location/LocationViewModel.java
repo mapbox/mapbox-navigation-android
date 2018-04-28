@@ -8,13 +8,13 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.location.Location;
 
+import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineListener;
+import com.mapbox.android.core.location.LocationEnginePriority;
+import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.android.telemetry.location.LocationEngineListener;
-import com.mapbox.services.android.telemetry.location.LocationEnginePriority;
-import com.mapbox.services.android.telemetry.location.LocationEngineProvider;
 
 
 public class LocationViewModel extends AndroidViewModel implements LifecycleObserver, LocationEngineListener {
@@ -95,7 +95,7 @@ public class LocationViewModel extends AndroidViewModel implements LifecycleObse
    * Initializes the {@link LocationEngine} based on whether or not
    * simulation is enabled.
    */
-  @SuppressWarnings({"MissingPermission"})
+  @SuppressWarnings( {"MissingPermission"})
   private void initLocation(Application application) {
     if (!shouldSimulateRoute) {
       LocationEngineProvider locationEngineProvider = new LocationEngineProvider(application.getApplicationContext());

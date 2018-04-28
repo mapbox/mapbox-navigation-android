@@ -4,16 +4,14 @@ import android.location.Location;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 
+import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
-
-import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.android.telemetry.location.LocationEngineListener;
-import com.mapbox.core.constants.Constants;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
-
 
 import java.util.ArrayList;
 import java.util.List;
