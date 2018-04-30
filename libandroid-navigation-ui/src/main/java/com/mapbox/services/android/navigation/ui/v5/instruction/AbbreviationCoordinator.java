@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionLoader.BannerComponentNode;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -51,8 +52,14 @@ public class AbbreviationCoordinator {
    */
   public String abbreviateBannerText(List<BannerComponentNode> bannerComponentNodes, TextView textView) {
     String bannerText = join(bannerComponentNodes);
+
+    if (abbreviations.isEmpty()) {
+      return bannerText;
+    }
+
     int currAbbreviationPriority = 0;
-    while (!textFits(textView, bannerText)) {
+    int maxAbbreviationPriority = Collections.max(abbreviations.keySet());
+    while (!textFits(textView, bannerText) && (currAbbreviationPriority > maxAbbreviationPriority)) {
       List<Integer> indices = abbreviations.get(new Integer(currAbbreviationPriority++));
 
       if (indices == null) {
