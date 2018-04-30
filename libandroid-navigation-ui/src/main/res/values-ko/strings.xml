@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that rerouting is in progress -->
+    <string name="rerouting">경로 재지정</string>
+
+    <!-- Button title for re-centering tracking -->
+    <string name="re_center">중앙으로 복귀</string>
+
+    <!-- Indicates voice instructions are muted -->
+    <string name="muted">음소거</string>
+
+    <!-- Indicates voice instructions are unmuted -->
+    <string name="unmuted">음소거 해제</string>
+
+    <!-- Feedback type for Bad Route -->
+    <string name="feedback_bad_route">잘못된 \n경로</string>
+
+    <!-- Feedback type for Confusing Instruction -->
+    <string name="feedback_confusing_instruction">\n지시 혼동</string>
+
+    <!-- Feedback type for Other Map Issue Issue -->
+    <string name="feedback_general_issue">기타\n지도 이슈</string>
+
+    <!-- Feedback type for Missing Exit -->
+    <string name="feedback_missing_exit">없어진\n출구</string>
+
+    <!-- Feedback type for Missing Road -->
+    <string name="feedback_missing_road">없어진\n도로</string>
+
+    <!-- Feedback type for a maneuver that is Not Allowed -->
+    <string name="feedback_not_allowed">이용\n불가</string>
+
+    <!-- Feedback type for Report Traffic -->
+    <string name="feedback_report_traffic">교통\n안내</string>
+
+    <!-- Feedback type for Road Closed -->
+    <string name="feedback_road_closure">통행\n금지</string>
+
+    <!-- Test app dialog text -->
+    <string name="dropoff_dialog_text">다음 목적지로 이동하시겠습니까?</string>
+
+    <!-- Test app dialog text start next route -->
+    <string name="dropoff_dialog_positive_text">다음 목적지로 이동</string>
+
+    <!-- Test app dialog text cancel navigation -->
+    <string name="dropoff_dialog_negative_text">취소</string>
+
+</resources>

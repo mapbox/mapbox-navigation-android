@@ -29,7 +29,7 @@ import java.util.Locale;
  * You have an option to include a AWS Cognito Pool ID, which will initialize the UI with AWS Polly Voice instructions
  * </p><p>
  * For testing, you can launch with simulation, in which our
- * {@link com.mapbox.services.android.location.MockLocationEngine} will begin
+ * {@link com.mapbox.services.android.navigation.v5.location.MockLocationEngine} will begin
  * following the given {@link DirectionsRoute} once the UI is initialized
  * </p>
  */

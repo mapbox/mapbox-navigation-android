@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">Mapbox Navigation SDK for Android</string>
+    <string name="title_mock_navigation">Navigasi Rekayasa</string>
+    <string name="title_reroute">Mengubah Rute</string>
+    <string name="title_navigation_route_ui">Navigasi Rute Peta</string>
+    <string name="description_navigation_route_ui">Gambar Rute pada Peta</string>
+
+    <string name="title_navigation_view_ui">Tampilan Navigasi</string>
+    <string name="description_navigation_view_ui">Coba Tampilan Drop-in</string>
+
 </resources>

@@ -36,11 +36,7 @@ dependencies {
   api project(':libandroid-navigation')
 
   // Mapbox Map SDK
-  implementation(dependenciesList.mapboxMapSdk) {
-    exclude module: 'lost'
-    exclude module: 'mapbox-java-geojson'
-    exclude module: 'mapbox-android-telemetry'
-  }
+  implementation dependenciesList.mapboxMapSdk
 
   // Support libraries
   implementation dependenciesList.supportDesign
@@ -53,10 +49,7 @@ dependencies {
   annotationProcessor dependenciesList.lifecycleCompiler
 
   // Mapbox plugins
-  implementation(dependenciesList.locationLayerPlugin) {
-    exclude module: 'mapbox-android-services'
-    exclude module: 'mapbox-android-sdk'
-  }
+  implementation dependenciesList.locationLayerPlugin
 
   // AutoValues
   annotationProcessor dependenciesList.autoValue

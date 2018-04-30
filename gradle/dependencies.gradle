@@ -8,10 +8,10 @@ ext {
   ]
 
   version = [
-      mapboxMapSdk       : '5.5.2',
-      mapboxServices     : '2.2.10',
+      mapboxMapSdk       : '6.0.1',
       mapboxSdkServices  : '3.0.1',
-      locationLayerPlugin: '0.4.0',
+      mapboxEvents       : '3.0.3',
+      locationLayerPlugin: '0.5.0',
       autoValue          : '1.5',
       autoValueParcel    : '0.2.5',
       junit              : '4.12',
@@ -29,8 +29,9 @@ ext {
       spoonRunner        : '1.6.2',
       commonsIO          : '2.5',
       robolectric        : '3.5.1',
-      lifecycle          : '1.0.0',
-      picasso            : '2.5.2'
+      lifecycle          : '1.1.1',
+      picasso            : '2.5.2',
+      gmsLocation        : '11.0.4'
   ]
 
   pluginVersion = [
@@ -48,10 +49,9 @@ ext {
   dependenciesList = [
       // mapbox
       mapboxMapSdk           : "com.mapbox.mapboxsdk:mapbox-android-sdk:${version.mapboxMapSdk}",
-      mapboxServices         : "com.mapbox.mapboxsdk:mapbox-android-services:${version.mapboxServices}",
-      mapboxJavaServices     : "com.mapbox.mapboxsdk:mapbox-java-services:${version.mapboxServices}",
       mapboxSdkServices      : "com.mapbox.mapboxsdk:mapbox-sdk-services:${version.mapboxSdkServices}",
       mapboxSdkTurf          : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${version.mapboxSdkServices}",
+      mapboxEvents           : "com.mapbox.mapboxsdk:mapbox-android-telemetry:${version.mapboxEvents}",
       locationLayerPlugin    : "com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:${version.locationLayerPlugin}",
 
       // AutoValue
@@ -99,6 +99,8 @@ ext {
 
       // aws polly
       polly                  : "com.amazonaws:aws-android-sdk-polly:${version.awsPolly}",
+      // play services
+      gmsLocation            : "com.google.android.gms:play-services-location:${version.gmsLocation}",
 
       errorprone             : "com.google.errorprone:error_prone_core:${version.errorprone}"
 

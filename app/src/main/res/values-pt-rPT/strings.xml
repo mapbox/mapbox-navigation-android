@@ -1,4 +1,6 @@
 <resources>
+    <string name="app_name">Navegação Mapbox SDK para Android</string>
+
     <string name="title_mock_navigation">Navegação Simulada</string>
     <string name="description_mock_navigation">Simule uma sessão de navegação usando um serviço de localizações simuladas.</string>
 
@@ -14,4 +16,20 @@
     <string name="title_navigation_view_ui">Vistas de Navegação</string>
     <string name="description_navigation_view_ui">Experiência de UI Drop-In</string>
 
+    <string name="title_waypoint_navigation">Navegação de Pontos de Passagem</string>
+    <string name="description_waypoint_navigation">Navegação com pontos de passagem entre destinos</string>
+
+    <string name="title_embedded_navigation">Navegação Embutida</string>
+    <string name="description_embedded_navigation">Navegação numa vista que contém outras vistas</string>
+
+    <string name="settings">Definições</string>
+    <string name="simulate_route">Simular Rota</string>
+    <string name="language">Idioma</string>
+    <string name="unit_type">Tipo de Unidade</string>
+    <string name="route_profile">Perfil da Rota</string>
+
+    <string name="error_route_not_available">A rota atual não está disponível</string>
+    <string name="error_select_longer_route">Por favor selecione uma rota mais longa</string>
+    <string name="error_valid_route_not_found">Não foi encontrada uma rota válida.</string>
+    <string name="explanation_long_press_waypoint">Toque longo no mapa para adicionar um ponto de passagem</string>
 </resources>

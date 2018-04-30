@@ -3,12 +3,12 @@ package com.mapbox.services.android.navigation.ui.v5.utils;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.services.commons.geojson.Feature;
-import com.mapbox.services.commons.geojson.FeatureCollection;
 
 /**
  * Utils class useful for performing map operations such as adding sources, layers, and more.

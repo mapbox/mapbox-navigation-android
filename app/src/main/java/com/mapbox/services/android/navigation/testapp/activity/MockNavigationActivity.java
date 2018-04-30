@@ -11,19 +11,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
-import com.mapbox.mapboxsdk.constants.MyLocationTracking;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
+import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification;
@@ -42,7 +42,6 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
@@ -126,7 +125,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       ((MockLocationEngine) locationEngine).setRoute(route);
       navigation.setLocationEngine(locationEngine);
       navigation.startNavigation(route);
-      mapboxMap.addOnMapClickListener(null);
+      mapboxMap.removeOnMapClickListener(this);
     }
   }
 
@@ -142,8 +141,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
         Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())
       );
       mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
-      mapboxMap.setMyLocationEnabled(true);
-      mapboxMap.getTrackingSettings().setMyLocationTrackingMode(MyLocationTracking.TRACKING_FOLLOW);
     }
   }
 
@@ -152,15 +149,13 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     this.mapboxMap = mapboxMap;
 
     locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, null);
-    locationLayerPlugin.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
-
+    locationLayerPlugin.setRenderMode(RenderMode.GPS);
     navigationMapRoute = new NavigationMapRoute(navigation, mapView, mapboxMap);
 
     mapboxMap.addOnMapClickListener(this);
     Snackbar.make(mapView, "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
 
     locationEngine = new MockLocationEngine(1000, 50, true);
-    mapboxMap.setLocationSource(locationEngine);
 
     newOrigin();
   }
@@ -181,7 +176,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void calculateRoute() {
-    Location userLocation = mapboxMap.getMyLocation();
+    Location userLocation = locationEngine.getLastLocation();
     if (userLocation == null) {
       Timber.d("calculateRoute: User location is null, therefore, origin can't be set.");
       return;
@@ -216,7 +211,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
       @Override
       public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-        Timber.e("onFailure: navigation.getRoute()", throwable);
+        Timber.e(throwable, "onFailure: navigation.getRoute()");
       }
     });
   }

@@ -2,7 +2,7 @@ package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
 import android.support.annotation.StringDef;
 
-import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
+import com.mapbox.android.telemetry.TelemetryUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -10,7 +10,7 @@ import java.lang.annotation.RetentionPolicy;
 public class FeedbackEvent implements TelemetryEvent {
 
   @Retention(RetentionPolicy.SOURCE)
-  @StringDef({
+  @StringDef( {
     FEEDBACK_TYPE_GENERAL_ISSUE,
     FEEDBACK_TYPE_OTHER_MAP_ISSUE,
     FEEDBACK_TYPE_ACCIDENT,
@@ -28,7 +28,7 @@ public class FeedbackEvent implements TelemetryEvent {
   }
 
   @Retention(RetentionPolicy.SOURCE)
-  @StringDef({
+  @StringDef( {
     FEEDBACK_SOURCE_REROUTE,
     FEEDBACK_SOURCE_UI
   })
@@ -62,7 +62,7 @@ public class FeedbackEvent implements TelemetryEvent {
     this.feedbackSessionState = sessionState;
     this.feedbackSource = feedbackSource;
     this.feedbackType = FEEDBACK_TYPE_GENERAL_ISSUE; // Default until updated
-    this.eventId = TelemetryUtils.buildUUID();
+    this.eventId = TelemetryUtils.obtainUniversalUniqueIdentifier();
     this.screenshot = "";
   }
 

@@ -9,8 +9,10 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -23,9 +25,8 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
-import com.mapbox.services.Constants;
+import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -37,7 +38,6 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -150,7 +150,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     mapboxMap.setOnMapClickListener(this);
 
     locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, null);
-    locationLayerPlugin.setLocationLayerEnabled(LocationLayerMode.NAVIGATION);
+    locationLayerPlugin.setRenderMode(RenderMode.GPS);
 
     // Setup the mockLocationEngine
     mockLocationEngine = new MockLocationEngine(1000, 30, false);

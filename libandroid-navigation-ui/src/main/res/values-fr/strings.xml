@@ -3,7 +3,7 @@
     <!-- Indicates that rerouting is in progress -->
     <string name="rerouting">Recalcul de l’itinéraire...</string>
 
-    <!-- Button title for resume tracking -->
+    <!-- Button title for re-centering tracking -->
     <string name="re_center">Recentrer</string>
 
     <!-- Indicates voice instructions are muted -->

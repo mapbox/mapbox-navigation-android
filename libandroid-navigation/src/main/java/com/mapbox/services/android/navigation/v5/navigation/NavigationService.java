@@ -10,6 +10,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.location.LocationValidator;
@@ -19,8 +21,6 @@ import com.mapbox.services.android.navigation.v5.route.RouteEngine;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
-import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 
 import java.util.List;
 import java.util.Locale;
@@ -56,7 +56,8 @@ public class NavigationService extends Service implements LocationEngineListener
   private LocationValidator locationValidator;
   private NavigationEngine thread;
   private Locale locale;
-  private @NavigationUnitType.UnitType int unitType;
+  @NavigationUnitType.UnitType
+  private int unitType;
 
   @Nullable
   @Override
