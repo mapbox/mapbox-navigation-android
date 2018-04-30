@@ -11,6 +11,7 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionLoader.BannerComponentNode;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class InstructionImageLoader {
   private Picasso picassoImageLoader;
   private List<InstructionTarget> targets;
   private UrlDensityMap urlDensityMap;
+  private List<BannerShieldInfo> shieldUrls;
 
   private InstructionImageLoader() {
   }
@@ -66,9 +68,22 @@ public class InstructionImageLoader {
 
       this.urlDensityMap = new UrlDensityMap(context);
       targets = new ArrayList<>();
+      shieldUrls = new ArrayList<>();
 
       isInitialized = true;
     }
+  }
+
+  /**
+   * Uses the given BannerComponents object to construct a BannerShieldInfo object containing the
+   * information needed to load the proper image into the TextView where appropriate.
+   *
+   * @param textView to insert image into
+   * @param components containing image info
+   * @param index of the BannerComponentNode which refers to the given BannerComponents
+   */
+  public void addShieldInfo(TextView textView, BannerComponents components, int index) {
+    shieldUrls.add(new BannerShieldInfo(textView.getContext(), components, index));
   }
 
   /**
@@ -111,13 +126,28 @@ public class InstructionImageLoader {
    * @param textView   target for the banner text
    * @since 0.9.0
    */
-  public void loadImages(TextView textView, List<BannerShieldInfo> shieldUrls) {
+  public void loadImages(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
+    if (!hasImages(shieldUrls)) {
+      return;
+    }
+
+    updateShieldUrlIndices(bannerComponentNodes);
     createTargets(textView, shieldUrls);
     loadTargets();
   }
 
+  private void updateShieldUrlIndices(List<BannerComponentNode> bannerComponentNodes) {
+    for (BannerShieldInfo bannerShieldInfo : shieldUrls) {
+      bannerShieldInfo.setStartIndex(bannerComponentNodes.get(bannerShieldInfo.getNodeIndex()).startIndex);
+    }
+  }
+
   private static boolean hasComponents(BannerText bannerText) {
     return bannerText != null && bannerText.components() != null && !bannerText.components().isEmpty();
+  }
+
+  private static boolean hasImages(List<BannerShieldInfo> shieldUrls) {
+    return !shieldUrls.isEmpty();
   }
 
   /**
@@ -134,7 +164,7 @@ public class InstructionImageLoader {
     }
   }
 
-  private static boolean hasImageUrl(BannerComponents components) {
+  public boolean hasImageUrl(BannerComponents components) {
     return !TextUtils.isEmpty(components.imageBaseUrl());
   }
 
@@ -161,6 +191,13 @@ public class InstructionImageLoader {
   private void checkIsInitialized() {
     if (!isInitialized) {
       throw new RuntimeException("InstructionLoader must be initialized prior to loading image URLs");
+    }
+  }
+
+  static class ShieldBannerComponentNode extends BannerComponentNode {
+
+    ShieldBannerComponentNode(BannerComponents bannerComponents, int startIndex) {
+      super(bannerComponents, startIndex);
     }
   }
 }

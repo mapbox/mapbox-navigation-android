@@ -12,9 +12,7 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Utility class that can be used to load a given {@link BannerText} into the provided
@@ -27,14 +25,12 @@ import java.util.Map;
  * a new {@link ImageSpan} is created and set to the appropriate position of the {@link Spannable}/
  */
 public class InstructionLoader {
-
   private static InstructionLoader instance;
   private static InstructionImageLoader instructionImageLoader;
-  private List<BannerShieldInfo> shieldUrls;
-  private List<Node> nodes;
-  private Map<Integer, List<Integer>> abbreviations;
-  int length = 0;
-
+  private AbbreviationCoordinator abbreviationCoordinator;
+  private List<BannerComponentNode> bannerComponentNodes;
+  private List<BannerComponents> bannerComponents;
+  private int length = 0;
   private boolean isInitialized;
 
   private InstructionLoader() {
@@ -102,17 +98,16 @@ public class InstructionLoader {
       return;
     }
 
-    parseBannerComponents(textView, bannerText.components());
+    abbreviationCoordinator = new AbbreviationCoordinator();
+    this.bannerComponents = bannerText.components();
+
+    parseBannerComponents(textView);
     setText(textView);
     loadImages(textView);
   }
 
   private void loadImages(TextView textView) {
-    List<BannerShieldInfo> shieldUrls = getShieldUrls();
-
-    if (hasImages(shieldUrls)) {
-      instructionImageLoader.loadImages(textView, shieldUrls);
-    }
+    instructionImageLoader.loadImages(textView, bannerComponentNodes);
   }
 
   private void setText(TextView textView) {
@@ -121,27 +116,32 @@ public class InstructionLoader {
   }
 
   private String getAbbreviatedBannerText(TextView textView) {
-    AbbreviationCoordinator abbreviationCoordinator = new AbbreviationCoordinator(textView, abbreviations);
-    return abbreviationCoordinator.abbreviateBannerText(nodes);
+    return abbreviationCoordinator.abbreviateBannerText(bannerComponentNodes, textView);
   }
 
-  private void parseBannerComponents(TextView textView, List<BannerComponents> bannerComponents) {
-    nodes = new ArrayList<>();
-    shieldUrls = new ArrayList<>();
-    abbreviations = new HashMap<>();
+  private void parseBannerComponents(TextView textView) {
+    bannerComponentNodes = new ArrayList<>();
 
     for (BannerComponents components : bannerComponents) {
       if (hasImageUrl(components)) {
-        addShieldInfo(textView, components);
-        nodes.add(new ShieldNode(components, length - 1));
+        setupWithImages(components, textView);
       } else if (hasAbbreviation(components)) {
-        addPriorityInfo(components);
-        nodes.add(new AbbreviationNode(components, length - 1));
+        setupWithAbbreviations(components);
       } else {
-        nodes.add(new Node(components, length - 1));
+        bannerComponentNodes.add(new BannerComponentNode(components, length - 1));
       }
       length += components.text().length() + 1;
     }
+  }
+
+  private void setupWithImages(BannerComponents components, TextView textView) {
+    instructionImageLoader.addShieldInfo(textView, components, bannerComponentNodes.size());
+    bannerComponentNodes.add(new InstructionImageLoader.ShieldBannerComponentNode(components, length - 1));
+  }
+
+  private void setupWithAbbreviations(BannerComponents components) {
+    abbreviationCoordinator.addPriorityInfo(components, bannerComponentNodes.size());
+    bannerComponentNodes.add(new AbbreviationCoordinator.AbbreviationBannerComponentNode(components, length - 1));
   }
 
   private boolean hasAbbreviation(BannerComponents components) {
@@ -152,31 +152,8 @@ public class InstructionLoader {
     return !TextUtils.isEmpty(components.imageBaseUrl());
   }
 
-  private void addPriorityInfo(BannerComponents components) {
-    int abbreviationPriority = components.abbreviationPriority();
-    if (abbreviations.get(Integer.valueOf(abbreviationPriority)) == null) {
-      abbreviations.put(abbreviationPriority, new ArrayList<Integer>());
-    }
-    abbreviations.get(abbreviationPriority).add(Integer.valueOf(nodes.size()));
-  }
-
-  public List<BannerShieldInfo> getShieldUrls() {
-    for (BannerShieldInfo bannerShieldInfo : shieldUrls) {
-      bannerShieldInfo.setStartIndex(nodes.get(bannerShieldInfo.getNodeIndex()).startIndex);
-    }
-    return shieldUrls;
-  }
-
-  private void addShieldInfo(TextView textView, BannerComponents components) {
-    shieldUrls.add(new BannerShieldInfo(textView.getContext(), components, nodes.size()));
-  }
-
   private static boolean hasComponents(BannerText bannerText) {
     return bannerText != null && bannerText.components() != null && !bannerText.components().isEmpty();
-  }
-
-  private static boolean hasImages(List<BannerShieldInfo> shieldUrls) {
-    return !shieldUrls.isEmpty();
   }
 
   private void checkIsInitialized() {
@@ -185,11 +162,14 @@ public class InstructionLoader {
     }
   }
 
-  static class Node {
+  /**
+   * Class used to construct a list of BannerComponents to be populated into a TextView
+   */
+  static class BannerComponentNode {
     protected BannerComponents bannerComponents;
     protected int startIndex;
 
-    Node(BannerComponents bannerComponents, int startIndex) {
+    protected BannerComponentNode(BannerComponents bannerComponents, int startIndex) {
       this.bannerComponents = bannerComponents;
       this.startIndex = startIndex;
     }
@@ -201,29 +181,6 @@ public class InstructionLoader {
 
     public void setStartIndex(int startIndex) {
       this.startIndex = startIndex;
-    }
-  }
-
-  static class ShieldNode extends Node {
-    ShieldNode(BannerComponents bannerComponents, int startIndex) {
-      super(bannerComponents, startIndex);
-    }
-  }
-
-  static class AbbreviationNode extends Node {
-    protected boolean abbreviate;
-
-    AbbreviationNode(BannerComponents bannerComponents, int startIndex) {
-      super(bannerComponents, startIndex);
-    }
-
-    @Override
-    public String toString() {
-      return abbreviate ? bannerComponents.abbreviation() : bannerComponents.text();
-    }
-
-    public void setAbbreviate(boolean abbreviate) {
-      this.abbreviate = abbreviate;
     }
   }
 }
