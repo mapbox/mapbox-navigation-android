@@ -17,12 +17,13 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.android.core.location.LocationEngineProvider;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
@@ -331,7 +332,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       .unitType(getUnitType())
       .directionsProfile(getRouteProfile());
 
-    if (route.routeOptions().language().equals(locale.getLanguage())) {
+    if (sameLocaleAndUnitType(route.routeOptions())) {
       optionsBuilder.directionsRoute(route);
     } else {
       optionsBuilder
@@ -340,6 +341,11 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     }
 
     NavigationLauncher.startNavigation(this, optionsBuilder.build());
+  }
+
+  private boolean sameLocaleAndUnitType(RouteOptions routeOptions) {
+    return routeOptions.language().equals(getLocale().getLanguage())
+      && routeOptions.voiceUnits().equals(NavigationUnitType.getDirectionsCriteriaUnitType(getUnitType(), getLocale()));
   }
 
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
