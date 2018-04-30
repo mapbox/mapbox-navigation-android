@@ -31,6 +31,43 @@ class NavigationViewSubscriber {
   void subscribe(LifecycleOwner owner, final LocationViewModel locationViewModel,
                  final RouteViewModel routeViewModel, final NavigationViewModel navigationViewModel) {
 
+    navigationViewModel.addCallback(new NavigationViewModel.Callback() {
+      @Override
+      public void userOffRoute(OffRouteEvent offRouteEvent) {
+        isOffRoute = true;
+        Point newOrigin = offRouteEvent.getNewOrigin();
+        if (navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
+          navigationViewEventDispatcher.onOffRoute(newOrigin);
+          routeViewModel.fetchRouteFromOffRouteEvent(offRouteEvent);
+        }
+      }
+
+      @Override
+      public void fasterRouteFound(DirectionsRoute directionsRoute) {
+        if (directionsRoute != null) {
+          navigationViewModel.updateRoute(directionsRoute);
+          locationViewModel.updateRoute(directionsRoute);
+          navigationPresenter.onRouteUpdate(directionsRoute);
+        }
+      }
+    });
+
+    routeViewModel.setCallback(new RouteViewModel.Callback() {
+      @Override
+      public void onRouteChanged(DirectionsRoute directionsRoute) {
+        if (directionsRoute != null) {
+          navigationViewModel.updateRoute(directionsRoute);
+          locationViewModel.updateRoute(directionsRoute);
+          navigationPresenter.onRouteUpdate(directionsRoute);
+
+          if (isOffRoute) {
+            navigationViewEventDispatcher.onRerouteAlong(directionsRoute);
+            isOffRoute = false;
+          }
+        }
+      }
+    });
+
     locationViewModel.rawLocation.observe(owner, new Observer<Location>() {
       @Override
       public void onChanged(@Nullable Location location) {
@@ -56,21 +93,6 @@ class NavigationViewSubscriber {
           navigationViewEventDispatcher.onFailedReroute(requestErrorMessage);
           // Discard message after firing the listener
           routeViewModel.requestErrorMessage.setValue(null);
-        }
-      }
-    });
-
-    routeViewModel.route.observe(owner, new Observer<DirectionsRoute>() {
-      @Override
-      public void onChanged(@Nullable DirectionsRoute directionsRoute) {
-        if (directionsRoute != null) {
-          navigationViewModel.updateRoute(directionsRoute);
-          locationViewModel.updateRoute(directionsRoute);
-          navigationPresenter.onRouteUpdate(directionsRoute);
-
-          if (isOffRoute) {
-            navigationViewEventDispatcher.onRerouteAlong(directionsRoute);
-          }
         }
       }
     });
@@ -106,33 +128,6 @@ class NavigationViewSubscriber {
       }
     });
 
-    navigationViewModel.fasterRoute.observe(owner, new Observer<DirectionsRoute>() {
-      @Override
-      public void onChanged(@Nullable DirectionsRoute directionsRoute) {
-        if (directionsRoute != null) {
-          navigationViewModel.updateRoute(directionsRoute);
-          locationViewModel.updateRoute(directionsRoute);
-          navigationPresenter.onRouteUpdate(directionsRoute);
-          // To prevent from firing on rotation
-          navigationViewModel.fasterRoute.setValue(null);
-        }
-      }
-    });
-
-    navigationViewModel.offRouteEvent.observe(owner, new Observer<OffRouteEvent>() {
-      @Override
-      public void onChanged(@Nullable OffRouteEvent event) {
-        if (event != null) {
-          Point newOrigin = event.getNewOrigin();
-          if (navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
-            navigationViewEventDispatcher.onOffRoute(newOrigin);
-            routeViewModel.fetchRouteFromOffRouteEvent(event);
-            preventDuplicateOffRouteEvents(navigationViewModel);
-          }
-        }
-      }
-    });
-
     navigationViewModel.shouldRecordScreenshot.observe(owner, new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean shouldRecordScreenshot) {
@@ -164,18 +159,5 @@ class NavigationViewSubscriber {
         }
       }
     });
-
-    navigationViewModel.isOffRoute.observe(owner, new Observer<Boolean>() {
-      @Override
-      public void onChanged(@Nullable Boolean isOffRoute) {
-        if (isOffRoute != null) {
-          NavigationViewSubscriber.this.isOffRoute = isOffRoute;
-        }
-      }
-    });
-  }
-
-  private void preventDuplicateOffRouteEvents(NavigationViewModel navigationViewModel) {
-    navigationViewModel.offRouteEvent.setValue(null);
   }
 }
