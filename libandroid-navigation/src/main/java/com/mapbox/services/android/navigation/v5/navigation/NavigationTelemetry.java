@@ -2,10 +2,13 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.support.annotation.NonNull;
 
+import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineListener;
+import com.mapbox.android.telemetry.Event;
+import com.mapbox.android.telemetry.TelemetryUtils;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.core.utils.TextUtils;
@@ -24,12 +27,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
-import com.mapbox.services.android.telemetry.MapboxEvent;
-import com.mapbox.services.android.telemetry.MapboxTelemetry;
-import com.mapbox.services.android.telemetry.constants.TelemetryConstants;
-import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.android.telemetry.location.LocationEngineListener;
-import com.mapbox.services.android.telemetry.utils.TelemetryUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,7 +60,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   private RingBuffer<Location> locationBuffer;
   private Date lastRerouteDate;
 
-  private String vendorId;
   private boolean isOffRoute;
   private boolean isConfigurationChange;
 
@@ -142,23 +138,19 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       updateLocationEngine(locationEngine);
 
       validateAccessToken(accessToken);
+      NavigationMetricsWrapper.init(context, accessToken, BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT);
 
       MapboxNavigationOptions options = navigation.options();
       // Set sdkIdentifier based on if from UI or not
       String sdkIdentifier = updateSdkIdentifier(options);
       // Enable extra logging in debug mode
-      MapboxTelemetry.getInstance().setDebugLoggingEnabled(options.isDebugLoggingEnabled());
-
-      updateUserAgent(context, accessToken, sdkIdentifier);
-
-      // Get the current vendorId
-      vendorId = obtainVendorId(context);
+      NavigationMetricsWrapper.enableLogging();
 
       NavigationMetricsWrapper.sdkIdentifier = sdkIdentifier;
-      NavigationMetricsWrapper.turnstileEvent();
-      // TODO This should be removed when we figure out a solution in NavigationTelemetry
-      // Force pushing a TYPE_MAP_LOAD event to ensure that the Nav turnstile event is sent
-      MapboxTelemetry.getInstance().pushEvent(MapboxEvent.buildMapLoadEvent());
+      Event navTurnstileEvent = NavigationMetricsWrapper.turnstileEvent();
+      // TODO Check if we are sending two turnstile events (Maps and Nav) and if so, do we want to track them
+      // separately?
+      NavigationMetricsWrapper.push(navTurnstileEvent);
 
       isInitialized = true;
     }
@@ -187,7 +179,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   void startSession(DirectionsRoute directionsRoute) {
     if (!isConfigurationChange) {
       navigationSessionState = navigationSessionState.toBuilder()
-        .sessionIdentifier(TelemetryUtils.buildUUID())
+        .sessionIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier())
         .originalDirectionRoute(directionsRoute)
         .originalRequestIdentifier(directionsRoute.routeOptions().requestUuid())
         .requestIdentifier(directionsRoute.routeOptions().requestUuid())
@@ -213,6 +205,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
         NavigationMetricsWrapper.cancelEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
       }
       lifecycleMonitor = null;
+      NavigationMetricsWrapper.disable();
       isInitialized = false;
     }
   }
@@ -346,13 +339,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     return sdkIdentifier;
   }
 
-  private void updateUserAgent(@NonNull Context context, @NonNull String accessToken, String sdkIdentifier) {
-    String userAgent = String.format("%s/%s", sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
-    MapboxTelemetry.getInstance().initialize(context, accessToken, userAgent, sdkIdentifier,
-      BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
-    MapboxTelemetry.getInstance().newUserAgent(userAgent);
-  }
-
   private void flushEventQueues() {
     for (FeedbackEvent feedbackEvent : queuedFeedbackEvents) {
       sendFeedbackEvent(feedbackEvent);
@@ -360,11 +346,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     for (RerouteEvent rerouteEvent : queuedRerouteEvents) {
       sendRerouteEvent(rerouteEvent);
     }
-  }
-
-  private String obtainVendorId(Context context) {
-    SharedPreferences prefs = TelemetryUtils.getSharedPreferences(context.getApplicationContext());
-    return prefs.getString(TelemetryConstants.MAPBOX_SHARED_PREFERENCE_KEY_VENDOR_ID, "");
   }
 
   private void updateCurrentLocation(Location rawLocation) {
@@ -521,7 +502,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
     NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, metricProgress,
       feedbackEvent.getSessionState().eventLocation(), feedbackEvent.getDescription(),
-      feedbackEvent.getFeedbackType(), feedbackEvent.getScreenshot(), feedbackEvent.getEventId(), vendorId);
+      feedbackEvent.getFeedbackType(), feedbackEvent.getScreenshot(), feedbackEvent.getFeedbackSource());
   }
 
   private TelemetryEvent findQueuedTelemetryEvent(String eventId) {
