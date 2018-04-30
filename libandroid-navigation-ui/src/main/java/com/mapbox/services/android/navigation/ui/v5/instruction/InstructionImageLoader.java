@@ -179,6 +179,7 @@ public class InstructionImageLoader {
           }
         }));
     }
+    shieldUrls.clear();
   }
 
   private void loadTargets() {
