@@ -59,7 +59,7 @@ public class AbbreviationCoordinator {
 
     int currAbbreviationPriority = 0;
     int maxAbbreviationPriority = Collections.max(abbreviations.keySet());
-    while (!textFits(textView, bannerText) && (currAbbreviationPriority > maxAbbreviationPriority)) {
+    while (!textFits(textView, bannerText) && (currAbbreviationPriority <= maxAbbreviationPriority)) {
       List<Integer> indices = abbreviations.get(new Integer(currAbbreviationPriority++));
 
       if (indices == null) {
