@@ -20,12 +20,12 @@ public class InstructionTarget implements Target {
 
   private TextView textView;
   private Spannable instructionSpannable;
-  private List<BannerShieldInfo> shields;
-  private BannerShieldInfo shield;
+  private List<BannerShield> shields;
+  private BannerShield shield;
   private InstructionLoadedCallback instructionLoadedCallback;
 
   InstructionTarget(TextView textView, Spannable instructionSpannable,
-                    List<BannerShieldInfo> shields, BannerShieldInfo shield,
+                    List<BannerShield> shields, BannerShield shield,
                     InstructionLoadedCallback instructionLoadedCallback) {
     this.textView = textView;
     this.instructionSpannable = instructionSpannable;
@@ -34,7 +34,7 @@ public class InstructionTarget implements Target {
     this.instructionLoadedCallback = instructionLoadedCallback;
   }
 
-  BannerShieldInfo getShield() {
+  BannerShield getShield() {
     return shield;
   }
 

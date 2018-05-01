@@ -4,13 +4,13 @@ import android.content.Context;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
 
-class BannerShieldInfo {
+class BannerShield {
   private String url;
   private String text;
   private int nodeIndex;
   private int startIndex = -1;
 
-  BannerShieldInfo(Context context, BannerComponents bannerComponents, int nodeIndex) {
+  BannerShield(Context context, BannerComponents bannerComponents, int nodeIndex) {
     this.url = new UrlDensityMap(context).get(bannerComponents.imageBaseUrl());
     this.nodeIndex = nodeIndex;
     this.text = bannerComponents.text();

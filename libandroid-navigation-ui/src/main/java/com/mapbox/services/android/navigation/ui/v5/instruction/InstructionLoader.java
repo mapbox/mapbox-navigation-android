@@ -30,7 +30,7 @@ public class InstructionLoader {
   private AbbreviationCoordinator abbreviationCoordinator;
   private List<BannerComponentNode> bannerComponentNodes;
   private List<BannerComponents> bannerComponents;
-  private int length = 0;
+  private int length;
   private boolean isInitialized;
 
   private InstructionLoader() {
@@ -120,6 +120,7 @@ public class InstructionLoader {
   }
 
   private void parseBannerComponents(TextView textView) {
+    length = 0;
     bannerComponentNodes = new ArrayList<>();
 
     for (BannerComponents components : bannerComponents) {

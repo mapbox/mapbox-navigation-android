@@ -34,7 +34,7 @@ public class InstructionImageLoader {
   private Picasso picassoImageLoader;
   private List<InstructionTarget> targets;
   private UrlDensityMap urlDensityMap;
-  private List<BannerShieldInfo> shieldUrls;
+  private List<BannerShield> bannerShieldList;
 
   private InstructionImageLoader() {
   }
@@ -68,22 +68,22 @@ public class InstructionImageLoader {
 
       this.urlDensityMap = new UrlDensityMap(context);
       targets = new ArrayList<>();
-      shieldUrls = new ArrayList<>();
+      bannerShieldList = new ArrayList<>();
 
       isInitialized = true;
     }
   }
 
   /**
-   * Uses the given BannerComponents object to construct a BannerShieldInfo object containing the
+   * Uses the given BannerComponents object to construct a BannerShield object containing the
    * information needed to load the proper image into the TextView where appropriate.
    *
    * @param textView to insert image into
-   * @param components containing image info
+   * @param bannerComponents containing image info
    * @param index of the BannerComponentNode which refers to the given BannerComponents
    */
-  public void addShieldInfo(TextView textView, BannerComponents components, int index) {
-    shieldUrls.add(new BannerShieldInfo(textView.getContext(), components, index));
+  public void addShieldInfo(TextView textView, BannerComponents bannerComponents, int index) {
+    bannerShieldList.add(new BannerShield(textView.getContext(), bannerComponents, index));
   }
 
   /**
@@ -127,18 +127,18 @@ public class InstructionImageLoader {
    * @since 0.9.0
    */
   public void loadImages(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
-    if (!hasImages(shieldUrls)) {
+    if (!hasImages()) {
       return;
     }
 
     updateShieldUrlIndices(bannerComponentNodes);
-    createTargets(textView, shieldUrls);
+    createTargets(textView);
     loadTargets();
   }
 
   private void updateShieldUrlIndices(List<BannerComponentNode> bannerComponentNodes) {
-    for (BannerShieldInfo bannerShieldInfo : shieldUrls) {
-      bannerShieldInfo.setStartIndex(bannerComponentNodes.get(bannerShieldInfo.getNodeIndex()).startIndex);
+    for (BannerShield bannerShield : bannerShieldList) {
+      bannerShield.setStartIndex(bannerComponentNodes.get(bannerShield.getNodeIndex()).startIndex);
     }
   }
 
@@ -146,8 +146,8 @@ public class InstructionImageLoader {
     return bannerText != null && bannerText.components() != null && !bannerText.components().isEmpty();
   }
 
-  private static boolean hasImages(List<BannerShieldInfo> shieldUrls) {
-    return !shieldUrls.isEmpty();
+  private boolean hasImages() {
+    return !bannerShieldList.isEmpty();
   }
 
   /**
@@ -168,10 +168,10 @@ public class InstructionImageLoader {
     return !TextUtils.isEmpty(components.imageBaseUrl());
   }
 
-  private void createTargets(TextView textView, List<BannerShieldInfo> shields) {
+  private void createTargets(TextView textView) {
     Spannable instructionSpannable = new SpannableString(textView.getText());
-    for (final BannerShieldInfo shield : shields) {
-      targets.add(new InstructionTarget(textView, instructionSpannable, shields, shield,
+    for (final BannerShield bannerShield : bannerShieldList) {
+      targets.add(new InstructionTarget(textView, instructionSpannable, bannerShieldList, bannerShield,
         new InstructionTarget.InstructionLoadedCallback() {
           @Override
           public void onInstructionLoaded(InstructionTarget target) {
@@ -179,7 +179,7 @@ public class InstructionImageLoader {
           }
         }));
     }
-    shieldUrls.clear();
+    bannerShieldList.clear();
   }
 
   private void loadTargets() {
