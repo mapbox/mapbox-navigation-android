@@ -36,7 +36,7 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
     super.onViewCreated(view, savedInstanceState);
     navigationView = view.findViewById(R.id.navigation_view_fragment);
     navigationView.onCreate(savedInstanceState);
-    navigationView.getNavigationAsync(this);
+    navigationView.initialize(this);
   }
 
   @Override

@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
-import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoader;
 
 import java.io.File;
@@ -48,13 +47,13 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
    *
    * @param context   to initialize {@link CognitoCachingCredentialsProvider} and {@link AudioManager}
    */
-  MapboxSpeechPlayer(Context context, Locale locale) {
+  MapboxSpeechPlayer(Context context, Locale locale, String accessToken) {
     setupCaches(context);
     instructionQueue = new ConcurrentLinkedQueue();
     voiceInstructionLoader = VoiceInstructionLoader.builder()
       .language(locale.toString())
       .cache(okhttpCache)
-      .accessToken(Mapbox.getAccessToken())
+      .accessToken(accessToken)
       .build();
   }
 

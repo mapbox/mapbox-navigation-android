@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.camera;
 import android.location.Location;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -137,6 +138,16 @@ public class NavigationCamera {
       }
       animateCameraFromLocation(currentRouteInformation);
     }
+  }
+
+  /**
+   * Call in {@link FragmentActivity#onDestroy()} to properly remove the {@link ProgressChangeListener}
+   * for the camera and prevent any leaks or further updates.
+   *
+   * @since 0.13.0
+   */
+  public void onDestroy() {
+    navigation.removeProgressChangeListener(progressChangeListener);
   }
 
   private void initialize() {

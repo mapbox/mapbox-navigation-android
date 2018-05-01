@@ -41,7 +41,19 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
     setContentView(R.layout.activity_navigation);
     navigationView = findViewById(R.id.navigationView);
     navigationView.onCreate(savedInstanceState);
-    navigationView.getNavigationAsync(this);
+    navigationView.initialize(this);
+  }
+
+  @Override
+  public void onStart() {
+    super.onStart();
+    navigationView.onStart();
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+    navigationView.onResume();
   }
 
   @Override
@@ -59,12 +71,6 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    navigationView.onDestroy();
-  }
-
-  @Override
   protected void onSaveInstanceState(Bundle outState) {
     navigationView.onSaveInstanceState(outState);
     super.onSaveInstanceState(outState);
@@ -74,6 +80,24 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   protected void onRestoreInstanceState(Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
     navigationView.onRestoreInstanceState(savedInstanceState);
+  }
+
+  @Override
+  public void onPause() {
+    super.onPause();
+    navigationView.onPause();
+  }
+
+  @Override
+  public void onStop() {
+    super.onStop();
+    navigationView.onStop();
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    navigationView.onDestroy();
   }
 
   @Override

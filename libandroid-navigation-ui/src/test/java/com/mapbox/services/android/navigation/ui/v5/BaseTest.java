@@ -8,6 +8,7 @@ import java.io.IOException;
 public class BaseTest {
 
   protected static final double DELTA = 1E-10;
+  protected static final String ACCESS_TOKEN = "pk.XXX";
 
   private TestRouteBuilder routeBuilder;
   private TestRouteProgressBuilder routeProgressBuilder;
