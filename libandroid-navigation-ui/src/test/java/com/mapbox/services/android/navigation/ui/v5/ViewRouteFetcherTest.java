@@ -28,7 +28,7 @@ import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class NavigationViewRouteEngineTest extends BaseTest {
+public class ViewRouteFetcherTest extends BaseTest {
 
   private static final String DIRECTIONS_PRECISION_6 = "directions_v5_precision_6.json";
 
@@ -157,6 +157,7 @@ public class NavigationViewRouteEngineTest extends BaseTest {
       .profile("profile")
       .accessToken(ACCESS_TOKEN)
       .requestUuid("uuid")
+      .geometries("mocked_geometries")
       .coordinates(coordinates).build();
   }
 }
