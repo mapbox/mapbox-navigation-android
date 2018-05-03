@@ -1,13 +1,11 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
 import android.content.Context;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoader;
 
 import java.io.File;
@@ -45,7 +43,9 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
   /**
    * Construct an instance of {@link MapboxSpeechPlayer}
    *
-   * @param context   to initialize {@link CognitoCachingCredentialsProvider} and {@link AudioManager}
+   * @param context     to setup the caches
+   * @param locale      for which language
+   * @param accessToken a valid Mapbox access token
    */
   MapboxSpeechPlayer(Context context, Locale locale, String accessToken) {
     setupCaches(context);
@@ -83,7 +83,7 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
    * Plays the specified text instruction using MapboxSpeech API
    *
    * @param instruction voice instruction to be synthesized and played
-   * @param textType either "ssml" or "text"
+   * @param textType    either "ssml" or "text"
    */
   private void play(String instruction, String textType) {
     downloadVoiceFile(instruction, textType);
