@@ -12,13 +12,12 @@ The upcoming road or ramp destination is named according to the local or nationa
 
 The table below lists the languages that are supported for user interface elements and for spoken instructions.
 
-| Language   | User interface | [Spoken instructions](https://www.mapbox.com/api-documentation/#instructions-languages) | Remarks
+| Language   | User interface | [Spoken instructions][apidoc] | Remarks
 |------------|:--------------:|:-----------------------------:|--------
 | Bengali    | ✅             | — 
 | Chinese    | -              | ✅ Mandarin | Depends on the device; may require third-party text-to-speech
 | Czech      | ✅             | -
 | Danish     | ✅             | ✅
-| French     | ✅             | ✅
 | English    | ✅             | ✅
 | Esperanto  | —              | ✅ 
 | French     | ✅             | ✅
@@ -43,4 +42,4 @@ The table below lists the languages that are supported for user interface elemen
 
 See the [contributing guide](https://github.com/mapbox/mapbox-navigation-ios/blob/master/CONTRIBUTING.md#adding-or-updating-a-localization) for instructions on adding a new localization or improving an existing localization.
 
-[osrmti]: https://www.mapbox.com/api-documentation/#instructions-languages
+[apidoc]: https://www.mapbox.com/api-documentation/#instructions-languages
