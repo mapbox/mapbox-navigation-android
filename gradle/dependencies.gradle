@@ -23,7 +23,6 @@ ext {
       butterknife        : '8.8.1',
       leakCanaryVersion  : '1.5.4',
       timber             : '4.6.0',
-      awsPolly           : '2.3.8',
       testRunnerVersion  : '1.0.1',
       espressoVersion    : '3.0.1',
       spoonRunner        : '1.6.2',
@@ -97,8 +96,6 @@ ext {
       commonsIO              : "commons-io:commons-io:${version.commonsIO}",
       robolectric            : "org.robolectric:robolectric:${version.robolectric}",
 
-      // aws polly
-      polly                  : "com.amazonaws:aws-android-sdk-polly:${version.awsPolly}",
       // play services
       gmsLocation            : "com.google.android.gms:play-services-location:${version.gmsLocation}",
 
