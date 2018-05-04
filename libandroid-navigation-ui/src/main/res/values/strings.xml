@@ -47,9 +47,9 @@
 
     <!-- Should not be translated -->
     <string name="navigation_guidance_day_v2"
-            translatable="false">mapbox://styles/mapbox/navigation-guidance-day-v2</string>
+            translatable="false">mapbox://styles/mapbox/navigation-guidance-day-v3</string>
     <string name="navigation_guidance_night_v2"
-            translatable="false">mapbox://styles/mapbox/navigation-guidance-night-v2</string>
+            translatable="false">mapbox://styles/mapbox/navigation-guidance-night-v3</string>
     <string name="instruction_super_state"
             translatable="false">instruction_super_state</string>
     <string name="instruction_visibility"
