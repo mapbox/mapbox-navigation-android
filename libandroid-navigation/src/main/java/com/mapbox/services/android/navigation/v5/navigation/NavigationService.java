@@ -82,7 +82,7 @@ public class NavigationService extends Service implements LocationEngineListener
 
   @Override
   public void onDestroy() {
-    if (mapboxNavigation.options().enableNotification()) {
+    if (isValidOptions() && mapboxNavigation.options().enableNotification()) {
       stopForeground(true);
     }
     endNavigation();
@@ -110,7 +110,7 @@ public class NavigationService extends Service implements LocationEngineListener
    */
   @Override
   public void onNewRouteProgress(Location location, RouteProgress routeProgress) {
-    if (mapboxNavigation.options().enableNotification()) {
+    if (isValidOptions() && mapboxNavigation.options().enableNotification()) {
       navigationNotification.updateNotification(routeProgress);
     }
     mapboxNavigation.getEventDispatcher().onProgressChange(location, routeProgress);
@@ -273,13 +273,12 @@ public class NavigationService extends Service implements LocationEngineListener
     startForeground(notificationId, notification);
   }
 
-  /**
-   * Runs several checks on the actual rawLocation object itself in order to ensure that we are
-   * performing navigation progress on a accurate/valid rawLocation update.
-   */
-  @SuppressWarnings("MissingPermission")
   private boolean isValidLocationUpdate(Location location) {
     return location != null && locationValidator.isValidUpdate(location);
+  }
+
+  private boolean isValidOptions() {
+    return mapboxNavigation != null && mapboxNavigation.options() != null;
   }
 
   /**
