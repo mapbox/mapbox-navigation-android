@@ -73,7 +73,11 @@ class InstructionDownloadTask extends AsyncTask<ResponseBody, Void, File> {
 
   @Override
   protected void onPostExecute(File instructionFile) {
-    taskListener.onFinishedDownloading(instructionFile);
+    if (instructionFile == null) {
+      taskListener.onErrorDownloading();
+    } else {
+      taskListener.onFinishedDownloading(instructionFile);
+    }
   }
 
   public interface TaskListener {
