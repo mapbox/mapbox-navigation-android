@@ -1,10 +1,13 @@
 package com.mapbox.services.android.navigation.testapp.activity;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -44,6 +47,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -57,6 +61,8 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   MapView mapView;
   @BindView(android.R.id.content)
   View contentLayout;
+  @BindView(R.id.fab_refresh_destination)
+  FloatingActionButton fabRefreshDestination;
 
   private Point origin = Point.fromLngLat(-87.6900, 41.8529);
   private Point destination = Point.fromLngLat(-87.8921, 41.9794);
@@ -83,6 +89,10 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     navigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken(), options);
     navigation.addNavigationEventListener(this);
     navigation.addMilestoneEventListener(this);
+
+    if (isTestMode()) {
+      fabRefreshDestination.show();
+    }
   }
 
   @Override
@@ -147,7 +157,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    mapboxMap.setOnMapClickListener(this);
+    mapboxMap.addOnMapClickListener(this);
 
     locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, null);
     locationLayerPlugin.setRenderMode(RenderMode.GPS);
@@ -180,12 +190,20 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     mapboxMap.addMarker(new MarkerOptions().position(point));
-    mapboxMap.setOnMapClickListener(null);
+    mapboxMap.removeOnMapClickListener(this);
 
     Point newDestination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     mockLocationEngine.moveToLocation(newDestination);
     destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     tracking = false;
+  }
+
+  @OnClick(R.id.fab_refresh_destination)
+  public void onFabRefreshDestinationClick() {
+    if (isTestMode()) {
+      LatLng nearRightPoint = mapboxMap.getProjection().getVisibleRegion().nearRight;
+      onMapClick(nearRightPoint);
+    }
   }
 
   @Override
@@ -221,7 +239,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
-    Timber.d("onMilestoneEvent - Current Instruction: " + instruction);
+    Timber.d("onMilestoneEvent - Current Instruction: %s", instruction);
   }
 
   @Override
@@ -244,7 +262,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-    Timber.e("Getting directions failed: ", throwable);
+    Timber.e(throwable);
   }
 
   private void getRoute(Point origin, Point destination, Float bearing) {
@@ -276,6 +294,11 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
         .color(Color.parseColor("#4264fb"))
         .width(5));
     }
+  }
+
+  private boolean isTestMode() {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+    return preferences.getBoolean(getString(R.string.test_mode_key), false);
   }
 
   private void resetLocationEngine(DirectionsRoute directionsRoute) {

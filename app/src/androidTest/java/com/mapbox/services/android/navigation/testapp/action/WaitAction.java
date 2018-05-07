@@ -1,4 +1,4 @@
-package com.mapbox.services.android.utils;
+package com.mapbox.services.android.navigation.testapp.action;
 
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
@@ -6,15 +6,18 @@ import android.view.View;
 
 import org.hamcrest.Matcher;
 
-import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
-public class WaitLoopAction implements ViewAction {
+public final class WaitAction implements ViewAction {
 
-  private long loopTime;
+  private static final long DEFAULT_LOOP_TIME = 375;
+  private final long loopTime;
 
-  public WaitLoopAction(long loopTime) {
+  public WaitAction() {
+    this(DEFAULT_LOOP_TIME);
+  }
+
+  public WaitAction(long loopTime) {
     this.loopTime = loopTime;
   }
 
@@ -31,13 +34,5 @@ public class WaitLoopAction implements ViewAction {
   @Override
   public void perform(UiController uiController, View view) {
     uiController.loopMainThreadForAtLeast(loopTime);
-  }
-
-  public static void performWaitLoop(long loopTime) {
-    onView(withId(android.R.id.content)).perform(new WaitLoopAction(loopTime));
-  }
-
-  public static void performWaitLoop(UiController controller, long waitTime) {
-    controller.loopMainThreadForAtLeast(waitTime);
   }
 }

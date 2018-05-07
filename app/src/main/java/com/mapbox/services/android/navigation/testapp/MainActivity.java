@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -19,6 +21,7 @@ import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.EmbeddedNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationViewActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationViewSettingsActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.WaypointNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.fragment.FragmentNavigationActivity;
 
@@ -94,6 +97,28 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
   }
 
   @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    // Inflate the menu; this adds items to the action bar if it is present.
+    getMenuInflater().inflate(R.menu.navigation_view_activity_menu, menu);
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case R.id.settings:
+        showSettings();
+        return true;
+      default:
+        return super.onOptionsItemSelected(item);
+    }
+  }
+
+  private void showSettings() {
+    startActivity(new Intent(this, NavigationViewSettingsActivity.class));
+  }
+
+  @Override
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                          @NonNull int[] grantResults) {
     permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -140,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     }
 
     @Override
-    public MainAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
       View view = LayoutInflater
         .from(parent.getContext())
         .inflate(R.layout.item_main_feature, parent, false);
@@ -158,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     }
 
     @Override
-    public void onBindViewHolder(MainAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position) {
       holder.nameView.setText(samples.get(position).getName());
       holder.descriptionView.setText(samples.get(position).getDescription());
     }
