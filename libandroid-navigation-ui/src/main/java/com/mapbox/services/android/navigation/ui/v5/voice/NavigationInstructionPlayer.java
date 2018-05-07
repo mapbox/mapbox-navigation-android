@@ -22,10 +22,10 @@ public class NavigationInstructionPlayer implements InstructionListener {
   private Queue<VoiceInstructionMilestone> instructionQueue;
   private boolean isMuted;
 
-  public NavigationInstructionPlayer(@NonNull Context context, Locale locale) {
+  public NavigationInstructionPlayer(@NonNull Context context, Locale locale, String accessToken) {
     initAudioManager(context);
     initAudioFocusRequest();
-    initInstructionPlayers(context, locale);
+    initInstructionPlayers(context, locale, accessToken);
     instructionQueue = new ConcurrentLinkedQueue<>();
   }
 
@@ -97,8 +97,8 @@ public class NavigationInstructionPlayer implements InstructionListener {
     }
   }
 
-  private void initInstructionPlayers(Context context, Locale locale) {
-    mapboxSpeechPlayer = new MapboxSpeechPlayer(context, locale);
+  private void initInstructionPlayers(Context context, Locale locale, String accessToken) {
+    mapboxSpeechPlayer = new MapboxSpeechPlayer(context, locale, accessToken);
     mapboxSpeechPlayer.setInstructionListener(this);
     androidSpeechPlayer = new AndroidSpeechPlayer(context, locale);
     androidSpeechPlayer.setInstructionListener(this);

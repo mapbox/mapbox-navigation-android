@@ -771,6 +771,10 @@ public class MapboxNavigation implements ServiceConnection {
     navigationTelemetry.cancelFeedback(feedbackId);
   }
 
+  String obtainAccessToken() {
+    return accessToken;
+  }
+
   DirectionsRoute getRoute() {
     return directionsRoute;
   }

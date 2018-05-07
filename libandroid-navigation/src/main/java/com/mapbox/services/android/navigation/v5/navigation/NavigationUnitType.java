@@ -21,6 +21,10 @@ public class NavigationUnitType {
   public static final int TYPE_METRIC = 1;
 
   public static String getDirectionsCriteriaUnitType(@NavigationUnitType.UnitType int unitType, Locale locale) {
+    if (locale == null) {
+      locale = Locale.getDefault();
+    }
+
     if (unitType == NONE_SPECIFIED) {
       unitType = LocaleUtils.getUnitTypeForLocale(locale);
     }

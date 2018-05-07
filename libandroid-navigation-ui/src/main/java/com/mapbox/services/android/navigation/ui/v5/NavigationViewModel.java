@@ -9,16 +9,18 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.text.TextUtils;
 
-import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
+import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductor;
+import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductorListener;
+import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteFetcher;
+import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteListener;
 import com.mapbox.services.android.navigation.ui.v5.route.OffRouteEvent;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
-import com.mapbox.services.android.navigation.ui.v5.voice.InstructionPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -38,22 +40,24 @@ import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.Locale;
 
-public class NavigationViewModel extends AndroidViewModel implements ProgressChangeListener,
-  OffRouteListener, MilestoneEventListener, NavigationEventListener, FasterRouteListener {
+public class NavigationViewModel extends AndroidViewModel {
+
+  private static final String EMPTY_STRING = "";
 
   public final MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
   public final MutableLiveData<BannerInstructionModel> bannerInstructionModel = new MutableLiveData<>();
   public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isFeedbackShowing = new MutableLiveData<>();
-  final MutableLiveData<FeedbackItem> selectedFeedbackItem = new MutableLiveData<>();
   final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
-  final MutableLiveData<DirectionsRoute> fasterRoute = new MutableLiveData<>();
-  final MutableLiveData<OffRouteEvent> offRouteEvent = new MutableLiveData<>();
-  final MutableLiveData<Boolean> isRunning = new MutableLiveData<>();
+  final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
+  final MutableLiveData<Point> destination = new MutableLiveData<>();
   final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
+  private ViewRouteFetcher navigationViewRouteEngine;
+  private LocationEngineConductor locationEngineConductor;
+  private NavigationViewEventDispatcher navigationViewEventDispatcher;
   private NavigationInstructionPlayer instructionPlayer;
   private ConnectivityManager connectivityManager;
   private RouteProgress routeProgress;
@@ -64,98 +68,31 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   private int unitType;
   @NavigationTimeFormat.Type
   private int timeFormatType;
+  private boolean resumeState;
+  private String accessToken;
 
   public NavigationViewModel(Application application) {
     super(application);
+    this.accessToken = Mapbox.getAccessToken();
     initConnectivityManager(application);
+    initNavigationRouteEngine();
+    initNavigationLocationEngine();
   }
 
-  public void onDestroy() {
-    endNavigation();
-    deactivateInstructionPlayer();
-  }
-
-  /**
-   * Listener used to update the location on screen
-   * and the data in the top / bottom views of the drop-in UI.
-   * <p>
-   * Added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
-   *
-   * @param location      modified to snap to the route being driven
-   * @param routeProgress used to create new models for our top / bottom views
-   * @since 0.6.0
-   */
-  @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    this.routeProgress = routeProgress;
-    instructionModel.setValue(new InstructionModel(getApplication(), routeProgress, locale, unitType));
-    summaryModel.setValue(new SummaryModel(getApplication(), routeProgress, locale, unitType, timeFormatType));
-    navigationLocation.setValue(location);
-  }
-
-  /**
-   * Listener used to update when a user has gone off-route.
-   * <p>
-   * This is being used as a cue for a re-route UX / to fetch a new route to
-   * keep the user on course.
-   * <p>
-   * Added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
-   *
-   * @param location given to create a new origin
-   * @since 0.6.0
-   */
-  @Override
-  public void userOffRoute(Location location) {
-    if (hasNetworkConnection()) {
-      Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-      this.offRouteEvent.setValue(new OffRouteEvent(newOrigin, routeProgress));
-      isOffRoute.setValue(true);
+  public void onCreate(boolean resumeState) {
+    this.resumeState = resumeState;
+    if (!resumeState) {
+      locationEngineConductor.onCreate();
     }
   }
 
-  /**
-   * Listener used to play instructions and finish this activity
-   * when the arrival milestone is triggered.
-   * <p>
-   * Added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
-   *
-   * @param routeProgress ignored in this scenario
-   * @param instruction   to be voiced by the {@link InstructionPlayer}
-   * @param milestone     the milestone being triggered
-   * @since 0.8.0
-   */
-  @Override
-  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
-    if (milestone instanceof VoiceInstructionMilestone) {
-      instructionPlayer.play((VoiceInstructionMilestone) milestone);
+  public void onDestroy(boolean isChangingConfigurations) {
+    if (!isChangingConfigurations) {
+      locationEngineConductor.onDestroy();
+      endNavigation();
+      deactivateInstructionPlayer();
     }
-    updateBannerInstruction(routeProgress, milestone);
-  }
-
-  /**
-   * Listener used to determine is navigation is running / not running.
-   * <p>
-   * In {@link NavigationView}, views will be shown when true.  When false,
-   * the {@link android.app.Activity} will be destroyed.
-   *
-   * @param running true if {@link MapboxNavigation} is up and running, false if not
-   * @since 0.6.0
-   */
-  @Override
-  public void onRunning(boolean running) {
-    isRunning.setValue(running);
-  }
-
-  /**
-   * Listener that will be fired if a faster {@link DirectionsRoute} is found
-   * while navigating.
-   *
-   * @param directionsRoute faster route retrieved
-   * @since 0.9.0
-   */
-  @Override
-  public void fasterRouteFound(DirectionsRoute directionsRoute) {
-    fasterRoute.setValue(directionsRoute);
+    navigationViewEventDispatcher = null;
   }
 
   public void setMuted(boolean isMuted) {
@@ -166,7 +103,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    * Records a general feedback item with source
    */
   public void recordFeedback(@FeedbackEvent.FeedbackSource String feedbackSource) {
-    feedbackId = navigation.recordFeedback(FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE, "", feedbackSource);
+    feedbackId = navigation.recordFeedback(FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE, EMPTY_STRING, feedbackSource);
     shouldRecordScreenshot.setValue(true);
   }
 
@@ -182,7 +119,7 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
   public void updateFeedback(FeedbackItem feedbackItem) {
     if (!TextUtils.isEmpty(feedbackId)) {
       navigation.updateFeedback(feedbackId, feedbackItem.getFeedbackType(), feedbackItem.getDescription(), screenshot);
-      selectedFeedbackItem.setValue(feedbackItem);
+      navigationViewEventDispatcher.onFeedbackSent(feedbackItem);
       feedbackId = null;
       screenshot = null;
     }
@@ -218,16 +155,22 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
    *
    * @param options to init MapboxNavigation
    */
-  void initializeNavigationOptions(Context context, MapboxNavigationOptions options) {
-    initLocaleInfo(options);
+  void initializeNavigation(NavigationViewOptions options, NavigationViewEventDispatcher dispatcher) {
+    this.navigationViewEventDispatcher = dispatcher;
+    MapboxNavigationOptions navigationOptions = options.navigationOptions();
+    navigationOptions = navigationOptions.toBuilder().isFromNavigationUi(true).build();
+    initLocaleInfo(navigationOptions);
+    initTimeFormat(navigationOptions);
     initVoiceInstructions();
-    initNavigation(context, options);
-    initTimeFormat(options);
+    if (!resumeState) {
+      locationEngineConductor.initializeLocationEngine(getApplication(), options.shouldSimulateRoute());
+      initNavigation(getApplication(), navigationOptions);
+      navigationViewRouteEngine.extractRouteOptions(getApplication(), options);
+    }
   }
 
-  void updateRoute(DirectionsRoute route) {
-    startNavigation(route);
-    isOffRoute.setValue(false);
+  void updateNavigation(NavigationViewOptions options) {
+    navigationViewRouteEngine.extractRouteOptions(getApplication(), options);
   }
 
   void updateFeedbackScreenshot(String screenshot) {
@@ -237,40 +180,172 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
     shouldRecordScreenshot.setValue(false);
   }
 
-  void updateLocationEngine(LocationEngine locationEngine) {
-    navigation.setLocationEngine(locationEngine);
-  }
-
-  /**
-   * Initializes the {@link ConnectivityManager}.
-   */
   private void initConnectivityManager(Application application) {
     connectivityManager = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
   }
 
-  /**
-   * Destroys {@link MapboxNavigation} if not null
-   */
+  private void initNavigationRouteEngine() {
+    navigationViewRouteEngine = new ViewRouteFetcher(routeEngineCallback);
+    navigationViewRouteEngine.updateAccessToken(accessToken);
+  }
+
+  private void initNavigationLocationEngine() {
+    locationEngineConductor = new LocationEngineConductor(locationEngineCallback);
+  }
+
+  private void initLocaleInfo(MapboxNavigationOptions options) {
+    locale = LocaleUtils.getNonNullLocale(getApplication(), options.locale());
+    unitType = options.unitType();
+  }
+
+  private void initVoiceInstructions() {
+    instructionPlayer = new NavigationInstructionPlayer(getApplication(), locale, accessToken);
+  }
+
+  private void initNavigation(Context context, MapboxNavigationOptions options) {
+    navigation = new MapboxNavigation(context, accessToken, options);
+    navigation.setLocationEngine(locationEngineConductor.obtainLocationEngine());
+    addNavigationListeners();
+  }
+
+  private void addNavigationListeners() {
+    navigation.addProgressChangeListener(progressChangeListener);
+    navigation.addOffRouteListener(offRouteListener);
+    navigation.addMilestoneEventListener(milestoneEventListener);
+    navigation.addNavigationEventListener(navigationEventListener);
+    navigation.addFasterRouteListener(fasterRouteListener);
+  }
+
+  private void initTimeFormat(MapboxNavigationOptions options) {
+    timeFormatType = options.timeFormatType();
+  }
+
+  private ProgressChangeListener progressChangeListener = new ProgressChangeListener() {
+    @Override
+    public void onProgressChange(Location location, RouteProgress routeProgress) {
+      NavigationViewModel.this.routeProgress = routeProgress;
+      instructionModel.setValue(new InstructionModel(getApplication(), routeProgress, locale, unitType));
+      summaryModel.setValue(new SummaryModel(getApplication(), routeProgress, locale, unitType, timeFormatType));
+      navigationLocation.setValue(location);
+    }
+  };
+
+  private OffRouteListener offRouteListener = new OffRouteListener() {
+    @Override
+    public void userOffRoute(Location location) {
+      if (hasNetworkConnection()) {
+        Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+        if (navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
+          navigationViewEventDispatcher.onOffRoute(newOrigin);
+          OffRouteEvent event = new OffRouteEvent(newOrigin, routeProgress);
+          navigationViewRouteEngine.fetchRouteFromOffRouteEvent(event);
+          isOffRoute.setValue(true);
+        }
+      }
+    }
+  };
+
+  private MilestoneEventListener milestoneEventListener = new MilestoneEventListener() {
+    @Override
+    public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
+      if (milestone instanceof VoiceInstructionMilestone) {
+        instructionPlayer.play((VoiceInstructionMilestone) milestone);
+      }
+      updateBannerInstruction(routeProgress, milestone);
+    }
+  };
+
+  private NavigationEventListener navigationEventListener = new NavigationEventListener() {
+    @Override
+    public void onRunning(boolean running) {
+      if (running) {
+        navigationViewEventDispatcher.onNavigationRunning();
+      } else {
+        navigationViewEventDispatcher.onNavigationFinished();
+      }
+    }
+  };
+
+  private FasterRouteListener fasterRouteListener = new FasterRouteListener() {
+    @Override
+    public void fasterRouteFound(DirectionsRoute directionsRoute) {
+      updateRoute(directionsRoute);
+    }
+  };
+
+  private ViewRouteListener routeEngineCallback = new ViewRouteListener() {
+    @Override
+    public void onRouteUpdate(DirectionsRoute directionsRoute) {
+      updateRoute(directionsRoute);
+    }
+
+    @Override
+    public void onRouteRequestError(Throwable throwable) {
+      if (isOffRoute() && navigationViewEventDispatcher != null) {
+        String errorMessage = throwable.getMessage();
+        navigationViewEventDispatcher.onFailedReroute(errorMessage);
+      }
+    }
+
+    @Override
+    public void onDestinationSet(Point destination) {
+      NavigationViewModel.this.destination.setValue(destination);
+    }
+  };
+
+  private LocationEngineConductorListener locationEngineCallback = new LocationEngineConductorListener() {
+    @Override
+    public void onLocationUpdate(Location location) {
+      navigationViewRouteEngine.updateRawLocation(location);
+    }
+  };
+
+  private void updateRoute(DirectionsRoute route) {
+    this.route.setValue(route);
+    startNavigation(route);
+    locationEngineConductor.updateRoute(route);
+    if (isOffRoute()) {
+      navigationViewEventDispatcher.onRerouteAlong(route);
+    }
+    isOffRoute.setValue(false);
+  }
+
+  private boolean isOffRoute() {
+    try {
+      return isOffRoute.getValue();
+    } catch (NullPointerException exception) {
+      return false;
+    }
+  }
+
+  private void startNavigation(DirectionsRoute route) {
+    if (route != null) {
+      navigation.startNavigation(route);
+    }
+  }
+
   private void endNavigation() {
     if (navigation != null) {
       navigation.onDestroy();
     }
   }
 
-  /**
-   * Destroys the {@link InstructionPlayer} if not null
-   */
   private void deactivateInstructionPlayer() {
     if (instructionPlayer != null) {
       instructionPlayer.onDestroy();
     }
   }
 
-  /**
-   * Checks for active network connection.
-   *
-   * @return true if connected, false otherwise
-   */
+  private void updateBannerInstruction(RouteProgress routeProgress, Milestone milestone) {
+    if (milestone instanceof BannerInstructionMilestone) {
+      BannerInstructionMilestone bannerInstructionMilestone = (BannerInstructionMilestone) milestone;
+      BannerInstructionModel model = new BannerInstructionModel(
+        getApplication(), bannerInstructionMilestone, routeProgress, locale, unitType
+      );
+      bannerInstructionModel.setValue(model);
+    }
+  }
+
   @SuppressWarnings( {"MissingPermission"})
   private boolean hasNetworkConnection() {
     if (connectivityManager == null) {
@@ -279,64 +354,5 @@ public class NavigationViewModel extends AndroidViewModel implements ProgressCha
 
     NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
     return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-  }
-
-  private void updateBannerInstruction(RouteProgress routeProgress, Milestone milestone) {
-    if (milestone instanceof BannerInstructionMilestone) {
-      bannerInstructionModel.setValue(
-        new BannerInstructionModel(
-          getApplication(), (BannerInstructionMilestone) milestone, routeProgress, locale, unitType));
-    }
-  }
-
-  private void initLocaleInfo(MapboxNavigationOptions options) {
-    locale = LocaleUtils.getNonNullLocale(this.getApplication(), options.locale());
-    unitType = options.unitType();
-  }
-
-  /**
-   * Initializes the {@link InstructionPlayer}.
-   */
-  private void initVoiceInstructions() {
-    instructionPlayer = new NavigationInstructionPlayer(this.getApplication().getBaseContext(), locale);
-  }
-
-  /**
-   * Initializes {@link MapboxNavigation} and adds all views that implement listeners.
-   */
-  private void initNavigation(Context context, MapboxNavigationOptions options) {
-    navigation = new MapboxNavigation(context, Mapbox.getAccessToken(), options);
-    addNavigationListeners();
-  }
-
-  private void initTimeFormat(MapboxNavigationOptions options) {
-    timeFormatType = options.timeFormatType();
-  }
-
-  /**
-   * Adds this class as a listener for progress,
-   * milestones, and off route events.
-   */
-  private void addNavigationListeners() {
-    if (navigation != null) {
-      navigation.addProgressChangeListener(this);
-      navigation.addOffRouteListener(this);
-      navigation.addMilestoneEventListener(this);
-      navigation.addNavigationEventListener(this);
-      navigation.addFasterRouteListener(this);
-    }
-  }
-
-  /**
-   * Starts navigation and sets isRunning to true.
-   * <p>
-   * This will notify any observer of isRunning that navigation has begun.
-   *
-   * @param route that is being navigated
-   */
-  private void startNavigation(DirectionsRoute route) {
-    if (route != null) {
-      navigation.startNavigation(route);
-    }
   }
 }

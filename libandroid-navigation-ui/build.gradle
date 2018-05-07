@@ -55,9 +55,6 @@ dependencies {
   annotationProcessor dependenciesList.autoValue
   compileOnly dependenciesList.autoValue
 
-  // AWS Polly
-  implementation dependenciesList.polly
-
   // Picasso
   implementation dependenciesList.picasso
 
