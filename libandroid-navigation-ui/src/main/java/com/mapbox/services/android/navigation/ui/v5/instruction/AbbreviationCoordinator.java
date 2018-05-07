@@ -1,10 +1,10 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.graphics.Paint;
 import android.widget.TextView;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionLoader.BannerComponentNode;
+import com.mapbox.services.android.navigation.ui.v5.utils.TextViewUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,9 +21,17 @@ import java.util.Map;
 public class AbbreviationCoordinator {
   private static final String SINGLE_SPACE = " ";
   private Map<Integer, List<Integer>> abbreviations;
+  private TextViewUtils textViewUtils;
+
+  public AbbreviationCoordinator(TextViewUtils textViewUtils) {
+    this.abbreviations = new HashMap<>();
+    this.textViewUtils = textViewUtils;
+  }
+
 
   public AbbreviationCoordinator() {
-    abbreviations = new HashMap<>();
+    this.abbreviations = new HashMap<>();
+    this.textViewUtils = new TextViewUtils();
   }
 
   /**
@@ -59,7 +67,7 @@ public class AbbreviationCoordinator {
 
     int currAbbreviationPriority = 0;
     int maxAbbreviationPriority = Collections.max(abbreviations.keySet());
-    while (!textFits(textView, bannerText) && (currAbbreviationPriority <= maxAbbreviationPriority)) {
+    while (!textViewUtils.textFits(textView, bannerText) && (currAbbreviationPriority <= maxAbbreviationPriority)) {
       List<Integer> indices = abbreviations.get(new Integer(currAbbreviationPriority++));
 
       if (indices == null) {
@@ -99,12 +107,6 @@ public class AbbreviationCoordinator {
     }
 
     return stringBuilder.toString();
-  }
-
-  private boolean textFits(TextView textView, String text) {
-    Paint paint = new Paint(textView.getPaint());
-    float width = paint.measureText(text);
-    return width < textView.getWidth();
   }
 
   /**
