@@ -28,9 +28,6 @@ public class InstructionLoader {
   private static InstructionLoader instance;
   private static InstructionImageLoader instructionImageLoader;
   private AbbreviationCoordinator abbreviationCoordinator;
-  private List<BannerComponentNode> bannerComponentNodes;
-  private List<BannerComponents> bannerComponents;
-  private int length;
   private boolean isInitialized;
 
   private InstructionLoader() {
@@ -58,9 +55,14 @@ public class InstructionLoader {
    * @param context to init Picasso
    */
   public void initialize(Context context) {
+    initialize(context, new AbbreviationCoordinator());
+  }
+
+  public void initialize(Context context, AbbreviationCoordinator abbreviationCoordinator) {
     if (!isInitialized) {
       instructionImageLoader = InstructionImageLoader.getInstance();
       instructionImageLoader.initialize(context);
+      this.abbreviationCoordinator = abbreviationCoordinator;
 
       isInitialized = true;
     }
@@ -98,51 +100,56 @@ public class InstructionLoader {
       return;
     }
 
-    abbreviationCoordinator = new AbbreviationCoordinator();
-    this.bannerComponents = bannerText.components();
-
-    parseBannerComponents(textView);
-    setText(textView);
-    loadImages(textView);
+    loadAbbreviationsAndImages(textView, bannerText.components());
   }
 
-  private void loadImages(TextView textView) {
+  private void loadAbbreviationsAndImages(TextView textView, List<BannerComponents> bannerComponents) {
+    List<BannerComponentNode> bannerComponentNodes = parseBannerComponents(textView, bannerComponents);
+    setText(textView, bannerComponentNodes);
+    loadImages(textView, bannerComponentNodes);
+  }
+
+  private List<BannerComponentNode> parseBannerComponents(TextView textView, List<BannerComponents> bannerComponents) {
+    int length = 0;
+    List<BannerComponentNode> bannerComponentNodes = new ArrayList<>();
+
+    for (BannerComponents components : bannerComponents) {
+      BannerComponentNode node;
+      if (hasImageUrl(components)) {
+        node = setupImageNode(components, textView, bannerComponentNodes.size(), length - 1);
+      } else if (hasAbbreviation(components)) {
+        node = setupAbbreviationNode(components, bannerComponentNodes.size(), length - 1);
+      } else {
+        node = new BannerComponentNode(components, length - 1);
+      }
+      bannerComponentNodes.add(node);
+      length += components.text().length() + 1;
+    }
+
+    return bannerComponentNodes;
+  }
+
+  private InstructionImageLoader.ShieldBannerComponentNode setupImageNode(BannerComponents components, TextView textView, int index, int startIndex) {
+    instructionImageLoader.addShieldInfo(textView, components, index);
+    return new InstructionImageLoader.ShieldBannerComponentNode(components, startIndex);
+  }
+
+  private AbbreviationCoordinator.AbbreviationBannerComponentNode setupAbbreviationNode(BannerComponents components, int index, int startIndex) {
+    abbreviationCoordinator.addPriorityInfo(components, index);
+    return new AbbreviationCoordinator.AbbreviationBannerComponentNode(components, startIndex);
+  }
+
+  private void loadImages(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
     instructionImageLoader.loadImages(textView, bannerComponentNodes);
   }
 
-  private void setText(TextView textView) {
-    String text = getAbbreviatedBannerText(textView);
+  private void setText(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
+    String text = getAbbreviatedBannerText(textView, bannerComponentNodes);
     textView.setText(text);
   }
 
-  private String getAbbreviatedBannerText(TextView textView) {
+  private String getAbbreviatedBannerText(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
     return abbreviationCoordinator.abbreviateBannerText(bannerComponentNodes, textView);
-  }
-
-  private void parseBannerComponents(TextView textView) {
-    length = 0;
-    bannerComponentNodes = new ArrayList<>();
-
-    for (BannerComponents components : bannerComponents) {
-      if (hasImageUrl(components)) {
-        setupWithImages(components, textView);
-      } else if (hasAbbreviation(components)) {
-        setupWithAbbreviations(components);
-      } else {
-        bannerComponentNodes.add(new BannerComponentNode(components, length - 1));
-      }
-      length += components.text().length() + 1;
-    }
-  }
-
-  private void setupWithImages(BannerComponents components, TextView textView) {
-    instructionImageLoader.addShieldInfo(textView, components, bannerComponentNodes.size());
-    bannerComponentNodes.add(new InstructionImageLoader.ShieldBannerComponentNode(components, length - 1));
-  }
-
-  private void setupWithAbbreviations(BannerComponents components) {
-    abbreviationCoordinator.addPriorityInfo(components, bannerComponentNodes.size());
-    bannerComponentNodes.add(new AbbreviationCoordinator.AbbreviationBannerComponentNode(components, length - 1));
   }
 
   private boolean hasAbbreviation(BannerComponents components) {

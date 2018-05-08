@@ -30,8 +30,7 @@ public class AbbreviationCoordinator {
 
 
   public AbbreviationCoordinator() {
-    this.abbreviations = new HashMap<>();
-    this.textViewUtils = new TextViewUtils();
+    this(new TextViewUtils());
   }
 
   /**
@@ -81,6 +80,7 @@ public class AbbreviationCoordinator {
       bannerText = join(bannerComponentNodes);
     }
 
+    abbreviations.clear();
     return bannerText;
   }
 
