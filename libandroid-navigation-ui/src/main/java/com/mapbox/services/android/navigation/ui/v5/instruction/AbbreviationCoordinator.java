@@ -85,7 +85,7 @@ public class AbbreviationCoordinator {
   }
 
   private void abbreviate(BannerComponentNode bannerComponentNode) {
-    ((AbbreviationBannerComponentNode) bannerComponentNode).setAbbreviate(true);
+    ((AbbreviationNode) bannerComponentNode).setAbbreviate(true);
   }
 
   private String join(List<BannerComponentNode> tokens) {
@@ -112,10 +112,10 @@ public class AbbreviationCoordinator {
   /**
    * Class used by InstructionLoader to determine that a BannerComponent contains an abbreviation
    */
-  static class AbbreviationBannerComponentNode extends BannerComponentNode {
+  static class AbbreviationNode extends BannerComponentNode {
     protected boolean abbreviate;
 
-    AbbreviationBannerComponentNode(BannerComponents bannerComponents, int startIndex) {
+    AbbreviationNode(BannerComponents bannerComponents, int startIndex) {
       super(bannerComponents, startIndex);
     }
 

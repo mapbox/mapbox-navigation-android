@@ -33,7 +33,7 @@ public class AbbreviationCoordinatorTest extends BaseTest {
     abbreviationCoordinator.addPriorityInfo(bannerComponents, 0);
 
     List<InstructionLoader.BannerComponentNode> bannerComponentNodes = new ArrayList<>();
-    bannerComponentNodes.add(new AbbreviationCoordinator.AbbreviationBannerComponentNode(bannerComponents, 0));
+    bannerComponentNodes.add(new AbbreviationCoordinator.AbbreviationNode(bannerComponents, 0));
 
     assertEquals(abbreviation, abbreviationCoordinator.abbreviateBannerText(bannerComponentNodes, textView));
   }
@@ -57,7 +57,7 @@ public class AbbreviationCoordinatorTest extends BaseTest {
     abbreviationCoordinator.addPriorityInfo(bannerComponents, 0);
 
     List<InstructionLoader.BannerComponentNode> bannerComponentNodes = new ArrayList<>();
-    bannerComponentNodes.add(new AbbreviationCoordinator.AbbreviationBannerComponentNode(bannerComponents, 0));
+    bannerComponentNodes.add(new AbbreviationCoordinator.AbbreviationNode(bannerComponents, 0));
 
     assertEquals(text, abbreviationCoordinator.abbreviateBannerText(bannerComponentNodes, textView));
   }

@@ -234,7 +234,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     if (newStep(model.getProgress())) {
       // Pre-fetch the image URLs for the upcoming step
       LegStep upComingStep = model.getProgress().currentLegProgress().upComingStep();
-      InstructionLoader.getInstance().prefetchImageCache(upComingStep);
+      InstructionImageLoader.getInstance().prefetchImageCache(upComingStep);
     }
   }
 
@@ -683,7 +683,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void updateTextInstruction(InstructionModel model) {
     if (model.getPrimaryBannerText() != null) {
-      InstructionLoader.getInstance().loadInstruction(upcomingPrimaryText, model.getPrimaryBannerText());
+      new InstructionLoader(upcomingPrimaryText, model.getPrimaryBannerText()).loadInstruction();
     }
     if (model.getSecondaryBannerText() != null) {
       if (upcomingSecondaryText.getVisibility() == GONE) {
@@ -691,7 +691,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         upcomingPrimaryText.setMaxLines(1);
         adjustBannerTextVerticalBias(0.65f);
       }
-      InstructionLoader.getInstance().loadInstruction(upcomingSecondaryText, model.getSecondaryBannerText());
+      new InstructionLoader(upcomingSecondaryText, model.getSecondaryBannerText()).loadInstruction();
     } else {
       upcomingPrimaryText.setMaxLines(2);
       upcomingSecondaryText.setVisibility(GONE);

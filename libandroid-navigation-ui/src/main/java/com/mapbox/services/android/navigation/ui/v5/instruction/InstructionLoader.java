@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.content.Context;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.style.ImageSpan;
@@ -8,7 +7,8 @@ import android.widget.TextView;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerText;
-import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.services.android.navigation.ui.v5.instruction.AbbreviationCoordinator.AbbreviationNode;
+import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionImageLoader.ShieldNode;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -25,91 +25,35 @@ import java.util.List;
  * a new {@link ImageSpan} is created and set to the appropriate position of the {@link Spannable}/
  */
 public class InstructionLoader {
-  private static InstructionLoader instance;
   private static InstructionImageLoader instructionImageLoader;
   private AbbreviationCoordinator abbreviationCoordinator;
-  private boolean isInitialized;
+  private TextView textView;
+  private List<BannerComponentNode> bannerComponentNodes;
 
-  private InstructionLoader() {
-  }
+  public InstructionLoader(TextView textView, BannerText bannerText) {
+    this.abbreviationCoordinator = new AbbreviationCoordinator();
+    this.textView = textView;
+    bannerComponentNodes = new ArrayList<>();
+    instructionImageLoader = InstructionImageLoader.getInstance();
 
-  /**
-   * Primary access method (using singleton pattern)
-   *
-   * @return InstructionLoader
-   */
-  public static synchronized InstructionLoader getInstance() {
-    if (instance == null) {
-      instance = new InstructionLoader();
+    if (!hasComponents(bannerText)) {
+      return;
     }
 
-    return instance;
-  }
-
-  /**
-   * Must be called before loading images.
-   * <p>
-   * Initializes a new {@link Picasso} instance as well as the
-   * {@link ArrayList} of {@link InstructionTarget}.
-   *
-   * @param context to init Picasso
-   */
-  public void initialize(Context context) {
-    initialize(context, new AbbreviationCoordinator());
-  }
-
-  public void initialize(Context context, AbbreviationCoordinator abbreviationCoordinator) {
-    if (!isInitialized) {
-      instructionImageLoader = InstructionImageLoader.getInstance();
-      instructionImageLoader.initialize(context);
-      this.abbreviationCoordinator = abbreviationCoordinator;
-
-      isInitialized = true;
-    }
-  }
-
-  /**
-   * Will pre-fetch images for a given {@link LegStep}.
-   * <p>
-   * If loaded successfully, this will allow the images to be displayed
-   * without delay in the {@link InstructionView}.
-   *
-   * @param step providing the image Urls
-   */
-  public void prefetchImageCache(LegStep step) {
-    instructionImageLoader.prefetchImageCache(step);
-  }
-
-  public void shutdown() {
-    instructionImageLoader.shutdown();
+    bannerComponentNodes = parseBannerComponents(bannerText.components());
   }
 
   /**
    * Takes the given components from the {@link BannerText} and creates
    * a new {@link Spannable} with text / {@link ImageSpan}s which is loaded
    * into the given {@link TextView}.
-   *
-   * @param textView   target for the banner text
-   * @param bannerText with components to be extracted
-   * @since 0.9.0
    */
-  public void loadInstruction(TextView textView, BannerText bannerText) {
-    checkIsInitialized();
-
-    if (!hasComponents(bannerText)) {
-      return;
-    }
-
-    loadAbbreviationsAndImages(textView, bannerText.components());
-  }
-
-  private void loadAbbreviationsAndImages(TextView textView, List<BannerComponents> bannerComponents) {
-    List<BannerComponentNode> bannerComponentNodes = parseBannerComponents(textView, bannerComponents);
+  public void loadInstruction() {
     setText(textView, bannerComponentNodes);
     loadImages(textView, bannerComponentNodes);
   }
 
-  private List<BannerComponentNode> parseBannerComponents(TextView textView, List<BannerComponents> bannerComponents) {
+  private List<BannerComponentNode> parseBannerComponents(List<BannerComponents> bannerComponents) {
     int length = 0;
     List<BannerComponentNode> bannerComponentNodes = new ArrayList<>();
 
@@ -129,14 +73,14 @@ public class InstructionLoader {
     return bannerComponentNodes;
   }
 
-  private InstructionImageLoader.ShieldBannerComponentNode setupImageNode(BannerComponents components, TextView textView, int index, int startIndex) {
+  private ShieldNode setupImageNode(BannerComponents components, TextView textView, int index, int startIndex) {
     instructionImageLoader.addShieldInfo(textView, components, index);
-    return new InstructionImageLoader.ShieldBannerComponentNode(components, startIndex);
+    return new InstructionImageLoader.ShieldNode(components, startIndex);
   }
 
-  private AbbreviationCoordinator.AbbreviationBannerComponentNode setupAbbreviationNode(BannerComponents components, int index, int startIndex) {
+  private AbbreviationNode setupAbbreviationNode(BannerComponents components, int index, int startIndex) {
     abbreviationCoordinator.addPriorityInfo(components, index);
-    return new AbbreviationCoordinator.AbbreviationBannerComponentNode(components, startIndex);
+    return new AbbreviationCoordinator.AbbreviationNode(components, startIndex);
   }
 
   private void loadImages(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
@@ -162,12 +106,6 @@ public class InstructionLoader {
 
   private static boolean hasComponents(BannerText bannerText) {
     return bannerText != null && bannerText.components() != null && !bannerText.components().isEmpty();
-  }
-
-  private void checkIsInitialized() {
-    if (!isInitialized) {
-      throw new RuntimeException("InstructionLoader must be initialized prior to loading image URLs");
-    }
   }
 
   /**
