@@ -95,7 +95,6 @@ public class InstructionImageLoader {
    * @param step providing the image Urls
    */
   public void prefetchImageCache(LegStep step) {
-
     if (step == null || step.bannerInstructions() == null
       || step.bannerInstructions().isEmpty()) {
       return;
