@@ -5,7 +5,7 @@ import android.support.annotation.Nullable;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 
-public abstract class NavigationOptions {
+public abstract class NavigationUiOptions {
 
   @Nullable
   public abstract DirectionsRoute directionsRoute();

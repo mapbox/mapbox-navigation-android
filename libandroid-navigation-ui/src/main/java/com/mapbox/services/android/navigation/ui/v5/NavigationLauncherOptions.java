@@ -11,7 +11,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import java.util.Locale;
 
 @AutoValue
-public abstract class NavigationLauncherOptions extends NavigationOptions {
+public abstract class NavigationLauncherOptions extends NavigationUiOptions {
 
   @Nullable
   public abstract Locale locale();

@@ -18,7 +18,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import java.util.List;
 
 @AutoValue
-public abstract class NavigationViewOptions extends NavigationOptions {
+public abstract class NavigationViewOptions extends NavigationUiOptions {
 
   public abstract MapboxNavigationOptions navigationOptions();
 
