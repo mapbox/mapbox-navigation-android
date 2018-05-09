@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.os.LocaleList;
 
 import com.mapbox.services.android.navigation.R;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 
 import junit.framework.Assert;
 

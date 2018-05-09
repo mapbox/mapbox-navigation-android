@@ -14,12 +14,6 @@ public abstract class NavigationUiOptions {
   public abstract String directionsProfile();
 
   @Nullable
-  public abstract Point origin();
-
-  @Nullable
-  public abstract Point destination();
-
-  @Nullable
   public abstract Integer lightThemeResId();
 
   @Nullable

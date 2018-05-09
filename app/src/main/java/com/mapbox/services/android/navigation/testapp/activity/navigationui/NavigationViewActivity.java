@@ -23,7 +23,6 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
@@ -46,12 +45,10 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -287,24 +284,21 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void setFieldsFromSharedPreferences(NavigationRoute.Builder builder) {
-    Locale locale = getLocale();
     builder
-      .language(locale)
-      .voiceUnits(NavigationUnitType.getDirectionsCriteriaUnitType(getUnitType(), locale));
+      .language(getLanguage())
+      .voiceUnits(getUnitType());
   }
 
-  private Locale getLocale() {
+  private String getLanguage() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     String defaultString = getString(R.string.language_default_value_device_locale);
     String localeString = sharedPreferences.getString(getString(R.string.language_key), defaultString);
-    return localeString.equals(defaultString) ? LocaleUtils.getDeviceLocale(this) : new Locale(localeString);
+    return localeString;
   }
 
-  @NavigationUnitType.UnitType
-  private int getUnitType() {
+  private String getUnitType() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    return Integer.parseInt(sharedPreferences.getString(getString(R.string.unit_type_key),
-      Integer.toString(NavigationUnitType.NONE_SPECIFIED)));
+    return sharedPreferences.getString(getString(R.string.unit_type_key), LocaleUtils.getUnitTypeForDeviceLocale(this));
   }
 
   private boolean getShouldSimulateRoute() {
@@ -325,27 +319,13 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       return;
     }
 
-    Locale locale = getLocale();
     NavigationLauncherOptions.Builder optionsBuilder = NavigationLauncherOptions.builder()
       .shouldSimulateRoute(getShouldSimulateRoute())
-      .locale(locale)
-      .unitType(getUnitType())
       .directionsProfile(getRouteProfile());
 
-    if (sameLocaleAndUnitType(route.routeOptions())) {
-      optionsBuilder.directionsRoute(route);
-    } else {
-      optionsBuilder
-        .origin(currentLocation)
-        .destination(destination);
-    }
+    optionsBuilder.directionsRoute(route);
 
     NavigationLauncher.startNavigation(this, optionsBuilder.build());
-  }
-
-  private boolean sameLocaleAndUnitType(RouteOptions routeOptions) {
-    return routeOptions.language().equals(getLocale().getLanguage())
-      && routeOptions.voiceUnits().equals(NavigationUnitType.getDirectionsCriteriaUnitType(getUnitType(), getLocale()));
   }
 
   private boolean validRouteResponse(Response<DirectionsResponse> response) {

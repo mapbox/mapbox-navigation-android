@@ -12,16 +12,15 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.text.DecimalFormat;
-import java.util.Locale;
 
 /**
  * A view with {@link android.support.design.widget.BottomSheetBehavior}
@@ -40,9 +39,9 @@ public class SummaryBottomSheet extends FrameLayout {
   private TextView arrivalTimeText;
   private ProgressBar rerouteProgressBar;
   private boolean isRerouting;
-  private Locale locale;
-  @NavigationUnitType.UnitType
-  private int unitType;
+  private String language;
+  @DirectionsCriteria.VoiceUnitCriteria
+  private String unitType;
   @NavigationTimeFormat.Type
   private int timeFormatType;
 
@@ -106,7 +105,7 @@ public class SummaryBottomSheet extends FrameLayout {
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      SummaryModel model = new SummaryModel(getContext(), routeProgress, locale, unitType, timeFormatType);
+      SummaryModel model = new SummaryModel(getContext(), routeProgress, language, unitType, timeFormatType);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());
@@ -138,10 +137,10 @@ public class SummaryBottomSheet extends FrameLayout {
   /**
    * Sets the locale to use for languages and default unit type
    *
-   * @param locale to use
+   * @param language to use
    */
-  public void setLocale(@NonNull Locale locale) {
-    this.locale = locale;
+  public void setLanguage(@NonNull String language) {
+    this.language = language;
   }
 
   /**
@@ -149,7 +148,7 @@ public class SummaryBottomSheet extends FrameLayout {
    *
    * @param unitType to use
    */
-  public void setUnitType(@NavigationUnitType.UnitType int unitType) {
+  public void setUnitType(@DirectionsCriteria.VoiceUnitCriteria String unitType) {
     this.unitType = unitType;
   }
 
@@ -166,7 +165,7 @@ public class SummaryBottomSheet extends FrameLayout {
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void init() {
-    locale = LocaleUtils.getDeviceLocale(getContext());
+    language = LocaleUtils.getDeviceLocale(getContext()).getLanguage();
     inflate(getContext(), R.layout.summary_bottomsheet_layout, this);
   }
 

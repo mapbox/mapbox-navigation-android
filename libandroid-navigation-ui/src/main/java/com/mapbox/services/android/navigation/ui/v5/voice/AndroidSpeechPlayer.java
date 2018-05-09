@@ -29,12 +29,12 @@ public class AndroidSpeechPlayer implements InstructionPlayer {
    * @param context used to create an instance of {@link TextToSpeech}
    * @since 0.6.0
    */
-  AndroidSpeechPlayer(Context context, final Locale locale) {
+  AndroidSpeechPlayer(Context context, final String language) {
     textToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
       @Override
       public void onInit(int status) {
         if (status != TextToSpeech.ERROR) {
-          textToSpeech.setLanguage(locale);
+          textToSpeech.setLanguage(new Locale(language));
         }
       }
     });

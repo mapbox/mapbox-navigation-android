@@ -20,11 +20,9 @@ import com.mapbox.services.android.navigation.v5.navigation.notification.Navigat
 import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
 import com.mapbox.services.android.navigation.v5.route.RouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
-import java.util.Locale;
 
 import timber.log.Timber;
 
@@ -54,9 +52,6 @@ public class NavigationService extends Service implements LocationEngineListener
   private LocationValidator locationValidator;
   private NavigationEngine thread;
   private RouteUtils routeUtils;
-  private Locale locale;
-  @NavigationUnitType.UnitType
-  private int unitType;
 
   @Nullable
   @Override
@@ -166,7 +161,6 @@ public class NavigationService extends Service implements LocationEngineListener
   void startNavigation(MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
     initNotification(mapboxNavigation);
-    initLocaleInfo(mapboxNavigation);
     initRouteEngine(mapboxNavigation);
     initLocationValidator();
     acquireLocationEngine();
@@ -226,11 +220,6 @@ public class NavigationService extends Service implements LocationEngineListener
     }
   }
 
-  private void initLocaleInfo(MapboxNavigation mapboxNavigation) {
-    locale = LocaleUtils.getNonNullLocale(this.getApplication(), mapboxNavigation.options().locale());
-    unitType = mapboxNavigation.options().unitType();
-  }
-
   /**
    * Builds a new route engine which can be used to find faster routes
    * during a navigation session based on traffic.
@@ -244,8 +233,6 @@ public class NavigationService extends Service implements LocationEngineListener
       String accessToken = mapboxNavigation.obtainAccessToken();
       routeEngine = new RouteFetcher();
       routeEngine.updateAccessToken(accessToken);
-      routeEngine.updateLocale(locale);
-      routeEngine.updateUnitType(unitType);
       routeEngine.addRouteListener(routeListener);
     }
   }

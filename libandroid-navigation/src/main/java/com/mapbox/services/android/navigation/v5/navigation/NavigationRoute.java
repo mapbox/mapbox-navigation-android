@@ -274,8 +274,8 @@ public final class NavigationRoute {
      * Languages</a>
      * @since 0.5.0
      */
-    public Builder language(@Nullable Locale language) {
-      directionsBuilder.language(language);
+    public Builder language(@Nullable String language) {
+      directionsBuilder.language(new Locale(language));
       return this;
     }
 

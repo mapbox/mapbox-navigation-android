@@ -3,15 +3,14 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 import android.content.Context;
 import android.text.SpannableString;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.StepIntersection;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
 import java.util.List;
-import java.util.Locale;
 
 class InstructionStepResources {
 
@@ -26,12 +25,12 @@ class InstructionStepResources {
   private List<IntersectionLanes> turnLanes;
   private boolean shouldShowThenStep;
   private DistanceUtils distanceUtils;
-  private Locale locale;
-  private @NavigationUnitType.UnitType int unitType;
+  private String language;
+  private @DirectionsCriteria.VoiceUnitCriteria String unitType;
 
-  InstructionStepResources(Context context, RouteProgress progress, Locale locale,
-                           @NavigationUnitType.UnitType int unitType) {
-    formatStepDistance(context, progress, locale, unitType);
+  InstructionStepResources(Context context, RouteProgress progress, String language,
+                           String unitType) {
+    formatStepDistance(context, progress, language, unitType);
     extractStepResources(progress);
   }
 
@@ -89,14 +88,19 @@ class InstructionStepResources {
   }
 
   private void formatStepDistance(Context context, RouteProgress progress,
-                                  Locale locale, @NavigationUnitType.UnitType int unitType) {
-    if (distanceUtils == null || !this.locale.equals(locale) || this.unitType != unitType) {
-      distanceUtils = new DistanceUtils(context, locale, unitType);
-      this.locale = locale;
+                                  String language, @DirectionsCriteria.VoiceUnitCriteria String unitType) {
+    if (shouldDistanceUtilsBeInitialized(language, unitType)) {
+      distanceUtils = new DistanceUtils(context, language, unitType);
+      this.language = language;
       this.unitType = unitType;
     }
     stepDistanceRemaining = distanceUtils.formatDistance(
       progress.currentLegProgress().currentStepProgress().distanceRemaining());
+  }
+
+  private boolean shouldDistanceUtilsBeInitialized(String language, @DirectionsCriteria.VoiceUnitCriteria String unitType) {
+    return distanceUtils == null ||  !this.language.equals(language) || !this.unitType.equals(unitType);
+
   }
 
   private void intersectionTurnLanes(LegStep step) {

@@ -9,7 +9,6 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
@@ -36,8 +35,8 @@ public class RouteFetcher {
   private String routeProfile;
   private RouteProgress routeProgress;
   private RouteUtils routeUtils;
-  private Locale locale = Locale.getDefault();
-  private int unitType = NavigationUnitType.NONE_SPECIFIED;
+  private String language = Locale.getDefault().getLanguage();
+  private String unitType = "";
 
   public RouteFetcher() {
     routeUtils = new RouteUtils();
@@ -57,11 +56,11 @@ public class RouteFetcher {
     this.accessToken = accessToken;
   }
 
-  public void updateLocale(Locale locale) {
-    this.locale = locale;
+  public void updateLanguage(String language) {
+    this.language = language;
   }
 
-  public void updateUnitType(int unitType) {
+  public void updateUnitType(String unitType) {
     this.unitType = unitType;
   }
 
@@ -96,7 +95,7 @@ public class RouteFetcher {
       .accessToken(accessToken)
       .origin(origin)
       .destination(destination);
-    addLocaleAndUnitType(builder);
+    addLanguageAndUnitType(builder);
     addRouteProfile(routeProfile, builder);
     builder.build().getRoute(directionsResponseCallback);
   }
@@ -121,9 +120,10 @@ public class RouteFetcher {
     return builder;
   }
 
-  private void addLocaleAndUnitType(NavigationRoute.Builder builder) {
-    String voiceUnitType = NavigationUnitType.getDirectionsCriteriaUnitType(unitType, locale);
-    builder.language(locale).voiceUnits(voiceUnitType);
+  private void addLanguageAndUnitType(NavigationRoute.Builder builder) {
+    builder
+      .language(routeProgress.directionsRoute().voiceLanguage())
+      .voiceUnits(routeProgress.directionsRoute().routeOptions().voiceUnits());
   }
 
   private void addRouteProfile(String routeProfile, NavigationRoute.Builder builder) {
@@ -166,7 +166,7 @@ public class RouteFetcher {
   private void executeRouteCall(NavigationRoute.Builder builder) {
     if (builder != null) {
       builder.accessToken(accessToken);
-      addLocaleAndUnitType(builder);
+      addLanguageAndUnitType(builder);
       builder.build().getRoute(directionsResponseCallback);
     }
   }

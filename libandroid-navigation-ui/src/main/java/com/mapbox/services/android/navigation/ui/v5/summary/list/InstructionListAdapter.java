@@ -9,26 +9,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class InstructionListAdapter extends RecyclerView.Adapter<InstructionViewHolder> {
   private List<LegStep> stepList;
   private RouteLeg currentLeg;
   private LegStep currentStep;
   private DistanceUtils distanceUtils;
-  private Locale locale;
-  private @NavigationUnitType.UnitType int unitType;
+  private String language;
+  private @DirectionsCriteria.VoiceUnitCriteria String unitType;
 
   public InstructionListAdapter() {
     stepList = new ArrayList<>();
@@ -71,10 +70,10 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   }
 
   public void updateSteps(Context context, RouteProgress routeProgress,
-                          Locale locale, @NavigationUnitType.UnitType int unitType) {
-    if (distanceUtils == null || !this.locale.equals(locale) || this.unitType != unitType) {
-      distanceUtils = new DistanceUtils(context, locale, unitType);
-      this.locale = locale;
+                          String language, @DirectionsCriteria.VoiceUnitCriteria String unitType) {
+    if (distanceUtils == null || !this.language.equals(language) || !this.unitType.equals(unitType)) {
+      distanceUtils = new DistanceUtils(context, language, unitType);
+      this.language = language;
       this.unitType = unitType;
     }
     addLegSteps(routeProgress);

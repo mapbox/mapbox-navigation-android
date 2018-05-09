@@ -5,8 +5,6 @@ import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 
-import java.util.Locale;
-
 /**
  * Immutable and can't be changed after passing into {@link MapboxNavigation}.
  */
@@ -47,14 +45,8 @@ public abstract class MapboxNavigationOptions {
 
   public abstract boolean isDebugLoggingEnabled();
 
-  @NavigationUnitType.UnitType
-  public abstract int unitType();
-
   @Nullable
   public abstract NavigationNotification navigationNotification();
-
-  @Nullable
-  public abstract Locale locale();
 
   @NavigationTimeFormat.Type
   public abstract int timeFormatType();
@@ -106,11 +98,7 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder isDebugLoggingEnabled(boolean debugLoggingEnabled);
 
-    public abstract Builder unitType(@NavigationUnitType.UnitType int unitType);
-
     public abstract Builder navigationNotification(NavigationNotification notification);
-
-    public abstract Builder locale(Locale locale);
 
     public abstract Builder timeFormatType(@NavigationTimeFormat.Type int type);
 
@@ -144,7 +132,6 @@ public abstract class MapboxNavigationOptions {
       .enableNotification(true)
       .isFromNavigationUi(false)
       .isDebugLoggingEnabled(false)
-      .unitType(NavigationUnitType.NONE_SPECIFIED)
       .timeFormatType(NavigationTimeFormat.NONE_SPECIFIED)
       .locationAcceptableAccuracyInMetersThreshold(NavigationConstants.FIFTY_METER_ACCEPTABLE_ACCURACY_THRESHOLD)
       .locationAccuracyPercentThreshold(NavigationConstants.TEN_PERCENT_ACCURACY_THRESHOLD)

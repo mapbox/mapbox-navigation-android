@@ -4,12 +4,9 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
 
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 
 import java.util.Locale;
-
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_IMPERIAL;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_METRIC;
 
 public class LocaleUtils {
 
@@ -19,15 +16,15 @@ public class LocaleUtils {
    * @param locale for which to return the default unit type
    * @return unit type for specified locale
    */
-  @NavigationUnitType.UnitType
-  public static int getUnitTypeForLocale(@NonNull Locale locale) {
+  @DirectionsCriteria.VoiceUnitCriteria
+  public static String getUnitTypeForLocale(@NonNull Locale locale) {
     switch (locale.getCountry()) {
       case "US": // US
       case "LR": // Liberia
       case "MM": // Burma
-        return TYPE_IMPERIAL;
+        return DirectionsCriteria.IMPERIAL;
       default:
-        return TYPE_METRIC;
+        return DirectionsCriteria.METRIC;
     }
   }
 
@@ -50,10 +47,14 @@ public class LocaleUtils {
    * @param locale to check if it is null
    * @return a non-null locale, either the one passed in, or the device locale
    */
-  public static Locale getNonNullLocale(Context context, Locale locale) {
-    if (locale == null) {
-      return getDeviceLocale(context);
+  public static String getNonNullLocale(Context context, String language) {
+    if (language == null) {
+      return getDeviceLocale(context).getLanguage();
     }
-    return locale;
+    return language;
+  }
+
+  public static String getUnitTypeForDeviceLocale(Context context) {
+    return getUnitTypeForLocale(getDeviceLocale(context));
   }
 }

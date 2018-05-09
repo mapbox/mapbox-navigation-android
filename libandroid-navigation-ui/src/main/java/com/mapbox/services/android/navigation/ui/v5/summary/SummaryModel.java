@@ -4,13 +4,12 @@ import android.content.Context;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
 import java.util.Calendar;
-import java.util.Locale;
 
 import static com.mapbox.services.android.navigation.v5.utils.time.TimeUtils.formatTime;
 import static com.mapbox.services.android.navigation.v5.utils.time.TimeUtils.formatTimeRemaining;
@@ -21,9 +20,9 @@ public class SummaryModel {
   private final SpannableStringBuilder timeRemaining;
   private final String arrivalTime;
 
-  public SummaryModel(Context context, RouteProgress progress, Locale locale,
-                      @NavigationUnitType.UnitType int unitType, @NavigationTimeFormat.Type int timeFormatType) {
-    distanceRemaining = new DistanceUtils(context, locale, unitType)
+  public SummaryModel(Context context, RouteProgress progress, String language,
+                      @DirectionsCriteria.VoiceUnitCriteria String unitType, @NavigationTimeFormat.Type int timeFormatType) {
+    distanceRemaining = new DistanceUtils(context, language, unitType)
       .formatDistance(progress.distanceRemaining()).toString();
     timeRemaining = formatTimeRemaining(progress.durationRemaining());
     Calendar time = Calendar.getInstance();

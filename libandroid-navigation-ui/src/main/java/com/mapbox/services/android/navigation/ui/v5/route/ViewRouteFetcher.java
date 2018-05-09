@@ -76,7 +76,7 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
   }
 
   private void extractLocale(Context context, NavigationViewOptions options) {
-    updateLocale(LocaleUtils.getNonNullLocale(context, options.navigationOptions().locale()));
+    updateLanguage(LocaleUtils.getNonNullLocale(context, options.navigationOptions().locale()));
   }
 
   private void extractUnitType(NavigationViewOptions options) {
@@ -109,11 +109,11 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
 
   private void cacheRouteLanguage(NavigationViewOptions options, @Nullable DirectionsRoute route) {
     if (options.navigationOptions().locale() != null) {
-      updateLocale(options.navigationOptions().locale());
+      updateLanguage(options.navigationOptions().locale());
     } else if (route != null && !TextUtils.isEmpty(route.routeOptions().language())) {
-      updateLocale(new Locale(route.routeOptions().language()));
+      updateLanguage(new Locale(route.routeOptions().language()));
     } else {
-      updateLocale(Locale.getDefault());
+      updateLanguage(Locale.getDefault());
     }
   }
 

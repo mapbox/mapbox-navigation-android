@@ -50,10 +50,6 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
 
     public abstract Builder directionsProfile(@DirectionsCriteria.ProfileCriteria String directionsProfile);
 
-    public abstract Builder origin(Point origin);
-
-    public abstract Builder destination(Point destination);
-
     public abstract Builder lightThemeResId(Integer lightThemeResId);
 
     public abstract Builder darkThemeResId(Integer darkThemeResId);

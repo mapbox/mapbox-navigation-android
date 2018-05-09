@@ -5,19 +5,11 @@ import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 
 import java.util.Locale;
 
 @AutoValue
 public abstract class NavigationLauncherOptions extends NavigationUiOptions {
-
-  @Nullable
-  public abstract Locale locale();
-
-  @Nullable
-  public abstract Integer unitType();
 
   public abstract boolean enableOffRouteDetection();
 
@@ -30,19 +22,11 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
 
     public abstract Builder directionsProfile(@DirectionsCriteria.ProfileCriteria String directionsProfile);
 
-    public abstract Builder origin(Point origin);
-
-    public abstract Builder destination(Point destination);
-
     public abstract Builder lightThemeResId(Integer lightThemeResId);
 
     public abstract Builder darkThemeResId(Integer darkThemeResId);
 
     public abstract Builder shouldSimulateRoute(boolean shouldSimulateRoute);
-
-    public abstract Builder locale(Locale locale);
-
-    public abstract Builder unitType(@NavigationUnitType.UnitType Integer unitType);
 
     public abstract Builder enableOffRouteDetection(boolean enableOffRouteDetection);
 
