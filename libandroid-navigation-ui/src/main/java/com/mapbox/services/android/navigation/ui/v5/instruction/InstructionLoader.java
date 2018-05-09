@@ -64,7 +64,7 @@ public class InstructionLoader {
     for (BannerComponents components : bannerComponents) {
       BannerComponentNode node;
       if (hasImageUrl(components)) {
-        node = setupImageNode(components, textView, bannerComponentNodes.size(), length - 1);
+        node = setupImageNode(components, bannerComponentNodes.size(), length - 1);
       } else if (hasAbbreviation(components)) {
         node = setupAbbreviationNode(components, bannerComponentNodes.size(), length - 1);
       } else {
@@ -77,8 +77,8 @@ public class InstructionLoader {
     return bannerComponentNodes;
   }
 
-  private ShieldNode setupImageNode(BannerComponents components, TextView textView, int index, int startIndex) {
-    instructionImageLoader.addShieldInfo(textView, components, index);
+  private ShieldNode setupImageNode(BannerComponents components, int index, int startIndex) {
+    instructionImageLoader.addShieldInfo(components, index);
     return new InstructionImageLoader.ShieldNode(components, startIndex);
   }
 

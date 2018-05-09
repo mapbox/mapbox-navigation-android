@@ -78,12 +78,11 @@ public class InstructionImageLoader {
    * Uses the given BannerComponents object to construct a BannerShield object containing the
    * information needed to load the proper image into the TextView where appropriate.
    *
-   * @param textView to insert image into
    * @param bannerComponents containing image info
    * @param index of the BannerComponentNode which refers to the given BannerComponents
    */
-  public void addShieldInfo(TextView textView, BannerComponents bannerComponents, int index) {
-    bannerShieldList.add(new BannerShield(textView.getContext(), bannerComponents, index));
+  public void addShieldInfo(BannerComponents bannerComponents, int index) {
+    bannerShieldList.add(new BannerShield(bannerComponents, index));
   }
 
   /**
@@ -183,7 +182,7 @@ public class InstructionImageLoader {
 
   private void loadTargets() {
     for (InstructionTarget target : new ArrayList<>(targets)) {
-      picassoImageLoader.load(target.getShield().getUrl())
+      picassoImageLoader.load(urlDensityMap.get(target.getShield().getUrl()))
         .into(target);
     }
   }

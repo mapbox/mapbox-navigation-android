@@ -10,8 +10,8 @@ class BannerShield {
   private int nodeIndex;
   private int startIndex = -1;
 
-  BannerShield(Context context, BannerComponents bannerComponents, int nodeIndex) {
-    this.url = new UrlDensityMap(context).get(bannerComponents.imageBaseUrl());
+  BannerShield(BannerComponents bannerComponents, int nodeIndex) {
+    this.url = bannerComponents.imageBaseUrl();
     this.nodeIndex = nodeIndex;
     this.text = bannerComponents.text();
   }
