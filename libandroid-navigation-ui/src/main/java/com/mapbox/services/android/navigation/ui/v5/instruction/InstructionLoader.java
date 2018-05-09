@@ -1,12 +1,12 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.text.Spannable;
-import android.text.TextUtils;
 import android.text.style.ImageSpan;
 import android.widget.TextView;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerText;
+import com.mapbox.core.utils.TextUtils;
 import com.mapbox.services.android.navigation.ui.v5.instruction.AbbreviationCoordinator.AbbreviationNode;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionImageLoader.ShieldNode;
 import com.squareup.picasso.Picasso;
@@ -31,10 +31,14 @@ public class InstructionLoader {
   private List<BannerComponentNode> bannerComponentNodes;
 
   public InstructionLoader(TextView textView, BannerText bannerText) {
-    this.abbreviationCoordinator = new AbbreviationCoordinator();
+    this(textView, bannerText, InstructionImageLoader.getInstance(), new AbbreviationCoordinator());
+  }
+
+  public InstructionLoader(TextView textView, BannerText bannerText, InstructionImageLoader instructionImageLoader, AbbreviationCoordinator abbreviationCoordinator) {
+    this.abbreviationCoordinator = abbreviationCoordinator;
     this.textView = textView;
     bannerComponentNodes = new ArrayList<>();
-    instructionImageLoader = InstructionImageLoader.getInstance();
+    this.instructionImageLoader = instructionImageLoader;
 
     if (!hasComponents(bannerText)) {
       return;
@@ -55,7 +59,7 @@ public class InstructionLoader {
 
   private List<BannerComponentNode> parseBannerComponents(List<BannerComponents> bannerComponents) {
     int length = 0;
-    List<BannerComponentNode> bannerComponentNodes = new ArrayList<>();
+    bannerComponentNodes = new ArrayList<>();
 
     for (BannerComponents components : bannerComponents) {
       BannerComponentNode node;
