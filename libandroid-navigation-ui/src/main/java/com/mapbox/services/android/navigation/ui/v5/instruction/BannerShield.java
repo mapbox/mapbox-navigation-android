@@ -1,7 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.content.Context;
-
 import com.mapbox.api.directions.v5.models.BannerComponents;
 
 class BannerShield {

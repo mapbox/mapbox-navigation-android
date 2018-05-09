@@ -34,7 +34,8 @@ public class InstructionLoader {
     this(textView, bannerText, InstructionImageLoader.getInstance(), new AbbreviationCoordinator());
   }
 
-  public InstructionLoader(TextView textView, BannerText bannerText, InstructionImageLoader instructionImageLoader, AbbreviationCoordinator abbreviationCoordinator) {
+  public InstructionLoader(TextView textView, BannerText bannerText, InstructionImageLoader instructionImageLoader,
+                           AbbreviationCoordinator abbreviationCoordinator) {
     this.abbreviationCoordinator = abbreviationCoordinator;
     this.textView = textView;
     bannerComponentNodes = new ArrayList<>();

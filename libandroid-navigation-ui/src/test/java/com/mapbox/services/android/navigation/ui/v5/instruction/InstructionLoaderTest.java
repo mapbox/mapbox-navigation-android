@@ -51,7 +51,7 @@ public class InstructionLoaderTest {
 
     new InstructionLoader(textView, bannerText, instructionImageLoader, abbreviationCoordinator);
 
-    verify(instructionImageLoader).addShieldInfo(textView, bannerComponents, 0);
+    verify(instructionImageLoader).addShieldInfo(bannerComponents, 0);
   }
 
   @Test
