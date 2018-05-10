@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.content.Context;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,6 +17,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.core.exceptions.ServicesException;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.Locale;
 
@@ -274,7 +276,7 @@ public final class NavigationRoute {
      * Languages</a>
      * @since 0.5.0
      */
-    public Builder language(@Nullable String language) {
+    public Builder language(String language) {
       directionsBuilder.language(new Locale(language));
       return this;
     }
@@ -367,7 +369,7 @@ public final class NavigationRoute {
      * @return this builder for chaining options together
      * @since 0.8.0
      */
-    public Builder voiceUnits(@Nullable @VoiceUnitCriteria String voiceUnits) {
+    public Builder voiceUnits(@VoiceUnitCriteria String voiceUnits) {
       directionsBuilder.voiceUnits(voiceUnits);
       return this;
     }
@@ -419,6 +421,12 @@ public final class NavigationRoute {
      */
     public Builder baseUrl(String baseUrl) {
       directionsBuilder.baseUrl(baseUrl);
+      return this;
+    }
+
+    public Builder languageAndVoiceUnitsFromContext(Context context) {
+      directionsBuilder.language(LocaleUtils.getDeviceLocale(context))
+      .voiceUnits(LocaleUtils.getUnitTypeForDeviceLocale(context));
       return this;
     }
 

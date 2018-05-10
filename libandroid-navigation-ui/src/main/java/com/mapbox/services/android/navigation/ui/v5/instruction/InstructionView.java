@@ -348,7 +348,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void init() {
-    language = LocaleUtils.getDeviceLocale(getContext()).getLanguage();
+    language = LocaleUtils.getDeviceLanguage(getContext());
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
 

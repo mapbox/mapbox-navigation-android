@@ -51,9 +51,9 @@ public class DistanceUtils {
     Locale locale = new Locale(language);
     numberFormat = NumberFormat.getNumberInstance(locale);
 
-    if (!DirectionsCriteria.IMPERIAL.equals(unitType) && ! DirectionsCriteria.METRIC.equals(unitType)) {
+    if (!DirectionsCriteria.IMPERIAL.equals(unitType) && !DirectionsCriteria.METRIC.equals(unitType)) {
       // If given locale does not include a country, use the device locale to get the default unitType
-      unitType = LocaleUtils.getUnitTypeForLocale(LocaleUtils.getDeviceLocale(context));
+      unitType = LocaleUtils.getUnitTypeForDeviceLocale(context);
     }
 
     largeUnit = DirectionsCriteria.IMPERIAL.equals(unitType) ? UNIT_MILES : UNIT_KILOMETERS;

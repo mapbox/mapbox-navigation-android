@@ -33,6 +33,11 @@ public class LocaleUtils {
    * @param context to check configuration
    * @return locale of device
    */
+  public static String getDeviceLanguage(Context context) {
+    return getDeviceLocale(context).getLanguage();
+  }
+
+
   public static Locale getDeviceLocale(Context context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
       return context.getResources().getConfiguration().getLocales().get(0);
@@ -44,12 +49,12 @@ public class LocaleUtils {
   /**
    * Returns the locale passed in if it is not null, otherwise returns the device locale
    * @param context to get device locale
-   * @param locale to check if it is null
+   * @param language to check if it is null
    * @return a non-null locale, either the one passed in, or the device locale
    */
   public static String getNonNullLocale(Context context, String language) {
     if (language == null) {
-      return getDeviceLocale(context).getLanguage();
+      return getDeviceLanguage(context);
     }
     return language;
   }
