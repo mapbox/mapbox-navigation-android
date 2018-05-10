@@ -306,14 +306,12 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private String getLanguage() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     String defaultString = getString(R.string.language_default_value_device_locale);
-    String localeString = sharedPreferences.getString(getString(R.string.language_key), defaultString);
-    return localeString;
+    return sharedPreferences.getString(getString(R.string.language_key), defaultString);
   }
 
   private String getUnitType() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    String unitType = sharedPreferences.getString(getString(R.string.unit_type_key), LocaleUtils.getUnitTypeForDeviceLocale(this));
-    return unitType;
+    return sharedPreferences.getString(getString(R.string.unit_type_key), LocaleUtils.getUnitTypeForDeviceLocale(this));
   }
 
   private boolean getShouldSimulateRoute() {

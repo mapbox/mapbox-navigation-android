@@ -7,7 +7,6 @@ import com.mapbox.geojson.Point;
 
 public abstract class NavigationUiOptions {
 
-  @Nullable
   public abstract DirectionsRoute directionsRoute();
 
   @Nullable
