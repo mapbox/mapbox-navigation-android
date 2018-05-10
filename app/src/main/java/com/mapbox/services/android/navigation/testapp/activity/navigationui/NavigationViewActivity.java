@@ -87,6 +87,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private DirectionsRoute route;
 
   private boolean locationFound;
+  private boolean settingsOpened = false;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,6 +96,18 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     ButterKnife.bind(this);
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
+  }
+
+  @Override
+  protected void onPostResume() {
+    super.onPostResume();
+
+    if (settingsOpened) {
+      if (currentLocation != null && destination != null) {
+        fetchRoute();
+      }
+      settingsOpened = false;
+    }
   }
 
   @Override
@@ -117,6 +130,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private void showSettings() {
     startActivity(new Intent(this, NavigationViewSettingsActivity.class));
+    settingsOpened = true;
   }
 
   @SuppressWarnings( {"MissingPermission"})
