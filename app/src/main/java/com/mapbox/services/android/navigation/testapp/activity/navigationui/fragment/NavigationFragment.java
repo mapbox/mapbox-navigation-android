@@ -93,9 +93,9 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
   public void onNavigationReady() {
     Point origin = Point.fromLngLat(ORIGIN_LONGITUDE, ORIGIN_LATITUDE);
     Point destination = Point.fromLngLat(DESTINATION_LONGITUDE, DESTINATION_LATITUDE);
-    NavigationViewOptions options = NavigationViewOptions.builder()
-      .origin(origin)
-      .destination(destination)
+    NavigationViewOptions options = NavigationViewOptions.builder() //todo get route
+//      .origin(origin)
+//      .destination(destination)
       .shouldSimulateRoute(true)
       .navigationListener(this)
       .build();

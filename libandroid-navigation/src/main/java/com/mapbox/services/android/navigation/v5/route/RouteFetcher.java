@@ -13,7 +13,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import retrofit2.Call;
@@ -35,8 +34,6 @@ public class RouteFetcher {
   private String routeProfile;
   private RouteProgress routeProgress;
   private RouteUtils routeUtils;
-  private String language = Locale.getDefault().getLanguage();
-  private String unitType = "";
 
   public RouteFetcher() {
     routeUtils = new RouteUtils();
@@ -54,14 +51,6 @@ public class RouteFetcher {
 
   public void updateAccessToken(String accessToken) {
     this.accessToken = accessToken;
-  }
-
-  public void updateLanguage(String language) {
-    this.language = language;
-  }
-
-  public void updateUnitType(String unitType) {
-    this.unitType = unitType;
   }
 
   public void updateRouteProfile(String routeProfile) {

@@ -18,7 +18,7 @@
         android:title="@string/unit_type"
         android:entries="@array/unit_type_array"
         android:entryValues="@array/unit_type_values_array"
-        android:defaultValue="-1"/>
+        android:defaultValue="@string/language_default_value_device_locale"/>
     <ListPreference
         android:entries="@array/route_profile_array"
         android:entryValues="@array/route_profile_values_array"

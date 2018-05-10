@@ -64,8 +64,8 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   public void onNavigationReady() {
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
     options.navigationListener(this);
-    options.origin(origin);
-    options.destination(destination);
+//    options.origin(origin);
+//    options.destination(destination);
     options.shouldSimulateRoute(true);
     options.progressChangeListener(this);
     setBottomSheetCallback(options);

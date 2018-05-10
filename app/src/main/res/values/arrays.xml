@@ -15,7 +15,6 @@
         <item>de_DE</item>
     </string-array>
 
-
     <string-array name="unit_type_array">
         <item>Default for Locale</item>
         <item>Metric</item>
@@ -23,9 +22,9 @@
     </string-array>
 
     <string-array name="unit_type_values_array">
-        <item>-1</item>
-        <item>1</item>
-        <item>0</item>
+        <item></item>
+        <item>metric</item>
+        <item>imperial</item>
     </string-array>
 
     <string-array name="route_profile_array">

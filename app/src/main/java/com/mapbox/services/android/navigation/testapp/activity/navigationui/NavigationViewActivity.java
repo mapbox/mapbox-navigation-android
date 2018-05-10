@@ -298,7 +298,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private String getUnitType() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    return sharedPreferences.getString(getString(R.string.unit_type_key), LocaleUtils.getUnitTypeForDeviceLocale(this));
+    String unitType = sharedPreferences.getString(getString(R.string.unit_type_key), LocaleUtils.getUnitTypeForDeviceLocale(this));
+    return unitType;
   }
 
   private boolean getShouldSimulateRoute() {

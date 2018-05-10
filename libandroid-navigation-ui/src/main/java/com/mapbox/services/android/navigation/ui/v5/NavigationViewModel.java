@@ -171,12 +171,12 @@ public class NavigationViewModel extends AndroidViewModel {
       locationEngineConductor.initializeLocationEngine(getApplication(), options.shouldSimulateRoute());
       initNavigation(getApplication(), navigationOptions);
       addMilestones(options);
-      navigationViewRouteEngine.extractRouteOptions(getApplication(), options);
+      navigationViewRouteEngine.extractRouteOptions(options);
     }
   }
 
   void updateNavigation(NavigationViewOptions options) {
-    navigationViewRouteEngine.extractRouteOptions(getApplication(), options);
+    navigationViewRouteEngine.extractRouteOptions(options);
   }
 
   void updateFeedbackScreenshot(String screenshot) {

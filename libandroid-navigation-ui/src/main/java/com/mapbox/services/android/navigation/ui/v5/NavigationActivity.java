@@ -7,16 +7,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
-import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
-
-import java.util.HashMap;
-import java.util.Locale;
-
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.NONE_SPECIFIED;
 
 /**
  * Serves as a launching point for the custom drop-in UI, {@link NavigationView}.
@@ -105,11 +98,8 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     options.navigationListener(this);
     if (!isRunning) {
       extractRoute(options);
-      extractCoordinates(options);
     }
     extractConfiguration(options, navigationOptions);
-    extractLocale(navigationOptions);
-    extractUnitType(navigationOptions);
 
     options.navigationOptions(navigationOptions.build());
     navigationView.startNavigation(options.build());
@@ -137,14 +127,6 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     options.directionsRoute(NavigationLauncher.extractRoute(this));
   }
 
-  private void extractCoordinates(NavigationViewOptions.Builder options) {
-    HashMap<String, Point> coordinates = NavigationLauncher.extractCoordinates(this);
-    if (options.build().directionsRoute() == null && coordinates.size() > 0) {
-      options.origin(coordinates.get(NavigationConstants.NAVIGATION_VIEW_ORIGIN));
-      options.destination(coordinates.get(NavigationConstants.NAVIGATION_VIEW_DESTINATION));
-    }
-  }
-
   private void extractConfiguration(NavigationViewOptions.Builder options,
                                     MapboxNavigationOptions.Builder navigationOptions) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -156,26 +138,5 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_OFF_ROUTE_ENABLED_KEY, true));
     navigationOptions.snapToRoute(preferences
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_SNAP_ENABLED_KEY, true));
-  }
-
-  private void extractLocale(MapboxNavigationOptions.Builder navigationOptions) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-    String country = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_COUNTRY, EMPTY_STRING);
-    String language = preferences.getString(NavigationConstants.NAVIGATION_VIEW_LOCALE_LANGUAGE, EMPTY_STRING);
-
-    Locale locale;
-    if (!language.isEmpty()) {
-      locale = new Locale(language, country);
-    } else {
-      locale = LocaleUtils.getDeviceLocale(this);
-    }
-
-    navigationOptions.locale(locale);
-  }
-
-  private void extractUnitType(MapboxNavigationOptions.Builder navigationOptions) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-    int unitType = preferences.getInt(NavigationConstants.NAVIGATION_VIEW_UNIT_TYPE, NONE_SPECIFIED);
-    navigationOptions.unitType(unitType);
   }
 }

@@ -239,20 +239,20 @@ public final class NavigationConstants {
   static final int TWO_HUNDRED_METERS_PER_SECOND_VELOCITY_THRESHOLD = 200;
 
   // Bundle variable keys
-  public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat";
+  public static final String NAVIGATION_VIEW_ORIGIN_LAT_KEY = "origin_lat"; //todo remove
   public static final String NAVIGATION_VIEW_ORIGIN_LNG_KEY = "origin_long";
   public static final String NAVIGATION_VIEW_ORIGIN = "origin";
   public static final String NAVIGATION_VIEW_DESTINATION_LAT_KEY = "destination_lat";
   public static final String NAVIGATION_VIEW_DESTINATION_LNG_KEY = "destination_long";
   public static final String NAVIGATION_VIEW_DESTINATION = "destination";
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
-  public static final String NAVIGATION_VIEW_UNIT_TYPE = "navigation_view_unit_type";
+//  public static final String NAVIGATION_VIEW_UNIT_TYPE = "navigation_view_unit_type";
   public static final String NAVIGATION_VIEW_SIMULATE_ROUTE = "navigation_view_simulate_route";
   public static final String NAVIGATION_VIEW_ROUTE_PROFILE_KEY = "navigation_view_route_profile";
   public static final String NAVIGATION_VIEW_OFF_ROUTE_ENABLED_KEY = "navigation_view_off_route_enabled";
   public static final String NAVIGATION_VIEW_SNAP_ENABLED_KEY = "navigation_view_snap_enabled";
-  public static final String NAVIGATION_VIEW_LOCALE_LANGUAGE = "navigation_view_locale_language";
-  public static final String NAVIGATION_VIEW_LOCALE_COUNTRY = "navigation_view_locale_country";
+//  public static final String NAVIGATION_VIEW_LOCALE_LANGUAGE = "navigation_view_locale_language";
+//  public static final String NAVIGATION_VIEW_LOCALE_COUNTRY = "navigation_view_locale_country";
 
   // Step Maneuver Types
   public static final String STEP_MANEUVER_TYPE_TURN = "turn";

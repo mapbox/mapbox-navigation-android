@@ -35,7 +35,8 @@
     <string name="simulate_route_key" translatable="false">simulate_route</string>
     <string name="language_key" translatable="false">language</string>
     <string name="route_profile_key" translatable="false">route_profile</string>
-    <string name="language_default_value_device_locale" translatable="false">device_locale</string>
+    <string name="language_default_value_device_locale" translatable="false"></string>
+    <string name="unit_type_default_value_default_for_locale" translatable="false">device_locale</string>
 
     <string name="error_route_not_available">Current route is not available</string>
     <string name="error_select_longer_route">Please select a longer route</string>
