@@ -4,19 +4,19 @@ ext {
       minSdkVersion    : 15,
       targetSdkVersion : 27,
       compileSdkVersion: 27,
-      buildToolsVersion: '27.0.2'
+      buildToolsVersion: '27.0.3'
   ]
 
   version = [
       mapboxMapSdk       : '6.0.1',
       mapboxSdkServices  : '3.1.0',
       mapboxEvents       : '3.0.3',
-      locationLayerPlugin: '0.5.0',
+      locationLayerPlugin: '0.5.2',
       autoValue          : '1.5',
       autoValueParcel    : '0.2.5',
       junit              : '4.12',
-      supportLibVersion  : '27.0.2',
-      constraintLayout   : '1.0.2',
+      supportLibVersion  : '27.1.1',
+      constraintLayout   : '1.1.0',
       mockito            : '2.11.0',
       hamcrest           : '2.0.0.0',
       errorprone         : '2.0.21',
@@ -30,7 +30,7 @@ ext {
       robolectric        : '3.5.1',
       lifecycle          : '1.1.1',
       picasso            : '2.5.2',
-      gmsLocation        : '11.0.4'
+      gmsLocation        : '15.0.1'
   ]
 
   pluginVersion = [
