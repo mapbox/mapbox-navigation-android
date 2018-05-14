@@ -37,11 +37,10 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   private NavigationView navigationView;
   private View spacer;
   private TextView speedWidget;
-  private Point origin = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
-  private Point destination = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
+  private Point ORIGIN = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
+  private Point DESTINATION = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
   private DirectionsRoute directionsRoute;
   private boolean bottomSheetVisible = true;
-  private boolean navigationIsReady;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,8 +53,6 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
     speedWidget = findViewById(R.id.speed_limit);
     spacer = findViewById(R.id.spacer);
     setSpeedWidgetAnchor(R.id.summaryBottomSheet);
-
-    fetchRoute();
 
     navigationView.initialize(this);
   }
@@ -74,11 +71,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
   @Override
   public void onNavigationReady() {
-    navigationIsReady = true;
-
-    if (directionsRoute != null) {
-      startNavigation();
-    }
+    fetchRoute();
   }
 
   private void startNavigation() {
@@ -96,8 +89,8 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   private void fetchRoute() {
     NavigationRoute.builder()
       .accessToken(Mapbox.getAccessToken())
-      .origin(origin)
-      .destination(destination)
+      .origin(ORIGIN)
+      .destination(DESTINATION)
       .alternatives(true)
       .languageAndVoiceUnitsFromContext(this)
       .build()
@@ -230,9 +223,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     directionsRoute = response.body().routes().get(0);
-    if (navigationIsReady) {
-      startNavigation();
-    }
+    startNavigation();
   }
 
   @Override
