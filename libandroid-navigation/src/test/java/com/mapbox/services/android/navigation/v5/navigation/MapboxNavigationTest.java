@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.content.Context;
 
 import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.StepMilestone;
@@ -217,7 +216,7 @@ public class MapboxNavigationTest extends BaseTest {
     NavigationEventListener navigationEventListener = mock(NavigationEventListener.class);
 
     navigation.addNavigationEventListener(navigationEventListener);
-    navigation.startNavigation(mock(DirectionsRoute.class));
+    navigation.startNavigation(buildTestDirectionsRoute());
     navigation.endNavigation();
 
     verify(navigationEventListener, times(1)).onRunning(false);
@@ -229,7 +228,7 @@ public class MapboxNavigationTest extends BaseTest {
     NavigationEventListener navigationEventListener = mock(NavigationEventListener.class);
 
     navigation.addNavigationEventListener(navigationEventListener);
-    navigation.startNavigation(mock(DirectionsRoute.class));
+    navigation.startNavigation(buildTestDirectionsRoute());
 
     verify(navigationEventListener, times(1)).onRunning(true);
   }
