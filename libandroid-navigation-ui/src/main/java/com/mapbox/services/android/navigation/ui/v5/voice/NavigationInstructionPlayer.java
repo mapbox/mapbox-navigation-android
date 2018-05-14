@@ -67,9 +67,9 @@ public class NavigationInstructionPlayer implements InstructionListener {
 
   @Override
   public void onError(boolean isMapboxPlayer) {
-    if (isMapboxPlayer) { // If mapbox player failed, try android speech player
+    if (isMapboxPlayer) {
       androidSpeechPlayer.play(instructionQueue.peek().getAnnouncement());
-    } else { // If android speech player fails, just drop the instruction
+    } else {
       instructionQueue.remove();
     }
   }
