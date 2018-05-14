@@ -12,8 +12,6 @@ import android.util.TypedValue;
 
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
 /**
@@ -29,7 +27,7 @@ public class ThemeSwitcher {
    * @return color resource identifier for primary theme color
    */
   public static int retrieveNavigationViewThemeColor(Context context, int resId) {
-    TypedValue outValue = obtainTypedValue(context, resId);
+    TypedValue outValue = resolveAttributeFromId(context, resId);
     if (outValue.type >= TypedValue.TYPE_FIRST_COLOR_INT
       && outValue.type <= TypedValue.TYPE_LAST_COLOR_INT) {
       return outValue.data;
@@ -71,16 +69,9 @@ public class ThemeSwitcher {
     context.setTheme(darkThemeEnabled ? darkTheme : lightTheme);
   }
 
-  /**
-   * Sets the {@link MapView} style based on the current theme setting.
-   *
-   * @param context to retrieve {@link SharedPreferences}
-   * @param map     the style will be set on
-   */
-  static void setMapStyle(Context context, MapboxMap map, MapboxMap.OnStyleLoadedListener listener) {
-    TypedValue mapStyleAttr = obtainTypedValue(context, R.attr.navigationViewMapStyle);
-    String styleUrl = mapStyleAttr.string.toString();
-    map.setStyleUrl(styleUrl, listener);
+  static String retrieveMapStyle(Context context) {
+    TypedValue mapStyleAttr = resolveAttributeFromId(context, R.attr.navigationViewMapStyle);
+    return mapStyleAttr.string.toString();
   }
 
   /**
@@ -90,7 +81,7 @@ public class ThemeSwitcher {
    * @return {@link Icon} map marker dark or light
    */
   static Icon retrieveMapMarker(Context context) {
-    TypedValue destinationMarkerResId = obtainTypedValue(context, R.attr.navigationViewDestinationMarker);
+    TypedValue destinationMarkerResId = resolveAttributeFromId(context, R.attr.navigationViewDestinationMarker);
     int markerResId = destinationMarkerResId.resourceId;
     IconFactory iconFactory = IconFactory.getInstance(context);
     return iconFactory.fromResource(markerResId);
@@ -105,12 +96,12 @@ public class ThemeSwitcher {
    * @return resolved style resource Id
    */
   static int retrieveNavigationViewStyle(Context context, int styleResId) {
-    TypedValue outValue = obtainTypedValue(context, styleResId);
+    TypedValue outValue = resolveAttributeFromId(context, styleResId);
     return outValue.resourceId;
   }
 
   @NonNull
-  private static TypedValue obtainTypedValue(Context context, int resId) {
+  private static TypedValue resolveAttributeFromId(Context context, int resId) {
     TypedValue outValue = new TypedValue();
     context.getTheme().resolveAttribute(resId, outValue, true);
     return outValue;

@@ -112,6 +112,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   public void onCreate(@Nullable Bundle savedInstanceState) {
     resumeState = savedInstanceState != null;
+    mapView.setStyleUrl(ThemeSwitcher.retrieveMapStyle(getContext()));
     mapView.onCreate(savedInstanceState);
     navigationViewModel.onCreate(resumeState);
   }
@@ -213,19 +214,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
-    ThemeSwitcher.setMapStyle(getContext(), map, new MapboxMap.OnStyleLoadedListener() {
-      @Override
-      public void onStyleLoaded(String style) {
-        initRoute();
-        initLocationLayer();
-        initMapPadding();
-        initLocationLayerObserver();
-        initNavigationPresenter();
-        initClickListeners();
-        map.addOnScrollListener(NavigationView.this);
-        onNavigationReadyCallback.onNavigationReady();
-      }
-    });
+    initRoute();
+    initLocationLayer();
+    initMapPadding();
+    initLocationLayerObserver();
+    initNavigationPresenter();
+    initClickListeners();
+    map.addOnScrollListener(NavigationView.this);
+    onNavigationReadyCallback.onNavigationReady();
   }
 
   /**
