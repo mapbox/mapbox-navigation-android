@@ -1,0 +1,10 @@
+<resources>
+    <!-- Notification Strings -->
+    <string name="end_navigation">လမ္းညြန္မွုအဆံုးသတ္ပါ</string>
+    <string name="channel_name">လမ္းညြန္မႈအသိေပးျခင္းမ်ား</string>
+    <string name="notification_arrival_time_format">%sတြင္ေရာက္ရွိသည္</string>
+    <string name="kilometers">ကီလိုမီတာ</string>
+    <string name="meters">မီတာ</string>
+    <string name="miles">မိုင္</string>
+    <string name="feet">ေပ</string>
+</resources>

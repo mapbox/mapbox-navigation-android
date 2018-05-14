@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">Mapbox လမ္းညြန္ျခင္း development tookkit</string>
+
+    <string name="title_mock_navigation">စမ္းသပ္လမ္းညြန္ျ္ခင္း</string>
+    <string name="description_mock_navigation">စမ္းသပ္လမ္းညြန္မႈအပိုင္းကို စမ္းသပ္တည္ေနရာျပengine အသံုးျပဳသည္</string>
+
+    <string name="title_off_route_detection">လမ္းေၾကာင္းမွားျခင္းကိုေျခရာခံျခင္း</string>
+    <string name="description_off_route_detection">Route Utils class ကိုအသံုးျပဳကာ အသံုးျပဳသူမ်ားလမ္းေၾကာင္းမွားျခင္းကိုေျခရာခံျခင္း</string>
+
+    <string name="title_reroute">လမ္းေၾကာင္းျပန္ေျပာင္းသည္</string>
+    <string name="description_reroute">လမ္းေၾကာင္းျပန္ေျပာင္းသည့္အလုပ္ကိုစမ္းသပ္သည္</string>
+
+    <string name="title_navigation_route_ui">လမ္းညြန္မႈေျမပံုလမ္းေၾကာင္း</string>
+    <string name="description_navigation_route_ui">ေျမပံုေပၚတြင္လမ္းေၾကာင္းဆြဲသည္</string>
+
+    <string name="title_navigation_view_ui">လမ္းညြန္မႈပံုစံမ်ား</string>
+    <string name="description_navigation_view_ui">Drop-in UI အေတြ႕အၾကံဳ</string>
+
+    <string name="title_waypoint_navigation">Waypoint လမ္းညြန္ျခင္း</string>
+    <string name="description_waypoint_navigation">ခရီးဆံုမွတ္မ်ားၾကားလမ္းေၾကာင္းမ်ားႏွင့္လမ္းညြန္ျခင္း</string>
+
+    <string name="title_embedded_navigation">Embedded လမ္းညြန္ျခင္း</string>
+    <string name="description_embedded_navigation">အျခားျမင္ကြင္းမ်ားပါဝင္ေသာျမင္ကြင္းတြင္လမ္းညြန္ျခင္း</string>
+
+    <string name="title_fragment_navigation">NavigationView implemented with Fragment</string>
+    <string name="description_fragment_navigation">NavigationView implemented with Fragment</string>
+
+    <string name="settings">ခ်ိန္ညွိမွုမ်ား</string>
+    <string name="simulate_route">လမ္းေၾကာင္းစမ္းသပ္သည္</string>
+    <string name="language">ဘာသာစကား</string>
+    <string name="unit_type">ယူနစ္အမ်ိဳးအစား</string>
+    <string name="route_profile">လမ္းေၾကာင္းပရိုဖိုင္</string>
+
+    <string name="error_route_not_available">လက္ရွိလမ္းေၾကာင္းသည္မရရွိႏိုင္ပါ</string>
+    <string name="error_select_longer_route">ေက်းဇူးျပဳ၍ရွည္ေသာလမ္းေၾကာင္းေရြးခ်ယ္ပါ</string>
+    <string name="error_valid_route_not_found">အဆင္ေျပေသာလမ္းေၾကာင္းရွာမေတြ႕ပါ</string>
+    <string name="explanation_long_press_waypoint">လမ္းေၾကာင္းမွတ္ေနရာခ်ရန္ေျမပံုကိုၾကာၾကာႏိွပ္ပါ</string>
+</resources>
