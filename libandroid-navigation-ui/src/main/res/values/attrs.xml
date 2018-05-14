@@ -21,6 +21,8 @@
     <attr name="routeScale" format="float"/>
     <attr name="alternativeRouteScale" format="float"/>
 
+    <attr name="upcomingManeuverArrowColor" format="color"/>
+    <attr name="upcomingManeuverArrowBorderColor" format="color"/>
   </declare-styleable>
 
   <declare-styleable name="NavigationView">
