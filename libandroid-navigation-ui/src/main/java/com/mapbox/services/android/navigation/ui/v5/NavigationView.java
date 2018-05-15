@@ -102,7 +102,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     super(context, attrs, defStyleAttr);
     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
     ThemeSwitcher.setTheme(context, attrs);
-    init();
+    initializeView();
   }
 
   /**
@@ -215,12 +215,12 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
-    initRoute();
-    initLocationLayer();
-    initMapPadding();
-    initLocationLayerObserver();
-    initNavigationPresenter();
-    initClickListeners();
+    initializeRoute();
+    initializeLocationLayer();
+    initializeMapPadding();
+    initializeLocationLayerObserver();
+    initializeNavigationPresenter();
+    initializeClickListeners();
     map.addOnScrollListener(NavigationView.this);
     onNavigationReadyCallback.onNavigationReady();
   }
@@ -369,9 +369,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void startNavigation(NavigationViewOptions options) {
     if (!isInitialized) {
       establish(options);
-      navigationViewModel.initializeNavigation(options, navigationViewEventDispatcher);
-      initNavigationListeners(options, navigationViewModel.getNavigation());
-      initNavigationCamera();
+      navigationViewModel.initializeNavigation(options);
+      initializeNavigationListeners(options, navigationViewModel.getNavigation());
+      initializeNavigationCamera();
       subscribeViewModels();
       isInitialized = true;
     } else {
@@ -403,13 +403,13 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     return map;
   }
 
-  private void init() {
+  private void initializeView() {
     InstructionLoader.getInstance().initialize(getContext());
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
-    initViewModels();
-    initSummaryBottomSheet();
-    initNavigationEventDispatcher();
+    initializeNavigationViewModel();
+    initializeSummaryBottomSheet();
+    initializeNavigationEventDispatcher();
   }
 
   private void bind() {
@@ -420,7 +420,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     recenterBtn = findViewById(R.id.recenterBtn);
   }
 
-  private void initViewModels() {
+  private void initializeNavigationViewModel() {
     try {
       navigationViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(NavigationViewModel.class);
     } catch (ClassCastException exception) {
@@ -428,7 +428,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     }
   }
 
-  private void initSummaryBottomSheet() {
+  private void initializeSummaryBottomSheet() {
     summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
     summaryBehavior.setHideable(false);
     summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
@@ -447,8 +447,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     });
   }
 
-  private void initNavigationEventDispatcher() {
+  private void initializeNavigationEventDispatcher() {
     navigationViewEventDispatcher = new NavigationViewEventDispatcher();
+    navigationViewModel.initializeEventDispatcher(navigationViewEventDispatcher);
   }
 
   /**
@@ -475,7 +476,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * Create a top map padding value that pushes the focal point
    * of the map to the bottom of the screen (above the bottom sheet).
    */
-  private void initMapPadding() {
+  private void initializeMapPadding() {
     int mapViewHeight = mapView.getHeight();
     int bottomSheetHeight = summaryBottomSheet.getHeight();
     int topPadding = mapViewHeight - (bottomSheetHeight * 4);
@@ -486,7 +487,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * Initializes the {@link NavigationMapRoute} to be used to draw the
    * route.
    */
-  private void initRoute() {
+  private void initializeRoute() {
     int routeStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(getContext(), R.attr.navigationViewRouteStyle);
     mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes);
   }
@@ -496,14 +497,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * location.
    */
   @SuppressWarnings( {"MissingPermission"})
-  private void initLocationLayer() {
+  private void initializeLocationLayer() {
     int locationLayerStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(getContext(),
       R.attr.navigationViewLocationLayerStyle);
     locationLayer = new LocationLayerPlugin(mapView, map, null, locationLayerStyleRes);
     locationLayer.setRenderMode(RenderMode.GPS);
   }
 
-  private void initLocationLayerObserver() {
+  private void initializeLocationLayerObserver() {
     try {
       ((LifecycleOwner) getContext()).getLifecycle().addObserver(locationLayer);
     } catch (ClassCastException exception) {
@@ -511,11 +512,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     }
   }
 
-  private void initNavigationPresenter() {
+  private void initializeNavigationPresenter() {
     navigationPresenter = new NavigationPresenter(this);
   }
 
-  private void initClickListeners() {
+  private void initializeClickListeners() {
     cancelBtn.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -563,11 +564,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     summaryBottomSheet.setTimeFormat(timeFormatType);
   }
 
-  private void initNavigationListeners(NavigationViewOptions options, MapboxNavigation navigation) {
+  private void initializeNavigationListeners(NavigationViewOptions options, MapboxNavigation navigation) {
     navigationViewEventDispatcher.initializeListeners(options, navigation);
   }
 
-  private void initNavigationCamera() {
+  private void initializeNavigationCamera() {
     camera = new NavigationCamera(map, navigationViewModel.getNavigation());
   }
 
