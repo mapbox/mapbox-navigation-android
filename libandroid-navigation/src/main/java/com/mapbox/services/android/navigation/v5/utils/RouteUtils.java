@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.METERS_REMAINING_TILL_ARRIVAL;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
 
 public final class RouteUtils {
@@ -79,8 +78,18 @@ public final class RouteUtils {
    * @since 0.8.0
    */
   public static boolean isArrivalEvent(@NonNull RouteProgress routeProgress) {
-    return (upcomingStepIsArrival(routeProgress) || currentStepIsArrival(routeProgress))
-      && routeProgress.currentLegProgress().distanceRemaining() <= METERS_REMAINING_TILL_ARRIVAL;
+    if (upcomingStepIsArrival(routeProgress) || currentStepIsArrival(routeProgress)) {
+      double distanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+      LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+      List<BannerInstructions> bannerInstructions = currentStep.bannerInstructions();
+      BannerInstructions currentInstructions = findCurrentBannerInstructions(currentStep, distanceRemaining);
+      if (hasValidInstructions(bannerInstructions, currentInstructions)) {
+        int lastInstructionIndex = bannerInstructions.size() - 1;
+        BannerInstructions lastInstructions = bannerInstructions.get(lastInstructionIndex);
+        return currentInstructions.equals(lastInstructions);
+      }
+    }
+    return false;
   }
 
   /**
@@ -256,6 +265,11 @@ public final class RouteUtils {
       instructionIndex = 0;
     }
     return instructionIndex;
+  }
+
+  private static boolean hasValidInstructions(List<BannerInstructions> bannerInstructions,
+                                              BannerInstructions currentInstructions) {
+    return bannerInstructions != null && !bannerInstructions.isEmpty() && currentInstructions != null;
   }
 
   private static BannerText retrievePrimaryOrSecondaryBannerText(boolean findPrimary, BannerInstructions instruction) {

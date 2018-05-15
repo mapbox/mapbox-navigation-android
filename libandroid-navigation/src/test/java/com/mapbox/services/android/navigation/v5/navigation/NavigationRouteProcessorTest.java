@@ -162,7 +162,7 @@ public class NavigationRouteProcessorTest extends BaseTest {
     RouteProgress firstProgress = routeProcessor.buildNewRouteProgress(navigation, mock(Location.class));
     int firstProgressIndex = firstProgress.currentLegProgress().stepIndex();
     List<Point> coordinates = createCoordinatesFromCurrentStep(firstProgress);
-    Point lastPointInCurrentStep = coordinates.remove(coordinates.size() - 2);
+    Point lastPointInCurrentStep = coordinates.remove(coordinates.size() - 1);
     Location rawLocation = buildDefaultLocationUpdate(
       lastPointInCurrentStep.longitude(), lastPointInCurrentStep.latitude()
     );
