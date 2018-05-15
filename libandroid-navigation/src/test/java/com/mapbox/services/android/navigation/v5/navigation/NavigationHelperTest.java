@@ -234,6 +234,21 @@ public class NavigationHelperTest extends BaseTest {
   }
 
   @Test
+  public void createIntersectionDistanceList_oneStepPointReturnsEmptyList() throws Exception {
+    RouteProgress routeProgress = buildMultiLegRouteProgress();
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    List<Point> currentStepPoints = new ArrayList<>();
+    currentStepPoints.add(Point.fromLngLat(1d, 1d));
+    List<StepIntersection> currentStepIntersections = currentStep.intersections();
+
+    List<Pair<StepIntersection, Double>> intersectionDistances = NavigationHelper.createDistancesToIntersections(
+      currentStepPoints, currentStepIntersections
+    );
+
+    assertTrue(intersectionDistances.isEmpty());
+  }
+
+  @Test
   public void createIntersectionDistanceList_emptyStepIntersectionsReturnsEmptyList() throws Exception {
     RouteProgress routeProgress = buildMultiLegRouteProgress();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
