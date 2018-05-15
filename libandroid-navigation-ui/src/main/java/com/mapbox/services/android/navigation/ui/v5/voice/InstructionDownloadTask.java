@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -73,11 +74,15 @@ class InstructionDownloadTask extends AsyncTask<ResponseBody, Void, File> {
 
   @Override
   protected void onPostExecute(File instructionFile) {
-    taskListener.onFinishedDownloading(instructionFile);
+    if (instructionFile == null) {
+      taskListener.onErrorDownloading();
+    } else {
+      taskListener.onFinishedDownloading(instructionFile);
+    }
   }
 
   public interface TaskListener {
-    void onFinishedDownloading(File file);
+    void onFinishedDownloading(@NonNull File file);
 
     void onErrorDownloading();
   }

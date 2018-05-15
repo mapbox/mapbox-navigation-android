@@ -1,47 +1,47 @@
 ext {
 
   androidVersions = [
-      minSdkVersion    : 15,
+      minSdkVersion    : 14,
       targetSdkVersion : 27,
       compileSdkVersion: 27,
-      buildToolsVersion: '27.0.2'
+      buildToolsVersion: '27.0.3'
   ]
 
   version = [
-      mapboxMapSdk       : '6.0.1',
+      mapboxMapSdk       : '6.1.1',
       mapboxSdkServices  : '3.1.0',
-      mapboxEvents       : '3.0.3',
-      locationLayerPlugin: '0.5.0',
+      mapboxEvents       : '3.1.0',
+      locationLayerPlugin: '0.5.2',
       autoValue          : '1.5',
       autoValueParcel    : '0.2.5',
       junit              : '4.12',
-      supportLibVersion  : '27.0.2',
-      constraintLayout   : '1.0.2',
-      mockito            : '2.11.0',
+      supportLibVersion  : '27.1.1',
+      constraintLayout   : '1.1.0',
+      mockito            : '2.18.3',
       hamcrest           : '2.0.0.0',
-      errorprone         : '2.0.21',
+      errorprone         : '2.3.1',
       butterknife        : '8.8.1',
       leakCanaryVersion  : '1.5.4',
-      timber             : '4.6.0',
+      timber             : '4.7.0',
       testRunnerVersion  : '1.0.1',
       espressoVersion    : '3.0.1',
       spoonRunner        : '1.6.2',
-      commonsIO          : '2.5',
-      robolectric        : '3.5.1',
+      commonsIO          : '2.6',
+      robolectric        : '3.8',
       lifecycle          : '1.1.1',
       picasso            : '2.5.2',
-      gmsLocation        : '11.0.4'
+      gmsLocation        : '15.0.1'
   ]
 
   pluginVersion = [
       checkstyle     : '8.2',
       pmd            : '5.8.1',
-      jacoco         : '0.7.9',
+      jacoco         : '0.8.1',
       errorprone     : '0.0.13',
       coveralls      : '2.8.1',
       spotbugs       : '1.3',
       sonarqube      : '2.6-rc1',
-      gradle         : '3.0.1',
+      gradle         : '3.1.2',
       dependencyGraph: '0.3.0'
   ]
 
