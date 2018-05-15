@@ -18,7 +18,6 @@ public class NavigationInstructionPlayer implements InstructionListener {
   private AudioFocusRequest instructionFocusRequest;
   private MapboxSpeechPlayer mapboxSpeechPlayer;
   private AndroidSpeechPlayer androidSpeechPlayer;
-  private InstructionListener instructionListener;
   private Queue<VoiceInstructionMilestone> instructionQueue;
   private boolean isMuted;
 
@@ -55,38 +54,22 @@ public class NavigationInstructionPlayer implements InstructionListener {
     androidSpeechPlayer.onDestroy();
   }
 
-  public void setInstructionListener(InstructionListener instructionListener) {
-    this.instructionListener = instructionListener;
-  }
-
   @Override
   public void onStart() {
-    if (instructionListener != null) {
-      instructionListener.onStart();
-    }
-
     requestAudioFocus();
     instructionQueue.remove();
   }
 
   @Override
   public void onDone() {
-    if (instructionListener != null) {
-      instructionListener.onDone();
-    }
-
     abandonAudioFocus();
   }
 
   @Override
   public void onError(boolean isMapboxPlayer) {
-    if (instructionListener != null) {
-      instructionListener.onError(isMapboxPlayer);
-    }
-
-    if (isMapboxPlayer) { // If mapbox player failed, try android speech player
+    if (isMapboxPlayer) {
       androidSpeechPlayer.play(instructionQueue.peek().getAnnouncement());
-    } else { // If android speech player fails, just drop the instruction
+    } else {
       instructionQueue.remove();
     }
   }
