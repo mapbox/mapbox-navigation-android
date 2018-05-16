@@ -3,4 +3,8 @@
     <string name="end_navigation">Завершить</string>
     <string name="channel_name">Оповещения навигации</string>
     <string name="notification_arrival_time_format">Время прибытия %s</string>
+    <string name="kilometers">км</string>
+    <string name="meters">м</string>
+    <string name="miles">миль</string>
+    <string name="feet">футов</string>
 </resources>
