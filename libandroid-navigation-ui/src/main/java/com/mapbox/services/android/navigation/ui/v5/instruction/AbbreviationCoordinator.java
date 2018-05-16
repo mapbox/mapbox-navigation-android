@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 import android.widget.TextView;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
+import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionLoader.BannerComponentNode;
 import com.mapbox.services.android.navigation.ui.v5.utils.TextViewUtils;
 
@@ -27,7 +28,6 @@ public class AbbreviationCoordinator {
     this.abbreviations = new HashMap<>();
     this.textViewUtils = textViewUtils;
   }
-
 
   public AbbreviationCoordinator() {
     this(new TextViewUtils());
@@ -66,7 +66,11 @@ public class AbbreviationCoordinator {
 
     int currAbbreviationPriority = 0;
     int maxAbbreviationPriority = Collections.max(abbreviations.keySet());
-    while (!textViewUtils.textFits(textView, bannerText) && (currAbbreviationPriority <= maxAbbreviationPriority)) {
+
+    boolean needsMoreAbbreviations = !textViewUtils.textFits(textView, bannerText);
+    boolean abbreviationsLeft = currAbbreviationPriority <= maxAbbreviationPriority;
+
+    while (needsMoreAbbreviations && abbreviationsLeft) {
       List<Integer> indices = abbreviations.get(new Integer(currAbbreviationPriority++));
 
       if (indices == null) {
@@ -78,6 +82,8 @@ public class AbbreviationCoordinator {
       }
 
       bannerText = join(bannerComponentNodes);
+      needsMoreAbbreviations = !textViewUtils.textFits(textView, bannerText);
+      abbreviationsLeft = currAbbreviationPriority <= maxAbbreviationPriority;
     }
 
     abbreviations.clear();
