@@ -31,6 +31,7 @@ import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.mapbox.core.constants.Constants.PRECISION_6;
@@ -47,6 +48,7 @@ public class NavigationHelper {
   private static final int INDEX_ZERO = 0;
   private static final String EMPTY_STRING = "";
   private static final double ZERO_METERS = 0d;
+  private static final int TWO_POINTS = 2;
 
   private NavigationHelper() {
     // Empty private constructor to prevent users creating an instance of this class.
@@ -297,19 +299,17 @@ public class NavigationHelper {
   @NonNull
   public static List<Pair<StepIntersection, Double>> createDistancesToIntersections(List<Point> stepPoints,
                                                                              List<StepIntersection> intersections) {
-    List<Pair<StepIntersection, Double>> distancesToIntersections = new ArrayList<>();
-    List<StepIntersection> stepIntersections = new ArrayList<>(intersections);
-    if (stepPoints.isEmpty()) {
-      return distancesToIntersections;
-    }
-    if (stepIntersections.isEmpty()) {
-      return distancesToIntersections;
+    boolean lessThanTwoStepPoints = stepPoints.size() < TWO_POINTS;
+    boolean noIntersections = intersections.isEmpty();
+    if (lessThanTwoStepPoints || noIntersections) {
+      return Collections.emptyList();
     }
 
     LineString stepLineString = LineString.fromLngLats(stepPoints);
     Point firstStepPoint = stepPoints.get(FIRST_POINT);
+    List<Pair<StepIntersection, Double>> distancesToIntersections = new ArrayList<>();
 
-    for (StepIntersection intersection : stepIntersections) {
+    for (StepIntersection intersection : intersections) {
       Point intersectionPoint = intersection.location();
       if (firstStepPoint.equals(intersectionPoint)) {
         distancesToIntersections.add(new Pair<>(intersection, ZERO_METERS));
