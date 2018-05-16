@@ -80,11 +80,13 @@ public class AbbreviationCoordinator {
     return bannerText;
   }
 
-  private boolean shouldKeepAbbreviating(TextView textView, String bannerText, int currAbbreviationPriority, int maxAbbreviationPriority) {
+  private boolean shouldKeepAbbreviating(TextView textView, String bannerText,
+                                         int currAbbreviationPriority, int maxAbbreviationPriority) {
     return !textViewUtils.textFits(textView, bannerText) && currAbbreviationPriority <= maxAbbreviationPriority;
   }
 
-  private boolean abbreviateAtAbbreviationPriority(List<BannerComponentNode> bannerComponentNodes, List<Integer> indices) {
+  private boolean abbreviateAtAbbreviationPriority(List<BannerComponentNode> bannerComponentNodes,
+                                                   List<Integer> indices) {
     if (indices == null) {
       return false;
     }
