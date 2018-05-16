@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5;
 
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -31,11 +32,15 @@ public class BaseTest {
   }
 
   protected DirectionsRoute buildTestDirectionsRoute() throws IOException {
-    return routeBuilder.buildTestDirectionsRoute();
+    return routeBuilder.buildTestDirectionsRoute(null);
+  }
+
+  protected DirectionsRoute buildTestDirectionsRoute(@Nullable String fixtureName) throws IOException {
+    return routeBuilder.buildTestDirectionsRoute(fixtureName);
   }
 
   protected RouteProgress buildDefaultTestRouteProgress() throws Exception {
-    DirectionsRoute testRoute = routeBuilder.buildTestDirectionsRoute();
+    DirectionsRoute testRoute = routeBuilder.buildTestDirectionsRoute(null);
     return routeProgressBuilder.buildDefaultTestRouteProgress(testRoute);
   }
 
