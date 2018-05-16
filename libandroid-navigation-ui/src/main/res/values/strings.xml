@@ -46,9 +46,9 @@
     <string name="dropoff_dialog_negative_text">Cancel</string>
 
     <!-- Should not be translated -->
-    <string name="navigation_guidance_day_v2"
+    <string name="navigation_guidance_day"
             translatable="false">mapbox://styles/mapbox/navigation-guidance-day-v3</string>
-    <string name="navigation_guidance_night_v2"
+    <string name="navigation_guidance_night"
             translatable="false">mapbox://styles/mapbox/navigation-guidance-night-v3</string>
     <string name="instruction_super_state"
             translatable="false">instruction_super_state</string>
