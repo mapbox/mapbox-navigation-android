@@ -36,7 +36,7 @@
 
         <item name="navigationViewDestinationMarker">@drawable/map_marker_light</item>
 
-        <item name="navigationViewMapStyle">@string/navigation_guidance_day_v2</item>
+        <item name="navigationViewMapStyle">@string/navigation_guidance_day</item>
     </style>
 
     <style name="NavigationViewDark" parent="Theme.AppCompat.Light.NoActionBar">
@@ -63,7 +63,7 @@
 
         <item name="navigationViewDestinationMarker">@drawable/map_marker_dark</item>
 
-        <item name="navigationViewMapStyle">@string/navigation_guidance_night_v2</item>
+        <item name="navigationViewMapStyle">@string/navigation_guidance_night</item>
     </style>
 
 </resources>

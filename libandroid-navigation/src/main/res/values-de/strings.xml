@@ -2,5 +2,9 @@
     <!-- Notification Strings -->
     <string name="end_navigation">Navigation beenden</string>
     <string name="channel_name">Navigationsbenachrichtigungen</string>
-    <string name="notification_arrival_time_format">Komme um %s an</string>
+    <string name="notification_arrival_time_format">Ankunft um %s</string>
+    <string name="kilometers">km</string>
+    <string name="meters">m</string>
+    <string name="miles">mile</string>
+    <string name="feet">Fuß</string>
 </resources>

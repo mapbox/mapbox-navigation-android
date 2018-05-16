@@ -1,6 +1,10 @@
 <resources>
     <!-- Notification Strings -->
-    <string name="end_navigation">Konec navigování</string>
+    <string name="end_navigation">Ukončit navigaci</string>
     <string name="channel_name">Navigační upozornění</string>
     <string name="notification_arrival_time_format">Příjezd v %s</string>
+    <string name="kilometers">km</string>
+    <string name="meters">m</string>
+    <string name="miles">míle</string>
+    <string name="feet">stopy</string>
 </resources>

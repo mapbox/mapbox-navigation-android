@@ -22,6 +22,9 @@
     <string name="title_embedded_navigation">Navegação Embutida</string>
     <string name="description_embedded_navigation">Navegação numa vista que contém outras vistas</string>
 
+    <string name="title_fragment_navigation">NavigationView implementado com Fragment</string>
+    <string name="description_fragment_navigation">NavigationView implementado com Fragment</string>
+
     <string name="settings">Definições</string>
     <string name="simulate_route">Simular Rota</string>
     <string name="language">Idioma</string>
