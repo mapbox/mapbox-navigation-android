@@ -164,7 +164,7 @@ public final class RouteUtils {
    */
   @Nullable
   public static BannerInstructions findCurrentBannerInstructions(LegStep currentStep, double stepDistanceRemaining) {
-    if (isValidStep(currentStep)) {
+    if (isValidStep(currentStep) && hasInstructions(currentStep.bannerInstructions())) {
       List<BannerInstructions> instructions = new ArrayList<>(currentStep.bannerInstructions());
       Iterator<BannerInstructions> instructionsIterator = instructions.iterator();
       while (instructionsIterator.hasNext()) {
@@ -208,15 +208,15 @@ public final class RouteUtils {
    * This method returns the current {@link VoiceInstructions} based on the step distance
    * remaining.
    *
-   * @param step                  holding the current banner instructions
+   * @param currentStep           holding the current banner instructions
    * @param stepDistanceRemaining to determine progress along the step
    * @return current voice instructions based on step distance remaining
    * @since 0.13.0
    */
   @Nullable
-  public static VoiceInstructions findCurrentVoiceInstructions(LegStep step, double stepDistanceRemaining) {
-    if (isValidStep(step)) {
-      List<VoiceInstructions> instructions = new ArrayList<>(step.voiceInstructions());
+  public static VoiceInstructions findCurrentVoiceInstructions(LegStep currentStep, double stepDistanceRemaining) {
+    if (isValidStep(currentStep) && hasInstructions(currentStep.voiceInstructions())) {
+      List<VoiceInstructions> instructions = new ArrayList<>(currentStep.voiceInstructions());
       Iterator<VoiceInstructions> instructionsIterator = instructions.iterator();
       while (instructionsIterator.hasNext()) {
         VoiceInstructions instruction = instructionsIterator.next();
@@ -243,7 +243,7 @@ public final class RouteUtils {
   }
 
   private static boolean isValidStep(LegStep step) {
-    return step != null && hasInstructions(step.bannerInstructions());
+    return step != null;
   }
 
   private static <T> boolean hasInstructions(List<T> instructions) {

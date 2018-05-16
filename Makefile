@@ -54,3 +54,7 @@ navigation-fixtures:
 	# Default Directions
 	curl "https://api.mapbox.com/directions/v5/mapbox/driving/-122.416686,37.783425;-121.90034,37.333317?geometries=polyline6&steps=true&banner_instructions=true&voice_instructions=true&access_token=$(MAPBOX_ACCESS_TOKEN)" \
 		-o libandroid-navigation/src/test/resources/directions_v5_precision_6.json
+
+    # No VoiceInstructions
+	curl "https://api.mapbox.com/directions/v5/mapbox/driving/-77.034013,38.899994;-77.033757,38.903311?geometries=polyline6&steps=true&access_token=$(MAPBOX_ACCESS_TOKEN)" \
+		-o libandroid-navigation/src/test/resources/directions_v5_no_voice.json
