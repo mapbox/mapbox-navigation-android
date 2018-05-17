@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 public class InstructionLoaderTest {
 
   @Test
-  public void testPriorityInfoIsAdded() {
+  public void onInstructionLoaderCreated_priorityInfoIsAdded() {
     TextView textView = mock(TextView.class);
     InstructionImageLoader instructionImageLoader = mock(InstructionImageLoader.class);
     AbbreviationCoordinator abbreviationCoordinator = mock(AbbreviationCoordinator.class);
@@ -34,7 +34,7 @@ public class InstructionLoaderTest {
   }
 
   @Test
-  public void testShieldInfoIsAdded() {
+  public void onInstructionLoaderCreated_shieldInfoIsAdded() {
     TextView textView = mock(TextView.class);
     InstructionImageLoader instructionImageLoader = mock(InstructionImageLoader.class);
     AbbreviationCoordinator abbreviationCoordinator = mock(AbbreviationCoordinator.class);
@@ -50,7 +50,7 @@ public class InstructionLoaderTest {
   }
 
   @Test
-  public void testSetAbbreviatedText() {
+  public void onLoadInstruction_textIsAbbreviated() {
     TextView textView = mock(TextView.class);
     InstructionImageLoader instructionImageLoader = mock(InstructionImageLoader.class);
     AbbreviationCoordinator abbreviationCoordinator = mock(AbbreviationCoordinator.class);
@@ -70,7 +70,7 @@ public class InstructionLoaderTest {
   }
 
   @Test
-  public void testLoadImages() {
+  public void onLoadInstruction_imagesAreLoaded() {
     TextView textView = mock(TextView.class);
     InstructionImageLoader instructionImageLoader = mock(InstructionImageLoader.class);
     AbbreviationCoordinator abbreviationCoordinator = mock(AbbreviationCoordinator.class);

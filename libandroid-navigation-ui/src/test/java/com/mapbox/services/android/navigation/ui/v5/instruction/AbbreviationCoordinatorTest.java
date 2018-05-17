@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 
 public class AbbreviationCoordinatorTest extends BaseTest {
   @Test
-  public void textIsAbbreviatedWhenItDoesntFit() {
+  public void onAbbreviateBannerText_textIsAbbreviated() {
     String abbreviation = "smtxt";
     BannerComponents bannerComponents =
       BannerComponentsFaker.bannerComponents()
@@ -38,7 +38,7 @@ public class AbbreviationCoordinatorTest extends BaseTest {
   }
 
   @Test
-  public void textIsNotAbbreviatedWhenItDoesFit() {
+  public void onAbbreviateBannerText_textIsNotAbbreviated() {
     String abbreviation = "smtxt";
     String text = "some text";
     BannerComponents bannerComponents =
