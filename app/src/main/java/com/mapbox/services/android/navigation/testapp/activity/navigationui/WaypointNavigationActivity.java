@@ -25,11 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 public class WaypointNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
-  NavigationListener, RouteListener, ProgressChangeListener, Callback<DirectionsResponse> {
+  NavigationListener, RouteListener, ProgressChangeListener {
 
   private NavigationView navigationView;
   private boolean dropoffDialogShown;
@@ -162,15 +161,6 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
     lastKnownLocation = location;
   }
 
-  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-    startNavigation(response.body().routes().get(0));
-  }
-
-  @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable t) {
-
-  }
-
   private void startNavigation(DirectionsRoute directionsRoute) {
     NavigationViewOptions navigationViewOptions = setupOptions(directionsRoute);
     navigationView.startNavigation(navigationViewOptions);
@@ -197,7 +187,12 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
       .alternatives(true)
       .languageAndVoiceUnitsFromContext(this)
       .build()
-      .getRoute(this);
+      .getRoute(new NavigationRoute.SimplifiedCallback() {
+        @Override
+        public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+          startNavigation(response.body().routes().get(0));
+        }
+      });
   }
 
   private NavigationViewOptions setupOptions(DirectionsRoute directionsRoute) {

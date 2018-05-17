@@ -28,11 +28,10 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 public class EmbeddedNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
-  NavigationListener, ProgressChangeListener, Callback<DirectionsResponse> {
+  NavigationListener, ProgressChangeListener {
 
   private NavigationView navigationView;
   private View spacer;
@@ -93,7 +92,13 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
       .alternatives(true)
       .languageAndVoiceUnitsFromContext(this)
       .build()
-      .getRoute(this);
+      .getRoute(new NavigationRoute.SimplifiedCallback() {
+        @Override
+        public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+          DirectionsRoute directionsRoute = response.body().routes().get(0);
+          startNavigation(directionsRoute);
+        }
+      });
   }
 
   private void setBottomSheetCallback(NavigationViewOptions.Builder options) {
@@ -217,16 +222,5 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
     speedWidget.setText(spannableString);
     speedWidget.setVisibility(View.VISIBLE);
-  }
-
-  @Override
-  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-    DirectionsRoute directionsRoute = response.body().routes().get(0);
-    startNavigation(directionsRoute);
-  }
-
-  @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-
   }
 }

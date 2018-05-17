@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.testapp.R;
@@ -19,10 +20,9 @@ import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NavigationFragment extends Fragment implements OnNavigationReadyCallback, NavigationListener, Callback<DirectionsResponse> {
+public class NavigationFragment extends Fragment implements OnNavigationReadyCallback, NavigationListener {
 
   private static final double ORIGIN_LONGITUDE = -77.04012393951416;
   private static final double ORIGIN_LATITUDE = 38.9111117447887;
@@ -129,20 +129,20 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
       .destination(destination)
       .languageAndVoiceUnitsFromContext(getContext())
       .build()
-      .getRoute(this);
+      .getRoute(new NavigationRoute.SimplifiedCallback() {
+        @Override
+        public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+          DirectionsRoute directionsRoute = response.body().routes().get(0);
+          startNavigation(directionsRoute);
+        }
+      });
   }
 
-  @Override
-  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+  private void startNavigation(DirectionsRoute directionsRoute) {
     NavigationViewOptions options = NavigationViewOptions.builder()
       .shouldSimulateRoute(true)
-      .navigationListener(this)
+      .navigationListener(NavigationFragment.this)
       .build();
     navigationView.startNavigation(options);
-  }
-
-  @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable t) {
-
   }
 }

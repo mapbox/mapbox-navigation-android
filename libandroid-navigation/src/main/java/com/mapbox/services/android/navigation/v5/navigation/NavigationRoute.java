@@ -23,6 +23,7 @@ import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
+import timber.log.Timber;
 
 
 /**
@@ -501,6 +502,16 @@ public final class NavigationRoute {
         .bannerInstructions(true)
         .roundaboutExits(true);
       return new NavigationRoute(directionsBuilder.build());
+    }
+  }
+
+  /**
+   * Helper class to reduce redundant logging code when no other action is taken in onFailure
+   */
+  public abstract static class SimplifiedCallback implements Callback<DirectionsResponse> {
+    @Override
+    public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+      Timber.e(throwable, throwable.getMessage());
     }
   }
 }

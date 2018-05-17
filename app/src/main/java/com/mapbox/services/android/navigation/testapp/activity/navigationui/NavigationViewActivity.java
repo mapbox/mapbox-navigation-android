@@ -54,15 +54,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
 import static com.mapbox.android.core.location.LocationEnginePriority.HIGH_ACCURACY;
 
 public class NavigationViewActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, LocationEngineListener, Callback<DirectionsResponse>,
-  OnRouteSelectionChangeListener {
+  MapboxMap.OnMapLongClickListener, LocationEngineListener, OnRouteSelectionChangeListener {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
@@ -234,26 +231,6 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   @Override
-  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-    if (validRouteResponse(response)) {
-      hideLoading();
-      route = response.body().routes().get(0);
-      if (route.distance() > 25d) {
-        launchRouteBtn.setEnabled(true);
-        mapRoute.addRoutes(response.body().routes());
-        boundCameraToRoute();
-      } else {
-        Snackbar.make(mapView, R.string.error_select_longer_route, Snackbar.LENGTH_SHORT).show();
-      }
-    }
-  }
-
-  @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-    Timber.e(throwable.getMessage());
-  }
-
-  @Override
   public void onNewPrimaryRouteSelected(DirectionsRoute directionsRoute) {
     route = directionsRoute;
   }
@@ -293,7 +270,22 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       .alternatives(true);
     setFieldsFromSharedPreferences(builder);
     builder.build()
-      .getRoute(this);
+      .getRoute(new NavigationRoute.SimplifiedCallback() {
+        @Override
+        public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+          if (validRouteResponse(response)) {
+            hideLoading();
+            route = response.body().routes().get(0);
+            if (route.distance() > 25d) {
+              launchRouteBtn.setEnabled(true);
+              mapRoute.addRoutes(response.body().routes());
+              boundCameraToRoute();
+            } else {
+              Snackbar.make(mapView, R.string.error_select_longer_route, Snackbar.LENGTH_SHORT).show();
+            }
+          }
+        }
+      });
     loading.setVisibility(View.VISIBLE);
   }
 
