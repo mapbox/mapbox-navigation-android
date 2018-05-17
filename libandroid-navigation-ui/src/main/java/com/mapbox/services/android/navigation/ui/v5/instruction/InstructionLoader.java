@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
+import android.support.annotation.NonNull;
 import android.text.Spannable;
 import android.text.style.ImageSpan;
 import android.widget.TextView;
@@ -24,28 +25,24 @@ import java.util.List;
  * If a shield URL is found, {@link Picasso} is used to load the image.  Then, once the image is loaded,
  * a new {@link ImageSpan} is created and set to the appropriate position of the {@link Spannable}/
  */
-public class InstructionLoader {
-  private static InstructionImageLoader instructionImageLoader;
+class InstructionLoader {
+  private InstructionImageLoader instructionImageLoader;
   private AbbreviationCoordinator abbreviationCoordinator;
   private TextView textView;
   private List<BannerComponentNode> bannerComponentNodes;
 
-  public InstructionLoader(TextView textView, BannerText bannerText) {
-    this(textView, bannerText, InstructionImageLoader.getInstance(), new AbbreviationCoordinator());
+  InstructionLoader(TextView textView, @NonNull List<BannerComponents> bannerComponents) {
+    this(textView, bannerComponents, InstructionImageLoader.getInstance(), new AbbreviationCoordinator());
   }
 
-  public InstructionLoader(TextView textView, BannerText bannerText, InstructionImageLoader instructionImageLoader,
-                           AbbreviationCoordinator abbreviationCoordinator) {
+  InstructionLoader(TextView textView, @NonNull List<BannerComponents> bannerComponents,
+                    InstructionImageLoader instructionImageLoader, AbbreviationCoordinator abbreviationCoordinator) {
     this.abbreviationCoordinator = abbreviationCoordinator;
     this.textView = textView;
     bannerComponentNodes = new ArrayList<>();
     this.instructionImageLoader = instructionImageLoader;
 
-    if (!hasComponents(bannerText)) {
-      return;
-    }
-
-    bannerComponentNodes = parseBannerComponents(bannerText.components());
+    bannerComponentNodes = parseBannerComponents(bannerComponents);
   }
 
   /**
@@ -53,7 +50,7 @@ public class InstructionLoader {
    * a new {@link Spannable} with text / {@link ImageSpan}s which is loaded
    * into the given {@link TextView}.
    */
-  public void loadInstruction() {
+  void loadInstruction() {
     setText(textView, bannerComponentNodes);
     loadImages(textView, bannerComponentNodes);
   }
@@ -109,18 +106,14 @@ public class InstructionLoader {
     return !TextUtils.isEmpty(components.imageBaseUrl());
   }
 
-  private static boolean hasComponents(BannerText bannerText) {
-    return bannerText != null && bannerText.components() != null && !bannerText.components().isEmpty();
-  }
-
   /**
    * Class used to construct a list of BannerComponents to be populated into a TextView
    */
   static class BannerComponentNode {
-    protected BannerComponents bannerComponents;
-    protected int startIndex;
+    BannerComponents bannerComponents;
+    int startIndex;
 
-    protected BannerComponentNode(BannerComponents bannerComponents, int startIndex) {
+    BannerComponentNode(BannerComponents bannerComponents, int startIndex) {
       this.bannerComponents = bannerComponents;
       this.startIndex = startIndex;
     }

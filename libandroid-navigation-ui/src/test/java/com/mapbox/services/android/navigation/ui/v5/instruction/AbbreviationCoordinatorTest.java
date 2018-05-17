@@ -4,7 +4,6 @@ import android.widget.TextView;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.services.android.navigation.ui.v5.BaseTest;
-import com.mapbox.services.android.navigation.ui.v5.utils.TextViewUtils;
 
 import org.junit.Test;
 
@@ -28,21 +27,20 @@ public class AbbreviationCoordinatorTest extends BaseTest {
     TextView textView = mock(TextView.class);
     when(textViewUtils.textFits(textView, abbreviation)).thenReturn(true);
     when(textViewUtils.textFits(textView, bannerComponents.text())).thenReturn(false);
-
     AbbreviationCoordinator abbreviationCoordinator = new AbbreviationCoordinator(textViewUtils);
     abbreviationCoordinator.addPriorityInfo(bannerComponents, 0);
-
     List<InstructionLoader.BannerComponentNode> bannerComponentNodes = new ArrayList<>();
     bannerComponentNodes.add(new AbbreviationCoordinator.AbbreviationNode(bannerComponents, 0));
 
-    assertEquals(abbreviation, abbreviationCoordinator.abbreviateBannerText(bannerComponentNodes, textView));
+    String abbreviatedTextFromCoordinator = abbreviationCoordinator.abbreviateBannerText(bannerComponentNodes, textView);
+
+    assertEquals(abbreviation, abbreviatedTextFromCoordinator);
   }
 
   @Test
   public void textIsNotAbbreviatedWhenItDoesFit() {
     String abbreviation = "smtxt";
     String text = "some text";
-
     BannerComponents bannerComponents =
       BannerComponentsFaker.bannerComponents()
         .abbreviation(abbreviation)
@@ -52,13 +50,13 @@ public class AbbreviationCoordinatorTest extends BaseTest {
     TextViewUtils textViewUtils = mock(TextViewUtils.class);
     TextView textView = mock(TextView.class);
     when(textViewUtils.textFits(textView, bannerComponents.text())).thenReturn(true);
-
     AbbreviationCoordinator abbreviationCoordinator = new AbbreviationCoordinator(textViewUtils);
     abbreviationCoordinator.addPriorityInfo(bannerComponents, 0);
-
     List<InstructionLoader.BannerComponentNode> bannerComponentNodes = new ArrayList<>();
     bannerComponentNodes.add(new AbbreviationCoordinator.AbbreviationNode(bannerComponents, 0));
 
-    assertEquals(text, abbreviationCoordinator.abbreviateBannerText(bannerComponentNodes, textView));
+    String abbreviatedTextFromCoordinator = abbreviationCoordinator.abbreviateBannerText(bannerComponentNodes, textView);
+
+    assertEquals(text, abbreviatedTextFromCoordinator);
   }
 }

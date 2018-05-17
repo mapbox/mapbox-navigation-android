@@ -35,6 +35,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
@@ -683,7 +684,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void updateTextInstruction(InstructionModel model) {
     if (model.getPrimaryBannerText() != null) {
-      new InstructionLoader(upcomingPrimaryText, model.getPrimaryBannerText()).loadInstruction();
+      createInstructionLoader(upcomingPrimaryText, model.getPrimaryBannerText()).loadInstruction();
     }
     if (model.getSecondaryBannerText() != null) {
       if (upcomingSecondaryText.getVisibility() == GONE) {
@@ -691,12 +692,24 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         upcomingPrimaryText.setMaxLines(1);
         adjustBannerTextVerticalBias(0.65f);
       }
-      new InstructionLoader(upcomingSecondaryText, model.getSecondaryBannerText()).loadInstruction();
+      createInstructionLoader(upcomingSecondaryText, model.getSecondaryBannerText()).loadInstruction();
     } else {
       upcomingPrimaryText.setMaxLines(2);
       upcomingSecondaryText.setVisibility(GONE);
       adjustBannerTextVerticalBias(0.5f);
     }
+  }
+
+  private InstructionLoader createInstructionLoader(TextView textView, BannerText bannerText) {
+    if (hasComponents(bannerText)) {
+      return new InstructionLoader(textView, bannerText.components());
+    } else {
+      return null;
+    }
+  }
+
+  private boolean hasComponents(BannerText bannerText) {
+    return bannerText != null && bannerText.components() != null && !bannerText.components().isEmpty();
   }
 
   /**

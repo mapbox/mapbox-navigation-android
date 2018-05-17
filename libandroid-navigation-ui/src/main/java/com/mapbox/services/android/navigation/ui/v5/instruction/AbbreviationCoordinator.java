@@ -4,7 +4,6 @@ import android.widget.TextView;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionLoader.BannerComponentNode;
-import com.mapbox.services.android.navigation.ui.v5.utils.TextViewUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,17 +17,17 @@ import java.util.Map;
  * BannerComponents containing abbreviation information and given a list of BannerComponentNodes,
  * constructed by InstructionLoader.
  */
-public class AbbreviationCoordinator {
+class AbbreviationCoordinator {
   private static final String SINGLE_SPACE = " ";
   private Map<Integer, List<Integer>> abbreviations;
   private TextViewUtils textViewUtils;
 
-  public AbbreviationCoordinator(TextViewUtils textViewUtils) {
+  AbbreviationCoordinator(TextViewUtils textViewUtils) {
     this.abbreviations = new HashMap<>();
     this.textViewUtils = textViewUtils;
   }
 
-  public AbbreviationCoordinator() {
+  AbbreviationCoordinator() {
     this(new TextViewUtils());
   }
 
@@ -40,9 +39,9 @@ public class AbbreviationCoordinator {
    * @param bannerComponents object holding the abbreviation information
    * @param index in the list of BannerComponentNodes
    */
-  public void addPriorityInfo(BannerComponents bannerComponents, int index) {
-    int abbreviationPriority = bannerComponents.abbreviationPriority();
-    if (abbreviations.get(Integer.valueOf(abbreviationPriority)) == null) {
+  void addPriorityInfo(BannerComponents bannerComponents, int index) {
+    Integer abbreviationPriority = bannerComponents.abbreviationPriority();
+    if (abbreviations.get(abbreviationPriority) == null) {
       abbreviations.put(abbreviationPriority, new ArrayList<Integer>());
     }
     abbreviations.get(abbreviationPriority).add(index);
@@ -50,13 +49,13 @@ public class AbbreviationCoordinator {
 
   /**
    * Using the abbreviations HashMap which should already be populated, abbreviates the text in the
-   * bannerConmponentNodes until the text fits the given TextView.
+   * bannerComponentNodes until the text fits the given TextView.
    *
    * @param bannerComponentNodes containing the text to construct
    * @param textView to check the text fits
    * @return the properly abbreviated string that will fit in the TextView
    */
-  public String abbreviateBannerText(List<BannerComponentNode> bannerComponentNodes, TextView textView) {
+  String abbreviateBannerText(List<BannerComponentNode> bannerComponentNodes, TextView textView) {
     String bannerText = join(bannerComponentNodes);
 
     if (abbreviations.isEmpty()) {
@@ -67,7 +66,7 @@ public class AbbreviationCoordinator {
     int maxAbbreviationPriority = Collections.max(abbreviations.keySet());
 
     while (shouldKeepAbbreviating(textView, bannerText, currAbbreviationPriority, maxAbbreviationPriority)) {
-      List<Integer> indices = abbreviations.get(new Integer(currAbbreviationPriority++));
+      List<Integer> indices = abbreviations.get(currAbbreviationPriority++);
 
       boolean abbreviationPriorityExists = abbreviateAtAbbreviationPriority(bannerComponentNodes, indices);
 
@@ -127,7 +126,7 @@ public class AbbreviationCoordinator {
    * Class used by InstructionLoader to determine that a BannerComponent contains an abbreviation
    */
   static class AbbreviationNode extends BannerComponentNode {
-    protected boolean abbreviate;
+    boolean abbreviate;
 
     AbbreviationNode(BannerComponents bannerComponents, int startIndex) {
       super(bannerComponents, startIndex);
@@ -138,7 +137,7 @@ public class AbbreviationCoordinator {
       return abbreviate ? bannerComponents.abbreviation() : bannerComponents.text();
     }
 
-    public void setAbbreviate(boolean abbreviate) {
+    void setAbbreviate(boolean abbreviate) {
       this.abbreviate = abbreviate;
     }
   }

@@ -25,7 +25,7 @@ import java.util.List;
  * URL taking priority).
  * <p>
  * If a shield URL is found, {@link Picasso} is used to load the image.  Then, once the image is loaded,
- * a new {@link ImageSpan} is created and set to the appropriate position of the {@link Spannable}/
+ * a new {@link ImageSpan} is created and set to the appropriate position of the {@link Spannable}
  */
 public class InstructionImageLoader {
 
@@ -162,7 +162,7 @@ public class InstructionImageLoader {
     }
   }
 
-  public boolean hasImageUrl(BannerComponents components) {
+  private boolean hasImageUrl(BannerComponents components) {
     return !TextUtils.isEmpty(components.imageBaseUrl());
   }
 
