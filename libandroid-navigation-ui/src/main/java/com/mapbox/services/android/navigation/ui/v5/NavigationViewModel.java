@@ -91,7 +91,6 @@ public class NavigationViewModel extends AndroidViewModel {
       endNavigation();
       deactivateInstructionPlayer();
     }
-    navigationViewEventDispatcher = null;
   }
 
   public void setMuted(boolean isMuted) {
@@ -148,14 +147,17 @@ public class NavigationViewModel extends AndroidViewModel {
     return navigation;
   }
 
+  void initializeEventDispatcher(NavigationViewEventDispatcher navigationViewEventDispatcher) {
+    this.navigationViewEventDispatcher = navigationViewEventDispatcher;
+  }
+
   /**
    * This method will pass {@link MapboxNavigationOptions} from the {@link NavigationViewOptions}
    * to this view model to be used to initialize {@link MapboxNavigation}.
    *
    * @param options to init MapboxNavigation
    */
-  void initializeNavigation(NavigationViewOptions options, NavigationViewEventDispatcher dispatcher) {
-    this.navigationViewEventDispatcher = dispatcher;
+  void initializeNavigation(NavigationViewOptions options) {
     MapboxNavigationOptions navigationOptions = options.navigationOptions();
     navigationOptions = navigationOptions.toBuilder().isFromNavigationUi(true).build();
     initLocaleInfo(navigationOptions);
