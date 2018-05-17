@@ -111,10 +111,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param savedInstanceState to restore state if not null
    */
   public void onCreate(@Nullable Bundle savedInstanceState) {
-    resumeState = savedInstanceState != null;
     mapView.setStyleUrl(ThemeSwitcher.retrieveMapStyle(getContext()));
     mapView.onCreate(savedInstanceState);
-    navigationViewModel.onCreate(resumeState);
+    navigationViewModel.onCreate();
   }
 
   /**
@@ -151,6 +150,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       summaryBehavior.getState());
     outState.putBoolean(getContext().getString(R.string.recenter_btn_visible),
       recenterBtn.getVisibility() == View.VISIBLE);
+    outState.putBoolean(getContext().getString(R.string.navigation_running), navigationViewModel.isRunning());
     mapView.onSaveInstanceState(outState);
   }
 
@@ -165,6 +165,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     boolean isVisible = savedInstanceState.getBoolean(getContext().getString(R.string.recenter_btn_visible));
     recenterBtn.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE);
     int bottomSheetState = savedInstanceState.getInt(getContext().getString(R.string.bottom_sheet_state));
+    resumeState = savedInstanceState.getBoolean(getContext().getString(R.string.navigation_running));
     resetBottomSheetState(bottomSheetState);
   }
 

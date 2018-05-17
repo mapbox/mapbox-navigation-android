@@ -68,7 +68,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private int unitType;
   @NavigationTimeFormat.Type
   private int timeFormatType;
-  private boolean resumeState;
+  private boolean isRunning;
   private String accessToken;
 
   public NavigationViewModel(Application application) {
@@ -79,9 +79,8 @@ public class NavigationViewModel extends AndroidViewModel {
     initNavigationLocationEngine();
   }
 
-  public void onCreate(boolean resumeState) {
-    this.resumeState = resumeState;
-    if (!resumeState) {
+  public void onCreate() {
+    if (!isRunning) {
       locationEngineConductor.onCreate();
     }
   }
@@ -162,7 +161,7 @@ public class NavigationViewModel extends AndroidViewModel {
     initLocaleInfo(navigationOptions);
     initTimeFormat(navigationOptions);
     initVoiceInstructions();
-    if (!resumeState) {
+    if (!isRunning) {
       locationEngineConductor.initializeLocationEngine(getApplication(), options.shouldSimulateRoute());
       initNavigation(getApplication(), navigationOptions);
       navigationViewRouteEngine.extractRouteOptions(getApplication(), options);
@@ -178,6 +177,10 @@ public class NavigationViewModel extends AndroidViewModel {
       this.screenshot = screenshot;
     }
     shouldRecordScreenshot.setValue(false);
+  }
+
+  boolean isRunning() {
+    return isRunning;
   }
 
   private void initConnectivityManager(Application application) {
@@ -257,8 +260,9 @@ public class NavigationViewModel extends AndroidViewModel {
 
   private NavigationEventListener navigationEventListener = new NavigationEventListener() {
     @Override
-    public void onRunning(boolean running) {
-      if (running) {
+    public void onRunning(boolean isRunning) {
+      NavigationViewModel.this.isRunning = isRunning;
+      if (isRunning) {
         navigationViewEventDispatcher.onNavigationRunning();
       } else {
         navigationViewEventDispatcher.onNavigationFinished();
