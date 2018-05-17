@@ -8,14 +8,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
-public class NavigationFragment extends Fragment implements OnNavigationReadyCallback, NavigationListener {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class NavigationFragment extends Fragment implements OnNavigationReadyCallback, NavigationListener, Callback<DirectionsResponse> {
 
   private static final double ORIGIN_LONGITUDE = -77.04012393951416;
   private static final double ORIGIN_LATITUDE = 38.9111117447887;
@@ -93,13 +100,7 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
   public void onNavigationReady() {
     Point origin = Point.fromLngLat(ORIGIN_LONGITUDE, ORIGIN_LATITUDE);
     Point destination = Point.fromLngLat(DESTINATION_LONGITUDE, DESTINATION_LATITUDE);
-    NavigationViewOptions options = NavigationViewOptions.builder() //todo get route
-//      .origin(origin)
-//      .destination(destination)
-      .shouldSimulateRoute(true)
-      .navigationListener(this)
-      .build();
-    navigationView.startNavigation(options);
+    fetchRoute(origin, destination);
   }
 
   @Override
@@ -119,5 +120,29 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
   @Override
   public void onNavigationRunning() {
     // no-op
+  }
+
+  private void fetchRoute(Point origin, Point destination) {
+    NavigationRoute.builder()
+      .accessToken(Mapbox.getAccessToken())
+      .origin(origin)
+      .destination(destination)
+      .languageAndVoiceUnitsFromContext(getContext())
+      .build()
+      .getRoute(this);
+  }
+
+  @Override
+  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+    NavigationViewOptions options = NavigationViewOptions.builder()
+      .shouldSimulateRoute(true)
+      .navigationListener(this)
+      .build();
+    navigationView.startNavigation(options);
+  }
+
+  @Override
+  public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+
   }
 }
