@@ -426,7 +426,7 @@ public final class NavigationRoute {
 
     public Builder languageAndVoiceUnitsFromContext(Context context) {
       directionsBuilder.language(LocaleUtils.getDeviceLocale(context))
-      .voiceUnits(LocaleUtils.getUnitTypeForDeviceLocale(context));
+        .voiceUnits(LocaleUtils.getUnitTypeForDeviceLocale(context));
       return this;
     }
 

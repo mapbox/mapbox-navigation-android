@@ -39,7 +39,6 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   private TextView speedWidget;
   private Point ORIGIN = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
   private Point DESTINATION = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
-  private DirectionsRoute directionsRoute;
   private boolean bottomSheetVisible = true;
 
   @Override
@@ -74,7 +73,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
     fetchRoute();
   }
 
-  private void startNavigation() {
+  private void startNavigation(DirectionsRoute directionsRoute) {
     NavigationViewOptions.Builder options =
       NavigationViewOptions.builder()
         .navigationListener(this)
@@ -222,11 +221,12 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
   @Override
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-    directionsRoute = response.body().routes().get(0);
-    startNavigation();
+    DirectionsRoute directionsRoute = response.body().routes().get(0);
+    startNavigation(directionsRoute);
   }
 
   @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+
   }
 }
