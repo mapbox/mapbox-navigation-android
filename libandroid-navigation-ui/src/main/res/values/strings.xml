@@ -60,4 +60,6 @@
             translatable="false">recenter_btn_visible</string>
     <string name="bottom_sheet_state"
             translatable="false">bottom_sheet_state</string>
+    <string name="navigation_running"
+            translatable="false">navigation_running</string>
 </resources>
