@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 
-import java.util.Locale;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 

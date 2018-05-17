@@ -98,7 +98,8 @@ class InstructionStepResources {
       progress.currentLegProgress().currentStepProgress().distanceRemaining());
   }
 
-  private boolean shouldDistanceUtilsBeInitialized(String language, @DirectionsCriteria.VoiceUnitCriteria String unitType) {
+  private boolean shouldDistanceUtilsBeInitialized(String language,
+                                                   @DirectionsCriteria.VoiceUnitCriteria String unitType) {
     return distanceUtils == null ||  !this.language.equals(language) || !this.unitType.equals(unitType);
 
   }

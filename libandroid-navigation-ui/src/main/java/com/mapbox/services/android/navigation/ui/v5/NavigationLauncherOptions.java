@@ -1,12 +1,8 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import android.support.annotation.Nullable;
-
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-
-import java.util.Locale;
 
 @AutoValue
 public abstract class NavigationLauncherOptions extends NavigationUiOptions {

@@ -11,8 +11,8 @@ public class BannerInstructionModel extends InstructionModel {
 
   private BannerInstructionMilestone milestone;
 
-  public BannerInstructionModel(Context context, BannerInstructionMilestone milestone,
-                                RouteProgress progress, String language, @DirectionsCriteria.VoiceUnitCriteria String unitType) {
+  public BannerInstructionModel(Context context, BannerInstructionMilestone milestone, RouteProgress progress,
+                                String language, @DirectionsCriteria.VoiceUnitCriteria String unitType) {
     super(context, progress, language, unitType);
     this.milestone = milestone;
   }

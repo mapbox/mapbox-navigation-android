@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.ui.v5;
 import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.geojson.Point;
 
 public abstract class NavigationUiOptions {
 

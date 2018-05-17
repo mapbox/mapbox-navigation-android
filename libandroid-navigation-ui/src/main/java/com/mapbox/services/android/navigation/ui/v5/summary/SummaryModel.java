@@ -21,7 +21,8 @@ public class SummaryModel {
   private final String arrivalTime;
 
   public SummaryModel(Context context, RouteProgress progress, String language,
-                      @DirectionsCriteria.VoiceUnitCriteria String unitType, @NavigationTimeFormat.Type int timeFormatType) {
+                      @DirectionsCriteria.VoiceUnitCriteria String unitType,
+                      @NavigationTimeFormat.Type int timeFormatType) {
     distanceRemaining = new DistanceUtils(context, language, unitType)
       .formatDistance(progress.distanceRemaining()).toString();
     timeRemaining = formatTimeRemaining(progress.durationRemaining());

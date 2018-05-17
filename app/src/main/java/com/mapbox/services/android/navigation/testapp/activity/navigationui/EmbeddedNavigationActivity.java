@@ -36,8 +36,8 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   private NavigationView navigationView;
   private View spacer;
   private TextView speedWidget;
-  private Point ORIGIN = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
-  private Point DESTINATION = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
+  private static final Point ORIGIN = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
+  private static final Point DESTINATION = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
   private boolean bottomSheetVisible = true;
 
   @Override
