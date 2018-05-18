@@ -9,7 +9,7 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.services.android.navigation.ui.v5.instruction.AbbreviationCoordinator.AbbreviationNode;
-import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionImageLoader.ShieldNode;
+import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionImageLoader.ImageNode;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -75,9 +75,9 @@ class InstructionLoader {
     return bannerComponentNodes;
   }
 
-  private ShieldNode setupImageNode(BannerComponents components, int index, int startIndex) {
+  private ImageNode setupImageNode(BannerComponents components, int index, int startIndex) {
     instructionImageLoader.addShieldInfo(components, index);
-    return new InstructionImageLoader.ShieldNode(components, startIndex);
+    return new ImageNode(components, startIndex);
   }
 
   private AbbreviationNode setupAbbreviationNode(BannerComponents components, int index, int startIndex) {

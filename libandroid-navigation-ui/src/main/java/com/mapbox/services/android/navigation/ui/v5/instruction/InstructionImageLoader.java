@@ -202,9 +202,9 @@ public class InstructionImageLoader {
     }
   }
 
-  static class ShieldNode extends BannerComponentNode {
+  static class ImageNode extends BannerComponentNode {
 
-    ShieldNode(BannerComponents bannerComponents, int startIndex) {
+    ImageNode(BannerComponents bannerComponents, int startIndex) {
       super(bannerComponents, startIndex);
     }
   }
