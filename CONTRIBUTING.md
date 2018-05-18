@@ -4,7 +4,7 @@ If you have a usage question pertaining to the Mapbox Navigation SDK for Android
 
 If you want to contribute code:
 
-1. Please familiarize yourself with the [install process](INSTALL.md).
+1. Please familiarize yourself with the [install process](https://www.mapbox.com/android-docs/navigation/overview/#install-the-navigation-sdk).
 
 2. Ensure that existing [pull requests](https://github.com/mapbox/mapbox-navigation-android/pulls) and [issues](https://github.com/mapbox/mapbox-navigation-android/issues) don’t already cover your contribution or question.
 
