@@ -84,7 +84,7 @@
             android:gravity="center_vertical"
             android:includeFontPadding="false"
             android:lineSpacingMultiplier="0.8"
-            android:maxLines="2"
+            android:maxLines="1"
             android:minHeight="31dp"
             android:textColor="?attr/navigationViewBannerSecondaryText"
             android:textSize="26sp"
