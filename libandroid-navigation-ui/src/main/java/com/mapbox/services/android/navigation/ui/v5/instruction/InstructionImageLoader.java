@@ -62,14 +62,8 @@ public class InstructionImageLoader {
    */
   public void initialize(Context context) {
     if (!isInitialized) {
-      Picasso.Builder builder = new Picasso.Builder(context)
-        .loggingEnabled(true);
-      picassoImageLoader = builder.build();
-
-      this.urlDensityMap = new UrlDensityMap(context);
-      targets = new ArrayList<>();
-      bannerShieldList = new ArrayList<>();
-
+      initializePicasso(context);
+      initializeData(context);
       isInitialized = true;
     }
   }
@@ -91,25 +85,11 @@ public class InstructionImageLoader {
    * If loaded successfully, this will allow the images to be displayed
    * without delay in the {@link InstructionView}.
    *
-   * @param step providing the image Urls
+   * @param legStep providing the image Urls
    */
-  public void prefetchImageCache(LegStep step) {
-    if (step == null || step.bannerInstructions() == null
-      || step.bannerInstructions().isEmpty()) {
-      return;
-    }
-
+  public void prefetchImageCache(LegStep legStep) {
     checkIsInitialized();
-
-    List<BannerInstructions> bannerInstructionList = new ArrayList<>(step.bannerInstructions());
-    for (BannerInstructions instructions : bannerInstructionList) {
-      if (hasComponents(instructions.primary())) {
-        fetchImageBaseUrls(instructions.primary());
-      }
-      if (hasComponents(instructions.secondary())) {
-        fetchImageBaseUrls(instructions.secondary());
-      }
-    }
+    fetchInstructions(legStep);
   }
 
   public void shutdown() {
@@ -134,13 +114,42 @@ public class InstructionImageLoader {
     loadTargets();
   }
 
+  private void initializePicasso(Context context) {
+    Picasso.Builder builder = new Picasso.Builder(context)
+      .loggingEnabled(true);
+    picassoImageLoader = builder.build();
+  }
+
+  private void initializeData(Context context) {
+    urlDensityMap = new UrlDensityMap(context);
+    targets = new ArrayList<>();
+    bannerShieldList = new ArrayList<>();
+  }
+
+  private void fetchInstructions(LegStep legStep) {
+    if (legStep == null || legStep.bannerInstructions() == null
+      || legStep.bannerInstructions().isEmpty()) {
+      return;
+    }
+
+    List<BannerInstructions> bannerInstructionList = new ArrayList<>(legStep.bannerInstructions());
+    for (BannerInstructions instructions : bannerInstructionList) {
+      if (hasComponents(instructions.primary())) {
+        fetchImageBaseUrls(instructions.primary());
+      }
+      if (hasComponents(instructions.secondary())) {
+        fetchImageBaseUrls(instructions.secondary());
+      }
+    }
+  }
+
   private void updateShieldUrlIndices(List<BannerComponentNode> bannerComponentNodes) {
     for (BannerShield bannerShield : bannerShieldList) {
       bannerShield.setStartIndex(bannerComponentNodes.get(bannerShield.getNodeIndex()).startIndex);
     }
   }
 
-  private static boolean hasComponents(BannerText bannerText) {
+  private boolean hasComponents(BannerText bannerText) {
     return bannerText != null && bannerText.components() != null && !bannerText.components().isEmpty();
   }
 

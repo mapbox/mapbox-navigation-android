@@ -62,8 +62,17 @@ class AbbreviationCoordinator {
       return bannerText;
     }
 
+    abbreviateUntilTextFits(textView, bannerText, bannerComponentNodes);
+
+    abbreviations.clear();
+    return bannerText;
+  }
+
+  private String abbreviateUntilTextFits(TextView textView, String startingText,
+                                         List<BannerComponentNode> bannerComponentNodes) {
     int currAbbreviationPriority = 0;
     int maxAbbreviationPriority = Collections.max(abbreviations.keySet());
+    String bannerText = startingText;
 
     while (shouldKeepAbbreviating(textView, bannerText, currAbbreviationPriority, maxAbbreviationPriority)) {
       List<Integer> indices = abbreviations.get(currAbbreviationPriority++);
@@ -75,7 +84,6 @@ class AbbreviationCoordinator {
       }
     }
 
-    abbreviations.clear();
     return bannerText;
   }
 

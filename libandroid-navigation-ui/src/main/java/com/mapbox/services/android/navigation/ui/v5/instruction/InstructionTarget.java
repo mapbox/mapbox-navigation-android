@@ -40,42 +40,47 @@ public class InstructionTarget implements Target {
 
   @Override
   public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-    // Create a new Drawable with intrinsic bounds
-    Drawable drawable = new BitmapDrawable(textView.getContext().getResources(), bitmap);
-
-    // width == (right - left), and height == (bottom - top)
-    int bottom = textView.getLineHeight();
-    int right = bottom * bitmap.getWidth() / bitmap.getHeight();
-    drawable.setBounds(0, 0, right, bottom);
-
-    // Create and set a new ImageSpan at the given index with the Drawable
-    instructionSpannable.setSpan(new ImageSpan(drawable),
-      shield.getStartIndex(), shield.getEndIndex(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-    // Check if last in array, if so, set the text with the spannable
-    if (shields.indexOf(shield) == shields.size() - 1) {
-      // Make sure cut-off images aren't displayed at the end of the spannable
-      CharSequence truncatedSequence = truncateImageSpan(instructionSpannable, textView);
-      textView.setText(truncatedSequence);
-    }
+    Drawable drawable = createDrawable(bitmap);
+    createAndSetImageSpan(drawable);
     sendInstructionLoadedCallback();
   }
 
   @Override
   public void onBitmapFailed(Drawable errorDrawable) {
-    // Set the backup text
-    textView.setText(shield.getText());
+    setBackupText();
     sendInstructionLoadedCallback();
     Timber.e("Shield bitmap failed to load.");
   }
 
   @Override
   public void onPrepareLoad(Drawable placeHolderDrawable) {
-
+    // no op
   }
 
   interface InstructionLoadedCallback {
     void onInstructionLoaded(InstructionTarget target);
+  }
+
+  private void setBackupText() {
+    textView.setText(shield.getText());
+  }
+
+  private void createAndSetImageSpan(Drawable drawable) {
+    instructionSpannable.setSpan(new ImageSpan(drawable),
+      shield.getStartIndex(), shield.getEndIndex(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+    if (shields.indexOf(shield) == shields.size() - 1) {
+      CharSequence truncatedSequence = truncateImageSpan(instructionSpannable, textView);
+      textView.setText(truncatedSequence);
+    }
+  }
+
+  private Drawable createDrawable(Bitmap bitmap) {
+    Drawable drawable = new BitmapDrawable(textView.getContext().getResources(), bitmap);
+    int bottom = textView.getLineHeight();
+    int right = bottom * bitmap.getWidth() / bitmap.getHeight();
+    drawable.setBounds(0, 0, right, bottom);
+    return drawable;
   }
 
   private void sendInstructionLoadedCallback() {
