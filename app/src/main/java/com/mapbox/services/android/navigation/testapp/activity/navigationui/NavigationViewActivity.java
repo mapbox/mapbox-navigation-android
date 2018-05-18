@@ -267,6 +267,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       .accessToken(Mapbox.getAccessToken())
       .origin(currentLocation)
       .destination(destination)
+      .languageAndVoiceUnitsFromContext(this)
       .alternatives(true);
     setFieldsFromSharedPreferences(builder);
     builder.build()
