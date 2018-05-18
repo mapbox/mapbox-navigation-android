@@ -27,16 +27,16 @@ import java.util.List;
  * If a shield URL is found, {@link Picasso} is used to load the image.  Then, once the image is loaded,
  * a new {@link ImageSpan} is created and set to the appropriate position of the {@link Spannable}
  */
-public class InstructionImageLoader {
+public class ImageCoordinator {
 
-  private static InstructionImageLoader instance;
+  private static ImageCoordinator instance;
   private boolean isInitialized;
   private Picasso picassoImageLoader;
   private List<InstructionTarget> targets;
   private UrlDensityMap urlDensityMap;
   private List<BannerShield> bannerShieldList;
 
-  private InstructionImageLoader() {
+  private ImageCoordinator() {
   }
 
   /**
@@ -44,9 +44,9 @@ public class InstructionImageLoader {
    *
    * @return InstructionLoader
    */
-  public static synchronized InstructionImageLoader getInstance() {
+  public static synchronized ImageCoordinator getInstance() {
     if (instance == null) {
-      instance = new InstructionImageLoader();
+      instance = new ImageCoordinator();
     }
 
     return instance;

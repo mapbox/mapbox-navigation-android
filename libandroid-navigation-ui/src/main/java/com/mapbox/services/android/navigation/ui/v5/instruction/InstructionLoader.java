@@ -9,7 +9,7 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.services.android.navigation.ui.v5.instruction.AbbreviationCoordinator.AbbreviationNode;
-import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionImageLoader.ImageNode;
+import com.mapbox.services.android.navigation.ui.v5.instruction.ImageCoordinator.ImageNode;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -26,21 +26,21 @@ import java.util.List;
  * a new {@link ImageSpan} is created and set to the appropriate position of the {@link Spannable}/
  */
 class InstructionLoader {
-  private InstructionImageLoader instructionImageLoader;
+  private ImageCoordinator imageCoordinator;
   private AbbreviationCoordinator abbreviationCoordinator;
   private TextView textView;
   private List<BannerComponentNode> bannerComponentNodes;
 
   InstructionLoader(TextView textView, @NonNull List<BannerComponents> bannerComponents) {
-    this(textView, bannerComponents, InstructionImageLoader.getInstance(), new AbbreviationCoordinator());
+    this(textView, bannerComponents, ImageCoordinator.getInstance(), new AbbreviationCoordinator());
   }
 
   InstructionLoader(TextView textView, @NonNull List<BannerComponents> bannerComponents,
-                    InstructionImageLoader instructionImageLoader, AbbreviationCoordinator abbreviationCoordinator) {
+                    ImageCoordinator imageCoordinator, AbbreviationCoordinator abbreviationCoordinator) {
     this.abbreviationCoordinator = abbreviationCoordinator;
     this.textView = textView;
     bannerComponentNodes = new ArrayList<>();
-    this.instructionImageLoader = instructionImageLoader;
+    this.imageCoordinator = imageCoordinator;
 
     bannerComponentNodes = parseBannerComponents(bannerComponents);
   }
@@ -76,7 +76,7 @@ class InstructionLoader {
   }
 
   private ImageNode setupImageNode(BannerComponents components, int index, int startIndex) {
-    instructionImageLoader.addShieldInfo(components, index);
+    imageCoordinator.addShieldInfo(components, index);
     return new ImageNode(components, startIndex);
   }
 
@@ -86,7 +86,7 @@ class InstructionLoader {
   }
 
   private void loadImages(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
-    instructionImageLoader.loadImages(textView, bannerComponentNodes);
+    imageCoordinator.loadImages(textView, bannerComponentNodes);
   }
 
   private void setText(TextView textView, List<BannerComponentNode> bannerComponentNodes) {

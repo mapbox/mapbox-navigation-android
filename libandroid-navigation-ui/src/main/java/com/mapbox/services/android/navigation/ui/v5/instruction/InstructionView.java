@@ -235,7 +235,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     if (newStep(model.getProgress())) {
       // Pre-fetch the image URLs for the upcoming step
       LegStep upComingStep = model.getProgress().currentLegProgress().upComingStep();
-      InstructionImageLoader.getInstance().prefetchImageCache(upComingStep);
+      ImageCoordinator.getInstance().prefetchImageCache(upComingStep);
     }
   }
 

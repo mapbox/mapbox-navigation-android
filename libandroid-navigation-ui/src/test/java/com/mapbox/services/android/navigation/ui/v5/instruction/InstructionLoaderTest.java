@@ -19,7 +19,7 @@ public class InstructionLoaderTest {
   @Test
   public void onInstructionLoaderCreated_priorityInfoIsAdded() {
     TextView textView = mock(TextView.class);
-    InstructionImageLoader instructionImageLoader = mock(InstructionImageLoader.class);
+    ImageCoordinator imageCoordinator = mock(ImageCoordinator.class);
     AbbreviationCoordinator abbreviationCoordinator = mock(AbbreviationCoordinator.class);
     BannerComponents bannerComponents = BannerComponentsFaker.bannerComponents()
       .abbreviationPriority(1)
@@ -28,7 +28,7 @@ public class InstructionLoaderTest {
     List<BannerComponents> bannerComponentsList = new ArrayList<>();
     bannerComponentsList.add(bannerComponents);
 
-    new InstructionLoader(textView, bannerComponentsList, instructionImageLoader, abbreviationCoordinator);
+    new InstructionLoader(textView, bannerComponentsList, imageCoordinator, abbreviationCoordinator);
 
     verify(abbreviationCoordinator).addPriorityInfo(bannerComponents, 0);
   }
@@ -36,7 +36,7 @@ public class InstructionLoaderTest {
   @Test
   public void onInstructionLoaderCreated_shieldInfoIsAdded() {
     TextView textView = mock(TextView.class);
-    InstructionImageLoader instructionImageLoader = mock(InstructionImageLoader.class);
+    ImageCoordinator imageCoordinator = mock(ImageCoordinator.class);
     AbbreviationCoordinator abbreviationCoordinator = mock(AbbreviationCoordinator.class);
     BannerComponents bannerComponents = BannerComponentsFaker.bannerComponents()
       .imageBaseUrl("string url")
@@ -44,15 +44,15 @@ public class InstructionLoaderTest {
     List<BannerComponents> bannerComponentsList = new ArrayList<>();
     bannerComponentsList.add(bannerComponents);
 
-    new InstructionLoader(textView, bannerComponentsList, instructionImageLoader, abbreviationCoordinator);
+    new InstructionLoader(textView, bannerComponentsList, imageCoordinator, abbreviationCoordinator);
 
-    verify(instructionImageLoader).addShieldInfo(bannerComponents, 0);
+    verify(imageCoordinator).addShieldInfo(bannerComponents, 0);
   }
 
   @Test
   public void onLoadInstruction_textIsAbbreviated() {
     TextView textView = mock(TextView.class);
-    InstructionImageLoader instructionImageLoader = mock(InstructionImageLoader.class);
+    ImageCoordinator imageCoordinator = mock(ImageCoordinator.class);
     AbbreviationCoordinator abbreviationCoordinator = mock(AbbreviationCoordinator.class);
     BannerComponents bannerComponents = BannerComponentsFaker.bannerComponents()
       .abbreviationPriority(1)
@@ -62,7 +62,7 @@ public class InstructionLoaderTest {
     bannerComponentsList.add(bannerComponents);
     String abbreviatedText = "abbreviated text";
     when(abbreviationCoordinator.abbreviateBannerText(any(List.class), any(TextView.class))).thenReturn(abbreviatedText);
-    InstructionLoader instructionLoader = new InstructionLoader(textView, bannerComponentsList, instructionImageLoader, abbreviationCoordinator);
+    InstructionLoader instructionLoader = new InstructionLoader(textView, bannerComponentsList, imageCoordinator, abbreviationCoordinator);
 
     instructionLoader.loadInstruction();
 
@@ -72,7 +72,7 @@ public class InstructionLoaderTest {
   @Test
   public void onLoadInstruction_imagesAreLoaded() {
     TextView textView = mock(TextView.class);
-    InstructionImageLoader instructionImageLoader = mock(InstructionImageLoader.class);
+    ImageCoordinator imageCoordinator = mock(ImageCoordinator.class);
     AbbreviationCoordinator abbreviationCoordinator = mock(AbbreviationCoordinator.class);
     BannerComponents bannerComponents = BannerComponentsFaker.bannerComponents()
       .imageBaseUrl("string url")
@@ -81,10 +81,10 @@ public class InstructionLoaderTest {
     bannerComponentsList.add(bannerComponents);
     String abbreviatedText = "abbreviated text";
     when(abbreviationCoordinator.abbreviateBannerText(any(List.class), any(TextView.class))).thenReturn(abbreviatedText);
-    InstructionLoader instructionLoader = new InstructionLoader(textView, bannerComponentsList, instructionImageLoader, abbreviationCoordinator);
+    InstructionLoader instructionLoader = new InstructionLoader(textView, bannerComponentsList, imageCoordinator, abbreviationCoordinator);
 
     instructionLoader.loadInstruction();
 
-    verify(instructionImageLoader).loadImages(any(TextView.class), any(List.class));
+    verify(imageCoordinator).loadImages(any(TextView.class), any(List.class));
   }
 }
