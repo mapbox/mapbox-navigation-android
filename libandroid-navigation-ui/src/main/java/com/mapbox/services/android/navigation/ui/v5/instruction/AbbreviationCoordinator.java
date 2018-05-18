@@ -62,7 +62,7 @@ class AbbreviationCoordinator {
       return bannerText;
     }
 
-    abbreviateUntilTextFits(textView, bannerText, bannerComponentNodes);
+    bannerText = abbreviateUntilTextFits(textView, bannerText, bannerComponentNodes);
 
     abbreviations.clear();
     return bannerText;
