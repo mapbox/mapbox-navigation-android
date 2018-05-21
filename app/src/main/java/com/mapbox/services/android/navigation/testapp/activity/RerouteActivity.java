@@ -124,7 +124,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
     if (navigation != null) {
       // End the navigation session
-      navigation.endNavigation();
+      navigation.stopNavigation();
     }
   }
 

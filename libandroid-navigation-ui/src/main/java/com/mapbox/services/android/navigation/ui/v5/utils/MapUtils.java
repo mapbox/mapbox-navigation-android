@@ -57,6 +57,9 @@ public final class MapUtils {
    */
   public static void addLayerToMap(@NonNull MapboxMap mapboxMap, @NonNull Layer layer,
                                    @Nullable String idBelowLayer) {
+    if (mapboxMap.getLayer(layer.getId()) != null) {
+      return;
+    }
     if (idBelowLayer == null) {
       mapboxMap.addLayer(layer);
     } else {

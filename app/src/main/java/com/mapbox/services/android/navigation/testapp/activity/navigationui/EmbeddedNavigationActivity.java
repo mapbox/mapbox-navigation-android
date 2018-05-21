@@ -67,7 +67,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public void onNavigationReady() {
+  public void onNavigationReady(boolean isRunning) {
     fetchRoute();
   }
 

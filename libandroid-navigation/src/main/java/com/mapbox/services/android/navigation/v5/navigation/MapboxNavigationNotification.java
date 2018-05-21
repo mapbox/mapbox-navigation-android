@@ -220,7 +220,7 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   private void onEndNavigationBtnClick() {
     if (mapboxNavigation != null) {
-      mapboxNavigation.endNavigation();
+      mapboxNavigation.stopNavigation();
     }
   }
 }

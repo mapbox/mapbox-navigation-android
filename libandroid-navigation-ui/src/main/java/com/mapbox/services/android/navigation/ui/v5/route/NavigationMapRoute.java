@@ -86,7 +86,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
  *
  * @since 0.4.0
  */
-public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMapChangedListener,
+public class NavigationMapRoute implements MapView.OnMapChangedListener,
   MapboxMap.OnMapClickListener, LifecycleObserver {
 
   private static final String CONGESTION_KEY = "congestion";
@@ -155,7 +155,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   @DrawableRes
   private int destinationWaypointIcon;
 
-  private final MapboxNavigation navigation;
+  private MapboxNavigation navigation;
   private final MapboxMap mapboxMap;
   private final HashMap<LineString, DirectionsRoute> routeLineStrings;
   private final List<FeatureCollection> featureCollections;
@@ -173,6 +173,16 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private GeoJsonSource arrowHeadGeoJsonSource;
   private Feature arrowShaftGeoJsonFeature = Feature.fromGeometry(Point.fromLngLat(0, 0));
   private Feature arrowHeadGeoJsonFeature = Feature.fromGeometry(Point.fromLngLat(0, 0));
+  private ProgressChangeListener progressChangeListener = new ProgressChangeListener() {
+    @Override
+    public void onProgressChange(Location location, RouteProgress routeProgress) {
+      if (!routeProgress.directionsRoute().equals(directionsRoutes.get(primaryRouteIndex))) {
+        addRoute(routeProgress.directionsRoute());
+      }
+      addUpcomingManeuverArrow(routeProgress);
+    }
+  };
+
 
   /**
    * Construct an instance of {@link NavigationMapRoute}.
@@ -325,6 +335,17 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   public void showAlternativeRoutes(boolean alternativesVisible) {
     this.alternativesVisible = alternativesVisible;
     toggleAlternativeVisibility(alternativesVisible);
+  }
+
+  public void addProgressChangeListener(MapboxNavigation navigation) {
+    this.navigation = navigation;
+    navigation.addProgressChangeListener(progressChangeListener);
+  }
+
+  public void removeProgressChangeListener(MapboxNavigation navigation) {
+    if (navigation != null) {
+      navigation.removeProgressChangeListener(progressChangeListener);
+    }
   }
 
   //
@@ -887,7 +908,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private void addListeners() {
     mapboxMap.addOnMapClickListener(this);
     if (navigation != null) {
-      navigation.addProgressChangeListener(this);
+      navigation.addProgressChangeListener(progressChangeListener);
     }
     mapView.addOnMapChangedListener(this);
   }
@@ -997,24 +1018,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   }
 
   /**
-   * Called when the user makes new progress during a navigation session. Used to determine whether
-   * or not a re-route has occurred and if so the route is redrawn to reflect the change.
-   *
-   * @param location      the users current location
-   * @param routeProgress a {@link RouteProgress} reflecting the users latest progress along the
-   *                      route
-   * @since 0.4.0
-   */
-  @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    // Check if the route's the same as the route currently drawn
-    if (!routeProgress.directionsRoute().equals(directionsRoutes.get(primaryRouteIndex))) {
-      addRoute(routeProgress.directionsRoute());
-    }
-    addUpcomingManeuverArrow(routeProgress);
-  }
-
-  /**
    * This method should be called only if you have passed {@link MapboxNavigation}
    * into the constructor.
    * <p>
@@ -1026,7 +1029,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   @OnLifecycleEvent(Lifecycle.Event.ON_START)
   public void onStart() {
     if (navigation != null) {
-      navigation.addProgressChangeListener(this);
+      navigation.addProgressChangeListener(progressChangeListener);
     }
   }
 
@@ -1042,7 +1045,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
   public void onStop() {
     if (navigation != null) {
-      navigation.removeProgressChangeListener(this);
+      navigation.removeProgressChangeListener(progressChangeListener);
     }
   }
 

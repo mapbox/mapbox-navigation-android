@@ -55,9 +55,10 @@ import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
  *
  * @since 0.7.0
  */
-public class NavigationView extends CoordinatorLayout implements LifecycleObserver,
-  OnMapReadyCallback, MapboxMap.OnScrollListener, NavigationContract.View {
+public class NavigationView extends CoordinatorLayout implements LifecycleObserver, OnMapReadyCallback,
+  NavigationContract.View {
 
+  private static final int INVALID_STATE = 0;
   private MapView mapView;
   private InstructionView instructionView;
   private SummaryBottomSheet summaryBottomSheet;
@@ -72,6 +73,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private MapboxMap map;
   private NavigationMapboxMap navigationMap;
   private OnNavigationReadyCallback onNavigationReadyCallback;
+  private MapboxMap.OnMoveListener onMoveListener;
   private boolean isInitialized;
 
   public NavigationView(Context context) {
@@ -126,8 +128,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param outState to store state variables
    */
   public void onSaveInstanceState(Bundle outState) {
-    outState.putInt(getContext().getString(R.string.bottom_sheet_state),
-      summaryBehavior.getState());
+    if (summaryBehavior != null) {
+      outState.putInt(getContext().getString(R.string.bottom_sheet_state), summaryBehavior.getState());
+    }
     outState.putBoolean(getContext().getString(R.string.recenter_btn_visible),
       recenterBtn.getVisibility() == View.VISIBLE);
     outState.putBoolean(getContext().getString(R.string.navigation_running), navigationViewModel.isRunning());
@@ -181,6 +184,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     if (navigationMap != null) {
       navigationMap.onStop();
     }
+    if (onMoveListener != null) {
+      map.removeOnMoveListener(onMoveListener);
+    }
   }
 
   /**
@@ -195,20 +201,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     map = mapboxMap;
-    onNavigationReadyCallback.onNavigationReady();
-  }
-
-  /**
-   * Listener this activity sets on the {@link MapboxMap}.
-   * <p>
-   * Used as a cue to hide the {@link SummaryBottomSheet} and stop the
-   * camera from following location updates.
-   *
-   * @since 0.6.0
-   */
-  @Override
-  public void onScroll() {
-    navigationPresenter.onMapScroll();
+    initializeNavigationMap(mapView, map);
+    onNavigationReadyCallback.onNavigationReady(navigationViewModel.isRunning());
   }
 
   @Override
@@ -228,12 +222,16 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   @Override
   public void updateCameraTrackingEnabled(boolean isEnabled) {
-    navigationMap.updateCameraTrackingEnabled(isEnabled);
+    if (navigationMap != null) {
+      navigationMap.updateCameraTrackingEnabled(isEnabled);
+    }
   }
 
   @Override
   public void resetCameraPosition() {
-    navigationMap.resetCameraPosition();
+    if (navigationMap != null) {
+      navigationMap.resetCameraPosition();
+    }
   }
 
   @Override
@@ -253,34 +251,53 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   @Override
   public void drawRoute(DirectionsRoute directionsRoute) {
-    navigationMap.drawRoute(directionsRoute);
+    if (navigationMap != null) {
+      navigationMap.drawRoute(directionsRoute);
+    }
+  }
+
+  private void initializeNavigationMap(MapView mapView, MapboxMap map) {
+    navigationMap = new NavigationMapboxMap(mapView, map);
   }
 
   @Override
   public void addMarker(Point position) {
-    navigationMap.addMarker(getContext(), position);
+    if (navigationMap != null) {
+      navigationMap.addMarker(getContext(), position);
+    }
   }
 
   public void clearMarkers() {
-    navigationMap.clearMarkers();
+    if (navigationMap != null) {
+      navigationMap.clearMarkers();
+    }
   }
 
   public void updateWaynameView(String wayname) {
-    navigationMap.updateWaynameView(wayname);
+    if (navigationMap != null) {
+      navigationMap.updateWaynameView(wayname);
+    }
   }
 
   @Override
   public void updateWaynameVisibility(boolean isVisible) {
-    navigationMap.updateWaynameVisibility(isVisible);
+    if (navigationMap != null) {
+      navigationMap.updateWaynameVisibility(isVisible);
+    }
   }
 
   public void updateWaynameQueryMap(boolean isEnabled) {
-    navigationMap.updateWaynameQueryMap(isEnabled);
+    if (navigationMap != null) {
+      navigationMap.updateWaynameQueryMap(isEnabled);
+    }
   }
 
   @Override
   public void takeScreenshot() {
-    map.snapshot(new NavigationSnapshotReadyCallback(this, navigationViewModel));
+    // TODO Refactor -> Move take screenshot functionality into NavigationMapboxMap
+    if (map != null) {
+      map.snapshot(new NavigationSnapshotReadyCallback(this, navigationViewModel));
+    }
   }
 
   /**
@@ -293,7 +310,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   @Override
   public void startCamera(DirectionsRoute directionsRoute) {
-    navigationMap.startCamera(directionsRoute);
+    if (navigationMap != null) {
+      navigationMap.startCamera(directionsRoute);
+    }
   }
 
   /**
@@ -304,18 +323,24 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   @Override
   public void resumeCamera(Location location) {
-    navigationMap.resumeCamera(location);
+    if (navigationMap != null) {
+      navigationMap.resumeCamera(location);
+    }
   }
 
   @Override
   public void updateNavigationMap(Location location) {
-    navigationMap.updateLocation(location);
+    if (navigationMap != null) {
+      navigationMap.updateLocation(location);
+    }
   }
 
   @Override
   public void updateCameraRouteOverview() {
-    int[] padding = buildRouteOverviewPadding(getContext());
-    navigationMap.showRouteOverview(padding);
+    if (navigationMap != null) {
+      int[] padding = buildRouteOverviewPadding(getContext());
+      navigationMap.showRouteOverview(padding);
+    }
   }
 
   /**
@@ -325,17 +350,19 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   public void startNavigation(NavigationViewOptions options) {
     if (!isInitialized) {
-      establish(options);
-      navigationViewModel.initializeNavigation(options);
-      initializeNavigationListeners(options, navigationViewModel.getNavigation());
       initializeNavigation(options);
-      initializeListeners();
-      subscribeViewModels();
-      isInitialized = true;
     } else {
-      navigationMap.clearMarkers();
       navigationViewModel.updateNavigation(options);
     }
+  }
+
+  /**
+   * Call this when the navigation session needs to end navigation without finishing the whole view
+   *
+   * @since 0.16.0
+   */
+  public void stopNavigation() {
+    navigationViewModel.stopNavigation();
   }
 
 
@@ -420,9 +447,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param bottomSheetState retrieved from savedInstanceState
    */
   private void resetBottomSheetState(int bottomSheetState) {
-    boolean isShowing = bottomSheetState == BottomSheetBehavior.STATE_EXPANDED;
-    summaryBehavior.setHideable(!isShowing);
-    summaryBehavior.setState(bottomSheetState);
+    if (bottomSheetState > INVALID_STATE) {
+      boolean isShowing = bottomSheetState == BottomSheetBehavior.STATE_EXPANDED;
+      summaryBehavior.setHideable(!isShowing);
+      summaryBehavior.setState(bottomSheetState);
+    }
   }
 
   private int[] buildRouteOverviewPadding(Context context) {
@@ -454,11 +483,27 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     }
   }
 
-  private void initializeListeners() {
-    map.addOnScrollListener(NavigationView.this);
+  private void initializeNavigation(NavigationViewOptions options) {
+    initializeClickListeners();
+    initializeOnMoveListener();
+    establish(options);
+    MapboxNavigation navigation = navigationViewModel.initializeNavigation(options);
+    initializeNavigationListeners(options, navigation);
+    setupNavigationMapboxMap(options);
+
+    subscribeViewModels();
+    isInitialized = true;
+  }
+
+  private void initializeClickListeners() {
     cancelBtn.setOnClickListener(new CancelBtnClickListener(navigationViewEventDispatcher));
     recenterBtn.setOnClickListener(new RecenterBtnClickListener(navigationPresenter));
     routeOverviewBtn.setOnClickListener(new RouteOverviewBtnClickListener(navigationPresenter));
+  }
+
+  private void initializeOnMoveListener() {
+    onMoveListener = new NavigationOnMoveListener(navigationPresenter, summaryBehavior);
+    map.addOnMoveListener(onMoveListener);
   }
 
   private void establish(NavigationViewOptions options) {
@@ -486,18 +531,12 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     summaryBottomSheet.setTimeFormat(timeFormatType);
   }
 
-  private void initializeNavigation(NavigationViewOptions options) {
-    MapboxNavigation navigation = navigationViewModel.initializeNavigation(options);
-    initializeNavigationListeners(options, navigation);
-    initializeNavigationMapboxMap(options, navigation);
-  }
-
   private void initializeNavigationListeners(NavigationViewOptions options, MapboxNavigation navigation) {
+    navigationMap.addProgressChangeListener(navigation);
     navigationViewEventDispatcher.initializeListeners(options, navigation);
   }
 
-  private void initializeNavigationMapboxMap(NavigationViewOptions options, MapboxNavigation navigation) {
-    navigationMap = new NavigationMapboxMap(mapView, map, navigation);
+  private void setupNavigationMapboxMap(NavigationViewOptions options) {
     navigationMap.updateWaynameQueryMap(options.waynameChipEnabled());
   }
 

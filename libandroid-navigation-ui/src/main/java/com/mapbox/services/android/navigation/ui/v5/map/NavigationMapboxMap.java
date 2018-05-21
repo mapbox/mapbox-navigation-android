@@ -57,25 +57,21 @@ public class NavigationMapboxMap {
   private static final int LAST_INDEX = 0;
 
   private MapboxMap mapboxMap;
-  private NavigationMapRoute mapRoute;
   private NavigationCamera mapCamera;
+  private NavigationMapRoute mapRoute;
   private LocationLayerPlugin locationLayer;
   private MapPaddingAdjustor mapPaddingAdjustor;
   private MapWayname mapWayname;
   private SymbolLayer waynameLayer;
   private List<Marker> mapMarkers = new ArrayList<>();
 
-  public NavigationMapboxMap(MapView mapView, MapboxMap mapboxMap, MapboxNavigation mapboxNavigation) {
+  public NavigationMapboxMap(MapView mapView, MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    initializeRoute(mapView, mapboxMap, mapboxNavigation);
-    initializeCamera(mapboxMap, mapboxNavigation);
     initializeLocationLayer(mapView, mapboxMap);
     initializeMapPaddingAdjustor(mapView, mapboxMap);
     initializeWayname(mapView, mapboxMap, mapPaddingAdjustor);
-  }
-
-  public void drawRoute(DirectionsRoute directionsRoute) {
-    mapRoute.addRoute(directionsRoute);
+    initializeRoute(mapView, mapboxMap);
+    initializeCamera(mapboxMap);
   }
 
   public void addMarker(Context context, Point position) {
@@ -90,6 +86,19 @@ public class NavigationMapboxMap {
   public void updateLocation(Location location) {
     locationLayer.forceLocationUpdate(location);
     updateMapWaynameWithLocation(location);
+  }
+
+  public void addProgressChangeListener(MapboxNavigation navigation) {
+    mapRoute.addProgressChangeListener(navigation);
+    mapCamera.addProgressChangeListener(navigation);
+  }
+
+  public void drawRoute(@NonNull DirectionsRoute route) {
+    mapRoute.addRoute(route);
+  }
+
+  public void removeRoute() {
+    mapRoute.removeRoute();
   }
 
   public void updateCameraTrackingEnabled(boolean isEnabled) {
@@ -139,10 +148,9 @@ public class NavigationMapboxMap {
     mapRoute.onStop();
   }
 
-  private void initializeRoute(MapView mapView, MapboxMap map, MapboxNavigation mapboxNavigation) {
-    Context context = mapView.getContext();
-    int routeStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context, R.attr.navigationViewRouteStyle);
-    mapRoute = new NavigationMapRoute(mapboxNavigation, mapView, map, routeStyleRes);
+  @SuppressLint("MissingPermission")
+  public void updateLocationLayerVisibilityTo(boolean isVisible) {
+    locationLayer.setLocationLayerEnabled(isVisible);
   }
 
   private void initializeLocationLayer(MapView mapView, MapboxMap map) {
@@ -157,8 +165,8 @@ public class NavigationMapboxMap {
     mapPaddingAdjustor = new MapPaddingAdjustor(mapView, mapboxMap);
   }
 
-  private void initializeCamera(MapboxMap map, MapboxNavigation mapboxNavigation) {
-    mapCamera = new NavigationCamera(map, mapboxNavigation);
+  private void initializeCamera(MapboxMap map) {
+    mapCamera = new NavigationCamera(map);
   }
 
   private void initializeWayname(MapView mapView, MapboxMap mapboxMap, MapPaddingAdjustor paddingAdjustor) {
@@ -210,6 +218,12 @@ public class NavigationMapboxMap {
     } else {
       mapPaddingAdjustor.updateTopPaddingWithDefault();
     }
+  }
+
+  private void initializeRoute(MapView mapView, MapboxMap map) {
+    Context context = mapView.getContext();
+    int routeStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context, R.attr.navigationViewRouteStyle);
+    mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes);
   }
 
   @NonNull
