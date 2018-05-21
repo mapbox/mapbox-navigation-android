@@ -49,10 +49,6 @@ final class NavigationMetricsWrapper {
     mapboxTelemetry.enable();
   }
 
-  static void enableLogging() {
-    mapboxTelemetry.updateDebugLoggingEnabled(true);
-  }
-
   static void disable() {
     if (mapboxTelemetry != null) {
       mapboxTelemetry.disable();

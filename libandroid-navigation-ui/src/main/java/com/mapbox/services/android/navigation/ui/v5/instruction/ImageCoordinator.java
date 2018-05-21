@@ -115,8 +115,7 @@ public class ImageCoordinator {
   }
 
   private void initializePicasso(Context context) {
-    Picasso.Builder builder = new Picasso.Builder(context)
-      .loggingEnabled(true);
+    Picasso.Builder builder = new Picasso.Builder(context);
     picassoImageLoader = builder.build();
   }
 

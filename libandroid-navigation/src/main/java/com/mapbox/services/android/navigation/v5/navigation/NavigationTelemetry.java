@@ -143,8 +143,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       MapboxNavigationOptions options = navigation.options();
       // Set sdkIdentifier based on if from UI or not
       String sdkIdentifier = updateSdkIdentifier(options);
-      // Enable extra logging in debug mode
-      NavigationMetricsWrapper.enableLogging();
 
       NavigationMetricsWrapper.sdkIdentifier = sdkIdentifier;
       Event navTurnstileEvent = NavigationMetricsWrapper.turnstileEvent();
