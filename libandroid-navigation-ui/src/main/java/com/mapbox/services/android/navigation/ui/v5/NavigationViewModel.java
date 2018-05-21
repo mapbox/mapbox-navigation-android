@@ -91,6 +91,7 @@ public class NavigationViewModel extends AndroidViewModel {
       endNavigation();
       deactivateInstructionPlayer();
     }
+    navigationViewEventDispatcher = null;
   }
 
   public void setMuted(boolean isMuted) {
