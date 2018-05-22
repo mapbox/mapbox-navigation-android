@@ -8,9 +8,9 @@ ext {
   ]
 
   version = [
-      mapboxMapSdk       : '6.1.1',
+      mapboxMapSdk       : '6.1.2',
       mapboxSdkServices  : '3.1.0',
-      mapboxEvents       : '3.1.0',
+      mapboxEvents       : '3.1.1',
       locationLayerPlugin: '0.5.2',
       autoValue          : '1.5',
       autoValueParcel    : '0.2.5',
