@@ -21,6 +21,7 @@
   <color name="mapbox_navigation_view_color_accent">#4882C6</color>
   <color name="mapbox_navigation_view_color_primary_text">#424242</color>
   <color name="mapbox_navigation_view_color_accent_text">#424242</color>
+  <color name="mapbox_navigation_view_color_divider">#D8D8D8</color>
 
   <color name="mapbox_navigation_view_color_list_background">#2D3F53</color>
 
@@ -36,6 +37,7 @@
   <color name="mapbox_navigation_view_color_accent_dark">#FFFFFF</color>
   <color name="mapbox_navigation_view_color_primary_text_dark">#424242</color>
   <color name="mapbox_navigation_view_color_accent_text_dark">#FFFFFF</color>
+  <color name="mapbox_navigation_view_color_divider_dark">#D8D8D8</color>
 
   <color name="mapbox_navigation_view_color_list_background_dark">#2D3F53</color>
 

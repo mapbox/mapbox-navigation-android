@@ -27,10 +27,6 @@ class NavigationPresenter {
     view.hideRecenterBtn();
   }
 
-  void onCancelBtnClick() {
-    view.finishNavigationView();
-  }
-
   void onMapScroll() {
     if (!view.isSummaryBottomSheetHidden()) {
       view.setSummaryBehaviorHideable(true);
@@ -48,6 +44,7 @@ class NavigationPresenter {
 
   void onRouteUpdate(DirectionsRoute directionsRoute) {
     view.drawRoute(directionsRoute);
+    view.updateWaynameVisibility(true);
     if (!resumeState) {
       view.startCamera(directionsRoute);
     }
@@ -69,7 +66,7 @@ class NavigationPresenter {
     view.updateNavigationMap(location);
   }
 
-  public void onInstructionListVisibilityChanged(boolean visible) {
+  void onInstructionListVisibilityChanged(boolean visible) {
     if (visible) {
       view.hideRecenterBtn();
     } else {
@@ -77,5 +74,11 @@ class NavigationPresenter {
         view.showRecenterBtn();
       }
     }
+  }
+
+  void onRouteOverviewClick() {
+    view.updateWaynameVisibility(false);
+    view.updateCameraRouteOverview();
+    view.showRecenterBtn();
   }
 }

@@ -1,12 +1,9 @@
 package com.mapbox.services.android.navigation.ui.v5.utils;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.support.design.widget.CoordinatorLayout;
 import android.util.Base64;
-import android.util.TypedValue;
 import android.view.View;
 
 import java.io.ByteArrayOutputStream;
@@ -46,10 +43,5 @@ public class ViewUtils {
       return bitmap;
     }
     return null;
-  }
-
-  public static float dpToPx(Context context, int dp) {
-    Resources resources = context.getResources();
-    return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.getDisplayMetrics());
   }
 }

@@ -32,6 +32,7 @@
     <attr name="navigationViewAccent" format="color"/>
     <attr name="navigationViewPrimaryText" format="color"/>
     <attr name="navigationViewSecondaryText" format="color"/>
+    <attr name="navigationViewDivider" format="color"/>
 
     <!-- Instruction List -->
     <attr name="navigationViewListBackground" format="color"/>
@@ -58,6 +59,9 @@
 
     <!-- Destination marker drawable -->
     <attr name="navigationViewDestinationMarker" format="reference"/>
+
+    <!-- Route overview drawable -->
+    <attr name="navigationViewRouteOverviewDrawable" format="reference"/>
 
     <!-- For setting the styles in XML -->
     <attr name="navigationLightTheme" format="reference"/>

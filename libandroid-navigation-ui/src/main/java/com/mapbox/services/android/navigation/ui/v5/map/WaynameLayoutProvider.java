@@ -7,7 +7,6 @@ import com.mapbox.services.android.navigation.ui.v5.utils.ViewUtils;
 
 class WaynameLayoutProvider {
 
-  private static final int THIRTY_TWO_DP = 32;
   private Context context;
 
   WaynameLayoutProvider(Context context) {
@@ -18,9 +17,5 @@ class WaynameLayoutProvider {
     WaynameView waynameView = new WaynameView(context);
     waynameView.setWaynameText(wayname);
     return ViewUtils.loadBitmapFromView(waynameView);
-  }
-
-  int retrieveHeight() {
-    return (int) ViewUtils.dpToPx(context, THIRTY_TWO_DP);
   }
 }

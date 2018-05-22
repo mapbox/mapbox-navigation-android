@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -39,7 +40,7 @@ public class ThemeSwitcher {
   /**
    * Returns a map marker {@link Icon} based on the current theme setting.
    *
-   * @param context to retrieve {@link SharedPreferences} and an instance of {@link IconFactory}
+   * @param context to retrieve an instance of {@link IconFactory}
    * @return {@link Icon} map marker dark or light
    */
   public static Icon retrieveThemeMapMarker(Context context) {
@@ -47,6 +48,18 @@ public class ThemeSwitcher {
     int markerResId = destinationMarkerResId.resourceId;
     IconFactory iconFactory = IconFactory.getInstance(context);
     return iconFactory.fromResource(markerResId);
+  }
+
+  /**
+   * Returns a route overview {@link Drawable} based on the current theme setting.
+   *
+   * @param context to retrieve overview {@link Drawable}
+   * @return {@link Drawable} for route overview - dark or light
+   */
+  public static Drawable retrieveThemeOverviewDrawable(Context context) {
+    TypedValue destinationMarkerResId = resolveAttributeFromId(context, R.attr.navigationViewRouteOverviewDrawable);
+    int overviewResId = destinationMarkerResId.resourceId;
+    return ContextCompat.getDrawable(context, overviewResId);
   }
 
   /**
@@ -70,17 +83,14 @@ public class ThemeSwitcher {
    * @param attrs   holding custom styles if any are set
    */
   static void setTheme(Context context, AttributeSet attrs) {
-    int uiMode = context.getResources().getConfiguration().uiMode
-      & Configuration.UI_MODE_NIGHT_MASK;
-    boolean darkThemeEnabled = uiMode == Configuration.UI_MODE_NIGHT_YES;
+    boolean darkThemeEnabled = isDarkThemeEnabled(context);
     updatePreferencesDarkEnabled(context, darkThemeEnabled);
 
-    // Check for custom theme from NavigationLauncher
     if (shouldSetThemeFromPreferences(context)) {
       int prefLightTheme = retrieveThemeResIdFromPreferences(context, NavigationConstants.NAVIGATION_VIEW_LIGHT_THEME);
       int prefDarkTheme = retrieveThemeResIdFromPreferences(context, NavigationConstants.NAVIGATION_VIEW_DARK_THEME);
-      prefLightTheme = prefLightTheme == 0 ?  R.style.NavigationViewLight : prefLightTheme;
-      prefDarkTheme = prefLightTheme == 0 ?  R.style.NavigationViewDark : prefDarkTheme;
+      prefLightTheme = prefLightTheme == 0 ? R.style.NavigationViewLight : prefLightTheme;
+      prefDarkTheme = prefLightTheme == 0 ? R.style.NavigationViewDark : prefDarkTheme;
       context.setTheme(darkThemeEnabled ? prefDarkTheme : prefLightTheme);
       return;
     }
@@ -93,6 +103,17 @@ public class ThemeSwitcher {
     styledAttributes.recycle();
 
     context.setTheme(darkThemeEnabled ? darkTheme : lightTheme);
+  }
+
+  /**
+   * Returns true if the current UI_MODE_NIGHT is enabled, false otherwise.
+   *
+   * @param context to retrieve the current configuration
+   */
+  private static boolean isDarkThemeEnabled(Context context) {
+    int uiMode = context.getResources().getConfiguration().uiMode
+      & Configuration.UI_MODE_NIGHT_MASK;
+    return uiMode == Configuration.UI_MODE_NIGHT_YES;
   }
 
   static String retrieveMapStyle(Context context) {
