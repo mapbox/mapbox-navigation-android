@@ -11,8 +11,8 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 public class InstructionModel {
 
-  private BannerText primaryBannerText;
-  private BannerText secondaryBannerText;
+  BannerText primaryBannerText;
+  BannerText secondaryBannerText;
   private BannerText thenBannerText;
   private Float roundaboutAngle = null;
   private InstructionStepResources stepResources;
@@ -48,6 +48,14 @@ public class InstructionModel {
 
   InstructionStepResources getStepResources() {
     return stepResources;
+  }
+
+  String getManeuverType() {
+    return stepResources.getManeuverViewType();
+  }
+
+  String getManeuverModifier() {
+    return stepResources.getManeuverViewModifier();
   }
 
   RouteProgress getProgress() {

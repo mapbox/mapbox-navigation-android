@@ -180,8 +180,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       @Override
       public void onChanged(@Nullable InstructionModel model) {
         if (model != null) {
-          updateViews(model);
-          updateTextInstruction(model);
+          updateDataFromInstruction(model);
         }
       }
     });
@@ -189,7 +188,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       @Override
       public void onChanged(@Nullable BannerInstructionModel bannerInstructionModel) {
         if (bannerInstructionModel != null) {
-          updateTextInstruction(bannerInstructionModel);
+          updateDataFromBannerInstruction(bannerInstructionModel);
         }
       }
     });
@@ -222,20 +221,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
       InstructionModel model = new InstructionModel(getContext(), routeProgress, language, unitType);
-      updateViews(model);
-      updateTextInstruction(model);
-    }
-  }
-
-  private void updateViews(InstructionModel model) {
-    updateManeuverView(model);
-    updateDistanceText(model);
-    updateInstructionList(model);
-    updateTurnLanes(model);
-    updateThenStep(model);
-    if (newStep(model.getProgress())) {
-      LegStep upComingStep = model.getProgress().currentLegProgress().upComingStep();
-      ImageCoordinator.getInstance().prefetchImageCache(upComingStep);
+      updateDataFromInstruction(model);
+      updateDataFromBannerInstruction(model);
     }
   }
 
@@ -508,8 +495,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       26, 30, 1, TypedValue.COMPLEX_UNIT_SP);
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(upcomingSecondaryText,
       20, 26, 1, TypedValue.COMPLEX_UNIT_SP);
-    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(upcomingDistanceText,
-      16, 20, 1, TypedValue.COMPLEX_UNIT_SP);
   }
 
   /**
@@ -642,35 +627,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   /**
-   * Looks to see if we have a new maneuver modifier or type.
-   * Updates new maneuver image if one is found.
-   *
-   * @param model provides maneuver modifier / type
-   */
-  private void updateManeuverView(InstructionModel model) {
-    String maneuverViewType = model.getStepResources().getManeuverViewType();
-    String maneuverViewModifier = model.getStepResources().getManeuverViewModifier();
-    upcomingManeuverView.setManeuverTypeAndModifier(maneuverViewType, maneuverViewModifier);
-    if (model.getRoundaboutAngle() != null) {
-      upcomingManeuverView.setRoundaboutAngle(model.getRoundaboutAngle());
-    }
-  }
-
-  /**
-   * Looks to see if we have a new distance text.
-   * Sets new distance text if found.
-   *
-   * @param model provides distance text
-   */
-  private void updateDistanceText(InstructionModel model) {
-    if (newDistanceText(model)) {
-      distanceText(model);
-    } else if (upcomingDistanceText.getText().toString().isEmpty()) {
-      distanceText(model);
-    }
-  }
-
-  /**
    * Looks to see if we have a new distance text.
    *
    * @param model provides distance text
@@ -689,30 +645,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void distanceText(InstructionModel model) {
     upcomingDistanceText.setText(model.getStepResources().getStepDistanceRemaining());
-  }
-
-  /**
-   * Looks to see if we have a new instruction text.
-   * Sets new instruction text if found.
-   *
-   * @param model provides instruction text
-   */
-  private void updateTextInstruction(InstructionModel model) {
-    if (model.getPrimaryBannerText() != null) {
-      createInstructionLoader(upcomingPrimaryText, model.getPrimaryBannerText()).loadInstruction();
-    }
-    if (model.getSecondaryBannerText() != null) {
-      if (upcomingSecondaryText.getVisibility() == GONE) {
-        upcomingSecondaryText.setVisibility(VISIBLE);
-        upcomingPrimaryText.setMaxLines(1);
-        adjustBannerTextVerticalBias(0.65f);
-      }
-      createInstructionLoader(upcomingSecondaryText, model.getSecondaryBannerText()).loadInstruction();
-    } else {
-      upcomingPrimaryText.setMaxLines(2);
-      upcomingSecondaryText.setVisibility(GONE);
-      adjustBannerTextVerticalBias(0.5f);
-    }
   }
 
   private InstructionLoader createInstructionLoader(TextView textView, BannerText bannerText) {
@@ -747,7 +679,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void updateTurnLanes(InstructionModel model) {
     List<IntersectionLanes> turnLanes = model.getStepResources().getTurnLanes();
-    String maneuverViewModifier = model.getStepResources().getManeuverViewModifier();
+    String maneuverViewModifier = model.getManeuverModifier();
     double durationRemaining = model.getProgress().currentLegProgress().currentStepProgress().durationRemaining();
 
     if (shouldShowTurnLanes(turnLanes, maneuverViewModifier, durationRemaining)) {
@@ -872,6 +804,71 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private void cancelDelayedTransition() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       clearAnimation();
+    }
+  }
+
+  private void updateDataFromInstruction(InstructionModel model) {
+    updateDistanceText(model);
+    updateInstructionList(model);
+    updateTurnLanes(model);
+    updateThenStep(model);
+    if (newStep(model.getProgress())) {
+      LegStep upComingStep = model.getProgress().currentLegProgress().upComingStep();
+      ImageCoordinator.getInstance().prefetchImageCache(upComingStep);
+    }
+  }
+
+  /**
+   * Looks to see if we have a new instruction text.
+   * Sets new instruction text if found.
+   *
+   * @param model provides instruction text
+   */
+  private void updateDataFromBannerInstruction(InstructionModel model) {
+    updateManeuverView(model);
+    if (model.getPrimaryBannerText() != null) {
+      createInstructionLoader(upcomingPrimaryText, model.getPrimaryBannerText()).loadInstruction();
+    }
+    if (model.getSecondaryBannerText() != null) {
+      if (upcomingSecondaryText.getVisibility() == GONE) {
+        upcomingSecondaryText.setVisibility(VISIBLE);
+        upcomingPrimaryText.setMaxLines(1);
+        adjustBannerTextVerticalBias(0.65f);
+      }
+      createInstructionLoader(upcomingSecondaryText, model.getSecondaryBannerText()).loadInstruction();
+    } else {
+      upcomingPrimaryText.setMaxLines(2);
+      upcomingSecondaryText.setVisibility(GONE);
+      adjustBannerTextVerticalBias(0.5f);
+    }
+  }
+
+  /**
+   * Looks to see if we have a new maneuver modifier or type.
+   * Updates new maneuver image if one is found.
+   *
+   * @param model provides maneuver modifier / type
+   */
+  private void updateManeuverView(InstructionModel model) {
+    String maneuverViewType = model.getManeuverType();
+    String maneuverViewModifier = model.getManeuverModifier();
+    upcomingManeuverView.setManeuverTypeAndModifier(maneuverViewType, maneuverViewModifier);
+    if (model.getRoundaboutAngle() != null) {
+      upcomingManeuverView.setRoundaboutAngle(model.getRoundaboutAngle());
+    }
+  }
+
+  /**
+   * Looks to see if we have a new distance text.
+   * Sets new distance text if found.
+   *
+   * @param model provides distance text
+   */
+  private void updateDistanceText(InstructionModel model) {
+    if (newDistanceText(model)) {
+      distanceText(model);
+    } else if (upcomingDistanceText.getText().toString().isEmpty()) {
+      distanceText(model);
     }
   }
 
