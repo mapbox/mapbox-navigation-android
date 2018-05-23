@@ -538,14 +538,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void establish(NavigationViewOptions options) {
-    establishLocale(options);
+    establishLanguage(options);
     establishUnitType(options);
     establishTimeFormat(options);
   }
 
-  private void establishLocale(NavigationViewOptions options) {
+  private void establishLanguage(NavigationViewOptions options) {
     String language = LocaleUtils.getNonNullLocale(getContext(), options.directionsRoute().voiceLanguage());
-    instructionView.setLocale(language);
+    instructionView.setLanguage(language);
     summaryBottomSheet.setLanguage(language);
   }
 

@@ -331,7 +331,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    *
    * @param language to use
    */
-  public void setLocale(@NonNull String language) {
+  public void setLanguage(@NonNull String language) {
     this.language = language;
   }
 
