@@ -9,7 +9,7 @@
     </string-array>
 
     <string-array name="language_values_array">
-        <item>device_locale</item>
+        <item>@string/device_locale</item>
         <item>en_US</item>
         <item>fr_FR</item>
         <item>de_DE</item>
@@ -22,7 +22,7 @@
     </string-array>
 
     <string-array name="unit_type_values_array">
-        <item></item>
+        <item>@string/default_for_locale</item>
         <item>metric</item>
         <item>imperial</item>
     </string-array>

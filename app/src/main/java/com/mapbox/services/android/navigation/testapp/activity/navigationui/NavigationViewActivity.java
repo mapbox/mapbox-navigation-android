@@ -267,7 +267,6 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       .accessToken(Mapbox.getAccessToken())
       .origin(currentLocation)
       .destination(destination)
-      .languageAndVoiceUnitsFromContext(this)
       .alternatives(true);
     setFieldsFromSharedPreferences(builder);
     builder.build()
@@ -296,15 +295,26 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       .voiceUnits(getUnitType());
   }
 
-  private String getLanguage() {
-    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    String defaultString = getString(R.string.language_default_value_device_locale);
-    return sharedPreferences.getString(getString(R.string.language_key), defaultString);
-  }
-
   private String getUnitType() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    return sharedPreferences.getString(getString(R.string.unit_type_key), LocaleUtils.getUnitTypeForDeviceLocale(this));
+    String defaultUnitType = getString(R.string.default_for_locale);
+    String unitType = sharedPreferences.getString(getString(R.string.unit_type_key), defaultUnitType);
+    if (unitType.equals(defaultUnitType)) {
+      unitType = LocaleUtils.getUnitTypeForDeviceLocale(this);
+    }
+
+    return unitType;
+  }
+
+  private String getLanguage() {
+    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    String defaultString = getString(R.string.device_locale);
+    String language = sharedPreferences.getString(getString(R.string.language_key), defaultString);
+    if (language.equals(defaultString)) {
+      language = LocaleUtils.getDeviceLanguage(this);
+    }
+
+    return language;
   }
 
   private boolean getShouldSimulateRoute() {
