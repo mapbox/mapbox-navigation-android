@@ -32,7 +32,9 @@ import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 import com.mapbox.services.android.navigation.v5.utils.ValidationUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import retrofit2.Callback;
 import timber.log.Timber;
@@ -55,7 +57,7 @@ public class MapboxNavigation implements ServiceConnection {
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
   private LocationEngine locationEngine = null;
-  private List<Milestone> milestones;
+  private Set<Milestone> milestones;
   private final String accessToken;
   private OffRoute offRouteEngine;
   private FasterRoute fasterRouteEngine;
@@ -146,7 +148,7 @@ public class MapboxNavigation implements ServiceConnection {
     initializeTelemetry();
 
     // Create and add default milestones if enabled.
-    milestones = new ArrayList<>();
+    milestones = new HashSet<>();
     if (options.defaultMilestonesEnabled()) {
       addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
       addMilestone(new BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build());
@@ -243,11 +245,25 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.4.0
    */
   public void addMilestone(@NonNull Milestone milestone) {
-    if (milestones.contains(milestone)) {
+    if (!milestones.add(milestone)) {
       Timber.w("Milestone has already been added to the stack.");
-      return;
     }
-    milestones.add(milestone);
+  }
+
+  /**
+   * Adds the given list of {@link Milestone} to be triggered during navigation.
+   * <p>
+   * Milestones can only be added once and must be removed and added back if any changes are
+   * desired.
+   * </p>
+   *
+   * @param milestones a list of custom built milestone
+   * @since 0.14.0
+   */
+  public void addMilestones(@NonNull List<Milestone> milestones) {
+    if (!this.milestones.addAll(milestones)) {
+      Timber.w("These milestones have already been added to the stack.");
+    }
   }
 
   /**
@@ -780,7 +796,7 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   List<Milestone> getMilestones() {
-    return milestones;
+    return new ArrayList<>(milestones);
   }
 
   MapboxNavigationOptions options() {

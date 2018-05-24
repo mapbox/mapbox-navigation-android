@@ -10,9 +10,12 @@ import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+
+import java.util.List;
 
 @AutoValue
 public abstract class NavigationViewOptions extends NavigationOptions {
@@ -33,6 +36,9 @@ public abstract class NavigationViewOptions extends NavigationOptions {
 
   @Nullable
   public abstract MilestoneEventListener milestoneEventListener();
+
+  @Nullable
+  public abstract List<Milestone> milestones();
 
   @Nullable
   public abstract BottomSheetCallback bottomSheetCallback();
@@ -65,6 +71,8 @@ public abstract class NavigationViewOptions extends NavigationOptions {
     public abstract Builder progressChangeListener(ProgressChangeListener progressChangeListener);
 
     public abstract Builder milestoneEventListener(MilestoneEventListener milestoneEventListener);
+
+    public abstract Builder milestones(List<Milestone> milestones);
 
     public abstract Builder bottomSheetCallback(BottomSheetCallback bottomSheetCallback);
 
