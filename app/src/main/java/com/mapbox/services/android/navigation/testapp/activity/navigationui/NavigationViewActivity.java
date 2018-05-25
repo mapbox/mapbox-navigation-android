@@ -298,7 +298,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private String getUnitType() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    String defaultUnitType = getString(R.string.default_for_locale);
+    String defaultUnitType = getString(R.string.default_unit_type);
     String unitType = sharedPreferences.getString(getString(R.string.unit_type_key), defaultUnitType);
     if (unitType.equals(defaultUnitType)) {
       unitType = localeUtils.getUnitTypeForDeviceLocale(this);
@@ -309,9 +309,9 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private String getLanguage() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    String defaultString = getString(R.string.device_locale);
-    String language = sharedPreferences.getString(getString(R.string.language_key), defaultString);
-    if (language.equals(defaultString)) {
+    String defaultLanguage = getString(R.string.default_locale);
+    String language = sharedPreferences.getString(getString(R.string.language_key), defaultLanguage);
+    if (language.equals(defaultLanguage)) {
       language = localeUtils.getDeviceLanguage(this);
     }
 
