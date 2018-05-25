@@ -79,16 +79,6 @@ public class RouteFetcher {
     executeRouteCall(builder);
   }
 
-  public void findRouteFromOriginToDestination(Point origin, Point destination) {
-    NavigationRoute.Builder builder = NavigationRoute.builder()
-      .accessToken(accessToken)
-      .origin(origin)
-      .destination(destination);
-    addLanguageAndUnitType(builder);
-    addRouteProfile(routeProfile, builder);
-    builder.build().getRoute(directionsResponseCallback);
-  }
-
   @Nullable
   private NavigationRoute.Builder buildRouteRequestFromCurrentLocation(Point origin, Double bearing,
                                                                        RouteProgress progress,

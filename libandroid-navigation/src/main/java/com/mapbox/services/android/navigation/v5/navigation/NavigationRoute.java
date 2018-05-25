@@ -58,9 +58,10 @@ public final class NavigationRoute {
    * @return a {@link Builder} object for creating this object
    * @since 0.5.0
    */
-  public static Builder builder() {
+  public static Builder builder(Context context) {
     return new Builder()
       .annotations(DirectionsCriteria.ANNOTATION_CONGESTION, DirectionsCriteria.ANNOTATION_DISTANCE)
+      .languageAndVoiceUnitsFromContext(context)
       .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
   }
 
@@ -425,7 +426,7 @@ public final class NavigationRoute {
       return this;
     }
 
-    public Builder languageAndVoiceUnitsFromContext(Context context) {
+    protected Builder languageAndVoiceUnitsFromContext(Context context) {
       directionsBuilder.language(LocaleUtils.getDeviceLocale(context))
         .voiceUnits(LocaleUtils.getUnitTypeForDeviceLocale(context));
       return this;

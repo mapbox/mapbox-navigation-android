@@ -123,11 +123,10 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
   }
 
   private void fetchRoute(Point origin, Point destination) {
-    NavigationRoute.builder()
+    NavigationRoute.builder(getContext())
       .accessToken(Mapbox.getAccessToken())
       .origin(origin)
       .destination(destination)
-      .languageAndVoiceUnitsFromContext(getContext())
       .build()
       .getRoute(new NavigationRoute.SimplifiedCallback() {
         @Override

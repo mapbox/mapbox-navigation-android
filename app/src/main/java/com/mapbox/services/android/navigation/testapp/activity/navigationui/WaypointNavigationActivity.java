@@ -180,12 +180,11 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   }
 
   private void fetchRoute(Point origin, Point destination) {
-    NavigationRoute.builder()
+    NavigationRoute.builder(this)
       .accessToken(Mapbox.getAccessToken())
       .origin(origin)
       .destination(destination)
       .alternatives(true)
-      .languageAndVoiceUnitsFromContext(this)
       .build()
       .getRoute(new NavigationRoute.SimplifiedCallback() {
         @Override
