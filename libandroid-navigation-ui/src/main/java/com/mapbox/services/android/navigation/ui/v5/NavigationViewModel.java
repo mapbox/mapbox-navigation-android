@@ -204,7 +204,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initLocaleInfo(NavigationUiOptions options) {
-    language = LocaleUtils.getNonNullLocale(getApplication(), options.directionsRoute().voiceLanguage());
+    language = new LocaleUtils().getNonNullLocale(getApplication(), options.directionsRoute().voiceLanguage());
     unitType = options.directionsRoute().routeOptions().voiceUnits();
   }
 

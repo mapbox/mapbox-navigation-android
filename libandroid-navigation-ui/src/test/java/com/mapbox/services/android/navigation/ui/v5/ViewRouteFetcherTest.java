@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
@@ -14,7 +13,6 @@ import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteFetcher;
 import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteListener;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import org.junit.Test;
@@ -22,7 +20,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -45,10 +42,9 @@ public class ViewRouteFetcherTest extends BaseTest {
     ViewRouteListener routeEngineListener = mock(ViewRouteListener.class);
     ViewRouteFetcher routeEngine = buildRouteEngine(routeEngineListener);
     NavigationViewOptions options = buildNavigationViewOptionsWithRoute();
-    Context mockContext = mock(Context.class);
     DirectionsRoute directionsRoute = options.directionsRoute();
 
-    routeEngine.extractRouteOptions(mockContext, options);
+    routeEngine.extractRouteOptions(options);
 
     verify(routeEngineListener).onRouteUpdate(directionsRoute);
   }
@@ -59,22 +55,8 @@ public class ViewRouteFetcherTest extends BaseTest {
     ViewRouteFetcher routeEngine = buildRouteEngine(routeEngineListener);
     NavigationViewOptions options = buildNavigationViewOptionsWithRoute();
     Point destination = findDestinationPoint(options);
-    Context mockContext = mock(Context.class);
 
-    routeEngine.extractRouteOptions(mockContext, options);
-
-    verify(routeEngineListener).onDestinationSet(destination);
-  }
-
-  @Test
-  public void onExtractOptionsWithCoordinates_destinationCallbackIsCalled() throws Exception {
-    ViewRouteListener routeEngineListener = mock(ViewRouteListener.class);
-    ViewRouteFetcher routeEngine = buildRouteEngine(routeEngineListener);
-    NavigationViewOptions options = buildNavigationViewOptionsWithCoordinates();
-    Context mockContext = mock(Context.class);
-    Point destination = options.destination();
-
-    routeEngine.extractRouteOptions(mockContext, options);
+    routeEngine.extractRouteOptions(options);
 
     verify(routeEngineListener).onDestinationSet(destination);
   }
@@ -111,19 +93,8 @@ public class ViewRouteFetcherTest extends BaseTest {
   }
 
   private NavigationViewOptions buildNavigationViewOptionsWithRoute() throws IOException {
-    MapboxNavigationOptions navigationOptions = MapboxNavigationOptions.builder().locale(Locale.US).build();
     return NavigationViewOptions.builder()
-      .navigationOptions(navigationOptions)
       .directionsRoute(buildDirectionsRoute())
-      .build();
-  }
-
-  private NavigationViewOptions buildNavigationViewOptionsWithCoordinates() throws IOException {
-    MapboxNavigationOptions navigationOptions = MapboxNavigationOptions.builder().locale(Locale.US).build();
-    return NavigationViewOptions.builder()
-      .navigationOptions(navigationOptions)
-      .origin(Point.fromLngLat(1.234455, 2.3456754))
-      .destination(Point.fromLngLat(123.422, 346754.32244))
       .build();
   }
 
