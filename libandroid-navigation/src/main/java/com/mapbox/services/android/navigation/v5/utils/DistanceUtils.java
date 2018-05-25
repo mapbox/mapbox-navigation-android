@@ -53,7 +53,7 @@ public class DistanceUtils {
 
     if (!DirectionsCriteria.IMPERIAL.equals(unitType) && !DirectionsCriteria.METRIC.equals(unitType)) {
       // If given locale does not include a country, use the device locale to get the default unitType
-      unitType = LocaleUtils.getUnitTypeForDeviceLocale(context);
+      unitType = new LocaleUtils().getUnitTypeForDeviceLocale(context);
     }
 
     largeUnit = DirectionsCriteria.IMPERIAL.equals(unitType) ? UNIT_MILES : UNIT_KILOMETERS;

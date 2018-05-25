@@ -59,9 +59,13 @@ public final class NavigationRoute {
    * @since 0.5.0
    */
   public static Builder builder(Context context) {
+    return builder(context, new LocaleUtils());
+  }
+
+  public static Builder builder(Context context, LocaleUtils localeUtils) {
     return new Builder()
       .annotations(DirectionsCriteria.ANNOTATION_CONGESTION, DirectionsCriteria.ANNOTATION_DISTANCE)
-      .languageAndVoiceUnitsFromContext(context)
+      .languageAndVoiceUnitsFromContext(context, localeUtils)
       .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
   }
 
@@ -426,9 +430,9 @@ public final class NavigationRoute {
       return this;
     }
 
-    protected Builder languageAndVoiceUnitsFromContext(Context context) {
-      directionsBuilder.language(LocaleUtils.getDeviceLocale(context))
-        .voiceUnits(LocaleUtils.getUnitTypeForDeviceLocale(context));
+    protected Builder languageAndVoiceUnitsFromContext(Context context, LocaleUtils localeUtils) {
+      directionsBuilder.language(localeUtils.getDeviceLocale(context))
+        .voiceUnits(localeUtils.getUnitTypeForDeviceLocale(context));
       return this;
     }
 

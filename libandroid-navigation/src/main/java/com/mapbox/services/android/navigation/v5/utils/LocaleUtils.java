@@ -17,7 +17,7 @@ public class LocaleUtils {
    * @return unit type for specified locale
    */
   @DirectionsCriteria.VoiceUnitCriteria
-  public static String getUnitTypeForLocale(@NonNull Locale locale) {
+  public String getUnitTypeForLocale(@NonNull Locale locale) {
     switch (locale.getCountry()) {
       case "US": // US
       case "LR": // Liberia
@@ -33,12 +33,12 @@ public class LocaleUtils {
    * @param context to check configuration
    * @return locale of device
    */
-  public static String getDeviceLanguage(Context context) {
+  public String getDeviceLanguage(Context context) {
     return getDeviceLocale(context).getLanguage();
   }
 
 
-  public static Locale getDeviceLocale(Context context) {
+  public Locale getDeviceLocale(Context context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
       return context.getResources().getConfiguration().getLocales().get(0);
     } else {
@@ -52,14 +52,14 @@ public class LocaleUtils {
    * @param language to check if it is null
    * @return a non-null locale, either the one passed in, or the device locale
    */
-  public static String getNonNullLocale(Context context, String language) {
+  public String getNonNullLocale(Context context, String language) {
     if (language == null) {
       return getDeviceLanguage(context);
     }
     return language;
   }
 
-  public static String getUnitTypeForDeviceLocale(Context context) {
+  public String getUnitTypeForDeviceLocale(Context context) {
     return getUnitTypeForLocale(getDeviceLocale(context));
   }
 }

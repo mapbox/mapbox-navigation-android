@@ -83,6 +83,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private Point currentLocation;
   private Point destination;
   private DirectionsRoute route;
+  private LocaleUtils localeUtils;
 
   private boolean locationFound;
 
@@ -93,6 +94,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     ButterKnife.bind(this);
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
+    localeUtils = new LocaleUtils();
   }
 
   @Override
@@ -299,7 +301,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     String defaultUnitType = getString(R.string.default_for_locale);
     String unitType = sharedPreferences.getString(getString(R.string.unit_type_key), defaultUnitType);
     if (unitType.equals(defaultUnitType)) {
-      unitType = LocaleUtils.getUnitTypeForDeviceLocale(this);
+      unitType = localeUtils.getUnitTypeForDeviceLocale(this);
     }
 
     return unitType;
@@ -310,7 +312,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     String defaultString = getString(R.string.device_locale);
     String language = sharedPreferences.getString(getString(R.string.language_key), defaultString);
     if (language.equals(defaultString)) {
-      language = LocaleUtils.getDeviceLanguage(this);
+      language = localeUtils.getDeviceLanguage(this);
     }
 
     return language;

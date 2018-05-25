@@ -165,7 +165,7 @@ public class SummaryBottomSheet extends FrameLayout {
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void init() {
-    language = LocaleUtils.getDeviceLanguage(getContext());
+    language = new LocaleUtils().getDeviceLanguage(getContext());
     inflate(getContext(), R.layout.summary_bottomsheet_layout, this);
   }
 
