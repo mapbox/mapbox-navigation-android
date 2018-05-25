@@ -63,6 +63,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
+  private static final int CHANGE_SETTING_REQUEST_CODE = 1;
 
   private LocationLayerPlugin locationLayer;
   private LocationEngine locationEngine;
@@ -113,7 +114,19 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void showSettings() {
-    startActivity(new Intent(this, NavigationViewSettingsActivity.class));
+    startActivityForResult(new Intent(this, NavigationViewSettingsActivity.class), CHANGE_SETTING_REQUEST_CODE);
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (requestCode == CHANGE_SETTING_REQUEST_CODE && resultCode == RESULT_OK) {
+      boolean shouldRefetch = data.getBooleanExtra(NavigationViewSettingsActivity.UNIT_TYPE_CHANGED, false)
+        || data.getBooleanExtra(NavigationViewSettingsActivity.LANGUAGE_CHANGED, false);
+      if (destination != null && shouldRefetch) {
+        fetchRoute();
+      }
+    }
   }
 
   @SuppressWarnings( {"MissingPermission"})
