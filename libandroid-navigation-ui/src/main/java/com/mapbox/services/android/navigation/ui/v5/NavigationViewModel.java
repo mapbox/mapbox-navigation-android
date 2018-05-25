@@ -379,7 +379,7 @@ public class NavigationViewModel extends AndroidViewModel {
     if (navigationViewEventDispatcher != null && navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
       navigationViewEventDispatcher.onOffRoute(newOrigin);
       OffRouteEvent event = new OffRouteEvent(newOrigin, routeProgress);
-      navigationViewRouteEngine.fetchRouteFromOffRouteEvent(event);
+      navigationViewRouteEngine.fetchRouteFromOffRouteEvent(getApplication(), event);
       isOffRoute.setValue(true);
     }
   }

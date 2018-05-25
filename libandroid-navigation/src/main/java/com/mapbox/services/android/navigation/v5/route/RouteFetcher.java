@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.route;
 
+import android.content.Context;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -70,21 +71,21 @@ public class RouteFetcher {
    * @param routeProgress for remaining waypoints along the route
    * @since 0.13.0
    */
-  public void findRouteFromRouteProgress(Location location, RouteProgress routeProgress) {
+  public void findRouteFromRouteProgress(Context context, Location location, RouteProgress routeProgress) {
     if (isValidProgress(location, routeProgress)) {
       return;
     }
     this.routeProgress = routeProgress;
-    NavigationRoute.Builder builder = buildRouteRequest(location, routeProgress);
+    NavigationRoute.Builder builder = buildRouteRequest(context, location, routeProgress);
     executeRouteCall(builder);
   }
 
   @Nullable
-  private NavigationRoute.Builder buildRouteRequestFromCurrentLocation(Point origin, Double bearing,
-                                                                       RouteProgress progress,
+  private NavigationRoute.Builder buildRouteRequestFromCurrentLocation(Context context, Point origin,
+                                                                       Double bearing, RouteProgress progress,
                                                                        @Nullable String routeProfile) {
     RouteOptions options = progress.directionsRoute().routeOptions();
-    NavigationRoute.Builder builder = NavigationRoute.builder()
+    NavigationRoute.Builder builder = NavigationRoute.builder(context)
       .origin(origin, bearing, BEARING_TOLERANCE)
       .routeOptions(options);
 
@@ -134,11 +135,11 @@ public class RouteFetcher {
     return location == null || routeProgress == null;
   }
 
-  private NavigationRoute.Builder buildRouteRequest(Location location, RouteProgress routeProgress) {
+  private NavigationRoute.Builder buildRouteRequest(Context context, Location location, RouteProgress routeProgress) {
     Point origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     Double bearing = location.hasBearing() ? Float.valueOf(location.getBearing()).doubleValue() : null;
     return buildRouteRequestFromCurrentLocation(
-      origin, bearing, routeProgress, routeProfile
+      context, origin, bearing, routeProgress, routeProfile
     );
   }
 

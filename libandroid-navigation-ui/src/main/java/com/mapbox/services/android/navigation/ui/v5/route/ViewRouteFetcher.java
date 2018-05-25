@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.route;
 
+import android.content.Context;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -52,10 +53,10 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
     extractRouteFromOptions(options);
   }
 
-  public void fetchRouteFromOffRouteEvent(OffRouteEvent event) {
+  public void fetchRouteFromOffRouteEvent(Context context, OffRouteEvent event) {
     if (OffRouteEvent.isValid(event)) {
       RouteProgress routeProgress = event.getRouteProgress();
-      findRouteFromRouteProgress(rawLocation, routeProgress);
+      findRouteFromRouteProgress(context, rawLocation, routeProgress);
     }
   }
 

@@ -150,7 +150,7 @@ public class NavigationService extends Service implements LocationEngineListener
   @Override
   public void onCheckFasterRoute(Location location, RouteProgress routeProgress, boolean checkFasterRoute) {
     if (checkFasterRoute) {
-      routeEngine.findRouteFromRouteProgress(location, routeProgress);
+      routeEngine.findRouteFromRouteProgress(getApplicationContext(), location, routeProgress);
     }
   }
 

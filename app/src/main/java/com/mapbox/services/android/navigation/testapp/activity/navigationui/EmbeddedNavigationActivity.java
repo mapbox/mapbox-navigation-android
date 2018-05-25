@@ -27,8 +27,6 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import java.util.Locale;
-
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -87,12 +85,11 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   }
 
   private void fetchRoute() {
-    NavigationRoute.builder()
+    NavigationRoute.builder(this)
       .accessToken(Mapbox.getAccessToken())
       .origin(ORIGIN)
       .destination(DESTINATION)
       .alternatives(true)
-      .languageAndVoiceUnitsFromContext(this)
       .build()
       .getRoute(new NavigationRoute.SimplifiedCallback() {
         @Override
