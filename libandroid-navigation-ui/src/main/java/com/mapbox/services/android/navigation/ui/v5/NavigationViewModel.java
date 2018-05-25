@@ -17,9 +17,9 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructio
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductor;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductorListener;
+import com.mapbox.services.android.navigation.ui.v5.route.OffRouteEvent;
 import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteFetcher;
 import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteListener;
-import com.mapbox.services.android.navigation.ui.v5.route.OffRouteEvent;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
@@ -37,6 +37,7 @@ import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
+import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
 import java.util.Locale;
@@ -70,6 +71,7 @@ public class NavigationViewModel extends AndroidViewModel {
   @NavigationTimeFormat.Type
   private int timeFormatType;
   private boolean isRunning;
+  private RouteUtils routeUtils;
   private String accessToken;
 
   public NavigationViewModel(Application application) {
@@ -78,6 +80,7 @@ public class NavigationViewModel extends AndroidViewModel {
     initConnectivityManager(application);
     initNavigationRouteEngine();
     initNavigationLocationEngine();
+    routeUtils = new RouteUtils();
   }
 
   public void onCreate() {
@@ -119,7 +122,7 @@ public class NavigationViewModel extends AndroidViewModel {
   public void updateFeedback(FeedbackItem feedbackItem) {
     if (!TextUtils.isEmpty(feedbackId)) {
       navigation.updateFeedback(feedbackId, feedbackItem.getFeedbackType(), feedbackItem.getDescription(), screenshot);
-      navigationViewEventDispatcher.onFeedbackSent(feedbackItem);
+      sendEventFeedback(feedbackItem);
       feedbackId = null;
       screenshot = null;
     }
@@ -250,12 +253,7 @@ public class NavigationViewModel extends AndroidViewModel {
     public void userOffRoute(Location location) {
       if (hasNetworkConnection()) {
         Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-        if (navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
-          navigationViewEventDispatcher.onOffRoute(newOrigin);
-          OffRouteEvent event = new OffRouteEvent(newOrigin, routeProgress);
-          navigationViewRouteEngine.fetchRouteFromOffRouteEvent(event);
-          isOffRoute.setValue(true);
-        }
+        sendEventOffRoute(newOrigin);
       }
     }
   };
@@ -267,6 +265,7 @@ public class NavigationViewModel extends AndroidViewModel {
         instructionPlayer.play((VoiceInstructionMilestone) milestone);
       }
       updateBannerInstruction(routeProgress, milestone);
+      sendEventArrival(routeProgress, milestone);
     }
   };
 
@@ -274,11 +273,7 @@ public class NavigationViewModel extends AndroidViewModel {
     @Override
     public void onRunning(boolean isRunning) {
       NavigationViewModel.this.isRunning = isRunning;
-      if (isRunning) {
-        navigationViewEventDispatcher.onNavigationRunning();
-      } else {
-        navigationViewEventDispatcher.onNavigationFinished();
-      }
+      sendNavigationStatusEvent(isRunning);
     }
   };
 
@@ -297,9 +292,9 @@ public class NavigationViewModel extends AndroidViewModel {
 
     @Override
     public void onRouteRequestError(Throwable throwable) {
-      if (isOffRoute() && navigationViewEventDispatcher != null) {
+      if (isOffRoute()) {
         String errorMessage = throwable.getMessage();
-        navigationViewEventDispatcher.onFailedReroute(errorMessage);
+        sendEventFailedReroute(errorMessage);
       }
     }
 
@@ -320,9 +315,7 @@ public class NavigationViewModel extends AndroidViewModel {
     this.route.setValue(route);
     startNavigation(route);
     locationEngineConductor.updateRoute(route);
-    if (isOffRoute()) {
-      navigationViewEventDispatcher.onRerouteAlong(route);
-    }
+    sendEventOnRerouteAlong(route);
     isOffRoute.setValue(false);
   }
 
@@ -367,8 +360,50 @@ public class NavigationViewModel extends AndroidViewModel {
     if (connectivityManager == null) {
       return false;
     }
-
     NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
     return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+  }
+
+  private void sendEventFeedback(FeedbackItem feedbackItem) {
+    if (navigationViewEventDispatcher != null) {
+      navigationViewEventDispatcher.onFeedbackSent(feedbackItem);
+    }
+  }
+
+  private void sendEventArrival(RouteProgress routeProgress, Milestone milestone) {
+    if (navigationViewEventDispatcher != null && routeUtils.isArrivalEvent(routeProgress, milestone)) {
+      navigationViewEventDispatcher.onArrival();
+    }
+  }
+
+  private void sendEventOffRoute(Point newOrigin) {
+    if (navigationViewEventDispatcher != null && navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
+      navigationViewEventDispatcher.onOffRoute(newOrigin);
+      OffRouteEvent event = new OffRouteEvent(newOrigin, routeProgress);
+      navigationViewRouteEngine.fetchRouteFromOffRouteEvent(event);
+      isOffRoute.setValue(true);
+    }
+  }
+
+  private void sendNavigationStatusEvent(boolean isRunning) {
+    if (navigationViewEventDispatcher != null) {
+      if (isRunning) {
+        navigationViewEventDispatcher.onNavigationRunning();
+      } else {
+        navigationViewEventDispatcher.onNavigationFinished();
+      }
+    }
+  }
+
+  private void sendEventFailedReroute(String errorMessage) {
+    if (navigationViewEventDispatcher != null) {
+      navigationViewEventDispatcher.onFailedReroute(errorMessage);
+    }
+  }
+
+  private void sendEventOnRerouteAlong(DirectionsRoute route) {
+    if (navigationViewEventDispatcher != null && isOffRoute()) {
+      navigationViewEventDispatcher.onRerouteAlong(route);
+    }
   }
 }

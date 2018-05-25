@@ -51,30 +51,19 @@ public class MapboxNavigationTest extends BaseTest {
   public void voiceInstructionMilestone_onInitializationDoesGetAdded() throws Exception {
     MapboxNavigation navigation = buildMapboxNavigation();
 
-    int identifier = -1;
-    for (Milestone milestone : navigation.getMilestones()) {
-      if (milestone instanceof VoiceInstructionMilestone) {
-        identifier = milestone.getIdentifier();
-      }
-    }
+    int identifier = searchForVoiceInstructionMilestone(navigation);
 
-    assertEquals(identifier, VOICE_INSTRUCTION_MILESTONE_ID);
+    assertEquals(VOICE_INSTRUCTION_MILESTONE_ID, identifier);
   }
 
   @Test
   public void bannerInstructionMilestone_onInitializationDoesGetAdded() throws Exception {
     MapboxNavigation navigation = buildMapboxNavigation();
 
-    int identifier = -1;
-    for (Milestone milestone : navigation.getMilestones()) {
-      if (milestone instanceof BannerInstructionMilestone) {
-        identifier = milestone.getIdentifier();
-      }
-    }
+    int identifier = searchForBannerInstructionMilestone(navigation);
 
-    assertEquals(identifier, BANNER_INSTRUCTION_MILESTONE_ID);
+    assertEquals(BANNER_INSTRUCTION_MILESTONE_ID, identifier);
   }
-
 
   @Test
   public void defaultMilestones_onInitializationDoNotGetAdded() throws Exception {
@@ -328,5 +317,25 @@ public class MapboxNavigationTest extends BaseTest {
   private MapboxNavigation buildMapboxNavigationWithOptions(MapboxNavigationOptions options) {
     return new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
       mock(LocationEngine.class));
+  }
+
+  private int searchForVoiceInstructionMilestone(MapboxNavigation navigation) {
+    int identifier = -1;
+    for (Milestone milestone : navigation.getMilestones()) {
+      if (milestone instanceof VoiceInstructionMilestone) {
+        identifier = milestone.getIdentifier();
+      }
+    }
+    return identifier;
+  }
+
+  private int searchForBannerInstructionMilestone(MapboxNavigation navigation) {
+    int identifier = -1;
+    for (Milestone milestone : navigation.getMilestones()) {
+      if (milestone instanceof BannerInstructionMilestone) {
+        identifier = milestone.getIdentifier();
+      }
+    }
+    return identifier;
   }
 }

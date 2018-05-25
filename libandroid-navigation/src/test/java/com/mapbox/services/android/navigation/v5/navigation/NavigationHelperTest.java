@@ -401,7 +401,7 @@ public class NavigationHelperTest extends BaseTest {
     );
 
     assertTrue(newLegAnnotation.distanceToAnnotation() < legDistanceRemaining);
-    assertEquals("severe", newLegAnnotation.congestion());
+    assertEquals("heavy", newLegAnnotation.congestion());
   }
 
   @Test

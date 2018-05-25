@@ -245,7 +245,8 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.4.0
    */
   public void addMilestone(@NonNull Milestone milestone) {
-    if (!milestones.add(milestone)) {
+    boolean milestoneAdded = milestones.add(milestone);
+    if (!milestoneAdded) {
       Timber.w("Milestone has already been added to the stack.");
     }
   }
@@ -261,7 +262,8 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.14.0
    */
   public void addMilestones(@NonNull List<Milestone> milestones) {
-    if (!this.milestones.addAll(milestones)) {
+    boolean milestonesAdded = this.milestones.addAll(milestones);
+    if (!milestonesAdded) {
       Timber.w("These milestones have already been added to the stack.");
     }
   }

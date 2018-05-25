@@ -35,8 +35,13 @@ public class RouteFetcher {
   private String accessToken;
   private String routeProfile;
   private RouteProgress routeProgress;
+  private RouteUtils routeUtils;
   private Locale locale = Locale.getDefault();
   private int unitType = NavigationUnitType.NONE_SPECIFIED;
+
+  public RouteFetcher() {
+    routeUtils = new RouteUtils();
+  }
 
   public void addRouteListener(RouteListener listener) {
     if (!routeListeners.contains(listener)) {
@@ -61,7 +66,7 @@ public class RouteFetcher {
   }
 
   public void updateRouteProfile(String routeProfile) {
-    if (RouteUtils.isValidRouteProfile(routeProfile)) {
+    if (routeUtils.isValidRouteProfile(routeProfile)) {
       this.routeProfile = routeProfile;
     }
   }
@@ -105,7 +110,7 @@ public class RouteFetcher {
       .origin(origin, bearing, BEARING_TOLERANCE)
       .routeOptions(options);
 
-    List<Point> remainingWaypoints = RouteUtils.calculateRemainingWaypoints(progress);
+    List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(progress);
     if (remainingWaypoints == null) {
       Timber.e("An error occurred fetching a new route");
       return null;

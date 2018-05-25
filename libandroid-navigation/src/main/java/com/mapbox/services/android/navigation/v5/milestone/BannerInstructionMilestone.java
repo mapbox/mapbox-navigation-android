@@ -4,15 +4,16 @@ import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-
-import static com.mapbox.services.android.navigation.v5.utils.RouteUtils.findCurrentBannerInstructions;
+import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 public class BannerInstructionMilestone extends Milestone {
 
   private BannerInstructions instructions;
+  private RouteUtils routeUtils;
 
   BannerInstructionMilestone(Builder builder) {
     super(builder);
+    routeUtils = new RouteUtils();
   }
 
   @Override
@@ -20,7 +21,7 @@ public class BannerInstructionMilestone extends Milestone {
     RouteLegProgress legProgress = routeProgress.currentLegProgress();
     LegStep currentStep = legProgress.currentStep();
     double stepDistanceRemaining = legProgress.currentStepProgress().distanceRemaining();
-    BannerInstructions instructions = findCurrentBannerInstructions(currentStep, stepDistanceRemaining);
+    BannerInstructions instructions = routeUtils.findCurrentBannerInstructions(currentStep, stepDistanceRemaining);
     if (shouldBeShown(instructions, stepDistanceRemaining)) {
       this.instructions = instructions;
       return true;

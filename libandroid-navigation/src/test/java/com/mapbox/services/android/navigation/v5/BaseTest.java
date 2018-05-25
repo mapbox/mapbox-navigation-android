@@ -44,6 +44,10 @@ public class BaseTest {
     return routeProgressBuilder.buildDefaultTestRouteProgress(testRoute);
   }
 
+  protected RouteProgress buildDefaultTestRouteProgress(DirectionsRoute testRoute) throws Exception {
+    return routeProgressBuilder.buildDefaultTestRouteProgress(testRoute);
+  }
+
   protected RouteProgress buildTestRouteProgress(DirectionsRoute route,
                                                  double stepDistanceRemaining,
                                                  double legDistanceRemaining,

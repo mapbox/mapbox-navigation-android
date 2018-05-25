@@ -53,6 +53,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private LocationEngine locationEngine;
   private LocationValidator locationValidator;
   private NavigationEngine thread;
+  private RouteUtils routeUtils;
   private Locale locale;
   @NavigationUnitType.UnitType
   private int unitType;
@@ -68,6 +69,7 @@ public class NavigationService extends Service implements LocationEngineListener
     thread = new NavigationEngine(new Handler(), this);
     thread.start();
     thread.prepareHandler();
+    routeUtils = new RouteUtils();
   }
 
   /**
@@ -299,7 +301,7 @@ public class NavigationService extends Service implements LocationEngineListener
   private void forceLocationUpdate() {
     Location location = locationEngine.getLastLocation();
     if (!isValidLocationUpdate(location)) {
-      location = RouteUtils.createFirstLocationFromRoute(mapboxNavigation.getRoute());
+      location = routeUtils.createFirstLocationFromRoute(mapboxNavigation.getRoute());
     }
     queueLocationUpdateTask(location);
   }

@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
+import android.support.annotation.NonNull;
+
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
@@ -8,37 +10,39 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.services.android.navigation.v5.BaseTest;
+import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RouteUtilsTest extends BaseTest {
 
   @Test
   public void isNewRoute_returnsTrueWhenPreviousGeometriesNull() throws Exception {
     RouteProgress defaultRouteProgress = buildDefaultTestRouteProgress();
-    boolean isNewRoute = RouteUtils.isNewRoute(null, defaultRouteProgress);
+    RouteUtils routeUtils = new RouteUtils();
+
+    boolean isNewRoute = routeUtils.isNewRoute(null, defaultRouteProgress);
+
     assertTrue(isNewRoute);
-    RouteProgress previousRouteProgress = buildDefaultTestRouteProgress();
-
-    isNewRoute = RouteUtils.isNewRoute(previousRouteProgress, defaultRouteProgress);
-
-    assertFalse(isNewRoute);
   }
 
   @Test
   public void isNewRoute_returnsFalseWhenGeometriesEqualEachOther() throws Exception {
     RouteProgress previousRouteProgress = buildDefaultTestRouteProgress();
+    RouteUtils routeUtils = new RouteUtils();
 
-    boolean isNewRoute = RouteUtils.isNewRoute(previousRouteProgress, previousRouteProgress);
+    boolean isNewRoute = routeUtils.isNewRoute(previousRouteProgress, previousRouteProgress);
 
     assertFalse(isNewRoute);
   }
@@ -50,72 +54,74 @@ public class RouteUtilsTest extends BaseTest {
     RouteProgress previousRouteProgress = defaultRouteProgress.toBuilder()
       .directionsRoute(aRoute.toBuilder().geometry("vfejnqiv").build())
       .build();
+    RouteUtils routeUtils = new RouteUtils();
 
-    boolean isNewRoute = RouteUtils.isNewRoute(previousRouteProgress, defaultRouteProgress);
+    boolean isNewRoute = routeUtils.isNewRoute(previousRouteProgress, defaultRouteProgress);
 
     assertTrue(isNewRoute);
   }
 
   @Test
-  public void isArrivalEvent_returnsTrueWhenManeuverTypeIsArrival_andIsValidMetersRemaining() throws Exception {
-    DirectionsRoute aRoute = buildTestDirectionsRoute();
-    int lastStepIndex = obtainLastStepIndex(aRoute);
-    RouteProgress defaultRouteProgress = buildDefaultTestRouteProgress();
-    RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
-      .stepDistanceRemaining(30)
-      .legDistanceRemaining(30)
-      .distanceRemaining(30)
-      .stepIndex(lastStepIndex)
-      .build();
+  public void isArrivalEvent_returnsTrueWhenManeuverTypeIsArrival_andIsLastInstruction() throws Exception {
+    DirectionsRoute route = buildTestDirectionsRoute();
+    int first = 0;
+    int lastInstruction = 1;
+    RouteLeg routeLeg = route.legs().get(first);
+    List<LegStep> routeSteps = routeLeg.steps();
+    int currentStepIndex = routeSteps.size() - 2;
+    int upcomingStepIndex = routeSteps.size() - 1;
+    LegStep currentStep = routeSteps.get(currentStepIndex);
+    LegStep upcomingStep = routeSteps.get(upcomingStepIndex);
+    RouteProgress routeProgress = buildRouteProgress(first, route, currentStep, upcomingStep);
+    BannerInstructionMilestone bannerInstructionMilestone = mock(BannerInstructionMilestone.class);
+    List<BannerInstructions> currentStepBannerInstructions = currentStep.bannerInstructions();
+    buildBannerInstruction(lastInstruction, bannerInstructionMilestone, currentStepBannerInstructions);
 
-    boolean isArrivalEvent = RouteUtils.isArrivalEvent(theRouteProgress);
+    RouteUtils routeUtils = new RouteUtils();
+
+    boolean isArrivalEvent = routeUtils.isArrivalEvent(routeProgress, bannerInstructionMilestone);
 
     assertTrue(isArrivalEvent);
   }
 
   @Test
-  public void isArrivalEvent_returnsFalseWhenManeuverTypeIsArrival_andIsNotValidMetersRemaining() throws Exception {
-    DirectionsRoute aRoute = buildTestDirectionsRoute();
-    int lastStepIndex = obtainLastStepIndex(aRoute);
-    RouteProgress defaultRouteProgress = buildDefaultTestRouteProgress();
-    RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
-      .stepIndex(lastStepIndex)
-      .legDistanceRemaining(100)
-      .build();
+  public void isArrivalEvent_returnsFalseWhenManeuverTypeIsArrival_andIsNotLastInstruction() throws Exception {
+    DirectionsRoute route = buildTestDirectionsRoute();
+    int first = 0;
+    RouteLeg routeLeg = route.legs().get(first);
+    List<LegStep> routeSteps = routeLeg.steps();
+    int currentStepIndex = routeSteps.size() - 2;
+    int upcomingStepIndex = routeSteps.size() - 1;
+    LegStep currentStep = routeSteps.get(currentStepIndex);
+    LegStep upcomingStep = routeSteps.get(upcomingStepIndex);
+    RouteProgress routeProgress = buildRouteProgress(first, route, currentStep, upcomingStep);
+    BannerInstructionMilestone bannerInstructionMilestone = mock(BannerInstructionMilestone.class);
+    List<BannerInstructions> currentStepBannerInstructions = currentStep.bannerInstructions();
+    buildBannerInstruction(first, bannerInstructionMilestone, currentStepBannerInstructions);
 
-    boolean isArrivalEvent = RouteUtils.isArrivalEvent(theRouteProgress);
+    RouteUtils routeUtils = new RouteUtils();
+
+    boolean isArrivalEvent = routeUtils.isArrivalEvent(routeProgress, bannerInstructionMilestone);
 
     assertFalse(isArrivalEvent);
   }
 
   @Test
-  public void isArrivalEvent_returnsTrueWhenUpcomingManeuverTypeIsArrival_andIsValidMetersRemaining() throws Exception {
-    DirectionsRoute aRoute = buildTestDirectionsRoute();
-    int lastStepIndex = obtainLastStepIndex(aRoute);
-    RouteProgress defaultRouteProgress = buildDefaultTestRouteProgress();
-    RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
-      .legDistanceRemaining(30)
-      .stepIndex(lastStepIndex - 1)
-      .build();
+  public void isArrivalEvent_returnsFalseWhenManeuverTypeIsNotArrival() throws Exception {
+    DirectionsRoute route = buildTestDirectionsRoute();
+    int first = 0;
+    RouteLeg routeLeg = route.legs().get(first);
+    List<LegStep> routeSteps = routeLeg.steps();
+    LegStep currentStep = routeSteps.get(first);
+    LegStep upcomingStep = routeSteps.get(first + 1);
+    RouteProgress routeProgress = buildRouteProgress(first, route, currentStep, upcomingStep);
+    BannerInstructionMilestone bannerInstructionMilestone = mock(BannerInstructionMilestone.class);
+    List<BannerInstructions> currentStepBannerInstructions = currentStep.bannerInstructions();
+    buildBannerInstruction(first, bannerInstructionMilestone, currentStepBannerInstructions);
 
-    boolean isArrivalEvent = RouteUtils.isArrivalEvent(theRouteProgress);
+    RouteUtils routeUtils = new RouteUtils();
 
-    assertTrue(isArrivalEvent);
-  }
-
-  @Test
-  public void isArrivalEvent_returnsFalseWhenManeuverTypeIsNotArrival_andIsNotValidMetersRemaining() throws Exception {
-    DirectionsRoute aRoute = buildTestDirectionsRoute();
-    int lastStepIndex = obtainLastStepIndex(aRoute);
-    RouteProgress defaultRouteProgress = buildDefaultTestRouteProgress();
-    RouteProgress theRouteProgress = defaultRouteProgress.toBuilder()
-      .stepDistanceRemaining(200)
-      .legDistanceRemaining(300)
-      .distanceRemaining(300)
-      .stepIndex(lastStepIndex - 1)
-      .build();
-
-    boolean isArrivalEvent = RouteUtils.isArrivalEvent(theRouteProgress);
+    boolean isArrivalEvent = routeUtils.isArrivalEvent(routeProgress, bannerInstructionMilestone);
 
     assertFalse(isArrivalEvent);
   }
@@ -123,8 +129,9 @@ public class RouteUtilsTest extends BaseTest {
   @Test
   public void isValidRouteProfile_returnsTrueWithDrivingTrafficProfile() throws Exception {
     String routeProfileDrivingTraffic = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC;
+    RouteUtils routeUtils = new RouteUtils();
 
-    boolean isValidProfile = RouteUtils.isValidRouteProfile(routeProfileDrivingTraffic);
+    boolean isValidProfile = routeUtils.isValidRouteProfile(routeProfileDrivingTraffic);
 
     assertTrue(isValidProfile);
   }
@@ -132,8 +139,9 @@ public class RouteUtilsTest extends BaseTest {
   @Test
   public void isValidRouteProfile_returnsTrueWithDrivingProfile() throws Exception {
     String routeProfileDriving = DirectionsCriteria.PROFILE_DRIVING;
+    RouteUtils routeUtils = new RouteUtils();
 
-    boolean isValidProfile = RouteUtils.isValidRouteProfile(routeProfileDriving);
+    boolean isValidProfile = routeUtils.isValidRouteProfile(routeProfileDriving);
 
     assertTrue(isValidProfile);
   }
@@ -141,8 +149,9 @@ public class RouteUtilsTest extends BaseTest {
   @Test
   public void isValidRouteProfile_returnsTrueWithCyclingProfile() throws Exception {
     String routeProfileCycling = DirectionsCriteria.PROFILE_CYCLING;
+    RouteUtils routeUtils = new RouteUtils();
 
-    boolean isValidProfile = RouteUtils.isValidRouteProfile(routeProfileCycling);
+    boolean isValidProfile = routeUtils.isValidRouteProfile(routeProfileCycling);
 
     assertTrue(isValidProfile);
   }
@@ -150,8 +159,9 @@ public class RouteUtilsTest extends BaseTest {
   @Test
   public void isValidRouteProfile_returnsTrueWithWalkingProfile() throws Exception {
     String routeProfileWalking = DirectionsCriteria.PROFILE_WALKING;
+    RouteUtils routeUtils = new RouteUtils();
 
-    boolean isValidProfile = RouteUtils.isValidRouteProfile(routeProfileWalking);
+    boolean isValidProfile = routeUtils.isValidRouteProfile(routeProfileWalking);
 
     assertTrue(isValidProfile);
   }
@@ -159,8 +169,9 @@ public class RouteUtilsTest extends BaseTest {
   @Test
   public void isValidRouteProfile_returnsFalseWithInvalidProfile() throws Exception {
     String invalidProfile = "invalid_profile";
+    RouteUtils routeUtils = new RouteUtils();
 
-    boolean isValidProfile = RouteUtils.isValidRouteProfile(invalidProfile);
+    boolean isValidProfile = routeUtils.isValidRouteProfile(invalidProfile);
 
     assertFalse(isValidProfile);
   }
@@ -168,8 +179,9 @@ public class RouteUtilsTest extends BaseTest {
   @Test
   public void isValidRouteProfile_returnsFalseWithNullProfile() throws Exception {
     String nullProfile = null;
+    RouteUtils routeUtils = new RouteUtils();
 
-    boolean isValidProfile = RouteUtils.isValidRouteProfile(nullProfile);
+    boolean isValidProfile = routeUtils.isValidRouteProfile(nullProfile);
 
     assertFalse(isValidProfile);
   }
@@ -178,8 +190,9 @@ public class RouteUtilsTest extends BaseTest {
   public void findCurrentBannerInstructions_returnsNullWithNullCurrentStep() throws Exception {
     LegStep currentStep = null;
     double stepDistanceRemaining = 0;
+    RouteUtils routeUtils = new RouteUtils();
 
-    BannerInstructions currentBannerInstructions = RouteUtils.findCurrentBannerInstructions(
+    BannerInstructions currentBannerInstructions = routeUtils.findCurrentBannerInstructions(
       currentStep, stepDistanceRemaining
     );
 
@@ -193,8 +206,9 @@ public class RouteUtilsTest extends BaseTest {
     double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
     List<BannerInstructions> currentInstructions = currentStep.bannerInstructions();
     currentInstructions.clear();
+    RouteUtils routeUtils = new RouteUtils();
 
-    BannerInstructions currentBannerInstructions = RouteUtils.findCurrentBannerInstructions(
+    BannerInstructions currentBannerInstructions = routeUtils.findCurrentBannerInstructions(
       currentStep, stepDistanceRemaining
     );
 
@@ -206,8 +220,9 @@ public class RouteUtilsTest extends BaseTest {
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     double stepDistanceRemaining = 400;
+    RouteUtils routeUtils = new RouteUtils();
 
-    BannerInstructions currentBannerInstructions = RouteUtils.findCurrentBannerInstructions(
+    BannerInstructions currentBannerInstructions = routeUtils.findCurrentBannerInstructions(
       currentStep, stepDistanceRemaining
     );
 
@@ -219,8 +234,9 @@ public class RouteUtilsTest extends BaseTest {
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    RouteUtils routeUtils = new RouteUtils();
 
-    BannerInstructions currentBannerInstructions = RouteUtils.findCurrentBannerInstructions(
+    BannerInstructions currentBannerInstructions = routeUtils.findCurrentBannerInstructions(
       currentStep, stepDistanceRemaining
     );
 
@@ -236,8 +252,9 @@ public class RouteUtilsTest extends BaseTest {
       .build();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    RouteUtils routeUtils = new RouteUtils();
 
-    BannerInstructions currentBannerInstructions = RouteUtils.findCurrentBannerInstructions(
+    BannerInstructions currentBannerInstructions = routeUtils.findCurrentBannerInstructions(
       currentStep, stepDistanceRemaining
     );
 
@@ -253,8 +270,9 @@ public class RouteUtilsTest extends BaseTest {
       .build();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    RouteUtils routeUtils = new RouteUtils();
 
-    BannerInstructions currentBannerInstructions = RouteUtils.findCurrentBannerInstructions(
+    BannerInstructions currentBannerInstructions = routeUtils.findCurrentBannerInstructions(
       currentStep, stepDistanceRemaining
     );
 
@@ -270,8 +288,9 @@ public class RouteUtilsTest extends BaseTest {
       .build();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    RouteUtils routeUtils = new RouteUtils();
 
-    BannerText currentBannerText = RouteUtils.findCurrentBannerText(
+    BannerText currentBannerText = routeUtils.findCurrentBannerText(
       currentStep, stepDistanceRemaining, true
     );
 
@@ -287,8 +306,9 @@ public class RouteUtilsTest extends BaseTest {
       .build();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    RouteUtils routeUtils = new RouteUtils();
 
-    BannerText currentBannerText = RouteUtils.findCurrentBannerText(
+    BannerText currentBannerText = routeUtils.findCurrentBannerText(
       currentStep, stepDistanceRemaining, false
     );
 
@@ -299,8 +319,9 @@ public class RouteUtilsTest extends BaseTest {
   public void findCurrentBannerText_returnsNullWithNullCurrentStep() throws Exception {
     LegStep currentStep = null;
     double stepDistanceRemaining = 0;
+    RouteUtils routeUtils = new RouteUtils();
 
-    BannerText currentBannerText = RouteUtils.findCurrentBannerText(
+    BannerText currentBannerText = routeUtils.findCurrentBannerText(
       currentStep, stepDistanceRemaining, false
     );
 
@@ -311,8 +332,9 @@ public class RouteUtilsTest extends BaseTest {
   public void findCurrentVoiceInstructions_returnsNullWithNullCurrentStep() throws Exception {
     LegStep currentStep = null;
     double stepDistanceRemaining = 0;
+    RouteUtils routeUtils = new RouteUtils();
 
-    VoiceInstructions currentVoiceInstructions = RouteUtils.findCurrentVoiceInstructions(
+    VoiceInstructions currentVoiceInstructions = routeUtils.findCurrentVoiceInstructions(
       currentStep, stepDistanceRemaining
     );
 
@@ -326,8 +348,9 @@ public class RouteUtilsTest extends BaseTest {
     double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
     List<VoiceInstructions> currentInstructions = currentStep.voiceInstructions();
     currentInstructions.clear();
+    RouteUtils routeUtils = new RouteUtils();
 
-    VoiceInstructions voiceInstructions = RouteUtils.findCurrentVoiceInstructions(
+    VoiceInstructions voiceInstructions = routeUtils.findCurrentVoiceInstructions(
       currentStep, stepDistanceRemaining
     );
 
@@ -339,12 +362,13 @@ public class RouteUtilsTest extends BaseTest {
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
     routeProgress = routeProgress.toBuilder()
       .stepIndex(1)
-      .stepDistanceRemaining(400)
+      .stepDistanceRemaining(300)
       .build();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    RouteUtils routeUtils = new RouteUtils();
 
-    VoiceInstructions currentVoiceInstructions = RouteUtils.findCurrentVoiceInstructions(
+    VoiceInstructions currentVoiceInstructions = routeUtils.findCurrentVoiceInstructions(
       currentStep, stepDistanceRemaining
     );
 
@@ -360,8 +384,9 @@ public class RouteUtilsTest extends BaseTest {
       .build();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    RouteUtils routeUtils = new RouteUtils();
 
-    VoiceInstructions currentVoiceInstructions = RouteUtils.findCurrentVoiceInstructions(
+    VoiceInstructions currentVoiceInstructions = routeUtils.findCurrentVoiceInstructions(
       currentStep, stepDistanceRemaining
     );
 
@@ -377,17 +402,31 @@ public class RouteUtilsTest extends BaseTest {
       .build();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
     double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    RouteUtils routeUtils = new RouteUtils();
 
-    VoiceInstructions currentVoiceInstructions = RouteUtils.findCurrentVoiceInstructions(
+    VoiceInstructions currentVoiceInstructions = routeUtils.findCurrentVoiceInstructions(
       currentStep, stepDistanceRemaining
     );
 
     assertEquals(currentStep.voiceInstructions().get(2), currentVoiceInstructions);
   }
 
-  private int obtainLastStepIndex(DirectionsRoute route) throws IOException {
-    RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
-    int lastStepIndex = lastLeg.steps().indexOf(lastLeg.steps().get(lastLeg.steps().size() - 1));
-    return lastStepIndex;
+  @NonNull
+  private RouteProgress buildRouteProgress(int first, DirectionsRoute route, LegStep currentStep,
+                                           LegStep upcomingStep) {
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    RouteLegProgress legProgress = mock(RouteLegProgress.class);
+    when(legProgress.currentStep()).thenReturn(currentStep);
+    when(legProgress.upComingStep()).thenReturn(upcomingStep);
+    when(routeProgress.currentLegProgress()).thenReturn(legProgress);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    when(routeProgress.currentLeg()).thenReturn(route.legs().get(first));
+    return routeProgress;
+  }
+
+  private void buildBannerInstruction(int first, BannerInstructionMilestone bannerInstructionMilestone,
+                                      List<BannerInstructions> currentStepBannerInstructions) {
+    BannerInstructions bannerInstructions = currentStepBannerInstructions.get(first);
+    when(bannerInstructionMilestone.getBannerInstructions()).thenReturn(bannerInstructions);
   }
 }

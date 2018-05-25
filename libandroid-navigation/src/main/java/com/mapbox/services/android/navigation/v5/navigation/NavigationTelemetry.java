@@ -58,6 +58,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   private LocationEngine navigationLocationEngine;
   private SessionState navigationSessionState;
   private RingBuffer<Location> locationBuffer;
+  private RouteUtils routeUtils;
   private Date lastRerouteDate;
 
   private boolean isOffRoute;
@@ -68,6 +69,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     metricLocation = new MetricsLocation(null);
     metricProgress = new MetricsRouteProgress(null);
     navigationSessionState = SessionState.builder().build();
+    routeUtils = new RouteUtils();
   }
 
   /**
@@ -118,7 +120,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   }
 
   @Override
-  public void onArrival(Location location, RouteProgress routeProgress) {
+  public void onArrival(RouteProgress routeProgress) {
     // Update arrival time stamp
     navigationSessionState = navigationSessionState.toBuilder().arrivalTimestamp(new Date()).build();
     updateLifecyclePercentages();
@@ -126,7 +128,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     NavigationMetricsWrapper.arriveEvent(navigationSessionState, routeProgress, metricLocation.getLocation());
 
     // Reset the departure listener if there is another leg in the route
-    if (!RouteUtils.isLastLeg(routeProgress)) {
+    if (!routeUtils.isLastLeg(routeProgress)) {
       resetArrivalListener();
     }
   }

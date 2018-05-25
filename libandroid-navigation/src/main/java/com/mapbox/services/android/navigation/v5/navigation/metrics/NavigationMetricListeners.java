@@ -15,6 +15,6 @@ public interface NavigationMetricListeners {
 
   interface ArrivalListener {
 
-    void onArrival(Location location, RouteProgress routeProgress);
+    void onArrival(RouteProgress routeProgress);
   }
 }
