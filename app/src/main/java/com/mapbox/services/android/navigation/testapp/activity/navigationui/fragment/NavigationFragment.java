@@ -139,6 +139,7 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
 
   private void startNavigation(DirectionsRoute directionsRoute) {
     NavigationViewOptions options = NavigationViewOptions.builder()
+      .directionsRoute(directionsRoute)
       .shouldSimulateRoute(true)
       .navigationListener(NavigationFragment.this)
       .build();
