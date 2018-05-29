@@ -1,9 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.os.LocaleList;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.RouteOptions;
@@ -35,7 +32,7 @@ public class NavigationRouteTest extends BaseTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    when(localeUtils.getDeviceLocale(context)).thenReturn(Locale.getDefault());
+    when(localeUtils.inferDeviceLocale(context)).thenReturn(Locale.getDefault());
     when(localeUtils.getUnitTypeForDeviceLocale(context)).thenReturn(DirectionsCriteria.IMPERIAL);
   }
 

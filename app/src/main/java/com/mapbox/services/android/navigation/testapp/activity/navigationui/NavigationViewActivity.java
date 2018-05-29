@@ -271,7 +271,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       .alternatives(true);
     setFieldsFromSharedPreferences(builder);
     builder.build()
-      .getRoute(new NavigationRoute.SimplifiedCallback() {
+      .getRoute(new SimplifiedCallback() {
         @Override
         public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
           if (validRouteResponse(response)) {
@@ -292,11 +292,11 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   private void setFieldsFromSharedPreferences(NavigationRoute.Builder builder) {
     builder
-      .language(getLanguage())
-      .voiceUnits(getUnitType());
+      .language(getLanguageFromSharedPreferences())
+      .voiceUnits(getUnitTypeFromSharedPreferences());
   }
 
-  private String getUnitType() {
+  private String getUnitTypeFromSharedPreferences() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     String defaultUnitType = getString(R.string.default_unit_type);
     String unitType = sharedPreferences.getString(getString(R.string.unit_type_key), defaultUnitType);
@@ -307,23 +307,23 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     return unitType;
   }
 
-  private String getLanguage() {
+  private String getLanguageFromSharedPreferences() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     String defaultLanguage = getString(R.string.default_locale);
     String language = sharedPreferences.getString(getString(R.string.language_key), defaultLanguage);
     if (language.equals(defaultLanguage)) {
-      language = localeUtils.getDeviceLanguage(this);
+      language = localeUtils.inferDeviceLanguage(this);
     }
 
     return language;
   }
 
-  private boolean getShouldSimulateRoute() {
+  private boolean getShouldSimulateRouteFromSharedPreferences() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     return sharedPreferences.getBoolean(getString(R.string.simulate_route_key), false);
   }
 
-  private String getRouteProfile() {
+  private String getRouteProfileFromSharedPreferences() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     return sharedPreferences.getString(
       getString(R.string.route_profile_key), DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
@@ -337,8 +337,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     }
 
     NavigationLauncherOptions.Builder optionsBuilder = NavigationLauncherOptions.builder()
-      .shouldSimulateRoute(getShouldSimulateRoute())
-      .directionsProfile(getRouteProfile());
+      .shouldSimulateRoute(getShouldSimulateRouteFromSharedPreferences())
+      .directionsProfile(getRouteProfileFromSharedPreferences());
 
     optionsBuilder.directionsRoute(route);
 

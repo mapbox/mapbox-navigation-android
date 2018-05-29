@@ -18,8 +18,6 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
  */
 public class NavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener {
 
-  private static final String EMPTY_STRING = "";
-
   private NavigationView navigationView;
   private boolean isRunning;
 

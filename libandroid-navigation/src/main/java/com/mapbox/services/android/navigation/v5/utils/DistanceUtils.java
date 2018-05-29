@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.utils;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.location.Location;
+import android.support.annotation.NonNull;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
@@ -41,18 +42,17 @@ public class DistanceUtils {
    * @param language   for which language
    * @param unitType to use, or NONE_SPECIFIED to use default for locale country
    */
-  public DistanceUtils(Context context, String language, @DirectionsCriteria.VoiceUnitCriteria String unitType) {
+  public DistanceUtils(Context context, @NonNull String language,
+                       @NonNull @DirectionsCriteria.VoiceUnitCriteria String unitType) {
     unitStrings.put(UNIT_KILOMETERS, context.getString(R.string.kilometers));
     unitStrings.put(UNIT_METERS, context.getString(R.string.meters));
     unitStrings.put(UNIT_MILES, context.getString(R.string.miles));
     unitStrings.put(UNIT_FEET, context.getString(R.string.feet));
 
-
     Locale locale = new Locale(language);
     numberFormat = NumberFormat.getNumberInstance(locale);
 
     if (!DirectionsCriteria.IMPERIAL.equals(unitType) && !DirectionsCriteria.METRIC.equals(unitType)) {
-      // If given locale does not include a country, use the device locale to get the default unitType
       unitType = new LocaleUtils().getUnitTypeForDeviceLocale(context);
     }
 

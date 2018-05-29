@@ -544,7 +544,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void establishLanguage(NavigationViewOptions options) {
-    String language = new LocaleUtils().getNonNullLocale(getContext(), options.directionsRoute().voiceLanguage());
+    LocaleUtils localeUtils = new LocaleUtils();
+    String language = localeUtils.getNonEmptyLanguage(getContext(), options.directionsRoute().voiceLanguage());
     instructionView.setLanguage(language);
     summaryBottomSheet.setLanguage(language);
   }

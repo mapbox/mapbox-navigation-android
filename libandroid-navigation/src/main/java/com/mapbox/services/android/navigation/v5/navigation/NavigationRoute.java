@@ -23,7 +23,6 @@ import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
-import timber.log.Timber;
 
 
 /**
@@ -65,7 +64,8 @@ public final class NavigationRoute {
   public static Builder builder(Context context, LocaleUtils localeUtils) {
     return new Builder()
       .annotations(DirectionsCriteria.ANNOTATION_CONGESTION, DirectionsCriteria.ANNOTATION_DISTANCE)
-      .languageAndVoiceUnitsFromContext(context, localeUtils)
+      .language(context, localeUtils)
+      .voiceUnits(context, localeUtils)
       .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
   }
 
@@ -275,7 +275,7 @@ public final class NavigationRoute {
      * select number of languages are currently supported, reference the table provided in the see
      * link below.
      *
-     * @param language a Locale value representing the language you'd like the instructions to be
+     * @param language a string value representing the language you'd like the instructions to be
      *                 written in when returned
      * @return this builder for chaining options together
      * @see <a href="https://www.mapbox.com/api-documentation/#instructions-languages">Supported
@@ -284,6 +284,11 @@ public final class NavigationRoute {
      */
     public Builder language(String language) {
       directionsBuilder.language(new Locale(language));
+      return this;
+    }
+
+    Builder language(Context context, LocaleUtils localeUtils) {
+      directionsBuilder.language(localeUtils.inferDeviceLocale(context));
       return this;
     }
 
@@ -380,6 +385,11 @@ public final class NavigationRoute {
       return this;
     }
 
+    Builder voiceUnits(Context context, LocaleUtils localeUtils) {
+      directionsBuilder.voiceUnits(localeUtils.getUnitTypeForDeviceLocale(context));
+      return this;
+    }
+
     /**
      * Exclude specific road classes such as highways, tolls, and more.
      *
@@ -427,12 +437,6 @@ public final class NavigationRoute {
      */
     public Builder baseUrl(String baseUrl) {
       directionsBuilder.baseUrl(baseUrl);
-      return this;
-    }
-
-    protected Builder languageAndVoiceUnitsFromContext(Context context, LocaleUtils localeUtils) {
-      directionsBuilder.language(localeUtils.getDeviceLocale(context))
-        .voiceUnits(localeUtils.getUnitTypeForDeviceLocale(context));
       return this;
     }
 
@@ -507,16 +511,6 @@ public final class NavigationRoute {
         .bannerInstructions(true)
         .roundaboutExits(true);
       return new NavigationRoute(directionsBuilder.build());
-    }
-  }
-
-  /**
-   * Helper class to reduce redundant logging code when no other action is taken in onFailure
-   */
-  public abstract static class SimplifiedCallback implements Callback<DirectionsResponse> {
-    @Override
-    public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-      Timber.e(throwable, throwable.getMessage());
     }
   }
 }

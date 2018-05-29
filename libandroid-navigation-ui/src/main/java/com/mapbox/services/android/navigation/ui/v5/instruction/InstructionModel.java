@@ -21,8 +21,7 @@ public class InstructionModel {
   private String language;
   private String unitType;
 
-  public InstructionModel(Context context, RouteProgress progress,
-                          String language, String unitType) {
+  public InstructionModel(Context context, RouteProgress progress, String language, String unitType) {
     this.progress = progress;
     this.language = language;
     this.unitType = unitType;

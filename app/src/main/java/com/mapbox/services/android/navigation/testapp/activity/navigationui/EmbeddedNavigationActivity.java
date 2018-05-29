@@ -91,7 +91,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
       .destination(DESTINATION)
       .alternatives(true)
       .build()
-      .getRoute(new NavigationRoute.SimplifiedCallback() {
+      .getRoute(new SimplifiedCallback() {
         @Override
         public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
           DirectionsRoute directionsRoute = response.body().routes().get(0);

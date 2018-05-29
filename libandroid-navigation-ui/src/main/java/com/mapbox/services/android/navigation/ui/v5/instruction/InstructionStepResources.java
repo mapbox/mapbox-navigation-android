@@ -26,10 +26,10 @@ class InstructionStepResources {
   private boolean shouldShowThenStep;
   private DistanceUtils distanceUtils;
   private String language;
-  private @DirectionsCriteria.VoiceUnitCriteria String unitType;
+  @DirectionsCriteria.VoiceUnitCriteria
+  private String unitType;
 
-  InstructionStepResources(Context context, RouteProgress progress, String language,
-                           String unitType) {
+  InstructionStepResources(Context context, RouteProgress progress, String language, String unitType) {
     formatStepDistance(context, progress, language, unitType);
     extractStepResources(progress);
   }
@@ -101,7 +101,6 @@ class InstructionStepResources {
   private boolean shouldDistanceUtilsBeInitialized(String language,
                                                    @DirectionsCriteria.VoiceUnitCriteria String unitType) {
     return distanceUtils == null ||  !this.language.equals(language) || !this.unitType.equals(unitType);
-
   }
 
   private void intersectionTurnLanes(LegStep step) {

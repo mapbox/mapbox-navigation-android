@@ -11,9 +11,9 @@ import android.preference.PreferenceManager;
 import com.mapbox.services.android.navigation.testapp.R;
 
 public class NavigationViewSettingsActivity extends PreferenceActivity {
-  SharedPreferences.OnSharedPreferenceChangeListener listener;
-  public static final String UNIT_TYPE_CHANGED = "unit_type_changed";
-  public static final String LANGUAGE_CHANGED = "language_changed";
+  private SharedPreferences.OnSharedPreferenceChangeListener listener;
+  static final String UNIT_TYPE_CHANGED = "unit_type_changed";
+  static final String LANGUAGE_CHANGED = "language_changed";
 
   @Override
   public void onCreate(Bundle savedInstanceState) {

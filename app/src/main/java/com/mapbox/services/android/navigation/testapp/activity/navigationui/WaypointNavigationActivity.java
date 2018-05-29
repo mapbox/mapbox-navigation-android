@@ -186,7 +186,7 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
       .destination(destination)
       .alternatives(true)
       .build()
-      .getRoute(new NavigationRoute.SimplifiedCallback() {
+      .getRoute(new SimplifiedCallback() {
         @Override
         public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
           startNavigation(response.body().routes().get(0));

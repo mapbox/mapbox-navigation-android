@@ -164,7 +164,9 @@ public class NavigationViewModel extends AndroidViewModel {
   void initializeNavigation(NavigationViewOptions options) {
     MapboxNavigationOptions navigationOptions = options.navigationOptions();
     navigationOptions = navigationOptions.toBuilder().isFromNavigationUi(true).build();
-    initLocaleInfo(options);
+    LocaleUtils localeUtils = new LocaleUtils();
+    initLanguage(options, localeUtils);
+    initUnitType(options, localeUtils);
     initTimeFormat(navigationOptions);
     initVoiceInstructions();
     if (!isRunning) {
@@ -203,8 +205,11 @@ public class NavigationViewModel extends AndroidViewModel {
     locationEngineConductor = new LocationEngineConductor(locationEngineCallback);
   }
 
-  private void initLocaleInfo(NavigationUiOptions options) {
-    language = new LocaleUtils().getNonNullLocale(getApplication(), options.directionsRoute().voiceLanguage());
+  private void initLanguage(NavigationUiOptions options, LocaleUtils localeUtils) {
+    language = localeUtils.getNonEmptyLanguage(getApplication(), options.directionsRoute().voiceLanguage());
+  }
+
+  private void initUnitType(NavigationUiOptions options, LocaleUtils localeUtils) {
     unitType = options.directionsRoute().routeOptions().voiceUnits();
   }
 

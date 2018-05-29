@@ -45,14 +45,20 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
   /**
    * Checks the options used to launch this {@link com.mapbox.services.android.navigation.ui.v5.NavigationView}.
    * <p>
-   * Will launch with either a {@link DirectionsRoute} or pair of {@link Point}s.
+   * Will launch with a {@link DirectionsRoute}.
    *
-   * @param options holds either a set of {@link Point} coordinates or a {@link DirectionsRoute}
+   * @param options holds a {@link DirectionsRoute}
    */
   public void extractRouteOptions(NavigationViewOptions options) {
     extractRouteFromOptions(options);
   }
 
+  /**
+   * Fetches the route from the off-route event
+   *
+   * @param context to pass to route builder
+   * @param event from which the route progress is extracted
+   */
   public void fetchRouteFromOffRouteEvent(Context context, OffRouteEvent event) {
     if (OffRouteEvent.isValid(event)) {
       RouteProgress routeProgress = event.getRouteProgress();
@@ -60,6 +66,11 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
     }
   }
 
+  /**
+   * Updates this object's awareness of the raw location
+   *
+   * @param rawLocation to set
+   */
   public void updateRawLocation(@NonNull Location rawLocation) {
     this.rawLocation = rawLocation;
   }

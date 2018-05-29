@@ -327,7 +327,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   /**
-   * Sets the locale to use for languages and default unit type
+   * Sets the language to use
    *
    * @param language to use
    */
@@ -348,7 +348,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void init() {
-    language = new LocaleUtils().getDeviceLanguage(getContext());
+    LocaleUtils localeUtils = new LocaleUtils();
+    language = localeUtils.inferDeviceLanguage(getContext());
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
 

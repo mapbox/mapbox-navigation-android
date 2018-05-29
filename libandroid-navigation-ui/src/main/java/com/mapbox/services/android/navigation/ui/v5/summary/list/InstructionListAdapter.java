@@ -27,7 +27,8 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   private LegStep currentStep;
   private DistanceUtils distanceUtils;
   private String language;
-  private @DirectionsCriteria.VoiceUnitCriteria String unitType;
+  @DirectionsCriteria.VoiceUnitCriteria
+  private String unitType;
 
   public InstructionListAdapter() {
     stepList = new ArrayList<>();
@@ -71,13 +72,18 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
 
   public void updateSteps(Context context, RouteProgress routeProgress,
                           String language, @DirectionsCriteria.VoiceUnitCriteria String unitType) {
-    if (distanceUtils == null || !this.language.equals(language) || !this.unitType.equals(unitType)) {
+    if (shouldDistanceUtilsBeInitialized(language, unitType)) {
       distanceUtils = new DistanceUtils(context, language, unitType);
       this.language = language;
       this.unitType = unitType;
     }
     addLegSteps(routeProgress);
     updateStepList(routeProgress);
+  }
+
+  private boolean shouldDistanceUtilsBeInitialized(String language,
+                                                   @DirectionsCriteria.VoiceUnitCriteria String unitType) {
+    return distanceUtils == null ||  !this.language.equals(language) || !this.unitType.equals(unitType);
   }
 
   public void clear() {

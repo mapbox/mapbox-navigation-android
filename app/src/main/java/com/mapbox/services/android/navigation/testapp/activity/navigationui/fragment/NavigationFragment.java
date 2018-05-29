@@ -13,6 +13,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.SimplifiedCallback;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
@@ -128,7 +129,7 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
       .origin(origin)
       .destination(destination)
       .build()
-      .getRoute(new NavigationRoute.SimplifiedCallback() {
+      .getRoute(new SimplifiedCallback() {
         @Override
         public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
           DirectionsRoute directionsRoute = response.body().routes().get(0);

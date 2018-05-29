@@ -100,10 +100,12 @@ public class RouteFetcher {
     return builder;
   }
 
-  private void addLanguageAndUnitType(NavigationRoute.Builder builder) {
-    builder
-      .language(routeProgress.directionsRoute().voiceLanguage())
-      .voiceUnits(routeProgress.directionsRoute().routeOptions().voiceUnits());
+  private void addLanguage(NavigationRoute.Builder builder) {
+    builder.language(routeProgress.directionsRoute().voiceLanguage());
+  }
+
+  private void addUnitType(NavigationRoute.Builder builder) {
+    builder.voiceUnits(routeProgress.directionsRoute().routeOptions().voiceUnits());
   }
 
   private void addRouteProfile(String routeProfile, NavigationRoute.Builder builder) {
@@ -146,7 +148,8 @@ public class RouteFetcher {
   private void executeRouteCall(NavigationRoute.Builder builder) {
     if (builder != null) {
       builder.accessToken(accessToken);
-      addLanguageAndUnitType(builder);
+      addLanguage(builder);
+      addUnitType(builder);
       builder.build().getRoute(directionsResponseCallback);
     }
   }

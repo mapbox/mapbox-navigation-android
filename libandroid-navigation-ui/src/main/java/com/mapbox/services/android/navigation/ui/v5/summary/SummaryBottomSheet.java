@@ -135,7 +135,7 @@ public class SummaryBottomSheet extends FrameLayout {
   }
 
   /**
-   * Sets the locale to use for languages and default unit type
+   * Sets the language to use for voice language and default unit type
    *
    * @param language to use
    */
@@ -165,7 +165,7 @@ public class SummaryBottomSheet extends FrameLayout {
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void init() {
-    language = new LocaleUtils().getDeviceLanguage(getContext());
+    language = new LocaleUtils().inferDeviceLanguage(getContext());
     inflate(getContext(), R.layout.summary_bottomsheet_layout, this);
   }
 
