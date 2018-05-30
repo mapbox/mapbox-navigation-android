@@ -38,6 +38,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
+import java.util.List;
 import java.util.Locale;
 
 public class NavigationViewModel extends AndroidViewModel {
@@ -167,6 +168,7 @@ public class NavigationViewModel extends AndroidViewModel {
     if (!isRunning) {
       locationEngineConductor.initializeLocationEngine(getApplication(), options.shouldSimulateRoute());
       initNavigation(getApplication(), navigationOptions);
+      addMilestones(options);
       navigationViewRouteEngine.extractRouteOptions(getApplication(), options);
     }
   }
@@ -220,6 +222,13 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.addMilestoneEventListener(milestoneEventListener);
     navigation.addNavigationEventListener(navigationEventListener);
     navigation.addFasterRouteListener(fasterRouteListener);
+  }
+
+  private void addMilestones(NavigationViewOptions options) {
+    List<Milestone> milestones = options.milestones();
+    if (milestones != null && !milestones.isEmpty()) {
+      navigation.addMilestones(milestones);
+    }
   }
 
   private void initTimeFormat(MapboxNavigationOptions options) {

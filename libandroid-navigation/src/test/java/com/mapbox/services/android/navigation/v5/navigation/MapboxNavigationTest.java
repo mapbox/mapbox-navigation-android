@@ -4,8 +4,10 @@ import android.content.Context;
 
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.services.android.navigation.v5.BaseTest;
+import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.StepMilestone;
+import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.camera.SimpleCamera;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
@@ -13,6 +15,9 @@ import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.BANNER_INSTRUCTION_MILESTONE_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID;
@@ -43,19 +48,29 @@ public class MapboxNavigationTest extends BaseTest {
   }
 
   @Test
-  public void voiceMilestone_onInitializationDoesGetAdded() throws Exception {
+  public void voiceInstructionMilestone_onInitializationDoesGetAdded() throws Exception {
     MapboxNavigation navigation = buildMapboxNavigation();
 
-    int identifier = navigation.getMilestones().get(0).getIdentifier();
+    int identifier = -1;
+    for (Milestone milestone : navigation.getMilestones()) {
+      if (milestone instanceof VoiceInstructionMilestone) {
+        identifier = milestone.getIdentifier();
+      }
+    }
 
     assertEquals(identifier, VOICE_INSTRUCTION_MILESTONE_ID);
   }
 
   @Test
-  public void bannerMilestone_onInitializationDoesGetAdded() throws Exception {
+  public void bannerInstructionMilestone_onInitializationDoesGetAdded() throws Exception {
     MapboxNavigation navigation = buildMapboxNavigation();
 
-    int identifier = navigation.getMilestones().get(1).getIdentifier();
+    int identifier = -1;
+    for (Milestone milestone : navigation.getMilestones()) {
+      if (milestone instanceof BannerInstructionMilestone) {
+        identifier = milestone.getIdentifier();
+      }
+    }
 
     assertEquals(identifier, BANNER_INSTRUCTION_MILESTONE_ID);
   }
@@ -196,6 +211,40 @@ public class MapboxNavigationTest extends BaseTest {
     navigationWithOptions.removeMilestone(removedMilestoneIdentifier);
 
     assertEquals(1, navigationWithOptions.getMilestones().size());
+  }
+
+  @Test
+  public void addMilestoneList_duplicateIdentifiersAreIgnored() throws Exception {
+    MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
+    MapboxNavigation navigationWithOptions = buildMapboxNavigationWithOptions(options);
+    int milestoneIdentifier = 5678;
+    Milestone milestone = new StepMilestone.Builder().setIdentifier(milestoneIdentifier).build();
+    navigationWithOptions.addMilestone(milestone);
+    List<Milestone> milestones = new ArrayList<>();
+    milestones.add(milestone);
+    milestones.add(milestone);
+    milestones.add(milestone);
+
+    navigationWithOptions.addMilestones(milestones);
+
+    assertEquals(1, navigationWithOptions.getMilestones().size());
+  }
+
+  @Test
+  public void addMilestoneList_allMilestonesAreAdded() throws Exception {
+    MapboxNavigationOptions options = MapboxNavigationOptions.builder().defaultMilestonesEnabled(false).build();
+    MapboxNavigation navigationWithOptions = buildMapboxNavigationWithOptions(options);
+    int firstMilestoneId = 5678;
+    int secondMilestoneId = 5679;
+    Milestone firstMilestone = new StepMilestone.Builder().setIdentifier(firstMilestoneId).build();
+    Milestone secondMilestone = new StepMilestone.Builder().setIdentifier(secondMilestoneId).build();
+    List<Milestone> milestones = new ArrayList<>();
+    milestones.add(firstMilestone);
+    milestones.add(secondMilestone);
+
+    navigationWithOptions.addMilestones(milestones);
+
+    assertEquals(2, navigationWithOptions.getMilestones().size());
   }
 
   @Test
