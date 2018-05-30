@@ -61,7 +61,7 @@ public final class NavigationRoute {
     return builder(context, new LocaleUtils());
   }
 
-  public static Builder builder(Context context, LocaleUtils localeUtils) {
+  static Builder builder(Context context, LocaleUtils localeUtils) {
     return new Builder()
       .annotations(DirectionsCriteria.ANNOTATION_CONGESTION, DirectionsCriteria.ANNOTATION_DISTANCE)
       .language(context, localeUtils)
