@@ -34,6 +34,7 @@ public class DistanceUtils {
   private final NumberFormat numberFormat;
   private final String largeUnit;
   private final String smallUnit;
+  private final LocaleUtils localeUtils;
 
   /**
    * Creates a DistanceUtils object with information about how to format distances
@@ -44,16 +45,23 @@ public class DistanceUtils {
    */
   public DistanceUtils(Context context, @NonNull String language,
                        @NonNull @DirectionsCriteria.VoiceUnitCriteria String unitType) {
+    localeUtils = new LocaleUtils();
+
     unitStrings.put(UNIT_KILOMETERS, context.getString(R.string.kilometers));
     unitStrings.put(UNIT_METERS, context.getString(R.string.meters));
     unitStrings.put(UNIT_MILES, context.getString(R.string.miles));
     unitStrings.put(UNIT_FEET, context.getString(R.string.feet));
 
-    Locale locale = new Locale(language);
+    Locale locale;
+    if (language == null) {
+      locale = localeUtils.inferDeviceLocale(context);
+    } else {
+      locale = new Locale(language);
+    }
     numberFormat = NumberFormat.getNumberInstance(locale);
 
     if (!DirectionsCriteria.IMPERIAL.equals(unitType) && !DirectionsCriteria.METRIC.equals(unitType)) {
-      unitType = new LocaleUtils().getUnitTypeForDeviceLocale(context);
+      unitType = localeUtils.getUnitTypeForDeviceLocale(context);
     }
 
     largeUnit = DirectionsCriteria.IMPERIAL.equals(unitType) ? UNIT_MILES : UNIT_KILOMETERS;
