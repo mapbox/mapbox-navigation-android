@@ -24,6 +24,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 public class NavigationRouteTest extends BaseTest {
+
   @Mock
   private Context context;
   @Mock
@@ -57,6 +58,34 @@ public class NavigationRouteTest extends BaseTest {
 
     assertThat(navigationRoute.getCall().request().url().toString(),
       containsString("/cycling/"));
+  }
+
+  @Test
+  public void addApproachesIncludedInRequest() {
+    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+      .accessToken(ACCESS_TOKEN)
+      .origin(Point.fromLngLat(1.0, 2.0))
+      .destination(Point.fromLngLat(1.0, 5.0))
+      .profile(DirectionsCriteria.PROFILE_CYCLING)
+      .addApproaches(DirectionsCriteria.APPROACH_CURB, DirectionsCriteria.APPROACH_UNRESTRICTED)
+      .build();
+
+    assertThat(navigationRoute.getCall().request().url().toString(),
+      containsString("curb"));
+  }
+
+  @Test
+  public void addWaypointNamesIncludedInRequest() {
+    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+      .accessToken(ACCESS_TOKEN)
+      .origin(Point.fromLngLat(1.0, 2.0))
+      .destination(Point.fromLngLat(1.0, 5.0))
+      .profile(DirectionsCriteria.PROFILE_CYCLING)
+      .addWaypointNames("Origin", "Destination")
+      .build();
+
+    assertThat(navigationRoute.getCall().request().url().toString(),
+      containsString("Destination"));
   }
 
   @Test
@@ -102,6 +131,8 @@ public class NavigationRouteTest extends BaseTest {
       .voiceUnits(DirectionsCriteria.METRIC)
       .user("example_user")
       .geometries("mocked_geometries")
+      .approaches("curb;unrestricted")
+      .waypointNames("Origin;Destination")
       .build();
 
     NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
@@ -118,5 +149,7 @@ public class NavigationRouteTest extends BaseTest {
     assertThat(request, containsString("example_user"));
     assertThat(request, containsString("language=en"));
     assertThat(request, containsString("walking"));
+    assertThat(request, containsString("curb"));
+    assertThat(request, containsString("Origin"));
   }
 }
