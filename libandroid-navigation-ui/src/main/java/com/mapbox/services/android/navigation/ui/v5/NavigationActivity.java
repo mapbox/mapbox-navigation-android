@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -19,7 +20,6 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 public class NavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener {
 
   private NavigationView navigationView;
-  private boolean isRunning;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,7 +60,6 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   @Override
   protected void onSaveInstanceState(Bundle outState) {
     navigationView.onSaveInstanceState(outState);
-    outState.putBoolean(NavigationConstants.NAVIGATION_VIEW_RUNNING, isRunning);
     super.onSaveInstanceState(outState);
   }
 
@@ -68,7 +67,6 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   protected void onRestoreInstanceState(Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
     navigationView.onRestoreInstanceState(savedInstanceState);
-    isRunning = savedInstanceState.getBoolean(NavigationConstants.NAVIGATION_VIEW_RUNNING);
   }
 
   @Override
@@ -94,14 +92,10 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     MapboxNavigationOptions.Builder navigationOptions = MapboxNavigationOptions.builder();
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
     options.navigationListener(this);
-    if (!isRunning) {
-      extractRoute(options);
-    }
+    extractRoute(options);
     extractConfiguration(options, navigationOptions);
-
     options.navigationOptions(navigationOptions.build());
     navigationView.startNavigation(options.build());
-    isRunning = true;
   }
 
   @Override
@@ -122,7 +116,8 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
   }
 
   private void extractRoute(NavigationViewOptions.Builder options) {
-    options.directionsRoute(NavigationLauncher.extractRoute(this));
+    DirectionsRoute route = NavigationLauncher.extractRoute(this);
+    options.directionsRoute(route);
   }
 
   private void extractConfiguration(NavigationViewOptions.Builder options,

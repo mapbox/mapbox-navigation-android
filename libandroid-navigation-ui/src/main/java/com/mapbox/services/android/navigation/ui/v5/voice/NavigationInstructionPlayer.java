@@ -56,7 +56,7 @@ public class NavigationInstructionPlayer implements InstructionListener {
   @Override
   public void onStart() {
     requestAudioFocus();
-    instructionQueue.remove();
+    instructionQueue.poll();
   }
 
   @Override
@@ -69,7 +69,7 @@ public class NavigationInstructionPlayer implements InstructionListener {
     if (isMapboxPlayer) {
       androidSpeechPlayer.play(instructionQueue.peek().getAnnouncement());
     } else {
-      instructionQueue.remove();
+      instructionQueue.poll();
     }
   }
 

@@ -256,7 +256,6 @@ public class NavigationViewModel extends AndroidViewModel {
     @Override
     public void userOffRoute(Location location) {
       if (hasNetworkConnection()) {
-        instructionPlayer.onOffRoute();
         Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
         sendEventOffRoute(newOrigin);
       }

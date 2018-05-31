@@ -77,10 +77,8 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
 
   private void extractRouteFromOptions(NavigationViewOptions options) {
     DirectionsRoute route = options.directionsRoute();
-    if (route != null) {
-      cacheRouteInformation(options, route);
-      updateCurrentRoute(route);
-    }
+    cacheRouteInformation(options, route);
+    updateCurrentRoute(route);
   }
 
   private void cacheRouteInformation(NavigationViewOptions options, DirectionsRoute route) {
