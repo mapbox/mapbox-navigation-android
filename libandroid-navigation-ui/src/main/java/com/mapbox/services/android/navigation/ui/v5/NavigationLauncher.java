@@ -10,22 +10,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
 /**
  * Use this class to launch the navigation UI
  * <p>
- * You can launch the UI with either a route you have already retrieved from
- * {@link com.mapbox.services.android.navigation.v5.navigation.NavigationRoute} or you can pass a
- * {@link Point} origin and {@link Point} destination and the UI will request the {@link DirectionsRoute}
- * while initializing.
- * </p><p>
- * You have an option to include a AWS Cognito Pool ID, which will initialize the UI with AWS Polly Voice instructions
+ * You can launch the UI a route you have already retrieved from
+ * {@link com.mapbox.services.android.navigation.v5.navigation.NavigationRoute}.
  * </p><p>
  * For testing, you can launch with simulation, in which our
  * {@link com.mapbox.services.android.navigation.v5.location.MockLocationEngine} will begin
- * following the given {@link DirectionsRoute} once the UI is initialized
+ * following the given {@link DirectionsRoute} once the UI is initialized.
  * </p>
  */
 public class NavigationLauncher {
@@ -41,7 +36,7 @@ public class NavigationLauncher {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
     SharedPreferences.Editor editor = preferences.edit();
 
-    storeRouteOptions(options, editor);
+    storeDirectionsRouteValue(options, editor);
     storeConfiguration(options, editor);
 
     storeThemePreferences(options, editor);
@@ -67,13 +62,9 @@ public class NavigationLauncher {
     return DirectionsRoute.fromJson(directionsRouteJson);
   }
 
-  private static void storeRouteOptions(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
-    if (options.directionsRoute() != null) {
-      storeDirectionsRouteValue(options, editor);
-    } else {
-      throw new RuntimeException("A valid DirectionsRoute or origin and "
-        + "destination must be provided in NavigationViewOptions");
-    }
+  private static void storeDirectionsRouteValue(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, new GsonBuilder()
+      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create().toJson(options.directionsRoute()));
   }
 
   private static void storeConfiguration(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
@@ -95,10 +86,5 @@ public class NavigationLauncher {
         editor.putInt(NavigationConstants.NAVIGATION_VIEW_DARK_THEME, options.darkThemeResId());
       }
     }
-  }
-
-  private static void storeDirectionsRouteValue(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
-    editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, new GsonBuilder()
-      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create().toJson(options.directionsRoute()));
   }
 }

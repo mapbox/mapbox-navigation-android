@@ -185,13 +185,6 @@ public final class NavigationConstants {
   public static final int NAVIGATION_HIGH_ALERT_DURATION = 15;
 
   /**
-   * Constant used to store running state in navigation view.
-   *
-   * @since 0.10.0
-   */
-  public static final String NAVIGATION_VIEW_RUNNING = "navigation_view_running";
-
-  /**
    * Default location acceptable accuracy threshold
    * used in {@link com.mapbox.services.android.navigation.v5.location.LocationValidator}.
    * <p>
