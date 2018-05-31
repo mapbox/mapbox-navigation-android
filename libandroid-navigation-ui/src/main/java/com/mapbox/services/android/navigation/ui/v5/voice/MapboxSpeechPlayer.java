@@ -10,7 +10,6 @@ import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoad
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Locale;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -44,14 +43,14 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
    * Construct an instance of {@link MapboxSpeechPlayer}
    *
    * @param context     to setup the caches
-   * @param locale      for which language
+   * @param language    for which language
    * @param accessToken a valid Mapbox access token
    */
-  MapboxSpeechPlayer(Context context, Locale locale, String accessToken) {
+  MapboxSpeechPlayer(Context context, String language, String accessToken) {
     setupCaches(context);
     instructionQueue = new ConcurrentLinkedQueue();
     voiceInstructionLoader = VoiceInstructionLoader.builder()
-      .language(locale.toString())
+      .language(language)
       .cache(okhttpCache)
       .accessToken(accessToken)
       .build();

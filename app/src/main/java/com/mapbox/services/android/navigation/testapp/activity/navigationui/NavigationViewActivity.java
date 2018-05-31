@@ -23,7 +23,6 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
@@ -46,29 +45,25 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
 import static com.mapbox.android.core.location.LocationEnginePriority.HIGH_ACCURACY;
 
 public class NavigationViewActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, LocationEngineListener, Callback<DirectionsResponse>,
-  OnRouteSelectionChangeListener {
+  MapboxMap.OnMapLongClickListener, LocationEngineListener, OnRouteSelectionChangeListener {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
+  private static final int CHANGE_SETTING_REQUEST_CODE = 1;
 
   private LocationLayerPlugin locationLayer;
   private LocationEngine locationEngine;
@@ -88,6 +83,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private Point currentLocation;
   private Point destination;
   private DirectionsRoute route;
+  private LocaleUtils localeUtils;
 
   private boolean locationFound;
 
@@ -98,6 +94,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     ButterKnife.bind(this);
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
+    localeUtils = new LocaleUtils();
   }
 
   @Override
@@ -119,7 +116,19 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void showSettings() {
-    startActivity(new Intent(this, NavigationViewSettingsActivity.class));
+    startActivityForResult(new Intent(this, NavigationViewSettingsActivity.class), CHANGE_SETTING_REQUEST_CODE);
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (requestCode == CHANGE_SETTING_REQUEST_CODE && resultCode == RESULT_OK) {
+      boolean shouldRefetch = data.getBooleanExtra(NavigationViewSettingsActivity.UNIT_TYPE_CHANGED, false)
+        || data.getBooleanExtra(NavigationViewSettingsActivity.LANGUAGE_CHANGED, false);
+      if (destination != null && shouldRefetch) {
+        fetchRoute();
+      }
+    }
   }
 
   @SuppressWarnings( {"MissingPermission"})
@@ -223,26 +232,6 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   @Override
-  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-    if (validRouteResponse(response)) {
-      hideLoading();
-      route = response.body().routes().get(0);
-      if (route.distance() > 25d) {
-        launchRouteBtn.setEnabled(true);
-        mapRoute.addRoutes(response.body().routes());
-        boundCameraToRoute();
-      } else {
-        Snackbar.make(mapView, R.string.error_select_longer_route, Snackbar.LENGTH_SHORT).show();
-      }
-    }
-  }
-
-  @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-    Timber.e(throwable.getMessage());
-  }
-
-  @Override
   public void onNewPrimaryRouteSelected(DirectionsRoute directionsRoute) {
     route = directionsRoute;
   }
@@ -275,44 +264,66 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void fetchRoute() {
-    NavigationRoute.Builder builder = NavigationRoute.builder()
+    NavigationRoute.Builder builder = NavigationRoute.builder(this)
       .accessToken(Mapbox.getAccessToken())
       .origin(currentLocation)
       .destination(destination)
       .alternatives(true);
     setFieldsFromSharedPreferences(builder);
     builder.build()
-      .getRoute(this);
+      .getRoute(new SimplifiedCallback() {
+        @Override
+        public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+          if (validRouteResponse(response)) {
+            hideLoading();
+            route = response.body().routes().get(0);
+            if (route.distance() > 25d) {
+              launchRouteBtn.setEnabled(true);
+              mapRoute.addRoutes(response.body().routes());
+              boundCameraToRoute();
+            } else {
+              Snackbar.make(mapView, R.string.error_select_longer_route, Snackbar.LENGTH_SHORT).show();
+            }
+          }
+        }
+      });
     loading.setVisibility(View.VISIBLE);
   }
 
   private void setFieldsFromSharedPreferences(NavigationRoute.Builder builder) {
-    Locale locale = getLocale();
     builder
-      .language(locale)
-      .voiceUnits(NavigationUnitType.getDirectionsCriteriaUnitType(getUnitType(), locale));
+      .language(getLanguageFromSharedPreferences())
+      .voiceUnits(getUnitTypeFromSharedPreferences());
   }
 
-  private Locale getLocale() {
+  private String getUnitTypeFromSharedPreferences() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    String defaultString = getString(R.string.language_default_value_device_locale);
-    String localeString = sharedPreferences.getString(getString(R.string.language_key), defaultString);
-    return localeString.equals(defaultString) ? LocaleUtils.getDeviceLocale(this) : new Locale(localeString);
+    String defaultUnitType = getString(R.string.default_unit_type);
+    String unitType = sharedPreferences.getString(getString(R.string.unit_type_key), defaultUnitType);
+    if (unitType.equals(defaultUnitType)) {
+      unitType = localeUtils.getUnitTypeForDeviceLocale(this);
+    }
+
+    return unitType;
   }
 
-  @NavigationUnitType.UnitType
-  private int getUnitType() {
+  private String getLanguageFromSharedPreferences() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    return Integer.parseInt(sharedPreferences.getString(getString(R.string.unit_type_key),
-      Integer.toString(NavigationUnitType.NONE_SPECIFIED)));
+    String defaultLanguage = getString(R.string.default_locale);
+    String language = sharedPreferences.getString(getString(R.string.language_key), defaultLanguage);
+    if (language.equals(defaultLanguage)) {
+      language = localeUtils.inferDeviceLanguage(this);
+    }
+
+    return language;
   }
 
-  private boolean getShouldSimulateRoute() {
+  private boolean getShouldSimulateRouteFromSharedPreferences() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     return sharedPreferences.getBoolean(getString(R.string.simulate_route_key), false);
   }
 
-  private String getRouteProfile() {
+  private String getRouteProfileFromSharedPreferences() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     return sharedPreferences.getString(
       getString(R.string.route_profile_key), DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
@@ -325,27 +336,13 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       return;
     }
 
-    Locale locale = getLocale();
     NavigationLauncherOptions.Builder optionsBuilder = NavigationLauncherOptions.builder()
-      .shouldSimulateRoute(getShouldSimulateRoute())
-      .locale(locale)
-      .unitType(getUnitType())
-      .directionsProfile(getRouteProfile());
+      .shouldSimulateRoute(getShouldSimulateRouteFromSharedPreferences())
+      .directionsProfile(getRouteProfileFromSharedPreferences());
 
-    if (sameLocaleAndUnitType(route.routeOptions())) {
-      optionsBuilder.directionsRoute(route);
-    } else {
-      optionsBuilder
-        .origin(currentLocation)
-        .destination(destination);
-    }
+    optionsBuilder.directionsRoute(route);
 
     NavigationLauncher.startNavigation(this, optionsBuilder.build());
-  }
-
-  private boolean sameLocaleAndUnitType(RouteOptions routeOptions) {
-    return routeOptions.language().equals(getLocale().getLanguage())
-      && routeOptions.voiceUnits().equals(NavigationUnitType.getDirectionsCriteriaUnitType(getUnitType(), getLocale()));
   }
 
   private boolean validRouteResponse(Response<DirectionsResponse> response) {

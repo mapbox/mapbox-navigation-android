@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.text.TextUtils;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -30,7 +31,6 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
@@ -40,7 +40,6 @@ import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
-import java.util.Locale;
 
 public class NavigationViewModel extends AndroidViewModel {
 
@@ -65,9 +64,9 @@ public class NavigationViewModel extends AndroidViewModel {
   private RouteProgress routeProgress;
   private String feedbackId;
   private String screenshot;
-  private Locale locale;
-  @NavigationUnitType.UnitType
-  private int unitType;
+  private String language;
+  @DirectionsCriteria.VoiceUnitCriteria
+  private String unitType;
   @NavigationTimeFormat.Type
   private int timeFormatType;
   private boolean isRunning;
@@ -165,19 +164,21 @@ public class NavigationViewModel extends AndroidViewModel {
   void initializeNavigation(NavigationViewOptions options) {
     MapboxNavigationOptions navigationOptions = options.navigationOptions();
     navigationOptions = navigationOptions.toBuilder().isFromNavigationUi(true).build();
-    initLocaleInfo(navigationOptions);
+    LocaleUtils localeUtils = new LocaleUtils();
+    initLanguage(options, localeUtils);
+    initUnitType(options, localeUtils);
     initTimeFormat(navigationOptions);
     initVoiceInstructions();
     if (!isRunning) {
       locationEngineConductor.initializeLocationEngine(getApplication(), options.shouldSimulateRoute());
       initNavigation(getApplication(), navigationOptions);
       addMilestones(options);
-      navigationViewRouteEngine.extractRouteOptions(getApplication(), options);
+      navigationViewRouteEngine.extractRouteOptions(options);
     }
   }
 
   void updateNavigation(NavigationViewOptions options) {
-    navigationViewRouteEngine.extractRouteOptions(getApplication(), options);
+    navigationViewRouteEngine.extractRouteOptions(options);
   }
 
   void updateFeedbackScreenshot(String screenshot) {
@@ -204,13 +205,16 @@ public class NavigationViewModel extends AndroidViewModel {
     locationEngineConductor = new LocationEngineConductor(locationEngineCallback);
   }
 
-  private void initLocaleInfo(MapboxNavigationOptions options) {
-    locale = LocaleUtils.getNonNullLocale(getApplication(), options.locale());
-    unitType = options.unitType();
+  private void initLanguage(NavigationUiOptions options, LocaleUtils localeUtils) {
+    language = localeUtils.getNonEmptyLanguage(getApplication(), options.directionsRoute().voiceLanguage());
+  }
+
+  private void initUnitType(NavigationUiOptions options, LocaleUtils localeUtils) {
+    unitType = options.directionsRoute().routeOptions().voiceUnits();
   }
 
   private void initVoiceInstructions() {
-    instructionPlayer = new NavigationInstructionPlayer(getApplication(), locale, accessToken);
+    instructionPlayer = new NavigationInstructionPlayer(getApplication(), language, accessToken);
   }
 
   private void initNavigation(Context context, MapboxNavigationOptions options) {
@@ -242,8 +246,8 @@ public class NavigationViewModel extends AndroidViewModel {
     @Override
     public void onProgressChange(Location location, RouteProgress routeProgress) {
       NavigationViewModel.this.routeProgress = routeProgress;
-      instructionModel.setValue(new InstructionModel(getApplication(), routeProgress, locale, unitType));
-      summaryModel.setValue(new SummaryModel(getApplication(), routeProgress, locale, unitType, timeFormatType));
+      instructionModel.setValue(new InstructionModel(getApplication(), routeProgress, language, unitType));
+      summaryModel.setValue(new SummaryModel(getApplication(), routeProgress, language, unitType, timeFormatType));
       navigationLocation.setValue(location);
     }
   };
@@ -252,6 +256,7 @@ public class NavigationViewModel extends AndroidViewModel {
     @Override
     public void userOffRoute(Location location) {
       if (hasNetworkConnection()) {
+        instructionPlayer.onOffRoute();
         Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
         sendEventOffRoute(newOrigin);
       }
@@ -349,7 +354,7 @@ public class NavigationViewModel extends AndroidViewModel {
     if (milestone instanceof BannerInstructionMilestone) {
       BannerInstructionMilestone bannerInstructionMilestone = (BannerInstructionMilestone) milestone;
       BannerInstructionModel model = new BannerInstructionModel(
-        getApplication(), bannerInstructionMilestone, routeProgress, locale, unitType
+        getApplication(), bannerInstructionMilestone, routeProgress, language, unitType
       );
       bannerInstructionModel.setValue(model);
     }
@@ -380,7 +385,7 @@ public class NavigationViewModel extends AndroidViewModel {
     if (navigationViewEventDispatcher != null && navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
       navigationViewEventDispatcher.onOffRoute(newOrigin);
       OffRouteEvent event = new OffRouteEvent(newOrigin, routeProgress);
-      navigationViewRouteEngine.fetchRouteFromOffRouteEvent(event);
+      navigationViewRouteEngine.fetchRouteFromOffRouteEvent(getApplication(), event);
       isOffRoute.setValue(true);
     }
   }

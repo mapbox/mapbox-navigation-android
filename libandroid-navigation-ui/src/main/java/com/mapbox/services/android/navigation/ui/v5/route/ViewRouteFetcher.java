@@ -4,7 +4,6 @@ import android.content.Context;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -12,14 +11,11 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
 import com.mapbox.services.android.navigation.v5.route.RouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.List;
-import java.util.Locale;
 
 public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
 
@@ -49,43 +45,34 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
   /**
    * Checks the options used to launch this {@link com.mapbox.services.android.navigation.ui.v5.NavigationView}.
    * <p>
-   * Will launch with either a {@link DirectionsRoute} or pair of {@link Point}s.
+   * Will launch with a {@link DirectionsRoute}.
    *
-   * @param options holds either a set of {@link Point} coordinates or a {@link DirectionsRoute}
+   * @param options holds a {@link DirectionsRoute}
    */
-  public void extractRouteOptions(Context context, NavigationViewOptions options) {
-    extractLocale(context, options);
-    extractUnitType(options);
-
-    if (launchWithRoute(options)) {
-      extractRouteFromOptions(options);
-    } else {
-      extractCoordinatesFromOptions(options);
-    }
+  public void extractRouteOptions(NavigationViewOptions options) {
+    extractRouteFromOptions(options);
   }
 
-  public void fetchRouteFromOffRouteEvent(OffRouteEvent event) {
+  /**
+   * Fetches the route from the off-route event
+   *
+   * @param context to pass to route builder
+   * @param event from which the route progress is extracted
+   */
+  public void fetchRouteFromOffRouteEvent(Context context, OffRouteEvent event) {
     if (OffRouteEvent.isValid(event)) {
       RouteProgress routeProgress = event.getRouteProgress();
-      findRouteFromRouteProgress(rawLocation, routeProgress);
+      findRouteFromRouteProgress(context, rawLocation, routeProgress);
     }
   }
 
+  /**
+   * Updates this object's awareness of the raw location
+   *
+   * @param rawLocation to set
+   */
   public void updateRawLocation(@NonNull Location rawLocation) {
     this.rawLocation = rawLocation;
-  }
-
-  private void extractLocale(Context context, NavigationViewOptions options) {
-    updateLocale(LocaleUtils.getNonNullLocale(context, options.navigationOptions().locale()));
-  }
-
-  private void extractUnitType(NavigationViewOptions options) {
-    MapboxNavigationOptions navigationOptions = options.navigationOptions();
-    updateUnitType(navigationOptions.unitType());
-  }
-
-  private boolean launchWithRoute(NavigationViewOptions options) {
-    return options.directionsRoute() != null;
   }
 
   private void extractRouteFromOptions(NavigationViewOptions options) {
@@ -99,22 +86,11 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
   private void cacheRouteInformation(NavigationViewOptions options, DirectionsRoute route) {
     cacheRouteOptions(route.routeOptions());
     cacheRouteProfile(options);
-    cacheRouteLanguage(options, route);
   }
 
   private void cacheRouteProfile(NavigationViewOptions options) {
     String routeProfile = options.directionsProfile();
     updateRouteProfile(routeProfile);
-  }
-
-  private void cacheRouteLanguage(NavigationViewOptions options, @Nullable DirectionsRoute route) {
-    if (options.navigationOptions().locale() != null) {
-      updateLocale(options.navigationOptions().locale());
-    } else if (route != null && !TextUtils.isEmpty(route.routeOptions().language())) {
-      updateLocale(new Locale(route.routeOptions().language()));
-    } else {
-      updateLocale(Locale.getDefault());
-    }
   }
 
   private void cacheRouteOptions(RouteOptions routeOptions) {
@@ -129,17 +105,6 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
       int destinationCoordinate = coordinates.size() - 1;
       Point destinationPoint = coordinates.get(destinationCoordinate);
       listener.onDestinationSet(destinationPoint);
-    }
-  }
-
-  private void extractCoordinatesFromOptions(NavigationViewOptions options) {
-    Point destination = options.destination();
-    if (options.origin() != null && options.destination() != null) {
-      cacheRouteProfile(options);
-      cacheRouteLanguage(options, null);
-      Point origin = options.origin();
-      listener.onDestinationSet(destination);
-      findRouteFromOriginToDestination(origin, destination);
     }
   }
 

@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.route;
 
+import android.content.Context;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,12 +10,10 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import retrofit2.Call;
@@ -36,8 +35,6 @@ public class RouteFetcher {
   private String routeProfile;
   private RouteProgress routeProgress;
   private RouteUtils routeUtils;
-  private Locale locale = Locale.getDefault();
-  private int unitType = NavigationUnitType.NONE_SPECIFIED;
 
   public RouteFetcher() {
     routeUtils = new RouteUtils();
@@ -57,14 +54,6 @@ public class RouteFetcher {
     this.accessToken = accessToken;
   }
 
-  public void updateLocale(Locale locale) {
-    this.locale = locale;
-  }
-
-  public void updateUnitType(int unitType) {
-    this.unitType = unitType;
-  }
-
   public void updateRouteProfile(String routeProfile) {
     if (routeUtils.isValidRouteProfile(routeProfile)) {
       this.routeProfile = routeProfile;
@@ -82,31 +71,21 @@ public class RouteFetcher {
    * @param routeProgress for remaining waypoints along the route
    * @since 0.13.0
    */
-  public void findRouteFromRouteProgress(Location location, RouteProgress routeProgress) {
+  public void findRouteFromRouteProgress(Context context, Location location, RouteProgress routeProgress) {
     if (isValidProgress(location, routeProgress)) {
       return;
     }
     this.routeProgress = routeProgress;
-    NavigationRoute.Builder builder = buildRouteRequest(location, routeProgress);
+    NavigationRoute.Builder builder = buildRouteRequest(context, location, routeProgress);
     executeRouteCall(builder);
   }
 
-  public void findRouteFromOriginToDestination(Point origin, Point destination) {
-    NavigationRoute.Builder builder = NavigationRoute.builder()
-      .accessToken(accessToken)
-      .origin(origin)
-      .destination(destination);
-    addLocaleAndUnitType(builder);
-    addRouteProfile(routeProfile, builder);
-    builder.build().getRoute(directionsResponseCallback);
-  }
-
   @Nullable
-  private NavigationRoute.Builder buildRouteRequestFromCurrentLocation(Point origin, Double bearing,
-                                                                       RouteProgress progress,
+  private NavigationRoute.Builder buildRouteRequestFromCurrentLocation(Context context, Point origin,
+                                                                       Double bearing, RouteProgress progress,
                                                                        @Nullable String routeProfile) {
     RouteOptions options = progress.directionsRoute().routeOptions();
-    NavigationRoute.Builder builder = NavigationRoute.builder()
+    NavigationRoute.Builder builder = NavigationRoute.builder(context)
       .origin(origin, bearing, BEARING_TOLERANCE)
       .routeOptions(options);
 
@@ -121,9 +100,12 @@ public class RouteFetcher {
     return builder;
   }
 
-  private void addLocaleAndUnitType(NavigationRoute.Builder builder) {
-    String voiceUnitType = NavigationUnitType.getDirectionsCriteriaUnitType(unitType, locale);
-    builder.language(locale).voiceUnits(voiceUnitType);
+  private void addLanguage(NavigationRoute.Builder builder) {
+    builder.language(routeProgress.directionsRoute().voiceLanguage());
+  }
+
+  private void addUnitType(NavigationRoute.Builder builder) {
+    builder.voiceUnits(routeProgress.directionsRoute().routeOptions().voiceUnits());
   }
 
   private void addRouteProfile(String routeProfile, NavigationRoute.Builder builder) {
@@ -155,18 +137,19 @@ public class RouteFetcher {
     return location == null || routeProgress == null;
   }
 
-  private NavigationRoute.Builder buildRouteRequest(Location location, RouteProgress routeProgress) {
+  private NavigationRoute.Builder buildRouteRequest(Context context, Location location, RouteProgress routeProgress) {
     Point origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     Double bearing = location.hasBearing() ? Float.valueOf(location.getBearing()).doubleValue() : null;
     return buildRouteRequestFromCurrentLocation(
-      origin, bearing, routeProgress, routeProfile
+      context, origin, bearing, routeProgress, routeProfile
     );
   }
 
   private void executeRouteCall(NavigationRoute.Builder builder) {
     if (builder != null) {
       builder.accessToken(accessToken);
-      addLocaleAndUnitType(builder);
+      addLanguage(builder);
+      addUnitType(builder);
       builder.build().getRoute(directionsResponseCallback);
     }
   }

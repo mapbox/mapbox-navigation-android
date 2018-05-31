@@ -1,12 +1,18 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.content.Context;
+
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.BaseTest;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +21,24 @@ import java.util.Locale;
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 
 public class NavigationRouteTest extends BaseTest {
+  @Mock
+  private Context context;
+  @Mock
+  private LocaleUtils localeUtils;
+
+  @Before
+  public void setup() {
+    MockitoAnnotations.initMocks(this);
+    when(localeUtils.inferDeviceLocale(context)).thenReturn(Locale.getDefault());
+    when(localeUtils.getUnitTypeForDeviceLocale(context)).thenReturn(DirectionsCriteria.IMPERIAL);
+  }
 
   @Test
   public void sanityTest() throws Exception {
-    NavigationRoute navigationRoute = NavigationRoute.builder()
+    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
       .accessToken(ACCESS_TOKEN)
       .origin(Point.fromLngLat(1.0, 2.0))
       .destination(Point.fromLngLat(1.0, 5.0))
@@ -30,7 +48,7 @@ public class NavigationRouteTest extends BaseTest {
 
   @Test
   public void changingDefaultValueToCustomWorksProperly() throws Exception {
-    NavigationRoute navigationRoute = NavigationRoute.builder()
+    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
       .accessToken(ACCESS_TOKEN)
       .origin(Point.fromLngLat(1.0, 2.0))
       .destination(Point.fromLngLat(1.0, 5.0))
@@ -43,7 +61,7 @@ public class NavigationRouteTest extends BaseTest {
 
   @Test
   public void addingPointAndBearingKeepsCorrectOrder() throws Exception {
-    NavigationRoute navigationRoute = NavigationRoute.builder()
+    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
       .accessToken(ACCESS_TOKEN)
       .origin(Point.fromLngLat(1.0, 2.0), 90d, 90d)
       .addBearing(2.0, 3.0)
@@ -57,7 +75,7 @@ public class NavigationRouteTest extends BaseTest {
   @Test
   @Ignore
   public void reverseOriginDestinationDoesntMessUpBearings() throws Exception {
-    NavigationRoute navigationRoute = NavigationRoute.builder()
+    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
       .accessToken(ACCESS_TOKEN)
       .destination(Point.fromLngLat(1.0, 5.0), 1d, 5d)
       .origin(Point.fromLngLat(1.0, 2.0), 90d, 90d)
@@ -86,7 +104,7 @@ public class NavigationRouteTest extends BaseTest {
       .geometries("mocked_geometries")
       .build();
 
-    NavigationRoute navigationRoute = NavigationRoute.builder()
+    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
       .origin(coordinates.get(0))
       .destination(coordinates.get(1))
       .routeOptions(routeOptions)

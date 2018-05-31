@@ -35,6 +35,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
@@ -49,7 +50,6 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.Maneuve
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -57,7 +57,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.List;
-import java.util.Locale;
 
 /**
  * A view that can be used to display upcoming maneuver information and control
@@ -105,8 +104,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private NavigationViewModel navigationViewModel;
   private boolean isRerouting;
 
-  private Locale locale;
-  private @NavigationUnitType.UnitType int unitType = NavigationUnitType.NONE_SPECIFIED;
+  private String language;
+  private String unitType;
   private boolean isMuted;
 
   public InstructionView(Context context) {
@@ -220,7 +219,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      InstructionModel model = new InstructionModel(getContext(), routeProgress, locale, unitType);
+      InstructionModel model = new InstructionModel(getContext(), routeProgress, language, unitType);
       updateViews(model);
       updateTextInstruction(model);
     }
@@ -328,12 +327,12 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   /**
-   * Sets the locale to use for languages and default unit type
+   * Sets the language to use
    *
-   * @param locale to use
+   * @param language to use
    */
-  public void setLocale(@NonNull Locale locale) {
-    this.locale = locale;
+  public void setLanguage(@NonNull String language) {
+    this.language = language;
   }
 
   /**
@@ -341,7 +340,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    *
    * @param unitType to use
    */
-  public void setUnitType(@NavigationUnitType.UnitType int unitType) {
+  public void setUnitType(@DirectionsCriteria.VoiceUnitCriteria String unitType) {
     this.unitType = unitType;
   }
 
@@ -349,7 +348,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void init() {
-    locale = LocaleUtils.getDeviceLocale(getContext());
+    LocaleUtils localeUtils = new LocaleUtils();
+    language = localeUtils.inferDeviceLanguage(getContext());
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
 
@@ -862,6 +862,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model to provide the current steps and unit type
    */
   private void updateInstructionList(InstructionModel model) {
-    instructionListAdapter.updateSteps(getContext(), model.getProgress(), locale, unitType);
+    instructionListAdapter.updateSteps(getContext(), model.getProgress(), language, unitType);
   }
 }

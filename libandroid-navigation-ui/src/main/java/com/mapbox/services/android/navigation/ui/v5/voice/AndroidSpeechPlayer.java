@@ -9,8 +9,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 /**
- * Default player used to play voice instructions when
- * {@link com.mapbox.services.android.navigation.ui.v5.NavigationView} is launched without an AWS Cognito Pool ID.
+ * Default player used to play voice instructions when a connection to Polly is unable to be established.
  * <p>
  * This instruction player uses {@link TextToSpeech} to play voice instructions.
  *
@@ -27,14 +26,15 @@ public class AndroidSpeechPlayer implements InstructionPlayer {
    * Creates an instance of {@link AndroidSpeechPlayer}.
    *
    * @param context used to create an instance of {@link TextToSpeech}
+   * @param language to initialize locale to set
    * @since 0.6.0
    */
-  AndroidSpeechPlayer(Context context, final Locale locale) {
+  AndroidSpeechPlayer(Context context, final String language) {
     textToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
       @Override
       public void onInit(int status) {
         if (status != TextToSpeech.ERROR) {
-          textToSpeech.setLanguage(locale);
+          textToSpeech.setLanguage(new Locale(language));
         }
       }
     });

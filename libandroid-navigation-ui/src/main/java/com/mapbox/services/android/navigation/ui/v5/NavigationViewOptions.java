@@ -6,7 +6,6 @@ import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
@@ -18,7 +17,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import java.util.List;
 
 @AutoValue
-public abstract class NavigationViewOptions extends NavigationOptions {
+public abstract class NavigationViewOptions extends NavigationUiOptions {
 
   public abstract MapboxNavigationOptions navigationOptions();
 
@@ -49,10 +48,6 @@ public abstract class NavigationViewOptions extends NavigationOptions {
     public abstract Builder directionsRoute(DirectionsRoute directionsRoute);
 
     public abstract Builder directionsProfile(@DirectionsCriteria.ProfileCriteria String directionsProfile);
-
-    public abstract Builder origin(Point origin);
-
-    public abstract Builder destination(Point destination);
 
     public abstract Builder lightThemeResId(Integer lightThemeResId);
 

@@ -41,11 +41,9 @@ import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.List;
-import java.util.Locale;
 
 /**
  * View that creates the drop-in UI.
@@ -540,20 +538,20 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void establish(NavigationViewOptions options) {
-    establishLocale(options);
+    establishLanguage(options);
     establishUnitType(options);
     establishTimeFormat(options);
   }
 
-  private void establishLocale(NavigationViewOptions options) {
-    Locale locale = LocaleUtils.getNonNullLocale(getContext(), options.navigationOptions().locale());
-    instructionView.setLocale(locale);
-    summaryBottomSheet.setLocale(locale);
+  private void establishLanguage(NavigationViewOptions options) {
+    LocaleUtils localeUtils = new LocaleUtils();
+    String language = localeUtils.getNonEmptyLanguage(getContext(), options.directionsRoute().voiceLanguage());
+    instructionView.setLanguage(language);
+    summaryBottomSheet.setLanguage(language);
   }
 
   private void establishUnitType(NavigationViewOptions options) {
-    @NavigationUnitType.UnitType
-    int unitType = options.navigationOptions().unitType();
+    String unitType = options.directionsRoute().routeOptions().voiceUnits();
     instructionView.setUnitType(unitType);
     summaryBottomSheet.setUnitType(unitType);
   }

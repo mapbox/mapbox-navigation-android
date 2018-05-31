@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.content.Context;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,6 +17,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.core.exceptions.ServicesException;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.Locale;
 
@@ -55,9 +57,15 @@ public final class NavigationRoute {
    * @return a {@link Builder} object for creating this object
    * @since 0.5.0
    */
-  public static Builder builder() {
+  public static Builder builder(Context context) {
+    return builder(context, new LocaleUtils());
+  }
+
+  static Builder builder(Context context, LocaleUtils localeUtils) {
     return new Builder()
       .annotations(DirectionsCriteria.ANNOTATION_CONGESTION, DirectionsCriteria.ANNOTATION_DISTANCE)
+      .language(context, localeUtils)
+      .voiceUnits(context, localeUtils)
       .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
   }
 
@@ -267,15 +275,20 @@ public final class NavigationRoute {
      * select number of languages are currently supported, reference the table provided in the see
      * link below.
      *
-     * @param language a Locale value representing the language you'd like the instructions to be
+     * @param language a string value representing the language you'd like the instructions to be
      *                 written in when returned
      * @return this builder for chaining options together
      * @see <a href="https://www.mapbox.com/api-documentation/#instructions-languages">Supported
      * Languages</a>
      * @since 0.5.0
      */
-    public Builder language(@Nullable Locale language) {
-      directionsBuilder.language(language);
+    public Builder language(String language) {
+      directionsBuilder.language(new Locale(language));
+      return this;
+    }
+
+    Builder language(Context context, LocaleUtils localeUtils) {
+      directionsBuilder.language(localeUtils.inferDeviceLocale(context));
       return this;
     }
 
@@ -367,8 +380,13 @@ public final class NavigationRoute {
      * @return this builder for chaining options together
      * @since 0.8.0
      */
-    public Builder voiceUnits(@Nullable @VoiceUnitCriteria String voiceUnits) {
+    public Builder voiceUnits(@VoiceUnitCriteria String voiceUnits) {
       directionsBuilder.voiceUnits(voiceUnits);
+      return this;
+    }
+
+    Builder voiceUnits(Context context, LocaleUtils localeUtils) {
+      directionsBuilder.voiceUnits(localeUtils.getUnitTypeForDeviceLocale(context));
       return this;
     }
 

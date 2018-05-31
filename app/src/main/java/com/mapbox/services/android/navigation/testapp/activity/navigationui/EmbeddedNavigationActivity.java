@@ -14,14 +14,21 @@ import android.text.style.AbsoluteSizeSpan;
 import android.view.View;
 import android.widget.TextView;
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class EmbeddedNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
   NavigationListener, ProgressChangeListener {
@@ -29,8 +36,8 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   private NavigationView navigationView;
   private View spacer;
   private TextView speedWidget;
-  private Point origin = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
-  private Point destination = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
+  private static final Point ORIGIN = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
+  private static final Point DESTINATION = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
   private boolean bottomSheetVisible = true;
 
   @Override
@@ -62,15 +69,35 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
   @Override
   public void onNavigationReady() {
-    NavigationViewOptions.Builder options = NavigationViewOptions.builder();
-    options.navigationListener(this);
-    options.origin(origin);
-    options.destination(destination);
-    options.shouldSimulateRoute(true);
-    options.progressChangeListener(this);
+    fetchRoute();
+  }
+
+  private void startNavigation(DirectionsRoute directionsRoute) {
+    NavigationViewOptions.Builder options =
+      NavigationViewOptions.builder()
+        .navigationListener(this)
+        .directionsRoute(directionsRoute)
+        .shouldSimulateRoute(true)
+        .progressChangeListener(this);
     setBottomSheetCallback(options);
 
     navigationView.startNavigation(options.build());
+  }
+
+  private void fetchRoute() {
+    NavigationRoute.builder(this)
+      .accessToken(Mapbox.getAccessToken())
+      .origin(ORIGIN)
+      .destination(DESTINATION)
+      .alternatives(true)
+      .build()
+      .getRoute(new SimplifiedCallback() {
+        @Override
+        public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+          DirectionsRoute directionsRoute = response.body().routes().get(0);
+          startNavigation(directionsRoute);
+        }
+      });
   }
 
   private void setBottomSheetCallback(NavigationViewOptions.Builder options) {

@@ -9,9 +9,9 @@ import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.R;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfConversion;
@@ -34,30 +34,38 @@ public class DistanceUtils {
   private final NumberFormat numberFormat;
   private final String largeUnit;
   private final String smallUnit;
+  private final LocaleUtils localeUtils;
 
   /**
    * Creates a DistanceUtils object with information about how to format distances
    *
    * @param context  from which to get localized strings from
-   * @param locale   for which language and country
+   * @param language   for which language
    * @param unitType to use, or NONE_SPECIFIED to use default for locale country
    */
-  public DistanceUtils(Context context, @NonNull Locale locale, @NavigationUnitType.UnitType int unitType) {
+  public DistanceUtils(Context context, @NonNull String language,
+                       @NonNull @DirectionsCriteria.VoiceUnitCriteria String unitType) {
+    localeUtils = new LocaleUtils();
+
     unitStrings.put(UNIT_KILOMETERS, context.getString(R.string.kilometers));
     unitStrings.put(UNIT_METERS, context.getString(R.string.meters));
     unitStrings.put(UNIT_MILES, context.getString(R.string.miles));
     unitStrings.put(UNIT_FEET, context.getString(R.string.feet));
 
+    Locale locale;
+    if (language == null) {
+      locale = localeUtils.inferDeviceLocale(context);
+    } else {
+      locale = new Locale(language);
+    }
     numberFormat = NumberFormat.getNumberInstance(locale);
 
-    if (unitType == NavigationUnitType.NONE_SPECIFIED) {
-      // If given locale does not include a country, use the device locale to get the default unitType
-      unitType = LocaleUtils.getUnitTypeForLocale(
-        locale.getCountry() == null ? LocaleUtils.getDeviceLocale(context) : locale);
+    if (!DirectionsCriteria.IMPERIAL.equals(unitType) && !DirectionsCriteria.METRIC.equals(unitType)) {
+      unitType = localeUtils.getUnitTypeForDeviceLocale(context);
     }
 
-    largeUnit = unitType == NavigationUnitType.TYPE_IMPERIAL ? UNIT_MILES : UNIT_KILOMETERS;
-    smallUnit = unitType == NavigationUnitType.TYPE_IMPERIAL ? UNIT_FEET : UNIT_METERS;
+    largeUnit = DirectionsCriteria.IMPERIAL.equals(unitType) ? UNIT_MILES : UNIT_KILOMETERS;
+    smallUnit = DirectionsCriteria.IMPERIAL.equals(unitType) ? UNIT_FEET : UNIT_METERS;
   }
 
   /**

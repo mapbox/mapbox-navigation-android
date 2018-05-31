@@ -4,39 +4,48 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
 
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 
 import java.util.Locale;
-
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_IMPERIAL;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_METRIC;
 
 public class LocaleUtils {
 
   /**
    * Returns the unit type for the specified locale. Try to avoid using this unnecessarily because
    * all methods consuming unit type are able to handle the NONE_SPECIFIED type
+   *
    * @param locale for which to return the default unit type
    * @return unit type for specified locale
    */
-  @NavigationUnitType.UnitType
-  public static int getUnitTypeForLocale(@NonNull Locale locale) {
+  @DirectionsCriteria.VoiceUnitCriteria
+  public String getUnitTypeForLocale(@NonNull Locale locale) {
     switch (locale.getCountry()) {
       case "US": // US
       case "LR": // Liberia
       case "MM": // Burma
-        return TYPE_IMPERIAL;
+        return DirectionsCriteria.IMPERIAL;
       default:
-        return TYPE_METRIC;
+        return DirectionsCriteria.METRIC;
     }
   }
 
   /**
-   * Returns the device locale to default to if no locale was specified
+   * Returns the device language to default to if no locale was specified
+   *
+   * @param context to check configuration
+   * @return language of device
+   */
+  public String inferDeviceLanguage(Context context) {
+    return inferDeviceLocale(context).getLanguage();
+  }
+
+  /**
+   * Returns the device locale for which to use as a default if no language is specified
+   *
    * @param context to check configuration
    * @return locale of device
    */
-  public static Locale getDeviceLocale(Context context) {
+  public Locale inferDeviceLocale(Context context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
       return context.getResources().getConfiguration().getLocales().get(0);
     } else {
@@ -46,14 +55,25 @@ public class LocaleUtils {
 
   /**
    * Returns the locale passed in if it is not null, otherwise returns the device locale
+   *
    * @param context to get device locale
-   * @param locale to check if it is null
+   * @param language to check if it is null
    * @return a non-null locale, either the one passed in, or the device locale
    */
-  public static Locale getNonNullLocale(Context context, Locale locale) {
-    if (locale == null) {
-      return getDeviceLocale(context);
+  public String getNonEmptyLanguage(Context context, String language) {
+    if (language == null) {
+      return inferDeviceLanguage(context);
     }
-    return locale;
+    return language;
+  }
+
+  /**
+   * Returns the unit type for the device locale
+   *
+   * @param context from which to get the configuration
+   * @return the default unit type for the device
+   */
+  public String getUnitTypeForDeviceLocale(Context context) {
+    return getUnitTypeForLocale(inferDeviceLocale(context));
   }
 }

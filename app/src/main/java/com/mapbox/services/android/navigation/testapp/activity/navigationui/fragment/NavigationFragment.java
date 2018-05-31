@@ -8,12 +8,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.SimplifiedCallback;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class NavigationFragment extends Fragment implements OnNavigationReadyCallback, NavigationListener {
 
@@ -93,13 +101,7 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
   public void onNavigationReady() {
     Point origin = Point.fromLngLat(ORIGIN_LONGITUDE, ORIGIN_LATITUDE);
     Point destination = Point.fromLngLat(DESTINATION_LONGITUDE, DESTINATION_LATITUDE);
-    NavigationViewOptions options = NavigationViewOptions.builder()
-      .origin(origin)
-      .destination(destination)
-      .shouldSimulateRoute(true)
-      .navigationListener(this)
-      .build();
-    navigationView.startNavigation(options);
+    fetchRoute(origin, destination);
   }
 
   @Override
@@ -119,5 +121,29 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
   @Override
   public void onNavigationRunning() {
     // no-op
+  }
+
+  private void fetchRoute(Point origin, Point destination) {
+    NavigationRoute.builder(getContext())
+      .accessToken(Mapbox.getAccessToken())
+      .origin(origin)
+      .destination(destination)
+      .build()
+      .getRoute(new SimplifiedCallback() {
+        @Override
+        public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+          DirectionsRoute directionsRoute = response.body().routes().get(0);
+          startNavigation(directionsRoute);
+        }
+      });
+  }
+
+  private void startNavigation(DirectionsRoute directionsRoute) {
+    NavigationViewOptions options = NavigationViewOptions.builder()
+      .directionsRoute(directionsRoute)
+      .shouldSimulateRoute(true)
+      .navigationListener(NavigationFragment.this)
+      .build();
+    navigationView.startNavigation(options);
   }
 }
