@@ -294,8 +294,10 @@ public class RouteStepProgressTest extends BaseTest {
       fractionsRemaining.add(Math.round(expectedFractionRemaining * 100.0) / 100.0);
       routeProgressDurationsTraveled.add(Math.round(routeStepProgress.durationRemaining() * 100.0) / 100.0);
     }
+    double fractionRemaining = fractionsRemaining.get(fractionsRemaining.size() - 1);
+    double routeProgressDuration = routeProgressDurationsTraveled.get(routeProgressDurationsTraveled.size() - 1);
 
-    assertTrue(fractionsRemaining.equals(routeProgressDurationsTraveled));
+    assertEquals(fractionRemaining, routeProgressDuration, BaseTest.DELTA);
   }
 
   @Test

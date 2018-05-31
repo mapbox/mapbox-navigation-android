@@ -8,10 +8,9 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.Locale;
-
-import static com.mapbox.services.android.navigation.v5.utils.RouteUtils.findCurrentBannerText;
 
 public class InstructionModel {
 
@@ -24,12 +23,14 @@ public class InstructionModel {
   private Locale locale;
   @NavigationUnitType.UnitType
   private int unitType;
+  private RouteUtils routeUtils;
 
   public InstructionModel(Context context, RouteProgress progress,
                           Locale locale, @NavigationUnitType.UnitType int unitType) {
     this.progress = progress;
     this.locale = locale;
     this.unitType = unitType;
+    routeUtils = new RouteUtils();
     buildInstructionModel(context, progress);
   }
 
@@ -69,11 +70,11 @@ public class InstructionModel {
     LegStep upComingStep = legProgress.upComingStep();
     int stepDistanceRemaining = (int) legProgress.currentStepProgress().distanceRemaining();
 
-    primaryBannerText = findCurrentBannerText(currentStep, stepDistanceRemaining, true);
-    secondaryBannerText = findCurrentBannerText(currentStep, stepDistanceRemaining, false);
+    primaryBannerText = routeUtils.findCurrentBannerText(currentStep, stepDistanceRemaining, true);
+    secondaryBannerText = routeUtils.findCurrentBannerText(currentStep, stepDistanceRemaining, false);
 
     if (upComingStep != null) {
-      thenBannerText = findCurrentBannerText(upComingStep, upComingStep.distance(), true);
+      thenBannerText = routeUtils.findCurrentBannerText(upComingStep, upComingStep.distance(), true);
     }
 
     if (primaryBannerText != null && primaryBannerText.degrees() != null) {

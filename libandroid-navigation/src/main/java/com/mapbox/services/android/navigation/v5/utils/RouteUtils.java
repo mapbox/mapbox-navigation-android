@@ -13,6 +13,8 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.ArrayList;
@@ -21,10 +23,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.METERS_REMAINING_TILL_ARRIVAL;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
 
-public final class RouteUtils {
+public class RouteUtils {
 
   private static final String FORCED_LOCATION = "Forced Location";
   private static final int FIRST_COORDINATE = 0;
@@ -37,10 +38,6 @@ public final class RouteUtils {
     }
   };
 
-  private RouteUtils() {
-    // Utils class therefore, shouldn't be initialized.
-  }
-
   /**
    * Compares a new routeProgress geometry to a previousRouteProgress geometry to determine if the
    * user is traversing along a new route. If the route geometries do not match, this returns true.
@@ -50,7 +47,7 @@ public final class RouteUtils {
    * @return true if the direction route geometries do not match up, otherwise, false
    * @since 0.7.0
    */
-  public static boolean isNewRoute(@Nullable RouteProgress previousRouteProgress,
+  public boolean isNewRoute(@Nullable RouteProgress previousRouteProgress,
                                    @NonNull RouteProgress routeProgress) {
     return isNewRoute(previousRouteProgress, routeProgress.directionsRoute());
   }
@@ -64,7 +61,7 @@ public final class RouteUtils {
    * @return true if the direction route geometries do not match up, otherwise, false
    * @since 0.7.0
    */
-  public static boolean isNewRoute(@Nullable RouteProgress previousRouteProgress,
+  public boolean isNewRoute(@Nullable RouteProgress previousRouteProgress,
                                    @NonNull DirectionsRoute directionsRoute) {
     return previousRouteProgress == null || !previousRouteProgress.directionsRoute().geometry()
       .equals(directionsRoute.geometry());
@@ -75,12 +72,27 @@ public final class RouteUtils {
    * checks if the arrival meter threshold has been hit.
    *
    * @param routeProgress the current route progress
+   * @param milestone     the current milestone from the MilestoneEventListener
    * @return true if in arrival state, false if not
    * @since 0.8.0
    */
-  public static boolean isArrivalEvent(@NonNull RouteProgress routeProgress) {
-    return (upcomingStepIsArrival(routeProgress) || currentStepIsArrival(routeProgress))
-      && routeProgress.currentLegProgress().distanceRemaining() <= METERS_REMAINING_TILL_ARRIVAL;
+  public boolean isArrivalEvent(@NonNull RouteProgress routeProgress, @NonNull Milestone milestone) {
+    if (!(milestone instanceof BannerInstructionMilestone)) {
+      return false;
+    }
+    boolean isValidArrivalManeuverType = upcomingStepIsArrivalManeuverType(routeProgress)
+      || currentStepIsArrivalManeuverType(routeProgress);
+    if (isValidArrivalManeuverType) {
+      LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+      BannerInstructions currentInstructions = ((BannerInstructionMilestone) milestone).getBannerInstructions();
+      List<BannerInstructions> bannerInstructions = currentStep.bannerInstructions();
+      if (hasValidInstructions(bannerInstructions, currentInstructions)) {
+        int lastInstructionIndex = bannerInstructions.size() - 1;
+        BannerInstructions lastInstructions = bannerInstructions.get(lastInstructionIndex);
+        return currentInstructions.equals(lastInstructions);
+      }
+    }
+    return false;
   }
 
   /**
@@ -91,7 +103,7 @@ public final class RouteUtils {
    * @return true if last leg, false if not
    * @since 0.8.0
    */
-  public static boolean isLastLeg(RouteProgress routeProgress) {
+  public boolean isLastLeg(RouteProgress routeProgress) {
     List<RouteLeg> legs = routeProgress.directionsRoute().legs();
     RouteLeg currentLeg = routeProgress.currentLeg();
     return currentLeg.equals(legs.get(legs.size() - 1));
@@ -109,7 +121,7 @@ public final class RouteUtils {
    * @since 0.10.0
    */
   @Nullable
-  public static List<Point> calculateRemainingWaypoints(RouteProgress routeProgress) {
+  public List<Point> calculateRemainingWaypoints(RouteProgress routeProgress) {
     if (routeProgress.directionsRoute().routeOptions() == null) {
       return null;
     }
@@ -132,7 +144,7 @@ public final class RouteUtils {
    * @return {@link Location} from first coordinate
    * @since 0.10.0
    */
-  public static Location createFirstLocationFromRoute(DirectionsRoute route) {
+  public Location createFirstLocationFromRoute(DirectionsRoute route) {
     List<Point> coordinates = route.routeOptions().coordinates();
     Point origin = coordinates.get(FIRST_COORDINATE);
     Location forcedLocation = new Location(FORCED_LOCATION);
@@ -149,7 +161,7 @@ public final class RouteUtils {
    * @return true if valid, false if not
    * @since 0.13.0
    */
-  public static boolean isValidRouteProfile(String routeProfile) {
+  public boolean isValidRouteProfile(String routeProfile) {
     return !TextUtils.isEmpty(routeProfile) && VALID_PROFILES.contains(routeProfile);
   }
 
@@ -163,7 +175,7 @@ public final class RouteUtils {
    * @since 0.13.0
    */
   @Nullable
-  public static BannerInstructions findCurrentBannerInstructions(LegStep currentStep, double stepDistanceRemaining) {
+  public BannerInstructions findCurrentBannerInstructions(LegStep currentStep, double stepDistanceRemaining) {
     if (isValidStep(currentStep) && hasInstructions(currentStep.bannerInstructions())) {
       List<BannerInstructions> instructions = new ArrayList<>(currentStep.bannerInstructions());
       Iterator<BannerInstructions> instructionsIterator = instructions.iterator();
@@ -195,7 +207,7 @@ public final class RouteUtils {
    * @since 0.13.0
    */
   @Nullable
-  public static BannerText findCurrentBannerText(LegStep currentStep, double stepDistanceRemaining,
+  public BannerText findCurrentBannerText(LegStep currentStep, double stepDistanceRemaining,
                                                  boolean findPrimary) {
     BannerInstructions instructions = findCurrentBannerInstructions(currentStep, stepDistanceRemaining);
     if (instructions != null) {
@@ -214,7 +226,7 @@ public final class RouteUtils {
    * @since 0.13.0
    */
   @Nullable
-  public static VoiceInstructions findCurrentVoiceInstructions(LegStep currentStep, double stepDistanceRemaining) {
+  public VoiceInstructions findCurrentVoiceInstructions(LegStep currentStep, double stepDistanceRemaining) {
     if (isValidStep(currentStep) && hasInstructions(currentStep.voiceInstructions())) {
       List<VoiceInstructions> instructions = new ArrayList<>(currentStep.voiceInstructions());
       Iterator<VoiceInstructions> instructionsIterator = instructions.iterator();
@@ -233,24 +245,24 @@ public final class RouteUtils {
     return null;
   }
 
-  private static boolean upcomingStepIsArrival(@NonNull RouteProgress routeProgress) {
+  private boolean upcomingStepIsArrivalManeuverType(@NonNull RouteProgress routeProgress) {
     return routeProgress.currentLegProgress().upComingStep() != null
       && routeProgress.currentLegProgress().upComingStep().maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE);
   }
 
-  private static boolean currentStepIsArrival(@NonNull RouteProgress routeProgress) {
+  private boolean currentStepIsArrivalManeuverType(@NonNull RouteProgress routeProgress) {
     return routeProgress.currentLegProgress().currentStep().maneuver().type().contains(STEP_MANEUVER_TYPE_ARRIVE);
   }
 
-  private static boolean isValidStep(LegStep step) {
+  private boolean isValidStep(LegStep step) {
     return step != null;
   }
 
-  private static <T> boolean hasInstructions(List<T> instructions) {
+  private <T> boolean hasInstructions(List<T> instructions) {
     return instructions != null && !instructions.isEmpty();
   }
 
-  private static <T> int checkValidIndex(List<T> instructions) {
+  private <T> int checkValidIndex(List<T> instructions) {
     int instructionIndex = instructions.size() - 1;
     if (instructionIndex < 0) {
       instructionIndex = 0;
@@ -258,7 +270,12 @@ public final class RouteUtils {
     return instructionIndex;
   }
 
-  private static BannerText retrievePrimaryOrSecondaryBannerText(boolean findPrimary, BannerInstructions instruction) {
+  private boolean hasValidInstructions(List<BannerInstructions> bannerInstructions,
+                                              BannerInstructions currentInstructions) {
+    return bannerInstructions != null && !bannerInstructions.isEmpty() && currentInstructions != null;
+  }
+
+  private BannerText retrievePrimaryOrSecondaryBannerText(boolean findPrimary, BannerInstructions instruction) {
     return findPrimary ? instruction.primary() : instruction.secondary();
   }
 }

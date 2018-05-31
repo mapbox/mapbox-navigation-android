@@ -48,9 +48,11 @@ class NavigationRouteProcessor implements OffRouteCallback {
   private NavigationIndices indices;
   private double stepDistanceRemaining;
   private boolean shouldIncreaseIndex;
+  private RouteUtils routeUtils;
 
   NavigationRouteProcessor() {
     indices = NavigationIndices.create(FIRST_LEG_INDEX, FIRST_STEP_INDEX);
+    routeUtils = new RouteUtils();
   }
 
   @Override
@@ -111,7 +113,7 @@ class NavigationRouteProcessor implements OffRouteCallback {
    */
   private void checkNewRoute(MapboxNavigation mapboxNavigation) {
     DirectionsRoute directionsRoute = mapboxNavigation.getRoute();
-    if (RouteUtils.isNewRoute(routeProgress, directionsRoute)) {
+    if (routeUtils.isNewRoute(routeProgress, directionsRoute)) {
       createFirstIndices(mapboxNavigation);
       routeProgress = assembleRouteProgress(directionsRoute);
     }

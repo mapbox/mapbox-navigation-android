@@ -7,21 +7,22 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class WaypointNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
-  NavigationListener, ProgressChangeListener {
+  NavigationListener, RouteListener, ProgressChangeListener {
 
   private NavigationView navigationView;
   private boolean dropoffDialogShown;
@@ -110,6 +111,7 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
 
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
     options.navigationListener(this);
+    options.routeListener(this);
     options.progressChangeListener(this);
     options.origin(origin);
     options.destination(points.remove(0));
@@ -134,33 +136,47 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    if (RouteUtils.isArrivalEvent(routeProgress)) {
-      lastKnownLocation = location; // Accounts for driver moving after dialog was triggered
-      if (!dropoffDialogShown && !points.isEmpty()) {
-        showDropoffDialog();
-        dropoffDialogShown = true; // Accounts for multiple arrival events
-      }
+  public boolean allowRerouteFrom(Point offRoutePoint) {
+    return true;
+  }
+
+  @Override
+  public void onOffRoute(Point offRoutePoint) {
+
+  }
+
+  @Override
+  public void onRerouteAlong(DirectionsRoute directionsRoute) {
+
+  }
+
+  @Override
+  public void onFailedReroute(String errorMessage) {
+
+  }
+
+  @Override
+  public void onArrival() {
+    if (!dropoffDialogShown && !points.isEmpty()) {
+      showDropoffDialog();
+      dropoffDialogShown = true; // Accounts for multiple arrival events
     }
+  }
+
+  @Override
+  public void onProgressChange(Location location, RouteProgress routeProgress) {
+    lastKnownLocation = location;
   }
 
   private void showDropoffDialog() {
     AlertDialog alertDialog = new AlertDialog.Builder(this).create();
     alertDialog.setMessage(getString(R.string.dropoff_dialog_text));
     alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.dropoff_dialog_positive_text),
-      new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialogInterface, int in) {
-          navigationView.startNavigation(
-            setupOptions(Point.fromLngLat(lastKnownLocation.getLongitude(), lastKnownLocation.getLatitude())));
-        }
-      });
+      (dialogInterface, in) -> navigationView.startNavigation(
+        setupOptions(Point.fromLngLat(lastKnownLocation.getLongitude(), lastKnownLocation.getLatitude()))));
     alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.dropoff_dialog_negative_text),
-      new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialogInterface, int in) {
-          // Do nothing
-        }
+      (dialogInterface, in) -> {
+        // Do nothing
       });
 
     alertDialog.show();

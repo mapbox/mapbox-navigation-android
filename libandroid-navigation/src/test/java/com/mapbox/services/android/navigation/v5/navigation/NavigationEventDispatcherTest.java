@@ -9,9 +9,9 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.BaseTest;
+import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListeners;
@@ -19,6 +19,7 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +33,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.DEFAULT_MANIFEST_NAME)
@@ -308,25 +310,32 @@ public class NavigationEventDispatcherTest extends BaseTest {
   }
 
   @Test
-  public void setNavigationMetricListener_didNotGetTriggeredUntilArrival() throws Exception {
-    RouteLeg lastLeg = route.legs().get(route.legs().size() - 1);
-    int lastStepIndex = lastLeg.steps().indexOf(lastLeg.steps().get(lastLeg.steps().size() - 1));
+  public void setNavigationMetricListener_didNotGetTriggeredBeforeArrival() throws Exception {
+    String instruction = "";
+    BannerInstructionMilestone milestone = mock(BannerInstructionMilestone.class);
+    RouteUtils routeUtils = mock(RouteUtils.class);
+    when(routeUtils.isArrivalEvent(routeProgress, milestone)).thenReturn(false);
+    NavigationEventDispatcher navigationEventDispatcher = new NavigationEventDispatcher(routeUtils);
 
-    navigationEventDispatcher.addMetricEventListeners(eventListeners);
     navigationEventDispatcher.addMetricArrivalListener(arrivalListener);
 
-    RouteProgress routeProgressDidNotArrive = buildTestRouteProgress(route, 100,
-      100, 100, lastStepIndex, 0);
+    navigationEventDispatcher.onMilestoneEvent(routeProgress, instruction, milestone);
 
-    navigationEventDispatcher.onProgressChange(location, routeProgressDidNotArrive);
-    verify(eventListeners, times(1)).onRouteProgressUpdate(routeProgressDidNotArrive);
-    verify(arrivalListener, times(0)).onArrival(location, routeProgressDidNotArrive);
+    verify(arrivalListener, times(0)).onArrival(routeProgress);
+  }
 
-    RouteProgress routeProgressDidArrive = buildTestRouteProgress(route, 30,
-      30, 30, lastStepIndex, 0);
+  @Test
+  public void setNavigationMetricListener_doesGetTriggeredUponArrival() throws Exception {
+    String instruction = "";
+    BannerInstructionMilestone milestone = mock(BannerInstructionMilestone.class);
+    RouteUtils routeUtils = mock(RouteUtils.class);
+    when(routeUtils.isArrivalEvent(routeProgress, milestone)).thenReturn(true);
+    NavigationEventDispatcher navigationEventDispatcher = new NavigationEventDispatcher(routeUtils);
 
-    navigationEventDispatcher.onProgressChange(location, routeProgressDidArrive);
-    verify(eventListeners, times(1)).onRouteProgressUpdate(routeProgressDidArrive);
-    verify(arrivalListener, times(1)).onArrival(location, routeProgressDidArrive);
+    navigationEventDispatcher.addMetricArrivalListener(arrivalListener);
+
+    navigationEventDispatcher.onMilestoneEvent(routeProgress, instruction, milestone);
+
+    verify(arrivalListener, times(1)).onArrival(routeProgress);
   }
 }

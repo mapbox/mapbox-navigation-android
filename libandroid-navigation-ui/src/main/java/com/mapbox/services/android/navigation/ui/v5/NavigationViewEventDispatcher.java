@@ -35,7 +35,7 @@ class NavigationViewEventDispatcher {
     assignNavigationListener(navigationViewOptions.navigationListener());
     assignRouteListener(navigationViewOptions.routeListener());
     assignBottomSheetCallback(navigationViewOptions.bottomSheetCallback());
-    assignProgressChangeListner(navigationViewOptions, navigation);
+    assignProgressChangeListener(navigationViewOptions, navigation);
     assignMilestoneEventListener(navigationViewOptions, navigation);
   }
 
@@ -125,6 +125,12 @@ class NavigationViewEventDispatcher {
     }
   }
 
+  void onArrival() {
+    if (routeListener != null) {
+      routeListener.onArrival();
+    }
+  }
+
   /*
    * BottomSheetCallbacks
    */
@@ -135,7 +141,7 @@ class NavigationViewEventDispatcher {
     }
   }
 
-  private void assignProgressChangeListner(NavigationViewOptions navigationViewOptions, MapboxNavigation navigation) {
+  private void assignProgressChangeListener(NavigationViewOptions navigationViewOptions, MapboxNavigation navigation) {
     if (navigationViewOptions.progressChangeListener() != null) {
       navigation.addProgressChangeListener(navigationViewOptions.progressChangeListener());
     }

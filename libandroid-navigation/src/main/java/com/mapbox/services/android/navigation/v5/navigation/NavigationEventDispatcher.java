@@ -27,13 +27,19 @@ class NavigationEventDispatcher {
   private CopyOnWriteArrayList<FasterRouteListener> fasterRouteListeners;
   private NavigationMetricListeners.EventListeners metricEventListeners;
   private NavigationMetricListeners.ArrivalListener metricArrivalListener;
+  private RouteUtils routeUtils;
 
   NavigationEventDispatcher() {
+    this(new RouteUtils());
+  }
+
+  NavigationEventDispatcher(RouteUtils routeUtils) {
     navigationEventListeners = new CopyOnWriteArrayList<>();
     milestoneEventListeners = new CopyOnWriteArrayList<>();
     progressChangeListeners = new CopyOnWriteArrayList<>();
     offRouteListeners = new CopyOnWriteArrayList<>();
     fasterRouteListeners = new CopyOnWriteArrayList<>();
+    this.routeUtils = routeUtils;
   }
 
   void addMilestoneEventListener(@NonNull MilestoneEventListener milestoneEventListener) {
@@ -127,31 +133,14 @@ class NavigationEventDispatcher {
   }
 
   void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
+    checkForArrivalEvent(routeProgress, milestone);
     for (MilestoneEventListener milestoneEventListener : milestoneEventListeners) {
       milestoneEventListener.onMilestoneEvent(routeProgress, instruction, milestone);
     }
   }
 
   void onProgressChange(Location location, RouteProgress routeProgress) {
-    if (metricEventListeners != null) {
-      // Update RouteProgress
-      metricEventListeners.onRouteProgressUpdate(routeProgress);
-
-      // Check if user has arrived and notify metric listener if so
-      if (RouteUtils.isArrivalEvent(routeProgress) && metricArrivalListener != null) {
-        metricArrivalListener.onArrival(location, routeProgress);
-        metricArrivalListener = null;
-
-        // If a this is the last leg, navigation is ending - remove listeners
-        if (RouteUtils.isLastLeg(routeProgress)) {
-          // Remove off route listeners
-          removeOffRouteListener(null);
-          // Remove metric listener
-          metricEventListeners = null;
-        }
-      }
-    }
-
+    sendMetricProgressUpdate(routeProgress);
     for (ProgressChangeListener progressChangeListener : progressChangeListeners) {
       progressChangeListener.onProgressChange(location, routeProgress);
     }
@@ -161,7 +150,6 @@ class NavigationEventDispatcher {
     for (OffRouteListener offRouteListener : offRouteListeners) {
       offRouteListener.userOffRoute(location);
     }
-    // Send off route event to metric listener
     if (metricEventListeners != null) {
       metricEventListeners.onOffRouteEvent(location);
     }
@@ -185,5 +173,23 @@ class NavigationEventDispatcher {
 
   void addMetricArrivalListener(NavigationMetricListeners.ArrivalListener arrivalListener) {
     this.metricArrivalListener = arrivalListener;
+  }
+
+  private void checkForArrivalEvent(RouteProgress routeProgress, Milestone milestone) {
+    if (routeUtils.isArrivalEvent(routeProgress, milestone) && metricArrivalListener != null) {
+      metricArrivalListener.onArrival(routeProgress);
+      metricArrivalListener = null;
+
+      if (routeUtils.isLastLeg(routeProgress)) {
+        removeOffRouteListener(null);
+        metricEventListeners = null;
+      }
+    }
+  }
+
+  private void sendMetricProgressUpdate(RouteProgress routeProgress) {
+    if (metricEventListeners != null) {
+      metricEventListeners.onRouteProgressUpdate(routeProgress);
+    }
   }
 }

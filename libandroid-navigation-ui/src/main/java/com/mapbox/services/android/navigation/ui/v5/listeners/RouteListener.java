@@ -53,4 +53,14 @@ public interface RouteListener {
    * @since 0.8.0
    */
   void onFailedReroute(String errorMessage);
+
+  /**
+   * Will trigger when a user has arrived at a given waypoint along a {@link DirectionsRoute}.
+   * <p>
+   * For example, if there are two {@link com.mapbox.api.directions.v5.models.LegStep}s, this callback
+   * will be triggered twice, once for each waypoint.
+   *
+   * @since 0.14.0
+   */
+  void onArrival();
 }
