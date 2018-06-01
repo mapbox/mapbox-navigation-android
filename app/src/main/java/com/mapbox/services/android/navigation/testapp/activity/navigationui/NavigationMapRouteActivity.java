@@ -76,14 +76,6 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
     }
   }
 
-  @OnClick(R.id.fabToggleAlternatives)
-  public void onToggleAlternativesClick(View view) {
-    alternativesVisible = !alternativesVisible;
-    if (navigationMapRoute != null) {
-      navigationMapRoute.showAlternativeRoutes(alternativesVisible);
-    }
-  }
-
   @Override
   public void onNewPrimaryRouteSelected(DirectionsRoute directionsRoute) {
     primaryRouteIndexTextView.setText(String.valueOf(routes.indexOf(directionsRoute)));
