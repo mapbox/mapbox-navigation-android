@@ -28,6 +28,7 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -57,6 +58,8 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   MapView mapView;
   @BindView(android.R.id.content)
   View contentLayout;
+  @BindView(R.id.instructionView)
+  InstructionView instructionView;
 
   private Point origin = Point.fromLngLat(-87.6900, 41.8529);
   private Point destination = Point.fromLngLat(-87.8921, 41.9794);
@@ -71,6 +74,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    setTheme(R.style.NavigationViewLight);
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_reroute);
     ButterKnife.bind(this);
@@ -217,6 +221,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
         .build();
       mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000);
     }
+    instructionView.update(routeProgress);
   }
 
   @Override

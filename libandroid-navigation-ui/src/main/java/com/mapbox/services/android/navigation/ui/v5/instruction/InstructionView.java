@@ -58,6 +58,8 @@ import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.List;
 
+import timber.log.Timber;
+
 /**
  * A view that can be used to display upcoming maneuver information and control
  * voice instruction mute / unmute.
@@ -102,11 +104,11 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private AnimationSet fadeInSlowOut;
   private LegStep currentStep;
   private NavigationViewModel navigationViewModel;
-  private boolean isRerouting;
 
-  private String language;
-  private String unitType;
+  private String language = "";
+  private String unitType = "";
   private boolean isMuted;
+  private boolean isRerouting;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -118,7 +120,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
   public InstructionView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
-    init();
+    initialize();
   }
 
   /**
@@ -131,10 +133,12 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   protected void onFinishInflate() {
     super.onFinishInflate();
     bind();
-    initBackground();
-    initTurnLaneRecyclerView();
-    initDirectionsRecyclerView();
-    initAnimations();
+    initializeBackground();
+    initializeTurnLaneRecyclerView();
+    initializeDirectionsRecyclerView();
+    initializeAnimations();
+    initializeStepListClickListener();
+    ImageCoordinator.getInstance().initialize(getContext());
   }
 
   @Override
@@ -204,9 +208,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         }
       }
     });
-
-    // ViewModel set - click listeners can be set now
-    initClickListeners();
+    initializeClickListeners();
   }
 
   /**
@@ -232,7 +234,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     updateTurnLanes(model);
     updateThenStep(model);
     if (newStep(model.getProgress())) {
-      // Pre-fetch the image URLs for the upcoming step
       LegStep upComingStep = model.getProgress().currentLegProgress().upComingStep();
       ImageCoordinator.getInstance().prefetchImageCache(upComingStep);
     }
@@ -243,11 +244,14 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * the proper feedback information is collected or the user dismisses the UI.
    */
   public void showFeedbackBottomSheet() {
-    FeedbackBottomSheet.newInstance(this,
-      NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION).show(
-      ((FragmentActivity) getContext()).getSupportFragmentManager(), FeedbackBottomSheet.TAG);
-    navigationViewModel.isFeedbackShowing.setValue(true);
+    FragmentManager fragmentManager = obtainSupportFragmentManger();
+    if (fragmentManager != null) {
+      long duration = NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION;
+      FeedbackBottomSheet.newInstance(this, duration).show(fragmentManager, FeedbackBottomSheet.TAG);
+      navigationViewModel.isFeedbackShowing.setValue(true);
+    }
   }
+
 
   /**
    * Will slide the reroute view down from the top of the screen
@@ -347,9 +351,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   /**
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
-  private void init() {
+  private void initialize() {
     LocaleUtils localeUtils = new LocaleUtils();
     language = localeUtils.inferDeviceLanguage(getContext());
+    unitType = localeUtils.getUnitTypeForDeviceLocale(getContext());
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
 
@@ -375,14 +380,14 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     instructionLayoutText = findViewById(R.id.instructionLayoutText);
     instructionListLayout = findViewById(R.id.instructionListLayout);
     rvInstructions = findViewById(R.id.rvInstructions);
-    initInstructionAutoSize();
+    initializeInstructionAutoSize();
   }
 
   /**
    * For API 21 and lower, manually set the drawable tint based on the colors
    * set in the given navigation theme (light or dark).
    */
-  private void initBackground() {
+  private void initializeBackground() {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
       int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
         R.attr.navigationViewPrimary);
@@ -498,7 +503,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Called after we bind the views, this will allow the step instruction {@link TextView}
    * to automatically re-size based on the length of the text.
    */
-  private void initInstructionAutoSize() {
+  private void initializeInstructionAutoSize() {
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(upcomingPrimaryText,
       26, 30, 1, TypedValue.COMPLEX_UNIT_SP);
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(upcomingSecondaryText,
@@ -510,7 +515,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   /**
    * Sets up the {@link RecyclerView} that is used to display the turn lanes.
    */
-  private void initTurnLaneRecyclerView() {
+  private void initializeTurnLaneRecyclerView() {
     turnLaneAdapter = new TurnLaneAdapter();
     rvTurnLanes.setAdapter(turnLaneAdapter);
     rvTurnLanes.setHasFixedSize(true);
@@ -521,7 +526,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   /**
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
-  private void initDirectionsRecyclerView() {
+  private void initializeDirectionsRecyclerView() {
     instructionListAdapter = new InstructionListAdapter();
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
@@ -532,7 +537,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   /**
    * Initializes all animations needed to show / hide views.
    */
-  private void initAnimations() {
+  private void initializeAnimations() {
     Context context = getContext();
     rerouteSlideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
     rerouteSlideUpTop = AnimationUtils.loadAnimation(context, R.anim.slide_up_top);
@@ -552,19 +557,17 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   private void addBottomSheetListener() {
-    FragmentManager mgr = ((FragmentActivity) getContext()).getSupportFragmentManager();
-    FeedbackBottomSheet feedbackBottomSheet = (FeedbackBottomSheet) mgr.findFragmentByTag(FeedbackBottomSheet.TAG);
-    if (feedbackBottomSheet != null) {
-      feedbackBottomSheet.setFeedbackBottomSheetListener(this);
+    FragmentManager fragmentManager = obtainSupportFragmentManger();
+    if (fragmentManager != null) {
+      String tag = FeedbackBottomSheet.TAG;
+      FeedbackBottomSheet feedbackBottomSheet = (FeedbackBottomSheet) fragmentManager.findFragmentByTag(tag);
+      if (feedbackBottomSheet != null) {
+        feedbackBottomSheet.setFeedbackBottomSheetListener(this);
+      }
     }
   }
 
-  private void initClickListeners() {
-    if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      initLandscapeListListener();
-    } else {
-      initPortraitListListener();
-    }
+  private void initializeClickListeners() {
     alertView.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -575,12 +578,14 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         alertView.hide();
       }
     });
+    soundFab.setVisibility(VISIBLE);
     soundFab.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         navigationViewModel.setMuted(toggleMute());
       }
     });
+    feedbackFab.setVisibility(VISIBLE);
     feedbackFab.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -590,11 +595,21 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     });
   }
 
+  private void initializeStepListClickListener() {
+    int deviceOrientation = getContext().getResources().getConfiguration().orientation;
+    boolean isOrientationLandscape = deviceOrientation == Configuration.ORIENTATION_LANDSCAPE;
+    if (isOrientationLandscape) {
+      initializeLandscapeListListener();
+    } else {
+      initializePortraitListListener();
+    }
+  }
+
   /**
    * For portrait orientation, attach the listener to the whole layout
    * and use custom animations to hide and show the instructions /sound layout
    */
-  private void initPortraitListListener() {
+  private void initializePortraitListListener() {
     instructionLayout.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View instructionView) {
@@ -612,7 +627,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * For landscape orientation, the click listener is attached to
    * the instruction text layout and the constraints are adjusted before animating
    */
-  private void initLandscapeListListener() {
+  private void initializeLandscapeListListener() {
     instructionLayoutText.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View instructionLayoutText) {
@@ -821,6 +836,16 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     if (thenStepLayout.getVisibility() == VISIBLE) {
       beginDelayedTransition();
       thenStepLayout.setVisibility(GONE);
+    }
+  }
+
+  @Nullable
+  private FragmentManager obtainSupportFragmentManger() {
+    try {
+      return ((FragmentActivity) getContext()).getSupportFragmentManager();
+    } catch (ClassCastException exception) {
+      Timber.e(exception);
+      return null;
     }
   }
 
