@@ -26,9 +26,9 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   private RouteLeg currentLeg;
   private LegStep currentStep;
   private DistanceUtils distanceUtils;
-  private String language;
+  private String language = "";
   @DirectionsCriteria.VoiceUnitCriteria
-  private String unitType;
+  private String unitType = "";
 
   public InstructionListAdapter() {
     stepList = new ArrayList<>();
@@ -81,13 +81,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     updateStepList(routeProgress);
   }
 
-  private boolean shouldDistanceUtilsBeInitialized(String language,
-                                                   @DirectionsCriteria.VoiceUnitCriteria String unitType) {
-    return distanceUtils == null ||  !this.language.equals(language) || !this.unitType.equals(unitType);
-  }
-
   public void clear() {
-    // Clear remaining stepList
     stepList.clear();
     notifyDataSetChanged();
   }
@@ -137,6 +131,11 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     String maneuverType = maneuverStep.maneuver().type();
     String maneuverModifier = maneuverStep.maneuver().modifier();
     holder.maneuverView.setManeuverTypeAndModifier(maneuverType, maneuverModifier);
+  }
+
+  private boolean shouldDistanceUtilsBeInitialized(String language,
+                                                   @DirectionsCriteria.VoiceUnitCriteria String unitType) {
+    return distanceUtils == null ||  !this.language.equals(language) || !this.unitType.equals(unitType);
   }
 
   private void addLegSteps(RouteProgress routeProgress) {

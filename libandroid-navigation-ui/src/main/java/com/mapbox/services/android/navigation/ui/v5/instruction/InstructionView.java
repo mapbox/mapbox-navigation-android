@@ -105,8 +105,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private LegStep currentStep;
   private NavigationViewModel navigationViewModel;
 
-  private String language;
-  private String unitType;
+  private String language = "";
+  private String unitType = "";
   private boolean isMuted;
   private boolean isRerouting;
 
@@ -354,6 +354,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private void initialize() {
     LocaleUtils localeUtils = new LocaleUtils();
     language = localeUtils.inferDeviceLanguage(getContext());
+    unitType = localeUtils.getUnitTypeForDeviceLocale(getContext());
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
 
