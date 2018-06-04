@@ -14,8 +14,7 @@ import com.mapbox.turf.TurfMisc;
 
 import java.util.List;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
-  .MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE;
 import static com.mapbox.services.android.navigation.v5.utils.MeasurementUtils.userTrueDistanceFromStep;
 import static com.mapbox.services.android.navigation.v5.utils.ToleranceUtils.dynamicRerouteDistanceTolerance;
 
@@ -30,16 +29,21 @@ public class OffRouteDetector extends OffRoute {
    * and the user progress along the route.
    * <p>
    * Test #1:
+   * Distance remaining.  If the route distance remaining is 0, then return true immediately.  In the
+   * route processor this will prompt the snap-to-route logic to return the raw Location.  If there isn't any
+   * distance remaining, the user will always be off-route.
+   * <p>
+   * Test #2:
    * Valid or invalid off-route.  An off-route check can only continue if the device has received
    * at least 1 location update (for comparison) and the user has traveled passed
    * the {@link MapboxNavigationOptions#minimumDistanceBeforeRerouting()} checked against the last re-route location.
    * <p>
-   * Test #2:
+   * Test #3:
    * Distance from the step. This test is checked against the max of the dynamic rerouting tolerance or the
    * accuracy based tolerance. If this test passes, this method then also checks if there have been &gt;= 3
    * location updates moving away from the maneuver point. If false, this method will return false early.
    * <p>
-   * Test #3:
+   * Test #4:
    * Checks if the user is close the upcoming step.  At this point, the user is considered off-route.
    * But, if the location update is within the {@link MapboxNavigationOptions#maneuverZoneRadius()} of the
    * upcoming step, this method will return false as well as send fire {@link OffRouteCallback#onShouldIncreaseIndex()}
@@ -52,31 +56,20 @@ public class OffRouteDetector extends OffRoute {
   @Override
   public boolean isUserOffRoute(Location location, RouteProgress routeProgress, MapboxNavigationOptions options) {
 
+    if (checkDistanceRemaining(routeProgress)) {
+      return true;
+    }
+
     if (!validOffRoute(location, options)) {
       return false;
     }
-
     Point currentPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    boolean isOffRoute = checkOffRouteRadius(location, routeProgress, options, currentPoint);
 
-    // Get distance from the current step to future point
-    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
-    double distanceFromCurrentStep = userTrueDistanceFromStep(currentPoint, currentStep);
-
-    // Create off-route radius from the max of our dynamic or accuracy based tolerances
-    double offRouteRadius = createOffRouteRadius(location, routeProgress, options, currentPoint);
-
-    // Off route if this distance is greater than our offRouteRadius
-    boolean isOffRoute = distanceFromCurrentStep > offRouteRadius;
-
-    // If not offRoute at this point, do not continue with remaining logic
     if (!isOffRoute) {
-      // Even though the current point is not considered off-route, check to see if the user is
-      // moving away from the maneuver.
       return isMovingAwayFromManeuver(location, routeProgress, distancesAwayFromManeuver, currentPoint);
     }
 
-    // If the user is considered off-route at this point, but they are close to the upcoming step,
-    // do not send an off-route event and increment the step index to the upcoming step
     LegStep upComingStep = routeProgress.currentLegProgress().upComingStep();
     if (closeToUpcomingStep(options, callback, currentPoint, upComingStep)) {
       return false;
@@ -110,6 +103,10 @@ public class OffRouteDetector extends OffRoute {
     distancesAwayFromManeuver.clear();
   }
 
+  private boolean checkDistanceRemaining(RouteProgress routeProgress) {
+    return routeProgress.distanceRemaining() == 0;
+  }
+
   /**
    * Method to check if the user has passed either the set (in {@link MapboxNavigationOptions})
    * minimum amount of seconds or minimum amount of meters since the last reroute.
@@ -132,6 +129,14 @@ public class OffRouteDetector extends OffRoute {
       updateLastReroutePoint(location);
     }
     return distanceFromLastReroute > options.minimumDistanceBeforeRerouting();
+  }
+
+  private boolean checkOffRouteRadius(Location location, RouteProgress routeProgress,
+                                      MapboxNavigationOptions options, Point currentPoint) {
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    double distanceFromCurrentStep = userTrueDistanceFromStep(currentPoint, currentStep);
+    double offRouteRadius = createOffRouteRadius(location, routeProgress, options, currentPoint);
+    return distanceFromCurrentStep > offRouteRadius;
   }
 
   private double createOffRouteRadius(Location location, RouteProgress routeProgress,

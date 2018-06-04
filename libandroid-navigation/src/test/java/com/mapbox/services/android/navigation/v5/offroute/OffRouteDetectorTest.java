@@ -20,6 +20,7 @@ import java.util.List;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,7 +53,10 @@ public class OffRouteDetectorTest extends BaseTest {
 
   @Test
   public void invalidOffRoute_onFirstLocationUpdate() throws Exception {
+    when(mockProgress.distanceRemaining()).thenReturn(1000d);
+
     boolean isUserOffRoute = offRouteDetector.isUserOffRoute(mockLocation, mockProgress, options);
+
     assertFalse(isUserOffRoute);
   }
 
@@ -60,13 +64,13 @@ public class OffRouteDetectorTest extends BaseTest {
   public void validOffRoute_onMinimumDistanceBeforeReroutingPassed() throws Exception {
     Location mapboxOffice = buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637);
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
-
+    when(mockProgress.distanceRemaining()).thenReturn(1000d);
     offRouteDetector.isUserOffRoute(mockLocation, mockProgress, options);
-
     Point target = buildPointAwayFromLocation(mapboxOffice, options.minimumDistanceBeforeRerouting() + 1);
-
     Location locationOverMinimumDistance = buildDefaultLocationUpdate(target.longitude(), target.latitude());
+
     boolean validOffRoute = offRouteDetector.isUserOffRoute(locationOverMinimumDistance, routeProgress, options);
+
     assertTrue(validOffRoute);
   }
 
@@ -209,5 +213,16 @@ public class OffRouteDetectorTest extends BaseTest {
     );
     boolean isUserOffRouteThirdTry = offRouteDetector.isUserOffRoute(fourthLocationUpdate, routeProgress, options);
     assertFalse(isUserOffRouteThirdTry);
+  }
+
+  @Test
+  public void isUserOffRoute_assertTrueWhenRouteDistanceRemainingIsZero() {
+    Location location = mock(Location.class);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.distanceRemaining()).thenReturn(0d);
+
+    boolean isOffRoute = offRouteDetector.isUserOffRoute(location, routeProgress, options);
+
+    assertTrue(isOffRoute);
   }
 }
