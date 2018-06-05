@@ -8,27 +8,23 @@ import android.support.annotation.NonNull;
 
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 public class NavigationInstructionPlayer implements InstructionListener {
 
   private AudioManager instructionAudioManager;
   private AudioFocusRequest instructionFocusRequest;
   private MapboxSpeechPlayer mapboxSpeechPlayer;
   private AndroidSpeechPlayer androidSpeechPlayer;
-  private Queue<VoiceInstructionMilestone> instructionQueue;
+  private VoiceInstructionMilestone voiceInstructionMilestone;
   private boolean isMuted;
 
   public NavigationInstructionPlayer(@NonNull Context context, String language, String accessToken) {
     initAudioManager(context);
     initAudioFocusRequest();
     initInstructionPlayers(context, language, accessToken);
-    instructionQueue = new ConcurrentLinkedQueue<>();
   }
 
   public void play(VoiceInstructionMilestone voiceInstructionMilestone) {
-    instructionQueue.add(voiceInstructionMilestone);
+    this.voiceInstructionMilestone = voiceInstructionMilestone;
     mapboxSpeechPlayer.play(voiceInstructionMilestone.getSsmlAnnouncement());
   }
 
@@ -43,7 +39,6 @@ public class NavigationInstructionPlayer implements InstructionListener {
   }
 
   public void onOffRoute() {
-    instructionQueue.clear();
     mapboxSpeechPlayer.onOffRoute();
     androidSpeechPlayer.onOffRoute();
   }
@@ -56,7 +51,6 @@ public class NavigationInstructionPlayer implements InstructionListener {
   @Override
   public void onStart() {
     requestAudioFocus();
-    instructionQueue.poll();
   }
 
   @Override
@@ -67,9 +61,7 @@ public class NavigationInstructionPlayer implements InstructionListener {
   @Override
   public void onError(boolean isMapboxPlayer) {
     if (isMapboxPlayer) {
-      androidSpeechPlayer.play(instructionQueue.peek().getAnnouncement());
-    } else {
-      instructionQueue.poll();
+      androidSpeechPlayer.play(voiceInstructionMilestone.getAnnouncement());
     }
   }
 
