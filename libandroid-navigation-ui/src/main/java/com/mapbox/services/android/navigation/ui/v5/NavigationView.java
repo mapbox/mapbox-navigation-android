@@ -402,7 +402,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void initializeView() {
-    ImageCoordinator.getInstance().initialize(getContext());
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
     initializeNavigationViewModel();
