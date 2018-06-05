@@ -14,6 +14,7 @@
         android:left="1dp"
         android:right="1dp">
         <shape android:shape="rectangle">
+            <solid android:color="?attr/navigationViewPrimary"/>
             <corners android:radius="24dp"/>
         </shape>
     </item>

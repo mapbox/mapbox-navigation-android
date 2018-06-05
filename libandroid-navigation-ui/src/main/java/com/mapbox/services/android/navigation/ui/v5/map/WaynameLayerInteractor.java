@@ -5,23 +5,23 @@ import android.graphics.Bitmap;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 
-public class MapLayerInteractor {
+class WaynameLayerInteractor {
 
   private MapboxMap mapboxMap;
 
-  MapLayerInteractor(MapboxMap mapboxMap) {
+  WaynameLayerInteractor(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
   }
 
-  public void addLayer(Layer layer) {
+  void addLayer(Layer layer) {
     mapboxMap.addLayer(layer);
   }
 
-  public Layer retrieveLayerFromId(String layerId) {
+  Layer retrieveLayerFromId(String layerId) {
     return mapboxMap.getLayerAs(layerId);
   }
 
-  public void addLayerImage(String imageName, Bitmap image) {
+  void addLayerImage(String imageName, Bitmap image) {
     mapboxMap.addImage(imageName, image);
   }
 }

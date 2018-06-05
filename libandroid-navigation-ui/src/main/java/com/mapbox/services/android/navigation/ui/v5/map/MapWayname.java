@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.ui.v5.wayname;
+package com.mapbox.services.android.navigation.ui.v5.map;
 
 import android.graphics.Bitmap;
 import android.graphics.PointF;
@@ -7,10 +7,6 @@ import com.mapbox.geojson.Feature;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
-import com.mapbox.services.android.navigation.ui.v5.map.MapFeatureInteractor;
-import com.mapbox.services.android.navigation.ui.v5.map.MapLayerInteractor;
-import com.mapbox.services.android.navigation.ui.v5.map.MapPaddingAdjustor;
-import com.mapbox.services.android.navigation.ui.v5.map.MapWaynameLayoutProvider;
 
 import java.util.List;
 
@@ -24,15 +20,15 @@ public class MapWayname {
   private static final String NAME_PROPERTY = "name";
   private static final int FIRST_ROAD_FEATURE = 0;
 
-  private MapWaynameLayoutProvider layoutProvider;
-  private MapLayerInteractor layerInteractor;
-  private MapFeatureInteractor featureInteractor;
-  private MapPaddingAdjustor paddingAdjustor;
+  private WaynameLayoutProvider layoutProvider;
+  private WaynameLayerInteractor layerInteractor;
+  private WaynameFeatureFinder featureInteractor;
+  private WaynamePaddingAdjustor paddingAdjustor;
   private boolean autoQueryIsEnabled;
   private String wayname = "";
 
-  public MapWayname(MapWaynameLayoutProvider layoutProvider, MapLayerInteractor layerInteractor,
-                    MapFeatureInteractor featureInteractor, MapPaddingAdjustor paddingAdjustor) {
+  MapWayname(WaynameLayoutProvider layoutProvider, WaynameLayerInteractor layerInteractor,
+             WaynameFeatureFinder featureInteractor, WaynamePaddingAdjustor paddingAdjustor) {
     this.layoutProvider = layoutProvider;
     this.layerInteractor = layerInteractor;
     this.featureInteractor = featureInteractor;

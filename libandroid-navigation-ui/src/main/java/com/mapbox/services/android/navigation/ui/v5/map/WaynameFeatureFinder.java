@@ -7,15 +7,15 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 
 import java.util.List;
 
-public class MapFeatureInteractor {
+class WaynameFeatureFinder {
 
   private MapboxMap mapboxMap;
 
-  MapFeatureInteractor(MapboxMap mapboxMap) {
+  WaynameFeatureFinder(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
   }
 
-  public List<Feature> queryRenderedFeatures(PointF point, String[] layerIds) {
+  List<Feature> queryRenderedFeatures(PointF point, String[] layerIds) {
     return mapboxMap.queryRenderedFeatures(point, layerIds);
   }
 }

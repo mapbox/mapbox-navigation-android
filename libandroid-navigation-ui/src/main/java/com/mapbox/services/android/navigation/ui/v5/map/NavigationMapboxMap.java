@@ -24,7 +24,6 @@ import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
-import com.mapbox.services.android.navigation.ui.v5.wayname.MapWayname;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
 import java.util.ArrayList;
@@ -50,7 +49,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 
 public class NavigationMapboxMap {
 
-  public static final String STREETS_LAYER_ID = "streetsLayer";
+  static final String STREETS_LAYER_ID = "streetsLayer";
   private static final String STREETS_SOURCE_ID = "streetsSource";
   private static final String MAPBOX_STREETS_V7 = "mapbox://mapbox.mapbox-streets-v7";
   private static final String ROAD_LABEL = "road_label";
@@ -156,15 +155,15 @@ public class NavigationMapboxMap {
 
   private void initializeWayname(MapView mapView, MapboxMap mapboxMap) {
     initializeStreetsSource(mapboxMap);
-    MapWaynameLayoutProvider layoutProvider = new MapWaynameLayoutProvider(mapView.getContext());
-    MapLayerInteractor layerInteractor = new MapLayerInteractor(mapboxMap);
-    MapFeatureInteractor featureInteractor = new MapFeatureInteractor(mapboxMap);
-    MapPaddingAdjustor paddingAdjustor = new MapPaddingAdjustor(mapboxMap);
+    WaynameLayoutProvider layoutProvider = new WaynameLayoutProvider(mapView.getContext());
+    WaynameLayerInteractor layerInteractor = new WaynameLayerInteractor(mapboxMap);
+    WaynameFeatureFinder featureInteractor = new WaynameFeatureFinder(mapboxMap);
+    WaynamePaddingAdjustor paddingAdjustor = new WaynamePaddingAdjustor(mapboxMap);
     initializeWaynameLayer(layerInteractor);
     mapWayname = new MapWayname(layoutProvider, layerInteractor, featureInteractor, paddingAdjustor);
   }
 
-  private void initializeWaynameLayer(MapLayerInteractor layerInteractor) {
+  private void initializeWaynameLayer(WaynameLayerInteractor layerInteractor) {
     waynameLayer = createWaynameLayer();
     layerInteractor.addLayer(waynameLayer);
   }
