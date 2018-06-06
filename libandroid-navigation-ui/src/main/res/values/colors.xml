@@ -12,6 +12,9 @@
   <color name="mapbox_navigation_route_alternative_congestion_red">#B58281</color>
   <color name="mapbox_navigation_route_alternative_shield_color">#727E8D</color>
 
+  <color name="mapbox_navigation_route_upcoming_maneuver_arrow_color">#FFFFFF</color>
+  <color name="mapbox_navigation_route_upcoming_maneuver_arrow_border_color">#2D3F53</color>
+
   <!-- Default Light Theme -->
   <color name="mapbox_navigation_view_color_primary">#FFFFFF</color>
   <color name="mapbox_navigation_view_color_secondary">#28353D</color>
