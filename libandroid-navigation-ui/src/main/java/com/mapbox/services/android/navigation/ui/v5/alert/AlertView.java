@@ -134,9 +134,9 @@ public class AlertView extends CardView {
 
   private void initBackground() {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-      int progressColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+      int progressColor = ThemeSwitcher.retrieveThemeColor(getContext(),
         R.attr.navigationViewProgress);
-      int progressBackgroundColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+      int progressBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
         R.attr.navigationViewProgressBackground);
 
       LayerDrawable progressBarDrawable = (LayerDrawable) alertProgressBar.getProgressDrawable();

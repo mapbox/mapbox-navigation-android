@@ -161,7 +161,7 @@ public class NavigationViewModel extends AndroidViewModel {
    *
    * @param options to init MapboxNavigation
    */
-  void initializeNavigation(NavigationViewOptions options) {
+  MapboxNavigation initializeNavigation(NavigationViewOptions options) {
     MapboxNavigationOptions navigationOptions = options.navigationOptions();
     navigationOptions = navigationOptions.toBuilder().isFromNavigationUi(true).build();
     LocaleUtils localeUtils = new LocaleUtils();
@@ -175,6 +175,7 @@ public class NavigationViewModel extends AndroidViewModel {
       addMilestones(options);
       navigationViewRouteEngine.extractRouteOptions(options);
     }
+    return navigation;
   }
 
   void updateNavigation(NavigationViewOptions options) {

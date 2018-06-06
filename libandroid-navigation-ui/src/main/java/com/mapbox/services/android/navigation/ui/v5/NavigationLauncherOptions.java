@@ -24,6 +24,8 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
 
     public abstract Builder shouldSimulateRoute(boolean shouldSimulateRoute);
 
+    public abstract Builder waynameChipEnabled(boolean waynameChipEnabled);
+
     public abstract Builder enableOffRouteDetection(boolean enableOffRouteDetection);
 
     public abstract Builder snapToRoute(boolean snapToRoute);
@@ -35,6 +37,7 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
     return new AutoValue_NavigationLauncherOptions.Builder()
       .shouldSimulateRoute(false)
       .enableOffRouteDetection(true)
-      .snapToRoute(true);
+      .snapToRoute(true)
+      .waynameChipEnabled(true);
   }
 }

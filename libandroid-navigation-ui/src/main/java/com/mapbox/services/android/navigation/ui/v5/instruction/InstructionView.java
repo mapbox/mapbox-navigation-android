@@ -317,6 +317,14 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     rvInstructions.smoothScrollToPosition(TOP);
   }
 
+  public boolean handleBackPressed() {
+    if (isShowingInstructionList()) {
+      hideInstructionList();
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Sets the language to use
    *
@@ -376,11 +384,11 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void initializeBackground() {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-      int navigationViewPrimaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+      int navigationViewPrimaryColor = ThemeSwitcher.retrieveThemeColor(getContext(),
         R.attr.navigationViewPrimary);
-      int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+      int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
         R.attr.navigationViewBannerBackground);
-      int navigationViewListBackgroundColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+      int navigationViewListBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
         R.attr.navigationViewListBackground);
       // Instruction Layout landscape - banner background
       if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {

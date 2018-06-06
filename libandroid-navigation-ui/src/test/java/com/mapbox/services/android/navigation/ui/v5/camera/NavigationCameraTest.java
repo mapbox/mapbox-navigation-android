@@ -26,8 +26,8 @@ public class NavigationCameraTest {
   public void setTrackingEnabled_trackingIsEnabled() throws Exception {
     NavigationCamera camera = buildCamera();
 
-    camera.setCameraTrackingLocation(false);
-    camera.setCameraTrackingLocation(true);
+    camera.updateCameraTrackingLocation(false);
+    camera.updateCameraTrackingLocation(true);
 
     assertTrue(camera.isTrackingEnabled());
   }
@@ -36,8 +36,8 @@ public class NavigationCameraTest {
   public void setTrackingDisabled_trackingIsDisabled() throws Exception {
     NavigationCamera camera = buildCamera();
 
-    camera.setCameraTrackingLocation(true);
-    camera.setCameraTrackingLocation(false);
+    camera.updateCameraTrackingLocation(true);
+    camera.updateCameraTrackingLocation(false);
 
     assertFalse(camera.isTrackingEnabled());
   }
@@ -46,7 +46,7 @@ public class NavigationCameraTest {
   public void onResetCamera_trackingIsResumed() throws Exception {
     NavigationCamera camera = buildCamera();
 
-    camera.setCameraTrackingLocation(false);
+    camera.updateCameraTrackingLocation(false);
     camera.resetCameraPosition();
 
     assertTrue(camera.isTrackingEnabled());

@@ -145,9 +145,9 @@ public class ManeuverView extends View {
   }
 
   private void initManeuverColor() {
-    this.primaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+    this.primaryColor = ThemeSwitcher.retrieveThemeColor(getContext(),
       R.attr.navigationViewBannerManeuverPrimary);
-    this.secondaryColor = ThemeSwitcher.retrieveNavigationViewThemeColor(getContext(),
+    this.secondaryColor = ThemeSwitcher.retrieveThemeColor(getContext(),
       R.attr.navigationViewBannerManeuverSecondary);
   }
 

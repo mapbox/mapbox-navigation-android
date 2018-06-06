@@ -26,7 +26,7 @@ public class ThemeSwitcher {
    * @param context to retrieve the set theme and resolved attribute and then color res Id with {@link ContextCompat}
    * @return color resource identifier for primary theme color
    */
-  public static int retrieveNavigationViewThemeColor(Context context, int resId) {
+  public static int retrieveThemeColor(Context context, int resId) {
     TypedValue outValue = resolveAttributeFromId(context, resId);
     if (outValue.type >= TypedValue.TYPE_FIRST_COLOR_INT
       && outValue.type <= TypedValue.TYPE_LAST_COLOR_INT) {
@@ -34,6 +34,32 @@ public class ThemeSwitcher {
     } else {
       return ContextCompat.getColor(context, outValue.resourceId);
     }
+  }
+
+  /**
+   * Returns a map marker {@link Icon} based on the current theme setting.
+   *
+   * @param context to retrieve {@link SharedPreferences} and an instance of {@link IconFactory}
+   * @return {@link Icon} map marker dark or light
+   */
+  public static Icon retrieveThemeMapMarker(Context context) {
+    TypedValue destinationMarkerResId = resolveAttributeFromId(context, R.attr.navigationViewDestinationMarker);
+    int markerResId = destinationMarkerResId.resourceId;
+    IconFactory iconFactory = IconFactory.getInstance(context);
+    return iconFactory.fromResource(markerResId);
+  }
+
+  /**
+   * Looks are current theme and retrieves the style
+   * for the given resId set in the theme.
+   *
+   * @param context to retrieve the resolved attribute
+   * @param styleResId for the given style
+   * @return resolved style resource Id
+   */
+  public static int retrieveNavigationViewStyle(Context context, int styleResId) {
+    TypedValue outValue = resolveAttributeFromId(context, styleResId);
+    return outValue.resourceId;
   }
 
   /**
@@ -72,32 +98,6 @@ public class ThemeSwitcher {
   static String retrieveMapStyle(Context context) {
     TypedValue mapStyleAttr = resolveAttributeFromId(context, R.attr.navigationViewMapStyle);
     return mapStyleAttr.string.toString();
-  }
-
-  /**
-   * Returns a map marker {@link Icon} based on the current theme setting.
-   *
-   * @param context to retrieve {@link SharedPreferences} and an instance of {@link IconFactory}
-   * @return {@link Icon} map marker dark or light
-   */
-  static Icon retrieveMapMarker(Context context) {
-    TypedValue destinationMarkerResId = resolveAttributeFromId(context, R.attr.navigationViewDestinationMarker);
-    int markerResId = destinationMarkerResId.resourceId;
-    IconFactory iconFactory = IconFactory.getInstance(context);
-    return iconFactory.fromResource(markerResId);
-  }
-
-  /**
-   * Looks are current theme and retrieves the style
-   * for the given resId set in the theme.
-   *
-   * @param context to retrieve the resolved attribute
-   * @param styleResId for the given style
-   * @return resolved style resource Id
-   */
-  static int retrieveNavigationViewStyle(Context context, int styleResId) {
-    TypedValue outValue = resolveAttributeFromId(context, styleResId);
-    return outValue.resourceId;
   }
 
   @NonNull
