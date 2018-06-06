@@ -129,10 +129,8 @@ public class NavigationMapboxMap {
 
   public void onStop() {
     locationLayer.onStop();
-  }
-
-  public void onDestroy() {
-    mapCamera.onDestroy();
+    mapCamera.onStop();
+    mapRoute.onStop();
   }
 
   private void initializeRoute(MapView mapView, MapboxMap map, MapboxNavigation mapboxNavigation) {

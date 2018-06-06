@@ -1,5 +1,8 @@
 package com.mapbox.services.android.navigation.ui.v5.camera;
 
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleObserver;
+import android.arch.lifecycle.OnLifecycleEvent;
 import android.location.Location;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
@@ -25,7 +28,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
  *
  * @since 0.6.0
  */
-public class NavigationCamera {
+public class NavigationCamera implements LifecycleObserver {
 
   private static final long MAX_ANIMATION_DURATION_MS = 1500;
 
@@ -144,9 +147,10 @@ public class NavigationCamera {
    * Call in {@link FragmentActivity#onDestroy()} to properly remove the {@link ProgressChangeListener}
    * for the camera and prevent any leaks or further updates.
    *
-   * @since 0.13.0
+   * @since 0.15.0
    */
-  public void onDestroy() {
+  @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+  public void onStop() {
     navigation.removeProgressChangeListener(progressChangeListener);
   }
 

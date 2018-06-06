@@ -1,5 +1,8 @@
 package com.mapbox.services.android.navigation.ui.v5.route;
 
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleObserver;
+import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -83,7 +86,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
  * @since 0.4.0
  */
 public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMapChangedListener,
-  MapboxMap.OnMapClickListener {
+  MapboxMap.OnMapClickListener, LifecycleObserver {
 
   private static final String CONGESTION_KEY = "congestion";
   private static final String SOURCE_KEY = "source";
@@ -986,6 +989,22 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       addRoute(routeProgress.directionsRoute());
     }
     addUpcomingManeuverArrow(routeProgress);
+  }
+
+  /**
+   * This method should be called only if you have passed {@link MapboxNavigation}
+   * into the constructor.
+   *
+   * This method will remove the {@link ProgressChangeListener} that was originally added so updates
+   * to the {@link MapboxMap} discontinue.
+   *
+   * @since 0.15.0
+   */
+  @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+  public void onStop() {
+    if (navigation != null) {
+      navigation.removeProgressChangeListener(this);
+    }
   }
 
   /**

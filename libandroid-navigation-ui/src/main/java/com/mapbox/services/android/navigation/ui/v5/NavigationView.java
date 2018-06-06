@@ -560,8 +560,5 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     mapView.onDestroy();
     navigationViewModel.onDestroy(isChangingConfigurations());
     ImageCoordinator.getInstance().shutdown();
-    if (navigationMap != null) {
-      navigationMap.onDestroy();
-    }
   }
 }
