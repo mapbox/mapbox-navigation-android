@@ -66,4 +66,12 @@ class NavigationPresenter {
     }
     view.updateNavigationMap(location);
   }
+
+  public void onInstructionListVisibilityChanged(boolean visible) {
+    if (visible) {
+      view.hideRecenterBtn();
+    } else {
+      view.showRecenterBtn();
+    }
+  }
 }

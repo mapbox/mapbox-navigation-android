@@ -22,6 +22,7 @@ import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
+import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -31,7 +32,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 public class EmbeddedNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
-  NavigationListener, ProgressChangeListener {
+  NavigationListener, ProgressChangeListener, InstructionListListener {
 
   private NavigationView navigationView;
   private View spacer;
@@ -39,6 +40,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   private static final Point ORIGIN = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
   private static final Point DESTINATION = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
   private boolean bottomSheetVisible = true;
+  private boolean instructionListShown = false;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -78,7 +80,8 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
         .navigationListener(this)
         .directionsRoute(directionsRoute)
         .shouldSimulateRoute(true)
-        .progressChangeListener(this);
+        .progressChangeListener(this)
+        .instructionListListener(this);
     setBottomSheetCallback(options);
 
     navigationView.startNavigation(options.build());
@@ -220,6 +223,14 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
       0, string.length() - 3, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
     speedWidget.setText(spannableString);
-    speedWidget.setVisibility(View.VISIBLE);
+    if (!instructionListShown) {
+      speedWidget.setVisibility(View.VISIBLE);
+    }
+  }
+
+  @Override
+  public void onInstructionListVisibilityChanged(boolean shown) {
+    instructionListShown = shown;
+    speedWidget.setVisibility(shown ? View.GONE : View.VISIBLE);
   }
 }
