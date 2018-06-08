@@ -796,6 +796,9 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private void placeRouteBelow() {
     if (belowLayer == null || belowLayer.isEmpty()) {
       List<Layer> styleLayers = mapboxMap.getLayers();
+      if (styleLayers == null) {
+        return;
+      }
       for (int i = 0; i < styleLayers.size(); i++) {
         if (!(styleLayers.get(i) instanceof SymbolLayer)
           // Avoid placing the route on top of the user location layer
