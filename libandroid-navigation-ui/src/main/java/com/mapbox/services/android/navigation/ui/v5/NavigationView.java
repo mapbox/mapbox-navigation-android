@@ -27,6 +27,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.instruction.ImageCoordinator;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
+import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
 import com.mapbox.services.android.navigation.ui.v5.utils.ViewUtils;
@@ -380,6 +381,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     initializeSummaryBottomSheet();
     initializeNavigationEventDispatcher();
     initializeNavigationPresenter();
+    initializeInstructionListListener();
   }
 
   private void bind() {
@@ -417,6 +419,16 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private void initializeNavigationEventDispatcher() {
     navigationViewEventDispatcher = new NavigationViewEventDispatcher();
     navigationViewModel.initializeEventDispatcher(navigationViewEventDispatcher);
+  }
+
+  private void initializeInstructionListListener() {
+    instructionView.setInstructionListListener(new InstructionListListener() {
+      @Override
+      public void onInstructionListVisibilityChanged(boolean visible) {
+        navigationPresenter.onInstructionListVisibilityChanged(visible);
+        navigationViewEventDispatcher.onInstructionListVisibilityChanged(visible);
+      }
+    });
   }
 
   /**

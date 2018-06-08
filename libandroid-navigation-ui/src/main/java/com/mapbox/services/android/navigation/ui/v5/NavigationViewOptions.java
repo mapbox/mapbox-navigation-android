@@ -7,6 +7,7 @@ import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -42,6 +43,9 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
   @Nullable
   public abstract BottomSheetCallback bottomSheetCallback();
 
+  @Nullable
+  public abstract InstructionListListener instructionListListener();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -72,6 +76,8 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
     public abstract Builder milestones(List<Milestone> milestones);
 
     public abstract Builder bottomSheetCallback(BottomSheetCallback bottomSheetCallback);
+
+    public abstract Builder instructionListListener(InstructionListListener instructionListListener);
 
     public abstract NavigationViewOptions build();
   }

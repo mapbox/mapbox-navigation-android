@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
 
@@ -277,5 +278,16 @@ public class NavigationViewEventDispatcherTest {
     eventDispatcher.onFeedbackSent(item);
 
     verify(feedbackListener, times(0)).onFeedbackSent(item);
+  }
+
+  @Test
+  public void onInstructionListShown() {
+    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
+    InstructionListListener instructionListListener = mock(InstructionListListener.class);
+    eventDispatcher.assignInstructionListListener(instructionListListener);
+
+    eventDispatcher.onInstructionListVisibilityChanged(true);
+
+    verify(instructionListListener, times(1)).onInstructionListVisibilityChanged(true);
   }
 }

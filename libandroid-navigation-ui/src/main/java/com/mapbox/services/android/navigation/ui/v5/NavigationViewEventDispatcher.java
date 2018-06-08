@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
@@ -24,6 +25,7 @@ class NavigationViewEventDispatcher {
   private NavigationListener navigationListener;
   private RouteListener routeListener;
   private BottomSheetCallback bottomSheetCallback;
+  private InstructionListListener instructionListListener;
 
   /**
    * Initializes the listeners in the dispatcher, as well as the listeners in the {@link MapboxNavigation}
@@ -37,6 +39,7 @@ class NavigationViewEventDispatcher {
     assignBottomSheetCallback(navigationViewOptions.bottomSheetCallback());
     assignProgressChangeListener(navigationViewOptions, navigation);
     assignMilestoneEventListener(navigationViewOptions, navigation);
+    assignInstructionListListener(navigationViewOptions.instructionListListener());
   }
 
   void assignFeedbackListener(@Nullable FeedbackListener feedbackListener) {
@@ -53,6 +56,10 @@ class NavigationViewEventDispatcher {
 
   void assignBottomSheetCallback(@Nullable BottomSheetCallback bottomSheetCallback) {
     this.bottomSheetCallback = bottomSheetCallback;
+  }
+
+  void assignInstructionListListener(@Nullable InstructionListListener instructionListListener) {
+    this.instructionListListener = instructionListListener;
   }
 
   /*
@@ -138,6 +145,12 @@ class NavigationViewEventDispatcher {
   void onBottomSheetStateChanged(View bottomSheet, int newState) {
     if (bottomSheetCallback != null) {
       bottomSheetCallback.onStateChanged(bottomSheet, newState);
+    }
+  }
+
+  void onInstructionListVisibilityChanged(boolean shown) {
+    if (instructionListListener != null) {
+      instructionListListener.onInstructionListVisibilityChanged(shown);
     }
   }
 

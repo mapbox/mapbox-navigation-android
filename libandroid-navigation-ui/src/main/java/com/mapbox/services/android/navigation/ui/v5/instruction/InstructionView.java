@@ -48,6 +48,7 @@ import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
+import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
@@ -104,6 +105,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private AnimationSet fadeInSlowOut;
   private LegStep currentStep;
   private NavigationViewModel navigationViewModel;
+  private InstructionListListener instructionListListener;
 
   private String language = "";
   private String unitType = "";
@@ -121,6 +123,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   public InstructionView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     initialize();
+  }
+
+  public void setInstructionListListener(InstructionListListener instructionListListener) {
+    this.instructionListListener = instructionListListener;
   }
 
   /**
@@ -299,6 +305,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       updateLandscapeConstraintsTo(R.layout.instruction_layout);
     }
     instructionListLayout.setVisibility(GONE);
+    onInstructionListVisibilityChanged(false);
   }
 
   /**
@@ -308,6 +315,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * can be animated appropriately.
    */
   public void showInstructionList() {
+    onInstructionListVisibilityChanged(true);
     beginDelayedTransition();
     int orientation = getContext().getResources().getConfiguration().orientation;
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -547,6 +555,12 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     fadeInSlowOut = new AnimationSet(false);
     fadeInSlowOut.addAnimation(fadeIn);
     fadeInSlowOut.addAnimation(fadeOut);
+  }
+
+  private void onInstructionListVisibilityChanged(boolean visible) {
+    if (instructionListListener != null) {
+      instructionListListener.onInstructionListVisibilityChanged(visible);
+    }
   }
 
   private void addBottomSheetListener() {
