@@ -151,16 +151,22 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
       public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
         if (response.isSuccessful()) {
           executeInstructionTask(response.body());
+        } else {
+          onError();
         }
       }
 
       @Override
       public void onFailure(Call<ResponseBody> call, Throwable throwable) {
-        if (instructionListener != null) {
-          instructionListener.onError(true);
-        }
+        onError();
       }
     });
+  }
+
+  private void onError() {
+    if (instructionListener != null) {
+      instructionListener.onError(true);
+    }
   }
 
   private void playInstruction(@NonNull File instruction) {
