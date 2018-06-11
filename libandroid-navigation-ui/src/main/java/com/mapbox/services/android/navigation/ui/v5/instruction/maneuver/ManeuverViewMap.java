@@ -82,6 +82,13 @@ class ManeuverViewMap extends HashMap<Pair<String, String>, ManeuverViewUpdate> 
         ManeuversStyleKit.drawArrive(canvas, primaryColor, size);
       }
     });
+    put(new Pair<>(STEP_MANEUVER_TYPE_ARRIVE, STEP_MANEUVER_MODIFIER_STRAIGHT), new ManeuverViewUpdate() {
+      @Override
+      public void updateManeuverView(Canvas canvas, int primaryColor, int secondaryColor,
+                                     PointF size, float roundaboutAngle) {
+        ManeuversStyleKit.drawArrive(canvas, primaryColor, size);
+      }
+    });
     put(new Pair<>(STEP_MANEUVER_TYPE_ARRIVE, STEP_MANEUVER_MODIFIER_RIGHT), new ManeuverViewUpdate() {
       @Override
       public void updateManeuverView(Canvas canvas, int primaryColor, int secondaryColor,
