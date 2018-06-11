@@ -105,6 +105,11 @@ public class ThemeSwitcher {
     context.setTheme(darkThemeEnabled ? darkTheme : lightTheme);
   }
 
+  static String retrieveMapStyle(Context context) {
+    TypedValue mapStyleAttr = resolveAttributeFromId(context, R.attr.navigationViewMapStyle);
+    return mapStyleAttr.string.toString();
+  }
+
   /**
    * Returns true if the current UI_MODE_NIGHT is enabled, false otherwise.
    *
@@ -114,11 +119,6 @@ public class ThemeSwitcher {
     int uiMode = context.getResources().getConfiguration().uiMode
       & Configuration.UI_MODE_NIGHT_MASK;
     return uiMode == Configuration.UI_MODE_NIGHT_YES;
-  }
-
-  static String retrieveMapStyle(Context context) {
-    TypedValue mapStyleAttr = resolveAttributeFromId(context, R.attr.navigationViewMapStyle);
-    return mapStyleAttr.string.toString();
   }
 
   @NonNull
