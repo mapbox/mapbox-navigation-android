@@ -997,7 +997,23 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   /**
    * This method should be called only if you have passed {@link MapboxNavigation}
    * into the constructor.
+   * <p>
+   * This method will add the {@link ProgressChangeListener} that was originally added so updates
+   * to the {@link MapboxMap} continue.
    *
+   * @since 0.15.0
+   */
+  @OnLifecycleEvent(Lifecycle.Event.ON_START)
+  public void onStart() {
+    if (navigation != null) {
+      navigation.addProgressChangeListener(this);
+    }
+  }
+
+  /**
+   * This method should be called only if you have passed {@link MapboxNavigation}
+   * into the constructor.
+   * <p>
    * This method will remove the {@link ProgressChangeListener} that was originally added so updates
    * to the {@link MapboxMap} discontinue.
    *

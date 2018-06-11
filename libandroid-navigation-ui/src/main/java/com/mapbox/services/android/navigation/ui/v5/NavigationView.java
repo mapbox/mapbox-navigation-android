@@ -161,6 +161,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * In a {@link android.app.Fragment}, this should be in {@link Fragment#onDestroyView()}.
    */
   public void onDestroy() {
+    navigationViewEventDispatcher.onDestroy(navigationViewModel.getNavigation());
     shutdown();
   }
 

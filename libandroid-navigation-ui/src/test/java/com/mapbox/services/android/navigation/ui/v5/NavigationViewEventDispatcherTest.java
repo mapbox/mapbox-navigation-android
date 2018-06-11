@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
+import android.support.annotation.NonNull;
+
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
@@ -7,6 +9,9 @@ import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 
 import org.junit.Test;
 
@@ -15,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class NavigationViewEventDispatcherTest {
 
@@ -281,13 +287,91 @@ public class NavigationViewEventDispatcherTest {
   }
 
   @Test
-  public void onInstructionListShown() {
-    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
+  public void onInstructionListShown_listenerReturnsTrue() {
     InstructionListListener instructionListListener = mock(InstructionListListener.class);
-    eventDispatcher.assignInstructionListListener(instructionListListener);
+    NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(instructionListListener);
 
     eventDispatcher.onInstructionListVisibilityChanged(true);
 
     verify(instructionListListener, times(1)).onInstructionListVisibilityChanged(true);
+  }
+
+  @Test
+  public void onInstructionListHidden_listenerReturnsFalse() {
+    InstructionListListener instructionListListener = mock(InstructionListListener.class);
+    NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(instructionListListener);
+
+    eventDispatcher.onInstructionListVisibilityChanged(false);
+
+    verify(instructionListListener, times(1)).onInstructionListVisibilityChanged(false);
+  }
+
+  @Test
+  public void onProgressChangeListenerAddedInOptions_isAddedToNavigation() {
+    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
+    NavigationViewOptions options = mock(NavigationViewOptions.class);
+    ProgressChangeListener progressChangeListener = setupProgressChangeListener(options);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+
+    eventDispatcher.initializeListeners(options, navigation);
+
+    verify(navigation, times(1)).addProgressChangeListener(progressChangeListener);
+  }
+
+  @Test
+  public void onProgressChangeListenerAddedInOptions_isRemovedInOnDestroy() {
+    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
+    NavigationViewOptions options = mock(NavigationViewOptions.class);
+    ProgressChangeListener progressChangeListener = setupProgressChangeListener(options);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+    eventDispatcher.initializeListeners(options, navigation);
+
+    eventDispatcher.onDestroy(navigation);
+
+    verify(navigation, times(1)).removeProgressChangeListener(progressChangeListener);
+  }
+
+  @Test
+  public void onMilestoneEventListenerAddedInOptions_isAddedToNavigation() {
+    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
+    NavigationViewOptions options = mock(NavigationViewOptions.class);
+    MilestoneEventListener milestoneEventListener = setupMilestoneEventListener(options);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+
+    eventDispatcher.initializeListeners(options, navigation);
+
+    verify(navigation, times(1)).addMilestoneEventListener(milestoneEventListener);
+  }
+
+  @Test
+  public void onMilestoneEventListenerAddedInOptions_isRemovedInOnDestroy() {
+    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
+    NavigationViewOptions options = mock(NavigationViewOptions.class);
+    MilestoneEventListener milestoneEventListener = setupMilestoneEventListener(options);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+    eventDispatcher.initializeListeners(options, navigation);
+
+    eventDispatcher.onDestroy(navigation);
+
+    verify(navigation, times(1)).removeMilestoneEventListener(milestoneEventListener);
+  }
+
+  @NonNull
+  private NavigationViewEventDispatcher buildViewEventDispatcher(InstructionListListener instructionListListener) {
+    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
+    eventDispatcher.assignInstructionListListener(instructionListListener);
+    return eventDispatcher;
+  }
+
+  private ProgressChangeListener setupProgressChangeListener(NavigationViewOptions options) {
+    ProgressChangeListener progressChangeListener = mock(ProgressChangeListener.class);
+    when(options.progressChangeListener()).thenReturn(progressChangeListener);
+    return  progressChangeListener;
+  }
+
+  private MilestoneEventListener setupMilestoneEventListener(NavigationViewOptions options) {
+    MilestoneEventListener milestoneEventListener = mock(MilestoneEventListener.class);
+    when(options.milestoneEventListener()).thenReturn(milestoneEventListener);
+    return  milestoneEventListener;
   }
 }
