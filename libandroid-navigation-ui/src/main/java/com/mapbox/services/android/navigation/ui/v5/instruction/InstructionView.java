@@ -316,6 +316,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   public void showInstructionList() {
     onInstructionListVisibilityChanged(true);
+    instructionLayout.requestFocus();
     beginDelayedTransition();
     int orientation = getContext().getResources().getConfiguration().orientation;
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
