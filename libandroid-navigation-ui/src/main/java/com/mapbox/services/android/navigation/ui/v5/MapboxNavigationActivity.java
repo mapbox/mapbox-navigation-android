@@ -17,7 +17,8 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
  * <p>
  * Demonstrates the proper setup and usage of the view, including all lifecycle methods.
  */
-public class NavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener {
+public class MapboxNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
+  NavigationListener {
 
   private NavigationView navigationView;
 

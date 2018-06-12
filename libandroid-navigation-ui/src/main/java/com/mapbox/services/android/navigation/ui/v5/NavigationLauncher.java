@@ -43,7 +43,7 @@ public class NavigationLauncher {
 
     editor.apply();
 
-    Intent navigationActivity = new Intent(activity, NavigationActivity.class);
+    Intent navigationActivity = new Intent(activity, MapboxNavigationActivity.class);
     activity.startActivity(navigationActivity);
   }
 
