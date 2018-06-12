@@ -18,14 +18,13 @@ import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.location.MetricsLocation;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListeners;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListener;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.RerouteEvent;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.SessionState;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.TelemetryEvent;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
-import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 
 import java.util.ArrayList;
@@ -36,8 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-class NavigationTelemetry implements LocationEngineListener, NavigationMetricListeners.EventListeners,
-  NavigationMetricListeners.ArrivalListener {
+class NavigationTelemetry implements LocationEngineListener, NavigationMetricListener {
 
   private static NavigationTelemetry instance;
   private boolean isInitialized = false;
@@ -58,7 +56,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   private LocationEngine navigationLocationEngine;
   private SessionState navigationSessionState;
   private RingBuffer<Location> locationBuffer;
-  private RouteUtils routeUtils;
   private Date lastRerouteDate;
 
   private boolean isOffRoute;
@@ -69,7 +66,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     metricLocation = new MetricsLocation(null);
     metricProgress = new MetricsRouteProgress(null);
     navigationSessionState = SessionState.builder().build();
-    routeUtils = new RouteUtils();
   }
 
   /**
@@ -126,11 +122,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     updateLifecyclePercentages();
     // Send arrival event
     NavigationMetricsWrapper.arriveEvent(navigationSessionState, routeProgress, metricLocation.getLocation());
-
-    // Reset the departure listener if there is another leg in the route
-    if (!routeUtils.isLastLeg(routeProgress)) {
-      resetArrivalListener();
-    }
   }
 
   void initialize(@NonNull Context context, @NonNull String accessToken,
@@ -222,6 +213,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   void updateSessionRoute(DirectionsRoute directionsRoute) {
     SessionState.Builder navigationBuilder = navigationSessionState.toBuilder();
     navigationBuilder.currentDirectionRoute(directionsRoute);
+    eventDispatcher.addMetricEventListeners(this);
 
     if (isOffRoute) {
       // If we are off-route, update the reroute count
@@ -312,10 +304,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     queuedFeedbackEvents.remove(feedbackEvent);
   }
 
-  private void resetArrivalListener() {
-    eventDispatcher.addMetricArrivalListener(this);
-  }
-
   private void validateAccessToken(String accessToken) {
     if (TextUtils.isEmpty(accessToken) || (!accessToken.toLowerCase(Locale.US).startsWith("pk.")
       && !accessToken.toLowerCase(Locale.US).startsWith("sk."))) {
@@ -327,7 +315,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   private void initEventDispatcherListeners(MapboxNavigation navigation) {
     eventDispatcher = navigation.getEventDispatcher();
     eventDispatcher.addMetricEventListeners(this);
-    eventDispatcher.addMetricArrivalListener(this);
   }
 
   @NonNull

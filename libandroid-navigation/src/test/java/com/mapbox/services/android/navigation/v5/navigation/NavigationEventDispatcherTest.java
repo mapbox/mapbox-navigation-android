@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.content.Context;
 import android.location.Location;
+import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -14,7 +15,7 @@ import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListeners;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -46,9 +47,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
   @Mock
   ProgressChangeListener progressChangeListener;
   @Mock
-  NavigationMetricListeners.EventListeners eventListeners;
-  @Mock
-  NavigationMetricListeners.ArrivalListener arrivalListener;
+  NavigationMetricListener metricEventListener;
   @Mock
   OffRouteListener offRouteListener;
   @Mock
@@ -303,10 +302,10 @@ public class NavigationEventDispatcherTest extends BaseTest {
 
   @Test
   public void setNavigationMetricListener_didGetSet() throws Exception {
-    navigationEventDispatcher.addMetricEventListeners(eventListeners);
+    navigationEventDispatcher.addMetricEventListeners(metricEventListener);
     navigationEventDispatcher.onProgressChange(location, routeProgress);
 
-    verify(eventListeners, times(1)).onRouteProgressUpdate(routeProgress);
+    verify(metricEventListener, times(1)).onRouteProgressUpdate(routeProgress);
   }
 
   @Test
@@ -316,12 +315,11 @@ public class NavigationEventDispatcherTest extends BaseTest {
     RouteUtils routeUtils = mock(RouteUtils.class);
     when(routeUtils.isArrivalEvent(routeProgress, milestone)).thenReturn(false);
     NavigationEventDispatcher navigationEventDispatcher = new NavigationEventDispatcher(routeUtils);
-
-    navigationEventDispatcher.addMetricArrivalListener(arrivalListener);
+    navigationEventDispatcher.addMetricEventListeners(metricEventListener);
 
     navigationEventDispatcher.onMilestoneEvent(routeProgress, instruction, milestone);
 
-    verify(arrivalListener, times(0)).onArrival(routeProgress);
+    verify(metricEventListener, times(0)).onArrival(routeProgress);
   }
 
   @Test
@@ -331,11 +329,50 @@ public class NavigationEventDispatcherTest extends BaseTest {
     RouteUtils routeUtils = mock(RouteUtils.class);
     when(routeUtils.isArrivalEvent(routeProgress, milestone)).thenReturn(true);
     NavigationEventDispatcher navigationEventDispatcher = new NavigationEventDispatcher(routeUtils);
-
-    navigationEventDispatcher.addMetricArrivalListener(arrivalListener);
+    navigationEventDispatcher.addMetricEventListeners(metricEventListener);
 
     navigationEventDispatcher.onMilestoneEvent(routeProgress, instruction, milestone);
 
-    verify(arrivalListener, times(1)).onArrival(routeProgress);
+    verify(metricEventListener, times(1)).onArrival(routeProgress);
+  }
+
+  @Test
+  public void onArrivalDuringLastLeg_offRouteListenerIsRemoved() {
+    String instruction = "";
+    Location location = mock(Location.class);
+    BannerInstructionMilestone milestone = mock(BannerInstructionMilestone.class);
+    RouteUtils routeUtils = mock(RouteUtils.class);
+    when(routeUtils.isArrivalEvent(routeProgress, milestone)).thenReturn(true);
+    when(routeUtils.isLastLeg(routeProgress)).thenReturn(true);
+    NavigationEventDispatcher navigationEventDispatcher = buildEventDispatcherHasArrived(instruction, routeUtils, milestone);
+
+    navigationEventDispatcher.onUserOffRoute(location);
+
+    verify(offRouteListener, times(0)).userOffRoute(location);
+  }
+
+  @Test
+  public void onArrivalDuringLastLeg_metricEventListenerIsRemoved() {
+    String instruction = "";
+    Location location = mock(Location.class);
+    BannerInstructionMilestone milestone = mock(BannerInstructionMilestone.class);
+    RouteUtils routeUtils = mock(RouteUtils.class);
+    when(routeUtils.isArrivalEvent(routeProgress, milestone)).thenReturn(true);
+    when(routeUtils.isLastLeg(routeProgress)).thenReturn(true);
+    NavigationEventDispatcher dispatcher = buildEventDispatcherHasArrived(instruction, routeUtils, milestone);
+
+    dispatcher.onUserOffRoute(location);
+
+    verify(metricEventListener, times(0)).onOffRouteEvent(location);
+  }
+
+  @NonNull
+  private NavigationEventDispatcher buildEventDispatcherHasArrived(String instruction, RouteUtils routeUtils,
+                                                                   Milestone milestone) {
+    NavigationEventDispatcher navigationEventDispatcher = new NavigationEventDispatcher(routeUtils);
+    navigationEventDispatcher.addOffRouteListener(offRouteListener);
+    navigationEventDispatcher.addMetricEventListeners(metricEventListener);
+    navigationEventDispatcher.onMilestoneEvent(routeProgress, instruction, milestone);
+    return navigationEventDispatcher;
   }
 }
