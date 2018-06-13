@@ -15,6 +15,8 @@ public interface NavigationContract {
 
     boolean isSummaryBottomSheetHidden();
 
+    void updateWaynameVisibility(boolean isVisible);
+
     void updateCameraTrackingEnabled(boolean isEnabled);
 
     void resetCameraPosition();
