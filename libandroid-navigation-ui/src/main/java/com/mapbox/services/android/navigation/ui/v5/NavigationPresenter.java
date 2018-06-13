@@ -71,7 +71,9 @@ class NavigationPresenter {
     if (visible) {
       view.hideRecenterBtn();
     } else {
-      view.showRecenterBtn();
+      if (view.isSummaryBottomSheetHidden()) {
+        view.showRecenterBtn();
+      }
     }
   }
 }
