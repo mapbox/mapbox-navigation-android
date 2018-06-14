@@ -172,7 +172,7 @@ public class NavigationService extends Service implements LocationEngineListener
    * the thread, and finally stops this service from running in the background.
    */
   void endNavigation() {
-    locationEngine.removeLocationEngineListener(this);
+    removeLocationEngineListener();
     removeRouteEngineListener();
     unregisterMapboxNotificationReceiver();
     quitThread();
@@ -291,6 +291,12 @@ public class NavigationService extends Service implements LocationEngineListener
       location = routeUtils.createFirstLocationFromRoute(mapboxNavigation.getRoute());
     }
     queueLocationUpdateTask(location);
+  }
+
+  private void removeLocationEngineListener() {
+    if (locationEngine != null) {
+      locationEngine.removeLocationEngineListener(this);
+    }
   }
 
   private void removeRouteEngineListener() {
