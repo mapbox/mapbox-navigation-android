@@ -272,6 +272,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     navigationMap.updateWaynameView(wayname);
   }
 
+  @Override
   public void updateWaynameVisibility(boolean isVisible) {
     navigationMap.updateWaynameVisibility(isVisible);
   }

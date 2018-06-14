@@ -22,6 +22,7 @@ class NavigationPresenter {
   void onRecenterClick() {
     view.setSummaryBehaviorHideable(false);
     view.setSummaryBehaviorState(BottomSheetBehavior.STATE_EXPANDED);
+    view.updateWaynameVisibility(true);
     view.resetCameraPosition();
     view.hideRecenterBtn();
   }
@@ -35,6 +36,7 @@ class NavigationPresenter {
       view.setSummaryBehaviorHideable(true);
       view.setSummaryBehaviorState(BottomSheetBehavior.STATE_HIDDEN);
       view.updateCameraTrackingEnabled(false);
+      view.updateWaynameVisibility(false);
     }
   }
 
