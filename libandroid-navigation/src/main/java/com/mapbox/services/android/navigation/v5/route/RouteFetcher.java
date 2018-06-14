@@ -14,6 +14,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import retrofit2.Call;
@@ -101,7 +102,7 @@ public class RouteFetcher {
   }
 
   private void addLanguage(NavigationRoute.Builder builder) {
-    builder.language(routeProgress.directionsRoute().voiceLanguage());
+    builder.language(new Locale(routeProgress.directionsRoute().voiceLanguage()));
   }
 
   private void addUnitType(NavigationRoute.Builder builder) {
