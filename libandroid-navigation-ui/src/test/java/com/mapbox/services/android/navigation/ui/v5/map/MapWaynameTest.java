@@ -63,6 +63,7 @@ public class MapWaynameTest {
     SymbolLayer waynameLayer = mock(SymbolLayer.class);
     List<Feature> roads = new ArrayList<>();
     Feature road = mock(Feature.class);
+    when(road.hasNonNullValueForProperty("name")).thenReturn(true);
     when(road.getStringProperty("name")).thenReturn(roadName);
     roads.add(road);
     MapWayname mapWayname = buildMapWayname(point, waynameLayer, roads);
@@ -70,6 +71,20 @@ public class MapWaynameTest {
     mapWayname.updateWaynameWithPoint(point, waynameLayer);
 
     verify(waynameLayer, times(1)).setProperties(any(PropertyValue.class));
+  }
+
+  @Test
+  public void onFeatureWithoutNamePropertyReturned_updateIsIgnored() {
+    PointF point = mock(PointF.class);
+    SymbolLayer waynameLayer = mock(SymbolLayer.class);
+    List<Feature> roads = new ArrayList<>();
+    Feature road = mock(Feature.class);
+    roads.add(road);
+    MapWayname mapWayname = buildMapWayname(point, waynameLayer, roads);
+
+    mapWayname.updateWaynameWithPoint(point, waynameLayer);
+
+    verify(waynameLayer, times(0)).setProperties(any(PropertyValue.class));
   }
 
   @Test
@@ -107,6 +122,7 @@ public class MapWaynameTest {
     SymbolLayer waynameLayer = mock(SymbolLayer.class);
     List<Feature> roads = new ArrayList<>();
     Feature road = mock(Feature.class);
+    when(road.hasNonNullValueForProperty("name")).thenReturn(true);
     when(road.getStringProperty("name")).thenReturn(roadName);
     roads.add(road);
     WaynameLayoutProvider layoutProvider = mock(WaynameLayoutProvider.class);

@@ -70,14 +70,10 @@ public class MapWayname {
   }
 
   private void updateLayerWithRoadLabelFeatures(List<Feature> roads, SymbolLayer waynameLayer) {
-    if (!roads.isEmpty()) {
-      String currentWayname = roads.get(FIRST_ROAD_FEATURE).getStringProperty(NAME_PROPERTY);
-      boolean newWayname = !wayname.contentEquals(currentWayname);
-      if (newWayname) {
-        wayname = currentWayname;
-        updateWaynameVisibility(true, waynameLayer);
-        updateWaynameLayer(wayname, waynameLayer);
-      }
+    boolean isValidFeatureList = !roads.isEmpty();
+    if (isValidFeatureList) {
+      Feature roadFeature = roads.get(FIRST_ROAD_FEATURE);
+      updateWaynameLayerWithNameProperty(waynameLayer, roadFeature);
     } else {
       updateWaynameVisibility(false, waynameLayer);
     }
@@ -106,6 +102,19 @@ public class MapWayname {
     if (waynameLayer != null) {
       waynameLayer.setProperties(visibility(isVisible ? Property.VISIBLE : Property.NONE));
       adjustMapPadding(isVisible);
+    }
+  }
+
+  private void updateWaynameLayerWithNameProperty(SymbolLayer waynameLayer, Feature roadFeature) {
+    boolean hasValidNameProperty = roadFeature.hasNonNullValueForProperty(NAME_PROPERTY);
+    if (hasValidNameProperty) {
+      String currentWayname = roadFeature.getStringProperty(NAME_PROPERTY);
+      boolean newWayname = !wayname.contentEquals(currentWayname);
+      if (newWayname) {
+        wayname = currentWayname;
+        updateWaynameVisibility(true, waynameLayer);
+        updateWaynameLayer(wayname, waynameLayer);
+      }
     }
   }
 
