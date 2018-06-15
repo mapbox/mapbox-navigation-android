@@ -7,7 +7,7 @@ import android.support.annotation.Nullable;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListeners;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -25,8 +25,7 @@ class NavigationEventDispatcher {
   private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
   private CopyOnWriteArrayList<OffRouteListener> offRouteListeners;
   private CopyOnWriteArrayList<FasterRouteListener> fasterRouteListeners;
-  private NavigationMetricListeners.EventListeners metricEventListeners;
-  private NavigationMetricListeners.ArrivalListener metricArrivalListener;
+  private NavigationMetricListener metricEventListener;
   private RouteUtils routeUtils;
 
   NavigationEventDispatcher() {
@@ -150,8 +149,8 @@ class NavigationEventDispatcher {
     for (OffRouteListener offRouteListener : offRouteListeners) {
       offRouteListener.userOffRoute(location);
     }
-    if (metricEventListeners != null) {
-      metricEventListeners.onOffRouteEvent(location);
+    if (metricEventListener != null) {
+      metricEventListener.onOffRouteEvent(location);
     }
   }
 
@@ -167,29 +166,25 @@ class NavigationEventDispatcher {
     }
   }
 
-  void addMetricEventListeners(NavigationMetricListeners.EventListeners eventListeners) {
-    this.metricEventListeners = eventListeners;
-  }
-
-  void addMetricArrivalListener(NavigationMetricListeners.ArrivalListener arrivalListener) {
-    this.metricArrivalListener = arrivalListener;
+  void addMetricEventListeners(NavigationMetricListener eventListeners) {
+    if (metricEventListener == null) {
+      metricEventListener = eventListeners;
+    }
   }
 
   private void checkForArrivalEvent(RouteProgress routeProgress, Milestone milestone) {
-    if (routeUtils.isArrivalEvent(routeProgress, milestone) && metricArrivalListener != null) {
-      metricArrivalListener.onArrival(routeProgress);
-      metricArrivalListener = null;
-
+    if (routeUtils.isArrivalEvent(routeProgress, milestone)) {
+      metricEventListener.onArrival(routeProgress);
       if (routeUtils.isLastLeg(routeProgress)) {
         removeOffRouteListener(null);
-        metricEventListeners = null;
+        metricEventListener = null;
       }
     }
   }
 
   private void sendMetricProgressUpdate(RouteProgress routeProgress) {
-    if (metricEventListeners != null) {
-      metricEventListeners.onRouteProgressUpdate(routeProgress);
+    if (metricEventListener != null) {
+      metricEventListener.onRouteProgressUpdate(routeProgress);
     }
   }
 }
