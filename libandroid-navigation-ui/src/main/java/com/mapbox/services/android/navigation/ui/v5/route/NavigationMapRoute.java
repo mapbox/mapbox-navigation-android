@@ -262,7 +262,6 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     routeLineStrings = new HashMap<>();
     layerIds = new ArrayList<>();
     initialize();
-    addListeners();
   }
 
   /**
@@ -1008,6 +1007,11 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     if (navigation != null) {
       navigation.removeProgressChangeListener(this);
     }
+  }
+
+  @OnLifecycleEvent(Lifecycle.Event.ON_START)
+  public void onStart() {
+    addListeners();
   }
 
   /**

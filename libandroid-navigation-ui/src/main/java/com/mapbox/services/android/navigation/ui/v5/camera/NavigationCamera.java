@@ -36,6 +36,7 @@ public class NavigationCamera implements LifecycleObserver {
   private MapboxNavigation navigation;
   private RouteInformation currentRouteInformation;
   private boolean trackingEnabled = true;
+  private boolean progressChangedListenerAttached = false;
   private long locationUpdateTimestamp;
   private ProgressChangeListener progressChangeListener = new ProgressChangeListener() {
     @Override
@@ -83,6 +84,7 @@ public class NavigationCamera implements LifecycleObserver {
       currentRouteInformation = buildRouteInformationFromRoute(route);
       animateCameraFromRoute(currentRouteInformation);
     } else {
+      progressChangedListenerAttached = true;
       navigation.addProgressChangeListener(progressChangeListener);
     }
   }
@@ -98,12 +100,12 @@ public class NavigationCamera implements LifecycleObserver {
    * @since 0.6.0
    */
   public void resume(Location location) {
+    progressChangedListenerAttached = true;
+    navigation.addProgressChangeListener(progressChangeListener);
+
     if (location != null) {
       currentRouteInformation = buildRouteInformationFromLocation(location, null);
       animateCameraFromLocation(currentRouteInformation);
-      navigation.addProgressChangeListener(progressChangeListener);
-    } else {
-      navigation.addProgressChangeListener(progressChangeListener);
     }
   }
 
@@ -152,6 +154,13 @@ public class NavigationCamera implements LifecycleObserver {
   @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
   public void onStop() {
     navigation.removeProgressChangeListener(progressChangeListener);
+  }
+
+  @OnLifecycleEvent(Lifecycle.Event.ON_START)
+  public void onStart() {
+    if (progressChangedListenerAttached) {
+      navigation.addProgressChangeListener(progressChangeListener);
+    }
   }
 
   private void initialize() {
@@ -236,11 +245,13 @@ public class NavigationCamera implements LifecycleObserver {
     updateMapCameraPosition(position, new MapboxMap.CancelableCallback() {
       @Override
       public void onCancel() {
+        progressChangedListenerAttached = true;
         navigation.addProgressChangeListener(progressChangeListener);
       }
 
       @Override
       public void onFinish() {
+        progressChangedListenerAttached = true;
         navigation.addProgressChangeListener(progressChangeListener);
       }
     });
