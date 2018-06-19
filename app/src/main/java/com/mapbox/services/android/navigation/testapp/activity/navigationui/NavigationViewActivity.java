@@ -49,6 +49,7 @@ import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -307,15 +308,15 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     return unitType;
   }
 
-  private String getLanguageFromSharedPreferences() {
+  private Locale getLanguageFromSharedPreferences() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     String defaultLanguage = getString(R.string.default_locale);
     String language = sharedPreferences.getString(getString(R.string.language_key), defaultLanguage);
     if (language.equals(defaultLanguage)) {
-      language = localeUtils.inferDeviceLanguage(this);
+      return localeUtils.inferDeviceLocale(this);
+    } else {
+      return new Locale(language);
     }
-
-    return language;
   }
 
   private boolean getShouldSimulateRouteFromSharedPreferences() {

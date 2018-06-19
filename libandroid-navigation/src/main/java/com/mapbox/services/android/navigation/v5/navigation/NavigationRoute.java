@@ -275,15 +275,15 @@ public final class NavigationRoute {
      * select number of languages are currently supported, reference the table provided in the see
      * link below.
      *
-     * @param language a string value representing the language you'd like the instructions to be
+     * @param language a Locale representing the language you'd like the instructions to be
      *                 written in when returned
      * @return this builder for chaining options together
      * @see <a href="https://www.mapbox.com/api-documentation/#instructions-languages">Supported
      * Languages</a>
      * @since 0.5.0
      */
-    public Builder language(String language) {
-      directionsBuilder.language(new Locale(language));
+    public Builder language(Locale language) {
+      directionsBuilder.language(language);
       return this;
     }
 
