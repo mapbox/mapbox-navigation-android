@@ -125,6 +125,8 @@ public class NavigationMapboxMap {
   @SuppressLint("MissingPermission")
   public void onStart() {
     locationLayer.onStart();
+    mapCamera.onStart();
+    mapRoute.onStart();
   }
 
   public void onStop() {

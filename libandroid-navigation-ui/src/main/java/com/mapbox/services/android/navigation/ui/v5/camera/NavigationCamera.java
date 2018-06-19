@@ -144,7 +144,18 @@ public class NavigationCamera implements LifecycleObserver {
   }
 
   /**
-   * Call in {@link FragmentActivity#onDestroy()} to properly remove the {@link ProgressChangeListener}
+   * Call in {@link FragmentActivity#onStart()} to properly add the {@link ProgressChangeListener}
+   * for the camera and prevent any leaks or further updates.
+   *
+   * @since 0.15.0
+   */
+  @OnLifecycleEvent(Lifecycle.Event.ON_START)
+  public void onStart() {
+    navigation.addProgressChangeListener(progressChangeListener);
+  }
+
+  /**
+   * Call in {@link FragmentActivity#onStop()} to properly remove the {@link ProgressChangeListener}
    * for the camera and prevent any leaks or further updates.
    *
    * @since 0.15.0

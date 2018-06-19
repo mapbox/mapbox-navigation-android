@@ -12,7 +12,9 @@ import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 
 /**
  * In charge of holding any {@link NavigationView} related listeners {@link NavigationListener},
@@ -21,6 +23,8 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
  */
 class NavigationViewEventDispatcher {
 
+  private ProgressChangeListener progressChangeListener;
+  private MilestoneEventListener milestoneEventListener;
   private FeedbackListener feedbackListener;
   private NavigationListener navigationListener;
   private RouteListener routeListener;
@@ -40,6 +44,13 @@ class NavigationViewEventDispatcher {
     assignProgressChangeListener(navigationViewOptions, navigation);
     assignMilestoneEventListener(navigationViewOptions, navigation);
     assignInstructionListListener(navigationViewOptions.instructionListListener());
+  }
+
+  void onDestroy(@Nullable MapboxNavigation navigation) {
+    if (navigation != null) {
+      removeProgressChangeListener(navigation);
+      removeMilestoneEventListener(navigation);
+    }
   }
 
   void assignFeedbackListener(@Nullable FeedbackListener feedbackListener) {
@@ -155,14 +166,28 @@ class NavigationViewEventDispatcher {
   }
 
   private void assignProgressChangeListener(NavigationViewOptions navigationViewOptions, MapboxNavigation navigation) {
-    if (navigationViewOptions.progressChangeListener() != null) {
-      navigation.addProgressChangeListener(navigationViewOptions.progressChangeListener());
+    this.progressChangeListener = navigationViewOptions.progressChangeListener();
+    if (progressChangeListener != null) {
+      navigation.addProgressChangeListener(progressChangeListener);
     }
   }
 
   private void assignMilestoneEventListener(NavigationViewOptions navigationViewOptions, MapboxNavigation navigation) {
-    if (navigationViewOptions.milestoneEventListener() != null) {
-      navigation.addMilestoneEventListener(navigationViewOptions.milestoneEventListener());
+    this.milestoneEventListener = navigationViewOptions.milestoneEventListener();
+    if (milestoneEventListener != null) {
+      navigation.addMilestoneEventListener(milestoneEventListener);
+    }
+  }
+
+  private void removeMilestoneEventListener(MapboxNavigation navigation) {
+    if (milestoneEventListener != null) {
+      navigation.removeMilestoneEventListener(milestoneEventListener);
+    }
+  }
+
+  private void removeProgressChangeListener(MapboxNavigation navigation) {
+    if (progressChangeListener != null) {
+      navigation.removeProgressChangeListener(progressChangeListener);
     }
   }
 }
