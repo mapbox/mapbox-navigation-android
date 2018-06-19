@@ -2,6 +2,8 @@ package com.mapbox.services.android.navigation.v5.navigation.camera;
 
 import com.mapbox.geojson.Point;
 
+import java.util.List;
+
 /**
  * This class handles calculating all properties necessary to configure the camera position while
  * routing. The {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation} uses
@@ -35,4 +37,6 @@ public abstract class Camera {
    */
   public abstract double zoom(RouteInformation routeInformation);
 
+
+  public abstract List<Point> overview(RouteInformation routeInformation);
 }

@@ -58,7 +58,7 @@
     <LinearLayout
         android:id="@+id/instructionLayoutText"
         android:layout_width="0dp"
-        android:layout_height="64dp"
+        android:layout_height="@dimen/instruction_layout_height"
         android:background="?attr/navigationViewBannerBackground"
         android:elevation="4dp"
         android:foreground="?attr/selectableItemBackground"

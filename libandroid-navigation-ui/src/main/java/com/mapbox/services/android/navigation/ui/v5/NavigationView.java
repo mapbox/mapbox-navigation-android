@@ -6,10 +6,9 @@ import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
@@ -18,7 +17,6 @@ import android.support.v7.app.AppCompatDelegate;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -27,10 +25,8 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.instruction.ImageCoordinator;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
-import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
-import com.mapbox.services.android.navigation.ui.v5.utils.ViewUtils;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
@@ -68,6 +64,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private BottomSheetBehavior summaryBehavior;
   private ImageButton cancelBtn;
   private RecenterButton recenterBtn;
+  private ImageButton routeOverviewBtn;
 
   private NavigationPresenter navigationPresenter;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
@@ -282,25 +279,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     navigationMap.updateWaynameQueryMap(isEnabled);
   }
 
-  /**
-   * Called when the navigation session is finished.
-   * Can either be from a cancel event or if the user has arrived at their destination.
-   */
-  @Override
-  public void finishNavigationView() {
-    navigationViewEventDispatcher.onNavigationFinished();
-  }
-
   @Override
   public void takeScreenshot() {
-    map.snapshot(new MapboxMap.SnapshotReadyCallback() {
-      @Override
-      public void onSnapshotReady(Bitmap snapshot) {
-        ImageView screenshotView = updateScreenshotViewWithSnapshot(snapshot);
-        updateFeedbackScreenshot();
-        resetViewVisibility(screenshotView);
-      }
-    });
+    map.snapshot(new NavigationSnapshotReadyCallback(this, navigationViewModel));
   }
 
   /**
@@ -330,6 +311,12 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Override
   public void updateNavigationMap(Location location) {
     navigationMap.updateLocation(location);
+  }
+
+  @Override
+  public void updateCameraRouteOverview() {
+    int[] padding = buildRouteOverviewPadding(getContext());
+    navigationMap.showRouteOverview(padding);
   }
 
   /**
@@ -380,10 +367,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
     initializeNavigationViewModel();
-    initializeSummaryBottomSheet();
     initializeNavigationEventDispatcher();
     initializeNavigationPresenter();
     initializeInstructionListListener();
+    initializeSummaryBottomSheet();
   }
 
   private void bind() {
@@ -392,6 +379,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     summaryBottomSheet = findViewById(R.id.summaryBottomSheet);
     cancelBtn = findViewById(R.id.cancelBtn);
     recenterBtn = findViewById(R.id.recenterBtn);
+    routeOverviewBtn = findViewById(R.id.routeOverviewBtn);
   }
 
   private void initializeNavigationViewModel() {
@@ -405,17 +393,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private void initializeSummaryBottomSheet() {
     summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
     summaryBehavior.setHideable(false);
-    summaryBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-      @Override
-      public void onStateChanged(@NonNull View bottomSheet, int newState) {
-        navigationViewEventDispatcher.onBottomSheetStateChanged(bottomSheet, newState);
-        navigationPresenter.onSummaryBottomSheetHidden();
-      }
-
-      @Override
-      public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-      }
-    });
+    summaryBehavior.setBottomSheetCallback(new SummaryBottomSheetCallback(navigationPresenter,
+      navigationViewEventDispatcher));
   }
 
   private void initializeNavigationEventDispatcher() {
@@ -424,13 +403,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void initializeInstructionListListener() {
-    instructionView.setInstructionListListener(new InstructionListListener() {
-      @Override
-      public void onInstructionListVisibilityChanged(boolean visible) {
-        navigationPresenter.onInstructionListVisibilityChanged(visible);
-        navigationViewEventDispatcher.onInstructionListVisibilityChanged(visible);
-      }
-    });
+    instructionView.setInstructionListListener(new NavigationInstructionListListener(navigationPresenter,
+      navigationViewEventDispatcher));
   }
 
   /**
@@ -445,24 +419,13 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     summaryBehavior.setState(bottomSheetState);
   }
 
-  @NonNull
-  private ImageView updateScreenshotViewWithSnapshot(Bitmap snapshot) {
-    ImageView screenshotView = findViewById(R.id.screenshotView);
-    screenshotView.setVisibility(View.VISIBLE);
-    screenshotView.setImageBitmap(snapshot);
-    return screenshotView;
-  }
-
-  private void updateFeedbackScreenshot() {
-    mapView.setVisibility(View.INVISIBLE);
-    Bitmap capture = ViewUtils.captureView(mapView);
-    String encoded = ViewUtils.encodeView(capture);
-    navigationViewModel.updateFeedbackScreenshot(encoded);
-  }
-
-  private void resetViewVisibility(ImageView screenshotView) {
-    screenshotView.setVisibility(View.INVISIBLE);
-    mapView.setVisibility(View.VISIBLE);
+  private int[] buildRouteOverviewPadding(Context context) {
+    Resources resources = context.getResources();
+    int leftRightPadding = (int) resources.getDimension(R.dimen.route_overview_left_right_padding);
+    int paddingBuffer = (int) resources.getDimension(R.dimen.route_overview_buffer_padding);
+    int instructionHeight = (int) (resources.getDimension(R.dimen.instruction_layout_height) + paddingBuffer);
+    int summaryHeight = (int) resources.getDimension(R.dimen.summary_bottomsheet_height);
+    return new int[] {leftRightPadding, instructionHeight, leftRightPadding, summaryHeight};
   }
 
   private boolean isChangingConfigurations() {
@@ -472,17 +435,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
     }
   }
-
-  /**
-   * Create a top map padding value that pushes the focal point
-   * of the map to the bottom of the screen (above the bottom sheet).
-   */
-  private int createDefaultMapTopPadding() {
-    int mapViewHeight = mapView.getHeight();
-    int bottomSheetHeight = summaryBottomSheet.getHeight();
-    return mapViewHeight - (bottomSheetHeight * 4);
-  }
-
 
   private void initializeNavigationPresenter() {
     navigationPresenter = new NavigationPresenter(this);
@@ -498,19 +450,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   private void initializeListeners() {
     map.addOnScrollListener(NavigationView.this);
-    cancelBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        navigationPresenter.onCancelBtnClick();
-        navigationViewEventDispatcher.onCancelNavigation();
-      }
-    });
-    recenterBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        navigationPresenter.onRecenterClick();
-      }
-    });
+    cancelBtn.setOnClickListener(new CancelBtnClickListener(navigationViewEventDispatcher));
+    recenterBtn.setOnClickListener(new RecenterBtnClickListener(navigationPresenter));
+    routeOverviewBtn.setOnClickListener(new RouteOverviewBtnClickListener(navigationPresenter));
   }
 
   private void establish(NavigationViewOptions options) {
@@ -550,7 +492,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   private void initializeNavigationMapboxMap(NavigationViewOptions options, MapboxNavigation navigation) {
     navigationMap = new NavigationMapboxMap(mapView, map, navigation);
-    navigationMap.updateDefaultMapTopPadding(createDefaultMapTopPadding());
     navigationMap.updateWaynameQueryMap(options.waynameChipEnabled());
   }
 

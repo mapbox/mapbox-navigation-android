@@ -15,7 +15,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
 import static com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap.STREETS_LAYER_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MAPBOX_WAYNAME_ICON;
 
-public class MapWayname {
+class MapWayname {
 
   private static final String NAME_PROPERTY = "name";
   private static final int FIRST_ROAD_FEATURE = 0;
@@ -23,45 +23,54 @@ public class MapWayname {
   private WaynameLayoutProvider layoutProvider;
   private WaynameLayerInteractor layerInteractor;
   private WaynameFeatureFinder featureInteractor;
-  private WaynamePaddingAdjustor paddingAdjustor;
-  private boolean autoQueryIsEnabled;
+  private MapPaddingAdjustor paddingAdjustor;
+  private boolean isAutoQueryEnabled;
+  private boolean isVisible;
   private String wayname = "";
 
   MapWayname(WaynameLayoutProvider layoutProvider, WaynameLayerInteractor layerInteractor,
-             WaynameFeatureFinder featureInteractor, WaynamePaddingAdjustor paddingAdjustor) {
+             WaynameFeatureFinder featureInteractor, MapPaddingAdjustor paddingAdjustor) {
     this.layoutProvider = layoutProvider;
     this.layerInteractor = layerInteractor;
     this.featureInteractor = featureInteractor;
     this.paddingAdjustor = paddingAdjustor;
   }
 
-  public void updateWaynameWithPoint(PointF point, SymbolLayer waynameLayer) {
-    if (!autoQueryIsEnabled) {
+  void updateWaynameWithPoint(PointF point, SymbolLayer waynameLayer) {
+    if (!isAutoQueryEnabled || !isVisible) {
       return;
     }
     List<Feature> roads = findRoadLabelFeatures(point);
+    boolean shouldBeVisible = !roads.isEmpty();
+    adjustWaynameVisibility(shouldBeVisible, waynameLayer);
+    adjustMapPadding(shouldBeVisible);
+    if (!shouldBeVisible) {
+      return;
+    }
     updateLayerWithRoadLabelFeatures(roads, waynameLayer);
   }
 
-  public void updateWaynameLayer(String wayname, SymbolLayer waynameLayer) {
+  void updateWaynameLayer(String wayname, SymbolLayer waynameLayer) {
     if (waynameLayer != null) {
       createWaynameIcon(wayname, waynameLayer);
     }
   }
 
-  public void updateWaynameVisibility(boolean isVisible, SymbolLayer waynameLayer) {
+  void updateWaynameVisibility(boolean isVisible, SymbolLayer waynameLayer) {
+    this.isVisible = isVisible;
+    adjustMapPadding(isVisible);
     if (checkWaynameVisibility(isVisible, waynameLayer)) {
       return;
     }
     adjustWaynameVisibility(isVisible, waynameLayer);
   }
 
-  public void updateWaynameQueryMap(boolean isEnabled) {
-    autoQueryIsEnabled = isEnabled;
+  void updateWaynameQueryMap(boolean isEnabled) {
+    isAutoQueryEnabled = isEnabled;
   }
 
-  public void updateDefaultMapTopPadding(int topPadding) {
-    paddingAdjustor.calculatePaddingValues(topPadding, layoutProvider.retrieveHeight());
+  boolean isVisible() {
+    return isVisible;
   }
 
   private List<Feature> findRoadLabelFeatures(PointF point) {
@@ -101,7 +110,6 @@ public class MapWayname {
   private void adjustWaynameVisibility(boolean isVisible, Layer waynameLayer) {
     if (waynameLayer != null) {
       waynameLayer.setProperties(visibility(isVisible ? Property.VISIBLE : Property.NONE));
-      adjustMapPadding(isVisible);
     }
   }
 

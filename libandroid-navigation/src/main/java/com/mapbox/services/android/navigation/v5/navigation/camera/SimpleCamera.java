@@ -6,6 +6,10 @@ import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.turf.TurfMeasurement;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * The default camera used by {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}.
  *
@@ -16,7 +20,7 @@ public class SimpleCamera extends Camera {
   private static final int CAMERA_TILT = 50;
   private static final double CAMERA_ZOOM = 15d;
 
-  private LineString lineString;
+  private List<Point> routeCoordinates = new ArrayList<>();
   private double initialBearing;
   private DirectionsRoute initialRoute;
 
@@ -38,8 +42,8 @@ public class SimpleCamera extends Camera {
     Point targetPoint = null;
     if (routeInformation.route() != null) {
       setupLineStringAndBearing(routeInformation.route());
-      lng = lineString.coordinates().get(0).longitude();
-      lat = lineString.coordinates().get(0).latitude();
+      lng = routeCoordinates.get(0).longitude();
+      lat = routeCoordinates.get(0).latitude();
       return Point.fromLngLat(lng, lat);
     } else if (routeInformation.location() != null) {
       lng = routeInformation.location().getLongitude();
@@ -59,20 +63,40 @@ public class SimpleCamera extends Camera {
     return CAMERA_ZOOM;
   }
 
+  @Override
+  public List<Point> overview(RouteInformation routeInformation) {
+    boolean invalidCoordinates = routeCoordinates == null || routeCoordinates.isEmpty();
+    if (invalidCoordinates) {
+      buildRouteCoordinatesFromRouteData(routeInformation);
+    }
+    return routeCoordinates;
+  }
+
+  private void buildRouteCoordinatesFromRouteData(RouteInformation routeInformation) {
+    if (routeInformation.route() != null) {
+      setupLineStringAndBearing(routeInformation.route());
+    } else if (routeInformation.routeProgress() != null) {
+      setupLineStringAndBearing(routeInformation.routeProgress().directionsRoute());
+    }
+  }
+
   private void setupLineStringAndBearing(DirectionsRoute route) {
     if (initialRoute != null && route.equals(initialRoute)) {
       return; //no need to recalculate these values
     }
     initialRoute = route;
-
-    lineString = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
+    routeCoordinates = generateRouteCoordinates(route);
     initialBearing = TurfMeasurement.bearing(
-      Point.fromLngLat(
-        lineString.coordinates().get(0).longitude(), lineString.coordinates().get(0).latitude()
-      ),
-      Point.fromLngLat(
-        lineString.coordinates().get(1).longitude(), lineString.coordinates().get(1).latitude()
-      )
+      Point.fromLngLat(routeCoordinates.get(0).longitude(), routeCoordinates.get(0).latitude()),
+      Point.fromLngLat(routeCoordinates.get(1).longitude(), routeCoordinates.get(1).latitude())
     );
+  }
+
+  private List<Point> generateRouteCoordinates(DirectionsRoute route) {
+    if (route == null) {
+      return Collections.emptyList();
+    }
+    LineString lineString = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
+    return lineString.coordinates();
   }
 }

@@ -14,10 +14,17 @@ class WaynameView extends CardView {
   private static final int BACKGROUND_ALPHA = 220;
 
   private TextView waynameText;
+  private int waynameHeight;
 
   WaynameView(Context context) {
     super(context);
     init();
+    waynameHeight = (int) context.getResources().getDimension(R.dimen.wayname_view_height);
+  }
+
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    super.onMeasure(widthMeasureSpec, waynameHeight);
   }
 
   void setWaynameText(String waynameText) {

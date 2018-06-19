@@ -60,8 +60,7 @@ public class DynamicCamera extends SimpleCamera {
 
   @Override
   public double zoom(RouteInformation routeInformation) {
-    RouteInformation information = routeInformation;
-    if (validLocationAndProgress(information) && shouldUpdateZoom(information)) {
+    if (validLocationAndProgress(routeInformation) && shouldUpdateZoom(routeInformation)) {
       return createZoom(routeInformation);
     } else if (routeInformation.route() != null) {
       return super.zoom(routeInformation);

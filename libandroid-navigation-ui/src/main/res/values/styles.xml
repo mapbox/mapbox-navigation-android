@@ -20,6 +20,7 @@
         <item name="navigationViewAccent">@color/mapbox_navigation_view_color_accent</item>
         <item name="navigationViewPrimaryText">@color/mapbox_navigation_view_color_secondary</item>
         <item name="navigationViewSecondaryText">@color/mapbox_navigation_view_color_accent_text</item>
+        <item name="navigationViewDivider">@color/mapbox_navigation_view_color_divider</item>
 
         <item name="navigationViewListBackground">@color/mapbox_navigation_view_color_list_background</item>
 
@@ -38,6 +39,8 @@
 
         <item name="navigationViewDestinationMarker">@drawable/map_marker_light</item>
 
+        <item name="navigationViewRouteOverviewDrawable">@drawable/ic_route_preview</item>
+
         <item name="navigationViewMapStyle">@string/navigation_guidance_day</item>
     </style>
 
@@ -47,6 +50,7 @@
         <item name="navigationViewAccent">@color/mapbox_navigation_view_color_accent_dark</item>
         <item name="navigationViewPrimaryText">@color/mapbox_navigation_view_color_secondary_dark</item>
         <item name="navigationViewSecondaryText">@color/mapbox_navigation_view_color_accent_text_dark</item>
+        <item name="navigationViewDivider">@color/mapbox_navigation_view_color_divider_dark</item>
 
         <item name="navigationViewListBackground">@color/mapbox_navigation_view_color_list_background_dark</item>
 
@@ -64,6 +68,8 @@
         <item name="navigationViewLocationLayerStyle">@style/mapbox_LocationLayer</item>
 
         <item name="navigationViewDestinationMarker">@drawable/map_marker_dark</item>
+
+        <item name="navigationViewRouteOverviewDrawable">@drawable/ic_route_preview_dark</item>
 
         <item name="navigationViewMapStyle">@string/navigation_guidance_night</item>
     </style>
