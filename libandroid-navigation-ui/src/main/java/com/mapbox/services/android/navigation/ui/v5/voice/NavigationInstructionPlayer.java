@@ -8,6 +8,8 @@ import android.support.annotation.NonNull;
 
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 
+import timber.log.Timber;
+
 public class NavigationInstructionPlayer implements InstructionListener {
 
   private AudioManager instructionAudioManager;
@@ -70,7 +72,9 @@ public class NavigationInstructionPlayer implements InstructionListener {
   }
 
   @Override
-  public void onError(boolean isMapboxPlayer) {
+  public void onError(boolean isMapboxPlayer, String errorText) {
+    Timber.e(errorText);
+
     if (isMapboxPlayer) {
       androidSpeechPlayer.play(voiceInstructionMilestone.getAnnouncement());
     }
@@ -91,13 +95,11 @@ public class NavigationInstructionPlayer implements InstructionListener {
   }
 
   private void initMapboxSpeechPlayer(Context context, String language, String accessToken) {
-    mapboxSpeechPlayer = new MapboxSpeechPlayer(context, language, accessToken);
-    mapboxSpeechPlayer.setInstructionListener(this);
+    mapboxSpeechPlayer = new MapboxSpeechPlayer(context, language, this, accessToken);
   }
 
   private void initAndroidSpeechPlayer(Context context, String language) {
-    androidSpeechPlayer = new AndroidSpeechPlayer(context, language);
-    androidSpeechPlayer.setInstructionListener(this);
+    androidSpeechPlayer = new AndroidSpeechPlayer(context, language, this);
   }
 
   private void initAudioManager(Context context) {
