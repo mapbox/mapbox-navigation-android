@@ -33,10 +33,12 @@ class AndroidSpeechPlayer implements InstructionPlayer {
    * @param language to initialize locale to set
    * @since 0.6.0
    */
-  AndroidSpeechPlayer(Context context, final String language) {
+  AndroidSpeechPlayer(Context context, final String language, final InstructionListener instructionListener) {
     textToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
       @Override
       public void onInit(int status) {
+        setInstructionListener(instructionListener);
+
         boolean ableToInitialize = status != TextToSpeech.ERROR && language != null;
         if (!ableToInitialize) {
           Timber.e("There was an error initializing native TTS");
@@ -131,7 +133,7 @@ class AndroidSpeechPlayer implements InstructionPlayer {
     }
   }
 
-  void setInstructionListener(final InstructionListener instructionListener) {
+  private void setInstructionListener(final InstructionListener instructionListener) {
     this.instructionListener = instructionListener;
 
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {

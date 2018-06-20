@@ -46,7 +46,9 @@ class MapboxSpeechPlayer implements InstructionPlayer {
    * @param language for which language
    * @param accessToken a valid Mapbox access token
    */
-  MapboxSpeechPlayer(Context context, String language, String accessToken) {
+  MapboxSpeechPlayer(Context context, String language, @NonNull InstructionListener instructionListener,
+                     String accessToken) {
+    this.instructionListener = instructionListener;
     setupCaches(context);
     instructionQueue = new ConcurrentLinkedQueue();
     voiceInstructionLoader = VoiceInstructionLoader.builder()
@@ -62,10 +64,6 @@ class MapboxSpeechPlayer implements InstructionPlayer {
     okhttpCache = new Cache(okHttpDirectory, TEN_MEGABYTE_CACHE_SIZE);
     mapboxCache = new File(context.getCacheDir(), MAPBOX_INSTRUCTION_CACHE);
     mapboxCache.mkdir();
-  }
-
-  void setInstructionListener(InstructionListener instructionListener) {
-    this.instructionListener = instructionListener;
   }
 
   /**
@@ -152,21 +150,23 @@ class MapboxSpeechPlayer implements InstructionPlayer {
         if (response.isSuccessful()) {
           executeInstructionTask(response.body());
         } else {
-          onError();
+          try {
+            onError(response.errorBody().string());
+          } catch (IOException exception) {
+            onError(exception.getLocalizedMessage());
+          }
         }
       }
 
       @Override
       public void onFailure(Call<ResponseBody> call, Throwable throwable) {
-        onError();
+        onError(throwable.getLocalizedMessage());
       }
     });
   }
 
-  private void onError() {
-    if (instructionListener != null) {
-      instructionListener.onError(true);
-    }
+  private void onError(String errorText) {
+    instructionListener.onError(true, errorText);
   }
 
   private void playInstruction(@NonNull File instruction) {
@@ -258,7 +258,7 @@ class MapboxSpeechPlayer implements InstructionPlayer {
       @Override
       public void onErrorDownloading() {
         if (instructionListener != null) {
-          instructionListener.onError(true);
+          onError("There was an error downloading the voice files.");
         }
       }
     }).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, responseBody);
