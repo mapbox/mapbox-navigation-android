@@ -1,8 +1,8 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
 import android.content.Context;
+import android.os.Build;
 import android.speech.tts.TextToSpeech;
-import android.speech.tts.UtteranceProgressListener;
 import android.text.TextUtils;
 
 import java.util.HashMap;
@@ -24,6 +24,7 @@ class AndroidSpeechPlayer implements InstructionPlayer {
   private TextToSpeech textToSpeech;
   private boolean isMuted;
   private boolean languageSupported = false;
+  private InstructionListener instructionListener;
 
   /**
    * Creates an instance of {@link AndroidSpeechPlayer}.
@@ -39,6 +40,7 @@ class AndroidSpeechPlayer implements InstructionPlayer {
         boolean ableToInitialize = status != TextToSpeech.ERROR && language != null;
         if (!ableToInitialize) {
           Timber.e("There was an error initializing native TTS");
+          return;
         }
         initializeWithLanguage(new Locale(language));
       }
@@ -56,6 +58,9 @@ class AndroidSpeechPlayer implements InstructionPlayer {
     if (!canPlay) {
       return;
     }
+
+    fireInstructionListenerIfApi14();
+
     HashMap<String, String> params = new HashMap<>(1);
     params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, DEFAULT_UTTERANCE_ID);
     textToSpeech.speak(instruction, TextToSpeech.QUEUE_ADD, params);
@@ -120,28 +125,19 @@ class AndroidSpeechPlayer implements InstructionPlayer {
     textToSpeech.setLanguage(language);
   }
 
+  private void fireInstructionListenerIfApi14() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+      instructionListener.onStart();
+    }
+  }
+
   void setInstructionListener(final InstructionListener instructionListener) {
-    textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-      @Override
-      public void onStart(String utteranceId) {
-        if (instructionListener != null) {
-          instructionListener.onStart();
-        }
-      }
+    this.instructionListener = instructionListener;
 
-      @Override
-      public void onDone(String utteranceId) {
-        if (instructionListener != null) {
-          instructionListener.onDone();
-        }
-      }
-
-      @Override
-      public void onError(String utteranceId) {
-        if (instructionListener != null) {
-          instructionListener.onError(false);
-        }
-      }
-    });
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+      textToSpeech.setOnUtteranceCompletedListener(new Api14UtteranceListener(instructionListener));
+    } else {
+      textToSpeech.setOnUtteranceProgressListener(new UtteranceListener(instructionListener));
+    }
   }
 }
