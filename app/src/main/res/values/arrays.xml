@@ -3,16 +3,18 @@
 
     <string-array name="language_array">
         <item>Default for Device</item>
-        <item>English (US)</item>
-        <item>French (France)</item>
-        <item>German (German)</item>
+        <item>English</item>
+        <item>French</item>
+        <item>German</item>
+        <item>Indonesian</item>
     </string-array>
 
     <string-array name="language_values_array">
         <item>@string/default_locale</item>
-        <item>en_US</item>
-        <item>fr_FR</item>
-        <item>de_DE</item>
+        <item>en</item>
+        <item>fr</item>
+        <item>de</item>
+        <item>in</item>
     </string-array>
 
     <string-array name="unit_type_array">
