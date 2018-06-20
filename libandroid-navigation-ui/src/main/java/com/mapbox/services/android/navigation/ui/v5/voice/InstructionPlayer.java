@@ -6,7 +6,7 @@ package com.mapbox.services.android.navigation.ui.v5.voice;
  *
  * @since 0.6.0
  */
-public interface InstructionPlayer {
+interface InstructionPlayer {
 
   /**
    * Will play the given string instruction.  If a voice instruction is already playing or

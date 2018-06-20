@@ -36,7 +36,6 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
@@ -164,11 +163,10 @@ public class NavigationViewModel extends AndroidViewModel {
   MapboxNavigation initializeNavigation(NavigationViewOptions options) {
     MapboxNavigationOptions navigationOptions = options.navigationOptions();
     navigationOptions = navigationOptions.toBuilder().isFromNavigationUi(true).build();
-    LocaleUtils localeUtils = new LocaleUtils();
-    initLanguage(options, localeUtils);
-    initUnitType(options, localeUtils);
+    initLanguage(options);
+    initUnitType(options);
     initTimeFormat(navigationOptions);
-    initVoiceInstructions();
+    initVoiceInstructions(options);
     if (!isRunning) {
       locationEngineConductor.initializeLocationEngine(getApplication(), options.shouldSimulateRoute());
       initNavigation(getApplication(), navigationOptions);
@@ -206,16 +204,17 @@ public class NavigationViewModel extends AndroidViewModel {
     locationEngineConductor = new LocationEngineConductor(locationEngineCallback);
   }
 
-  private void initLanguage(NavigationUiOptions options, LocaleUtils localeUtils) {
-    language = localeUtils.getNonEmptyLanguage(getApplication(), options.directionsRoute().voiceLanguage());
+  private void initLanguage(NavigationUiOptions options) {
+    language = options.directionsRoute().routeOptions().language();
   }
 
-  private void initUnitType(NavigationUiOptions options, LocaleUtils localeUtils) {
+  private void initUnitType(NavigationUiOptions options) {
     unitType = options.directionsRoute().routeOptions().voiceUnits();
   }
 
-  private void initVoiceInstructions() {
-    instructionPlayer = new NavigationInstructionPlayer(getApplication(), language, accessToken);
+  private void initVoiceInstructions(NavigationViewOptions options) {
+    boolean languageSupported = options.directionsRoute().voiceLanguage() != null;
+    instructionPlayer = new NavigationInstructionPlayer(getApplication(), language, languageSupported, accessToken);
   }
 
   private void initNavigation(Context context, MapboxNavigationOptions options) {

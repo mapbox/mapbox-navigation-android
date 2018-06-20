@@ -25,7 +25,7 @@ import timber.log.Timber;
  * Will retrieve synthesized speech mp3s from Mapbox's API Voice.
  * </p>
  */
-public class MapboxSpeechPlayer implements InstructionPlayer {
+class MapboxSpeechPlayer implements InstructionPlayer {
   private static final long TEN_MEGABYTE_CACHE_SIZE = 10 * 1098 * 1098;
   private static final String OKHTTP_INSTRUCTION_CACHE = "okhttp_instruction_cache";
   private static final String MAPBOX_INSTRUCTION_CACHE = "mapbox_instruction_cache";
@@ -42,8 +42,8 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
   /**
    * Construct an instance of {@link MapboxSpeechPlayer}
    *
-   * @param context     to setup the caches
-   * @param language    for which language
+   * @param context to setup the caches
+   * @param language for which language
    * @param accessToken a valid Mapbox access token
    */
   MapboxSpeechPlayer(Context context, String language, String accessToken) {
@@ -82,7 +82,7 @@ public class MapboxSpeechPlayer implements InstructionPlayer {
    * Plays the specified text instruction using MapboxSpeech API
    *
    * @param instruction voice instruction to be synthesized and played
-   * @param textType    either "ssml" or "text"
+   * @param textType either "ssml" or "text"
    */
   private void play(String instruction, String textType) {
     downloadVoiceFile(instruction, textType);

@@ -16,8 +16,11 @@ public class NavigationInstructionPlayer implements InstructionListener {
   private AndroidSpeechPlayer androidSpeechPlayer;
   private VoiceInstructionMilestone voiceInstructionMilestone;
   private boolean isMuted;
+  private boolean languageSupportedByMapboxSpeech;
 
-  public NavigationInstructionPlayer(@NonNull Context context, String language, String accessToken) {
+  public NavigationInstructionPlayer(@NonNull Context context, String language,
+                                     boolean languageSupportedByMapboxSpeech, String accessToken) {
+    this.languageSupportedByMapboxSpeech = languageSupportedByMapboxSpeech;
     initAudioManager(context);
     initAudioFocusRequest();
     initInstructionPlayers(context, language, accessToken);
@@ -25,7 +28,15 @@ public class NavigationInstructionPlayer implements InstructionListener {
 
   public void play(VoiceInstructionMilestone voiceInstructionMilestone) {
     this.voiceInstructionMilestone = voiceInstructionMilestone;
-    mapboxSpeechPlayer.play(voiceInstructionMilestone.getSsmlAnnouncement());
+    play();
+  }
+
+  private void play() {
+    if (languageSupportedByMapboxSpeech) {
+      mapboxSpeechPlayer.play(voiceInstructionMilestone.getSsmlAnnouncement());
+    } else {
+      androidSpeechPlayer.play(voiceInstructionMilestone.getAnnouncement());
+    }
   }
 
   public boolean isMuted() {
@@ -72,8 +83,19 @@ public class NavigationInstructionPlayer implements InstructionListener {
   }
 
   private void initInstructionPlayers(Context context, String language, String accessToken) {
+    if (languageSupportedByMapboxSpeech) {
+      initMapboxSpeechPlayer(context, language, accessToken);
+    }
+
+    initAndroidSpeechPlayer(context, language);
+  }
+
+  private void initMapboxSpeechPlayer(Context context, String language, String accessToken) {
     mapboxSpeechPlayer = new MapboxSpeechPlayer(context, language, accessToken);
     mapboxSpeechPlayer.setInstructionListener(this);
+  }
+
+  private void initAndroidSpeechPlayer(Context context, String language) {
     androidSpeechPlayer = new AndroidSpeechPlayer(context, language);
     androidSpeechPlayer.setInstructionListener(this);
   }
