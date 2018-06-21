@@ -13,13 +13,13 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatDelegate;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -84,7 +84,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   public NavigationView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
-    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
     ThemeSwitcher.setTheme(context, attrs);
     initializeView();
   }
@@ -95,7 +94,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param savedInstanceState to restore state if not null
    */
   public void onCreate(@Nullable Bundle savedInstanceState) {
-    mapView.setStyleUrl(ThemeSwitcher.retrieveMapStyle(getContext()));
+    updateSavedInstanceStateMapStyle(savedInstanceState);
     mapView.onCreate(savedInstanceState);
     updatePresenterState(savedInstanceState);
     navigationViewModel.onCreate();
@@ -405,6 +404,13 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private void initializeInstructionListListener() {
     instructionView.setInstructionListListener(new NavigationInstructionListListener(navigationPresenter,
       navigationViewEventDispatcher));
+  }
+
+  private void updateSavedInstanceStateMapStyle(@Nullable Bundle savedInstanceState) {
+    if (savedInstanceState != null) {
+      String mapStyleUrl = ThemeSwitcher.retrieveMapStyle(getContext());
+      savedInstanceState.putString(MapboxConstants.STATE_STYLE_URL, mapStyleUrl);
+    }
   }
 
   /**
