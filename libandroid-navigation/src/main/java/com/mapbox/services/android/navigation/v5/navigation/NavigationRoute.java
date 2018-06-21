@@ -441,6 +441,41 @@ public final class NavigationRoute {
     }
 
     /**
+     * Indicates from which side of the road to approach a waypoint.
+     * Accepts <tt>unrestricted</tt> (default), <tt>curb</tt> or <tt>null</tt>.
+     * If set to <tt>unrestricted</tt>, the route can approach waypoints
+     * from either side of the road. If set to <tt>curb</tt>, the route will be returned
+     * so that on arrival, the waypoint will be found on the side that corresponds with the
+     * <tt>driving_side</tt> of the region in which the returned route is located.
+     * If provided, the list of approaches must be the same length as the list of waypoints.
+     *
+     * @param approaches null if you'd like the default approaches,
+     *                   else one of the options found in
+     *                   {@link com.mapbox.api.directions.v5.DirectionsCriteria.ApproachesCriteria}.
+     * @return this builder for chaining options together
+     * @since 0.15.0
+     */
+    public Builder addApproaches(String... approaches) {
+      directionsBuilder.addApproaches(approaches);
+      return this;
+    }
+
+    /**
+     * Custom names for waypoints used for the arrival instruction,
+     * each separated by <tt>;</tt>. Values can be any string and total number of all characters cannot
+     * exceed 500. If provided, the list of <tt>waypointNames</tt> must be the same length as the list of
+     * coordinates, but you can skip a coordinate and show its position with the <tt>;</tt> separator.
+     *
+     * @param waypointNames Custom names for waypoints used for the arrival instruction.
+     * @return this builder for chaining options together
+     * @since 0.15.0
+     */
+    public Builder addWaypointNames(@Nullable String... waypointNames) {
+      directionsBuilder.addWaypointNames(waypointNames);
+      return this;
+    }
+
+    /**
      * Optionally create a {@link Builder} based on all variables
      * from given {@link RouteOptions}.
      * <p>
@@ -488,6 +523,16 @@ public final class NavigationRoute {
 
       if (!TextUtils.isEmpty(options.annotations())) {
         directionsBuilder.annotations(options.annotations());
+      }
+
+      if (!TextUtils.isEmpty(options.approaches())) {
+        String[] approaches = options.approaches().split(";");
+        directionsBuilder.addApproaches(approaches);
+      }
+
+      if (!TextUtils.isEmpty(options.waypointNames())) {
+        String[] waypointNames = options.waypointNames().split(";");
+        directionsBuilder.addWaypointNames(waypointNames);
       }
 
       return this;
