@@ -1,13 +1,18 @@
 package com.mapbox.services.android.navigation.testapp.activity.navigationui;
 
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
@@ -34,103 +39,36 @@ import retrofit2.Response;
 public class EmbeddedNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
   NavigationListener, ProgressChangeListener, InstructionListListener {
 
+  private static final Point ORIGIN = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
+  private static final Point DESTINATION = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
+
   private NavigationView navigationView;
   private View spacer;
   private TextView speedWidget;
-  private static final Point ORIGIN = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
-  private static final Point DESTINATION = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
+  private FloatingActionButton fabNightModeToggle;
+
   private boolean bottomSheetVisible = true;
   private boolean instructionListShown = false;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_AppCompat_Light_NoActionBar);
+    initNightMode();
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_embedded_navigation);
     navigationView = findViewById(R.id.navigationView);
-    navigationView.onCreate(savedInstanceState);
-
+    fabNightModeToggle = findViewById(R.id.fabToggleNightMode);
     speedWidget = findViewById(R.id.speed_limit);
     spacer = findViewById(R.id.spacer);
     setSpeedWidgetAnchor(R.id.summaryBottomSheet);
 
+    navigationView.onCreate(savedInstanceState);
     navigationView.initialize(this);
-  }
-
-  /**
-   * Sets the anchor of the spacer for the speed widget, thus setting the anchor for the speed widget
-   * (The speed widget is anchored to the spacer, which is there because padding between items and
-   * their anchors in CoordinatorLayouts is finicky.
-   * @param res resource for view of which to anchor the spacer
-   */
-  private void setSpeedWidgetAnchor(@IdRes int res) {
-    CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) spacer.getLayoutParams();
-    layoutParams.setAnchorId(res);
-    spacer.setLayoutParams(layoutParams);
   }
 
   @Override
   public void onNavigationReady() {
     fetchRoute();
-  }
-
-  private void startNavigation(DirectionsRoute directionsRoute) {
-    NavigationViewOptions.Builder options =
-      NavigationViewOptions.builder()
-        .navigationListener(this)
-        .directionsRoute(directionsRoute)
-        .shouldSimulateRoute(true)
-        .progressChangeListener(this)
-        .instructionListListener(this);
-    setBottomSheetCallback(options);
-
-    navigationView.startNavigation(options.build());
-  }
-
-  private void fetchRoute() {
-    NavigationRoute.builder(this)
-      .accessToken(Mapbox.getAccessToken())
-      .origin(ORIGIN)
-      .destination(DESTINATION)
-      .alternatives(true)
-      .build()
-      .getRoute(new SimplifiedCallback() {
-        @Override
-        public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-          DirectionsRoute directionsRoute = response.body().routes().get(0);
-          startNavigation(directionsRoute);
-        }
-      });
-  }
-
-  private void setBottomSheetCallback(NavigationViewOptions.Builder options) {
-    options.bottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-      @Override
-      public void onStateChanged(@NonNull View bottomSheet, int newState) {
-        switch (newState) {
-          case BottomSheetBehavior.STATE_HIDDEN:
-            bottomSheetVisible = false;
-            setSpeedWidgetAnchor(R.id.recenterBtn);
-            break;
-          case BottomSheetBehavior.STATE_EXPANDED:
-            bottomSheetVisible = true;
-            break;
-          case BottomSheetBehavior.STATE_SETTLING:
-            if (!bottomSheetVisible) {
-              // View needs to be anchored to the bottom sheet before it is finished expanding
-              // because of the animation
-              setSpeedWidgetAnchor(R.id.summaryBottomSheet);
-            }
-            break;
-          default:
-            return;
-        }
-      }
-
-      @Override
-      public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-      }
-    });
   }
 
   @Override
@@ -187,6 +125,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   protected void onDestroy() {
     super.onDestroy();
     navigationView.onDestroy();
+    saveNightModeToPreferences(AppCompatDelegate.MODE_NIGHT_AUTO);
   }
 
   @Override
@@ -210,6 +149,134 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
     setSpeed(location);
   }
 
+  @Override
+  public void onInstructionListVisibilityChanged(boolean shown) {
+    instructionListShown = shown;
+    speedWidget.setVisibility(shown ? View.GONE : View.VISIBLE);
+    if (instructionListShown) {
+      fabNightModeToggle.hide();
+    } else if (bottomSheetVisible) {
+      fabNightModeToggle.show();
+    }
+  }
+
+  private void startNavigation(DirectionsRoute directionsRoute) {
+    NavigationViewOptions.Builder options =
+      NavigationViewOptions.builder()
+        .navigationListener(this)
+        .directionsRoute(directionsRoute)
+        .shouldSimulateRoute(true)
+        .progressChangeListener(this)
+        .instructionListListener(this);
+    setBottomSheetCallback(options);
+    setupNightModeFab();
+
+    navigationView.startNavigation(options.build());
+  }
+
+  private void fetchRoute() {
+    NavigationRoute.builder(this)
+      .accessToken(Mapbox.getAccessToken())
+      .origin(ORIGIN)
+      .destination(DESTINATION)
+      .alternatives(true)
+      .build()
+      .getRoute(new SimplifiedCallback() {
+        @Override
+        public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+          DirectionsRoute directionsRoute = response.body().routes().get(0);
+          startNavigation(directionsRoute);
+        }
+      });
+  }
+
+  /**
+   * Sets the anchor of the spacer for the speed widget, thus setting the anchor for the speed widget
+   * (The speed widget is anchored to the spacer, which is there because padding between items and
+   * their anchors in CoordinatorLayouts is finicky.
+   *
+   * @param res resource for view of which to anchor the spacer
+   */
+  private void setSpeedWidgetAnchor(@IdRes int res) {
+    CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) spacer.getLayoutParams();
+    layoutParams.setAnchorId(res);
+    spacer.setLayoutParams(layoutParams);
+  }
+
+  private void setBottomSheetCallback(NavigationViewOptions.Builder options) {
+    options.bottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+      @Override
+      public void onStateChanged(@NonNull View bottomSheet, int newState) {
+        switch (newState) {
+          case BottomSheetBehavior.STATE_HIDDEN:
+            bottomSheetVisible = false;
+            fabNightModeToggle.hide();
+            setSpeedWidgetAnchor(R.id.recenterBtn);
+            break;
+          case BottomSheetBehavior.STATE_EXPANDED:
+            bottomSheetVisible = true;
+            break;
+          case BottomSheetBehavior.STATE_SETTLING:
+            if (!bottomSheetVisible) {
+              // View needs to be anchored to the bottom sheet before it is finished expanding
+              // because of the animation
+              fabNightModeToggle.show();
+              setSpeedWidgetAnchor(R.id.summaryBottomSheet);
+            }
+            break;
+          default:
+            return;
+        }
+      }
+
+      @Override
+      public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+      }
+    });
+  }
+
+  private void setupNightModeFab() {
+    fabNightModeToggle.setOnClickListener(view -> toggleNightMode());
+  }
+
+  private void toggleNightMode() {
+    int currentNightMode = getCurrentNightMode();
+    alternateNightMode(currentNightMode);
+  }
+
+  private void initNightMode() {
+    int nightMode = retrieveNightModeFromPreferences();
+    AppCompatDelegate.setDefaultNightMode(nightMode);
+  }
+
+  private int getCurrentNightMode() {
+    return getResources().getConfiguration().uiMode
+      & Configuration.UI_MODE_NIGHT_MASK;
+  }
+
+  private void alternateNightMode(int currentNightMode) {
+    int newNightMode;
+    if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
+      newNightMode = AppCompatDelegate.MODE_NIGHT_NO;
+    } else {
+      newNightMode = AppCompatDelegate.MODE_NIGHT_YES;
+    }
+    saveNightModeToPreferences(newNightMode);
+    recreate();
+  }
+
+  private int retrieveNightModeFromPreferences() {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+    return preferences.getInt(getString(R.string.current_night_mode), AppCompatDelegate.MODE_NIGHT_AUTO);
+  }
+
+  private void saveNightModeToPreferences(int nightMode) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+    SharedPreferences.Editor editor = preferences.edit();
+    editor.putInt(getString(R.string.current_night_mode), nightMode);
+    editor.apply();
+  }
+
   private void setSpeed(Location location) {
     String string = String.format("%d\nMPH", (int) (location.getSpeed() * 2.2369));
     int mphTextSize = getResources().getDimensionPixelSize(R.dimen.mph_text_size);
@@ -226,11 +293,5 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
     if (!instructionListShown) {
       speedWidget.setVisibility(View.VISIBLE);
     }
-  }
-
-  @Override
-  public void onInstructionListVisibilityChanged(boolean shown) {
-    instructionListShown = shown;
-    speedWidget.setVisibility(shown ? View.GONE : View.VISIBLE);
   }
 }

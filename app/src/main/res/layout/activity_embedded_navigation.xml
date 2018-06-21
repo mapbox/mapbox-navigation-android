@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -8,28 +9,43 @@
         android:id="@+id/navigationView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:navigationLightTheme="@style/CustomNavigationView"
-        app:navigationDarkTheme="@style/NavigationViewDark"/>
-    <TextView
+        app:navigationDarkTheme="@style/NavigationViewDark"
+        app:navigationLightTheme="@style/CustomNavigationView"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabToggleNightMode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/speed_limit"
-        android:textSize="35sp"
-        android:padding="6dp"
-        app:layout_anchorGravity="top"
-        android:layout_gravity="top"
-        android:gravity="center"
-        android:layout_marginLeft="16dp"
-        android:elevation="3dp"
+        android:layout_gravity="top|start"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:tint="@android:color/white"
         app:layout_anchor="@id/spacer"
-        android:textColor="@android:color/black"
+        app:layout_anchorGravity="top|end"
+        app:srcCompat="@drawable/ic_refresh"/>
+
+    <TextView
+        android:id="@+id/speed_limit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_marginLeft="16dp"
         android:background="@android:color/white"
-        android:visibility="gone"/>
+        android:elevation="3dp"
+        android:gravity="center"
+        android:padding="6dp"
+        android:textColor="@android:color/black"
+        android:textSize="35sp"
+        android:visibility="gone"
+        app:layout_anchor="@id/spacer"
+        app:layout_anchorGravity="top"/>
+
     <View
+        android:id="@+id/spacer"
         android:layout_width="wrap_content"
         android:layout_height="6dp"
-        android:id="@+id/spacer"
+        android:layout_gravity="top"
         android:background="@android:color/transparent"
-        app:layout_anchorGravity="top"
-        android:layout_gravity="top"/>
+        app:layout_anchorGravity="top"/>
+
 </android.support.design.widget.CoordinatorLayout>
