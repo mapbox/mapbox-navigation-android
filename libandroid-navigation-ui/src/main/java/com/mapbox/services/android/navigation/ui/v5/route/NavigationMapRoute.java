@@ -472,6 +472,14 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   }
 
   private void initializeUpcomingManeuverArrow() {
+    arrowShaftGeoJsonSource = (GeoJsonSource) mapboxMap.getSource(ARROW_SHAFT_SOURCE_ID);
+    arrowHeadGeoJsonSource = (GeoJsonSource) mapboxMap.getSource(ARROW_HEAD_SOURCE_ID);
+
+    LineLayer shaftLayer = createArrowShaftLayer();
+    LineLayer shaftCasingLayer = createArrowShaftCasingLayer();
+    SymbolLayer headLayer = createArrowHeadLayer();
+    SymbolLayer headCasingLayer = createArrowHeadCasingLayer();
+
     if (arrowShaftGeoJsonSource == null && arrowHeadGeoJsonSource == null) {
       initializeArrowShaft();
       initializeArrowHead();
@@ -479,19 +487,13 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       addArrowHeadIcon();
       addArrowHeadIconCasing();
 
-      LineLayer shaftLayer = createArrowShaftLayer();
-      LineLayer shaftCasingLayer = createArrowShaftCasingLayer();
-      SymbolLayer headLayer = createArrowHeadLayer();
-      SymbolLayer headCasingLayer = createArrowHeadCasingLayer();
+      mapboxMap.addLayerAbove(shaftCasingLayer, belowLayer);
+      mapboxMap.addLayerAbove(headCasingLayer, shaftCasingLayer.getId());
 
-      mapboxMap.addLayer(shaftLayer);
-      mapboxMap.addLayer(headLayer);
-
-      mapboxMap.addLayerBelow(shaftCasingLayer, shaftLayer.getId());
-      mapboxMap.addLayerBelow(headCasingLayer, shaftCasingLayer.getId());
-
-      initializeArrowLayers(shaftLayer, shaftCasingLayer, headLayer, headCasingLayer);
+      mapboxMap.addLayerAbove(shaftLayer, headCasingLayer.getId());
+      mapboxMap.addLayerAbove(headLayer, shaftLayer.getId());
     }
+    initializeArrowLayers(shaftLayer, shaftCasingLayer, headLayer, headCasingLayer);
   }
 
   private void initializeArrowShaft() {
@@ -528,6 +530,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   }
 
   private LineLayer createArrowShaftLayer() {
+    LineLayer shaftLayer = (LineLayer) mapboxMap.getLayer(ARROW_SHAFT_LINE_LAYER_ID);
+    if (shaftLayer != null) {
+      return shaftLayer;
+    }
     return new LineLayer(ARROW_SHAFT_LINE_LAYER_ID, ARROW_SHAFT_SOURCE_ID).withProperties(
       PropertyFactory.lineColor(color(arrowColor)),
       PropertyFactory.lineWidth(
@@ -550,6 +556,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   }
 
   private LineLayer createArrowShaftCasingLayer() {
+    LineLayer shaftCasingLayer = (LineLayer) mapboxMap.getLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID);
+    if (shaftCasingLayer != null) {
+      return shaftCasingLayer;
+    }
     return new LineLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID, ARROW_SHAFT_SOURCE_ID).withProperties(
       PropertyFactory.lineColor(color(arrowBorderColor)),
       PropertyFactory.lineWidth(
@@ -572,6 +582,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   }
 
   private SymbolLayer createArrowHeadLayer() {
+    SymbolLayer headLayer = (SymbolLayer) mapboxMap.getLayer(ARROW_HEAD_LAYER_ID);
+    if (headLayer != null) {
+      return headLayer;
+    }
     return new SymbolLayer(ARROW_HEAD_LAYER_ID, ARROW_HEAD_SOURCE_ID)
       .withProperties(
         PropertyFactory.iconImage(ARROW_HEAD_ICON),
@@ -597,6 +611,10 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   }
 
   private SymbolLayer createArrowHeadCasingLayer() {
+    SymbolLayer headCasingLayer = (SymbolLayer) mapboxMap.getLayer(ARROW_HEAD_CASING_LAYER_ID);
+    if (headCasingLayer != null) {
+      return headCasingLayer;
+    }
     return new SymbolLayer(ARROW_HEAD_CASING_LAYER_ID, ARROW_HEAD_SOURCE_ID).withProperties(
       PropertyFactory.iconImage(ARROW_HEAD_ICON_CASING),
       iconAllowOverlap(true),
