@@ -29,6 +29,7 @@ public class RouteUtils {
 
   private static final String FORCED_LOCATION = "Forced Location";
   private static final int FIRST_COORDINATE = 0;
+  private static final int ZERO_INSTRUCTIONS = 0;
   private static final Set<String> VALID_PROFILES = new HashSet<String>() {
     {
       add(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
@@ -177,17 +178,18 @@ public class RouteUtils {
   @Nullable
   public BannerInstructions findCurrentBannerInstructions(LegStep currentStep, double stepDistanceRemaining) {
     if (isValidStep(currentStep) && hasInstructions(currentStep.bannerInstructions())) {
+      int roundedDistanceRemaining = (int) stepDistanceRemaining;
       List<BannerInstructions> instructions = new ArrayList<>(currentStep.bannerInstructions());
       Iterator<BannerInstructions> instructionsIterator = instructions.iterator();
       while (instructionsIterator.hasNext()) {
         BannerInstructions instruction = instructionsIterator.next();
         double distanceAlongGeometry = instruction.distanceAlongGeometry();
-        if (distanceAlongGeometry < stepDistanceRemaining) {
+        if (distanceAlongGeometry < roundedDistanceRemaining) {
           instructionsIterator.remove();
         }
       }
       int instructionIndex = checkValidIndex(instructions);
-      if (instructions.size() > 0) {
+      if (instructions.size() > ZERO_INSTRUCTIONS) {
         return instructions.get(instructionIndex);
       }
     }
@@ -238,7 +240,7 @@ public class RouteUtils {
         }
       }
       int instructionIndex = checkValidIndex(instructions);
-      if (instructions.size() > 0) {
+      if (instructions.size() > ZERO_INSTRUCTIONS) {
         return instructions.get(instructionIndex);
       }
     }
