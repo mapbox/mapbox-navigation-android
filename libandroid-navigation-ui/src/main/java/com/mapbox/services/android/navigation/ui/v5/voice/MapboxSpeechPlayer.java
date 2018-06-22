@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoader;
@@ -25,30 +26,33 @@ import timber.log.Timber;
  * Will retrieve synthesized speech mp3s from Mapbox's API Voice.
  * </p>
  */
-class MapboxSpeechPlayer implements InstructionPlayer {
+class MapboxSpeechPlayer implements SpeechPlayer {
+
   private static final long TEN_MEGABYTE_CACHE_SIZE = 10 * 1098 * 1098;
   private static final String OKHTTP_INSTRUCTION_CACHE = "okhttp_instruction_cache";
   private static final String MAPBOX_INSTRUCTION_CACHE = "mapbox_instruction_cache";
-  private static final String SSML_TEXT_TYPE = "ssml";
   private static final String ERROR_TEXT = "Unable to set data source for the media mediaPlayer! %s";
-  private Queue<File> instructionQueue;
+  private static final SpeechAnnouncementMap SPEECH_ANNOUNCEMENT_MAP = new SpeechAnnouncementMap();
+
   private VoiceInstructionLoader voiceInstructionLoader;
+  private SpeechAnnouncement announcement;
+  private SpeechListener speechListener;
   private MediaPlayer mediaPlayer;
-  private InstructionListener instructionListener;
-  private boolean isMuted;
+  private Queue<File> instructionQueue;
   private File mapboxCache;
   private Cache okhttpCache;
+  private boolean isMuted;
 
   /**
    * Construct an instance of {@link MapboxSpeechPlayer}
    *
-   * @param context to setup the caches
-   * @param language for which language
+   * @param context     to setup the caches
+   * @param language    for which language
    * @param accessToken a valid Mapbox access token
    */
-  MapboxSpeechPlayer(Context context, String language, @NonNull InstructionListener instructionListener,
+  MapboxSpeechPlayer(Context context, String language, @NonNull SpeechListener speechListener,
                      String accessToken) {
-    this.instructionListener = instructionListener;
+    this.speechListener = speechListener;
     setupCaches(context);
     instructionQueue = new ConcurrentLinkedQueue();
     voiceInstructionLoader = VoiceInstructionLoader.builder()
@@ -58,32 +62,15 @@ class MapboxSpeechPlayer implements InstructionPlayer {
       .build();
   }
 
-  private void setupCaches(Context context) {
-    File okHttpDirectory = new File(context.getCacheDir(), OKHTTP_INSTRUCTION_CACHE);
-    okHttpDirectory.mkdir();
-    okhttpCache = new Cache(okHttpDirectory, TEN_MEGABYTE_CACHE_SIZE);
-    mapboxCache = new File(context.getCacheDir(), MAPBOX_INSTRUCTION_CACHE);
-    mapboxCache.mkdir();
-  }
-
   /**
    * Plays the specified text instruction using MapboxSpeech API, defaulting to SSML input type
    *
-   * @param instruction voice instruction to be synthesized and played
+   * @param speechAnnouncement with voice instruction to be synthesized and played
    */
   @Override
-  public void play(String instruction) {
-    play(instruction, SSML_TEXT_TYPE);
-  }
-
-  /**
-   * Plays the specified text instruction using MapboxSpeech API
-   *
-   * @param instruction voice instruction to be synthesized and played
-   * @param textType either "ssml" or "text"
-   */
-  private void play(String instruction, String textType) {
-    downloadVoiceFile(instruction, textType);
+  public void play(SpeechAnnouncement speechAnnouncement) {
+    this.announcement = speechAnnouncement;
+    playAnnouncementTextAndTypeFrom(speechAnnouncement);
   }
 
   @Override
@@ -109,12 +96,29 @@ class MapboxSpeechPlayer implements InstructionPlayer {
     flushCache();
   }
 
-  private void flushCache() {
-    try {
-      okhttpCache.flush();
-    } catch (IOException exception) {
-      Timber.e(exception.getMessage());
-    }
+  private void setupCaches(Context context) {
+    File okHttpDirectory = new File(context.getCacheDir(), OKHTTP_INSTRUCTION_CACHE);
+    okHttpDirectory.mkdir();
+    okhttpCache = new Cache(okHttpDirectory, TEN_MEGABYTE_CACHE_SIZE);
+    mapboxCache = new File(context.getCacheDir(), MAPBOX_INSTRUCTION_CACHE);
+    mapboxCache.mkdir();
+  }
+
+  private void playAnnouncementTextAndTypeFrom(SpeechAnnouncement announcement) {
+    boolean hasSsmlAnnouncement = announcement.ssmlAnnouncement() != null;
+    SpeechAnnouncementUpdate speechAnnouncementUpdate = SPEECH_ANNOUNCEMENT_MAP.get(hasSsmlAnnouncement);
+    Pair<String, String> textAndType = speechAnnouncementUpdate.buildTextAndTypeFrom(announcement);
+    playAnnouncementText(textAndType.first, textAndType.second);
+  }
+
+  /**
+   * Plays the specified text instruction using MapboxSpeech API
+   *
+   * @param instruction voice instruction to be synthesized and played
+   * @param textType    either "ssml" or "text"
+   */
+  private void playAnnouncementText(String instruction, String textType) {
+    downloadVoiceFile(instruction, textType);
   }
 
   private void muteSpeech() {
@@ -124,17 +128,23 @@ class MapboxSpeechPlayer implements InstructionPlayer {
     }
   }
 
+  private void flushCache() {
+    try {
+      okhttpCache.flush();
+    } catch (IOException exception) {
+      Timber.e(exception);
+    }
+  }
+
   private void stopMediaPlayerPlaying() {
     try {
       if (mediaPlayer != null && mediaPlayer.isPlaying()) {
         mediaPlayer.stop();
         mediaPlayer.release();
-        if (instructionListener != null) {
-          instructionListener.onDone();
-        }
+        speechListener.onDone();
       }
     } catch (IllegalStateException exception) {
-      Timber.e(exception.getMessage());
+      Timber.e(exception);
     }
   }
 
@@ -166,7 +176,7 @@ class MapboxSpeechPlayer implements InstructionPlayer {
   }
 
   private void onError(String errorText) {
-    instructionListener.onError(true, errorText);
+    speechListener.onError(errorText, announcement);
   }
 
   private void playInstruction(@NonNull File instruction) {
@@ -190,7 +200,7 @@ class MapboxSpeechPlayer implements InstructionPlayer {
         mediaPlayer.stop();
       }
     } catch (IllegalStateException exception) {
-      Timber.e(exception.getMessage());
+      Timber.e(exception);
     }
   }
 
@@ -206,9 +216,7 @@ class MapboxSpeechPlayer implements InstructionPlayer {
     mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
       @Override
       public void onPrepared(MediaPlayer mp) {
-        if (instructionListener != null) {
-          instructionListener.onStart();
-        }
+        speechListener.onStart();
         mp.start();
       }
     });
@@ -216,9 +224,7 @@ class MapboxSpeechPlayer implements InstructionPlayer {
       @Override
       public void onCompletion(MediaPlayer mp) {
         mp.release();
-        if (instructionListener != null) {
-          instructionListener.onDone();
-        }
+        speechListener.onDone();
         onInstructionFinishedPlaying();
       }
     });
@@ -248,7 +254,7 @@ class MapboxSpeechPlayer implements InstructionPlayer {
   }
 
   private void executeInstructionTask(ResponseBody responseBody) {
-    new InstructionDownloadTask(mapboxCache.getPath(), new InstructionDownloadTask.TaskListener() {
+    new SpeechDownloadTask(mapboxCache.getPath(), new SpeechDownloadTask.TaskListener() {
       @Override
       public void onFinishedDownloading(@NonNull File instructionFile) {
         playInstructionIfUpNext(instructionFile);
@@ -257,9 +263,7 @@ class MapboxSpeechPlayer implements InstructionPlayer {
 
       @Override
       public void onErrorDownloading() {
-        if (instructionListener != null) {
-          onError("There was an error downloading the voice files.");
-        }
+        onError("There was an error downloading the voice files.");
       }
     }).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, responseBody);
   }

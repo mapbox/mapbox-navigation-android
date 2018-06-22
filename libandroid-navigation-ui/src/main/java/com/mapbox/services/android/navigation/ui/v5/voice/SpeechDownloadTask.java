@@ -11,14 +11,15 @@ import java.io.OutputStream;
 
 import okhttp3.ResponseBody;
 
-class InstructionDownloadTask extends AsyncTask<ResponseBody, Void, File> {
+class SpeechDownloadTask extends AsyncTask<ResponseBody, Void, File> {
+
   private static final String MP3_POSTFIX = ".mp3";
   private static final int END_OF_FILE_DENOTER = -1;
   private static int instructionNamingInt = 1;
   private final String cacheDirectory;
   private final TaskListener taskListener;
 
-  InstructionDownloadTask(String cacheDirectory, TaskListener taskListener) {
+  SpeechDownloadTask(String cacheDirectory, TaskListener taskListener) {
     this.cacheDirectory = cacheDirectory;
     this.taskListener = taskListener;
   }

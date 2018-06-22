@@ -1,10 +1,10 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
-interface InstructionListener {
+interface SpeechListener {
 
   void onStart();
 
   void onDone();
 
-  void onError(boolean isMapboxPlayer, String errorText);
+  void onError(String errorText, SpeechAnnouncement speechAnnouncement);
 }

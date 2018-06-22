@@ -6,24 +6,20 @@ import android.support.annotation.RequiresApi;
 
 @RequiresApi(api = Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
 class UtteranceListener extends UtteranceProgressListener {
-  private InstructionListener instructionListener;
+  private SpeechListener speechListener;
 
-  UtteranceListener(InstructionListener instructionListener) {
-    this.instructionListener = instructionListener;
+  UtteranceListener(SpeechListener speechListener) {
+    this.speechListener = speechListener;
   }
 
   @Override
   public void onStart(String utteranceId) {
-    if (instructionListener != null) {
-      instructionListener.onStart();
-    }
+    speechListener.onStart();
   }
 
   @Override
   public void onDone(String utteranceId) {
-    if (instructionListener != null) {
-      instructionListener.onDone();
-    }
+    speechListener.onDone();
   }
 
   @Override
