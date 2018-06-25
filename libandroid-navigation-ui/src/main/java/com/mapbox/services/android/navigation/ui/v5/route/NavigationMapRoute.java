@@ -125,6 +125,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   private static final float OPAQUE = 0.0f;
   private static final int ARROW_HIDDEN_ZOOM_LEVEL = 14;
   private static final float TRANSPARENT = 1.0f;
+  private static final String LAYER_ABOVE_UPCOMING_MANEUVER_ARROW = "com.mapbox.annotations.points";
 
   @StyleRes
   private int styleRes;
@@ -487,7 +488,7 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
       addArrowHeadIcon();
       addArrowHeadIconCasing();
 
-      mapboxMap.addLayerAbove(shaftCasingLayer, belowLayer);
+      mapboxMap.addLayerBelow(shaftCasingLayer, LAYER_ABOVE_UPCOMING_MANEUVER_ARROW);
       mapboxMap.addLayerAbove(headCasingLayer, shaftCasingLayer.getId());
 
       mapboxMap.addLayerAbove(shaftLayer, headCasingLayer.getId());
