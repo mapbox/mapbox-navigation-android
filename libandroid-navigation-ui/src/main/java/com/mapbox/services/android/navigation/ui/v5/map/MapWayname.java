@@ -2,12 +2,18 @@ package com.mapbox.services.android.navigation.ui.v5.map;
 
 import android.graphics.Bitmap;
 import android.graphics.PointF;
+import android.location.Location;
+import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 
 import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
@@ -18,14 +24,16 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 class MapWayname {
 
   private static final String NAME_PROPERTY = "name";
-  private static final int FIRST_ROAD_FEATURE = 0;
-
   private WaynameLayoutProvider layoutProvider;
   private MapLayerInteractor layerInteractor;
   private WaynameFeatureFinder featureInteractor;
   private MapPaddingAdjustor paddingAdjustor;
+  private List<Point> currentStepPoints = new ArrayList<>();
+  private Location currentLocation = null;
+  private final MapWaynameProgressChangeListener progressChangeListener = new MapWaynameProgressChangeListener(this);
   private boolean isAutoQueryEnabled;
   private boolean isVisible;
+  private FeatureFilterTask filterTask;
   private String wayname = "";
 
   MapWayname(WaynameLayoutProvider layoutProvider, MapLayerInteractor layerInteractor,
@@ -65,6 +73,15 @@ class MapWayname {
     adjustWaynameVisibility(isVisible, waynameLayer);
   }
 
+  void updateProgress(Location currentLocation, List<Point> currentStepPoints) {
+    if (!this.currentStepPoints.equals(currentStepPoints)) {
+      this.currentStepPoints = currentStepPoints;
+    }
+    if (this.currentLocation == null || !this.currentLocation.equals(currentLocation)) {
+      this.currentLocation = currentLocation;
+    }
+  }
+
   void updateWaynameQueryMap(boolean isEnabled) {
     isAutoQueryEnabled = isEnabled;
   }
@@ -77,19 +94,54 @@ class MapWayname {
     return wayname;
   }
 
+  void addProgressChangeListener(MapboxNavigation navigation) {
+    navigation.addProgressChangeListener(progressChangeListener);
+  }
+
+  void onStop() {
+    if (isTaskRunning()) {
+      filterTask.cancel(true);
+    }
+  }
+
   private List<Feature> findRoadLabelFeatures(PointF point) {
     String[] layerIds = {STREETS_LAYER_ID};
     return featureInteractor.queryRenderedFeatures(point, layerIds);
   }
 
-  private void updateLayerWithRoadLabelFeatures(List<Feature> roads, SymbolLayer waynameLayer) {
-    boolean isValidFeatureList = !roads.isEmpty();
+  private void updateLayerWithRoadLabelFeatures(List<Feature> roadFeatures, final SymbolLayer waynameLayer) {
+    boolean isValidFeatureList = !roadFeatures.isEmpty();
     if (isValidFeatureList) {
-      Feature roadFeature = roads.get(FIRST_ROAD_FEATURE);
-      updateWaynameLayerWithNameProperty(waynameLayer, roadFeature);
+      executeFeatureFilterTask(roadFeatures, waynameLayer);
     } else {
       updateWaynameVisibility(false, waynameLayer);
     }
+  }
+
+  private void executeFeatureFilterTask(List<Feature> roadFeatures, final SymbolLayer waynameLayer) {
+    if (isTaskRunning()) {
+      filterTask.cancel(true);
+    }
+
+    if (hasValidProgressData()) {
+      filterTask = new FeatureFilterTask(roadFeatures, currentLocation, currentStepPoints,
+        new OnFeatureFilteredCallback() {
+          @Override
+          public void onFeatureFiltered(@NonNull Feature feature) {
+            updateWaynameLayerWithNameProperty(waynameLayer, feature);
+          }
+        });
+      filterTask.execute();
+    }
+  }
+
+  private boolean isTaskRunning() {
+    return filterTask != null
+      && (filterTask.getStatus() == AsyncTask.Status.PENDING || filterTask.getStatus() == AsyncTask.Status.RUNNING);
+  }
+
+  private boolean hasValidProgressData() {
+    return currentLocation != null && !currentStepPoints.isEmpty();
   }
 
   private void createWaynameIcon(String wayname, Layer waynameLayer) {

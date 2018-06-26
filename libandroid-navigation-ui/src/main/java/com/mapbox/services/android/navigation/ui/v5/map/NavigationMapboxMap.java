@@ -177,6 +177,7 @@ public class NavigationMapboxMap {
   public void addProgressChangeListener(MapboxNavigation navigation) {
     mapRoute.addProgressChangeListener(navigation);
     mapCamera.addProgressChangeListener(navigation);
+    mapWayname.addProgressChangeListener(navigation);
   }
 
   /**
@@ -405,6 +406,7 @@ public class NavigationMapboxMap {
     locationLayer.onStop();
     mapCamera.onStop();
     mapRoute.onStop();
+    mapWayname.onStop();
   }
 
   /**
@@ -512,8 +514,8 @@ public class NavigationMapboxMap {
     mapCamera = new NavigationCamera(map, locationLayer);
   }
 
-  private void initializeWayname(MapView mapView, MapboxMap mapboxMap,
-                                 MapLayerInteractor layerInteractor, MapPaddingAdjustor paddingAdjustor) {
+  private void initializeWayname(MapView mapView, MapboxMap mapboxMap, MapLayerInteractor layerInteractor,
+                                 MapPaddingAdjustor paddingAdjustor) {
     initializeStreetsSource(mapboxMap);
     WaynameLayoutProvider layoutProvider = new WaynameLayoutProvider(mapView.getContext());
     WaynameFeatureFinder featureInteractor = new WaynameFeatureFinder(mapboxMap);
