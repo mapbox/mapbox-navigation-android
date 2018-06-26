@@ -22,6 +22,10 @@ public class BaseTest {
     return routeBuilder.loadJsonFixture(filename);
   }
 
+  protected DirectionsRoute buildTestDirectionsRoute() throws IOException {
+    return routeBuilder.buildTestDirectionsRoute(null);
+  }
+
   protected RouteProgress buildRouteProgress(DirectionsRoute route,
                                              double stepDistanceRemaining,
                                              double legDistanceRemaining,

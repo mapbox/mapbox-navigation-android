@@ -21,7 +21,6 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT;
-
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_EXIT_ROTARY;
@@ -39,6 +38,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  */
 public class ManeuverView extends View {
 
+  private static final float THREE_HUNDRED_DEGREES = 300f;
   private static final Map<Pair<String, String>, ManeuverViewUpdate> MANEUVER_VIEW_UPDATE_MAP = new ManeuverViewMap();
   private static final Set<String> SHOULD_FLIP_MODIFIERS = new HashSet<String>() {
     {
@@ -110,9 +110,17 @@ public class ManeuverView extends View {
 
   public void setRoundaboutAngle(float roundaboutAngle) {
     if (ROUNDABOUT_MANEUVER_TYPES.contains(maneuverType) && this.roundaboutAngle != roundaboutAngle) {
-      this.roundaboutAngle = roundaboutAngle;
+      updateRoundaboutAngle(roundaboutAngle);
       invalidate();
     }
+  }
+
+  private void updateRoundaboutAngle(float roundaboutAngle) {
+    if (roundaboutAngle > THREE_HUNDRED_DEGREES) {
+      this.roundaboutAngle = THREE_HUNDRED_DEGREES;
+      return;
+    }
+    this.roundaboutAngle = roundaboutAngle;
   }
 
   @Override

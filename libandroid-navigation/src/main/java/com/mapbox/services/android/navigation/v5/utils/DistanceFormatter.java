@@ -27,7 +27,8 @@ import static com.mapbox.turf.TurfConstants.UNIT_KILOMETERS;
 import static com.mapbox.turf.TurfConstants.UNIT_METERS;
 import static com.mapbox.turf.TurfConstants.UNIT_MILES;
 
-public class DistanceUtils {
+public class DistanceFormatter {
+
   private static final int LARGE_UNIT_THRESHOLD = 10;
   private static final int SMALL_UNIT_THRESHOLD = 401;
   private final Map<String, String> unitStrings = new HashMap<>();
@@ -37,14 +38,14 @@ public class DistanceUtils {
   private final LocaleUtils localeUtils;
 
   /**
-   * Creates a DistanceUtils object with information about how to format distances
+   * Creates a DistanceFormatter object with information about how to format distances
    *
    * @param context  from which to get localized strings from
-   * @param language   for which language
+   * @param language for which language
    * @param unitType to use, or NONE_SPECIFIED to use default for locale country
    */
-  public DistanceUtils(Context context, @NonNull String language,
-                       @NonNull @DirectionsCriteria.VoiceUnitCriteria String unitType) {
+  public DistanceFormatter(Context context, @NonNull String language,
+                           @NonNull @DirectionsCriteria.VoiceUnitCriteria String unitType) {
     localeUtils = new LocaleUtils();
 
     unitStrings.put(UNIT_KILOMETERS, context.getString(R.string.kilometers));
