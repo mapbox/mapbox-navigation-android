@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatDelegate;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 
@@ -83,15 +84,15 @@ public class ThemeSwitcher {
    * @param attrs   holding custom styles if any are set
    */
   static void setTheme(Context context, AttributeSet attrs) {
-    boolean darkThemeEnabled = isDarkThemeEnabled(context);
-    updatePreferencesDarkEnabled(context, darkThemeEnabled);
+    boolean nightModeEnabled = isNightModeEnabled(context);
+    updatePreferencesDarkEnabled(context, nightModeEnabled);
 
     if (shouldSetThemeFromPreferences(context)) {
       int prefLightTheme = retrieveThemeResIdFromPreferences(context, NavigationConstants.NAVIGATION_VIEW_LIGHT_THEME);
       int prefDarkTheme = retrieveThemeResIdFromPreferences(context, NavigationConstants.NAVIGATION_VIEW_DARK_THEME);
       prefLightTheme = prefLightTheme == 0 ? R.style.NavigationViewLight : prefLightTheme;
       prefDarkTheme = prefLightTheme == 0 ? R.style.NavigationViewDark : prefDarkTheme;
-      context.setTheme(darkThemeEnabled ? prefDarkTheme : prefLightTheme);
+      context.setTheme(nightModeEnabled ? prefDarkTheme : prefLightTheme);
       return;
     }
 
@@ -102,7 +103,7 @@ public class ThemeSwitcher {
       R.style.NavigationViewDark);
     styledAttributes.recycle();
 
-    context.setTheme(darkThemeEnabled ? darkTheme : lightTheme);
+    context.setTheme(nightModeEnabled ? darkTheme : lightTheme);
   }
 
   static String retrieveMapStyle(Context context) {
@@ -115,10 +116,25 @@ public class ThemeSwitcher {
    *
    * @param context to retrieve the current configuration
    */
-  private static boolean isDarkThemeEnabled(Context context) {
-    int uiMode = context.getResources().getConfiguration().uiMode
-      & Configuration.UI_MODE_NIGHT_MASK;
+  private static boolean isNightModeEnabled(Context context) {
+    if (isNightModeFollowSystem()) {
+      AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
+    }
+    int uiMode = retrieveCurrentUiMode(context);
     return uiMode == Configuration.UI_MODE_NIGHT_YES;
+  }
+
+  /**
+   * Returns true if the current UI_MODE_NIGHT is undefined, false otherwise.
+   */
+  private static boolean isNightModeFollowSystem() {
+    int nightMode = AppCompatDelegate.getDefaultNightMode();
+    return nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+  }
+
+  private static int retrieveCurrentUiMode(Context context) {
+    return context.getResources().getConfiguration().uiMode
+      & Configuration.UI_MODE_NIGHT_MASK;
   }
 
   @NonNull
