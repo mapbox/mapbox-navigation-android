@@ -98,7 +98,9 @@ public class NavigationHelperTest extends BaseTest {
     RouteProgress routeProgress = buildMultiLegRouteProgress();
     MapboxNavigationOptions options = MapboxNavigationOptions.builder()
       .defaultMilestonesEnabled(false).build();
-    MapboxNavigation mapboxNavigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, options,
+    Context context = mock(Context.class);
+    when(context.getApplicationContext()).thenReturn(mock(Context.class));
+    MapboxNavigation mapboxNavigation = new MapboxNavigation(context, ACCESS_TOKEN, options,
       mock(NavigationTelemetry.class), mock(LocationEngine.class));
     mapboxNavigation.addMilestone(new StepMilestone.Builder()
       .setTrigger(Trigger.eq(TriggerProperty.STEP_INDEX, 0))
@@ -119,9 +121,11 @@ public class NavigationHelperTest extends BaseTest {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder()
       .enableOffRouteDetection(false)
       .build();
-    MapboxNavigation mapboxNavigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, options,
+    Context context = mock(Context.class);
+    when(context.getApplicationContext()).thenReturn(mock(Context.class));
+    MapboxNavigation mapboxNavigation = new MapboxNavigation(context, ACCESS_TOKEN, options,
       mock(NavigationTelemetry.class), mock(LocationEngine.class));
-    NewLocationModel model = NewLocationModel.create(mock(Location.class), mapboxNavigation);
+    NavigationLocationUpdate model = NavigationLocationUpdate.create(mock(Location.class), mapboxNavigation);
 
     boolean userOffRoute = isUserOffRoute(model, mock(RouteProgress.class), mock(OffRouteCallback.class));
 

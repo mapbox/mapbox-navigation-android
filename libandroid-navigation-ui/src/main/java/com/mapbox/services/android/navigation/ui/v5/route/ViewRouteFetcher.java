@@ -27,7 +27,8 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
   private DirectionsRoute currentRoute;
   private Location rawLocation;
 
-  public ViewRouteFetcher(ViewRouteListener listener) {
+  public ViewRouteFetcher(Context context, String accessToken, ViewRouteListener listener) {
+    super(context, accessToken);
     this.listener = listener;
     addRouteListener(this);
   }
@@ -56,13 +57,12 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
   /**
    * Fetches the route from the off-route event
    *
-   * @param context to pass to route builder
    * @param event from which the route progress is extracted
    */
-  public void fetchRouteFromOffRouteEvent(Context context, OffRouteEvent event) {
+  public void fetchRouteFromOffRouteEvent(OffRouteEvent event) {
     if (OffRouteEvent.isValid(event)) {
       RouteProgress routeProgress = event.getRouteProgress();
-      findRouteFromRouteProgress(context, rawLocation, routeProgress);
+      findRouteFromRouteProgress(rawLocation, routeProgress);
     }
   }
 
@@ -77,18 +77,8 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
 
   private void extractRouteFromOptions(NavigationViewOptions options) {
     DirectionsRoute route = options.directionsRoute();
-    cacheRouteInformation(options, route);
-    updateCurrentRoute(route);
-  }
-
-  private void cacheRouteInformation(NavigationViewOptions options, DirectionsRoute route) {
     cacheRouteOptions(route.routeOptions());
-    cacheRouteProfile(options);
-  }
-
-  private void cacheRouteProfile(NavigationViewOptions options) {
-    String routeProfile = options.directionsProfile();
-    updateRouteProfile(routeProfile);
+    updateCurrentRoute(route);
   }
 
   private void cacheRouteOptions(RouteOptions routeOptions) {
