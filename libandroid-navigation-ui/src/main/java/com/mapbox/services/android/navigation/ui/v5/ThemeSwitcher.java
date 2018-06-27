@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.content.res.AppCompatResources;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 
@@ -60,14 +61,14 @@ public class ThemeSwitcher {
   public static Drawable retrieveThemeOverviewDrawable(Context context) {
     TypedValue destinationMarkerResId = resolveAttributeFromId(context, R.attr.navigationViewRouteOverviewDrawable);
     int overviewResId = destinationMarkerResId.resourceId;
-    return ContextCompat.getDrawable(context, overviewResId);
+    return AppCompatResources.getDrawable(context, overviewResId);
   }
 
   /**
    * Looks are current theme and retrieves the style
    * for the given resId set in the theme.
    *
-   * @param context to retrieve the resolved attribute
+   * @param context    to retrieve the resolved attribute
    * @param styleResId for the given style
    * @return resolved style resource Id
    */

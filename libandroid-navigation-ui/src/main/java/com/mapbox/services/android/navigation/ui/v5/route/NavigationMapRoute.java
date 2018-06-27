@@ -16,6 +16,7 @@ import android.support.annotation.Size;
 import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.content.res.AppCompatResources;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
@@ -414,8 +415,8 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
     MapUtils.updateMapSourceFromFeatureCollection(
       mapboxMap, featureCollections.get(featureCollections.size() - 1), WAYPOINT_SOURCE_ID);
     drawWaypointMarkers(mapboxMap,
-      ContextCompat.getDrawable(mapView.getContext(), originWaypointIcon),
-      ContextCompat.getDrawable(mapView.getContext(), destinationWaypointIcon)
+      AppCompatResources.getDrawable(mapView.getContext(), originWaypointIcon),
+      AppCompatResources.getDrawable(mapView.getContext(), destinationWaypointIcon)
     );
   }
 
@@ -516,14 +517,14 @@ public class NavigationMapRoute implements ProgressChangeListener, MapView.OnMap
   }
 
   private void addArrowHeadIcon() {
-    Drawable head = DrawableCompat.wrap(ContextCompat.getDrawable(mapView.getContext(), R.drawable.ic_arrow_head));
+    Drawable head = DrawableCompat.wrap(AppCompatResources.getDrawable(mapView.getContext(), R.drawable.ic_arrow_head));
     DrawableCompat.setTint(head.mutate(), arrowColor);
     Bitmap icon = MapImageUtils.getBitmapFromDrawable(head);
     mapboxMap.addImage(ARROW_HEAD_ICON, icon);
   }
 
   private void addArrowHeadIconCasing() {
-    Drawable headCasing = DrawableCompat.wrap(ContextCompat.getDrawable(mapView.getContext(),
+    Drawable headCasing = DrawableCompat.wrap(AppCompatResources.getDrawable(mapView.getContext(),
       R.drawable.ic_arrow_head_casing));
     DrawableCompat.setTint(headCasing.mutate(), arrowBorderColor);
     Bitmap icon = MapImageUtils.getBitmapFromDrawable(headCasing);
