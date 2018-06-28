@@ -59,6 +59,9 @@ public abstract class MapboxNavigationOptions {
 
   public abstract int locationVelocityInMetersPerSecondThreshold();
 
+  @Nullable
+  public abstract Class notificationClass();
+
   public abstract Builder toBuilder();
 
   @AutoValue.Builder
@@ -109,6 +112,8 @@ public abstract class MapboxNavigationOptions {
     public abstract Builder locationUpdateTimeInMillisThreshold(int timeInMillisThreshold);
 
     public abstract Builder locationVelocityInMetersPerSecondThreshold(int metersPerSecondThreshold);
+
+    public abstract Builder notificationClass(Class notificationClass);
 
     public abstract MapboxNavigationOptions build();
   }

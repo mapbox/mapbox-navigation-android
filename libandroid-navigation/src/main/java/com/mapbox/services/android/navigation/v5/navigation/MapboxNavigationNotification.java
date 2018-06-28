@@ -30,10 +30,11 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 /**
  * This is in charge of creating the persistent navigation session notification and updating it.
  */
-class MapboxNavigationNotification implements NavigationNotification {
-  private static final String END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION";
+public class MapboxNavigationNotification implements NavigationNotification {
+  public static final String END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION";
   private final DistanceUtils distanceUtils;
   private final String etaFormat;
+  private final Class notificationClass;
   private NotificationCompat.Builder notificationBuilder;
   private NotificationManager notificationManager;
   private Notification notification;
@@ -52,8 +53,9 @@ class MapboxNavigationNotification implements NavigationNotification {
     }
   };
 
-  MapboxNavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
+  MapboxNavigationNotification(Context context, MapboxNavigation mapboxNavigation, Class notificationClass) {
     this.mapboxNavigation = mapboxNavigation;
+    this.notificationClass = notificationClass;
     RouteOptions routeOptions = mapboxNavigation.getRoute().routeOptions();
     this.distanceUtils = new DistanceUtils(
       context, routeOptions.language(), routeOptions.voiceUnits());
@@ -114,6 +116,8 @@ class MapboxNavigationNotification implements NavigationNotification {
     PendingIntent pendingCloseIntent = createPendingCloseIntent(context);
     expandedNotificationRemoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent);
 
+    PendingIntent pendingOpenIntent = createPendingOpenIntent(context);
+
     // Sets up the top bar notification
     notificationBuilder = new NotificationCompat.Builder(context, NAVIGATION_NOTIFICATION_CHANNEL)
       .setCategory(NotificationCompat.CATEGORY_SERVICE)
@@ -122,6 +126,10 @@ class MapboxNavigationNotification implements NavigationNotification {
       .setCustomContentView(collapsedNotificationRemoteViews)
       .setCustomBigContentView(expandedNotificationRemoteViews)
       .setOngoing(true);
+
+    if (notificationClass != null) {
+      notificationBuilder.setContentIntent(pendingOpenIntent);
+    }
 
     notification = notificationBuilder.build();
   }
@@ -214,8 +222,13 @@ class MapboxNavigationNotification implements NavigationNotification {
   }
 
   private PendingIntent createPendingCloseIntent(Context context) {
-    Intent endNavigationBtn = new Intent(END_NAVIGATION_ACTION);
-    return PendingIntent.getBroadcast(context, 0, endNavigationBtn, 0);
+    Intent endNavigationIntent = new Intent(END_NAVIGATION_ACTION);
+    return PendingIntent.getBroadcast(context, 0, endNavigationIntent, 0);
+  }
+
+  private PendingIntent createPendingOpenIntent(Context context) {
+    Intent intent = new Intent(context, notificationClass);
+    return PendingIntent.getActivity(context, 0, intent, 0);
   }
 
   private void onEndNavigationBtnClick() {

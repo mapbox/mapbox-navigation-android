@@ -213,7 +213,7 @@ public class NavigationService extends Service implements LocationEngineListener
       int notificationId = navigationNotification.getNotificationId();
       startForegroundNotification(notification, notificationId);
     } else {
-      navigationNotification = new MapboxNavigationNotification(this, mapboxNavigation);
+      navigationNotification = new MapboxNavigationNotification(this, mapboxNavigation, options.notificationClass());
       Notification notification = navigationNotification.getNotification();
       int notificationId = navigationNotification.getNotificationId();
       startForegroundNotification(notification, notificationId);

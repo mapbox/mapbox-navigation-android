@@ -92,7 +92,8 @@ public class MapboxNavigationActivity extends AppCompatActivity implements OnNav
 
   @Override
   public void onNavigationReady() {
-    MapboxNavigationOptions.Builder navigationOptions = MapboxNavigationOptions.builder();
+    MapboxNavigationOptions.Builder navigationOptions = MapboxNavigationOptions.builder()
+      .notificationClass(this.getClass());
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
     options.navigationListener(this);
     extractRoute(options);
