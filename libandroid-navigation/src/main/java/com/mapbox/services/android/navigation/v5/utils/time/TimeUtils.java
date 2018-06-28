@@ -5,6 +5,7 @@ import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 
+import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
 import com.mapbox.services.android.navigation.v5.utils.span.SpanItem;
 import com.mapbox.services.android.navigation.v5.utils.span.SpanUtils;
 import com.mapbox.services.android.navigation.v5.utils.span.TextSpanItem;
@@ -18,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 public class TimeUtils {
 
-  private static final String ARRIVAL_TIME_STRING_FORMAT = "%tl:%tM %tp%n";
+  private static final String ARRIVAL_TIME_STRING_FORMAT = "%tl:%tM %tp";
   private static final String DAY = " day ";
   private static final String DAYS = " days ";
   private static final String HOUR = " hr ";
@@ -32,7 +33,8 @@ public class TimeUtils {
       calendar, calendar, calendar);
   }
 
-  public static String formatTime(Calendar time, double routeDuration, int type, boolean isDeviceTwentyFourHourFormat) {
+  public static String formatTime(Calendar time, double routeDuration, @NavigationTimeFormat.Type int type,
+                                  boolean isDeviceTwentyFourHourFormat) {
     time.add(Calendar.SECOND, (int) routeDuration);
     TimeFormattingChain chain = new TimeFormattingChain();
     String formattedTime = chain.setup(isDeviceTwentyFourHourFormat).obtainTimeFormatted(type, time);

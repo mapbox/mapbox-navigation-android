@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@android:style/TextAppearance.StatusBar.EventContent"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:background="@android:color/holo_blue_dark"
+    android:id="@+id/relativeLayout">
+
+    <ImageView
+        android:id="@+id/maneuverImage"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_maneuver_arrive"
+        android:tint="@android:color/white"/>
+
+    <TextView
+        android:id="@+id/notificationDistanceText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_toRightOf="@id/maneuverImage"
+        android:layout_toEndOf="@id/maneuverImage"
+        android:layout_alignTop="@id/maneuverImage"
+        android:lines="1"
+        android:textColor="@android:color/white"
+        tools:text="250 ft"/>
+
+    <ImageView
+        android:id="@+id/dot"
+        android:layout_width="4dp"
+        android:layout_height="4dp"
+        android:layout_toRightOf="@id/notificationDistanceText"
+        android:layout_toEndOf="@id/notificationDistanceText"
+        android:layout_alignTop="@id/notificationDistanceText"
+        android:layout_alignBottom="@id/notificationDistanceText"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_circle"
+        android:tint="@android:color/white"/>
+
+    <TextView
+        android:id="@+id/notificationArrivalText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_toRightOf="@+id/dot"
+        android:layout_toEndOf="@+id/dot"
+        android:layout_alignTop="@id/notificationDistanceText"
+        android:layout_alignBottom="@id/notificationDistanceText"
+        android:lines="1"
+        android:textColor="@android:color/white"
+        tools:text="11:13 AM ETA"/>
+
+    <TextView
+        android:id="@+id/notificationInstructionText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:layout_toRightOf="@id/maneuverImage"
+        android:layout_toEndOf="@id/maneuverImage"
+        android:layout_alignBottom="@id/maneuverImage"
+        android:ellipsize="end"
+        android:lines="1"
+        android:textColor="@android:color/white"
+        tools:text="Sherman Ave NW"/>
+</RelativeLayout>
