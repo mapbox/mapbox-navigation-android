@@ -17,6 +17,7 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -202,6 +203,8 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
       .navigationListener(this)
       .progressChangeListener(this)
       .routeListener(this)
+      .navigationOptions(MapboxNavigationOptions.builder().notificationClass(this.getClass())
+        .build())
       .shouldSimulateRoute(true);
     return options.build();
   }
