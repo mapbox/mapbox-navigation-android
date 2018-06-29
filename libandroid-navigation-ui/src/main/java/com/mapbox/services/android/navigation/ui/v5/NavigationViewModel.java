@@ -7,6 +7,7 @@ import android.content.Context;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -22,7 +23,9 @@ import com.mapbox.services.android.navigation.ui.v5.route.OffRouteEvent;
 import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteFetcher;
 import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteListener;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
-import com.mapbox.services.android.navigation.ui.v5.voice.NavigationInstructionPlayer;
+import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer;
+import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
+import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayerProvider;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -58,7 +61,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private ViewRouteFetcher navigationViewRouteEngine;
   private LocationEngineConductor locationEngineConductor;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
-  private NavigationInstructionPlayer instructionPlayer;
+  private NavigationSpeechPlayer instructionPlayer;
   private ConnectivityManager connectivityManager;
   private RouteProgress routeProgress;
   private String feedbackId;
@@ -212,9 +215,19 @@ public class NavigationViewModel extends AndroidViewModel {
     unitType = options.directionsRoute().routeOptions().voiceUnits();
   }
 
+  private void initTimeFormat(MapboxNavigationOptions options) {
+    timeFormatType = options.timeFormatType();
+  }
+
   private void initVoiceInstructions(NavigationViewOptions options) {
-    boolean languageSupported = options.directionsRoute().voiceLanguage() != null;
-    instructionPlayer = new NavigationInstructionPlayer(getApplication(), language, languageSupported, accessToken);
+    boolean isVoiceLanguageSupported = options.directionsRoute().voiceLanguage() != null;
+    SpeechPlayerProvider speechPlayerProvider = initializeSpeechPlayerProvider(isVoiceLanguageSupported);
+    instructionPlayer = new NavigationSpeechPlayer(speechPlayerProvider);
+  }
+
+  @NonNull
+  private SpeechPlayerProvider initializeSpeechPlayerProvider(boolean voiceLanguageSupported) {
+    return new SpeechPlayerProvider(getApplication(), language, voiceLanguageSupported, accessToken);
   }
 
   private void initNavigation(Context context, MapboxNavigationOptions options) {
@@ -236,10 +249,6 @@ public class NavigationViewModel extends AndroidViewModel {
     if (milestones != null && !milestones.isEmpty()) {
       navigation.addMilestones(milestones);
     }
-  }
-
-  private void initTimeFormat(MapboxNavigationOptions options) {
-    timeFormatType = options.timeFormatType();
   }
 
   private ProgressChangeListener progressChangeListener = new ProgressChangeListener() {
@@ -267,7 +276,9 @@ public class NavigationViewModel extends AndroidViewModel {
     @Override
     public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
       if (milestone instanceof VoiceInstructionMilestone) {
-        instructionPlayer.play((VoiceInstructionMilestone) milestone);
+        SpeechAnnouncement speechAnnouncement = SpeechAnnouncement.builder()
+          .voiceInstructionMilestone((VoiceInstructionMilestone) milestone).build();
+        instructionPlayer.play(speechAnnouncement);
       }
       updateBannerInstruction(routeProgress, milestone);
       sendEventArrival(routeProgress, milestone);

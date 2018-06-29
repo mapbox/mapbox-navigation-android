@@ -3,14 +3,14 @@ package com.mapbox.services.android.navigation.ui.v5.voice;
 import android.speech.tts.TextToSpeech;
 
 class Api14UtteranceListener implements TextToSpeech.OnUtteranceCompletedListener {
-  private InstructionListener instructionListener;
+  private SpeechListener speechListener;
 
-  Api14UtteranceListener(InstructionListener instructionListener) {
-    this.instructionListener = instructionListener;
+  Api14UtteranceListener(SpeechListener speechListener) {
+    this.speechListener = speechListener;
   }
 
   @Override
   public void onUtteranceCompleted(String utteranceId) {
-    instructionListener.onDone();
+    speechListener.onDone();
   }
 }

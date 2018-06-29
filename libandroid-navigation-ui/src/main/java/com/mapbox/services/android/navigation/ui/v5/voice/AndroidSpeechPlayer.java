@@ -17,27 +17,28 @@ import timber.log.Timber;
  *
  * @since 0.6.0
  */
-class AndroidSpeechPlayer implements InstructionPlayer {
+class AndroidSpeechPlayer implements SpeechPlayer {
 
   private static final String DEFAULT_UTTERANCE_ID = "default_id";
 
   private TextToSpeech textToSpeech;
+  private SpeechListener speechListener;
+
   private boolean isMuted;
   private boolean languageSupported = false;
-  private InstructionListener instructionListener;
 
   /**
    * Creates an instance of {@link AndroidSpeechPlayer}.
    *
-   * @param context used to create an instance of {@link TextToSpeech}
+   * @param context  used to create an instance of {@link TextToSpeech}
    * @param language to initialize locale to set
    * @since 0.6.0
    */
-  AndroidSpeechPlayer(Context context, final String language, final InstructionListener instructionListener) {
+  AndroidSpeechPlayer(Context context, final String language, final SpeechListener speechListener) {
     textToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
       @Override
       public void onInit(int status) {
-        setInstructionListener(instructionListener);
+        setSpeechListener(speechListener);
 
         boolean ableToInitialize = status != TextToSpeech.ERROR && language != null;
         if (!ableToInitialize) {
@@ -52,11 +53,13 @@ class AndroidSpeechPlayer implements InstructionPlayer {
   /**
    * Plays the given voice instruction using TTS
    *
-   * @param instruction voice instruction to be synthesized and played
+   * @param speechAnnouncement with voice instruction to be synthesized and played
    */
   @Override
-  public void play(String instruction) {
-    boolean canPlay = languageSupported && !isMuted && !TextUtils.isEmpty(instruction);
+  public void play(SpeechAnnouncement speechAnnouncement) {
+    boolean isValidAnnouncement = speechAnnouncement != null
+      && !TextUtils.isEmpty(speechAnnouncement.announcement());
+    boolean canPlay = isValidAnnouncement && languageSupported && !isMuted;
     if (!canPlay) {
       return;
     }
@@ -65,7 +68,7 @@ class AndroidSpeechPlayer implements InstructionPlayer {
 
     HashMap<String, String> params = new HashMap<>(1);
     params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, DEFAULT_UTTERANCE_ID);
-    textToSpeech.speak(instruction, TextToSpeech.QUEUE_ADD, params);
+    textToSpeech.speak(speechAnnouncement.announcement(), TextToSpeech.QUEUE_ADD, params);
   }
 
   /**
@@ -129,17 +132,17 @@ class AndroidSpeechPlayer implements InstructionPlayer {
 
   private void fireInstructionListenerIfApi14() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-      instructionListener.onStart();
+      speechListener.onStart();
     }
   }
 
-  private void setInstructionListener(final InstructionListener instructionListener) {
-    this.instructionListener = instructionListener;
+  private void setSpeechListener(final SpeechListener speechListener) {
+    this.speechListener = speechListener;
 
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-      textToSpeech.setOnUtteranceCompletedListener(new Api14UtteranceListener(instructionListener));
+      textToSpeech.setOnUtteranceCompletedListener(new Api14UtteranceListener(speechListener));
     } else {
-      textToSpeech.setOnUtteranceProgressListener(new UtteranceListener(instructionListener));
+      textToSpeech.setOnUtteranceProgressListener(new UtteranceListener(speechListener));
     }
   }
 }
