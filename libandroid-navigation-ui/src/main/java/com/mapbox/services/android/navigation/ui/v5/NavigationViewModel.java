@@ -194,6 +194,10 @@ public class NavigationViewModel extends AndroidViewModel {
     return isRunning;
   }
 
+  void stopNavigation() {
+    navigation.stopNavigation();
+  }
+
   private void initConnectivityManager(Application application) {
     connectivityManager = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
   }

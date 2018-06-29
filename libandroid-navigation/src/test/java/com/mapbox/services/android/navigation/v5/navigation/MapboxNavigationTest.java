@@ -255,7 +255,7 @@ public class MapboxNavigationTest extends BaseTest {
 
     navigation.addNavigationEventListener(navigationEventListener);
     navigation.startNavigation(buildTestDirectionsRoute());
-    navigation.endNavigation();
+    navigation.stopNavigation();
 
     verify(navigationEventListener, times(1)).onRunning(false);
   }

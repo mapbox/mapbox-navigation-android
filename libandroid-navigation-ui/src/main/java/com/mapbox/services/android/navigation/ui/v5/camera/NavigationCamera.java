@@ -68,6 +68,19 @@ public class NavigationCamera implements LifecycleObserver {
   }
 
   /**
+   * Creates an instance of {@link NavigationCamera}.
+   * <p>
+   * The camera won't do anything until {@link NavigationCamera#addProgressChangeListener} is called.
+   *
+   * @param mapboxMap for moving the camera
+   * @since 0.15.0
+   */
+  public NavigationCamera(@NonNull MapboxMap mapboxMap) {
+    this.mapboxMap = mapboxMap;
+    mapboxMap.setMinZoomPreference(7d);
+  }
+
+  /**
    * Used for testing only.
    */
   NavigationCamera(MapboxMap mapboxMap, MapboxNavigation navigation, ProgressChangeListener progressChangeListener) {
@@ -173,7 +186,15 @@ public class NavigationCamera implements LifecycleObserver {
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
   public void onStop() {
-    navigation.removeProgressChangeListener(progressChangeListener);
+    if (navigation != null) {
+      navigation.removeProgressChangeListener(progressChangeListener);
+    }
+  }
+
+  public void addProgressChangeListener(MapboxNavigation navigation) {
+    this.navigation = navigation;
+    navigation.setCameraEngine(new DynamicCamera(mapboxMap));
+    navigation.addProgressChangeListener(progressChangeListener);
   }
 
   private void initialize() {

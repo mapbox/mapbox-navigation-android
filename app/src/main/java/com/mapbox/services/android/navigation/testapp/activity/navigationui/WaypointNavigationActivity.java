@@ -108,7 +108,7 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public void onNavigationReady() {
+  public void onNavigationReady(boolean isRunning) {
     fetchRoute(points.remove(0), points.remove(0));
   }
 

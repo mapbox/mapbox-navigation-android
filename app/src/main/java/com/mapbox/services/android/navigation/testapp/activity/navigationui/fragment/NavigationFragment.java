@@ -98,7 +98,7 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
   }
 
   @Override
-  public void onNavigationReady() {
+  public void onNavigationReady(boolean isRunning) {
     Point origin = Point.fromLngLat(ORIGIN_LONGITUDE, ORIGIN_LATITUDE);
     Point destination = Point.fromLngLat(DESTINATION_LONGITUDE, DESTINATION_LATITUDE);
     fetchRoute(origin, destination);
