@@ -101,7 +101,7 @@ jobs:
       - deploy:
           name: Publish Navigation SDK To Maven Central
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            if [ "${CIRCLE_BRANCH}" == "release-v0.16.0-beta.1" ]; then
             make publish ;
             fi
       - store_artifacts:
