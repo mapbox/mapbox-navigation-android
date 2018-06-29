@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.feedback;
 
-import android.support.v4.content.ContextCompat;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
@@ -22,7 +22,7 @@ class FeedbackViewHolder extends RecyclerView.ViewHolder {
   }
 
   void setFeedbackImage(int feedbackImageId) {
-    feedbackImage.setImageDrawable(ContextCompat.getDrawable(feedbackImage.getContext(), feedbackImageId));
+    feedbackImage.setImageDrawable(AppCompatResources.getDrawable(feedbackImage.getContext(), feedbackImageId));
   }
 
   void setFeedbackText(String feedbackText) {
