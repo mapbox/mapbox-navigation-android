@@ -13,8 +13,7 @@
     <string name="title_navigation_route_ui">Mapa de Percurso de Navegação</string>
     <string name="description_navigation_route_ui">Desenha um percurso no mapa</string>
 
-    <string name="title_navigation_view_ui">Vistas de Navegação</string>
-    <string name="description_navigation_view_ui">Experiência de UI Drop-In</string>
+    <string name="description_navigation_launcher">Experiência de UI Drop-In</string>
 
     <string name="title_waypoint_navigation">Navegação de Pontos de Passagem</string>
     <string name="description_waypoint_navigation">Navegação com pontos de passagem entre destinos</string>

@@ -19,7 +19,7 @@ import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.EmbeddedNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.EndNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationViewActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationLauncherActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.WaypointNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.fragment.FragmentNavigationActivity;
 
@@ -38,9 +38,9 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
 
     final List<SampleItem> samples = new ArrayList<>(Arrays.asList(
       new SampleItem(
-        getString(R.string.title_navigation_view_ui),
-        getString(R.string.description_navigation_view_ui),
-        NavigationViewActivity.class
+        getString(R.string.title_navigation_launcher),
+        getString(R.string.description_navigation_launcher),
+        NavigationLauncherActivity.class
       ),
       new SampleItem(
         getString(R.string.title_end_navigation),

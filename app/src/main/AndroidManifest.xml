@@ -51,8 +51,8 @@
         </activity>
 
         <activity
-            android:name=".activity.navigationui.NavigationViewActivity"
-            android:label="@string/title_navigation_view_ui">
+            android:name=".activity.navigationui.NavigationLauncherActivity"
+            android:label="@string/title_navigation_launcher">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
@@ -63,7 +63,7 @@
             android:label="@string/settings">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activity.navigationui.NavigationViewActivity"/>
+                android:value=".activity.navigationui.NavigationLauncherActivity"/>
         </activity>
 
         <activity

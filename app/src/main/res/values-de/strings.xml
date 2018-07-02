@@ -13,8 +13,7 @@
     <string name="title_navigation_route_ui">Navigation / Karte / Route</string>
     <string name="description_navigation_route_ui">Zeichnet eine Route auf der Karte</string>
 
-    <string name="title_navigation_view_ui">Navigationsansichten</string>
-    <string name="description_navigation_view_ui">Eingebautes UI Erlebnis</string>
+    <string name="description_navigation_launcher">Eingebautes UI Erlebnis</string>
 
     <string name="title_waypoint_navigation">Wegpunkt-Navigation</string>
     <string name="description_waypoint_navigation">Navigation mit Wegpunkten zwischen den Zielen</string>

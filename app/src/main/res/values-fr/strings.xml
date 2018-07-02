@@ -11,7 +11,6 @@
     <string name="title_navigation_route_ui">Itinéraire de navigation sur carte</string>
     <string name="description_navigation_route_ui">Trace un itinéraire sur la carte</string>
 
-    <string name="title_navigation_view_ui">Vues de navigation</string>
-    <string name="description_navigation_view_ui">Expérimentation de l’interface utilisateur</string>
+    <string name="description_navigation_launcher">Expérimentation de l’interface utilisateur</string>
 
 </resources>
