@@ -62,4 +62,6 @@
             translatable="false">bottom_sheet_state</string>
     <string name="navigation_running"
             translatable="false">navigation_running</string>
+    <string name="instruction_view_visible"
+            translatable="false">instruction_view_visible</string>
 </resources>
