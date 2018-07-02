@@ -7,10 +7,10 @@
     <string name="re_center">Vystředit</string>
 
     <!-- Indicates voice instructions are muted -->
-    <string name="muted">Vypnout zvuk</string>
+    <string name="muted">Zvuk vypnut</string>
 
     <!-- Indicates voice instructions are unmuted -->
-    <string name="unmuted">Zapnout zvuk</string>
+    <string name="unmuted">Zvuk zapnut</string>
 
     <!-- Feedback type for Bad Route -->
     <string name="feedback_bad_route">Chyba \nTrasy</string>

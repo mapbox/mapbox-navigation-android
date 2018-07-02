@@ -3,4 +3,8 @@
     <string name="end_navigation">Закінчити навігацію</string>
     <string name="channel_name">Навігаційні повідомлення</string>
     <string name="notification_arrival_time_format">Прибуття о %s</string>
+    <string name="kilometers">км</string>
+    <string name="meters">м</string>
+    <string name="miles">mi</string>
+    <string name="feet">фт</string>
 </resources>
