@@ -59,7 +59,7 @@ import retrofit2.Response;
 
 import static com.mapbox.android.core.location.LocationEnginePriority.HIGH_ACCURACY;
 
-public class NavigationViewActivity extends AppCompatActivity implements OnMapReadyCallback,
+public class NavigationLauncherActivity extends AppCompatActivity implements OnMapReadyCallback,
   MapboxMap.OnMapLongClickListener, LocationEngineListener, OnRouteSelectionChangeListener {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
@@ -91,7 +91,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_navigation_view);
+    setContentView(R.layout.activity_navigation_launcher);
     ButterKnife.bind(this);
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);

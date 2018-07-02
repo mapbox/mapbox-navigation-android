@@ -11,7 +11,6 @@
     <string name="title_navigation_route_ui">Navigeringskarta Rutt</string>
     <string name="description_navigation_route_ui">Rita en rutt på kartan</string>
 
-    <string name="title_navigation_view_ui">Navigationsvyer</string>
-    <string name="description_navigation_view_ui">Drop-in användarupplevelse</string>
+    <string name="description_navigation_launcher">Drop-in användarupplevelse</string>
 
 </resources>

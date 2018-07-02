@@ -13,8 +13,7 @@
     <string name="title_navigation_route_ui">လမ္းညြန္မႈေျမပံုလမ္းေၾကာင္း</string>
     <string name="description_navigation_route_ui">ေျမပံုေပၚတြင္လမ္းေၾကာင္းဆြဲသည္</string>
 
-    <string name="title_navigation_view_ui">လမ္းညြန္မႈပံုစံမ်ား</string>
-    <string name="description_navigation_view_ui">Drop-in UI အေတြ႕အၾကံဳ</string>
+    <string name="description_navigation_launcher">Drop-in UI အေတြ႕အၾကံဳ</string>
 
     <string name="title_waypoint_navigation">Waypoint လမ္းညြန္ျခင္း</string>
     <string name="description_waypoint_navigation">ခရီးဆံုမွတ္မ်ားၾကားလမ္းေၾကာင္းမ်ားႏွင့္လမ္းညြန္ျခင္း</string>

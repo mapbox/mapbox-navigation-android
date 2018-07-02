@@ -11,7 +11,6 @@
     <string name="title_navigation_route_ui">Mapa de navegació de la ruta</string>
     <string name="description_navigation_route_ui">Dibuixa una ruta al mapa</string>
 
-    <string name="title_navigation_view_ui">Vistes de navegació</string>
-    <string name="description_navigation_view_ui">Experiència UI casual</string>
+    <string name="description_navigation_launcher">Experiència UI casual</string>
 
 </resources>

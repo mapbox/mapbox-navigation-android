@@ -13,8 +13,7 @@
     <string name="title_navigation_route_ui">Mapa trasy</string>
     <string name="description_navigation_route_ui">Zobrazit trasu na mapě</string>
 
-    <string name="title_navigation_view_ui">Režim navigace</string>
-    <string name="description_navigation_view_ui">Opustit uživatelské prostředí</string>
+    <string name="description_navigation_launcher">Opustit uživatelské prostředí</string>
 
     <string name="title_waypoint_navigation">Navigace s trasovými body</string>
     <string name="description_waypoint_navigation">Navigace s trasovými body mezi cíli</string>

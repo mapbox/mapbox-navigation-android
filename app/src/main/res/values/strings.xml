@@ -13,8 +13,8 @@
     <string name="title_navigation_route_ui">Navigation Map Route</string>
     <string name="description_navigation_route_ui">Shows different styles using NavigationMapRoute</string>
 
-    <string name="title_navigation_view_ui">Navigation Views</string>
-    <string name="description_navigation_view_ui">Drop-in UI experience</string>
+    <string name="title_navigation_launcher">Navigation Launcher</string>
+    <string name="description_navigation_launcher">Drop-in UI experience</string>
 
     <string name="title_end_navigation">End Navigation</string>
     <string name="description_end_navigation">Shows how to end navigation using NavigationView</string>
