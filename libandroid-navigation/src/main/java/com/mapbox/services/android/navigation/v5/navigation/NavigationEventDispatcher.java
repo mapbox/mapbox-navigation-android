@@ -174,7 +174,10 @@ class NavigationEventDispatcher {
 
   private void checkForArrivalEvent(RouteProgress routeProgress, Milestone milestone) {
     if (routeUtils.isArrivalEvent(routeProgress, milestone)) {
-      metricEventListener.onArrival(routeProgress);
+      if (metricEventListener != null) {
+        metricEventListener.onArrival(routeProgress);
+      }
+
       if (routeUtils.isLastLeg(routeProgress)) {
         removeOffRouteListener(null);
         metricEventListener = null;
