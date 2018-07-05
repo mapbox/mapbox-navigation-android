@@ -134,6 +134,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     outState.putBoolean(getContext().getString(R.string.recenter_btn_visible),
       recenterBtn.getVisibility() == View.VISIBLE);
     outState.putBoolean(getContext().getString(R.string.navigation_running), navigationViewModel.isRunning());
+    outState.putBoolean(getContext().getString(R.string.instruction_view_visible),
+      instructionView.isShowingInstructionList());
     mapView.onSaveInstanceState(outState);
   }
 
@@ -149,6 +151,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     recenterBtn.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE);
     int bottomSheetState = savedInstanceState.getInt(getContext().getString(R.string.bottom_sheet_state));
     resetBottomSheetState(bottomSheetState);
+    boolean instructionViewVisible = savedInstanceState.getBoolean(getContext().getString(
+      R.string.instruction_view_visible));
+    updateInstructionListState(instructionViewVisible);
   }
 
   /**
@@ -451,6 +456,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       boolean isShowing = bottomSheetState == BottomSheetBehavior.STATE_EXPANDED;
       summaryBehavior.setHideable(!isShowing);
       summaryBehavior.setState(bottomSheetState);
+    }
+  }
+
+  private void updateInstructionListState(boolean visible) {
+    if (visible) {
+      instructionView.showInstructionList();
+    } else {
+      instructionView.hideInstructionList();
     }
   }
 
