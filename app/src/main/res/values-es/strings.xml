@@ -11,4 +11,7 @@
 
     <string name="description_navigation_launcher">Entra en la experiencia de la interfaz</string>
 
+    <string name="title_end_navigation">Finaliza navegación</string>
+    <string name="language">Idioma</string>
+    <string name="unit_type">Sistema de medida</string>
 </resources>

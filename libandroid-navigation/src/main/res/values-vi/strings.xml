@@ -7,4 +7,5 @@
     <string name="meters">m</string>
     <string name="miles">dặm</string>
     <string name="feet">foot</string>
+    <string name="eta_format">Đến %s</string>
 </resources>
