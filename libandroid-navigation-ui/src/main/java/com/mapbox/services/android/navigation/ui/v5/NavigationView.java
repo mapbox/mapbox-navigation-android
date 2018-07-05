@@ -400,7 +400,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void bind() {
-    mapView = findViewById(R.id.mapView);
+    mapView = findViewById(R.id.navigationMapView);
     instructionView = findViewById(R.id.instructionView);
     summaryBottomSheet = findViewById(R.id.summaryBottomSheet);
     cancelBtn = findViewById(R.id.cancelBtn);

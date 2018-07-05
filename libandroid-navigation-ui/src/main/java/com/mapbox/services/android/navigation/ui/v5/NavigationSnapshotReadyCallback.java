@@ -35,7 +35,7 @@ class NavigationSnapshotReadyCallback implements MapboxMap.SnapshotReadyCallback
   }
 
   private void updateFeedbackScreenshot() {
-    MapView mapView = navigationView.findViewById(R.id.mapView);
+    MapView mapView = navigationView.findViewById(R.id.navigationMapView);
     mapView.setVisibility(View.INVISIBLE);
     Bitmap capture = ViewUtils.captureView(mapView);
     String encoded = ViewUtils.encodeView(capture);
@@ -44,7 +44,7 @@ class NavigationSnapshotReadyCallback implements MapboxMap.SnapshotReadyCallback
 
   private void resetViewVisibility(ImageView screenshotView) {
     screenshotView.setVisibility(View.INVISIBLE);
-    MapView mapView = navigationView.findViewById(R.id.mapView);
+    MapView mapView = navigationView.findViewById(R.id.navigationMapView);
     mapView.setVisibility(View.VISIBLE);
   }
 }
