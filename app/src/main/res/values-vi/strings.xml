@@ -13,7 +13,11 @@
     <string name="title_navigation_route_ui">Tuyến đường trên Bản đồ Điều hướng</string>
     <string name="description_navigation_route_ui">Vẽ tuyến đường trên bản đồ</string>
 
+    <string name="title_navigation_launcher">Trình khởi động Điều hướng</string>
     <string name="description_navigation_launcher">Trải nghiệm giao diện người dùng có thể xen vào</string>
+
+    <string name="title_end_navigation">Kết thúc Điều hướng</string>
+    <string name="description_end_navigation">Cho biết cách kết thúc điều hướng dùng NavigationView</string>
 
     <string name="title_waypoint_navigation">Điều hướng giữa các Tọa độ điểm</string>
     <string name="description_waypoint_navigation">Điều hướng giữa các tọa độ điểm</string>

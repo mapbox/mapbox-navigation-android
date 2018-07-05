@@ -11,6 +11,4 @@
     <string name="title_navigation_route_ui">Навигационен картов маршрут</string>
     <string name="description_navigation_route_ui">Изчертава маршрут на картата</string>
 
-    <string name="description_navigation_launcher">Drop-in UI experience</string>
-
 </resources>
