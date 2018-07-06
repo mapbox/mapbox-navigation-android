@@ -366,6 +366,21 @@ public class NavigationEventDispatcherTest extends BaseTest {
     verify(metricEventListener, times(0)).onOffRouteEvent(location);
   }
 
+  @Test
+  public void onArrivalAlreadyOccurred_arrivalCheckIsIgnored() {
+    String instruction = "";
+    Location location = mock(Location.class);
+    BannerInstructionMilestone milestone = mock(BannerInstructionMilestone.class);
+    RouteUtils routeUtils = mock(RouteUtils.class);
+    when(routeUtils.isArrivalEvent(routeProgress, milestone)).thenReturn(true);
+    when(routeUtils.isLastLeg(routeProgress)).thenReturn(true);
+    NavigationEventDispatcher dispatcher = buildEventDispatcherHasArrived(instruction, routeUtils, milestone);
+
+    dispatcher.onMilestoneEvent(routeProgress, instruction, milestone);
+
+    verify(metricEventListener, times(0)).onOffRouteEvent(location);
+  }
+
   @NonNull
   private NavigationEventDispatcher buildEventDispatcherHasArrived(String instruction, RouteUtils routeUtils,
                                                                    Milestone milestone) {
