@@ -176,7 +176,10 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
   private ProgressChangeListener progressChangeListener = new ProgressChangeListener() {
     @Override
     public void onProgressChange(Location location, RouteProgress routeProgress) {
-      if (!routeProgress.directionsRoute().equals(directionsRoutes.get(primaryRouteIndex))) {
+      boolean noRoutes = directionsRoutes.isEmpty();
+      boolean newCurrentRoute = !routeProgress.directionsRoute().equals(directionsRoutes.get(primaryRouteIndex));
+      boolean isANewRoute = noRoutes || newCurrentRoute;
+      if (isANewRoute) {
         addRoute(routeProgress.directionsRoute());
       }
       addUpcomingManeuverArrow(routeProgress);
