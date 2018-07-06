@@ -19,6 +19,9 @@
     <string name="title_end_navigation">End Navigation</string>
     <string name="description_end_navigation">Shows how to end navigation using NavigationView</string>
 
+    <string name="title_dual_navigation_map">Dual Navigation Map</string>
+    <string name="description_dual_navigation_map">Shows how to add NavigationView and MapView in the same layout</string>
+
     <string name="title_waypoint_navigation">Waypoint Navigation</string>
     <string name="description_waypoint_navigation">Navigation with waypoints between destinations</string>
 

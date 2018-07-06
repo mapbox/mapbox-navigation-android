@@ -16,7 +16,7 @@ ext {
       autoValueParcel    : '0.2.5',
       junit              : '4.12',
       supportLibVersion  : '27.1.1',
-      constraintLayout   : '1.1.0',
+      constraintLayout   : '1.1.1',
       mockito            : '2.18.3',
       hamcrest           : '2.0.0.0',
       errorprone         : '2.3.1',
