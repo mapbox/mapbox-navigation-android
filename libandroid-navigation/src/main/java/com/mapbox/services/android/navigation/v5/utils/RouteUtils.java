@@ -17,9 +17,10 @@ import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMile
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -30,6 +31,7 @@ public class RouteUtils {
   private static final String FORCED_LOCATION = "Forced Location";
   private static final int FIRST_COORDINATE = 0;
   private static final int ZERO_INSTRUCTIONS = 0;
+  private static final int FIRST_INSTRUCTION = 0;
   private static final Set<String> VALID_PROFILES = new HashSet<String>() {
     {
       add(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
@@ -177,23 +179,32 @@ public class RouteUtils {
    */
   @Nullable
   public BannerInstructions findCurrentBannerInstructions(LegStep currentStep, double stepDistanceRemaining) {
-    if (isValidStep(currentStep) && hasInstructions(currentStep.bannerInstructions())) {
-      int roundedDistanceRemaining = (int) stepDistanceRemaining;
-      List<BannerInstructions> instructions = new ArrayList<>(currentStep.bannerInstructions());
-      Iterator<BannerInstructions> instructionsIterator = instructions.iterator();
-      while (instructionsIterator.hasNext()) {
-        BannerInstructions instruction = instructionsIterator.next();
+    if (isValidBannerInstructions(currentStep)) {
+      List<BannerInstructions> instructions = sortBannerInstructions(currentStep.bannerInstructions());
+      for (BannerInstructions instruction : instructions) {
         double distanceAlongGeometry = instruction.distanceAlongGeometry();
-        if (distanceAlongGeometry < roundedDistanceRemaining) {
-          instructionsIterator.remove();
+        if (distanceAlongGeometry >= stepDistanceRemaining) {
+          return instruction;
         }
       }
-      int instructionIndex = checkValidIndex(instructions);
-      if (instructions.size() > ZERO_INSTRUCTIONS) {
-        return instructions.get(instructionIndex);
-      }
+      return instructions.get(FIRST_INSTRUCTION);
     }
     return null;
+  }
+
+  private boolean isValidBannerInstructions(LegStep currentStep) {
+    return isValidStep(currentStep) && hasInstructions(currentStep.bannerInstructions());
+  }
+
+  private List<BannerInstructions> sortBannerInstructions(List<BannerInstructions> instructions) {
+    List<BannerInstructions> sortedInstructions = new ArrayList<>(instructions);
+    Collections.sort(sortedInstructions, new Comparator<BannerInstructions>() {
+      @Override
+      public int compare(BannerInstructions instructions, BannerInstructions nextInstructions) {
+        return Double.compare(instructions.distanceAlongGeometry(), nextInstructions.distanceAlongGeometry());
+      }
+    });
+    return sortedInstructions;
   }
 
   /**
@@ -229,22 +240,32 @@ public class RouteUtils {
    */
   @Nullable
   public VoiceInstructions findCurrentVoiceInstructions(LegStep currentStep, double stepDistanceRemaining) {
-    if (isValidStep(currentStep) && hasInstructions(currentStep.voiceInstructions())) {
-      List<VoiceInstructions> instructions = new ArrayList<>(currentStep.voiceInstructions());
-      Iterator<VoiceInstructions> instructionsIterator = instructions.iterator();
-      while (instructionsIterator.hasNext()) {
-        VoiceInstructions instruction = instructionsIterator.next();
+    if (isValidVoiceInstructions(currentStep)) {
+      List<VoiceInstructions> instructions = sortVoiceInstructions(currentStep.voiceInstructions());
+      for (VoiceInstructions instruction : instructions) {
         double distanceAlongGeometry = instruction.distanceAlongGeometry();
-        if (distanceAlongGeometry < stepDistanceRemaining) {
-          instructionsIterator.remove();
+        if (distanceAlongGeometry >= stepDistanceRemaining) {
+          return instruction;
         }
       }
-      int instructionIndex = checkValidIndex(instructions);
-      if (instructions.size() > ZERO_INSTRUCTIONS) {
-        return instructions.get(instructionIndex);
-      }
+      return instructions.get(FIRST_INSTRUCTION);
     }
     return null;
+  }
+
+  private boolean isValidVoiceInstructions(LegStep currentStep) {
+    return isValidStep(currentStep) && hasInstructions(currentStep.voiceInstructions());
+  }
+
+  private List<VoiceInstructions> sortVoiceInstructions(List<VoiceInstructions>  instructions) {
+    List<VoiceInstructions> sortedInstructions = new ArrayList<>(instructions);
+    Collections.sort(sortedInstructions, new Comparator<VoiceInstructions>() {
+      @Override
+      public int compare(VoiceInstructions instructions, VoiceInstructions nextInstructions) {
+        return Double.compare(instructions.distanceAlongGeometry(), nextInstructions.distanceAlongGeometry());
+      }
+    });
+    return sortedInstructions;
   }
 
   private boolean upcomingStepIsArrivalManeuverType(@NonNull RouteProgress routeProgress) {
