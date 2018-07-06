@@ -17,6 +17,8 @@ import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMile
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -178,22 +180,20 @@ public class RouteUtils {
   @Nullable
   public BannerInstructions findCurrentBannerInstructions(LegStep currentStep, double stepDistanceRemaining) {
     if (isValidStep(currentStep) && hasInstructions(currentStep.bannerInstructions())) {
-      int roundedDistanceRemaining = (int) stepDistanceRemaining;
       List<BannerInstructions> instructions = new ArrayList<>(currentStep.bannerInstructions());
-      Iterator<BannerInstructions> instructionsIterator = instructions.iterator();
-      while (instructionsIterator.hasNext()) {
-        BannerInstructions instruction = instructionsIterator.next();
-        double distanceAlongGeometry = instruction.distanceAlongGeometry();
-        if (distanceAlongGeometry < roundedDistanceRemaining) {
-          instructionsIterator.remove();
+      Collections.sort(instructions, new Comparator<BannerInstructions>() {
+        @Override
+        public int compare(BannerInstructions instructions1, BannerInstructions instructions2) {
+          return Double.compare(instructions1.distanceAlongGeometry(), instructions2.distanceAlongGeometry());
         }
+      });
+      for (BannerInstructions instruction : instructions) {
+        double distanceAlongGeometry = instruction.distanceAlongGeometry();
+          if (distanceAlongGeometry >= stepDistanceRemaining) {
+            return instruction;
+          }
       }
-      int instructionIndex = checkValidIndex(instructions);
-      if (instructions.size() > ZERO_INSTRUCTIONS) {
-        return instructions.get(instructionIndex);
-      }
-    }
-    return null;
+      return instructions.get(0);
   }
 
   /**
