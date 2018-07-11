@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.location.gpx;
+package com.mapbox.services.android.navigation.v5.location.replay;
 
 import android.location.Location;
 import android.support.annotation.NonNull;
@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,7 +33,7 @@ class GpxParser {
   private static final String GPX_LOCATION_NAME = "GPX Generated Location";
   private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
-  private SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.getDefault());
+  private SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN);
 
   @Nullable
   List<Location> parseGpx(InputStream inputStream) throws ParserConfigurationException,
@@ -76,6 +76,7 @@ class GpxParser {
 
   @NonNull
   private Long createTime(Node trackPoint) throws ParseException {
+    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     NodeList trackPointChildren = trackPoint.getChildNodes();
     for (int i = 0; i < trackPointChildren.getLength(); i++) {
       Node node = trackPointChildren.item(i);

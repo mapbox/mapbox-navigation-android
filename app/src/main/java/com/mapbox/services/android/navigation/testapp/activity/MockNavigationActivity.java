@@ -32,7 +32,7 @@ import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
-import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
+import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.RouteMilestone;
@@ -132,7 +132,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       navigation.addMilestoneEventListener(this);
       navigation.addOffRouteListener(this);
 
-      ((MockLocationEngine) locationEngine).setRoute(route);
+      ((ReplayRouteLocationEngine) locationEngine).assign(route);
       navigation.setLocationEngine(locationEngine);
       navigation.startNavigation(route);
       mapboxMap.removeOnMapClickListener(this);
@@ -147,7 +147,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   private void newOrigin() {
     if (mapboxMap != null) {
       LatLng latLng = Utils.getRandomLatLng(new double[] {-77.1825, 38.7825, -76.9790, 39.0157});
-      ((MockLocationEngine) locationEngine).setLastLocation(
+      ((ReplayRouteLocationEngine) locationEngine).assignLastLocation(
         Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())
       );
       mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
@@ -165,7 +165,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapboxMap.addOnMapClickListener(this);
     Snackbar.make(findViewById(R.id.container), "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
 
-    locationEngine = new MockLocationEngine(1000, 50, true);
+    locationEngine = new ReplayRouteLocationEngine();
 
     newOrigin();
   }

@@ -29,7 +29,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
-import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
+import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
@@ -66,7 +66,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   private Polyline polyline;
 
   private LocationLayerPlugin locationLayerPlugin;
-  private MockLocationEngine mockLocationEngine;
+  private ReplayRouteLocationEngine mockLocationEngine;
   private MapboxNavigation navigation;
   private MapboxMap mapboxMap;
   private boolean running;
@@ -157,7 +157,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     locationLayerPlugin.setRenderMode(RenderMode.GPS);
 
     // Setup the mockLocationEngine
-    mockLocationEngine = new MockLocationEngine(1000, 30, false);
+    mockLocationEngine = new ReplayRouteLocationEngine();
     mockLocationEngine.addLocationEngineListener(this);
     navigation.setLocationEngine(mockLocationEngine);
 
@@ -187,7 +187,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     mapboxMap.setOnMapClickListener(null);
 
     Point newDestination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
-    mockLocationEngine.moveToLocation(newDestination);
+    mockLocationEngine.moveTo(newDestination);
     destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     tracking = false;
   }
@@ -285,7 +285,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   private void resetLocationEngine(DirectionsRoute directionsRoute) {
     mockLocationEngine.deactivate();
-    mockLocationEngine.setRoute(directionsRoute);
+    mockLocationEngine.assign(directionsRoute);
   }
 
   private void shutdownLocationEngine() {

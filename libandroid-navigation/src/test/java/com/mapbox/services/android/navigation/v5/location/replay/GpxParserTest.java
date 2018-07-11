@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.location.gpx;
+package com.mapbox.services.android.navigation.v5.location.replay;
 
 import android.location.Location;
 
@@ -27,7 +27,7 @@ public class GpxParserTest {
   private static final String TEST_INVALID_GPX = "test_invalid.gpx";
   private static final double FIRST_TEST_GPS_LATITUDE = 47.644548;
   private static final double FIRST_TEST_GPS_LONGITUDE = -122.326897;
-  private static final long FIRST_TEST_GPS_TIME = 1255819046000L;
+  private static final long FIRST_TEST_GPS_TIME = 1255804646000L;
   private static final int FIRST_LOCATION = 0;
 
   @Test

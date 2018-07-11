@@ -29,7 +29,7 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMapInstanceState;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
-import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
+import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
@@ -49,7 +49,7 @@ import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
  * Once valid data is obtained, this activity will immediately begin navigation
  * with {@link MapboxNavigation}.
  * <p>
- * If launched with the simulation boolean set to true, a {@link MockLocationEngine}
+ * If launched with the simulation boolean set to true, a {@link ReplayRouteLocationEngine}
  * will be initialized and begin pushing updates.
  * <p>
  * This activity requires user permissions ACCESS_FINE_LOCATION
