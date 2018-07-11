@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -278,11 +279,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private MilestoneEventListener milestoneEventListener = new MilestoneEventListener() {
     @Override
     public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
-      if (milestone instanceof VoiceInstructionMilestone) {
-        SpeechAnnouncement speechAnnouncement = SpeechAnnouncement.builder()
-          .voiceInstructionMilestone((VoiceInstructionMilestone) milestone).build();
-        instructionPlayer.play(speechAnnouncement);
-      }
+      playVoiceAnnouncement(milestone);
       updateBannerInstruction(routeProgress, milestone);
       sendEventArrival(routeProgress, milestone);
     }
@@ -364,13 +361,24 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
+  private void playVoiceAnnouncement(Milestone milestone) {
+    if (milestone instanceof VoiceInstructionMilestone) {
+      SpeechAnnouncement announcement = SpeechAnnouncement.builder()
+        .voiceInstructionMilestone((VoiceInstructionMilestone) milestone).build();
+      announcement = navigationViewEventDispatcher.onAnnouncement(announcement);
+      instructionPlayer.play(announcement);
+    }
+  }
+
   private void updateBannerInstruction(RouteProgress routeProgress, Milestone milestone) {
     if (milestone instanceof BannerInstructionMilestone) {
-      BannerInstructionMilestone bannerInstructionMilestone = (BannerInstructionMilestone) milestone;
-      BannerInstructionModel model = new BannerInstructionModel(
-        getApplication(), bannerInstructionMilestone, routeProgress, language, unitType
-      );
-      bannerInstructionModel.setValue(model);
+      BannerInstructions instructions = ((BannerInstructionMilestone) milestone).getBannerInstructions();
+      instructions = navigationViewEventDispatcher.onBannerDisplay(instructions);
+      if (instructions != null) {
+        BannerInstructionModel model = new BannerInstructionModel(getApplication(), instructions,
+          routeProgress, language, unitType);
+        bannerInstructionModel.setValue(model);
+      }
     }
   }
 

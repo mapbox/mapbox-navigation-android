@@ -5,13 +5,17 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 import android.view.View;
 
+import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
+import com.mapbox.services.android.navigation.ui.v5.listeners.BannerInstructionsListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.SpeechAnnouncementListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
+import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -30,6 +34,8 @@ class NavigationViewEventDispatcher {
   private RouteListener routeListener;
   private BottomSheetCallback bottomSheetCallback;
   private InstructionListListener instructionListListener;
+  private SpeechAnnouncementListener speechAnnouncementListener;
+  private BannerInstructionsListener bannerInstructionsListener;
 
   /**
    * Initializes the listeners in the dispatcher, as well as the listeners in the {@link MapboxNavigation}
@@ -44,6 +50,8 @@ class NavigationViewEventDispatcher {
     assignProgressChangeListener(navigationViewOptions, navigation);
     assignMilestoneEventListener(navigationViewOptions, navigation);
     assignInstructionListListener(navigationViewOptions.instructionListListener());
+    assignSpeechAnnouncementListener(navigationViewOptions.speechAnnouncementListener());
+    assignBannerInstructionsListener(navigationViewOptions.bannerInstructionsListener());
   }
 
   void onDestroy(@Nullable MapboxNavigation navigation) {
@@ -73,9 +81,13 @@ class NavigationViewEventDispatcher {
     this.instructionListListener = instructionListListener;
   }
 
-  /*
-   * Feedback listeners
-   */
+  void assignSpeechAnnouncementListener(@Nullable SpeechAnnouncementListener speechAnnouncementListener) {
+    this.speechAnnouncementListener = speechAnnouncementListener;
+  }
+
+  void assignBannerInstructionsListener(@Nullable BannerInstructionsListener bannerInstructionsListener) {
+    this.bannerInstructionsListener = bannerInstructionsListener;
+  }
 
   void onFeedbackOpened() {
     if (feedbackListener != null) {
@@ -95,10 +107,6 @@ class NavigationViewEventDispatcher {
     }
   }
 
-  /*
-   * Navigation listeners
-   */
-
   void onNavigationFinished() {
     if (navigationListener != null) {
       navigationListener.onNavigationFinished();
@@ -116,10 +124,6 @@ class NavigationViewEventDispatcher {
       navigationListener.onNavigationRunning();
     }
   }
-
-  /*
-   * Route listeners
-   */
 
   boolean allowRerouteFrom(Point point) {
     return routeListener == null || routeListener.allowRerouteFrom(point);
@@ -149,10 +153,6 @@ class NavigationViewEventDispatcher {
     }
   }
 
-  /*
-   * BottomSheetCallbacks
-   */
-
   void onBottomSheetStateChanged(View bottomSheet, int newState) {
     if (bottomSheetCallback != null) {
       bottomSheetCallback.onStateChanged(bottomSheet, newState);
@@ -163,6 +163,20 @@ class NavigationViewEventDispatcher {
     if (instructionListListener != null) {
       instructionListListener.onInstructionListVisibilityChanged(shown);
     }
+  }
+
+  SpeechAnnouncement onAnnouncement(SpeechAnnouncement announcement) {
+    if (speechAnnouncementListener != null) {
+      return speechAnnouncementListener.willVoice(announcement);
+    }
+    return announcement;
+  }
+
+  BannerInstructions onBannerDisplay(BannerInstructions instructions) {
+    if (bannerInstructionsListener != null) {
+      return bannerInstructionsListener.willDisplay(instructions);
+    }
+    return instructions;
   }
 
   private void assignProgressChangeListener(NavigationViewOptions navigationViewOptions, MapboxNavigation navigation) {
