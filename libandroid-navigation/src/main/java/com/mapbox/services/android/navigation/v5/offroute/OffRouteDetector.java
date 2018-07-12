@@ -23,6 +23,7 @@ public class OffRouteDetector extends OffRoute {
   private Point lastReroutePoint;
   private OffRouteCallback callback;
   private RingBuffer<Integer> distancesAwayFromManeuver = new RingBuffer<>(3);
+  private static final int TWO_POINTS = 2;
 
   /**
    * Method in charge of running a series of test based on the device current location
@@ -208,8 +209,9 @@ public class OffRouteDetector extends OffRoute {
                                                 RingBuffer<Integer> distancesAwayFromManeuver,
                                                 List<Point> stepPoints,
                                                 Point currentPoint) {
-
-    if (routeProgress.currentLegProgress().upComingStep() == null || stepPoints.isEmpty()) {
+    boolean invalidUpcomingStep = routeProgress.currentLegProgress().upComingStep() == null;
+    boolean invalidStepPointSize = stepPoints.size() < TWO_POINTS;
+    if (invalidUpcomingStep || invalidStepPointSize) {
       return false;
     }
 

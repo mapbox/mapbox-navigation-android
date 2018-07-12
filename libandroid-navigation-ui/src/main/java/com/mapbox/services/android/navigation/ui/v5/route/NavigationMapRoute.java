@@ -99,7 +99,7 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
   private static final String WAYPOINT_LAYER_ID = "mapbox-navigation-waypoint-layer";
   private static final String ID_FORMAT = "%s-%d";
   private static final String GENERIC_ROUTE_SHIELD_LAYER_ID = "mapbox-navigation-route-shield-layer";
-  private static final int TWO_MANEUVERS = 2;
+  private static final int TWO_POINTS = 2;
   private static final int THIRTY = 30;
   private static final String ARROW_BEARING = "mapbox-navigation-arrow-bearing";
   private static final String ARROW_SHAFT_SOURCE_ID = "mapbox-navigation-arrow-shaft-source";
@@ -445,7 +445,10 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
   }
 
   private void addUpcomingManeuverArrow(RouteProgress routeProgress) {
-    if (routeProgress.upcomingStepPoints() == null || routeProgress.upcomingStepPoints().size() < TWO_MANEUVERS) {
+    boolean invalidUpcomingStepPoints = routeProgress.upcomingStepPoints() == null
+            || routeProgress.upcomingStepPoints().size() < TWO_POINTS;
+    boolean invalidCurrentStepPoints = routeProgress.currentStepPoints().size() < TWO_POINTS;
+    if (invalidUpcomingStepPoints || invalidCurrentStepPoints) {
       updateArrowLayersVisibilityTo(false);
       return;
     }

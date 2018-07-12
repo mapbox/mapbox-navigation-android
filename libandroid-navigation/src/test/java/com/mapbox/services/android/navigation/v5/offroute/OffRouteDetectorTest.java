@@ -90,6 +90,21 @@ public class OffRouteDetectorTest extends BaseTest {
   }
 
   @Test
+  public void isUserOffRoute_StepPointSize() throws Exception {
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
+    Point stepManeuverPoint = routeProgress.directionsRoute().legs().get(0).steps().get(0).maneuver().location();
+    removeAllButOneStepPoints(routeProgress);
+    Location firstUpdate = buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637);
+    offRouteDetector.isUserOffRoute(firstUpdate, routeProgress, options);
+    Point offRoutePoint = buildPointAwayFromPoint(stepManeuverPoint, 50, 90);
+    Location secondUpdate = buildDefaultLocationUpdate(offRoutePoint.longitude(), offRoutePoint.latitude());
+
+    boolean isUserOffRoute = offRouteDetector.isUserOffRoute(secondUpdate, routeProgress, options);
+
+    assertFalse(isUserOffRoute);
+  }
+
+  @Test
   public void isUserOffRoute_AssertFalseWhenOnStep() throws Exception {
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
     Point stepManeuverPoint = routeProgress.directionsRoute().legs().get(0).steps().get(0).maneuver().location();
@@ -224,5 +239,11 @@ public class OffRouteDetectorTest extends BaseTest {
     boolean isOffRoute = offRouteDetector.isUserOffRoute(location, routeProgress, options);
 
     assertTrue(isOffRoute);
+  }
+
+  private void removeAllButOneStepPoints(RouteProgress routeProgress) {
+    for (int i = routeProgress.currentStepPoints().size() - 2; i >= 0; i--) {
+      routeProgress.currentStepPoints().remove(i);
+    }
   }
 }
