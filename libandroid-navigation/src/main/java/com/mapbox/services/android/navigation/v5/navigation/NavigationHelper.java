@@ -461,26 +461,27 @@ public class NavigationHelper {
    * {@link OffRouteDetector#isUserOffRoute(Location, RouteProgress, MapboxNavigationOptions)} is called
    * to determine if the location is on or off route.
    *
-   * @param newLocationModel containing new location and navigation objects
+   * @param navigationLocationUpdate containing new location and navigation objects
    * @param routeProgress    to be used in off route check
    * @param callback         only used if using our default {@link OffRouteDetector}
    * @return true if on route, false otherwise
    */
-  static boolean isUserOffRoute(NewLocationModel newLocationModel, RouteProgress routeProgress,
+  static boolean isUserOffRoute(NavigationLocationUpdate navigationLocationUpdate, RouteProgress routeProgress,
                                 OffRouteCallback callback) {
-    MapboxNavigationOptions options = newLocationModel.mapboxNavigation().options();
+    MapboxNavigationOptions options = navigationLocationUpdate.mapboxNavigation().options();
     if (!options.enableOffRouteDetection()) {
       return false;
     }
-    Location location = newLocationModel.location();
-    OffRoute offRoute = newLocationModel.mapboxNavigation().getOffRouteEngine();
+    Location location = navigationLocationUpdate.location();
+    OffRoute offRoute = navigationLocationUpdate.mapboxNavigation().getOffRouteEngine();
     setOffRouteDetectorCallback(offRoute, callback);
     return offRoute.isUserOffRoute(location, routeProgress, options);
   }
 
-  static boolean shouldCheckFasterRoute(NewLocationModel newLocationModel, RouteProgress routeProgress) {
-    FasterRoute fasterRoute = newLocationModel.mapboxNavigation().getFasterRouteEngine();
-    return fasterRoute.shouldCheckFasterRoute(newLocationModel.location(), routeProgress);
+  static boolean shouldCheckFasterRoute(NavigationLocationUpdate navigationLocationUpdate,
+                                        RouteProgress routeProgress) {
+    FasterRoute fasterRoute = navigationLocationUpdate.mapboxNavigation().getFasterRouteEngine();
+    return fasterRoute.shouldCheckFasterRoute(navigationLocationUpdate.location(), routeProgress);
   }
 
   /**

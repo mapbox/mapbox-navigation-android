@@ -5,10 +5,10 @@ import android.location.Location;
 import com.google.auto.value.AutoValue;
 
 @AutoValue
-abstract class NewLocationModel {
+abstract class NavigationLocationUpdate {
 
-  static NewLocationModel create(Location location, MapboxNavigation mapboxNavigation) {
-    return new AutoValue_NewLocationModel(location, mapboxNavigation);
+  static NavigationLocationUpdate create(Location location, MapboxNavigation mapboxNavigation) {
+    return new AutoValue_NavigationLocationUpdate(location, mapboxNavigation);
   }
 
   abstract Location location();

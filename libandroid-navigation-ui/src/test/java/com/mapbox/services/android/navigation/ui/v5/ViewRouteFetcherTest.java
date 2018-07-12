@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
@@ -87,9 +88,7 @@ public class ViewRouteFetcherTest extends BaseTest {
 
   @NonNull
   private ViewRouteFetcher buildRouteEngine(ViewRouteListener routeEngineListener) {
-    ViewRouteFetcher routeEngine = new ViewRouteFetcher(routeEngineListener);
-    routeEngine.updateAccessToken(ACCESS_TOKEN);
-    return routeEngine;
+    return new ViewRouteFetcher(mock(Context.class), ACCESS_TOKEN, routeEngineListener);
   }
 
   private NavigationViewOptions buildNavigationViewOptionsWithRoute() throws IOException {

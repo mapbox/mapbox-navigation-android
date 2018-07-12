@@ -203,8 +203,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initNavigationRouteEngine() {
-    navigationViewRouteEngine = new ViewRouteFetcher(routeEngineCallback);
-    navigationViewRouteEngine.updateAccessToken(accessToken);
+    navigationViewRouteEngine = new ViewRouteFetcher(getApplication(), accessToken, routeEngineListener);
   }
 
   private void initNavigationLocationEngine() {
@@ -304,7 +303,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };
 
-  private ViewRouteListener routeEngineCallback = new ViewRouteListener() {
+  private ViewRouteListener routeEngineListener = new ViewRouteListener() {
     @Override
     public void onRouteUpdate(DirectionsRoute directionsRoute) {
       updateRoute(directionsRoute);
@@ -400,7 +399,7 @@ public class NavigationViewModel extends AndroidViewModel {
     if (navigationViewEventDispatcher != null && navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
       navigationViewEventDispatcher.onOffRoute(newOrigin);
       OffRouteEvent event = new OffRouteEvent(newOrigin, routeProgress);
-      navigationViewRouteEngine.fetchRouteFromOffRouteEvent(getApplication(), event);
+      navigationViewRouteEngine.fetchRouteFromOffRouteEvent(event);
       isOffRoute.setValue(true);
     }
   }

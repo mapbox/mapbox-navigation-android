@@ -23,6 +23,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class FasterRouteDetectorTest extends BaseTest {
 
@@ -112,7 +113,9 @@ public class FasterRouteDetectorTest extends BaseTest {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder()
       .enableFasterRouteDetection(true)
       .build();
-    return new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
+    Context context = mock(Context.class);
+    when(context.getApplicationContext()).thenReturn(mock(Context.class));
+    return new MapboxNavigation(context, ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
       mock(LocationEngine.class));
   }
 

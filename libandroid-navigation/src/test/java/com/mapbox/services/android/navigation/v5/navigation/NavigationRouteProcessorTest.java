@@ -29,7 +29,9 @@ public class NavigationRouteProcessorTest extends BaseTest {
   public void before() throws Exception {
     routeProcessor = new NavigationRouteProcessor();
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().build();
-    navigation = new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
+    Context context = mock(Context.class);
+    when(context.getApplicationContext()).thenReturn(context);
+    navigation = new MapboxNavigation(context, ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
       mock(LocationEngine.class));
     navigation.startNavigation(buildTestDirectionsRoute());
   }
