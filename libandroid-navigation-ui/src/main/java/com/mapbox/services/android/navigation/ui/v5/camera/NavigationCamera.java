@@ -175,7 +175,9 @@ public class NavigationCamera implements LifecycleObserver {
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_START)
   public void onStart() {
-    navigation.addProgressChangeListener(progressChangeListener);
+    if (navigation != null) {
+      navigation.addProgressChangeListener(progressChangeListener);
+    }
   }
 
   /**

@@ -24,11 +24,11 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
-import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class MapboxNavigationTest extends BaseTest {
 
@@ -85,36 +85,6 @@ public class MapboxNavigationTest extends BaseTest {
     MapboxNavigation navigation = buildMapboxNavigation();
 
     assertNotNull(navigation.getSnapEngine());
-  }
-
-  @Test
-  public void offRouteEngine_doesNotGetInitializedWithFalseOption() throws Exception {
-    MapboxNavigationOptions options = MapboxNavigationOptions.builder()
-      .enableOffRouteDetection(false)
-      .build();
-    MapboxNavigation navigationWithOptions = buildMapboxNavigationWithOptions(options);
-
-    assertNull(navigationWithOptions.getOffRouteEngine());
-  }
-
-  @Test
-  public void snapToRouteEngine_doesNotGetInitializedWithFalseOption() throws Exception {
-    MapboxNavigationOptions options = MapboxNavigationOptions.builder()
-      .snapToRoute(false)
-      .build();
-    MapboxNavigation navigationWithOptions = buildMapboxNavigationWithOptions(options);
-
-    assertNull(navigationWithOptions.getSnapEngine());
-  }
-
-  @Test
-  public void fasterRouteEngine_doesNotGetInitializedWithFalseOption() throws Exception {
-    MapboxNavigationOptions options = MapboxNavigationOptions.builder()
-      .enableFasterRouteDetection(false)
-      .build();
-    MapboxNavigation navigationWithOptions = buildMapboxNavigationWithOptions(options);
-
-    assertNull(navigationWithOptions.getFasterRouteEngine());
   }
 
   @Test
@@ -249,18 +219,6 @@ public class MapboxNavigationTest extends BaseTest {
   }
 
   @Test
-  public void endNavigation_doesSendFalseToNavigationEvent() throws Exception {
-    MapboxNavigation navigation = buildMapboxNavigation();
-    NavigationEventListener navigationEventListener = mock(NavigationEventListener.class);
-
-    navigation.addNavigationEventListener(navigationEventListener);
-    navigation.startNavigation(buildTestDirectionsRoute());
-    navigation.stopNavigation();
-
-    verify(navigationEventListener, times(1)).onRunning(false);
-  }
-
-  @Test
   public void startNavigation_doesSendTrueToNavigationEvent() throws Exception {
     MapboxNavigation navigation = buildMapboxNavigation();
     NavigationEventListener navigationEventListener = mock(NavigationEventListener.class);
@@ -310,12 +268,16 @@ public class MapboxNavigationTest extends BaseTest {
   }
 
   private MapboxNavigation buildMapboxNavigation() {
-    return new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, mock(NavigationTelemetry.class),
+    Context context = mock(Context.class);
+    when(context.getApplicationContext()).thenReturn(context);
+    return new MapboxNavigation(context, ACCESS_TOKEN, mock(NavigationTelemetry.class),
       mock(LocationEngine.class));
   }
 
   private MapboxNavigation buildMapboxNavigationWithOptions(MapboxNavigationOptions options) {
-    return new MapboxNavigation(mock(Context.class), ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
+    Context context = mock(Context.class);
+    when(context.getApplicationContext()).thenReturn(context);
+    return new MapboxNavigation(context, ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
       mock(LocationEngine.class));
   }
 

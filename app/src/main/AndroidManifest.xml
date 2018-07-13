@@ -51,6 +51,14 @@
         </activity>
 
         <activity
+            android:name=".activity.navigationui.DualNavigationMapActivity"
+            android:label="@string/title_dual_navigation_map">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
+        <activity
             android:name=".activity.navigationui.NavigationLauncherActivity"
             android:label="@string/title_navigation_launcher">
             <meta-data

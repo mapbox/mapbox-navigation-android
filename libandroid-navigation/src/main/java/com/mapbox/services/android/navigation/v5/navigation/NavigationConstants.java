@@ -153,7 +153,7 @@ public final class NavigationConstants {
 
   /**
    * In seconds, how quickly {@link com.mapbox.services.android.navigation.v5.route.FasterRouteDetector}
-   * will tell {@link NavigationEngine} to check
+   * will tell {@link RouteProcessorBackgroundThread} to check
    * for a faster {@link com.mapbox.api.directions.v5.models.DirectionsRoute}.
    *
    * @since 0.9.0
@@ -230,6 +230,8 @@ public final class NavigationConstants {
    * @since 0.12.0
    */
   static final int TWO_HUNDRED_METERS_PER_SECOND_VELOCITY_THRESHOLD = 200;
+
+  static final String NON_NULL_APPLICATION_CONTEXT_REQUIRED = "Non-null application context required.";
 
   public static final Float[] WAYNAME_OFFSET = {0.0f, 40.0f};
   public static final String MAPBOX_LOCATION_SOURCE = "mapbox-location-source";
