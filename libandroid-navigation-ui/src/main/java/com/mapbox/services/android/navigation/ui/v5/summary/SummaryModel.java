@@ -11,8 +11,8 @@ import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 
 import java.util.Calendar;
 
-import static com.mapbox.services.android.navigation.v5.utils.time.TimeUtils.formatTime;
-import static com.mapbox.services.android.navigation.v5.utils.time.TimeUtils.formatTimeRemaining;
+import static com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter.formatTime;
+import static com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter.formatTimeRemaining;
 
 public class SummaryModel {
 
@@ -25,7 +25,7 @@ public class SummaryModel {
                       @NavigationTimeFormat.Type int timeFormatType) {
     distanceRemaining = new DistanceUtils(context, language, unitType)
       .formatDistance(progress.distanceRemaining()).toString();
-    timeRemaining = formatTimeRemaining(progress.durationRemaining());
+    timeRemaining = formatTimeRemaining(context, progress.durationRemaining());
     Calendar time = Calendar.getInstance();
     boolean isTwentyFourHourFormat = DateFormat.is24HourFormat(context);
     arrivalTime = formatTime(time, progress.durationRemaining(), timeFormatType, isTwentyFourHourFormat);

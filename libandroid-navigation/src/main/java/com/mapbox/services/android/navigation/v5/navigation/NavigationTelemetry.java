@@ -25,7 +25,6 @@ import com.mapbox.services.android.navigation.v5.navigation.metrics.TelemetryEve
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
-import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -368,7 +367,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   }
 
   private boolean shouldSendEvent(SessionState sessionState) {
-    return TimeUtils.dateDiff(sessionState.eventDate(), new Date(), TimeUnit.SECONDS) > TWENTY_SECOND_INTERVAL;
+    return dateDiff(sessionState.eventDate(), new Date(), TimeUnit.SECONDS) > TWENTY_SECOND_INTERVAL;
   }
 
   @NonNull
@@ -490,6 +489,11 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, metricProgress,
       feedbackEvent.getSessionState().eventLocation(), feedbackEvent.getDescription(),
       feedbackEvent.getFeedbackType(), feedbackEvent.getScreenshot(), feedbackEvent.getFeedbackSource());
+  }
+
+  private long dateDiff(Date firstDate, Date secondDate, TimeUnit timeUnit) {
+    long diffInMillis = secondDate.getTime() - firstDate.getTime();
+    return timeUnit.convert(diffInMillis, TimeUnit.MILLISECONDS);
   }
 
   private TelemetryEvent findQueuedTelemetryEvent(String eventId) {
