@@ -8,7 +8,6 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteStepProgress;
-import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -128,6 +127,11 @@ public class FasterRouteDetector extends FasterRoute {
   }
 
   private long secondsSinceLastCheck(Location location) {
-    return TimeUtils.dateDiff(new Date(lastCheckedLocation.getTime()), new Date(location.getTime()), TimeUnit.SECONDS);
+    return dateDiff(new Date(lastCheckedLocation.getTime()), new Date(location.getTime()), TimeUnit.SECONDS);
+  }
+
+  private long dateDiff(Date firstDate, Date secondDate, TimeUnit timeUnit) {
+    long diffInMillis = secondDate.getTime() - firstDate.getTime();
+    return timeUnit.convert(diffInMillis, TimeUnit.MILLISECONDS);
   }
 }

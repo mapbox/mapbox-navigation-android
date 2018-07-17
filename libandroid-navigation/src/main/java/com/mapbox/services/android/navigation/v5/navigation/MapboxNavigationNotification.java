@@ -20,7 +20,7 @@ import com.mapbox.services.android.navigation.v5.navigation.notification.Navigat
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
-import com.mapbox.services.android.navigation.v5.utils.time.TimeUtils;
+import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter;
 
 import java.util.Locale;
 
@@ -188,7 +188,7 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   private void updateArrivalTime(RouteProgress routeProgress) {
     if (currentArrivalTime == null || newArrivalTime(routeProgress)) {
-      currentArrivalTime = TimeUtils.formatArrivalTime(routeProgress.durationRemaining());
+      currentArrivalTime = TimeFormatter.formatArrivalTime(routeProgress.durationRemaining());
       String formattedArrivalText = String.format(Locale.getDefault(), etaFormat, currentArrivalTime);
       collapsedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, formattedArrivalText);
       expandedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, formattedArrivalText);
@@ -196,7 +196,7 @@ class MapboxNavigationNotification implements NavigationNotification {
   }
 
   private boolean newArrivalTime(RouteProgress routeProgress) {
-    return currentArrivalTime != null && !currentArrivalTime.equals(TimeUtils
+    return currentArrivalTime != null && !currentArrivalTime.equals(TimeFormatter
       .formatArrivalTime(routeProgress.durationRemaining()));
   }
 

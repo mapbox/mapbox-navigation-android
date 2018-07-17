@@ -6,7 +6,7 @@ import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
 
-public class TimeUtilsTest {
+public class TimeFormatterTest {
 
   @Test
   public void checksTwelveHoursTimeFormat() throws Exception {
@@ -22,7 +22,7 @@ public class TimeUtilsTest {
     int twelveHoursTimeFormatType = 0;
     boolean indifferentDeviceTwentyFourHourFormat = true;
 
-    String formattedTime = TimeUtils.formatTime(time, elevenMinutes, twelveHoursTimeFormatType,
+    String formattedTime = TimeFormatter.formatTime(time, elevenMinutes, twelveHoursTimeFormatType,
       indifferentDeviceTwentyFourHourFormat);
 
     assertEquals("6:29 pm", formattedTime);
@@ -42,7 +42,7 @@ public class TimeUtilsTest {
     int twentyFourHoursTimeFormatType = 1;
     boolean indifferentDeviceTwentyFourHourFormat = false;
 
-    String formattedTime = TimeUtils.formatTime(time, elevenMinutes, twentyFourHoursTimeFormatType,
+    String formattedTime = TimeFormatter.formatTime(time, elevenMinutes, twentyFourHoursTimeFormatType,
       indifferentDeviceTwentyFourHourFormat);
 
     assertEquals("18:29", formattedTime);
@@ -62,7 +62,7 @@ public class TimeUtilsTest {
     int noneSpecifiedTimeFormatType = -1;
     boolean deviceTwelveHourFormat = false;
 
-    String formattedTime = TimeUtils.formatTime(time, elevenMinutes, noneSpecifiedTimeFormatType,
+    String formattedTime = TimeFormatter.formatTime(time, elevenMinutes, noneSpecifiedTimeFormatType,
       deviceTwelveHourFormat);
 
     assertEquals("6:29 pm", formattedTime);
@@ -82,7 +82,7 @@ public class TimeUtilsTest {
     int noneSpecifiedTimeFormatType = -1;
     boolean deviceTwentyFourHourFormat = true;
 
-    String formattedTime = TimeUtils.formatTime(time, elevenMinutes, noneSpecifiedTimeFormatType,
+    String formattedTime = TimeFormatter.formatTime(time, elevenMinutes, noneSpecifiedTimeFormatType,
       deviceTwentyFourHourFormat);
 
     assertEquals("18:29", formattedTime);
