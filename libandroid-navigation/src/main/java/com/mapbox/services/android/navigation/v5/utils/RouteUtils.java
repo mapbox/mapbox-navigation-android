@@ -32,6 +32,7 @@ public class RouteUtils {
   private static final String FORCED_LOCATION = "Forced Location";
   private static final int FIRST_COORDINATE = 0;
   private static final int ZERO_INSTRUCTIONS = 0;
+  private static final int FIRST_INSTRUCTION = 0;
   private static final Set<String> VALID_PROFILES = new HashSet<String>() {
     {
       add(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
@@ -179,21 +180,31 @@ public class RouteUtils {
    */
   @Nullable
   public BannerInstructions findCurrentBannerInstructions(LegStep currentStep, double stepDistanceRemaining) {
-    if (isValidStep(currentStep) && hasInstructions(currentStep.bannerInstructions())) {
+    if (isValidBannerInstructions(currentStep)) {
       List<BannerInstructions> instructions = new ArrayList<>(currentStep.bannerInstructions());
-      Collections.sort(instructions, new Comparator<BannerInstructions>() {
-        @Override
-        public int compare(BannerInstructions instructions1, BannerInstructions instructions2) {
-          return Double.compare(instructions1.distanceAlongGeometry(), instructions2.distanceAlongGeometry());
-        }
-      });
+      sortBannerInstructions(instructions);
       for (BannerInstructions instruction : instructions) {
         double distanceAlongGeometry = instruction.distanceAlongGeometry();
-          if (distanceAlongGeometry >= stepDistanceRemaining) {
-            return instruction;
-          }
+        if (distanceAlongGeometry >= stepDistanceRemaining) {
+          return instruction;
+        }
       }
-      return instructions.get(0);
+      return instructions.get(FIRST_INSTRUCTION);
+    }
+    return null;
+  }
+
+  private boolean isValidBannerInstructions(LegStep currentStep) {
+    return isValidStep(currentStep) && hasInstructions(currentStep.bannerInstructions());
+  }
+
+  private void sortBannerInstructions(List<BannerInstructions> instructions) {
+      Collections.sort(instructions, new Comparator<BannerInstructions>() {
+        @Override
+        public int compare(BannerInstructions instructions, BannerInstructions nextInstructions) {
+          return Double.compare(instructions.distanceAlongGeometry(), nextInstructions.distanceAlongGeometry());
+        }
+      });
   }
 
   /**
@@ -229,22 +240,31 @@ public class RouteUtils {
    */
   @Nullable
   public VoiceInstructions findCurrentVoiceInstructions(LegStep currentStep, double stepDistanceRemaining) {
-    if (isValidStep(currentStep) && hasInstructions(currentStep.voiceInstructions())) {
+    if (isValidVoiceInstructions(currentStep)) {
       List<VoiceInstructions> instructions = new ArrayList<>(currentStep.voiceInstructions());
-      Iterator<VoiceInstructions> instructionsIterator = instructions.iterator();
-      while (instructionsIterator.hasNext()) {
-        VoiceInstructions instruction = instructionsIterator.next();
+      sortVoiceInstructions(instructions);
+      for (VoiceInstructions instruction : instructions) {
         double distanceAlongGeometry = instruction.distanceAlongGeometry();
-        if (distanceAlongGeometry < stepDistanceRemaining) {
-          instructionsIterator.remove();
+        if (distanceAlongGeometry >= stepDistanceRemaining) {
+          return instruction;
         }
       }
-      int instructionIndex = checkValidIndex(instructions);
-      if (instructions.size() > ZERO_INSTRUCTIONS) {
-        return instructions.get(instructionIndex);
-      }
+      return instructions.get(FIRST_INSTRUCTION);
     }
     return null;
+  }
+
+  private boolean isValidVoiceInstructions(LegStep currentStep) {
+    return isValidStep(currentStep) && hasInstructions(currentStep.voiceInstructions());
+  }
+
+  private void sortVoiceInstructions(List<VoiceInstructions> instructions) {
+    Collections.sort(instructions, new Comparator<VoiceInstructions>() {
+      @Override
+      public int compare(VoiceInstructions instructions, VoiceInstructions nextInstructions) {
+        return Double.compare(instructions.distanceAlongGeometry(), nextInstructions.distanceAlongGeometry());
+      }
+    });
   }
 
   private boolean upcomingStepIsArrivalManeuverType(@NonNull RouteProgress routeProgress) {
