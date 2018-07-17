@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -199,12 +198,12 @@ public class RouteUtils {
   }
 
   private void sortBannerInstructions(List<BannerInstructions> instructions) {
-      Collections.sort(instructions, new Comparator<BannerInstructions>() {
-        @Override
-        public int compare(BannerInstructions instructions, BannerInstructions nextInstructions) {
-          return Double.compare(instructions.distanceAlongGeometry(), nextInstructions.distanceAlongGeometry());
-        }
-      });
+    Collections.sort(instructions, new Comparator<BannerInstructions>() {
+      @Override
+      public int compare(BannerInstructions instructions, BannerInstructions nextInstructions) {
+        return Double.compare(instructions.distanceAlongGeometry(), nextInstructions.distanceAlongGeometry());
+      }
+    });
   }
 
   /**
