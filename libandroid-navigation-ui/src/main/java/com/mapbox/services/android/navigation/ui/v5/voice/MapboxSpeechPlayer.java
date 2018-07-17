@@ -65,12 +65,16 @@ class MapboxSpeechPlayer implements SpeechPlayer {
   /**
    * Plays the specified text instruction using MapboxSpeech API, defaulting to SSML input type
    *
-   * @param speechAnnouncement with voice instruction to be synthesized and played
+   * @param announcement with voice instruction to be synthesized and played
    */
   @Override
-  public void play(SpeechAnnouncement speechAnnouncement) {
-    this.announcement = speechAnnouncement;
-    playAnnouncementTextAndTypeFrom(speechAnnouncement);
+  public void play(SpeechAnnouncement announcement) {
+    boolean isInvalidAnnouncement = announcement == null;
+    if (isInvalidAnnouncement) {
+      return;
+    }
+    this.announcement = announcement;
+    playAnnouncementTextAndTypeFrom(announcement);
   }
 
   @Override

@@ -2,13 +2,17 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.support.annotation.NonNull;
 
+import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
+import com.mapbox.services.android.navigation.ui.v5.listeners.BannerInstructionsListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.SpeechAnnouncementListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
+import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -355,6 +359,47 @@ public class NavigationViewEventDispatcherTest {
 
     verify(navigation, times(1)).removeMilestoneEventListener(milestoneEventListener);
   }
+
+  @Test
+  public void onNewBannerInstruction_instructionListenerIsCalled() {
+    BannerInstructions modifiedInstructions = mock(BannerInstructions.class);
+    BannerInstructions originalInstructions = mock(BannerInstructions.class);
+    BannerInstructionsListener bannerInstructionsListener = mock(BannerInstructionsListener.class);
+    when(bannerInstructionsListener.willDisplay(originalInstructions)).thenReturn(modifiedInstructions);
+    NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(bannerInstructionsListener);
+
+    eventDispatcher.onBannerDisplay(originalInstructions);
+
+    verify(bannerInstructionsListener).willDisplay(originalInstructions);
+  }
+
+  @Test
+  public void onNewVoiceAnnouncement_instructionListenerIsCalled() {
+    SpeechAnnouncement modifiedAnnouncement = mock(SpeechAnnouncement.class);
+    SpeechAnnouncement originalAnnouncement = mock(SpeechAnnouncement.class);
+    SpeechAnnouncementListener speechAnnouncementListener = mock(SpeechAnnouncementListener.class);
+    when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(modifiedAnnouncement);
+    NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(speechAnnouncementListener);
+
+    eventDispatcher.onAnnouncement(originalAnnouncement);
+
+    verify(speechAnnouncementListener).willVoice(originalAnnouncement);
+  }
+
+  @NonNull
+  private NavigationViewEventDispatcher buildViewEventDispatcher(SpeechAnnouncementListener speechAnnouncementListener) {
+    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
+    eventDispatcher.assignSpeechAnnouncementListener(speechAnnouncementListener);
+    return eventDispatcher;
+  }
+
+  @NonNull
+  private NavigationViewEventDispatcher buildViewEventDispatcher(BannerInstructionsListener bannerInstructionsListener) {
+    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
+    eventDispatcher.assignBannerInstructionsListener(bannerInstructionsListener);
+    return eventDispatcher;
+  }
+
 
   @NonNull
   private NavigationViewEventDispatcher buildViewEventDispatcher(InstructionListListener instructionListListener) {

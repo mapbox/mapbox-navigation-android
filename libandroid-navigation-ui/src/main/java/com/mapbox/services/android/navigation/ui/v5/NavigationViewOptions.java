@@ -6,8 +6,10 @@ import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.android.navigation.ui.v5.listeners.BannerInstructionsListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.SpeechAnnouncementListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -46,6 +48,12 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
   @Nullable
   public abstract InstructionListListener instructionListListener();
 
+  @Nullable
+  public abstract SpeechAnnouncementListener speechAnnouncementListener();
+
+  @Nullable
+  public abstract BannerInstructionsListener bannerInstructionsListener();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -78,6 +86,10 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
     public abstract Builder bottomSheetCallback(BottomSheetCallback bottomSheetCallback);
 
     public abstract Builder instructionListListener(InstructionListListener instructionListListener);
+
+    public abstract Builder speechAnnouncementListener(SpeechAnnouncementListener speechAnnouncementListener);
+
+    public abstract Builder bannerInstructionsListener(BannerInstructionsListener bannerInstructionsListener);
 
     public abstract NavigationViewOptions build();
   }

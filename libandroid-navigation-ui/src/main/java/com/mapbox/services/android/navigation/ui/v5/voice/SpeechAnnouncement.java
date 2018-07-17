@@ -20,7 +20,7 @@ import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMiles
 public abstract class SpeechAnnouncement {
 
   /**
-   * Announcment text containing SSML Markup Language
+   * Announcement text containing SSML Markup Language
    *
    * @return announcement containing SSML text
    * @see <a href="https://docs.aws.amazon.com/polly/latest/dg/ssml.html">SSML Markup Language</a>
@@ -30,12 +30,25 @@ public abstract class SpeechAnnouncement {
   public abstract String ssmlAnnouncement();
 
   /**
-   * Announcment text without any type of markup.
+   * Announcement text without any type of markup.
    *
    * @return announcement text
    * @since 0.16.0
    */
   public abstract String announcement();
+
+  /**
+   * Convert the current {@link SpeechAnnouncement} to its builder holding the currently assigned
+   * values. This allows you to modify a single property and then rebuild the object resulting in
+   * an updated and modified {@link SpeechAnnouncement}.
+   * <p>
+   * Please note, the usage of this method creates a new instance of {@link SpeechAnnouncement}.
+   *
+   * @return a {@link SpeechAnnouncement.Builder} with the same values set to match the ones defined
+   * in this {@link SpeechAnnouncement}
+   * @since 0.16.0
+   */
+  public abstract Builder toBuilder();
 
   @Nullable
   abstract VoiceInstructionMilestone voiceInstructionMilestone();
@@ -44,7 +57,7 @@ public abstract class SpeechAnnouncement {
   public abstract static class Builder {
 
     /**
-     * Announcment text containing SSML Markup Language
+     * Announcement text containing SSML Markup Language
      *
      * @return this builder for chaining options together
      * @see <a href="https://docs.aws.amazon.com/polly/latest/dg/ssml.html">SSML Markup Language</a>
@@ -53,7 +66,7 @@ public abstract class SpeechAnnouncement {
     public abstract Builder ssmlAnnouncement(@Nullable String ssmlAnnouncement);
 
     /**
-     * Announcment text without any type of markup.
+     * Announcement text without any type of markup.
      *
      * @return this builder for chaining options together
      * @since 0.16.0
@@ -63,7 +76,7 @@ public abstract class SpeechAnnouncement {
     /**
      * The {@link com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener} can provide
      * voice instructions via {@link VoiceInstructionMilestone}.
-     *
+     * <p>
      * If you pass the milestone into the builder, {@link SpeechAnnouncement} will extract both the SSML
      * and normal speech announcements.
      *
