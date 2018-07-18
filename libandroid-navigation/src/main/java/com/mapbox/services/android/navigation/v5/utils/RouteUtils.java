@@ -180,7 +180,7 @@ public class RouteUtils {
   @Nullable
   public BannerInstructions findCurrentBannerInstructions(LegStep currentStep, double stepDistanceRemaining) {
     if (isValidBannerInstructions(currentStep)) {
-      List<BannerInstructions> instructions = getBannerInstructions(currentStep);
+      List<BannerInstructions> instructions = sortBannerInstructions(currentStep.bannerInstructions());
       for (BannerInstructions instruction : instructions) {
         double distanceAlongGeometry = instruction.distanceAlongGeometry();
         if (distanceAlongGeometry >= stepDistanceRemaining) {
@@ -196,15 +196,15 @@ public class RouteUtils {
     return isValidStep(currentStep) && hasInstructions(currentStep.bannerInstructions());
   }
 
-  private List<BannerInstructions> getBannerInstructions(LegStep currentStep) {
-    List<BannerInstructions> instructions = new ArrayList<>(currentStep.bannerInstructions());
-    Collections.sort(instructions, new Comparator<BannerInstructions>() {
+  private List<BannerInstructions> sortBannerInstructions(List<BannerInstructions> instructions) {
+    List<BannerInstructions> sortedInstructions = new ArrayList<>(instructions);
+    Collections.sort(sortedInstructions, new Comparator<BannerInstructions>() {
       @Override
       public int compare(BannerInstructions instructions, BannerInstructions nextInstructions) {
         return Double.compare(instructions.distanceAlongGeometry(), nextInstructions.distanceAlongGeometry());
       }
     });
-    return instructions;
+    return sortedInstructions;
   }
 
   /**
@@ -241,7 +241,7 @@ public class RouteUtils {
   @Nullable
   public VoiceInstructions findCurrentVoiceInstructions(LegStep currentStep, double stepDistanceRemaining) {
     if (isValidVoiceInstructions(currentStep)) {
-      List<VoiceInstructions> instructions = getVoiceInstructions(currentStep);
+      List<VoiceInstructions> instructions = sortVoiceInstructions(currentStep.voiceInstructions());
       for (VoiceInstructions instruction : instructions) {
         double distanceAlongGeometry = instruction.distanceAlongGeometry();
         if (distanceAlongGeometry >= stepDistanceRemaining) {
@@ -257,15 +257,15 @@ public class RouteUtils {
     return isValidStep(currentStep) && hasInstructions(currentStep.voiceInstructions());
   }
 
-  private List<VoiceInstructions> getVoiceInstructions(LegStep currentStep) {
-    List<VoiceInstructions> instructions = new ArrayList<>(currentStep.voiceInstructions());
-    Collections.sort(instructions, new Comparator<VoiceInstructions>() {
+  private List<VoiceInstructions> sortVoiceInstructions(List<VoiceInstructions>  instructions) {
+    List<VoiceInstructions> sortedInstructions = new ArrayList<>(instructions);
+    Collections.sort(sortedInstructions, new Comparator<VoiceInstructions>() {
       @Override
       public int compare(VoiceInstructions instructions, VoiceInstructions nextInstructions) {
         return Double.compare(instructions.distanceAlongGeometry(), nextInstructions.distanceAlongGeometry());
       }
     });
-    return instructions;
+    return sortedInstructions;
   }
 
   private boolean upcomingStepIsArrivalManeuverType(@NonNull RouteProgress routeProgress) {
