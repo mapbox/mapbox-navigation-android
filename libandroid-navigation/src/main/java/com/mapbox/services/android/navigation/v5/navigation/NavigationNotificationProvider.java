@@ -8,6 +8,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 class NavigationNotificationProvider {
 
   private NavigationNotification navigationNotification;
+  private boolean shouldUpdate = true;
 
   NavigationNotificationProvider(Context context, MapboxNavigation mapboxNavigation) {
     navigationNotification = buildNotificationFrom(context, mapboxNavigation);
@@ -18,14 +19,17 @@ class NavigationNotificationProvider {
   }
 
   void updateNavigationNotification(RouteProgress routeProgress) {
-    navigationNotification.updateNotification(routeProgress);
+    if (shouldUpdate) {
+      navigationNotification.updateNotification(routeProgress);
+    }
   }
 
-  void unregisterNotificationReceiver(Context context) {
+  void shutdown(Context context) {
     if (navigationNotification instanceof MapboxNavigationNotification) {
       ((MapboxNavigationNotification) navigationNotification).unregisterReceiver(context);
     }
     navigationNotification = null;
+    shouldUpdate = false;
   }
 
   private NavigationNotification buildNotificationFrom(Context context, MapboxNavigation mapboxNavigation) {
