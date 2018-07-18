@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.text.SpannableString;
+import android.text.format.DateFormat;
 import android.widget.RemoteViews;
 
 import com.mapbox.api.directions.v5.models.LegStep;
@@ -20,20 +21,19 @@ import com.mapbox.services.android.navigation.v5.navigation.notification.Navigat
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
-import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter;
 
-import java.util.Locale;
+import java.util.Calendar;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
+import static com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter.formatTime;
 
 /**
  * This is in charge of creating the persistent navigation session notification and updating it.
  */
 class MapboxNavigationNotification implements NavigationNotification {
+
   private static final String END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION";
-  private final DistanceFormatter distanceFormatter;
-  private final String etaFormat;
   private NotificationCompat.Builder notificationBuilder;
   private NotificationManager notificationManager;
   private Notification notification;
@@ -41,9 +41,10 @@ class MapboxNavigationNotification implements NavigationNotification {
   private RemoteViews expandedNotificationRemoteViews;
   private MapboxNavigation mapboxNavigation;
   private SpannableString currentDistanceText;
-  private String currentArrivalTime;
+  private DistanceFormatter distanceFormatter;
   private String instructionText;
   private int currentManeuverId;
+  private boolean isTwentyFourHourFormat;
 
   private BroadcastReceiver endNavigationBtnReceiver = new BroadcastReceiver() {
     @Override
@@ -53,12 +54,7 @@ class MapboxNavigationNotification implements NavigationNotification {
   };
 
   MapboxNavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
-    this.mapboxNavigation = mapboxNavigation;
-    RouteOptions routeOptions = mapboxNavigation.getRoute().routeOptions();
-    this.distanceFormatter = new DistanceFormatter(
-      context, routeOptions.language(), routeOptions.voiceUnits());
-    etaFormat = context.getString(R.string.eta_format);
-    initialize(context);
+    initialize(context, mapboxNavigation);
   }
 
   @Override
@@ -85,8 +81,12 @@ class MapboxNavigationNotification implements NavigationNotification {
     }
   }
 
-  private void initialize(Context context) {
+  private void initialize(Context context, MapboxNavigation mapboxNavigation) {
+    this.mapboxNavigation = mapboxNavigation;
+    RouteOptions routeOptions = mapboxNavigation.getRoute().routeOptions();
+    distanceFormatter = new DistanceFormatter(context, routeOptions.language(), routeOptions.voiceUnits());
     notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    isTwentyFourHourFormat = DateFormat.is24HourFormat(context);
     createNotificationChannel(context);
     buildNotification(context);
     registerReceiver(context);
@@ -139,17 +139,12 @@ class MapboxNavigationNotification implements NavigationNotification {
    * @param routeProgress the latest RouteProgress object
    */
   private void updateNotificationViews(RouteProgress routeProgress) {
-    // Instruction
     updateInstructionText(routeProgress.currentLegProgress().currentStep());
-    // Distance
     updateDistanceText(routeProgress);
-    // Arrival Time
     updateArrivalTime(routeProgress);
-    // Get upcoming step for maneuver image - current step if null
     LegStep step = routeProgress.currentLegProgress().upComingStep() != null
       ? routeProgress.currentLegProgress().upComingStep()
       : routeProgress.currentLegProgress().currentStep();
-    // Maneuver Image
     updateManeuverImage(step);
 
     notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notificationBuilder.build());
@@ -187,17 +182,13 @@ class MapboxNavigationNotification implements NavigationNotification {
   }
 
   private void updateArrivalTime(RouteProgress routeProgress) {
-    if (currentArrivalTime == null || newArrivalTime(routeProgress)) {
-      currentArrivalTime = TimeFormatter.formatArrivalTime(routeProgress.durationRemaining());
-      String formattedArrivalText = String.format(Locale.getDefault(), etaFormat, currentArrivalTime);
-      collapsedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, formattedArrivalText);
-      expandedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, formattedArrivalText);
-    }
-  }
-
-  private boolean newArrivalTime(RouteProgress routeProgress) {
-    return currentArrivalTime != null && !currentArrivalTime.equals(TimeFormatter
-      .formatArrivalTime(routeProgress.durationRemaining()));
+    MapboxNavigationOptions options = mapboxNavigation.options();
+    Calendar time = Calendar.getInstance();
+    double durationRemaining = routeProgress.durationRemaining();
+    int timeFormatType = options.timeFormatType();
+    String arrivalTime = formatTime(time, durationRemaining, timeFormatType, isTwentyFourHourFormat);
+    collapsedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, arrivalTime);
+    expandedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, arrivalTime);
   }
 
   private void updateManeuverImage(LegStep step) {
