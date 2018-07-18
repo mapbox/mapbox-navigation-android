@@ -216,20 +216,6 @@ public class RouteUtilsTest extends BaseTest {
   }
 
   @Test
-  public void findCurrentBannerInstructions_clearsAllInvalidInstructions() throws Exception {
-    RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
-    double stepDistanceRemaining = 400;
-    RouteUtils routeUtils = new RouteUtils();
-
-    BannerInstructions currentBannerInstructions = routeUtils.findCurrentBannerInstructions(
-      currentStep, stepDistanceRemaining
-    );
-
-    assertNull(currentBannerInstructions);
-  }
-
-  @Test
   public void findCurrentBannerInstructions_returnsCorrectCurrentInstruction() throws Exception {
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
