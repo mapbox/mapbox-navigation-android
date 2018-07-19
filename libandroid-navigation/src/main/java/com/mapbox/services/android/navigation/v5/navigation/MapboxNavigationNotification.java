@@ -18,7 +18,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
+import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
 import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter;
 
@@ -32,7 +32,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  */
 class MapboxNavigationNotification implements NavigationNotification {
   private static final String END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION";
-  private final DistanceUtils distanceUtils;
+  private final DistanceFormatter distanceFormatter;
   private final String etaFormat;
   private NotificationCompat.Builder notificationBuilder;
   private NotificationManager notificationManager;
@@ -55,7 +55,7 @@ class MapboxNavigationNotification implements NavigationNotification {
   MapboxNavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
     RouteOptions routeOptions = mapboxNavigation.getRoute().routeOptions();
-    this.distanceUtils = new DistanceUtils(
+    this.distanceFormatter = new DistanceFormatter(
       context, routeOptions.language(), routeOptions.voiceUnits());
     etaFormat = context.getString(R.string.eta_format);
     initialize(context);
@@ -173,7 +173,7 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   private void updateDistanceText(RouteProgress routeProgress) {
     if (currentDistanceText == null || newDistanceText(routeProgress)) {
-      currentDistanceText = distanceUtils.formatDistance(
+      currentDistanceText = distanceFormatter.formatDistance(
         routeProgress.currentLegProgress().currentStepProgress().distanceRemaining());
       collapsedNotificationRemoteViews.setTextViewText(R.id.notificationDistanceText, currentDistanceText);
       expandedNotificationRemoteViews.setTextViewText(R.id.notificationDistanceText, currentDistanceText);
@@ -182,7 +182,7 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   private boolean newDistanceText(RouteProgress routeProgress) {
     return currentDistanceText != null
-      && !currentDistanceText.toString().equals(distanceUtils.formatDistance(
+      && !currentDistanceText.toString().equals(distanceFormatter.formatDistance(
       routeProgress.currentLegProgress().currentStepProgress().distanceRemaining()).toString());
   }
 

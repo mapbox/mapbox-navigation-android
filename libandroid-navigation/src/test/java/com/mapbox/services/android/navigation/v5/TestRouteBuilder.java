@@ -34,8 +34,7 @@ class TestRouteBuilder {
 
   DirectionsRoute buildTestDirectionsRoute(@Nullable String fixtureName) throws IOException {
     fixtureName = checkNullFixtureName(fixtureName);
-    Gson gson = new GsonBuilder()
-      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
+    Gson gson = new GsonBuilder().registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
     String body = loadJsonFixture(fixtureName);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     DirectionsRoute route = response.routes().get(0);

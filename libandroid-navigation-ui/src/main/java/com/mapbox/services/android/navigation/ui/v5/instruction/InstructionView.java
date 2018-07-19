@@ -16,7 +16,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.TextViewCompat;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -55,7 +54,9 @@ import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEven
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
+import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
 
@@ -204,7 +205,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         if (isOffRoute != null) {
           if (isOffRoute) {
             showRerouteState();
-            instructionListAdapter.clear();
           } else if (isRerouting) {
             hideRerouteState();
             showAlertView();
@@ -324,6 +324,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     }
     instructionListLayout.setVisibility(VISIBLE);
     rvInstructions.smoothScrollToPosition(TOP);
+    instructionListAdapter.notifyDataSetChanged();
   }
 
   public boolean handleBackPressed() {
@@ -529,10 +530,11 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
   private void initializeDirectionsRecyclerView() {
-    instructionListAdapter = new InstructionListAdapter();
+    RouteUtils routeUtils = new RouteUtils();
+    DistanceFormatter distanceFormatter = new DistanceFormatter(getContext(), language, unitType);
+    instructionListAdapter = new InstructionListAdapter(routeUtils, distanceFormatter);
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
-    rvInstructions.setItemAnimator(new DefaultItemAnimator());
     rvInstructions.setLayoutManager(new LinearLayoutManager(getContext()));
   }
 
@@ -753,6 +755,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       String thenStepManeuverType = model.getStepResources().getThenStepManeuverType();
       String thenStepManeuverModifier = model.getStepResources().getThenStepManeuverModifier();
       thenManeuverView.setManeuverTypeAndModifier(thenStepManeuverType, thenStepManeuverModifier);
+      Float roundaboutAngle = model.getRoundaboutAngle();
+      if (roundaboutAngle != null) {
+        thenManeuverView.setRoundaboutAngle(roundaboutAngle);
+      }
       thenStepText.setText(model.getThenBannerText().text());
       showThenStepLayout();
     } else {
@@ -907,6 +913,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model to provide the current steps and unit type
    */
   private void updateInstructionList(InstructionModel model) {
-    instructionListAdapter.updateSteps(getContext(), model.getProgress(), language, unitType);
+    RouteProgress routeProgress = model.getProgress();
+    boolean isListShowing = instructionListLayout.getVisibility() == VISIBLE;
+    instructionListAdapter.updateBannerListWith(routeProgress, isListShowing);
+    instructionListAdapter.updateBannerFormat(getContext(), language, unitType);
   }
 }

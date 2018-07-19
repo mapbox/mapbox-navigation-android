@@ -8,7 +8,7 @@ import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
+import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ class InstructionStepResources {
   private String thenStepManeuverType;
   private List<IntersectionLanes> turnLanes;
   private boolean shouldShowThenStep;
-  private DistanceUtils distanceUtils;
+  private DistanceFormatter distanceFormatter;
   private String language;
   @DirectionsCriteria.VoiceUnitCriteria
   private String unitType;
@@ -90,17 +90,17 @@ class InstructionStepResources {
   private void formatStepDistance(Context context, RouteProgress progress,
                                   String language, @DirectionsCriteria.VoiceUnitCriteria String unitType) {
     if (shouldDistanceUtilsBeInitialized(language, unitType)) {
-      distanceUtils = new DistanceUtils(context, language, unitType);
+      distanceFormatter = new DistanceFormatter(context, language, unitType);
       this.language = language;
       this.unitType = unitType;
     }
-    stepDistanceRemaining = distanceUtils.formatDistance(
+    stepDistanceRemaining = distanceFormatter.formatDistance(
       progress.currentLegProgress().currentStepProgress().distanceRemaining());
   }
 
   private boolean shouldDistanceUtilsBeInitialized(String language,
                                                    @DirectionsCriteria.VoiceUnitCriteria String unitType) {
-    return distanceUtils == null ||  !this.language.equals(language) || !this.unitType.equals(unitType);
+    return distanceFormatter == null ||  !this.language.equals(language) || !this.unitType.equals(unitType);
   }
 
   private void intersectionTurnLanes(LegStep step) {

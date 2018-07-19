@@ -22,7 +22,7 @@ import java.util.Locale;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-public class DistanceUtilsTest {
+public class DistanceFormatterTest {
   private static final double LARGE_LARGE_UNIT = 18124.65;
   private static final double MEDIUM_LARGE_UNIT = 9812.33;
   private static final double SMALL_SMALL_UNIT = 13.71;
@@ -115,6 +115,6 @@ public class DistanceUtilsTest {
 
   private void assertOutput(double distance, Locale locale, String unitType, String output) {
     Assert.assertEquals(output,
-      new DistanceUtils(context, locale.getLanguage(), unitType).formatDistance(distance).toString());
+      new DistanceFormatter(context, locale.getLanguage(), unitType).formatDistance(distance).toString());
   }
 }

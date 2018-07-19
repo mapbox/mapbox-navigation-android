@@ -7,7 +7,7 @@ import android.text.format.DateFormat;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceUtils;
+import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 
 import java.util.Calendar;
 
@@ -23,7 +23,7 @@ public class SummaryModel {
   public SummaryModel(Context context, RouteProgress progress, String language,
                       @DirectionsCriteria.VoiceUnitCriteria String unitType,
                       @NavigationTimeFormat.Type int timeFormatType) {
-    distanceRemaining = new DistanceUtils(context, language, unitType)
+    distanceRemaining = new DistanceFormatter(context, language, unitType)
       .formatDistance(progress.distanceRemaining()).toString();
     timeRemaining = formatTimeRemaining(context, progress.durationRemaining());
     Calendar time = Calendar.getInstance();
