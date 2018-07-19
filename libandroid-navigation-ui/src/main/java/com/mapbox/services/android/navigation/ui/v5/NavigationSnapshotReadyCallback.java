@@ -9,7 +9,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.utils.ViewUtils;
 
-class NavigationSnapshotReadyCallback implements MapboxMap.SnapshotReadyCallback {
+public class NavigationSnapshotReadyCallback implements MapboxMap.SnapshotReadyCallback {
 
   private NavigationView navigationView;
   private NavigationViewModel navigationViewModel;
