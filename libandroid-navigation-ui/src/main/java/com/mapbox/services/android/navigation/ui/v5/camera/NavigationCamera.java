@@ -36,6 +36,7 @@ import java.util.List;
 public class NavigationCamera implements LifecycleObserver {
 
   private static final long MAX_ANIMATION_DURATION_MS = 1500;
+  private static final int ONE_POINT = 1;
 
   private MapboxMap mapboxMap;
   private MapboxNavigation navigation;
@@ -300,6 +301,9 @@ public class NavigationCamera implements LifecycleObserver {
   }
 
   private void animateMapboxMapForRouteOverview(int[] padding, List<Point> routePoints) {
+    if (routePoints.size() <= ONE_POINT) {
+      return;
+    }
     CameraUpdate resetUpdate = buildResetCameraUpdate();
     final CameraUpdate overviewUpdate = buildOverviewCameraUpdate(padding, routePoints);
     mapboxMap.animateCamera(resetUpdate, 150,
