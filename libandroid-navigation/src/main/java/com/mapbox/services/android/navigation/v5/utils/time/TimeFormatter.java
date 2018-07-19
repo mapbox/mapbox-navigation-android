@@ -16,21 +16,11 @@ import com.mapbox.services.android.navigation.v5.utils.span.TextSpanItem;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class TimeFormatter {
 
-  private static final String ARRIVAL_TIME_STRING_FORMAT = "%tl:%tM %tp";
   private static final String TIME_STRING_FORMAT = " %s ";
-
-  public static String formatArrivalTime(double routeDuration) {
-    Calendar calendar = Calendar.getInstance();
-    calendar.add(Calendar.SECOND, (int) routeDuration);
-
-    return String.format(Locale.getDefault(), ARRIVAL_TIME_STRING_FORMAT,
-      calendar, calendar, calendar);
-  }
 
   public static String formatTime(Calendar time, double routeDuration, @NavigationTimeFormat.Type int type,
                                   boolean isDeviceTwentyFourHourFormat) {
