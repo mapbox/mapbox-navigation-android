@@ -20,6 +20,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
+import com.mapbox.services.android.navigation.ui.v5.NavigationSnapshotReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
@@ -151,6 +152,24 @@ public class NavigationMapboxMap {
   @SuppressLint("MissingPermission")
   public void updateLocationLayerVisibilityTo(boolean isVisible) {
     locationLayer.setLocationLayerEnabled(isVisible);
+  }
+
+  public MapboxMap retrieveMap() {
+    return mapboxMap;
+  }
+
+  public void addOnMoveListener(@NonNull MapboxMap.OnMoveListener onMoveListener) {
+    mapboxMap.addOnMoveListener(onMoveListener);
+  }
+
+  public void removeOnMoveListener(MapboxMap.OnMoveListener onMoveListener) {
+    if (onMoveListener != null) {
+      mapboxMap.removeOnMoveListener(onMoveListener);
+    }
+  }
+
+  public void takeScreenshot(NavigationSnapshotReadyCallback navigationSnapshotReadyCallback) {
+    mapboxMap.snapshot(navigationSnapshotReadyCallback);
   }
 
   private void initializeLocationLayer(MapView mapView, MapboxMap map) {

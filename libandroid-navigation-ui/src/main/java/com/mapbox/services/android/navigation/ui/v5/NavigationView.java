@@ -70,7 +70,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private NavigationPresenter navigationPresenter;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
   private NavigationViewModel navigationViewModel;
-  private MapboxMap map;
   private NavigationMapboxMap navigationMap;
   private OnNavigationReadyCallback onNavigationReadyCallback;
   private MapboxMap.OnMoveListener onMoveListener;
@@ -188,9 +187,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     mapView.onStop();
     if (navigationMap != null) {
       navigationMap.onStop();
-    }
-    if (onMoveListener != null) {
-      map.removeOnMoveListener(onMoveListener);
+      navigationMap.removeOnMoveListener(onMoveListener);
     }
   }
 
@@ -205,8 +202,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
-    map = mapboxMap;
-    initializeNavigationMap(mapView, map);
+    initializeNavigationMap(mapView, mapboxMap);
     onNavigationReadyCallback.onNavigationReady(navigationViewModel.isRunning());
   }
 
@@ -299,9 +295,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   @Override
   public void takeScreenshot() {
-    // TODO Refactor -> Move take screenshot functionality into NavigationMapboxMap
-    if (map != null) {
-      map.snapshot(new NavigationSnapshotReadyCallback(this, navigationViewModel));
+    if (navigationMap != null) {
+      navigationMap.takeScreenshot(new NavigationSnapshotReadyCallback(this, navigationViewModel));
     }
   }
 
@@ -390,8 +385,12 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    *
    * @return mapbox map object, or null if view has not been initialized
    */
+  @Nullable
   public MapboxMap retrieveMapboxMap() {
-    return map;
+    if (navigationMap == null) {
+      return null;
+    }
+    return navigationMap.retrieveMap();
   }
 
   private void initializeView() {
@@ -516,7 +515,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   private void initializeOnMoveListener() {
     onMoveListener = new NavigationOnMoveListener(navigationPresenter, summaryBehavior);
-    map.addOnMoveListener(onMoveListener);
+    navigationMap.addOnMoveListener(onMoveListener);
   }
 
   private void establish(NavigationViewOptions options) {
@@ -573,5 +572,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     mapView.onDestroy();
     navigationViewModel.onDestroy(isChangingConfigurations());
     ImageCoordinator.getInstance().shutdown();
+    navigationMap = null;
   }
 }
