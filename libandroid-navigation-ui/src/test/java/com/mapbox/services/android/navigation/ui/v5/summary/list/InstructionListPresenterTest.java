@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
@@ -107,6 +108,19 @@ public class InstructionListPresenterTest extends BaseTest {
     assertTrue(didUpdate);
   }
 
+  @Test
+  public void updateBannerListWith_emptyInstructionsReturnFalse() throws Exception {
+    RouteProgress routeProgress = buildRouteProgress();
+    RouteUtils routeUtils = buildRouteUtils(routeProgress);
+    clearInstructions(routeProgress);
+    DistanceFormatter distanceFormatter = mock(DistanceFormatter.class);
+    InstructionListPresenter presenter = new InstructionListPresenter(routeUtils, distanceFormatter);
+
+    boolean didUpdate = presenter.updateBannerListWith(routeProgress);
+
+    assertFalse(didUpdate);
+  }
+
   @NonNull
   private RouteProgress buildRouteProgress() throws Exception {
     DirectionsRoute route = buildTestDirectionsRoute();
@@ -139,5 +153,14 @@ public class InstructionListPresenterTest extends BaseTest {
       }
     }
     return instructions.size() - 1;
+  }
+
+  private void clearInstructions(RouteProgress routeProgress) {
+    for (LegStep step : routeProgress.currentLeg().steps()) {
+      List<BannerInstructions> instructions = step.bannerInstructions();
+      if (instructions != null) {
+        instructions.clear();
+      }
+    }
   }
 }

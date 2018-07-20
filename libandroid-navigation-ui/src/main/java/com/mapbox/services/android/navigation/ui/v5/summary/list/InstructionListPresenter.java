@@ -122,7 +122,7 @@ public class InstructionListPresenter {
       List<LegStep> steps = currentLeg.steps();
       for (LegStep step : steps) {
         List<BannerInstructions> bannerInstructions = step.bannerInstructions();
-        if (bannerInstructions != null) {
+        if (bannerInstructions != null && !bannerInstructions.isEmpty()) {
           instructions.addAll(bannerInstructions);
           didAddInstructions = true;
         }
@@ -142,6 +142,9 @@ public class InstructionListPresenter {
     BannerInstructions currentBannerInstructions = routeUtils.findCurrentBannerInstructions(
       currentStep, stepDistanceRemaining
     );
+    if (!instructions.contains(currentBannerInstructions)) {
+      return false;
+    }
     int currentInstructionIndex = instructions.indexOf(currentBannerInstructions);
     return removeInstructionsFrom(currentInstructionIndex);
   }
@@ -150,8 +153,8 @@ public class InstructionListPresenter {
     if (currentInstructionIndex == FIRST_INSTRUCTION_INDEX) {
       instructions.remove(FIRST_INSTRUCTION_INDEX);
       return true;
-    } else if (currentInstructionIndex < instructions.size() - 1) {
-      instructions.subList(0, currentInstructionIndex).clear();
+    } else if (currentInstructionIndex <= instructions.size()) {
+      instructions.subList(FIRST_INSTRUCTION_INDEX, currentInstructionIndex).clear();
       return true;
     }
     return false;
