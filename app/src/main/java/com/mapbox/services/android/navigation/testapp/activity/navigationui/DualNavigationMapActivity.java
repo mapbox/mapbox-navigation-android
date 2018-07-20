@@ -89,7 +89,6 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   @Override
   public void onNavigationReady(boolean isRunning) {
     isNavigationRunning = isRunning;
-    fetchRoute();
   }
 
   @Override
@@ -99,6 +98,7 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     initLocationEngine();
     initLocationLayer();
     initMapRoute();
+    fetchRoute();
   }
 
   @Override
@@ -115,7 +115,6 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
     if (validRouteResponse(response)) {
       updateLoadingTo(false);
-      launchNavigationFab.setVisibility(View.VISIBLE);
       launchNavigationFab.show();
       route = response.body().routes().get(0);
       mapRoute.addRoutes(response.body().routes());

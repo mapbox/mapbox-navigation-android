@@ -46,7 +46,7 @@
         android:layout_marginRight="16dp"
         android:src="@drawable/ic_navigation"
         android:tint="@android:color/white"
-        android:visibility="visible"
+        android:visibility="gone"
         app:backgroundTint="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
