@@ -13,7 +13,14 @@
     <string name="title_navigation_route_ui">Mapa de Percurso de Navegação</string>
     <string name="description_navigation_route_ui">Desenha um percurso no mapa</string>
 
+    <string name="title_navigation_launcher">Lançador de Navegação</string>
     <string name="description_navigation_launcher">Experiência de UI Drop-In</string>
+
+    <string name="title_end_navigation">Terminar Navegação</string>
+    <string name="description_end_navigation">Mostra como terminar a navegação utilizando NavigationView</string>
+
+    <string name="title_dual_navigation_map">Mapa Duplo de Navegação</string>
+    <string name="description_dual_navigation_map">Mostra como adicionar NavigationView e MapView no mesmo layout</string>
 
     <string name="title_waypoint_navigation">Navegação de Pontos de Passagem</string>
     <string name="description_waypoint_navigation">Navegação com pontos de passagem entre destinos</string>

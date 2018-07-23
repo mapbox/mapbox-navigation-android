@@ -8,4 +8,13 @@
     <string name="miles">dặm</string>
     <string name="feet">foot</string>
     <string name="eta_format">Đến %s</string>
+
+    <!-- Time formatting -->
+    <plurals name="numberOfDays">
+        <item quantity="other">ngày</item>
+    </plurals>
+    <!-- Hour -->
+    <string name="hr">giờ</string>
+    <!-- Minute -->
+    <string name="min">phút</string>
 </resources>
