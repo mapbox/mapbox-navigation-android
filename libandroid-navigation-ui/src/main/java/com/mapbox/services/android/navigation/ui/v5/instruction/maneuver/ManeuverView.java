@@ -19,8 +19,10 @@ import java.util.Set;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ManeuverModifier;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ManeuverType;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
+  .STEP_MANEUVER_MODIFIER_SHARP_LEFT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
+  .STEP_MANEUVER_MODIFIER_SLIGHT_LEFT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_EXIT_ROTARY;
@@ -28,7 +30,8 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROTARY;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT_TURN;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
+  .STEP_MANEUVER_TYPE_ROUNDABOUT_TURN;
 
 
 /**
@@ -38,7 +41,8 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  */
 public class ManeuverView extends View {
 
-  private static final float THREE_HUNDRED_DEGREES = 300f;
+  private static final float TOP_ROUNDABOUT_ANGLE_LIMIT = 300f;
+  private static final float BOTTOM_ROUNDABOUT_ANGLE_LIMIT = 60f;
   private static final Map<Pair<String, String>, ManeuverViewUpdate> MANEUVER_VIEW_UPDATE_MAP = new ManeuverViewMap();
   private static final Set<String> SHOULD_FLIP_MODIFIERS = new HashSet<String>() {
     {
@@ -115,14 +119,6 @@ public class ManeuverView extends View {
     }
   }
 
-  private void updateRoundaboutAngle(float roundaboutAngle) {
-    if (roundaboutAngle > THREE_HUNDRED_DEGREES) {
-      this.roundaboutAngle = THREE_HUNDRED_DEGREES;
-      return;
-    }
-    this.roundaboutAngle = roundaboutAngle;
-  }
-
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -135,6 +131,7 @@ public class ManeuverView extends View {
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
 
+    // TODO Abstract this "debug" code somehow?
     if (isInEditMode()) {
       ManeuversStyleKit.drawArrowStraight(canvas, primaryColor, size);
       return;
@@ -179,5 +176,31 @@ public class ManeuverView extends View {
       maneuverType = null;
     }
     return maneuverType;
+  }
+
+  private void updateRoundaboutAngle(float roundaboutAngle) {
+    if (checkRoundaboutBottomLimit(roundaboutAngle)) {
+      return;
+    }
+    if (checkRoundaboutTopLimit(roundaboutAngle)) {
+      return;
+    }
+    this.roundaboutAngle = roundaboutAngle;
+  }
+
+  private boolean checkRoundaboutBottomLimit(float roundaboutAngle) {
+    if (roundaboutAngle < BOTTOM_ROUNDABOUT_ANGLE_LIMIT) {
+      this.roundaboutAngle = BOTTOM_ROUNDABOUT_ANGLE_LIMIT;
+      return true;
+    }
+    return false;
+  }
+
+  private boolean checkRoundaboutTopLimit(float roundaboutAngle) {
+    if (roundaboutAngle > TOP_ROUNDABOUT_ANGLE_LIMIT) {
+      this.roundaboutAngle = TOP_ROUNDABOUT_ANGLE_LIMIT;
+      return true;
+    }
+    return false;
   }
 }
