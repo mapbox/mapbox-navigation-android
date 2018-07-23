@@ -755,7 +755,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       String thenStepManeuverType = model.getStepResources().getThenStepManeuverType();
       String thenStepManeuverModifier = model.getStepResources().getThenStepManeuverModifier();
       thenManeuverView.setManeuverTypeAndModifier(thenStepManeuverType, thenStepManeuverModifier);
-      Float roundaboutAngle = model.getRoundaboutAngle();
+      Float roundaboutAngle = model.getStepResources().getThenStepRoundaboutDegrees();
       if (roundaboutAngle != null) {
         thenManeuverView.setRoundaboutAngle(roundaboutAngle);
       }

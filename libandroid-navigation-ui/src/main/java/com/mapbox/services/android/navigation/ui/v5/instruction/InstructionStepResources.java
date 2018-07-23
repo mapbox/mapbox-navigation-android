@@ -1,9 +1,12 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.text.SpannableString;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.api.directions.v5.models.BannerInstructions;
+import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.StepIntersection;
@@ -16,12 +19,14 @@ class InstructionStepResources {
 
   private static final double VALID_UPCOMING_DURATION = 25d * 1.2d;
   private static final double VALID_CURRENT_DURATION = 70d;
+  private static final int FIRST_INSTRUCTION = 0;
 
   private SpannableString stepDistanceRemaining;
   private String maneuverViewModifier;
   private String maneuverViewType;
   private String thenStepManeuverModifier;
   private String thenStepManeuverType;
+  private Float thenStepRoundaboutDegrees;
   private List<IntersectionLanes> turnLanes;
   private boolean shouldShowThenStep;
   private DistanceFormatter distanceFormatter;
@@ -52,6 +57,11 @@ class InstructionStepResources {
 
   String getThenStepManeuverType() {
     return thenStepManeuverType;
+  }
+
+  @Nullable
+  Float getThenStepRoundaboutDegrees() {
+    return thenStepRoundaboutDegrees;
   }
 
   boolean shouldShowThenStep() {
@@ -114,8 +124,16 @@ class InstructionStepResources {
   }
 
   private void thenStep(LegStep upcomingStep, LegStep followOnStep, double currentDurationRemaining) {
-    thenStepManeuverType = followOnStep.maneuver().type();
-    thenStepManeuverModifier = followOnStep.maneuver().modifier();
+    List<BannerInstructions> bannerInstructions = followOnStep.bannerInstructions();
+    if (bannerInstructions == null || bannerInstructions.isEmpty()) {
+      return;
+    }
+    BannerText primaryText = bannerInstructions.get(FIRST_INSTRUCTION).primary();
+    thenStepManeuverType = primaryText.type();
+    thenStepManeuverModifier = primaryText.modifier();
+    if (primaryText.degrees() != null) {
+      thenStepRoundaboutDegrees = primaryText.degrees().floatValue();
+    }
     shouldShowThenStep = isValidStepDuration(upcomingStep, currentDurationRemaining);
   }
 
