@@ -23,14 +23,18 @@ The Mapbox Navigation SDK is a precise and flexible platform which enables your 
 
 If you are looking to include this inside your project, please take a look at [the detailed instructions](https://www.mapbox.com/android-docs/navigation/overview/) found in our docs. If you are interested in building from source, read the contributing guide inside this project.
 
-The snippet to add to your `build.gradle` file to use this SDK is the following:
+Add this snippet to your `build.gradle` file to use this SDK (`libandroid-navigation`):
 
 ```
-// Mapbox Navigation SDK for Android
+implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.16.0'
+```
 
-compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.16.0'
+And for `libandroid-navigation-ui`:
 
 ```
+implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.16.0'
+```
+**Note**:  When using the UI library, you _do not_ need to add both dependencies.  The UI library will automatically pull in `libandroid-navigation`.  
 
 To run the [sample code](#sample-code) on a device or emulator, include your [developer access token](https://www.mapbox.com/help/define-access-token/) in `developer-config.xml` found in the project. 
 ## Documentation
