@@ -206,14 +206,13 @@ public class MapboxNavigation implements ServiceConnection {
    * also removes all listeners that have been attached.
    */
   public void onDestroy() {
-    Timber.d("MapboxNavigation onDestroy.");
     stopNavigation();
     disableLocationEngine();
-    navigationEngineFactory.clearEngines();
-    removeNavigationEventListener(null);
+    removeOffRouteListener(null);
     removeProgressChangeListener(null);
     removeMilestoneEventListener(null);
-    removeOffRouteListener(null);
+    removeNavigationEventListener(null);
+    navigationEngineFactory.clearEngines();
   }
 
   // Public APIs

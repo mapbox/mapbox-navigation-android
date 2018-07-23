@@ -94,8 +94,8 @@ public class NavigationViewModel extends AndroidViewModel {
   public void onDestroy(boolean isChangingConfigurations) {
     if (!isChangingConfigurations) {
       locationEngineConductor.onDestroy();
-      endNavigation();
       deactivateInstructionPlayer();
+      endNavigation();
     }
     navigationViewEventDispatcher = null;
   }

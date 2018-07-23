@@ -472,9 +472,9 @@ public class NavigationHelper {
     if (!options.enableOffRouteDetection()) {
       return false;
     }
-    Location location = navigationLocationUpdate.location();
     OffRoute offRoute = navigationLocationUpdate.mapboxNavigation().getOffRouteEngine();
     setOffRouteDetectorCallback(offRoute, callback);
+    Location location = navigationLocationUpdate.location();
     return offRoute.isUserOffRoute(location, routeProgress, options);
   }
 
