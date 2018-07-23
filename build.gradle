@@ -8,6 +8,7 @@ buildscript {
     google()
     jcenter()
     maven { url 'https://plugins.gradle.org/m2' }
+    maven { url 'https://mapbox.bintray.com/mapbox' }
   }
   dependencies {
     classpath pluginDependencies.gradle
@@ -27,6 +28,7 @@ allprojects {
     google()
     jcenter()
     maven { url 'https://plugins.gradle.org/m2' }
+    maven { url 'https://mapbox.bintray.com/mapbox' }
   }
 
   group = GROUP
