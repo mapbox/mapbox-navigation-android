@@ -10,7 +10,6 @@ import com.mapbox.services.android.navigation.v5.milestone.StepMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.camera.SimpleCamera;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
-import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 
@@ -246,7 +245,7 @@ public class MapboxNavigationTest extends BaseTest {
     OffRoute offRoute = mock(OffRoute.class);
     navigation.setOffRouteEngine(offRoute);
 
-    assertTrue(!(navigation.getOffRouteEngine() instanceof OffRouteDetector));
+    assertEquals(offRoute, navigation.getOffRouteEngine());
   }
 
   @Test
@@ -262,7 +261,7 @@ public class MapboxNavigationTest extends BaseTest {
   public void getCameraEngine_returnsSimpleCameraWhenNull() throws Exception {
     MapboxNavigation navigation = buildMapboxNavigation();
 
-    navigation.setOffRouteEngine(null);
+    navigation.setCameraEngine(null);
 
     assertTrue(navigation.getCameraEngine() instanceof SimpleCamera);
   }

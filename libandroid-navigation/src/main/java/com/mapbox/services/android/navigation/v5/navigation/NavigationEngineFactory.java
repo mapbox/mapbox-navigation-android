@@ -25,6 +25,9 @@ class NavigationEngineFactory {
   }
 
   void updateOffRouteEngine(OffRoute offRouteEngine) {
+    if (offRouteEngine == null) {
+      return;
+    }
     this.offRouteEngine = offRouteEngine;
   }
 
@@ -33,6 +36,9 @@ class NavigationEngineFactory {
   }
 
   void updateFasterRouteEngine(FasterRoute fasterRouteEngine) {
+    if (fasterRouteEngine == null) {
+      return;
+    }
     this.fasterRouteEngine = fasterRouteEngine;
   }
 
@@ -41,6 +47,9 @@ class NavigationEngineFactory {
   }
 
   void updateSnapEngine(Snap snapEngine) {
+    if (snapEngine == null) {
+      return;
+    }
     this.snapEngine = snapEngine;
   }
 
@@ -49,6 +58,9 @@ class NavigationEngineFactory {
   }
 
   void updateCameraEngine(Camera cameraEngine) {
+    if (cameraEngine == null) {
+      return;
+    }
     this.cameraEngine = cameraEngine;
   }
 
