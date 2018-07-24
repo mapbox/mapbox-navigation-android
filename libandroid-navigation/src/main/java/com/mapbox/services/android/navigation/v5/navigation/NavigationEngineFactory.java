@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
 import com.mapbox.services.android.navigation.v5.navigation.camera.SimpleCamera;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
@@ -16,8 +17,8 @@ class NavigationEngineFactory {
   private Snap snapEngine;
   private Camera cameraEngine;
 
-  NavigationEngineFactory() {
-    initializeDefaultEngines();
+  NavigationEngineFactory(Navigator navigator) {
+    initializeDefaultEngines(navigator);
   }
 
   OffRoute retrieveOffRouteEngine() {
@@ -64,10 +65,10 @@ class NavigationEngineFactory {
     this.cameraEngine = cameraEngine;
   }
 
-  private void initializeDefaultEngines() {
+  private void initializeDefaultEngines(Navigator navigator) {
     cameraEngine = new SimpleCamera();
-    snapEngine = new SnapToRoute();
-    offRouteEngine = new OffRouteDetector();
+    snapEngine = new SnapToRoute(navigator);
+    offRouteEngine = new OffRouteDetector(navigator);
     fasterRouteEngine = new FasterRouteDetector();
   }
 }

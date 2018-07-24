@@ -91,9 +91,9 @@ public class NavigationService extends Service {
   private void initialize(MapboxNavigation mapboxNavigation) {
     NavigationEventDispatcher dispatcher = mapboxNavigation.getEventDispatcher();
     String accessToken = mapboxNavigation.obtainAccessToken();
-    initializeRouteFetcher(dispatcher, accessToken, mapboxNavigation.retrieveEngineProvider());
+    initializeRouteFetcher(dispatcher, accessToken, mapboxNavigation.retrieveEngineFactory());
     initializeNotificationProvider(mapboxNavigation);
-    initializeRouteProcessorThread(dispatcher, routeFetcher, notificationProvider);
+    initializeRouteProcessorThread(mapboxNavigation, dispatcher, routeFetcher, notificationProvider);
     initializeLocationProvider(mapboxNavigation);
   }
 
@@ -109,12 +109,14 @@ public class NavigationService extends Service {
     notificationProvider = new NavigationNotificationProvider(getApplication(), mapboxNavigation);
   }
 
-  private void initializeRouteProcessorThread(NavigationEventDispatcher dispatcher, RouteFetcher routeFetcher,
+  private void initializeRouteProcessorThread(MapboxNavigation mapboxNavigation,
+                                              NavigationEventDispatcher dispatcher,
+                                              RouteFetcher routeFetcher,
                                               NavigationNotificationProvider notificationProvider) {
     RouteProcessorThreadListener listener = new RouteProcessorThreadListener(
       dispatcher, routeFetcher, notificationProvider
     );
-    thread = new RouteProcessorBackgroundThread(new Handler(), listener);
+    thread = new RouteProcessorBackgroundThread(mapboxNavigation.retrieveNavigator(), new Handler(), listener);
   }
 
   private void initializeLocationProvider(MapboxNavigation mapboxNavigation) {

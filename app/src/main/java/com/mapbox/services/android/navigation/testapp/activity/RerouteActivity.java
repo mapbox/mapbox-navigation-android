@@ -32,6 +32,7 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
@@ -226,7 +227,9 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
-    Timber.d("onMilestoneEvent - Current Instruction: " + instruction);
+    if (milestone instanceof VoiceInstructionMilestone) {
+      Snackbar.make(contentLayout, instruction, Snackbar.LENGTH_SHORT).show();
+    }
   }
 
   @Override
@@ -240,7 +243,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
         drawRoute(route);
         // Start mocking the new route
         resetLocationEngine(route);
-        navigation.startNavigation(route);
+        navigation.startNavigation(call, response);
         mapboxMap.setOnMapClickListener(this);
         tracking = true;
       }
@@ -249,7 +252,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-    Timber.e("Getting directions failed: ", throwable);
+    Timber.e(throwable);
   }
 
   private void getRoute(Point origin, Point destination, Float bearing) {
@@ -270,12 +273,9 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     if (!points.isEmpty()) {
-
       if (polyline != null) {
         mapboxMap.removePolyline(polyline);
       }
-
-      // Draw polyline on map
       polyline = mapboxMap.addPolyline(new PolylineOptions()
         .addAll(points)
         .color(Color.parseColor("#4264fb"))
