@@ -146,9 +146,9 @@ public class MapboxNavigation implements ServiceConnection {
    */
   private void initialize() {
     // Initialize event dispatcher and add internal listeners
-    navigationEventDispatcher = new NavigationEventDispatcher();
-    navigationEngineFactory = new NavigationEngineFactory();
     navigator = new Navigator();
+    navigationEventDispatcher = new NavigationEventDispatcher();
+    navigationEngineFactory = new NavigationEngineFactory(navigator);
     initializeDefaultLocationEngine();
     initializeTelemetry();
 
@@ -788,7 +788,7 @@ public class MapboxNavigation implements ServiceConnection {
     return navigationEventDispatcher;
   }
 
-  NavigationEngineFactory retrieveEngineProvider() {
+  NavigationEngineFactory retrieveEngineFactory() {
     return navigationEngineFactory;
   }
 

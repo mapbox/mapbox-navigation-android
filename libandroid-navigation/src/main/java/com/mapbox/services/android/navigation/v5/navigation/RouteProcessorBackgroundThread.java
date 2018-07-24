@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 
+import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -20,18 +21,18 @@ class RouteProcessorBackgroundThread extends HandlerThread {
   private static final int MSG_LOCATION_UPDATED = 1001;
   private Handler workerHandler;
 
-  RouteProcessorBackgroundThread(Handler responseHandler, Listener listener) {
+  RouteProcessorBackgroundThread(Navigator navigator, Handler responseHandler, Listener listener) {
     super(MAPBOX_NAVIGATION_THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
     start();
-    initialize(responseHandler, listener);
+    initialize(navigator, responseHandler, listener);
   }
 
   void queueUpdate(NavigationLocationUpdate navigationLocationUpdate) {
     workerHandler.obtainMessage(MSG_LOCATION_UPDATED, navigationLocationUpdate).sendToTarget();
   }
 
-  private void initialize(Handler responseHandler, Listener listener) {
-    NavigationRouteProcessor routeProcessor = new NavigationRouteProcessor();
+  private void initialize(Navigator navigator, Handler responseHandler, Listener listener) {
+    NavigationRouteProcessor routeProcessor = new NavigationRouteProcessor(navigator);
     workerHandler = new Handler(getLooper(), new RouteProcessorHandlerCallback(
       routeProcessor, responseHandler, listener)
     );

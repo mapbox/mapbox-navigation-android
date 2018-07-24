@@ -9,9 +9,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.List;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildSnappedLocation;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.checkMilestones;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.isUserOffRoute;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.shouldCheckFasterRoute;
 
 class RouteProcessorHandlerCallback implements Handler.Callback {
@@ -34,46 +32,28 @@ class RouteProcessorHandlerCallback implements Handler.Callback {
     return true;
   }
 
-  /**
-   * Takes a new location model and runs all related engine checks against it
-   * (off-route, milestones, snapped location, and faster-route).
-   * <p>
-   * After running through the engines, all data is submitted to {@link NavigationService} via
-   * {@link RouteProcessorBackgroundThread.Listener}.
-   *
-   * @param update hold location, navigation (with options), and distances away from maneuver
-   */
   private void handleRequest(final NavigationLocationUpdate update) {
     final MapboxNavigation mapboxNavigation = update.mapboxNavigation();
+    final MapboxNavigationOptions options = mapboxNavigation.options();
     final Location rawLocation = update.location();
-    RouteProgress routeProgress = routeProcessor.buildNewRouteProgress(mapboxNavigation, rawLocation);
+    RouteProgress routeProgress = routeProcessor.buildNewRouteProgress(mapboxNavigation.getRoute(), rawLocation);
 
-    final boolean userOffRoute = determineUserOffRoute(update, mapboxNavigation, routeProgress);
-    final List<Milestone> milestones = findTriggeredMilestones(mapboxNavigation, routeProgress);
-    final Location location = findSnappedLocation(mapboxNavigation, rawLocation, routeProgress, userOffRoute);
+    NavigationEngineFactory engineFactory = mapboxNavigation.retrieveEngineFactory();
+    final boolean userOffRoute = engineFactory.retrieveOffRouteEngine().isUserOffRoute(rawLocation, routeProgress, options);
+    final Location location = engineFactory.retrieveSnapEngine().getSnappedLocation(rawLocation, routeProgress);
+
     final boolean checkFasterRoute = findFasterRoute(update, mapboxNavigation, routeProgress, userOffRoute);
+    final List<Milestone> milestones = findTriggeredMilestones(mapboxNavigation, routeProgress);
 
-    final RouteProgress finalRouteProgress = updateRouteProcessorWith(routeProgress);
-    sendUpdateToListener(userOffRoute, milestones, location, checkFasterRoute, finalRouteProgress);
+    sendUpdateToListener(userOffRoute, milestones, location, checkFasterRoute, routeProgress);
   }
 
   private List<Milestone> findTriggeredMilestones(MapboxNavigation mapboxNavigation, RouteProgress routeProgress) {
-    RouteProgress previousRouteProgress = routeProcessor.getRouteProgress();
+    RouteProgress previousRouteProgress = routeProcessor.retrievePreviousRouteProgress();
+    if (previousRouteProgress == null) {
+      previousRouteProgress = routeProgress;
+    }
     return checkMilestones(previousRouteProgress, routeProgress, mapboxNavigation);
-  }
-
-  private Location findSnappedLocation(MapboxNavigation mapboxNavigation, Location rawLocation,
-                                       RouteProgress routeProgress, boolean userOffRoute) {
-    boolean snapToRouteEnabled = mapboxNavigation.options().snapToRoute();
-    return buildSnappedLocation(mapboxNavigation, snapToRouteEnabled,
-      rawLocation, routeProgress, userOffRoute);
-  }
-
-  private boolean determineUserOffRoute(NavigationLocationUpdate navigationLocationUpdate,
-                                        MapboxNavigation mapboxNavigation, RouteProgress routeProgress) {
-    final boolean userOffRoute = isUserOffRoute(navigationLocationUpdate, routeProgress, routeProcessor);
-    routeProcessor.checkIncreaseIndex(mapboxNavigation);
-    return userOffRoute;
   }
 
   private boolean findFasterRoute(NavigationLocationUpdate navigationLocationUpdate, MapboxNavigation mapboxNavigation,
@@ -81,11 +61,6 @@ class RouteProcessorHandlerCallback implements Handler.Callback {
     boolean fasterRouteEnabled = mapboxNavigation.options().enableFasterRouteDetection();
     return fasterRouteEnabled && !userOffRoute
       && shouldCheckFasterRoute(navigationLocationUpdate, routeProgress);
-  }
-
-  private RouteProgress updateRouteProcessorWith(RouteProgress routeProgress) {
-    routeProcessor.setRouteProgress(routeProgress);
-    return routeProgress;
   }
 
   private void sendUpdateToListener(final boolean userOffRoute, final List<Milestone> milestones,
