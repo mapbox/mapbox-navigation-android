@@ -100,7 +100,6 @@ ext {
       gmsLocation            : "com.google.android.gms:play-services-location:${version.gmsLocation}",
 
       errorprone             : "com.google.errorprone:error_prone_core:${version.errorprone}"
-
   ]
 
   pluginDependencies = [

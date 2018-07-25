@@ -39,12 +39,18 @@ android {
 }
 
 dependencies {
-  api dependenciesList.mapboxEvents
-  api dependenciesList.mapboxSdkServices
+  api (dependenciesList.mapboxEvents) {
+    exclude group: 'com.google.code.gson', module: 'gson'
+  }
+  api (dependenciesList.mapboxSdkServices) {
+    exclude group: 'com.google.code.gson', module: 'gson'
+  }
   api dependenciesList.mapboxSdkTurf
 
   // Support
   implementation dependenciesList.supportAppcompatV7
+
+  api 'com.google.code.gson:gson:2.8.5'
 
   // Logging
   implementation dependenciesList.timber
