@@ -51,12 +51,6 @@ public abstract class MapboxNavigationOptions {
 
   public abstract int locationAcceptableAccuracyInMetersThreshold();
 
-  public abstract int locationAccuracyPercentThreshold();
-
-  public abstract int locationUpdateTimeInMillisThreshold();
-
-  public abstract int locationVelocityInMetersPerSecondThreshold();
-
   public abstract Builder toBuilder();
 
   @AutoValue.Builder
@@ -100,12 +94,6 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder locationAcceptableAccuracyInMetersThreshold(int accuracyInMetersThreshold);
 
-    public abstract Builder locationAccuracyPercentThreshold(int accuracyPercentThreshold);
-
-    public abstract Builder locationUpdateTimeInMillisThreshold(int timeInMillisThreshold);
-
-    public abstract Builder locationVelocityInMetersPerSecondThreshold(int metersPerSecondThreshold);
-
     public abstract MapboxNavigationOptions build();
   }
 
@@ -128,9 +116,6 @@ public abstract class MapboxNavigationOptions {
       .isFromNavigationUi(false)
       .isDebugLoggingEnabled(false)
       .timeFormatType(NavigationTimeFormat.NONE_SPECIFIED)
-      .locationAcceptableAccuracyInMetersThreshold(NavigationConstants.FIFTY_METER_ACCEPTABLE_ACCURACY_THRESHOLD)
-      .locationAccuracyPercentThreshold(NavigationConstants.TEN_PERCENT_ACCURACY_THRESHOLD)
-      .locationUpdateTimeInMillisThreshold(NavigationConstants.FIVE_SECONDS_IN_MILLIS_UPDATE_THRESHOLD)
-      .locationVelocityInMetersPerSecondThreshold(NavigationConstants.TWO_HUNDRED_METERS_PER_SECOND_VELOCITY_THRESHOLD);
+      .locationAcceptableAccuracyInMetersThreshold(NavigationConstants.ONE_HUNDRED_METER_ACCEPTABLE_ACCURACY_THRESHOLD);
   }
 }
