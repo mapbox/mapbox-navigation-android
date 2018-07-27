@@ -1,11 +1,14 @@
 package com.mapbox.services.android.navigation.testapp.activity.navigationui;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -30,11 +33,11 @@ import retrofit2.Response;
 public class WaypointNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
   NavigationListener, RouteListener, ProgressChangeListener {
 
+  private static final int FIRST_POINT = 0;
   private NavigationView navigationView;
-  private boolean dropoffDialogShown;
   private Location lastKnownLocation;
-
   private List<Point> points = new ArrayList<>();
+  private boolean dropoffDialogShown;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -151,8 +154,13 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   @Override
   public void onArrival() {
     if (!dropoffDialogShown && !points.isEmpty()) {
-      showDropoffDialog();
-      dropoffDialogShown = true; // Accounts for multiple arrival events
+      if (isTestMode()) {
+        Toast.makeText(this, "Arrival event triggered", Toast.LENGTH_SHORT).show();
+        fetchRoute(getLastKnownLocation(), points.remove(FIRST_POINT));
+      } else {
+        showDropoffDialog();
+        dropoffDialogShown = true; // Accounts for multiple arrival events
+      }
     }
   }
 
@@ -170,7 +178,7 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
     AlertDialog alertDialog = new AlertDialog.Builder(this).create();
     alertDialog.setMessage(getString(R.string.dropoff_dialog_text));
     alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.dropoff_dialog_positive_text),
-      (dialogInterface, in) -> fetchRoute(getLastKnownLocation(), points.remove(0)));
+      (dialogInterface, in) -> fetchRoute(getLastKnownLocation(), points.remove(FIRST_POINT)));
     alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.dropoff_dialog_negative_text),
       (dialogInterface, in) -> {
         // Do nothing
@@ -208,5 +216,10 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
 
   private Point getLastKnownLocation() {
     return Point.fromLngLat(lastKnownLocation.getLongitude(), lastKnownLocation.getLatitude());
+  }
+
+  private boolean isTestMode() {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+    return preferences.getBoolean(getString(R.string.test_mode_key), false);
   }
 }

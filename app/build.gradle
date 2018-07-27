@@ -78,6 +78,12 @@ dependencies {
   androidTestImplementation(dependenciesList.testEspressoCore, {
     exclude group: 'com.android.support', module: 'support-annotations'
   })
+  androidTestImplementation(dependenciesList.testEspressoContrib, {
+    exclude group: 'com.android.support', module: 'support-annotations'
+    exclude group: 'com.android.support', module: 'support-v4'
+    exclude group: 'com.android.support', module: 'design'
+    exclude group: 'com.android.support', module: 'recyclerview-v7'
+  })
 }
 
 apply from: "${rootDir}/gradle/developer-config.gradle"

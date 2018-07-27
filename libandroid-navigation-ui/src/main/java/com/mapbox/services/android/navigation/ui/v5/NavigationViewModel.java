@@ -97,6 +97,7 @@ public class NavigationViewModel extends AndroidViewModel {
       deactivateInstructionPlayer();
       endNavigation();
     }
+    navigation.setCameraEngine(null);
     navigationViewEventDispatcher = null;
   }
 

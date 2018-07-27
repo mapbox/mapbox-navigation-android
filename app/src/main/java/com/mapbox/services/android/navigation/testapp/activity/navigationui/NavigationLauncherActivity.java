@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -50,6 +51,7 @@ import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -65,6 +67,16 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
   private static final int CHANGE_SETTING_REQUEST_CODE = 1;
+  private static final List<Pair<Point, Point>> TEST_POINT_PAIRS = new ArrayList<Pair<Point, Point>>() {
+    {
+      add(new Pair<>(Point.fromLngLat(-122.396631, 37.7831650),
+        Point.fromLngLat(-122.384369, 37.616898))); // SF > SFO
+      add(new Pair<>(Point.fromLngLat(-77.033987, 38.900123),
+        Point.fromLngLat(-77.044818, 38.848942))); // DC > DCA
+      add(new Pair<>(Point.fromLngLat(-74.025559, 40.752380),
+        Point.fromLngLat(-74.177355, 40.690982))); // NY > EWR
+    }
+  };
 
   private LocationLayerPlugin locationLayer;
   private LocationEngine locationEngine;
@@ -85,7 +97,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   private Point destination;
   private DirectionsRoute route;
   private LocaleUtils localeUtils;
-
   private boolean locationFound;
 
   @Override
@@ -203,10 +214,11 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    this.mapboxMap.setOnMapLongClickListener(this);
+    this.mapboxMap.addOnMapLongClickListener(this);
     initLocationEngine();
     initLocationLayer();
     initMapRoute();
+    fetchRoute();
   }
 
   @Override
@@ -267,9 +279,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   private void fetchRoute() {
     NavigationRoute.Builder builder = NavigationRoute.builder(this)
       .accessToken(Mapbox.getAccessToken())
-      .origin(currentLocation)
-      .destination(destination)
       .alternatives(true);
+    addCoordinates(builder);
     setFieldsFromSharedPreferences(builder);
     builder.build()
       .getRoute(new SimplifiedCallback() {
@@ -329,6 +340,23 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     return sharedPreferences.getString(
       getString(R.string.route_profile_key), DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
     );
+  }
+
+  private void addCoordinates(NavigationRoute.Builder routeBuilder) {
+    if (!isTestMode()) {
+      routeBuilder.origin(currentLocation);
+      routeBuilder.destination(destination);
+      return;
+    }
+    Random random = new Random();
+    Pair<Point, Point> testPointPair = TEST_POINT_PAIRS.get(random.nextInt(TEST_POINT_PAIRS.size()));
+    routeBuilder.origin(testPointPair.first);
+    routeBuilder.destination(testPointPair.second);
+  }
+
+  private boolean isTestMode() {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+    return preferences.getBoolean(getString(R.string.test_mode_key), false);
   }
 
   private void launchNavigationWithRoute() {

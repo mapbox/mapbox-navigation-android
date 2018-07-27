@@ -212,7 +212,6 @@ public class MapboxNavigation implements ServiceConnection {
     removeProgressChangeListener(null);
     removeMilestoneEventListener(null);
     removeNavigationEventListener(null);
-    navigationEngineFactory.clearEngines();
   }
 
   // Public APIs
