@@ -55,7 +55,13 @@ jobs:
           no_output_timeout: 1200
           shell: /bin/bash -euo pipefail
           command: |
-            gcloud firebase test android run --type robo --app app/build/outputs/apk/debug/app-debug.apk --device-ids shamu --os-version-ids 22 --locales en --orientations portrait --timeout 5m
+            gcloud firebase test android run --type robo \
+              --app app/build/outputs/apk/debug/app-debug.apk \
+              --device model=victara,version=19,locale=en,orientation=portrait \
+              --device model=shamu,version=21,locale=es,orientation=landscape \
+              --device model=hammerhead,version=23,locale=de,orientation=portrait  \
+              --device model=sailfish,version=27,locale=fr,orientation=landscape \
+              --timeout 5m
       - run:
           name: Update Transifex
           command: |
