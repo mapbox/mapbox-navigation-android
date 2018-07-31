@@ -77,6 +77,10 @@ public class DynamicCamera extends SimpleCamera {
     forceUpdateZoom = true;
   }
 
+  public void clearMap() {
+    mapboxMap = null;
+  }
+
   /**
    * Creates a tilt value based on the distance remaining for the current {@link LegStep}.
    * <p>

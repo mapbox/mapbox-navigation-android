@@ -64,13 +64,6 @@ class NavigationEngineFactory {
     this.cameraEngine = cameraEngine;
   }
 
-  void clearEngines() {
-    offRouteEngine = null;
-    fasterRouteEngine = null;
-    snapEngine = null;
-    cameraEngine = null;
-  }
-
   private void initializeDefaultEngines() {
     cameraEngine = new SimpleCamera();
     snapEngine = new SnapToRoute();

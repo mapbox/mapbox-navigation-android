@@ -15,6 +15,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
@@ -35,6 +36,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
+import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
@@ -96,6 +98,11 @@ public class NavigationViewModel extends AndroidViewModel {
       locationEngineConductor.onDestroy();
       deactivateInstructionPlayer();
       endNavigation();
+    }
+    Camera cameraEngine = navigation.getCameraEngine();
+    boolean isDynamicCamera = cameraEngine instanceof DynamicCamera;
+    if (isDynamicCamera) {
+      ((DynamicCamera) cameraEngine).clearMap();
     }
     navigationViewEventDispatcher = null;
   }
