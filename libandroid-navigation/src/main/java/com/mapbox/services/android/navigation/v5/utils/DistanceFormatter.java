@@ -36,9 +36,14 @@ public class DistanceFormatter {
   private final String largeUnit;
   private final String smallUnit;
   private final LocaleUtils localeUtils;
+  private final String language;
+  private final String unitType;
 
   /**
-   * Creates a DistanceFormatter object with information about how to format distances
+   * Creates an instance of DistanceFormatter, which can format distances in meters
+   * based on a language format and unit type.
+   * <p>
+   * This constructor will infer device language and unit type using the device locale.
    *
    * @param context  from which to get localized strings from
    * @param language for which language
@@ -59,11 +64,13 @@ public class DistanceFormatter {
     } else {
       locale = new Locale(language);
     }
+    this.language = locale.getLanguage();
     numberFormat = NumberFormat.getNumberInstance(locale);
 
     if (!DirectionsCriteria.IMPERIAL.equals(unitType) && !DirectionsCriteria.METRIC.equals(unitType)) {
       unitType = localeUtils.getUnitTypeForDeviceLocale(context);
     }
+    this.unitType = unitType;
 
     largeUnit = DirectionsCriteria.IMPERIAL.equals(unitType) ? UNIT_MILES : UNIT_KILOMETERS;
     smallUnit = DirectionsCriteria.IMPERIAL.equals(unitType) ? UNIT_FEET : UNIT_METERS;
@@ -90,6 +97,18 @@ public class DistanceFormatter {
     } else {
       return getDistanceString(roundToDecimalPlace(distanceLargeUnit, 1), largeUnit);
     }
+  }
+
+  /**
+   * Method that can be used to check if an instance of {@link DistanceFormatter}
+   * needs to be updated based on the passed language / unitType.
+   *
+   * @param language to check against the current formatter language
+   * @param unitType to check against the current formatter unitType
+   * @return true if new formatter is needed, false otherwise
+   */
+  public boolean shouldUpdate(@NonNull String language, @NonNull String unitType) {
+    return !this.language.equals(language) || !this.unitType.equals(unitType);
   }
 
   /**

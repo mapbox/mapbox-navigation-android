@@ -1,13 +1,11 @@
 package com.mapbox.services.android.navigation.ui.v5.summary.list;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
@@ -52,8 +50,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
     }
   }
 
-  public void updateBannerFormat(Context context, String language,
-                                 @DirectionsCriteria.VoiceUnitCriteria String unitType) {
-    presenter.updateLanguageAndUnitType(context, language, unitType);
+  public void updateDistanceFormatter(DistanceFormatter distanceFormatter) {
+    presenter.updateDistanceFormatter(distanceFormatter);
   }
 }

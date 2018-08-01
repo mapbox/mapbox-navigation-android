@@ -108,6 +108,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private NavigationViewModel navigationViewModel;
   private InstructionListListener instructionListListener;
 
+  private DistanceFormatter distanceFormatter;
   private String language = "";
   private String unitType = "";
   private boolean isMuted;
@@ -142,7 +143,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     bind();
     initializeBackground();
     initializeTurnLaneRecyclerView();
-    initializeDirectionsRecyclerView();
+    initializeInstructionListRecyclerView();
     initializeAnimations();
     initializeStepListClickListener();
     ImageCoordinator.getInstance().initialize(getContext());
@@ -338,19 +339,28 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   /**
    * Sets the language to use
    *
-   * @param language to use
+   * @param language to be used for formatting
    */
   public void setLanguage(@NonNull String language) {
+    if (language == null) {
+      return;
+    }
     this.language = language;
+    checkForDistanceFormatterUpdate();
   }
 
   /**
-   * Sets the unit type to use
+   * Sets the unit type which will be used for formatting the distance remaining
+   * and instruction list - (imperial vs. metric).
    *
-   * @param unitType to use
+   * @param unitType to be used for formatting
    */
   public void setUnitType(@DirectionsCriteria.VoiceUnitCriteria String unitType) {
+    if (unitType == null) {
+      return;
+    }
     this.unitType = unitType;
+    checkForDistanceFormatterUpdate();
   }
 
   /**
@@ -360,6 +370,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     LocaleUtils localeUtils = new LocaleUtils();
     language = localeUtils.inferDeviceLanguage(getContext());
     unitType = localeUtils.getUnitTypeForDeviceLocale(getContext());
+    distanceFormatter = new DistanceFormatter(getContext(), language, unitType);
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
 
@@ -529,9 +540,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   /**
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
-  private void initializeDirectionsRecyclerView() {
+  private void initializeInstructionListRecyclerView() {
     RouteUtils routeUtils = new RouteUtils();
-    DistanceFormatter distanceFormatter = new DistanceFormatter(getContext(), language, unitType);
     instructionListAdapter = new InstructionListAdapter(routeUtils, distanceFormatter);
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
@@ -901,6 +911,13 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     }
   }
 
+  private void checkForDistanceFormatterUpdate() {
+    if (distanceFormatter.shouldUpdate(language, unitType)) {
+      distanceFormatter = new DistanceFormatter(getContext(), language, unitType);
+      instructionListAdapter.updateDistanceFormatter(distanceFormatter);
+    }
+  }
+
   private void updateLandscapeConstraintsTo(int layoutRes) {
     ConstraintSet collapsed = new ConstraintSet();
     collapsed.clone(getContext(), layoutRes);
@@ -916,6 +933,5 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     RouteProgress routeProgress = model.getProgress();
     boolean isListShowing = instructionListLayout.getVisibility() == VISIBLE;
     instructionListAdapter.updateBannerListWith(routeProgress, isListShowing);
-    instructionListAdapter.updateBannerFormat(getContext(), language, unitType);
   }
 }

@@ -121,6 +121,36 @@ public class InstructionListPresenterTest extends BaseTest {
     assertFalse(didUpdate);
   }
 
+  @Test
+  public void updateDistanceFormatter_newFormatterIsUsed() throws Exception {
+    RouteProgress routeProgress = buildRouteProgress();
+    DistanceFormatter firstDistanceFormatter = buildDistanceFormatter();
+    InstructionListPresenter presenter = buildPresenter(routeProgress, firstDistanceFormatter);
+    presenter.updateBannerListWith(routeProgress);
+    InstructionListView listView = mock(InstructionListView.class);
+
+    DistanceFormatter secondDistanceFormatter = buildDistanceFormatter();
+    presenter.updateDistanceFormatter(secondDistanceFormatter);
+    presenter.onBindInstructionListViewAtPosition(0, listView);
+
+    verify(secondDistanceFormatter).formatDistance(anyDouble());
+  }
+
+  @Test
+  public void updateDistanceFormatter_doesNotAllowNullValues() throws Exception {
+    RouteProgress routeProgress = buildRouteProgress();
+    DistanceFormatter distanceFormatter = buildDistanceFormatter();
+    InstructionListPresenter presenter = buildPresenter(routeProgress, distanceFormatter);
+    presenter.updateBannerListWith(routeProgress);
+    InstructionListView listView = mock(InstructionListView.class);
+
+    presenter.updateDistanceFormatter(null);
+    presenter.onBindInstructionListViewAtPosition(0, listView);
+
+    verify(distanceFormatter).formatDistance(anyDouble());
+  }
+
+
   @NonNull
   private RouteProgress buildRouteProgress() throws Exception {
     DirectionsRoute route = buildTestDirectionsRoute();
@@ -136,11 +166,25 @@ public class InstructionListPresenterTest extends BaseTest {
   }
 
   @NonNull
+  private InstructionListPresenter buildPresenter(RouteProgress routeProgress, DistanceFormatter distanceFormatter) {
+    RouteUtils routeUtils = buildRouteUtils(routeProgress);
+    return new InstructionListPresenter(routeUtils, distanceFormatter);
+  }
+
+  @NonNull
   private RouteUtils buildRouteUtils(RouteProgress routeProgress) {
     RouteUtils routeUtils = mock(RouteUtils.class);
     BannerInstructions instructions = routeProgress.currentLegProgress().currentStep().bannerInstructions().get(FIRST);
     when(routeUtils.findCurrentBannerInstructions(any(LegStep.class), anyDouble())).thenReturn(instructions);
     return routeUtils;
+  }
+
+  @NonNull
+  private DistanceFormatter buildDistanceFormatter() {
+    SpannableString spannableString = mock(SpannableString.class);
+    DistanceFormatter distanceFormatter = mock(DistanceFormatter.class);
+    when(distanceFormatter.formatDistance(anyDouble())).thenReturn(spannableString);
+    return distanceFormatter;
   }
 
   private int retrieveInstructionSizeFrom(RouteLeg routeLeg) {
