@@ -46,10 +46,10 @@ public class InstructionTarget implements Target {
   }
 
   @Override
-  public void onBitmapFailed(Drawable errorDrawable) {
+  public void onBitmapFailed(Exception exception, Drawable errorDrawable) {
     setBackupText();
     sendInstructionLoadedCallback();
-    Timber.e("Shield bitmap failed to load.");
+    Timber.e(exception);
   }
 
   @Override
