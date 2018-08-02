@@ -20,12 +20,12 @@ public class CustomNavigationNotification implements NavigationNotification {
   private NotificationManager notificationManager;
   private int numberOfUpdates;
 
-  public CustomNavigationNotification(Context context) {
+  public CustomNavigationNotification(Context applicationContext) {
     // Get the notification manager to update your notification
-    notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    notificationManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
     // Store the builder to update later
-    customNotificationBuilder = new NotificationCompat.Builder(context, NAVIGATION_NOTIFICATION_CHANNEL)
+    customNotificationBuilder = new NotificationCompat.Builder(applicationContext, NAVIGATION_NOTIFICATION_CHANNEL)
       .setSmallIcon(R.drawable.ic_navigation)
       .setContentTitle("Custom Navigation Notification")
       .setContentText("Display your own content here!");
