@@ -23,6 +23,7 @@ public class DynamicCamera extends SimpleCamera {
   private static final double MIN_CAMERA_TILT = 35d;
   private static final double MAX_CAMERA_ZOOM = 16d;
   private static final double MIN_CAMERA_ZOOM = 12d;
+  private static final Point DEFAULT_TARGET = Point.fromLngLat(0d, 0d);
 
   private MapboxMap mapboxMap;
   private LegStep currentStep;
@@ -30,6 +31,7 @@ public class DynamicCamera extends SimpleCamera {
   private boolean hasPassedMediumAlertLevel;
   private boolean hasPassedHighAlertLevel;
   private boolean forceUpdateZoom;
+  private boolean isShutdown = false;
 
   public DynamicCamera(@NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
@@ -37,6 +39,10 @@ public class DynamicCamera extends SimpleCamera {
 
   @Override
   public Point target(RouteInformation routeInformation) {
+    if (isShutdown) {
+      return DEFAULT_TARGET;
+    }
+
     if (routeInformation.location() != null) {
       Location target = routeInformation.location();
       return Point.fromLngLat(target.getLongitude(), target.getLatitude());
@@ -50,6 +56,10 @@ public class DynamicCamera extends SimpleCamera {
 
   @Override
   public double tilt(RouteInformation routeInformation) {
+    if (isShutdown) {
+      return DEFAULT_TILT;
+    }
+
     RouteProgress progress = routeInformation.routeProgress();
     if (progress != null) {
       double distanceRemaining = progress.currentLegProgress().currentStepProgress().distanceRemaining();
@@ -60,6 +70,10 @@ public class DynamicCamera extends SimpleCamera {
 
   @Override
   public double zoom(RouteInformation routeInformation) {
+    if (isShutdown) {
+      return DEFAULT_ZOOM;
+    }
+
     if (validLocationAndProgress(routeInformation) && shouldUpdateZoom(routeInformation)) {
       return createZoom(routeInformation);
     } else if (routeInformation.route() != null) {
@@ -78,6 +92,7 @@ public class DynamicCamera extends SimpleCamera {
   }
 
   public void clearMap() {
+    isShutdown = true;
     mapboxMap = null;
   }
 
@@ -148,10 +163,7 @@ public class DynamicCamera extends SimpleCamera {
         .build();
 
       int[] padding = {0, 0, 0, 0};
-      CameraPosition positionForLatLngBounds = mapboxMap.getCameraForLatLngBounds(cameraBounds, padding);
-      if (positionForLatLngBounds != null) {
-        return positionForLatLngBounds;
-      }
+      return mapboxMap.getCameraForLatLngBounds(cameraBounds, padding);
     }
     return mapboxMap.getCameraPosition();
   }

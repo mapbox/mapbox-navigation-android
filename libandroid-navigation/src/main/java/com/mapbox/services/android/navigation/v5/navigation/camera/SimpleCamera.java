@@ -17,8 +17,8 @@ import java.util.List;
  */
 public class SimpleCamera extends Camera {
 
-  private static final int CAMERA_TILT = 50;
-  private static final double CAMERA_ZOOM = 15d;
+  protected static final int DEFAULT_TILT = 50;
+  protected static final double DEFAULT_ZOOM = 15d;
 
   private List<Point> routeCoordinates = new ArrayList<>();
   private double initialBearing;
@@ -55,12 +55,12 @@ public class SimpleCamera extends Camera {
 
   @Override
   public double tilt(RouteInformation routeInformation) {
-    return CAMERA_TILT;
+    return DEFAULT_TILT;
   }
 
   @Override
   public double zoom(RouteInformation routeInformation) {
-    return CAMERA_ZOOM;
+    return DEFAULT_ZOOM;
   }
 
   @Override
