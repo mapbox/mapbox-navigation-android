@@ -1017,6 +1017,7 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
   public void onMapChanged(int change) {
     if (change == MapView.DID_FINISH_LOADING_STYLE) {
       placeRouteBelow();
+      initializeUpcomingManeuverArrow();
       drawRoutes();
       addDirectionWaypoints();
       showAlternativeRoutes(alternativesVisible);

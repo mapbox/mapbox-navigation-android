@@ -55,7 +55,6 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
 
   private Marker originMarker;
   private Marker destinationMarker;
-  private boolean alternativesVisible = true;
   private List<DirectionsRoute> routes = new ArrayList<>();
 
   @Override
@@ -91,7 +90,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
     DirectionsResponse response = gson.fromJson(loadJsonFromAsset(DIRECTIONS_RESPONSE),
       DirectionsResponse.class);
     navigationMapRoute.addRoute(response.routes().get(0));
-    mapboxMap.setOnMapLongClickListener(this);
+    mapboxMap.addOnMapLongClickListener(this);
     navigationMapRoute.setOnRouteSelectionChangeListener(this);
   }
 
