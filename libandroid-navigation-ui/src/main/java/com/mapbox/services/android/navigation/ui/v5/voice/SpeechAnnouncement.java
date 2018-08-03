@@ -79,6 +79,9 @@ public abstract class SpeechAnnouncement {
      * <p>
      * If you pass the milestone into the builder, {@link SpeechAnnouncement} will extract both the SSML
      * and normal speech announcements.
+     * <p>
+     * Note, the milestone, if passed will override {@link SpeechAnnouncement#announcement()} and
+     * {@link SpeechAnnouncement#ssmlAnnouncement()}.
      *
      * @param milestone optional {@link VoiceInstructionMilestone} with SSML / normal announcements
      * @return this builder for chaining options together
