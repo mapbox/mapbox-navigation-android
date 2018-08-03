@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
@@ -173,19 +172,7 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
   private GeoJsonSource arrowHeadGeoJsonSource;
   private Feature arrowShaftGeoJsonFeature = Feature.fromGeometry(Point.fromLngLat(0, 0));
   private Feature arrowHeadGeoJsonFeature = Feature.fromGeometry(Point.fromLngLat(0, 0));
-  private ProgressChangeListener progressChangeListener = new ProgressChangeListener() {
-    @Override
-    public void onProgressChange(Location location, RouteProgress routeProgress) {
-      boolean noRoutes = directionsRoutes.isEmpty();
-      boolean newCurrentRoute = !routeProgress.directionsRoute().equals(directionsRoutes.get(primaryRouteIndex));
-      boolean isANewRoute = noRoutes || newCurrentRoute;
-      if (isANewRoute) {
-        addRoute(routeProgress.directionsRoute());
-      }
-      addUpcomingManeuverArrow(routeProgress);
-    }
-  };
-
+  private ProgressChangeListener progressChangeListener = new MapRouteProgressChangeListener(this);
 
   /**
    * Construct an instance of {@link NavigationMapRoute}.
@@ -351,6 +338,30 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
     }
   }
 
+  void addUpcomingManeuverArrow(RouteProgress routeProgress) {
+    boolean invalidUpcomingStepPoints = routeProgress.upcomingStepPoints() == null
+      || routeProgress.upcomingStepPoints().size() < TWO_POINTS;
+    boolean invalidCurrentStepPoints = routeProgress.currentStepPoints().size() < TWO_POINTS;
+    if (invalidUpcomingStepPoints || invalidCurrentStepPoints) {
+      updateArrowLayersVisibilityTo(false);
+      return;
+    }
+    updateArrowLayersVisibilityTo(true);
+
+    List<Point> maneuverPoints = obtainArrowPointsFrom(routeProgress);
+
+    updateArrowShaftWith(maneuverPoints);
+    updateArrowHeadWith(maneuverPoints);
+  }
+
+  List<DirectionsRoute> retrieveDirectionsRoutes() {
+    return directionsRoutes;
+  }
+
+  int retrievePrimaryRouteIndex() {
+    return primaryRouteIndex;
+  }
+
   //
   // Private methods
   //
@@ -442,22 +453,6 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
       AppCompatResources.getDrawable(mapView.getContext(), originWaypointIcon),
       AppCompatResources.getDrawable(mapView.getContext(), destinationWaypointIcon)
     );
-  }
-
-  private void addUpcomingManeuverArrow(RouteProgress routeProgress) {
-    boolean invalidUpcomingStepPoints = routeProgress.upcomingStepPoints() == null
-            || routeProgress.upcomingStepPoints().size() < TWO_POINTS;
-    boolean invalidCurrentStepPoints = routeProgress.currentStepPoints().size() < TWO_POINTS;
-    if (invalidUpcomingStepPoints || invalidCurrentStepPoints) {
-      updateArrowLayersVisibilityTo(false);
-      return;
-    }
-    updateArrowLayersVisibilityTo(true);
-
-    List<Point> maneuverPoints = obtainArrowPointsFrom(routeProgress);
-
-    updateArrowShaftWith(maneuverPoints);
-    updateArrowHeadWith(maneuverPoints);
   }
 
   private void updateArrowLayersVisibilityTo(boolean visible) {
