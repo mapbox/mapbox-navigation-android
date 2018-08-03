@@ -50,18 +50,10 @@
             translatable="false">mapbox://styles/mapbox/navigation-guidance-day-v3</string>
     <string name="navigation_guidance_night"
             translatable="false">mapbox://styles/mapbox/navigation-guidance-night-v3</string>
-    <string name="instruction_super_state"
-            translatable="false">instruction_super_state</string>
-    <string name="instruction_visibility"
-            translatable="false">instruction_visibility</string>
     <string name="dark_theme_enabled"
             translatable="false">dark_theme_enabled</string>
-    <string name="recenter_btn_visible"
-            translatable="false">recenter_btn_visible</string>
-    <string name="bottom_sheet_state"
-            translatable="false">bottom_sheet_state</string>
+    <string name="instance_state"
+            translatable="false">instance_state</string>
     <string name="navigation_running"
             translatable="false">navigation_running</string>
-    <string name="instruction_view_visible"
-            translatable="false">instruction_view_visible</string>
 </resources>
