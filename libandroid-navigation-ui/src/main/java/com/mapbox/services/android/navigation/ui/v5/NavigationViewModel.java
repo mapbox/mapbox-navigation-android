@@ -365,7 +365,7 @@ public class NavigationViewModel extends AndroidViewModel {
     if (milestone instanceof VoiceInstructionMilestone) {
       SpeechAnnouncement announcement = SpeechAnnouncement.builder()
         .voiceInstructionMilestone((VoiceInstructionMilestone) milestone).build();
-      announcement = navigationViewEventDispatcher.onAnnouncement(announcement);
+      announcement = retrieveAnnouncementFromSpeechEvent(announcement);
       instructionPlayer.play(announcement);
     }
   }
@@ -373,7 +373,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private void updateBannerInstruction(RouteProgress routeProgress, Milestone milestone) {
     if (milestone instanceof BannerInstructionMilestone) {
       BannerInstructions instructions = ((BannerInstructionMilestone) milestone).getBannerInstructions();
-      instructions = navigationViewEventDispatcher.onBannerDisplay(instructions);
+      instructions = retrieveInstructionsFromBannerEvent(instructions);
       if (instructions != null) {
         BannerInstructionModel model = new BannerInstructionModel(getApplication(), instructions,
           routeProgress, language, unitType);
@@ -432,5 +432,19 @@ public class NavigationViewModel extends AndroidViewModel {
     if (navigationViewEventDispatcher != null && isOffRoute()) {
       navigationViewEventDispatcher.onRerouteAlong(route);
     }
+  }
+
+  private SpeechAnnouncement retrieveAnnouncementFromSpeechEvent(SpeechAnnouncement announcement) {
+    if (navigationViewEventDispatcher != null) {
+      announcement = navigationViewEventDispatcher.onAnnouncement(announcement);
+    }
+    return announcement;
+  }
+
+  private BannerInstructions retrieveInstructionsFromBannerEvent(BannerInstructions instructions) {
+    if (navigationViewEventDispatcher != null) {
+      instructions = navigationViewEventDispatcher.onBannerDisplay(instructions);
+    }
+    return instructions;
   }
 }
