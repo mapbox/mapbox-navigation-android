@@ -1,11 +1,9 @@
 package com.mapbox.services.android.navigation.ui.v5.summary.list;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.SpannableString;
 import android.view.View;
 
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
@@ -25,12 +23,9 @@ public class InstructionListPresenter {
   private static final float ONE_LINE_BIAS = 0.5f;
   private static final int FIRST_INSTRUCTION_INDEX = 0;
   private final RouteUtils routeUtils;
+  private DistanceFormatter distanceFormatter;
   private List<BannerInstructions> instructions;
   private RouteLeg currentLeg;
-  private DistanceFormatter distanceFormatter;
-  @DirectionsCriteria.VoiceUnitCriteria
-  private String unitType = "";
-  private String language = "";
 
   InstructionListPresenter(RouteUtils routeUtils, DistanceFormatter distanceFormatter) {
     this.routeUtils = routeUtils;
@@ -53,17 +48,15 @@ public class InstructionListPresenter {
     return addBannerInstructions(routeProgress) && updateInstructionList(routeProgress);
   }
 
-  void updateLanguageAndUnitType(Context context, String language,
-                                 @DirectionsCriteria.VoiceUnitCriteria String unitType) {
-    if (shouldUpdate(language, unitType)) {
-      distanceFormatter = new DistanceFormatter(context, language, unitType);
-      this.language = language;
-      this.unitType = unitType;
+  void updateDistanceFormatter(DistanceFormatter distanceFormatter) {
+    if (shouldUpdate(distanceFormatter)) {
+      this.distanceFormatter = distanceFormatter;
     }
   }
 
-  private boolean shouldUpdate(String language, @DirectionsCriteria.VoiceUnitCriteria String unitType) {
-    return distanceFormatter == null || !this.language.equals(language) || !this.unitType.equals(unitType);
+  private boolean shouldUpdate(DistanceFormatter distanceFormatter) {
+    return distanceFormatter != null
+      && (this.distanceFormatter == null || !this.distanceFormatter.equals(distanceFormatter));
   }
 
   private void updateListView(@NonNull InstructionListView listView, BannerInstructions bannerInstructions,

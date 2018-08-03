@@ -519,20 +519,21 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void establish(NavigationViewOptions options) {
-    establishLanguage(options);
-    establishUnitType(options);
+    LocaleUtils localeUtils = new LocaleUtils();
+    establishLanguage(localeUtils, options);
+    establishUnitType(localeUtils, options);
     establishTimeFormat(options);
   }
 
-  private void establishLanguage(NavigationViewOptions options) {
-    LocaleUtils localeUtils = new LocaleUtils();
+  private void establishLanguage(LocaleUtils localeUtils, NavigationViewOptions options) {
     String language = localeUtils.getNonEmptyLanguage(getContext(), options.directionsRoute().voiceLanguage());
     instructionView.setLanguage(language);
     summaryBottomSheet.setLanguage(language);
   }
 
-  private void establishUnitType(NavigationViewOptions options) {
-    String unitType = options.directionsRoute().routeOptions().voiceUnits();
+  private void establishUnitType(LocaleUtils localeUtils, NavigationViewOptions options) {
+    String voiceUnits = options.directionsRoute().routeOptions().voiceUnits();
+    String unitType = localeUtils.retrieveNonNullUnitType(getContext(), voiceUnits);
     instructionView.setUnitType(unitType);
     summaryBottomSheet.setUnitType(unitType);
   }

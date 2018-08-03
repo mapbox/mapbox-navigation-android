@@ -76,4 +76,19 @@ public class LocaleUtils {
   public String getUnitTypeForDeviceLocale(Context context) {
     return getUnitTypeForLocale(inferDeviceLocale(context));
   }
+
+  /**
+   * Returns the unitType passed in if it is not null, otherwise returns the a unitType
+   * based on the device Locale.
+   *
+   * @param context to get device locale
+   * @param unitType to check if it is null
+   * @return a non-null unitType, either the one passed in, or based on the device locale
+   */
+  public String retrieveNonNullUnitType(Context context, String unitType) {
+    if (unitType == null) {
+      return getUnitTypeForDeviceLocale(context);
+    }
+    return unitType;
+  }
 }
