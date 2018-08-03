@@ -36,6 +36,7 @@
     <string name="language">Language</string>
     <string name="unit_type">Unit Type</string>
     <string name="route_profile">Route Profile</string>
+    <string name="test_mode">Test Mode</string>
 
     <string name="unit_type_key" translatable="false">unit_type</string>
     <string name="simulate_route_key" translatable="false">simulate_route</string>
@@ -44,6 +45,7 @@
     <string name="default_locale" translatable="false">default_for_device</string>
     <string name="default_unit_type" translatable="false">default_for_device</string>
     <string name="current_night_mode" translatable="false">current_night_mode</string>
+    <string name="test_mode_key" translatable="false">test_mode_key</string>
 
     <string name="error_route_not_available">Current route is not available</string>
     <string name="error_select_longer_route">Please select a longer route</string>

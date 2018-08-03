@@ -41,6 +41,10 @@ jobs:
             ./gradlew accessToken
             ./gradlew app:assembleDebug
       - run:
+          name: Build Test APK
+          command: |
+            ./gradlew app:assembleAndroidTest
+      - run:
           name: Build release to test ProGuard rules
           command: ./gradlew app:assembleRelease
       - run:
@@ -55,7 +59,15 @@ jobs:
           no_output_timeout: 1200
           shell: /bin/bash -euo pipefail
           command: |
-            gcloud firebase test android run --type robo --app app/build/outputs/apk/debug/app-debug.apk --device-ids shamu --os-version-ids 22 --locales en --orientations portrait --timeout 5m
+            gcloud firebase test android models list
+            gcloud firebase test android run --type instrumentation \
+              --app app/build/outputs/apk/debug/app-debug.apk \
+              --test app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+              --device model=hammerhead,version=21,locale=en,orientation=portrait  \
+              --device model=athene,version=23,locale=fr,orientation=landscape \
+              --device model=sailfish,version=26,locale=es,orientation=portrait \
+              --device model=walleye,version=28,locale=en,orientation=portrait \
+              --timeout 20m
       - run:
           name: Update Transifex
           command: |
