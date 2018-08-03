@@ -21,7 +21,7 @@ ext {
       hamcrest           : '2.0.0.0',
       errorprone         : '2.3.1',
       butterknife        : '8.8.1',
-      leakCanaryVersion  : '1.5.4',
+      leakCanaryVersion  : '1.6.1',
       timber             : '4.7.0',
       testRunnerVersion  : '1.0.1',
       espressoVersion    : '3.0.1',
