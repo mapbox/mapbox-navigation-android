@@ -19,6 +19,9 @@
     <string name="title_end_navigation">Kết thúc Điều hướng</string>
     <string name="description_end_navigation">Cho biết cách kết thúc điều hướng dùng NavigationView</string>
 
+    <string name="title_dual_navigation_map">Đôi Bản đồ Điều hướng</string>
+    <string name="description_dual_navigation_map">Chỉ cách thêm NavigationView và MapView vào cùng bố cục</string>
+
     <string name="title_waypoint_navigation">Điều hướng giữa các Tọa độ điểm</string>
     <string name="description_waypoint_navigation">Điều hướng giữa các tọa độ điểm</string>
 
