@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.testapp.activity;
 
+import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -90,7 +91,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapView.getMapAsync(this);
 
     // Use a custom notification
-    CustomNavigationNotification customNavigationNotification = new CustomNavigationNotification(this);
+    Context applicationContext = getApplicationContext();
+    CustomNavigationNotification customNavigationNotification = new CustomNavigationNotification(applicationContext);
     MapboxNavigationOptions options = MapboxNavigationOptions.builder()
       .navigationNotification(customNavigationNotification)
       .build();
