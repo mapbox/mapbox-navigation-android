@@ -45,6 +45,7 @@ class MapboxNavigationNotification implements NavigationNotification {
   private String instructionText;
   private int currentManeuverId;
   private boolean isTwentyFourHourFormat;
+  private String etaFormat;
 
   private BroadcastReceiver endNavigationBtnReceiver = new BroadcastReceiver() {
     @Override
@@ -83,6 +84,7 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   private void initialize(Context context, MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
+    etaFormat = context.getString(R.string.eta_format);
     RouteOptions routeOptions = mapboxNavigation.getRoute().routeOptions();
     distanceFormatter = new DistanceFormatter(context, routeOptions.language(), routeOptions.voiceUnits());
     notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -187,8 +189,9 @@ class MapboxNavigationNotification implements NavigationNotification {
     double durationRemaining = routeProgress.durationRemaining();
     int timeFormatType = options.timeFormatType();
     String arrivalTime = formatTime(time, durationRemaining, timeFormatType, isTwentyFourHourFormat);
-    collapsedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, arrivalTime);
-    expandedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, arrivalTime);
+    String formattedArrivalTime = String.format(etaFormat, arrivalTime);
+    collapsedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, formattedArrivalTime);
+    expandedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, formattedArrivalTime);
   }
 
   private void updateManeuverImage(LegStep step) {
