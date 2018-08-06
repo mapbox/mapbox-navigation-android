@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.feedback;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.graphics.PorterDuff;
@@ -56,12 +57,12 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   }
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+  public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     return inflater.inflate(R.layout.feedback_bottom_sheet_layout, container, false);
   }
 
   @Override
-  public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     bind(view);
     initFeedbackRecyclerView();
@@ -150,15 +151,16 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   }
 
   private void initFeedbackRecyclerView() {
-    feedbackAdapter = new FeedbackAdapter();
+    Context context = getContext();
+    feedbackAdapter = new FeedbackAdapter(context);
     feedbackItems.setAdapter(feedbackAdapter);
     feedbackItems.setOverScrollMode(RecyclerView.OVER_SCROLL_IF_CONTENT_SCROLLS);
-    feedbackItems.addOnItemTouchListener(new FeedbackClickListener(getContext(), this));
-    if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      feedbackItems.setLayoutManager(new LinearLayoutManager(getContext(),
+    feedbackItems.addOnItemTouchListener(new FeedbackClickListener(context, this));
+    if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      feedbackItems.setLayoutManager(new LinearLayoutManager(context,
         LinearLayoutManager.HORIZONTAL, false));
     } else {
-      feedbackItems.setLayoutManager(new GridLayoutManager(getContext(), 3));
+      feedbackItems.setLayoutManager(new GridLayoutManager(context, 3));
     }
   }
 
