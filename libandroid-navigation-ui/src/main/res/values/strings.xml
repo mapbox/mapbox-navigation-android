@@ -13,7 +13,7 @@
     <string name="unmuted">Unmuted</string>
 
     <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">Bad \nRoute</string>
+    <string name="feedback_bad_route">Bad\nRoute</string>
 
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Confusing\nInstruction</string>
