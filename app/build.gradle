@@ -82,3 +82,4 @@ dependencies {
 
 apply from: "${rootDir}/gradle/developer-config.gradle"
 apply from: "${rootDir}/gradle/checkstyle.gradle"
+apply from: "${rootDir}/gradle/dependency-updates.gradle"

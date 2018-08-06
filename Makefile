@@ -30,6 +30,11 @@ graphs:
 	./gradlew :libandroid-navigation:generateDependencyGraphMapboxLibraries
 	./gradlew :libandroid-navigation-ui:generateDependencyGraphMapboxLibraries
 
+dependency-updates:
+	./gradlew :libandroid-navigation:dependencyUpdates
+	./gradlew :libandroid-navigation-ui:dependencyUpdates
+	./gradlew :app:dependencyUpdates
+
 dex-count:
 	./gradlew countDebugDexMethods
 	./gradlew countReleaseDexMethods
