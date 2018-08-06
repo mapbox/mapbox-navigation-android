@@ -99,11 +99,7 @@ public class NavigationViewModel extends AndroidViewModel {
       deactivateInstructionPlayer();
       endNavigation();
     }
-    Camera cameraEngine = navigation.getCameraEngine();
-    boolean isDynamicCamera = cameraEngine instanceof DynamicCamera;
-    if (isDynamicCamera) {
-      ((DynamicCamera) cameraEngine).clearMap();
-    }
+    clearDynamicCameraMap();
     navigationViewEventDispatcher = null;
   }
 
@@ -359,6 +355,16 @@ public class NavigationViewModel extends AndroidViewModel {
   private void endNavigation() {
     if (navigation != null) {
       navigation.onDestroy();
+    }
+  }
+
+  private void clearDynamicCameraMap() {
+    if (navigation != null) {
+      Camera cameraEngine = navigation.getCameraEngine();
+      boolean isDynamicCamera = cameraEngine instanceof DynamicCamera;
+      if (isDynamicCamera) {
+        ((DynamicCamera) cameraEngine).clearMap();
+      }
     }
   }
 
