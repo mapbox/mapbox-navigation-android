@@ -75,6 +75,7 @@ dependencies {
   testImplementation dependenciesList.mockito
 
   // Instrumentation testing
+  androidTestImplementation dependenciesList.testRules
   androidTestImplementation(dependenciesList.testEspressoCore, {
     exclude group: 'com.android.support', module: 'support-annotations'
   })

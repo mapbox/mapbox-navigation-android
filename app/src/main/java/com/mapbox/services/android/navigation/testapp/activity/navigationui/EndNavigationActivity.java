@@ -145,7 +145,7 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
 
   private void drawPaella() {
     Icon paellaIcon = IconFactory.getInstance(this).fromResource(R.drawable.paella_icon);
-    paella = navigationView.retrieveMapboxMap().addMarker(new MarkerOptions()
+    paella = navigationView.retrieveNavigationMapboxMap().retrieveMap().addMarker(new MarkerOptions()
       .position(new LatLng(37.760615, -122.424306))
       .icon(paellaIcon)
     );
@@ -187,7 +187,7 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
   }
 
   private void updateUiNavigationFinished() {
-    navigationView.retrieveMapboxMap().removeMarker(paella);
+    navigationView.retrieveNavigationMapboxMap().retrieveMap().removeMarker(paella);
     navigationView.setVisibility(View.GONE);
     message.setText("Launch Navigation");
     message.setLayoutParams(new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT,

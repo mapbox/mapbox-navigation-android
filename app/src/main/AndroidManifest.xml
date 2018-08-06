@@ -97,5 +97,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
+
+        <!-- Testing -->
+        <activity android:name=".test.TestNavigationActivity"/>
     </application>
 </manifest>

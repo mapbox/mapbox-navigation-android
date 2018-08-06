@@ -378,16 +378,27 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   /**
    * Gives the ability to manipulate the map directly for anything that might not currently be
-   * supported. This returns null until the view is initialized
+   * supported. This returns null until the view is initialized.
+   * <p>
+   * The {@link NavigationMapboxMap} gives direct access to the map UI (location marker, route, etc.).
    *
-   * @return mapbox map object, or null if view has not been initialized
+   * @return navigation mapbox map object, or null if view has not been initialized
    */
   @Nullable
-  public MapboxMap retrieveMapboxMap() {
-    if (navigationMap == null) {
-      return null;
-    }
-    return navigationMap.retrieveMap();
+  public NavigationMapboxMap retrieveNavigationMapboxMap() {
+    return navigationMap;
+  }
+
+  /**
+   * Returns the instance of {@link MapboxNavigation} powering the {@link NavigationView}
+   * once navigation has started.  Will return null if navgiation has not been started with
+   * {@link NavigationView#startNavigation(NavigationViewOptions)}.
+   *
+   * @return mapbox navigation, or null if navigation has not started
+   */
+  @Nullable
+  public MapboxNavigation retrieveMapboxNavigation() {
+    return navigationViewModel.getNavigation();
   }
 
   private void initializeView() {
