@@ -119,20 +119,12 @@ public class NavigationService extends Service {
 
   private void initializeLocationProvider(MapboxNavigation mapboxNavigation) {
     LocationEngine locationEngine = mapboxNavigation.getLocationEngine();
-    LocationValidator validator = initializeLocationValidator(mapboxNavigation.options());
+    int accuracyThreshold = mapboxNavigation.options().locationAcceptableAccuracyInMetersThreshold();
+    LocationValidator validator = new LocationValidator(accuracyThreshold);
     NavigationLocationEngineListener listener = new NavigationLocationEngineListener(
       thread, mapboxNavigation, locationEngine, validator
     );
     locationProvider = new NavigationLocationEngineUpdater(locationEngine, listener);
-  }
-
-  private LocationValidator initializeLocationValidator(MapboxNavigationOptions options) {
-    int accuracyAcceptableThreshold = options.locationAcceptableAccuracyInMetersThreshold();
-    int accuracyPercentThreshold = options.locationAccuracyPercentThreshold();
-    int timeInMillisThreshold = options.locationUpdateTimeInMillisThreshold();
-    int velocityInMetersPerSecondThreshold = options.locationVelocityInMetersPerSecondThreshold();
-    return new LocationValidator(accuracyAcceptableThreshold, accuracyPercentThreshold,
-      timeInMillisThreshold, velocityInMetersPerSecondThreshold);
   }
 
   private void startForegroundNotification(NavigationNotification navigationNotification) {

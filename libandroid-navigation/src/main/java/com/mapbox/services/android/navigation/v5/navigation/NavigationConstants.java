@@ -192,44 +192,9 @@ public final class NavigationConstants {
    * an accuracy less than this threshold, the update will be considered valid and all other validation
    * is not considered.
    *
-   * @since 0.12.0
+   * @since 0.17.0
    */
-  static final int FIFTY_METER_ACCEPTABLE_ACCURACY_THRESHOLD = 50;
-
-  /**
-   * Default location accuracy threshold
-   * used in {@link com.mapbox.services.android.navigation.v5.location.LocationValidator}.
-   * <p>
-   * If a new {@link android.location.Location} update is received from the LocationEngine that has
-   * 10 percent worse accuracy compared to the last update, the new update will be considered invalid.
-   *
-   * @since 0.12.0
-   */
-  static final int TEN_PERCENT_ACCURACY_THRESHOLD = 10;
-
-  /**
-   * Default location time threshold
-   * used in {@link com.mapbox.services.android.navigation.v5.location.LocationValidator}.
-   * <p>
-   * If a device receives invalid updates for more than 5 seconds, the next location update will
-   * be considered valid, even if it does not meet the other validation criteria.
-   * <p>
-   * This is used as a last effort to push data to the SDK.
-   *
-   * @since 0.12.0
-   */
-  static final int FIVE_SECONDS_IN_MILLIS_UPDATE_THRESHOLD = 5000;
-
-  /**
-   * Default location velocity threshold
-   * used in {@link com.mapbox.services.android.navigation.v5.location.LocationValidator}.
-   * <p>
-   * If a new {@link android.location.Location} update is received from the LocationEngine that has
-   * traveled faster the 200 meters per second from the last update, the new update will be considered invalid.
-   *
-   * @since 0.12.0
-   */
-  static final int TWO_HUNDRED_METERS_PER_SECOND_VELOCITY_THRESHOLD = 200;
+  static final int ONE_HUNDRED_METER_ACCEPTABLE_ACCURACY_THRESHOLD = 100;
 
   static final String NON_NULL_APPLICATION_CONTEXT_REQUIRED = "Non-null application context required.";
 
