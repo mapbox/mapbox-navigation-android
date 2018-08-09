@@ -25,14 +25,16 @@ public class AbbreviationCoordinatorTest extends BaseTest {
         .build();
     TextViewUtils textViewUtils = mock(TextViewUtils.class);
     TextView textView = mock(TextView.class);
+    AbbreviationVerifier abbreviationVerifier = mock(AbbreviationVerifier.class);
+    when(abbreviationVerifier.isNodeType(bannerComponents)).thenReturn(true);
     when(textViewUtils.textFits(textView, abbreviation)).thenReturn(true);
     when(textViewUtils.textFits(textView, bannerComponents.text())).thenReturn(false);
-    AbbreviationCoordinator abbreviationCoordinator = new AbbreviationCoordinator(textViewUtils);
+    AbbreviationCreator abbreviationCoordinator = new AbbreviationCreator(textViewUtils, abbreviationVerifier);
     abbreviationCoordinator.addPriorityInfo(bannerComponents, 0);
-    List<InstructionLoader.BannerComponentNode> bannerComponentNodes = new ArrayList<>();
-    bannerComponentNodes.add(new AbbreviationCoordinator.AbbreviationNode(bannerComponents, 0));
+    List<BannerComponentNode> bannerComponentNodes = new ArrayList<>();
+    bannerComponentNodes.add(new AbbreviationCreator.AbbreviationNode(bannerComponents, 0));
 
-    String abbreviatedTextFromCoordinator = abbreviationCoordinator.abbreviateBannerText(bannerComponentNodes, textView);
+    String abbreviatedTextFromCoordinator = abbreviationCoordinator.abbreviateBannerText(textView, bannerComponentNodes);
 
     assertEquals(abbreviation, abbreviatedTextFromCoordinator);
   }
@@ -49,13 +51,15 @@ public class AbbreviationCoordinatorTest extends BaseTest {
         .build();
     TextViewUtils textViewUtils = mock(TextViewUtils.class);
     TextView textView = mock(TextView.class);
+    AbbreviationVerifier abbreviationVerifier = mock(AbbreviationVerifier.class);
+    when(abbreviationVerifier.isNodeType(bannerComponents)).thenReturn(true);
     when(textViewUtils.textFits(textView, bannerComponents.text())).thenReturn(true);
-    AbbreviationCoordinator abbreviationCoordinator = new AbbreviationCoordinator(textViewUtils);
+    AbbreviationCreator abbreviationCoordinator = new AbbreviationCreator(textViewUtils, abbreviationVerifier);
     abbreviationCoordinator.addPriorityInfo(bannerComponents, 0);
-    List<InstructionLoader.BannerComponentNode> bannerComponentNodes = new ArrayList<>();
-    bannerComponentNodes.add(new AbbreviationCoordinator.AbbreviationNode(bannerComponents, 0));
+    List<BannerComponentNode> bannerComponentNodes = new ArrayList<>();
+    bannerComponentNodes.add(new AbbreviationCreator.AbbreviationNode(bannerComponents, 0));
 
-    String abbreviatedTextFromCoordinator = abbreviationCoordinator.abbreviateBannerText(bannerComponentNodes, textView);
+    String abbreviatedTextFromCoordinator = abbreviationCoordinator.abbreviateBannerText(textView, bannerComponentNodes);
 
     assertEquals(text, abbreviatedTextFromCoordinator);
   }

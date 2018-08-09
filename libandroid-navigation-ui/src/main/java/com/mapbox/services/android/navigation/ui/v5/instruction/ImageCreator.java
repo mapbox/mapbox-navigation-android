@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 import android.content.Context;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.TextUtils;
 import android.text.style.ImageSpan;
 import android.widget.TextView;
 
@@ -11,7 +10,6 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionLoader.BannerComponentNode;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -27,16 +25,41 @@ import java.util.List;
  * If a shield URL is found, {@link Picasso} is used to load the image.  Then, once the image is loaded,
  * a new {@link ImageSpan} is created and set to the appropriate position of the {@link Spannable}
  */
-public class ImageCoordinator {
+public class ImageCreator extends NodeCreator<ImageCreator.ImageNode, ImageVerifier> {
 
-  private static ImageCoordinator instance;
+  private static ImageCreator instance;
   private boolean isInitialized;
   private Picasso picassoImageLoader;
   private List<InstructionTarget> targets;
   private UrlDensityMap urlDensityMap;
   private List<BannerShield> bannerShieldList;
 
-  private ImageCoordinator() {
+  private ImageCreator(ImageVerifier imageVerifier) {
+    super(imageVerifier);
+  }
+
+  @Override
+  ImageCreator.ImageNode setupNode(BannerComponents components, int index, int startIndex) {
+    addShieldInfo(components, index);
+    return new ImageCreator.ImageNode(components, startIndex);
+  }
+
+  /**
+   * Uses the given BannerComponents object to construct a BannerShield object containing the
+   * information needed to load the proper image into the TextView where appropriate.
+   *
+   * @param bannerComponents containing image info
+   * @param index of the BannerComponentNode which refers to the given BannerComponents
+   */
+  public void addShieldInfo(BannerComponents bannerComponents, int index) {
+    bannerShieldList.add(new BannerShield(bannerComponents, index));
+  }
+
+  static class ImageNode extends BannerComponentNode {
+
+    ImageNode(BannerComponents bannerComponents, int startIndex) {
+      super(bannerComponents, startIndex);
+    }
   }
 
   /**
@@ -44,9 +67,13 @@ public class ImageCoordinator {
    *
    * @return ImageCoordinator
    */
-  public static synchronized ImageCoordinator getInstance() {
+  public static ImageCreator getInstance() {
+    return getInstance(new ImageVerifier());
+  }
+
+  public static synchronized ImageCreator getInstance(ImageVerifier imageVerifier) {
     if (instance == null) {
-      instance = new ImageCoordinator();
+      instance = new ImageCreator(imageVerifier);
     }
 
     return instance;
@@ -68,16 +95,7 @@ public class ImageCoordinator {
     }
   }
 
-  /**
-   * Uses the given BannerComponents object to construct a BannerShield object containing the
-   * information needed to load the proper image into the TextView where appropriate.
-   *
-   * @param bannerComponents containing image info
-   * @param index of the BannerComponentNode which refers to the given BannerComponents
-   */
-  public void addShieldInfo(BannerComponents bannerComponents, int index) {
-    bannerShieldList.add(new BannerShield(bannerComponents, index));
-  }
+
 
   /**
    * Will pre-fetch images for a given {@link LegStep}.
@@ -164,14 +182,10 @@ public class ImageCoordinator {
    */
   private void fetchImageBaseUrls(BannerText bannerText) {
     for (BannerComponents components : bannerText.components()) {
-      if (hasImageUrl(components)) {
+      if (nodeVerifier.hasImageUrl(components)) {
         picassoImageLoader.load(urlDensityMap.get(components.imageBaseUrl())).fetch();
       }
     }
-  }
-
-  private boolean hasImageUrl(BannerComponents components) {
-    return !TextUtils.isEmpty(components.imageBaseUrl());
   }
 
   private void createTargets(TextView textView) {
@@ -201,10 +215,8 @@ public class ImageCoordinator {
     }
   }
 
-  static class ImageNode extends BannerComponentNode {
-
-    ImageNode(BannerComponents bannerComponents, int startIndex) {
-      super(bannerComponents, startIndex);
-    }
+  @Override
+  void postProcess(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
+    loadImages(textView, bannerComponentNodes);
   }
 }

@@ -27,7 +27,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
-import com.mapbox.services.android.navigation.ui.v5.instruction.ImageCoordinator;
+import com.mapbox.services.android.navigation.ui.v5.instruction.ImageCreator;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.NavigationAlertView;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
@@ -712,7 +712,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     navigationViewEventDispatcher.onDestroy(navigationViewModel.retrieveNavigation());
     mapView.onDestroy();
     navigationViewModel.onDestroy(isChangingConfigurations());
-    ImageCoordinator.getInstance().shutdown();
+    ImageCreator.getInstance().shutdown();
     navigationMap = null;
   }
 }

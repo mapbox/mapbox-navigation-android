@@ -8,4 +8,11 @@ class BannerComponentsFaker {
       .type("some type")
       .text("some text");
   }
+
+  static BannerComponents bannerComponentsWithAbbreviation() {
+    return bannerComponents()
+      .abbreviationPriority(1)
+      .abbreviation("abbreviation text")
+      .build();
+  }
 }
