@@ -12,6 +12,8 @@ import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.design.widget.FloatingActionButton;
+import android.support.transition.AutoTransition;
+import android.support.transition.TransitionManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -19,7 +21,6 @@ import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.transition.TransitionManager;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -318,14 +319,13 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   public void showInstructionList() {
     onInstructionListVisibilityChanged(true);
     instructionLayout.requestFocus();
-    beginDelayedTransition();
+    beginDelayedListTransition();
     int orientation = getContext().getResources().getConfiguration().orientation;
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
       updateLandscapeConstraintsTo(R.layout.instruction_layout_alt);
     }
     instructionListLayout.setVisibility(VISIBLE);
     rvInstructions.smoothScrollToPosition(TOP);
-    instructionListAdapter.notifyDataSetChanged();
   }
 
   public boolean handleBackPressed() {
@@ -835,9 +835,13 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   private void beginDelayedTransition() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      TransitionManager.beginDelayedTransition(InstructionView.this);
-    }
+    TransitionManager.beginDelayedTransition(this);
+  }
+
+  private void beginDelayedListTransition() {
+    AutoTransition transition = new AutoTransition();
+    transition.addListener(new InstructionListTransitionListener(instructionListAdapter));
+    TransitionManager.beginDelayedTransition(this, transition);
   }
 
   private void cancelDelayedTransition() {

@@ -45,7 +45,8 @@ public class InstructionListPresenter {
   }
 
   boolean updateBannerListWith(RouteProgress routeProgress) {
-    return addBannerInstructions(routeProgress) && updateInstructionList(routeProgress);
+    addBannerInstructions(routeProgress);
+    return updateInstructionList(routeProgress);
   }
 
   void updateDistanceFormatter(DistanceFormatter distanceFormatter) {
@@ -107,8 +108,7 @@ public class InstructionListPresenter {
     }
   }
 
-  private boolean addBannerInstructions(RouteProgress routeProgress) {
-    boolean didAddInstructions = false;
+  private void addBannerInstructions(RouteProgress routeProgress) {
     if (isNewLeg(routeProgress)) {
       instructions = new ArrayList<>();
       currentLeg = routeProgress.currentLeg();
@@ -117,11 +117,9 @@ public class InstructionListPresenter {
         List<BannerInstructions> bannerInstructions = step.bannerInstructions();
         if (bannerInstructions != null && !bannerInstructions.isEmpty()) {
           instructions.addAll(bannerInstructions);
-          didAddInstructions = true;
         }
       }
     }
-    return didAddInstructions;
   }
 
   private boolean isNewLeg(RouteProgress routeProgress) {
@@ -129,6 +127,9 @@ public class InstructionListPresenter {
   }
 
   private boolean updateInstructionList(RouteProgress routeProgress) {
+    if (instructions.isEmpty()) {
+      return false;
+    }
     RouteLegProgress legProgress = routeProgress.currentLegProgress();
     LegStep currentStep = legProgress.currentStep();
     double stepDistanceRemaining = legProgress.currentStepProgress().distanceRemaining();
