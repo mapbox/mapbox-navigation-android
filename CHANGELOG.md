@@ -2,6 +2,37 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.17.0 - August 10, 2018
+
+* Bump MAS version to 3.4.1 [#1203](https://github.com/mapbox/mapbox-navigation-android/pull/1203)
+* Notify InstructionListAdapter after animation finishes [#1143](https://github.com/mapbox/mapbox-navigation-android/pull/1143)
+* Revert MAS version from 3.4.0 to 3.3.0 [#1200](https://github.com/mapbox/mapbox-navigation-android/pull/1200)
+* Update Java SDK to 3.4.0 [#1196](https://github.com/mapbox/mapbox-navigation-android/pull/1196)
+* Allow access to NavigationMapboxMap and MapboxNavigation [#1179](https://github.com/mapbox/mapbox-navigation-android/pull/1179)
+* Retrieve feedback Strings from Resources [#1194](https://github.com/mapbox/mapbox-navigation-android/pull/1194)
+* Update README Snapshot [#1186](https://github.com/mapbox/mapbox-navigation-android/pull/1186)
+* Add gradle-versions-plugin to the project [#1187](https://github.com/mapbox/mapbox-navigation-android/pull/1187)
+* Add a null check to prevent NPE in NavigationViewModel onDestroy [#1192](https://github.com/mapbox/mapbox-navigation-android/pull/1192)
+* Remove Location filter and check Location#getAccuracy [#1157](https://github.com/mapbox/mapbox-navigation-android/pull/1157)
+* Provide example of showing and hiding Fragment with NavigationView [#1113](https://github.com/mapbox/mapbox-navigation-android/pull/1113)
+* Added InstanceState to simplify saving the state [#1162](https://github.com/mapbox/mapbox-navigation-android/pull/1162)
+* Fix OffRoute engine cleared before service shutdown [#1167](https://github.com/mapbox/mapbox-navigation-android/pull/1167)
+* Transifex Updates [#1145](https://github.com/mapbox/mapbox-navigation-android/pull/1145)
+* Fix SpeechAnnouncementListener example and add tests [#1166](https://github.com/mapbox/mapbox-navigation-android/pull/1166)
+* Update dependencies LLP, ConstraintLayout [#1172](https://github.com/mapbox/mapbox-navigation-android/pull/1172)
+* Consolidate InstructionView DistanceFormatters [#1174](https://github.com/mapbox/mapbox-navigation-android/pull/1174)
+* Add ETA support for the notification back [#1184](https://github.com/mapbox/mapbox-navigation-android/pull/1184)
+* Fix exception when adding routes in NavigationMapRoute [#1150](https://github.com/mapbox/mapbox-navigation-android/pull/1150)
+* Check dispatcher on announcement and instruction events in ViewModel [#1152](https://github.com/mapbox/mapbox-navigation-android/pull/1152)
+* Update LeakCanary to 1.6.1 [#1181](https://github.com/mapbox/mapbox-navigation-android/pull/1181)
+* Re-initialize arrow sources in NavigationMapRoute after style loaded [#1180](https://github.com/mapbox/mapbox-navigation-android/pull/1180)
+* Use application Context for CustomNavigationNotification example [#1182](https://github.com/mapbox/mapbox-navigation-android/pull/1182)
+* Update README.md with UI build.gradle instructions [#1148](https://github.com/mapbox/mapbox-navigation-android/pull/1148)
+* Add maneuver view roundabout angle bottom limit [#1144](https://github.com/mapbox/mapbox-navigation-android/pull/1144)
+* Use roundabout degrees for "then" step in InstructionView [#1141](https://github.com/mapbox/mapbox-navigation-android/pull/1141)
+* Remove navigation listeners before clearing NavigationEngineFactory [#1140](https://github.com/mapbox/mapbox-navigation-android/pull/1140)
+* Prevent to use the map route until the map is ready and the route fetched [#1134](https://github.com/mapbox/mapbox-navigation-android/pull/1134)
+
 ### v0.16.0 - July 20, 2018
 
 * Fixed error by only accepting SUCCESS state [#1127](https://github.com/mapbox/mapbox-navigation-android/pull/1127)
