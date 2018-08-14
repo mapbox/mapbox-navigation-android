@@ -10,7 +10,7 @@ jobs:
   build:
     working_directory: ~/code
     docker:
-      - image: mbgl/feb0443038:android-ndk-r17
+      - image: mbgl/d672e128ed:android-ndk-r17
     environment:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
@@ -101,7 +101,7 @@ jobs:
       only:
       - master
     docker:
-      - image: mbgl/feb0443038:android-ndk-r17
+      - image: mbgl/d672e128ed:android-ndk-r17
     working_directory: ~/code
     environment:
       BUILDTYPE: Release
