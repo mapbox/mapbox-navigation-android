@@ -73,6 +73,10 @@ class MapWayname {
     return isVisible;
   }
 
+  String retrieveWayname() {
+    return wayname;
+  }
+
   private List<Feature> findRoadLabelFeatures(PointF point) {
     String[] layerIds = {STREETS_LAYER_ID};
     return featureInteractor.queryRenderedFeatures(point, layerIds);

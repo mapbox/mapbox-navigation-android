@@ -1,11 +1,13 @@
 package com.mapbox.services.android.navigation.ui.v5.map;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.location.Location;
+import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -15,6 +17,7 @@ import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
@@ -48,11 +51,19 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MAPBOX_WAYNAME_LAYER;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.WAYNAME_OFFSET;
 
+/**
+ * Wrapper class for {@link MapboxMap}.
+ * <p>
+ * This class initializes various map-related components and plugins that are
+ * useful for providing a navigation-driven map experience.
+ * <p>
+ * These APIs include drawing a route line, camera animations, and more.
+ */
 public class NavigationMapboxMap {
 
   static final String STREETS_LAYER_ID = "streetsLayer";
-  private static final String STREETS_SOURCE_ID = "streetsSource";
   private static final String MAPBOX_STREETS_V7 = "mapbox://mapbox.mapbox-streets-v7";
+  private static final String STREETS_SOURCE_ID = "streetsSource";
   private static final String ROAD_LABEL = "road_label";
   private static final float DEFAULT_WIDTH = 20f;
   private static final int LAST_INDEX = 0;
@@ -69,7 +80,14 @@ public class NavigationMapboxMap {
   private MapLayerInteractor layerInteractor;
   private List<Marker> mapMarkers = new ArrayList<>();
 
-  public NavigationMapboxMap(MapView mapView, MapboxMap mapboxMap) {
+  /**
+   * Constructor that can be used once {@link com.mapbox.mapboxsdk.maps.OnMapReadyCallback}
+   * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
+   *
+   * @param mapView   for map size and Context
+   * @param mapboxMap for APIs to interact with the map
+   */
+  public NavigationMapboxMap(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     initializeLocationLayer(mapView, mapboxMap);
     initializeMapPaddingAdjustor(mapView, mapboxMap);
@@ -84,85 +102,249 @@ public class NavigationMapboxMap {
     this.layerInteractor = layerInteractor;
   }
 
+  /**
+   * Adds a marker icon on the map at the given position.
+   * <p>
+   * The icon used for this method can be defined in your theme with
+   * the attribute <tt>navigationViewDestinationMarker</tt>.
+   *
+   * @param context  to retrieve the icon drawable from the theme
+   * @param position the point at which the marker will be placed
+   */
   public void addMarker(Context context, Point position) {
     Marker marker = createMarkerFromIcon(context, position);
     mapMarkers.add(marker);
   }
 
+  /**
+   * Clears all markers on the map that have been added by this class.
+   * <p>
+   * This will not clear all markers from the map entirely.  Does nothing
+   * if no markers have been added.
+   */
   public void clearMarkers() {
     removeAllMarkers();
   }
 
+  /**
+   * Updates the location icon on the map and way name data (if found)
+   * for the given {@link Location}.
+   *
+   * @param location to update the icon and query the map
+   */
   public void updateLocation(Location location) {
     locationLayer.forceLocationUpdate(location);
     updateMapWaynameWithLocation(location);
   }
 
+  /**
+   * Can be used to automatically drive the map camera / route updates and arrow
+   * once navigation has started.
+   * <p>
+   * These will automatically be removed in {@link MapboxNavigation#onDestroy()}.
+   *
+   * @param navigation to add the progress listeners
+   */
   public void addProgressChangeListener(MapboxNavigation navigation) {
     mapRoute.addProgressChangeListener(navigation);
     mapCamera.addProgressChangeListener(navigation);
   }
 
+  /**
+   * Can be used to store the current state of the map in
+   * {@link android.support.v4.app.FragmentActivity#onSaveInstanceState(Bundle, PersistableBundle)}.
+   * <p>
+   * This method uses {@link NavigationMapboxMapInstanceState}, stored with the provided key.  This key
+   * can also later be used to extract the {@link NavigationMapboxMapInstanceState}.
+   *
+   * @param key      used to store the state
+   * @param outState to store state variables
+   */
+  public void saveStateWith(String key, Bundle outState) {
+    boolean isVisible = mapWayname.isVisible();
+    String waynameText = mapWayname.retrieveWayname();
+    boolean isCameraTracking = mapCamera.isTrackingEnabled();
+    NavigationMapboxMapInstanceState instanceState = new NavigationMapboxMapInstanceState(
+      isVisible, waynameText, isCameraTracking
+    );
+    outState.putParcelable(key, instanceState);
+  }
+
+  /**
+   * Can be used to restore a {@link NavigationMapboxMap} after it has been initialized.
+   * <p>
+   * This cannot be called in {@link android.support.v4.app.FragmentActivity#onRestoreInstanceState(Bundle)}
+   * because we cannot guarantee the map is re-initialized at that point.
+   * <p>
+   * You can extract the {@link NavigationMapboxMapInstanceState} in <tt>onRestoreInstanceState</tt> and then
+   * restore the map once it's ready.
+   *
+   * @param instanceState to extract state variables
+   */
+  public void restoreFrom(NavigationMapboxMapInstanceState instanceState) {
+    boolean isVisible = instanceState.isWaynameVisible();
+    updateWaynameVisibility(isVisible);
+    if (isVisible) {
+      updateWaynameView(instanceState.retrieveWayname());
+    }
+    boolean cameraTracking = instanceState.isCameraTracking();
+    updateCameraTrackingEnabled(cameraTracking);
+  }
+
+  /**
+   * Will draw the given {@link DirectionsRoute} on the map using the colors defined
+   * in your given style.
+   *
+   * @param route to be drawn
+   */
   public void drawRoute(@NonNull DirectionsRoute route) {
     mapRoute.addRoute(route);
   }
 
+  /**
+   * Will remove the drawn route displayed on the map.  Does nothing
+   * if no route is drawn.
+   */
   public void removeRoute() {
     mapRoute.removeRoute();
   }
 
+  /**
+   * Provides the camera being used to animate the map camera positions
+   * along the route, driven by the progress change listener.
+   *
+   * @return camera used to animate map
+   */
+  public NavigationCamera retrieveCamera() {
+    return mapCamera;
+  }
+
+  /**
+   * Will enable or disable the camera tracking the location updates provided
+   * by {@link MapboxNavigation}.  The camera will only be
+   * tracking if {@link NavigationMapboxMap#addProgressChangeListener(MapboxNavigation)}
+   * has been called.
+   *
+   * @param isEnabled true to track, false to not track
+   */
   public void updateCameraTrackingEnabled(boolean isEnabled) {
     mapCamera.updateCameraTrackingLocation(isEnabled);
   }
 
-  public void startCamera(DirectionsRoute directionsRoute) {
+  /**
+   * Centers the map camera to the beginning of the provided {@link DirectionsRoute}.
+   *
+   * @param directionsRoute to update the camera position
+   */
+  public void startCamera(@NonNull DirectionsRoute directionsRoute) {
     mapCamera.start(directionsRoute);
   }
 
-  public void resumeCamera(Location location) {
+  /**
+   * Centers the map camera around the provided {@link Location}.
+   *
+   * @param location to update the camera position
+   */
+  public void resumeCamera(@NonNull Location location) {
     mapCamera.resume(location);
   }
 
+  /**
+   * Resets the map camera / padding to the last known camera position.
+   * <p>
+   * Tracking is also re-enabled.
+   */
   public void resetCameraPosition() {
     mapCamera.resetCameraPosition();
     resetMapPadding();
   }
 
+  /**
+   * Adjusts the map camera to {@link DirectionsRoute} being traveled along.
+   * <p>
+   * Also includes the given padding.
+   *
+   * @param padding for creating the overview camera position
+   */
   public void showRouteOverview(int[] padding) {
     mapPaddingAdjustor.removeAllPadding();
     mapCamera.showRouteOverview(padding);
   }
 
+  /**
+   * Set the text of the way name chip underneath the location icon.
+   * <p>
+   * The text will only be set if the way name is visible / enabled.
+   *
+   * @param wayname text to be set
+   */
   public void updateWaynameView(String wayname) {
     mapWayname.updateWaynameLayer(wayname, waynameLayer);
   }
 
+  /**
+   * Hide or show the way name chip underneath the location icon.
+   *
+   * @param isVisible true to show, false to hide
+   */
   public void updateWaynameVisibility(boolean isVisible) {
     mapWayname.updateWaynameVisibility(isVisible, waynameLayer);
   }
 
+  /**
+   * Provides current visibility of the map way name.
+   *
+   * @return true if visible, false if not
+   */
+  public boolean isWaynameVisible() {
+    return mapWayname.isVisible();
+  }
+
+  /**
+   * Enables or disables the way name chip underneath the location icon.
+   *
+   * @param isEnabled true to enable, false to disable
+   */
   public void updateWaynameQueryMap(boolean isEnabled) {
     mapWayname.updateWaynameQueryMap(isEnabled);
   }
 
-  @SuppressLint("MissingPermission")
+  /**
+   * Should be used in {@link FragmentActivity#onStart()} to ensure proper
+   * accounting for the lifecycle.
+   */
   public void onStart() {
     locationLayer.onStart();
     mapCamera.onStart();
     mapRoute.onStart();
   }
 
+  /**
+   * Should be used in {@link FragmentActivity#onStop()} to ensure proper
+   * accounting for the lifecycle.
+   */
   public void onStop() {
     locationLayer.onStop();
     mapCamera.onStop();
     mapRoute.onStop();
   }
 
-  @SuppressLint("MissingPermission")
+  /**
+   * Hide or show the location icon on the map.
+   *
+   * @param isVisible true to show, false to hide
+   */
   public void updateLocationLayerVisibilityTo(boolean isVisible) {
     locationLayer.setLocationLayerEnabled(isVisible);
   }
 
+  /**
+   * Provides the {@link MapboxMap} originally given in the constructor.
+   * <p>
+   * This method gives access to all map-related APIs.
+   *
+   * @return map provided in the constructor
+   */
   public MapboxMap retrieveMap() {
     return mapboxMap;
   }

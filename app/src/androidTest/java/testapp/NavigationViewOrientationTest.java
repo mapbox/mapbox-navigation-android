@@ -3,14 +3,22 @@ package testapp;
 import android.content.res.Configuration;
 import android.support.test.espresso.ViewAction;
 
+import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.test.TestNavigationActivity;
+import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 
 import org.junit.Test;
 
 import testapp.activity.BaseNavigationActivityTest;
 
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.swipeUp;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static junit.framework.Assert.assertFalse;
 import static testapp.action.OrientationChangeAction.orientationLandscape;
 import static testapp.action.OrientationChangeAction.orientationPortrait;
 
@@ -39,6 +47,48 @@ public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
     validateTestSetup();
 
     changeOrientation(orientationPortrait());
+  }
+
+  @Test
+  public void onOrientationChange_recenterBtnStateIsRestore() {
+    if (checkOrientation(Configuration.ORIENTATION_LANDSCAPE)) {
+      return;
+    }
+    validateTestSetup();
+
+    onView(withId(R.id.routeOverviewBtn)).perform(click());
+    changeOrientation(orientationLandscape());
+    onView(withId(R.id.recenterBtn)).check(matches(isDisplayed()));
+  }
+
+  @Test
+  public void onOrientationChange_cameraTrackingIsRestore() {
+    if (checkOrientation(Configuration.ORIENTATION_LANDSCAPE)) {
+      return;
+    }
+    validateTestSetup();
+
+    onView(withId(R.id.navigationMapView)).perform(swipeUp());
+    changeOrientation(orientationLandscape());
+
+    NavigationMapboxMap navigationMapboxMap = getNavigationView().retrieveNavigationMapboxMap();
+    boolean isTrackingEnabled = navigationMapboxMap.retrieveCamera().isTrackingEnabled();
+    assertFalse(isTrackingEnabled);
+  }
+
+  @Test
+  public void onOrientationChange_waynameVisibilityIsRestored() {
+    if (checkOrientation(Configuration.ORIENTATION_LANDSCAPE)) {
+      return;
+    }
+    validateTestSetup();
+
+    onView(withId(R.id.navigationMapView)).perform(swipeUp());
+    changeOrientation(orientationLandscape());
+
+    NavigationMapboxMap navigationMapboxMap = getNavigationView().retrieveNavigationMapboxMap();
+    boolean isWaynameVisible = navigationMapboxMap.isWaynameVisible();
+    assertFalse(isWaynameVisible);
   }
 
   // TODO create test rule for this to conditionally ignore
