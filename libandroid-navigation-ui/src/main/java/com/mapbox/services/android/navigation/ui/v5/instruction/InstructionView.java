@@ -80,7 +80,6 @@ import timber.log.Timber;
 public class InstructionView extends RelativeLayout implements FeedbackBottomSheetListener {
 
   private static final double VALID_DURATION_REMAINING = 70d;
-  private static final int TOP = 0;
 
   private ManeuverView upcomingManeuverView;
   private TextView upcomingDistanceText;
@@ -325,7 +324,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       updateLandscapeConstraintsTo(R.layout.instruction_layout_alt);
     }
     instructionListLayout.setVisibility(VISIBLE);
-    rvInstructions.smoothScrollToPosition(TOP);
   }
 
   public boolean handleBackPressed() {
@@ -840,7 +838,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
   private void beginDelayedListTransition() {
     AutoTransition transition = new AutoTransition();
-    transition.addListener(new InstructionListTransitionListener(instructionListAdapter));
+    transition.addListener(new InstructionListTransitionListener(rvInstructions, instructionListAdapter));
     TransitionManager.beginDelayedTransition(this, transition);
   }
 
