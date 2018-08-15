@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.text.SpannableString;
@@ -112,12 +113,14 @@ class MapboxNavigationNotification implements NavigationNotification {
     expandedNotificationRemoteViews = new RemoteViews(context.getPackageName(),
       R.layout.expanded_navigation_notification_layout);
 
+    PendingIntent pendingOpenIntent = createPendingOpenIntent(context);
     // Will trigger endNavigationBtnReceiver when clicked
     PendingIntent pendingCloseIntent = createPendingCloseIntent(context);
     expandedNotificationRemoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent);
 
     // Sets up the top bar notification
     notificationBuilder = new NotificationCompat.Builder(context, NAVIGATION_NOTIFICATION_CHANNEL)
+      .setContentIntent(pendingOpenIntent)
       .setCategory(NotificationCompat.CATEGORY_SERVICE)
       .setPriority(NotificationCompat.PRIORITY_MAX)
       .setSmallIcon(R.drawable.ic_navigation)
@@ -126,6 +129,13 @@ class MapboxNavigationNotification implements NavigationNotification {
       .setOngoing(true);
 
     notification = notificationBuilder.build();
+  }
+
+  private PendingIntent createPendingOpenIntent(Context context) {
+    PackageManager pm = context.getPackageManager();
+    Intent intent = pm.getLaunchIntentForPackage(context.getPackageName());
+    intent.setPackage(null);
+    return PendingIntent.getActivity(context, 0, intent, 0);
   }
 
   private void registerReceiver(Context context) {
