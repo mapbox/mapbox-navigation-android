@@ -130,7 +130,9 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   protected void onDestroy() {
     super.onDestroy();
     navigationView.onDestroy();
-    saveNightModeToPreferences(AppCompatDelegate.MODE_NIGHT_AUTO);
+    if (isFinishing()) {
+      saveNightModeToPreferences(AppCompatDelegate.MODE_NIGHT_AUTO);
+    }
   }
 
   @Override
