@@ -41,6 +41,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
   private Queue<File> instructionQueue;
   private File mapboxCache;
   private Cache okhttpCache;
+  private boolean isPlaying;
   private boolean isMuted;
 
   /**
@@ -115,12 +116,6 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     playAnnouncementText(textAndType.first, textAndType.second);
   }
 
-  /**
-   * Plays the specified text instruction using MapboxSpeech API
-   *
-   * @param instruction voice instruction to be synthesized and played
-   * @param textType    either "ssml" or "text"
-   */
   private void playAnnouncementText(String instruction, String textType) {
     downloadVoiceFile(instruction, textType);
   }
@@ -141,14 +136,11 @@ class MapboxSpeechPlayer implements SpeechPlayer {
   }
 
   private void stopMediaPlayerPlaying() {
-    try {
-      if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-        mediaPlayer.stop();
-        mediaPlayer.release();
-        speechListener.onDone();
-      }
-    } catch (IllegalStateException exception) {
-      Timber.e(exception);
+    if (isPlaying) {
+      isPlaying = false;
+      mediaPlayer.stop();
+      mediaPlayer.release();
+      speechListener.onDone();
     }
   }
 
@@ -191,20 +183,16 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     if (TextUtils.isEmpty(instructionPath)) {
       return;
     }
-
     mediaPlayer = new MediaPlayer();
     setDataSource(instructionPath);
     mediaPlayer.prepareAsync();
-    setListeners();
+    addListeners();
   }
 
   private void pauseInstruction() {
-    try {
-      if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-        mediaPlayer.stop();
-      }
-    } catch (IllegalStateException exception) {
-      Timber.e(exception);
+    if (isPlaying) {
+      isPlaying = false;
+      mediaPlayer.stop();
     }
   }
 
@@ -216,11 +204,12 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     }
   }
 
-  private void setListeners() {
+  private void addListeners() {
     mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
       @Override
       public void onPrepared(MediaPlayer mp) {
         speechListener.onStart();
+        isPlaying = true;
         mp.start();
       }
     });
@@ -228,6 +217,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
       @Override
       public void onCompletion(MediaPlayer mp) {
         mp.release();
+        isPlaying = false;
         speechListener.onDone();
         onInstructionFinishedPlaying();
       }
