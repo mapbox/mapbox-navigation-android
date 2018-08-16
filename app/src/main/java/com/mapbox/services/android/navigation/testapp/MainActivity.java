@@ -16,6 +16,7 @@ import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.ComponentNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.DualNavigationMapActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.EmbeddedNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.EndNavigationActivity;
@@ -82,6 +83,11 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         getString(R.string.title_fragment_navigation),
         getString(R.string.description_fragment_navigation),
         FragmentNavigationActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_component_navigation),
+        getString(R.string.description_component_navigation),
+        ComponentNavigationActivity.class
       )
     ));
 
@@ -142,8 +148,8 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
 
       ViewHolder(View view) {
         super(view);
-        nameView = (TextView) view.findViewById(R.id.nameView);
-        descriptionView = (TextView) view.findViewById(R.id.descriptionView);
+        nameView = view.findViewById(R.id.nameView);
+        descriptionView = view.findViewById(R.id.descriptionView);
       }
     }
 
@@ -151,26 +157,24 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
       this.samples = samples;
     }
 
+    @NonNull
     @Override
-    public MainAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MainAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
       View view = LayoutInflater
         .from(parent.getContext())
         .inflate(R.layout.item_main_feature, parent, false);
 
-      view.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-          int position = recyclerView.getChildLayoutPosition(view);
-          Intent intent = new Intent(view.getContext(), samples.get(position).getActivity());
-          startActivity(intent);
-        }
+      view.setOnClickListener(view1 -> {
+        int position = recyclerView.getChildLayoutPosition(view1);
+        Intent intent = new Intent(view1.getContext(), samples.get(position).getActivity());
+        startActivity(intent);
       });
 
       return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(MainAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MainAdapter.ViewHolder holder, int position) {
       holder.nameView.setText(samples.get(position).getName());
       holder.descriptionView.setText(samples.get(position).getDescription());
     }

@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.mapbox.services.android.navigation.testapp">
 
+    <uses-permission android:name="android.permission.VIBRATE"/>
+
     <application
         android:name=".NavigationApplication"
         android:allowBackup="true"
@@ -92,7 +94,16 @@
 
         <activity
             android:name=".activity.navigationui.fragment.FragmentNavigationActivity"
-            android:label="@string/title_embedded_navigation">
+            android:label="@string/title_fragment_navigation">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
+        <activity
+            android:name=".activity.navigationui.ComponentNavigationActivity"
+            android:label="@string/title_component_navigation"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
