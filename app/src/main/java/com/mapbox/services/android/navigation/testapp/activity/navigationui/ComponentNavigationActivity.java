@@ -63,12 +63,18 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
   MapboxMap.OnMapLongClickListener, LocationEngineListener, ProgressChangeListener,
   MilestoneEventListener, OffRouteListener {
 
-  private static final String ACCESS_TOKEN = Mapbox.getAccessToken();
   private static final int FIRST = 0;
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
   private static final int BOTTOMSHEET_PADDING_MULTIPLIER = 4;
-  private static final int TWO_SECONDS = 2000;
+  private static final int TWO_SECONDS_IN_MILLISECONDS = 2000;
   private static final double BEARING_TOLERANCE = 90d;
+  private static final String LONG_PRESS_MAP_MESSAGE = "Long press the map to select a destination.";
+  private static final String SEARCHING_FOR_GPS_MESSAGE = "Searching for GPS...";
+  private static final int ZERO_PADDING = 0;
+  private static final double DEFAULT_ZOOM = 12.0;
+  private static final double DEFAULT_TILT = 0d;
+  private static final double DEFAULT_BEARING = 0d;
+  private static final int ONE_SECOND_INTERVAL = 1000;
 
   @BindView(R.id.componentNavigationLayout)
   ConstraintLayout navigationLayout;
@@ -82,6 +88,9 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
   @BindView(R.id.startNavigationFab)
   FloatingActionButton startNavigationFab;
 
+  @BindView(R.id.cancelNavigationFab)
+  FloatingActionButton cancelNavigationFab;
+
   private LocationEngine locationEngine;
   private MapboxNavigation navigation;
   private NavigationSpeechPlayer speechPlayer;
@@ -89,6 +98,12 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
   private Location lastLocation;
   private DirectionsRoute route;
   private Point destination;
+  private MapState mapState;
+
+  private enum MapState {
+    INFO,
+    NAVIGATION
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +120,7 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
 
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
+    mapState = MapState.INFO;
     navigationMap = new NavigationMapboxMap(mapView, mapboxMap);
 
     // For voice instructions
@@ -119,18 +135,31 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
 
   @Override
   public void onMapLongClick(@NonNull LatLng point) {
+    // Only reverse geocode while we are not in navigation
+    if (mapState.equals(MapState.NAVIGATION)) {
+      return;
+    }
+
     // Fetch the route with this given point
     destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     calculateRouteWith(destination, false);
+
+    // Clear any existing markers and add new one
     navigationMap.clearMarkers();
     navigationMap.addMarker(this, destination);
+
+    // Update camera to new destination
     moveCameraToInclude(destination);
     vibrate();
   }
 
   @OnClick(R.id.startNavigationFab)
   public void onStartNavigationClick(FloatingActionButton floatingActionButton) {
+    // Transition to navigation state
+    mapState = MapState.NAVIGATION;
+
     floatingActionButton.hide();
+    cancelNavigationFab.show();
 
     // Show the InstructionView
     TransitionManager.beginDelayedTransition(navigationLayout);
@@ -142,6 +171,24 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
 
     // Location updates will be received from ProgressChangeListener
     removeLocationEngineListener();
+  }
+
+  @OnClick(R.id.cancelNavigationFab)
+  public void onCancelNavigationClick(FloatingActionButton floatingActionButton) {
+    // Transition to info state
+    mapState = MapState.INFO;
+
+    floatingActionButton.hide();
+
+    // Hide the InstructionView
+    TransitionManager.beginDelayedTransition(navigationLayout);
+    instructionView.setVisibility(View.INVISIBLE);
+
+    // Reset map camera and pitch
+    resetMapAfterNavigation();
+
+    // Add back regular location listener
+    addLocationEngineListener();
   }
 
   /*
@@ -162,7 +209,7 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
 
       // Allow navigationMap clicks now that we have the current Location
       navigationMap.retrieveMap().addOnMapLongClickListener(this);
-      showSnackbar("Long press the map to select a destination.", BaseTransientBottomBar.LENGTH_LONG);
+      showSnackbar(LONG_PRESS_MAP_MESSAGE, BaseTransientBottomBar.LENGTH_LONG);
     }
 
     // Cache for fetching the route later
@@ -257,9 +304,9 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
   }
 
   private void initializeSpeechPlayer() {
-    String en = Locale.US.getLanguage();
+    String english = Locale.US.getLanguage();
     String accessToken = Mapbox.getAccessToken();
-    SpeechPlayerProvider speechPlayerProvider = new SpeechPlayerProvider(getApplication(), en, true, accessToken);
+    SpeechPlayerProvider speechPlayerProvider = new SpeechPlayerProvider(getApplication(), english, true, accessToken);
     speechPlayer = new NavigationSpeechPlayer(speechPlayerProvider);
   }
 
@@ -268,13 +315,13 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
     locationEngine = locationEngineProvider.obtainBestLocationEngineAvailable();
     locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
     locationEngine.addLocationEngineListener(this);
-    locationEngine.setFastestInterval(1000);
+    locationEngine.setFastestInterval(ONE_SECOND_INTERVAL);
     locationEngine.activate();
-    showSnackbar("Searching for GPS...", BaseTransientBottomBar.LENGTH_SHORT);
+    showSnackbar(SEARCHING_FOR_GPS_MESSAGE, BaseTransientBottomBar.LENGTH_SHORT);
   }
 
   private void initializeNavigation(MapboxMap mapboxMap) {
-    navigation = new MapboxNavigation(this, ACCESS_TOKEN);
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
     navigation.setLocationEngine(locationEngine);
     navigation.setCameraEngine(new DynamicCamera(mapboxMap));
     navigation.addProgressChangeListener(this);
@@ -302,12 +349,10 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
   }
 
   private void moveCameraTo(Location location) {
-    CameraPosition cameraPosition = new CameraPosition.Builder()
-      .zoom(12)
-      .target(new LatLng(location.getLatitude(), location.getLongitude()))
-      .bearing(location.getBearing())
-      .build();
-    navigationMap.retrieveMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), TWO_SECONDS);
+    CameraPosition cameraPosition = buildCameraPositionFrom(location, location.getBearing());
+    navigationMap.retrieveMap().animateCamera(
+      CameraUpdateFactory.newCameraPosition(cameraPosition), TWO_SECONDS_IN_MILLISECONDS
+    );
   }
 
   private void moveCameraToInclude(Point destination) {
@@ -320,7 +365,29 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
     int routeCameraPadding = (int) resources.getDimension(R.dimen.component_navigation_route_camera_padding);
     int[] padding = {routeCameraPadding, routeCameraPadding, routeCameraPadding, routeCameraPadding};
     CameraPosition cameraPosition = navigationMap.retrieveMap().getCameraForLatLngBounds(bounds, padding);
-    navigationMap.retrieveMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), TWO_SECONDS);
+    navigationMap.retrieveMap().animateCamera(
+      CameraUpdateFactory.newCameraPosition(cameraPosition), TWO_SECONDS_IN_MILLISECONDS
+    );
+  }
+
+  private void moveCameraOverhead() {
+    if (lastLocation == null) {
+      return;
+    }
+    CameraPosition cameraPosition = buildCameraPositionFrom(lastLocation, DEFAULT_BEARING);
+    navigationMap.retrieveMap().animateCamera(
+      CameraUpdateFactory.newCameraPosition(cameraPosition), TWO_SECONDS_IN_MILLISECONDS
+    );
+  }
+
+  @NonNull
+  private CameraPosition buildCameraPositionFrom(Location location, double bearing) {
+    return new CameraPosition.Builder()
+      .zoom(DEFAULT_ZOOM)
+      .target(new LatLng(location.getLatitude(), location.getLongitude()))
+      .bearing(bearing)
+      .tilt(DEFAULT_TILT)
+      .build();
   }
 
   private void adjustMapPaddingForNavigation() {
@@ -328,7 +395,14 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
     int mapViewHeight = mapView.getHeight();
     int bottomSheetHeight = (int) resources.getDimension(R.dimen.component_navigation_bottomsheet_height);
     int topPadding = mapViewHeight - (bottomSheetHeight * BOTTOMSHEET_PADDING_MULTIPLIER);
-    navigationMap.retrieveMap().setPadding(0, topPadding, 0, 0);
+    navigationMap.retrieveMap().setPadding(ZERO_PADDING, topPadding, ZERO_PADDING, ZERO_PADDING);
+  }
+
+  private void resetMapAfterNavigation() {
+    navigationMap.removeRoute();
+    navigationMap.clearMarkers();
+    navigation.stopNavigation();
+    moveCameraOverhead();
   }
 
   private void removeLocationEngineListener() {
@@ -337,11 +411,17 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
     }
   }
 
+  private void addLocationEngineListener() {
+    if (locationEngine != null) {
+      locationEngine.addLocationEngineListener(this);
+    }
+  }
+
   private void calculateRouteWith(Point destination, boolean isOffRoute) {
     Point origin = Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude());
     Double bearing = Float.valueOf(lastLocation.getBearing()).doubleValue();
     NavigationRoute.builder(this)
-      .accessToken(ACCESS_TOKEN)
+      .accessToken(Mapbox.getAccessToken())
       .origin(origin, bearing, BEARING_TOLERANCE)
       .destination(destination)
       .build()
@@ -371,6 +451,7 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
     }
   }
 
+  @SuppressLint("MissingPermission")
   private void vibrate() {
     Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

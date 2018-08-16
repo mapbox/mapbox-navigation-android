@@ -164,9 +164,9 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         .from(parent.getContext())
         .inflate(R.layout.item_main_feature, parent, false);
 
-      view.setOnClickListener(view1 -> {
-        int position = recyclerView.getChildLayoutPosition(view1);
-        Intent intent = new Intent(view1.getContext(), samples.get(position).getActivity());
+      view.setOnClickListener(clickedView -> {
+        int position = recyclerView.getChildLayoutPosition(clickedView);
+        Intent intent = new Intent(clickedView.getContext(), samples.get(position).getActivity());
         startActivity(intent);
       });
 
