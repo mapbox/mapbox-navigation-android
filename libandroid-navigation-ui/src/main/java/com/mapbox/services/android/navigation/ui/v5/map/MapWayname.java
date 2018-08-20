@@ -21,14 +21,14 @@ class MapWayname {
   private static final int FIRST_ROAD_FEATURE = 0;
 
   private WaynameLayoutProvider layoutProvider;
-  private WaynameLayerInteractor layerInteractor;
+  private MapLayerInteractor layerInteractor;
   private WaynameFeatureFinder featureInteractor;
   private MapPaddingAdjustor paddingAdjustor;
   private boolean isAutoQueryEnabled;
   private boolean isVisible;
   private String wayname = "";
 
-  MapWayname(WaynameLayoutProvider layoutProvider, WaynameLayerInteractor layerInteractor,
+  MapWayname(WaynameLayoutProvider layoutProvider, MapLayerInteractor layerInteractor,
              WaynameFeatureFinder featureInteractor, MapPaddingAdjustor paddingAdjustor) {
     this.layoutProvider = layoutProvider;
     this.layerInteractor = layerInteractor;
