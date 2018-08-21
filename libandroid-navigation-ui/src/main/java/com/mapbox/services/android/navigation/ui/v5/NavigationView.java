@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.ImageButton;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -540,7 +541,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void establishUnitType(LocaleUtils localeUtils, NavigationViewOptions options) {
-    String voiceUnits = options.directionsRoute().routeOptions().voiceUnits();
+    RouteOptions routeOptions = options.directionsRoute().routeOptions();
+    String voiceUnits = routeOptions == null ? null : routeOptions.voiceUnits();
     String unitType = localeUtils.retrieveNonNullUnitType(getContext(), voiceUnits);
     instructionView.setUnitType(unitType);
     summaryBottomSheet.setUnitType(unitType);
