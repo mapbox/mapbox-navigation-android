@@ -8,6 +8,7 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -28,6 +29,7 @@ import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteListener;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
+import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayerProvider;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -66,7 +68,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private ViewRouteFetcher navigationViewRouteEngine;
   private LocationEngineConductor locationEngineConductor;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
-  private NavigationSpeechPlayer instructionPlayer;
+  private SpeechPlayer speechPlayer;
   private ConnectivityManager connectivityManager;
   private RouteProgress routeProgress;
   private String feedbackId;
@@ -84,9 +86,9 @@ public class NavigationViewModel extends AndroidViewModel {
   public NavigationViewModel(Application application) {
     super(application);
     this.accessToken = Mapbox.getAccessToken();
-    initConnectivityManager(application);
-    initNavigationRouteEngine();
-    initNavigationLocationEngine();
+    initializeConnectivityManager(application);
+    initializeNavigationRouteEngine();
+    initializeNavigationLocationEngine();
     routeUtils = new RouteUtils();
     localeUtils = new LocaleUtils();
   }
@@ -108,7 +110,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   public void setMuted(boolean isMuted) {
-    instructionPlayer.setMuted(isMuted);
+    speechPlayer.setMuted(isMuted);
   }
 
   /**
@@ -155,9 +157,10 @@ public class NavigationViewModel extends AndroidViewModel {
   /**
    * Returns the current instance of {@link MapboxNavigation}.
    *
-   * @since 0.6.1
+   * Will be null if navigation has not been initialized.
    */
-  public MapboxNavigation getNavigation() {
+  @Nullable
+  public MapboxNavigation retrieveNavigation() {
     return navigation;
   }
 
@@ -171,16 +174,16 @@ public class NavigationViewModel extends AndroidViewModel {
    *
    * @param options to init MapboxNavigation
    */
-  MapboxNavigation initializeNavigation(NavigationViewOptions options) {
+  MapboxNavigation initialize(NavigationViewOptions options) {
     MapboxNavigationOptions navigationOptions = options.navigationOptions();
     navigationOptions = navigationOptions.toBuilder().isFromNavigationUi(true).build();
-    initLanguage(options);
-    initUnitType(options);
-    initTimeFormat(navigationOptions);
-    initVoiceInstructions(options);
+    initializeLanguage(options);
+    initializeUnitType(options);
+    initializeTimeFormat(navigationOptions);
+    initializeNavigationSpeechPlayer(options);
     if (!isRunning) {
       locationEngineConductor.initializeLocationEngine(getApplication(), options.shouldSimulateRoute());
-      initNavigation(getApplication(), navigationOptions);
+      initializeNavigation(getApplication(), navigationOptions);
       addMilestones(options);
       navigationViewRouteEngine.extractRouteOptions(options);
     }
@@ -206,19 +209,19 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.stopNavigation();
   }
 
-  private void initConnectivityManager(Application application) {
+  private void initializeConnectivityManager(Application application) {
     connectivityManager = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
   }
 
-  private void initNavigationRouteEngine() {
+  private void initializeNavigationRouteEngine() {
     navigationViewRouteEngine = new ViewRouteFetcher(getApplication(), accessToken, routeEngineListener);
   }
 
-  private void initNavigationLocationEngine() {
+  private void initializeNavigationLocationEngine() {
     locationEngineConductor = new LocationEngineConductor(locationEngineCallback);
   }
 
-  private void initLanguage(NavigationUiOptions options) {
+  private void initializeLanguage(NavigationUiOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     language = localeUtils.inferDeviceLanguage(getApplication());
     if (routeOptions != null) {
@@ -226,7 +229,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void initUnitType(NavigationUiOptions options) {
+  private void initializeUnitType(NavigationUiOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     unitType = localeUtils.getUnitTypeForDeviceLocale(getApplication());
     if (routeOptions != null) {
@@ -234,14 +237,19 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void initTimeFormat(MapboxNavigationOptions options) {
+  private void initializeTimeFormat(MapboxNavigationOptions options) {
     timeFormatType = options.timeFormatType();
   }
 
-  private void initVoiceInstructions(NavigationViewOptions options) {
+  private void initializeNavigationSpeechPlayer(NavigationViewOptions options) {
+    SpeechPlayer speechPlayer = options.speechPlayer();
+    if (speechPlayer != null) {
+      this.speechPlayer = speechPlayer;
+      return;
+    }
     boolean isVoiceLanguageSupported = options.directionsRoute().voiceLanguage() != null;
     SpeechPlayerProvider speechPlayerProvider = initializeSpeechPlayerProvider(isVoiceLanguageSupported);
-    instructionPlayer = new NavigationSpeechPlayer(speechPlayerProvider);
+    this.speechPlayer = new NavigationSpeechPlayer(speechPlayerProvider);
   }
 
   @NonNull
@@ -249,7 +257,7 @@ public class NavigationViewModel extends AndroidViewModel {
     return new SpeechPlayerProvider(getApplication(), language, voiceLanguageSupported, accessToken);
   }
 
-  private void initNavigation(Context context, MapboxNavigationOptions options) {
+  private void initializeNavigation(Context context, MapboxNavigationOptions options) {
     navigation = new MapboxNavigation(context, accessToken, options);
     navigation.setLocationEngine(locationEngineConductor.obtainLocationEngine());
     addNavigationListeners();
@@ -284,7 +292,7 @@ public class NavigationViewModel extends AndroidViewModel {
     @Override
     public void userOffRoute(Location location) {
       if (hasNetworkConnection()) {
-        instructionPlayer.onOffRoute();
+        speechPlayer.onOffRoute();
         Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
         sendEventOffRoute(newOrigin);
       }
@@ -381,8 +389,8 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void deactivateInstructionPlayer() {
-    if (instructionPlayer != null) {
-      instructionPlayer.onDestroy();
+    if (speechPlayer != null) {
+      speechPlayer.onDestroy();
     }
   }
 
@@ -391,7 +399,7 @@ public class NavigationViewModel extends AndroidViewModel {
       SpeechAnnouncement announcement = SpeechAnnouncement.builder()
         .voiceInstructionMilestone((VoiceInstructionMilestone) milestone).build();
       announcement = retrieveAnnouncementFromSpeechEvent(announcement);
-      instructionPlayer.play(announcement);
+      speechPlayer.play(announcement);
     }
   }
 
