@@ -2,6 +2,7 @@ package testapp;
 
 import com.mapbox.services.android.navigation.testapp.test.TestNavigationActivity;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
+import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayer;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
 import org.junit.Test;
@@ -33,5 +34,14 @@ public class NavigationViewTest extends BaseNavigationActivityTest {
     MapboxNavigation mapboxNavigation = getNavigationView().retrieveMapboxNavigation();
 
     assertNotNull(mapboxNavigation);
+  }
+
+  @Test
+  public void onNavigationStart_speechPlayerIsNotNull() {
+    validateTestSetup();
+
+    SpeechPlayer speechPlayer = getNavigationView().retrieveNavigationSpeechPlayer();
+
+    assertNotNull(speechPlayer);
   }
 }

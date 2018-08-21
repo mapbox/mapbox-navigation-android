@@ -28,6 +28,8 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.ImageCoordinator
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
+import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer;
+import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayer;
 import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
@@ -162,7 +164,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * In a {@link android.app.Fragment}, this should be in {@link Fragment#onDestroyView()}.
    */
   public void onDestroy() {
-    navigationViewEventDispatcher.onDestroy(navigationViewModel.getNavigation());
+    navigationViewEventDispatcher.onDestroy(navigationViewModel.retrieveNavigation());
     shutdown();
   }
 
@@ -392,14 +394,26 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   /**
    * Returns the instance of {@link MapboxNavigation} powering the {@link NavigationView}
-   * once navigation has started.  Will return null if navgiation has not been started with
+   * once navigation has started.  Will return null if navigation has not been started with
    * {@link NavigationView#startNavigation(NavigationViewOptions)}.
    *
    * @return mapbox navigation, or null if navigation has not started
    */
   @Nullable
   public MapboxNavigation retrieveMapboxNavigation() {
-    return navigationViewModel.getNavigation();
+    return navigationViewModel.retrieveNavigation();
+  }
+
+  /**
+   * Returns the instance of {@link NavigationSpeechPlayer} powering the {@link NavigationView}
+   * voice announcements once navigation has started.  Will return null if navigation has not been started with
+   * {@link NavigationView#startNavigation(NavigationViewOptions)}.
+   *
+   * @return navigation speech player, or null if navigation has not started
+   */
+  @Nullable
+  public SpeechPlayer retrieveNavigationSpeechPlayer() {
+    return navigationViewModel.retrieveNavigationSpeechPlayer();
   }
 
   private void initializeView() {
@@ -508,7 +522,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     initializeClickListeners();
     initializeOnMoveListener();
     establish(options);
-    MapboxNavigation navigation = navigationViewModel.initializeNavigation(options);
+    MapboxNavigation navigation = navigationViewModel.initialize(options);
     initializeNavigationListeners(options, navigation);
     setupNavigationMapboxMap(options);
 
