@@ -15,7 +15,6 @@ import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
-import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.turf.TurfConstants;
@@ -338,33 +337,6 @@ public class NavigationHelper {
     }
     annotationBuilder.index(annotationIndex);
     return annotationBuilder.build();
-  }
-
-  /**
-   * This method runs through the list of milestones in {@link MapboxNavigation#getMilestones()}
-   * and returns a list of occurring milestones (if any), based on their individual criteria.
-   *
-   * @param previousRouteProgress for checking if milestone is occurring
-   * @param routeProgress         for checking if milestone is occurring
-   * @param mapboxNavigation      for list of milestones
-   * @return list of occurring milestones
-   */
-  static List<Milestone> checkMilestones(RouteProgress previousRouteProgress,
-                                         RouteProgress routeProgress,
-                                         MapboxNavigation mapboxNavigation) {
-    List<Milestone> milestones = new ArrayList<>();
-    for (Milestone milestone : mapboxNavigation.getMilestones()) {
-      if (milestone.isOccurring(previousRouteProgress, routeProgress)) {
-        milestones.add(milestone);
-      }
-    }
-    return milestones;
-  }
-
-  static boolean shouldCheckFasterRoute(NavigationLocationUpdate navigationLocationUpdate,
-                                        RouteProgress routeProgress) {
-    FasterRoute fasterRoute = navigationLocationUpdate.mapboxNavigation().getFasterRouteEngine();
-    return fasterRoute.shouldCheckFasterRoute(navigationLocationUpdate.location(), routeProgress);
   }
 
   /**
