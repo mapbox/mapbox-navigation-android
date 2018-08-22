@@ -13,6 +13,7 @@ import android.text.TextUtils;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera;
@@ -42,6 +43,7 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.List;
@@ -76,6 +78,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private int timeFormatType;
   private boolean isRunning;
   private RouteUtils routeUtils;
+  private LocaleUtils localeUtils;
   private String accessToken;
 
   public NavigationViewModel(Application application) {
@@ -85,6 +88,7 @@ public class NavigationViewModel extends AndroidViewModel {
     initNavigationRouteEngine();
     initNavigationLocationEngine();
     routeUtils = new RouteUtils();
+    localeUtils = new LocaleUtils();
   }
 
   public void onCreate() {
@@ -215,11 +219,19 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initLanguage(NavigationUiOptions options) {
-    language = options.directionsRoute().routeOptions().language();
+    RouteOptions routeOptions = options.directionsRoute().routeOptions();
+    language = localeUtils.inferDeviceLanguage(getApplication());
+    if (routeOptions != null) {
+      language = routeOptions.language();
+    }
   }
 
   private void initUnitType(NavigationUiOptions options) {
-    unitType = options.directionsRoute().routeOptions().voiceUnits();
+    RouteOptions routeOptions = options.directionsRoute().routeOptions();
+    unitType = localeUtils.getUnitTypeForDeviceLocale(getApplication());
+    if (routeOptions != null) {
+      unitType = routeOptions.voiceUnits();
+    }
   }
 
   private void initTimeFormat(MapboxNavigationOptions options) {

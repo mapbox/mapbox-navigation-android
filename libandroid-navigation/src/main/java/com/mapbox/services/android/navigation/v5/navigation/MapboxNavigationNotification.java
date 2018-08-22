@@ -21,6 +21,7 @@ import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
 
 import java.util.Calendar;
@@ -86,8 +87,7 @@ class MapboxNavigationNotification implements NavigationNotification {
   private void initialize(Context context, MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
     etaFormat = context.getString(R.string.eta_format);
-    RouteOptions routeOptions = mapboxNavigation.getRoute().routeOptions();
-    distanceFormatter = new DistanceFormatter(context, routeOptions.language(), routeOptions.voiceUnits());
+    initializeDistanceFormatter(context, mapboxNavigation);
     notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     isTwentyFourHourFormat = DateFormat.is24HourFormat(context);
     createNotificationChannel(context);
@@ -95,9 +95,18 @@ class MapboxNavigationNotification implements NavigationNotification {
     registerReceiver(context);
   }
 
-  /**
-   * Notification channel setup for devices running Android Oreo or later.
-   */
+  private void initializeDistanceFormatter(Context context, MapboxNavigation mapboxNavigation) {
+    RouteOptions routeOptions = mapboxNavigation.getRoute().routeOptions();
+    LocaleUtils localeUtils = new LocaleUtils();
+    String language = localeUtils.inferDeviceLanguage(context);
+    String unitType = localeUtils.getUnitTypeForDeviceLocale(context);
+    if (routeOptions != null) {
+      language = routeOptions.language();
+      unitType = routeOptions.voiceUnits();
+    }
+    distanceFormatter = new DistanceFormatter(context, language, unitType);
+  }
+
   private void createNotificationChannel(Context context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       NotificationChannel notificationChannel = new NotificationChannel(
