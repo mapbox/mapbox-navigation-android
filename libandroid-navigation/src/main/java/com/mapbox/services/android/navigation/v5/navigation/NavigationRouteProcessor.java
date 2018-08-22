@@ -93,7 +93,8 @@ class NavigationRouteProcessor {
       .currentIntersection(currentIntersection)
       .upcomingIntersection(upcomingIntersection)
       .intersectionDistancesAlongStep(currentIntersectionDistances)
-      .currentLegAnnotation(currentLegAnnotation);
+      .currentLegAnnotation(currentLegAnnotation)
+      .inTunnel(status.getInTunnel());
 
     // TODO voice banner "current" in RouteProgress
 
