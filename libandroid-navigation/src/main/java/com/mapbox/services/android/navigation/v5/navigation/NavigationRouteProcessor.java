@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.location.Location;
 import android.support.v4.util.Pair;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -30,29 +29,37 @@ class NavigationRouteProcessor {
   private static final int ONE_INDEX = 1;
   private final RingBuffer<RouteProgress> previousProgressList = new RingBuffer<>(2);
   private final Navigator navigator;
+  private DirectionsRoute route;
+  private RouteLeg currentLeg;
+  private LegStep currentStep;
   private List<Point> currentStepPoints;
+  private LegStep upcomingStep;
   private List<Point> upcomingStepPoints;
   private List<StepIntersection> currentIntersections;
   private List<Pair<StepIntersection, Double>> currentIntersectionDistances;
-  private RouteLeg currentLeg;
-  private LegStep currentStep;
-  private LegStep upcomingStep;
   private CurrentLegAnnotation currentLegAnnotation;
 
   NavigationRouteProcessor(Navigator navigator) {
     this.navigator = navigator;
   }
 
-  RouteProgress buildNewRouteProgress(DirectionsRoute route, Location location) {
-    NavigationStatus status = navigator.getStatus(new Date(location.getTime()));
-    return buildRouteProgress(route, status);
+  RouteProgress buildNewRouteProgress(Date date, DirectionsRoute route) {
+    NavigationStatus status = navigator.getStatus(date);
+    updateRoute(route);
+    return buildRouteProgressWith(status);
   }
 
   RouteProgress retrievePreviousRouteProgress() {
     return previousProgressList.pollLast();
   }
 
-  private RouteProgress buildRouteProgress(DirectionsRoute route, NavigationStatus status) {
+  private void updateRoute(DirectionsRoute route) {
+    if (this.route == null || !this.route.equals(route)) {
+      this.route = route;
+    }
+  }
+
+  private RouteProgress buildRouteProgressWith(NavigationStatus status) {
     int legIndex = status.getLegIndex();
     int stepIndex = status.getStepIndex();
     int upcomingStepIndex = stepIndex + ONE_INDEX;
@@ -87,6 +94,8 @@ class NavigationRouteProcessor {
       .upcomingIntersection(upcomingIntersection)
       .intersectionDistancesAlongStep(currentIntersectionDistances)
       .currentLegAnnotation(currentLegAnnotation);
+
+    // TODO voice banner "current" in RouteProgress
 
     addUpcomingStepPoints(progressBuilder);
     RouteProgress routeProgress = progressBuilder.build();

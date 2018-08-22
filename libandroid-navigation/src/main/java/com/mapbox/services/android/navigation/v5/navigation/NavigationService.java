@@ -32,7 +32,7 @@ public class NavigationService extends Service {
 
   private final IBinder localBinder = new LocalBinder();
   private RouteProcessorBackgroundThread thread;
-  private NavigationLocationEngineUpdater locationProvider;
+  private NavigationLocationEngineUpdater locationUpdater;
   private RouteFetcher routeFetcher;
   private NavigationNotificationProvider notificationProvider;
 
@@ -65,7 +65,7 @@ public class NavigationService extends Service {
   void startNavigation(MapboxNavigation mapboxNavigation) {
     initialize(mapboxNavigation);
     startForegroundNotification(notificationProvider.retrieveNotification());
-    locationProvider.forceLocationUpdate(mapboxNavigation.getRoute());
+    locationUpdater.forceLocationUpdate(mapboxNavigation.getRoute());
   }
 
   /**
@@ -73,7 +73,7 @@ public class NavigationService extends Service {
    */
   void endNavigation() {
     routeFetcher.clearListeners();
-    locationProvider.removeLocationEngineListener();
+    locationUpdater.removeLocationEngineListener();
     notificationProvider.shutdown(getApplication());
     thread.quit();
   }
@@ -85,7 +85,7 @@ public class NavigationService extends Service {
    * @param locationEngine to update the provider
    */
   void updateLocationEngine(LocationEngine locationEngine) {
-    locationProvider.updateLocationEngine(locationEngine);
+    locationUpdater.updateLocationEngine(locationEngine);
   }
 
   private void initialize(MapboxNavigation mapboxNavigation) {
@@ -116,7 +116,7 @@ public class NavigationService extends Service {
     RouteProcessorThreadListener listener = new RouteProcessorThreadListener(
       dispatcher, routeFetcher, notificationProvider
     );
-    thread = new RouteProcessorBackgroundThread(mapboxNavigation.retrieveNavigator(), new Handler(), listener);
+    thread = new RouteProcessorBackgroundThread(mapboxNavigation, new Handler(), listener);
   }
 
   private void initializeLocationProvider(MapboxNavigation mapboxNavigation) {
@@ -124,9 +124,9 @@ public class NavigationService extends Service {
     int accuracyThreshold = mapboxNavigation.options().locationAcceptableAccuracyInMetersThreshold();
     LocationValidator validator = new LocationValidator(accuracyThreshold);
     NavigationLocationEngineListener listener = new NavigationLocationEngineListener(
-      thread, mapboxNavigation, locationEngine, validator
+      thread, mapboxNavigation.retrieveNavigator(), locationEngine, validator
     );
-    locationProvider = new NavigationLocationEngineUpdater(locationEngine, listener);
+    locationUpdater = new NavigationLocationEngineUpdater(locationEngine, listener);
   }
 
   private void startForegroundNotification(NavigationNotification navigationNotification) {

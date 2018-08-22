@@ -243,7 +243,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
         drawRoute(route);
         // Start mocking the new route
         resetLocationEngine(route);
-        navigation.startNavigation(call, response);
+        navigation.startNavigation(route);
         mapboxMap.setOnMapClickListener(this);
         tracking = true;
       }

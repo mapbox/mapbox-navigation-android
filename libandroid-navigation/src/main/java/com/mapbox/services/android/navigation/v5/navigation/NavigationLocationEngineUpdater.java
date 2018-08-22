@@ -30,7 +30,7 @@ class NavigationLocationEngineUpdater {
       routeUtils = obtainRouteUtils();
       location = routeUtils.createFirstLocationFromRoute(route);
     }
-    listener.queueLocationUpdate(location);
+    listener.onLocationChanged(location);
   }
 
   void removeLocationEngineListener() {
