@@ -168,13 +168,13 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public SpeechAnnouncement willVoice(SpeechAnnouncement announcement) {
-    return SpeechAnnouncement.builder().announcement("All announcements will be the same.").build();
+  public String willVoice(SpeechAnnouncement announcement) {
+    return "All announcements will be the same.";
   }
 
   @Override
-  public BannerInstructions willDisplay(BannerInstructions instructions) {
-    return instructions;
+  public String willDisplay(BannerInstructions instructions) {
+    return "All banners will be the same.";
   }
 
   private void startNavigation(DirectionsRoute directionsRoute) {

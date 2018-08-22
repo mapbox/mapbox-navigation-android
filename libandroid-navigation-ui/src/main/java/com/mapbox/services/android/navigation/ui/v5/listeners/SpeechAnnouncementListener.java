@@ -19,8 +19,8 @@ public interface SpeechAnnouncementListener {
    * and it will be ignored.
    *
    * @param announcement about to be announced
-   * @return announcement to be played; null if should be ignored
-   * @since 0.16.0
+   * @return text announcement to be played; null if should be ignored
+   * @since 0.18.0
    */
-  SpeechAnnouncement willVoice(SpeechAnnouncement announcement);
+  String willVoice(SpeechAnnouncement announcement);
 }

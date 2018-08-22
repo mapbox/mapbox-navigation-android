@@ -19,8 +19,8 @@ public interface BannerInstructionsListener {
    * and it will be ignored.
    *
    * @param instructions about to be displayed
-   * @return instructions to be displayed; null if should be ignored
-   * @since 0.16.0
+   * @return instruction text to be displayed; null if should be ignored
+   * @since 0.18.0
    */
-  BannerInstructions willDisplay(BannerInstructions instructions);
+  String willDisplay(BannerInstructions instructions);
 }

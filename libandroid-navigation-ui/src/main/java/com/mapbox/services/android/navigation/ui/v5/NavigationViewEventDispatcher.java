@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 import android.view.View;
 
+import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -12,13 +13,16 @@ import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.listeners.BannerInstructionsListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
-import com.mapbox.services.android.navigation.ui.v5.listeners.SpeechAnnouncementListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.SpeechAnnouncementListener;
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * In charge of holding any {@link NavigationView} related listeners {@link NavigationListener},
@@ -27,6 +31,8 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
  */
 class NavigationViewEventDispatcher {
 
+  private static final int ONE = 1;
+  private static final int FIRST = 0;
   private ProgressChangeListener progressChangeListener;
   private MilestoneEventListener milestoneEventListener;
   private FeedbackListener feedbackListener;
@@ -167,14 +173,22 @@ class NavigationViewEventDispatcher {
 
   SpeechAnnouncement onAnnouncement(SpeechAnnouncement announcement) {
     if (speechAnnouncementListener != null) {
-      return speechAnnouncementListener.willVoice(announcement);
+      String textAnnouncement = speechAnnouncementListener.willVoice(announcement);
+      SpeechAnnouncement announcementToBeVoiced = SpeechAnnouncement.builder().announcement(textAnnouncement).build();
+      return announcementToBeVoiced;
     }
     return announcement;
   }
 
   BannerInstructions onBannerDisplay(BannerInstructions instructions) {
     if (bannerInstructionsListener != null) {
-      return bannerInstructionsListener.willDisplay(instructions);
+      String textBanner = bannerInstructionsListener.willDisplay(instructions);
+      List<BannerComponents> bannerComponents = new ArrayList<>(ONE);
+      bannerComponents.add(instructions.primary().components().get(FIRST).toBuilder().text(textBanner)
+        .abbreviation(textBanner).build());
+      BannerInstructions bannerToBeDisplayed = instructions.toBuilder().primary(instructions.primary().toBuilder()
+        .components(bannerComponents).build()).build();
+      return bannerToBeDisplayed;
     }
     return instructions;
   }

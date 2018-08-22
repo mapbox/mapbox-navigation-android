@@ -2,7 +2,9 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.support.annotation.NonNull;
 
+import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
+import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
@@ -19,8 +21,13 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -362,10 +369,8 @@ public class NavigationViewEventDispatcherTest {
 
   @Test
   public void onNewBannerInstruction_instructionListenerIsCalled() {
-    BannerInstructions modifiedInstructions = mock(BannerInstructions.class);
-    BannerInstructions originalInstructions = mock(BannerInstructions.class);
+    BannerInstructions originalInstructions = mock(BannerInstructions.class, RETURNS_DEEP_STUBS);
     BannerInstructionsListener bannerInstructionsListener = mock(BannerInstructionsListener.class);
-    when(bannerInstructionsListener.willDisplay(originalInstructions)).thenReturn(modifiedInstructions);
     NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(bannerInstructionsListener);
 
     eventDispatcher.onBannerDisplay(originalInstructions);
@@ -375,15 +380,47 @@ public class NavigationViewEventDispatcherTest {
 
   @Test
   public void onNewVoiceAnnouncement_instructionListenerIsCalled() {
-    SpeechAnnouncement modifiedAnnouncement = mock(SpeechAnnouncement.class);
     SpeechAnnouncement originalAnnouncement = mock(SpeechAnnouncement.class);
     SpeechAnnouncementListener speechAnnouncementListener = mock(SpeechAnnouncementListener.class);
-    when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(modifiedAnnouncement);
+    String textAnnouncement = "announcement to be voiced";
+    when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(textAnnouncement);
     NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(speechAnnouncementListener);
 
     eventDispatcher.onAnnouncement(originalAnnouncement);
 
     verify(speechAnnouncementListener).willVoice(originalAnnouncement);
+  }
+
+  @Test
+  public void onNewBannerInstruction_bannerToBeDisplayedIsReturned() {
+    List<BannerComponents> originalBannerComponents = new ArrayList<>(1);
+    BannerComponents originalBannerComponent = BannerComponents.builder().text("text").type("type").build();
+    originalBannerComponents.add(originalBannerComponent);
+    BannerText originalBannerText = BannerText.builder().components(originalBannerComponents).build();
+    BannerInstructions originalInstructions = BannerInstructions.builder().primary(originalBannerText)
+      .distanceAlongGeometry(25.0).build();
+    BannerInstructionsListener bannerInstructionsListener = mock(BannerInstructionsListener.class);
+    String textBanner = "banner to be displayed";
+    when(bannerInstructionsListener.willDisplay(originalInstructions)).thenReturn(textBanner);
+    NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(bannerInstructionsListener);
+
+    BannerInstructions modifiedInstruction = eventDispatcher.onBannerDisplay(originalInstructions);
+
+    assertEquals("banner to be displayed", modifiedInstruction.primary().components().get(0).text());
+    assertEquals("banner to be displayed", modifiedInstruction.primary().components().get(0).abbreviation());
+  }
+
+  @Test
+  public void onNewVoiceAnnouncement_announcementToBeVoicedIsReturned() {
+    SpeechAnnouncement originalAnnouncement = SpeechAnnouncement.builder().announcement("announcement").build();
+    SpeechAnnouncementListener speechAnnouncementListener = mock(SpeechAnnouncementListener.class);
+    String textAnnouncement = "announcement to be voiced";
+    when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(textAnnouncement);
+    NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(speechAnnouncementListener);
+
+    SpeechAnnouncement modifiedAnnouncement = eventDispatcher.onAnnouncement(originalAnnouncement);
+
+    assertEquals("announcement to be voiced", modifiedAnnouncement.announcement());
   }
 
   @NonNull
