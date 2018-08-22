@@ -149,6 +149,8 @@ public abstract class RouteProgress {
   @Nullable
   public abstract List<Point> upcomingStepPoints();
 
+  public abstract boolean inTunnel();
+
   public abstract RouteProgress.Builder toBuilder();
 
   abstract int stepIndex();
@@ -226,6 +228,8 @@ public abstract class RouteProgress {
 
     abstract Builder currentLegProgress(RouteLegProgress routeLegProgress);
 
+    public abstract Builder inTunnel(boolean inTunnel);
+
     abstract RouteProgress autoBuild(); // not public
 
     public RouteProgress build() {
@@ -250,6 +254,7 @@ public abstract class RouteProgress {
   }
 
   public static Builder builder() {
-    return new AutoValue_RouteProgress.Builder();
+    return new AutoValue_RouteProgress.Builder()
+      .inTunnel(false);
   }
 }
