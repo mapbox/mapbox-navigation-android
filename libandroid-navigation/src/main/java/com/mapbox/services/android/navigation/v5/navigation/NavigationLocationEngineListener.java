@@ -14,17 +14,15 @@ import java.util.Date;
 class NavigationLocationEngineListener implements LocationEngineListener {
 
   private final RouteProcessorBackgroundThread thread;
-  private final LocationValidator validator;
-  private final LocationEngine locationEngine;
   private final Navigator navigator;
-  private MapboxNavigation mapboxNavigation;
+  private final LocationEngine locationEngine;
+  private final LocationValidator validator;
 
-  NavigationLocationEngineListener(RouteProcessorBackgroundThread thread, MapboxNavigation mapboxNavigation,
+  NavigationLocationEngineListener(RouteProcessorBackgroundThread thread, Navigator navigator,
                                    LocationEngine locationEngine, LocationValidator validator) {
     this.thread = thread;
-    this.mapboxNavigation = mapboxNavigation;
     this.locationEngine = locationEngine;
-    this.navigator = mapboxNavigation.retrieveNavigator();
+    this.navigator = navigator;
     this.validator = validator;
   }
 
@@ -37,23 +35,14 @@ class NavigationLocationEngineListener implements LocationEngineListener {
   @Override
   public void onLocationChanged(Location location) {
     navigator.updateLocation(buildFixLocationFrom(location));
-    if (isValidLocationUpdate(location)) {
-      queueLocationUpdate(location);
+    thread.updateLocation(location);
+    if (!thread.isAlive()) {
+      thread.start();
     }
   }
 
   boolean isValidLocationUpdate(Location location) {
     return location != null && validator.isValidUpdate(location);
-  }
-
-  /**
-   * Queues a new task created from a location update to be sent
-   * to {@link RouteProcessorBackgroundThread} for processing.
-   *
-   * @param location to be processed
-   */
-  void queueLocationUpdate(Location location) {
-    thread.queueUpdate(NavigationLocationUpdate.create(location, mapboxNavigation));
   }
 
   private FixLocation buildFixLocationFrom(Location rawLocation) {

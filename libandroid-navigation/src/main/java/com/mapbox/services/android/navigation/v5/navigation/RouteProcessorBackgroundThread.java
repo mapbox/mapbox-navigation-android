@@ -5,11 +5,12 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 
-import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.List;
+
+import timber.log.Timber;
 
 /**
  * This class extends handler thread to run most of the navigation calculations on a separate
@@ -18,24 +19,39 @@ import java.util.List;
 class RouteProcessorBackgroundThread extends HandlerThread {
 
   private static final String MAPBOX_NAVIGATION_THREAD_NAME = "mapbox_navigation_thread";
-  private static final int MSG_LOCATION_UPDATED = 1001;
+  private final MapboxNavigation navigation;
+  private final Handler responseHandler;
+  private final Listener listener;
+  private final NavigationRouteProcessor routeProcessor;
   private Handler workerHandler;
+  private Location unfilteredLocation;
 
-  RouteProcessorBackgroundThread(Navigator navigator, Handler responseHandler, Listener listener) {
+  RouteProcessorBackgroundThread(MapboxNavigation navigation, Handler responseHandler, Listener listener) {
     super(MAPBOX_NAVIGATION_THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
-    start();
-    initialize(navigator, responseHandler, listener);
+    this.navigation = navigation;
+    this.responseHandler = responseHandler;
+    this.listener = listener;
+    this.routeProcessor = new NavigationRouteProcessor(navigation.retrieveNavigator());
   }
 
-  void queueUpdate(NavigationLocationUpdate navigationLocationUpdate) {
-    workerHandler.obtainMessage(MSG_LOCATION_UPDATED, navigationLocationUpdate).sendToTarget();
-  }
+  @Override
+  public synchronized void start() {
+    super.start();
+    Timber.d("NAV_DEBUG *background thread running*");
+    if (workerHandler == null) {
+      workerHandler = new Handler(getLooper());
+    }
 
-  private void initialize(Navigator navigator, Handler responseHandler, Listener listener) {
-    NavigationRouteProcessor routeProcessor = new NavigationRouteProcessor(navigator);
-    workerHandler = new Handler(getLooper(), new RouteProcessorHandlerCallback(
-      routeProcessor, responseHandler, listener)
+    NavigationLocationUpdate locationUpdate = NavigationLocationUpdate.create(unfilteredLocation, navigation);
+    RouteProcessorRunnable runnable = new RouteProcessorRunnable(
+      routeProcessor, locationUpdate, workerHandler, responseHandler, listener
     );
+    workerHandler.post(runnable);
+  }
+
+  void updateLocation(Location location) {
+    Timber.d("NAV_DEBUG background thread Location updated");
+    unfilteredLocation = location;
   }
 
   /**
