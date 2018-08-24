@@ -30,7 +30,7 @@ public class MapWaynameTest {
   @Test
   public void onUpdateWaynameWithPoint_queryRenderedFeaturesIsCalled() {
     WaynameLayoutProvider layoutProvider = mock(WaynameLayoutProvider.class);
-    WaynameLayerInteractor layerInteractor = mock(WaynameLayerInteractor.class);
+    MapLayerInteractor layerInteractor = mock(MapLayerInteractor.class);
     SymbolLayer waynameLayer = mock(SymbolLayer.class);
     when(waynameLayer.getVisibility()).thenReturn(visibility(Property.VISIBLE));
     when(layerInteractor.retrieveLayerFromId(MAPBOX_WAYNAME_LAYER)).thenReturn(waynameLayer);
@@ -85,7 +85,7 @@ public class MapWaynameTest {
   public void onVisibiltySetToFalse_paddingIsAdjusted() {
     SymbolLayer waynameLayer = mock(SymbolLayer.class);
     when(waynameLayer.getVisibility()).thenReturn(visibility(Property.VISIBLE));
-    WaynameLayerInteractor layerInteractor = mock(WaynameLayerInteractor.class);
+    MapLayerInteractor layerInteractor = mock(MapLayerInteractor.class);
     when(layerInteractor.retrieveLayerFromId(MAPBOX_WAYNAME_LAYER)).thenReturn(waynameLayer);
     MapPaddingAdjustor paddingAdjustor = mock(MapPaddingAdjustor.class);
     MapWayname mapWayname = buildMapWayname(layerInteractor, paddingAdjustor);
@@ -99,7 +99,7 @@ public class MapWaynameTest {
   public void onVisibiltySetToTrue_paddingIsAdjusted() {
     SymbolLayer waynameLayer = mock(SymbolLayer.class);
     when(waynameLayer.getVisibility()).thenReturn(visibility(Property.NONE));
-    WaynameLayerInteractor layerInteractor = mock(WaynameLayerInteractor.class);
+    MapLayerInteractor layerInteractor = mock(MapLayerInteractor.class);
     when(layerInteractor.retrieveLayerFromId(MAPBOX_WAYNAME_LAYER)).thenReturn(waynameLayer);
     MapPaddingAdjustor paddingAdjustor = mock(MapPaddingAdjustor.class);
     MapWayname mapWayname = buildMapWayname(layerInteractor, paddingAdjustor);
@@ -113,7 +113,7 @@ public class MapWaynameTest {
   public void onVisibiltySetToFalse_isVisibleReturnsFalse() {
     SymbolLayer waynameLayer = mock(SymbolLayer.class);
     when(waynameLayer.getVisibility()).thenReturn(visibility(Property.VISIBLE));
-    WaynameLayerInteractor layerInteractor = mock(WaynameLayerInteractor.class);
+    MapLayerInteractor layerInteractor = mock(MapLayerInteractor.class);
     when(layerInteractor.retrieveLayerFromId(MAPBOX_WAYNAME_LAYER)).thenReturn(waynameLayer);
     MapPaddingAdjustor paddingAdjustor = mock(MapPaddingAdjustor.class);
     MapWayname mapWayname = buildMapWayname(layerInteractor, paddingAdjustor);
@@ -127,7 +127,7 @@ public class MapWaynameTest {
   public void onVisibiltySetToTrue_isVisibleReturnsTrue() {
     SymbolLayer waynameLayer = mock(SymbolLayer.class);
     when(waynameLayer.getVisibility()).thenReturn(visibility(Property.NONE));
-    WaynameLayerInteractor layerInteractor = mock(WaynameLayerInteractor.class);
+    MapLayerInteractor layerInteractor = mock(MapLayerInteractor.class);
     when(layerInteractor.retrieveLayerFromId(MAPBOX_WAYNAME_LAYER)).thenReturn(waynameLayer);
     MapPaddingAdjustor paddingAdjustor = mock(MapPaddingAdjustor.class);
     MapWayname mapWayname = buildMapWayname(layerInteractor, paddingAdjustor);
@@ -162,7 +162,7 @@ public class MapWaynameTest {
     String roadName = "roadName";
     SymbolLayer waynameLayer = mock(SymbolLayer.class);
     when(waynameLayer.getVisibility()).thenReturn(visibility(Property.VISIBLE));
-    WaynameLayerInteractor layerInteractor = mock(WaynameLayerInteractor.class);
+    MapLayerInteractor layerInteractor = mock(MapLayerInteractor.class);
     when(layerInteractor.retrieveLayerFromId(MAPBOX_WAYNAME_LAYER)).thenReturn(waynameLayer);
     Bitmap bitmap = mock(Bitmap.class);
     WaynameLayoutProvider layoutProvider = mock(WaynameLayoutProvider.class);
@@ -178,7 +178,7 @@ public class MapWaynameTest {
   private MapWayname buildMapWayname(PointF point, WaynameLayoutProvider layoutProvider,
                                      SymbolLayer waynameLayer, List<Feature> roads) {
     String[] layerIds = {"streetsLayer"};
-    WaynameLayerInteractor layerInteractor = mock(WaynameLayerInteractor.class);
+    MapLayerInteractor layerInteractor = mock(MapLayerInteractor.class);
     when(waynameLayer.getVisibility()).thenReturn(visibility(Property.VISIBLE));
     when(layerInteractor.retrieveLayerFromId(MAPBOX_WAYNAME_LAYER)).thenReturn(waynameLayer);
     WaynameFeatureFinder featureInteractor = mock(WaynameFeatureFinder.class);
@@ -190,7 +190,7 @@ public class MapWaynameTest {
   }
 
   @NonNull
-  private MapWayname buildMapWayname(WaynameLayoutProvider layoutProvider, WaynameLayerInteractor layerInteractor) {
+  private MapWayname buildMapWayname(WaynameLayoutProvider layoutProvider, MapLayerInteractor layerInteractor) {
     WaynameFeatureFinder featureInteractor = mock(WaynameFeatureFinder.class);
     MapPaddingAdjustor paddingAdjustor = mock(MapPaddingAdjustor.class);
     MapWayname mapWayname = new MapWayname(layoutProvider, layerInteractor, featureInteractor, paddingAdjustor);
@@ -199,7 +199,7 @@ public class MapWaynameTest {
   }
 
   @NonNull
-  private MapWayname buildMapWayname(WaynameLayerInteractor layerInteractor, MapPaddingAdjustor paddingAdjustor) {
+  private MapWayname buildMapWayname(MapLayerInteractor layerInteractor, MapPaddingAdjustor paddingAdjustor) {
     WaynameLayoutProvider layoutProvider = mock(WaynameLayoutProvider.class);
     WaynameFeatureFinder featureInteractor = mock(WaynameFeatureFinder.class);
     MapWayname mapWayname = new MapWayname(layoutProvider, layerInteractor, featureInteractor, paddingAdjustor);
@@ -213,7 +213,7 @@ public class MapWaynameTest {
     String[] layerIds = {"streetsLayer"};
     WaynameLayoutProvider layoutProvider = mock(WaynameLayoutProvider.class);
     when(layoutProvider.generateLayoutBitmap(roadName)).thenReturn(mock(Bitmap.class));
-    WaynameLayerInteractor layerInteractor = mock(WaynameLayerInteractor.class);
+    MapLayerInteractor layerInteractor = mock(MapLayerInteractor.class);
     when(waynameLayer.getVisibility()).thenReturn(visibility(Property.VISIBLE));
     when(layerInteractor.retrieveLayerFromId(MAPBOX_WAYNAME_LAYER)).thenReturn(waynameLayer);
     WaynameFeatureFinder featureInteractor = mock(WaynameFeatureFinder.class);

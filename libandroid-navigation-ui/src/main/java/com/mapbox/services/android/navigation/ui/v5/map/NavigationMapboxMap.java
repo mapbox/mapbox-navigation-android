@@ -56,6 +56,8 @@ public class NavigationMapboxMap {
   private static final String ROAD_LABEL = "road_label";
   private static final float DEFAULT_WIDTH = 20f;
   private static final int LAST_INDEX = 0;
+  private static final String INCIDENTS_LAYER_ID = "closures";
+  private static final String TRAFFIC_LAYER_ID = "traffic";
 
   private MapboxMap mapboxMap;
   private NavigationCamera mapCamera;
@@ -64,15 +66,22 @@ public class NavigationMapboxMap {
   private MapPaddingAdjustor mapPaddingAdjustor;
   private MapWayname mapWayname;
   private SymbolLayer waynameLayer;
+  private MapLayerInteractor layerInteractor;
   private List<Marker> mapMarkers = new ArrayList<>();
 
   public NavigationMapboxMap(MapView mapView, MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     initializeLocationLayer(mapView, mapboxMap);
     initializeMapPaddingAdjustor(mapView, mapboxMap);
-    initializeWayname(mapView, mapboxMap, mapPaddingAdjustor);
+    initializeMapLayerInteractor(mapboxMap);
+    initializeWayname(mapView, mapboxMap, layerInteractor, mapPaddingAdjustor);
     initializeRoute(mapView, mapboxMap);
     initializeCamera(mapboxMap);
+  }
+
+  // Package private (no modifier) for testing purposes
+  NavigationMapboxMap(MapLayerInteractor layerInteractor) {
+    this.layerInteractor = layerInteractor;
   }
 
   public void addMarker(Context context, Point position) {
@@ -158,6 +167,44 @@ public class NavigationMapboxMap {
     return mapboxMap;
   }
 
+  /**
+   * Updates the visibility of incidents layers on the map (if any exist).
+   *
+   * @param isVisible true if incidents should be visible, false otherwise
+   */
+  public void updateIncidentsVisibility(boolean isVisible) {
+    layerInteractor.updateLayerVisibility(isVisible, INCIDENTS_LAYER_ID);
+  }
+
+  /**
+   * Returns true if the map has incidents layers and they are visible and
+   * will return false otherwise.
+   *
+   * @return true if the map has incidents layers and they are visible, false otherwise
+   */
+  public boolean isIncidentsVisible() {
+    return layerInteractor.isLayerVisible(INCIDENTS_LAYER_ID);
+  }
+
+  /**
+   * Updates the visibility of traffic layers on the map (if any exist).
+   *
+   * @param isVisible true if traffic should be visible, false otherwise
+   */
+  public void updateTrafficVisibility(boolean isVisible) {
+    layerInteractor.updateLayerVisibility(isVisible, TRAFFIC_LAYER_ID);
+  }
+
+  /**
+   * Returns true if the map has traffic layers and they are visible and
+   * will return false otherwise.
+   *
+   * @return true if the map has traffic layers and they are visible, false otherwise
+   */
+  public boolean isTrafficVisible() {
+    return layerInteractor.isLayerVisible(TRAFFIC_LAYER_ID);
+  }
+
   public void addOnMoveListener(@NonNull MapboxMap.OnMoveListener onMoveListener) {
     mapboxMap.addOnMoveListener(onMoveListener);
   }
@@ -188,16 +235,16 @@ public class NavigationMapboxMap {
     mapCamera = new NavigationCamera(map);
   }
 
-  private void initializeWayname(MapView mapView, MapboxMap mapboxMap, MapPaddingAdjustor paddingAdjustor) {
+  private void initializeWayname(MapView mapView, MapboxMap mapboxMap,
+                                 MapLayerInteractor layerInteractor, MapPaddingAdjustor paddingAdjustor) {
     initializeStreetsSource(mapboxMap);
     WaynameLayoutProvider layoutProvider = new WaynameLayoutProvider(mapView.getContext());
-    WaynameLayerInteractor layerInteractor = new WaynameLayerInteractor(mapboxMap);
     WaynameFeatureFinder featureInteractor = new WaynameFeatureFinder(mapboxMap);
     initializeWaynameLayer(layerInteractor);
     mapWayname = new MapWayname(layoutProvider, layerInteractor, featureInteractor, paddingAdjustor);
   }
 
-  private void initializeWaynameLayer(WaynameLayerInteractor layerInteractor) {
+  private void initializeWaynameLayer(MapLayerInteractor layerInteractor) {
     waynameLayer = createWaynameLayer();
     layerInteractor.addLayer(waynameLayer);
   }
@@ -217,6 +264,10 @@ public class NavigationMapboxMap {
         iconOffset(WAYNAME_OFFSET),
         iconRotationAlignment(ICON_ROTATION_ALIGNMENT_VIEWPORT)
       );
+  }
+
+  private void initializeMapLayerInteractor(MapboxMap mapboxMap) {
+    layerInteractor = new MapLayerInteractor(mapboxMap);
   }
 
   private void initializeStreetsSource(MapboxMap mapboxMap) {
