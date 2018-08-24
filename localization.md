@@ -15,20 +15,22 @@ The table below lists the languages that are supported for user interface elemen
 | Language   | User interface | [Spoken instructions][apidoc] | Remarks
 |------------|:--------------:|:-----------------------------:|--------
 | Bengali    | ✅             | —
-| Burmese    | ✅             | —
+| Burmese    | ✅             | ✅ | Depends on the device; may require third-party text-to-speech
 | Chinese    | -              | ✅ Mandarin | Depends on the device; may require third-party text-to-speech
 | Czech      | ✅             | -
 | Danish     | ✅             | ✅
 | English    | ✅             | ✅
 | Esperanto  | —              | ✅ 
+| Finnish    | —              | ✅ | Depends on the device; may require third-party text-to-speech
 | French     | ✅             | ✅
 | German     | ✅             | ✅
 | Hebrew     | ✅             | ✅ | Depends on the device; may require third-party text-to-speech
 | Indonesian | —              | ✅ | Depends on the device; may require third-party text-to-speech
 | Italian    | ✅             | ✅
-| Korean     | ✅             | —
-| Portuguese | ✅             | ✅
+| Korean     | ✅             | ✅
+| Norwegian  | —              | ✅
 | Polish     | —              | ✅ 
+| Portuguese | ✅             | ✅
 | Romanian   | —              | ✅ 
 | Russian    | ✅             | ✅
 | Spanish    | ✅             | ✅
