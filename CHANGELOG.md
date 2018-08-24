@@ -2,6 +2,17 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.18.0 - August 24, 2018
+
+* Add toggles in NavigationMapboxMap for traffic and incident data [#1226](https://github.com/mapbox/mapbox-navigation-android/pull/1226)
+* Update Map styles to V4 with incident coverage [#1234](https://github.com/mapbox/mapbox-navigation-android/pull/1234)
+* Add initialization logic for null RouteOptions [#1229](https://github.com/mapbox/mapbox-navigation-android/pull/1229)
+* Reopen the app when when clicking the whole notification [#1221](https://github.com/mapbox/mapbox-navigation-android/pull/1221)
+* Update Maps SDK to 6.4.0 and Events to 3.1.5 [#1220](https://github.com/mapbox/mapbox-navigation-android/pull/1220)
+* Do not scroll Instruction RecyclerView while animating [#1214](https://github.com/mapbox/mapbox-navigation-android/pull/1214)
+* Only reset night mode for EmbeddedNavigationActivity when isFinishing [#1213](https://github.com/mapbox/mapbox-navigation-android/pull/1213)
+* Add Boolean in MapboxSpeechPlayer to prevent IllegalStateException [#1212](https://github.com/mapbox/mapbox-navigation-android/pull/1212)
+
 ### v0.17.0 - August 10, 2018
 
 * Bump MAS version to 3.4.1 [#1203](https://github.com/mapbox/mapbox-navigation-android/pull/1203)
