@@ -9,9 +9,10 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.ui.v5.listeners.BannerInstructionsListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
-import com.mapbox.services.android.navigation.ui.v5.listeners.SpeechAnnouncementListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.SpeechAnnouncementListener;
+import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayer;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
@@ -54,6 +55,9 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
   @Nullable
   public abstract BannerInstructionsListener bannerInstructionsListener();
 
+  @Nullable
+  public abstract SpeechPlayer speechPlayer();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -90,6 +94,8 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
     public abstract Builder speechAnnouncementListener(SpeechAnnouncementListener speechAnnouncementListener);
 
     public abstract Builder bannerInstructionsListener(BannerInstructionsListener bannerInstructionsListener);
+
+    public abstract Builder speechPlayer(SpeechPlayer speechPlayer);
 
     public abstract NavigationViewOptions build();
   }

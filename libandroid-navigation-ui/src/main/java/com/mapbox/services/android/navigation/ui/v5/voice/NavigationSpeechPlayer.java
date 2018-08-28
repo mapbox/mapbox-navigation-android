@@ -14,7 +14,7 @@ import android.support.v4.app.FragmentActivity;
  *
  * @since 0.16.0
  */
-public class NavigationSpeechPlayer {
+public class NavigationSpeechPlayer implements SpeechPlayer {
 
   private SpeechPlayerProvider speechPlayerProvider;
   private boolean isMuted;
@@ -29,6 +29,7 @@ public class NavigationSpeechPlayer {
    * @param speechAnnouncement with SSML and normal announcement text
    * @since 0.16.0
    */
+  @Override
   public void play(SpeechAnnouncement speechAnnouncement) {
     speechPlayerProvider.retrieveSpeechPlayer().play(speechAnnouncement);
   }
@@ -39,6 +40,7 @@ public class NavigationSpeechPlayer {
    * @return current muted state
    * @since 0.16.0
    */
+  @Override
   public boolean isMuted() {
     return isMuted;
   }
@@ -52,6 +54,7 @@ public class NavigationSpeechPlayer {
    * @param isMuted true to mute, false to un-mute
    * @since 0.16.0
    */
+  @Override
   public void setMuted(boolean isMuted) {
     this.isMuted = isMuted;
     speechPlayerProvider.setMuted(isMuted);
@@ -65,6 +68,7 @@ public class NavigationSpeechPlayer {
    *
    * @since 0.16.0
    */
+  @Override
   public void onOffRoute() {
     speechPlayerProvider.onOffRoute();
   }
@@ -77,6 +81,7 @@ public class NavigationSpeechPlayer {
    *
    * @since 0.16.0
    */
+  @Override
   public void onDestroy() {
     speechPlayerProvider.onDestroy();
   }

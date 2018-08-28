@@ -162,7 +162,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * In a {@link android.app.Fragment}, this should be in {@link Fragment#onDestroyView()}.
    */
   public void onDestroy() {
-    navigationViewEventDispatcher.onDestroy(navigationViewModel.getNavigation());
+    navigationViewEventDispatcher.onDestroy(navigationViewModel.retrieveNavigation());
     shutdown();
   }
 
@@ -392,14 +392,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   /**
    * Returns the instance of {@link MapboxNavigation} powering the {@link NavigationView}
-   * once navigation has started.  Will return null if navgiation has not been started with
+   * once navigation has started.  Will return null if navigation has not been started with
    * {@link NavigationView#startNavigation(NavigationViewOptions)}.
    *
    * @return mapbox navigation, or null if navigation has not started
    */
   @Nullable
   public MapboxNavigation retrieveMapboxNavigation() {
-    return navigationViewModel.getNavigation();
+    return navigationViewModel.retrieveNavigation();
   }
 
   private void initializeView() {
@@ -508,7 +508,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     initializeClickListeners();
     initializeOnMoveListener();
     establish(options);
-    MapboxNavigation navigation = navigationViewModel.initializeNavigation(options);
+    MapboxNavigation navigation = navigationViewModel.initialize(options);
     initializeNavigationListeners(options, navigation);
     setupNavigationMapboxMap(options);
 
