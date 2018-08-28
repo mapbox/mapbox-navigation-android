@@ -6,7 +6,7 @@ package com.mapbox.services.android.navigation.ui.v5.voice;
  *
  * @since 0.6.0
  */
-interface SpeechPlayer {
+public interface SpeechPlayer {
 
   /**
    * Will play the given string speechAnnouncement.  If a voice speechAnnouncement is already playing or
