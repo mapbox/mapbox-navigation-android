@@ -5,6 +5,7 @@ import android.support.test.espresso.ViewAction;
 
 import com.mapbox.services.android.navigation.testapp.test.TestNavigationActivity;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import testapp.activity.BaseNavigationActivityTest;
@@ -21,6 +22,7 @@ public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
     return TestNavigationActivity.class;
   }
 
+  @Ignore
   @Test
   public void onOrientationLandscape_navigationContinuesRunning() {
     if (checkOrientation(Configuration.ORIENTATION_LANDSCAPE)) {
@@ -31,6 +33,7 @@ public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
     changeOrientation(orientationLandscape());
   }
 
+  @Ignore
   @Test
   public void onOrientationPortrait_navigationContinuesRunning() {
     if (checkOrientation(Configuration.ORIENTATION_PORTRAIT)) {
