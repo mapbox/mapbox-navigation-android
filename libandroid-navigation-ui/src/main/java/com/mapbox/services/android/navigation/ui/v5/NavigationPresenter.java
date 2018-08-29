@@ -44,8 +44,8 @@ class NavigationPresenter {
 
   void onRouteUpdate(DirectionsRoute directionsRoute) {
     view.drawRoute(directionsRoute);
-    view.updateWaynameVisibility(true);
     if (!resumeState) {
+      view.updateWaynameVisibility(true);
       view.startCamera(directionsRoute);
     }
   }
