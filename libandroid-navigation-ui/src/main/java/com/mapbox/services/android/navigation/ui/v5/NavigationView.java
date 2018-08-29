@@ -74,7 +74,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private NavigationMapboxMap navigationMap;
   private OnNavigationReadyCallback onNavigationReadyCallback;
   private MapboxMap.OnMoveListener onMoveListener;
-  private boolean isInitialized;
+  private boolean isMapInitialized;
 
   public NavigationView(Context context) {
     this(context, null);
@@ -202,6 +202,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void onMapReady(MapboxMap mapboxMap) {
     initializeNavigationMap(mapView, mapboxMap);
     onNavigationReadyCallback.onNavigationReady(navigationViewModel.isRunning());
+    isMapInitialized = true;
   }
 
   @Override
@@ -347,11 +348,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param options with containing route / coordinate data
    */
   public void startNavigation(NavigationViewOptions options) {
-    if (!isInitialized) {
-      initializeNavigation(options);
-    } else {
-      navigationViewModel.updateNavigation(options);
-    }
+    initializeNavigation(options);
   }
 
   /**
@@ -374,7 +371,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   public void initialize(OnNavigationReadyCallback onNavigationReadyCallback) {
     this.onNavigationReadyCallback = onNavigationReadyCallback;
-    mapView.getMapAsync(this);
+    if (!isMapInitialized) {
+      mapView.getMapAsync(this);
+    } else {
+      onNavigationReadyCallback.onNavigationReady(navigationViewModel.isRunning());
+    }
   }
 
   /**
@@ -513,7 +514,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     setupNavigationMapboxMap(options);
 
     subscribeViewModels();
-    isInitialized = true;
   }
 
   private void initializeClickListeners() {
