@@ -104,6 +104,7 @@ public class NavigationViewModel extends AndroidViewModel {
       locationEngineConductor.onDestroy();
       deactivateInstructionPlayer();
       endNavigation();
+      isRunning = false;
     }
     clearDynamicCameraMap();
     navigationViewEventDispatcher = null;
@@ -188,10 +189,6 @@ public class NavigationViewModel extends AndroidViewModel {
       navigationViewRouteEngine.extractRouteOptions(options);
     }
     return navigation;
-  }
-
-  void updateNavigation(NavigationViewOptions options) {
-    navigationViewRouteEngine.extractRouteOptions(options);
   }
 
   void updateFeedbackScreenshot(String screenshot) {
