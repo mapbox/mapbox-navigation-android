@@ -12,6 +12,7 @@ import android.text.style.StyleSpan;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.R;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfConversion;
@@ -31,6 +32,8 @@ public class DistanceFormatter {
 
   private static final int LARGE_UNIT_THRESHOLD = 10;
   private static final int SMALL_UNIT_THRESHOLD = 401;
+  @NavigationConstants.RoundingIncrement
+  private final int roundingIncrement;
   private final Map<String, String> unitStrings = new HashMap<>();
   private final NumberFormat numberFormat;
   private final String largeUnit;
@@ -48,9 +51,12 @@ public class DistanceFormatter {
    * @param context  from which to get localized strings from
    * @param language for which language
    * @param unitType to use, or NONE_SPECIFIED to use default for locale country
+   * @param roundingIncrement increment by which to round small distances
    */
   public DistanceFormatter(Context context, @NonNull String language,
-                           @NonNull @DirectionsCriteria.VoiceUnitCriteria String unitType) {
+                           @NonNull @DirectionsCriteria.VoiceUnitCriteria String unitType,
+                           @NavigationConstants.RoundingIncrement int roundingIncrement) {
+    this.roundingIncrement = roundingIncrement;
     localeUtils = new LocaleUtils();
 
     unitStrings.put(UNIT_KILOMETERS, context.getString(R.string.kilometers));
@@ -92,7 +98,7 @@ public class DistanceFormatter {
       return getDistanceString(roundToDecimalPlace(distanceLargeUnit, 0), largeUnit);
       // If the distance is less than 401 feet/meters, round by fifty feet/meters
     } else if (distanceSmallUnit < SMALL_UNIT_THRESHOLD) {
-      return getDistanceString(roundToClosestFifty(distanceSmallUnit), smallUnit);
+      return getDistanceString(roundToClosestIncrement(distanceSmallUnit), smallUnit);
       // If the distance is between 401 feet/meters and 10 miles/kilometers, then round to one decimal place
     } else {
       return getDistanceString(roundToDecimalPlace(distanceLargeUnit, 1), largeUnit);
@@ -107,20 +113,22 @@ public class DistanceFormatter {
    * @param unitType to check against the current formatter unitType
    * @return true if new formatter is needed, false otherwise
    */
-  public boolean shouldUpdate(@NonNull String language, @NonNull String unitType) {
-    return !this.language.equals(language) || !this.unitType.equals(unitType);
+  public boolean shouldUpdate(@NonNull String language, @NonNull String unitType, int roundingIncrement) {
+    return !this.language.equals(language) || !this.unitType.equals(unitType)
+      || !(this.roundingIncrement == roundingIncrement);
   }
 
   /**
-   * Returns number rounded to closest fifty, unless the number is less than fifty, then fifty is returned
+   * Returns number rounded to closest specified rounding increment, unless the number is less than
+   * the rounding increment, then the rounding increment is returned
    *
-   * @param distance to round to closest fifty
-   * @return number rounded to closest fifty, or fifty if distance is less than fifty
+   * @param distance to round to closest specified rounding increment
+   * @return number rounded to closest rounding increment, or rounding increment if distance is less
    */
-  private String roundToClosestFifty(double distance) {
-    int roundedNumber = ((int) Math.round(distance)) / 50 * 50;
+  private String roundToClosestIncrement(double distance) {
+    int roundedNumber = ((int) Math.round(distance)) / roundingIncrement * roundingIncrement;
 
-    return String.valueOf(roundedNumber < 50 ? 50 : roundedNumber);
+    return String.valueOf(roundedNumber < roundingIncrement ? roundingIncrement : roundedNumber);
   }
 
   /**

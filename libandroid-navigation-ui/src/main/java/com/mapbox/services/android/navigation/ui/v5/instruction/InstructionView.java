@@ -111,6 +111,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private DistanceFormatter distanceFormatter;
   private String language = "";
   private String unitType = "";
+
+  @NavigationConstants.RoundingIncrement
+  private int roundingIncrement;
   private boolean isMuted;
   private boolean isRerouting;
 
@@ -227,7 +230,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      InstructionModel model = new InstructionModel(getContext(), routeProgress, language, unitType);
+      InstructionModel model = new InstructionModel(getContext(), routeProgress, language, unitType, roundingIncrement);
       updateDataFromInstruction(model);
       updateDataFromBannerInstruction(model);
     }
@@ -362,13 +365,24 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   /**
+   * Sets the rounding increment which will be used for rounding small distances. I.e., if the rounding
+   * increment is 5, and the specified distance is 16, it will round to 15. If the rounding increment were 50,
+   * 16 would be rounded to 50.
+   *
+   * @param roundingIncrement increment of which to round
+   */
+  public void setRoundingIncrement(@NavigationConstants.RoundingIncrement int roundingIncrement) {
+    this.roundingIncrement = roundingIncrement;
+  }
+
+  /**
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void initialize() {
     LocaleUtils localeUtils = new LocaleUtils();
     language = localeUtils.inferDeviceLanguage(getContext());
     unitType = localeUtils.getUnitTypeForDeviceLocale(getContext());
-    distanceFormatter = new DistanceFormatter(getContext(), language, unitType);
+    distanceFormatter = new DistanceFormatter(getContext(), language, unitType, roundingIncrement);
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
 
@@ -914,8 +928,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   private void checkForDistanceFormatterUpdate() {
-    if (distanceFormatter.shouldUpdate(language, unitType)) {
-      distanceFormatter = new DistanceFormatter(getContext(), language, unitType);
+    if (distanceFormatter.shouldUpdate(language, unitType, roundingIncrement)) {
+      distanceFormatter = new DistanceFormatter(getContext(), language, unitType, roundingIncrement);
       instructionListAdapter.updateDistanceFormatter(distanceFormatter);
     }
   }

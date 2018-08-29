@@ -3,8 +3,10 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
@@ -20,11 +22,16 @@ public class InstructionModel {
   private RouteUtils routeUtils;
   private String language;
   private String unitType;
+  @NavigationConstants.RoundingIncrement
+  private int roundingIncrement;
 
-  public InstructionModel(Context context, RouteProgress progress, String language, String unitType) {
+  public InstructionModel(Context context, RouteProgress progress, String language,
+                          @DirectionsCriteria.VoiceUnitCriteria String unitType,
+                          @NavigationConstants.RoundingIncrement int roundingIncrement) {
     this.progress = progress;
     this.language = language;
     this.unitType = unitType;
+    this.roundingIncrement = roundingIncrement;
     routeUtils = new RouteUtils();
     buildInstructionModel(context, progress);
   }
@@ -63,7 +70,8 @@ public class InstructionModel {
   }
 
   private void buildInstructionModel(Context context, RouteProgress progress) {
-    stepResources = new InstructionStepResources(context, progress, language, unitType);
+    stepResources = new
+      InstructionStepResources(context, progress, language, unitType, roundingIncrement);
     extractStepInstructions(progress);
   }
 

@@ -17,6 +17,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -46,6 +47,8 @@ public class SummaryBottomSheet extends FrameLayout {
   private String unitType;
   @NavigationTimeFormat.Type
   private int timeFormatType;
+  @NavigationConstants.RoundingIncrement
+  private int roundingIncrement;
 
   public SummaryBottomSheet(Context context) {
     this(context, null);
@@ -107,7 +110,8 @@ public class SummaryBottomSheet extends FrameLayout {
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      SummaryModel model = new SummaryModel(getContext(), routeProgress, language, unitType, timeFormatType);
+      SummaryModel model = new SummaryModel(
+        getContext(), routeProgress, language, unitType, timeFormatType, roundingIncrement);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());
@@ -161,6 +165,17 @@ public class SummaryBottomSheet extends FrameLayout {
    */
   public void setTimeFormat(@NavigationTimeFormat.Type int type) {
     this.timeFormatType = type;
+  }
+
+  /**
+   * Sets the rounding increment which will be used for rounding small distances. I.e., if the rounding
+   * increment is 5, and the specified distance is 16, it will round to 15. If the rounding increment were 50,
+   * 16 would be rounded to 50.
+   *
+   * @param roundingIncrement increment of which to round
+   */
+  public void setRoundingIncrement(@NavigationConstants.RoundingIncrement int roundingIncrement) {
+    this.roundingIncrement = roundingIncrement;
   }
 
   /**

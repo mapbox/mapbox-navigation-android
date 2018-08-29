@@ -10,6 +10,7 @@ import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.StepIntersection;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 
@@ -34,8 +35,10 @@ class InstructionStepResources {
   @DirectionsCriteria.VoiceUnitCriteria
   private String unitType;
 
-  InstructionStepResources(Context context, RouteProgress progress, String language, String unitType) {
-    formatStepDistance(context, progress, language, unitType);
+  InstructionStepResources(Context context, RouteProgress progress, String language,
+                           @DirectionsCriteria.VoiceUnitCriteria String unitType,
+                           @NavigationConstants.RoundingIncrement int roundingIncrement) {
+    formatStepDistance(context, progress, language, unitType, roundingIncrement);
     extractStepResources(progress);
   }
 
@@ -98,9 +101,10 @@ class InstructionStepResources {
   }
 
   private void formatStepDistance(Context context, RouteProgress progress,
-                                  String language, @DirectionsCriteria.VoiceUnitCriteria String unitType) {
+                                  String language, @DirectionsCriteria.VoiceUnitCriteria String unitType,
+                                  @NavigationConstants.RoundingIncrement int roundingIncrement) {
     if (shouldDistanceUtilsBeInitialized(language, unitType)) {
-      distanceFormatter = new DistanceFormatter(context, language, unitType);
+      distanceFormatter = new DistanceFormatter(context, language, unitType, roundingIncrement);
       this.language = language;
       this.unitType = unitType;
     }
