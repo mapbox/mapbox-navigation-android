@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
@@ -181,7 +182,7 @@ public abstract class RouteLegProgress {
    * This object will only be present when a {@link com.mapbox.api.directions.v5.models.DirectionsRoute}
    * requested with {@link com.mapbox.api.directions.v5.DirectionsCriteria#ANNOTATION_DISTANCE}.
    * <p>
-   * This will be provided by default with {@link NavigationRoute#builder()}.
+   * This will be provided by default with {@link NavigationRoute#builder(Context)}.
    *
    * @return object current annotation data
    * @since 0.13.0
