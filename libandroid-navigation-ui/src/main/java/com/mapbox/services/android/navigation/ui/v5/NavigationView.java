@@ -79,6 +79,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private NavigationMapboxMapInstanceState mapInstanceState;
   private boolean isMapInitialized;
   private boolean isSubscribed;
+  private boolean isMoveListenerRemoved = false;
 
   public NavigationView(Context context) {
     this(context, null);
@@ -175,7 +176,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     mapView.onStart();
     if (navigationMap != null) {
       navigationMap.onStart();
-      navigationMap.addOnMoveListener(onMoveListener);
+      if (isMoveListenerRemoved) {
+        navigationMap.addOnMoveListener(onMoveListener);
+      }
     }
   }
 
@@ -191,6 +194,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     mapView.onStop();
     if (navigationMap != null) {
       navigationMap.onStop();
+      isMoveListenerRemoved = true;
       navigationMap.removeOnMoveListener(onMoveListener);
     }
   }
