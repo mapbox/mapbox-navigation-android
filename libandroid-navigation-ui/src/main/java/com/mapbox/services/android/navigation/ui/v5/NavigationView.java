@@ -175,6 +175,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     mapView.onStart();
     if (navigationMap != null) {
       navigationMap.onStart();
+      navigationMap.addOnMoveListener(onMoveListener);
     }
   }
 
