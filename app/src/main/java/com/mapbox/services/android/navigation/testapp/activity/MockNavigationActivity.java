@@ -150,7 +150,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
 
-    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, null);
+    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap);
     locationLayerPlugin.setRenderMode(RenderMode.GPS);
     navigationMapRoute = new NavigationMapRoute(navigation, mapView, mapboxMap);
 

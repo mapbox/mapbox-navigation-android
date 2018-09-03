@@ -153,7 +153,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     this.mapboxMap = mapboxMap;
     mapboxMap.setOnMapClickListener(this);
 
-    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap, null);
+    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap);
     locationLayerPlugin.setRenderMode(RenderMode.GPS);
 
     // Setup the mockLocationEngine
