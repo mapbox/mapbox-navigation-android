@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.snap;
 
 import android.location.Location;
+import android.support.annotation.NonNull;
 
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
@@ -18,12 +19,17 @@ public class SnapToRoute extends Snap {
 
   @Override
   public Location getSnappedLocation(Location location, RouteProgress routeProgress) {
-    return buildSnappedLocation(location);
+    // No impl
+    return location;
   }
 
-  private Location buildSnappedLocation(Location location) {
-    Date locationDate = new Date(location.getTime());
-    NavigationStatus status = navigator.getStatus(locationDate);
+  public Location getSnappedLocationWith(Location location, Date date) {
+    return buildSnappedLocation(location, date);
+  }
+
+  @NonNull
+  private Location buildSnappedLocation(Location location, Date date) {
+    NavigationStatus status = navigator.getStatus(date);
     Location snappedLocation = new Location(location);
     snappedLocation.setLatitude(status.getLocation().latitude());
     snappedLocation.setLongitude(status.getLocation().longitude());

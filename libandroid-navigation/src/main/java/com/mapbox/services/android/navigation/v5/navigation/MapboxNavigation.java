@@ -141,7 +141,7 @@ public class MapboxNavigation implements ServiceConnection {
     this.options = options;
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
-    initialize();
+    initializeForTest();
   }
 
   // Package private (no modifier) for testing purposes
@@ -152,7 +152,22 @@ public class MapboxNavigation implements ServiceConnection {
     this.options = MapboxNavigationOptions.builder().build();
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
-    initialize();
+    initializeForTest();
+  }
+
+  private void initializeForTest() {
+    // Initialize event dispatcher and add internal listeners
+    navigationEventDispatcher = new NavigationEventDispatcher();
+    navigationEngineFactory = new NavigationEngineFactory();
+    initializeDefaultLocationEngine();
+    initializeTelemetry();
+
+    // Create and add default milestones if enabled.
+    milestones = new HashSet<>();
+    if (options.defaultMilestonesEnabled()) {
+      addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
+      addMilestone(new BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build());
+    }
   }
 
   /**

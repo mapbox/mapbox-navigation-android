@@ -149,6 +149,13 @@ public abstract class RouteProgress {
   @Nullable
   public abstract List<Point> upcomingStepPoints();
 
+  /**
+   * Returns whether or not the location updates are
+   * considered in a tunnel along the route.
+   *
+   * @return true if in a tunnel, false otherwise
+   * @since 0.19.0
+   */
   public abstract boolean inTunnel();
 
   public abstract RouteProgress.Builder toBuilder();
