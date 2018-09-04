@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
@@ -184,8 +185,8 @@ public class NavigationViewModel extends AndroidViewModel {
     initializeDistanceFormatter(options);
     initializeNavigationSpeechPlayer(options);
     if (!isRunning) {
-      locationEngineConductor.initializeLocationEngine(getApplication(), options.shouldSimulateRoute());
-      initializeNavigation(getApplication(), navigationOptions);
+      LocationEngine locationEngine = initializeLocationEngineFrom(options);
+      initializeNavigation(getApplication(), navigationOptions, locationEngine);
       addMilestones(options);
     }
     navigationViewRouteEngine.extractRouteOptions(options);
@@ -267,9 +268,15 @@ public class NavigationViewModel extends AndroidViewModel {
     return new SpeechPlayerProvider(getApplication(), language, voiceLanguageSupported, accessToken);
   }
 
-  private void initializeNavigation(Context context, MapboxNavigationOptions options) {
-    navigation = new MapboxNavigation(context, accessToken, options);
-    navigation.setLocationEngine(locationEngineConductor.obtainLocationEngine());
+  private LocationEngine initializeLocationEngineFrom(NavigationViewOptions options) {
+    LocationEngine locationEngine = options.locationEngine();
+    boolean shouldReplayRoute = options.shouldSimulateRoute();
+    locationEngineConductor.initializeLocationEngine(getApplication(), locationEngine, shouldReplayRoute);
+    return locationEngineConductor.obtainLocationEngine();
+  }
+
+  private void initializeNavigation(Context context, MapboxNavigationOptions options, LocationEngine locationEngine) {
+    navigation = new MapboxNavigation(context, accessToken, options, locationEngine);
     addNavigationListeners();
   }
 

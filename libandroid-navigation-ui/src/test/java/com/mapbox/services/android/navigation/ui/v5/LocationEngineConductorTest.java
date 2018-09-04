@@ -12,15 +12,17 @@ import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLoca
 
 import org.junit.Test;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class LocationEngineConductorTest extends BaseTest {
 
   @Test
-  public void sanity() throws Exception {
+  public void sanity() {
     LocationEngineConductorListener mockCallback = mock(LocationEngineConductorListener.class);
     LocationEngineConductor locationEngineConductor = new LocationEngineConductor(mockCallback);
 
@@ -28,15 +30,40 @@ public class LocationEngineConductorTest extends BaseTest {
   }
 
   @Test
-  public void onInitWithSimulation_mockLocationEngineIsActivated() throws Exception {
+  public void onInitWithSimulation_replayEngineIsProvided() {
     LocationEngineConductorListener mockCallback = mock(LocationEngineConductorListener.class);
     LocationEngineConductor locationEngineConductor = new LocationEngineConductor(mockCallback);
     boolean simulateRouteEnabled = true;
-    locationEngineConductor.initializeLocationEngine(createMockContext(), simulateRouteEnabled);
+    locationEngineConductor.initializeLocationEngine(createMockContext(), null, simulateRouteEnabled);
 
     LocationEngine locationEngine = locationEngineConductor.obtainLocationEngine();
 
     assertTrue(locationEngine instanceof ReplayRouteLocationEngine);
+  }
+
+  @Test
+  public void onInitWithSimulationAndCustomEngine_customEngineIsProvided() {
+    LocationEngineConductorListener mockCallback = mock(LocationEngineConductorListener.class);
+    LocationEngineConductor locationEngineConductor = new LocationEngineConductor(mockCallback);
+    LocationEngine customEngine = mock(LocationEngine.class);
+    boolean simulateRouteEnabled = true;
+    locationEngineConductor.initializeLocationEngine(createMockContext(), customEngine, simulateRouteEnabled);
+
+    LocationEngine locationEngine = locationEngineConductor.obtainLocationEngine();
+
+    assertEquals(customEngine, locationEngine);
+  }
+
+  @Test
+  public void onInitWithCustomEngine_customEngineIsActivated() {
+    LocationEngineConductorListener mockCallback = mock(LocationEngineConductorListener.class);
+    LocationEngineConductor locationEngineConductor = new LocationEngineConductor(mockCallback);
+    LocationEngine customEngine = mock(LocationEngine.class);
+    boolean simulateRouteEnabled = false;
+
+    locationEngineConductor.initializeLocationEngine(createMockContext(), customEngine, simulateRouteEnabled);
+
+    verify(customEngine).activate();
   }
 
   @NonNull

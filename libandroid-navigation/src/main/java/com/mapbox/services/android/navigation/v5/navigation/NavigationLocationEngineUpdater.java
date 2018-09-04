@@ -19,6 +19,7 @@ class NavigationLocationEngineUpdater {
   }
 
   void updateLocationEngine(LocationEngine locationEngine) {
+    removeLocationEngineListener();
     this.locationEngine = locationEngine;
     locationEngine.addLocationEngineListener(listener);
   }
