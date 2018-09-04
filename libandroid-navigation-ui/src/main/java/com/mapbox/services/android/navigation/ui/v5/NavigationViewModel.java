@@ -302,7 +302,7 @@ public class NavigationViewModel extends AndroidViewModel {
       if (hasNetworkConnection()) {
         speechPlayer.onOffRoute();
         Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-        sendEventOffRoute(newOrigin);
+        handleOffRouteEvent(newOrigin);
       }
     }
   };
@@ -443,7 +443,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void sendEventOffRoute(Point newOrigin) {
+  private void handleOffRouteEvent(Point newOrigin) {
     if (navigationViewEventDispatcher != null && navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
       navigationViewEventDispatcher.onOffRoute(newOrigin);
       OffRouteEvent event = new OffRouteEvent(newOrigin, routeProgress);

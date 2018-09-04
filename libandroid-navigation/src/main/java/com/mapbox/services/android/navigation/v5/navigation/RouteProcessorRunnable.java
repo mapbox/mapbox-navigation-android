@@ -6,9 +6,11 @@ import android.os.Handler;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
+import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,11 +51,12 @@ class RouteProcessorRunnable implements Runnable {
     MapboxNavigationOptions options = mapboxNavigation.options();
     Location rawLocation = locationUpdate.location();
     DirectionsRoute route = mapboxNavigation.getRoute();
-    RouteProgress routeProgress = routeProcessor.buildNewRouteProgress(new Date(), route);
+    Date currentDate = new Date();
+    RouteProgress routeProgress = routeProcessor.buildNewRouteProgress(currentDate, route);
 
     NavigationEngineFactory engineFactory = mapboxNavigation.retrieveEngineFactory();
-    final boolean userOffRoute = isUserOffRoute(options, rawLocation, routeProgress, engineFactory);
-    final Location snappedLocation = findSnappedLocation(rawLocation, routeProgress, engineFactory);
+    final boolean userOffRoute = isUserOffRoute(options, currentDate, rawLocation, routeProgress, engineFactory);
+    final Location snappedLocation = findSnappedLocation(currentDate, rawLocation, routeProgress, engineFactory);
     final boolean checkFasterRoute = checkFasterRoute(options, rawLocation, routeProgress, engineFactory, userOffRoute);
     final List<Milestone> milestones = findTriggeredMilestones(mapboxNavigation, routeProgress);
 
@@ -61,15 +64,21 @@ class RouteProcessorRunnable implements Runnable {
     sendUpdateToResponseHandler(userOffRoute, milestones, snappedLocation, checkFasterRoute, routeProgress);
   }
 
-  private boolean isUserOffRoute(MapboxNavigationOptions options, Location rawLocation,
+  private boolean isUserOffRoute(MapboxNavigationOptions options, Date date, Location rawLocation,
                                  RouteProgress routeProgress, NavigationEngineFactory engineFactory) {
     OffRoute offRoute = engineFactory.retrieveOffRouteEngine();
+    if (offRoute instanceof OffRouteDetector) {
+      return ((OffRouteDetector) offRoute).isUserOffRouteWith(date);
+    }
     return offRoute.isUserOffRoute(rawLocation, routeProgress, options);
   }
 
-  private Location findSnappedLocation(Location rawLocation, RouteProgress routeProgress,
+  private Location findSnappedLocation(Date date, Location rawLocation, RouteProgress routeProgress,
                                        NavigationEngineFactory engineFactory) {
     Snap snap = engineFactory.retrieveSnapEngine();
+    if (snap instanceof SnapToRoute) {
+      return ((SnapToRoute) snap).getSnappedLocationWith(rawLocation, date);
+    }
     return snap.getSnappedLocation(rawLocation, routeProgress);
   }
 
