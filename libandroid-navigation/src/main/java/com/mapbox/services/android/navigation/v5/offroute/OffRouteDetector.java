@@ -20,12 +20,16 @@ public class OffRouteDetector extends OffRoute {
 
   @Override
   public boolean isUserOffRoute(Location location, RouteProgress routeProgress, MapboxNavigationOptions options) {
-    return determineIsUserOffRoute(location);
+    // No impl
+    return false;
   }
 
-  private boolean determineIsUserOffRoute(Location location) {
-    Date locationDate = new Date(location.getTime());
-    NavigationStatus status = navigator.getStatus(locationDate);
+  public boolean isUserOffRouteWith(Date date) {
+    return determineIsUserOffRoute(date);
+  }
+
+  private boolean determineIsUserOffRoute(Date date) {
+    NavigationStatus status = navigator.getStatus(date);
     return status.getRouteState() == RouteState.OFFROUTE;
   }
 }

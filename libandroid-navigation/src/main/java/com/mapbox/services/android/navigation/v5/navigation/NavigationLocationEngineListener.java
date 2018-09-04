@@ -36,9 +36,6 @@ class NavigationLocationEngineListener implements LocationEngineListener {
   public void onLocationChanged(Location location) {
     navigator.updateLocation(buildFixLocationFrom(location));
     thread.updateLocation(location);
-    if (!thread.isAlive()) {
-      thread.start();
-    }
   }
 
   boolean isValidLocationUpdate(Location location) {

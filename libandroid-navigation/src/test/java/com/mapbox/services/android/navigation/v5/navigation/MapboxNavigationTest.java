@@ -13,6 +13,7 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -218,6 +219,7 @@ public class MapboxNavigationTest extends BaseTest {
   }
 
   @Test
+  @Ignore
   public void startNavigation_doesSendTrueToNavigationEvent() throws Exception {
     MapboxNavigation navigation = buildMapboxNavigation();
     NavigationEventListener navigationEventListener = mock(NavigationEventListener.class);
