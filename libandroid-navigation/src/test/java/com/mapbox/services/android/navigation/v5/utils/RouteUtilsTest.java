@@ -8,7 +8,9 @@ import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
@@ -16,6 +18,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
@@ -397,6 +400,67 @@ public class RouteUtilsTest extends BaseTest {
     assertEquals(currentStep.voiceInstructions().get(2), currentVoiceInstructions);
   }
 
+  @Test
+  public void calculateRemainingWaypoints() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypoints()).thenReturn(2);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress);
+
+    assertEquals(2, remainingWaypoints.size());
+  }
+
+  @Test
+  public void calculateRemainingWaypoints_handlesNullOptions() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    when(route.routeOptions()).thenReturn(null);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypoints()).thenReturn(2);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress);
+
+    assertNull(remainingWaypoints);
+  }
+
+  @Test
+  public void calculateRemainingWaypointNames() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.waypointNames()).thenReturn("first;second;third;fourth");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypoints()).thenReturn(2);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(routeProgress);
+
+    assertEquals(2, remainingWaypointNames.length);
+  }
+
+  @Test
+  public void calculateRemainingWaypointNames_handlesNullOptions() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    when(route.routeOptions()).thenReturn(null);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypoints()).thenReturn(2);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(routeProgress);
+
+    assertNull(remainingWaypointNames);
+  }
+
   @NonNull
   private RouteProgress buildRouteProgress(int first, DirectionsRoute route, LegStep currentStep,
                                            LegStep upcomingStep) {
@@ -414,5 +478,14 @@ public class RouteUtilsTest extends BaseTest {
                                       List<BannerInstructions> currentStepBannerInstructions) {
     BannerInstructions bannerInstructions = currentStepBannerInstructions.get(first);
     when(bannerInstructionMilestone.getBannerInstructions()).thenReturn(bannerInstructions);
+  }
+
+  private List<Point> buildCoordinateList() {
+    List<Point> coordinates = new ArrayList<>();
+    coordinates.add(Point.fromLngLat(1.234, 5.678));
+    coordinates.add(Point.fromLngLat(1.234, 5.678));
+    coordinates.add(Point.fromLngLat(1.234, 5.678));
+    coordinates.add(Point.fromLngLat(1.234, 5.678));
+    return coordinates;
   }
 }
