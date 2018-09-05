@@ -404,10 +404,10 @@ public class NavigationViewEventDispatcherTest {
     when(bannerInstructionsListener.willDisplay(originalInstructions)).thenReturn(textBanner);
     NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(bannerInstructionsListener);
 
-    BannerInstructions modifiedInstruction = eventDispatcher.onBannerDisplay(originalInstructions);
+    BannerInstructionsWrapper modifiedInstruction = eventDispatcher.onBannerDisplay(originalInstructions);
 
-    assertEquals("banner to be displayed", modifiedInstruction.primary().components().get(0).text());
-    assertEquals("banner to be displayed", modifiedInstruction.primary().components().get(0).abbreviation());
+    assertEquals("banner to be displayed", modifiedInstruction.getBannerInstructions().primary().components().get(0).text());
+    assertEquals("banner to be displayed", modifiedInstruction.getBannerInstructions().primary().components().get(0).abbreviation());
   }
 
   @Test

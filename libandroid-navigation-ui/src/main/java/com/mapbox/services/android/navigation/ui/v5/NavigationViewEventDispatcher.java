@@ -180,7 +180,7 @@ class NavigationViewEventDispatcher {
     return announcement;
   }
 
-  BannerInstructions onBannerDisplay(BannerInstructions instructions) {
+  BannerInstructionsWrapper onBannerDisplay(BannerInstructions instructions) {
     if (bannerInstructionsListener != null) {
       String textBanner = bannerInstructionsListener.willDisplay(instructions);
       List<BannerComponents> bannerComponents = new ArrayList<>(ONE);
@@ -188,9 +188,9 @@ class NavigationViewEventDispatcher {
         .abbreviation(textBanner).build());
       BannerInstructions bannerToBeDisplayed = instructions.toBuilder().primary(instructions.primary().toBuilder()
         .components(bannerComponents).build()).build();
-      return bannerToBeDisplayed;
+      return new BannerInstructionsWrapper(bannerToBeDisplayed, true);
     }
-    return instructions;
+    return new BannerInstructionsWrapper(instructions, false);
   }
 
   private void assignProgressChangeListener(NavigationViewOptions navigationViewOptions, MapboxNavigation navigation) {
