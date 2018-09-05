@@ -43,8 +43,8 @@ dependencies {
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
 
-  // Native
-  implementation 'com.mapbox.navigator:mapbox-navigation-native:master-SNAPSHOT'
+  // Navigator
+  implementation dependenciesList.mapboxNavigator
 
   // Support
   implementation dependenciesList.supportAppcompatV7

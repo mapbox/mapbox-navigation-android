@@ -2,12 +2,10 @@ package com.mapbox.services.android.navigation.v5.snap;
 
 import android.location.Location;
 
-import com.mapbox.navigator.Navigator;
+import com.mapbox.navigator.NavigationStatus;
 
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.Date;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
@@ -18,19 +16,19 @@ public class SnapToRouteTest {
 
   @Test
   public void sanity() {
-    Navigator navigator = mock(Navigator.class);
-    Snap snap = new SnapToRoute(navigator);
+    Snap snap = new SnapToRoute();
 
     assertNotNull(snap);
   }
 
   @Test
   public void getSnappedLocation_returnsProviderNameCorrectly() {
-    Navigator navigator = mock(Navigator.class);
-    SnapToRoute snap = new SnapToRoute(navigator);
+    // TODO mock final class
+    NavigationStatus status = mock(NavigationStatus.class);
+    SnapToRoute snap = new SnapToRoute();
     Location location = new Location("test");
 
-    Location snappedLocation = snap.getSnappedLocationWith(location, new Date());
+    Location snappedLocation = snap.getSnappedLocationWith(location, status);
 
     assertTrue(snappedLocation.getProvider().equals("test"));
   }

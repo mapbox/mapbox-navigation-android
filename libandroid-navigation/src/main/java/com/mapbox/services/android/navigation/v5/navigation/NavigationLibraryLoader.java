@@ -15,16 +15,7 @@ public abstract class NavigationLibraryLoader {
   private static volatile NavigationLibraryLoader loader = DEFAULT;
 
   /**
-   * Set the library loader that loads the shared library.
-   *
-   * @param libraryLoader the library loader
-   */
-  public static void setLibraryLoader(NavigationLibraryLoader libraryLoader) {
-    loader = libraryLoader;
-  }
-
-  /**
-   * Loads navigation native shared library.
+   * Loads navigation shared library.
    * <p>
    * Catches UnsatisfiedLinkErrors and prints a warning to logcat.
    * </p>
