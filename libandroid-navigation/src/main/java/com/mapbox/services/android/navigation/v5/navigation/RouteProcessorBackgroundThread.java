@@ -10,8 +10,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.List;
 
-import timber.log.Timber;
-
 /**
  * This class extends handler thread to run most of the navigation calculations on a separate
  * background thread.
@@ -37,7 +35,6 @@ class RouteProcessorBackgroundThread extends HandlerThread {
   @Override
   public synchronized void start() {
     super.start();
-    Timber.d("NAV_DEBUG *background thread running*");
     if (workerHandler == null) {
       workerHandler = new Handler(getLooper());
     }
@@ -50,8 +47,10 @@ class RouteProcessorBackgroundThread extends HandlerThread {
   }
 
   void updateLocation(Location location) {
-    Timber.d("NAV_DEBUG background thread Location updated");
     unfilteredLocation = location;
+    if (!isAlive()) {
+      start();
+    }
   }
 
   /**

@@ -8,35 +8,35 @@ public class NavigationEngineFactoryTest {
 
   @Test
   public void onInitialization_defaultCameraEngineIsCreated() {
-    NavigationEngineFactory provider = new NavigationEngineFactory();
+    NavigationEngineFactory provider = buildNavigationEngineFactory();
 
     assertNotNull(provider.retrieveCameraEngine());
   }
 
   @Test
   public void onInitialization_defaultOffRouteEngineIsCreated() {
-    NavigationEngineFactory provider = new NavigationEngineFactory();
+    NavigationEngineFactory provider = buildNavigationEngineFactory();
 
     assertNotNull(provider.retrieveOffRouteEngine());
   }
 
   @Test
   public void onInitialization_defaultSnapEngineIsCreated() {
-    NavigationEngineFactory provider = new NavigationEngineFactory();
+    NavigationEngineFactory provider = buildNavigationEngineFactory();
 
     assertNotNull(provider.retrieveSnapEngine());
   }
 
   @Test
   public void onInitialization_defaultFasterRouteEngineIsCreated() {
-    NavigationEngineFactory provider = new NavigationEngineFactory();
+    NavigationEngineFactory provider = buildNavigationEngineFactory();
 
     assertNotNull(provider.retrieveFasterRouteEngine());
   }
 
   @Test
   public void updateFasterRouteEngine_ignoresNull() {
-    NavigationEngineFactory provider = new NavigationEngineFactory();
+    NavigationEngineFactory provider = buildNavigationEngineFactory();
 
     provider.updateFasterRouteEngine(null);
 
@@ -45,7 +45,7 @@ public class NavigationEngineFactoryTest {
 
   @Test
   public void updateOffRouteEngine_ignoresNull() {
-    NavigationEngineFactory provider = new NavigationEngineFactory();
+    NavigationEngineFactory provider = buildNavigationEngineFactory();
 
     provider.updateOffRouteEngine(null);
 
@@ -54,7 +54,7 @@ public class NavigationEngineFactoryTest {
 
   @Test
   public void updateCameraEngine_ignoresNull() {
-    NavigationEngineFactory provider = new NavigationEngineFactory();
+    NavigationEngineFactory provider = buildNavigationEngineFactory();
 
     provider.updateCameraEngine(null);
 
@@ -63,10 +63,14 @@ public class NavigationEngineFactoryTest {
 
   @Test
   public void updateSnapEngine_ignoresNull() {
-    NavigationEngineFactory provider = new NavigationEngineFactory();
+    NavigationEngineFactory provider = buildNavigationEngineFactory();
 
     provider.updateSnapEngine(null);
 
     assertNotNull(provider.retrieveSnapEngine());
+  }
+
+  private NavigationEngineFactory buildNavigationEngineFactory() {
+    return new NavigationEngineFactory();
   }
 }
