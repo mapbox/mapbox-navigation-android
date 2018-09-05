@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.navigator.VoiceInstruction;
 import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
@@ -63,16 +64,15 @@ class NavigationRouteProcessor {
     int legIndex = status.getLegIndex();
     int stepIndex = status.getStepIndex();
     int upcomingStepIndex = stepIndex + ONE_INDEX;
-    double stepDistanceRemaining = status.getRemainingStepDistance();
     updateSteps(route, legIndex, stepIndex, upcomingStepIndex);
     updateStepPoints(route, legIndex, stepIndex, upcomingStepIndex);
     updateIntersections();
 
     double legDistanceRemaining = status.getRemainingLegDistance();
     double routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, legIndex, route);
+    double stepDistanceRemaining = status.getRemainingStepDistance();
     double stepDistanceTraveled = currentStep.distance() - stepDistanceRemaining;
     currentLegAnnotation = createCurrentAnnotation(currentLegAnnotation, currentLeg, legDistanceRemaining);
-
     StepIntersection currentIntersection = findCurrentIntersection(
       currentIntersections, currentIntersectionDistances, stepDistanceTraveled
     );
@@ -96,8 +96,8 @@ class NavigationRouteProcessor {
       .currentLegAnnotation(currentLegAnnotation)
       .inTunnel(status.getInTunnel());
 
-    // TODO voice banner "current" in RouteProgress
-
+    // TODO build banner instructions from status here
+    addVoiceInstructions(status, progressBuilder);
     addUpcomingStepPoints(progressBuilder);
     RouteProgress routeProgress = progressBuilder.build();
     previousProgressList.add(routeProgress);
@@ -124,6 +124,14 @@ class NavigationRouteProcessor {
   private void addUpcomingStepPoints(RouteProgress.Builder progressBuilder) {
     if (upcomingStepPoints != null && !upcomingStepPoints.isEmpty()) {
       progressBuilder.upcomingStepPoints(upcomingStepPoints);
+    }
+  }
+
+  private void addVoiceInstructions(NavigationStatus status, RouteProgress.Builder progressBuilder) {
+    VoiceInstruction voiceInstruction = status.getVoiceInstruction();
+    if (voiceInstruction != null) {
+      progressBuilder.currentAnnouncement(voiceInstruction.getAnnouncement());
+      progressBuilder.currentSsmlAnnouncement(voiceInstruction.getSsmlAnnouncement());
     }
   }
 }

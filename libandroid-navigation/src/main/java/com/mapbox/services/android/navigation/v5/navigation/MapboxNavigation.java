@@ -64,7 +64,9 @@ public class MapboxNavigation implements ServiceConnection {
   private Context applicationContext;
   private boolean isBound;
 
-  static { NavigationLibraryLoader.load(); }
+  static {
+    NavigationLibraryLoader.load();
+  }
 
   /**
    * Constructs a new instance of this class using the default options. This should be used over
