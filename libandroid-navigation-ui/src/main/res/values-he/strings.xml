@@ -13,7 +13,7 @@
     <string name="unmuted">שמע פועל</string>
 
     <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">דרך \nמשובשת</string>
+    <string name="feedback_bad_route">דרך\nמשובשת</string>
 
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">הוראות\nמבולבלות</string>

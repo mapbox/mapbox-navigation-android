@@ -13,7 +13,7 @@
     <string name="unmuted">Genaktiveret </string>
 
     <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">Dårlig \nRute</string>
+    <string name="feedback_bad_route">Dårlig\nRute</string>
 
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Modsignede\nInstruktioner</string>

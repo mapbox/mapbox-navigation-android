@@ -13,7 +13,14 @@
     <string name="title_navigation_route_ui">Navigation / Karte / Route</string>
     <string name="description_navigation_route_ui">Zeichnet eine Route auf der Karte</string>
 
+    <string name="title_navigation_launcher">Navigations-Starter</string>
     <string name="description_navigation_launcher">Eingebautes UI Erlebnis</string>
+
+    <string name="title_end_navigation">Navigation beenden</string>
+    <string name="description_end_navigation">Zeigt, wie die Navigation mit NavigationView beendet wird</string>
+
+    <string name="title_dual_navigation_map">Duale Navigationskarte</string>
+    <string name="description_dual_navigation_map">Zeigt, wie die NavigationView und MapView im selben Layout hinzugefügt werden</string>
 
     <string name="title_waypoint_navigation">Wegpunkt-Navigation</string>
     <string name="description_waypoint_navigation">Navigation mit Wegpunkten zwischen den Zielen</string>
