@@ -55,7 +55,7 @@ public class MapboxNavigation implements ServiceConnection {
   private NavigationEngineFactory navigationEngineFactory;
   private NavigationTelemetry navigationTelemetry = null;
   private NavigationService navigationService;
-  private Navigator navigator;
+  private MapboxNavigator mapboxNavigator;
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
   private LocationEngine locationEngine = null;
@@ -64,7 +64,9 @@ public class MapboxNavigation implements ServiceConnection {
   private Context applicationContext;
   private boolean isBound;
 
-  static { NavigationLibraryLoader.load(); }
+  static {
+    NavigationLibraryLoader.load();
+  }
 
   /**
    * Constructs a new instance of this class using the default options. This should be used over
@@ -177,9 +179,9 @@ public class MapboxNavigation implements ServiceConnection {
    */
   private void initialize() {
     // Initialize event dispatcher and add internal listeners
-    navigator = new Navigator();
+    mapboxNavigator = new MapboxNavigator(new Navigator());
     navigationEventDispatcher = new NavigationEventDispatcher();
-    navigationEngineFactory = new NavigationEngineFactory(navigator);
+    navigationEngineFactory = new NavigationEngineFactory();
     initializeDefaultLocationEngine();
     initializeTelemetry();
 
@@ -816,14 +818,14 @@ public class MapboxNavigation implements ServiceConnection {
     return navigationEngineFactory;
   }
 
-  Navigator retrieveNavigator() {
-    return navigator;
+  MapboxNavigator retrieveMapboxNavigator() {
+    return mapboxNavigator;
   }
 
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute) {
     ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
-    navigator.setDirections(directionsRoute.toJson());
+    mapboxNavigator.updateRoute(directionsRoute.toJson());
     if (!isBound) {
       navigationTelemetry.startSession(directionsRoute);
       startNavigationService();
