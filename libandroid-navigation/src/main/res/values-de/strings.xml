@@ -7,4 +7,15 @@
     <string name="meters">m</string>
     <string name="miles">mile</string>
     <string name="feet">Fuß</string>
+    <string name="eta_format">%s ETA</string>
+
+    <!-- Time formatting -->
+    <plurals name="numberOfDays">
+        <item quantity="one">Tag</item>
+        <item quantity="other">Tage</item>
+    </plurals>
+    <!-- Hour -->
+    <string name="hr">Std.</string>
+    <!-- Minute -->
+    <string name="min">Min.</string>
 </resources>

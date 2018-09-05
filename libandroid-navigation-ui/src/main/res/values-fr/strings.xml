@@ -13,7 +13,7 @@
     <string name="unmuted">Audible</string>
 
     <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">Mauvaise \nroute</string>
+    <string name="feedback_bad_route">Mauvaise\nroute</string>
 
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Instructions\nnon précises</string>

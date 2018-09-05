@@ -13,7 +13,14 @@
     <string name="title_navigation_route_ui">Mapa trasy</string>
     <string name="description_navigation_route_ui">Zobrazit trasu na mapě</string>
 
+    <string name="title_navigation_launcher">Obsluha navigace</string>
     <string name="description_navigation_launcher">Opustit uživatelské prostředí</string>
+
+    <string name="title_end_navigation">Ukončit navigaci</string>
+    <string name="description_end_navigation">Zobrazit, jak ukončit navigaci v prostředí NavigationView</string>
+
+    <string name="title_dual_navigation_map">Dvojitá navigační mapa</string>
+    <string name="description_dual_navigation_map">Zobrazit, jak přidat NavigationView a MapView ve stejném okně</string>
 
     <string name="title_waypoint_navigation">Navigace s trasovými body</string>
     <string name="description_waypoint_navigation">Navigace s trasovými body mezi cíli</string>

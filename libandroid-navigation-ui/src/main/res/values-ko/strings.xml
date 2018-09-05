@@ -13,7 +13,7 @@
     <string name="unmuted">음소거 해제</string>
 
     <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">잘못된 \n경로</string>
+    <string name="feedback_bad_route">잘못된\n경로</string>
 
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">\n지시 혼동</string>

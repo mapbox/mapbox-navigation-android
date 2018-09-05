@@ -13,7 +13,7 @@
     <string name="unmuted">Увімкнено</string>
 
     <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">Незручний \nмаршрут</string>
+    <string name="feedback_bad_route">Незручний\nмаршрут</string>
 
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Незрозумілі\nінструкції</string>

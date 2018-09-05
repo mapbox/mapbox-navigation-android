@@ -13,7 +13,7 @@
     <string name="unmuted">সশব্দ</string>
 
     <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">খারাপ \nরুট</string>
+    <string name="feedback_bad_route">খারাপ\nরুট</string>
 
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">বিভ্রান্তিকর নির্দেশ</string>

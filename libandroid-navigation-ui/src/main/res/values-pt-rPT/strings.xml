@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Indicates that rerouting is in progress -->
-    <string name="rerouting">Redirecionando...</string>
+    <string name="rerouting">A redirecionar...</string>
 
     <!-- Button title for re-centering tracking -->
     <string name="re_center">Recentrar</string>
@@ -13,7 +13,7 @@
     <string name="unmuted">Som ligado</string>
 
     <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">Percurso \nRuim</string>
+    <string name="feedback_bad_route">Rota\nErrada</string>
 
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Instrução\nConfusa</string>
