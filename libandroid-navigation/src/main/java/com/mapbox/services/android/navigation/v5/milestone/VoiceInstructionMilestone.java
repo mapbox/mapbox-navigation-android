@@ -8,7 +8,13 @@ import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoad
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
-
+/**
+ * A default milestone that is added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}
+ * when default milestones are enabled.
+ * <p>
+ * Please note, this milestone has a custom trigger based on location progress along a route.  If you
+ * set custom triggers, they will be ignored in favor of this logic.
+ */
 public class VoiceInstructionMilestone extends Milestone {
 
   private static final String EMPTY_STRING = "";
