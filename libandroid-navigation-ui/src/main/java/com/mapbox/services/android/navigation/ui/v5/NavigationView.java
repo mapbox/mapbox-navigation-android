@@ -78,6 +78,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private MapboxMap.OnMoveListener onMoveListener;
   private NavigationMapboxMapInstanceState mapInstanceState;
   private boolean isMapInitialized;
+  private boolean isSubscribed;
 
   public NavigationView(Context context) {
     this(context, null);
@@ -513,14 +514,16 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void initializeNavigation(NavigationViewOptions options) {
-    initializeClickListeners();
-    initializeOnMoveListener();
     establish(options);
     MapboxNavigation navigation = navigationViewModel.initialize(options);
     initializeNavigationListeners(options, navigation);
     setupNavigationMapboxMap(options);
 
-    subscribeViewModels();
+    if (!isSubscribed) {
+      initializeClickListeners();
+      initializeOnMoveListener();
+      subscribeViewModels();
+    }
   }
 
   private void initializeClickListeners() {
@@ -584,6 +587,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
     NavigationViewSubscriber subscriber = new NavigationViewSubscriber(navigationPresenter);
     subscriber.subscribe(((LifecycleOwner) getContext()), navigationViewModel);
+    isSubscribed = true;
   }
 
   private void shutdown() {
