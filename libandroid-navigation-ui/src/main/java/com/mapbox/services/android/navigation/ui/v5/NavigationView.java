@@ -34,6 +34,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
+import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 /**
@@ -543,30 +544,33 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private void establish(NavigationViewOptions options) {
     LocaleUtils localeUtils = new LocaleUtils();
 
-    establishRoundingIncrement(options);
-    establishLanguage(localeUtils, options);
-    establishUnitType(localeUtils, options);
+    establishDistanceFormatter(localeUtils, options);
     establishTimeFormat(options);
   }
 
-  private void establishRoundingIncrement(NavigationViewOptions navigationViewOptions) {
+  private void establishDistanceFormatter(LocaleUtils localeUtils, NavigationViewOptions options) {
+    String unitType = establishUnitType(localeUtils, options);
+    String language = establishLanguage(localeUtils, options);
+    int roundingIncrement = establishRoundingIncrement(options);
+    DistanceFormatter distanceFormatter = new DistanceFormatter(getContext(), language, unitType, roundingIncrement);
+
+    instructionView.setDistanceFormatter(distanceFormatter);
+    summaryBottomSheet.setDistanceFormatter(distanceFormatter);
+  }
+
+  private int establishRoundingIncrement(NavigationViewOptions navigationViewOptions) {
     MapboxNavigationOptions mapboxNavigationOptions = navigationViewOptions.navigationOptions();
-    instructionView.setRoundingIncrement(mapboxNavigationOptions.roundingIncrement());
-    summaryBottomSheet.setRoundingIncrement(mapboxNavigationOptions.roundingIncrement());
+    return mapboxNavigationOptions.roundingIncrement();
   }
 
-  private void establishLanguage(LocaleUtils localeUtils, NavigationViewOptions options) {
-    String language = localeUtils.getNonEmptyLanguage(getContext(), options.directionsRoute().voiceLanguage());
-    instructionView.setLanguage(language);
-    summaryBottomSheet.setLanguage(language);
+  private String establishLanguage(LocaleUtils localeUtils, NavigationViewOptions options) {
+    return localeUtils.getNonEmptyLanguage(getContext(), options.directionsRoute().voiceLanguage());
   }
 
-  private void establishUnitType(LocaleUtils localeUtils, NavigationViewOptions options) {
+  private String establishUnitType(LocaleUtils localeUtils, NavigationViewOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     String voiceUnits = routeOptions == null ? null : routeOptions.voiceUnits();
-    String unitType = localeUtils.retrieveNonNullUnitType(getContext(), voiceUnits);
-    instructionView.setUnitType(unitType);
-    summaryBottomSheet.setUnitType(unitType);
+    return localeUtils.retrieveNonNullUnitType(getContext(), voiceUnits);
   }
 
   private void establishTimeFormat(NavigationViewOptions options) {

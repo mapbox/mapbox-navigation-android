@@ -11,7 +11,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
@@ -37,7 +36,6 @@ import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListene
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
 import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
@@ -46,6 +44,7 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
@@ -75,16 +74,13 @@ public class NavigationViewModel extends AndroidViewModel {
   private String feedbackId;
   private String screenshot;
   private String language;
-  @DirectionsCriteria.VoiceUnitCriteria
-  private String unitType;
   @NavigationTimeFormat.Type
   private int timeFormatType;
   private boolean isRunning;
   private RouteUtils routeUtils;
   private LocaleUtils localeUtils;
   private String accessToken;
-  @NavigationConstants.RoundingIncrement
-  private int roundingIncrement;
+  private DistanceFormatter distanceFormatter;
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -182,9 +178,8 @@ public class NavigationViewModel extends AndroidViewModel {
     MapboxNavigationOptions navigationOptions = options.navigationOptions();
     navigationOptions = navigationOptions.toBuilder().isFromNavigationUi(true).build();
     initializeLanguage(options);
-    initializeUnitType(options);
     initializeTimeFormat(navigationOptions);
-    initRoundingIncrement(navigationOptions);
+    initializeDistanceFormatter(options);
     initializeNavigationSpeechPlayer(options);
     if (!isRunning) {
       locationEngineConductor.initializeLocationEngine(getApplication(), options.shouldSimulateRoute());
@@ -230,20 +225,28 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void initializeUnitType(NavigationUiOptions options) {
+  private String initializeUnitType(NavigationUiOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
-    unitType = localeUtils.getUnitTypeForDeviceLocale(getApplication());
+    String unitType = localeUtils.getUnitTypeForDeviceLocale(getApplication());
     if (routeOptions != null) {
       unitType = routeOptions.voiceUnits();
     }
+    return unitType;
   }
 
   private void initializeTimeFormat(MapboxNavigationOptions options) {
     timeFormatType = options.timeFormatType();
   }
 
-  private void initRoundingIncrement(MapboxNavigationOptions options) {
-    this.roundingIncrement = options.roundingIncrement();
+  private int initializeRoundingIncrement(NavigationViewOptions options) {
+    MapboxNavigationOptions navigationOptions = options.navigationOptions();
+    return navigationOptions.roundingIncrement();
+  }
+
+  private void initializeDistanceFormatter(NavigationViewOptions options) {
+    String unitType = initializeUnitType(options);
+    int roundingIncrement = initializeRoundingIncrement(options);
+    distanceFormatter = new DistanceFormatter(getApplication(), language, unitType, roundingIncrement);
   }
 
   private void initializeNavigationSpeechPlayer(NavigationViewOptions options) {
@@ -287,10 +290,8 @@ public class NavigationViewModel extends AndroidViewModel {
     @Override
     public void onProgressChange(Location location, RouteProgress routeProgress) {
       NavigationViewModel.this.routeProgress = routeProgress;
-      instructionModel.setValue(
-        new InstructionModel(getApplication(), routeProgress, language, unitType,roundingIncrement));
-      summaryModel.setValue(
-        new SummaryModel(getApplication(), routeProgress, language, unitType, timeFormatType, roundingIncrement));
+      instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
+      summaryModel.setValue(new SummaryModel(getApplication(), distanceFormatter, routeProgress, timeFormatType));
       navigationLocation.setValue(location);
     }
   };
@@ -415,8 +416,7 @@ public class NavigationViewModel extends AndroidViewModel {
       BannerInstructions instructions = ((BannerInstructionMilestone) milestone).getBannerInstructions();
       instructions = retrieveInstructionsFromBannerEvent(instructions);
       if (instructions != null) {
-        BannerInstructionModel model = new BannerInstructionModel(getApplication(), instructions,
-          routeProgress, language, unitType, roundingIncrement);
+        BannerInstructionModel model = new BannerInstructionModel(distanceFormatter, routeProgress, instructions);
         bannerInstructionModel.setValue(model);
       }
     }

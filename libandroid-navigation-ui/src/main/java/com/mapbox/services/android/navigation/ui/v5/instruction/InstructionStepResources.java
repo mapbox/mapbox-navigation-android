@@ -1,16 +1,13 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.content.Context;
 import android.support.annotation.Nullable;
 import android.text.SpannableString;
 
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.StepIntersection;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 
@@ -30,15 +27,10 @@ class InstructionStepResources {
   private Float thenStepRoundaboutDegrees;
   private List<IntersectionLanes> turnLanes;
   private boolean shouldShowThenStep;
-  private DistanceFormatter distanceFormatter;
-  private String language;
-  @DirectionsCriteria.VoiceUnitCriteria
-  private String unitType;
 
-  InstructionStepResources(Context context, RouteProgress progress, String language,
-                           @DirectionsCriteria.VoiceUnitCriteria String unitType,
-                           @NavigationConstants.RoundingIncrement int roundingIncrement) {
-    formatStepDistance(context, progress, language, unitType, roundingIncrement);
+  InstructionStepResources(DistanceFormatter distanceFormatter, RouteProgress progress) {
+    double distanceRemaining = progress.currentLegProgress().currentStepProgress().distanceRemaining();
+    stepDistanceRemaining = distanceFormatter.formatDistance(distanceRemaining);
     extractStepResources(progress);
   }
 
@@ -98,23 +90,6 @@ class InstructionStepResources {
       maneuverViewType = currentStep.maneuver().type();
       maneuverViewModifier = currentStep.maneuver().modifier();
     }
-  }
-
-  private void formatStepDistance(Context context, RouteProgress progress,
-                                  String language, @DirectionsCriteria.VoiceUnitCriteria String unitType,
-                                  @NavigationConstants.RoundingIncrement int roundingIncrement) {
-    if (shouldDistanceUtilsBeInitialized(language, unitType)) {
-      distanceFormatter = new DistanceFormatter(context, language, unitType, roundingIncrement);
-      this.language = language;
-      this.unitType = unitType;
-    }
-    stepDistanceRemaining = distanceFormatter.formatDistance(
-      progress.currentLegProgress().currentStepProgress().distanceRemaining());
-  }
-
-  private boolean shouldDistanceUtilsBeInitialized(String language,
-                                                   @DirectionsCriteria.VoiceUnitCriteria String unitType) {
-    return distanceFormatter == null ||  !this.language.equals(language) || !this.unitType.equals(unitType);
   }
 
   private void intersectionTurnLanes(LegStep step) {
