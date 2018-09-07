@@ -7,6 +7,7 @@ import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 class MapboxNavigator {
@@ -19,6 +20,14 @@ class MapboxNavigator {
 
   synchronized void updateRoute(String routeJson) {
     navigator.setDirections(routeJson);
+  }
+
+  synchronized void configureRouter(String tileFilePath, String translationsDirPath) {
+    navigator.configureRouter(tileFilePath, translationsDirPath);
+  }
+
+  synchronized String getRoute(ArrayList<FixLocation> waypoints) {
+    return navigator.getRoute(waypoints);
   }
 
   synchronized NavigationStatus retrieveStatus(Date date) {
