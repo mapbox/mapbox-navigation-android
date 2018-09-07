@@ -9,10 +9,14 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -389,6 +393,21 @@ public class MapboxNavigation implements ServiceConnection {
    */
   public void startNavigation(@NonNull DirectionsRoute directionsRoute) {
     startNavigationWith(directionsRoute);
+  }
+
+  public void initializeOfflineData(String tileFilePath, String instructionsDirectoryPath) {
+    navigator.configureRouter(tileFilePath, instructionsDirectoryPath);
+  }
+
+  @Nullable
+  public DirectionsRoute findRouteOfflineFor(ArrayList<Point> coordinates) {
+    String responseJson = navigator.getRoute(coordinates);
+    if (responseJson.contains("error")) {
+      JsonObject jsonObject = new JsonParser().parse(responseJson).getAsJsonObject();
+      Timber.e("Error occurred fetching offline route: %s", jsonObject.get("error").getAsString());
+      return null;
+    }
+    return DirectionsResponse.fromJson(responseJson).routes().get(0);
   }
 
   /**

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -41,6 +42,7 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,8 +64,8 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @BindView(R.id.instructionView)
   InstructionView instructionView;
 
-  private Point origin = Point.fromLngLat(-87.6900, 41.8529);
-  private Point destination = Point.fromLngLat(-87.8921, 41.9794);
+  private Point origin = Point.fromLngLat(-0.126926, 51.507165);
+  private Point destination = Point.fromLngLat(-0.152683, 51.551346);
   private Polyline polyline;
 
   private LocationLayerPlugin locationLayerPlugin;
@@ -88,6 +90,32 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     navigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken(), options);
     navigation.addNavigationEventListener(this);
     navigation.addMilestoneEventListener(this);
+
+    String offlineTar = getOfflineDirectoryFile("uk.tar");
+    Timber.d("Tar file path: %s", offlineTar);
+    String translations = getOfflineDirectoryFile("translations");
+    Timber.d("Translations file path: %s", translations);
+
+    navigation.initializeOfflineData(offlineTar, translations);
+
+    ArrayList<Point> nullIsland = new ArrayList<>();
+    nullIsland.add(Point.fromLngLat(0.0, 0.0));
+    nullIsland.add(Point.fromLngLat(0.0, 0.0));
+    navigation.findRouteOfflineFor(nullIsland);
+
+    ArrayList<Point> coordinates = new ArrayList<>();
+    coordinates.add(Point.fromLngLat(-0.126926, 51.507165));
+    coordinates.add(Point.fromLngLat(-0.152683, 51.551346));
+    DirectionsRoute route = navigation.findRouteOfflineFor(coordinates);
+    if (route != null) {
+      Timber.d("Offline route: %s", route.geometry());
+    }
+  }
+
+  public String getOfflineDirectoryFile(String fileName) {
+    File offline = Environment.getExternalStoragePublicDirectory("Offline");
+    File file = new File(offline, fileName);
+    return file.getAbsolutePath();
   }
 
   @Override
