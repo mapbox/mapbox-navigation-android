@@ -92,6 +92,7 @@ public class RouteFetcher {
     }
     addDestination(remainingWaypoints, builder);
     addWaypoints(remainingWaypoints, builder);
+    addWaypointNames(progress, builder);
     return builder;
   }
 
@@ -111,6 +112,13 @@ public class RouteFetcher {
       for (Point coordinate : remainingCoordinates) {
         builder.addWaypoint(coordinate);
       }
+    }
+  }
+
+  private void addWaypointNames(RouteProgress progress, NavigationRoute.Builder builder) {
+    String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(progress);
+    if (remainingWaypointNames != null) {
+      builder.addWaypointNames(remainingWaypointNames);
     }
   }
 

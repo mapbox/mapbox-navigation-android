@@ -10,6 +10,7 @@ import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
@@ -17,9 +18,10 @@ import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMile
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,8 +32,8 @@ public class RouteUtils {
 
   private static final String FORCED_LOCATION = "Forced Location";
   private static final int FIRST_COORDINATE = 0;
-  private static final int ZERO_INSTRUCTIONS = 0;
   private static final int FIRST_INSTRUCTION = 0;
+  private static final String SEMICOLON = ";";
   private static final Set<String> VALID_PROFILES = new HashSet<String>() {
     {
       add(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
@@ -134,6 +136,25 @@ public class RouteUtils {
     }
     coordinates.subList(0, routeProgress.remainingWaypoints()).clear();
     return coordinates;
+  }
+
+  /**
+   * Given a {@link RouteProgress}, this method will calculate the remaining waypoint names
+   * along the given route based on route option waypoint names and the progress remaining coordinates.
+   *
+   * @param routeProgress for route waypoint names and remaining coordinates
+   * @return String array of remaining waypoint names
+   * @since 0.19.0
+   */
+  @Nullable
+  public String[] calculateRemainingWaypointNames(RouteProgress routeProgress) {
+    RouteOptions routeOptions = routeProgress.directionsRoute().routeOptions();
+    if (routeOptions == null || TextUtils.isEmpty(routeOptions.waypointNames())) {
+      return null;
+    }
+    String waypointNames = routeOptions.waypointNames();
+    String[] names = waypointNames.split(SEMICOLON);
+    return Arrays.copyOfRange(names, FIRST_COORDINATE, routeProgress.remainingWaypoints());
   }
 
   /**
