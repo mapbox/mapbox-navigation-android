@@ -167,6 +167,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * In a {@link android.app.Fragment}, this should be in {@link Fragment#onDestroyView()}.
    */
   public void onDestroy() {
+    if ( navigationMap != null) {
+      navigationMap.removeOnMoveListener(onMoveListener);
+    }
     navigationViewEventDispatcher.onDestroy(navigationViewModel.retrieveNavigation());
     shutdown();
   }
@@ -190,7 +193,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     mapView.onStop();
     if (navigationMap != null) {
       navigationMap.onStop();
-      navigationMap.removeOnMoveListener(onMoveListener);
     }
   }
 
