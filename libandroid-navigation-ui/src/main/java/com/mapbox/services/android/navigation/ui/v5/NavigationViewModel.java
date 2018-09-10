@@ -186,8 +186,8 @@ public class NavigationViewModel extends AndroidViewModel {
       locationEngineConductor.initializeLocationEngine(getApplication(), options.shouldSimulateRoute());
       initializeNavigation(getApplication(), navigationOptions);
       addMilestones(options);
-      navigationViewRouteEngine.extractRouteOptions(options);
     }
+    navigationViewRouteEngine.extractRouteOptions(options);
     return navigation;
   }
 
