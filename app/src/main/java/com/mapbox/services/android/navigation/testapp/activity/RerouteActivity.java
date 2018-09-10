@@ -6,6 +6,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -64,8 +65,8 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @BindView(R.id.instructionView)
   InstructionView instructionView;
 
-  private Point origin = Point.fromLngLat(-0.126926, 51.507165);
-  private Point destination = Point.fromLngLat(-0.152683, 51.551346);
+  private Point origin = Point.fromLngLat(-1.220722, 51.757772);
+  private Point destination = Point.fromLngLat(-1.2206, 51.757);
   private Polyline polyline;
 
   private LocationLayerPlugin locationLayerPlugin;
@@ -74,6 +75,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   private MapboxMap mapboxMap;
   private boolean running;
   private boolean tracking;
+  private DirectionsRoute route;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +85,6 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     ButterKnife.bind(this);
 
     mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(this);
 
     // Initialize MapboxNavigation and add listeners
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().isDebugLoggingEnabled(true).build();
@@ -91,31 +92,16 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     navigation.addNavigationEventListener(this);
     navigation.addMilestoneEventListener(this);
 
-    String offlineTar = getOfflineDirectoryFile("uk.tar");
-    Timber.d("Tar file path: %s", offlineTar);
-    String translations = getOfflineDirectoryFile("translations");
-    Timber.d("Translations file path: %s", translations);
+    String tarFilePath = getOfflineDirectoryFile("uk.tar");
+    Timber.d("Tar file path: %s", tarFilePath);
+    String translationsDirPath = getOfflineDirectoryFile("translations");
+    Timber.d("Translations file path: %s", translationsDirPath);
 
-    navigation.initializeOfflineData(offlineTar, translations);
+    navigation.initializeOfflineData(tarFilePath, translationsDirPath);
+    route = findOfflineRouteFor(origin, destination);
+    checkRoute();
 
-    ArrayList<Point> nullIsland = new ArrayList<>();
-    nullIsland.add(Point.fromLngLat(0.0, 0.0));
-    nullIsland.add(Point.fromLngLat(0.0, 0.0));
-    navigation.findRouteOfflineFor(nullIsland);
-
-    ArrayList<Point> coordinates = new ArrayList<>();
-    coordinates.add(Point.fromLngLat(-0.126926, 51.507165));
-    coordinates.add(Point.fromLngLat(-0.152683, 51.551346));
-    DirectionsRoute route = navigation.findRouteOfflineFor(coordinates);
-    if (route != null) {
-      Timber.d("Offline route: %s", route.geometry());
-    }
-  }
-
-  public String getOfflineDirectoryFile(String fileName) {
-    File offline = Environment.getExternalStoragePublicDirectory("Offline");
-    File file = new File(offline, fileName);
-    return file.getAbsolutePath();
+    mapView.getMapAsync(this);
   }
 
   @Override
@@ -180,18 +166,17 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    mapboxMap.setOnMapClickListener(this);
+    mapboxMap.addOnMapClickListener(this);
 
     locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap);
-    locationLayerPlugin.setRenderMode(RenderMode.GPS);
+    locationLayerPlugin.setRenderMode(RenderMode.NORMAL);
 
     // Setup the mockLocationEngine
     mockLocationEngine = new MockLocationEngine(1000, 30, false);
     mockLocationEngine.addLocationEngineListener(this);
     navigation.setLocationEngine(mockLocationEngine);
 
-    // Acquire the navigation route
-    getRoute(origin, destination, null);
+    handleNewRoute(route);
   }
 
   @Override
@@ -213,7 +198,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     mapboxMap.addMarker(new MarkerOptions().position(point));
-    mapboxMap.setOnMapClickListener(null);
+    mapboxMap.removeOnMapClickListener(this);
 
     Point newDestination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     mockLocationEngine.moveToLocation(newDestination);
@@ -232,10 +217,12 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void userOffRoute(Location location) {
-    Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    getRoute(newOrigin, destination, location.getBearing());
     Snackbar.make(contentLayout, "User Off Route", Snackbar.LENGTH_SHORT).show();
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
+    Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    route = findOfflineRouteFor(newOrigin, destination);
+    checkRoute();
+    handleNewRoute(route);
   }
 
 
@@ -243,12 +230,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     if (tracking) {
       locationLayerPlugin.forceLocationUpdate(location);
-      CameraPosition cameraPosition = new CameraPosition.Builder()
-        .zoom(15)
-        .target(new LatLng(location.getLatitude(), location.getLongitude()))
-        .bearing(location.getBearing())
-        .build();
-      mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000);
+      animateCameraFor(location);
     }
     instructionView.update(routeProgress);
   }
@@ -265,15 +247,8 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     Timber.d(call.request().url().toString());
     if (response.body() != null) {
       if (!response.body().routes().isEmpty()) {
-        // Extract the route
         DirectionsRoute route = response.body().routes().get(0);
-        // Draw it on the map
-        drawRoute(route);
-        // Start mocking the new route
-        resetLocationEngine(route);
-        navigation.startNavigation(route);
-        mapboxMap.setOnMapClickListener(this);
-        tracking = true;
+        handleNewRoute(route);
       }
     }
   }
@@ -283,6 +258,31 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     Timber.e(throwable);
   }
 
+  private void checkRoute() {
+    if (route != null) {
+      Snackbar.make(contentLayout, "Offline route found", Snackbar.LENGTH_SHORT).show();
+    } else {
+      Snackbar.make(contentLayout, "Offline route not found", Snackbar.LENGTH_SHORT).show();
+    }
+  }
+
+  private String getOfflineDirectoryFile(String fileName) {
+    File offline = Environment.getExternalStoragePublicDirectory("Offline");
+    if (!offline.exists()) {
+      Timber.d("Offline directory does not exist");
+    }
+    File file = new File(offline, fileName);
+    return file.getAbsolutePath();
+  }
+
+  @Nullable
+  private DirectionsRoute findOfflineRouteFor(Point origin, Point destination) {
+    ArrayList<Point> coordinates = new ArrayList<>();
+    coordinates.add(origin);
+    coordinates.add(destination);
+    return navigation.findOfflineRouteFor(coordinates);
+  }
+
   private void getRoute(Point origin, Point destination, Float bearing) {
     Double heading = bearing == null ? null : bearing.doubleValue();
     NavigationRoute.builder(this)
@@ -290,6 +290,12 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
       .destination(destination)
       .accessToken(Mapbox.getAccessToken())
       .build().getRoute(this);
+  }
+
+  private void startNavigation(DirectionsRoute route) {
+    navigation.startNavigation(route);
+    mapboxMap.addOnMapClickListener(this);
+    tracking = true;
   }
 
   private void drawRoute(DirectionsRoute route) {
@@ -309,6 +315,24 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
         .color(Color.parseColor("#4264fb"))
         .width(5));
     }
+  }
+
+  private void handleNewRoute(DirectionsRoute route) {
+    if (route == null) {
+      return;
+    }
+    drawRoute(route);
+    resetLocationEngine(route);
+    startNavigation(route);
+  }
+
+  private void animateCameraFor(Location location) {
+    CameraPosition cameraPosition = new CameraPosition.Builder()
+      .zoom(15)
+      .target(new LatLng(location.getLatitude(), location.getLongitude()))
+      .bearing(location.getBearing())
+      .build();
+    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000);
   }
 
   private void resetLocationEngine(DirectionsRoute directionsRoute) {

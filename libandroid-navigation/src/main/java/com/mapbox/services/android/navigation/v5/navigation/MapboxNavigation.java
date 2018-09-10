@@ -14,8 +14,10 @@ import com.google.gson.JsonParser;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
@@ -31,7 +33,6 @@ import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
-import com.mapbox.services.android.navigation.v5.utils.ValidationUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -395,19 +396,42 @@ public class MapboxNavigation implements ServiceConnection {
     startNavigationWith(directionsRoute);
   }
 
-  public void initializeOfflineData(String tileFilePath, String instructionsDirectoryPath) {
-    navigator.configureRouter(tileFilePath, instructionsDirectoryPath);
+  public void initializeOfflineData(String tileFilePath, String translationsDirPath) {
+    navigator.configureRouter(tileFilePath, translationsDirPath);
+
+    // Prime Navigator
+    ArrayList<Point> nullIsland = new ArrayList<>();
+    nullIsland.add(Point.fromLngLat(0.0, 0.0));
+    nullIsland.add(Point.fromLngLat(0.0, 0.0));
+    navigator.getRoute(nullIsland);
   }
 
   @Nullable
-  public DirectionsRoute findRouteOfflineFor(ArrayList<Point> coordinates) {
+  public DirectionsRoute findOfflineRouteFor(ArrayList<Point> coordinates) {
     String responseJson = navigator.getRoute(coordinates);
     if (responseJson.contains("error")) {
       JsonObject jsonObject = new JsonParser().parse(responseJson).getAsJsonObject();
-      Timber.e("Error occurred fetching offline route: %s", jsonObject.get("error").getAsString());
+      Timber.e("Error occurred fetching offline route: %s - Code: %s",
+        jsonObject.get("error").getAsString(),
+        jsonObject.get("error_code").getAsString());
       return null;
     }
-    return DirectionsResponse.fromJson(responseJson).routes().get(0);
+    DirectionsRoute route = DirectionsResponse.fromJson(responseJson).routes().get(0);
+    return route.toBuilder().routeOptions(generateRouteOptionsFrom(coordinates)).build();
+  }
+
+  private RouteOptions generateRouteOptionsFrom(List<Point> coordinates) {
+    return RouteOptions.builder()
+      .accessToken(accessToken)
+      .baseUrl("valhalla_base_url")
+      .requestUuid("valhalla")
+      .user("test_user")
+      .geometries("valhalla_geometries")
+      .coordinates(coordinates)
+      .profile(DirectionsCriteria.PROFILE_DRIVING)
+      .voiceInstructions(true)
+      .bannerInstructions(true)
+      .build();
   }
 
   /**
@@ -820,7 +844,7 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute) {
-    ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
+//    ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
     synchronizedNavigator.retrieveNavigator().setDirections(directionsRoute.toJson());
     if (!isBound) {

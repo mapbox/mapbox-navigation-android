@@ -199,6 +199,10 @@ public class MockLocationEngine extends LocationEngine {
    * @since 2.2.0
    */
   private void sliceRoute(LineString lineString, double distance) {
+    if (lineString.coordinates().size() < 2) {
+      return;
+    }
+
     double distanceKm = TurfMeasurement.length(lineString, TurfConstants.UNIT_KILOMETERS);
     Timber.d("Route distance in km: %f", distanceKm);
     if (distanceKm <= 0) {
