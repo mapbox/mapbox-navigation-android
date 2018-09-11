@@ -1,6 +1,8 @@
 package com.mapbox.services.android.navigation.testapp.activity;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -81,6 +83,13 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   private Point destination;
   private Point waypoint;
 
+  private final BroadcastReceiver stopNavigationReceiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      navigation.stopNavigation();
+    }
+  };
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -90,11 +99,10 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
 
-    // Use a custom notification
-    Context applicationContext = getApplicationContext();
-    CustomNavigationNotification customNavigationNotification = new CustomNavigationNotification(applicationContext);
+    Context context = getApplicationContext();
+    CustomNavigationNotification customNotification = new CustomNavigationNotification(context, stopNavigationReceiver);
     MapboxNavigationOptions options = MapboxNavigationOptions.builder()
-      .navigationNotification(customNavigationNotification)
+      .navigationNotification(customNotification)
       .build();
 
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken(), options);

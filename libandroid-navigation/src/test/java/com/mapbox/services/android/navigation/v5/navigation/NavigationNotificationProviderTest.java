@@ -10,8 +10,8 @@ import org.junit.Test;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 public class NavigationNotificationProviderTest {
@@ -35,11 +35,24 @@ public class NavigationNotificationProviderTest {
     MapboxNavigation mapboxNavigation = buildNavigationWithNotificationOptions(notification);
     Context context = mock(Context.class);
     NavigationNotificationProvider provider = new NavigationNotificationProvider(context, mapboxNavigation);
+    RouteProgress routeProgress = mock(RouteProgress.class);
 
     provider.shutdown(context);
-    provider.updateNavigationNotification(mock(RouteProgress.class));
+    provider.updateNavigationNotification(routeProgress);
 
-    verifyZeroInteractions(notification);
+    verify(notification, times(0)).updateNotification(routeProgress);
+  }
+
+  @Test
+  public void onShutdown_onNavigationStoppedIsCalled() {
+    NavigationNotification notification = mock(NavigationNotification.class);
+    MapboxNavigation mapboxNavigation = buildNavigationWithNotificationOptions(notification);
+    Context context = mock(Context.class);
+    NavigationNotificationProvider provider = new NavigationNotificationProvider(context, mapboxNavigation);
+
+    provider.shutdown(context);
+
+    verify(notification).onNavigationStopped(context);
   }
 
   @NonNull
