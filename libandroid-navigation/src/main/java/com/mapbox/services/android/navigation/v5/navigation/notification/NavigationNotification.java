@@ -1,7 +1,9 @@
 package com.mapbox.services.android.navigation.v5.navigation.notification;
 
 import android.app.Notification;
+import android.content.Context;
 
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 /**
@@ -38,4 +40,13 @@ public interface NavigationNotification {
    * @param routeProgress with the latest progress data
    */
   void updateNotification(RouteProgress routeProgress);
+
+  /**
+   * Callback for when navigation is stopped via {@link MapboxNavigation#stopNavigation()}.
+   * <p>
+   * This callback may be used to clean up any listeners or receivers, preventing leaks.
+   *
+   * @param context to be used if needed for Android-related work
+   */
+  void onNavigationStopped(Context context);
 }

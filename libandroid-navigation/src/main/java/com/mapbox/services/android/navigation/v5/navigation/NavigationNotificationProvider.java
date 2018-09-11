@@ -25,9 +25,7 @@ class NavigationNotificationProvider {
   }
 
   void shutdown(Context context) {
-    if (navigationNotification instanceof MapboxNavigationNotification) {
-      ((MapboxNavigationNotification) navigationNotification).unregisterReceiver(context);
-    }
+    navigationNotification.onNavigationStopped(context);
     navigationNotification = null;
     shouldUpdate = false;
   }

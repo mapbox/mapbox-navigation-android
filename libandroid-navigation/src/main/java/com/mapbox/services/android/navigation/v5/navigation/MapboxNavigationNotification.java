@@ -75,13 +75,9 @@ class MapboxNavigationNotification implements NavigationNotification {
     updateNotificationViews(routeProgress);
   }
 
-  void unregisterReceiver(Context context) {
-    if (context != null) {
-      context.unregisterReceiver(endNavigationBtnReceiver);
-    }
-    if (notificationManager != null) {
-      notificationManager.cancel(NAVIGATION_NOTIFICATION_ID);
-    }
+  @Override
+  public void onNavigationStopped(Context context) {
+    unregisterReceiver(context);
   }
 
   private void initialize(Context context, MapboxNavigation mapboxNavigation) {
@@ -170,6 +166,15 @@ class MapboxNavigationNotification implements NavigationNotification {
     updateManeuverImage(step);
 
     notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notificationBuilder.build());
+  }
+
+  private void unregisterReceiver(Context context) {
+    if (context != null) {
+      context.unregisterReceiver(endNavigationBtnReceiver);
+    }
+    if (notificationManager != null) {
+      notificationManager.cancel(NAVIGATION_NOTIFICATION_ID);
+    }
   }
 
   private void updateInstructionText(LegStep step) {
