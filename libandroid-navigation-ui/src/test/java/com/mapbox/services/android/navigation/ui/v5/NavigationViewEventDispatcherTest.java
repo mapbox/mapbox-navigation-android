@@ -19,6 +19,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -375,15 +376,26 @@ public class NavigationViewEventDispatcherTest {
 
   @Test
   public void onNewVoiceAnnouncement_instructionListenerIsCalled() {
-    SpeechAnnouncement modifiedAnnouncement = mock(SpeechAnnouncement.class);
     SpeechAnnouncement originalAnnouncement = mock(SpeechAnnouncement.class);
     SpeechAnnouncementListener speechAnnouncementListener = mock(SpeechAnnouncementListener.class);
-    when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(modifiedAnnouncement);
+    String textAnnouncement = "announcement to be voiced";
+    when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(textAnnouncement);
     NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(speechAnnouncementListener);
 
     eventDispatcher.onAnnouncement(originalAnnouncement);
 
     verify(speechAnnouncementListener).willVoice(originalAnnouncement);
+  }
+
+  @Test
+  public void onNewVoiceAnnouncement_announcementToBeVoicedIsReturned() {
+    SpeechAnnouncement originalAnnouncement = SpeechAnnouncement.builder().announcement("announcement").build();
+    SpeechAnnouncementListener speechAnnouncementListener = mock(SpeechAnnouncementListener.class);
+    String textAnnouncement = "announcement to be voiced";
+    when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(textAnnouncement);
+    NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(speechAnnouncementListener);
+    SpeechAnnouncement modifiedAnnouncement = eventDispatcher.onAnnouncement(originalAnnouncement);
+    assertEquals("announcement to be voiced", modifiedAnnouncement.announcement());
   }
 
   @NonNull
