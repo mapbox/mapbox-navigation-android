@@ -55,6 +55,10 @@ public class InstructionListPresenter {
     }
   }
 
+  void clearBannerInstructions() {
+    instructions.clear();
+  }
+
   private boolean shouldUpdate(DistanceFormatter distanceFormatter) {
     return distanceFormatter != null
       && (this.distanceFormatter == null || !this.distanceFormatter.equals(distanceFormatter));

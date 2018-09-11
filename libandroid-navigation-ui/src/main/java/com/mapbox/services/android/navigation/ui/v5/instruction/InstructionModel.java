@@ -20,6 +20,7 @@ public class InstructionModel {
   private RouteUtils routeUtils;
   private String language;
   private String unitType;
+  private boolean isBannerTextOverridden;
 
   public InstructionModel(Context context, RouteProgress progress, String language, String unitType) {
     this.progress = progress;
@@ -27,6 +28,14 @@ public class InstructionModel {
     this.unitType = unitType;
     routeUtils = new RouteUtils();
     buildInstructionModel(context, progress);
+  }
+
+  public boolean isBannerTextOverridden() {
+    return isBannerTextOverridden;
+  }
+
+  public void setBannerTextOverridden(boolean bannerTextOverridden) {
+    isBannerTextOverridden = bannerTextOverridden;
   }
 
   BannerText getPrimaryBannerText() {

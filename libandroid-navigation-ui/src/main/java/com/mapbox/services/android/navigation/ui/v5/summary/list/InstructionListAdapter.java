@@ -53,4 +53,8 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   public void updateDistanceFormatter(DistanceFormatter distanceFormatter) {
     presenter.updateDistanceFormatter(distanceFormatter);
   }
+
+  public void clearBannerInstructions() {
+    presenter.clearBannerInstructions();
+  }
 }

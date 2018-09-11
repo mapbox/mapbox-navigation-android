@@ -82,6 +82,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private RouteUtils routeUtils;
   private LocaleUtils localeUtils;
   private String accessToken;
+  private boolean isBannerTextOverridden;
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -157,7 +158,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
   /**
    * Returns the current instance of {@link MapboxNavigation}.
-   *
+   * <p>
    * Will be null if navigation has not been initialized.
    */
   @Nullable
@@ -279,7 +280,9 @@ public class NavigationViewModel extends AndroidViewModel {
     @Override
     public void onProgressChange(Location location, RouteProgress routeProgress) {
       NavigationViewModel.this.routeProgress = routeProgress;
-      instructionModel.setValue(new InstructionModel(getApplication(), routeProgress, language, unitType));
+      InstructionModel instruction = new InstructionModel(getApplication(), routeProgress, language, unitType);
+      instruction.setBannerTextOverridden(isBannerTextOverridden);
+      instructionModel.setValue(instruction);
       summaryModel.setValue(new SummaryModel(getApplication(), routeProgress, language, unitType, timeFormatType));
       navigationLocation.setValue(location);
     }
@@ -403,7 +406,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private void updateBannerInstruction(RouteProgress routeProgress, Milestone milestone) {
     if (milestone instanceof BannerInstructionMilestone) {
       BannerInstructions instructions = ((BannerInstructionMilestone) milestone).getBannerInstructions();
-      instructions = retrieveInstructionsFromBannerEvent(instructions);
+      instructions = retrieveInstructionsFromBannerEvent(instructions).getBannerInstructions();
       if (instructions != null) {
         BannerInstructionModel model = new BannerInstructionModel(getApplication(), instructions,
           routeProgress, language, unitType);
@@ -471,10 +474,13 @@ public class NavigationViewModel extends AndroidViewModel {
     return announcement;
   }
 
-  private BannerInstructions retrieveInstructionsFromBannerEvent(BannerInstructions instructions) {
+  private BannerInstructionsWrapper retrieveInstructionsFromBannerEvent(BannerInstructions instructions) {
     if (navigationViewEventDispatcher != null) {
-      instructions = navigationViewEventDispatcher.onBannerDisplay(instructions);
+      BannerInstructionsWrapper wrapper = navigationViewEventDispatcher.onBannerDisplay(instructions);
+      isBannerTextOverridden = wrapper.isBannerTextOverridden();
+      return wrapper;
     }
-    return instructions;
+    isBannerTextOverridden = false;
+    return new BannerInstructionsWrapper(instructions, isBannerTextOverridden);
   }
 }

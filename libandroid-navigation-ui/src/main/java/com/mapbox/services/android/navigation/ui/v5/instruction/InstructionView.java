@@ -715,7 +715,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     String maneuverViewModifier = model.getManeuverModifier();
     double durationRemaining = model.getProgress().currentLegProgress().currentStepProgress().durationRemaining();
 
-    if (shouldShowTurnLanes(turnLanes, maneuverViewModifier, durationRemaining)) {
+    boolean isBannerTextOverridden = model.isBannerTextOverridden();
+    if (!isBannerTextOverridden && shouldShowTurnLanes(turnLanes, maneuverViewModifier, durationRemaining)) {
       if (turnLaneLayout.getVisibility() == GONE) {
         turnLaneAdapter.addTurnLanes(turnLanes, maneuverViewModifier);
         showTurnLanes();
@@ -759,7 +760,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model to determine if the then step layout should be shown
    */
   private void updateThenStep(InstructionModel model) {
-    if (shouldShowThenStep(model)) {
+    boolean isBannerTextOverridden = model.isBannerTextOverridden();
+    if (!isBannerTextOverridden && shouldShowThenStep(model)) {
       String thenStepManeuverType = model.getStepResources().getThenStepManeuverType();
       String thenStepManeuverModifier = model.getStepResources().getThenStepManeuverModifier();
       thenManeuverView.setManeuverTypeAndModifier(thenStepManeuverType, thenStepManeuverModifier);
@@ -932,6 +934,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model to provide the current steps and unit type
    */
   private void updateInstructionList(InstructionModel model) {
+    boolean isBannerTextOverridden = model.isBannerTextOverridden();
+    if (isBannerTextOverridden) {
+      instructionListAdapter.clearBannerInstructions();
+    }
     RouteProgress routeProgress = model.getProgress();
     boolean isListShowing = instructionListLayout.getVisibility() == VISIBLE;
     instructionListAdapter.updateBannerListWith(routeProgress, isListShowing);
