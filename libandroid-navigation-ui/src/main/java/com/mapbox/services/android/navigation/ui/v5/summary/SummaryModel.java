@@ -4,7 +4,6 @@ import android.content.Context;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
@@ -20,11 +19,9 @@ public class SummaryModel {
   private final SpannableStringBuilder timeRemaining;
   private final String arrivalTime;
 
-  public SummaryModel(Context context, RouteProgress progress, String language,
-                      @DirectionsCriteria.VoiceUnitCriteria String unitType,
+  public SummaryModel(Context context, DistanceFormatter distanceFormatter, RouteProgress progress,
                       @NavigationTimeFormat.Type int timeFormatType) {
-    distanceRemaining = new DistanceFormatter(context, language, unitType)
-      .formatDistance(progress.distanceRemaining()).toString();
+    distanceRemaining = distanceFormatter.formatDistance(progress.distanceRemaining()).toString();
     timeRemaining = formatTimeRemaining(context, progress.durationRemaining());
     Calendar time = Calendar.getInstance();
     boolean isTwentyFourHourFormat = DateFormat.is24HourFormat(context);

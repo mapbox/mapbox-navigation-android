@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.ui.v5.summary;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -13,13 +12,14 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.text.DecimalFormat;
@@ -41,11 +41,9 @@ public class SummaryBottomSheet extends FrameLayout {
   private TextView arrivalTimeText;
   private ProgressBar rerouteProgressBar;
   private boolean isRerouting;
-  private String language;
-  @DirectionsCriteria.VoiceUnitCriteria
-  private String unitType;
   @NavigationTimeFormat.Type
   private int timeFormatType;
+  private DistanceFormatter distanceFormatter;
 
   public SummaryBottomSheet(Context context) {
     this(context, null);
@@ -57,7 +55,7 @@ public class SummaryBottomSheet extends FrameLayout {
 
   public SummaryBottomSheet(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
-    init();
+    initialize();
   }
 
   /**
@@ -107,7 +105,7 @@ public class SummaryBottomSheet extends FrameLayout {
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
-      SummaryModel model = new SummaryModel(getContext(), routeProgress, language, unitType, timeFormatType);
+      SummaryModel model = new SummaryModel(getContext(), distanceFormatter, routeProgress, timeFormatType);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());
@@ -137,24 +135,6 @@ public class SummaryBottomSheet extends FrameLayout {
   }
 
   /**
-   * Sets the language to use for voice language and default unit type
-   *
-   * @param language to use
-   */
-  public void setLanguage(@NonNull String language) {
-    this.language = language;
-  }
-
-  /**
-   * Sets the unit type to use
-   *
-   * @param unitType to use
-   */
-  public void setUnitType(@DirectionsCriteria.VoiceUnitCriteria String unitType) {
-    this.unitType = unitType;
-  }
-
-  /**
    * Sets the time format type to use
    *
    * @param type to use
@@ -164,11 +144,30 @@ public class SummaryBottomSheet extends FrameLayout {
   }
 
   /**
+   * Sets the distance formatter
+   *
+   * @param distanceFormatter to set
+   */
+  public void setDistanceFormatter(DistanceFormatter distanceFormatter) {
+    if (distanceFormatter != null && !distanceFormatter.equals(this.distanceFormatter)) {
+      this.distanceFormatter = distanceFormatter;
+    }
+  }
+
+  /**
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
-  private void init() {
-    language = new LocaleUtils().inferDeviceLanguage(getContext());
+  private void initialize() {
+    initializeDistanceFormatter();
     inflate(getContext(), R.layout.summary_bottomsheet_layout, this);
+  }
+
+  private void initializeDistanceFormatter() {
+    LocaleUtils localeUtils = new LocaleUtils();
+    String language = localeUtils.inferDeviceLanguage(getContext());
+    String unitType = localeUtils.getUnitTypeForDeviceLocale(getContext());
+    int roundingIncrement = NavigationConstants.ROUNDING_INCREMENT_FIFTY;
+    distanceFormatter = new DistanceFormatter(getContext(), language, unitType, roundingIncrement);
   }
 
   /**

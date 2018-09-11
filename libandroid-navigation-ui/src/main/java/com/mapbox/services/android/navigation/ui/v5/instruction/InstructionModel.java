@@ -1,12 +1,12 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 public class InstructionModel {
@@ -18,15 +18,11 @@ public class InstructionModel {
   private InstructionStepResources stepResources;
   private RouteProgress progress;
   private RouteUtils routeUtils;
-  private String language;
-  private String unitType;
 
-  public InstructionModel(Context context, RouteProgress progress, String language, String unitType) {
+  public InstructionModel(DistanceFormatter distanceFormatter, RouteProgress progress) {
     this.progress = progress;
-    this.language = language;
-    this.unitType = unitType;
     routeUtils = new RouteUtils();
-    buildInstructionModel(context, progress);
+    buildInstructionModel(distanceFormatter, progress);
   }
 
   BannerText getPrimaryBannerText() {
@@ -62,8 +58,8 @@ public class InstructionModel {
     return progress;
   }
 
-  private void buildInstructionModel(Context context, RouteProgress progress) {
-    stepResources = new InstructionStepResources(context, progress, language, unitType);
+  private void buildInstructionModel(DistanceFormatter distanceFormatter, RouteProgress progress) {
+    stepResources = new InstructionStepResources(distanceFormatter, progress);
     extractStepInstructions(progress);
   }
 

@@ -19,6 +19,8 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.util.Locale;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ROUNDING_INCREMENT_FIFTY;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ROUNDING_INCREMENT_TEN;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
@@ -49,72 +51,82 @@ public class DistanceFormatterTest {
 
   @Test
   public void formatDistance_noLocaleCountry() {
-    assertOutput(LARGE_LARGE_UNIT, new Locale(Locale.ENGLISH.getLanguage()), DirectionsCriteria.IMPERIAL, "11 mi");
+    assertOutput(LARGE_LARGE_UNIT, new Locale(Locale.ENGLISH.getLanguage()), DirectionsCriteria.IMPERIAL, ROUNDING_INCREMENT_FIFTY, "11 mi");
 
   }
 
   @Test
   public void formatDistance_noLocale() {
-    assertOutput(LARGE_LARGE_UNIT, new Locale("", ""), DirectionsCriteria.IMPERIAL, "11 mi");
+    assertOutput(LARGE_LARGE_UNIT, new Locale("", ""), DirectionsCriteria.IMPERIAL, ROUNDING_INCREMENT_FIFTY, "11 mi");
   }
 
   @Test
   public void formatDistance_unitTypeDifferentFromLocale() {
-    assertOutput(LARGE_LARGE_UNIT, Locale.US, DirectionsCriteria.METRIC, "18 km");
+    assertOutput(LARGE_LARGE_UNIT, Locale.US, DirectionsCriteria.METRIC, ROUNDING_INCREMENT_FIFTY,"18 km");
   }
 
   @Test
   public void formatDistance_largeMiles() {
-    assertOutput(LARGE_LARGE_UNIT, Locale.US, DirectionsCriteria.IMPERIAL,"11 mi");
+    assertOutput(LARGE_LARGE_UNIT, Locale.US, DirectionsCriteria.IMPERIAL, ROUNDING_INCREMENT_FIFTY, "11 mi");
   }
 
   @Test
   public void formatDistance_largeKilometers() {
-    assertOutput(LARGE_LARGE_UNIT, Locale.FRANCE, DirectionsCriteria.METRIC, "18 km");
+    assertOutput(LARGE_LARGE_UNIT, Locale.FRANCE, DirectionsCriteria.METRIC, ROUNDING_INCREMENT_FIFTY,"18 km");
   }
 
   @Test
   public void formatDistance_largeKilometerNoUnitTypeButMetricLocale() {
-    assertOutput(LARGE_LARGE_UNIT, Locale.FRANCE, DirectionsCriteria.METRIC,"18 km");
+    assertOutput(LARGE_LARGE_UNIT, Locale.FRANCE, DirectionsCriteria.METRIC, ROUNDING_INCREMENT_FIFTY,"18 km");
   }
 
   @Test
   public void formatDistance_mediumMiles() {
-    assertOutput(MEDIUM_LARGE_UNIT, Locale.US, DirectionsCriteria.IMPERIAL, "6.1 mi");
+    assertOutput(MEDIUM_LARGE_UNIT, Locale.US, DirectionsCriteria.IMPERIAL, ROUNDING_INCREMENT_FIFTY,"6.1 mi");
   }
 
   @Test
   public void formatDistance_mediumKilometers() {
-    assertOutput(MEDIUM_LARGE_UNIT, Locale.FRANCE, DirectionsCriteria.METRIC, "9,8 km");
+    assertOutput(MEDIUM_LARGE_UNIT, Locale.FRANCE, DirectionsCriteria.METRIC, ROUNDING_INCREMENT_FIFTY,"9,8 km");
   }
 
   @Test
   public void formatDistance_mediumKilometersUnitTypeDifferentFromLocale() {
-    assertOutput(MEDIUM_LARGE_UNIT, Locale.FRANCE, DirectionsCriteria.IMPERIAL, "6,1 mi");
+    assertOutput(MEDIUM_LARGE_UNIT, Locale.FRANCE, DirectionsCriteria.IMPERIAL, ROUNDING_INCREMENT_FIFTY,"6,1 mi");
   }
 
   @Test
   public void formatDistance_smallFeet() {
-    assertOutput(SMALL_SMALL_UNIT, Locale.US, DirectionsCriteria.IMPERIAL, "50 ft");
+    assertOutput(SMALL_SMALL_UNIT, Locale.US, DirectionsCriteria.IMPERIAL, ROUNDING_INCREMENT_FIFTY, "50 ft");
+  }
+
+  @Test
+  public void formatDistance_smallFeet_roundToTen() {
+    assertOutput(SMALL_SMALL_UNIT, Locale.US, DirectionsCriteria.IMPERIAL, ROUNDING_INCREMENT_TEN, "40 ft");
   }
 
   @Test
   public void formatDistance_smallMeters() {
-    assertOutput(SMALL_SMALL_UNIT, Locale.FRANCE, DirectionsCriteria.METRIC, "50 m");
+    assertOutput(SMALL_SMALL_UNIT, Locale.FRANCE, DirectionsCriteria.METRIC, ROUNDING_INCREMENT_FIFTY, "50 m");
+  }
+
+  @Test
+  public void formatDistance_smallMeters_roundToTen() {
+    assertOutput(SMALL_SMALL_UNIT, Locale.FRANCE, DirectionsCriteria.METRIC, ROUNDING_INCREMENT_TEN, "10 m");
   }
 
   @Test
   public void formatDistance_largeFeet() {
-    assertOutput(LARGE_SMALL_UNIT, Locale.US, DirectionsCriteria.IMPERIAL,"350 ft");
+    assertOutput(LARGE_SMALL_UNIT, Locale.US, DirectionsCriteria.IMPERIAL, ROUNDING_INCREMENT_FIFTY,"350 ft");
   }
 
   @Test
   public void formatDistance_largeMeters() {
-    assertOutput(LARGE_SMALL_UNIT, Locale.FRANCE, DirectionsCriteria.METRIC, "100 m");
+    assertOutput(LARGE_SMALL_UNIT, Locale.FRANCE, DirectionsCriteria.METRIC, ROUNDING_INCREMENT_FIFTY,"100 m");
   }
 
-  private void assertOutput(double distance, Locale locale, String unitType, String output) {
+  private void assertOutput(double distance, Locale locale, String unitType, int roundIncrement, String output) {
     Assert.assertEquals(output,
-      new DistanceFormatter(context, locale.getLanguage(), unitType).formatDistance(distance).toString());
+      new DistanceFormatter(context, locale.getLanguage(), unitType, roundIncrement).formatDistance(distance).toString());
   }
 }

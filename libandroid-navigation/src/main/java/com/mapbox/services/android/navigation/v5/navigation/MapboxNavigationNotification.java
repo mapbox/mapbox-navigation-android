@@ -104,7 +104,8 @@ class MapboxNavigationNotification implements NavigationNotification {
       language = routeOptions.language();
       unitType = routeOptions.voiceUnits();
     }
-    distanceFormatter = new DistanceFormatter(context, language, unitType);
+    MapboxNavigationOptions mapboxNavigationOptions = mapboxNavigation.options();
+    distanceFormatter = new DistanceFormatter(context, language, unitType, mapboxNavigationOptions.roundingIncrement());
   }
 
   private void createNotificationChannel(Context context) {

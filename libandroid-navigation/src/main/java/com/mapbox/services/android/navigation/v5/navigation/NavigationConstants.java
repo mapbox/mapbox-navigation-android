@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.support.annotation.IntDef;
 import android.support.annotation.StringDef;
 
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -276,4 +277,21 @@ public final class NavigationConstants {
   public static final String TURN_LANE_INDICATION_RIGHT = "right";
   public static final String TURN_LANE_INDICATION_SLIGHT_RIGHT = "slight right";
   public static final String TURN_LANE_INDICATION_UTURN = "uturn";
+
+  // Distance Rounding Increments
+  public static final int ROUNDING_INCREMENT_FIVE = 5;
+  public static final int ROUNDING_INCREMENT_TEN = 10;
+  public static final int ROUNDING_INCREMENT_TWENTY_FIVE = 25;
+  public static final int ROUNDING_INCREMENT_FIFTY = 50;
+  public static final int ROUNDING_INCREMENT_ONE_HUNDRED = 100;
+
+  @IntDef( {
+    ROUNDING_INCREMENT_FIVE,
+    ROUNDING_INCREMENT_TEN,
+    ROUNDING_INCREMENT_TWENTY_FIVE,
+    ROUNDING_INCREMENT_FIFTY,
+    ROUNDING_INCREMENT_ONE_HUNDRED
+  })
+  public @interface RoundingIncrement {
+  }
 }

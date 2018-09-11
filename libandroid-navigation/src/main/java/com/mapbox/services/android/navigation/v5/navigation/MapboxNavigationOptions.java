@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ROUNDING_INCREMENT_FIFTY;
+
 /**
  * Immutable and can't be changed after passing into {@link MapboxNavigation}.
  */
@@ -45,6 +47,9 @@ public abstract class MapboxNavigationOptions {
 
   @Nullable
   public abstract NavigationNotification navigationNotification();
+
+  @NavigationConstants.RoundingIncrement
+  public abstract int roundingIncrement();
 
   @NavigationTimeFormat.Type
   public abstract int timeFormatType();
@@ -90,6 +95,8 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder navigationNotification(NavigationNotification notification);
 
+    public abstract Builder roundingIncrement(@NavigationConstants.RoundingIncrement int roundingIncrement);
+
     public abstract Builder timeFormatType(@NavigationTimeFormat.Type int type);
 
     public abstract Builder locationAcceptableAccuracyInMetersThreshold(int accuracyInMetersThreshold);
@@ -115,6 +122,7 @@ public abstract class MapboxNavigationOptions {
       .metersRemainingTillArrival(NavigationConstants.METERS_REMAINING_TILL_ARRIVAL)
       .isFromNavigationUi(false)
       .isDebugLoggingEnabled(false)
+      .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
       .timeFormatType(NavigationTimeFormat.NONE_SPECIFIED)
       .locationAcceptableAccuracyInMetersThreshold(NavigationConstants.ONE_HUNDRED_METER_ACCEPTABLE_ACCURACY_THRESHOLD);
   }
