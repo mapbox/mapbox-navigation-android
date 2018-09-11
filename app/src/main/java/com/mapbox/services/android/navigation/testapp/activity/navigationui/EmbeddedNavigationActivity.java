@@ -168,8 +168,8 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public SpeechAnnouncement willVoice(SpeechAnnouncement announcement) {
-    return SpeechAnnouncement.builder().announcement("All announcements will be the same.").build();
+  public String willVoice(SpeechAnnouncement announcement) {
+    return "All announcements will be the same.";
   }
 
   @Override

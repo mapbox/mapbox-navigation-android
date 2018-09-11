@@ -12,9 +12,9 @@ import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.listeners.BannerInstructionsListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
-import com.mapbox.services.android.navigation.ui.v5.listeners.SpeechAnnouncementListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.SpeechAnnouncementListener;
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
@@ -167,7 +167,9 @@ class NavigationViewEventDispatcher {
 
   SpeechAnnouncement onAnnouncement(SpeechAnnouncement announcement) {
     if (speechAnnouncementListener != null) {
-      return speechAnnouncementListener.willVoice(announcement);
+      String textAnnouncement = speechAnnouncementListener.willVoice(announcement);
+      SpeechAnnouncement announcementToBeVoiced = SpeechAnnouncement.builder().announcement(textAnnouncement).build();
+      return announcementToBeVoiced;
     }
     return announcement;
   }
