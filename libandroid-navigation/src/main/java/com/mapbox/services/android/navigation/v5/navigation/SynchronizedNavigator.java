@@ -7,6 +7,7 @@ import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 class SynchronizedNavigator {
@@ -19,6 +20,10 @@ class SynchronizedNavigator {
 
   Navigator retrieveNavigator() {
     return navigator;
+  }
+
+  synchronized String getRoute(ArrayList<FixLocation> waypoints) {
+    return navigator.getRoute(waypoints);
   }
 
   synchronized NavigationStatus getStatus(Date date) {

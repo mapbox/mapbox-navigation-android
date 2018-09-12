@@ -8,12 +8,15 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.NavigationStatus;
+import com.mapbox.navigator.RouteState;
 import com.mapbox.navigator.VoiceInstruction;
 import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 
 import java.util.List;
+
+import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createCurrentAnnotation;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createDistancesToIntersections;
@@ -87,6 +90,8 @@ class NavigationRouteProcessor {
       .intersectionDistancesAlongStep(currentIntersectionDistances)
       .currentLegAnnotation(currentLegAnnotation)
       .inTunnel(status.getInTunnel());
+
+    Timber.d("NavigationRouteProcessor#stale? %s", status.getRouteState() == RouteState.STALE);
 
     // TODO build banner instructions from status here
     addVoiceInstructions(status, progressBuilder);

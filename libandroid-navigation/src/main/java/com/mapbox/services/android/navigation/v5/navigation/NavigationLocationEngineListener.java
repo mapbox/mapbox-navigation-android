@@ -6,6 +6,8 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.services.android.navigation.v5.location.LocationValidator;
 
+import timber.log.Timber;
+
 class NavigationLocationEngineListener implements LocationEngineListener {
 
   private final RouteProcessorBackgroundThread thread;
@@ -27,6 +29,7 @@ class NavigationLocationEngineListener implements LocationEngineListener {
 
   @Override
   public void onLocationChanged(Location location) {
+    Timber.d("NavigationLocationEngineListener#onLocationChanged: %s", location);
     thread.updateRawLocation(location);
   }
 

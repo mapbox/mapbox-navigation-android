@@ -6,7 +6,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -92,13 +91,16 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     navigation.addNavigationEventListener(this);
     navigation.addMilestoneEventListener(this);
 
-    String tarFilePath = getOfflineDirectoryFile("uk.tar");
-    Timber.d("Tar file path: %s", tarFilePath);
+    String tarFilePath = getOfflineDirectoryFile("tiles");
+    Timber.d("Tiles file path: %s", tarFilePath);
     String translationsDirPath = getOfflineDirectoryFile("translations");
     Timber.d("Translations file path: %s", translationsDirPath);
 
     navigation.initializeOfflineData(tarFilePath, translationsDirPath);
-    route = findOfflineRouteFor(origin, destination);
+    ArrayList<Point> waypoints = new ArrayList<>();
+    waypoints.add(origin);
+    waypoints.add(destination);
+    route = navigation.findOfflineRouteFor(null, waypoints);
     checkRoute();
 
     mapView.getMapAsync(this);
@@ -220,7 +222,10 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     Snackbar.make(contentLayout, "User Off Route", Snackbar.LENGTH_SHORT).show();
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
     Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    route = findOfflineRouteFor(newOrigin, destination);
+    ArrayList<Point> waypoints = new ArrayList<>();
+    waypoints.add(newOrigin);
+    waypoints.add(destination);
+    route = navigation.findOfflineRouteFor(null, waypoints);
     checkRoute();
     handleNewRoute(route);
   }
@@ -273,14 +278,6 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     }
     File file = new File(offline, fileName);
     return file.getAbsolutePath();
-  }
-
-  @Nullable
-  private DirectionsRoute findOfflineRouteFor(Point origin, Point destination) {
-    ArrayList<Point> coordinates = new ArrayList<>();
-    coordinates.add(origin);
-    coordinates.add(destination);
-    return navigation.findOfflineRouteFor(coordinates);
   }
 
   private void getRoute(Point origin, Point destination, Float bearing) {

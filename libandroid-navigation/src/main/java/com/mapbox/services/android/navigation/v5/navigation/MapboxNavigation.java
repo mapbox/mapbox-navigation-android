@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -19,6 +20,7 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
+import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -35,6 +37,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -397,18 +400,20 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   public void initializeOfflineData(String tileFilePath, String translationsDirPath) {
-    navigator.configureRouter(tileFilePath, translationsDirPath);
+    synchronizedNavigator.retrieveNavigator().configureRouter(tileFilePath, translationsDirPath);
 
     // Prime Navigator
-    ArrayList<Point> nullIsland = new ArrayList<>();
-    nullIsland.add(Point.fromLngLat(0.0, 0.0));
-    nullIsland.add(Point.fromLngLat(0.0, 0.0));
-    navigator.getRoute(nullIsland);
+    ArrayList<FixLocation> nullIsland = new ArrayList<>();
+    nullIsland.add(buildFixLocationFrom(Point.fromLngLat(0.0, 0.0)));
+    nullIsland.add(buildFixLocationFrom(Point.fromLngLat(0.0, 0.0)));
+    synchronizedNavigator.getRoute(nullIsland);
   }
 
   @Nullable
-  public DirectionsRoute findOfflineRouteFor(ArrayList<Point> coordinates) {
-    String responseJson = navigator.getRoute(coordinates);
+  public DirectionsRoute findOfflineRouteFor(@Nullable Location currentLocation,
+                                             ArrayList<Point> waypoints) {
+    ArrayList<FixLocation> fixLocations = buildFixLocationListFrom(currentLocation, waypoints);
+    String responseJson = synchronizedNavigator.getRoute(fixLocations);
     if (responseJson.contains("error")) {
       JsonObject jsonObject = new JsonParser().parse(responseJson).getAsJsonObject();
       Timber.e("Error occurred fetching offline route: %s - Code: %s",
@@ -417,10 +422,14 @@ public class MapboxNavigation implements ServiceConnection {
       return null;
     }
     DirectionsRoute route = DirectionsResponse.fromJson(responseJson).routes().get(0);
-    return route.toBuilder().routeOptions(generateRouteOptionsFrom(coordinates)).build();
+    return route.toBuilder().routeOptions(generateRouteOptionsFrom(fixLocations)).build();
   }
 
-  private RouteOptions generateRouteOptionsFrom(List<Point> coordinates) {
+  private RouteOptions generateRouteOptionsFrom(List<FixLocation> fixLocations) {
+    List<Point> coordinates = new ArrayList<>();
+    for (FixLocation fixLocation : fixLocations) {
+      coordinates.add(fixLocation.getLocation());
+    }
     return RouteOptions.builder()
       .accessToken(accessToken)
       .baseUrl("valhalla_base_url")
@@ -432,6 +441,40 @@ public class MapboxNavigation implements ServiceConnection {
       .voiceInstructions(true)
       .bannerInstructions(true)
       .build();
+  }
+
+  private ArrayList<FixLocation> buildFixLocationListFrom(@Nullable Location currentLocation,
+                                                          ArrayList<Point> waypoints) {
+    ArrayList<FixLocation> fixLocations = new ArrayList<>();
+    if (currentLocation != null) {
+      fixLocations.add(buildFixLocationFrom(currentLocation));
+    }
+    for (Point point : waypoints) {
+      fixLocations.add(buildFixLocationFrom(point));
+    }
+    return fixLocations;
+  }
+
+  private FixLocation buildFixLocationFrom(Location location) {
+    Point point = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    return new FixLocation(
+      point,
+      new Date(location.getTime()),
+      location.getSpeed(),
+      location.getBearing(),
+      (float) location.getAltitude(),
+      location.getAccuracy(),
+      "mapbox_navigation"
+    );
+  }
+
+  private FixLocation buildFixLocationFrom(Point point) {
+    return new FixLocation(
+      point,
+      new Date(),
+      0f, 0f, 0f, 0f,
+      "mapbox_navigation"
+    );
   }
 
   /**
