@@ -124,7 +124,7 @@ public class NavigationService extends Service {
     int accuracyThreshold = mapboxNavigation.options().locationAcceptableAccuracyInMetersThreshold();
     LocationValidator validator = new LocationValidator(accuracyThreshold);
     NavigationLocationEngineListener listener = new NavigationLocationEngineListener(
-      thread, mapboxNavigation.retrieveNavigator(), locationEngine, validator
+      thread, locationEngine, validator
     );
     locationUpdater = new NavigationLocationEngineUpdater(locationEngine, listener);
   }

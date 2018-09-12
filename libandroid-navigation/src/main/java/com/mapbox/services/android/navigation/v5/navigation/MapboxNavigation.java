@@ -55,7 +55,7 @@ public class MapboxNavigation implements ServiceConnection {
   private NavigationEngineFactory navigationEngineFactory;
   private NavigationTelemetry navigationTelemetry = null;
   private NavigationService navigationService;
-  private Navigator navigator;
+  private SynchronizedNavigator synchronizedNavigator;
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
   private LocationEngine locationEngine = null;
@@ -157,9 +157,9 @@ public class MapboxNavigation implements ServiceConnection {
    */
   private void initialize() {
     // Initialize event dispatcher and add internal listeners
-    navigator = new Navigator();
+    synchronizedNavigator = new SynchronizedNavigator(new Navigator());
     navigationEventDispatcher = new NavigationEventDispatcher();
-    navigationEngineFactory = new NavigationEngineFactory(navigator);
+    navigationEngineFactory = new NavigationEngineFactory();
     initializeDefaultLocationEngine();
     initializeTelemetry();
 
@@ -796,14 +796,14 @@ public class MapboxNavigation implements ServiceConnection {
     return navigationEngineFactory;
   }
 
-  Navigator retrieveNavigator() {
-    return navigator;
+  SynchronizedNavigator retrieveSynchronizedNavigator() {
+    return synchronizedNavigator;
   }
 
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute) {
     ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
-    navigator.setDirections(directionsRoute.toJson());
+    synchronizedNavigator.retrieveNavigator().setDirections(directionsRoute.toJson());
     if (!isBound) {
       navigationTelemetry.startSession(directionsRoute);
       startNavigationService();

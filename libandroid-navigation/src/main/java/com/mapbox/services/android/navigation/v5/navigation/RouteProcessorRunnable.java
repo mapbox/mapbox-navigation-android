@@ -4,6 +4,7 @@ import android.location.Location;
 import android.os.Handler;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
@@ -22,18 +23,19 @@ class RouteProcessorRunnable implements Runnable {
 
   private static final int ONE_SECOND = 1000;
   private final NavigationRouteProcessor routeProcessor;
-  private final NavigationLocationUpdate locationUpdate;
+  private final MapboxNavigation navigation;
   private final Handler workerHandler;
   private final Handler responseHandler;
   private final RouteProcessorBackgroundThread.Listener listener;
+  private Location rawLocation;
 
   RouteProcessorRunnable(NavigationRouteProcessor routeProcessor,
-                         NavigationLocationUpdate locationUpdate,
+                         MapboxNavigation navigation,
                          Handler workerHandler,
                          Handler responseHandler,
                          RouteProcessorBackgroundThread.Listener listener) {
     this.routeProcessor = routeProcessor;
-    this.locationUpdate = locationUpdate;
+    this.navigation = navigation;
     this.workerHandler = workerHandler;
     this.responseHandler = responseHandler;
     this.listener = listener;
@@ -44,40 +46,44 @@ class RouteProcessorRunnable implements Runnable {
     process();
   }
 
+  void updateRawLocation(Location rawLocation) {
+    this.rawLocation = rawLocation;
+  }
+
   private void process() {
     Timber.d("NAV_DEBUG Processor Runnable fired - processing...");
 
-    MapboxNavigation mapboxNavigation = locationUpdate.mapboxNavigation();
-    MapboxNavigationOptions options = mapboxNavigation.options();
-    Location rawLocation = locationUpdate.location();
-    DirectionsRoute route = mapboxNavigation.getRoute();
-    Date currentDate = new Date();
-    RouteProgress routeProgress = routeProcessor.buildNewRouteProgress(currentDate, route);
+    SynchronizedNavigator synchronizedNavigator = navigation.retrieveSynchronizedNavigator();
+    MapboxNavigationOptions options = navigation.options();
+    DirectionsRoute route = navigation.getRoute();
 
-    NavigationEngineFactory engineFactory = mapboxNavigation.retrieveEngineFactory();
-    final boolean userOffRoute = isUserOffRoute(options, currentDate, rawLocation, routeProgress, engineFactory);
-    final Location snappedLocation = findSnappedLocation(currentDate, rawLocation, routeProgress, engineFactory);
+    NavigationStatus status = synchronizedNavigator.getStatus(new Date());
+    RouteProgress routeProgress = routeProcessor.buildNewRouteProgress(status, route);
+
+    NavigationEngineFactory engineFactory = navigation.retrieveEngineFactory();
+    final boolean userOffRoute = isUserOffRoute(options, status, rawLocation, routeProgress, engineFactory);
+    final Location snappedLocation = findSnappedLocation(status, rawLocation, routeProgress, engineFactory);
     final boolean checkFasterRoute = checkFasterRoute(options, rawLocation, routeProgress, engineFactory, userOffRoute);
-    final List<Milestone> milestones = findTriggeredMilestones(mapboxNavigation, routeProgress);
+    final List<Milestone> milestones = findTriggeredMilestones(navigation, routeProgress);
 
     workerHandler.postDelayed(this, ONE_SECOND);
     sendUpdateToResponseHandler(userOffRoute, milestones, snappedLocation, checkFasterRoute, routeProgress);
   }
 
-  private boolean isUserOffRoute(MapboxNavigationOptions options, Date date, Location rawLocation,
+  private boolean isUserOffRoute(MapboxNavigationOptions options, NavigationStatus status, Location rawLocation,
                                  RouteProgress routeProgress, NavigationEngineFactory engineFactory) {
     OffRoute offRoute = engineFactory.retrieveOffRouteEngine();
     if (offRoute instanceof OffRouteDetector) {
-      return ((OffRouteDetector) offRoute).isUserOffRouteWith(date);
+      return ((OffRouteDetector) offRoute).isUserOffRouteWith(status);
     }
     return offRoute.isUserOffRoute(rawLocation, routeProgress, options);
   }
 
-  private Location findSnappedLocation(Date date, Location rawLocation, RouteProgress routeProgress,
+  private Location findSnappedLocation(NavigationStatus status, Location rawLocation, RouteProgress routeProgress,
                                        NavigationEngineFactory engineFactory) {
     Snap snap = engineFactory.retrieveSnapEngine();
     if (snap instanceof SnapToRoute) {
-      return ((SnapToRoute) snap).getSnappedLocationWith(rawLocation, date);
+      return ((SnapToRoute) snap).getSnappedLocationWith(rawLocation, status);
     }
     return snap.getSnappedLocation(rawLocation, routeProgress);
   }

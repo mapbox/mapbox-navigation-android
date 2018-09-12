@@ -22,14 +22,14 @@ class RouteProcessorBackgroundThread extends HandlerThread {
   private final Listener listener;
   private final NavigationRouteProcessor routeProcessor;
   private Handler workerHandler;
-  private Location unfilteredLocation;
+  private RouteProcessorRunnable runnable;
 
   RouteProcessorBackgroundThread(MapboxNavigation navigation, Handler responseHandler, Listener listener) {
     super(MAPBOX_NAVIGATION_THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
     this.navigation = navigation;
     this.responseHandler = responseHandler;
     this.listener = listener;
-    this.routeProcessor = new NavigationRouteProcessor(navigation.retrieveNavigator());
+    this.routeProcessor = new NavigationRouteProcessor();
   }
 
   @Override
@@ -38,19 +38,18 @@ class RouteProcessorBackgroundThread extends HandlerThread {
     if (workerHandler == null) {
       workerHandler = new Handler(getLooper());
     }
-
-    NavigationLocationUpdate locationUpdate = NavigationLocationUpdate.create(unfilteredLocation, navigation);
-    RouteProcessorRunnable runnable = new RouteProcessorRunnable(
-      routeProcessor, locationUpdate, workerHandler, responseHandler, listener
+    runnable = new RouteProcessorRunnable(
+      routeProcessor, navigation, workerHandler, responseHandler, listener
     );
     workerHandler.post(runnable);
   }
 
-  void updateLocation(Location location) {
-    unfilteredLocation = location;
+  void updateRawLocation(Location rawLocation) {
     if (!isAlive()) {
       start();
     }
+    navigation.retrieveSynchronizedNavigator().updateLocation(rawLocation);
+    runnable.updateRawLocation(rawLocation);
   }
 
   /**
