@@ -11,7 +11,6 @@ buildscript {
   }
   dependencies {
     classpath pluginDependencies.gradle
-    classpath pluginDependencies.sonarqube
     classpath pluginDependencies.coveralls
     classpath pluginDependencies.errorprone
     classpath pluginDependencies.dependencyUpdates
@@ -47,5 +46,3 @@ subprojects {
 task clean(type: Delete) {
   delete rootProject.buildDir
 }
-
-apply from: "${rootDir}/gradle/sonarqube.gradle"
