@@ -21,7 +21,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.FixLocation;
-import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -35,6 +34,7 @@ import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
+import com.mapbox.services.android.navigation.v5.utils.ValidationUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -165,7 +165,7 @@ public class MapboxNavigation implements ServiceConnection {
    */
   private void initialize() {
     // Initialize event dispatcher and add internal listeners
-    synchronizedNavigator = new SynchronizedNavigator(new Navigator());
+    synchronizedNavigator = new SynchronizedNavigator();
     navigationEventDispatcher = new NavigationEventDispatcher();
     navigationEngineFactory = new NavigationEngineFactory();
     initializeDefaultLocationEngine();
@@ -399,84 +399,6 @@ public class MapboxNavigation implements ServiceConnection {
     startNavigationWith(directionsRoute);
   }
 
-  public void initializeOfflineData(String tileFilePath, String translationsDirPath) {
-    synchronizedNavigator.retrieveNavigator().configureRouter(tileFilePath, translationsDirPath);
-
-    // Prime Navigator
-    ArrayList<FixLocation> nullIsland = new ArrayList<>();
-    nullIsland.add(buildFixLocationFrom(Point.fromLngLat(0.0, 0.0)));
-    nullIsland.add(buildFixLocationFrom(Point.fromLngLat(0.0, 0.0)));
-    synchronizedNavigator.getRoute(nullIsland);
-  }
-
-  @Nullable
-  public DirectionsRoute findOfflineRouteFor(@Nullable Location currentLocation,
-                                             ArrayList<Point> waypoints) {
-    ArrayList<FixLocation> fixLocations = buildFixLocationListFrom(currentLocation, waypoints);
-    String responseJson = synchronizedNavigator.getRoute(fixLocations);
-    if (responseJson.contains("error")) {
-      JsonObject jsonObject = new JsonParser().parse(responseJson).getAsJsonObject();
-      Timber.e("Error occurred fetching offline route: %s - Code: %s",
-        jsonObject.get("error").getAsString(),
-        jsonObject.get("error_code").getAsString());
-      return null;
-    }
-    DirectionsRoute route = DirectionsResponse.fromJson(responseJson).routes().get(0);
-    return route.toBuilder().routeOptions(generateRouteOptionsFrom(fixLocations)).build();
-  }
-
-  private RouteOptions generateRouteOptionsFrom(List<FixLocation> fixLocations) {
-    List<Point> coordinates = new ArrayList<>();
-    for (FixLocation fixLocation : fixLocations) {
-      coordinates.add(fixLocation.getLocation());
-    }
-    return RouteOptions.builder()
-      .accessToken(accessToken)
-      .baseUrl("valhalla_base_url")
-      .requestUuid("valhalla")
-      .user("test_user")
-      .geometries("valhalla_geometries")
-      .coordinates(coordinates)
-      .profile(DirectionsCriteria.PROFILE_DRIVING)
-      .voiceInstructions(true)
-      .bannerInstructions(true)
-      .build();
-  }
-
-  private ArrayList<FixLocation> buildFixLocationListFrom(@Nullable Location currentLocation,
-                                                          ArrayList<Point> waypoints) {
-    ArrayList<FixLocation> fixLocations = new ArrayList<>();
-    if (currentLocation != null) {
-      fixLocations.add(buildFixLocationFrom(currentLocation));
-    }
-    for (Point point : waypoints) {
-      fixLocations.add(buildFixLocationFrom(point));
-    }
-    return fixLocations;
-  }
-
-  private FixLocation buildFixLocationFrom(Location location) {
-    Point point = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    return new FixLocation(
-      point,
-      new Date(location.getTime()),
-      location.getSpeed(),
-      location.getBearing(),
-      (float) location.getAltitude(),
-      location.getAccuracy(),
-      "mapbox_navigation"
-    );
-  }
-
-  private FixLocation buildFixLocationFrom(Point point) {
-    return new FixLocation(
-      point,
-      new Date(),
-      0f, 0f, 0f, 0f,
-      "mapbox_navigation"
-    );
-  }
-
   /**
    * Call this when the navigation session needs to end before the user reaches their final
    * destination. There isn't a need to manually end the navigation session using this API when the
@@ -500,6 +422,49 @@ public class MapboxNavigation implements ServiceConnection {
       navigationService.stopSelf();
       navigationEventDispatcher.onNavigationEvent(false);
     }
+  }
+
+  /**
+   * Initializes the offline data used for fetching offline routes.
+   * <p>
+   * This method must be called before {@link MapboxNavigation#findOfflineRouteFor(Location, ArrayList)}.
+   *
+   * @param tileFilePath        path to directory containing tile data
+   * @param translationsDirPath path to directory containing OSRMTI translations
+   */
+  public void initializeOfflineData(String tileFilePath, String translationsDirPath) {
+    synchronizedNavigator.configureRouter(tileFilePath, translationsDirPath);
+  }
+
+  /**
+   * Once {@link MapboxNavigation#initializeOfflineData(String, String)} has been called, you may
+   * call this method to retrieve routes without internet connectivity.
+   * <p>
+   * This first parameter, <code>currentLocation</code>, is optional and is used when provided to find a more
+   * accurate route (for example, in the direction of the location bearing).
+   *
+   * @param currentLocation optional to increase route accuracy
+   * @param waypoints       of the route
+   * @return an offline <code>DirectionsRoute</code>
+   */
+  @Nullable
+  public DirectionsRoute findOfflineRouteFor(@Nullable Location currentLocation,
+                                             ArrayList<Point> waypoints) {
+    ArrayList<FixLocation> fixLocations = buildFixLocationListFrom(currentLocation, waypoints);
+    if (fixLocations.size() < 2) {
+      Timber.e("Error occurred fetching offline route: invalid way point data");
+      return null;
+    }
+    String responseJson = synchronizedNavigator.getRoute(fixLocations);
+    if (responseJson.contains("error")) {
+      JsonObject jsonObject = new JsonParser().parse(responseJson).getAsJsonObject();
+      Timber.e("Error occurred fetching offline route: %s - Code: %s",
+        jsonObject.get("error").getAsString(),
+        jsonObject.get("error_code").getAsString());
+      return null;
+    }
+    DirectionsRoute route = DirectionsResponse.fromJson(responseJson).routes().get(0);
+    return route.toBuilder().routeOptions(generateRouteOptionsFrom(fixLocations)).build();
   }
 
   // Listeners
@@ -887,9 +852,9 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute) {
-//    ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
+    ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
-    synchronizedNavigator.retrieveNavigator().setDirections(directionsRoute.toJson());
+    synchronizedNavigator.setRoute(directionsRoute.toJson());
     if (!isBound) {
       navigationTelemetry.startSession(directionsRoute);
       startNavigationService();
@@ -915,6 +880,58 @@ public class MapboxNavigation implements ServiceConnection {
 
   private boolean isServiceAvailable() {
     return navigationService != null && isBound;
+  }
+
+  private RouteOptions generateRouteOptionsFrom(List<FixLocation> fixLocations) {
+    List<Point> coordinates = new ArrayList<>();
+    for (FixLocation fixLocation : fixLocations) {
+      coordinates.add(fixLocation.getLocation());
+    }
+    return RouteOptions.builder()
+      .accessToken(accessToken)
+      .baseUrl("valhalla_base_url")
+      .requestUuid("valhalla")
+      .user("test_user")
+      .geometries("valhalla_geometries")
+      .coordinates(coordinates)
+      .profile(DirectionsCriteria.PROFILE_DRIVING)
+      .voiceInstructions(true)
+      .bannerInstructions(true)
+      .build();
+  }
+
+  private ArrayList<FixLocation> buildFixLocationListFrom(@Nullable Location currentLocation,
+                                                          ArrayList<Point> waypoints) {
+    ArrayList<FixLocation> fixLocations = new ArrayList<>();
+    if (currentLocation != null) {
+      fixLocations.add(buildFixLocationFrom(currentLocation));
+    }
+    for (Point point : waypoints) {
+      fixLocations.add(buildFixLocationFrom(point));
+    }
+    return fixLocations;
+  }
+
+  private FixLocation buildFixLocationFrom(Location location) {
+    Point point = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    return new FixLocation(
+      point,
+      new Date(location.getTime()),
+      location.getSpeed(),
+      location.getBearing(),
+      (float) location.getAltitude(),
+      location.getAccuracy(),
+      "mapbox_navigation"
+    );
+  }
+
+  private FixLocation buildFixLocationFrom(Point point) {
+    return new FixLocation(
+      point,
+      new Date(),
+      0f, 0f, 0f, 0f,
+      "mapbox_navigation"
+    );
   }
 
   @Override

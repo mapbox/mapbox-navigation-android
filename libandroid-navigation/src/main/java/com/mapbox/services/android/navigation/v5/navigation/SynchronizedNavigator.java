@@ -14,16 +14,20 @@ class SynchronizedNavigator {
 
   private final Navigator navigator;
 
-  SynchronizedNavigator(Navigator navigator) {
-    this.navigator = navigator;
+  SynchronizedNavigator() {
+    this.navigator = new Navigator();
   }
 
-  Navigator retrieveNavigator() {
-    return navigator;
+  synchronized void configureRouter(String tileFilePath, String translationsDirPath) {
+    navigator.configureRouter(tileFilePath, translationsDirPath);
   }
 
   synchronized String getRoute(ArrayList<FixLocation> waypoints) {
     return navigator.getRoute(waypoints);
+  }
+
+  synchronized NavigationStatus setRoute(String routeJson) {
+    return navigator.setDirections(routeJson);
   }
 
   synchronized NavigationStatus getStatus(Date date) {
