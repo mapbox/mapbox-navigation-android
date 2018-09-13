@@ -74,13 +74,14 @@ public class NavigationViewModel extends AndroidViewModel {
   private String feedbackId;
   private String screenshot;
   private String language;
+  private RouteUtils routeUtils;
+  private LocaleUtils localeUtils;
+  private DistanceFormatter distanceFormatter;
+  private String accessToken;
   @NavigationTimeFormat.Type
   private int timeFormatType;
   private boolean isRunning;
-  private RouteUtils routeUtils;
-  private LocaleUtils localeUtils;
-  private String accessToken;
-  private DistanceFormatter distanceFormatter;
+  private boolean isChangingConfigurations;
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -99,6 +100,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   public void onDestroy(boolean isChangingConfigurations) {
+    this.isChangingConfigurations = isChangingConfigurations;
     if (!isChangingConfigurations) {
       locationEngineConductor.onDestroy();
       deactivateInstructionPlayer();
@@ -156,7 +158,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
   /**
    * Returns the current instance of {@link MapboxNavigation}.
-   *
+   * <p>
    * Will be null if navigation has not been initialized.
    */
   @Nullable
@@ -361,7 +363,8 @@ public class NavigationViewModel extends AndroidViewModel {
   private void updateRoute(DirectionsRoute route) {
     this.route.setValue(route);
     startNavigation(route);
-    locationEngineConductor.updateRoute(route);
+    updateSimulatedRoute(route);
+    resetConfigurationFlag();
     sendEventOnRerouteAlong(route);
     isOffRoute.setValue(false);
   }
@@ -465,6 +468,18 @@ public class NavigationViewModel extends AndroidViewModel {
   private void sendEventFailedReroute(String errorMessage) {
     if (navigationViewEventDispatcher != null) {
       navigationViewEventDispatcher.onFailedReroute(errorMessage);
+    }
+  }
+
+  private void updateSimulatedRoute(DirectionsRoute route) {
+    if (!isChangingConfigurations) {
+      locationEngineConductor.updateSimulatedRoute(route);
+    }
+  }
+
+  private void resetConfigurationFlag() {
+    if (isChangingConfigurations) {
+      isChangingConfigurations = false;
     }
   }
 
