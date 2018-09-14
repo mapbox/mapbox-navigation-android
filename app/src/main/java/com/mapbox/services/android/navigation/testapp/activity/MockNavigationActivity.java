@@ -48,6 +48,8 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
+import java.lang.ref.WeakReference;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -83,12 +85,19 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   private Point destination;
   private Point waypoint;
 
-  private final BroadcastReceiver stopNavigationReceiver = new BroadcastReceiver() {
+  private static class MyBroadcastReceiver extends BroadcastReceiver {
+    private final WeakReference<MapboxNavigation> weakNavigation;
+
+    MyBroadcastReceiver(MapboxNavigation navigation) {
+      this.weakNavigation = new WeakReference<>(navigation);
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
+      MapboxNavigation navigation = weakNavigation.get();
       navigation.stopNavigation();
     }
-  };
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +109,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapView.getMapAsync(this);
 
     Context context = getApplicationContext();
-    CustomNavigationNotification customNotification = new CustomNavigationNotification(context, stopNavigationReceiver);
+    CustomNavigationNotification customNotification = new CustomNavigationNotification(context);
     MapboxNavigationOptions options = MapboxNavigationOptions.builder()
       .navigationNotification(customNotification)
       .build();
@@ -117,6 +126,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
           Trigger.gte(TriggerProperty.STEP_DISTANCE_TRAVELED_METERS, 75)
         )
       ).build());
+    customNotification.register(new MyBroadcastReceiver(navigation), context);
   }
 
   @OnClick(R.id.startRouteButton)
@@ -134,6 +144,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
       ((ReplayRouteLocationEngine) locationEngine).assign(route);
       navigation.setLocationEngine(locationEngine);
+      locationLayerPlugin.setLocationLayerEnabled(true);
       navigation.startNavigation(route);
       mapboxMap.removeOnMapClickListener(this);
     }
@@ -160,6 +171,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
     locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap);
     locationLayerPlugin.setRenderMode(RenderMode.GPS);
+    locationLayerPlugin.setLocationLayerEnabled(false);
     navigationMapRoute = new NavigationMapRoute(navigation, mapView, mapboxMap);
 
     mapboxMap.addOnMapClickListener(this);
