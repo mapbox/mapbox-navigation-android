@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductor;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductorListener;
-import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
+import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 
 import org.junit.Test;
 
@@ -36,7 +36,7 @@ public class LocationEngineConductorTest extends BaseTest {
 
     LocationEngine locationEngine = locationEngineConductor.obtainLocationEngine();
 
-    assertTrue(locationEngine instanceof MockLocationEngine);
+    assertTrue(locationEngine instanceof ReplayRouteLocationEngine);
   }
 
   @NonNull

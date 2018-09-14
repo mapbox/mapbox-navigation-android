@@ -19,7 +19,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
  * {@link com.mapbox.services.android.navigation.v5.navigation.NavigationRoute}.
  * </p><p>
  * For testing, you can launch with simulation, in which our
- * {@link com.mapbox.services.android.navigation.v5.location.MockLocationEngine} will begin
+ * {@link com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine} will begin
  * following the given {@link DirectionsRoute} once the UI is initialized.
  * </p>
  */

@@ -41,7 +41,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
   private static final String MAPBOX_NAVIGATION_SDK_IDENTIFIER = "mapbox-navigation-android";
   private static final String MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER = "mapbox-navigation-ui-android";
-  private static final String MOCK_PROVIDER = "com.mapbox.services.android.navigation.v5.location.MockLocationEngine";
+  private static final String MOCK_PROVIDER = "com.mapbox.services.android.navigation.v5.location.replay"
+    + ".ReplayRouteLocationEngine";
   private static final int TWENTY_SECOND_INTERVAL = 20;
 
   private List<RerouteEvent> queuedRerouteEvents = new ArrayList<>();

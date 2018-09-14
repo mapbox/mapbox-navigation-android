@@ -9,12 +9,10 @@ import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.v5.location.MockLocationEngine;
+import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 
 public class LocationEngineConductor {
 
-  private static final int UPDATE_DELAY_IN_MILLIS = 1000;
-  private static final int SPEED_IN_MPH = 30;
   private static final int FASTEST_INTERVAL_IN_MILLIS = 1000;
   private static final int INTERVAL_IN_MILLIS = 0;
 
@@ -38,8 +36,8 @@ public class LocationEngineConductor {
   }
 
   public void updateRoute(DirectionsRoute route) {
-    if (locationEngine instanceof MockLocationEngine) {
-      ((MockLocationEngine) locationEngine).setRoute(route);
+    if (locationEngine instanceof ReplayRouteLocationEngine) {
+      ((ReplayRouteLocationEngine) locationEngine).assign(route);
     }
   }
 
@@ -49,7 +47,7 @@ public class LocationEngineConductor {
 
   private void initLocationEngine(Context context, boolean simulateRoute) {
     if (simulateRoute) {
-      locationEngine = new MockLocationEngine(UPDATE_DELAY_IN_MILLIS, SPEED_IN_MPH, false);
+      locationEngine = new ReplayRouteLocationEngine();
     } else {
       LocationEngineProvider locationEngineProvider = new LocationEngineProvider(context.getApplicationContext());
       locationEngine = locationEngineProvider.obtainBestLocationEngineAvailable();
