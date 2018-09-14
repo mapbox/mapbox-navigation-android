@@ -23,14 +23,10 @@ public class CustomNavigationNotification implements NavigationNotification {
   private final Notification customNotification;
   private final NotificationCompat.Builder customNotificationBuilder;
   private final NotificationManager notificationManager;
-  private final BroadcastReceiver stopNavigationReceiver;
+  private BroadcastReceiver stopNavigationReceiver;
   private int numberOfUpdates;
 
-  public CustomNavigationNotification(Context applicationContext, BroadcastReceiver stopNavigationReceiver) {
-    // Receiver for listening to clicks
-    this.stopNavigationReceiver = stopNavigationReceiver;
-    applicationContext.registerReceiver(stopNavigationReceiver, new IntentFilter(STOP_NAVIGATION_ACTION));
-
+  public CustomNavigationNotification(Context applicationContext) {
     notificationManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
     customNotificationBuilder = new NotificationCompat.Builder(applicationContext, NAVIGATION_NOTIFICATION_CHANNEL)
@@ -63,6 +59,12 @@ public class CustomNavigationNotification implements NavigationNotification {
   @Override
   public void onNavigationStopped(Context context) {
     context.unregisterReceiver(stopNavigationReceiver);
+    notificationManager.cancel(CUSTOM_NOTIFICATION_ID);
+  }
+
+  public void register(BroadcastReceiver stopNavigationReceiver, Context applicationContext) {
+    this.stopNavigationReceiver = stopNavigationReceiver;
+    applicationContext.registerReceiver(stopNavigationReceiver, new IntentFilter(STOP_NAVIGATION_ACTION));
   }
 
   private PendingIntent createPendingStopIntent(Context context) {
