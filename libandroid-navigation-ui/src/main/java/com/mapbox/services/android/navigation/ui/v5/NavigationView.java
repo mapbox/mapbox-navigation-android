@@ -37,6 +37,8 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
+import java.util.ArrayList;
+
 /**
  * View that creates the drop-in UI.
  * <p>
@@ -413,6 +415,28 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Nullable
   public MapboxNavigation retrieveMapboxNavigation() {
     return navigationViewModel.retrieveNavigation();
+  }
+
+  /**
+   * Initializes the offline data used for fetching offline routes.
+   * <p>
+   * This method must be called before {@link MapboxNavigation#findOfflineRouteFor(Location, ArrayList)}.
+   *
+   * @param tileFilePath        path to directory containing tile data
+   * @param translationsDirPath path to directory containing OSRMTI translations
+   */
+  public void initializeOfflineData(String tileFilePath, String translationsDirPath) {
+    navigationViewModel.initializeOfflineData(tileFilePath, translationsDirPath);
+  }
+
+  /**
+   * Sets the NavigationView to use or not use offline data. This call should be followed by a call
+   * to initializeOfflineData.
+   *
+   * @param isOffline whether the map should load offline or not
+   */
+  public void setOffline(boolean isOffline) {
+    navigationViewModel.setOffline(isOffline);
   }
 
   private void initializeView() {

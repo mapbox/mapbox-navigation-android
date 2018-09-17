@@ -34,7 +34,7 @@ public class RouteFetcher {
   private final WeakReference<Context> contextWeakReference;
 
   private RouteProgress routeProgress;
-  private RouteUtils routeUtils;
+  protected RouteUtils routeUtils;
 
   public RouteFetcher(Context context, String accessToken) {
     this.accessToken = accessToken;

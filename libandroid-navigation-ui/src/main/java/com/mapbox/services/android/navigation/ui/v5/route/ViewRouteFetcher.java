@@ -15,6 +15,7 @@ import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
 import com.mapbox.services.android.navigation.v5.route.RouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
@@ -63,6 +64,22 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
     if (OffRouteEvent.isValid(event)) {
       RouteProgress routeProgress = event.getRouteProgress();
       findRouteFromRouteProgress(rawLocation, routeProgress);
+    }
+  }
+
+  /**
+   * Calculates the remaining coordinates in the given OffRouteEvent
+   *
+   * @param event from which the progress is extracted
+   * @return List of remaining coordinates
+   */
+  public ArrayList<Point> calculateRemainingCoordinates(OffRouteEvent event) {
+    if (OffRouteEvent.isValid(event)) {
+      RouteProgress routeProgress = event.getRouteProgress();
+      List<Point> list = routeUtils.calculateRemainingWaypoints(routeProgress);
+      return new ArrayList<>(list);
+    } else {
+      return new ArrayList<>();
     }
   }
 
