@@ -48,6 +48,7 @@ import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NavigationViewModel extends AndroidViewModel {
@@ -65,7 +66,7 @@ public class NavigationViewModel extends AndroidViewModel {
   final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
-  private ViewRouteFetcher navigationViewRouteEngine;
+  private ViewRouteFetcher viewRouteFetcher;
   private LocationEngineConductor locationEngineConductor;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
   private SpeechPlayer speechPlayer;
@@ -81,6 +82,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private LocaleUtils localeUtils;
   private String accessToken;
   private DistanceFormatter distanceFormatter;
+  private boolean isOffline;
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -164,6 +166,28 @@ public class NavigationViewModel extends AndroidViewModel {
     return navigation;
   }
 
+  /**
+   * Initializes the offline data used for fetching offline routes.
+   * <p>
+   * This method must be called before {@link MapboxNavigation#findOfflineRouteFor(Location, ArrayList)}.
+   *
+   * @param tileFilePath        path to directory containing tile data
+   * @param translationsDirPath path to directory containing OSRMTI translations
+   */
+  public void initializeOfflineData(String tileFilePath, String translationsDirPath) {
+    navigation.initializeOfflineData(tileFilePath, translationsDirPath);
+  }
+
+  /**
+   * Sets the NavigationView to use or not use offline data. This call should be followed by a call
+   * to initializeOfflineData.
+   *
+   * @param isOffline whether the map should load offline or not
+   */
+  public void setOffline(boolean isOffline) {
+    this.isOffline = isOffline;
+  }
+
   void initializeEventDispatcher(NavigationViewEventDispatcher navigationViewEventDispatcher) {
     this.navigationViewEventDispatcher = navigationViewEventDispatcher;
   }
@@ -186,7 +210,7 @@ public class NavigationViewModel extends AndroidViewModel {
       initializeNavigation(getApplication(), navigationOptions);
       addMilestones(options);
     }
-    navigationViewRouteEngine.extractRouteOptions(options);
+    viewRouteFetcher.extractRouteOptions(options);
     return navigation;
   }
 
@@ -210,7 +234,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initializeNavigationRouteEngine() {
-    navigationViewRouteEngine = new ViewRouteFetcher(getApplication(), accessToken, routeEngineListener);
+    viewRouteFetcher = new ViewRouteFetcher(getApplication(), accessToken, viewRouteListener);
   }
 
   private void initializeNavigationLocationEngine() {
@@ -301,8 +325,7 @@ public class NavigationViewModel extends AndroidViewModel {
     public void userOffRoute(Location location) {
       if (hasNetworkConnection()) {
         speechPlayer.onOffRoute();
-        Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-        handleOffRouteEvent(newOrigin);
+        handleOffRouteEvent(location);
       }
     }
   };
@@ -331,7 +354,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };
 
-  private ViewRouteListener routeEngineListener = new ViewRouteListener() {
+  private ViewRouteListener viewRouteListener = new ViewRouteListener() {
     @Override
     public void onRouteUpdate(DirectionsRoute directionsRoute) {
       updateRoute(directionsRoute);
@@ -354,7 +377,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private LocationEngineConductorListener locationEngineCallback = new LocationEngineConductorListener() {
     @Override
     public void onLocationUpdate(Location location) {
-      navigationViewRouteEngine.updateRawLocation(location);
+      viewRouteFetcher.updateRawLocation(location);
     }
   };
 
@@ -443,11 +466,20 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void handleOffRouteEvent(Point newOrigin) {
+  private void handleOffRouteEvent(Location location) {
+    Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     if (navigationViewEventDispatcher != null && navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
       navigationViewEventDispatcher.onOffRoute(newOrigin);
       OffRouteEvent event = new OffRouteEvent(newOrigin, routeProgress);
-      navigationViewRouteEngine.fetchRouteFromOffRouteEvent(event);
+
+      if (isOffline) {
+        ArrayList<Point> locations = viewRouteFetcher.calculateRemainingCoordinates(event);
+        DirectionsRoute directionsRoute = navigation.findOfflineRouteFor(location, locations);
+        updateRoute(directionsRoute);
+      } else {
+        viewRouteFetcher.fetchRouteFromOffRouteEvent(event);
+      }
+
       isOffRoute.setValue(true);
     }
   }
