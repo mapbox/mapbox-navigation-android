@@ -31,11 +31,11 @@ public class LocationEngineConductor {
     deactivateLocationEngine();
   }
 
-  public void initializeLocationEngine(Context context, boolean simulateRoute) {
-    initLocationEngine(context, simulateRoute);
+  public void initializeLocationEngine(Context context, boolean shouldReplayRoute) {
+    initLocationEngine(context, shouldReplayRoute);
   }
 
-  public void updateRoute(DirectionsRoute route) {
+  public void updateSimulatedRoute(DirectionsRoute route) {
     if (locationEngine instanceof ReplayRouteLocationEngine) {
       ((ReplayRouteLocationEngine) locationEngine).assign(route);
     }
