@@ -38,6 +38,18 @@ public class NavigationLocationEngineUpdaterTest {
   }
 
   @Test
+  public void updateLocationEngine_oldEngineListenerIsRemoved() {
+    LocationEngine locationEngine = mock(LocationEngine.class);
+    NavigationLocationEngineListener listener = mock(NavigationLocationEngineListener.class);
+    NavigationLocationEngineUpdater provider = new NavigationLocationEngineUpdater(locationEngine, listener);
+    LocationEngine newLocationEngine = mock(LocationEngine.class);
+
+    provider.updateLocationEngine(newLocationEngine);
+
+    verify(locationEngine).removeLocationEngineListener(eq(listener));
+  }
+
+  @Test
   public void forceLocationUpdate_nonNullLastLocationIsSent() {
     LocationEngine locationEngine = mock(LocationEngine.class);
     when(locationEngine.getLastLocation()).thenReturn(mock(Location.class));

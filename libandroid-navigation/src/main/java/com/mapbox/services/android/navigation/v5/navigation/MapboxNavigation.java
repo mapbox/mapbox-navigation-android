@@ -67,7 +67,7 @@ public class MapboxNavigation implements ServiceConnection {
    * {@link #MapboxNavigation(Context, String, MapboxNavigationOptions)} if all the default options
    * fit your needs.
    * <p>
-   * Initialization will also add the default milestones and create a new LOST location engine
+   * Initialization will also add the default milestones and create a new location engine
    * which will be used during navigation unless a different engine gets passed in through
    * {@link #setLocationEngine(LocationEngine)}.
    * </p>
@@ -87,7 +87,7 @@ public class MapboxNavigation implements ServiceConnection {
    * that your app requires special tweaking. Once this class is initialized, the options specified
    * through the options class cannot be modified.
    * <p>
-   * Initialization will also add the default milestones and create a new LOST location engine
+   * Initialization will also add the default milestones and create a new location engine
    * which will be used during navigation unless a different engine gets passed in through
    * {@link #setLocationEngine(LocationEngine)}.
    * </p>
@@ -103,6 +103,28 @@ public class MapboxNavigation implements ServiceConnection {
     initializeContext(context);
     this.accessToken = accessToken;
     this.options = options;
+    initialize();
+  }
+
+  /**
+   * Constructs a new instance of this class using a custom built options class. Building a custom
+   * {@link MapboxNavigationOptions} object and passing it in allows you to further customize the
+   * user experience. Once this class is initialized, the options specified
+   * through the options class cannot be modified.
+   *
+   * @param context        required in order to create and bind the navigation service
+   * @param accessToken    a valid Mapbox access token
+   * @param options        a custom built {@code MapboxNavigationOptions} class
+   * @param locationEngine a LocationEngine to provide Location updates
+   * @see MapboxNavigationOptions
+   * @since 0.19.0
+   */
+  public MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
+                          @NonNull MapboxNavigationOptions options, @NonNull LocationEngine locationEngine) {
+    initializeContext(context);
+    this.accessToken = accessToken;
+    this.options = options;
+    this.locationEngine = locationEngine;
     initialize();
   }
 

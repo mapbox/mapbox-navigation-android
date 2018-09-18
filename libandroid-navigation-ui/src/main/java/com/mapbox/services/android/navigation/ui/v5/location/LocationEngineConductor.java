@@ -31,8 +31,8 @@ public class LocationEngineConductor {
     deactivateLocationEngine();
   }
 
-  public void initializeLocationEngine(Context context, boolean shouldReplayRoute) {
-    initLocationEngine(context, shouldReplayRoute);
+  public void initializeLocationEngine(Context context, LocationEngine locationEngine, boolean shouldReplayRoute) {
+    initialize(context, locationEngine, shouldReplayRoute);
   }
 
   public void updateSimulatedRoute(DirectionsRoute route) {
@@ -45,18 +45,32 @@ public class LocationEngineConductor {
     return locationEngine;
   }
 
-  private void initLocationEngine(Context context, boolean simulateRoute) {
-    if (simulateRoute) {
-      locationEngine = new ReplayRouteLocationEngine();
+  private void initialize(Context context, LocationEngine locationEngine, boolean simulateRoute) {
+    if (locationEngine != null) {
+      this.locationEngine = locationEngine;
+    } else if (simulateRoute) {
+      this.locationEngine = new ReplayRouteLocationEngine();
     } else {
-      LocationEngineProvider locationEngineProvider = new LocationEngineProvider(context.getApplicationContext());
-      locationEngine = locationEngineProvider.obtainBestLocationEngineAvailable();
-      locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
-      locationEngine.setFastestInterval(FASTEST_INTERVAL_IN_MILLIS);
-      locationEngine.setInterval(INTERVAL_IN_MILLIS);
-      updateLastLocation();
+      this.locationEngine = buildLocationEngine(context);
     }
+    updateLastLocation();
     activateLocationEngine();
+  }
+
+  private LocationEngine buildLocationEngine(Context context) {
+    LocationEngineProvider locationEngineProvider = new LocationEngineProvider(context.getApplicationContext());
+    LocationEngine locationEngine = locationEngineProvider.obtainBestLocationEngineAvailable();
+    locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
+    locationEngine.setFastestInterval(FASTEST_INTERVAL_IN_MILLIS);
+    locationEngine.setInterval(INTERVAL_IN_MILLIS);
+    return locationEngine;
+  }
+
+  @SuppressWarnings( {"MissingPermission"})
+  private void updateLastLocation() {
+    if (locationEngine.getLastLocation() != null) {
+      listener.onLocationUpdate(locationEngine.getLastLocation());
+    }
   }
 
   private void activateLocationEngine() {
@@ -71,13 +85,6 @@ public class LocationEngineConductor {
       locationEngine.removeLocationUpdates();
       locationEngine.removeLocationEngineListener(locationEngineListener);
       locationEngine.deactivate();
-    }
-  }
-
-  @SuppressWarnings( {"MissingPermission"})
-  private void updateLastLocation() {
-    if (locationEngine.getLastLocation() != null) {
-      listener.onLocationUpdate(locationEngine.getLastLocation());
     }
   }
 
