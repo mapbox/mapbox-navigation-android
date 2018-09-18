@@ -29,13 +29,14 @@ public class ReplayRouteLocationEngine extends LocationEngine implements Runnabl
   private static final int ZERO = 0;
   private static final String SPEED_MUST_BE_GREATER_THAN_ZERO_KM_H = "Speed must be greater than 0 km/h.";
   private static final String DELAY_MUST_BE_GREATER_THAN_ZERO_SECONDS = "Delay must be greater than 0 seconds.";
+  private static final String REPLAY_ROUTE = "ReplayRouteLocation";
   private ReplayRouteLocationConverter converter;
   private int speed = DEFAULT_SPEED;
   private int delay = DEFAULT_DELAY;
   private Handler handler;
   private List<Location> mockedLocations;
   private ReplayLocationDispatcher dispatcher;
-  private Location lastLocation = new Location("ReplayRouteLocation");
+  private Location lastLocation = null;
   private final ReplayLocationListener replayLocationListener = new ReplayLocationListener() {
     @Override
     public void onLocationReplay(Location location) {
@@ -69,6 +70,7 @@ public class ReplayRouteLocationEngine extends LocationEngine implements Runnabl
   }
 
   public void assignLastLocation(Point currentPosition) {
+    initializeLastLocation();
     lastLocation.setLongitude(currentPosition.longitude());
     lastLocation.setLatitude(currentPosition.latitude());
   }
@@ -208,6 +210,12 @@ public class ReplayRouteLocationEngine extends LocationEngine implements Runnabl
       handler.postDelayed(this, ONE_SECOND_IN_MILLISECONDS);
     } else {
       handler.postDelayed(this, (currentMockedPoints - MOCKED_POINTS_LEFT_THRESHOLD) * ONE_SECOND_IN_MILLISECONDS);
+    }
+  }
+
+  private void initializeLastLocation() {
+    if (lastLocation == null) {
+      lastLocation = new Location(REPLAY_ROUTE);
     }
   }
 }
