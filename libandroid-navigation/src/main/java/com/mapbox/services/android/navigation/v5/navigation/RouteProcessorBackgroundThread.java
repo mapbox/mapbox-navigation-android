@@ -17,24 +17,47 @@ import java.util.List;
 class RouteProcessorBackgroundThread extends HandlerThread {
 
   private static final String MAPBOX_NAVIGATION_THREAD_NAME = "mapbox_navigation_thread";
-  private static final int MSG_LOCATION_UPDATED = 1001;
+  private final MapboxNavigation navigation;
+  private final Handler responseHandler;
+  private final Listener listener;
+  private final NavigationRouteProcessor routeProcessor;
   private Handler workerHandler;
+  private RouteProcessorRunnable runnable;
 
-  RouteProcessorBackgroundThread(Handler responseHandler, Listener listener) {
+  RouteProcessorBackgroundThread(MapboxNavigation navigation, Handler responseHandler, Listener listener) {
     super(MAPBOX_NAVIGATION_THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
-    start();
-    initialize(responseHandler, listener);
+    this.navigation = navigation;
+    this.responseHandler = responseHandler;
+    this.listener = listener;
+    this.routeProcessor = new NavigationRouteProcessor();
   }
 
-  void queueUpdate(NavigationLocationUpdate navigationLocationUpdate) {
-    workerHandler.obtainMessage(MSG_LOCATION_UPDATED, navigationLocationUpdate).sendToTarget();
-  }
-
-  private void initialize(Handler responseHandler, Listener listener) {
-    NavigationRouteProcessor routeProcessor = new NavigationRouteProcessor();
-    workerHandler = new Handler(getLooper(), new RouteProcessorHandlerCallback(
-      routeProcessor, responseHandler, listener)
+  @Override
+  public synchronized void start() {
+    super.start();
+    if (workerHandler == null) {
+      workerHandler = new Handler(getLooper());
+    }
+    runnable = new RouteProcessorRunnable(
+      routeProcessor, navigation, workerHandler, responseHandler, listener
     );
+    workerHandler.post(runnable);
+  }
+
+  @Override
+  public boolean quit() {
+    if (isAlive()) {
+      workerHandler.removeCallbacks(runnable);
+    }
+    return super.quit();
+  }
+
+  void updateRawLocation(Location rawLocation) {
+    if (!isAlive()) {
+      start();
+    }
+    navigation.retrieveMapboxNavigator().updateLocation(rawLocation);
+    runnable.updateRawLocation(rawLocation);
   }
 
   /**

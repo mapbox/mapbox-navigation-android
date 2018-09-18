@@ -65,6 +65,7 @@ class TestRouteProgressBuilder {
       .intersectionDistancesAlongStep(intersectionDistances)
       .stepIndex(stepIndex)
       .legIndex(legIndex)
+      .inTunnel(false)
       .build();
   }
 

@@ -28,6 +28,8 @@ import java.util.List;
 @AutoValue
 public abstract class RouteProgress {
 
+  private static final String EMPTY_ANNOUNCEMENT = "";
+
   /**
    * Get the route the navigation session is currently using. When a reroute occurs and a new
    * directions route gets obtained, with the next location update this directions route should
@@ -149,6 +151,27 @@ public abstract class RouteProgress {
   @Nullable
   public abstract List<Point> upcomingStepPoints();
 
+  /**
+   * Returns whether or not the location updates are
+   * considered in a tunnel along the route.
+   *
+   * @return true if in a tunnel, false otherwise
+   * @since 0.19.0
+   */
+  public abstract boolean inTunnel();
+
+  /**
+   * @return current announcement
+   * @since 0.19.0
+   */
+  public abstract String currentAnnouncement();
+
+  /**
+   * @return current announcement with SSML markup
+   * @since 0.19.0
+   */
+  public abstract String currentSsmlAnnouncement();
+
   public abstract RouteProgress.Builder toBuilder();
 
   abstract int stepIndex();
@@ -226,6 +249,12 @@ public abstract class RouteProgress {
 
     abstract Builder currentLegProgress(RouteLegProgress routeLegProgress);
 
+    public abstract Builder inTunnel(boolean inTunnel);
+
+    public abstract Builder currentAnnouncement(String announcement);
+
+    public abstract Builder currentSsmlAnnouncement(String ssmlAnnouncement);
+
     abstract RouteProgress autoBuild(); // not public
 
     public RouteProgress build() {
@@ -250,6 +279,8 @@ public abstract class RouteProgress {
   }
 
   public static Builder builder() {
-    return new AutoValue_RouteProgress.Builder();
+    return new AutoValue_RouteProgress.Builder()
+      .currentAnnouncement(EMPTY_ANNOUNCEMENT)
+      .currentSsmlAnnouncement(EMPTY_ANNOUNCEMENT);
   }
 }
