@@ -1,20 +1,17 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.api.directions.v5.models.VoiceInstructions;
-import com.mapbox.services.android.navigation.v5.BaseTest;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import org.junit.Test;
 
-import java.util.List;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-public class VoiceInstructionMilestoneTest extends BaseTest {
+public class VoiceInstructionMilestoneTest {
 
   @Test
   public void sanity() {
@@ -24,24 +21,13 @@ public class VoiceInstructionMilestoneTest extends BaseTest {
   }
 
   @Test
-  public void onBeginningOfStep_voiceInstructionsShouldTrigger() throws Exception {
-    RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    routeProgress = createBeginningOfStepRouteProgress(routeProgress);
-    VoiceInstructionMilestone milestone = buildVoiceInstructionMilestone();
-
-    boolean isOccurring = milestone.isOccurring(routeProgress, routeProgress);
-
-    assertTrue(isOccurring);
-  }
-
-  @Test
-  public void onSameInstructionOccurring_milestoneDoesNotTriggerTwice() throws Exception {
-    RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    RouteProgress firstProgress = createBeginningOfStepRouteProgress(routeProgress);
-    RouteProgress secondProgress = routeProgress.toBuilder()
-      .stepDistanceRemaining(routeProgress.currentLegProgress().currentStep().distance() - 40)
-      .stepIndex(0)
-      .build();
+  public void onSameInstructionOccurring_milestoneDoesNotTriggerTwice() {
+    RouteProgress firstProgress = mock(RouteProgress.class);
+    when(firstProgress.currentAnnouncement()).thenReturn("instruction");
+    when(firstProgress.directionsRoute()).thenReturn(mock(DirectionsRoute.class));
+    RouteProgress secondProgress = mock(RouteProgress.class);
+    when(secondProgress.directionsRoute()).thenReturn(mock(DirectionsRoute.class));
+    when(secondProgress.currentAnnouncement()).thenReturn("instruction");
     VoiceInstructionMilestone milestone = buildVoiceInstructionMilestone();
 
     milestone.isOccurring(firstProgress, firstProgress);
@@ -51,83 +37,61 @@ public class VoiceInstructionMilestoneTest extends BaseTest {
   }
 
   @Test
-  public void nullInstructions_doNotGetTriggered() throws Exception {
-    RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
-    List<VoiceInstructions> instructions = currentStep.voiceInstructions();
-    instructions.clear();
-    routeProgress = createBeginningOfStepRouteProgress(routeProgress);
-    VoiceInstructionMilestone milestone = buildVoiceInstructionMilestone();
-
-    boolean isOccurring = milestone.isOccurring(routeProgress, routeProgress);
-
-    assertFalse(isOccurring);
-  }
-
-  @Test
-  public void onOccurringMilestone_voiceSsmlInstructionsAreReturned() throws Exception {
-    RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    routeProgress = createBeginningOfStepRouteProgress(routeProgress);
-    VoiceInstructions instructions = routeProgress.currentLegProgress().currentStep().voiceInstructions().get(0);
+  public void onOccurringMilestone_voiceSsmlInstructionsAreReturned() {
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.directionsRoute()).thenReturn(mock(DirectionsRoute.class));
+    when(routeProgress.currentAnnouncement()).thenReturn("current announcement");
+    String currentSsmlAnnouncement = "current SSML announcement";
+    when(routeProgress.currentSsmlAnnouncement()).thenReturn(currentSsmlAnnouncement);
     VoiceInstructionMilestone milestone = buildVoiceInstructionMilestone();
 
     milestone.isOccurring(routeProgress, routeProgress);
 
-    assertEquals(instructions.ssmlAnnouncement(), milestone.getSsmlAnnouncement());
+    assertEquals(currentSsmlAnnouncement, milestone.getSsmlAnnouncement());
   }
 
   @Test
-  public void onOccurringMilestone_voiceInstructionsAreReturned() throws Exception {
-    RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    routeProgress = createBeginningOfStepRouteProgress(routeProgress);
-    VoiceInstructions instructions = routeProgress.currentLegProgress().currentStep().voiceInstructions().get(0);
+  public void onOccurringMilestone_voiceInstructionsAreReturned() {
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.directionsRoute()).thenReturn(mock(DirectionsRoute.class));
+    String currentAnnouncement = "current announcement";
+    when(routeProgress.currentAnnouncement()).thenReturn(currentAnnouncement);
+    String currentSsmlAnnouncement = "current SSML announcement";
+    when(routeProgress.currentSsmlAnnouncement()).thenReturn(currentSsmlAnnouncement);
     VoiceInstructionMilestone milestone = buildVoiceInstructionMilestone();
 
     milestone.isOccurring(routeProgress, routeProgress);
 
-    assertEquals(instructions.announcement(), milestone.getAnnouncement());
+    assertEquals(currentAnnouncement, milestone.getAnnouncement());
   }
 
   @Test
-  public void onOccurringMilestone_instructionsAreReturned() throws Exception {
-    RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    routeProgress = createBeginningOfStepRouteProgress(routeProgress);
-    VoiceInstructions instructions = routeProgress.currentLegProgress().currentStep().voiceInstructions().get(0);
+  public void onOccurringMilestone_instructionsAreReturned() {
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.directionsRoute()).thenReturn(mock(DirectionsRoute.class));
+    String currentAnnouncement = "current announcement";
+    when(routeProgress.currentAnnouncement()).thenReturn(currentAnnouncement);
+    String currentSsmlAnnouncement = "current SSML announcement";
+    when(routeProgress.currentSsmlAnnouncement()).thenReturn(currentSsmlAnnouncement);
     VoiceInstructionMilestone milestone = buildVoiceInstructionMilestone();
 
     milestone.isOccurring(routeProgress, routeProgress);
 
-    assertEquals(instructions.announcement(), milestone.getInstruction().buildInstruction(routeProgress));
+    assertEquals(currentAnnouncement, milestone.getInstruction().buildInstruction(routeProgress));
   }
 
   @Test
-  public void onNullMilestoneInstructions_emptyInstructionsAreReturned() throws Exception {
+  public void onNullMilestoneInstructions_emptyInstructionsAreReturned() {
     VoiceInstructionMilestone milestone = buildVoiceInstructionMilestone();
 
     assertEquals("", milestone.getAnnouncement());
   }
 
   @Test
-  public void onNullMilestoneInstructions_emptySsmlInstructionsAreReturned() throws Exception {
+  public void onNullMilestoneInstructions_emptySsmlInstructionsAreReturned() {
     VoiceInstructionMilestone milestone = buildVoiceInstructionMilestone();
 
     assertEquals("", milestone.getSsmlAnnouncement());
-  }
-
-  @Test
-  public void onNullMilestoneInstructions_stepNameIsReturnedForInstruction() throws Exception {
-    RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
-    VoiceInstructionMilestone milestone = buildVoiceInstructionMilestone();
-
-    assertEquals(currentStep.name(), milestone.getInstruction().buildInstruction(routeProgress));
-  }
-
-  private RouteProgress createBeginningOfStepRouteProgress(RouteProgress routeProgress) {
-    return routeProgress.toBuilder()
-      .stepDistanceRemaining(routeProgress.currentLegProgress().currentStep().distance())
-      .stepIndex(0)
-      .build();
   }
 
   private VoiceInstructionMilestone buildVoiceInstructionMilestone() {

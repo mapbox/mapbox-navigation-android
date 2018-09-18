@@ -43,6 +43,9 @@ dependencies {
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
 
+  // Navigator
+  implementation dependenciesList.mapboxNavigator
+
   // Support
   implementation dependenciesList.supportAppcompatV7
 
