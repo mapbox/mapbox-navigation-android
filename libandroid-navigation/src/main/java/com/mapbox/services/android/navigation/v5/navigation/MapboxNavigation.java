@@ -13,6 +13,7 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -52,7 +53,9 @@ public class MapboxNavigation implements ServiceConnection {
 
   private NavigationEventDispatcher navigationEventDispatcher;
   private NavigationEngineFactory navigationEngineFactory;
+  private NavigationTelemetry navigationTelemetry = null;
   private NavigationService navigationService;
+  private MapboxNavigator mapboxNavigator;
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
   private LocationEngine locationEngine = null;
@@ -60,7 +63,10 @@ public class MapboxNavigation implements ServiceConnection {
   private final String accessToken;
   private Context applicationContext;
   private boolean isBound;
-  private NavigationTelemetry navigationTelemetry = null;
+
+  static {
+    NavigationLibraryLoader.load();
+  }
 
   /**
    * Constructs a new instance of this class using the default options. This should be used over
@@ -137,7 +143,7 @@ public class MapboxNavigation implements ServiceConnection {
     this.options = options;
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
-    initialize();
+    initializeForTest();
   }
 
   // Package private (no modifier) for testing purposes
@@ -148,7 +154,22 @@ public class MapboxNavigation implements ServiceConnection {
     this.options = MapboxNavigationOptions.builder().build();
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
-    initialize();
+    initializeForTest();
+  }
+
+  private void initializeForTest() {
+    // Initialize event dispatcher and add internal listeners
+    navigationEventDispatcher = new NavigationEventDispatcher();
+    navigationEngineFactory = new NavigationEngineFactory();
+    initializeDefaultLocationEngine();
+    initializeTelemetry();
+
+    // Create and add default milestones if enabled.
+    milestones = new HashSet<>();
+    if (options.defaultMilestonesEnabled()) {
+      addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
+      addMilestone(new BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build());
+    }
   }
 
   /**
@@ -158,6 +179,7 @@ public class MapboxNavigation implements ServiceConnection {
    */
   private void initialize() {
     // Initialize event dispatcher and add internal listeners
+    mapboxNavigator = new MapboxNavigator(new Navigator());
     navigationEventDispatcher = new NavigationEventDispatcher();
     navigationEngineFactory = new NavigationEngineFactory();
     initializeDefaultLocationEngine();
@@ -388,28 +410,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.1.0
    */
   public void startNavigation(@NonNull DirectionsRoute directionsRoute) {
-    ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
-    this.directionsRoute = directionsRoute;
-    Timber.d("MapboxNavigation startNavigation called.");
-    if (!isBound) {
-      // Begin telemetry session
-      navigationTelemetry.startSession(directionsRoute);
-
-      // Start the NavigationService
-      Intent intent = getServiceIntent();
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        applicationContext.startForegroundService(intent);
-      } else {
-        applicationContext.startService(intent);
-      }
-      applicationContext.bindService(intent, this, Context.BIND_AUTO_CREATE);
-
-      // Send navigation event running: true
-      navigationEventDispatcher.onNavigationEvent(true);
-    } else {
-      // Update telemetry directions route
-      navigationTelemetry.updateSessionRoute(directionsRoute);
-    }
+    startNavigationWith(directionsRoute);
   }
 
   /**
@@ -813,8 +814,35 @@ public class MapboxNavigation implements ServiceConnection {
     return navigationEventDispatcher;
   }
 
-  NavigationEngineFactory retrieveEngineProvider() {
+  NavigationEngineFactory retrieveEngineFactory() {
     return navigationEngineFactory;
+  }
+
+  MapboxNavigator retrieveMapboxNavigator() {
+    return mapboxNavigator;
+  }
+
+  private void startNavigationWith(@NonNull DirectionsRoute directionsRoute) {
+    ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
+    this.directionsRoute = directionsRoute;
+    mapboxNavigator.updateRoute(directionsRoute.toJson());
+    if (!isBound) {
+      navigationTelemetry.startSession(directionsRoute);
+      startNavigationService();
+      navigationEventDispatcher.onNavigationEvent(true);
+    } else {
+      navigationTelemetry.updateSessionRoute(directionsRoute);
+    }
+  }
+
+  private void startNavigationService() {
+    Intent intent = getServiceIntent();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      applicationContext.startForegroundService(intent);
+    } else {
+      applicationContext.startService(intent);
+    }
+    applicationContext.bindService(intent, this, Context.BIND_AUTO_CREATE);
   }
 
   private Intent getServiceIntent() {

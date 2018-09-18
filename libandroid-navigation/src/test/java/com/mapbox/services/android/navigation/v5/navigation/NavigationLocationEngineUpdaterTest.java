@@ -59,7 +59,7 @@ public class NavigationLocationEngineUpdaterTest {
 
     provider.forceLocationUpdate(mock(DirectionsRoute.class));
 
-    verify(listener).queueLocationUpdate(any(Location.class));
+    verify(listener).onLocationChanged(any(Location.class));
   }
 
   @Test
