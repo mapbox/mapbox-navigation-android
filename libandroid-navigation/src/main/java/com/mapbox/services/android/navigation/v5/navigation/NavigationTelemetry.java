@@ -127,17 +127,15 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   void initialize(@NonNull Context context, @NonNull String accessToken,
                   MapboxNavigation navigation, LocationEngine locationEngine) {
     if (!isInitialized) {
-      // Setup the location engine
       updateLocationEngine(locationEngine);
 
       validateAccessToken(accessToken);
       NavigationMetricsWrapper.init(context, accessToken, BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT);
 
       MapboxNavigationOptions options = navigation.options();
-      // Set sdkIdentifier based on if from UI or not
-      String sdkIdentifier = updateSdkIdentifier(options);
-
+      String sdkIdentifier = obtainSdkIdentifier(options);
       NavigationMetricsWrapper.sdkIdentifier = sdkIdentifier;
+      NavigationMetricsWrapper.toggleLogging(options.isDebugLoggingEnabled());
       Event navTurnstileEvent = NavigationMetricsWrapper.turnstileEvent();
       // TODO Check if we are sending two turnstile events (Maps and Nav) and if so, do we want to track them
       // separately?
@@ -145,7 +143,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
       isInitialized = true;
     }
-    // Setup the listeners
     initEventDispatcherListeners(navigation);
   }
 
@@ -318,7 +315,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   }
 
   @NonNull
-  private String updateSdkIdentifier(MapboxNavigationOptions options) {
+  private String obtainSdkIdentifier(MapboxNavigationOptions options) {
     String sdkIdentifier = MAPBOX_NAVIGATION_SDK_IDENTIFIER;
     if (options.isFromNavigationUi()) {
       sdkIdentifier = MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER;
