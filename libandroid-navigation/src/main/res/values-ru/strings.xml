@@ -7,4 +7,17 @@
     <string name="meters">м</string>
     <string name="miles">миль</string>
     <string name="feet">футов</string>
+    <string name="eta_format">Ожидаемое прибытие %s</string>
+
+    <!-- Time formatting -->
+    <plurals name="numberOfDays">
+        <item quantity="one">день</item>
+        <item quantity="few">дня</item>
+        <item quantity="many">дней</item>
+        <item quantity="other">дней</item>
+    </plurals>
+    <!-- Hour -->
+    <string name="hr">ч.</string>
+    <!-- Minute -->
+    <string name="min">мин.</string>
 </resources>

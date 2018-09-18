@@ -13,7 +13,14 @@
     <string name="title_navigation_route_ui">Маршрут на карте</string>
     <string name="description_navigation_route_ui">Отобразить маршрут на карте</string>
 
+    <string name="title_navigation_launcher">Запуск навигации</string>
     <string name="description_navigation_launcher">Различное представление маршрута на экране</string>
+
+    <string name="title_end_navigation">Завершить</string>
+    <string name="description_end_navigation">Показывает, как завершить маршрут из его отображения</string>
+
+    <string name="title_dual_navigation_map">Двойная карта маршрута</string>
+    <string name="description_dual_navigation_map">Показывает, как добавить отображение маршрута и карты на один экран</string>
 
     <string name="title_waypoint_navigation">Маршрут с промежуточными точками</string>
     <string name="description_waypoint_navigation">Маршрут с промежуточными пунктами назначения между начальным и конечным</string>
