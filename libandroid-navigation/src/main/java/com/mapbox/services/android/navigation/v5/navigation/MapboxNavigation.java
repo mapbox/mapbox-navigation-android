@@ -10,8 +10,7 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.Gson;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
@@ -22,6 +21,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.navigator.RouterResult;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -38,7 +38,6 @@ import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.utils.ValidationUtils;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,7 +46,8 @@ import retrofit2.Callback;
 import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.BANNER_INSTRUCTION_MILESTONE_ID;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NON_NULL_APPLICATION_CONTEXT_REQUIRED;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
+  .NON_NULL_APPLICATION_CONTEXT_REQUIRED;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID;
 
 /**
@@ -164,91 +164,6 @@ public class MapboxNavigation implements ServiceConnection {
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
     initializeForTest();
-  }
-
-  private void initializeForTest() {
-    // Initialize event dispatcher and add internal listeners
-    navigationEventDispatcher = new NavigationEventDispatcher();
-    navigationEngineFactory = new NavigationEngineFactory();
-    initializeDefaultLocationEngine();
-    initializeTelemetry();
-
-    // Create and add default milestones if enabled.
-    milestones = new HashSet<>();
-    if (options.defaultMilestonesEnabled()) {
-      addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
-      addMilestone(new BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build());
-    }
-  }
-
-  /**
-   * In-charge of initializing all variables needed to begin a navigation session. Many values can
-   * be changed later on using their corresponding setter. An internal progressChangeListeners used
-   * to prevent users from removing it.
-   */
-  private void initialize() {
-    // Initialize event dispatcher and add internal listeners
-    mapboxNavigator = new MapboxNavigator(new Navigator());
-    navigationEventDispatcher = new NavigationEventDispatcher();
-    navigationEngineFactory = new NavigationEngineFactory();
-    initializeDefaultLocationEngine();
-    initializeTelemetry();
-
-    // Create and add default milestones if enabled.
-    milestones = new HashSet<>();
-    if (options.defaultMilestonesEnabled()) {
-      addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
-      addMilestone(new BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build());
-    }
-  }
-
-  private void initializeContext(Context context) {
-    if (context == null || context.getApplicationContext() == null) {
-      throw new IllegalArgumentException(NON_NULL_APPLICATION_CONTEXT_REQUIRED);
-    }
-    applicationContext = context.getApplicationContext();
-  }
-
-  private void initializeTelemetry() {
-    navigationTelemetry = obtainTelemetry();
-    navigationTelemetry.initialize(applicationContext, accessToken, this, locationEngine);
-  }
-
-  private NavigationTelemetry obtainTelemetry() {
-    if (navigationTelemetry == null) {
-      return NavigationTelemetry.getInstance();
-    }
-    return navigationTelemetry;
-  }
-
-  /**
-   * Since navigation requires location information there should always be a valid location engine
-   * which we can use to get information. Therefore, by default we build one.
-   */
-  private void initializeDefaultLocationEngine() {
-    locationEngine = obtainLocationEngine();
-    locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
-    locationEngine.setFastestInterval(1000);
-    locationEngine.setInterval(0);
-    locationEngine.activate();
-  }
-
-  private LocationEngine obtainLocationEngine() {
-    if (locationEngine == null) {
-      return new LocationEngineProvider(applicationContext).obtainBestLocationEngineAvailable();
-    }
-
-    return locationEngine;
-  }
-
-  /**
-   * When onDestroy gets called, it is safe to remove location updates and deactivate the engine.
-   */
-  private void disableLocationEngine() {
-    if (locationEngine != null) {
-      locationEngine.removeLocationUpdates();
-      locationEngine.deactivate();
-    }
   }
 
   // Lifecycle
@@ -450,44 +365,51 @@ public class MapboxNavigation implements ServiceConnection {
   /**
    * Initializes the offline data used for fetching offline routes.
    * <p>
-   * This method must be called before {@link MapboxNavigation#findOfflineRouteFor(Location, ArrayList)}.
+   * This method must be called before {@link MapboxNavigation#findOfflineRouteFor(Point, Point, Point[])} /
+   * {@link MapboxNavigation#findOfflineRouteFor(Location, Point, Point[])}.
    *
-   * @param tileFilePath        path to directory containing tile data
+   * @param tilesDirPath        path to directory containing tile data
    * @param translationsDirPath path to directory containing OSRMTI translations
    */
-  public void initializeOfflineData(String tileFilePath, String translationsDirPath) {
-    mapboxNavigator.configureRouter(tileFilePath, translationsDirPath);
+  public void initializeOfflineData(String tilesDirPath, String translationsDirPath) {
+    mapboxNavigator.configureRouter(tilesDirPath, translationsDirPath);
+  }
+
+  /**
+   * Once {@link MapboxNavigation#initializeOfflineData(String, String)} has been called, you may
+   * call this method to retrieve routes without internet connectivity.
+   *
+   * @param origin      origin {@link Point} of the route
+   * @param destination destination {@link Point} of the route
+   * @param waypoints   way {@link Point}s of the route - these are optional
+   * @return an offline <tt>DirectionsRoute</tt>, <tt>null</tt> if an error is occurred fetching offline route or if
+   * storage permissions are not granted
+   */
+  @Nullable
+  public DirectionsRoute findOfflineRouteFor(@NonNull Point origin, @NonNull Point destination,
+                                             @Nullable Point... waypoints) {
+    FixLocation originFixLocation = mapboxNavigator.buildFixLocationFromPoint(origin);
+    return retrieveOfflineRouteFor(originFixLocation, destination, waypoints);
   }
 
   /**
    * Once {@link MapboxNavigation#initializeOfflineData(String, String)} has been called, you may
    * call this method to retrieve routes without internet connectivity.
    * <p>
-   * This first parameter, <code>currentLocation</code>, is optional and is used when provided to find a more
+   * Use this instead of {@link MapboxNavigation#findOfflineRouteFor(Point, Point, Point[])} to find a more
    * accurate route (for example, in the direction of the location bearing).
    *
-   * @param currentLocation optional to increase route accuracy
-   * @param waypoints       of the route
-   * @return an offline <code>DirectionsRoute</code>
+   * @param current     current {@link Location} use as origin to increase route accuracy
+   * @param destination destination {@link Point} of the route
+   * @param waypoints   way {@link Point}s of the route - these are optional
+   * @return an offline <tt>DirectionsRoute</tt>, <tt>null</tt> if an error is occurred fetching offline route or if
+   * storage permissions are not granted
    */
   @Nullable
-  public DirectionsRoute findOfflineRouteFor(@Nullable Location currentLocation,
-                                             ArrayList<Point> waypoints) {
-    ArrayList<FixLocation> fixLocations = buildFixLocationListFrom(currentLocation, waypoints);
-    if (fixLocations.size() < 2) {
-      Timber.e("Error occurred fetching offline route: invalid way point data");
-      return null;
-    }
-    String responseJson = mapboxNavigator.getRoute(fixLocations);
-    if (responseJson.contains("error")) {
-      JsonObject jsonObject = new JsonParser().parse(responseJson).getAsJsonObject();
-      Timber.e("Error occurred fetching offline route: %s - Code: %s",
-        jsonObject.get("error").getAsString(),
-        jsonObject.get("error_code").getAsString());
-      return null;
-    }
-    DirectionsRoute route = DirectionsResponse.fromJson(responseJson).routes().get(0);
-    return route.toBuilder().routeOptions(generateRouteOptionsFrom(fixLocations)).build();
+  public DirectionsRoute findOfflineRouteFor(@NonNull Location current, @NonNull Point destination,
+                                             @Nullable Point... waypoints) {
+    FixLocation originFixLocation = mapboxNavigator.buildFixLocationFromLocation(current);
+    return retrieveOfflineRouteFor(originFixLocation, destination, waypoints);
   }
 
   // Listeners
@@ -846,6 +768,22 @@ public class MapboxNavigation implements ServiceConnection {
     navigationTelemetry.cancelFeedback(feedbackId);
   }
 
+  @Override
+  public void onServiceConnected(ComponentName name, IBinder service) {
+    Timber.d("Connected to service.");
+    NavigationService.LocalBinder binder = (NavigationService.LocalBinder) service;
+    navigationService = binder.getService();
+    navigationService.startNavigation(this);
+    isBound = true;
+  }
+
+  @Override
+  public void onServiceDisconnected(ComponentName name) {
+    Timber.d("Disconnected from service.");
+    navigationService = null;
+    isBound = false;
+  }
+
   String obtainAccessToken() {
     return accessToken;
   }
@@ -872,6 +810,91 @@ public class MapboxNavigation implements ServiceConnection {
 
   MapboxNavigator retrieveMapboxNavigator() {
     return mapboxNavigator;
+  }
+
+  private void initializeForTest() {
+    // Initialize event dispatcher and add internal listeners
+    navigationEventDispatcher = new NavigationEventDispatcher();
+    navigationEngineFactory = new NavigationEngineFactory();
+    initializeDefaultLocationEngine();
+    initializeTelemetry();
+
+    // Create and add default milestones if enabled.
+    milestones = new HashSet<>();
+    if (options.defaultMilestonesEnabled()) {
+      addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
+      addMilestone(new BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build());
+    }
+  }
+
+  /**
+   * In-charge of initializing all variables needed to begin a navigation session. Many values can
+   * be changed later on using their corresponding setter. An internal progressChangeListeners used
+   * to prevent users from removing it.
+   */
+  private void initialize() {
+    // Initialize event dispatcher and add internal listeners
+    mapboxNavigator = new MapboxNavigator(new Navigator());
+    navigationEventDispatcher = new NavigationEventDispatcher();
+    navigationEngineFactory = new NavigationEngineFactory();
+    initializeDefaultLocationEngine();
+    initializeTelemetry();
+
+    // Create and add default milestones if enabled.
+    milestones = new HashSet<>();
+    if (options.defaultMilestonesEnabled()) {
+      addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
+      addMilestone(new BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build());
+    }
+  }
+
+  private void initializeContext(Context context) {
+    if (context == null || context.getApplicationContext() == null) {
+      throw new IllegalArgumentException(NON_NULL_APPLICATION_CONTEXT_REQUIRED);
+    }
+    applicationContext = context.getApplicationContext();
+  }
+
+  private void initializeTelemetry() {
+    navigationTelemetry = obtainTelemetry();
+    navigationTelemetry.initialize(applicationContext, accessToken, this, locationEngine);
+  }
+
+  private NavigationTelemetry obtainTelemetry() {
+    if (navigationTelemetry == null) {
+      return NavigationTelemetry.getInstance();
+    }
+    return navigationTelemetry;
+  }
+
+  /**
+   * Since navigation requires location information there should always be a valid location engine
+   * which we can use to get information. Therefore, by default we build one.
+   */
+  private void initializeDefaultLocationEngine() {
+    locationEngine = obtainLocationEngine();
+    locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
+    locationEngine.setFastestInterval(1000);
+    locationEngine.setInterval(0);
+    locationEngine.activate();
+  }
+
+  private LocationEngine obtainLocationEngine() {
+    if (locationEngine == null) {
+      return new LocationEngineProvider(applicationContext).obtainBestLocationEngineAvailable();
+    }
+
+    return locationEngine;
+  }
+
+  /**
+   * When onDestroy gets called, it is safe to remove location updates and deactivate the engine.
+   */
+  private void disableLocationEngine() {
+    if (locationEngine != null) {
+      locationEngine.removeLocationUpdates();
+      locationEngine.deactivate();
+    }
   }
 
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute) {
@@ -905,6 +928,35 @@ public class MapboxNavigation implements ServiceConnection {
     return navigationService != null && isBound;
   }
 
+  @Nullable
+  private DirectionsRoute retrieveOfflineRouteFor(FixLocation originFixLocation, @NonNull Point destination,
+                                                  @Nullable Point[] waypoints) {
+    ArrayList<FixLocation> fixLocations = mapboxNavigator.buildFixLocationListFrom(originFixLocation, destination,
+      waypoints);
+    RouterResult response = mapboxNavigator.retrieveRouteFor(fixLocations);
+    boolean success = response.getSuccess();
+    String jsonResponse = response.getJson();
+    if (checkRoute(success, jsonResponse)) {
+      return null;
+    }
+    return obtainRouteFor(jsonResponse, fixLocations);
+  }
+
+  private boolean checkRoute(boolean isSuccess, String json) {
+    if (!isSuccess) {
+      Gson gson = new Gson();
+      OfflineError error = gson.fromJson(json, OfflineError.class);
+      Timber.e("Error occurred fetching offline route: %s - Code: %d", error.getError(), error.getErrorCode());
+      return true;
+    }
+    return false;
+  }
+
+  private DirectionsRoute obtainRouteFor(String response, ArrayList<FixLocation> fixLocations) {
+    DirectionsRoute route = DirectionsResponse.fromJson(response).routes().get(0);
+    return route.toBuilder().routeOptions(generateRouteOptionsFrom(fixLocations)).build();
+  }
+
   private RouteOptions generateRouteOptionsFrom(List<FixLocation> fixLocations) {
     List<Point> coordinates = new ArrayList<>();
     for (FixLocation fixLocation : fixLocations) {
@@ -921,55 +973,5 @@ public class MapboxNavigation implements ServiceConnection {
       .voiceInstructions(true)
       .bannerInstructions(true)
       .build();
-  }
-
-  private ArrayList<FixLocation> buildFixLocationListFrom(@Nullable Location currentLocation,
-                                                          ArrayList<Point> waypoints) {
-    ArrayList<FixLocation> fixLocations = new ArrayList<>();
-    if (currentLocation != null) {
-      fixLocations.add(buildFixLocationFrom(currentLocation));
-    }
-    for (Point point : waypoints) {
-      fixLocations.add(buildFixLocationFrom(point));
-    }
-    return fixLocations;
-  }
-
-  private FixLocation buildFixLocationFrom(Location location) {
-    Point point = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    return new FixLocation(
-      point,
-      new Date(location.getTime()),
-      location.getSpeed(),
-      location.getBearing(),
-      (float) location.getAltitude(),
-      location.getAccuracy(),
-      "mapbox_navigation"
-    );
-  }
-
-  private FixLocation buildFixLocationFrom(Point point) {
-    return new FixLocation(
-      point,
-      new Date(),
-      0f, 0f, 0f, 0f,
-      "mapbox_navigation"
-    );
-  }
-
-  @Override
-  public void onServiceConnected(ComponentName name, IBinder service) {
-    Timber.d("Connected to service.");
-    NavigationService.LocalBinder binder = (NavigationService.LocalBinder) service;
-    navigationService = binder.getService();
-    navigationService.startNavigation(this);
-    isBound = true;
-  }
-
-  @Override
-  public void onServiceDisconnected(ComponentName name) {
-    Timber.d("Disconnected from service.");
-    navigationService = null;
-    isBound = false;
   }
 }
