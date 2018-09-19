@@ -4,17 +4,14 @@ import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListLis
 
 class NavigationInstructionListListener implements InstructionListListener {
 
-  private NavigationPresenter presenter;
   private NavigationViewEventDispatcher dispatcher;
 
-  NavigationInstructionListListener(NavigationPresenter presenter, NavigationViewEventDispatcher dispatcher) {
-    this.presenter = presenter;
+  NavigationInstructionListListener(NavigationViewEventDispatcher dispatcher) {
     this.dispatcher = dispatcher;
   }
 
   @Override
   public void onInstructionListVisibilityChanged(boolean visible) {
-    presenter.onInstructionListVisibilityChanged(visible);
     dispatcher.onInstructionListVisibilityChanged(visible);
   }
 }

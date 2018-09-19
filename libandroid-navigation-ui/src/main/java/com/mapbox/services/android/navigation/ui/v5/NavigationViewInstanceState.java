@@ -5,13 +5,13 @@ import android.os.Parcelable;
 
 class NavigationViewInstanceState implements Parcelable {
   private int bottomSheetBehaviorState;
-  private int recenterButtonVisibility;
+  private int cameraState;
   private boolean instructionViewVisible;
 
-  NavigationViewInstanceState(int bottomSheetBehaviorState, int recenterButtonVisibility,
+  NavigationViewInstanceState(int bottomSheetBehaviorState, int cameraState,
                               boolean instructionViewVisible) {
     this.bottomSheetBehaviorState = bottomSheetBehaviorState;
-    this.recenterButtonVisibility = recenterButtonVisibility;
+    this.cameraState = cameraState;
     this.instructionViewVisible = instructionViewVisible;
   }
 
@@ -19,8 +19,8 @@ class NavigationViewInstanceState implements Parcelable {
     return bottomSheetBehaviorState;
   }
 
-  int getRecenterButtonVisibility() {
-    return recenterButtonVisibility;
+  int getCameraState() {
+    return cameraState;
   }
 
   boolean isInstructionViewVisible() {
@@ -29,7 +29,7 @@ class NavigationViewInstanceState implements Parcelable {
 
   private NavigationViewInstanceState(Parcel parcel) {
     bottomSheetBehaviorState = parcel.readInt();
-    recenterButtonVisibility = parcel.readInt();
+    cameraState = parcel.readInt();
     instructionViewVisible = parcel.readByte() != 0x00;
   }
 
@@ -41,7 +41,7 @@ class NavigationViewInstanceState implements Parcelable {
   @Override
   public void writeToParcel(Parcel dest, int flags) {
     dest.writeInt(bottomSheetBehaviorState);
-    dest.writeInt(recenterButtonVisibility);
+    dest.writeInt(cameraState);
     dest.writeByte((byte) (instructionViewVisible ? 0x01 : 0x00));
   }
 

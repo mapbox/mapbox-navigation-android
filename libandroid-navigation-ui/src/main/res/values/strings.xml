@@ -47,13 +47,13 @@
 
     <!-- Should not be translated -->
     <string name="navigation_guidance_day"
-            translatable="false">mapbox://styles/mapbox/navigation-guidance-day-v4</string>
+        translatable="false">mapbox://styles/mapbox/navigation-guidance-day-v4</string>
     <string name="navigation_guidance_night"
-            translatable="false">mapbox://styles/mapbox/navigation-guidance-night-v4</string>
+        translatable="false">mapbox://styles/mapbox/navigation-guidance-night-v4</string>
     <string name="dark_theme_enabled"
-            translatable="false">dark_theme_enabled</string>
+        translatable="false">dark_theme_enabled</string>
     <string name="navigation_view_instance_state"
-            translatable="false">navigation_view_instance_state</string>
+        translatable="false">navigation_view_instance_state</string>
     <string name="navigation_running"
-            translatable="false">navigation_running</string>
+        translatable="false">navigation_running</string>
 </resources>

@@ -13,11 +13,9 @@ public interface NavigationContract {
 
     void setSummaryBehaviorHideable(boolean isHideable);
 
-    boolean isSummaryBottomSheetHidden();
-
     void updateWaynameVisibility(boolean isVisible);
 
-    void updateCameraTrackingEnabled(boolean isEnabled);
+    void setNotTracking();
 
     void resetCameraPosition();
 
@@ -36,8 +34,6 @@ public interface NavigationContract {
     void resumeCamera(Location location);
 
     void updateNavigationMap(Location location);
-
-    boolean isRecenterButtonVisible();
 
     void updateCameraRouteOverview();
   }

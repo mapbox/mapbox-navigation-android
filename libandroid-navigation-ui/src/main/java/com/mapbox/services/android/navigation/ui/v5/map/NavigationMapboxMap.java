@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.map;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.location.Location;
@@ -23,6 +24,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
+import com.mapbox.services.android.navigation.ui.v5.CameraState;
 import com.mapbox.services.android.navigation.ui.v5.NavigationSnapshotReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
@@ -87,14 +89,14 @@ public class NavigationMapboxMap {
    * @param mapView   for map size and Context
    * @param mapboxMap for APIs to interact with the map
    */
-  public NavigationMapboxMap(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap) {
+  public NavigationMapboxMap(MapView mapView, MapboxMap mapboxMap, Context context, int cameraState) {
     this.mapboxMap = mapboxMap;
     initializeLocationLayer(mapView, mapboxMap);
     initializeMapPaddingAdjustor(mapView, mapboxMap);
     initializeMapLayerInteractor(mapboxMap);
     initializeWayname(mapView, mapboxMap, layerInteractor, mapPaddingAdjustor);
     initializeRoute(mapView, mapboxMap);
-    initializeCamera(mapboxMap);
+    initializeCamera(mapboxMap, context, cameraState);
   }
 
   // Package private (no modifier) for testing purposes
@@ -163,7 +165,7 @@ public class NavigationMapboxMap {
   public void saveStateWith(String key, Bundle outState) {
     boolean isVisible = mapWayname.isVisible();
     String waynameText = mapWayname.retrieveWayname();
-    boolean isCameraTracking = mapCamera.isTrackingEnabled();
+    boolean isCameraTracking = mapCamera.getCameraState() == CameraState.TRACKING;
     NavigationMapboxMapInstanceState instanceState = new NavigationMapboxMapInstanceState(
       isVisible, waynameText, isCameraTracking
     );
@@ -228,7 +230,11 @@ public class NavigationMapboxMap {
    * @param isEnabled true to track, false to not track
    */
   public void updateCameraTrackingEnabled(boolean isEnabled) {
-    mapCamera.updateCameraTrackingLocation(isEnabled);
+    mapCamera.setTracking(isEnabled);
+  }
+
+  public void setNotTracking() {
+    mapCamera.setTracking(false);
   }
 
   /**
@@ -263,12 +269,10 @@ public class NavigationMapboxMap {
    * Adjusts the map camera to {@link DirectionsRoute} being traveled along.
    * <p>
    * Also includes the given padding.
-   *
-   * @param padding for creating the overview camera position
    */
-  public void showRouteOverview(int[] padding) {
+  public void showRouteOverview() {
     mapPaddingAdjustor.removeAllPadding();
-    mapCamera.showRouteOverview(padding);
+    mapCamera.showRouteOverview();
   }
 
   /**
@@ -401,6 +405,19 @@ public class NavigationMapboxMap {
     mapboxMap.snapshot(navigationSnapshotReadyCallback);
   }
 
+  public int getCameraState() {
+    return mapCamera.getCameraState();
+  }
+
+  private int[] buildRouteOverviewPadding(Context context) {
+    Resources resources = context.getResources();
+    int leftRightPadding = (int) resources.getDimension(R.dimen.route_overview_left_right_padding);
+    int paddingBuffer = (int) resources.getDimension(R.dimen.route_overview_buffer_padding);
+    int instructionHeight = (int) (resources.getDimension(R.dimen.instruction_layout_height) + paddingBuffer);
+    int summaryHeight = (int) resources.getDimension(R.dimen.summary_bottomsheet_height);
+    return new int[] {leftRightPadding, instructionHeight, leftRightPadding, summaryHeight};
+  }
+
   private void initializeLocationLayer(MapView mapView, MapboxMap map) {
     Context context = mapView.getContext();
     int locationLayerStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context,
@@ -413,8 +430,9 @@ public class NavigationMapboxMap {
     mapPaddingAdjustor = new MapPaddingAdjustor(mapView, mapboxMap);
   }
 
-  private void initializeCamera(MapboxMap map) {
-    mapCamera = new NavigationCamera(map);
+  private void initializeCamera(MapboxMap map, Context context, int cameraState) {
+    int[] padding = buildRouteOverviewPadding(context);
+    mapCamera = new NavigationCamera(map, padding, cameraState);
   }
 
   private void initializeWayname(MapView mapView, MapboxMap mapboxMap,

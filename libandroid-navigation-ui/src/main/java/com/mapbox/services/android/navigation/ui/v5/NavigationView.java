@@ -14,7 +14,6 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentActivity;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.ImageButton;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -81,6 +80,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private NavigationMapboxMapInstanceState mapInstanceState;
   private boolean isMapInitialized;
   private boolean isSubscribed;
+  private int cameraState;
 
   public NavigationView(Context context) {
     this(context, null);
@@ -154,8 +154,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void onRestoreInstanceState(Bundle savedInstanceState) {
     String instanceKey = getContext().getString(R.string.navigation_view_instance_state);
     NavigationViewInstanceState navigationViewInstanceState = savedInstanceState.getParcelable(instanceKey);
-    recenterBtn.setVisibility(navigationViewInstanceState.getRecenterButtonVisibility());
     resetBottomSheetState(navigationViewInstanceState.getBottomSheetBehaviorState());
+    cameraState = navigationViewInstanceState.getCameraState();
     updateInstructionListState(navigationViewInstanceState.isInstructionViewVisible());
     mapInstanceState = savedInstanceState.getParcelable(MAP_INSTANCE_STATE_KEY);
   }
@@ -225,14 +225,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   @Override
-  public boolean isSummaryBottomSheetHidden() {
-    return summaryBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN;
-  }
-
-  @Override
-  public void updateCameraTrackingEnabled(boolean isEnabled) {
+  public void setNotTracking() {
     if (navigationMap != null) {
-      navigationMap.updateCameraTrackingEnabled(isEnabled);
+      navigationMap.setNotTracking();
     }
   }
 
@@ -254,11 +249,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   @Override
-  public boolean isRecenterButtonVisible() {
-    return recenterBtn.getVisibility() == View.VISIBLE;
-  }
-
-  @Override
   public void drawRoute(DirectionsRoute directionsRoute) {
     if (navigationMap != null) {
       navigationMap.drawRoute(directionsRoute);
@@ -266,7 +256,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void initializeNavigationMap(MapView mapView, MapboxMap map) {
-    navigationMap = new NavigationMapboxMap(mapView, map);
+    navigationMap = new NavigationMapboxMap(mapView, map, getContext(), navigationPresenter.getCameraState());
     if (mapInstanceState != null) {
       navigationMap.restoreFrom(mapInstanceState);
     }
@@ -349,8 +339,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Override
   public void updateCameraRouteOverview() {
     if (navigationMap != null) {
-      int[] padding = buildRouteOverviewPadding(getContext());
-      navigationMap.showRouteOverview(padding);
+      navigationMap.showRouteOverview();
     }
   }
 
@@ -455,8 +444,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void initializeInstructionListListener() {
-    instructionView.setInstructionListListener(new NavigationInstructionListListener(navigationPresenter,
-      navigationViewEventDispatcher));
+    instructionView.setInstructionListListener(new NavigationInstructionListListener(navigationViewEventDispatcher));
   }
 
   private void updateSavedInstanceStateMapStyle(@Nullable Bundle savedInstanceState) {
