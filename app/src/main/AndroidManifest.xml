@@ -3,7 +3,6 @@
           package="com.mapbox.services.android.navigation.testapp">
 
     <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".NavigationApplication"
@@ -32,6 +31,14 @@
         <activity
             android:name=".activity.RerouteActivity"
             android:label="@string/title_reroute">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
+        <activity
+            android:name=".activity.OfflineRerouteActivity"
+            android:label="@string/title_offline_reroute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
