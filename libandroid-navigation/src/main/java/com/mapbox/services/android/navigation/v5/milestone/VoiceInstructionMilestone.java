@@ -104,8 +104,9 @@ public class VoiceInstructionMilestone extends Milestone {
   }
 
   private boolean updateCurrentAnnouncement(RouteProgress routeProgress) {
-    if (!announcement.equals(routeProgress.currentAnnouncement())) {
-      announcement = routeProgress.currentAnnouncement();
+    String currentAnnouncement = routeProgress.currentAnnouncement();
+    if (!currentAnnouncement.isEmpty() && !announcement.equals(currentAnnouncement)) {
+      announcement = currentAnnouncement;
       ssmlAnnouncement = routeProgress.currentSsmlAnnouncement();
       cacheInstructions(routeProgress, false);
       return true;
