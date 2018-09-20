@@ -10,6 +10,9 @@
     <string name="title_reroute">Reroute</string>
     <string name="description_reroute">Test the reroute function inside the navigation SDK</string>
 
+    <string name="title_offline_reroute">Offline Reroute</string>
+    <string name="description_offline_reroute">Test the offline reroute function inside the navigation SDK</string>
+
     <string name="title_navigation_route_ui">Navigation Map Route</string>
     <string name="description_navigation_route_ui">Shows different styles using NavigationMapRoute</string>
 
