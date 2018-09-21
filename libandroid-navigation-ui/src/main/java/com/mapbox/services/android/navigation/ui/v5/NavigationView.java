@@ -81,6 +81,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private NavigationMapboxMapInstanceState mapInstanceState;
   private boolean isMapInitialized;
   private boolean isSubscribed;
+  private boolean isOffline;
 
   public NavigationView(Context context) {
     this(context, null);
@@ -415,6 +416,32 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     return navigationViewModel.retrieveNavigation();
   }
 
+  /**
+   * Initializes the offline data used for fetching offline routes.
+   * <p>
+   * This method must be called before {@link MapboxNavigation#findOfflineRouteFor(Point, Point, Point[])} /
+   * {@link MapboxNavigation#findOfflineRouteFor(Location, Point, Point[])}.
+   *
+   * @param tileFilePath        path to directory containing tile data
+   * @param translationsDirPath path to directory containing OSRMTI translations
+   */
+  public void initializeOfflineData(String tileFilePath, String translationsDirPath) {
+    navigationViewModel.initializeOfflineData(tileFilePath, translationsDirPath);
+  }
+
+  /**
+   * Sets the NavigationView to use or not use offline data. This call should be followed by a call
+   * to initializeOfflineData.
+   *
+   * @param isOffline whether the map should load offline or not
+   */
+  public void setOffline(boolean isOffline) {
+    this.isOffline = isOffline;
+    if (navigationViewModel != null) {
+      navigationViewModel.setOffline(isOffline);
+    }
+  }
+
   private void initializeView() {
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
@@ -520,6 +547,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private void initializeNavigation(NavigationViewOptions options) {
     establish(options);
     MapboxNavigation navigation = navigationViewModel.initialize(options);
+    setOffline(isOffline);
     initializeNavigationListeners(options, navigation);
     setupNavigationMapboxMap(options);
 

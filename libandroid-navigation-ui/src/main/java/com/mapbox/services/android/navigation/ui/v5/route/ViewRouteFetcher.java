@@ -67,6 +67,21 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
   }
 
   /**
+   * Calculates the remaining coordinates in the given OffRouteEvent
+   *
+   * @param event from which the progress is extracted
+   * @return List of remaining coordinates
+   */
+  public List<Point> calculateRemainingCoordinates(OffRouteEvent event) {
+    if (OffRouteEvent.isValid(event)) {
+      RouteProgress routeProgress = event.getRouteProgress();
+      return routeUtils.calculateRemainingWaypoints(routeProgress);
+    } else {
+      return null;
+    }
+  }
+
+  /**
    * Updates this object's awareness of the raw location
    *
    * @param rawLocation to set
