@@ -45,7 +45,7 @@
 
     </LinearLayout>
 
-    <com.mapbox.services.android.navigation.ui.v5.alert.AlertView
+    <com.mapbox.services.android.navigation.ui.v5.instruction.NavigationAlertView
         android:id="@+id/alertView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -57,9 +57,8 @@
         android:layout_centerHorizontal="true"
         android:visibility="invisible"/>
 
-    <include
+    <com.mapbox.services.android.navigation.ui.v5.SoundButton
         android:id="@+id/soundLayout"
-        layout="@layout/sound_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -68,13 +67,13 @@
         android:layout_alignParentRight="true"
         android:layout_below="@id/extraInstructionContentLayout"/>
 
-    <include
+    <com.mapbox.services.android.navigation.ui.v5.FeedbackButton
         android:id="@+id/feedbackLayout"
-        layout="@layout/feedback_button_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_below="@id/soundLayout"/>
+        android:layout_below="@id/soundLayout"
+        android:layout_alignWithParentIfMissing="true"/>
 
 </RelativeLayout>

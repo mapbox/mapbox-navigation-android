@@ -415,6 +415,33 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     return navigationViewModel.retrieveNavigation();
   }
 
+  /**
+   * Returns the sound button used for muting instructions
+   *
+   * @return sound button
+   */
+  public NavigationButton retrieveSoundButton() {
+    return instructionView.retrieveSoundButton();
+  }
+
+  /**
+   * Returns the feedback button for sending feedback about navigation
+   *
+   * @return feedback button
+   */
+  public NavigationButton retrieveFeedbackButton() {
+    return instructionView.retrieveFeedbackButton();
+  }
+
+  /**
+   * Returns the re-center button for recentering on current location
+   *
+   * @return recenter button
+   */
+  public NavigationButton retrieveRecenterButton() {
+    return recenterBtn;
+  }
+
   private void initializeView() {
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
@@ -532,7 +559,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   private void initializeClickListeners() {
     cancelBtn.setOnClickListener(new CancelBtnClickListener(navigationViewEventDispatcher));
-    recenterBtn.setOnClickListener(new RecenterBtnClickListener(navigationPresenter));
+    recenterBtn.addOnClickListener(new RecenterBtnClickListener(navigationPresenter));
     routeOverviewBtn.setOnClickListener(new RouteOverviewBtnClickListener(navigationPresenter));
   }
 
