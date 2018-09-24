@@ -7,12 +7,14 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -28,6 +30,11 @@ import timber.log.Timber;
 public class RouteFetcher {
 
   private static final double BEARING_TOLERANCE = 90d;
+  private static final String SEMICOLON = ";";
+  private static final int ORIGIN_APPROACH_THRESHOLD = 1;
+  private static final int ORIGIN_APPROACH = 0;
+  private static final int FIRST_POSITION = 0;
+  private static final int SECOND_POSITION = 1;
 
   private final List<RouteListener> routeListeners = new CopyOnWriteArrayList<>();
   private final String accessToken;
@@ -93,6 +100,7 @@ public class RouteFetcher {
     addDestination(remainingWaypoints, builder);
     addWaypoints(remainingWaypoints, builder);
     addWaypointNames(progress, builder);
+    addApproaches(progress, builder);
     return builder;
   }
 
@@ -120,6 +128,29 @@ public class RouteFetcher {
     if (remainingWaypointNames != null) {
       builder.addWaypointNames(remainingWaypointNames);
     }
+  }
+
+  private void addApproaches(RouteProgress progress, NavigationRoute.Builder builder) {
+    String[] remainingApproaches = calculateRemainingApproaches(progress);
+    if (remainingApproaches != null) {
+      builder.addApproaches(remainingApproaches);
+    }
+  }
+
+  private String[] calculateRemainingApproaches(RouteProgress routeProgress) {
+    RouteOptions routeOptions = routeProgress.directionsRoute().routeOptions();
+    if (routeOptions == null || TextUtils.isEmpty(routeOptions.approaches())) {
+      return null;
+    }
+    String allApproaches = routeOptions.approaches();
+    String[] splitApproaches = allApproaches.split(SEMICOLON);
+    int coordinatesSize = routeProgress.directionsRoute().routeOptions().coordinates().size();
+    String[] remainingApproaches = Arrays.copyOfRange(splitApproaches,
+      coordinatesSize - routeProgress.remainingWaypoints(), coordinatesSize);
+    String[] approaches = new String[remainingApproaches.length + ORIGIN_APPROACH_THRESHOLD];
+    approaches[ORIGIN_APPROACH] = splitApproaches[ORIGIN_APPROACH];
+    System.arraycopy(remainingApproaches, FIRST_POSITION, approaches, SECOND_POSITION, remainingApproaches.length);
+    return approaches;
   }
 
   private void executeRouteCall(NavigationRoute.Builder builder) {

@@ -347,7 +347,8 @@ public class RouteUtilsTest extends BaseTest {
   }
 
   @Test
-  public void findCurrentVoiceInstructions_returnsCorrectInstructionsBeginningOfStepDistanceRemaining() throws Exception {
+  public void findCurrentVoiceInstructions_returnsCorrectInstructionsBeginningOfStepDistanceRemaining() throws
+    Exception {
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
     routeProgress = routeProgress.toBuilder()
       .stepIndex(1)
@@ -414,6 +415,8 @@ public class RouteUtilsTest extends BaseTest {
     List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress);
 
     assertEquals(2, remainingWaypoints.size());
+    assertEquals(Point.fromLngLat(7.890, 1.234), remainingWaypoints.get(0));
+    assertEquals(Point.fromLngLat(5.678, 9.012), remainingWaypoints.get(1));
   }
 
   @Test
@@ -444,7 +447,10 @@ public class RouteUtilsTest extends BaseTest {
 
     String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(routeProgress);
 
-    assertEquals(2, remainingWaypointNames.length);
+    assertEquals(3, remainingWaypointNames.length);
+    assertEquals("first", remainingWaypointNames[0]);
+    assertEquals("third", remainingWaypointNames[1]);
+    assertEquals("fourth", remainingWaypointNames[2]);
   }
 
   @Test
@@ -483,9 +489,9 @@ public class RouteUtilsTest extends BaseTest {
   private List<Point> buildCoordinateList() {
     List<Point> coordinates = new ArrayList<>();
     coordinates.add(Point.fromLngLat(1.234, 5.678));
-    coordinates.add(Point.fromLngLat(1.234, 5.678));
-    coordinates.add(Point.fromLngLat(1.234, 5.678));
-    coordinates.add(Point.fromLngLat(1.234, 5.678));
+    coordinates.add(Point.fromLngLat(9.012, 3.456));
+    coordinates.add(Point.fromLngLat(7.890, 1.234));
+    coordinates.add(Point.fromLngLat(5.678, 9.012));
     return coordinates;
   }
 }
