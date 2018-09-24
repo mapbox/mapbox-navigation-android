@@ -33,6 +33,10 @@ public class RouteUtils {
   private static final String FORCED_LOCATION = "Forced Location";
   private static final int FIRST_COORDINATE = 0;
   private static final int FIRST_INSTRUCTION = 0;
+  private static final int ORIGIN_WAYPOINT_NAME_THRESHOLD = 1;
+  private static final int ORIGIN_WAYPOINT_NAME = 0;
+  private static final int FIRST_POSITION = 0;
+  private static final int SECOND_POSITION = 1;
   private static final String SEMICOLON = ";";
   private static final Set<String> VALID_PROFILES = new HashSet<String>() {
     {
@@ -53,7 +57,7 @@ public class RouteUtils {
    * @since 0.7.0
    */
   public boolean isNewRoute(@Nullable RouteProgress previousRouteProgress,
-                                   @NonNull RouteProgress routeProgress) {
+                            @NonNull RouteProgress routeProgress) {
     return isNewRoute(previousRouteProgress, routeProgress.directionsRoute());
   }
 
@@ -67,7 +71,7 @@ public class RouteUtils {
    * @since 0.7.0
    */
   public boolean isNewRoute(@Nullable RouteProgress previousRouteProgress,
-                                   @NonNull DirectionsRoute directionsRoute) {
+                            @NonNull DirectionsRoute directionsRoute) {
     return previousRouteProgress == null || !previousRouteProgress.directionsRoute().geometry()
       .equals(directionsRoute.geometry());
   }
@@ -131,19 +135,23 @@ public class RouteUtils {
       return null;
     }
     List<Point> coordinates = new ArrayList<>(routeProgress.directionsRoute().routeOptions().coordinates());
-    if (coordinates.size() < routeProgress.remainingWaypoints()) {
+    int coordinatesSize = coordinates.size();
+    int remainingWaypoints = routeProgress.remainingWaypoints();
+    if (coordinatesSize < remainingWaypoints) {
       return null;
     }
-    coordinates.subList(0, routeProgress.remainingWaypoints()).clear();
-    return coordinates;
+    List<Point> remainingCoordinates = coordinates.subList(coordinatesSize - remainingWaypoints, coordinatesSize);
+    return remainingCoordinates;
   }
 
   /**
    * Given a {@link RouteProgress}, this method will calculate the remaining waypoint names
    * along the given route based on route option waypoint names and the progress remaining coordinates.
+   * <p>
+   * If the waypoint names are empty, this method will return null.
    *
    * @param routeProgress for route waypoint names and remaining coordinates
-   * @return String array of remaining waypoint names
+   * @return String array including the origin waypoint name and the remaining ones
    * @since 0.19.0
    */
   @Nullable
@@ -152,9 +160,16 @@ public class RouteUtils {
     if (routeOptions == null || TextUtils.isEmpty(routeOptions.waypointNames())) {
       return null;
     }
-    String waypointNames = routeOptions.waypointNames();
-    String[] names = waypointNames.split(SEMICOLON);
-    return Arrays.copyOfRange(names, FIRST_COORDINATE, routeProgress.remainingWaypoints());
+    String allWaypointNames = routeOptions.waypointNames();
+    String[] names = allWaypointNames.split(SEMICOLON);
+    int coordinatesSize = routeProgress.directionsRoute().routeOptions().coordinates().size();
+    String[] remainingWaypointNames = Arrays.copyOfRange(names,
+      coordinatesSize - routeProgress.remainingWaypoints(), coordinatesSize);
+    String[] waypointNames = new String[remainingWaypointNames.length + ORIGIN_WAYPOINT_NAME_THRESHOLD];
+    waypointNames[ORIGIN_WAYPOINT_NAME] = names[ORIGIN_WAYPOINT_NAME];
+    System.arraycopy(remainingWaypointNames, FIRST_POSITION, waypointNames, SECOND_POSITION,
+      remainingWaypointNames.length);
+    return waypointNames;
   }
 
   /**
@@ -242,7 +257,7 @@ public class RouteUtils {
    */
   @Nullable
   public BannerText findCurrentBannerText(LegStep currentStep, double stepDistanceRemaining,
-                                                 boolean findPrimary) {
+                                          boolean findPrimary) {
     BannerInstructions instructions = findCurrentBannerInstructions(currentStep, stepDistanceRemaining);
     if (instructions != null) {
       return retrievePrimaryOrSecondaryBannerText(findPrimary, instructions);
@@ -278,7 +293,7 @@ public class RouteUtils {
     return isValidStep(currentStep) && hasInstructions(currentStep.voiceInstructions());
   }
 
-  private List<VoiceInstructions> sortVoiceInstructions(List<VoiceInstructions>  instructions) {
+  private List<VoiceInstructions> sortVoiceInstructions(List<VoiceInstructions> instructions) {
     List<VoiceInstructions> sortedInstructions = new ArrayList<>(instructions);
     Collections.sort(sortedInstructions, new Comparator<VoiceInstructions>() {
       @Override
@@ -315,7 +330,7 @@ public class RouteUtils {
   }
 
   private boolean hasValidInstructions(List<BannerInstructions> bannerInstructions,
-                                              BannerInstructions currentInstructions) {
+                                       BannerInstructions currentInstructions) {
     return bannerInstructions != null && !bannerInstructions.isEmpty() && currentInstructions != null;
   }
 
