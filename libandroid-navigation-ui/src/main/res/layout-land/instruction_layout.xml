@@ -122,7 +122,7 @@
         app:layout_constraintStart_toEndOf="@+id/instructionManeuverLayout"
         app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText"/>
 
-    <com.mapbox.services.android.navigation.ui.v5.alert.AlertView
+    <com.mapbox.services.android.navigation.ui.v5.instruction.NavigationAlertView
         android:id="@+id/alertView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -149,17 +149,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/instructionManeuverLayout"/>
 
-    <include
+    <com.mapbox.services.android.navigation.ui.v5.SoundButton
         android:id="@+id/soundLayout"
-        layout="@layout/sound_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText"/>
 
-    <include
+    <com.mapbox.services.android.navigation.ui.v5.FeedbackButton
         android:id="@+id/feedbackLayout"
-        layout="@layout/feedback_button_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"

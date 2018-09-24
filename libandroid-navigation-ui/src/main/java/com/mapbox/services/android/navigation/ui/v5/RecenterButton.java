@@ -20,8 +20,8 @@ import android.view.animation.TranslateAnimation;
  *
  * @since 0.6.0
  */
-public class RecenterButton extends CardView {
-
+public class RecenterButton extends CardView implements NavigationButton {
+  private MultiOnClickListener multiOnClickListener;
   private Animation slideUpBottom;
 
   public RecenterButton(Context context) {
@@ -42,6 +42,7 @@ public class RecenterButton extends CardView {
    *
    * @since 0.6.0
    */
+  @Override
   public void show() {
     if (getVisibility() == INVISIBLE) {
       setVisibility(VISIBLE);
@@ -50,10 +51,31 @@ public class RecenterButton extends CardView {
   }
 
   /**
+   * Adds an onClickListener to the button
+   *
+   * @param onClickListener to add
+   */
+  @Override
+  public void addOnClickListener(OnClickListener onClickListener) {
+    multiOnClickListener.addListener(onClickListener);
+  }
+
+  /**
+   * Removes an onClickListener from the button
+   *
+   * @param onClickListener to remove
+   */
+  @Override
+  public void removeOnClickListener(OnClickListener onClickListener) {
+    multiOnClickListener.removeListener(onClickListener);
+  }
+
+  /**
    * Sets visibility to INVISIBLE.
    *
    * @since 0.6.0
    */
+  @Override
   public void hide() {
     if (getVisibility() == VISIBLE) {
       setVisibility(INVISIBLE);
@@ -68,6 +90,29 @@ public class RecenterButton extends CardView {
   protected void onFinishInflate() {
     super.onFinishInflate();
     initAnimation();
+  }
+
+  @Override
+  protected void onAttachedToWindow() {
+    super.onAttachedToWindow();
+    setupOnClickListeners();
+  }
+
+  @Override
+  protected void onDetachedFromWindow() {
+    super.onDetachedFromWindow();
+    clearListeners();
+  }
+
+  private void setupOnClickListeners() {
+    multiOnClickListener = new MultiOnClickListener();
+    setOnClickListener(multiOnClickListener);
+  }
+
+  private void clearListeners() {
+    multiOnClickListener.clearListeners();
+    multiOnClickListener = null;
+    setOnClickListener(null);
   }
 
   /**
