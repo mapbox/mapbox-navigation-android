@@ -43,6 +43,7 @@ public class ManeuverView extends View {
 
   private static final float TOP_ROUNDABOUT_ANGLE_LIMIT = 300f;
   private static final float BOTTOM_ROUNDABOUT_ANGLE_LIMIT = 60f;
+  private static final float DEFAULT_ROUNDABOUT_ANGLE = 180f;
   private static final Map<Pair<String, String>, ManeuverViewUpdate> MANEUVER_VIEW_UPDATE_MAP = new ManeuverViewMap();
   private static final Set<String> SHOULD_FLIP_MODIFIERS = new HashSet<String>() {
     {
@@ -77,7 +78,7 @@ public class ManeuverView extends View {
   private Pair<String, String> maneuverTypeAndModifier = new Pair<>(null, null);
   private int primaryColor;
   private int secondaryColor;
-  private float roundaboutAngle;
+  private float roundaboutAngle = DEFAULT_ROUNDABOUT_ANGLE;
   private PointF size;
 
   public ManeuverView(Context context) {
