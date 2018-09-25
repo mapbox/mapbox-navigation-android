@@ -2,6 +2,40 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.19.0 - September 24, 2018
+
+* Fix route requests that include approaches and fix calculate remaining waypoints and waypoint names logic [#1303](https://github.com/mapbox/mapbox-navigation-android/pull/1303)
+* Added ability to hide/add listeners to buttons/alert views [#1251](https://github.com/mapbox/mapbox-navigation-android/pull/1251)
+* Allow custom LocationEngine from NavigationViewOptions [#1257](https://github.com/mapbox/mapbox-navigation-android/pull/1257)
+* Add debug logging support back [#1298](https://github.com/mapbox/mapbox-navigation-android/pull/1298)
+* Make last location from replay route location engine null (by default) until the first location is received or assigned explicitly [#1296](https://github.com/mapbox/mapbox-navigation-android/pull/1296)
+* Do not update MockLocationEngine route on rotation [#1289](https://github.com/mapbox/mapbox-navigation-android/pull/1289)
+* Fix mock navigation activity leak and fix location puck flying from current location to mock [#1294](https://github.com/mapbox/mapbox-navigation-android/pull/1294)
+* Add location dispatcher to replay raw GPS traces [#1039](https://github.com/mapbox/mapbox-navigation-android/pull/1089)
+* Remove sonarqube integration [#1290](https://github.com/mapbox/mapbox-navigation-android/pull/1290)
+* Update Maps SDK to 6.5.0 and Events to 3.2.0 [#1241](https://github.com/mapbox/mapbox-navigation-android/pull/1241)
+* Add onNavigationStopped callback for NavigationNotification [#1283](https://github.com/mapbox/mapbox-navigation-android/pull/1283)
+* Added custom rounding increments for formatting distance [#1231](https://github.com/mapbox/mapbox-navigation-android/pull/1231)
+* Simplify will voice api [#1281](https://github.com/mapbox/mapbox-navigation-android/pull/1281)
+* Update RouteEngine for NavigationView duplicate starts [#1277](https://github.com/mapbox/mapbox-navigation-android/pull/1277)
+* Fix recenter problem with Remove onMoveListener in onDestroy [#1263](https://github.com/mapbox/mapbox-navigation-android/pull/1263)
+* Update Milestone javadoc to explain ignored trigger behavior [#1269](https://github.com/mapbox/mapbox-navigation-android/pull/1269)
+* Fix route requests that include waypoint names [#1260](https://github.com/mapbox/mapbox-navigation-android/pull/1260)
+* Do not allow multiple ViewModel subscriptions in NavigationView [#1275](https://github.com/mapbox/mapbox-navigation-android/pull/1275)
+* Update Transfiex Translations [#1258](https://github.com/mapbox/mapbox-navigation-android/pull/1258)
+* Do not add Fragments to backstack in FragmentNavigationActivity [#1256](https://github.com/mapbox/mapbox-navigation-android/pull/1256)
+* bump location layer plugin version to 0.8.1 [#1252](https://github.com/mapbox/mapbox-navigation-android/pull/1252)
+* fix route leg progress current leg annotation javadoc broken link [#1250](https://github.com/mapbox/mapbox-navigation-android/pull/1250)
+* Save and restore map state on rotation for way name and camera tracking [#1215](https://github.com/mapbox/mapbox-navigation-android/pull/1215)
+* Add example with MapboxNavigation driving separate UI components [#1219](https://github.com/mapbox/mapbox-navigation-android/pull/1219)
+* Update NavigationView to guard against duplicate initializations [#1247](https://github.com/mapbox/mapbox-navigation-android/pull/1247)
+* Add NavigationViewOption for default or custom SpeechPlayer [#1232](https://github.com/mapbox/mapbox-navigation-android/pull/1232)
+* Added Burmese, Finnish, Korean, Norwegian guidance
+* Add toggles in NavigationMapboxMap for traffic and incident data [#1226](https://github.com/mapbox/mapbox-navigation-android/pull/1226)
+* Update Map styles to V4 with incident coverage [#1234](https://github.com/mapbox/mapbox-navigation-android/pull/1234)
+* Add initialization logic for null RouteOptions [#1229](https://github.com/mapbox/mapbox-navigation-android/pull/1229)
+* add open pending intent which brings the existing task (activity) to the foreground when clicking the notification [#1221](https://github.com/mapbox/mapbox-navigation-android/pull/1221)
+
 ### v0.18.0 - August 24, 2018
 
 * Add toggles in NavigationMapboxMap for traffic and incident data [#1226](https://github.com/mapbox/mapbox-navigation-android/pull/1226)
