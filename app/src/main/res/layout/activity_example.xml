@@ -16,10 +16,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:mapbox_styleUrl="mapbox://styles/mapbox/navigation-guidance-day-v4"
-        app:mapbox_uiAttribution="false"
-        app:mapbox_uiLogo="false"/>
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
@@ -28,36 +25,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            app:layout_anchor="@id/autocompleteBottomSheet"
-            app:layout_anchorGravity="top|start">
-
-            <ImageView
-                android:id="@+id/logo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/fab_margin_end"
-                android:layout_marginLeft="@dimen/fab_margin_end"
-                android:layout_marginBottom="@dimen/fab_margin_bottom"
-                android:clickable="false"
-                android:focusable="false"
-                android:src="@drawable/mapbox_logo_icon"/>
-
-            <ImageView
-                android:id="@+id/attribution"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/attribution_margin_start"
-                android:layout_marginLeft="@dimen/attribution_margin_start"
-                android:layout_toEndOf="@id/logo"
-                android:layout_toRightOf="@id/logo"
-                android:src="@drawable/mapbox_info_bg_selector"/>
-
-        </RelativeLayout>
 
         <FrameLayout
             android:id="@+id/fabFrameLayout"
@@ -71,9 +38,8 @@
                 android:id="@+id/locationFab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/fab_margin_end"
-                android:layout_marginRight="@dimen/fab_margin_end"
                 android:layout_marginBottom="@dimen/fab_margin_bottom"
+                android:layout_marginEnd="@dimen/fab_margin_end"
                 app:srcCompat="@drawable/ic_my_location"/>
 
             <android.support.design.widget.FloatingActionButton
@@ -105,32 +71,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/fab_margin_default"
-            android:layout_marginLeft="@dimen/fab_margin_default"
             android:layout_marginTop="@dimen/fab_margin_default"
             app:fabSize="mini"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_settings"/>
 
-        <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView
-            android:id="@+id/instructionView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:visibility="invisible"/>
-
         <android.support.constraint.ConstraintLayout
             android:id="@+id/autocompleteBottomSheet"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/autocomplete_bottomsheet_margin"
-            android:layout_marginEnd="@dimen/autocomplete_bottomsheet_margin"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
             android:background="@drawable/autocomplete_bottomsheet_background"
             android:elevation="@dimen/autocomplete_bottomsheet_elevation"
-            android:paddingTop="@dimen/autocomplete_bottomsheet_padding"
             android:paddingBottom="@dimen/autocomplete_bottomsheet_padding"
-            app:behavior_hideable="true"
-            app:layout_behavior="@string/autocompleteBehavior">
+            android:paddingTop="@dimen/autocomplete_bottomsheet_padding"
+            app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
             <android.support.v7.widget.CardView
                 android:id="@+id/autocompleteCardView"
@@ -155,5 +112,59 @@
         </android.support.constraint.ConstraintLayout>
 
     </android.support.design.widget.CoordinatorLayout>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/navigationDataCardView"
+        android:layout_width="@dimen/data_card_view_width"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/data_card_view_start_padding"
+        android:layout_marginTop="@dimen/data_card_view_top_padding"
+        android:visibility="invisible"
+        app:cardCornerRadius="@dimen/autocomplete_cardview_corner_radius"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView
+                android:id="@+id/maneuverView"
+                android:layout_width="@dimen/maneuver_view_width"
+                android:layout_height="@dimen/maneuver_view_height"
+                android:layout_margin="@dimen/maneuver_view_margin"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="8dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/stepDistanceRemainingTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/step_distance_remaining_margin_bottom"
+                    android:includeFontPadding="false"
+                    android:textSize="@dimen/data_text_size"
+                    android:textStyle="bold"
+                    tools:text="@tools:sample/lorem"/>
+
+                <TextView
+                    android:id="@+id/arrivalTimeTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textSize="@dimen/data_text_size"
+                    tools:text="@tools:sample/lorem"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
 
 </android.support.constraint.ConstraintLayout>

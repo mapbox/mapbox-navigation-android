@@ -4,7 +4,6 @@ import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.location.Location
 import android.support.design.widget.BottomSheetBehavior
-import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -16,12 +15,16 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
+import com.mapbox.services.android.navigation.testapp.example.ui.offline.OfflineFilesLoadedCallback
+import com.mapbox.services.android.navigation.testapp.example.utils.formatArrivalTime
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
+import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import timber.log.Timber
+import kotlin.math.roundToInt
 
 class ExamplePresenter(private val view: ExampleView, private val viewModel: ExampleViewModel) {
 
@@ -34,6 +37,11 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   private var state: PresenterState = PresenterState.SHOW_LOCATION
+  private val offlineCallback = object : OfflineFilesLoadedCallback {
+    override fun onFilesLoaded() {
+      Timber.d("Offline files loaded")
+    }
+  }
 
   fun onPermissionResult(granted: Boolean) {
     if (granted) {
@@ -47,11 +55,8 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     view.selectAllAutocompleteText()
     view.updateLocationFabVisibility(INVISIBLE)
     view.updateSettingsFabVisibility(INVISIBLE)
+    view.updateAutocompleteBottomSheetHideable(false)
     view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_EXPANDED)
-  }
-
-  fun onAttributionsClick(attributionView: View) {
-    view.showAttributionDialog(attributionView)
   }
 
   fun onSettingsFabClick() {
@@ -70,17 +75,16 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   fun onNavigationFabClick() {
-    if (viewModel.canNavigate()) {
+    viewModel.route.value?.let {
       state = PresenterState.NAVIGATE
-      view.showAlternativeRoutes(false)
       view.addMapProgressChangeListener(viewModel.retrieveNavigation())
+      viewModel.startNavigationWith(it)
       view.updateNavigationFabVisibility(INVISIBLE)
       view.updateCancelFabVisibility(VISIBLE)
-      view.updateInstructionViewVisibility(VISIBLE)
-      view.updateLocationRenderMode(RenderMode.GPS)
+      view.updateNavigationDataVisibility(VISIBLE)
+      view.updateAutocompleteBottomSheetHideable(true)
       view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_HIDDEN)
       view.adjustMapPaddingForNavigation()
-      viewModel.startNavigation()
     }
   }
 
@@ -90,11 +94,11 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     view.removeRoute()
     view.clearMarkers()
     view.resetMapPadding()
-    view.updateLocationRenderMode(RenderMode.NORMAL)
     view.updateLocationFabVisibility(VISIBLE)
     view.updateSettingsFabVisibility(VISIBLE)
     view.updateCancelFabVisibility(INVISIBLE)
-    view.updateInstructionViewVisibility(INVISIBLE)
+    view.updateNavigationDataVisibility(INVISIBLE)
+    view.updateAutocompleteBottomSheetHideable(false)
     view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED)
   }
 
@@ -116,11 +120,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   fun onDestinationFound(feature: CarmenFeature) {
     feature.center()?.let {
-      if (state == PresenterState.ROUTE_FOUND) {
-        view.removeRoute()
-        viewModel.primaryRoute = null
-        view.updateNavigationFabVisibility(INVISIBLE)
-      }
       state = PresenterState.SELECTED_DESTINATION
       viewModel.destination.value = it
       view.clearMarkers()
@@ -144,14 +143,12 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     }
   }
 
-  fun onRouteFound(routes: List<DirectionsRoute>?) {
-    routes?.let { directionsRoutes ->
+  fun onRouteFound(route: DirectionsRoute?) {
+    route?.let { directionsRoute ->
       when (state) {
         PresenterState.FIND_ROUTE -> {
           state = PresenterState.ROUTE_FOUND
-          view.transition()
-          view.showAlternativeRoutes(true)
-          view.updateRoutes(directionsRoutes)
+          view.updateRoute(directionsRoute)
           view.updateDirectionsFabVisibility(INVISIBLE)
           view.updateNavigationFabVisibility(VISIBLE)
           viewModel.destination.value?.let { destination ->
@@ -159,7 +156,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
           }
         }
         PresenterState.NAVIGATE -> {
-          view.updateRoutes(directionsRoutes)
+          viewModel.startNavigationWith(directionsRoute)
         }
         else -> {
           // TODO no impl
@@ -168,45 +165,35 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     }
   }
 
-  fun onNewRouteSelected(directionsRoute: DirectionsRoute) {
-    viewModel.updatePrimaryRoute(directionsRoute)
-  }
-
   fun onProgressUpdate(progress: RouteProgress?) {
     progress?.let {
-      view.updateInstructionViewWith(progress)
+      view.updateArrivalTime(it.formatArrivalTime(NavigationApplication.instance))
+      val distance = it.currentLegProgress().currentStepProgress().distanceRemaining()
+      view.updateStepDistanceRemaining("${distance.roundToInt()} m")
     }
   }
 
   fun onMilestoneUpdate(milestone: Milestone?) {
     milestone?.let {
-      // TODO update instructionview -- fix API
+      if (milestone is BannerInstructionMilestone) {
+        val type = milestone.bannerInstructions.primary()?.type()
+        val modifier = milestone.bannerInstructions.primary()?.modifier()
+        view.updateManeuverView(type, modifier)
+      }
     }
   }
 
-  fun onMapLongClick(point: LatLng) {
-    viewModel.reverseGeocode(point)
-  }
-
-  fun onBackPressed(): Boolean {
-    if (!viewModel.collapsedBottomSheet) {
-      view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED)
-      return false
-    }
-    return true
+  fun onDestroy() {
+    viewModel.onDestroy()
   }
 
   fun subscribe(owner: LifecycleOwner) {
     viewModel.location.observe(owner, Observer { onLocationUpdate(it) })
-    viewModel.routes.observe(owner, Observer { onRouteFound(it) })
+    viewModel.route.observe(owner, Observer { onRouteFound(it) })
     viewModel.progress.observe(owner, Observer { onProgressUpdate(it) })
     viewModel.milestone.observe(owner, Observer { onMilestoneUpdate(it) })
-    viewModel.geocode.observe(owner, Observer {
-      it?.features()?.first()?.let {
-        onDestinationFound(it)
-      }
-    })
     viewModel.activateLocationEngine()
+    viewModel.loadOfflineFiles(offlineCallback)
   }
 
   fun buildDynamicCameraFrom(mapboxMap: MapboxMap) {
@@ -249,5 +236,13 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       val padding = intArrayOf(left, top, right, bottom)
       view.updateMapCameraFor(bounds, padding, TWO_SECONDS)
     }
+  }
+
+  fun onBackPressed(): Boolean {
+    if (!viewModel.collapsedBottomSheet) {
+      view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED)
+      return false
+    }
+    return true
   }
 }
