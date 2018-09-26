@@ -24,6 +24,7 @@ public class SnapToRoute extends Snap {
     snappedLocation.setLatitude(status.getLocation().latitude());
     snappedLocation.setLongitude(status.getLocation().longitude());
     snappedLocation.setBearing(status.getBearing());
+    snappedLocation.setTime(status.getTime().getTime());
     return snappedLocation;
   }
 }
