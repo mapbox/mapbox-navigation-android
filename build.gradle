@@ -12,6 +12,7 @@ buildscript {
   }
   dependencies {
     classpath pluginDependencies.gradle
+    classpath pluginDependencies.kotlin
     classpath pluginDependencies.coveralls
     classpath pluginDependencies.errorprone
     classpath pluginDependencies.dependencyUpdates
