@@ -44,6 +44,9 @@
     <string name="simulate_route_key" translatable="false">simulate_route</string>
     <string name="language_key" translatable="false">language</string>
     <string name="route_profile_key" translatable="false">route_profile</string>
+    <string name="offline_preference_key"
+            translatable="false">offline_preference_key</string>
+    <string name="view_examples_key" translatable="false">view_examples</string>
     <string name="default_locale" translatable="false">default_for_device</string>
     <string name="default_unit_type" translatable="false">default_for_device</string>
     <string name="current_night_mode" translatable="false">current_night_mode</string>
@@ -56,4 +59,7 @@
     <string name="explanation_long_press_waypoint">Long press map to place waypoint</string>
 
     <string name="blue" translatable="false">#4264fb</string>
+
+    <string name="hint_where_to">Where to?</string>
+    <string name="offline_routing">Offline routing</string>
 </resources>
