@@ -13,11 +13,21 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".example.ui.ExampleActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
+        </activity>
+
+        <activity android:name=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".NavigationSettingsActivity"/>
         </activity>
 
         <activity
@@ -69,11 +79,11 @@
         </activity>
 
         <activity
-            android:name=".activity.navigationui.NavigationViewSettingsActivity"
+            android:name=".NavigationSettingsActivity"
             android:label="@string/settings">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activity.navigationui.NavigationLauncherActivity"/>
+                android:value=".example.ui.ExampleActivity"/>
         </activity>
 
         <activity
