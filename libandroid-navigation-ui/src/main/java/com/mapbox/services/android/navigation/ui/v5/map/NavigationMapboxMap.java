@@ -102,6 +102,11 @@ public class NavigationMapboxMap {
     this.layerInteractor = layerInteractor;
   }
 
+  // Package private (no modifier) for testing purposes
+  NavigationMapboxMap(LocationLayerPlugin locationLayer) {
+    this.locationLayer = locationLayer;
+  }
+
   /**
    * Adds a marker icon on the map at the given position.
    * <p>
@@ -135,6 +140,21 @@ public class NavigationMapboxMap {
   public void updateLocation(Location location) {
     locationLayer.forceLocationUpdate(location);
     updateMapWaynameWithLocation(location);
+  }
+
+  /**
+   * Updates how the user location is shown on the map.
+   * <p>
+   * <ul>
+   * <li>{@link RenderMode#NORMAL}: Shows user location, bearing ignored</li>
+   * <li>{@link RenderMode#COMPASS}: Shows user location with bearing considered from compass</li>
+   * <li>{@link RenderMode#GPS}: Shows user location with bearing considered from location</li>
+   * </ul>
+   *
+   * @param renderMode GPS, NORMAL, or COMPASS
+   */
+  public void updateLocationLayerRenderMode(@RenderMode.Mode int renderMode) {
+    locationLayer.setRenderMode(renderMode);
   }
 
   /**

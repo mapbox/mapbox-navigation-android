@@ -1,5 +1,8 @@
 package com.mapbox.services.android.navigation.ui.v5.map;
 
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
+import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
+
 import org.junit.Test;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -48,5 +51,16 @@ public class NavigationMapboxMapTest {
     theNavigationMap.isTrafficVisible();
 
     verify(mockedMapLayerInteractor).isLayerVisible(eq("traffic"));
+  }
+
+  @Test
+  public void updateRenderMode_locationLayerIsUpdatedWithRenderMode() {
+    LocationLayerPlugin locationLayer = mock(LocationLayerPlugin.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(locationLayer);
+    int renderMode = RenderMode.GPS;
+
+    theNavigationMap.updateLocationLayerRenderMode(renderMode);
+
+    verify(locationLayer).setRenderMode(eq(renderMode));
   }
 }
