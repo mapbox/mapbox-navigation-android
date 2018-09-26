@@ -62,5 +62,4 @@
 
     <string name="hint_where_to">Where to?</string>
     <string name="offline_routing">Offline routing</string>
-    <string name="autocompleteBehavior" translatable="false">com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.AutocompleteBottomSheetBehavior</string>
 </resources>

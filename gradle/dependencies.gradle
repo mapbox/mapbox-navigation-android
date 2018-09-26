@@ -43,6 +43,7 @@ ext {
       mapboxSdkTurf          : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${version.mapboxSdkServices}",
       mapboxEvents           : "com.mapbox.mapboxsdk:mapbox-android-telemetry:${version.mapboxEvents}",
       mapboxNavigator        : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
+      searchSdk              : "com.mapbox.mapboxsdk:mapbox-search-android:${version.searchSdk}",
 
       // Kotlin
       kotlinStdLib           : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${version.kotlinStdLib}",
