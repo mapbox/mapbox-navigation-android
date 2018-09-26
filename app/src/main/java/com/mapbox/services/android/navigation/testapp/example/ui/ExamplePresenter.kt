@@ -17,13 +17,11 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
-import com.mapbox.services.android.navigation.testapp.example.ui.offline.OfflineFilesLoadedCallback
 import com.mapbox.services.android.navigation.testapp.example.utils.formatArrivalTime
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
-import timber.log.Timber
 import kotlin.math.roundToInt
 
 class ExamplePresenter(private val view: ExampleView, private val viewModel: ExampleViewModel) {
@@ -37,11 +35,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   private var state: PresenterState = PresenterState.SHOW_LOCATION
-  private val offlineCallback = object : OfflineFilesLoadedCallback {
-    override fun onFilesLoaded() {
-      Timber.d("Offline files loaded")
-    }
-  }
 
   fun onPermissionResult(granted: Boolean) {
     if (granted) {
@@ -174,9 +167,9 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   fun onMapLongClick(point: LatLng) {
-    viewModel.reverseGeocode(point);
+    viewModel.reverseGeocode(point)
   }
-  
+
   fun onMilestoneUpdate(milestone: Milestone?) {
     milestone?.let {
       if (milestone is BannerInstructionMilestone) {
@@ -185,6 +178,14 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
         view.updateManeuverView(type, modifier)
       }
     }
+  }
+
+  fun onBackPressed(): Boolean {
+    if (!viewModel.collapsedBottomSheet) {
+      view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED)
+      return false
+    }
+    return true
   }
 
   fun onDestroy() {
@@ -202,7 +203,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       }
     })
     viewModel.activateLocationEngine()
-    viewModel.loadOfflineFiles(offlineCallback)
   }
 
   fun buildDynamicCameraFrom(mapboxMap: MapboxMap) {
@@ -245,13 +245,5 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       val padding = intArrayOf(left, top, right, bottom)
       view.updateMapCameraFor(bounds, padding, TWO_SECONDS)
     }
-  }
-
-  fun onBackPressed(): Boolean {
-    if (!viewModel.collapsedBottomSheet) {
-      view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED)
-      return false
-    }
-    return true
   }
 }

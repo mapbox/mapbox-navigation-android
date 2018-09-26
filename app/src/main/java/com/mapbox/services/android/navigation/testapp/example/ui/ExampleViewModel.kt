@@ -19,8 +19,6 @@ import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.NavigationApplication.Companion.instance
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.example.ui.navigation.*
-import com.mapbox.services.android.navigation.testapp.example.ui.offline.OfflineFileLoader
-import com.mapbox.services.android.navigation.testapp.example.ui.offline.OfflineFilesLoadedCallback
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayerProvider
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
@@ -80,10 +78,6 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
   fun activateLocationEngine() {
     locationEngine.activate()
-  }
-
-  fun loadOfflineFiles(callback: OfflineFilesLoadedCallback) {
-    OfflineFileLoader(navigation, callback)
   }
 
   fun findRouteToDestination() {
