@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 android {
   compileSdkVersion androidVersions.compileSdkVersion
@@ -39,10 +41,15 @@ android {
 }
 
 dependencies {
+  // Kotlin support
+  implementation dependenciesList.kotlinStdLib
+  implementation dependenciesList.ankoCommon
+
   // Mapbox Navigation SDK
   implementation project(':libandroid-navigation-ui')
   implementation dependenciesList.mapboxMapSdk
   implementation dependenciesList.locationLayerPlugin
+  implementation dependenciesList.searchSdk
 
   // Support libraries
   implementation dependenciesList.supportAppcompatV7
