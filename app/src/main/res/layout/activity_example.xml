@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:keepScreenOn="true"
+    tools:context=".example.ui.ExampleActivity">
+
+    <com.mapbox.mapboxsdk.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <FrameLayout
+            android:id="@+id/fabFrameLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            app:layout_anchor="@id/autocompleteBottomSheet"
+            app:layout_anchorGravity="top|end">
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/locationFab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/fab_margin_bottom"
+                android:layout_marginEnd="@dimen/fab_margin_end"
+                app:srcCompat="@drawable/ic_my_location"/>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/directionsFab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="invisible"
+                app:srcCompat="@drawable/ic_directions"/>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/navigationFab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="invisible"
+                app:srcCompat="@drawable/ic_navigation"/>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/cancelFab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="invisible"
+                app:backgroundTint="@android:color/holo_red_light"
+                app:srcCompat="@drawable/ic_cancel"/>
+
+        </FrameLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/settingsFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/fab_margin_default"
+            android:layout_marginTop="@dimen/fab_margin_default"
+            app:fabSize="mini"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_settings"/>
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/autocompleteBottomSheet"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/autocomplete_bottomsheet_background"
+            android:elevation="@dimen/autocomplete_bottomsheet_elevation"
+            android:paddingBottom="@dimen/autocomplete_bottomsheet_padding"
+            android:paddingTop="@dimen/autocomplete_bottomsheet_padding"
+            app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/autocompleteCardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/autocomplete_cardview_margin"
+                app:cardCornerRadius="@dimen/autocomplete_cardview_corner_radius"
+                app:cardUseCompatPadding="true">
+
+                <com.mapbox.android.search.autocomplete.MapboxAutocompleteView
+                    android:id="@+id/autocompleteView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/white"
+                    android:hint="@string/hint_where_to"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:padding="@dimen/autocomplete_padding"/>
+
+            </android.support.v7.widget.CardView>
+
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.design.widget.CoordinatorLayout>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/navigationDataCardView"
+        android:layout_width="@dimen/data_card_view_width"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/data_card_view_start_padding"
+        android:layout_marginTop="@dimen/data_card_view_top_padding"
+        android:visibility="invisible"
+        app:cardCornerRadius="@dimen/autocomplete_cardview_corner_radius"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView
+                android:id="@+id/maneuverView"
+                android:layout_width="@dimen/maneuver_view_width"
+                android:layout_height="@dimen/maneuver_view_height"
+                android:layout_margin="@dimen/maneuver_view_margin"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="8dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/stepDistanceRemainingTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/step_distance_remaining_margin_bottom"
+                    android:includeFontPadding="false"
+                    android:textSize="@dimen/data_text_size"
+                    android:textStyle="bold"
+                    tools:text="@tools:sample/lorem"/>
+
+                <TextView
+                    android:id="@+id/arrivalTimeTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textSize="@dimen/data_text_size"
+                    tools:text="@tools:sample/lorem"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+</android.support.constraint.ConstraintLayout>
