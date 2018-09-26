@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.testapp.example.ui
 
 import android.location.Location
-import android.view.View
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.search.autocomplete.OnFeatureClickListener
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -9,14 +8,9 @@ import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
-import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
-import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener
-import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
-interface ExampleView: PermissionsListener, OnMapReadyCallback,
-    OnFeatureClickListener, OnRouteSelectionChangeListener {
+interface ExampleView: PermissionsListener, OnMapReadyCallback, OnFeatureClickListener {
 
   fun initialize()
 
@@ -32,9 +26,11 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
 
   fun updateMapLocation(location: Location?)
 
-  fun updateRoutes(routes: List<DirectionsRoute>)
+  fun updateRoute(route: DirectionsRoute)
 
   fun updateDestinationMarker(destination: Point)
+
+  fun updateAutocompleteBottomSheetHideable(isHideable: Boolean)
 
   fun updateAutocompleteBottomSheetState(state: Int)
 
@@ -52,11 +48,13 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
 
   fun updateSettingsFabVisibility(visibility: Int)
 
-  fun updateInstructionViewVisibility(visibility: Int)
+  fun updateNavigationDataVisibility(visibility: Int)
 
-  fun updateInstructionViewWith(progress: RouteProgress)
+  fun updateManeuverView(maneuverType: String?, maneuverModifier: String?)
 
-  fun updateInstructionViewWith(progress: RouteProgress, milestone: Milestone)
+  fun updateStepDistanceRemaining(distance: String)
+
+  fun updateArrivalTime(time: String)
 
   fun addMapProgressChangeListener(navigation: MapboxNavigation)
 
@@ -66,17 +64,9 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
 
   fun makeToast(message: String)
 
-  fun transition()
-
   fun showSettings()
 
   fun adjustMapPaddingForNavigation()
 
   fun resetMapPadding()
-
-  fun showAttributionDialog(attributionView: View)
-
-  fun showAlternativeRoutes(alternativesVisible: Boolean)
-
-  fun updateLocationRenderMode(@RenderMode.Mode renderMode: Int)
 }
