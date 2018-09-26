@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
+import com.mapbox.navigator.VoiceInstruction;
 
 import java.util.List;
 
@@ -27,8 +28,6 @@ import java.util.List;
  */
 @AutoValue
 public abstract class RouteProgress {
-
-  private static final String EMPTY_ANNOUNCEMENT = "";
 
   /**
    * Get the route the navigation session is currently using. When a reroute occurs and a new
@@ -161,16 +160,13 @@ public abstract class RouteProgress {
   public abstract boolean inTunnel();
 
   /**
-   * @return current announcement
-   * @since 0.19.0
+   * Current voice instruction.
+   *
+   * @return current voice instruction
+   * @since 0.20.0
    */
-  public abstract String currentAnnouncement();
-
-  /**
-   * @return current announcement with SSML markup
-   * @since 0.19.0
-   */
-  public abstract String currentSsmlAnnouncement();
+  @Nullable
+  public abstract VoiceInstruction voiceInstruction();
 
   public abstract RouteProgress.Builder toBuilder();
 
@@ -251,9 +247,7 @@ public abstract class RouteProgress {
 
     public abstract Builder inTunnel(boolean inTunnel);
 
-    public abstract Builder currentAnnouncement(String announcement);
-
-    public abstract Builder currentSsmlAnnouncement(String ssmlAnnouncement);
+    public abstract Builder voiceInstruction(@Nullable VoiceInstruction voiceInstruction);
 
     abstract RouteProgress autoBuild(); // not public
 
@@ -279,8 +273,6 @@ public abstract class RouteProgress {
   }
 
   public static Builder builder() {
-    return new AutoValue_RouteProgress.Builder()
-      .currentAnnouncement(EMPTY_ANNOUNCEMENT)
-      .currentSsmlAnnouncement(EMPTY_ANNOUNCEMENT);
+    return new AutoValue_RouteProgress.Builder();
   }
 }
