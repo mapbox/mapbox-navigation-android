@@ -124,9 +124,6 @@ class NavigationRouteProcessor {
 
   private void addVoiceInstructions(NavigationStatus status, RouteProgress.Builder progressBuilder) {
     VoiceInstruction voiceInstruction = status.getVoiceInstruction();
-    if (voiceInstruction != null) {
-      progressBuilder.currentAnnouncement(voiceInstruction.getAnnouncement());
-      progressBuilder.currentSsmlAnnouncement(voiceInstruction.getSsmlAnnouncement());
-    }
+    progressBuilder.voiceInstruction(voiceInstruction);
   }
 }

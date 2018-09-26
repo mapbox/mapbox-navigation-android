@@ -59,7 +59,8 @@ class RouteProcessorRunnable implements Runnable {
     NavigationEngineFactory engineFactory = navigation.retrieveEngineFactory();
     final boolean userOffRoute = isUserOffRoute(options, status, rawLocation, routeProgress, engineFactory);
     final Location snappedLocation = findSnappedLocation(status, rawLocation, routeProgress, engineFactory);
-    final boolean checkFasterRoute = checkFasterRoute(options, rawLocation, routeProgress, engineFactory, userOffRoute);
+    final boolean checkFasterRoute = checkFasterRoute(options, snappedLocation, routeProgress, engineFactory,
+      userOffRoute);
     final List<Milestone> milestones = findTriggeredMilestones(navigation, routeProgress);
 
     sendUpdateToResponseHandler(userOffRoute, milestones, snappedLocation, checkFasterRoute, routeProgress);

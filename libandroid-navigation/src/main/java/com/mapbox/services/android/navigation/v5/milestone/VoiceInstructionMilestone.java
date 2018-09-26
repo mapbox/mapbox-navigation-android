@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.navigator.VoiceInstruction;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoader;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -104,10 +105,10 @@ public class VoiceInstructionMilestone extends Milestone {
   }
 
   private boolean updateCurrentAnnouncement(RouteProgress routeProgress) {
-    String currentAnnouncement = routeProgress.currentAnnouncement();
-    if (!currentAnnouncement.isEmpty() && !announcement.equals(currentAnnouncement)) {
-      announcement = currentAnnouncement;
-      ssmlAnnouncement = routeProgress.currentSsmlAnnouncement();
+    VoiceInstruction currentVoiceInstruction = routeProgress.voiceInstruction();
+    if (currentVoiceInstruction != null) {
+      announcement = currentVoiceInstruction.getAnnouncement();
+      ssmlAnnouncement = currentVoiceInstruction.getSsmlAnnouncement();
       cacheInstructions(routeProgress, false);
       return true;
     }

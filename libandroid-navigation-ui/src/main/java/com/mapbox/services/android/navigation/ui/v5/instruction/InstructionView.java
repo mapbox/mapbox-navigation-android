@@ -750,7 +750,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private void updateDataFromBannerInstruction(InstructionModel model) {
     updateManeuverView(model);
     if (model.getPrimaryBannerText() != null) {
-      createInstructionLoader(upcomingPrimaryText, model.getPrimaryBannerText()).loadInstruction();
+      InstructionLoader instructionLoader = createInstructionLoader(upcomingPrimaryText, model.getPrimaryBannerText());
+      if (instructionLoader != null) {
+        instructionLoader.loadInstruction();
+      }
     }
     if (model.getSecondaryBannerText() != null) {
       if (upcomingSecondaryText.getVisibility() == GONE) {
@@ -758,7 +761,11 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         upcomingPrimaryText.setMaxLines(1);
         adjustBannerTextVerticalBias(0.65f);
       }
-      createInstructionLoader(upcomingSecondaryText, model.getSecondaryBannerText()).loadInstruction();
+      InstructionLoader instructionLoader = createInstructionLoader(upcomingSecondaryText,
+        model.getSecondaryBannerText());
+      if (instructionLoader != null) {
+        instructionLoader.loadInstruction();
+      }
     } else {
       upcomingPrimaryText.setMaxLines(2);
       upcomingSecondaryText.setVisibility(GONE);
