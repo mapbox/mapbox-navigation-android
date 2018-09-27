@@ -28,6 +28,7 @@ import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
 import java.util.ArrayList;
@@ -102,6 +103,16 @@ public class NavigationMapboxMap {
     this.layerInteractor = layerInteractor;
   }
 
+  // Package private (no modifier) for testing purposes
+  NavigationMapboxMap(LocationLayerPlugin locationLayer) {
+    this.locationLayer = locationLayer;
+  }
+
+  // Package private (no modifier) for testing purposes
+  NavigationMapboxMap(NavigationMapRoute mapRoute) {
+    this.mapRoute = mapRoute;
+  }
+
   /**
    * Adds a marker icon on the map at the given position.
    * <p>
@@ -135,6 +146,21 @@ public class NavigationMapboxMap {
   public void updateLocation(Location location) {
     locationLayer.forceLocationUpdate(location);
     updateMapWaynameWithLocation(location);
+  }
+
+  /**
+   * Updates how the user location is shown on the map.
+   * <p>
+   * <ul>
+   * <li>{@link RenderMode#NORMAL}: Shows user location, bearing ignored</li>
+   * <li>{@link RenderMode#COMPASS}: Shows user location with bearing considered from compass</li>
+   * <li>{@link RenderMode#GPS}: Shows user location with bearing considered from location</li>
+   * </ul>
+   *
+   * @param renderMode GPS, NORMAL, or COMPASS
+   */
+  public void updateLocationLayerRenderMode(@RenderMode.Mode int renderMode) {
+    locationLayer.setRenderMode(renderMode);
   }
 
   /**
@@ -199,6 +225,43 @@ public class NavigationMapboxMap {
    */
   public void drawRoute(@NonNull DirectionsRoute route) {
     mapRoute.addRoute(route);
+  }
+
+  /**
+   * Will draw the given list of {@link DirectionsRoute} on the map using the colors defined
+   * in your given style.
+   * <p>
+   * The primary route will default to the first route in the directions route list.
+   * All other routes in the list will be drawn on the map using the alternative route style.
+   *
+   * @param routes to be drawn
+   */
+  public void drawRoutes(@NonNull List<DirectionsRoute> routes) {
+    mapRoute.addRoutes(routes);
+  }
+
+  /**
+   * Set a {@link OnRouteSelectionChangeListener} to know which route the user has currently
+   * selected as their primary route.
+   *
+   * @param listener a listener which lets you know when the user has changed
+   *                 the primary route and provides the current direction
+   *                 route which the user has selected
+   */
+  public void setOnRouteSelectionChangeListener(@NonNull OnRouteSelectionChangeListener listener) {
+    mapRoute.setOnRouteSelectionChangeListener(listener);
+  }
+
+  /**
+   * Toggle whether or not you'd like the map to display the alternative routes. This option can be used
+   * for when the user actually begins the navigation session and alternative routes aren't needed
+   * anymore.
+   *
+   * @param alternativesVisible true if you'd like alternative routes to be displayed on the map,
+   *                            else false
+   */
+  public void showAlternativeRoutes(boolean alternativesVisible) {
+    mapRoute.showAlternativeRoutes(alternativesVisible);
   }
 
   /**

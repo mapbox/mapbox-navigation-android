@@ -1,6 +1,15 @@
 package com.mapbox.services.android.navigation.ui.v5.map;
 
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
+import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
+
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -48,5 +57,49 @@ public class NavigationMapboxMapTest {
     theNavigationMap.isTrafficVisible();
 
     verify(mockedMapLayerInteractor).isLayerVisible(eq("traffic"));
+  }
+
+  @Test
+  public void updateRenderMode_locationLayerIsUpdatedWithRenderMode() {
+    LocationLayerPlugin locationLayer = mock(LocationLayerPlugin.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(locationLayer);
+    int renderMode = RenderMode.GPS;
+
+    theNavigationMap.updateLocationLayerRenderMode(renderMode);
+
+    verify(locationLayer).setRenderMode(eq(renderMode));
+  }
+
+  @Test
+  public void drawRoutes_mapRoutesAreAdded() {
+    NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapRoute);
+    List<DirectionsRoute> routes = new ArrayList<>();
+
+    theNavigationMap.drawRoutes(routes);
+
+    verify(mapRoute).addRoutes(eq(routes));
+  }
+
+  @Test
+  public void setOnRouteSelectionChangeListener_listenerIsSet() {
+    NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapRoute);
+    OnRouteSelectionChangeListener listener = mock(OnRouteSelectionChangeListener.class);
+
+    theNavigationMap.setOnRouteSelectionChangeListener(listener);
+
+    verify(mapRoute).setOnRouteSelectionChangeListener(eq(listener));
+  }
+
+  @Test
+  public void showAlternativeRoutes_correctVisibilityIsSet() {
+    NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapRoute);
+    boolean notVisible = false;
+
+    theNavigationMap.showAlternativeRoutes(notVisible);
+
+    verify(mapRoute).showAlternativeRoutes(notVisible);
   }
 }
