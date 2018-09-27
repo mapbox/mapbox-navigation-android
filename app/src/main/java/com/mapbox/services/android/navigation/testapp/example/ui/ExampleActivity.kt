@@ -261,4 +261,11 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     val granted = PermissionsManager.areLocationPermissionsGranted(this)
     presenter.onPermissionResult(granted)
   }
+
+  override fun onBackPressed() {
+    val exitActivity = presenter.onBackPressed()
+    if (exitActivity) {
+      super.onBackPressed()
+    }
+  }
 }

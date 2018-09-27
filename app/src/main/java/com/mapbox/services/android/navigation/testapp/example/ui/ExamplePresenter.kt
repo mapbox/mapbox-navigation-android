@@ -105,11 +105,15 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   fun onAutocompleteBottomSheetStateChange(state: Int) {
     when (state) {
       BottomSheetBehavior.STATE_COLLAPSED -> {
+        viewModel.collapsedBottomSheet = true
         view.hideSoftKeyboard()
         if (this.state == PresenterState.SHOW_LOCATION) {
           view.updateLocationFabVisibility(VISIBLE)
           view.updateSettingsFabVisibility(VISIBLE)
         }
+      }
+      BottomSheetBehavior.STATE_EXPANDED -> {
+        viewModel.collapsedBottomSheet = false
       }
     }
   }
@@ -232,5 +236,13 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       val padding = intArrayOf(left, top, right, bottom)
       view.updateMapCameraFor(bounds, padding, TWO_SECONDS)
     }
+  }
+
+  fun onBackPressed(): Boolean {
+    if (!viewModel.collapsedBottomSheet) {
+      view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED)
+      return false
+    }
+    return true
   }
 }

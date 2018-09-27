@@ -34,6 +34,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   val progress: MutableLiveData<RouteProgress> = MutableLiveData()
   val milestone: MutableLiveData<Milestone> = MutableLiveData()
   val destination: MutableLiveData<Point> = MutableLiveData()
+  var collapsedBottomSheet: Boolean = false
 
   private val locationEngine: LocationEngine
   private val locationEngineListener: ExampleLocationEngineListener
