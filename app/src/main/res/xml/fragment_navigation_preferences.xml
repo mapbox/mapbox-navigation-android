@@ -18,11 +18,6 @@
         android:title="@string/simulate_route"
         android:defaultValue="false" />
 
-    <CheckBoxPreference
-        android:key="@string/offline_preference_key"
-        android:title="@string/offline_routing"
-        android:defaultValue="false" />
-
     <ListPreference
         android:key="@string/language_key"
         android:title="@string/language"
