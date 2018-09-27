@@ -8,9 +8,11 @@ import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 
-interface ExampleView: PermissionsListener, OnMapReadyCallback, OnFeatureClickListener {
+interface ExampleView: PermissionsListener, OnMapReadyCallback,
+    OnFeatureClickListener, OnRouteSelectionChangeListener {
 
   fun initialize()
 
@@ -26,7 +28,7 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback, OnFeatureClickLi
 
   fun updateMapLocation(location: Location?)
 
-  fun updateRoute(route: DirectionsRoute)
+  fun updateRoutes(routes: List<DirectionsRoute>)
 
   fun updateDestinationMarker(destination: Point)
 

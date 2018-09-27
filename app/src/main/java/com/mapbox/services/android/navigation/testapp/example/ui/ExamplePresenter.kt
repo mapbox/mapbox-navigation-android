@@ -68,16 +68,16 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   fun onNavigationFabClick() {
-    viewModel.route.value?.let {
+    if (viewModel.canNavigate()) {
       state = PresenterState.NAVIGATE
       view.addMapProgressChangeListener(viewModel.retrieveNavigation())
-      viewModel.startNavigationWith(it)
       view.updateNavigationFabVisibility(INVISIBLE)
       view.updateCancelFabVisibility(VISIBLE)
       view.updateNavigationDataVisibility(VISIBLE)
       view.updateAutocompleteBottomSheetHideable(true)
       view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_HIDDEN)
       view.adjustMapPaddingForNavigation()
+      viewModel.startNavigation()
     }
   }
 
@@ -136,12 +136,12 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     }
   }
 
-  fun onRouteFound(route: DirectionsRoute?) {
-    route?.let { directionsRoute ->
+  fun onRouteFound(routes: List<DirectionsRoute>?) {
+    routes?.let { directionsRoutes ->
       when (state) {
         PresenterState.FIND_ROUTE -> {
           state = PresenterState.ROUTE_FOUND
-          view.updateRoute(directionsRoute)
+          view.updateRoutes(directionsRoutes)
           view.updateDirectionsFabVisibility(INVISIBLE)
           view.updateNavigationFabVisibility(VISIBLE)
           viewModel.destination.value?.let { destination ->
@@ -149,12 +149,19 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
           }
         }
         PresenterState.NAVIGATE -> {
-          viewModel.startNavigationWith(directionsRoute)
+          view.updateRoutes(directionsRoutes)
         }
         else -> {
           // TODO no impl
         }
       }
+    }
+  }
+
+  fun onNewRouteSelected(directionsRoute: DirectionsRoute) {
+    viewModel.updatePrimaryRoute(directionsRoute)
+    if (state == PresenterState.NAVIGATE) {
+      viewModel.startNavigation()
     }
   }
 
@@ -194,7 +201,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   fun subscribe(owner: LifecycleOwner) {
     viewModel.location.observe(owner, Observer { onLocationUpdate(it) })
-    viewModel.route.observe(owner, Observer { onRouteFound(it) })
+    viewModel.routes.observe(owner, Observer { onRouteFound(it) })
     viewModel.progress.observe(owner, Observer { onProgressUpdate(it) })
     viewModel.milestone.observe(owner, Observer { onMilestoneUpdate(it) })
     viewModel.geocode.observe(owner, Observer {

@@ -35,7 +35,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
 
   companion object {
     const val ZERO_PADDING = 0
-    const val BOTTOMSHEET_MULTIPLER = 4
+    const val BOTTOMSHEET_MULTIPLIER = 4
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,12 +93,17 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
 
   override fun onMapReady(mapboxMap: MapboxMap) {
     map = NavigationMapboxMap(mapView, mapboxMap)
+    map?.setOnRouteSelectionChangeListener(this)
     mapboxMap.addOnMapLongClickListener{ presenter.onMapLongClick(it) }
     presenter.buildDynamicCameraFrom(mapboxMap)
   }
 
   override fun onFeatureClicked(feature: CarmenFeature) {
     presenter.onDestinationFound(feature)
+  }
+
+  override fun onNewPrimaryRouteSelected(directionsRoute: DirectionsRoute) {
+    presenter.onNewRouteSelected(directionsRoute)
   }
 
   override fun onPermissionResult(granted: Boolean) {
@@ -137,8 +142,8 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     map?.updateLocation(location)
   }
 
-  override fun updateRoute(route: DirectionsRoute) {
-    map?.drawRoute(route)
+  override fun updateRoutes(routes: List<DirectionsRoute>) {
+    map?.drawRoutes(routes)
   }
 
   override fun updateDestinationMarker(destination: Point) {
@@ -229,7 +234,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   override fun adjustMapPaddingForNavigation() {
     val mapViewHeight = mapView.height
     val bottomSheetHeight = resources.getDimension(R.dimen.bottom_sheet_peek_height).toInt()
-    val topPadding = mapViewHeight - bottomSheetHeight * BOTTOMSHEET_MULTIPLER
+    val topPadding = mapViewHeight - bottomSheetHeight * BOTTOMSHEET_MULTIPLIER
     map?.retrieveMap()?.setPadding(ZERO_PADDING, topPadding, ZERO_PADDING, ZERO_PADDING)
   }
 
