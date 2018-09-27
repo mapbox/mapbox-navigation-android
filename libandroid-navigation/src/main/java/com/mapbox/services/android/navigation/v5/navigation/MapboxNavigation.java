@@ -4,24 +4,16 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.google.gson.Gson;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
-import com.mapbox.api.directions.v5.DirectionsCriteria;
-import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.RouteOptions;
-import com.mapbox.geojson.Point;
-import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.Navigator;
-import com.mapbox.navigator.RouterResult;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -360,56 +352,6 @@ public class MapboxNavigation implements ServiceConnection {
       navigationService.stopSelf();
       navigationEventDispatcher.onNavigationEvent(false);
     }
-  }
-
-  /**
-   * Initializes the offline data used for fetching offline routes.
-   * <p>
-   * This method must be called before {@link MapboxNavigation#findOfflineRouteFor(Point, Point, Point[])} /
-   * {@link MapboxNavigation#findOfflineRouteFor(Location, Point, Point[])}.
-   *
-   * @param tilesDirPath        path to directory containing tile data
-   * @param translationsDirPath path to directory containing OSRMTI translations
-   */
-  public void initializeOfflineData(String tilesDirPath, String translationsDirPath) {
-    mapboxNavigator.configureRouter(tilesDirPath, translationsDirPath);
-  }
-
-  /**
-   * Once {@link MapboxNavigation#initializeOfflineData(String, String)} has been called, you may
-   * call this method to retrieve routes without internet connectivity.
-   *
-   * @param origin      origin {@link Point} of the route
-   * @param destination destination {@link Point} of the route
-   * @param waypoints   way {@link Point}s of the route - these are optional
-   * @return an offline <tt>DirectionsRoute</tt>, <tt>null</tt> if an error is occurred fetching offline route or if
-   * storage permissions are not granted
-   */
-  @Nullable
-  public DirectionsRoute findOfflineRouteFor(@NonNull Point origin, @NonNull Point destination,
-                                             @Nullable Point... waypoints) {
-    FixLocation originFixLocation = mapboxNavigator.buildFixLocationFromPoint(origin);
-    return retrieveOfflineRouteFor(originFixLocation, destination, waypoints);
-  }
-
-  /**
-   * Once {@link MapboxNavigation#initializeOfflineData(String, String)} has been called, you may
-   * call this method to retrieve routes without internet connectivity.
-   * <p>
-   * Use this instead of {@link MapboxNavigation#findOfflineRouteFor(Point, Point, Point[])} to find a more
-   * accurate route (for example, in the direction of the location bearing).
-   *
-   * @param current     current {@link Location} use as origin to increase route accuracy
-   * @param destination destination {@link Point} of the route
-   * @param waypoints   way {@link Point}s of the route - these are optional
-   * @return an offline <tt>DirectionsRoute</tt>, <tt>null</tt> if an error is occurred fetching offline route or if
-   * storage permissions are not granted
-   */
-  @Nullable
-  public DirectionsRoute findOfflineRouteFor(@NonNull Location current, @NonNull Point destination,
-                                             @Nullable Point... waypoints) {
-    FixLocation originFixLocation = mapboxNavigator.buildFixLocationFromLocation(current);
-    return retrieveOfflineRouteFor(originFixLocation, destination, waypoints);
   }
 
   // Listeners
@@ -926,52 +868,5 @@ public class MapboxNavigation implements ServiceConnection {
 
   private boolean isServiceAvailable() {
     return navigationService != null && isBound;
-  }
-
-  @Nullable
-  private DirectionsRoute retrieveOfflineRouteFor(FixLocation originFixLocation, @NonNull Point destination,
-                                                  @Nullable Point[] waypoints) {
-    ArrayList<FixLocation> fixLocations = mapboxNavigator.buildFixLocationListFrom(originFixLocation, destination,
-      waypoints);
-    RouterResult response = mapboxNavigator.retrieveRouteFor(fixLocations);
-    boolean success = response.getSuccess();
-    String jsonResponse = response.getJson();
-    if (checkRoute(success, jsonResponse)) {
-      return null;
-    }
-    return obtainRouteFor(jsonResponse, fixLocations);
-  }
-
-  private boolean checkRoute(boolean isSuccess, String json) {
-    if (!isSuccess) {
-      Gson gson = new Gson();
-      OfflineError error = gson.fromJson(json, OfflineError.class);
-      Timber.e("Error occurred fetching offline route: %s - Code: %d", error.getError(), error.getErrorCode());
-      return true;
-    }
-    return false;
-  }
-
-  private DirectionsRoute obtainRouteFor(String response, ArrayList<FixLocation> fixLocations) {
-    DirectionsRoute route = DirectionsResponse.fromJson(response).routes().get(0);
-    return route.toBuilder().routeOptions(generateRouteOptionsFrom(fixLocations)).build();
-  }
-
-  private RouteOptions generateRouteOptionsFrom(List<FixLocation> fixLocations) {
-    List<Point> coordinates = new ArrayList<>();
-    for (FixLocation fixLocation : fixLocations) {
-      coordinates.add(fixLocation.getLocation());
-    }
-    return RouteOptions.builder()
-      .accessToken(accessToken)
-      .baseUrl("valhalla_base_url")
-      .requestUuid("valhalla")
-      .user("test_user")
-      .geometries("valhalla_geometries")
-      .coordinates(coordinates)
-      .profile(DirectionsCriteria.PROFILE_DRIVING)
-      .voiceInstructions(true)
-      .bannerInstructions(true)
-      .build();
   }
 }
