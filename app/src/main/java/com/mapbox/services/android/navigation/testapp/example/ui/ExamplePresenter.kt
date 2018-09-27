@@ -173,6 +173,10 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     }
   }
 
+  fun onMapLongClick(point: LatLng) {
+    viewModel.reverseGeocode(point);
+  }
+  
   fun onMilestoneUpdate(milestone: Milestone?) {
     milestone?.let {
       if (milestone is BannerInstructionMilestone) {
@@ -192,6 +196,11 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     viewModel.route.observe(owner, Observer { onRouteFound(it) })
     viewModel.progress.observe(owner, Observer { onProgressUpdate(it) })
     viewModel.milestone.observe(owner, Observer { onMilestoneUpdate(it) })
+    viewModel.geocode.observe(owner, Observer {
+      it?.features()?.first()?.let {
+        onDestinationFound(it)
+      }
+    })
     viewModel.activateLocationEngine()
     viewModel.loadOfflineFiles(offlineCallback)
   }
