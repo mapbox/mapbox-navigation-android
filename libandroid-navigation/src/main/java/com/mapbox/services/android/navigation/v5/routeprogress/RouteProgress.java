@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
+import com.mapbox.navigator.VoiceInstruction;
 
 import java.util.List;
 
@@ -149,6 +150,24 @@ public abstract class RouteProgress {
   @Nullable
   public abstract List<Point> upcomingStepPoints();
 
+  /**
+   * Returns whether or not the location updates are
+   * considered in a tunnel along the route.
+   *
+   * @return true if in a tunnel, false otherwise
+   * @since 0.19.0
+   */
+  public abstract boolean inTunnel();
+
+  /**
+   * Current voice instruction.
+   *
+   * @return current voice instruction
+   * @since 0.20.0
+   */
+  @Nullable
+  public abstract VoiceInstruction voiceInstruction();
+
   public abstract RouteProgress.Builder toBuilder();
 
   abstract int stepIndex();
@@ -225,6 +244,10 @@ public abstract class RouteProgress {
     abstract CurrentLegAnnotation currentLegAnnotation();
 
     abstract Builder currentLegProgress(RouteLegProgress routeLegProgress);
+
+    public abstract Builder inTunnel(boolean inTunnel);
+
+    public abstract Builder voiceInstruction(@Nullable VoiceInstruction voiceInstruction);
 
     abstract RouteProgress autoBuild(); // not public
 

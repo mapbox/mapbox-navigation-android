@@ -32,6 +32,7 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
@@ -82,7 +83,6 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
 
-    // Initialize MapboxNavigation and add listeners
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().isDebugLoggingEnabled(true).build();
     navigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken(), options);
     navigation.addNavigationEventListener(this);
@@ -123,7 +123,6 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     if (navigation != null) {
-      // End the navigation session
       navigation.stopNavigation();
     }
   }
@@ -151,17 +150,15 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    mapboxMap.setOnMapClickListener(this);
+    mapboxMap.addOnMapClickListener(this);
 
     locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap);
     locationLayerPlugin.setRenderMode(RenderMode.GPS);
 
-    // Setup the mockLocationEngine
     mockLocationEngine = new ReplayRouteLocationEngine();
     mockLocationEngine.addLocationEngineListener(this);
     navigation.setLocationEngine(mockLocationEngine);
 
-    // Acquire the navigation route
     getRoute(origin, destination, null);
   }
 
@@ -184,7 +181,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     mapboxMap.addMarker(new MarkerOptions().position(point));
-    mapboxMap.setOnMapClickListener(null);
+    mapboxMap.removeOnMapClickListener(this);
 
     Point newDestination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     mockLocationEngine.moveTo(newDestination);
@@ -209,7 +206,6 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
   }
 
-
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     if (tracking) {
@@ -226,6 +222,9 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
 
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
+    if (milestone instanceof VoiceInstructionMilestone) {
+      Snackbar.make(contentLayout, instruction, Snackbar.LENGTH_SHORT).show();
+    }
     Timber.d("onMilestoneEvent - Current Instruction: " + instruction);
   }
 
@@ -234,14 +233,11 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     Timber.d(call.request().url().toString());
     if (response.body() != null) {
       if (!response.body().routes().isEmpty()) {
-        // Extract the route
         DirectionsRoute route = response.body().routes().get(0);
-        // Draw it on the map
         drawRoute(route);
-        // Start mocking the new route
         resetLocationEngine(route);
         navigation.startNavigation(route);
-        mapboxMap.setOnMapClickListener(this);
+        mapboxMap.addOnMapClickListener(this);
         tracking = true;
       }
     }
@@ -270,15 +266,12 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     if (!points.isEmpty()) {
-
       if (polyline != null) {
         mapboxMap.removePolyline(polyline);
       }
-
-      // Draw polyline on map
       polyline = mapboxMap.addPolyline(new PolylineOptions()
         .addAll(points)
-        .color(Color.parseColor("#4264fb"))
+        .color(Color.parseColor(getString(R.string.blue)))
         .width(5));
     }
   }

@@ -13,6 +13,7 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -37,7 +38,8 @@ import retrofit2.Callback;
 import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.BANNER_INSTRUCTION_MILESTONE_ID;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NON_NULL_APPLICATION_CONTEXT_REQUIRED;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
+  .NON_NULL_APPLICATION_CONTEXT_REQUIRED;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID;
 
 /**
@@ -52,7 +54,9 @@ public class MapboxNavigation implements ServiceConnection {
 
   private NavigationEventDispatcher navigationEventDispatcher;
   private NavigationEngineFactory navigationEngineFactory;
+  private NavigationTelemetry navigationTelemetry = null;
   private NavigationService navigationService;
+  private MapboxNavigator mapboxNavigator;
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
   private LocationEngine locationEngine = null;
@@ -60,7 +64,10 @@ public class MapboxNavigation implements ServiceConnection {
   private final String accessToken;
   private Context applicationContext;
   private boolean isBound;
-  private NavigationTelemetry navigationTelemetry = null;
+
+  static {
+    NavigationLibraryLoader.load();
+  }
 
   /**
    * Constructs a new instance of this class using the default options. This should be used over
@@ -137,7 +144,7 @@ public class MapboxNavigation implements ServiceConnection {
     this.options = options;
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
-    initialize();
+    initializeForTest();
   }
 
   // Package private (no modifier) for testing purposes
@@ -148,76 +155,7 @@ public class MapboxNavigation implements ServiceConnection {
     this.options = MapboxNavigationOptions.builder().build();
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
-    initialize();
-  }
-
-  /**
-   * In-charge of initializing all variables needed to begin a navigation session. Many values can
-   * be changed later on using their corresponding setter. An internal progressChangeListeners used
-   * to prevent users from removing it.
-   */
-  private void initialize() {
-    // Initialize event dispatcher and add internal listeners
-    navigationEventDispatcher = new NavigationEventDispatcher();
-    navigationEngineFactory = new NavigationEngineFactory();
-    initializeDefaultLocationEngine();
-    initializeTelemetry();
-
-    // Create and add default milestones if enabled.
-    milestones = new HashSet<>();
-    if (options.defaultMilestonesEnabled()) {
-      addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
-      addMilestone(new BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build());
-    }
-  }
-
-  private void initializeContext(Context context) {
-    if (context == null || context.getApplicationContext() == null) {
-      throw new IllegalArgumentException(NON_NULL_APPLICATION_CONTEXT_REQUIRED);
-    }
-    applicationContext = context.getApplicationContext();
-  }
-
-  private void initializeTelemetry() {
-    navigationTelemetry = obtainTelemetry();
-    navigationTelemetry.initialize(applicationContext, accessToken, this, locationEngine);
-  }
-
-  private NavigationTelemetry obtainTelemetry() {
-    if (navigationTelemetry == null) {
-      return NavigationTelemetry.getInstance();
-    }
-    return navigationTelemetry;
-  }
-
-  /**
-   * Since navigation requires location information there should always be a valid location engine
-   * which we can use to get information. Therefore, by default we build one.
-   */
-  private void initializeDefaultLocationEngine() {
-    locationEngine = obtainLocationEngine();
-    locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
-    locationEngine.setFastestInterval(1000);
-    locationEngine.setInterval(0);
-    locationEngine.activate();
-  }
-
-  private LocationEngine obtainLocationEngine() {
-    if (locationEngine == null) {
-      return new LocationEngineProvider(applicationContext).obtainBestLocationEngineAvailable();
-    }
-
-    return locationEngine;
-  }
-
-  /**
-   * When onDestroy gets called, it is safe to remove location updates and deactivate the engine.
-   */
-  private void disableLocationEngine() {
-    if (locationEngine != null) {
-      locationEngine.removeLocationUpdates();
-      locationEngine.deactivate();
-    }
+    initializeForTest();
   }
 
   // Lifecycle
@@ -388,28 +326,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.1.0
    */
   public void startNavigation(@NonNull DirectionsRoute directionsRoute) {
-    ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
-    this.directionsRoute = directionsRoute;
-    Timber.d("MapboxNavigation startNavigation called.");
-    if (!isBound) {
-      // Begin telemetry session
-      navigationTelemetry.startSession(directionsRoute);
-
-      // Start the NavigationService
-      Intent intent = getServiceIntent();
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        applicationContext.startForegroundService(intent);
-      } else {
-        applicationContext.startService(intent);
-      }
-      applicationContext.bindService(intent, this, Context.BIND_AUTO_CREATE);
-
-      // Send navigation event running: true
-      navigationEventDispatcher.onNavigationEvent(true);
-    } else {
-      // Update telemetry directions route
-      navigationTelemetry.updateSessionRoute(directionsRoute);
-    }
+    startNavigationWith(directionsRoute);
   }
 
   /**
@@ -793,6 +710,22 @@ public class MapboxNavigation implements ServiceConnection {
     navigationTelemetry.cancelFeedback(feedbackId);
   }
 
+  @Override
+  public void onServiceConnected(ComponentName name, IBinder service) {
+    Timber.d("Connected to service.");
+    NavigationService.LocalBinder binder = (NavigationService.LocalBinder) service;
+    navigationService = binder.getService();
+    navigationService.startNavigation(this);
+    isBound = true;
+  }
+
+  @Override
+  public void onServiceDisconnected(ComponentName name) {
+    Timber.d("Disconnected from service.");
+    navigationService = null;
+    isBound = false;
+  }
+
   String obtainAccessToken() {
     return accessToken;
   }
@@ -813,8 +746,120 @@ public class MapboxNavigation implements ServiceConnection {
     return navigationEventDispatcher;
   }
 
-  NavigationEngineFactory retrieveEngineProvider() {
+  NavigationEngineFactory retrieveEngineFactory() {
     return navigationEngineFactory;
+  }
+
+  MapboxNavigator retrieveMapboxNavigator() {
+    return mapboxNavigator;
+  }
+
+  private void initializeForTest() {
+    // Initialize event dispatcher and add internal listeners
+    navigationEventDispatcher = new NavigationEventDispatcher();
+    navigationEngineFactory = new NavigationEngineFactory();
+    initializeDefaultLocationEngine();
+    initializeTelemetry();
+
+    // Create and add default milestones if enabled.
+    milestones = new HashSet<>();
+    if (options.defaultMilestonesEnabled()) {
+      addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
+      addMilestone(new BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build());
+    }
+  }
+
+  /**
+   * In-charge of initializing all variables needed to begin a navigation session. Many values can
+   * be changed later on using their corresponding setter. An internal progressChangeListeners used
+   * to prevent users from removing it.
+   */
+  private void initialize() {
+    // Initialize event dispatcher and add internal listeners
+    mapboxNavigator = new MapboxNavigator(new Navigator());
+    navigationEventDispatcher = new NavigationEventDispatcher();
+    navigationEngineFactory = new NavigationEngineFactory();
+    initializeDefaultLocationEngine();
+    initializeTelemetry();
+
+    // Create and add default milestones if enabled.
+    milestones = new HashSet<>();
+    if (options.defaultMilestonesEnabled()) {
+      addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
+      addMilestone(new BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build());
+    }
+  }
+
+  private void initializeContext(Context context) {
+    if (context == null || context.getApplicationContext() == null) {
+      throw new IllegalArgumentException(NON_NULL_APPLICATION_CONTEXT_REQUIRED);
+    }
+    applicationContext = context.getApplicationContext();
+  }
+
+  private void initializeTelemetry() {
+    navigationTelemetry = obtainTelemetry();
+    navigationTelemetry.initialize(applicationContext, accessToken, this, locationEngine);
+  }
+
+  private NavigationTelemetry obtainTelemetry() {
+    if (navigationTelemetry == null) {
+      return NavigationTelemetry.getInstance();
+    }
+    return navigationTelemetry;
+  }
+
+  /**
+   * Since navigation requires location information there should always be a valid location engine
+   * which we can use to get information. Therefore, by default we build one.
+   */
+  private void initializeDefaultLocationEngine() {
+    locationEngine = obtainLocationEngine();
+    locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
+    locationEngine.setFastestInterval(1000);
+    locationEngine.setInterval(0);
+    locationEngine.activate();
+  }
+
+  private LocationEngine obtainLocationEngine() {
+    if (locationEngine == null) {
+      return new LocationEngineProvider(applicationContext).obtainBestLocationEngineAvailable();
+    }
+
+    return locationEngine;
+  }
+
+  /**
+   * When onDestroy gets called, it is safe to remove location updates and deactivate the engine.
+   */
+  private void disableLocationEngine() {
+    if (locationEngine != null) {
+      locationEngine.removeLocationUpdates();
+      locationEngine.deactivate();
+    }
+  }
+
+  private void startNavigationWith(@NonNull DirectionsRoute directionsRoute) {
+    ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
+    this.directionsRoute = directionsRoute;
+    mapboxNavigator.updateRoute(directionsRoute.toJson());
+    if (!isBound) {
+      navigationTelemetry.startSession(directionsRoute);
+      startNavigationService();
+      navigationEventDispatcher.onNavigationEvent(true);
+    } else {
+      navigationTelemetry.updateSessionRoute(directionsRoute);
+    }
+  }
+
+  private void startNavigationService() {
+    Intent intent = getServiceIntent();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      applicationContext.startForegroundService(intent);
+    } else {
+      applicationContext.startService(intent);
+    }
+    applicationContext.bindService(intent, this, Context.BIND_AUTO_CREATE);
   }
 
   private Intent getServiceIntent() {
@@ -823,21 +868,5 @@ public class MapboxNavigation implements ServiceConnection {
 
   private boolean isServiceAvailable() {
     return navigationService != null && isBound;
-  }
-
-  @Override
-  public void onServiceConnected(ComponentName name, IBinder service) {
-    Timber.d("Connected to service.");
-    NavigationService.LocalBinder binder = (NavigationService.LocalBinder) service;
-    navigationService = binder.getService();
-    navigationService.startNavigation(this);
-    isBound = true;
-  }
-
-  @Override
-  public void onServiceDisconnected(ComponentName name) {
-    Timber.d("Disconnected from service.");
-    navigationService = null;
-    isBound = false;
   }
 }
