@@ -32,4 +32,8 @@
     <dimen name="route_overview_padding_bottom">150dp</dimen>
     <dimen name="route_overview_padding_left">50dp</dimen>
     <dimen name="route_overview_padding_right">50dp</dimen>
+    <dimen name="data_margin_start">8dp</dimen>
+    <dimen name="data_margin_left">8dp</dimen>
+    <dimen name="attribution_margin_start">4dp</dimen>
+    <dimen name="autocomplete_bottomsheet_margin">8dp</dimen>
 </resources>
