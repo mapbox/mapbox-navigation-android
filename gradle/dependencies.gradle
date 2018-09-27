@@ -38,66 +38,66 @@ ext {
   ]
 
   dependenciesList = [
-          // mapbox
-          mapboxMapSdk           : "com.mapbox.mapboxsdk:mapbox-android-sdk:${version.mapboxMapSdk}",
-          mapboxSdkServices      : "com.mapbox.mapboxsdk:mapbox-sdk-services:${version.mapboxSdkServices}",
-          mapboxSdkTurf          : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${version.mapboxSdkServices}",
-          mapboxEvents           : "com.mapbox.mapboxsdk:mapbox-android-telemetry:${version.mapboxEvents}",
-          mapboxNavigator        : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
-          locationLayerPlugin    : "com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:${version.locationLayerPlugin}",
-          searchSdk              : "com.mapbox.mapboxsdk:mapbox-search-android:${version.searchSdk}",
+      // mapbox
+      mapboxMapSdk           : "com.mapbox.mapboxsdk:mapbox-android-sdk:${version.mapboxMapSdk}",
+      mapboxSdkServices      : "com.mapbox.mapboxsdk:mapbox-sdk-services:${version.mapboxSdkServices}",
+      mapboxSdkTurf          : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${version.mapboxSdkServices}",
+      mapboxEvents           : "com.mapbox.mapboxsdk:mapbox-android-telemetry:${version.mapboxEvents}",
+      mapboxNavigator        : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
+      locationLayerPlugin    : "com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:${version.locationLayerPlugin}",
+      searchSdk              : "com.mapbox.mapboxsdk:mapbox-search-android:${version.searchSdk}",
 
-          // Kotlin
-          kotlinStdLib           : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${version.kotlinStdLib}",
-          ankoCommon             : "org.jetbrains.anko:anko-common:${version.ankoCommon}",
+      // Kotlin
+      kotlinStdLib           : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${version.kotlinStdLib}",
+      ankoCommon             : "org.jetbrains.anko:anko-common:${version.ankoCommon}",
 
-          // AutoValue
-          autoValue              : "com.google.auto.value:auto-value:${version.autoValue}",
-          autoValuesParcel       : "com.ryanharter.auto.value:auto-value-parcel:${version.autoValueParcel}",
-          autoValuesParcelAdapter: "com.ryanharter.auto.value:auto-value-parcel-adapter:${version.autoValueParcel}",
+      // AutoValue
+      autoValue              : "com.google.auto.value:auto-value:${version.autoValue}",
+      autoValuesParcel       : "com.ryanharter.auto.value:auto-value-parcel:${version.autoValueParcel}",
+      autoValuesParcelAdapter: "com.ryanharter.auto.value:auto-value-parcel-adapter:${version.autoValueParcel}",
 
-          // butterknife
-          butterKnife            : "com.jakewharton:butterknife:${version.butterknife}",
-          butterKnifeProcessor   : "com.jakewharton:butterknife-compiler:${version.butterknife}",
+      // butterknife
+      butterKnife            : "com.jakewharton:butterknife:${version.butterknife}",
+      butterKnifeProcessor   : "com.jakewharton:butterknife-compiler:${version.butterknife}",
 
-          // support
-          supportAnnotation      : "com.android.support:support-annotations:${version.supportLibVersion}",
-          supportAppcompatV7     : "com.android.support:appcompat-v7:${version.supportLibVersion}",
-          supportV4              : "com.android.support:support-v4:${version.supportLibVersion}",
-          supportDesign          : "com.android.support:design:${version.supportLibVersion}",
-          supportRecyclerView    : "com.android.support:recyclerview-v7:${version.supportLibVersion}",
-          supportCardView        : "com.android.support:cardview-v7:${version.supportLibVersion}",
-          supportConstraintLayout: "com.android.support.constraint:constraint-layout:${version.constraintLayout}",
+      // support
+      supportAnnotation      : "com.android.support:support-annotations:${version.supportLibVersion}",
+      supportAppcompatV7     : "com.android.support:appcompat-v7:${version.supportLibVersion}",
+      supportV4              : "com.android.support:support-v4:${version.supportLibVersion}",
+      supportDesign          : "com.android.support:design:${version.supportLibVersion}",
+      supportRecyclerView    : "com.android.support:recyclerview-v7:${version.supportLibVersion}",
+      supportCardView        : "com.android.support:cardview-v7:${version.supportLibVersion}",
+      supportConstraintLayout: "com.android.support.constraint:constraint-layout:${version.constraintLayout}",
 
-          // architecture
-          lifecycleExtensions    : "android.arch.lifecycle:extensions:${version.lifecycle}",
-          lifecycleCompiler      : "android.arch.lifecycle:compiler:${version.lifecycle}",
+      // architecture
+      lifecycleExtensions    : "android.arch.lifecycle:extensions:${version.lifecycle}",
+      lifecycleCompiler      : "android.arch.lifecycle:compiler:${version.lifecycle}",
 
-          // square crew
-          timber                 : "com.jakewharton.timber:timber:${version.timber}",
-          picasso                : "com.squareup.picasso:picasso:${version.picasso}",
-          leakCanaryDebug        : "com.squareup.leakcanary:leakcanary-android:${version.leakCanaryVersion}",
-          leakCanaryRelease      : "com.squareup.leakcanary:leakcanary-android-no-op:${version.leakCanaryVersion}",
-          leakCanaryTest         : "com.squareup.leakcanary:leakcanary-android-no-op:${version.leakCanaryVersion}",
+      // square crew
+      timber                 : "com.jakewharton.timber:timber:${version.timber}",
+      picasso                : "com.squareup.picasso:picasso:${version.picasso}",
+      leakCanaryDebug        : "com.squareup.leakcanary:leakcanary-android:${version.leakCanaryVersion}",
+      leakCanaryRelease      : "com.squareup.leakcanary:leakcanary-android-no-op:${version.leakCanaryVersion}",
+      leakCanaryTest         : "com.squareup.leakcanary:leakcanary-android-no-op:${version.leakCanaryVersion}",
 
-          // instrumentation test
-          testSpoonRunner        : "com.squareup.spoon:spoon-client:${version.spoonRunner}",
-          testRunner             : "com.android.support.test:runner:${version.testRunnerVersion}",
-          testRules              : "com.android.support.test:rules:${version.testRunnerVersion}",
-          testEspressoCore       : "com.android.support.test.espresso:espresso-core:${version.espressoVersion}",
-          testEspressoIntents    : "com.android.support.test.espresso:espresso-intents:${version.espressoVersion}",
+      // instrumentation test
+      testSpoonRunner        : "com.squareup.spoon:spoon-client:${version.spoonRunner}",
+      testRunner             : "com.android.support.test:runner:${version.testRunnerVersion}",
+      testRules              : "com.android.support.test:rules:${version.testRunnerVersion}",
+      testEspressoCore       : "com.android.support.test.espresso:espresso-core:${version.espressoVersion}",
+      testEspressoIntents    : "com.android.support.test.espresso:espresso-intents:${version.espressoVersion}",
 
-          // unit test
-          junit                  : "junit:junit:${version.junit}",
-          mockito                : "org.mockito:mockito-core:${version.mockito}",
-          hamcrest               : "org.hamcrest:hamcrest-junit:${version.hamcrest}",
-          commonsIO              : "commons-io:commons-io:${version.commonsIO}",
-          robolectric            : "org.robolectric:robolectric:${version.robolectric}",
+      // unit test
+      junit                  : "junit:junit:${version.junit}",
+      mockito                : "org.mockito:mockito-core:${version.mockito}",
+      hamcrest               : "org.hamcrest:hamcrest-junit:${version.hamcrest}",
+      commonsIO              : "commons-io:commons-io:${version.commonsIO}",
+      robolectric            : "org.robolectric:robolectric:${version.robolectric}",
 
-          // play services
-          gmsLocation            : "com.google.android.gms:play-services-location:${version.gmsLocation}",
+      // play services
+      gmsLocation            : "com.google.android.gms:play-services-location:${version.gmsLocation}",
 
-          errorprone             : "com.google.errorprone:error_prone_core:${version.errorprone}"
+      errorprone             : "com.google.errorprone:error_prone_core:${version.errorprone}"
   ]
 
   pluginVersion = [

@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
 import android.support.transition.TransitionManager
 import android.support.v7.app.AppCompatActivity
+import android.view.View
 import android.widget.Toast
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -15,6 +16,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
+import com.mapbox.mapboxsdk.maps.AttributionDialogManager
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity
 import com.mapbox.services.android.navigation.testapp.R
@@ -35,7 +37,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
 
   companion object {
     const val ZERO_PADDING = 0
-    const val BOTTOMSHEET_MULTIPLER = 4
+    const val BOTTOMSHEET_MULTIPLIER = 4
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,6 +84,13 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     presenter.onDestroy()
   }
 
+  override fun onBackPressed() {
+    val exitActivity = presenter.onBackPressed()
+    if (exitActivity) {
+      super.onBackPressed()
+    }
+  }
+
   override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
                                           grantResults: IntArray) {
     permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -93,12 +102,17 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
 
   override fun onMapReady(mapboxMap: MapboxMap) {
     map = NavigationMapboxMap(mapView, mapboxMap)
-    mapboxMap.addOnMapLongClickListener{ presenter.onMapLongClick(it) }
+    map?.setOnRouteSelectionChangeListener(this)
+    mapboxMap.addOnMapLongClickListener { presenter.onMapLongClick(it) }
     presenter.buildDynamicCameraFrom(mapboxMap)
   }
 
   override fun onFeatureClicked(feature: CarmenFeature) {
     presenter.onDestinationFound(feature)
+  }
+
+  override fun onNewPrimaryRouteSelected(directionsRoute: DirectionsRoute) {
+    presenter.onNewRouteSelected(directionsRoute)
   }
 
   override fun onPermissionResult(granted: Boolean) {
@@ -137,8 +151,8 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     map?.updateLocation(location)
   }
 
-  override fun updateRoute(route: DirectionsRoute) {
-    map?.drawRoute(route)
+  override fun updateRoutes(routes: List<DirectionsRoute>) {
+    map?.drawRoutes(routes)
   }
 
   override fun updateDestinationMarker(destination: Point) {
@@ -229,12 +243,18 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   override fun adjustMapPaddingForNavigation() {
     val mapViewHeight = mapView.height
     val bottomSheetHeight = resources.getDimension(R.dimen.bottom_sheet_peek_height).toInt()
-    val topPadding = mapViewHeight - bottomSheetHeight * BOTTOMSHEET_MULTIPLER
+    val topPadding = mapViewHeight - bottomSheetHeight * BOTTOMSHEET_MULTIPLIER
     map?.retrieveMap()?.setPadding(ZERO_PADDING, topPadding, ZERO_PADDING, ZERO_PADDING)
   }
 
   override fun resetMapPadding() {
     map?.retrieveMap()?.setPadding(ZERO_PADDING, ZERO_PADDING, ZERO_PADDING, ZERO_PADDING)
+  }
+
+  override fun showAttributionDialog(attributionView: View) {
+    map?.retrieveMap()?.let {
+      AttributionDialogManager(attributionView.context, it).onClick(attributionView)
+    }
   }
 
   private fun setupWith(savedInstanceState: Bundle?) {
@@ -258,15 +278,9 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     directionsFab.setOnClickListener { presenter.onDirectionsFabClick() }
     navigationFab.setOnClickListener { presenter.onNavigationFabClick() }
     cancelFab.setOnClickListener { presenter.onCancelFabClick() }
+    attribution.setOnClickListener { presenter.onAttributionsClick(it) }
 
     val granted = PermissionsManager.areLocationPermissionsGranted(this)
     presenter.onPermissionResult(granted)
-  }
-
-  override fun onBackPressed() {
-    val exitActivity = presenter.onBackPressed()
-    if (exitActivity) {
-      super.onBackPressed()
-    }
   }
 }
