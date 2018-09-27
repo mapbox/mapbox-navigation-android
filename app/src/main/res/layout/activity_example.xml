@@ -83,8 +83,8 @@
             android:id="@+id/autocompleteBottomSheet"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="@dimen/autocomplete_bottomsheet_margin"
+            android:layout_marginEnd="@dimen/autocomplete_bottomsheet_margin"
             android:background="@drawable/autocomplete_bottomsheet_background"
             android:paddingTop="@dimen/autocomplete_bottomsheet_padding"
             android:paddingBottom="@dimen/autocomplete_bottomsheet_padding"
@@ -142,8 +142,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
+                android:layout_marginStart="@dimen/data_margin_start"
+                android:layout_marginLeft="@dimen/data_margin_left"
                 android:gravity="center_vertical"
                 android:orientation="vertical">
 
