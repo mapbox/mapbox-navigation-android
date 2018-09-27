@@ -15,3 +15,5 @@ build/
 
 #MacOS
 .DS_Store
+
+jacoco.exec
