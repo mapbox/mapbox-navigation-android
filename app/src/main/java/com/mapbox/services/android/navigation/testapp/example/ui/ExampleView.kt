@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.testapp.example.ui
 
 import android.location.Location
+import android.view.View
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.search.autocomplete.OnFeatureClickListener
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -69,4 +70,6 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback, OnFeatureClickLi
   fun adjustMapPaddingForNavigation()
 
   fun resetMapPadding()
+
+  fun showAttributionDialog(attributionView: View)
 }

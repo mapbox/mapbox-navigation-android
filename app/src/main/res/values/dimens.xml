@@ -24,6 +24,7 @@
     <dimen name="step_distance_remaining_margin_bottom">8dp</dimen>
     <dimen name="fab_margin_bottom">16dp</dimen>
     <dimen name="fab_margin_end">8dp</dimen>
+    <dimen name="attribution_margin_start">4dp</dimen>
     <dimen name="fab_margin_default">16dp</dimen>
     <dimen name="data_text_size">18sp</dimen>
     <dimen name="offline_dialog_text_size">18sp</dimen>

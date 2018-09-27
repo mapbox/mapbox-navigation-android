@@ -4,6 +4,7 @@ import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.location.Location
 import android.support.design.widget.BottomSheetBehavior
+import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -57,6 +58,10 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     view.updateSettingsFabVisibility(INVISIBLE)
     view.updateAutocompleteBottomSheetHideable(false)
     view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_EXPANDED)
+  }
+
+  fun onAttributionsClick(attributionView: View) {
+    view.showAttributionDialog(attributionView)
   }
 
   fun onSettingsFabClick() {

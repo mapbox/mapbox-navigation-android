@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
 import android.support.transition.TransitionManager
 import android.support.v7.app.AppCompatActivity
+import android.view.View
 import android.widget.Toast
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -15,6 +16,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
+import com.mapbox.mapboxsdk.maps.AttributionDialogManager
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity
 import com.mapbox.services.android.navigation.testapp.R
@@ -225,6 +227,12 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     startActivity(Intent(this, NavigationSettingsActivity::class.java))
   }
 
+  override fun showAttributionDialog(attributionView: View) {
+    map?.retrieveMap().let {
+      AttributionDialogManager(attributionView.context, it!!).onClick(attributionView)
+    }
+  }
+
   override fun adjustMapPaddingForNavigation() {
     val mapViewHeight = mapView.height
     val bottomSheetHeight = resources.getDimension(R.dimen.bottom_sheet_peek_height).toInt()
@@ -257,6 +265,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     directionsFab.setOnClickListener { presenter.onDirectionsFabClick() }
     navigationFab.setOnClickListener { presenter.onNavigationFabClick() }
     cancelFab.setOnClickListener { presenter.onCancelFabClick() }
+    attribution.setOnClickListener{ presenter.onAttributionsClick(it) }
 
     val granted = PermissionsManager.areLocationPermissionsGranted(this)
     presenter.onPermissionResult(granted)
