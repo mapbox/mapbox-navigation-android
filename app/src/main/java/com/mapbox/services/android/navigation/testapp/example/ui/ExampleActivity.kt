@@ -93,6 +93,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
 
   override fun onMapReady(mapboxMap: MapboxMap) {
     map = NavigationMapboxMap(mapView, mapboxMap)
+    mapboxMap.addOnMapLongClickListener{ presenter.onMapLongClick(it) }
     presenter.buildDynamicCameraFrom(mapboxMap)
   }
 
