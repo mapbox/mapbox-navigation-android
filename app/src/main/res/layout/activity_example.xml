@@ -59,6 +59,25 @@
 
         </RelativeLayout>
 
+        <TextView
+            android:id="@+id/waynameView"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/wayname_view_height"
+            android:background="@drawable/wayname_text_background"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:maxWidth="200dp"
+            android:paddingBottom="2dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:textColor="?attr/navigationViewAccent"
+            android:textStyle="bold"
+            android:layout_gravity="top|center_horizontal"
+            app:layout_anchor="@id/autocompleteBottomSheet"
+            app:layout_anchorGravity="top|center_horizontal"
+            tools:text="Wayname Text"/>
+
         <FrameLayout
             android:id="@+id/fabFrameLayout"
             android:layout_width="wrap_content"

@@ -104,6 +104,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
 
   override fun onMapReady(mapboxMap: MapboxMap) {
     map = NavigationMapboxMap(mapView, mapboxMap)
+    map?.setOnUpdateWaynameListener{ presenter.onUpdateWayName(it, mapboxMap) }
     map?.setOnRouteSelectionChangeListener(this)
     map?.updateLocationLayerRenderMode(RenderMode.NORMAL)
     mapboxMap.addOnMapLongClickListener { presenter.onMapLongClick(it) }
@@ -256,6 +257,15 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
 
   override fun updateLocationRenderMode(renderMode: Int) {
     map?.updateLocationLayerRenderMode(renderMode)
+  }
+
+  override fun updateWayname(wayName: String) {
+    if(!wayName.isEmpty()) {
+      waynameView.text = wayName
+      waynameView.visibility = View.VISIBLE
+    }else{
+      waynameView.visibility = View.GONE
+    }
   }
 
   private fun setupWith(savedInstanceState: Bundle?) {

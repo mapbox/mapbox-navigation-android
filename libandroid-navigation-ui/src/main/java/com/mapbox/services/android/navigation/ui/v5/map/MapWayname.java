@@ -73,6 +73,10 @@ class MapWayname {
     return isVisible;
   }
 
+  boolean isAutoQueryEnabled() {
+    return isAutoQueryEnabled;
+  }
+
   String retrieveWayname() {
     return wayname;
   }

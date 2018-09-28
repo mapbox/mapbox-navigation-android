@@ -79,4 +79,7 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
   fun showAlternativeRoutes(alternativesVisible: Boolean)
 
   fun updateLocationRenderMode(@RenderMode.Mode renderMode: Int)
+
+  fun updateWayname(wayName: String)
+
 }

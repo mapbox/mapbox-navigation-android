@@ -250,4 +250,17 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       view.updateMapCameraFor(bounds, padding, TWO_SECONDS)
     }
   }
+
+  fun onUpdateWayName(location: Location, mapboxMap: MapboxMap) {
+    val mapPoint = mapboxMap.projection.toScreenLocation(LatLng(location))
+    val features = mapboxMap.queryRenderedFeatures(mapPoint, "streetsLayer")
+    if(!features.isEmpty()){
+      val roadFeature = features.first();
+      if(roadFeature.hasNonNullValueForProperty("name")) {
+        view.updateWayname(roadFeature.getStringProperty("name"))
+        return
+      }
+    }
+    view.updateWayname("")
+  }
 }
