@@ -18,6 +18,7 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.AttributionDialogManager
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.AutoCompleteBottomSheetCallback
@@ -26,7 +27,9 @@ import com.mapbox.services.android.navigation.testapp.example.ui.permissions.Per
 import com.mapbox.services.android.navigation.testapp.example.utils.hideKeyboard
 import com.mapbox.services.android.navigation.testapp.example.utils.showKeyboard
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap
+import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import kotlinx.android.synthetic.main.activity_example.*
 
 class ExampleActivity : AppCompatActivity(), ExampleView {
@@ -81,7 +84,6 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   override fun onDestroy() {
     super.onDestroy()
     mapView.onDestroy()
-    presenter.onDestroy()
   }
 
   override fun onBackPressed() {
@@ -103,6 +105,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   override fun onMapReady(mapboxMap: MapboxMap) {
     map = NavigationMapboxMap(mapView, mapboxMap)
     map?.setOnRouteSelectionChangeListener(this)
+    map?.updateLocationLayerRenderMode(RenderMode.NORMAL)
     mapboxMap.addOnMapLongClickListener { presenter.onMapLongClick(it) }
     presenter.buildDynamicCameraFrom(mapboxMap)
   }
@@ -164,11 +167,6 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     behavior.state = state
   }
 
-  override fun updateAutocompleteBottomSheetHideable(isHideable: Boolean) {
-    val behavior = BottomSheetBehavior.from(autocompleteBottomSheet)
-    behavior.isHideable = isHideable
-  }
-
   override fun updateAutocompleteProximity(location: Location?) {
     autocompleteView.updateProximity(location)
   }
@@ -199,25 +197,16 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     settingsFab.visibility = visibility
   }
 
-  override fun updateNavigationDataVisibility(visibility: Int) {
-    TransitionManager.beginDelayedTransition(mainLayout)
-    navigationDataCardView.visibility = visibility
+  override fun updateInstructionViewVisibility(visibility: Int) {
+    instructionView.visibility = visibility
   }
 
-  override fun updateManeuverView(maneuverType: String?, maneuverModifier: String?) {
-    maneuverView.setManeuverTypeAndModifier(maneuverType, maneuverModifier)
+  override fun updateInstructionViewWith(progress: RouteProgress) {
+    instructionView.update(progress)
   }
 
-  override fun updateStepDistanceRemaining(distance: String) {
-    if (stepDistanceRemainingTextView.text != distance) {
-      stepDistanceRemainingTextView.text = distance
-    }
-  }
-
-  override fun updateArrivalTime(time: String) {
-    if (arrivalTimeTextView.text != time) {
-      arrivalTimeTextView.text = time
-    }
+  override fun updateInstructionViewWith(progress: RouteProgress, milestone: Milestone) {
+    TODO("not implemented")
   }
 
   override fun addMapProgressChangeListener(navigation: MapboxNavigation) {
@@ -234,6 +223,10 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
 
   override fun makeToast(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+  }
+
+  override fun transition() {
+    TransitionManager.beginDelayedTransition(mainLayout)
   }
 
   override fun showSettings() {
@@ -257,14 +250,24 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     }
   }
 
+  override fun showAlternativeRoutes(alternativesVisible: Boolean) {
+    map?.showAlternativeRoutes(false)
+  }
+
+  override fun updateLocationRenderMode(renderMode: Int) {
+    map?.updateLocationLayerRenderMode(renderMode)
+  }
+
   private fun setupWith(savedInstanceState: Bundle?) {
     val viewModel = ViewModelProviders.of(this).get(ExampleViewModel::class.java)
     presenter = ExamplePresenter(this, viewModel)
 
     mapView.onCreate(savedInstanceState)
 
+    instructionView.retrieveFeedbackButton().hide()
+    instructionView.retrieveSoundButton().hide()
+
     val behavior = BottomSheetBehavior.from(autocompleteBottomSheet)
-    behavior.isHideable = false
     behavior.peekHeight = resources.getDimension(R.dimen.bottom_sheet_peek_height).toInt()
     behavior.state = BottomSheetBehavior.STATE_COLLAPSED
     behavior.setBottomSheetCallback(AutoCompleteBottomSheetCallback(presenter))
