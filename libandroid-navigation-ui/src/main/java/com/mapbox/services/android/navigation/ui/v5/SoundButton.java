@@ -23,7 +23,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
   private TextView soundChipText;
   private AnimationSet fadeInSlowOut;
   private boolean isMuted;
-  private MultiOnClickListener multiOnClickListener;
+  private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();
 
   public SoundButton(Context context) {
     this(context, null);
@@ -105,7 +105,6 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
   }
 
   private void setupOnClickListeners() {
-    multiOnClickListener = new MultiOnClickListener();
     setOnClickListener(multiOnClickListener);
   }
 
