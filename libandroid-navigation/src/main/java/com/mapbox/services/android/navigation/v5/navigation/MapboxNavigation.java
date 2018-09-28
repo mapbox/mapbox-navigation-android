@@ -710,6 +710,14 @@ public class MapboxNavigation implements ServiceConnection {
     navigationTelemetry.cancelFeedback(feedbackId);
   }
 
+  public String retrieveHistory() {
+    return mapboxNavigator.retrieveHistory();
+  }
+
+  public void toggleHistory(boolean isEnabled) {
+    mapboxNavigator.toggleHistory(isEnabled);
+  }
+
   @Override
   public void onServiceConnected(ComponentName name, IBinder service) {
     Timber.d("Connected to service.");

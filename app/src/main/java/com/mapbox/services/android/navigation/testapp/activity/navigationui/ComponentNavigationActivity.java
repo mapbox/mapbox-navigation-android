@@ -48,6 +48,8 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -75,6 +77,8 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
   private static final double DEFAULT_TILT = 0d;
   private static final double DEFAULT_BEARING = 0d;
   private static final int ONE_SECOND_INTERVAL = 1000;
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+  private static final String JSON_EXTENSION = ".json";
 
   @BindView(R.id.componentNavigationLayout)
   ConstraintLayout navigationLayout;
@@ -99,6 +103,7 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
   private DirectionsRoute route;
   private Point destination;
   private MapState mapState;
+  private String filename;
 
   private enum MapState {
     INFO,
@@ -167,6 +172,8 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
 
     // Start navigation
     adjustMapPaddingForNavigation();
+    navigation.toggleHistory(true);
+    filename = buildFileName();
     navigation.startNavigation(route);
 
     // Location updates will be received from ProgressChangeListener
@@ -222,6 +229,8 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
+    new StoreHistoryTask(navigation, filename).execute();
+
     // Cache "snapped" Locations for re-route Directions API requests
     updateLocation(location);
 
@@ -402,6 +411,7 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
     navigationMap.removeRoute();
     navigationMap.clearMarkers();
     navigation.stopNavigation();
+    navigation.toggleHistory(false);
     moveCameraOverhead();
   }
 
@@ -459,5 +469,18 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
     } else {
       vibrator.vibrate(ONE_HUNDRED_MILLISECONDS);
     }
+  }
+
+  private String buildFileName() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(obtainCurrentTimeStamp());
+    sb.append(JSON_EXTENSION);
+    return sb.toString();
+  }
+
+  private String obtainCurrentTimeStamp() {
+    Date now = new Date();
+    String strDate = DATE_FORMAT.format(now);
+    return strDate;
   }
 }
