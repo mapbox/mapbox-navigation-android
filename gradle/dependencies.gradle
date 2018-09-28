@@ -12,7 +12,7 @@ ext {
       mapboxSdkServices  : '4.0.0',
       mapboxEvents       : '3.2.0',
       mapboxNavigator    : '3.0.0',
-      locationLayerPlugin: '0.8.1',
+      locationLayerPlugin: '0.9.0-SNAPSHOT',
       searchSdk          : '0.1.0-SNAPSHOT',
       autoValue          : '1.5.4',
       autoValueParcel    : '0.2.5',
