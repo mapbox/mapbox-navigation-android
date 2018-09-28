@@ -33,6 +33,28 @@ class MapboxNavigator {
     }
   }
 
+  /**
+   * Gets the history of state changing calls to the navigator this can be used to
+   * replay a sequence of events for the purpose of bug fixing.
+   *
+   * @return a json representing the series of events that happened since the last time
+   * history was toggled on
+   */
+  synchronized String retrieveHistory() {
+    return navigator.getHistory();
+  }
+
+  /**
+   * Toggles the recording of history on or off.
+   *
+   * @param isEnabled set this to true to turn on history recording and false to turn it off
+   *                  toggling will reset all history call getHistory first before toggling
+   *                  to retain a copy
+   */
+  synchronized void toggleHistory(boolean isEnabled) {
+    navigator.toggleHistory(isEnabled);
+  }
+
   FixLocation buildFixLocationFromLocation(Location location) {
     Point rawPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     Date time = new Date(location.getTime());
