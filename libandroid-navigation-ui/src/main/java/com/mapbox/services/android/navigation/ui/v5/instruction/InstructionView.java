@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
@@ -44,6 +45,8 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.Maneuve
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
+import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -207,23 +210,58 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     initializeButtons();
   }
 
-  private void subscribeAlertView() {
-    alertView.subscribe(navigationViewModel);
-  }
-
   /**
    * Called in {@link ProgressChangeListener}, creates a new model and then
    * uses it to update the views.
    *
    * @param routeProgress used to provide navigation / routeProgress data
    * @since 0.6.2
+   * @deprecated As of 0.20.0, use a combination of {@link InstructionView#updateDistanceWith(RouteProgress)} and
+   * {@link InstructionView#updateBannerInstructionsWith(RouteProgress, Milestone)} to achieve the same behavior.
    */
-  @SuppressWarnings("UnusedDeclaration")
+  @Deprecated
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
       InstructionModel model = new InstructionModel(distanceFormatter, routeProgress);
       updateDataFromInstruction(model);
       updateDataFromBannerInstruction(model);
+    }
+  }
+
+  /**
+   * Use this method inside a {@link ProgressChangeListener} to update this view with all other information
+   * that is not updated by the {@link InstructionView#updateBannerInstructionsWith(RouteProgress, Milestone)}.
+   * <p>
+   * This includes the distance remaining, instruction list, turn lanes, and next step information.
+   *
+   * @param routeProgress for route data used to populate the views
+   * @since 0.20.0
+   */
+  public void updateDistanceWith(RouteProgress routeProgress) {
+    if (routeProgress != null && !isRerouting) {
+      InstructionModel model = new InstructionModel(distanceFormatter, routeProgress);
+      updateDataFromInstruction(model);
+    }
+  }
+
+  /**
+   * Use this in a {@link com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener} to update
+   * this view with new banner instructions.
+   * <p>
+   * This method will look at the type of milestone to determine when
+   * it should update.
+   *
+   * @param routeProgress for updating the instructions
+   * @param milestone     for retrieving the new BannerInstructions
+   * @since 0.20.0
+   */
+  public void updateBannerInstructionsWith(RouteProgress routeProgress, Milestone milestone) {
+    if (milestone instanceof BannerInstructionMilestone) {
+      BannerInstructions instructions = ((BannerInstructionMilestone) milestone).getBannerInstructions();
+      if (instructions != null) {
+        BannerInstructionModel model = new BannerInstructionModel(distanceFormatter, routeProgress, instructions);
+        updateDataFromBannerInstruction(model);
+      }
     }
   }
 
@@ -469,6 +507,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         feedbackBottomSheet.setFeedbackBottomSheetListener(this);
       }
     }
+  }
+
+  private void subscribeAlertView() {
+    alertView.subscribe(navigationViewModel);
   }
 
   private void initializeButtons() {
