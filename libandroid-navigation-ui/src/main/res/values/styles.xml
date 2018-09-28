@@ -35,7 +35,7 @@
 
         <item name="navigationViewRouteStyle">@style/NavigationMapRoute</item>
 
-        <item name="navigationViewLocationLayerStyle">@style/mapbox_LocationLayer</item>
+        <item name="navigationViewLocationLayerStyle">@style/NavigationLocationLayerStyle</item>
 
         <item name="navigationViewDestinationMarker">@drawable/map_marker_light</item>
 
@@ -65,13 +65,17 @@
 
         <item name="navigationViewRouteStyle">@style/NavigationMapRoute</item>
 
-        <item name="navigationViewLocationLayerStyle">@style/mapbox_LocationLayer</item>
+        <item name="navigationViewLocationLayerStyle">@style/NavigationLocationLayerStyle</item>
 
         <item name="navigationViewDestinationMarker">@drawable/map_marker_dark</item>
 
         <item name="navigationViewRouteOverviewDrawable">@drawable/ic_route_preview_dark</item>
 
         <item name="navigationViewMapStyle">@string/navigation_guidance_night</item>
+    </style>
+    
+    <style name="NavigationLocationLayerStyle" parent="@style/mapbox_LocationLayer">
+        <item name="mapbox_trackingAnimationDurationMultiplier">2.0</item>
     </style>
 
 </resources>
