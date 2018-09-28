@@ -7,7 +7,7 @@ import android.util.AttributeSet;
 
 public class FeedbackButton extends ConstraintLayout implements NavigationButton {
   private FloatingActionButton feedbackFab;
-  private MultiOnClickListener multiOnClickListener;
+  private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();
 
   public FeedbackButton(Context context) {
     this(context, null);
@@ -78,7 +78,6 @@ public class FeedbackButton extends ConstraintLayout implements NavigationButton
 
 
   private void setupOnClickListeners() {
-    multiOnClickListener = new MultiOnClickListener();
     feedbackFab.setOnClickListener(multiOnClickListener);
   }
 
