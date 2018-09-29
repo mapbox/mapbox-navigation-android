@@ -53,7 +53,8 @@ class RouteProcessorRunnable implements Runnable {
     MapboxNavigationOptions options = navigation.options();
     DirectionsRoute route = navigation.getRoute();
 
-    NavigationStatus status = mapboxNavigator.retrieveStatus(new Date());
+    NavigationStatus status = mapboxNavigator.retrieveStatus(new Date(),
+      options.navigationLocationEngineIntervalLagInMilliseconds());
     RouteProgress routeProgress = routeProcessor.buildNewRouteProgress(status, route);
 
     NavigationEngineFactory engineFactory = navigation.retrieveEngineFactory();
