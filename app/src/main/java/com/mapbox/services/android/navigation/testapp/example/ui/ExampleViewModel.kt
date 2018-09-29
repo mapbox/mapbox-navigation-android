@@ -17,6 +17,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.services.android.navigation.testapp.NavigationApplication.Companion.instance
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.example.ui.navigation.*
+import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayerProvider
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
@@ -40,7 +41,10 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   val milestone: MutableLiveData<Milestone> = MutableLiveData()
   val destination: MutableLiveData<Point> = MutableLiveData()
   val geocode: MutableLiveData<GeocodingResponse> = MutableLiveData()
+
+  var primaryRoute: DirectionsRoute? = null
   var collapsedBottomSheet: Boolean = false
+  var isOffRoute: Boolean = false
 
   private val locationEngine: LocationEngine
   private val locationEngineListener: ExampleLocationEngineListener
@@ -71,7 +75,12 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     navigation.addOffRouteListener(ExampleOffRouteListener(this))
 
     // For fetching new routes
-    routeFinder = ExampleRouteFinder(routes, accessToken)
+    routeFinder = ExampleRouteFinder(this, routes, accessToken)
+  }
+
+  override fun onCleared() {
+    super.onCleared()
+    shutdown()
   }
 
   fun activateLocationEngine() {
@@ -87,15 +96,15 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   }
 
   fun updatePrimaryRoute(primaryRoute: DirectionsRoute) {
-    routeFinder.primaryRoute = primaryRoute
+    this.primaryRoute = primaryRoute
   }
 
   fun canNavigate(): Boolean {
-    return routeFinder.primaryRoute != null
+    return primaryRoute != null
   }
 
   fun startNavigation() {
-    routeFinder.primaryRoute?.let {
+    primaryRoute?.let {
       navigation.startNavigation(it)
       removeLocationEngineListener()
     }
@@ -127,7 +136,8 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     })
   }
 
-  fun onDestroy() {
+  private fun shutdown() {
+    (navigation.cameraEngine as DynamicCamera).clearMap()
     navigation.onDestroy()
     speechPlayer.onDestroy()
     removeLocationEngineListener()
