@@ -23,6 +23,8 @@ class MapboxNavigator {
   }
 
   synchronized NavigationStatus retrieveStatus(Date date) {
+    // We ask for a point slightly in the future to account for lag in location services
+    date.setTime(date.getTime() + 1500);
     return navigator.getStatus(date);
   }
 
