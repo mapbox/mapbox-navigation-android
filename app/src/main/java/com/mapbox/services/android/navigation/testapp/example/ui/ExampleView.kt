@@ -8,8 +8,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
+import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
-import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
@@ -56,7 +56,7 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
 
   fun updateInstructionViewWith(progress: RouteProgress)
 
-  fun updateInstructionViewWith(progress: RouteProgress, milestone: Milestone)
+  fun updateInstructionViewWith(milestone: Milestone)
 
   fun addMapProgressChangeListener(navigation: MapboxNavigation)
 

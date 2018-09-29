@@ -6,7 +6,6 @@ import android.arch.lifecycle.MutableLiveData
 import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEnginePriority
-import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.geocoding.v5.GeocodingCriteria
 import com.mapbox.api.geocoding.v5.MapboxGeocoding
@@ -16,6 +15,7 @@ import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.services.android.navigation.testapp.NavigationApplication.Companion.instance
 import com.mapbox.services.android.navigation.testapp.R
+import com.mapbox.services.android.navigation.testapp.activity.location.FusedLocationEngine
 import com.mapbox.services.android.navigation.testapp.example.ui.navigation.*
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer
@@ -29,11 +29,9 @@ import retrofit2.Response
 import timber.log.Timber
 import java.util.Locale.US
 
-class ExampleViewModel(application: Application) : AndroidViewModel(application) {
+private const val ONE_SECOND_INTERVAL = 1000
 
-  companion object {
-    const val ONE_SECOND_INTERVAL = 1000
-  }
+class ExampleViewModel(application: Application) : AndroidViewModel(application) {
 
   val location: MutableLiveData<Location> = MutableLiveData()
   val routes: MutableLiveData<List<DirectionsRoute>> = MutableLiveData()
@@ -55,8 +53,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
   init {
     // Initialize the location engine
-    val locationEngineProvider = LocationEngineProvider(getApplication())
-    locationEngine = locationEngineProvider.obtainBestLocationEngineAvailable()
+    locationEngine = FusedLocationEngine(getApplication())
     locationEngineListener = ExampleLocationEngineListener(locationEngine, location)
     locationEngine.addLocationEngineListener(locationEngineListener)
     locationEngine.priority = LocationEnginePriority.HIGH_ACCURACY

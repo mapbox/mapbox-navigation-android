@@ -16,9 +16,9 @@ import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
+import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.AttributionDialogManager
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.AutoCompleteBottomSheetCallback
@@ -32,15 +32,16 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import kotlinx.android.synthetic.main.activity_example.*
 
+private const val ZERO_PADDING = 0
+private const val BOTTOMSHEET_MULTIPLIER = 4
+
 class ExampleActivity : AppCompatActivity(), ExampleView {
 
   private val permissionsManager = PermissionsManager(this)
-  private lateinit var presenter: ExamplePresenter
   private var map: NavigationMapboxMap? = null
-
-  companion object {
-    const val ZERO_PADDING = 0
-    const val BOTTOMSHEET_MULTIPLIER = 4
+  private val presenter by lazy(mode = LazyThreadSafetyMode.NONE) {
+    val viewModel = ViewModelProviders.of(this).get(ExampleViewModel::class.java)
+    ExamplePresenter(this, viewModel)
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -108,6 +109,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     map?.updateLocationLayerRenderMode(RenderMode.NORMAL)
     mapboxMap.addOnMapLongClickListener { presenter.onMapLongClick(it) }
     presenter.buildDynamicCameraFrom(mapboxMap)
+    resetMapPadding() // Ignore navigation padding default
   }
 
   override fun onFeatureClicked(feature: CarmenFeature) {
@@ -202,11 +204,11 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   }
 
   override fun updateInstructionViewWith(progress: RouteProgress) {
-    instructionView.update(progress)
+    instructionView.updateDistanceWith(progress)
   }
 
-  override fun updateInstructionViewWith(progress: RouteProgress, milestone: Milestone) {
-    TODO("not implemented")
+  override fun updateInstructionViewWith(milestone: Milestone) {
+    instructionView.updateBannerInstructionsWith(milestone)
   }
 
   override fun addMapProgressChangeListener(navigation: MapboxNavigation) {
@@ -237,11 +239,13 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     val mapViewHeight = mapView.height
     val bottomSheetHeight = resources.getDimension(R.dimen.bottom_sheet_peek_height).toInt()
     val topPadding = mapViewHeight - bottomSheetHeight * BOTTOMSHEET_MULTIPLIER
-    map?.retrieveMap()?.setPadding(ZERO_PADDING, topPadding, ZERO_PADDING, ZERO_PADDING)
+    val customPadding = intArrayOf(ZERO_PADDING, topPadding, ZERO_PADDING, ZERO_PADDING)
+    map?.adjustLocationIconWith(customPadding)
   }
 
   override fun resetMapPadding() {
-    map?.retrieveMap()?.setPadding(ZERO_PADDING, ZERO_PADDING, ZERO_PADDING, ZERO_PADDING)
+    val zeroPadding = intArrayOf(ZERO_PADDING, ZERO_PADDING, ZERO_PADDING, ZERO_PADDING)
+    map?.adjustLocationIconWith(zeroPadding)
   }
 
   override fun showAttributionDialog(attributionView: View) {
@@ -259,9 +263,6 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   }
 
   private fun setupWith(savedInstanceState: Bundle?) {
-    val viewModel = ViewModelProviders.of(this).get(ExampleViewModel::class.java)
-    presenter = ExamplePresenter(this, viewModel)
-
     mapView.onCreate(savedInstanceState)
 
     instructionView.retrieveFeedbackButton().hide()

@@ -13,13 +13,11 @@ import retrofit2.Callback
 import retrofit2.Response
 import timber.log.Timber
 
+private const val BEARING_TOLERANCE = 90.0
+
 class ExampleRouteFinder(private val viewModel: ExampleViewModel,
                          private val routes: MutableLiveData<List<DirectionsRoute>>,
                          private val accessToken: String) : Callback<DirectionsResponse> {
-
-  companion object {
-    const val BEARING_TOLERANCE = 90.0
-  }
 
   fun findRoute(location: Location, destination: Point) {
     find(location, destination)
@@ -59,6 +57,7 @@ class ExampleRouteFinder(private val viewModel: ExampleViewModel,
 
     // Handle off-route scenarios
     if (viewModel.isOffRoute) {
+      viewModel.isOffRoute = false
       viewModel.startNavigation()
     }
   }

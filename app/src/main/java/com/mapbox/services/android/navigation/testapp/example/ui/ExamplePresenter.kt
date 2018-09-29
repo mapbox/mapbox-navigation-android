@@ -15,23 +15,21 @@ import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
+import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
-class ExamplePresenter(private val view: ExampleView, private val viewModel: ExampleViewModel) {
+private const val DEFAULT_ZOOM = 12.0
+private const val DEFAULT_BEARING = 0.0
+private const val DEFAULT_TILT = 0.0
+private const val TWO_SECONDS = 2000
+private const val ONE_SECOND = 1000
 
-  companion object {
-    const val DEFAULT_ZOOM = 12.0
-    const val DEFAULT_BEARING = 0.0
-    const val DEFAULT_TILT = 0.0
-    const val TWO_SECONDS = 2000
-    const val ONE_SECOND = 1000
-  }
+class ExamplePresenter(private val view: ExampleView, private val viewModel: ExampleViewModel) {
 
   private var state: PresenterState = PresenterState.SHOW_LOCATION
 
@@ -174,13 +172,13 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   fun onProgressUpdate(progress: RouteProgress?) {
     progress?.let {
-      view.updateInstructionViewWith(progress)
+      view.updateInstructionViewWith(it)
     }
   }
 
   fun onMilestoneUpdate(milestone: Milestone?) {
     milestone?.let {
-      // TODO update instructionview -- fix API
+      view.updateInstructionViewWith(it)
     }
   }
 
@@ -245,7 +243,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       val top = resources.getDimension(R.dimen.route_overview_padding_top).toInt()
       val right = resources.getDimension(R.dimen.route_overview_padding_right).toInt()
       val bottom = resources.getDimension(R.dimen.route_overview_padding_bottom).toInt()
-      // left top right bottom
       val padding = intArrayOf(left, top, right, bottom)
       view.updateMapCameraFor(bounds, padding, TWO_SECONDS)
     }
