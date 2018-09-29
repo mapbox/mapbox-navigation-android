@@ -217,7 +217,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
         .build();
       mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000);
     }
-    instructionView.update(routeProgress);
+    instructionView.updateDistanceWith(routeProgress);
   }
 
   @Override
@@ -225,6 +225,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     if (milestone instanceof VoiceInstructionMilestone) {
       Snackbar.make(contentLayout, instruction, Snackbar.LENGTH_SHORT).show();
     }
+    instructionView.updateBannerInstructionsWith(milestone);
     Timber.d("onMilestoneEvent - Current Instruction: " + instruction);
   }
 
