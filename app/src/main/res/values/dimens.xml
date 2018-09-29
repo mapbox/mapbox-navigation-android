@@ -28,7 +28,7 @@
     <dimen name="data_text_size">18sp</dimen>
     <dimen name="offline_dialog_text_size">18sp</dimen>
     <dimen name="bottom_sheet_peek_height">125dp</dimen>
-    <dimen name="route_overview_padding_top">50dp</dimen>
+    <dimen name="route_overview_padding_top">100dp</dimen>
     <dimen name="route_overview_padding_bottom">150dp</dimen>
     <dimen name="route_overview_padding_left">50dp</dimen>
     <dimen name="route_overview_padding_right">50dp</dimen>

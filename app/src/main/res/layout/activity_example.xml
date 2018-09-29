@@ -17,6 +17,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:mapbox_styleUrl="mapbox://styles/mapbox/navigation-guidance-day-v4"
         app:mapbox_uiAttribution="false"
         app:mapbox_uiLogo="false"/>
 
@@ -111,6 +112,13 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_settings"/>
 
+        <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView
+            android:id="@+id/instructionView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:visibility="invisible"/>
+
         <android.support.constraint.ConstraintLayout
             android:id="@+id/autocompleteBottomSheet"
             android:layout_width="match_parent"
@@ -121,7 +129,8 @@
             android:elevation="@dimen/autocomplete_bottomsheet_elevation"
             android:paddingTop="@dimen/autocomplete_bottomsheet_padding"
             android:paddingBottom="@dimen/autocomplete_bottomsheet_padding"
-            app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+            app:behavior_hideable="true"
+            app:layout_behavior="@string/autocompleteBehavior">
 
             <android.support.v7.widget.CardView
                 android:id="@+id/autocompleteCardView"
@@ -146,61 +155,5 @@
         </android.support.constraint.ConstraintLayout>
 
     </android.support.design.widget.CoordinatorLayout>
-
-    <android.support.v7.widget.CardView
-        android:id="@+id/navigationDataCardView"
-        android:layout_width="@dimen/data_card_view_width"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/data_card_view_start_padding"
-        android:layout_marginLeft="@dimen/data_card_view_start_padding"
-        android:layout_marginTop="@dimen/data_card_view_top_padding"
-        android:visibility="invisible"
-        app:cardCornerRadius="@dimen/autocomplete_cardview_corner_radius"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView
-                android:id="@+id/maneuverView"
-                android:layout_width="@dimen/maneuver_view_width"
-                android:layout_height="@dimen/maneuver_view_height"
-                android:layout_margin="@dimen/maneuver_view_margin"/>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="@dimen/data_margin_start"
-                android:layout_marginLeft="@dimen/data_margin_left"
-                android:gravity="center_vertical"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/stepDistanceRemainingTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/step_distance_remaining_margin_bottom"
-                    android:includeFontPadding="false"
-                    android:textSize="@dimen/data_text_size"
-                    android:textStyle="bold"
-                    tools:text="@tools:sample/lorem"/>
-
-                <TextView
-                    android:id="@+id/arrivalTimeTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:includeFontPadding="false"
-                    android:textSize="@dimen/data_text_size"
-                    tools:text="@tools:sample/lorem"/>
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </android.support.v7.widget.CardView>
 
 </android.support.constraint.ConstraintLayout>
