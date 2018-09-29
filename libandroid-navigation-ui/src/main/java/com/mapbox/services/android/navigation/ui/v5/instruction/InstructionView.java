@@ -138,6 +138,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     initializeInstructionListRecyclerView();
     initializeAnimations();
     initializeStepListClickListener();
+    initializeButtons();
     ImageCoordinator.getInstance().initialize(getContext());
   }
 
@@ -207,7 +208,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       }
     });
     subscribeAlertView();
-    initializeButtons();
+    showButtons();
   }
 
   /**
@@ -519,6 +520,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   private void setupFeedbackButton() {
+    feedbackButton.hide();
     feedbackButton.addOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -529,12 +531,18 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   private void setupSoundButton() {
+    soundButton.hide();
     soundButton.addOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View view) {
         navigationViewModel.setMuted(soundButton.toggleMute());
       }
     });
+  }
+
+  private void showButtons() {
+    feedbackButton.show();
+    soundButton.show();
   }
 
   private void initializeStepListClickListener() {
