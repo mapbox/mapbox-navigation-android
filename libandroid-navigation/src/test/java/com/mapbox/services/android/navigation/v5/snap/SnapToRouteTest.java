@@ -26,10 +26,9 @@ public class SnapToRouteTest {
     // TODO mock final class
     NavigationStatus status = mock(NavigationStatus.class);
     SnapToRoute snap = new SnapToRoute();
-    Location location = new Location("test");
 
-    Location snappedLocation = snap.getSnappedLocationWith(location, status);
+    Location snappedLocation = snap.getSnappedLocationWith(status);
 
-    assertTrue(snappedLocation.getProvider().equals("test"));
+    assertTrue(snappedLocation.getProvider().equals("NavigatorSnappedLocation"));
   }
 }

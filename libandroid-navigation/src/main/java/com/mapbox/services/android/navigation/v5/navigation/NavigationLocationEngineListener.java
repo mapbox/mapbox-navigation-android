@@ -27,7 +27,9 @@ class NavigationLocationEngineListener implements LocationEngineListener {
 
   @Override
   public void onLocationChanged(Location location) {
-    thread.updateRawLocation(location);
+    if (location != null) {
+      thread.updateRawLocation(location);
+    }
   }
 
   boolean isValidLocationUpdate(Location location) {
