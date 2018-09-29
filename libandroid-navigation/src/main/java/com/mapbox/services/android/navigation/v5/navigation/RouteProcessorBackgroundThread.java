@@ -56,8 +56,8 @@ class RouteProcessorBackgroundThread extends HandlerThread {
     if (!isAlive()) {
       start();
     }
-    navigation.retrieveMapboxNavigator().updateLocation(rawLocation);
     runnable.updateRawLocation(rawLocation);
+    navigation.retrieveMapboxNavigator().updateLocation(rawLocation);
   }
 
   /**
