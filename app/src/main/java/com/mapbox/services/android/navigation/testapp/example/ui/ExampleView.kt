@@ -9,8 +9,11 @@ import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener
+import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
 interface ExampleView: PermissionsListener, OnMapReadyCallback,
     OnFeatureClickListener, OnRouteSelectionChangeListener {
@@ -33,8 +36,6 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
 
   fun updateDestinationMarker(destination: Point)
 
-  fun updateAutocompleteBottomSheetHideable(isHideable: Boolean)
-
   fun updateAutocompleteBottomSheetState(state: Int)
 
   fun updateAutocompleteProximity(location: Location?)
@@ -51,13 +52,11 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
 
   fun updateSettingsFabVisibility(visibility: Int)
 
-  fun updateNavigationDataVisibility(visibility: Int)
+  fun updateInstructionViewVisibility(visibility: Int)
 
-  fun updateManeuverView(maneuverType: String?, maneuverModifier: String?)
+  fun updateInstructionViewWith(progress: RouteProgress)
 
-  fun updateStepDistanceRemaining(distance: String)
-
-  fun updateArrivalTime(time: String)
+  fun updateInstructionViewWith(progress: RouteProgress, milestone: Milestone)
 
   fun addMapProgressChangeListener(navigation: MapboxNavigation)
 
@@ -67,6 +66,8 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
 
   fun makeToast(message: String)
 
+  fun transition()
+
   fun showSettings()
 
   fun adjustMapPaddingForNavigation()
@@ -74,4 +75,8 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
   fun resetMapPadding()
 
   fun showAttributionDialog(attributionView: View)
+
+  fun showAlternativeRoutes(alternativesVisible: Boolean)
+
+  fun updateLocationRenderMode(@RenderMode.Mode renderMode: Int)
 }
