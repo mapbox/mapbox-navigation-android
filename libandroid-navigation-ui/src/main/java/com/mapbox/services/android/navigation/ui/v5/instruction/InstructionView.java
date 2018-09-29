@@ -187,9 +187,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     });
     navigationViewModel.bannerInstructionModel.observe(owner, new Observer<BannerInstructionModel>() {
       @Override
-      public void onChanged(@Nullable BannerInstructionModel bannerInstructionModel) {
-        if (bannerInstructionModel != null) {
-          updateDataFromBannerInstruction(bannerInstructionModel);
+      public void onChanged(@Nullable BannerInstructionModel model) {
+        if (model != null) {
+          updateManeuverView(model.getManeuverType(), model.getManeuverModifier(), model.getRoundaboutAngle());
+          updateDataFromBannerText(model.getPrimaryBannerText(), model.getSecondaryBannerText());
         }
       }
     });
@@ -218,20 +219,21 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param routeProgress used to provide navigation / routeProgress data
    * @since 0.6.2
    * @deprecated As of 0.20.0, use a combination of {@link InstructionView#updateDistanceWith(RouteProgress)} and
-   * {@link InstructionView#updateBannerInstructionsWith(RouteProgress, Milestone)} to achieve the same behavior.
+   * {@link InstructionView#updateBannerInstructionsWith(Milestone)} to achieve the same behavior.
    */
   @Deprecated
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
       InstructionModel model = new InstructionModel(distanceFormatter, routeProgress);
       updateDataFromInstruction(model);
-      updateDataFromBannerInstruction(model);
+      updateManeuverView(model.getManeuverType(), model.getManeuverModifier(), model.getRoundaboutAngle());
+      updateDataFromBannerText(model.getPrimaryBannerText(), model.getSecondaryBannerText());
     }
   }
 
   /**
    * Use this method inside a {@link ProgressChangeListener} to update this view with all other information
-   * that is not updated by the {@link InstructionView#updateBannerInstructionsWith(RouteProgress, Milestone)}.
+   * that is not updated by the {@link InstructionView#updateBannerInstructionsWith(Milestone)}.
    * <p>
    * This includes the distance remaining, instruction list, turn lanes, and next step information.
    *
@@ -252,17 +254,18 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * This method will look at the type of milestone to determine when
    * it should update.
    *
-   * @param routeProgress for updating the instructions
-   * @param milestone     for retrieving the new BannerInstructions
+   * @param milestone for retrieving the new BannerInstructions
    * @since 0.20.0
    */
-  public void updateBannerInstructionsWith(RouteProgress routeProgress, Milestone milestone) {
+  public void updateBannerInstructionsWith(Milestone milestone) {
     if (milestone instanceof BannerInstructionMilestone) {
       BannerInstructions instructions = ((BannerInstructionMilestone) milestone).getBannerInstructions();
-      if (instructions != null) {
-        BannerInstructionModel model = new BannerInstructionModel(distanceFormatter, routeProgress, instructions);
-        updateDataFromBannerInstruction(model);
+      if (instructions == null || instructions.primary() == null) {
+        return;
       }
+      BannerText primary = instructions.primary();
+      updateManeuverView(primary.type(), primary.modifier(), extractRoundaboutDegreesFrom(primary));
+      updateDataFromBannerText(primary, instructions.secondary());
     }
   }
 
@@ -794,25 +797,21 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   /**
    * Looks to see if we have a new instruction text.
    * Sets new instruction text if found.
-   *
-   * @param model provides instruction text
    */
-  private void updateDataFromBannerInstruction(InstructionModel model) {
-    updateManeuverView(model);
-    if (model.getPrimaryBannerText() != null) {
-      InstructionLoader instructionLoader = createInstructionLoader(upcomingPrimaryText, model.getPrimaryBannerText());
+  private void updateDataFromBannerText(BannerText primaryBannerText, BannerText secondaryBannerText) {
+    if (primaryBannerText != null) {
+      InstructionLoader instructionLoader = createInstructionLoader(upcomingPrimaryText, primaryBannerText);
       if (instructionLoader != null) {
         instructionLoader.loadInstruction();
       }
     }
-    if (model.getSecondaryBannerText() != null) {
+    if (secondaryBannerText != null) {
       if (upcomingSecondaryText.getVisibility() == GONE) {
         upcomingSecondaryText.setVisibility(VISIBLE);
         upcomingPrimaryText.setMaxLines(1);
         adjustBannerTextVerticalBias(0.65f);
       }
-      InstructionLoader instructionLoader = createInstructionLoader(upcomingSecondaryText,
-        model.getSecondaryBannerText());
+      InstructionLoader instructionLoader = createInstructionLoader(upcomingSecondaryText, secondaryBannerText);
       if (instructionLoader != null) {
         instructionLoader.loadInstruction();
       }
@@ -826,16 +825,22 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   /**
    * Looks to see if we have a new maneuver modifier or type.
    * Updates new maneuver image if one is found.
-   *
-   * @param model provides maneuver modifier / type
    */
-  private void updateManeuverView(InstructionModel model) {
-    String maneuverViewType = model.getManeuverType();
-    String maneuverViewModifier = model.getManeuverModifier();
+  private void updateManeuverView(String maneuverViewType, String maneuverViewModifier,
+                                  @Nullable Float roundaboutAngle) {
     upcomingManeuverView.setManeuverTypeAndModifier(maneuverViewType, maneuverViewModifier);
-    if (model.getRoundaboutAngle() != null) {
-      upcomingManeuverView.setRoundaboutAngle(model.getRoundaboutAngle());
+    if (roundaboutAngle != null) {
+      upcomingManeuverView.setRoundaboutAngle(roundaboutAngle);
     }
+  }
+
+  @Nullable
+  private Float extractRoundaboutDegreesFrom(BannerText bannerText) {
+    Double degrees = bannerText.degrees();
+    if (degrees != null) {
+      return degrees.floatValue();
+    }
+    return null;
   }
 
   /**
