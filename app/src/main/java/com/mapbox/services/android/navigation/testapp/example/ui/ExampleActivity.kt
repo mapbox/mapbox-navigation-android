@@ -202,11 +202,11 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   }
 
   override fun updateInstructionViewWith(progress: RouteProgress) {
-    instructionView.update(progress)
+    instructionView.updateDistanceWith(progress)
   }
 
-  override fun updateInstructionViewWith(progress: RouteProgress, milestone: Milestone) {
-    TODO("not implemented")
+  override fun updateInstructionViewWith(milestone: Milestone) {
+    instructionView.updateBannerInstructionsWith(milestone)
   }
 
   override fun addMapProgressChangeListener(navigation: MapboxNavigation) {

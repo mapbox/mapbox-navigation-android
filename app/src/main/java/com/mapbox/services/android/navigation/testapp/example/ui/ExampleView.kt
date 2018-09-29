@@ -56,7 +56,7 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
 
   fun updateInstructionViewWith(progress: RouteProgress)
 
-  fun updateInstructionViewWith(progress: RouteProgress, milestone: Milestone)
+  fun updateInstructionViewWith(milestone: Milestone)
 
   fun addMapProgressChangeListener(navigation: MapboxNavigation)
 

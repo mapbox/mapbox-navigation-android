@@ -174,13 +174,13 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   fun onProgressUpdate(progress: RouteProgress?) {
     progress?.let {
-      view.updateInstructionViewWith(progress)
+      view.updateInstructionViewWith(it)
     }
   }
 
   fun onMilestoneUpdate(milestone: Milestone?) {
     milestone?.let {
-      // TODO update instructionview -- fix API
+      view.updateInstructionViewWith(it)
     }
   }
 
