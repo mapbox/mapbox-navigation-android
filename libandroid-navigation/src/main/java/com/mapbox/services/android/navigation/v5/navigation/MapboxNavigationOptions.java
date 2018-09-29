@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
+  .NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ROUNDING_INCREMENT_FIFTY;
 
 /**
@@ -56,6 +58,8 @@ public abstract class MapboxNavigationOptions {
 
   public abstract int locationAcceptableAccuracyInMetersThreshold();
 
+  public abstract int navigationLocationEngineIntervalLagInMilliseconds();
+
   public abstract Builder toBuilder();
 
   @AutoValue.Builder
@@ -101,6 +105,8 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder locationAcceptableAccuracyInMetersThreshold(int accuracyInMetersThreshold);
 
+    public abstract Builder navigationLocationEngineIntervalLagInMilliseconds(int lagInMilliseconds);
+
     public abstract MapboxNavigationOptions build();
   }
 
@@ -124,6 +130,7 @@ public abstract class MapboxNavigationOptions {
       .isDebugLoggingEnabled(false)
       .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
       .timeFormatType(NavigationTimeFormat.NONE_SPECIFIED)
-      .locationAcceptableAccuracyInMetersThreshold(NavigationConstants.ONE_HUNDRED_METER_ACCEPTABLE_ACCURACY_THRESHOLD);
+      .locationAcceptableAccuracyInMetersThreshold(NavigationConstants.ONE_HUNDRED_METER_ACCEPTABLE_ACCURACY_THRESHOLD)
+      .navigationLocationEngineIntervalLagInMilliseconds(NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG);
   }
 }

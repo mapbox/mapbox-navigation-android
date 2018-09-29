@@ -22,7 +22,11 @@ class MapboxNavigator {
     navigator.setRoute(routeJson, 0, 0);
   }
 
-  synchronized NavigationStatus retrieveStatus(Date date) {
+  synchronized NavigationStatus retrieveStatus(Date date, long lagInMilliseconds) {
+    // We ask for a point slightly in the future to account for lag in location services
+    if (lagInMilliseconds > 0) {
+      date.setTime(date.getTime() + lagInMilliseconds);
+    }
     return navigator.getStatus(date);
   }
 
