@@ -199,12 +199,14 @@ public final class NavigationConstants {
 
   /**
    * Default approximate location engine interval lag in milliseconds
-   *
+   * <p>
    * This value will be used to offset the time at which the current location was calculated
    * in such a way as to project the location forward along the current trajectory so as to
    * appear more in sync with the users ground-truth location
+   *
+   * @since 0.20.0
    */
-  public static final int NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG = 1500;
+  static final int NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG = 1500;
 
   static final String NON_NULL_APPLICATION_CONTEXT_REQUIRED = "Non-null application context required.";
 

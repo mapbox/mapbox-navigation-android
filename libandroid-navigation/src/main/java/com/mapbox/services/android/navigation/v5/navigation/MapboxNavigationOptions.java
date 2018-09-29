@@ -5,8 +5,9 @@ import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
+  .NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ROUNDING_INCREMENT_FIFTY;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG;
 
 /**
  * Immutable and can't be changed after passing into {@link MapboxNavigation}.
@@ -57,7 +58,7 @@ public abstract class MapboxNavigationOptions {
 
   public abstract int locationAcceptableAccuracyInMetersThreshold();
 
-  public abstract long navigationLocationEngineIntervalLagInMilliseconds();
+  public abstract int navigationLocationEngineIntervalLagInMilliseconds();
 
   public abstract Builder toBuilder();
 
@@ -104,7 +105,7 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder locationAcceptableAccuracyInMetersThreshold(int accuracyInMetersThreshold);
 
-    public abstract Builder navigationLocationEngineIntervalLagInMilliseconds(long lagInMilliseconds);
+    public abstract Builder navigationLocationEngineIntervalLagInMilliseconds(int lagInMilliseconds);
 
     public abstract MapboxNavigationOptions build();
   }
