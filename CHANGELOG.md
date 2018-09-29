@@ -2,6 +2,8 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.20.0-beta.1 - September 30, 2018
+
 ### v0.19.0 - September 24, 2018
 
 * Fix route requests that include approaches and fix calculate remaining waypoints and waypoint names logic [#1303](https://github.com/mapbox/mapbox-navigation-android/pull/1303)
