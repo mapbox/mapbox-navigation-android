@@ -209,6 +209,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       }
     });
     subscribeAlertView();
+    initializeButtonListeners();
     showButtons();
   }
 
@@ -517,13 +518,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     alertView.subscribe(navigationViewModel);
   }
 
-  private void initializeButtons() {
-    setupSoundButton();
-    setupFeedbackButton();
-  }
-
-  private void setupFeedbackButton() {
-    feedbackButton.hide();
+  private void initializeButtonListeners() {
     feedbackButton.addOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -531,10 +526,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         showFeedbackBottomSheet();
       }
     });
-  }
-
-  private void setupSoundButton() {
-    soundButton.hide();
     soundButton.addOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -556,6 +547,11 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     } else {
       initializePortraitListListener();
     }
+  }
+
+  private void initializeButtons() {
+    feedbackButton.hide();
+    soundButton.hide();
   }
 
   /**
