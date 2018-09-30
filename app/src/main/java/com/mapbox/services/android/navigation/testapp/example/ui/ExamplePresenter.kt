@@ -19,6 +19,9 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
+import com.mapbox.services.android.navigation.testapp.example.ui.callout.ExampleBubbleCalloutOptions
+import com.mapbox.services.android.navigation.testapp.example.ui.callout.ExampleCalloutOptions
+import com.mapbox.services.android.navigation.testapp.example.utils.formatArrivalTime
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
@@ -88,7 +91,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     state = PresenterState.SHOW_LOCATION
     viewModel.stopNavigation()
     view.removeRoute()
-    view.clearMarkers()
+    view.removeCallouts()
     view.resetMapPadding()
     view.updateLocationRenderMode(RenderMode.NORMAL)
     view.updateLocationFabVisibility(VISIBLE)
@@ -119,6 +122,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       if (state == PresenterState.ROUTE_FOUND) {
         view.removeRoute()
         viewModel.primaryRoute = null
+        view.removeCallouts()
         view.updateNavigationFabVisibility(INVISIBLE)
       }
       state = PresenterState.SELECTED_DESTINATION
@@ -151,11 +155,17 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
           state = PresenterState.ROUTE_FOUND
           view.transition()
           view.showAlternativeRoutes(true)
-          view.updateRoutes(directionsRoutes)
           view.updateDirectionsFabVisibility(INVISIBLE)
           view.updateNavigationFabVisibility(VISIBLE)
+          view.updateRoutes(directionsRoutes)
           viewModel.destination.value?.let { destination ->
             moveCameraToInclude(destination)
+          }
+          directionsRoutes.forEach {
+            val arrivalCalloutOptions = buildArrivalCalloutOptionsFrom(it)
+            arrivalCalloutOptions?.let { calloutOptions ->
+              view.addCalloutWith(calloutOptions)
+            }
           }
         }
         PresenterState.NAVIGATE -> {
@@ -210,7 +220,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   fun buildDynamicCameraFrom(mapboxMap: MapboxMap) {
-    // TODO fix this leak
     viewModel.retrieveNavigation().cameraEngine = DynamicCamera(mapboxMap)
   }
 
@@ -249,5 +258,25 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       val padding = intArrayOf(left, top, right, bottom)
       view.updateMapCameraFor(bounds, padding, TWO_SECONDS)
     }
+  }
+
+  private fun buildArrivalCalloutOptionsFrom(directionsRoute: DirectionsRoute): ExampleCalloutOptions? {
+    val steps = directionsRoute.legs()?.first()?.steps()
+    val middleStep = steps?.let {
+      it[it.size / 2]
+    }
+    middleStep?.let {
+      val location = it.maneuver().location()
+      val latLng = LatLng(location.latitude(), location.longitude())
+      val arrivalTime = directionsRoute.formatArrivalTime(NavigationApplication.instance)
+      return ExampleBubbleCalloutOptions()
+          .withArrowHeight(22f)
+          .withArrowWidth(22f)
+          .withCornerRadius(20f)
+          .withLatLng(latLng)
+          .withText(arrivalTime)
+          .withTextSize(18f)
+    }
+    return null
   }
 }
