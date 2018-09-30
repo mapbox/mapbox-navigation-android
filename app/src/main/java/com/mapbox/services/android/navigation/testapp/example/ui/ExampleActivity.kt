@@ -23,6 +23,8 @@ import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.AutoCompleteBottomSheetCallback
 import com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.ExampleAutocompleteAdapter
+import com.mapbox.services.android.navigation.testapp.example.ui.callout.ExampleCalloutManager
+import com.mapbox.services.android.navigation.testapp.example.ui.callout.ExampleCalloutOptions
 import com.mapbox.services.android.navigation.testapp.example.ui.permissions.PermissionRequestDialog
 import com.mapbox.services.android.navigation.testapp.example.utils.hideKeyboard
 import com.mapbox.services.android.navigation.testapp.example.utils.showKeyboard
@@ -37,6 +39,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   private val permissionsManager = PermissionsManager(this)
   private lateinit var presenter: ExamplePresenter
   private var map: NavigationMapboxMap? = null
+  private var calloutManager: ExampleCalloutManager? = null
 
   companion object {
     const val ZERO_PADDING = 0
@@ -107,6 +110,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     map?.setOnRouteSelectionChangeListener(this)
     map?.updateLocationLayerRenderMode(RenderMode.NORMAL)
     mapboxMap.addOnMapLongClickListener { presenter.onMapLongClick(it) }
+    calloutManager = ExampleCalloutManager(mapboxMap)
     presenter.buildDynamicCameraFrom(mapboxMap)
   }
 
@@ -160,6 +164,10 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
 
   override fun updateDestinationMarker(destination: Point) {
     map?.addMarker(this, destination)
+  }
+
+  override fun clearMarkers() {
+    map?.clearMarkers()
   }
 
   override fun updateAutocompleteBottomSheetState(state: Int) {
@@ -217,10 +225,6 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     map?.removeRoute()
   }
 
-  override fun clearMarkers() {
-    map?.clearMarkers()
-  }
-
   override fun makeToast(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
   }
@@ -256,6 +260,14 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
 
   override fun updateLocationRenderMode(renderMode: Int) {
     map?.updateLocationLayerRenderMode(renderMode)
+  }
+
+  override fun addCalloutWith(options: ExampleCalloutOptions) {
+    calloutManager?.add(options)
+  }
+
+  override fun removeCallouts() {
+    calloutManager?.removeAll()
   }
 
   private fun setupWith(savedInstanceState: Bundle?) {

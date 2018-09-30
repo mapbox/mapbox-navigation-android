@@ -10,6 +10,7 @@ import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
+import com.mapbox.services.android.navigation.testapp.example.ui.callout.ExampleCalloutOptions
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
@@ -35,6 +36,8 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
   fun updateRoutes(routes: List<DirectionsRoute>)
 
   fun updateDestinationMarker(destination: Point)
+
+  fun clearMarkers()
 
   fun updateAutocompleteBottomSheetState(state: Int)
 
@@ -62,8 +65,6 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
 
   fun removeRoute()
 
-  fun clearMarkers()
-
   fun makeToast(message: String)
 
   fun transition()
@@ -79,4 +80,8 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
   fun showAlternativeRoutes(alternativesVisible: Boolean)
 
   fun updateLocationRenderMode(@RenderMode.Mode renderMode: Int)
+
+  fun addCalloutWith(options: ExampleCalloutOptions)
+
+  fun removeCallouts()
 }
