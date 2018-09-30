@@ -4,6 +4,23 @@ Mapbox welcomes participation and contributions from everyone.
 
 ### v0.20.0-beta.1 - September 30, 2018
 
+* Refine InstructionView update APIs [#1355](https://github.com/mapbox/mapbox-navigation-android/pull/1355)
+* Puck Gymnastics [#1354](https://github.com/mapbox/mapbox-navigation-android/pull/1354)
+* Fix MultiOnClickListener NPE [#1353](https://github.com/mapbox/mapbox-navigation-android/pull/1353)
+* Ignore null locations [#1352](https://github.com/mapbox/mapbox-navigation-android/pull/1352)
+* Update nav native to 3.0.1 [#1348](https://github.com/mapbox/mapbox-navigation-android/pull/1348)
+* Add separate APIs for updating InstructionView [#1340](https://github.com/mapbox/mapbox-navigation-android/pull/1340)
+* Create MultiOnClickListener before View is attached [#1345](https://github.com/mapbox/mapbox-navigation-android/pull/1345)
+* Add navigator history functionality [#1342](https://github.com/mapbox/mapbox-navigation-android/pull/1342)
+* Navigation native [#1336](https://github.com/mapbox/mapbox-navigation-android/pull/1336)
+* Ignore navigation view orientation test [#1331](https://github.com/mapbox/mapbox-navigation-android/pull/1331)
+* Add NavigationMapboxMap APIs for showing multiple routes on map [#1320](https://github.com/mapbox/mapbox-navigation-android/pull/1320)
+* Add NavigationMapboxMap to set LocationLayer RenderMode [#1319](https://github.com/mapbox/mapbox-navigation-android/pull/1319)
+* Update Build Tools 28.0.3 [#1313](https://github.com/mapbox/mapbox-navigation-android/pull/1313)
+* Add default roundabout angle value for ManeuverView [#1264](https://github.com/mapbox/mapbox-navigation-android/pull/1264)
+* 0.19.0 release README bump [#1306](https://github.com/mapbox/mapbox-navigation-android/pull/1306)
+* Bump MAS version to 4.0.0 [#1308](https://github.com/mapbox/mapbox-navigation-android/pull/1308)
+
 ### v0.19.0 - September 24, 2018
 
 * Fix route requests that include approaches and fix calculate remaining waypoints and waypoint names logic [#1303](https://github.com/mapbox/mapbox-navigation-android/pull/1303)
