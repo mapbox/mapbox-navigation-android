@@ -339,21 +339,6 @@ public class NavigationEventDispatcherTest extends BaseTest {
   }
 
   @Test
-  public void onArrivalDuringLastLeg_offRouteListenerIsRemoved() {
-    String instruction = "";
-    Location location = mock(Location.class);
-    BannerInstructionMilestone milestone = mock(BannerInstructionMilestone.class);
-    RouteUtils routeUtils = mock(RouteUtils.class);
-    when(routeUtils.isArrivalEvent(routeProgress, milestone)).thenReturn(true);
-    when(routeUtils.isLastLeg(routeProgress)).thenReturn(true);
-    NavigationEventDispatcher navigationEventDispatcher = buildEventDispatcherHasArrived(instruction, routeUtils, milestone);
-
-    navigationEventDispatcher.onUserOffRoute(location);
-
-    verify(offRouteListener, times(0)).userOffRoute(location);
-  }
-
-  @Test
   public void onArrivalDuringLastLeg_metricEventListenerIsRemoved() {
     String instruction = "";
     Location location = mock(Location.class);
