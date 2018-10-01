@@ -2,6 +2,12 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.20.0 - September 30, 2018
+
+* Update Navigator to 3.1.3 [#1364](https://github.com/mapbox/mapbox-navigation-android/pull/1364)
+* Delay adding InstructionView default click listeners until subscribed [#1362](https://github.com/mapbox/mapbox-navigation-android/pull/1362)
+* Do not remove OffRouteListeners onArrival [#1363](https://github.com/mapbox/mapbox-navigation-android/pull/1363)
+
 ### v0.20.0-beta.1 - September 30, 2018
 
 * Refine InstructionView update APIs [#1355](https://github.com/mapbox/mapbox-navigation-android/pull/1355)
