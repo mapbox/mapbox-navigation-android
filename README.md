@@ -32,7 +32,7 @@ implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.20.0'
 And for `libandroid-navigation-ui`:
 
 ```
-implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.21.0'
+implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.20.0'
 ```
 **Note**:  When using the UI library, you _do not_ need to add both dependencies.  The UI library will automatically pull in `libandroid-navigation`.  
 
