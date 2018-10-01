@@ -21,6 +21,7 @@ import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
+import com.mapbox.services.android.navigation.ui.v5.instruction.PreviewInstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductor;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductorListener;
 import com.mapbox.services.android.navigation.ui.v5.route.OffRouteEvent;
@@ -55,10 +56,12 @@ public class NavigationViewModel extends AndroidViewModel {
 
   private static final String EMPTY_STRING = "";
 
+  public final MutableLiveData<PreviewInstructionModel> previewModel = new MutableLiveData<>();
   public final MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
   public final MutableLiveData<BannerInstructionModel> bannerInstructionModel = new MutableLiveData<>();
   public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
+  public final MutableLiveData<Boolean> isInPreviewMode = new MutableLiveData<>();
   final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
   final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
   final MutableLiveData<Point> destination = new MutableLiveData<>();
@@ -113,6 +116,10 @@ public class NavigationViewModel extends AndroidViewModel {
 
   public void setMuted(boolean isMuted) {
     speechPlayer.setMuted(isMuted);
+  }
+
+  public void setPreviewMode(boolean isInPreviewMode) {
+    this.isInPreviewMode.setValue(isInPreviewMode);
   }
 
   /**
@@ -300,6 +307,12 @@ public class NavigationViewModel extends AndroidViewModel {
       instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
       summaryModel.setValue(new SummaryModel(getApplication(), distanceFormatter, routeProgress, timeFormatType));
       navigationLocation.setValue(location);
+
+      if (previewModel.getValue() == null) {
+        previewModel.setValue(new PreviewInstructionModel(routeProgress));
+      } else {
+        previewModel.getValue().update(routeProgress);
+      }
     }
   };
 
@@ -413,7 +426,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private void playVoiceAnnouncement(Milestone milestone) {
     if (milestone instanceof VoiceInstructionMilestone) {
       SpeechAnnouncement announcement = SpeechAnnouncement.builder()
-        .voiceInstructionMilestone((VoiceInstructionMilestone) milestone).build();
+          .voiceInstructionMilestone((VoiceInstructionMilestone) milestone).build();
       announcement = retrieveAnnouncementFromSpeechEvent(announcement);
       speechPlayer.play(announcement);
     }
@@ -430,7 +443,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  @SuppressWarnings( {"MissingPermission"})
+  @SuppressWarnings({"MissingPermission"})
   private boolean hasNetworkConnection() {
     if (connectivityManager == null) {
       return false;

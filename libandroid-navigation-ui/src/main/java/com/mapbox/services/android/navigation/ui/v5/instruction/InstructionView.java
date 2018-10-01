@@ -20,6 +20,8 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -32,6 +34,8 @@ import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.FeedbackButton;
 import com.mapbox.services.android.navigation.ui.v5.NavigationButton;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
@@ -43,6 +47,7 @@ import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
+import com.mapbox.services.android.navigation.ui.v5.listeners.BannerInstructionsPreviewListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
@@ -94,6 +99,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private ConstraintLayout instructionLayout;
   private LinearLayout instructionLayoutText;
   private View instructionListLayout;
+  private BannerInstructionsPreviewListener previewListener;
   private InstructionListAdapter instructionListAdapter;
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
@@ -103,8 +109,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
   private DistanceFormatter distanceFormatter;
   private boolean isRerouting;
+  private boolean isInPreview;
   private SoundButton soundButton;
   private FeedbackButton feedbackButton;
+  private GestureDetector gestureDetector;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -117,6 +125,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   public InstructionView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     initialize();
+  }
+
+  public void setPreviewListener(BannerInstructionsPreviewListener previewListener) {
+    this.previewListener = previewListener;
   }
 
   public void setInstructionListListener(InstructionListListener instructionListListener) {
@@ -137,8 +149,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     initializeTurnLaneRecyclerView();
     initializeInstructionListRecyclerView();
     initializeAnimations();
-    initializeStepListClickListener();
     initializeButtons();
+    initalizeGestureRecognizer();
     ImageCoordinator.getInstance().initialize(getContext());
   }
 
@@ -153,6 +165,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     super.onDetachedFromWindow();
     cancelDelayedTransition();
   }
+
 
   @Override
   public void onFeedbackSelected(FeedbackItem feedbackItem) {
@@ -174,8 +187,11 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param navigationViewModel to which this View is subscribing
    * @since 0.6.2
    */
-  public void subscribe(NavigationViewModel navigationViewModel) {
+  public void subscribe(final NavigationViewModel navigationViewModel) {
+    final InstructionView self = this;
+
     this.navigationViewModel = navigationViewModel;
+
     LifecycleOwner owner = (LifecycleOwner) getContext();
     navigationViewModel.instructionModel.observe(owner, new Observer<InstructionModel>() {
       @Override
@@ -188,7 +204,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     navigationViewModel.bannerInstructionModel.observe(owner, new Observer<BannerInstructionModel>() {
       @Override
       public void onChanged(@Nullable BannerInstructionModel model) {
-        if (model != null) {
+        if (model != null && !isInPreview) {
           updateManeuverView(model.getManeuverType(), model.getManeuverModifier(), model.getRoundaboutAngle());
           updateDataFromBannerText(model.getPrimaryBannerText(), model.getSecondaryBannerText());
         }
@@ -205,6 +221,29 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
             alertView.showReportProblem();
           }
           isRerouting = isOffRoute;
+        }
+      }
+    });
+    navigationViewModel.isInPreviewMode.observe(owner, new Observer<Boolean>() {
+      @Override
+      public void onChanged(@Nullable Boolean isInPreviewMode) {
+        self.isInPreview = isInPreviewMode;
+
+        PreviewInstructionModel model = navigationViewModel.previewModel.getValue();
+        if (model == null) {
+          return;
+        }
+
+        // ignore this update
+        if (isInPreviewMode || model.currentStep() == null) {
+          return;
+        }
+
+        model.reset();
+        updateDataFromInstruction(navigationViewModel.instructionModel.getValue());
+
+        if (previewListener != null) {
+          previewListener.willStopPreview();
         }
       }
     });
@@ -342,6 +381,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * can be animated appropriately.
    */
   public void showInstructionList() {
+    navigationViewModel.setPreviewMode(false);
     onInstructionListVisibilityChanged(true);
     instructionLayout.requestFocus();
     beginDelayedListTransition();
@@ -435,9 +475,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private void initializeBackground() {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
       int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-        R.attr.navigationViewBannerBackground);
+          R.attr.navigationViewBannerBackground);
       int navigationViewListBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-        R.attr.navigationViewListBackground);
+          R.attr.navigationViewListBackground);
       // Instruction Layout landscape - banner background
       if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
         View instructionLayoutManeuver = findViewById(R.id.instructionManeuverLayout);
@@ -461,9 +501,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void initializeInstructionAutoSize() {
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(upcomingPrimaryText,
-      26, 30, 1, TypedValue.COMPLEX_UNIT_SP);
+        26, 30, 1, TypedValue.COMPLEX_UNIT_SP);
     TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(upcomingSecondaryText,
-      20, 26, 1, TypedValue.COMPLEX_UNIT_SP);
+        20, 26, 1, TypedValue.COMPLEX_UNIT_SP);
   }
 
   /**
@@ -474,7 +514,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     rvTurnLanes.setAdapter(turnLaneAdapter);
     rvTurnLanes.setHasFixedSize(true);
     rvTurnLanes.setLayoutManager(new LinearLayoutManager(getContext(),
-      LinearLayoutManager.HORIZONTAL, false));
+        LinearLayoutManager.HORIZONTAL, false));
   }
 
   /**
@@ -539,55 +579,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     soundButton.show();
   }
 
-  private void initializeStepListClickListener() {
-    int deviceOrientation = getContext().getResources().getConfiguration().orientation;
-    boolean isOrientationLandscape = deviceOrientation == Configuration.ORIENTATION_LANDSCAPE;
-    if (isOrientationLandscape) {
-      initializeLandscapeListListener();
-    } else {
-      initializePortraitListListener();
-    }
-  }
-
   private void initializeButtons() {
     feedbackButton.hide();
     soundButton.hide();
-  }
-
-  /**
-   * For portrait orientation, attach the listener to the whole layout
-   * and use custom animations to hide and show the instructions /sound layout
-   */
-  private void initializePortraitListListener() {
-    instructionLayout.setOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View instructionView) {
-        boolean instructionsVisible = instructionListLayout.getVisibility() == VISIBLE;
-        if (!instructionsVisible) {
-          showInstructionList();
-        } else {
-          hideInstructionList();
-        }
-      }
-    });
-  }
-
-  /**
-   * For landscape orientation, the click listener is attached to
-   * the instruction text layout and the constraints are adjusted before animating
-   */
-  private void initializeLandscapeListListener() {
-    instructionLayoutText.setOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View instructionLayoutText) {
-        boolean instructionsVisible = instructionListLayout.getVisibility() == VISIBLE;
-        if (!instructionsVisible) {
-          showInstructionList();
-        } else {
-          hideInstructionList();
-        }
-      }
-    });
   }
 
   /**
@@ -597,9 +591,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private boolean newDistanceText(InstructionModel model) {
     return !upcomingDistanceText.getText().toString().isEmpty()
-      && !TextUtils.isEmpty(model.getStepResources().getStepDistanceRemaining())
-      && !upcomingDistanceText.getText().toString()
-      .contentEquals(model.getStepResources().getStepDistanceRemaining().toString());
+        && !TextUtils.isEmpty(model.getStepResources().getStepDistanceRemaining())
+        && !upcomingDistanceText.getText().toString()
+        .contentEquals(model.getStepResources().getStepDistanceRemaining().toString());
   }
 
   /**
@@ -659,7 +653,16 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private boolean shouldShowTurnLanes(List<IntersectionLanes> turnLanes,
                                       String maneuverViewModifier, double durationRemaining) {
     return turnLanes != null && !TextUtils.isEmpty(maneuverViewModifier)
-      && durationRemaining <= VALID_DURATION_REMAINING;
+        && durationRemaining <= VALID_DURATION_REMAINING;
+  }
+
+  private void toggleStepList() {
+    boolean instructionsVisible = instructionListLayout.getVisibility() == VISIBLE;
+    if (!instructionsVisible) {
+      showInstructionList();
+    } else {
+      hideInstructionList();
+    }
   }
 
   /**
@@ -715,8 +718,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private boolean shouldShowThenStep(InstructionModel model) {
     return turnLaneLayout.getVisibility() != VISIBLE
-      && model.getThenBannerText() != null
-      && model.getStepResources().shouldShowThenStep();
+        && model.getThenBannerText() != null
+        && model.getStepResources().shouldShowThenStep();
   }
 
   /**
@@ -868,5 +871,84 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     RouteProgress routeProgress = model.getProgress();
     boolean isListShowing = instructionListLayout.getVisibility() == VISIBLE;
     instructionListAdapter.updateBannerListWith(routeProgress, isListShowing);
+  }
+
+  private void handleSwipeLeft() {
+    PreviewInstructionModel previewModel = navigationViewModel.previewModel.getValue();
+
+    if (previewModel == null) {
+      return;
+    }
+
+    LegStep nextStep = previewModel.nextStep();
+    if (nextStep == null) {
+      return;
+    }
+
+    showPreviewInstruction(previewModel);
+  }
+
+  private void handleSwipeRight() {
+    PreviewInstructionModel previewModel = navigationViewModel.previewModel.getValue();
+
+    if (previewModel == null) {
+      return;
+    }
+
+    LegStep prevStep = previewModel.previousStep();
+    if (prevStep == null) {
+      return;
+    }
+
+    showPreviewInstruction(previewModel);
+  }
+
+  private void showPreviewInstruction(PreviewInstructionModel previewInstructionModel) {
+    RouteLeg currentLeg = previewInstructionModel.currentLeg();
+    if (currentLeg == null) {
+      return;
+    }
+
+    int stepIndex = previewInstructionModel.stepIndex();
+    InstructionModel instructionModel = new InstructionModel(distanceFormatter, currentLeg, stepIndex);
+
+    if (previewListener != null) {
+      List<List<Point>> polyline = previewInstructionModel.getPolyline();
+      previewListener.willStartPreview(PreviewInstructionUtils.upcomingStep(currentLeg, stepIndex),
+          polyline.get(0),
+          polyline.get(1));
+    }
+
+    updateDataFromInstruction(instructionModel);
+  }
+
+  private void initalizeGestureRecognizer() {
+    gestureDetector = new GestureDetector(getContext(), new InstructionSwipeGestureListener() {
+      @Override
+      public boolean onTouch() {
+        toggleStepList();
+        return true;
+      }
+
+      @Override
+      public boolean onSwipeLeft() {
+        handleSwipeLeft();
+        return true;
+      }
+
+      @Override
+      public boolean onSwipeRight() {
+        handleSwipeRight();
+        return true;
+      }
+    });
+
+    setOnTouchListener(new OnTouchListener() {
+      @Override
+      public boolean onTouch(View view, MotionEvent event) {
+        gestureDetector.onTouchEvent(event);
+        return true;
+      }
+    });
   }
 }

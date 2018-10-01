@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.ImageButton;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
@@ -36,6 +37,8 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
+
+import java.util.List;
 
 /**
  * View that creates the drop-in UI.
@@ -239,6 +242,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Override
   public void resetCameraPosition() {
     if (navigationMap != null) {
+      navigationViewModel.setPreviewMode(false);
       navigationMap.resetCameraPosition();
     }
   }
@@ -336,6 +340,13 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void resumeCamera(Location location) {
     if (navigationMap != null) {
       navigationMap.resumeCamera(location);
+    }
+  }
+
+  @Override
+  public void moveCameraTo(LegStep step, List<Point> currentPoints, List<Point> upcomingPoints) {
+    if (navigationMap != null) {
+      navigationMap.moveCameraTo(step, currentPoints, upcomingPoints);
     }
   }
 
@@ -484,6 +495,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private void initializeInstructionListListener() {
     instructionView.setInstructionListListener(new NavigationInstructionListListener(navigationPresenter,
       navigationViewEventDispatcher));
+    instructionView.setPreviewListener(new NavigationInstructionPreviewListener(navigationPresenter));
   }
 
   private void updateSavedInstanceStateMapStyle(@Nullable Bundle savedInstanceState) {

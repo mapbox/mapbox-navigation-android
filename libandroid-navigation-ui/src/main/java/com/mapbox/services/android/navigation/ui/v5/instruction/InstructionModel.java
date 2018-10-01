@@ -4,7 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
@@ -23,6 +23,11 @@ public class InstructionModel {
     this.progress = progress;
     routeUtils = new RouteUtils();
     buildInstructionModel(distanceFormatter, progress);
+  }
+
+  public InstructionModel(DistanceFormatter distanceFormatter, RouteLeg leg, int stepIndex) {
+    routeUtils = new RouteUtils();
+    buildInstructionModel(distanceFormatter, leg, stepIndex);
   }
 
   BannerText getPrimaryBannerText() {
@@ -63,12 +68,31 @@ public class InstructionModel {
     extractStepInstructions(progress);
   }
 
-  private void extractStepInstructions(RouteProgress progress) {
-    RouteLegProgress legProgress = progress.currentLegProgress();
-    LegStep currentStep = progress.currentLegProgress().currentStep();
-    LegStep upComingStep = legProgress.upComingStep();
-    int stepDistanceRemaining = (int) legProgress.currentStepProgress().distanceRemaining();
+  private void buildInstructionModel(DistanceFormatter distanceFormatter, RouteLeg leg, int stepIndex) {
+    stepResources = new InstructionStepResources(distanceFormatter, leg, stepIndex);
+    LegStep step = PreviewInstructionUtils.currentStep(leg, stepIndex);
+    LegStep upcomingStep = PreviewInstructionUtils.upcomingStep(leg, stepIndex);
+    extractStepInstructions(step, upcomingStep, step.distance());
+  }
 
+  private void extractStepInstructions(RouteProgress routeProgress) {
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    LegStep upComingStep = routeProgress.currentLegProgress().upComingStep();
+    int stepDistanceRemaining = (int) routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+
+    primaryBannerText = routeUtils.findCurrentBannerText(currentStep, stepDistanceRemaining, true);
+    secondaryBannerText = routeUtils.findCurrentBannerText(currentStep, stepDistanceRemaining, false);
+
+    if (upComingStep != null) {
+      thenBannerText = routeUtils.findCurrentBannerText(upComingStep, upComingStep.distance(), true);
+    }
+
+    if (primaryBannerText != null && primaryBannerText.degrees() != null) {
+      roundaboutAngle = primaryBannerText.degrees().floatValue();
+    }
+  }
+
+  private void extractStepInstructions(LegStep currentStep, LegStep upComingStep, double stepDistanceRemaining) {
     primaryBannerText = routeUtils.findCurrentBannerText(currentStep, stepDistanceRemaining, true);
     secondaryBannerText = routeUtils.findCurrentBannerText(currentStep, stepDistanceRemaining, false);
 

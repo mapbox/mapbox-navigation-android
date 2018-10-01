@@ -257,8 +257,9 @@ public class NavigationCamera implements LifecycleObserver {
    * @param position to which the camera should animate
    */
   private void easeMapCameraPosition(CameraPosition position) {
+    int duration = obtainLocationUpdateDuration();
     mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(position),
-      obtainLocationUpdateDuration(), false, null);
+      duration > 0 ? duration : 1, false, null);
   }
 
   /**

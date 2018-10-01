@@ -166,6 +166,7 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
   private float alternativeRouteScale;
   private String belowLayer;
   private boolean alternativesVisible;
+  private boolean shouldAutomaticallyUpdateArrow;
   private OnRouteSelectionChangeListener onRouteSelectionChangeListener;
   private List<Layer> arrowLayers;
   private GeoJsonSource arrowShaftGeoJsonSource;
@@ -263,6 +264,7 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
     directionsRoutes = new ArrayList<>();
     routeLineStrings = new HashMap<>();
     layerIds = new ArrayList<>();
+    this.shouldAutomaticallyUpdateArrow = true;
     initialize();
     addListeners();
   }
@@ -327,6 +329,10 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
     toggleAlternativeVisibility(alternativesVisible);
   }
 
+  public void setShouldAutomaticallyUpdateArrow(boolean shouldAutomaticallyUpdateArrow) {
+    this.shouldAutomaticallyUpdateArrow = shouldAutomaticallyUpdateArrow;
+  }
+
   public void addProgressChangeListener(MapboxNavigation navigation) {
     this.navigation = navigation;
     navigation.addProgressChangeListener(progressChangeListener);
@@ -339,16 +345,25 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
   }
 
   void addUpcomingManeuverArrow(RouteProgress routeProgress) {
-    boolean invalidUpcomingStepPoints = routeProgress.upcomingStepPoints() == null
-      || routeProgress.upcomingStepPoints().size() < TWO_POINTS;
-    boolean invalidCurrentStepPoints = routeProgress.currentStepPoints().size() < TWO_POINTS;
+    // this get's called every routeProgress tick, we can be in a preview mode
+    // so in this case we don't want to draw the arrow in the current spot, we need to draw it
+    // in the preview spot
+    if (!shouldAutomaticallyUpdateArrow) {
+      return;
+    }
+    addManeuverArrow(routeProgress.currentStepPoints(), routeProgress.upcomingStepPoints());
+  }
+
+  public void addManeuverArrow(List<Point> currentStepPoints, List<Point> upcomingStepPoints) {
+    boolean invalidUpcomingStepPoints = upcomingStepPoints == null || upcomingStepPoints.size() < TWO_POINTS;
+    boolean invalidCurrentStepPoints = currentStepPoints.size() < TWO_POINTS;
     if (invalidUpcomingStepPoints || invalidCurrentStepPoints) {
       updateArrowLayersVisibilityTo(false);
       return;
     }
     updateArrowLayersVisibilityTo(true);
 
-    List<Point> maneuverPoints = obtainArrowPointsFrom(routeProgress);
+    List<Point> maneuverPoints = obtainArrowPointsFrom(currentStepPoints, upcomingStepPoints);
 
     updateArrowShaftWith(maneuverPoints);
     updateArrowHeadWith(maneuverPoints);
@@ -464,12 +479,12 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
     }
   }
 
-  private List<Point> obtainArrowPointsFrom(RouteProgress routeProgress) {
-    List<Point> reversedCurrent = new ArrayList<>(routeProgress.currentStepPoints());
+  private List<Point> obtainArrowPointsFrom(List<Point> currentStepPoints, List<Point> upcomingStepPoints) {
+    List<Point> reversedCurrent = new ArrayList<>(currentStepPoints);
     Collections.reverse(reversedCurrent);
 
     LineString arrowLineCurrent = LineString.fromLngLats(reversedCurrent);
-    LineString arrowLineUpcoming = LineString.fromLngLats(routeProgress.upcomingStepPoints());
+    LineString arrowLineUpcoming = LineString.fromLngLats(upcomingStepPoints);
 
     LineString arrowCurrentSliced = TurfMisc.lineSliceAlong(arrowLineCurrent, 0, THIRTY, TurfConstants.UNIT_METERS);
     LineString arrowUpcomingSliced = TurfMisc.lineSliceAlong(arrowLineUpcoming, 0, THIRTY, TurfConstants.UNIT_METERS);

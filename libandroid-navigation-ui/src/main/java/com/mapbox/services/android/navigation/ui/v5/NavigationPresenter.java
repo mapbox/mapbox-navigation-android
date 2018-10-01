@@ -4,7 +4,10 @@ import android.location.Location;
 import android.support.design.widget.BottomSheetBehavior;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.geojson.Point;
+
+import java.util.List;
 
 class NavigationPresenter {
 
@@ -23,8 +26,13 @@ class NavigationPresenter {
     view.setSummaryBehaviorHideable(false);
     view.setSummaryBehaviorState(BottomSheetBehavior.STATE_EXPANDED);
     view.updateWaynameVisibility(true);
-    view.resetCameraPosition();
+    onResetCameraAndArrow();
     view.hideRecenterBtn();
+  }
+
+  void onResetCameraAndArrow() {
+    view.resetCameraPosition();
+    view.updateCameraTrackingEnabled(true);
   }
 
   void onMapScroll() {
@@ -79,6 +87,12 @@ class NavigationPresenter {
   void onRouteOverviewClick() {
     view.updateWaynameVisibility(false);
     view.updateCameraRouteOverview();
+    view.showRecenterBtn();
+  }
+
+  void moveCameraTo(LegStep step, List<Point> currentPoints, List<Point> upcomingPoints) {
+    view.updateCameraTrackingEnabled(false);
+    view.moveCameraTo(step, currentPoints, upcomingPoints);
     view.showRecenterBtn();
   }
 }

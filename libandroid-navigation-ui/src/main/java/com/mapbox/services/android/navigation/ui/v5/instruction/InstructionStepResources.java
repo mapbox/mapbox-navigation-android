@@ -7,7 +7,9 @@ import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 
@@ -31,7 +33,16 @@ class InstructionStepResources {
   InstructionStepResources(DistanceFormatter distanceFormatter, RouteProgress progress) {
     double distanceRemaining = progress.currentLegProgress().currentStepProgress().distanceRemaining();
     stepDistanceRemaining = distanceFormatter.formatDistance(distanceRemaining);
-    extractStepResources(progress);
+    extractStepResources(progress.currentLegProgress());
+  }
+
+  InstructionStepResources(DistanceFormatter distanceFormatter, RouteLeg leg, int stepIndex) {
+    LegStep currentStep = PreviewInstructionUtils.currentStep(leg, stepIndex);
+    LegStep upcomingStep = PreviewInstructionUtils.upcomingStep(leg, stepIndex);
+    LegStep followOnStep = PreviewInstructionUtils.followOnStep(leg, stepIndex);
+
+    stepDistanceRemaining = distanceFormatter.formatDistance(currentStep.distance());
+    extractStepResources(currentStep, upcomingStep, followOnStep, currentStep.duration());
   }
 
   SpannableString getStepDistanceRemaining() {
@@ -67,11 +78,16 @@ class InstructionStepResources {
     return turnLanes;
   }
 
-  private void extractStepResources(RouteProgress progress) {
-    LegStep currentStep = progress.currentLegProgress().currentStep();
-    LegStep upcomingStep = progress.currentLegProgress().upComingStep();
-    LegStep followOnStep = progress.currentLegProgress().followOnStep();
+  private void extractStepResources(RouteLegProgress routeLegProgress) {
+    LegStep currentStep = routeLegProgress.currentStep();
+    LegStep upcomingStep = routeLegProgress.upComingStep();
+    LegStep followOnStep = routeLegProgress.followOnStep();
+    double durationRemaining = routeLegProgress.currentStepProgress().durationRemaining();
+    extractStepResources(currentStep, upcomingStep, followOnStep, durationRemaining);
+  }
 
+  public void extractStepResources(LegStep currentStep, LegStep upcomingStep, LegStep followOnStep,
+                                   double durationRemaining) {
     // Type / Modifier / Text
     if (upcomingStep != null) {
       maneuverViewType = upcomingStep.maneuver().type();
@@ -79,7 +95,7 @@ class InstructionStepResources {
 
       // Then step (step after upcoming)
       if (followOnStep != null) {
-        thenStep(upcomingStep, followOnStep, progress.currentLegProgress().currentStepProgress().durationRemaining());
+        thenStep(upcomingStep, followOnStep, durationRemaining);
       }
 
       // Turn lane data
@@ -118,7 +134,7 @@ class InstructionStepResources {
 
   private boolean isValidStepDuration(LegStep upcomingStep, double currentDurationRemaining) {
     return upcomingStep.duration() <= VALID_UPCOMING_DURATION
-      && currentDurationRemaining <= VALID_CURRENT_DURATION;
+        && currentDurationRemaining <= VALID_CURRENT_DURATION;
   }
 
   private boolean checkForNoneIndications(List<IntersectionLanes> lanes) {
@@ -137,6 +153,6 @@ class InstructionStepResources {
 
   private boolean hasIntersections(LegStep step) {
     return step.intersections() != null
-      && step.intersections().get(0) != null;
+        && step.intersections().get(0) != null;
   }
 }

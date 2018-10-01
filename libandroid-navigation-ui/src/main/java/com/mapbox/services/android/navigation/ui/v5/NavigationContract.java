@@ -3,7 +3,10 @@ package com.mapbox.services.android.navigation.ui.v5;
 import android.location.Location;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.geojson.Point;
+
+import java.util.List;
 
 public interface NavigationContract {
 
@@ -34,6 +37,8 @@ public interface NavigationContract {
     void startCamera(DirectionsRoute directionsRoute);
 
     void resumeCamera(Location location);
+
+    void moveCameraTo(LegStep step, List<Point> currentPoints, List<Point> upcomingPoints);
 
     void updateNavigationMap(Location location);
 

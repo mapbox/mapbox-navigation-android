@@ -10,10 +10,13 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -292,6 +295,10 @@ public class NavigationMapboxMap {
    */
   public void updateCameraTrackingEnabled(boolean isEnabled) {
     mapCamera.updateCameraTrackingLocation(isEnabled);
+
+    if (isEnabled) {
+      mapRoute.setShouldAutomaticallyUpdateArrow(true);
+    }
   }
 
   /**
@@ -310,6 +317,22 @@ public class NavigationMapboxMap {
    */
   public void resumeCamera(@NonNull Location location) {
     mapCamera.resume(location);
+  }
+
+  public void moveCameraTo(LegStep step, List<Point> currentPoints, List<Point> upcomingPoints) {
+    Point location = step.maneuver().location();
+    LatLng steplatLng = new LatLng(location.latitude(), location.longitude());
+
+    CameraPosition nextPosition = new CameraPosition.Builder()
+            .bearing(step.maneuver().bearingBefore())
+            .target(steplatLng)
+            .zoom(mapboxMap.getCameraPosition().zoom)
+            .build();
+
+
+    mapRoute.setShouldAutomaticallyUpdateArrow(false);
+    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(nextPosition), 200);
+    mapRoute.addManeuverArrow(currentPoints, upcomingPoints);
   }
 
   /**
