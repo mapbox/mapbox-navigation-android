@@ -21,7 +21,7 @@ import android.view.animation.TranslateAnimation;
  * @since 0.6.0
  */
 public class RecenterButton extends CardView implements NavigationButton {
-  private MultiOnClickListener multiOnClickListener;
+  private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();
   private Animation slideUpBottom;
 
   public RecenterButton(Context context) {
@@ -105,7 +105,6 @@ public class RecenterButton extends CardView implements NavigationButton {
   }
 
   private void setupOnClickListeners() {
-    multiOnClickListener = new MultiOnClickListener();
     setOnClickListener(multiOnClickListener);
   }
 
