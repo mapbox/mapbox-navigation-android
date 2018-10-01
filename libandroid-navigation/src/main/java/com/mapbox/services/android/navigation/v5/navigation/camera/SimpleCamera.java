@@ -36,24 +36,6 @@ public class SimpleCamera extends Camera {
   }
 
   @Override
-  public Point target(RouteInformation routeInformation) {
-    double lng;
-    double lat;
-    Point targetPoint = null;
-    if (routeInformation.route() != null) {
-      setupLineStringAndBearing(routeInformation.route());
-      lng = routeCoordinates.get(0).longitude();
-      lat = routeCoordinates.get(0).latitude();
-      return Point.fromLngLat(lng, lat);
-    } else if (routeInformation.location() != null) {
-      lng = routeInformation.location().getLongitude();
-      lat = routeInformation.location().getLatitude();
-      targetPoint = Point.fromLngLat(lng, lat);
-    }
-    return targetPoint;
-  }
-
-  @Override
   public double tilt(RouteInformation routeInformation) {
     return DEFAULT_TILT;
   }

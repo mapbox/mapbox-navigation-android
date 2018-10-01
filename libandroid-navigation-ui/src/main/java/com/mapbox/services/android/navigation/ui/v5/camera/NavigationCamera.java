@@ -4,7 +4,6 @@ import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.location.Location;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 
@@ -16,14 +15,21 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
+import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
 import com.mapbox.services.android.navigation.v5.navigation.camera.RouteInformation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.MathUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MIN_CAMERA_TILT_ADJUSTMENT_ANIMATION_DURATION;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MIN_CAMERA_ZOOM_ADJUSTMENT_ANIMATION_DURATION;
 
 /**
  * Updates the map camera while navigating.
@@ -35,22 +41,21 @@ import java.util.List;
  */
 public class NavigationCamera implements LifecycleObserver {
 
-  private static final long MAX_ANIMATION_DURATION_MS = 1500;
   private static final int ONE_POINT = 1;
 
   private MapboxMap mapboxMap;
+  private LocationLayerPlugin locationLayer;
   private MapboxNavigation navigation;
   private RouteInformation currentRouteInformation;
   private RouteProgress currentRouteProgress;
-  private boolean trackingEnabled = true;
-  private long locationUpdateTimestamp;
+  private boolean trackingEnabled;
   private ProgressChangeListener progressChangeListener = new ProgressChangeListener() {
     @Override
     public void onProgressChange(Location location, RouteProgress routeProgress) {
       currentRouteProgress = routeProgress;
       if (trackingEnabled) {
         currentRouteInformation = buildRouteInformationFromLocation(location, routeProgress);
-        animateCameraFromLocation(currentRouteInformation);
+        adjustCameraFromLocation(currentRouteInformation);
       }
     }
   };
@@ -58,70 +63,67 @@ public class NavigationCamera implements LifecycleObserver {
   /**
    * Creates an instance of {@link NavigationCamera}.
    *
-   * @param mapboxMap  for moving the camera
-   * @param navigation for listening to location updates
+   * @param mapboxMap     for moving the camera
+   * @param navigation    for listening to location updates
+   * @param locationLayer for managing camera mode
    * @since 0.6.0
    */
-  public NavigationCamera(@NonNull MapboxMap mapboxMap, @NonNull MapboxNavigation navigation) {
+  public NavigationCamera(@NonNull MapboxMap mapboxMap, @NonNull MapboxNavigation navigation,
+                          @NonNull LocationLayerPlugin locationLayer) {
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
+    this.locationLayer = locationLayer;
     initialize();
   }
 
   /**
    * Creates an instance of {@link NavigationCamera}.
    * <p>
-   * The camera won't do anything until {@link NavigationCamera#addProgressChangeListener} is called.
+   * Camera will start tracking current user location by default.
    *
-   * @param mapboxMap for moving the camera
+   * @param mapboxMap     for moving the camera
+   * @param locationLayer for managing camera mode
    * @since 0.15.0
    */
-  public NavigationCamera(@NonNull MapboxMap mapboxMap) {
+  public NavigationCamera(@NonNull MapboxMap mapboxMap, LocationLayerPlugin locationLayer) {
     this.mapboxMap = mapboxMap;
-    mapboxMap.setMinZoomPreference(7d);
+    this.locationLayer = locationLayer;
+    setTrackingEnabled(true);
   }
 
   /**
    * Used for testing only.
    */
-  NavigationCamera(MapboxMap mapboxMap, MapboxNavigation navigation, ProgressChangeListener progressChangeListener) {
+  NavigationCamera(MapboxMap mapboxMap, MapboxNavigation navigation, ProgressChangeListener progressChangeListener,
+                   LocationLayerPlugin locationLayer) {
     this.mapboxMap = mapboxMap;
+    this.locationLayer = locationLayer;
     this.navigation = navigation;
     this.progressChangeListener = progressChangeListener;
   }
 
   /**
    * Called when beginning navigation with a route.
-   * <p>
-   * Creates a {@link CameraPosition} based on the {@link DirectionsRoute}.
-   * If the route is null, the {@link ProgressChangeListener} is still added so future updates aren't ignored.
    *
-   * @param route used to create the camera position
+   * @param route used to update route information
    * @since 0.6.0
    */
   public void start(DirectionsRoute route) {
     if (route != null) {
       currentRouteInformation = buildRouteInformationFromRoute(route);
-      animateCameraFromRoute(currentRouteInformation);
-    } else {
-      navigation.addProgressChangeListener(progressChangeListener);
     }
+    navigation.addProgressChangeListener(progressChangeListener);
   }
 
   /**
-   * Called during rotation.
-   * The camera should resume from the last location update, not the beginning of the route.
-   * <p>
-   * Creates a {@link CameraPosition} based on the {@link Location}.
-   * If the route is null, the {@link ProgressChangeListener} is still added so future updates aren't ignored.
+   * Called during rotation to update route information.
    *
-   * @param location used to create the camera position
+   * @param location used to update route information
    * @since 0.6.0
    */
   public void resume(Location location) {
     if (location != null) {
       currentRouteInformation = buildRouteInformationFromLocation(location, null);
-      animateCameraFromLocation(currentRouteInformation);
     }
     navigation.addProgressChangeListener(progressChangeListener);
   }
@@ -133,7 +135,7 @@ public class NavigationCamera implements LifecycleObserver {
    * @since 0.6.0
    */
   public void updateCameraTrackingLocation(boolean trackingEnabled) {
-    this.trackingEnabled = trackingEnabled;
+    setTrackingEnabled(trackingEnabled);
   }
 
   /**
@@ -147,23 +149,23 @@ public class NavigationCamera implements LifecycleObserver {
   }
 
   /**
-   * Enables tracking and moves the camera to the last known location update
-   * from the {@link ProgressChangeListener}.
+   * Enables tracking and updates zoom/tilt based on the available route information.
    *
    * @since 0.6.0
    */
   public void resetCameraPosition() {
-    trackingEnabled = true;
+    setTrackingEnabled(true);
     if (currentRouteInformation != null) {
-      if (navigation.getCameraEngine() instanceof DynamicCamera) {
-        ((DynamicCamera) navigation.getCameraEngine()).forceResetZoomLevel();
+      Camera camera = navigation.getCameraEngine();
+      if (camera instanceof DynamicCamera) {
+        ((DynamicCamera) camera).forceResetZoomLevel();
       }
-      animateCameraFromLocation(currentRouteInformation);
+      adjustCameraFromLocation(currentRouteInformation);
     }
   }
 
   public void showRouteOverview(int[] padding) {
-    trackingEnabled = false;
+    setTrackingEnabled(false);
     RouteInformation routeInformation = buildRouteInformationFromProgress(currentRouteProgress);
     animateCameraForRouteOverview(routeInformation, padding);
   }
@@ -201,8 +203,8 @@ public class NavigationCamera implements LifecycleObserver {
   }
 
   private void initialize() {
-    mapboxMap.setMinZoomPreference(7d);
     navigation.setCameraEngine(new DynamicCamera(mapboxMap));
+    setTrackingEnabled(true);
   }
 
   /**
@@ -241,53 +243,13 @@ public class NavigationCamera implements LifecycleObserver {
     return RouteInformation.create(routeProgress.directionsRoute(), null, null);
   }
 
-  /**
-   * Will animate the {@link MapboxMap} to the given {@link CameraPosition} with the given duration.
-   *
-   * @param position to which the camera should animate
-   * @param callback that will fire if the animation is cancelled or finished
-   */
-  private void updateMapCameraPosition(CameraPosition position, MapboxMap.CancelableCallback callback) {
-    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 1000, callback);
-  }
-
-  /**
-   * Will ease the {@link MapboxMap} to the given {@link CameraPosition} with the given duration.
-   *
-   * @param position to which the camera should animate
-   */
-  private void easeMapCameraPosition(CameraPosition position) {
-    mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(position),
-      obtainLocationUpdateDuration(), false, null);
-  }
-
-  /**
-   * Creates an initial animation with the given {@link RouteInformation#route()}.
-   * <p>
-   * This is the first animation that fires prior to receiving progress updates.
-   * <p>
-   * If a user interacts with the {@link MapboxMap} while the animation is in progress,
-   * the animation will be cancelled.  So it's important to add the {@link ProgressChangeListener}
-   * in both onCancel() and onFinish() scenarios.
-   *
-   * @param routeInformation with route data
-   */
-  private void animateCameraFromRoute(RouteInformation routeInformation) {
-
-    Camera cameraEngine = navigation.getCameraEngine();
-
-    Point targetPoint = cameraEngine.target(routeInformation);
-    LatLng targetLatLng = new LatLng(targetPoint.latitude(), targetPoint.longitude());
-    double bearing = cameraEngine.bearing(routeInformation);
-    double zoom = cameraEngine.zoom(routeInformation);
-
-    CameraPosition position = new CameraPosition.Builder()
-      .target(targetLatLng)
-      .bearing(bearing)
-      .zoom(zoom)
-      .build();
-
-    updateMapCameraPosition(position, new AddProgressListenerCancelableCallback(navigation, progressChangeListener));
+  private void setTrackingEnabled(boolean trackingEnabled) {
+    this.trackingEnabled = trackingEnabled;
+    if (trackingEnabled) {
+      locationLayer.setCameraMode(CameraMode.TRACKING_GPS);
+    } else {
+      locationLayer.setCameraMode(CameraMode.NONE);
+    }
   }
 
   private void animateCameraForRouteOverview(RouteInformation routeInformation, int[] padding) {
@@ -336,36 +298,33 @@ public class NavigationCamera implements LifecycleObserver {
   }
 
   /**
-   * Creates an animation with the given {@link RouteInformation#location()}.
-   * <p>
-   * This animation that fires for new progress update.
+   * Updates the camera's zoom and tilt while tracking.
    *
    * @param routeInformation with location data
    */
-  private void animateCameraFromLocation(RouteInformation routeInformation) {
-
+  private void adjustCameraFromLocation(RouteInformation routeInformation) {
     Camera cameraEngine = navigation.getCameraEngine();
 
-    Point targetPoint = cameraEngine.target(routeInformation);
-    LatLng target = new LatLng(targetPoint.latitude(), targetPoint.longitude());
-    double bearing = cameraEngine.bearing(routeInformation);
     float tilt = (float) cameraEngine.tilt(routeInformation);
     double zoom = cameraEngine.zoom(routeInformation);
 
-    CameraPosition position = new CameraPosition.Builder()
-      .target(target)
-      .bearing(bearing)
-      .tilt(tilt)
-      .zoom(zoom)
-      .build();
-
-    easeMapCameraPosition(position);
+    locationLayer.zoomWhileTracking(zoom, getZoomAnimationDuration(zoom));
+    locationLayer.tiltWhileTracking(tilt, getTiltAnimationDuration(tilt));
   }
 
-  private int obtainLocationUpdateDuration() {
-    long previousUpdateTimeStamp = locationUpdateTimestamp;
-    locationUpdateTimestamp = SystemClock.elapsedRealtime();
-    long duration = locationUpdateTimestamp - previousUpdateTimeStamp;
-    return (int) (duration < MAX_ANIMATION_DURATION_MS ? duration : MAX_ANIMATION_DURATION_MS);
+  private long getZoomAnimationDuration(double zoom) {
+    double zoomDiff = Math.abs(mapboxMap.getCameraPosition().zoom - zoom);
+    return (long) MathUtils.clamp(
+      500 * zoomDiff,
+      NAVIGATION_MIN_CAMERA_ZOOM_ADJUSTMENT_ANIMATION_DURATION,
+      NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION);
+  }
+
+  private long getTiltAnimationDuration(double tilt) {
+    double tiltDiff = Math.abs(mapboxMap.getCameraPosition().tilt - tilt);
+    return (long) MathUtils.clamp(
+      500 * tiltDiff,
+      NAVIGATION_MIN_CAMERA_TILT_ADJUSTMENT_ANIMATION_DURATION,
+      NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION);
   }
 }

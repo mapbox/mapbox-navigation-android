@@ -208,6 +208,26 @@ public final class NavigationConstants {
    */
   static final int NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG = 1500;
 
+  /**
+   * Defines the minimum zoom level of the displayed map.
+   */
+  public static final double NAVIGATION_MINIMUM_MAP_ZOOM = 7d;
+
+  /**
+   * Maximum duration of the zoom/tilt adjustment animation while tracking.
+   */
+  public static final long NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION = 1500L;
+
+  /**
+   * Minimum duration of the zoom adjustment animation while tracking.
+   */
+  public static final long NAVIGATION_MIN_CAMERA_ZOOM_ADJUSTMENT_ANIMATION_DURATION = 300L;
+
+  /**
+   * Minimum duration of the tilt adjustment animation while tracking.
+   */
+  public static final long NAVIGATION_MIN_CAMERA_TILT_ADJUSTMENT_ANIMATION_DURATION = 750L;
+
   static final String NON_NULL_APPLICATION_CONTEXT_REQUIRED = "Non-null application context required.";
 
   public static final Float[] WAYNAME_OFFSET = {0.0f, 40.0f};
