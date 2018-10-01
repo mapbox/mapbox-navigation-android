@@ -144,7 +144,7 @@ public class NavigationHelper {
    * @param stepIndex       to get current step
    * @return list of {@link Point} representing the current step
    */
-  static List<Point> decodeStepPoints(DirectionsRoute directionsRoute, List<Point> currentPoints,
+  public static List<Point> decodeStepPoints(DirectionsRoute directionsRoute, List<Point> currentPoints,
                                       int legIndex, int stepIndex) {
     List<RouteLeg> legs = directionsRoute.legs();
     if (hasInvalidLegs(legs)) {
