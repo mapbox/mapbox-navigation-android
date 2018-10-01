@@ -6,11 +6,13 @@ import android.support.v4.util.Pair;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.VoiceInstruction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -102,6 +104,39 @@ public abstract class RouteProgress {
       fractionRemaining = (float) (distanceTraveled() / directionsRoute().distance());
     }
     return fractionRemaining;
+  }
+
+  public List<RouteLeg> remainingRouteLegs() {
+    List<RouteLeg> legs = directionsRoute().legs();
+    return legs.subList(legIndex() + 1, legs.size());
+  }
+
+  public List<LegStep> remainingLegSteps() {
+    List<LegStep> remainingSteps = new ArrayList<>();
+    RouteLegProgress currentLegProgress = currentLegProgress();
+
+    if (currentLegProgress == null) {
+      return remainingSteps;
+    }
+
+    // add all steps on current leg
+    int curStepIndex = currentLegProgress.stepIndex();
+    List<LegStep> curLegSteps = currentLegProgress().routeLeg().steps();
+    if (curLegSteps == null) {
+      return remainingSteps;
+    }
+    curLegSteps = curLegSteps.subList(curStepIndex, curLegSteps.size() - 1);
+    remainingSteps.addAll(curLegSteps);
+
+    // add all steps from remaining legs
+    List<RouteLeg> remainingLegs = remainingRouteLegs();
+    for (RouteLeg leg : remainingLegs) {
+      List<LegStep> legSteps = leg.steps();
+      legSteps.remove(legSteps.size() - 1);
+      remainingSteps.addAll(legSteps);
+    }
+
+    return remainingSteps;
   }
 
   /**
