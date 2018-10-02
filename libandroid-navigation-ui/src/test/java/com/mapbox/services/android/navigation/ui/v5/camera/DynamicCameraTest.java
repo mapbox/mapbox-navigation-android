@@ -78,7 +78,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double tilt = cameraEngine.tilt(routeInformation);
 
-    assertEquals(50d, tilt);
+    assertEquals(60d, tilt);
   }
 
   @Test
@@ -89,7 +89,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double tilt = cameraEngine.tilt(routeInformation);
 
-    assertEquals(40d, tilt);
+    assertEquals(45d, tilt);
   }
 
   @Test
@@ -100,7 +100,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double tilt = cameraEngine.tilt(routeInformation);
 
-    assertEquals(35d, tilt);
+    assertEquals(45d, tilt);
   }
 
   @Test
