@@ -18,6 +18,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerOptions;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
@@ -50,6 +51,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MAPBOX_LOCATION_SOURCE;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MAPBOX_WAYNAME_LAYER;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MINIMUM_MAP_ZOOM;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.WAYNAME_OFFSET;
 
 /**
@@ -468,7 +470,12 @@ public class NavigationMapboxMap {
     Context context = mapView.getContext();
     int locationLayerStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context,
       R.attr.navigationViewLocationLayerStyle);
-    locationLayer = new LocationLayerPlugin(mapView, map, null, locationLayerStyleRes);
+
+    LocationLayerOptions locationLayerOptions =
+      LocationLayerOptions.createFromAttributes(context, locationLayerStyleRes);
+    locationLayerOptions = locationLayerOptions.toBuilder().minZoom(NAVIGATION_MINIMUM_MAP_ZOOM).build();
+
+    locationLayer = new LocationLayerPlugin(mapView, map, null, locationLayerOptions);
     locationLayer.setRenderMode(RenderMode.GPS);
   }
 
@@ -477,7 +484,7 @@ public class NavigationMapboxMap {
   }
 
   private void initializeCamera(MapboxMap map) {
-    mapCamera = new NavigationCamera(map);
+    mapCamera = new NavigationCamera(map, locationLayer);
   }
 
   private void initializeWayname(MapView mapView, MapboxMap mapboxMap,

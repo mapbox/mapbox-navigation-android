@@ -41,19 +41,6 @@ public class DynamicCameraTest extends BaseTest {
   }
 
   @Test
-  public void onInformationFromRoute_engineCreatesCorrectTarget() throws Exception {
-    DynamicCamera cameraEngine = buildDynamicCamera();
-    RouteInformation routeInformation = RouteInformation.create(buildDirectionsRoute(), null, null);
-
-    Point target = cameraEngine.target(routeInformation);
-
-    double lng = target.longitude();
-    assertEquals(-122.416686, lng);
-    double lat = target.latitude();
-    assertEquals(37.783425, lat);
-  }
-
-  @Test
   public void onInformationFromRoute_engineCreatesCorrectZoom() throws Exception {
     DynamicCamera cameraEngine = buildDynamicCamera();
     RouteInformation routeInformation = RouteInformation.create(buildDirectionsRoute(), null, null);
@@ -81,20 +68,6 @@ public class DynamicCameraTest extends BaseTest {
     double bearing = cameraEngine.bearing(routeInformation);
 
     assertEquals(-99, Math.round(bearing));
-  }
-
-  @Test
-  public void onInformationFromLocationAndProgress_engineCreatesCorrectTarget() throws Exception {
-    DynamicCamera cameraEngine = buildDynamicCamera();
-    RouteInformation routeInformation = RouteInformation.create(null,
-      buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(null));
-
-    Point target = cameraEngine.target(routeInformation);
-
-    double lng = target.longitude();
-    assertEquals(-77.0339782574523, lng);
-    double lat = target.latitude();
-    assertEquals(38.89993519985637, lat);
   }
 
   @Test

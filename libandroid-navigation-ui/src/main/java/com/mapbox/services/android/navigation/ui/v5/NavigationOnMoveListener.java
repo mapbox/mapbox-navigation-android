@@ -16,7 +16,9 @@ class NavigationOnMoveListener implements MapboxMap.OnMoveListener {
 
   @Override
   public void onMoveBegin(MoveGestureDetector detector) {
-    // Intentionally empty
+    if (summaryBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+      navigationPresenter.onMapScroll();
+    }
   }
 
   @Override
@@ -26,8 +28,6 @@ class NavigationOnMoveListener implements MapboxMap.OnMoveListener {
 
   @Override
   public void onMoveEnd(MoveGestureDetector detector) {
-    if (summaryBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
-      navigationPresenter.onMapScroll();
-    }
+    // Intentionally empty
   }
 }

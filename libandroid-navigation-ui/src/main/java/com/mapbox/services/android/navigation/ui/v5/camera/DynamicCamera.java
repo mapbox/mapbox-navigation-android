@@ -23,7 +23,6 @@ public class DynamicCamera extends SimpleCamera {
   private static final double MIN_CAMERA_TILT = 35d;
   private static final double MAX_CAMERA_ZOOM = 16d;
   private static final double MIN_CAMERA_ZOOM = 12d;
-  private static final Point DEFAULT_TARGET = Point.fromLngLat(0d, 0d);
 
   private MapboxMap mapboxMap;
   private LegStep currentStep;
@@ -35,23 +34,6 @@ public class DynamicCamera extends SimpleCamera {
 
   public DynamicCamera(@NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-  }
-
-  @Override
-  public Point target(RouteInformation routeInformation) {
-    if (isShutdown) {
-      return DEFAULT_TARGET;
-    }
-
-    if (routeInformation.location() != null) {
-      Location target = routeInformation.location();
-      return Point.fromLngLat(target.getLongitude(), target.getLatitude());
-    } else if (routeInformation.route() != null) {
-      return super.target(routeInformation);
-    }
-    // Without route or location info, return the current position
-    LatLng currentTarget = mapboxMap.getCameraPosition().target;
-    return Point.fromLngLat(currentTarget.getLongitude(), currentTarget.getLongitude());
   }
 
   @Override

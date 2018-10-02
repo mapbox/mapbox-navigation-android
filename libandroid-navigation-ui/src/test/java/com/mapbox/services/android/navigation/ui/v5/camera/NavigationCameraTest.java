@@ -1,6 +1,8 @@
 package com.mapbox.services.android.navigation.ui.v5.camera;
 
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
+import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 
@@ -24,20 +26,34 @@ public class NavigationCameraTest {
 
   @Test
   public void setTrackingEnabled_trackingIsEnabled() throws Exception {
-    NavigationCamera camera = buildCamera();
+    LocationLayerPlugin locationLayerPlugin = mock(LocationLayerPlugin.class);
+    NavigationCamera camera = buildCamera(locationLayerPlugin);
+
+    verify(locationLayerPlugin, times(1)).setCameraMode(CameraMode.TRACKING_GPS);
+    verify(locationLayerPlugin, times(0)).setCameraMode(CameraMode.NONE);
 
     camera.updateCameraTrackingLocation(false);
+    verify(locationLayerPlugin, times(1)).setCameraMode(CameraMode.NONE);
+
     camera.updateCameraTrackingLocation(true);
+    verify(locationLayerPlugin, times(2)).setCameraMode(CameraMode.TRACKING_GPS);
 
     assertTrue(camera.isTrackingEnabled());
   }
 
   @Test
   public void setTrackingDisabled_trackingIsDisabled() throws Exception {
-    NavigationCamera camera = buildCamera();
+    LocationLayerPlugin locationLayerPlugin = mock(LocationLayerPlugin.class);
+    NavigationCamera camera = buildCamera(locationLayerPlugin);
+
+    verify(locationLayerPlugin, times(1)).setCameraMode(CameraMode.TRACKING_GPS);
+    verify(locationLayerPlugin, times(0)).setCameraMode(CameraMode.NONE);
 
     camera.updateCameraTrackingLocation(true);
+    verify(locationLayerPlugin, times(2)).setCameraMode(CameraMode.TRACKING_GPS);
+
     camera.updateCameraTrackingLocation(false);
+    verify(locationLayerPlugin, times(1)).setCameraMode(CameraMode.NONE);
 
     assertFalse(camera.isTrackingEnabled());
   }
@@ -75,10 +91,14 @@ public class NavigationCameraTest {
   }
 
   private NavigationCamera buildCamera() {
-    return new NavigationCamera(mock(MapboxMap.class), mock(MapboxNavigation.class));
+    return new NavigationCamera(mock(MapboxMap.class), mock(MapboxNavigation.class), mock(LocationLayerPlugin.class));
+  }
+
+  private NavigationCamera buildCamera(LocationLayerPlugin locationLayerPlugin) {
+    return new NavigationCamera(mock(MapboxMap.class), mock(MapboxNavigation.class), locationLayerPlugin);
   }
 
   private NavigationCamera buildCamera(MapboxNavigation navigation, ProgressChangeListener listener) {
-    return new NavigationCamera(mock(MapboxMap.class), navigation, listener);
+    return new NavigationCamera(mock(MapboxMap.class), navigation, listener, mock(LocationLayerPlugin.class));
   }
 }
