@@ -61,16 +61,6 @@ public class DynamicCameraTest extends BaseTest {
   }
 
   @Test
-  public void onInformationFromRoute_engineCreatesCorrectBearing() throws Exception {
-    DynamicCamera cameraEngine = buildDynamicCamera();
-    RouteInformation routeInformation = RouteInformation.create(buildDirectionsRoute(), null, null);
-
-    double bearing = cameraEngine.bearing(routeInformation);
-
-    assertEquals(-99, Math.round(bearing));
-  }
-
-  @Test
   public void onHighDistanceRemaining_engineCreatesCorrectTilt() throws Exception {
     DynamicCamera cameraEngine = buildDynamicCamera();
     RouteInformation routeInformation = RouteInformation.create(null,
@@ -101,17 +91,6 @@ public class DynamicCameraTest extends BaseTest {
     double tilt = cameraEngine.tilt(routeInformation);
 
     assertEquals(45d, tilt);
-  }
-
-  @Test
-  public void onInformationFromLocationAndProgress_engineCreatesCorrectBearing() throws Exception {
-    DynamicCamera cameraEngine = buildDynamicCamera();
-    RouteInformation routeInformation = RouteInformation.create(null,
-      buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(null));
-
-    double bearing = cameraEngine.bearing(routeInformation);
-
-    assertEquals(100f, bearing, DELTA);
   }
 
   @Test

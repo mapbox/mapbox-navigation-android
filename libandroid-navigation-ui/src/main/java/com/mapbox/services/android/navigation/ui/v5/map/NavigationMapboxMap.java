@@ -192,8 +192,10 @@ public class NavigationMapboxMap {
     boolean isVisible = mapWayname.isVisible();
     String waynameText = mapWayname.retrieveWayname();
     boolean isCameraTracking = mapCamera.isTrackingEnabled();
+    @NavigationCamera.TrackingMode
+    int cameraTrackingMode = mapCamera.getCameraTrackingMode();
     NavigationMapboxMapInstanceState instanceState = new NavigationMapboxMapInstanceState(
-      isVisible, waynameText, isCameraTracking
+      isVisible, waynameText, isCameraTracking, cameraTrackingMode
     );
     outState.putParcelable(key, instanceState);
   }
@@ -215,8 +217,8 @@ public class NavigationMapboxMap {
     if (isVisible) {
       updateWaynameView(instanceState.retrieveWayname());
     }
-    boolean cameraTracking = instanceState.isCameraTracking();
-    updateCameraTrackingEnabled(cameraTracking);
+    updateCameraTrackingEnabled(instanceState.isCameraTracking());
+    updateCameraTrackingMode(instanceState.getCameraTrackingMode());
   }
 
   /**
@@ -294,6 +296,16 @@ public class NavigationMapboxMap {
    */
   public void updateCameraTrackingEnabled(boolean isEnabled) {
     mapCamera.updateCameraTrackingLocation(isEnabled);
+  }
+
+  /**
+   * Updates the {@link NavigationCamera.TrackingMode} that will be used when camera tracking is enabled.
+   *
+   * @param trackingMode the tracking mode
+   * @since 0.21.0
+   */
+  public void updateCameraTrackingMode(@NavigationCamera.TrackingMode int trackingMode) {
+    mapCamera.updateCameraTrackingMode(trackingMode);
   }
 
   /**
@@ -456,9 +468,19 @@ public class NavigationMapboxMap {
     mapboxMap.addOnMoveListener(onMoveListener);
   }
 
+  public void addOnFlingListener(MapboxMap.OnFlingListener onFlingListener) {
+    mapboxMap.addOnFlingListener(onFlingListener);
+  }
+
   public void removeOnMoveListener(MapboxMap.OnMoveListener onMoveListener) {
     if (onMoveListener != null) {
       mapboxMap.removeOnMoveListener(onMoveListener);
+    }
+  }
+
+  public void removeOnFlingListener(MapboxMap.OnFlingListener onFlingListener) {
+    if (onFlingListener != null) {
+      mapboxMap.removeOnFlingListener(onFlingListener);
     }
   }
 

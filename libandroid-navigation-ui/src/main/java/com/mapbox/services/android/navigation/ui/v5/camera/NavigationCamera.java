@@ -4,6 +4,7 @@ import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.location.Location;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 
@@ -24,8 +25,12 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.MathUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+
+import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MIN_CAMERA_TILT_ADJUSTMENT_ANIMATION_DURATION;
@@ -59,6 +64,28 @@ public class NavigationCamera implements LifecycleObserver {
       }
     }
   };
+
+  @Retention(RetentionPolicy.SOURCE)
+  @IntDef( {NAVIGATION_TRACKING_MODE_GPS, NAVIGATION_TRACKING_MODE_NORTH})
+  public @interface TrackingMode {
+  }
+
+  /**
+   * Camera tracks the user location, with bearing provided by the location update.
+   * <p>
+   * Equivalent of the {@link CameraMode#TRACKING_GPS}.
+   */
+  public static final int NAVIGATION_TRACKING_MODE_GPS = 0;
+
+  /**
+   * Camera tracks the user location, with bearing always set to north (0).
+   * <p>
+   * Equivalent of the {@link CameraMode#TRACKING_GPS_NORTH}.
+   */
+  public static final int NAVIGATION_TRACKING_MODE_NORTH = 1;
+
+  @TrackingMode
+  private int trackingCameraMode = NAVIGATION_TRACKING_MODE_GPS;
 
   /**
    * Creates an instance of {@link NavigationCamera}.
@@ -139,6 +166,17 @@ public class NavigationCamera implements LifecycleObserver {
   }
 
   /**
+   * Updates the {@link TrackingMode} that's going to be used when camera tracking is enabled.
+   *
+   * @param trackingMode the tracking mode
+   * @since 0.21.0
+   */
+  public void updateCameraTrackingMode(@TrackingMode int trackingMode) {
+    trackingCameraMode = trackingMode;
+    setCameraMode();
+  }
+
+  /**
    * Getter for current state of tracking.
    *
    * @return true if tracking, false if not
@@ -146,6 +184,17 @@ public class NavigationCamera implements LifecycleObserver {
    */
   public boolean isTrackingEnabled() {
     return trackingEnabled;
+  }
+
+  /**
+   * Getter for {@link TrackingMode} that's being used when tracking is enabled.
+   *
+   * @return tracking mode
+   * @since 0.21.0
+   */
+  @TrackingMode
+  public int getCameraTrackingMode() {
+    return trackingCameraMode;
   }
 
   /**
@@ -245,21 +294,15 @@ public class NavigationCamera implements LifecycleObserver {
 
   private void setTrackingEnabled(boolean trackingEnabled) {
     this.trackingEnabled = trackingEnabled;
-    if (trackingEnabled) {
-      locationLayer.setCameraMode(CameraMode.TRACKING_GPS);
-    } else {
-      locationLayer.setCameraMode(CameraMode.NONE);
-    }
+    setCameraMode();
   }
 
   private void animateCameraForRouteOverview(RouteInformation routeInformation, int[] padding) {
     Camera cameraEngine = navigation.getCameraEngine();
     List<Point> routePoints = cameraEngine.overview(routeInformation);
-    boolean invalidPoints = routePoints.isEmpty();
-    if (invalidPoints) {
-      return;
+    if (!routePoints.isEmpty()) {
+      animateMapboxMapForRouteOverview(padding, routePoints);
     }
-    animateMapboxMapForRouteOverview(padding, routePoints);
   }
 
   private void animateMapboxMapForRouteOverview(int[] padding, List<Point> routePoints) {
@@ -295,6 +338,26 @@ public class NavigationCamera implements LifecycleObserver {
     return new LatLngBounds.Builder()
       .includes(latLngs)
       .build();
+  }
+
+  private void setCameraMode() {
+    @CameraMode.Mode int mode;
+    if (trackingEnabled) {
+      if (trackingCameraMode == NAVIGATION_TRACKING_MODE_GPS) {
+        mode = CameraMode.TRACKING_GPS;
+      } else if (trackingCameraMode == NAVIGATION_TRACKING_MODE_NORTH) {
+        mode = CameraMode.TRACKING_GPS_NORTH;
+      } else {
+        mode = CameraMode.NONE;
+        Timber.e("Using unsupported camera tracking mode - %d.", trackingCameraMode);
+      }
+    } else {
+      mode = CameraMode.NONE;
+    }
+
+    if (mode != locationLayer.getCameraMode()) {
+      locationLayer.setCameraMode(mode);
+    }
   }
 
   /**
