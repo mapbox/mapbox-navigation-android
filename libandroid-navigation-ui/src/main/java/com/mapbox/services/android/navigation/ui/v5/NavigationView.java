@@ -78,6 +78,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private NavigationMapboxMap navigationMap;
   private OnNavigationReadyCallback onNavigationReadyCallback;
   private MapboxMap.OnMoveListener onMoveListener;
+  private MapboxMap.OnFlingListener onFlingListener;
   private NavigationMapboxMapInstanceState mapInstanceState;
   private boolean isMapInitialized;
   private boolean isSubscribed;
@@ -171,6 +172,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void onDestroy() {
     if (navigationMap != null) {
       navigationMap.removeOnMoveListener(onMoveListener);
+      navigationMap.removeOnFlingListener(onFlingListener);
     }
     navigationViewEventDispatcher.onDestroy(navigationViewModel.retrieveNavigation());
     shutdown();
@@ -372,7 +374,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     navigationViewModel.stopNavigation();
   }
 
-
   /**
    * Should be called after {@link NavigationView#onCreate(Bundle)}.
    * <p>
@@ -553,6 +554,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     if (!isSubscribed) {
       initializeClickListeners();
       initializeOnMoveListener();
+      initializeOnFlingListener();
       subscribeViewModels();
     }
   }
@@ -566,6 +568,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private void initializeOnMoveListener() {
     onMoveListener = new NavigationOnMoveListener(navigationPresenter, summaryBehavior);
     navigationMap.addOnMoveListener(onMoveListener);
+  }
+
+  private void initializeOnFlingListener() {
+    onFlingListener = new NavigationOnFlingListener(navigationPresenter, summaryBehavior);
+    navigationMap.addOnFlingListener(onFlingListener);
   }
 
   private void establish(NavigationViewOptions options) {

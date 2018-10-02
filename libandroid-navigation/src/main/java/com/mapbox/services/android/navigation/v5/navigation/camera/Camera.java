@@ -5,20 +5,15 @@ import com.mapbox.geojson.Point;
 import java.util.List;
 
 /**
- * This class handles calculating all properties necessary to configure the camera position while
- * routing. The {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation} uses
- * a {@link SimpleCamera} by default. If you would like to customize the camera position, create a
+ * This class handles calculating camera's zoom and tilt properties while routing.
+ * The {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation} uses
+ * a {@link SimpleCamera} by default. If you would like to customize the camera properties, create a
  * concrete implementation of this class or subclass {@link SimpleCamera} and update
  * {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation#setCameraEngine(Camera)}.
  *
  * @since 0.10.0
  */
 public abstract class Camera {
-
-  /**
-   * Direction that the camera is pointing in, in degrees clockwise from north.
-   */
-  public abstract double bearing(RouteInformation routeInformation);
 
   /**
    * The angle, in degrees, of the camera angle from the nadir (directly facing the Earth).
@@ -32,6 +27,8 @@ public abstract class Camera {
    */
   public abstract double zoom(RouteInformation routeInformation);
 
-
+  /**
+   * Return a list of route coordinates that should be visible when creating the route's overview.
+   */
   public abstract List<Point> overview(RouteInformation routeInformation);
 }

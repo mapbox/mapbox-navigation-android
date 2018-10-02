@@ -4,7 +4,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
-import com.mapbox.turf.TurfMeasurement;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,19 +20,7 @@ public class SimpleCamera extends Camera {
   protected static final double DEFAULT_ZOOM = 15d;
 
   private List<Point> routeCoordinates = new ArrayList<>();
-  private double initialBearing;
   private DirectionsRoute initialRoute;
-
-  @Override
-  public double bearing(RouteInformation routeInformation) {
-    if (routeInformation.route() != null) {
-      setupLineStringAndBearing(routeInformation.route());
-      return initialBearing;
-    } else if (routeInformation.location() != null) {
-      return routeInformation.location().getBearing();
-    }
-    return 0;
-  }
 
   @Override
   public double tilt(RouteInformation routeInformation) {
@@ -63,15 +50,11 @@ public class SimpleCamera extends Camera {
   }
 
   private void setupLineStringAndBearing(DirectionsRoute route) {
-    if (initialRoute != null && route.equals(initialRoute)) {
+    if (route.equals(initialRoute)) {
       return; //no need to recalculate these values
     }
     initialRoute = route;
     routeCoordinates = generateRouteCoordinates(route);
-    initialBearing = TurfMeasurement.bearing(
-      Point.fromLngLat(routeCoordinates.get(0).longitude(), routeCoordinates.get(0).latitude()),
-      Point.fromLngLat(routeCoordinates.get(1).longitude(), routeCoordinates.get(1).latitude())
-    );
   }
 
   private List<Point> generateRouteCoordinates(DirectionsRoute route) {
