@@ -69,6 +69,10 @@ class MapWayname {
     isAutoQueryEnabled = isEnabled;
   }
 
+  boolean isAutoQueryEnabled() {
+    return isAutoQueryEnabled;
+  }
+
   boolean isVisible() {
     return isVisible;
   }
