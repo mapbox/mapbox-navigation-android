@@ -110,7 +110,8 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
     } else {
       originMarker = null;
       destinationMarker = null;
-      navigationMapRoute.removeRoute();
+      navigationMapRoute.updateRouteVisibilityTo(false);
+      navigationMapRoute.updateRouteArrowVisibilityTo(false);
     }
   }
 

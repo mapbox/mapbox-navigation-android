@@ -416,7 +416,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   }
 
   private void resetMapAfterNavigation() {
-    navigationMap.removeRoute();
+    navigationMap.updateRouteVisibility(false);
     navigationMap.clearMarkers();
     navigation.stopNavigation();
     moveCameraOverhead();

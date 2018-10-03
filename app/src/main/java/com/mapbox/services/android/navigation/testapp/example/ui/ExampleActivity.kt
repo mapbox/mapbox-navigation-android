@@ -221,7 +221,7 @@ class ExampleActivity : HistoryActivity(), ExampleView {
   }
 
   override fun removeRoute() {
-    map?.removeRoute()
+    map?.updateRouteVisibility(false)
   }
 
   override fun clearMarkers() {
@@ -260,7 +260,7 @@ class ExampleActivity : HistoryActivity(), ExampleView {
   }
 
   override fun showAlternativeRoutes(alternativesVisible: Boolean) {
-    map?.showAlternativeRoutes(false)
+    map?.showAlternativeRoutes(alternativesVisible)
   }
 
   override fun updateLocationRenderMode(renderMode: Int) {

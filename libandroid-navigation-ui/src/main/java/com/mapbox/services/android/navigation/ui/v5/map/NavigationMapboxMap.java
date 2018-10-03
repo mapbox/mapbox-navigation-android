@@ -259,11 +259,16 @@ public class NavigationMapboxMap {
   }
 
   /**
-   * Will remove the drawn route displayed on the map.  Does nothing
-   * if no route is drawn.
+   * This method will update the route visibility.
+   * <p>
+   * The visibility will include the main route, alternatives,
+   * and the upcoming maneuver arrow.
+   *
+   * @param isVisible true to show, false otherwise.
    */
-  public void removeRoute() {
-    mapRoute.removeRoute();
+  public void updateRouteVisibility(boolean isVisible) {
+    mapRoute.updateRouteVisibilityTo(isVisible);
+    mapRoute.updateRouteArrowVisibilityTo(isVisible);
   }
 
   /**
