@@ -77,8 +77,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private NavigationViewModel navigationViewModel;
   private NavigationMapboxMap navigationMap;
   private OnNavigationReadyCallback onNavigationReadyCallback;
-  private MapboxMap.OnMoveListener onMoveListener;
-  private MapboxMap.OnFlingListener onFlingListener;
+  private NavigationOnCameraTrackingChangedListener onTrackingChangedListener;
   private NavigationMapboxMapInstanceState mapInstanceState;
   private boolean isMapInitialized;
   private boolean isSubscribed;
@@ -170,11 +169,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * In a {@link android.app.Fragment}, this should be in {@link Fragment#onDestroyView()}.
    */
   public void onDestroy() {
-    if (navigationMap != null) {
-      navigationMap.removeOnMoveListener(onMoveListener);
-      navigationMap.removeOnFlingListener(onFlingListener);
-    }
-    navigationViewEventDispatcher.onDestroy(navigationViewModel.retrieveNavigation());
     shutdown();
   }
 
@@ -553,8 +547,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
     if (!isSubscribed) {
       initializeClickListeners();
-      initializeOnMoveListener();
-      initializeOnFlingListener();
+      initializeOnCameraTrackingChangedListener();
       subscribeViewModels();
     }
   }
@@ -565,19 +558,13 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     routeOverviewBtn.setOnClickListener(new RouteOverviewBtnClickListener(navigationPresenter));
   }
 
-  private void initializeOnMoveListener() {
-    onMoveListener = new NavigationOnMoveListener(navigationPresenter, summaryBehavior);
-    navigationMap.addOnMoveListener(onMoveListener);
-  }
-
-  private void initializeOnFlingListener() {
-    onFlingListener = new NavigationOnFlingListener(navigationPresenter, summaryBehavior);
-    navigationMap.addOnFlingListener(onFlingListener);
+  private void initializeOnCameraTrackingChangedListener() {
+    onTrackingChangedListener = new NavigationOnCameraTrackingChangedListener(navigationPresenter, summaryBehavior);
+    navigationMap.addOnCameraTrackingChangedListener(onTrackingChangedListener);
   }
 
   private void establish(NavigationViewOptions options) {
     LocaleUtils localeUtils = new LocaleUtils();
-
     establishDistanceFormatter(localeUtils, options);
     establishTimeFormat(options);
   }
@@ -640,6 +627,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void shutdown() {
+    if (navigationMap != null) {
+      navigationMap.removeOnCameraTrackingChangedListener(onTrackingChangedListener);
+    }
+    navigationViewEventDispatcher.onDestroy(navigationViewModel.retrieveNavigation());
     mapView.onDestroy();
     navigationViewModel.onDestroy(isChangingConfigurations());
     ImageCoordinator.getInstance().shutdown();

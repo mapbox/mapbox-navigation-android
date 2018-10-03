@@ -20,6 +20,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerOptions;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
+import com.mapbox.mapboxsdk.plugins.locationlayer.OnCameraTrackingChangedListener;
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
@@ -464,24 +465,26 @@ public class NavigationMapboxMap {
     return layerInteractor.isLayerVisible(TRAFFIC_LAYER_ID);
   }
 
-  public void addOnMoveListener(@NonNull MapboxMap.OnMoveListener onMoveListener) {
-    mapboxMap.addOnMoveListener(onMoveListener);
+  /**
+   * Add a {@link OnCameraTrackingChangedListener} to the {@link LocationLayerPlugin} that is
+   * wrapped within this class.
+   * <p>
+   * This listener will fire any time camera tracking is dismissed or the camera mode is updated.
+   *
+   * @param listener to be added
+   */
+  public void addOnCameraTrackingChangedListener(OnCameraTrackingChangedListener listener) {
+    locationLayer.addOnCameraTrackingChangedListener(listener);
   }
 
-  public void addOnFlingListener(MapboxMap.OnFlingListener onFlingListener) {
-    mapboxMap.addOnFlingListener(onFlingListener);
-  }
-
-  public void removeOnMoveListener(MapboxMap.OnMoveListener onMoveListener) {
-    if (onMoveListener != null) {
-      mapboxMap.removeOnMoveListener(onMoveListener);
-    }
-  }
-
-  public void removeOnFlingListener(MapboxMap.OnFlingListener onFlingListener) {
-    if (onFlingListener != null) {
-      mapboxMap.removeOnFlingListener(onFlingListener);
-    }
+  /**
+   * Remove a {@link OnCameraTrackingChangedListener} from the {@link LocationLayerPlugin} that is
+   * wrapped within this class.
+   *
+   * @param listener to be removed
+   */
+  public void removeOnCameraTrackingChangedListener(OnCameraTrackingChangedListener listener) {
+    locationLayer.removeOnCameraTrackingChangedListener(listener);
   }
 
   public void takeScreenshot(NavigationSnapshotReadyCallback navigationSnapshotReadyCallback) {

@@ -27,7 +27,7 @@ class NavigationPresenter {
     view.hideRecenterBtn();
   }
 
-  void onMapScroll() {
+  void onCameraTrackingDismissed() {
     if (!view.isSummaryBottomSheetHidden()) {
       view.setSummaryBehaviorHideable(true);
       view.setSummaryBehaviorState(BottomSheetBehavior.STATE_HIDDEN);
