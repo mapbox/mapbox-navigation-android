@@ -1,24 +1,26 @@
 package com.mapbox.services.android.navigation.testapp.activity.notification;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL;
-
 public class CustomNavigationNotification implements NavigationNotification {
 
   private static final int CUSTOM_NOTIFICATION_ID = 91234821;
   private static final String STOP_NAVIGATION_ACTION = "stop_navigation_action";
+  private static final String CUSTOM_CHANNEL_ID = "custom_channel_id";
+  private static final String CUSTOM_CHANNEL_NAME = "custom_channel_name";
 
   private final Notification customNotification;
   private final NotificationCompat.Builder customNotificationBuilder;
@@ -29,7 +31,14 @@ public class CustomNavigationNotification implements NavigationNotification {
   public CustomNavigationNotification(Context applicationContext) {
     notificationManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
-    customNotificationBuilder = new NotificationCompat.Builder(applicationContext, NAVIGATION_NOTIFICATION_CHANNEL)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      NotificationChannel notificationChannel = new NotificationChannel(
+        CUSTOM_CHANNEL_ID, CUSTOM_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW
+      );
+      notificationManager.createNotificationChannel(notificationChannel);
+    }
+
+    customNotificationBuilder = new NotificationCompat.Builder(applicationContext, CUSTOM_CHANNEL_ID)
       .setSmallIcon(R.drawable.ic_navigation)
       .setContentTitle("Custom Navigation Notification")
       .setContentText("Display your own content here!")
