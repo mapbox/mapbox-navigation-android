@@ -47,6 +47,8 @@
     <string name="default_locale" translatable="false">default_for_device</string>
     <string name="default_unit_type" translatable="false">default_for_device</string>
     <string name="current_night_mode" translatable="false">current_night_mode</string>
+    <string name="was_in_tunnel" translatable="false">was_in_tunnel</string>
+    <string name="was_navigation_stopped" translatable="false">was_navigation_stopped</string>
 
     <string name="error_route_not_available">Current route is not available</string>
     <string name="error_select_longer_route">Please select a longer route</string>

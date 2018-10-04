@@ -8,7 +8,6 @@ import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.content.res.AppCompatResources;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -86,7 +85,6 @@ public class ThemeSwitcher {
    */
   static void setTheme(Context context, AttributeSet attrs) {
     boolean nightModeEnabled = isNightModeEnabled(context);
-    updatePreferencesDarkEnabled(context, nightModeEnabled);
 
     if (shouldSetThemeFromPreferences(context)) {
       int prefLightTheme = retrieveThemeResIdFromPreferences(context, NavigationConstants.NAVIGATION_VIEW_LIGHT_THEME);
@@ -114,23 +112,10 @@ public class ThemeSwitcher {
 
   /**
    * Returns true if the current UI_MODE_NIGHT is enabled, false otherwise.
-   *
-   * @param context to retrieve the current configuration
    */
   private static boolean isNightModeEnabled(Context context) {
-    if (isNightModeFollowSystem()) {
-      AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
-    }
-    int uiMode = retrieveCurrentUiMode(context);
-    return uiMode == Configuration.UI_MODE_NIGHT_YES;
-  }
-
-  /**
-   * Returns true if the current UI_MODE_NIGHT is undefined, false otherwise.
-   */
-  private static boolean isNightModeFollowSystem() {
-    int nightMode = AppCompatDelegate.getDefaultNightMode();
-    return nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+    int currentNightMode = retrieveCurrentUiMode(context);
+    return currentNightMode == Configuration.UI_MODE_NIGHT_YES;
   }
 
   private static int retrieveCurrentUiMode(Context context) {
@@ -143,13 +128,6 @@ public class ThemeSwitcher {
     TypedValue outValue = new TypedValue();
     context.getTheme().resolveAttribute(resId, outValue, true);
     return outValue;
-  }
-
-  private static void updatePreferencesDarkEnabled(Context context, boolean darkThemeEnabled) {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    SharedPreferences.Editor editor = preferences.edit();
-    editor.putBoolean(context.getString(R.string.dark_theme_enabled), darkThemeEnabled);
-    editor.apply();
   }
 
   private static boolean shouldSetThemeFromPreferences(Context context) {
