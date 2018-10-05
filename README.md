@@ -36,7 +36,7 @@ implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.20.0'
 ```
 **Note**:  When using the UI library, you _do not_ need to add both dependencies.  The UI library will automatically pull in `libandroid-navigation`.
 
-**Important Note**: With this release, you _must_ include the following snippet in your project’s `build.gradle`:
+**Important Note**: You _must_ include the following snippet in your top project-level `build.gradle` file:
 ```
 repositories {
     maven { url 'https://mapbox.bintray.com/mapbox' }
