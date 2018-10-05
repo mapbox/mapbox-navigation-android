@@ -2,6 +2,17 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.21.0 - October 5, 2018
+
+* Add CustomNavigationNotification notification channel [#1388](https://github.com/mapbox/mapbox-navigation-android/pull/1388)
+* Add OnCameraTrackingChangedListener to NavigationMapboxMap [#1386](https://github.com/mapbox/mapbox-navigation-android/pull/1386)
+* Bump mapbox-android-plugin-locationlayer version to 0.10.0 [#1382](https://github.com/mapbox/mapbox-navigation-android/pull/1382)
+* Camera tracking modes selection with GPS and North as options [#1377](https://github.com/mapbox/mapbox-navigation-android/pull/1377)
+* Match min and max pitch values with iOS [#1379](https://github.com/mapbox/mapbox-navigation-android/pull/1379)
+* Migrate camera tracking logic to the LocationLayerPlugin [#1372](https://github.com/mapbox/mapbox-navigation-android/pull/1372)
+* CP: Use tracking animation multiplier 2x [#1347](https://github.com/mapbox/mapbox-navigation-android/pull/1347)
+* Fix multi on click listener NPE in recenter button [#1374](https://github.com/mapbox/mapbox-navigation-android/pull/1374)
+
 ### v0.20.0 - September 30, 2018
 
 * Update Navigator to 3.1.3 [#1364](https://github.com/mapbox/mapbox-navigation-android/pull/1364)
