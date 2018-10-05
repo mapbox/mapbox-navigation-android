@@ -9,11 +9,14 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.google.gson.Gson;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.navigator.RouterResult;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -718,6 +721,15 @@ public class MapboxNavigation implements ServiceConnection {
     mapboxNavigator.toggleHistory(isEnabled);
   }
 
+  public void initializeOfflineData(String tilesDirPath, String translationsDirPath) {
+    mapboxNavigator.configureRouter(tilesDirPath, translationsDirPath);
+  }
+
+  @Nullable
+  public DirectionsRoute findOfflineRouteFor(@NonNull String directionsUri) {
+    return retrieveOfflineRouteFor(directionsUri);
+  }
+
   @Override
   public void onServiceConnected(ComponentName name, IBinder service) {
     Timber.d("Connected to service.");
@@ -876,5 +888,31 @@ public class MapboxNavigation implements ServiceConnection {
 
   private boolean isServiceAvailable() {
     return navigationService != null && isBound;
+  }
+
+  @Nullable
+  private DirectionsRoute retrieveOfflineRouteFor(@NonNull String directionsUri) {
+    RouterResult response = mapboxNavigator.retrieveRouteFor(directionsUri);
+    boolean success = response.getSuccess();
+    String jsonResponse = response.getJson();
+    if (checkRoute(success, jsonResponse)) {
+      return null;
+    }
+    return obtainRouteFor(jsonResponse);
+  }
+
+  private boolean checkRoute(boolean isSuccess, String json) {
+    if (!isSuccess) {
+      Gson gson = new Gson();
+      OfflineError error = gson.fromJson(json, OfflineError.class);
+      Timber.e("Error occurred fetching offline route: %s - Code: %d", error.getError(), error.getErrorCode());
+      return true;
+    }
+    return false;
+  }
+
+  private DirectionsRoute obtainRouteFor(String response) {
+    DirectionsRoute route = DirectionsResponse.fromJson(response).routes().get(0);
+    return route;
   }
 }

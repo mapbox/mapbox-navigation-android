@@ -9,7 +9,8 @@ ext {
 
   version = [
       mapboxMapSdk       : '6.6.2',
-      mapboxSdkServices  : '4.0.0',
+      // TODO Remove SNAPSHOT when 4.1.0 gets released - See https://github.com/mapbox/mapbox-java/pull/895
+      mapboxSdkServices  : '4.1.0-SNAPSHOT',
       mapboxEvents       : '3.4.0',
       mapboxNavigator    : '3.2.1',
       autoValue          : '1.5.4',

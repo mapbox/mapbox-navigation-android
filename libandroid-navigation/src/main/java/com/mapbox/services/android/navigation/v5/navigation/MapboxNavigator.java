@@ -6,6 +6,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.navigator.RouterResult;
 
 import java.util.Date;
 
@@ -35,6 +36,21 @@ class MapboxNavigator {
     synchronized (this) {
       navigator.updateLocation(fixedLocation);
     }
+  }
+
+  // TODO this call should be done in the background - it's currently blocking the UI
+  synchronized void configureRouter(String tileFilePath, String translationsDirPath) {
+    navigator.configureRouter(tileFilePath, translationsDirPath);
+  }
+
+  /**
+   * Uses libvalhalla and local tile data to generate mapbox-directions-api-like json
+   *
+   * @param directionsUri the uri used when hitting the http service
+   * @return a RouterResult object with the json and a success/fail bool
+   */
+  synchronized RouterResult retrieveRouteFor(String directionsUri) {
+    return navigator.getRoute(directionsUri);
   }
 
   /**
