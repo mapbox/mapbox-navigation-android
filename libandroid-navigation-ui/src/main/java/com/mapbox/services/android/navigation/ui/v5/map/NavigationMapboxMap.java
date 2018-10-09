@@ -83,6 +83,7 @@ public class NavigationMapboxMap {
   private SymbolLayer waynameLayer;
   private MapLayerInteractor layerInteractor;
   private List<Marker> mapMarkers = new ArrayList<>();
+  private OnUpdateWaynameListener onUpdateWaynameListener;
 
   /**
    * Constructor that can be used once {@link com.mapbox.mapboxsdk.maps.OnMapReadyCallback}
@@ -590,8 +591,20 @@ public class NavigationMapboxMap {
   }
 
   private void updateMapWaynameWithLocation(Location location) {
-    LatLng latLng = new LatLng(location);
-    PointF mapPoint = mapboxMap.getProjection().toScreenLocation(latLng);
-    mapWayname.updateWaynameWithPoint(mapPoint, waynameLayer);
+    if (mapWayname.isAutoQueryEnabled() && onUpdateWaynameListener != null) {
+      onUpdateWaynameListener.updateWaynameWithLocation(location);
+    } else {
+      LatLng latLng = new LatLng(location);
+      PointF mapPoint = mapboxMap.getProjection().toScreenLocation(latLng);
+      mapWayname.updateWaynameWithPoint(mapPoint, waynameLayer);
+    }
+  }
+
+  public void setOnUpdateWaynameListener(OnUpdateWaynameListener onUpdateWayname) {
+    this.onUpdateWaynameListener = onUpdateWayname;
+  }
+
+  public interface OnUpdateWaynameListener {
+    void updateWaynameWithLocation(Location location);
   }
 }
