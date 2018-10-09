@@ -22,11 +22,11 @@ import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
-import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
@@ -64,7 +64,6 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   private Point destination = Point.fromLngLat(-3.712331, 40.401686);
   private Polyline polyline;
 
-  private LocationLayerPlugin locationLayerPlugin;
   private ReplayRouteLocationEngine mockLocationEngine;
   private MapboxNavigation navigation;
   private MapboxMap mapboxMap;
@@ -104,14 +103,10 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     mapView.onResume();
   }
 
-  @SuppressLint("MissingPermission")
   @Override
   protected void onStart() {
     super.onStart();
     mapView.onStart();
-    if (locationLayerPlugin != null) {
-      locationLayerPlugin.onStart();
-    }
   }
 
   @Override
@@ -126,10 +121,6 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     mapView.onStop();
 
     shutdownLocationEngine();
-
-    if (locationLayerPlugin != null) {
-      locationLayerPlugin.onStop();
-    }
 
     if (navigation != null) {
       // End the navigation session
@@ -162,8 +153,10 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     this.mapboxMap = mapboxMap;
     mapboxMap.addOnMapClickListener(this);
 
-    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap);
-    locationLayerPlugin.setRenderMode(RenderMode.NORMAL);
+    LocationComponent locationComponent = mapboxMap.getLocationComponent();
+    locationComponent.activateLocationComponent(this);
+    locationComponent.setLocationComponentEnabled(true);
+    locationComponent.setRenderMode(RenderMode.GPS);
 
     // Setup the mockLocationEngine
     mockLocationEngine = new ReplayRouteLocationEngine();
@@ -183,7 +176,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onLocationChanged(Location location) {
     if (!tracking) {
-      locationLayerPlugin.forceLocationUpdate(location);
+      mapboxMap.getLocationComponent().forceLocationUpdate(location);
     }
   }
 
@@ -224,10 +217,10 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     if (tracking) {
-      locationLayerPlugin.forceLocationUpdate(location);
+      mapboxMap.getLocationComponent().forceLocationUpdate(location);
       animateCameraFor(location);
     }
-    instructionView.update(routeProgress);
+    instructionView.updateDistanceWith(routeProgress);
   }
 
   @Override
@@ -235,6 +228,8 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     if (milestone instanceof VoiceInstructionMilestone) {
       Snackbar.make(contentLayout, instruction, Snackbar.LENGTH_SHORT).show();
     }
+    instructionView.updateBannerInstructionsWith(milestone);
+    Timber.d("onMilestoneEvent - Current Instruction: " + instruction);
   }
 
   private boolean checkRoute() {
