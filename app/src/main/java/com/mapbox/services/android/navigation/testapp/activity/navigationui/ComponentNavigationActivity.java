@@ -136,6 +136,7 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
 
     // For navigation logic / processing
     initializeNavigation(mapboxMap);
+    navigationMap.updateCameraTrackingEnabled(false);
   }
 
   @Override
@@ -160,6 +161,7 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
 
   @OnClick(R.id.startNavigationFab)
   public void onStartNavigationClick(FloatingActionButton floatingActionButton) {
+    navigationMap.updateCameraTrackingEnabled(true);
     // Transition to navigation state
     mapState = MapState.NAVIGATION;
 
@@ -182,6 +184,7 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
 
   @OnClick(R.id.cancelNavigationFab)
   public void onCancelNavigationClick(FloatingActionButton floatingActionButton) {
+    navigationMap.updateCameraTrackingEnabled(false);
     // Transition to info state
     mapState = MapState.INFO;
 
