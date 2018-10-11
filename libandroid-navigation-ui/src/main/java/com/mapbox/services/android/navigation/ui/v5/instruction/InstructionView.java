@@ -82,12 +82,12 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private TextView upcomingDistanceText;
   private TextView upcomingPrimaryText;
   private TextView upcomingSecondaryText;
-  private ManeuverView thenManeuverView;
-  private TextView thenStepText;
+  private ManeuverView subManeuverView;
+  private TextView subStepText;
   private NavigationAlertView alertView;
   private View rerouteLayout;
   private View turnLaneLayout;
-  private View thenStepLayout;
+  private View subStepLayout;
   private RecyclerView rvTurnLanes;
   private RecyclerView rvInstructions;
   private TurnLaneAdapter turnLaneAdapter;
@@ -189,8 +189,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       @Override
       public void onChanged(@Nullable BannerInstructionModel model) {
         if (model != null) {
-          updateManeuverView(model.getManeuverType(), model.getManeuverModifier(), model.getRoundaboutAngle());
-          updateDataFromBannerText(model.getPrimaryBannerText(), model.getSecondaryBannerText());
+          updateManeuverView(model.retrievePrimaryManeuverType(), model.retrieveSecondaryManeuverModifier(),
+            model.retrievePrimaryRoundaboutAngle());
+          updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
+          updateSubStep(model.retrieveSubBannerText());
         }
       }
     });
@@ -211,25 +213,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     subscribeAlertView();
     initializeButtonListeners();
     showButtons();
-  }
-
-  /**
-   * Called in {@link ProgressChangeListener}, creates a new model and then
-   * uses it to update the views.
-   *
-   * @param routeProgress used to provide navigation / routeProgress data
-   * @since 0.6.2
-   * @deprecated As of 0.20.0, use a combination of {@link InstructionView#updateDistanceWith(RouteProgress)} and
-   * {@link InstructionView#updateBannerInstructionsWith(Milestone)} to achieve the same behavior.
-   */
-  @Deprecated
-  public void update(RouteProgress routeProgress) {
-    if (routeProgress != null && !isRerouting) {
-      InstructionModel model = new InstructionModel(distanceFormatter, routeProgress);
-      updateDataFromInstruction(model);
-      updateManeuverView(model.getManeuverType(), model.getManeuverModifier(), model.getRoundaboutAngle());
-      updateDataFromBannerText(model.getPrimaryBannerText(), model.getSecondaryBannerText());
-    }
   }
 
   /**
@@ -265,8 +248,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         return;
       }
       BannerText primary = instructions.primary();
-      updateManeuverView(primary.type(), primary.modifier(), extractRoundaboutDegreesFrom(primary));
+      updateManeuverView(primary.type(), primary.modifier(), primary.degrees());
       updateDataFromBannerText(primary, instructions.secondary());
+      updateSubStep(instructions.sub());
     }
   }
 
@@ -412,12 +396,12 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     upcomingDistanceText = findViewById(R.id.stepDistanceText);
     upcomingPrimaryText = findViewById(R.id.stepPrimaryText);
     upcomingSecondaryText = findViewById(R.id.stepSecondaryText);
-    thenManeuverView = findViewById(R.id.thenManeuverView);
-    thenStepText = findViewById(R.id.thenStepText);
+    subManeuverView = findViewById(R.id.subManeuverView);
+    subStepText = findViewById(R.id.subStepText);
     alertView = findViewById(R.id.alertView);
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
-    thenStepLayout = findViewById(R.id.thenStepLayout);
+    subStepLayout = findViewById(R.id.subStepLayout);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
     instructionLayout = findViewById(R.id.instructionLayout);
     instructionLayoutText = findViewById(R.id.instructionLayoutText);
@@ -444,9 +428,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         Drawable maneuverBackground = DrawableCompat.wrap(instructionLayoutManeuver.getBackground()).mutate();
         DrawableCompat.setTint(maneuverBackground, navigationViewBannerBackgroundColor);
 
-        View thenStepLayout = findViewById(R.id.thenStepLayout);
-        Drawable thenStepBackground = DrawableCompat.wrap(thenStepLayout.getBackground()).mutate();
-        DrawableCompat.setTint(thenStepBackground, navigationViewListBackgroundColor);
+        View subStepLayout = findViewById(R.id.subStepLayout);
+        Drawable subStepBackground = DrawableCompat.wrap(subStepLayout.getBackground()).mutate();
+        DrawableCompat.setTint(subStepBackground, navigationViewListBackgroundColor);
 
         View turnLaneLayout = findViewById(R.id.turnLaneLayout);
         Drawable turnLaneBackground = DrawableCompat.wrap(turnLaneLayout.getBackground()).mutate();
@@ -597,9 +581,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private boolean newDistanceText(InstructionModel model) {
     return !upcomingDistanceText.getText().toString().isEmpty()
-      && !TextUtils.isEmpty(model.getStepResources().getStepDistanceRemaining())
+      && !TextUtils.isEmpty(model.retrieveStepDistanceRemaining())
       && !upcomingDistanceText.getText().toString()
-      .contentEquals(model.getStepResources().getStepDistanceRemaining().toString());
+      .contentEquals(model.retrieveStepDistanceRemaining().toString());
   }
 
   /**
@@ -608,7 +592,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model provides distance text
    */
   private void distanceText(InstructionModel model) {
-    upcomingDistanceText.setText(model.getStepResources().getStepDistanceRemaining());
+    upcomingDistanceText.setText(model.retrieveStepDistanceRemaining());
   }
 
   private InstructionLoader createInstructionLoader(TextView textView, BannerText bannerText) {
@@ -642,9 +626,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model created with new {@link RouteProgress} holding turn lane data
    */
   private void updateTurnLanes(InstructionModel model) {
-    List<IntersectionLanes> turnLanes = model.getStepResources().getTurnLanes();
-    String maneuverViewModifier = model.getManeuverModifier();
-    double durationRemaining = model.getProgress().currentLegProgress().currentStepProgress().durationRemaining();
+    List<IntersectionLanes> turnLanes = model.retrieveTurnLanes();
+    String maneuverViewModifier = model.retrieveUpcomingManeuverModifier();
+    double durationRemaining = model.retrieveProgress().currentLegProgress().currentStepProgress().durationRemaining();
 
     if (shouldShowTurnLanes(turnLanes, maneuverViewModifier, durationRemaining)) {
       if (turnLaneLayout.getVisibility() == GONE) {
@@ -683,59 +667,43 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   /**
-   * Check if the the then step should be shown.
+   * Check if the the sub step should be shown.
    * If true, update the "then" maneuver and the "then" step text.
    * If false, hide the then layout.
    *
-   * @param model to determine if the then step layout should be shown
+   * @param subText to determine if the then step layout should be shown
    */
-  private void updateThenStep(InstructionModel model) {
-    if (shouldShowThenStep(model)) {
-      String thenStepManeuverType = model.getStepResources().getThenStepManeuverType();
-      String thenStepManeuverModifier = model.getStepResources().getThenStepManeuverModifier();
-      thenManeuverView.setManeuverTypeAndModifier(thenStepManeuverType, thenStepManeuverModifier);
-      Float roundaboutAngle = model.getStepResources().getThenStepRoundaboutDegrees();
+  private void updateSubStep(BannerText subText) {
+    if (shouldShowSubStep(subText)) {
+      String maneuverType = subText.type();
+      String maneuverModifier = subText.modifier();
+      subManeuverView.setManeuverTypeAndModifier(maneuverType, maneuverModifier);
+      Double roundaboutAngle = subText.degrees();
       if (roundaboutAngle != null) {
-        thenManeuverView.setRoundaboutAngle(roundaboutAngle);
+        subManeuverView.setRoundaboutAngle(roundaboutAngle.floatValue());
       }
-      thenStepText.setText(model.getThenBannerText().text());
+      subStepText.setText(subText.text());
       showThenStepLayout();
     } else {
       hideThenStepLayout();
     }
   }
 
-  /**
-   * First, checks if the turn lanes are visible (if they are, don't show then step).
-   * Second, checks if the upcoming step is less than 15 seconds long.
-   * This is our cue to show the thenStep.
-   *
-   * @param model to check the upcoming step
-   * @return true if should show, false if not
-   */
-  private boolean shouldShowThenStep(InstructionModel model) {
-    return turnLaneLayout.getVisibility() != VISIBLE
-      && model.getThenBannerText() != null
-      && model.getStepResources().shouldShowThenStep();
+  private boolean shouldShowSubStep(@Nullable BannerText subText) {
+    return turnLaneLayout.getVisibility() != VISIBLE && subText != null;
   }
 
-  /**
-   * Shows then step layout
-   */
   private void showThenStepLayout() {
-    if (thenStepLayout.getVisibility() == GONE) {
+    if (subStepLayout.getVisibility() == GONE) {
       beginDelayedTransition();
-      thenStepLayout.setVisibility(VISIBLE);
+      subStepLayout.setVisibility(VISIBLE);
     }
   }
 
-  /**
-   * Hides then step layout
-   */
   private void hideThenStepLayout() {
-    if (thenStepLayout.getVisibility() == VISIBLE) {
+    if (subStepLayout.getVisibility() == VISIBLE) {
       beginDelayedTransition();
-      thenStepLayout.setVisibility(GONE);
+      subStepLayout.setVisibility(GONE);
     }
   }
 
@@ -783,9 +751,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     updateDistanceText(model);
     updateInstructionList(model);
     updateTurnLanes(model);
-    updateThenStep(model);
-    if (newStep(model.getProgress())) {
-      LegStep upComingStep = model.getProgress().currentLegProgress().upComingStep();
+    if (newStep(model.retrieveProgress())) {
+      LegStep upComingStep = model.retrieveProgress().currentLegProgress().upComingStep();
       ImageCoordinator.getInstance().prefetchImageCache(upComingStep);
     }
   }
@@ -823,20 +790,11 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Updates new maneuver image if one is found.
    */
   private void updateManeuverView(String maneuverViewType, String maneuverViewModifier,
-                                  @Nullable Float roundaboutAngle) {
+                                  @Nullable Double roundaboutAngle) {
     upcomingManeuverView.setManeuverTypeAndModifier(maneuverViewType, maneuverViewModifier);
     if (roundaboutAngle != null) {
-      upcomingManeuverView.setRoundaboutAngle(roundaboutAngle);
+      upcomingManeuverView.setRoundaboutAngle(roundaboutAngle.floatValue());
     }
-  }
-
-  @Nullable
-  private Float extractRoundaboutDegreesFrom(BannerText bannerText) {
-    Double degrees = bannerText.degrees();
-    if (degrees != null) {
-      return degrees.floatValue();
-    }
-    return null;
   }
 
   /**
@@ -865,7 +823,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param model to provide the current steps and unit type
    */
   private void updateInstructionList(InstructionModel model) {
-    RouteProgress routeProgress = model.getProgress();
+    RouteProgress routeProgress = model.retrieveProgress();
     boolean isListShowing = instructionListLayout.getVisibility() == VISIBLE;
     instructionListAdapter.updateBannerListWith(routeProgress, isListShowing);
   }
