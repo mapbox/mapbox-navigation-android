@@ -15,8 +15,6 @@ import com.google.android.gms.location.SettingsClient;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineListener;
 
-import java.util.Date;
-
 import timber.log.Timber;
 
 public class FusedLocationEngine extends LocationEngine {
@@ -60,10 +58,7 @@ public class FusedLocationEngine extends LocationEngine {
   @Override
   @SuppressWarnings("MissingPermission")
   public Location getLastLocation() {
-    fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
-      location.setTime((new Date()).getTime()); //match system clock
-      lastLocation = location;
-    });
+    fusedLocationClient.getLastLocation().addOnSuccessListener(location -> lastLocation = location);
     return lastLocation;
   }
 
@@ -87,7 +82,6 @@ public class FusedLocationEngine extends LocationEngine {
   }
 
   void notifyListenersOnLocationChanged(Location location) {
-    location.setTime((new Date()).getTime()); //match system clock
     for (LocationEngineListener listener : locationListeners) {
       listener.onLocationChanged(location);
     }
