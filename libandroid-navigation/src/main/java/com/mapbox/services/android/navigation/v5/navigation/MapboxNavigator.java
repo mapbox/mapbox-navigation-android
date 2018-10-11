@@ -60,8 +60,8 @@ class MapboxNavigator {
   }
 
   FixLocation buildFixLocationFromLocation(Location location) {
+    Date time = new Date();
     Point rawPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    Date time = new Date(location.getTime());
     Float speed = checkFor(location.getSpeed());
     Float bearing = checkFor(location.getBearing());
     Float altitude = checkFor((float) location.getAltitude());
