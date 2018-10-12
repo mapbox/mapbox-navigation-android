@@ -159,25 +159,6 @@ public class RouteLegProgressTest extends BaseTest {
   }
 
   @Test
-  public void getDurationRemaining_equalsLegDurationAtBeginning() throws Exception {
-    RouteProgress routeProgress = buildBeginningOfLegRouteProgress();
-    DirectionsRoute route = routeProgress.directionsRoute();
-    RouteLeg firstLeg = route.legs().get(0);
-
-    Double firstLegDuration = firstLeg.duration();
-    double currentLegDurationRemaining = routeProgress.currentLegProgress().durationRemaining();
-
-    assertEquals(firstLegDuration, currentLegDurationRemaining, BaseTest.DELTA);
-  }
-
-  @Test
-  public void getDurationRemaining_equalsZeroAtEndOfLeg() throws Exception {
-    RouteProgress routeProgress = buildEndOfLegRouteProgress();
-
-    assertEquals(0, routeProgress.currentLegProgress().durationRemaining(), BaseTest.DELTA);
-  }
-
-  @Test
   public void followOnStep_doesReturnTwoStepsAheadOfCurrent() throws Exception {
     int stepIndex = 5;
     RouteProgress routeProgress = buildDefaultTestRouteProgress();

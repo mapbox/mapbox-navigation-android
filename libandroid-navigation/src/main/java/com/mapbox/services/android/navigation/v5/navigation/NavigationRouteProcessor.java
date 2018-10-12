@@ -27,6 +27,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
 class NavigationRouteProcessor {
 
   private static final int ONE_INDEX = 1;
+  public static final int ONE_SECOND = 1000;
   private RouteProgress previousRouteProgress;
   private DirectionsRoute route;
   private RouteLeg currentLeg;
@@ -70,8 +71,8 @@ class NavigationRouteProcessor {
     double routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, legIndex, route);
     double stepDistanceRemaining = status.getRemainingStepDistance();
     double stepDistanceTraveled = currentStep.distance() - stepDistanceRemaining;
-    double remainingLegDuration = status.getRouteState() == RouteState.TRACKING
-      ? status.getRemainingLegDuration() / 1000 : route.duration();
+    double legDurationRemaining = status.getRouteState() == RouteState.TRACKING
+      ? status.getRemainingLegDuration() / ONE_SECOND : route.duration();
 
     currentLegAnnotation = createCurrentAnnotation(currentLegAnnotation, currentLeg, legDistanceRemaining);
     StepIntersection currentIntersection = findCurrentIntersection(
@@ -82,10 +83,10 @@ class NavigationRouteProcessor {
     );
 
     RouteProgress.Builder progressBuilder = RouteProgress.builder()
-      .stepDistanceRemaining(stepDistanceRemaining)
-      .legDistanceRemaining(legDistanceRemaining)
       .distanceRemaining(routeDistanceRemaining)
-      .legDurationRemaining(remainingLegDuration)
+      .legDistanceRemaining(legDistanceRemaining)
+      .legDurationRemaining(legDurationRemaining)
+      .stepDistanceRemaining(stepDistanceRemaining)
       .directionsRoute(route)
       .currentStepPoints(currentStepPoints)
       .upcomingStepPoints(upcomingStepPoints)

@@ -66,9 +66,7 @@ public abstract class RouteLegProgress {
    * @return long value representing the duration remaining till end of step, in unit seconds.
    * @since 0.1.0
    */
-  public double durationRemaining() {
-    return (1 - fractionTraveled()) * routeLeg().duration();
-  }
+  public abstract double durationRemaining();
 
   /**
    * Get the fraction traveled along the current leg, this is a float value between 0 and 1 and
@@ -216,6 +214,8 @@ public abstract class RouteLegProgress {
     abstract Builder stepIndex(int stepIndex);
 
     abstract int stepIndex();
+
+    abstract Builder durationRemaining(double durationRemaining);
 
     abstract Builder stepDistanceRemaining(double stepDistanceRemaining);
 

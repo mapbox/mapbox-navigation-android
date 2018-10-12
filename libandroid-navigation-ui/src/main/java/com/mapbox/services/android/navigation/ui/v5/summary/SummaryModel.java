@@ -22,10 +22,11 @@ public class SummaryModel {
   public SummaryModel(Context context, DistanceFormatter distanceFormatter, RouteProgress progress,
                       @NavigationTimeFormat.Type int timeFormatType) {
     distanceRemaining = distanceFormatter.formatDistance(progress.distanceRemaining()).toString();
-    timeRemaining = formatTimeRemaining(context, progress.legDurationRemaining());
+    double legDurationRemaining = progress.currentLegProgress().durationRemaining();
+    timeRemaining = formatTimeRemaining(context, legDurationRemaining);
     Calendar time = Calendar.getInstance();
     boolean isTwentyFourHourFormat = DateFormat.is24HourFormat(context);
-    arrivalTime = formatTime(time, progress.legDurationRemaining(), timeFormatType, isTwentyFourHourFormat);
+    arrivalTime = formatTime(time, legDurationRemaining, timeFormatType, isTwentyFourHourFormat);
   }
 
   String getDistanceRemaining() {
