@@ -192,8 +192,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       Toast.makeText(this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show();
     }
     mapboxMap.addMarker(new MarkerOptions().position(point));
-
-    startRouteButton.setVisibility(View.VISIBLE);
     calculateRoute();
   }
 
@@ -227,6 +225,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
             DirectionsRoute directionsRoute = response.body().routes().get(0);
             MockNavigationActivity.this.route = directionsRoute;
             navigationMapRoute.addRoutes(response.body().routes());
+            startRouteButton.setVisibility(View.VISIBLE);
           }
         }
       }
