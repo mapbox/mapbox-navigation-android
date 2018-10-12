@@ -118,7 +118,10 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   @Override
   public void onArrival(RouteProgress routeProgress) {
     // Update arrival time stamp
-    navigationSessionState = navigationSessionState.toBuilder().arrivalTimestamp(new Date()).build();
+    navigationSessionState = navigationSessionState.toBuilder()
+      .arrivalTimestamp(new Date())
+      .tripIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier())
+      .build();
     updateLifecyclePercentages();
     // Send arrival event
     NavigationMetricsWrapper.arriveEvent(navigationSessionState, routeProgress, metricLocation.getLocation());
@@ -168,6 +171,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     if (!isConfigurationChange) {
       navigationSessionState = navigationSessionState.toBuilder()
         .sessionIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier())
+        .tripIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier())
         .originalDirectionRoute(directionsRoute)
         .originalRequestIdentifier(directionsRoute.routeOptions().requestUuid())
         .requestIdentifier(directionsRoute.routeOptions().requestUuid())
@@ -208,7 +212,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
    * @param directionsRoute new route passed to {@link MapboxNavigation}
    */
   void updateSessionRoute(DirectionsRoute directionsRoute) {
-    SessionState.Builder navigationBuilder = navigationSessionState.toBuilder();
+    SessionState.Builder navigationBuilder = navigationSessionState.toBuilder()
+      .tripIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier());
     navigationBuilder.currentDirectionRoute(directionsRoute);
     eventDispatcher.addMetricEventListeners(this);
 

@@ -106,6 +106,8 @@ public abstract class SessionState {
 
   public abstract String sessionIdentifier();
 
+  public abstract String tripIdentifier();
+
   @Nullable
   public abstract String originalRequestIdentifier();
 
@@ -134,6 +136,7 @@ public abstract class SessionState {
     return new AutoValue_SessionState.Builder()
       .eventRouteDistanceCompleted(0d)
       .sessionIdentifier("")
+      .tripIdentifier("")
       .mockLocation(false)
       .rerouteCount(0)
       .secondsSinceLastReroute(-1)
@@ -163,6 +166,8 @@ public abstract class SessionState {
     public abstract Builder currentDirectionRoute(@Nullable DirectionsRoute currentDirectionsRoute);
 
     public abstract Builder sessionIdentifier(String sessionIdentifier);
+
+    public abstract Builder tripIdentifier(String tripIdentifier);
 
     public abstract Builder originalRequestIdentifier(@Nullable String originalRequestIdentifier);
 

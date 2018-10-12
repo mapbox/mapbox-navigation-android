@@ -85,7 +85,13 @@ final class NavigationMetricsWrapper {
       routeProgress.directionsRoute().routeOptions().profile(),
       sessionState.mockLocation(),
       sessionState.locationEngineName(),
-      absoluteDistanceToDestination
+      absoluteDistanceToDestination,
+      sessionState.tripIdentifier(),
+      routeProgress.legIndex(),
+      routeProgress.directionsRoute().legs().size(),
+      routeProgress.currentLegProgress().stepIndex(),
+      routeProgress.currentLeg().steps().size(),
+      sessionState.currentStepCount()
     );
     metadata.setEstimatedDistance(routeProgress.directionsRoute().distance().intValue());
     metadata.setEstimatedDuration(routeProgress.directionsRoute().duration().intValue());
@@ -95,7 +101,6 @@ final class NavigationMetricsWrapper {
     metadata.setOriginalGeometry(sessionState.originalGeometry());
     metadata.setOriginalEstimatedDistance(sessionState.originalDistance());
     metadata.setOriginalEstimatedDuration(sessionState.originalDuration());
-    metadata.setStepCount(sessionState.currentStepCount());
     metadata.setOriginalStepCount(sessionState.originalStepCount());
     metadata.setPercentTimeInForeground(sessionState.percentInForeground());
     metadata.setPercentTimeInPortrait(sessionState.percentInPortrait());
@@ -126,7 +131,13 @@ final class NavigationMetricsWrapper {
       metricProgress.getDirectionsRouteProfile(),
       sessionState.mockLocation(),
       sessionState.locationEngineName(),
-      absoluteDistanceToDestination
+      absoluteDistanceToDestination,
+      sessionState.tripIdentifier(),
+      metricProgress.getLegIndex(),
+      metricProgress.getLegCount(),
+      metricProgress.getStepIndex(),
+      metricProgress.getStepCount(),
+      sessionState.currentStepCount()
     );
     metadata.setEstimatedDistance(metricProgress.getDirectionsRouteDistance());
     metadata.setEstimatedDuration(metricProgress.getDirectionsRouteDuration());
@@ -136,7 +147,6 @@ final class NavigationMetricsWrapper {
     metadata.setOriginalGeometry(sessionState.originalGeometry());
     metadata.setOriginalEstimatedDistance(sessionState.originalDistance());
     metadata.setOriginalEstimatedDuration(sessionState.originalDuration());
-    metadata.setStepCount(sessionState.currentStepCount());
     metadata.setOriginalStepCount(sessionState.originalStepCount());
     metadata.setPercentTimeInForeground(sessionState.percentInForeground());
     metadata.setPercentTimeInPortrait(sessionState.percentInPortrait());
@@ -173,7 +183,13 @@ final class NavigationMetricsWrapper {
       metricProgress.getDirectionsRouteProfile(),
       sessionState.mockLocation(),
       sessionState.locationEngineName(),
-      absoluteDistanceToDestination
+      absoluteDistanceToDestination,
+      sessionState.tripIdentifier(),
+      metricProgress.getLegIndex(),
+      metricProgress.getLegCount(),
+      metricProgress.getStepIndex(),
+      metricProgress.getStepCount(),
+      sessionState.currentStepCount()
     );
     metadata.setEstimatedDistance(metricProgress.getDirectionsRouteDistance());
     metadata.setEstimatedDuration(metricProgress.getDirectionsRouteDuration());
@@ -183,7 +199,6 @@ final class NavigationMetricsWrapper {
     metadata.setOriginalGeometry(sessionState.originalGeometry());
     metadata.setOriginalEstimatedDistance(sessionState.originalDistance());
     metadata.setOriginalEstimatedDuration(sessionState.originalDuration());
-    metadata.setStepCount(sessionState.currentStepCount());
     metadata.setOriginalStepCount(sessionState.originalStepCount());
     metadata.setPercentTimeInForeground(sessionState.percentInForeground());
     metadata.setPercentTimeInPortrait(sessionState.percentInPortrait());
@@ -216,7 +231,13 @@ final class NavigationMetricsWrapper {
       metricProgress.getDirectionsRouteProfile(),
       sessionState.mockLocation(),
       sessionState.locationEngineName(),
-      absoluteDistanceToDestination
+      absoluteDistanceToDestination,
+      sessionState.tripIdentifier(),
+      metricProgress.getLegIndex(),
+      metricProgress.getLegCount(),
+      metricProgress.getStepIndex(),
+      metricProgress.getStepCount(),
+      sessionState.currentStepCount()
     );
     metadata.setEstimatedDistance(metricProgress.getDirectionsRouteDistance());
     metadata.setEstimatedDuration(metricProgress.getDirectionsRouteDuration());
@@ -226,7 +247,6 @@ final class NavigationMetricsWrapper {
     metadata.setOriginalGeometry(sessionState.originalGeometry());
     metadata.setOriginalEstimatedDistance(sessionState.originalDistance());
     metadata.setOriginalEstimatedDuration(sessionState.originalDuration());
-    metadata.setStepCount(sessionState.currentStepCount());
     metadata.setOriginalStepCount(sessionState.originalStepCount());
     metadata.setPercentTimeInForeground(sessionState.percentInForeground());
     metadata.setPercentTimeInPortrait(sessionState.percentInPortrait());
@@ -293,7 +313,13 @@ final class NavigationMetricsWrapper {
       metricProgress.getDirectionsRouteProfile(),
       sessionState.mockLocation(),
       sessionState.locationEngineName(),
-      absoluteDistanceToDestination
+      absoluteDistanceToDestination,
+      sessionState.tripIdentifier(),
+      metricProgress.getLegIndex(),
+      metricProgress.getLegCount(),
+      metricProgress.getStepIndex(),
+      metricProgress.getStepCount(),
+      sessionState.currentStepCount()
     );
     metadata.setEstimatedDistance(metricProgress.getDirectionsRouteDistance());
     metadata.setEstimatedDuration(metricProgress.getDirectionsRouteDuration());
@@ -303,7 +329,6 @@ final class NavigationMetricsWrapper {
     metadata.setOriginalGeometry(sessionState.originalGeometry());
     metadata.setOriginalEstimatedDistance(sessionState.originalDistance());
     metadata.setOriginalEstimatedDuration(sessionState.originalDuration());
-    metadata.setStepCount(sessionState.currentStepCount());
     metadata.setOriginalStepCount(sessionState.originalStepCount());
     metadata.setPercentTimeInForeground(sessionState.percentInForeground());
     metadata.setPercentTimeInPortrait(sessionState.percentInPortrait());
