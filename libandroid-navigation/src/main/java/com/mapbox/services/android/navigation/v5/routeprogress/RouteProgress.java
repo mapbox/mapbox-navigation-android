@@ -87,6 +87,8 @@ public abstract class RouteProgress {
     return (1 - fractionTraveled()) * directionsRoute().duration();
   }
 
+  public abstract double legDurationRemaining();
+
   /**
    * Get the fraction traveled along the current route, this is a float value between 0 and 1 and
    * isn't guaranteed to reach 1 before the user reaches the end of the route.
@@ -220,6 +222,10 @@ public abstract class RouteProgress {
     abstract List<Point> upcomingStepPoints();
 
     public abstract Builder distanceRemaining(double distanceRemaining);
+
+    public abstract Builder legDurationRemaining(double durationRemaining);
+
+    abstract double legDurationRemaining();
 
     public abstract Builder intersections(List<StepIntersection> intersections);
 

@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.NavigationStatus;
+import com.mapbox.navigator.RouteState;
 import com.mapbox.navigator.VoiceInstruction;
 import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -69,6 +70,9 @@ class NavigationRouteProcessor {
     double routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, legIndex, route);
     double stepDistanceRemaining = status.getRemainingStepDistance();
     double stepDistanceTraveled = currentStep.distance() - stepDistanceRemaining;
+    double remainingLegDuration = status.getRouteState() == RouteState.TRACKING
+      ? status.getRemainingLegDuration() / 1000 : route.duration();
+
     currentLegAnnotation = createCurrentAnnotation(currentLegAnnotation, currentLeg, legDistanceRemaining);
     StepIntersection currentIntersection = findCurrentIntersection(
       currentIntersections, currentIntersectionDistances, stepDistanceTraveled
@@ -81,6 +85,7 @@ class NavigationRouteProcessor {
       .stepDistanceRemaining(stepDistanceRemaining)
       .legDistanceRemaining(legDistanceRemaining)
       .distanceRemaining(routeDistanceRemaining)
+      .legDurationRemaining(remainingLegDuration)
       .directionsRoute(route)
       .currentStepPoints(currentStepPoints)
       .upcomingStepPoints(upcomingStepPoints)
