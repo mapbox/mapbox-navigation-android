@@ -238,12 +238,15 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
     updateLocation(location);
 
     // Update InstructionView data from RouteProgress
-    instructionView.update(routeProgress);
+    instructionView.updateDistanceWith(routeProgress);
   }
 
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
     playAnnouncement(milestone);
+
+    // Update InstructionView banner instructions
+    instructionView.updateBannerInstructionsWith(milestone);
   }
 
   @Override

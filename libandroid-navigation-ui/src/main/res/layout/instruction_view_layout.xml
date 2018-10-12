@@ -36,8 +36,8 @@
             android:visibility="gone"/>
 
         <include
-            android:id="@+id/thenStepLayout"
-            layout="@layout/then_instruction_layout"
+            android:id="@+id/subStepLayout"
+            layout="@layout/sub_instruction_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"

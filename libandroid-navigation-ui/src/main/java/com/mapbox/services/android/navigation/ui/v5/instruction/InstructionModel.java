@@ -1,83 +1,81 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.support.annotation.Nullable;
+import android.text.SpannableString;
 
-import com.mapbox.api.directions.v5.models.BannerText;
+import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
+import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
+
+import java.util.List;
 
 public class InstructionModel {
 
-  BannerText primaryBannerText;
-  BannerText secondaryBannerText;
-  private BannerText thenBannerText;
-  private Float roundaboutAngle = null;
-  private InstructionStepResources stepResources;
   private RouteProgress progress;
-  private RouteUtils routeUtils;
+  private SpannableString stepDistanceRemaining;
+  private List<IntersectionLanes> turnLanes;
+  private String upcomingManeuverModifier;
 
   public InstructionModel(DistanceFormatter distanceFormatter, RouteProgress progress) {
     this.progress = progress;
-    routeUtils = new RouteUtils();
-    buildInstructionModel(distanceFormatter, progress);
+    double distanceRemaining = progress.currentLegProgress().currentStepProgress().distanceRemaining();
+    stepDistanceRemaining = distanceFormatter.formatDistance(distanceRemaining);
+    extractStepResources(progress);
   }
 
-  BannerText getPrimaryBannerText() {
-    return primaryBannerText;
-  }
-
-  BannerText getSecondaryBannerText() {
-    return secondaryBannerText;
-  }
-
-  BannerText getThenBannerText() {
-    return thenBannerText;
-  }
-
-  @Nullable
-  Float getRoundaboutAngle() {
-    return roundaboutAngle;
-  }
-
-  InstructionStepResources getStepResources() {
-    return stepResources;
-  }
-
-  String getManeuverType() {
-    return stepResources.getManeuverViewType();
-  }
-
-  String getManeuverModifier() {
-    return stepResources.getManeuverViewModifier();
-  }
-
-  RouteProgress getProgress() {
+  RouteProgress retrieveProgress() {
     return progress;
   }
 
-  private void buildInstructionModel(DistanceFormatter distanceFormatter, RouteProgress progress) {
-    stepResources = new InstructionStepResources(distanceFormatter, progress);
-    extractStepInstructions(progress);
+  SpannableString retrieveStepDistanceRemaining() {
+    return stepDistanceRemaining;
   }
 
-  private void extractStepInstructions(RouteProgress progress) {
-    RouteLegProgress legProgress = progress.currentLegProgress();
-    LegStep currentStep = progress.currentLegProgress().currentStep();
-    LegStep upComingStep = legProgress.upComingStep();
-    int stepDistanceRemaining = (int) legProgress.currentStepProgress().distanceRemaining();
+  String retrieveUpcomingManeuverModifier() {
+    return upcomingManeuverModifier;
+  }
 
-    primaryBannerText = routeUtils.findCurrentBannerText(currentStep, stepDistanceRemaining, true);
-    secondaryBannerText = routeUtils.findCurrentBannerText(currentStep, stepDistanceRemaining, false);
+  List<IntersectionLanes> retrieveTurnLanes() {
+    return turnLanes;
+  }
 
-    if (upComingStep != null) {
-      thenBannerText = routeUtils.findCurrentBannerText(upComingStep, upComingStep.distance(), true);
+  private void extractStepResources(RouteProgress progress) {
+    LegStep upcomingStep = progress.currentLegProgress().upComingStep();
+    if (upcomingStep != null) {
+      if (hasIntersections(upcomingStep)) {
+        intersectionTurnLanes(upcomingStep);
+      }
+      upcomingManeuverModifier = upcomingStep.maneuver().modifier();
     }
+  }
 
-    if (primaryBannerText != null && primaryBannerText.degrees() != null) {
-      roundaboutAngle = primaryBannerText.degrees().floatValue();
+  private void intersectionTurnLanes(LegStep step) {
+    StepIntersection intersection = step.intersections().get(0);
+    List<IntersectionLanes> lanes = intersection.lanes();
+    if (checkForNoneIndications(lanes)) {
+      turnLanes = null;
+      return;
     }
+    turnLanes = lanes;
+  }
+
+  private boolean checkForNoneIndications(List<IntersectionLanes> lanes) {
+    if (lanes == null) {
+      return true;
+    }
+    for (IntersectionLanes lane : lanes) {
+      for (String indication : lane.indications()) {
+        if (indication.contains("none")) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private boolean hasIntersections(LegStep step) {
+    return step.intersections() != null
+      && step.intersections().get(0) != null;
   }
 }

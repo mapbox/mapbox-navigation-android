@@ -9,7 +9,7 @@
     android:elevation="2dp">
 
     <com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView
-        android:id="@+id/thenManeuverView"
+        android:id="@+id/subManeuverView"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_margin="8dp"
@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
-        android:id="@+id/thenStepText"
+        android:id="@+id/subStepText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
