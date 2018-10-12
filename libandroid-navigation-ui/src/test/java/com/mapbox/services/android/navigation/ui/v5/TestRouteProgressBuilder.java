@@ -55,6 +55,7 @@ class TestRouteProgressBuilder {
       .legDistanceRemaining(legDistanceRemaining)
       .distanceRemaining(distanceRemaining)
       .directionsRoute(route)
+      .legDurationRemaining(0)
       .currentStepPoints(currentStepPoints)
       .upcomingStepPoints(upcomingStepPoints)
       .intersections(intersections)
