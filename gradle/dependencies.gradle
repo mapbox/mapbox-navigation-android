@@ -11,7 +11,7 @@ ext {
       mapboxMapSdk       : '6.5.0',
       mapboxSdkServices  : '4.0.0',
       mapboxEvents       : '3.2.0',
-      mapboxNavigator    : '3.1.5',
+      mapboxNavigator    : 'kk_animate-SNAPSHOT-8',
       locationLayerPlugin: '0.10.0',
       autoValue          : '1.5.4',
       autoValueParcel    : '0.2.5',
