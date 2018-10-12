@@ -34,6 +34,11 @@ public class MetricsRouteProgress {
   private String previousStepType;
   private String previousStepName;
 
+  private int legIndex;
+  private int legCount;
+  private int stepIndex;
+  private int stepCount;
+
   public MetricsRouteProgress(@Nullable RouteProgress routeProgress) {
     if (routeProgress != null) {
       obtainRouteData(routeProgress.directionsRoute());
@@ -42,6 +47,10 @@ public class MetricsRouteProgress {
       this.distanceRemaining = (int) routeProgress.distanceRemaining();
       this.durationRemaining = (int) routeProgress.durationRemaining();
       this.distanceTraveled = (int) routeProgress.distanceTraveled();
+      this.legIndex = routeProgress.legIndex();
+      this.legCount = routeProgress.directionsRoute().legs().size();
+      this.stepIndex = routeProgress.currentLegProgress().stepIndex();
+      this.stepCount = routeProgress.currentLeg().steps().size();
     } else {
       initDefaultValues();
     }
@@ -188,5 +197,21 @@ public class MetricsRouteProgress {
 
   public String getPreviousStepName() {
     return previousStepName;
+  }
+
+  public int getLegIndex() {
+    return legIndex;
+  }
+
+  public int getLegCount() {
+    return legCount;
+  }
+
+  public int getStepIndex() {
+    return stepIndex;
+  }
+
+  public int getStepCount() {
+    return stepCount;
   }
 }
