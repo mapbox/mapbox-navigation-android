@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.NavigationStatus;
+import com.mapbox.navigator.RouteState;
 import com.mapbox.navigator.VoiceInstruction;
 import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -26,6 +27,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
 class NavigationRouteProcessor {
 
   private static final int ONE_INDEX = 1;
+  public static final int ONE_SECOND = 1000;
   private RouteProgress previousRouteProgress;
   private DirectionsRoute route;
   private RouteLeg currentLeg;
@@ -69,6 +71,9 @@ class NavigationRouteProcessor {
     double routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, legIndex, route);
     double stepDistanceRemaining = status.getRemainingStepDistance();
     double stepDistanceTraveled = currentStep.distance() - stepDistanceRemaining;
+    double legDurationRemaining = status.getRouteState() == RouteState.TRACKING
+      ? status.getRemainingLegDuration() / ONE_SECOND : route.duration();
+
     currentLegAnnotation = createCurrentAnnotation(currentLegAnnotation, currentLeg, legDistanceRemaining);
     StepIntersection currentIntersection = findCurrentIntersection(
       currentIntersections, currentIntersectionDistances, stepDistanceTraveled
@@ -78,9 +83,10 @@ class NavigationRouteProcessor {
     );
 
     RouteProgress.Builder progressBuilder = RouteProgress.builder()
-      .stepDistanceRemaining(stepDistanceRemaining)
-      .legDistanceRemaining(legDistanceRemaining)
       .distanceRemaining(routeDistanceRemaining)
+      .legDistanceRemaining(legDistanceRemaining)
+      .legDurationRemaining(legDurationRemaining)
+      .stepDistanceRemaining(stepDistanceRemaining)
       .directionsRoute(route)
       .currentStepPoints(currentStepPoints)
       .upcomingStepPoints(upcomingStepPoints)

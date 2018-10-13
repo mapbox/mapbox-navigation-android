@@ -31,6 +31,7 @@ class TestRouteProgressBuilder {
                                        double distanceRemaining,
                                        int stepIndex,
                                        int legIndex) throws Exception {
+    double legDurationRemaining = route.legs().get(0).duration();
     List<LegStep> steps = route.legs().get(legIndex).steps();
     LegStep currentStep = steps.get(stepIndex);
     List<Point> currentStepPoints = buildCurrentStepPoints(currentStep);
@@ -55,6 +56,7 @@ class TestRouteProgressBuilder {
     return RouteProgress.builder()
       .stepDistanceRemaining(stepDistanceRemaining)
       .legDistanceRemaining(legDistanceRemaining)
+      .legDurationRemaining(legDurationRemaining)
       .distanceRemaining(distanceRemaining)
       .directionsRoute(route)
       .currentStepPoints(currentStepPoints)

@@ -25,7 +25,9 @@ class NavigationNotificationProvider {
   }
 
   void shutdown(Context context) {
-    navigationNotification.onNavigationStopped(context);
+    if (navigationNotification != null) {
+      navigationNotification.onNavigationStopped(context);
+    }
     navigationNotification = null;
     shouldUpdate = false;
   }

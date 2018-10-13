@@ -188,6 +188,8 @@ public abstract class RouteProgress {
 
   abstract List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep();
 
+  abstract double legDurationRemaining();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -206,6 +208,10 @@ public abstract class RouteProgress {
     public abstract Builder legDistanceRemaining(double legDistanceRemaining);
 
     abstract double legDistanceRemaining();
+
+    public abstract Builder legDurationRemaining(double durationRemaining);
+
+    abstract double legDurationRemaining();
 
     public abstract Builder stepDistanceRemaining(double stepDistanceRemaining);
 
@@ -257,6 +263,7 @@ public abstract class RouteProgress {
         .routeLeg(currentLeg)
         .stepIndex(stepIndex())
         .distanceRemaining(legDistanceRemaining())
+        .durationRemaining(legDurationRemaining())
         .stepDistanceRemaining(stepDistanceRemaining())
         .currentStepPoints(currentStepPoints())
         .upcomingStepPoints(upcomingStepPoints())
