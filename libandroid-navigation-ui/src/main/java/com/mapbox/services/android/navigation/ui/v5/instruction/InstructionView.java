@@ -682,10 +682,13 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       if (roundaboutAngle != null) {
         subManeuverView.setRoundaboutAngle(roundaboutAngle.floatValue());
       }
-      subStepText.setText(subText.text());
-      showThenStepLayout();
+      InstructionLoader instructionLoader = createInstructionLoader(subStepText, subText);
+      if (instructionLoader != null) {
+        instructionLoader.loadInstruction();
+      }
+      showSubLayout();
     } else {
-      hideThenStepLayout();
+      hideSubLayout();
     }
   }
 
@@ -693,14 +696,14 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     return turnLaneLayout.getVisibility() != VISIBLE && subText != null;
   }
 
-  private void showThenStepLayout() {
+  private void showSubLayout() {
     if (subStepLayout.getVisibility() == GONE) {
       beginDelayedTransition();
       subStepLayout.setVisibility(VISIBLE);
     }
   }
 
-  private void hideThenStepLayout() {
+  private void hideSubLayout() {
     if (subStepLayout.getVisibility() == VISIBLE) {
       beginDelayedTransition();
       subStepLayout.setVisibility(GONE);
