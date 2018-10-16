@@ -695,7 +695,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   private boolean shouldShowSubStep(@Nullable BannerText subText) {
-    return turnLaneLayout.getVisibility() != VISIBLE && subText != null;
+    return turnLaneLayout.getVisibility() != VISIBLE
+      && subText != null
+      && subText.type() != null;
   }
 
   private void showSubLayout() {
