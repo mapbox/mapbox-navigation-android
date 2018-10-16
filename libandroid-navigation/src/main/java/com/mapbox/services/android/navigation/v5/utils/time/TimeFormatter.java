@@ -18,6 +18,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import timber.log.Timber;
+
 public class TimeFormatter {
 
   private static final String TIME_STRING_FORMAT = " %s ";
@@ -33,7 +35,8 @@ public class TimeFormatter {
     long seconds = (long) routeDuration;
 
     if (seconds < 0) {
-      throw new IllegalArgumentException("Duration must be greater than zero.");
+      Timber.e("Duration must be greater than zero. Invalid duration %s", seconds);
+      seconds = 0L;
     }
 
     long days = TimeUnit.SECONDS.toDays(seconds);
