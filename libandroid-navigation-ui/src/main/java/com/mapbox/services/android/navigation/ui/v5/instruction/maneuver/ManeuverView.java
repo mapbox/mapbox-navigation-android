@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.instruction.maneuver;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PointF;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
@@ -100,7 +101,7 @@ public class ManeuverView extends View {
     initManeuverColor();
   }
 
-  public void setManeuverTypeAndModifier(String maneuverType, String maneuverModifier) {
+  public void setManeuverTypeAndModifier(@NonNull String maneuverType, String maneuverModifier) {
     if (isNewTypeOrModifier(maneuverType, maneuverModifier)) {
       this.maneuverType = maneuverType;
       this.maneuverModifier = maneuverModifier;
@@ -158,6 +159,9 @@ public class ManeuverView extends View {
   }
 
   private boolean isNewTypeOrModifier(String maneuverType, String maneuverModifier) {
+    if (maneuverType == null) {
+      return false;
+    }
     return !TextUtils.equals(this.maneuverType, maneuverType)
       || !TextUtils.equals(this.maneuverModifier, maneuverModifier);
   }
