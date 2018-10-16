@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.AppCompatDelegate;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -27,7 +26,6 @@ public class MapboxNavigationActivity extends AppCompatActivity implements OnNav
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_AppCompat_NoActionBar);
     super.onCreate(savedInstanceState);
-    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
     setContentView(R.layout.activity_navigation);
     navigationView = findViewById(R.id.navigationView);
     navigationView.onCreate(savedInstanceState);
