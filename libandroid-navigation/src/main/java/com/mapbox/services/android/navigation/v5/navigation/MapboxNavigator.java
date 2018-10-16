@@ -62,10 +62,10 @@ class MapboxNavigator {
   FixLocation buildFixLocationFromLocation(Location location) {
     Point rawPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     Date time = new Date(location.getTime());
-    Float speed = location.getSpeed();
-    Float bearing = location.getBearing();
-    Float altitude = (float) location.getAltitude();
-    Float horizontalAccuracy = location.getAccuracy();
+    Float speed = checkFor(location.getSpeed());
+    Float bearing = checkFor(location.getBearing());
+    Float altitude = checkFor((float) location.getAltitude());
+    Float horizontalAccuracy = checkFor(location.getAccuracy());
     String provider = location.getProvider();
 
     return new FixLocation(
@@ -77,5 +77,12 @@ class MapboxNavigator {
       horizontalAccuracy,
       provider
     );
+  }
+
+  private Float checkFor(Float value) {
+    if (value == 0.0) {
+      return null;
+    }
+    return value;
   }
 }
