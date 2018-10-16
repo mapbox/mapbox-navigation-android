@@ -2,14 +2,19 @@ package com.mapbox.services.android.navigation.ui.v5.map;
 
 import android.graphics.Bitmap;
 import android.graphics.PointF;
+import android.location.Location;
 import android.support.annotation.NonNull;
 
 import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.PropertyValue;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +30,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@Config(manifest=Config.NONE)
+@RunWith(RobolectricTestRunner.class)
 public class MapWaynameTest {
 
   @Test
@@ -60,6 +67,9 @@ public class MapWaynameTest {
     WaynameLayoutProvider layoutProvider = mock(WaynameLayoutProvider.class);
     when(layoutProvider.generateLayoutBitmap(roadName)).thenReturn(mock(Bitmap.class));
     MapWayname mapWayname = buildMapWayname(point, layoutProvider, waynameLayer, roads);
+    List<Point> stepPoints = new ArrayList<>();
+    stepPoints.add(mock(Point.class));
+    mapWayname.updateProgress(mock(Location.class), stepPoints);
     mapWayname.updateWaynameVisibility(true, waynameLayer);
 
     mapWayname.updateWaynameWithPoint(point, waynameLayer);
@@ -151,6 +161,9 @@ public class MapWaynameTest {
     when(layoutProvider.generateLayoutBitmap(roadName)).thenReturn(mock(Bitmap.class));
     MapWayname mapWayname = buildMapWayname(point, layoutProvider, waynameLayer, roads);
     mapWayname.updateWaynameVisibility(true, waynameLayer);
+    List<Point> stepPoints = new ArrayList<>();
+    stepPoints.add(mock(Point.class));
+    mapWayname.updateProgress(mock(Location.class), stepPoints);
 
     mapWayname.updateWaynameWithPoint(point, waynameLayer);
 
