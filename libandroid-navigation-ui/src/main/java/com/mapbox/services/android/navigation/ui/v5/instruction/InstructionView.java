@@ -642,7 +642,9 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
   private boolean shouldShowTurnLanes(List<IntersectionLanes> turnLanes,
                                       String maneuverViewModifier, double durationRemaining) {
-    return turnLanes != null && !TextUtils.isEmpty(maneuverViewModifier)
+    return subStepLayout.getVisibility() != VISIBLE
+      && turnLanes != null
+      && !TextUtils.isEmpty(maneuverViewModifier)
       && durationRemaining <= VALID_DURATION_REMAINING;
   }
 
