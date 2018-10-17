@@ -31,6 +31,7 @@ class InstructionListTransitionListener extends TransitionListenerAdapter {
   }
 
   private void onAnimationFinished() {
+    rvInstructions.stopScroll();
     instructionListAdapter.notifyDataSetChanged();
     rvInstructions.smoothScrollToPosition(TOP);
   }
