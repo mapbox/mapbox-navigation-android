@@ -832,6 +832,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private void updateInstructionList(InstructionModel model) {
     RouteProgress routeProgress = model.retrieveProgress();
     boolean isListShowing = instructionListLayout.getVisibility() == VISIBLE;
+    rvInstructions.stopScroll();
     instructionListAdapter.updateBannerListWith(routeProgress, isListShowing);
   }
 }
