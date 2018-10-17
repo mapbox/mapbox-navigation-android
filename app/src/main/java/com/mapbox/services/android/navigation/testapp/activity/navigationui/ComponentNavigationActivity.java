@@ -326,10 +326,10 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
   }
 
   private void initializeLocationEngine() {
-    locationEngine = new FusedLocationEngine(this);
+    locationEngine = new FusedLocationEngine(getApplicationContext());
     locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
     locationEngine.addLocationEngineListener(this);
-    locationEngine.setInterval(1000);
+    locationEngine.setInterval(ONE_SECOND_INTERVAL);
     locationEngine.setFastestInterval(500);
     locationEngine.activate();
     showSnackbar(SEARCHING_FOR_GPS_MESSAGE, BaseTransientBottomBar.LENGTH_SHORT);

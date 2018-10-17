@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.testapp.activity.location;
 
-import android.app.Activity;
+import android.content.Context;
 import android.location.Location;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -21,7 +21,6 @@ public class FusedLocationEngine extends LocationEngine {
 
   private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
   private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 500;
-
   private FusedLocationProviderClient fusedLocationClient;
   private SettingsClient settingsClient;
   private LocationRequest locationRequest;
@@ -31,10 +30,10 @@ public class FusedLocationEngine extends LocationEngine {
   private Location lastLocation = null;
   private final ForwardingLocationCallback forwardingCallback = new ForwardingLocationCallback(this);
 
-  public FusedLocationEngine(@NonNull Activity activity) {
+  public FusedLocationEngine(@NonNull Context context) {
     super();
-    fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
-    settingsClient = LocationServices.getSettingsClient(activity);
+    fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+    settingsClient = LocationServices.getSettingsClient(context);
   }
 
   @Override
@@ -89,6 +88,7 @@ public class FusedLocationEngine extends LocationEngine {
 
   private void createLocationRequest() {
     locationRequest = new LocationRequest();
+    //TODO: unhardcode these
     locationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
     locationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
     locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);

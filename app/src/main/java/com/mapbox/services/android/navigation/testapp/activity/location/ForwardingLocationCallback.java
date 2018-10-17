@@ -5,8 +5,11 @@ import android.location.Location;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationResult;
 
+import java.util.List;
+
 class ForwardingLocationCallback extends LocationCallback {
 
+  private static final int FIRST = 0;
   private final FusedLocationEngine locationEngine;
 
   ForwardingLocationCallback(FusedLocationEngine locationEngine) {
@@ -15,7 +18,11 @@ class ForwardingLocationCallback extends LocationCallback {
 
   @Override
   public void onLocationResult(LocationResult locationResult) {
-    Location location = locationResult.getLastLocation();
-    locationEngine.notifyListenersOnLocationChanged(location);
+    List<Location> locations = locationResult.getLocations();
+    boolean hasLocation = !locations.isEmpty();
+    if (hasLocation) {
+      Location newLocation = locations.get(FIRST);
+      locationEngine.notifyListenersOnLocationChanged(newLocation);
+    }
   }
 }
