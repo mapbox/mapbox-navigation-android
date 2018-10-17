@@ -20,7 +20,6 @@ import android.view.View;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.android.core.location.LocationEnginePriority;
-import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -33,6 +32,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.testapp.activity.location.FusedLocationEngine;
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
@@ -326,11 +326,11 @@ public class ComponentNavigationActivity extends AppCompatActivity implements On
   }
 
   private void initializeLocationEngine() {
-    LocationEngineProvider locationEngineProvider = new LocationEngineProvider(this);
-    locationEngine = locationEngineProvider.obtainBestLocationEngineAvailable();
+    locationEngine = new FusedLocationEngine(getApplicationContext());
     locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
     locationEngine.addLocationEngineListener(this);
-    locationEngine.setFastestInterval(ONE_SECOND_INTERVAL);
+    locationEngine.setInterval(ONE_SECOND_INTERVAL);
+    locationEngine.setFastestInterval(500);
     locationEngine.activate();
     showSnackbar(SEARCHING_FOR_GPS_MESSAGE, BaseTransientBottomBar.LENGTH_SHORT);
   }
