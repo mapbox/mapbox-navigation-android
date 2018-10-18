@@ -27,7 +27,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationHel
 class NavigationRouteProcessor {
 
   private static final int ONE_INDEX = 1;
-  private static final long ONE_SECOND_IN_MILLISECONDS = 1000L;
+  private static final double ONE_SECOND_IN_MILLISECONDS = 1000.0;
   private RouteProgress previousRouteProgress;
   private DirectionsRoute route;
   private RouteLeg currentLeg;
@@ -71,8 +71,7 @@ class NavigationRouteProcessor {
     double routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, legIndex, route);
     double stepDistanceRemaining = status.getRemainingStepDistance();
     double stepDistanceTraveled = currentStep.distance() - stepDistanceRemaining;
-    double legDurationRemaining = status.getRouteState() == RouteState.TRACKING
-      ? status.getRemainingLegDuration() / ONE_SECOND_IN_MILLISECONDS : route.duration();
+    double legDurationRemaining = status.getRemainingLegDuration() / ONE_SECOND_IN_MILLISECONDS;
 
     currentLegAnnotation = createCurrentAnnotation(currentLegAnnotation, currentLeg, legDistanceRemaining);
     StepIntersection currentIntersection = findCurrentIntersection(
