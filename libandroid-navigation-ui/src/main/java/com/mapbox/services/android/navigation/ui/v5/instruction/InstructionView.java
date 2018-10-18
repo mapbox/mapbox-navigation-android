@@ -14,12 +14,10 @@ import android.support.transition.TransitionManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -409,7 +407,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     rvInstructions = findViewById(R.id.rvInstructions);
     soundButton = findViewById(R.id.soundLayout);
     feedbackButton = findViewById(R.id.feedbackLayout);
-    initializeInstructionAutoSize();
   }
 
   /**
@@ -437,17 +434,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         DrawableCompat.setTint(turnLaneBackground, navigationViewListBackgroundColor);
       }
     }
-  }
-
-  /**
-   * Called after we bind the views, this will allow the step instruction {@link TextView}
-   * to automatically re-size based on the length of the text.
-   */
-  private void initializeInstructionAutoSize() {
-    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(upcomingPrimaryText,
-      26, 30, 1, TypedValue.COMPLEX_UNIT_SP);
-    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(upcomingSecondaryText,
-      20, 26, 1, TypedValue.COMPLEX_UNIT_SP);
   }
 
   /**

@@ -28,6 +28,24 @@ class UrlDensityMap extends SparseArray<String> {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
       put(DisplayMetrics.DENSITY_XXXHIGH, FOUR_X + DOT_PNG);
     }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      put(DisplayMetrics.DENSITY_400, THREE_X + DOT_PNG);
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      put(DisplayMetrics.DENSITY_560, FOUR_X + DOT_PNG);
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+      put(DisplayMetrics.DENSITY_280, TWO_X + DOT_PNG);
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      put(DisplayMetrics.DENSITY_360, THREE_X + DOT_PNG);
+      put(DisplayMetrics.DENSITY_420, THREE_X + DOT_PNG);
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+      put(DisplayMetrics.DENSITY_260, TWO_X + DOT_PNG);
+      put(DisplayMetrics.DENSITY_300, TWO_X + DOT_PNG);
+      put(DisplayMetrics.DENSITY_340, THREE_X + DOT_PNG);
+    }
   }
 
   public String get(String url) {

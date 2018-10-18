@@ -15,7 +15,7 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InstructionListPresenter {
+class InstructionListPresenter {
 
   private static final int TWO_LINES = 2;
   private static final int ONE_LINE = 1;
