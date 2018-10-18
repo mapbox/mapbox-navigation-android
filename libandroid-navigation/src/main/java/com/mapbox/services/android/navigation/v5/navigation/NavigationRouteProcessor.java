@@ -106,9 +106,14 @@ class NavigationRouteProcessor {
   }
 
   private void updateSteps(DirectionsRoute route, int legIndex, int stepIndex, int upcomingStepIndex) {
-    currentLeg = route.legs().get(legIndex);
+    List<RouteLeg> legs = route.legs();
+    if (legIndex < legs.size()) {
+      currentLeg = legs.get(legIndex);
+    }
     List<LegStep> steps = currentLeg.steps();
-    currentStep = steps.get(stepIndex);
+    if (stepIndex < steps.size()) {
+      currentStep = steps.get(stepIndex);
+    }
     upcomingStep = upcomingStepIndex < steps.size() - ONE_INDEX ? steps.get(upcomingStepIndex) : null;
   }
 
