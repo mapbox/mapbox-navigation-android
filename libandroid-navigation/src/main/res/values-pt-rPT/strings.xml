@@ -7,6 +7,8 @@
     <string name="meters">m</string>
     <string name="miles">mi</string>
     <string name="feet">ft</string>
+    <string name="eta_format">%s TEC</string>
+
     <!-- Time formatting -->
     <plurals name="numberOfDays">
         <item quantity="one">dia</item>
