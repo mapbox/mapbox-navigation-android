@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.testapp.activity;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,11 +23,11 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
-import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification;
@@ -81,7 +82,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   private MapboxNavigation navigation;
   private DirectionsRoute route;
   private NavigationMapRoute navigationMapRoute;
-  private LocationLayerPlugin locationLayerPlugin;
   private Point destination;
   private Point waypoint;
 
@@ -144,7 +144,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
       ((ReplayRouteLocationEngine) locationEngine).assign(route);
       navigation.setLocationEngine(locationEngine);
-      locationLayerPlugin.setLocationLayerEnabled(true);
+      mapboxMap.getLocationComponent().setLocationComponentEnabled(true);
       navigation.startNavigation(route);
       mapboxMap.removeOnMapClickListener(this);
     }
@@ -165,13 +165,15 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
+  @SuppressLint("MissingPermission")
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
 
-    locationLayerPlugin = new LocationLayerPlugin(mapView, mapboxMap);
-    locationLayerPlugin.setRenderMode(RenderMode.GPS);
-    locationLayerPlugin.setLocationLayerEnabled(false);
+    LocationComponent locationComponent = mapboxMap.getLocationComponent();
+    locationComponent.activateLocationComponent(this);
+    locationComponent.setRenderMode(RenderMode.GPS);
+    locationComponent.setLocationComponentEnabled(false);
     navigationMapRoute = new NavigationMapRoute(navigation, mapView, mapboxMap);
 
     mapboxMap.addOnMapClickListener(this);
@@ -263,7 +265,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    locationLayerPlugin.forceLocationUpdate(location);
+    mapboxMap.getLocationComponent().forceLocationUpdate(location);
     Timber.d("onProgressChange: fraction of route traveled: %f", routeProgress.fractionTraveled());
   }
 
@@ -287,18 +289,12 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   protected void onStart() {
     super.onStart();
     mapView.onStart();
-    if (locationLayerPlugin != null) {
-      locationLayerPlugin.onStart();
-    }
   }
 
   @Override
   protected void onStop() {
     super.onStop();
     mapView.onStop();
-    if (locationLayerPlugin != null) {
-      locationLayerPlugin.onStop();
-    }
   }
 
   @Override

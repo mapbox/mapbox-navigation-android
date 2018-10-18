@@ -34,6 +34,7 @@ import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.activity.HistoryActivity;
 import com.mapbox.services.android.navigation.testapp.activity.location.FusedLocationEngine;
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera;
+import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer;
@@ -131,7 +132,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
     // For navigation logic / processing
     initializeNavigation(mapboxMap);
-    navigationMap.updateCameraTrackingEnabled(false);
+    navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE);
   }
 
   @Override
@@ -156,7 +157,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   @OnClick(R.id.startNavigationFab)
   public void onStartNavigationClick(FloatingActionButton floatingActionButton) {
-    navigationMap.updateCameraTrackingEnabled(true);
+    navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
     // Transition to navigation state
     mapState = MapState.NAVIGATION;
 
@@ -177,7 +178,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   @OnClick(R.id.cancelNavigationFab)
   public void onCancelNavigationClick(FloatingActionButton floatingActionButton) {
-    navigationMap.updateCameraTrackingEnabled(false);
+    navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE);
     // Transition to info state
     mapState = MapState.INFO;
 

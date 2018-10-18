@@ -12,7 +12,6 @@ ext {
       mapboxSdkServices  : '4.0.0',
       mapboxEvents       : '3.4.0',
       mapboxNavigator    : '3.2.0',
-      locationLayerPlugin: '0.10.0',
       autoValue          : '1.5.4',
       autoValueParcel    : '0.2.5',
       junit              : '4.12',
@@ -53,7 +52,6 @@ ext {
       mapboxSdkTurf          : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${version.mapboxSdkServices}",
       mapboxEvents           : "com.mapbox.mapboxsdk:mapbox-android-telemetry:${version.mapboxEvents}",
       mapboxNavigator        : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
-      locationLayerPlugin    : "com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:${version.locationLayerPlugin}",
 
       // AutoValue
       autoValue              : "com.google.auto.value:auto-value:${version.autoValue}",

@@ -1,8 +1,8 @@
 package com.mapbox.services.android.navigation.ui.v5.map;
 
-import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
-import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 
@@ -60,14 +60,14 @@ public class NavigationMapboxMapTest {
   }
 
   @Test
-  public void updateRenderMode_locationLayerIsUpdatedWithRenderMode() {
-    LocationLayerPlugin locationLayer = mock(LocationLayerPlugin.class);
-    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(locationLayer);
+  public void updateRenderMode_locationComponentIsUpdatedWithRenderMode() {
+    LocationComponent locationComponent = mock(LocationComponent.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(locationComponent);
     int renderMode = RenderMode.GPS;
 
     theNavigationMap.updateLocationLayerRenderMode(renderMode);
 
-    verify(locationLayer).setRenderMode(eq(renderMode));
+    verify(locationComponent).setRenderMode(eq(renderMode));
   }
 
   @Test

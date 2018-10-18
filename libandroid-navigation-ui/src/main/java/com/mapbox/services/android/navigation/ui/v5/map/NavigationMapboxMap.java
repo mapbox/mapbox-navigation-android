@@ -15,13 +15,13 @@ import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.LocationComponentOptions;
+import com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerOptions;
-import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
-import com.mapbox.mapboxsdk.plugins.locationlayer.OnCameraTrackingChangedListener;
-import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
@@ -77,7 +77,7 @@ public class NavigationMapboxMap {
   private MapboxMap mapboxMap;
   private NavigationCamera mapCamera;
   private NavigationMapRoute mapRoute;
-  private LocationLayerPlugin locationLayer;
+  private LocationComponent locationComponent;
   private MapPaddingAdjustor mapPaddingAdjustor;
   private MapWayname mapWayname;
   private SymbolLayer waynameLayer;
@@ -93,7 +93,7 @@ public class NavigationMapboxMap {
    */
   public NavigationMapboxMap(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    initializeLocationLayer(mapView, mapboxMap);
+    initializeLocationComponent(mapView, mapboxMap);
     initializeMapPaddingAdjustor(mapView, mapboxMap);
     initializeMapLayerInteractor(mapboxMap);
     initializeWayname(mapView, mapboxMap, layerInteractor, mapPaddingAdjustor);
@@ -107,8 +107,8 @@ public class NavigationMapboxMap {
   }
 
   // Package private (no modifier) for testing purposes
-  NavigationMapboxMap(LocationLayerPlugin locationLayer) {
-    this.locationLayer = locationLayer;
+  NavigationMapboxMap(LocationComponent locationComponent) {
+    this.locationComponent = locationComponent;
   }
 
   // Package private (no modifier) for testing purposes
@@ -147,7 +147,7 @@ public class NavigationMapboxMap {
    * @param location to update the icon and query the map
    */
   public void updateLocation(Location location) {
-    locationLayer.forceLocationUpdate(location);
+    locationComponent.forceLocationUpdate(location);
     updateMapWaynameWithLocation(location);
   }
 
@@ -163,7 +163,7 @@ public class NavigationMapboxMap {
    * @param renderMode GPS, NORMAL, or COMPASS
    */
   public void updateLocationLayerRenderMode(@RenderMode.Mode int renderMode) {
-    locationLayer.setRenderMode(renderMode);
+    locationComponent.setRenderMode(renderMode);
   }
 
   /**
@@ -219,7 +219,6 @@ public class NavigationMapboxMap {
     if (isVisible) {
       updateWaynameView(instanceState.retrieveWayname());
     }
-    updateCameraTrackingEnabled(instanceState.isCameraTracking());
     updateCameraTrackingMode(instanceState.getCameraTrackingMode());
   }
 
@@ -289,18 +288,6 @@ public class NavigationMapboxMap {
   }
 
   /**
-   * Will enable or disable the camera tracking the location updates provided
-   * by {@link MapboxNavigation}.  The camera will only be
-   * tracking if {@link NavigationMapboxMap#addProgressChangeListener(MapboxNavigation)}
-   * has been called.
-   *
-   * @param isEnabled true to track, false to not track
-   */
-  public void updateCameraTrackingEnabled(boolean isEnabled) {
-    mapCamera.updateCameraTrackingLocation(isEnabled);
-  }
-
-  /**
    * Updates the {@link NavigationCamera.TrackingMode} that will be used when camera tracking is enabled.
    *
    * @param trackingMode the tracking mode
@@ -331,10 +318,13 @@ public class NavigationMapboxMap {
   /**
    * Resets the map camera / padding to the last known camera position.
    * <p>
-   * Tracking is also re-enabled.
+   * You can also specify a tracking mode to reset with.  For example if you would like
+   * to reset the camera and continue tracking, you would use {@link NavigationCamera#NAVIGATION_TRACKING_MODE_GPS}.
+   *
+   * @param trackingCameraMode the tracking mode
    */
-  public void resetCameraPosition() {
-    mapCamera.resetCameraPosition();
+  public void resetCameraPositionWith(@NavigationCamera.TrackingMode int trackingCameraMode) {
+    mapCamera.resetCameraPositionWith(trackingCameraMode);
     resetMapPadding();
   }
 
@@ -393,7 +383,6 @@ public class NavigationMapboxMap {
    * accounting for the lifecycle.
    */
   public void onStart() {
-    locationLayer.onStart();
     mapCamera.onStart();
     mapRoute.onStart();
     mapWayname.onStart();
@@ -404,7 +393,6 @@ public class NavigationMapboxMap {
    * accounting for the lifecycle.
    */
   public void onStop() {
-    locationLayer.onStop();
     mapCamera.onStop();
     mapRoute.onStop();
     mapWayname.onStop();
@@ -415,8 +403,8 @@ public class NavigationMapboxMap {
    *
    * @param isVisible true to show, false to hide
    */
-  public void updateLocationLayerVisibilityTo(boolean isVisible) {
-    locationLayer.setLocationLayerEnabled(isVisible);
+  public void updateLocationVisibilityTo(boolean isVisible) {
+    locationComponent.setLocationComponentEnabled(isVisible);
   }
 
   /**
@@ -469,7 +457,7 @@ public class NavigationMapboxMap {
   }
 
   /**
-   * Add a {@link OnCameraTrackingChangedListener} to the {@link LocationLayerPlugin} that is
+   * Add a {@link OnCameraTrackingChangedListener} to the {@link LocationComponent} that is
    * wrapped within this class.
    * <p>
    * This listener will fire any time camera tracking is dismissed or the camera mode is updated.
@@ -477,34 +465,36 @@ public class NavigationMapboxMap {
    * @param listener to be added
    */
   public void addOnCameraTrackingChangedListener(OnCameraTrackingChangedListener listener) {
-    locationLayer.addOnCameraTrackingChangedListener(listener);
+    locationComponent.addOnCameraTrackingChangedListener(listener);
   }
 
   /**
-   * Remove a {@link OnCameraTrackingChangedListener} from the {@link LocationLayerPlugin} that is
+   * Remove a {@link OnCameraTrackingChangedListener} from the {@link LocationComponent} that is
    * wrapped within this class.
    *
    * @param listener to be removed
    */
   public void removeOnCameraTrackingChangedListener(OnCameraTrackingChangedListener listener) {
-    locationLayer.removeOnCameraTrackingChangedListener(listener);
+    locationComponent.removeOnCameraTrackingChangedListener(listener);
   }
 
   public void takeScreenshot(NavigationSnapshotReadyCallback navigationSnapshotReadyCallback) {
     mapboxMap.snapshot(navigationSnapshotReadyCallback);
   }
 
-  private void initializeLocationLayer(MapView mapView, MapboxMap map) {
+  private void initializeLocationComponent(MapView mapView, MapboxMap map) {
     Context context = mapView.getContext();
     int locationLayerStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context,
       R.attr.navigationViewLocationLayerStyle);
 
-    LocationLayerOptions locationLayerOptions =
-      LocationLayerOptions.createFromAttributes(context, locationLayerStyleRes);
-    locationLayerOptions = locationLayerOptions.toBuilder().minZoom(NAVIGATION_MINIMUM_MAP_ZOOM).build();
+    LocationComponentOptions locationComponentOptions =
+      LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
+    locationComponentOptions = locationComponentOptions.toBuilder().minZoom(NAVIGATION_MINIMUM_MAP_ZOOM).build();
 
-    locationLayer = new LocationLayerPlugin(mapView, map, null, locationLayerOptions);
-    locationLayer.setRenderMode(RenderMode.GPS);
+    locationComponent = map.getLocationComponent();
+    locationComponent.activateLocationComponent(context, null, locationComponentOptions);
+    locationComponent.setLocationComponentEnabled(true);
+    locationComponent.setRenderMode(RenderMode.GPS);
   }
 
   private void initializeMapPaddingAdjustor(MapView mapView, MapboxMap mapboxMap) {
@@ -512,7 +502,7 @@ public class NavigationMapboxMap {
   }
 
   private void initializeCamera(MapboxMap map) {
-    mapCamera = new NavigationCamera(map, locationLayer);
+    mapCamera = new NavigationCamera(map, locationComponent);
   }
 
   private void initializeWayname(MapView mapView, MapboxMap mapboxMap, MapLayerInteractor layerInteractor,
