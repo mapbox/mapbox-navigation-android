@@ -9,7 +9,6 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.NavigationStatus;
-import com.mapbox.navigator.RouteState;
 import com.mapbox.navigator.VoiceInstruction;
 import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
