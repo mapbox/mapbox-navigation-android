@@ -39,8 +39,7 @@ class MapboxNavigationNotification implements NavigationNotification {
   private NotificationCompat.Builder notificationBuilder;
   private NotificationManager notificationManager;
   private Notification notification;
-  private RemoteViews collapsedNotificationRemoteViews;
-  private RemoteViews expandedNotificationRemoteViews;
+  private RemoteViews views;
   private MapboxNavigation mapboxNavigation;
   private SpannableString currentDistanceText;
   private DistanceFormatter distanceFormatter;
@@ -113,49 +112,29 @@ class MapboxNavigationNotification implements NavigationNotification {
     }
   }
 
-  private void buildNotification(Context context) {
-    collapsedNotificationRemoteViews = new RemoteViews(context.getPackageName(),
-      R.layout.collapsed_navigation_notification_layout);
-    expandedNotificationRemoteViews = new RemoteViews(context.getPackageName(),
-      R.layout.expanded_navigation_notification_layout);
-
-    PendingIntent pendingOpenIntent = createPendingOpenIntent(context);
-    // Will trigger endNavigationBtnReceiver when clicked
-    PendingIntent pendingCloseIntent = createPendingCloseIntent(context);
-    expandedNotificationRemoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent);
-
-    // Sets up the top bar notification
-    notificationBuilder = new NotificationCompat.Builder(context, NAVIGATION_NOTIFICATION_CHANNEL)
-      .setContentIntent(pendingOpenIntent)
-      .setCategory(NotificationCompat.CATEGORY_SERVICE)
-      .setPriority(NotificationCompat.PRIORITY_MAX)
-      .setSmallIcon(R.drawable.ic_navigation)
-      .setCustomContentView(collapsedNotificationRemoteViews)
-      .setCustomBigContentView(expandedNotificationRemoteViews)
-      .setOngoing(true);
-
-    notification = notificationBuilder.build();
-  }
-
-  private PendingIntent createPendingOpenIntent(Context context) {
-    PackageManager pm = context.getPackageManager();
-    Intent intent = pm.getLaunchIntentForPackage(context.getPackageName());
-    intent.setPackage(null);
-    return PendingIntent.getActivity(context, 0, intent, 0);
-  }
-
   private void registerReceiver(Context context) {
     if (context != null) {
       context.registerReceiver(endNavigationBtnReceiver, new IntentFilter(END_NAVIGATION_ACTION));
     }
   }
 
-  /**
-   * With each location update and new routeProgress, the notification is checked and updated if any
-   * information has changed.
-   *
-   * @param routeProgress the latest RouteProgress object
-   */
+  private void buildNotification(Context context) {
+    PendingIntent pendingOpenIntent = createPendingOpenIntent(context);
+    PendingIntent pendingCloseIntent = createPendingCloseIntent(context);
+
+    views = new RemoteViews(context.getPackageName(), R.layout.navigation_notification_layout);
+    views.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent);
+
+    notificationBuilder = new NotificationCompat.Builder(context, NAVIGATION_NOTIFICATION_CHANNEL)
+      .setContentIntent(pendingOpenIntent)
+      .setCategory(NotificationCompat.CATEGORY_SERVICE)
+      .setPriority(NotificationCompat.PRIORITY_MAX)
+      .setSmallIcon(R.drawable.ic_navigation)
+      .setCustomContentView(views)
+      .setOngoing(true);
+    notification = notificationBuilder.build();
+  }
+
   private void updateNotificationViews(RouteProgress routeProgress) {
     updateInstructionText(routeProgress.currentLegProgress().currentStep());
     updateDistanceText(routeProgress);
@@ -180,8 +159,7 @@ class MapboxNavigationNotification implements NavigationNotification {
   private void updateInstructionText(LegStep step) {
     if (hasInstructions(step) && (instructionText == null || newInstructionText(step))) {
       instructionText = step.bannerInstructions().get(0).primary().text();
-      collapsedNotificationRemoteViews.setTextViewText(R.id.notificationInstructionText, instructionText);
-      expandedNotificationRemoteViews.setTextViewText(R.id.notificationInstructionText, instructionText);
+      views.setTextViewText(R.id.notificationInstructionText, instructionText);
     }
   }
 
@@ -197,8 +175,7 @@ class MapboxNavigationNotification implements NavigationNotification {
     if (currentDistanceText == null || newDistanceText(routeProgress)) {
       currentDistanceText = distanceFormatter.formatDistance(
         routeProgress.currentLegProgress().currentStepProgress().distanceRemaining());
-      collapsedNotificationRemoteViews.setTextViewText(R.id.notificationDistanceText, currentDistanceText);
-      expandedNotificationRemoteViews.setTextViewText(R.id.notificationDistanceText, currentDistanceText);
+      views.setTextViewText(R.id.notificationDistanceText, currentDistanceText);
     }
   }
 
@@ -215,21 +192,26 @@ class MapboxNavigationNotification implements NavigationNotification {
     int timeFormatType = options.timeFormatType();
     String arrivalTime = formatTime(time, durationRemaining, timeFormatType, isTwentyFourHourFormat);
     String formattedArrivalTime = String.format(etaFormat, arrivalTime);
-    collapsedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, formattedArrivalTime);
-    expandedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, formattedArrivalTime);
+    views.setTextViewText(R.id.notificationArrivalText, formattedArrivalTime);
   }
 
   private void updateManeuverImage(LegStep step) {
     if (newManeuverId(step)) {
       int maneuverResource = ManeuverUtils.getManeuverResource(step);
       currentManeuverId = maneuverResource;
-      collapsedNotificationRemoteViews.setImageViewResource(R.id.maneuverImage, maneuverResource);
-      expandedNotificationRemoteViews.setImageViewResource(R.id.maneuverImage, maneuverResource);
+      views.setImageViewResource(R.id.maneuverImage, maneuverResource);
     }
   }
 
   private boolean newManeuverId(LegStep step) {
     return currentManeuverId != ManeuverUtils.getManeuverResource(step);
+  }
+
+  private PendingIntent createPendingOpenIntent(Context context) {
+    PackageManager pm = context.getPackageManager();
+    Intent intent = pm.getLaunchIntentForPackage(context.getPackageName());
+    intent.setPackage(null);
+    return PendingIntent.getActivity(context, 0, intent, 0);
   }
 
   private PendingIntent createPendingCloseIntent(Context context) {
