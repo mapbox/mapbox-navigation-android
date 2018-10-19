@@ -218,8 +218,8 @@ public class RouteUtils {
     if (isValidBannerInstructions(currentStep)) {
       List<BannerInstructions> instructions = sortBannerInstructions(currentStep.bannerInstructions());
       for (BannerInstructions instruction : instructions) {
-        double distanceAlongGeometry = instruction.distanceAlongGeometry();
-        if (distanceAlongGeometry >= stepDistanceRemaining) {
+        int distanceAlongGeometry = (int) instruction.distanceAlongGeometry();
+        if (distanceAlongGeometry >= (int) stepDistanceRemaining) {
           return instruction;
         }
       }

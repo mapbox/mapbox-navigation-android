@@ -26,9 +26,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
-import com.mapbox.api.directions.v5.models.IntersectionLanes;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.services.android.navigation.ui.v5.FeedbackButton;
 import com.mapbox.services.android.navigation.ui.v5.NavigationButton;
@@ -54,8 +54,6 @@ import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
-import java.util.List;
-
 import timber.log.Timber;
 
 /**
@@ -74,7 +72,7 @@ import timber.log.Timber;
  */
 public class InstructionView extends RelativeLayout implements FeedbackBottomSheetListener {
 
-  private static final double VALID_DURATION_REMAINING = 70d;
+  private static final String COMPONENT_TYPE_LANE = "lane";
 
   private ManeuverView upcomingManeuverView;
   private TextView upcomingDistanceText;
@@ -190,7 +188,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
           updateManeuverView(model.retrievePrimaryManeuverType(), model.retrieveSecondaryManeuverModifier(),
             model.retrievePrimaryRoundaboutAngle());
           updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
-          updateSubStep(model.retrieveSubBannerText());
+          updateSubStep(model.retrieveSubBannerText(), model.retrievePrimaryManeuverType());
         }
       }
     });
@@ -246,9 +244,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         return;
       }
       BannerText primary = instructions.primary();
-      updateManeuverView(primary.type(), primary.modifier(), primary.degrees());
+      String primaryManeuverModifier = primary.modifier();
+      updateManeuverView(primary.type(), primaryManeuverModifier, primary.degrees());
       updateDataFromBannerText(primary, instructions.secondary());
-      updateSubStep(instructions.sub());
+      updateSubStep(instructions.sub(), primaryManeuverModifier);
     }
   }
 
@@ -605,63 +604,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     return newStep;
   }
 
-  /**
-   * Looks for turn lane data and populates / shows the turn lane view if found.
-   * If not, hides the turn lane view.
-   *
-   * @param model created with new {@link RouteProgress} holding turn lane data
-   */
-  private void updateTurnLanes(InstructionModel model) {
-    List<IntersectionLanes> turnLanes = model.retrieveTurnLanes();
-    String maneuverViewModifier = model.retrieveUpcomingManeuverModifier();
-    double durationRemaining = model.retrieveProgress().currentLegProgress().currentStepProgress().durationRemaining();
-
-    if (shouldShowTurnLanes(turnLanes, maneuverViewModifier, durationRemaining)) {
-      if (turnLaneLayout.getVisibility() == GONE) {
-        turnLaneAdapter.addTurnLanes(turnLanes, maneuverViewModifier);
-        showTurnLanes();
-      }
-    } else {
-      hideTurnLanes();
-    }
-  }
-
-  private boolean shouldShowTurnLanes(List<IntersectionLanes> turnLanes,
-                                      String maneuverViewModifier, double durationRemaining) {
-    return subStepLayout.getVisibility() != VISIBLE
-      && turnLanes != null
-      && !TextUtils.isEmpty(maneuverViewModifier)
-      && durationRemaining <= VALID_DURATION_REMAINING;
-  }
-
-  /**
-   * Shows turn lane view
-   */
-  private void showTurnLanes() {
-    if (turnLaneLayout.getVisibility() == GONE) {
-      beginDelayedTransition();
-      turnLaneLayout.setVisibility(VISIBLE);
-    }
-  }
-
-  /**
-   * Hides turn lane view
-   */
-  private void hideTurnLanes() {
-    if (turnLaneLayout.getVisibility() == VISIBLE) {
-      beginDelayedTransition();
-      turnLaneLayout.setVisibility(GONE);
-    }
-  }
-
-  /**
-   * Check if the the sub step should be shown.
-   * If true, update the "then" maneuver and the "then" step text.
-   * If false, hide the then layout.
-   *
-   * @param subText to determine if the then step layout should be shown
-   */
-  private void updateSubStep(BannerText subText) {
+  private void updateSubStep(BannerText subText, String primaryManeuverModifier) {
     if (shouldShowSubStep(subText)) {
       String maneuverType = subText.type();
       String maneuverModifier = subText.modifier();
@@ -675,15 +618,23 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         instructionLoader.loadInstruction();
       }
       showSubLayout();
+      return;
     } else {
       hideSubLayout();
+    }
+
+    if (shouldShowTurnLanes(subText, primaryManeuverModifier)) {
+      turnLaneAdapter.addTurnLanes(subText.components(), primaryManeuverModifier);
+      showTurnLanes();
+    } else {
+      hideTurnLanes();
     }
   }
 
   private boolean shouldShowSubStep(@Nullable BannerText subText) {
-    return turnLaneLayout.getVisibility() != VISIBLE
-      && subText != null
-      && subText.type() != null;
+    return subText != null
+      && subText.type() != null
+      && !subText.type().contains(COMPONENT_TYPE_LANE);
   }
 
   private void showSubLayout() {
@@ -697,6 +648,32 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     if (subStepLayout.getVisibility() == VISIBLE) {
       beginDelayedTransition();
       subStepLayout.setVisibility(GONE);
+    }
+  }
+
+  private boolean shouldShowTurnLanes(BannerText subText, String maneuverModifier) {
+    if (!hasComponents(subText) || TextUtils.isEmpty(maneuverModifier)) {
+      return false;
+    }
+    for (BannerComponents components : subText.components()) {
+      if (components.type().equals(COMPONENT_TYPE_LANE)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private void showTurnLanes() {
+    if (turnLaneLayout.getVisibility() == GONE) {
+      beginDelayedTransition();
+      turnLaneLayout.setVisibility(VISIBLE);
+    }
+  }
+
+  private void hideTurnLanes() {
+    if (turnLaneLayout.getVisibility() == VISIBLE) {
+      beginDelayedTransition();
+      turnLaneLayout.setVisibility(GONE);
     }
   }
 
@@ -743,7 +720,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private void updateDataFromInstruction(InstructionModel model) {
     updateDistanceText(model);
     updateInstructionList(model);
-    updateTurnLanes(model);
     if (newStep(model.retrieveProgress())) {
       LegStep upComingStep = model.retrieveProgress().currentLegProgress().upComingStep();
       ImageCoordinator.getInstance().prefetchImageCache(upComingStep);
