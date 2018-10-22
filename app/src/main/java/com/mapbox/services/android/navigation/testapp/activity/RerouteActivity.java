@@ -6,7 +6,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
 
@@ -52,7 +51,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
-public class RerouteActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener,
+public class RerouteActivity extends HistoryActivity implements OnMapReadyCallback, LocationEngineListener,
   Callback<DirectionsResponse>, MapboxMap.OnMapClickListener, NavigationEventListener, OffRouteListener,
   ProgressChangeListener, MilestoneEventListener {
 
@@ -89,6 +88,7 @@ public class RerouteActivity extends AppCompatActivity implements OnMapReadyCall
     navigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken(), options);
     navigation.addNavigationEventListener(this);
     navigation.addMilestoneEventListener(this);
+    addNavigationForHistory(navigation);
 
     instructionView.retrieveSoundButton().show();
     instructionView.retrieveSoundButton().addOnClickListener(

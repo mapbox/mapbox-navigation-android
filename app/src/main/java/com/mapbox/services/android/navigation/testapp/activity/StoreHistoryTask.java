@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.testapp.activity.navigationui;
+package com.mapbox.services.android.navigation.testapp.activity;
 
 import android.os.AsyncTask;
 import android.os.Environment;
