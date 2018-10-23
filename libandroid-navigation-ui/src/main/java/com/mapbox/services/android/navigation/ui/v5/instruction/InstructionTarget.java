@@ -91,6 +91,10 @@ public class InstructionTarget implements Target {
 
   private static CharSequence truncateImageSpan(Spannable instructionSpannable, TextView textView) {
     int availableSpace = textView.getWidth() - textView.getPaddingRight() - textView.getPaddingLeft();
-    return TextUtils.ellipsize(instructionSpannable, textView.getPaint(), availableSpace, TextUtils.TruncateAt.END);
+    if (availableSpace > 0) {
+      return TextUtils.ellipsize(instructionSpannable, textView.getPaint(), availableSpace, TextUtils.TruncateAt.END);
+    } else {
+      return instructionSpannable;
+    }
   }
 }
