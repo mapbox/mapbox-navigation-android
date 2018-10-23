@@ -30,6 +30,7 @@ class MapWayname {
   private MapPaddingAdjustor paddingAdjustor;
   private List<Point> currentStepPoints = new ArrayList<>();
   private Location currentLocation = null;
+  private MapboxNavigation navigation;
   private final MapWaynameProgressChangeListener progressChangeListener = new MapWaynameProgressChangeListener(this);
   private boolean isAutoQueryEnabled;
   private boolean isVisible;
@@ -95,12 +96,22 @@ class MapWayname {
   }
 
   void addProgressChangeListener(MapboxNavigation navigation) {
+    this.navigation = navigation;
     navigation.addProgressChangeListener(progressChangeListener);
+  }
+
+  void onStart() {
+    if (navigation != null) {
+      navigation.addProgressChangeListener(progressChangeListener);
+    }
   }
 
   void onStop() {
     if (isTaskRunning()) {
       filterTask.cancel(true);
+    }
+    if (navigation != null) {
+      navigation.removeProgressChangeListener(progressChangeListener);
     }
   }
 

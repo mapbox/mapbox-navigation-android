@@ -396,6 +396,7 @@ public class NavigationMapboxMap {
     locationLayer.onStart();
     mapCamera.onStart();
     mapRoute.onStart();
+    mapWayname.onStart();
   }
 
   /**
