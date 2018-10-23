@@ -8,25 +8,23 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.mapbox.api.directions.v5.models.IntersectionLanes;
+import com.mapbox.api.directions.v5.models.BannerComponents;
+import com.mapbox.core.utils.TextUtils;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
-import com.mapbox.core.utils.TextUtils;
 
 import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_RIGHT;
 import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_RIGHT_ONLY;
 import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_SLIGHT_RIGHT;
 import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_STRAIGHT;
 import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_STRAIGHT_ONLY;
-import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_STRAIGHT_RIGHT;
 import static com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneViewData.DRAW_LANE_UTURN;
 
 public class TurnLaneView extends View {
 
   private TurnLaneViewData drawData;
   private PointF size;
-  private boolean isValid;
-
+  private boolean isActive;
   private int primaryColor;
   private int secondaryColor;
 
@@ -86,9 +84,6 @@ public class TurnLaneView extends View {
       case DRAW_LANE_RIGHT_ONLY:
         LanesStyleKit.drawLaneRightOnly(canvas, primaryColor, secondaryColor, size);
         break;
-      case DRAW_LANE_STRAIGHT_RIGHT:
-        LanesStyleKit.drawLaneStraightRight(canvas, primaryColor, size);
-        break;
       case DRAW_LANE_STRAIGHT_ONLY:
         LanesStyleKit.drawLaneStraightOnly(canvas, primaryColor, secondaryColor, size);
         break;
@@ -97,21 +92,27 @@ public class TurnLaneView extends View {
         break;
     }
 
-    // Set alpha based on validity
-    setAlpha(!isValid ? 0.4f : 1.0f);
+    setAlpha(!isActive ? 0.4f : 1.0f);
 
-    // Flip if needed
     setScaleX(drawData.shouldBeFlipped() ? -1 : 1);
   }
 
-  public void updateLaneView(@NonNull IntersectionLanes lane, @NonNull String maneuverModifier) {
+  public void updateLaneView(@NonNull BannerComponents lane, @NonNull String maneuverModifier) {
+    if (hasInvalidData(lane)) {
+      return;
+    }
     StringBuilder builder = new StringBuilder();
-    for (String indication : lane.indications()) {
+    for (String indication : lane.directions()) {
       builder.append(indication);
     }
-    this.drawData = new TurnLaneViewData(builder.toString(), maneuverModifier);
-    this.isValid = lane.valid();
+    String laneIndications = builder.toString();
+    this.drawData = new TurnLaneViewData(laneIndications, maneuverModifier);
+    this.isActive = lane.active();
     invalidate();
+  }
+
+  private boolean hasInvalidData(@NonNull BannerComponents lane) {
+    return lane.directions() == null || lane.active() == null;
   }
 
   private void initManeuverColor() {

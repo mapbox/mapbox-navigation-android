@@ -9,13 +9,12 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_STRAIGHT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.TURN_LANE_INDICATION_UTURN;
 
-public class TurnLaneViewData {
+class TurnLaneViewData {
 
   static final String DRAW_LANE_SLIGHT_RIGHT = "draw_lane_slight_right";
   static final String DRAW_LANE_RIGHT = "draw_lane_right";
   static final String DRAW_LANE_STRAIGHT = "draw_lane_straight";
   static final String DRAW_LANE_UTURN = "draw_lane_uturn";
-  static final String DRAW_LANE_STRAIGHT_RIGHT = "draw_lane_straight_right";
   static final String DRAW_LANE_RIGHT_ONLY = "draw_lane_right_only";
   static final String DRAW_LANE_STRAIGHT_ONLY = "draw_lane_straight_only";
 
@@ -84,7 +83,7 @@ public class TurnLaneViewData {
     } else if (maneuverModifier.contains(STEP_MANEUVER_MODIFIER_STRAIGHT)) {
       drawMethod = DRAW_LANE_STRAIGHT_ONLY;
     } else {
-      drawMethod = DRAW_LANE_STRAIGHT_RIGHT;
+      drawMethod = DRAW_LANE_RIGHT_ONLY;
     }
   }
 
