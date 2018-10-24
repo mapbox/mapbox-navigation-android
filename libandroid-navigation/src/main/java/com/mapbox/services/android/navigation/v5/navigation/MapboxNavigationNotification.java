@@ -36,7 +36,6 @@ import static com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter
 class MapboxNavigationNotification implements NavigationNotification {
 
   private static final String END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION";
-  private NotificationCompat.Builder notificationBuilder;
   private NotificationManager notificationManager;
   private Notification notification;
   private RemoteViews views;
@@ -47,6 +46,8 @@ class MapboxNavigationNotification implements NavigationNotification {
   private int currentManeuverId;
   private boolean isTwentyFourHourFormat;
   private String etaFormat;
+  private PendingIntent pendingOpenIntent;
+  private final Context applicationContext;
 
   private BroadcastReceiver endNavigationBtnReceiver = new BroadcastReceiver() {
     @Override
@@ -55,8 +56,9 @@ class MapboxNavigationNotification implements NavigationNotification {
     }
   };
 
-  MapboxNavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
-    initialize(context, mapboxNavigation);
+  MapboxNavigationNotification(Context applicationContext, MapboxNavigation mapboxNavigation) {
+    this.applicationContext = applicationContext;
+    initialize(applicationContext, mapboxNavigation);
   }
 
   @Override
@@ -86,7 +88,7 @@ class MapboxNavigationNotification implements NavigationNotification {
     notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     isTwentyFourHourFormat = DateFormat.is24HourFormat(context);
     createNotificationChannel(context);
-    buildNotification(context);
+    setupNotification(context);
     registerReceiver(context);
   }
 
@@ -118,21 +120,23 @@ class MapboxNavigationNotification implements NavigationNotification {
     }
   }
 
-  private void buildNotification(Context context) {
-    PendingIntent pendingOpenIntent = createPendingOpenIntent(context);
+  private void setupNotification(Context context) {
+    pendingOpenIntent = createPendingOpenIntent(context);
     PendingIntent pendingCloseIntent = createPendingCloseIntent(context);
-
     views = new RemoteViews(context.getPackageName(), R.layout.navigation_notification_layout);
     views.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent);
+    notification = buildNotification(context);
+  }
 
-    notificationBuilder = new NotificationCompat.Builder(context, NAVIGATION_NOTIFICATION_CHANNEL)
+  private Notification buildNotification(Context context) {
+    return new NotificationCompat.Builder(context, NAVIGATION_NOTIFICATION_CHANNEL)
       .setContentIntent(pendingOpenIntent)
       .setCategory(NotificationCompat.CATEGORY_SERVICE)
       .setPriority(NotificationCompat.PRIORITY_MAX)
       .setSmallIcon(R.drawable.ic_navigation)
       .setCustomContentView(views)
-      .setOngoing(true);
-    notification = notificationBuilder.build();
+      .setOngoing(true)
+      .build();
   }
 
   private void updateNotificationViews(RouteProgress routeProgress) {
@@ -144,7 +148,8 @@ class MapboxNavigationNotification implements NavigationNotification {
       : routeProgress.currentLegProgress().currentStep();
     updateManeuverImage(step);
 
-    notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notificationBuilder.build());
+    notification = buildNotification(applicationContext);
+    notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notification);
   }
 
   private void unregisterReceiver(Context context) {
