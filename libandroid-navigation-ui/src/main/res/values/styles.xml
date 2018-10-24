@@ -74,7 +74,7 @@
         <item name="navigationViewMapStyle">@string/navigation_guidance_night</item>
     </style>
     
-    <style name="NavigationLocationLayerStyle" parent="@style/mapbox_LocationLayer">
+    <style name="NavigationLocationLayerStyle" parent="@style/mapbox_LocationComponent">
         <item name="mapbox_trackingAnimationDurationMultiplier">2.0</item>
     </style>
 

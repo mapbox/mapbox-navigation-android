@@ -42,7 +42,6 @@ dependencies {
   // Mapbox Navigation SDK
   implementation project(':libandroid-navigation-ui')
   implementation dependenciesList.mapboxMapSdk
-  implementation dependenciesList.locationLayerPlugin
 
   // Support libraries
   implementation dependenciesList.supportAppcompatV7

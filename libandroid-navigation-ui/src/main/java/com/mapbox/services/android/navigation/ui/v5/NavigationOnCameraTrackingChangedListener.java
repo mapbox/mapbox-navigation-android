@@ -2,7 +2,7 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.support.design.widget.BottomSheetBehavior;
 
-import com.mapbox.mapboxsdk.plugins.locationlayer.OnCameraTrackingChangedListener;
+import com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener;
 
 /**
  * Listener used to detect user interaction with the map while driving.

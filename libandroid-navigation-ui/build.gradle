@@ -48,9 +48,6 @@ dependencies {
   implementation dependenciesList.lifecycleExtensions
   annotationProcessor dependenciesList.lifecycleCompiler
 
-  // Mapbox plugins
-  implementation dependenciesList.locationLayerPlugin
-
   // AutoValues
   annotationProcessor dependenciesList.autoValue
   compileOnly dependenciesList.autoValue

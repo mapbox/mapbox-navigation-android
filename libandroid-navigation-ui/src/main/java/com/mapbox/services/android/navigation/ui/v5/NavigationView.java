@@ -24,6 +24,7 @@ import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.ImageCoordinator;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
@@ -225,17 +226,18 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     return summaryBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN;
   }
 
+
   @Override
-  public void updateCameraTrackingEnabled(boolean isEnabled) {
+  public void updateCameraTrackingMode(int trackingMode) {
     if (navigationMap != null) {
-      navigationMap.updateCameraTrackingEnabled(isEnabled);
+      navigationMap.updateCameraTrackingMode(trackingMode);
     }
   }
 
   @Override
   public void resetCameraPosition() {
     if (navigationMap != null) {
-      navigationMap.resetCameraPosition();
+      navigationMap.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
     }
   }
 

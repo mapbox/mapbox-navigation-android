@@ -22,11 +22,11 @@ import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
-import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
@@ -56,17 +56,15 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   private Point origin = Point.fromLngLat(-122.423579, 37.761689);
   private Point destination = Point.fromLngLat(-122.426183, 37.760872);
   private DirectionsRoute route;
-  private boolean isNavigationRunning;
-  private LocationLayerPlugin locationLayer;
   private LocationEngine locationEngine;
   private NavigationMapRoute mapRoute;
   private MapboxMap mapboxMap;
   private Marker currentMarker;
+  private boolean isNavigationRunning;
   private boolean locationFound;
+  private boolean[] constraintChanged;
   private ConstraintSet navigationMapConstraint;
   private ConstraintSet navigationMapExpandedConstraint;
-  private boolean[] constraintChanged;
-
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -94,9 +92,9 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    this.mapboxMap.setOnMapLongClickListener(this);
+    this.mapboxMap.addOnMapLongClickListener(this);
     initLocationEngine();
-    initLocationLayer();
+    initializeLocationLayer();
     initMapRoute();
     fetchRoute();
   }
@@ -164,9 +162,6 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     super.onStart();
     navigationView.onStart();
     mapView.onStart();
-    if (locationLayer != null) {
-      locationLayer.onStart();
-    }
   }
 
   @Override
@@ -224,9 +219,6 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     super.onStop();
     navigationView.onStop();
     mapView.onStop();
-    if (locationLayer != null) {
-      locationLayer.onStop();
-    }
   }
 
   @Override
@@ -313,9 +305,11 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   }
 
   @SuppressWarnings( {"MissingPermission"})
-  private void initLocationLayer() {
-    locationLayer = new LocationLayerPlugin(mapView, mapboxMap, locationEngine);
-    locationLayer.setRenderMode(RenderMode.COMPASS);
+  private void initializeLocationLayer() {
+    LocationComponent locationComponent = mapboxMap.getLocationComponent();
+    locationComponent.activateLocationComponent(this, locationEngine);
+    locationComponent.setLocationComponentEnabled(true);
+    locationComponent.setRenderMode(RenderMode.COMPASS);
   }
 
   private void initMapRoute() {
