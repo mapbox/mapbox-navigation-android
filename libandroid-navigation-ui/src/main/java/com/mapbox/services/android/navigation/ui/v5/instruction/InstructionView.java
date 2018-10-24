@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -730,27 +731,33 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Looks to see if we have a new instruction text.
    * Sets new instruction text if found.
    */
-  private void updateDataFromBannerText(BannerText primaryBannerText, BannerText secondaryBannerText) {
-    if (primaryBannerText != null) {
-      InstructionLoader instructionLoader = createInstructionLoader(upcomingPrimaryText, primaryBannerText);
-      if (instructionLoader != null) {
-        instructionLoader.loadInstruction();
-      }
+  private void updateDataFromBannerText(@NonNull BannerText primaryBannerText, BannerText secondaryBannerText) {
+    if (secondaryBannerText == null) {
+      loadPrimary(primaryBannerText);
+      return;
     }
-    if (secondaryBannerText != null) {
-      if (upcomingSecondaryText.getVisibility() == GONE) {
-        upcomingSecondaryText.setVisibility(VISIBLE);
-        upcomingPrimaryText.setMaxLines(1);
-        adjustBannerTextVerticalBias(0.65f);
-      }
-      InstructionLoader instructionLoader = createInstructionLoader(upcomingSecondaryText, secondaryBannerText);
-      if (instructionLoader != null) {
-        instructionLoader.loadInstruction();
-      }
-    } else {
-      upcomingPrimaryText.setMaxLines(2);
-      upcomingSecondaryText.setVisibility(GONE);
-      adjustBannerTextVerticalBias(0.5f);
+    loadPrimaryAndSecondary(primaryBannerText, secondaryBannerText);
+  }
+
+  private void loadPrimary(BannerText primaryBannerText) {
+    upcomingPrimaryText.setMaxLines(2);
+    upcomingSecondaryText.setVisibility(GONE);
+    adjustBannerTextVerticalBias(0.5f);
+    loadTextWith(primaryBannerText, upcomingPrimaryText);
+  }
+
+  private void loadPrimaryAndSecondary(BannerText primaryBannerText, BannerText secondaryBannerText) {
+    upcomingPrimaryText.setMaxLines(1);
+    upcomingSecondaryText.setVisibility(VISIBLE);
+    adjustBannerTextVerticalBias(0.65f);
+    loadTextWith(primaryBannerText, upcomingPrimaryText);
+    loadTextWith(secondaryBannerText, upcomingSecondaryText);
+  }
+
+  private void loadTextWith(BannerText bannerText, TextView textView) {
+    InstructionLoader instructionLoader = createInstructionLoader(textView, bannerText);
+    if (instructionLoader != null) {
+      instructionLoader.loadInstruction();
     }
   }
 
