@@ -878,7 +878,7 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
           stop(12f, 1.3f),
           stop(22f, 2.8f)
         )),
-        PropertyFactory.iconPitchAlignment(Property.ANCHOR_MAP),
+        PropertyFactory.iconPitchAlignment(Property.ICON_PITCH_ALIGNMENT_MAP),
         PropertyFactory.iconAllowOverlap(true),
         PropertyFactory.iconIgnorePlacement(true)
       );
