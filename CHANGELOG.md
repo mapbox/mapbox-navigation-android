@@ -2,6 +2,41 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.22.0 - October 24, 2018
+
+* Replace LocationLayerPlugin with LocationComponent [#1438](https://github.com/mapbox/mapbox-navigation-android/pull/1438)
+* Makes gradle.properties license listing consisting with repo [#1456](https://github.com/mapbox/mapbox-navigation-android/pull/1456)
+* Rebuild MapboxNavigationNotification for each update [#1455](https://github.com/mapbox/mapbox-navigation-android/pull/1455)
+* Update progruard rules to ensure Navigator is kept in release builds [#1454](https://github.com/mapbox/mapbox-navigation-android/pull/1454)
+* Adjust InstructionView primary and secondary loading logic [#1451](https://github.com/mapbox/mapbox-navigation-android/pull/1451)
+* Correct iconSize expression [#1453](https://github.com/mapbox/mapbox-navigation-android/pull/1453)
+* Update InstructionView to consume turn lane data from sub BannerText [#1440](https://github.com/mapbox/mapbox-navigation-android/pull/1440)
+* Fix MapWayname ProgressChangeListener leak [#1442](https://github.com/mapbox/mapbox-navigation-android/pull/1442)
+* Add base HistoryActivity for testing [#1447](https://github.com/mapbox/mapbox-navigation-android/pull/1447)
+* Fix sub BannerText loading shields for first time [#1446](https://github.com/mapbox/mapbox-navigation-android/pull/1446)
+* make use of fixed duration for non tracking statuses [#1437](https://github.com/mapbox/mapbox-navigation-android/pull/1437)
+* Check for valid index before updating steps in NavigationRouteProcessor [#1435](https://github.com/mapbox/mapbox-navigation-android/pull/1435)
+* Update UrlDensityMap for more screen densities [#1436](https://github.com/mapbox/mapbox-navigation-android/pull/1436)
+* Update Transifex latest translations [#1433](https://github.com/mapbox/mapbox-navigation-android/pull/1433)
+* Update Maps SDK 6.6.1 and Events 3.4.0 [#1434](https://github.com/mapbox/mapbox-navigation-android/pull/1434)
+* Stop scrolling before notifying InstructionListAdapter [#1432](https://github.com/mapbox/mapbox-navigation-android/pull/1432)
+* Add FusedLocationEngine to Test App [#1373](https://github.com/mapbox/mapbox-navigation-android/pull/1373)
+* Check for null maneuver type in ManeuverView [#1429](https://github.com/mapbox/mapbox-navigation-android/pull/1429)
+* Revert Shield URL density additions [#1428](https://github.com/mapbox/mapbox-navigation-android/pull/1428)
+* Add no value checks for FixLocation in MapboxNavigator [#1426](https://github.com/mapbox/mapbox-navigation-android/pull/1426)
+* Show turn lanes when sub BannerText is not present [#1427](https://github.com/mapbox/mapbox-navigation-android/pull/14257)
+* Log TimeFormatter error in place of IllegalArgumentException [#1425](https://github.com/mapbox/mapbox-navigation-android/pull/1425)
+* Filter queried Features for map way name [#1156](https://github.com/mapbox/mapbox-navigation-android/pull/1156)
+* Add tunnels functionality [#1392](https://github.com/mapbox/mapbox-navigation-android/pull/1392)
+* Load sub-banner Shield Images [#1418](https://github.com/mapbox/mapbox-navigation-android/pull/1418)
+* Fix shields not showing up for some display densities [#1414](https://github.com/mapbox/mapbox-navigation-android/pull/1414)
+* Bump Android Gradle plugin version to 3.2.1 [#1415](https://github.com/mapbox/mapbox-navigation-android/pull/1415)
+* Added nav-native ETAs [#1412](https://github.com/mapbox/mapbox-navigation-android/pull/1412)
+* Delay start navigation until route received in MockNavigationActivity [#1411](https://github.com/mapbox/mapbox-navigation-android/pull/1411)
+* Update Maps v6.6.0 release [#1310](https://github.com/mapbox/mapbox-navigation-android/pull/1310)
+* Consume Sub BannerText in InstructionView [#1408](https://github.com/mapbox/mapbox-navigation-android/pull/1408)
+* Fix component navigation activity camera issues [#1407](https://github.com/mapbox/mapbox-navigation-android/pull/1407)
+
 ### v0.21.0 - October 5, 2018
 
 * Add CustomNavigationNotification notification channel [#1388](https://github.com/mapbox/mapbox-navigation-android/pull/1388)
