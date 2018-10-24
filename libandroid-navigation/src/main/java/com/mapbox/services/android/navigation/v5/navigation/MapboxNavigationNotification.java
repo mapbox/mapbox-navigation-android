@@ -36,7 +36,6 @@ import static com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter
 class MapboxNavigationNotification implements NavigationNotification {
 
   private static final String END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION";
-  private NotificationCompat.Builder notificationBuilder;
   private NotificationManager notificationManager;
   private Notification notification;
   private RemoteViews collapsedNotificationRemoteViews;
@@ -48,16 +47,19 @@ class MapboxNavigationNotification implements NavigationNotification {
   private int currentManeuverId;
   private boolean isTwentyFourHourFormat;
   private String etaFormat;
+  private final Context applicationContext;
+  private PendingIntent pendingOpenIntent;
 
   private BroadcastReceiver endNavigationBtnReceiver = new BroadcastReceiver() {
     @Override
-    public void onReceive(final Context context, final Intent intent) {
+    public void onReceive(final Context applicationContext, final Intent intent) {
       MapboxNavigationNotification.this.onEndNavigationBtnClick();
     }
   };
 
-  MapboxNavigationNotification(Context context, MapboxNavigation mapboxNavigation) {
-    initialize(context, mapboxNavigation);
+  MapboxNavigationNotification(Context applicationContext, MapboxNavigation mapboxNavigation) {
+    this.applicationContext = applicationContext;
+    initialize(applicationContext, mapboxNavigation);
   }
 
   @Override
@@ -76,86 +78,84 @@ class MapboxNavigationNotification implements NavigationNotification {
   }
 
   @Override
-  public void onNavigationStopped(Context context) {
-    unregisterReceiver(context);
+  public void onNavigationStopped(Context applicationContext) {
+    unregisterReceiver(applicationContext);
   }
 
-  private void initialize(Context context, MapboxNavigation mapboxNavigation) {
+  private void initialize(Context applicationContext, MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
-    etaFormat = context.getString(R.string.eta_format);
-    initializeDistanceFormatter(context, mapboxNavigation);
-    notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-    isTwentyFourHourFormat = DateFormat.is24HourFormat(context);
-    createNotificationChannel(context);
-    buildNotification(context);
-    registerReceiver(context);
+    etaFormat = applicationContext.getString(R.string.eta_format);
+    initializeDistanceFormatter(applicationContext, mapboxNavigation);
+    notificationManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
+    isTwentyFourHourFormat = DateFormat.is24HourFormat(applicationContext);
+
+    collapsedNotificationRemoteViews = new RemoteViews(applicationContext.getPackageName(),
+      R.layout.collapsed_navigation_notification_layout);
+    expandedNotificationRemoteViews = new RemoteViews(applicationContext.getPackageName(),
+      R.layout.expanded_navigation_notification_layout);
+
+    pendingOpenIntent = createPendingOpenIntent(applicationContext);
+    PendingIntent pendingCloseIntent = createPendingCloseIntent(applicationContext);
+    expandedNotificationRemoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent);
+
+    registerReceiver(applicationContext);
+    createNotificationChannel(applicationContext);
+    notification = buildNotification(applicationContext);
   }
 
-  private void initializeDistanceFormatter(Context context, MapboxNavigation mapboxNavigation) {
+  private void initializeDistanceFormatter(Context applicationContext, MapboxNavigation mapboxNavigation) {
     RouteOptions routeOptions = mapboxNavigation.getRoute().routeOptions();
     LocaleUtils localeUtils = new LocaleUtils();
-    String language = localeUtils.inferDeviceLanguage(context);
-    String unitType = localeUtils.getUnitTypeForDeviceLocale(context);
+    String language = localeUtils.inferDeviceLanguage(applicationContext);
+    String unitType = localeUtils.getUnitTypeForDeviceLocale(applicationContext);
     if (routeOptions != null) {
       language = routeOptions.language();
       unitType = routeOptions.voiceUnits();
     }
     MapboxNavigationOptions mapboxNavigationOptions = mapboxNavigation.options();
-    distanceFormatter = new DistanceFormatter(context, language, unitType, mapboxNavigationOptions.roundingIncrement());
+    int roundingIncrement = mapboxNavigationOptions.roundingIncrement();
+    distanceFormatter = new DistanceFormatter(applicationContext, language, unitType, roundingIncrement);
   }
 
-  private void createNotificationChannel(Context context) {
+  private void createNotificationChannel(Context applicationContext) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       NotificationChannel notificationChannel = new NotificationChannel(
-        NAVIGATION_NOTIFICATION_CHANNEL, context.getString(R.string.channel_name),
+        NAVIGATION_NOTIFICATION_CHANNEL, applicationContext.getString(R.string.channel_name),
         NotificationManager.IMPORTANCE_LOW);
       notificationManager.createNotificationChannel(notificationChannel);
     }
   }
 
-  private void buildNotification(Context context) {
-    collapsedNotificationRemoteViews = new RemoteViews(context.getPackageName(),
-      R.layout.collapsed_navigation_notification_layout);
-    expandedNotificationRemoteViews = new RemoteViews(context.getPackageName(),
-      R.layout.expanded_navigation_notification_layout);
-
-    PendingIntent pendingOpenIntent = createPendingOpenIntent(context);
-    // Will trigger endNavigationBtnReceiver when clicked
-    PendingIntent pendingCloseIntent = createPendingCloseIntent(context);
-    expandedNotificationRemoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent);
-
-    // Sets up the top bar notification
-    notificationBuilder = new NotificationCompat.Builder(context, NAVIGATION_NOTIFICATION_CHANNEL)
+  private Notification buildNotification(Context applicationContext) {
+    return new NotificationCompat.Builder(applicationContext, NAVIGATION_NOTIFICATION_CHANNEL)
       .setContentIntent(pendingOpenIntent)
       .setCategory(NotificationCompat.CATEGORY_SERVICE)
       .setPriority(NotificationCompat.PRIORITY_MAX)
       .setSmallIcon(R.drawable.ic_navigation)
       .setCustomContentView(collapsedNotificationRemoteViews)
       .setCustomBigContentView(expandedNotificationRemoteViews)
-      .setOngoing(true);
-
-    notification = notificationBuilder.build();
+      .setOngoing(true)
+      .build();
   }
 
-  private PendingIntent createPendingOpenIntent(Context context) {
-    PackageManager pm = context.getPackageManager();
-    Intent intent = pm.getLaunchIntentForPackage(context.getPackageName());
+  private PendingIntent createPendingOpenIntent(Context applicationContext) {
+    PackageManager pm = applicationContext.getPackageManager();
+    Intent intent = pm.getLaunchIntentForPackage(applicationContext.getPackageName());
     intent.setPackage(null);
-    return PendingIntent.getActivity(context, 0, intent, 0);
+    return PendingIntent.getActivity(applicationContext, 0, intent, 0);
   }
 
-  private void registerReceiver(Context context) {
-    if (context != null) {
-      context.registerReceiver(endNavigationBtnReceiver, new IntentFilter(END_NAVIGATION_ACTION));
+  private PendingIntent createPendingCloseIntent(Context applicationContext) {
+    Intent endNavigationBtn = new Intent(END_NAVIGATION_ACTION);
+    return PendingIntent.getBroadcast(applicationContext, 0, endNavigationBtn, 0);
+  }
+
+  private void registerReceiver(Context applicationContext) {
+    if (applicationContext != null) {
+      applicationContext.registerReceiver(endNavigationBtnReceiver, new IntentFilter(END_NAVIGATION_ACTION));
     }
   }
 
-  /**
-   * With each location update and new routeProgress, the notification is checked and updated if any
-   * information has changed.
-   *
-   * @param routeProgress the latest RouteProgress object
-   */
   private void updateNotificationViews(RouteProgress routeProgress) {
     updateInstructionText(routeProgress.currentLegProgress().currentStep());
     updateDistanceText(routeProgress);
@@ -165,12 +165,13 @@ class MapboxNavigationNotification implements NavigationNotification {
       : routeProgress.currentLegProgress().currentStep();
     updateManeuverImage(step);
 
-    notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notificationBuilder.build());
+    notification = buildNotification(applicationContext);
+    notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notification);
   }
 
-  private void unregisterReceiver(Context context) {
-    if (context != null) {
-      context.unregisterReceiver(endNavigationBtnReceiver);
+  private void unregisterReceiver(Context applicationContext) {
+    if (applicationContext != null) {
+      applicationContext.unregisterReceiver(endNavigationBtnReceiver);
     }
     if (notificationManager != null) {
       notificationManager.cancel(NAVIGATION_NOTIFICATION_ID);
@@ -230,11 +231,6 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   private boolean newManeuverId(LegStep step) {
     return currentManeuverId != ManeuverUtils.getManeuverResource(step);
-  }
-
-  private PendingIntent createPendingCloseIntent(Context context) {
-    Intent endNavigationBtn = new Intent(END_NAVIGATION_ACTION);
-    return PendingIntent.getBroadcast(context, 0, endNavigationBtn, 0);
   }
 
   private void onEndNavigationBtnClick() {
