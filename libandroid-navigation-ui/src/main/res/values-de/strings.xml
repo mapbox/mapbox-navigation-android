@@ -44,6 +44,12 @@ melden</string>
     <string name="feedback_road_closure">Straße
 gesperrt</string>
 
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="feedback_submitted">Rückmeldung gesendet</string>
+
+    <!-- Shown in off-route scenarios to provide feedback -->
+    <string name="report_problem">Problem melden</string>
+
     <!-- Test app dialog text -->
     <string name="dropoff_dialog_text">Möchtest Du zum nächsten Ziel navigieren?</string>
 
