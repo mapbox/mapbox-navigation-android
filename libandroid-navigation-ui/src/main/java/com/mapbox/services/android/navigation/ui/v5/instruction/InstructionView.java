@@ -116,6 +116,11 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     initialize();
   }
 
+  /**
+   * Adds a listener that is triggered when the instruction list in InstructionView is shown or hidden.
+   *
+   * @param instructionListListener to be set
+   */
   public void setInstructionListListener(InstructionListListener instructionListListener) {
     this.instructionListListener = instructionListListener;
   }
@@ -372,6 +377,16 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   public NavigationButton retrieveFeedbackButton() {
     return feedbackButton;
+  }
+
+  /**
+   * Returns the {@link NavigationAlertView} that is shown during off-route events with
+   * "Report a Problem" text.
+   *
+   * @return alert view that is used in the instruction view
+   */
+  public NavigationAlertView retrieveAlertView() {
+    return alertView;
   }
 
   /**
