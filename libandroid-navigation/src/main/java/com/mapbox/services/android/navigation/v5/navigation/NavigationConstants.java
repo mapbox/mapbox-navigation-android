@@ -118,11 +118,6 @@ public final class NavigationConstants {
   public static final double MINIMUM_DISTANCE_BEFORE_REROUTING = 50;
 
   /**
-   * Text to be shown in AlertView during off-route scenario.
-   */
-  public static final String REPORT_PROBLEM = "Report Problem";
-
-  /**
    * Duration in which the AlertView is shown with the "Report Problem" text.
    */
   public static final long ALERT_VIEW_PROBLEM_DURATION = 10000;
@@ -131,11 +126,6 @@ public final class NavigationConstants {
    * Duration in which the feedback BottomSheet is shown.
    */
   public static final long FEEDBACK_BOTTOM_SHEET_DURATION = 10000;
-
-  /**
-   * Shown in AlertView after a particular feedback item has been selected.
-   */
-  public static final String FEEDBACK_SUBMITTED = "Feedback Submitted";
 
   /**
    * If a set of light / dark themes been set in {@link android.content.SharedPreferences}

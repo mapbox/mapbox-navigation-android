@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
+import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.alert.AlertView;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheetListener;
@@ -19,8 +20,10 @@ import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEven
 import timber.log.Timber;
 
 public class NavigationAlertView extends AlertView implements FeedbackBottomSheetListener {
-  private NavigationViewModel navigationViewModel;
+
   private static final long THREE_SECOND_DELAY_IN_MILLIS = 3000;
+  private NavigationViewModel navigationViewModel;
+  private boolean isEnabled = true;
 
   public NavigationAlertView(Context context) {
     this(context, null);
@@ -47,18 +50,24 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
    * Shows this alert view for when feedback is submitted
    */
   public void showFeedbackSubmitted() {
-    show(NavigationConstants.FEEDBACK_SUBMITTED, THREE_SECOND_DELAY_IN_MILLIS, false);
+    if (!isEnabled) {
+      return;
+    }
+    show(getContext().getString(R.string.feedback_submitted), THREE_SECOND_DELAY_IN_MILLIS, false);
   }
 
   /**
    * Shows this alert view to let user report a problem for the given number of milliseconds
    */
   public void showReportProblem() {
+    if (!isEnabled) {
+      return;
+    }
     final Handler handler = new Handler();
     handler.postDelayed(new Runnable() {
       @Override
       public void run() {
-        show(NavigationConstants.REPORT_PROBLEM,
+        show(getContext().getString(R.string.report_problem),
           NavigationConstants.ALERT_VIEW_PROBLEM_DURATION, true);
       }
     }, THREE_SECOND_DELAY_IN_MILLIS);
@@ -69,6 +78,9 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
    * the proper feedback information is collected or the user dismisses the UI.
    */
   public void showFeedbackBottomSheet() {
+    if (!isEnabled) {
+      return;
+    }
     FragmentManager fragmentManager = obtainSupportFragmentManager();
     if (fragmentManager != null) {
       long duration = NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION;
@@ -76,14 +88,34 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
     }
   }
 
+  /**
+   * This method enables or disables the alert view from being shown during off-route
+   * events.
+   * <p>
+   * Note this will only happen automatically in the context of
+   * the {@link com.mapbox.services.android.navigation.ui.v5.NavigationView} or a {@link NavigationViewModel}
+   * has been added to the instruction view with {@link InstructionView#subscribe(NavigationViewModel)}.
+   *
+   * @param isEnabled true to show during off-route events, false to hide
+   */
+  public void updateEnabled(boolean isEnabled) {
+    this.isEnabled = isEnabled;
+  }
+
   @Override
   public void onFeedbackSelected(FeedbackItem feedbackItem) {
+    if (navigationViewModel == null) {
+      return;
+    }
     navigationViewModel.updateFeedback(feedbackItem);
     showFeedbackSubmitted();
   }
 
   @Override
   public void onFeedbackDismissed() {
+    if (navigationViewModel == null) {
+      return;
+    }
     navigationViewModel.cancelFeedback();
   }
 
@@ -93,7 +125,7 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
     setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        if (isShowingReportProblem()) {
+        if (navigationViewModel != null && isShowingReportProblem()) {
           navigationViewModel.recordFeedback(FeedbackEvent.FEEDBACK_SOURCE_REROUTE);
           showFeedbackBottomSheet();
         }
@@ -113,6 +145,6 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
   }
 
   private boolean isShowingReportProblem() {
-    return getAlertText().equals(NavigationConstants.REPORT_PROBLEM);
+    return getAlertText().equals(getContext().getString(R.string.report_problem));
   }
 }

@@ -27,6 +27,7 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.ImageCoordinator;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
+import com.mapbox.services.android.navigation.ui.v5.instruction.NavigationAlertView;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMapInstanceState;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
@@ -437,6 +438,16 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   public NavigationButton retrieveRecenterButton() {
     return recenterBtn;
+  }
+
+  /**
+   * Returns the {@link NavigationAlertView} that is shown during off-route events with
+   * "Report a Problem" text.
+   *
+   * @return alert view that is used in the instruction view
+   */
+  public NavigationAlertView retrieveAlertView() {
+    return instructionView.retrieveAlertView();
   }
 
   private void initializeView() {
