@@ -40,6 +40,8 @@ android {
 
 dependencies {
   api dependenciesList.mapboxEvents
+  // TODO Remove this line when 4.1.0 gets released
+  api dependenciesList.mapboxSdkCore
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
 

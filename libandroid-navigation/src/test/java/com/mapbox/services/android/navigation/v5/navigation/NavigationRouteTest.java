@@ -173,6 +173,21 @@ public class NavigationRouteTest extends BaseTest {
   }
 
   @Test
+  public void addWaypointTypesIncludedInRequest() {
+    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+      .accessToken(ACCESS_TOKEN)
+      .origin(Point.fromLngLat(1.0, 2.0))
+      .addWaypoint(Point.fromLngLat(4.0, 3.0))
+      .destination(Point.fromLngLat(1.0, 5.0))
+      .profile(DirectionsCriteria.PROFILE_CYCLING)
+      .addWaypointTypes(DirectionsCriteria.BREAK, DirectionsCriteria.THROUGH, DirectionsCriteria.BREAK)
+      .build();
+
+    assertThat(navigationRoute.getCall().request().url().toString(),
+      containsString("break"));
+  }
+
+  @Test
   public void addingPointAndBearingKeepsCorrectOrder() throws Exception {
     NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
       .accessToken(ACCESS_TOKEN)
@@ -223,6 +238,7 @@ public class NavigationRouteTest extends BaseTest {
       .useHills(0.5f)
       .useFerry(0.5f)
       .avoidBadSurfaces(0.5f)
+      .waypointTypes("break;break")
       .build();
 
     NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
@@ -247,5 +263,6 @@ public class NavigationRouteTest extends BaseTest {
     assertThat(request, containsString("use_hills=0.5"));
     assertThat(request, containsString("use_ferry=0.5"));
     assertThat(request, containsString("avoid_bad_surfaces=0.5"));
+    assertThat(request, containsString("break"));
   }
 }
