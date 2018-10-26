@@ -598,6 +598,25 @@ public final class NavigationRoute {
     }
 
     /**
+     * Type of location, accepts  <tt>break</tt> (default), <tt>through</tt> or null.
+     * A <tt>break</tt> is a stop, so the first and last locations must be of type <tt>break</tt>.
+     * A <tt>through</tt> location is one that the route path travels through, and is useful to
+     * force a route to go through location.The path is not allowed to reverse direction at the through locations.
+     * If no type is provided, the type is assumed to be a <tt>break</tt>.
+     * If provided, the list of waypoint types must be the same length as the list of waypoints.
+     * However, you can skip a coordinate and show its position in the list with the <tt>;</tt> separator.
+     *
+     * @param waypointTypes null if you'd like the default waypoint types,
+     *                   else one of the options found in
+     *                   {@link com.mapbox.api.directions.v5.DirectionsCriteria.WaypointType}.
+     * @return this builder for chaining options together
+     */
+    public Builder addWaypointTypes(@DirectionsCriteria.WaypointType @Nullable String... waypointTypes) {
+      directionsBuilder.addWaypointTypes(waypointTypes);
+      return this;
+    }
+
+    /**
      * Optionally create a {@link Builder} based on all variables
      * from given {@link RouteOptions}.
      * <p>
@@ -679,6 +698,11 @@ public final class NavigationRoute {
 
       if (options.avoidBadSurfaces() != null) {
         directionsBuilder.avoidBadSurfaces(options.avoidBadSurfaces());
+      }
+
+      if (!TextUtils.isEmpty(options.waypointTypes())) {
+        String[] waypointTypes = options.waypointTypes().split(";");
+        directionsBuilder.addWaypointTypes(waypointTypes);
       }
 
       return this;
