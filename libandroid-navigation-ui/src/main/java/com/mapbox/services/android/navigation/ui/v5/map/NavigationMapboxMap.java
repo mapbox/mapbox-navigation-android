@@ -73,6 +73,7 @@ public class NavigationMapboxMap {
   private static final int LAST_INDEX = 0;
   private static final String INCIDENTS_LAYER_ID = "closures";
   private static final String TRAFFIC_LAYER_ID = "traffic";
+  private static final int[] ZERO_MAP_PADDING = {0, 0, 0, 0};
 
   private MapboxMap mapboxMap;
   private NavigationCamera mapCamera;
@@ -193,11 +194,12 @@ public class NavigationMapboxMap {
   public void saveStateWith(String key, Bundle outState) {
     boolean isVisible = mapWayname.isVisible();
     String waynameText = mapWayname.retrieveWayname();
-    boolean isCameraTracking = mapCamera.isTrackingEnabled();
+    int[] mapPadding = mapPaddingAdjustor.retrieveCurrentPadding();
+    boolean isUsingDefault = mapPaddingAdjustor.isUsingDefault();
     @NavigationCamera.TrackingMode
     int cameraTrackingMode = mapCamera.getCameraTrackingMode();
     NavigationMapboxMapInstanceState instanceState = new NavigationMapboxMapInstanceState(
-      isVisible, waynameText, isCameraTracking, cameraTrackingMode
+      isVisible, waynameText, mapPadding, isUsingDefault, cameraTrackingMode
     );
     outState.putParcelable(key, instanceState);
   }
@@ -220,6 +222,12 @@ public class NavigationMapboxMap {
       updateWaynameView(instanceState.retrieveWayname());
     }
     updateCameraTrackingMode(instanceState.getCameraTrackingMode());
+    MapPaddingInstanceState mapPadding = instanceState.retrieveMapPadding();
+    if (mapPadding.shouldUseDefault()) {
+      mapPaddingAdjustor.updatePaddingWithDefault();
+    } else {
+      adjustLocationIconWith(mapPadding.retrieveCurrentPadding());
+    }
   }
 
   /**
@@ -325,7 +333,17 @@ public class NavigationMapboxMap {
    */
   public void resetCameraPositionWith(@NavigationCamera.TrackingMode int trackingCameraMode) {
     mapCamera.resetCameraPositionWith(trackingCameraMode);
-    resetMapPadding();
+  }
+
+  /**
+   * This method resets the map padding to the default padding that is
+   * generated when navigation begins (location icon moved to lower half of the screen) or
+   * the custom padding that was last passed via {@link MapPaddingAdjustor#adjustLocationIconWith(int[])}.
+   * <p>
+   * The custom padding will be used if it exists, otherwise the default will be used.
+   */
+  public void resetPadding() {
+    mapPaddingAdjustor.resetPadding();
   }
 
   /**
@@ -336,7 +354,7 @@ public class NavigationMapboxMap {
    * @param padding for creating the overview camera position
    */
   public void showRouteOverview(int[] padding) {
-    mapPaddingAdjustor.removeAllPadding();
+    mapPaddingAdjustor.updatePaddingWith(ZERO_MAP_PADDING);
     mapCamera.showRouteOverview(padding);
   }
 
@@ -478,6 +496,18 @@ public class NavigationMapboxMap {
     locationComponent.removeOnCameraTrackingChangedListener(listener);
   }
 
+  /**
+   * Use this method to position the location icon on the map.
+   * <p>
+   * For example, to position the icon in the center of the map, you can pass {0, 0, 0, 0} which
+   * eliminates the default padding we provide when navigation begins.
+   *
+   * @param customPadding true if should be centered on the map, false to position above the bottom view
+   */
+  public void adjustLocationIconWith(int[] customPadding) {
+    mapPaddingAdjustor.adjustLocationIconWith(customPadding);
+  }
+
   public void takeScreenshot(NavigationSnapshotReadyCallback navigationSnapshotReadyCallback) {
     mapboxMap.snapshot(navigationSnapshotReadyCallback);
   }
@@ -550,14 +580,6 @@ public class NavigationMapboxMap {
       )
       .withSourceLayer(ROAD_LABEL);
     mapboxMap.addLayerAt(streetsLayer, LAST_INDEX);
-  }
-
-  private void resetMapPadding() {
-    if (mapWayname.isVisible()) {
-      mapPaddingAdjustor.updateTopPaddingWithWayname();
-    } else {
-      mapPaddingAdjustor.updateTopPaddingWithDefault();
-    }
   }
 
   private void initializeRoute(MapView mapView, MapboxMap map) {
