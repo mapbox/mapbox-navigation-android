@@ -81,7 +81,7 @@ class ReplayRouteLocationConverter {
       Location mockedLocation = createMockLocationFrom(point);
 
       if (pointsToCopy.size() >= 2) {
-        double bearing = TurfMeasurement.bearing(point, points.get(1));
+        double bearing = TurfMeasurement.bearing(point, pointsToCopy.get(1));
         mockedLocation.setBearing((float) bearing);
       }
       time += delay * ONE_SECOND_IN_MILLISECONDS;
