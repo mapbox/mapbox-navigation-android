@@ -172,7 +172,7 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
   private GeoJsonSource arrowHeadGeoJsonSource;
   private Feature arrowShaftGeoJsonFeature = Feature.fromGeometry(Point.fromLngLat(0, 0));
   private Feature arrowHeadGeoJsonFeature = Feature.fromGeometry(Point.fromLngLat(0, 0));
-  private ProgressChangeListener progressChangeListener = new MapRouteProgressChangeListener(this);
+  private MapRouteProgressChangeListener progressChangeListener = new MapRouteProgressChangeListener(this);
 
   /**
    * Construct an instance of {@link NavigationMapRoute}.
@@ -413,12 +413,14 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
       addRouteShieldLayer(layerIds.get(layerIds.size() - 2), sourceId, index);
       addRouteLayer(layerIds.get(layerIds.size() - 1), sourceId, index);
     }
+    progressChangeListener.updateVisibility(true);
   }
 
   private void clearRoutes() {
     removeLayerIds();
-    updateArrowLayersVisibilityTo(false);
     clearRouteListData();
+    updateArrowLayersVisibilityTo(false);
+    progressChangeListener.updateVisibility(false);
   }
 
   private void generateFeatureCollectionList(List<DirectionsRoute> directionsRoutes) {

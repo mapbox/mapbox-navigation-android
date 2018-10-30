@@ -11,6 +11,7 @@ import java.util.List;
 class MapRouteProgressChangeListener implements ProgressChangeListener {
 
   private final NavigationMapRoute mapRoute;
+  private boolean isVisible = true;
 
   MapRouteProgressChangeListener(NavigationMapRoute mapRoute) {
     this.mapRoute = mapRoute;
@@ -18,11 +19,18 @@ class MapRouteProgressChangeListener implements ProgressChangeListener {
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
+    if (!isVisible) {
+      return;
+    }
     DirectionsRoute currentRoute = routeProgress.directionsRoute();
     List<DirectionsRoute> directionsRoutes = mapRoute.retrieveDirectionsRoutes();
     int primaryRouteIndex = mapRoute.retrievePrimaryRouteIndex();
     addNewRoute(currentRoute, directionsRoutes, primaryRouteIndex);
     mapRoute.addUpcomingManeuverArrow(routeProgress);
+  }
+
+  void updateVisibility(boolean isVisible) {
+    this.isVisible = isVisible;
   }
 
   private void addNewRoute(DirectionsRoute currentRoute, List<DirectionsRoute> directionsRoutes,
