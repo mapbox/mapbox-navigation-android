@@ -24,6 +24,8 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
@@ -46,6 +48,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
   private static final Point ORIGIN = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
   private static final Point DESTINATION = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
+  private static final int INITIAL_ZOOM = 16;
 
   private NavigationView navigationView;
   private View spacer;
@@ -67,8 +70,12 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
     spacer = findViewById(R.id.spacer);
     setSpeedWidgetAnchor(R.id.summaryBottomSheet);
 
+    CameraPosition initialPosition = new CameraPosition.Builder()
+      .target(new LatLng(ORIGIN.latitude(), ORIGIN.longitude()))
+      .zoom(INITIAL_ZOOM)
+      .build();
     navigationView.onCreate(savedInstanceState);
-    navigationView.initialize(this);
+    navigationView.initialize(this, initialPosition);
   }
 
   @Override

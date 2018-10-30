@@ -143,6 +143,11 @@ public final class NavigationConstants {
   public static final String NAVIGATION_VIEW_DARK_THEME = "navigation_view_dark_theme";
 
   /**
+   * NavigationLauncher key for storing initial map position in Intent
+   */
+  public static final String NAVIGATION_VIEW_INITIAL_MAP_POSITION = "navigation_view_initial_map_position";
+
+  /**
    * In seconds, how quickly {@link com.mapbox.services.android.navigation.v5.route.FasterRouteDetector}
    * will tell {@link RouteProcessorBackgroundThread} to check
    * for a faster {@link com.mapbox.api.directions.v5.models.DirectionsRoute}.

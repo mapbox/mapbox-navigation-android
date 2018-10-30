@@ -65,6 +65,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
   private static final int CHANGE_SETTING_REQUEST_CODE = 1;
+  private static final int INITIAL_ZOOM = 16;
 
   private LocationEngine locationEngine;
   private NavigationMapRoute mapRoute;
@@ -332,9 +333,12 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     NavigationLauncherOptions.Builder optionsBuilder = NavigationLauncherOptions.builder()
       .shouldSimulateRoute(getShouldSimulateRouteFromSharedPreferences())
       .directionsProfile(getRouteProfileFromSharedPreferences());
-
+    CameraPosition initialPosition = new CameraPosition.Builder()
+      .target(new LatLng(currentLocation.latitude(), currentLocation.longitude()))
+      .zoom(INITIAL_ZOOM)
+      .build();
+    optionsBuilder.initialMapCameraPosition(initialPosition);
     optionsBuilder.directionsRoute(route);
-
     NavigationLauncher.startNavigation(this, optionsBuilder.build());
   }
 

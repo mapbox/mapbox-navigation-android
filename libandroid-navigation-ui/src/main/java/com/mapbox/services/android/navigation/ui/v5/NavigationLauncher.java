@@ -44,6 +44,7 @@ public class NavigationLauncher {
     editor.apply();
 
     Intent navigationActivity = new Intent(activity, MapboxNavigationActivity.class);
+    storeInitialMapPosition(options, navigationActivity);
     activity.startActivity(navigationActivity);
   }
 
@@ -85,6 +86,14 @@ public class NavigationLauncher {
       if (options.darkThemeResId() != null) {
         editor.putInt(NavigationConstants.NAVIGATION_VIEW_DARK_THEME, options.darkThemeResId());
       }
+    }
+  }
+
+  private static void storeInitialMapPosition(NavigationLauncherOptions options, Intent navigationActivity) {
+    if (options.initialMapCameraPosition() != null) {
+      navigationActivity.putExtra(
+        NavigationConstants.NAVIGATION_VIEW_INITIAL_MAP_POSITION, options.initialMapCameraPosition()
+      );
     }
   }
 }

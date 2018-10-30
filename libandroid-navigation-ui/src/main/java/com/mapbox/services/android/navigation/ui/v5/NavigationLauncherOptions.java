@@ -1,8 +1,11 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
+import android.support.annotation.Nullable;
+
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
 
 @AutoValue
 public abstract class NavigationLauncherOptions extends NavigationUiOptions {
@@ -10,6 +13,9 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
   public abstract boolean enableOffRouteDetection();
 
   public abstract boolean snapToRoute();
+
+  @Nullable
+  public abstract CameraPosition initialMapCameraPosition();
 
   @AutoValue.Builder
   public abstract static class Builder {
@@ -29,6 +35,8 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
     public abstract Builder enableOffRouteDetection(boolean enableOffRouteDetection);
 
     public abstract Builder snapToRoute(boolean snapToRoute);
+
+    public abstract Builder initialMapCameraPosition(@Nullable CameraPosition initialMapCameraPosition);
 
     public abstract NavigationLauncherOptions build();
   }
