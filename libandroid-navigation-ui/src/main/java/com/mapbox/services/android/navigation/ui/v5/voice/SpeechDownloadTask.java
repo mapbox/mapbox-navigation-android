@@ -43,6 +43,7 @@ class SpeechDownloadTask extends AsyncTask<ResponseBody, Void, File> {
 
       try {
         inputStream = responseBody.byteStream();
+        responseBody.close();
         outputStream = new FileOutputStream(file);
         byte[] buffer = new byte[4096];
         int numOfBufferedBytes;
