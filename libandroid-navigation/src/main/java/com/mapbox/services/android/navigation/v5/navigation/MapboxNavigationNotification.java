@@ -49,6 +49,7 @@ class MapboxNavigationNotification implements NavigationNotification {
   private String etaFormat;
   private final Context applicationContext;
   private PendingIntent pendingOpenIntent;
+  private PendingIntent pendingCloseIntent;
 
   private BroadcastReceiver endNavigationBtnReceiver = new BroadcastReceiver() {
     @Override
@@ -89,14 +90,8 @@ class MapboxNavigationNotification implements NavigationNotification {
     notificationManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
     isTwentyFourHourFormat = DateFormat.is24HourFormat(applicationContext);
 
-    collapsedNotificationRemoteViews = new RemoteViews(applicationContext.getPackageName(),
-      R.layout.collapsed_navigation_notification_layout);
-    expandedNotificationRemoteViews = new RemoteViews(applicationContext.getPackageName(),
-      R.layout.expanded_navigation_notification_layout);
-
     pendingOpenIntent = createPendingOpenIntent(applicationContext);
-    PendingIntent pendingCloseIntent = createPendingCloseIntent(applicationContext);
-    expandedNotificationRemoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent);
+    pendingCloseIntent = createPendingCloseIntent(applicationContext);
 
     registerReceiver(applicationContext);
     createNotificationChannel(applicationContext);
@@ -138,6 +133,14 @@ class MapboxNavigationNotification implements NavigationNotification {
       .build();
   }
 
+  private void buildRemoteViews() {
+    collapsedNotificationRemoteViews = new RemoteViews(applicationContext.getPackageName(),
+      R.layout.collapsed_navigation_notification_layout);
+    expandedNotificationRemoteViews = new RemoteViews(applicationContext.getPackageName(),
+      R.layout.expanded_navigation_notification_layout);
+    expandedNotificationRemoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent);
+  }
+
   private PendingIntent createPendingOpenIntent(Context applicationContext) {
     PackageManager pm = applicationContext.getPackageManager();
     Intent intent = pm.getLaunchIntentForPackage(applicationContext.getPackageName());
@@ -157,6 +160,7 @@ class MapboxNavigationNotification implements NavigationNotification {
   }
 
   private void updateNotificationViews(RouteProgress routeProgress) {
+    buildRemoteViews();
     updateInstructionText(routeProgress.currentLegProgress().currentStep());
     updateDistanceText(routeProgress);
     updateArrivalTime(routeProgress);
