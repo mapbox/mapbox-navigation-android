@@ -238,6 +238,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Override
   public void resetCameraPosition() {
     if (navigationMap != null) {
+      navigationMap.resetPadding();
       navigationMap.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
     }
   }

@@ -9,40 +9,43 @@ public class NavigationMapboxMapInstanceState implements Parcelable {
 
   private final boolean isWaynameVisible;
   private final String waynameText;
-  private final boolean isCameraTracking;
+  private final MapPaddingInstanceState mapPaddingInstanceState;
 
   @NavigationCamera.TrackingMode
   private final int cameraTrackingMode;
 
-  NavigationMapboxMapInstanceState(boolean isWaynameVisible, String waynameText, boolean isCameraTracking,
+  NavigationMapboxMapInstanceState(boolean isWaynameVisible,
+                                   String waynameText,
+                                   int[] currentPadding,
+                                   boolean shouldUseDefaultPadding,
                                    @NavigationCamera.TrackingMode int cameraTrackingMode) {
     this.isWaynameVisible = isWaynameVisible;
     this.waynameText = waynameText;
-    this.isCameraTracking = isCameraTracking;
+    this.mapPaddingInstanceState = new MapPaddingInstanceState(currentPadding, shouldUseDefaultPadding);
     this.cameraTrackingMode = cameraTrackingMode;
   }
 
-  public boolean isWaynameVisible() {
+  boolean isWaynameVisible() {
     return isWaynameVisible;
   }
 
-  public String retrieveWayname() {
+  String retrieveWayname() {
     return waynameText;
   }
 
-  public boolean isCameraTracking() {
-    return isCameraTracking;
+  MapPaddingInstanceState retrieveMapPadding() {
+    return mapPaddingInstanceState;
   }
 
   @NavigationCamera.TrackingMode
-  public int getCameraTrackingMode() {
+  int getCameraTrackingMode() {
     return cameraTrackingMode;
   }
 
   private NavigationMapboxMapInstanceState(Parcel in) {
     isWaynameVisible = in.readByte() != 0;
     waynameText = in.readString();
-    isCameraTracking = in.readByte() != 0;
+    mapPaddingInstanceState = in.readParcelable(MapPaddingInstanceState.class.getClassLoader());
     cameraTrackingMode = in.readInt();
   }
 
@@ -50,7 +53,7 @@ public class NavigationMapboxMapInstanceState implements Parcelable {
   public void writeToParcel(Parcel dest, int flags) {
     dest.writeByte((byte) (isWaynameVisible ? 1 : 0));
     dest.writeString(waynameText);
-    dest.writeByte((byte) (isCameraTracking ? 1 : 0));
+    dest.writeParcelable(mapPaddingInstanceState, flags);
     dest.writeInt(cameraTrackingMode);
   }
 
@@ -61,6 +64,7 @@ public class NavigationMapboxMapInstanceState implements Parcelable {
 
   public static final Creator<NavigationMapboxMapInstanceState> CREATOR =
     new Creator<NavigationMapboxMapInstanceState>() {
+
       @Override
       public NavigationMapboxMapInstanceState createFromParcel(Parcel in) {
         return new NavigationMapboxMapInstanceState(in);

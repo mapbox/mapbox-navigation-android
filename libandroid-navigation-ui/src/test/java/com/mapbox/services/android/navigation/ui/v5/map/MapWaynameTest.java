@@ -98,11 +98,10 @@ public class MapWaynameTest {
     MapLayerInteractor layerInteractor = mock(MapLayerInteractor.class);
     when(layerInteractor.retrieveLayerFromId(MAPBOX_WAYNAME_LAYER)).thenReturn(waynameLayer);
     MapPaddingAdjustor paddingAdjustor = mock(MapPaddingAdjustor.class);
-    MapWayname mapWayname = buildMapWayname(layerInteractor, paddingAdjustor);
 
-    mapWayname.updateWaynameVisibility(false, waynameLayer);
+    buildMapWayname(layerInteractor, paddingAdjustor);
 
-    verify(paddingAdjustor).updateTopPaddingWithDefault();
+    verify(paddingAdjustor).updatePaddingWithDefault();
   }
 
   @Test
@@ -116,7 +115,7 @@ public class MapWaynameTest {
 
     mapWayname.updateWaynameVisibility(true, waynameLayer);
 
-    verify(paddingAdjustor).updateTopPaddingWithWayname();
+    verify(paddingAdjustor).updatePaddingWithDefault();
   }
 
   @Test

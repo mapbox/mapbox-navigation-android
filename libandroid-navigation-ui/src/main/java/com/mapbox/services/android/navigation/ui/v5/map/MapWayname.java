@@ -27,7 +27,6 @@ class MapWayname {
   private WaynameLayoutProvider layoutProvider;
   private MapLayerInteractor layerInteractor;
   private WaynameFeatureFinder featureInteractor;
-  private MapPaddingAdjustor paddingAdjustor;
   private List<Point> currentStepPoints = new ArrayList<>();
   private Location currentLocation = null;
   private MapboxNavigation navigation;
@@ -42,7 +41,7 @@ class MapWayname {
     this.layoutProvider = layoutProvider;
     this.layerInteractor = layerInteractor;
     this.featureInteractor = featureInteractor;
-    this.paddingAdjustor = paddingAdjustor;
+    paddingAdjustor.updatePaddingWithDefault();
   }
 
   void updateWaynameWithPoint(PointF point, SymbolLayer waynameLayer) {
@@ -52,7 +51,6 @@ class MapWayname {
     List<Feature> roads = findRoadLabelFeatures(point);
     boolean shouldBeVisible = !roads.isEmpty();
     adjustWaynameVisibility(shouldBeVisible, waynameLayer);
-    adjustMapPadding(shouldBeVisible);
     if (!shouldBeVisible) {
       return;
     }
@@ -67,7 +65,6 @@ class MapWayname {
 
   void updateWaynameVisibility(boolean isVisible, SymbolLayer waynameLayer) {
     this.isVisible = isVisible;
-    adjustMapPadding(isVisible);
     if (checkWaynameVisibility(isVisible, waynameLayer)) {
       return;
     }
@@ -190,14 +187,6 @@ class MapWayname {
         updateWaynameVisibility(true, waynameLayer);
         updateWaynameLayer(wayname, waynameLayer);
       }
-    }
-  }
-
-  private void adjustMapPadding(boolean isVisible) {
-    if (isVisible) {
-      paddingAdjustor.updateTopPaddingWithWayname();
-    } else {
-      paddingAdjustor.updateTopPaddingWithDefault();
     }
   }
 }
