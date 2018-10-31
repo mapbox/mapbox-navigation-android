@@ -1,17 +1,12 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.location.Location;
-
 import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
 
 import org.junit.Test;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class NavigationLocationEngineUpdaterTest {
 
@@ -47,19 +42,6 @@ public class NavigationLocationEngineUpdaterTest {
     provider.updateLocationEngine(newLocationEngine);
 
     verify(locationEngine).removeLocationEngineListener(eq(listener));
-  }
-
-  @Test
-  public void forceLocationUpdate_nonNullLastLocationIsSent() {
-    LocationEngine locationEngine = mock(LocationEngine.class);
-    when(locationEngine.getLastLocation()).thenReturn(mock(Location.class));
-    NavigationLocationEngineListener listener = mock(NavigationLocationEngineListener.class);
-    when(listener.isValidLocationUpdate(any(Location.class))).thenReturn(true);
-    NavigationLocationEngineUpdater provider = new NavigationLocationEngineUpdater(locationEngine, listener);
-
-    provider.forceLocationUpdate(mock(DirectionsRoute.class));
-
-    verify(listener).onLocationChanged(any(Location.class));
   }
 
   @Test
