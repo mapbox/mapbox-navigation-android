@@ -2,12 +2,14 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -29,7 +31,7 @@ public class MapboxNavigationActivity extends AppCompatActivity implements OnNav
     setContentView(R.layout.activity_navigation);
     navigationView = findViewById(R.id.navigationView);
     navigationView.onCreate(savedInstanceState);
-    navigationView.initialize(this);
+    initialize();
   }
 
   @Override
@@ -114,6 +116,15 @@ public class MapboxNavigationActivity extends AppCompatActivity implements OnNav
   @Override
   public void onNavigationRunning() {
     // Intentionally empty
+  }
+
+  private void initialize() {
+    Parcelable position = getIntent().getParcelableExtra(NavigationConstants.NAVIGATION_VIEW_INITIAL_MAP_POSITION);
+    if (position != null) {
+      navigationView.initialize(this, (CameraPosition) position);
+    } else {
+      navigationView.initialize(this);
+    }
   }
 
   private void extractRoute(NavigationViewOptions.Builder options) {
