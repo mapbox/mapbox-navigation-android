@@ -895,13 +895,13 @@ public class MapboxNavigation implements ServiceConnection {
     RouterResult response = mapboxNavigator.retrieveRouteFor(directionsUri);
     boolean success = response.getSuccess();
     String jsonResponse = response.getJson();
-    if (checkRoute(success, jsonResponse)) {
+    if (checkOfflineRoute(success, jsonResponse)) {
       return null;
     }
     return obtainRouteFor(jsonResponse);
   }
 
-  private boolean checkRoute(boolean isSuccess, String json) {
+  private boolean checkOfflineRoute(boolean isSuccess, String json) {
     if (!isSuccess) {
       Gson gson = new Gson();
       OfflineError error = gson.fromJson(json, OfflineError.class);

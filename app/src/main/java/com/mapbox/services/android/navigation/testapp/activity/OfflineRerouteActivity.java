@@ -37,6 +37,9 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineCriteria;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineNavigationOptions;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineNavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -277,11 +280,14 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   }
 
   private String obtainRouteUri(Point origin, Point destination) {
-    return NavigationRoute.builder(this)
+    NavigationRoute route = NavigationRoute.builder(this)
       .origin(origin)
       .destination(destination)
       .accessToken(Mapbox.getAccessToken())
-      .build().getCall().request().url().toString();
+      .build();
+    OfflineNavigationOptions offlineOptions = OfflineNavigationOptions.builder()
+      .bicycleType(OfflineCriteria.MOUNTAIN).build();
+    return OfflineNavigationRoute.buildUrl(route, offlineOptions);
   }
 
   private void handleNewRoute(DirectionsRoute route) {

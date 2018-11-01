@@ -9,8 +9,7 @@ ext {
 
   version = [
       mapboxMapSdk       : '6.6.2',
-      // TODO Remove SNAPSHOT when 4.1.0 gets released - See https://github.com/mapbox/mapbox-java/pull/895
-      mapboxSdkServices  : '4.1.0-SNAPSHOT',
+      mapboxSdkServices  : '4.0.0',
       mapboxEvents       : '3.4.0',
       mapboxNavigator    : '3.2.1',
       autoValue          : '1.5.4',
@@ -50,10 +49,8 @@ ext {
       // mapbox
       mapboxMapSdk           : "com.mapbox.mapboxsdk:mapbox-android-sdk:${version.mapboxMapSdk}",
       // TODO Remove SNAPSHOTs when 4.1.0 gets released
-      mapboxSdkServices      : "com.mapbox.mapboxsdk:mapbox-sdk-services:4.1.0-20181026.134318-13",
-      mapboxSdkTurf          : "com.mapbox.mapboxsdk:mapbox-sdk-turf:4.1.0-20181026.134326-13",
-      // TODO Remove this line when 4.1.0 gets released
-      mapboxSdkCore          : "com.mapbox.mapboxsdk:mapbox-sdk-core:4.1.0-20181026.134303-13",
+      mapboxSdkServices      : "com.mapbox.mapboxsdk:mapbox-sdk-services:${version.mapboxSdkServices}",
+      mapboxSdkTurf          : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${version.mapboxSdkServices}",
       mapboxEvents           : "com.mapbox.mapboxsdk:mapbox-android-telemetry:${version.mapboxEvents}",
       mapboxNavigator        : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
 
