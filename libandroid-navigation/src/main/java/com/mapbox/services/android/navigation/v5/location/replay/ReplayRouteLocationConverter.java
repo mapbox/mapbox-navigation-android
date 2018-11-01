@@ -50,6 +50,10 @@ class ReplayRouteLocationConverter {
     return mockedLocations;
   }
 
+  boolean isMultiLegRoute() {
+    return route.legs().size() > 1;
+  }
+
   void initializeTime() {
     time = System.currentTimeMillis();
   }
