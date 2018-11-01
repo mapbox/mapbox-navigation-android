@@ -31,7 +31,7 @@ allprojects {
     jcenter()
     maven { url 'https://plugins.gradle.org/m2' }
     maven { url 'https://mapbox.bintray.com/mapbox' }
-    // TODO Remove before merging
+    // TODO Remove SNAPSHOT when 4.1.0 gets released
     maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
   }
 

@@ -37,6 +37,8 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineCriteria;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -119,13 +121,6 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   protected void onStop() {
     super.onStop();
     mapView.onStop();
-
-    shutdownLocationEngine();
-
-    if (navigation != null) {
-      // End the navigation session
-      navigation.stopNavigation();
-    }
   }
 
   @Override
@@ -144,6 +139,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
+    shutdownLocationEngine();
     shutdownNavigation();
   }
 
@@ -163,8 +159,8 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     mockLocationEngine.addLocationEngineListener(this);
     navigation.setLocationEngine(mockLocationEngine);
 
-    String routeUri = obtainRouteUri(origin, destination);
-    route = navigation.findOfflineRouteFor(routeUri);
+    OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
+    route = navigation.findOfflineRoute(offlineRoute);
     handleNewRoute(route);
   }
 
@@ -209,8 +205,8 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     Snackbar.make(contentLayout, "User Off Route", Snackbar.LENGTH_SHORT).show();
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
     Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    String routeUri = obtainRouteUri(newOrigin, newDestination);
-    route = navigation.findOfflineRouteFor(routeUri);
+    OfflineRoute offlineRoute = obtainOfflineRoute(newOrigin, newDestination);
+    route = navigation.findOfflineRoute(offlineRoute);
     handleNewRoute(route);
   }
 
@@ -276,12 +272,14 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
-  private String obtainRouteUri(Point origin, Point destination) {
-    return NavigationRoute.builder(this)
+  private OfflineRoute obtainOfflineRoute(Point origin, Point destination) {
+    NavigationRoute.Builder onlineRouteBuilder = NavigationRoute.builder(this)
       .origin(origin)
       .destination(destination)
-      .accessToken(Mapbox.getAccessToken())
-      .build().getCall().request().url().toString();
+      .accessToken(Mapbox.getAccessToken());
+    OfflineRoute offlineRoute = OfflineRoute.builder(onlineRouteBuilder)
+      .bicycleType(OfflineCriteria.MOUNTAIN).build();
+    return offlineRoute;
   }
 
   private void handleNewRoute(DirectionsRoute route) {
@@ -316,8 +314,10 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void shutdownNavigation() {
-    navigation.removeNavigationEventListener(this);
-    navigation.removeProgressChangeListener(this);
-    navigation.onDestroy();
+    if (navigation != null) {
+      navigation.removeNavigationEventListener(this);
+      navigation.removeProgressChangeListener(this);
+      navigation.onDestroy();
+    }
   }
 }

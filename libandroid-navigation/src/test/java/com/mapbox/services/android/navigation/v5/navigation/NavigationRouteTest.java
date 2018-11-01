@@ -89,105 +89,6 @@ public class NavigationRouteTest extends BaseTest {
   }
 
   @Test
-  public void addBicycleTypeIncludedInRequest() {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
-      .accessToken(ACCESS_TOKEN)
-      .origin(Point.fromLngLat(1.0, 2.0))
-      .destination(Point.fromLngLat(1.0, 5.0))
-      .profile(DirectionsCriteria.PROFILE_CYCLING)
-      .addBicycleType(DirectionsCriteria.ROAD)
-      .build();
-
-    assertThat(navigationRoute.getCall().request().url().toString(),
-      containsString("bicycle_type=Road"));
-  }
-
-  @Test
-  public void addCyclingSpeedIncludedInRequest() {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
-      .accessToken(ACCESS_TOKEN)
-      .origin(Point.fromLngLat(1.0, 2.0))
-      .destination(Point.fromLngLat(1.0, 5.0))
-      .profile(DirectionsCriteria.PROFILE_CYCLING)
-      .addCyclingSpeed(10.0f)
-      .build();
-
-    assertThat(navigationRoute.getCall().request().url().toString(),
-      containsString("cycling_speed=10.0"));
-  }
-
-  @Test
-  public void addUseRoadsIncludedInRequest() {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
-      .accessToken(ACCESS_TOKEN)
-      .origin(Point.fromLngLat(1.0, 2.0))
-      .destination(Point.fromLngLat(1.0, 5.0))
-      .profile(DirectionsCriteria.PROFILE_CYCLING)
-      .addUseRoads(0.5f)
-      .build();
-
-    assertThat(navigationRoute.getCall().request().url().toString(),
-      containsString("use_roads=0.5"));
-  }
-
-  @Test
-  public void addUseHillsIncludedInRequest() {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
-      .accessToken(ACCESS_TOKEN)
-      .origin(Point.fromLngLat(1.0, 2.0))
-      .destination(Point.fromLngLat(1.0, 5.0))
-      .profile(DirectionsCriteria.PROFILE_CYCLING)
-      .addUseHills(0.5f)
-      .build();
-
-    assertThat(navigationRoute.getCall().request().url().toString(),
-      containsString("use_hills=0.5"));
-  }
-
-  @Test
-  public void addUseFerryIncludedInRequest() {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
-      .accessToken(ACCESS_TOKEN)
-      .origin(Point.fromLngLat(1.0, 2.0))
-      .destination(Point.fromLngLat(1.0, 5.0))
-      .profile(DirectionsCriteria.PROFILE_CYCLING)
-      .addUseFerry(0.5f)
-      .build();
-
-    assertThat(navigationRoute.getCall().request().url().toString(),
-      containsString("use_ferry=0.5"));
-  }
-
-  @Test
-  public void addAvoidBadSurfacesIncludedInRequest() {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
-      .accessToken(ACCESS_TOKEN)
-      .origin(Point.fromLngLat(1.0, 2.0))
-      .destination(Point.fromLngLat(1.0, 5.0))
-      .profile(DirectionsCriteria.PROFILE_CYCLING)
-      .addAvoidBadSurfaces(0.5f)
-      .build();
-
-    assertThat(navigationRoute.getCall().request().url().toString(),
-      containsString("avoid_bad_surfaces=0.5"));
-  }
-
-  @Test
-  public void addWaypointTypesIncludedInRequest() {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
-      .accessToken(ACCESS_TOKEN)
-      .origin(Point.fromLngLat(1.0, 2.0))
-      .addWaypoint(Point.fromLngLat(4.0, 3.0))
-      .destination(Point.fromLngLat(1.0, 5.0))
-      .profile(DirectionsCriteria.PROFILE_CYCLING)
-      .addWaypointTypes(DirectionsCriteria.BREAK, DirectionsCriteria.THROUGH, DirectionsCriteria.BREAK)
-      .build();
-
-    assertThat(navigationRoute.getCall().request().url().toString(),
-      containsString("break"));
-  }
-
-  @Test
   public void addingPointAndBearingKeepsCorrectOrder() throws Exception {
     NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
       .accessToken(ACCESS_TOKEN)
@@ -232,13 +133,6 @@ public class NavigationRouteTest extends BaseTest {
       .geometries("mocked_geometries")
       .approaches("curb;unrestricted")
       .waypointNames("Origin;Destination")
-      .bicycleType(DirectionsCriteria.ROAD)
-      .cyclingSpeed(10.0f)
-      .useRoads(0.5f)
-      .useHills(0.5f)
-      .useFerry(0.5f)
-      .avoidBadSurfaces(0.5f)
-      .waypointTypes("break;break")
       .build();
 
     NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
@@ -257,12 +151,5 @@ public class NavigationRouteTest extends BaseTest {
     assertThat(request, containsString("walking"));
     assertThat(request, containsString("curb"));
     assertThat(request, containsString("Origin"));
-    assertThat(request, containsString("bicycle_type=Road"));
-    assertThat(request, containsString("cycling_speed=10.0"));
-    assertThat(request, containsString("use_roads=0.5"));
-    assertThat(request, containsString("use_hills=0.5"));
-    assertThat(request, containsString("use_ferry=0.5"));
-    assertThat(request, containsString("avoid_bad_surfaces=0.5"));
-    assertThat(request, containsString("break"));
   }
 }

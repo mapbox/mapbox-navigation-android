@@ -9,11 +9,9 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.google.gson.Gson;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
-import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.RouterResult;
@@ -719,13 +717,25 @@ public class MapboxNavigation implements ServiceConnection {
     mapboxNavigator.toggleHistory(isEnabled);
   }
 
+  /**
+   * Configures the navigator for getting offline routes
+   *
+   * @param tilesDirPath        directory path where the tiles are located
+   * @param translationsDirPath directory path where the translations are located
+   */
   public void initializeOfflineData(String tilesDirPath, String translationsDirPath) {
     mapboxNavigator.configureRouter(tilesDirPath, translationsDirPath);
   }
 
+  /**
+   * Uses libvalhalla and local tile data to generate mapbox-directions-api-like JSON
+   *
+   * @param route the {@link OfflineRoute} to get a {@link DirectionsRoute} from
+   * @return the offline {@link DirectionsRoute}
+   */
   @Nullable
-  public DirectionsRoute findOfflineRouteFor(@NonNull String directionsUri) {
-    return retrieveOfflineRouteFor(directionsUri);
+  public DirectionsRoute findOfflineRoute(@NonNull OfflineRoute route) {
+    return retrieveOfflineRoute(route);
   }
 
   @Override
@@ -889,28 +899,8 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   @Nullable
-  private DirectionsRoute retrieveOfflineRouteFor(@NonNull String directionsUri) {
-    RouterResult response = mapboxNavigator.retrieveRouteFor(directionsUri);
-    boolean success = response.getSuccess();
-    String jsonResponse = response.getJson();
-    if (checkRoute(success, jsonResponse)) {
-      return null;
-    }
-    return obtainRouteFor(jsonResponse);
-  }
-
-  private boolean checkRoute(boolean isSuccess, String json) {
-    if (!isSuccess) {
-      Gson gson = new Gson();
-      OfflineError error = gson.fromJson(json, OfflineError.class);
-      Timber.e("Error occurred fetching offline route: %s - Code: %d", error.getError(), error.getErrorCode());
-      return true;
-    }
-    return false;
-  }
-
-  private DirectionsRoute obtainRouteFor(String response) {
-    DirectionsRoute route = DirectionsResponse.fromJson(response).routes().get(0);
-    return route;
+  private DirectionsRoute retrieveOfflineRoute(@NonNull OfflineRoute offlineRoute) {
+    RouterResult response = mapboxNavigator.retrieveRouteFor(offlineRoute);
+    return offlineRoute.retrieveOfflineRoute(response);
   }
 }

@@ -117,12 +117,6 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   protected void onStop() {
     super.onStop();
     mapView.onStop();
-
-    shutdownLocationEngine();
-
-    if (navigation != null) {
-      navigation.stopNavigation();
-    }
   }
 
   @Override
@@ -141,6 +135,7 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
+    shutdownLocationEngine();
     shutdownNavigation();
   }
 
