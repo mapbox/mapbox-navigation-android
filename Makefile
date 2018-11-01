@@ -6,6 +6,10 @@ test:
 	./gradlew :libandroid-navigation:test
 	./gradlew :libandroid-navigation-ui:test
 
+build-app-test:
+	./gradlew :app:assembleDebug
+	./gradlew :app:assembleAndroidTest
+
 build-release:
 	./gradlew :libandroid-navigation:assembleRelease
 	./gradlew :libandroid-navigation-ui:assembleRelease

@@ -1,0 +1,2795 @@
+{
+  "distance": 8099.2,
+  "duration": 928.8,
+  "geometry": "y}geiAdax|qCAeNAsGjEDjC@x|@NlCMbEFtC@pHB|SJxDA`m@[tGGnFAhj@W|FCjFEnd@_@rHG`A?bHp@~BBfQDbXZxNAxnAIhY@vWGxGJpJf@jTDpMDxAClFe@nDg@jHeBxB{@jBy@hFsCpBmAxLeJnCkBnCcBfCiAzDeBpBq@|CeA`HcBhDi@~Ec@jBMzEGdBDlBBvBFhDNxMxBxCj@lCx@x@_GPqAh@yC`AuFlA{G~CgOf@aEHkJdEAbJErTAvYAtFhD|YBvD@rr@F`A?tD@jdAJ`_@d@`Nr@fEVrEh@bF~@dE~@fFlA`EnAdDdA|N|FvNtIrCjB~DjCbDvB|DhChElC~d@hYhXrRnt@xe@bIjGfE~ElD~EvCdEtBdEhC~FzB|EhBrFrA`GrAzF`AxFx@lGt@pGj@`G`@bH`@vHX~E`@dITfGTfGHnHLxGLnGHlGTfHb@zGh@|Fp@dGdAxGfAxFnA`GrAvEzBlGhKhX`FtJvFpIbHtIv_G|xFfD`DbQnPzEpEhF`FdBfBrDfDnDbDhInJxJbKfErFz@`A|G~IhAtAxAfB`GdHzBxEdAbDh@vDLfFWdDoArEsAdDeBvBmAr@iDbBsC^wDQkDoAoBmAqBwCeB{DcA_FBqI|AyH`DqGhIoQnf@{q@tBaDzDyGlCuE|CiFnCeE|CaFxLyQtCkE`D{EjCuDhDaFvCgEdIqLdCkDvCaElCmDtD}EfDwDdIkKxCaDdEkEtCyChDmDpAuAvFaFzDkDhFuEdI_GzDuC|EsCbE_CjDqB`FyCjR}Jr\\wJj]{Cz_@a@n\\jBtTjDvW`Ix\\lOvJtGpRlMj_@d\\fb@zc@x]|d@x{@~cAda@pb@p^h^pWtP|P|Kfd@hThZvMny@~Zfn@bOr\\bEb\\zDbHh@~BRnDVlc@lClaB_Afn@~@~fA~JngCz^d_BzYpCrA~ClApOxGvLdIbHvItC`JFbKg@xEw@bEyCbH}E`DaHlAeI}@sGaFeEsKuAaLJ_Kp@mJOqF|CePRy@x@aEbAsEn@_D|AaIzG}SbLKvLrBnJfDnBn@rDp@pATfAAxAKhAMlDuApG_DlPoJfTmNlHoB|EgBoB{DeHkN_IwO}[qo@uTub@wDiImKySmDoGgF{KqN_YkAyE_@o@a@Q}@Uu@Ws@q@i@eAw@cBo@sBc@iDa@wEM{E?_DJaDXmC|AsIfB{J~@oEPoA^mCD}DGsDUkDeAaGe@aBa@sAmAeCuAiA",
+  "weight": 1232.1,
+  "weight_name": "routability",
+  "legs": [
+    {
+      "distance": 8099.2,
+      "duration": 928.8,
+      "summary": "15th Street Northwest, George Washington Memorial Parkway",
+      "steps": [
+        {
+          "distance": 33.0,
+          "duration": 10.1,
+          "geometry": "y}geiAdax|qCAeNAsG",
+          "name": "H Street Northwest",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.034019,
+              38.900205
+            ],
+            "bearing_before": 0.0,
+            "bearing_after": 90.0,
+            "instruction": "Head east on H Street Northwest",
+            "type": "depart",
+            "modifier": "right"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 33.0,
+              "announcement": "Head east on H Street Northwest, then turn right onto 15th Street Northwest",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eHead east on H Street Northwest, then turn right onto \u003csay-as interpret-as\u003d\"address\"\u003e15th\u003c/say-as\u003e Street Northwest\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 33.0,
+              "primary": {
+                "text": "15th Street Northwest",
+                "components": [
+                  {
+                    "text": "15th Street",
+                    "type": "text",
+                    "abbr": "15th St",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "Northwest",
+                    "type": "text",
+                    "abbr": "NW",
+                    "abbr_priority": 1
+                  }
+                ],
+                "type": "turn",
+                "modifier": "right"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 35.2,
+          "intersections": [
+            {
+              "location": [
+                -77.034019,
+                38.900205
+              ],
+              "bearings": [
+                90
+              ],
+              "entry": [
+                true
+              ],
+              "out": 0
+            }
+          ]
+        },
+        {
+          "distance": 1278.7,
+          "duration": 229.79999999999998,
+          "geometry": "}}geiAjiw|qCjEDjC@x|@NlCMbEFtC@pHB|SJxDA`m@[tGGnFAhj@W|FCjFEnd@_@rHG`A?bHp@~BBfQDbXZxNAxnAIhY@vWGxGJpJf@jTDpMDxAClFe@nDg@jHeBxB{@jBy@hFsCpBmAxLeJnCkBnCcBfCiAzDeBpBq@|CeA`HcBhDi@~Ec@jBMzEGdBDlBBvBFhDNxMxBxCj@lCx@",
+          "name": "15th Street Northwest",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.033638,
+              38.900207
+            ],
+            "bearing_before": 88.0,
+            "bearing_after": 180.0,
+            "instruction": "Turn right onto 15th Street Northwest",
+            "type": "turn",
+            "modifier": "right"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 1278.7,
+              "announcement": "Continue on 15th Street Northwest for 1 mile",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eContinue on \u003csay-as interpret-as\u003d\"address\"\u003e15th\u003c/say-as\u003e Street Northwest for 1 mile\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            },
+            {
+              "distanceAlongGeometry": 389.5,
+              "announcement": "In a quarter mile, turn left onto Jefferson Drive Southwest",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eIn a quarter mile, turn left onto Jefferson Drive Southwest\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            },
+            {
+              "distanceAlongGeometry": 83.5,
+              "announcement": "Turn left onto Jefferson Drive Southwest, then turn right onto 14th Street Southwest (US 1)",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eTurn left onto Jefferson Drive Southwest, then turn right onto \u003csay-as interpret-as\u003d\"address\"\u003e14th\u003c/say-as\u003e Street Southwest (US \u003csay-as interpret-as\u003d\"address\"\u003e1\u003c/say-as\u003e)\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 1278.7,
+              "primary": {
+                "text": "Jefferson Drive Southwest",
+                "components": [
+                  {
+                    "text": "Jefferson Drive",
+                    "type": "text",
+                    "abbr": "Jefferson Dr",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "Southwest",
+                    "type": "text",
+                    "abbr": "SW",
+                    "abbr_priority": 1
+                  }
+                ],
+                "type": "turn",
+                "modifier": "left"
+              }
+            },
+            {
+              "distanceAlongGeometry": 83.5,
+              "primary": {
+                "text": "Jefferson Drive Southwest",
+                "components": [
+                  {
+                    "text": "Jefferson Drive",
+                    "type": "text",
+                    "abbr": "Jefferson Dr",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "Southwest",
+                    "type": "text",
+                    "abbr": "SW",
+                    "abbr_priority": 1
+                  }
+                ],
+                "type": "turn",
+                "modifier": "left"
+              },
+              "sub": {
+                "text": "US 1",
+                "components": [
+                  {
+                    "text": "US 1",
+                    "type": "icon",
+                    "imageBaseURL": "https://s3.amazonaws.com/mapbox/shields/v3/us-1"
+                  }
+                ],
+                "type": "turn",
+                "modifier": "right"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 369.70000000000005,
+          "intersections": [
+            {
+              "location": [
+                -77.033638,
+                38.900207
+              ],
+              "bearings": [
+                0,
+                90,
+                180,
+                270
+              ],
+              "entry": [
+                true,
+                true,
+                true,
+                false
+              ],
+              "in": 3,
+              "out": 2
+            },
+            {
+              "location": [
+                -77.033648,
+                38.898802
+              ],
+              "bearings": [
+                0,
+                60,
+                180
+              ],
+              "entry": [
+                false,
+                false,
+                true
+              ],
+              "in": 0,
+              "out": 2
+            },
+            {
+              "location": [
+                -77.033656,
+                38.898314
+              ],
+              "bearings": [
+                0,
+                90,
+                180
+              ],
+              "entry": [
+                false,
+                false,
+                true
+              ],
+              "in": 0,
+              "out": 2,
+              "lanes": [
+                {
+                  "valid": true,
+                  "indications": [
+                    "straight"
+                  ]
+                },
+                {
+                  "valid": true,
+                  "indications": [
+                    "straight"
+                  ]
+                }
+              ]
+            },
+            {
+              "location": [
+                -77.033637,
+                38.897345
+              ],
+              "bearings": [
+                0,
+                90,
+                180
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ],
+              "in": 0,
+              "out": 2,
+              "lanes": [
+                {
+                  "valid": true,
+                  "indications": [
+                    "straight",
+                    "left"
+                  ]
+                },
+                {
+                  "valid": true,
+                  "indications": [
+                    "straight"
+                  ]
+                }
+              ]
+            },
+            {
+              "location": [
+                -77.033622,
+                38.896405
+              ],
+              "bearings": [
+                0,
+                90,
+                180
+              ],
+              "entry": [
+                false,
+                false,
+                true
+              ],
+              "in": 0,
+              "out": 2,
+              "lanes": [
+                {
+                  "valid": true,
+                  "indications": [
+                    "straight"
+                  ]
+                },
+                {
+                  "valid": true,
+                  "indications": [
+                    "straight"
+                  ]
+                }
+              ]
+            },
+            {
+              "location": [
+                -77.033599,
+                38.8955
+              ],
+              "bearings": [
+                0,
+                90,
+                180
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ],
+              "in": 0,
+              "out": 2,
+              "lanes": [
+                {
+                  "valid": false,
+                  "indications": [
+                    "left"
+                  ]
+                },
+                {
+                  "valid": true,
+                  "indications": [
+                    "straight"
+                  ]
+                },
+                {
+                  "valid": true,
+                  "indications": [
+                    "straight"
+                  ]
+                }
+              ]
+            },
+            {
+              "location": [
+                -77.03364,
+                38.892108
+              ],
+              "bearings": [
+                0,
+                90,
+                180,
+                270
+              ],
+              "entry": [
+                false,
+                false,
+                true,
+                true
+              ],
+              "in": 0,
+              "out": 2,
+              "lanes": [
+                {
+                  "valid": true,
+                  "indications": [
+                    "straight"
+                  ]
+                },
+                {
+                  "valid": true,
+                  "indications": [
+                    "straight"
+                  ]
+                },
+                {
+                  "valid": false,
+                  "indications": [
+                    "right"
+                  ]
+                }
+              ]
+            },
+            {
+              "location": [
+                -77.033031,
+                38.89013
+              ],
+              "bearings": [
+                75,
+                165,
+                330
+              ],
+              "entry": [
+                false,
+                true,
+                false
+              ],
+              "in": 2,
+              "out": 1
+            },
+            {
+              "location": [
+                -77.032871,
+                38.889488
+              ],
+              "bearings": [
+                0,
+                180
+              ],
+              "entry": [
+                false,
+                true
+              ],
+              "in": 0,
+              "out": 1
+            }
+          ]
+        },
+        {
+          "distance": 95.3,
+          "duration": 52.7,
+          "geometry": "gxqdiAnav|qCx@_GPqAh@yC`AuFlA{G~CgOf@aEHkJ",
+          "name": "Jefferson Drive Southwest",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.033,
+              38.888852
+            ],
+            "bearing_before": 198.0,
+            "bearing_after": 108.0,
+            "instruction": "Turn left onto Jefferson Drive Southwest",
+            "type": "turn",
+            "modifier": "left"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 27.1,
+              "announcement": "Turn right onto 14th Street Southwest (US 1)",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eTurn right onto \u003csay-as interpret-as\u003d\"address\"\u003e14th\u003c/say-as\u003e Street Southwest (US \u003csay-as interpret-as\u003d\"address\"\u003e1\u003c/say-as\u003e)\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 95.3,
+              "primary": {
+                "text": "US 1",
+                "components": [
+                  {
+                    "text": "US 1",
+                    "type": "icon",
+                    "imageBaseURL": "https://s3.amazonaws.com/mapbox/shields/v3/us-1"
+                  }
+                ],
+                "type": "turn",
+                "modifier": "right"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 75.8,
+          "intersections": [
+            {
+              "location": [
+                -77.033,
+                38.888852
+              ],
+              "bearings": [
+                15,
+                105,
+                195
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ],
+              "in": 0,
+              "out": 1
+            }
+          ]
+        },
+        {
+          "distance": 1397.3,
+          "duration": 103.8,
+          "geometry": "oiqdiAz_t|qCdEAbJErTAvYAtFhD|YBvD@rr@F`A?tD@jdAJ`_@d@`Nr@fEVrEh@bF~@dE~@fFlA`EnAdDdA|N|FvNtIrCjB~DjCbDvB|DhChElC~d@hYhXrRnt@xe@bIjGfE~ElD~EvCdEtBdEhC~FzB|EhBrFrA`GrAzF`AxFx@lGt@pGj@`G`@bH`@vHX~E`@dITfGTfGHnHLxGLnGHlGTfHb@zGh@|Fp@dGdAxGfAxFnA`GrAvEzBlGhKhX",
+          "name": "14th Street Southwest (US 1)",
+          "ref": "US 1",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.03195,
+              38.888616
+            ],
+            "bearing_before": 91.0,
+            "bearing_after": 178.0,
+            "instruction": "Turn right onto 14th Street Southwest (US 1)",
+            "type": "turn",
+            "modifier": "right"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 1397.3,
+              "announcement": "In 1 mile, merge right onto US 1",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eIn 1 mile, merge right onto US \u003csay-as interpret-as\u003d\"address\"\u003e1\u003c/say-as\u003e\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            },
+            {
+              "distanceAlongGeometry": 804.0,
+              "announcement": "In a half mile, merge right onto US 1",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eIn a half mile, merge right onto US \u003csay-as interpret-as\u003d\"address\"\u003e1\u003c/say-as\u003e\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            },
+            {
+              "distanceAlongGeometry": 402.0,
+              "announcement": "Merge right onto US 1",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eMerge right onto US \u003csay-as interpret-as\u003d\"address\"\u003e1\u003c/say-as\u003e\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 1397.3,
+              "primary": {
+                "text": "US 1 / I-395 South",
+                "components": [
+                  {
+                    "text": "US 1",
+                    "type": "icon",
+                    "imageBaseURL": "https://s3.amazonaws.com/mapbox/shields/v3/us-1"
+                  },
+                  {
+                    "text": "/",
+                    "type": "delimiter"
+                  },
+                  {
+                    "text": "I-395",
+                    "type": "icon",
+                    "imageBaseURL": "https://s3.amazonaws.com/mapbox/shields/v3/i-395"
+                  },
+                  {
+                    "text": "South",
+                    "type": "text",
+                    "abbr": "S",
+                    "abbr_priority": 0
+                  }
+                ],
+                "type": "merge",
+                "modifier": "slight right"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 128.2,
+          "intersections": [
+            {
+              "location": [
+                -77.03195,
+                38.888616
+              ],
+              "bearings": [
+                0,
+                90,
+                180,
+                270
+              ],
+              "entry": [
+                true,
+                true,
+                true,
+                false
+              ],
+              "in": 3,
+              "out": 2
+            },
+            {
+              "location": [
+                -77.031944,
+                38.887565
+              ],
+              "bearings": [
+                89,
+                179,
+                181,
+                277,
+                0
+              ],
+              "entry": [
+                true,
+                false,
+                true,
+                true,
+                false
+              ],
+              "in": 4,
+              "out": 1
+            },
+            {
+              "location": [
+                -77.032037,
+                38.885969
+              ],
+              "bearings": [
+                0,
+                90,
+                180
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ],
+              "in": 0,
+              "out": 2
+            },
+            {
+              "location": [
+                -77.032264,
+                38.883473
+              ],
+              "bearings": [
+                8,
+                18,
+                198
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                false,
+                true
+              ],
+              "in": 1,
+              "out": 2
+            },
+            {
+              "location": [
+                -77.034411,
+                38.880404
+              ],
+              "bearings": [
+                30,
+                210,
+                225
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ],
+              "in": 0,
+              "out": 2
+            },
+            {
+              "location": [
+                -77.036552,
+                38.879639
+              ],
+              "bearings": [
+                76,
+                81,
+                266
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                false,
+                true
+              ],
+              "in": 1,
+              "out": 2
+            }
+          ]
+        },
+        {
+          "distance": 751.2,
+          "duration": 56.39999999999999,
+          "geometry": "cw~ciAtva}qC`FtJvFpIbHtIv_G|xFfD`DbQnPzEpEhF`FdBfBrDfDnDbD",
+          "name": "George Mason Memorial Bridge (US 1; I-395 South)",
+          "ref": "US 1; I-395 South",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.038971,
+              38.879106
+            ],
+            "bearing_before": 237.0,
+            "bearing_after": 230.0,
+            "instruction": "Merge right onto US 1",
+            "type": "merge",
+            "modifier": "slight right"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 751.2,
+              "announcement": "In a half mile, take exit 10B towards George Washington Memorial Parkway South",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eIn a half mile, take exit \u003csay-as interpret-as\u003d\"address\"\u003e10B\u003c/say-as\u003e towards George Washington Memorial Parkway South\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            },
+            {
+              "distanceAlongGeometry": 402.0,
+              "announcement": "Take exit 10B, then keep right towards George Washington Memorial Parkway South",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eTake exit \u003csay-as interpret-as\u003d\"address\"\u003e10B\u003c/say-as\u003e, then keep right towards George Washington MemorialParkway South\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 751.2,
+              "primary": {
+                "text": "Exit 10B George Washington Memorial Parkway South",
+                "components": [
+                  {
+                    "text": "Exit",
+                    "type": "exit"
+                  },
+                  {
+                    "text": "10B",
+                    "type": "exit-number"
+                  },
+                  {
+                    "text": "George Washington Memorial Parkway",
+                    "type": "text",
+                    "abbr": "George Washington Mem Pky",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "South",
+                    "type": "text",
+                    "abbr": "S",
+                    "abbr_priority": 1
+                  }
+                ],
+                "type": "off ramp",
+                "modifier": "right"
+              },
+              "secondary": {
+                "text": "Mount Vernon Reagan International Airport",
+                "components": [
+                  {
+                    "text": "Mount",
+                    "type": "text",
+                    "abbr": "Mt",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "Vernon",
+                    "type": "text"
+                  },
+                  {
+                    "text": "Reagan International",
+                    "type": "text",
+                    "abbr": "Reagan Int’l",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "Airport",
+                    "type": "text"
+                  }
+                ],
+                "type": "off ramp",
+                "modifier": "right"
+              }
+            },
+            {
+              "distanceAlongGeometry": 333.0,
+              "primary": {
+                "text": "Exit 10B George Washington Memorial Parkway South",
+                "components": [
+                  {
+                    "text": "Exit",
+                    "type": "exit"
+                  },
+                  {
+                    "text": "10B",
+                    "type": "exit-number"
+                  },
+                  {
+                    "text": "George Washington Memorial Parkway",
+                    "type": "text",
+                    "abbr": "George Washington Mem Pky",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "South",
+                    "type": "text",
+                    "abbr": "S",
+                    "abbr_priority": 1
+                  }
+                ],
+                "type": "off ramp",
+                "modifier": "right"
+              },
+              "secondary": {
+                "text": "Mount Vernon Reagan International Airport",
+                "components": [
+                  {
+                    "text": "Mount",
+                    "type": "text",
+                    "abbr": "Mt",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "Vernon",
+                    "type": "text"
+                  },
+                  {
+                    "text": "Reagan International",
+                    "type": "text",
+                    "abbr": "Reagan Int’l",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "Airport",
+                    "type": "text"
+                  }
+                ],
+                "type": "off ramp",
+                "modifier": "right"
+              },
+              "sub": {
+                "text": "Exit 10B George Washington Memorial Parkway South",
+                "components": [
+                  {
+                    "text": "Exit",
+                    "type": "exit"
+                  },
+                  {
+                    "text": "10B",
+                    "type": "exit-number"
+                  },
+                  {
+                    "text": "George Washington Memorial Parkway",
+                    "type": "text",
+                    "abbr": "George Washington Mem Pky",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "South",
+                    "type": "text",
+                    "abbr": "S",
+                    "abbr_priority": 1
+                  }
+                ],
+                "type": "fork",
+                "modifier": "right"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 62.099999999999994,
+          "intersections": [
+            {
+              "location": [
+                -77.038971,
+                38.879106
+              ],
+              "bearings": [
+                59,
+                63,
+                232
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                false,
+                true
+              ],
+              "in": 0,
+              "out": 2
+            },
+            {
+              "location": [
+                -77.043497,
+                38.874615
+              ],
+              "bearings": [
+                30,
+                210,
+                225
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ],
+              "in": 0,
+              "out": 1
+            },
+            {
+              "location": [
+                -77.044076,
+                38.874014
+              ],
+              "bearings": [
+                30,
+                225
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                true
+              ],
+              "in": 0,
+              "out": 1
+            }
+          ]
+        },
+        {
+          "distance": 70.9,
+          "duration": 4.2,
+          "geometry": "qjtciAjcl}qChInJxJbKfErFz@`A",
+          "name": "",
+          "destinations": "George Washington Memorial Parkway South, Mount Vernon, Reagan International Airport",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.044294,
+              38.873785
+            ],
+            "bearing_before": 215.0,
+            "bearing_after": 219.0,
+            "instruction": "Take exit 10B towards George Washington Memorial Parkway South",
+            "type": "off ramp",
+            "modifier": "slight right"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 70.9,
+              "announcement": "Keep right towards George Washington Memorial Parkway South, then merge left onto George Washington Memorial Parkway",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eKeep right towards George Washington Memorial Parkway South, then merge left onto George Washington Memorial Parkway\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 70.9,
+              "primary": {
+                "text": "Exit 10B George Washington Memorial Parkway South",
+                "components": [
+                  {
+                    "text": "Exit",
+                    "type": "exit"
+                  },
+                  {
+                    "text": "10B",
+                    "type": "exit-number"
+                  },
+                  {
+                    "text": "George Washington Memorial Parkway",
+                    "type": "text",
+                    "abbr": "George Washington Mem Pky",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "South",
+                    "type": "text",
+                    "abbr": "S",
+                    "abbr_priority": 1
+                  }
+                ],
+                "type": "fork",
+                "modifier": "right"
+              },
+              "secondary": {
+                "text": "Mount Vernon Reagan International Airport",
+                "components": [
+                  {
+                    "text": "Mount",
+                    "type": "text",
+                    "abbr": "Mt",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "Vernon",
+                    "type": "text"
+                  },
+                  {
+                    "text": "Reagan International",
+                    "type": "text",
+                    "abbr": "Reagan Int’l",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "Airport",
+                    "type": "text"
+                  }
+                ],
+                "type": "fork",
+                "modifier": "right"
+              },
+              "sub": {
+                "text": "GWMP",
+                "components": [
+                  {
+                    "text": "GWMP",
+                    "type": "text"
+                  }
+                ],
+                "type": "merge",
+                "modifier": "slight left"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 4.3,
+          "intersections": [
+            {
+              "location": [
+                -77.044294,
+                38.873785
+              ],
+              "bearings": [
+                30,
+                210,
+                225
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ],
+              "in": 0,
+              "out": 2
+            },
+            {
+              "location": [
+                -77.044794,
+                38.873331
+              ],
+              "bearings": [
+                30,
+                45,
+                225
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                false,
+                true
+              ],
+              "in": 1,
+              "out": 2
+            }
+          ],
+          "exits": "10B"
+        },
+        {
+          "distance": 281.7,
+          "duration": 86.2,
+          "geometry": "ilsciAtdm}qC|G~IhAtAxAfB`GdHzBxEdAbDh@vDLfFWdDoArEsAdDeBvBmAr@iDbBsC^wDQkDoAoBmAqBwCeB{DcA_FBqI|AyH`DqGhIoQ",
+          "name": "",
+          "destinations": "George Washington Memorial Parkway South, Mount Vernon, Reagan International Airport",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.044827,
+              38.873301
+            ],
+            "bearing_before": 219.0,
+            "bearing_after": 223.0,
+            "instruction": "Keep right towards George Washington Memorial Parkway South",
+            "type": "fork",
+            "modifier": "slight right"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 281.7,
+              "announcement": "Merge left onto George Washington Memorial Parkway",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eMerge left onto George Washington Memorial Parkway\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 281.7,
+              "primary": {
+                "text": "GWMP",
+                "components": [
+                  {
+                    "text": "GWMP",
+                    "type": "text"
+                  }
+                ],
+                "type": "merge",
+                "modifier": "slight left"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 92.0,
+          "intersections": [
+            {
+              "location": [
+                -77.044827,
+                38.873301
+              ],
+              "bearings": [
+                45,
+                210,
+                225
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ],
+              "in": 0,
+              "out": 2
+            }
+          ],
+          "exits": "10B"
+        },
+        {
+          "distance": 2981.2,
+          "duration": 137.2,
+          "geometry": "{hsciAtkm}qCnf@{q@tBaDzDyGlCuE|CiFnCeE|CaFxLyQtCkE`D{EjCuDhDaFvCgEdIqLdCkDvCaElCmDtD}EfDwDdIkKxCaDdEkEtCyChDmDpAuAvFaFzDkDhFuEdI_GzDuC|EsCbE_CjDqB`FyCjR}Jr\\wJj]{Cz_@a@n\\jBtTjDvW`Ix\\lOvJtGpRlMj_@d\\fb@zc@x]|d@x{@~cAda@pb@p^h^pWtP|P|Kfd@hThZvMny@~Zfn@bOr\\bEb\\zDbHh@~BRnDVlc@lClaB_Afn@~@~fA~JngCz^d_BzY",
+          "name": "George Washington Memorial Parkway (GWMP)",
+          "ref": "GWMP",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.044939,
+              38.873246
+            ],
+            "bearing_before": 125.0,
+            "bearing_after": 133.0,
+            "instruction": "Merge left onto George Washington Memorial Parkway",
+            "type": "merge",
+            "modifier": "slight left"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 2981.2,
+              "announcement": "In 2 miles, take the ramp towards VA 233 East: Reagan National Airport",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eIn 2 miles, take the ramp towards VA \u003csay-as interpret-as\u003d\"address\"\u003e233\u003c/say-as\u003e East: Reagan National Airport\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            },
+            {
+              "distanceAlongGeometry": 804.0,
+              "announcement": "In a half mile, take the ramp towards VA 233 East: Reagan National Airport",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eIn a half mile, take the ramp towards VA \u003csay-as interpret-as\u003d\"address\"\u003e233\u003c/say-as\u003e East: Reagan National Airport\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            },
+            {
+              "distanceAlongGeometry": 402.0,
+              "announcement": "Take the ramp towards VA 233 East: Reagan National Airport, then merge left onto VA 233",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eTake the ramp towards VA \u003csay-as interpret-as\u003d\"address\"\u003e233\u003c/say-as\u003e East: Reagan National Airport, then merge left onto VA \u003csay-as interpret-as\u003d\"address\"\u003e233\u003c/say-as\u003e\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 2981.2,
+              "primary": {
+                "text": "VA 233 East",
+                "components": [
+                  {
+                    "text": "VA 233",
+                    "type": "icon",
+                    "imageBaseURL": "https://s3.amazonaws.com/mapbox/shields/v3/va-233"
+                  },
+                  {
+                    "text": "East",
+                    "type": "text",
+                    "abbr": "E",
+                    "abbr_priority": 0
+                  }
+                ],
+                "type": "off ramp",
+                "modifier": "right"
+              },
+              "secondary": {
+                "text": "Reagan National Airport",
+                "components": [
+                  {
+                    "text": "Reagan National",
+                    "type": "text",
+                    "abbr": "Reagan Nat’l",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "Airport",
+                    "type": "text"
+                  }
+                ],
+                "type": "off ramp",
+                "modifier": "right"
+              }
+            },
+            {
+              "distanceAlongGeometry": 543.2,
+              "primary": {
+                "text": "VA 233 East",
+                "components": [
+                  {
+                    "text": "VA 233",
+                    "type": "icon",
+                    "imageBaseURL": "https://s3.amazonaws.com/mapbox/shields/v3/va-233"
+                  },
+                  {
+                    "text": "East",
+                    "type": "text",
+                    "abbr": "E",
+                    "abbr_priority": 0
+                  }
+                ],
+                "type": "off ramp",
+                "modifier": "right"
+              },
+              "secondary": {
+                "text": "Reagan National Airport",
+                "components": [
+                  {
+                    "text": "Reagan National",
+                    "type": "text",
+                    "abbr": "Reagan Nat’l",
+                    "abbr_priority": 0
+                  },
+                  {
+                    "text": "Airport",
+                    "type": "text"
+                  }
+                ],
+                "type": "off ramp",
+                "modifier": "right"
+              },
+              "sub": {
+                "text": "VA 233",
+                "components": [
+                  {
+                    "text": "VA 233",
+                    "type": "icon",
+                    "imageBaseURL": "https://s3.amazonaws.com/mapbox/shields/v3/va-233"
+                  }
+                ],
+                "type": "merge",
+                "modifier": "slight left"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 143.5,
+          "intersections": [
+            {
+              "location": [
+                -77.044939,
+                38.873246
+              ],
+              "bearings": [
+                135,
+                300,
+                315
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                true,
+                false,
+                false
+              ],
+              "in": 1,
+              "out": 0
+            },
+            {
+              "location": [
+                -77.043467,
+                38.87216
+              ],
+              "bearings": [
+                133,
+                138,
+                311
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                true,
+                true,
+                false
+              ],
+              "in": 2,
+              "out": 0
+            },
+            {
+              "location": [
+                -77.041579,
+                38.870661
+              ],
+              "bearings": [
+                143,
+                315,
+                319
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                true,
+                false,
+                false
+              ],
+              "in": 1,
+              "out": 0
+            },
+            {
+              "location": [
+                -77.045379,
+                38.861191
+              ],
+              "bearings": [
+                29,
+                204,
+                211
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ],
+              "in": 0,
+              "out": 1
+            }
+          ]
+        },
+        {
+          "distance": 318.79999999999995,
+          "duration": 28.6,
+          "geometry": "}xdbiAfqs}qCpCrA~ClApOxGvLdIbHvItC`JFbKg@xEw@bEyCbH}E`DaHlAeI}@sGaFeEsKuAaLJ_Kp@mJOqF",
+          "name": "",
+          "destinations": "VA 233 East: Reagan National Airport",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.0481,
+              38.849439
+            ],
+            "bearing_before": 191.0,
+            "bearing_after": 202.0,
+            "instruction": "Take the ramp towards VA 233 East: Reagan National Airport",
+            "type": "off ramp",
+            "modifier": "slight right"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 240.3,
+              "announcement": "Merge left onto VA 233, then keep right at the fork",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eMerge left onto VA \u003csay-as interpret-as\u003d\"address\"\u003e233\u003c/say-as\u003e, then keep right at the fork\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 318.79999999999995,
+              "primary": {
+                "text": "VA 233",
+                "components": [
+                  {
+                    "text": "VA 233",
+                    "type": "icon",
+                    "imageBaseURL": "https://s3.amazonaws.com/mapbox/shields/v3/va-233"
+                  }
+                ],
+                "type": "merge",
+                "modifier": "slight left"
+              }
+            },
+            {
+              "distanceAlongGeometry": 278.7,
+              "primary": {
+                "text": "VA 233",
+                "components": [
+                  {
+                    "text": "VA 233",
+                    "type": "icon",
+                    "imageBaseURL": "https://s3.amazonaws.com/mapbox/shields/v3/va-233"
+                  }
+                ],
+                "type": "merge",
+                "modifier": "slight left"
+              },
+              "sub": {
+                "text": "Keep right at the fork",
+                "components": [
+                  {
+                    "text": "Keep right at the fork",
+                    "type": "text"
+                  }
+                ],
+                "type": "fork",
+                "modifier": "right"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 36.3,
+          "intersections": [
+            {
+              "location": [
+                -77.0481,
+                38.849439
+              ],
+              "bearings": [
+                15,
+                195,
+                210
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ],
+              "in": 0,
+              "out": 1
+            },
+            {
+              "location": [
+                -77.049137,
+                38.848596
+              ],
+              "bearings": [
+                105,
+                135,
+                285
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ],
+              "in": 0,
+              "out": 2
+            }
+          ]
+        },
+        {
+          "distance": 54.5,
+          "duration": 7.3,
+          "geometry": "audbiAbgt}qC|CePRy@x@aEbAsEn@_D",
+          "name": "VA 233",
+          "ref": "VA 233",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.04845,
+              38.849377
+            ],
+            "bearing_before": 84.0,
+            "bearing_after": 109.0,
+            "instruction": "Merge left onto VA 233",
+            "type": "merge",
+            "modifier": "slight left"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 54.5,
+              "announcement": "Keep right at the fork, then turn right",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eKeep right at the fork, then turn right\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 54.5,
+              "primary": {
+                "text": "Keep right at the fork",
+                "components": [
+                  {
+                    "text": "Keep right at the fork",
+                    "type": "text"
+                  }
+                ],
+                "type": "fork",
+                "modifier": "right"
+              },
+              "sub": {
+                "text": "Turn right",
+                "components": [
+                  {
+                    "text": "Turn right",
+                    "type": "text"
+                  }
+                ],
+                "type": "turn",
+                "modifier": "right"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 12.9,
+          "intersections": [
+            {
+              "location": [
+                -77.04845,
+                38.849377
+              ],
+              "bearings": [
+                105,
+                270,
+                285
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                true,
+                false,
+                false
+              ],
+              "in": 1,
+              "out": 0
+            }
+          ]
+        },
+        {
+          "distance": 47.9,
+          "duration": 8.5,
+          "geometry": "ajdbiAlbs}qC|AaIzG}S",
+          "name": "",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.047863,
+              38.849201
+            ],
+            "bearing_before": 109.0,
+            "bearing_after": 115.0,
+            "instruction": "Keep right at the fork",
+            "type": "fork",
+            "modifier": "slight right"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 47.9,
+              "announcement": "Turn right",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eTurn right\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 47.9,
+              "primary": {
+                "text": "Turn right",
+                "components": [
+                  {
+                    "text": "Turn right",
+                    "type": "text"
+                  }
+                ],
+                "type": "turn",
+                "modifier": "right"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 23.1,
+          "intersections": [
+            {
+              "location": [
+                -77.047863,
+                38.849201
+              ],
+              "bearings": [
+                75,
+                120,
+                285
+              ],
+              "classes": [
+                "motorway"
+              ],
+              "entry": [
+                true,
+                true,
+                false
+              ],
+              "in": 2,
+              "out": 1
+            }
+          ]
+        },
+        {
+          "distance": 240.8,
+          "duration": 40.5,
+          "geometry": "g~cbiAlcr}qCbLKvLrBnJfDnBn@rDp@pATfAAxAKhAMlDuApG_DlPoJfTmNlHoB|EgB",
+          "name": "",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.047367,
+              38.849012
+            ],
+            "bearing_before": 115.0,
+            "bearing_after": 178.0,
+            "instruction": "Turn right",
+            "type": "turn",
+            "modifier": "right"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 240.8,
+              "announcement": "In 800 feet, turn left onto Thomas Avenue",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eIn 800 feet, turn left onto Thomas Avenue\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            },
+            {
+              "distanceAlongGeometry": 89.2,
+              "announcement": "Turn left onto Thomas Avenue",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eTurn left onto Thomas Avenue\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 240.8,
+              "primary": {
+                "text": "Thomas Avenue",
+                "components": [
+                  {
+                    "text": "Thomas Avenue",
+                    "type": "text",
+                    "abbr": "Thomas Ave",
+                    "abbr_priority": 0
+                  }
+                ],
+                "type": "turn",
+                "modifier": "left"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 83.1,
+          "intersections": [
+            {
+              "location": [
+                -77.047367,
+                38.849012
+              ],
+              "bearings": [
+                135,
+                180,
+                300,
+                315,
+                345
+              ],
+              "entry": [
+                true,
+                true,
+                false,
+                true,
+                true
+              ],
+              "in": 2,
+              "out": 1
+            },
+            {
+              "location": [
+                -77.047552,
+                38.848252
+              ],
+              "bearings": [
+                15,
+                30,
+                180
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ],
+              "in": 0,
+              "out": 2
+            },
+            {
+              "location": [
+                -77.047549,
+                38.848093
+              ],
+              "bearings": [
+                0,
+                75,
+                150
+              ],
+              "entry": [
+                false,
+                true,
+                true
+              ],
+              "in": 0,
+              "out": 2
+            },
+            {
+              "location": [
+                -77.046995,
+                38.84725
+              ],
+              "bearings": [
+                120,
+                150,
+                165,
+                180,
+                330
+              ],
+              "entry": [
+                false,
+                false,
+                true,
+                true,
+                false
+              ],
+              "in": 4,
+              "out": 2
+            }
+          ]
+        },
+        {
+          "distance": 360.8,
+          "duration": 97.19999999999999,
+          "geometry": "w_`biAleq}qCoB{DeHkN_IwO}[qo@uTub@wDiImKySmDoGgF{KqN_YkAyE",
+          "name": "Thomas Avenue",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.046887,
+              38.846988
+            ],
+            "bearing_before": 161.0,
+            "bearing_after": 52.0,
+            "instruction": "Turn left onto Thomas Avenue",
+            "type": "end of road",
+            "modifier": "left"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 360.8,
+              "announcement": "In a quarter mile, make a slight left",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eIn a quarter mile, make a slight left\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            },
+            {
+              "distanceAlongGeometry": 55.7,
+              "announcement": "Make a slight left, then keep right at the fork",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eMake a slight left, then keep right at the fork\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 360.8,
+              "primary": {
+                "text": "Make a slight left",
+                "components": [
+                  {
+                    "text": "Make a slight left",
+                    "type": "text"
+                  }
+                ],
+                "type": "turn",
+                "modifier": "slight left"
+              }
+            },
+            {
+              "distanceAlongGeometry": 55.7,
+              "primary": {
+                "text": "Make a slight left",
+                "components": [
+                  {
+                    "text": "Make a slight left",
+                    "type": "text"
+                  }
+                ],
+                "type": "turn",
+                "modifier": "slight left"
+              },
+              "sub": {
+                "text": "Keep right at the fork",
+                "components": [
+                  {
+                    "text": "Keep right at the fork",
+                    "type": "text"
+                  }
+                ],
+                "type": "fork",
+                "modifier": "right"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 99.5,
+          "intersections": [
+            {
+              "location": [
+                -77.046887,
+                38.846988
+              ],
+              "bearings": [
+                60,
+                225,
+                345
+              ],
+              "entry": [
+                true,
+                true,
+                false
+              ],
+              "in": 2,
+              "out": 0
+            },
+            {
+              "location": [
+                -77.046793,
+                38.847044
+              ],
+              "bearings": [
+                60,
+                240,
+                330
+              ],
+              "entry": [
+                true,
+                false,
+                true
+              ],
+              "in": 1,
+              "out": 0
+            },
+            {
+              "location": [
+                -77.046547,
+                38.847191
+              ],
+              "bearings": [
+                60,
+                240,
+                255
+              ],
+              "entry": [
+                true,
+                false,
+                true
+              ],
+              "in": 1,
+              "out": 0
+            },
+            {
+              "location": [
+                -77.045502,
+                38.847814
+              ],
+              "bearings": [
+                45,
+                225,
+                315
+              ],
+              "entry": [
+                true,
+                false,
+                true
+              ],
+              "in": 1,
+              "out": 0
+            },
+            {
+              "location": [
+                -77.044931,
+                38.848161
+              ],
+              "bearings": [
+                60,
+                225,
+                330
+              ],
+              "entry": [
+                true,
+                false,
+                true
+              ],
+              "in": 1,
+              "out": 0
+            },
+            {
+              "location": [
+                -77.044433,
+                38.848452
+              ],
+              "bearings": [
+                45,
+                225,
+                345
+              ],
+              "entry": [
+                true,
+                false,
+                true
+              ],
+              "in": 1,
+              "out": 0
+            },
+            {
+              "location": [
+                -77.044297,
+                38.848539
+              ],
+              "bearings": [
+                15,
+                60,
+                225
+              ],
+              "entry": [
+                true,
+                true,
+                false
+              ],
+              "in": 2,
+              "out": 1
+            }
+          ]
+        },
+        {
+          "distance": 30.0,
+          "duration": 9.9,
+          "geometry": "{ycbiAzuj}qC_@o@a@Q}@Uu@Ws@q@i@eAw@cBo@sB",
+          "name": "",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.043566,
+              38.848942
+            ],
+            "bearing_before": 64.0,
+            "bearing_after": 26.0,
+            "instruction": "Make a slight left",
+            "type": "turn",
+            "modifier": "slight left"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 30.0,
+              "announcement": "Keep right at the fork",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eKeep right at the fork\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 30.0,
+              "primary": {
+                "text": "Keep right at the fork",
+                "components": [
+                  {
+                    "text": "Keep right at the fork",
+                    "type": "text"
+                  }
+                ],
+                "type": "fork",
+                "modifier": "right"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 10.0,
+          "intersections": [
+            {
+              "location": [
+                -77.043566,
+                38.848942
+              ],
+              "bearings": [
+                30,
+                75,
+                240
+              ],
+              "entry": [
+                true,
+                true,
+                false
+              ],
+              "in": 2,
+              "out": 0
+            }
+          ]
+        },
+        {
+          "distance": 157.1,
+          "duration": 56.4,
+          "geometry": "wedbiAzgj}qCc@iDa@wEM{E?_DJaDXmC|AsIfB{J~@oEPoA^mCD}DGsDUkDeAaGe@aBa@sAmAeCuAiA",
+          "name": "",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.043342,
+              38.849132
+            ],
+            "bearing_before": 57.0,
+            "bearing_after": 74.0,
+            "instruction": "Keep right at the fork",
+            "type": "fork",
+            "modifier": "slight right"
+          },
+          "voiceInstructions": [
+            {
+              "distanceAlongGeometry": 157.1,
+              "announcement": "In 600 feet, you will arrive at your destination",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eIn 600 feet, you will arrive at your destination\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            },
+            {
+              "distanceAlongGeometry": 27.9,
+              "announcement": "You have arrived at your destination",
+              "ssmlAnnouncement": "\u003cspeak\u003e\u003camazon:effect name\u003d\"drc\"\u003e\u003cprosody rate\u003d\"1.08\"\u003eYou have arrived at your destination\u003c/prosody\u003e\u003c/amazon:effect\u003e\u003c/speak\u003e"
+            }
+          ],
+          "bannerInstructions": [
+            {
+              "distanceAlongGeometry": 157.1,
+              "primary": {
+                "text": "You will arrive",
+                "components": [
+                  {
+                    "text": "You will arrive",
+                    "type": "text"
+                  }
+                ],
+                "type": "arrive",
+                "modifier": "straight"
+              }
+            },
+            {
+              "distanceAlongGeometry": 27.9,
+              "primary": {
+                "text": "You have arrived",
+                "components": [
+                  {
+                    "text": "You have arrived",
+                    "type": "text"
+                  }
+                ],
+                "type": "arrive",
+                "modifier": "straight"
+              }
+            }
+          ],
+          "driving_side": "right",
+          "weight": 56.4,
+          "intersections": [
+            {
+              "location": [
+                -77.043342,
+                38.849132
+              ],
+              "bearings": [
+                71,
+                76,
+                238
+              ],
+              "entry": [
+                true,
+                true,
+                false
+              ],
+              "in": 2,
+              "out": 1
+            }
+          ]
+        },
+        {
+          "distance": 0.0,
+          "duration": 0.0,
+          "geometry": "wgdbiAh}f}qC",
+          "name": "",
+          "mode": "driving",
+          "maneuver": {
+            "location": [
+              -77.041637,
+              38.849164
+            ],
+            "bearing_before": 34.0,
+            "bearing_after": 0.0,
+            "instruction": "You have arrived at your destination",
+            "type": "arrive"
+          },
+          "voiceInstructions": [],
+          "bannerInstructions": [],
+          "driving_side": "right",
+          "weight": 0.0,
+          "intersections": [
+            {
+              "location": [
+                -77.041637,
+                38.849164
+              ],
+              "bearings": [
+                214
+              ],
+              "entry": [
+                true
+              ],
+              "in": 0
+            }
+          ]
+        }
+      ],
+      "annotation": {
+        "distance": [
+          21.034581934363505,
+          11.94591569183382,
+          11.348054208558962,
+          7.786322167317381,
+          110.00499038237562,
+          7.920279704123473,
+          10.905675412061527,
+          8.342421605534534,
+          17.018504505519864,
+          37.264430122677474,
+          10.344408091778023,
+          81.98274085609594,
+          15.464332651944924,
+          13.347436708874096,
+          77.08682521947556,
+          14.12680104104299,
+          13.127272439147664,
+          66.75015140227,
+          17.132349786767318,
+          3.6704679003626186,
+          16.38261372499044,
+          7.120588339840168,
+          32.47911789405421,
+          44.72939444755939,
+          28.140387054178913,
+          142.03664462850554,
+          46.82635232174102,
+          44.04697599024749,
+          15.69150769884056,
+          20.64958105712039,
+          38.04028118460559,
+          25.91702923209481,
+          5.008177362184426,
+          13.337743886215492,
+          9.939876571044183,
+          17.258267217751385,
+          7.264904498862453,
+          6.5098210036788435,
+          14.504894340982565,
+          7.182889205272602,
+          29.058005711564753,
+          9.27295809950664,
+          9.103292364313855,
+          8.213728515527828,
+          11.349314809570888,
+          6.6991523222420115,
+          9.294649370828251,
+          16.698615159340093,
+          9.627453111450484,
+          12.554435010993929,
+          6.036715729504423,
+          12.239792776888784,
+          5.678483974258159,
+          6.119896397973561,
+          6.68255673152984,
+          9.479570374422469,
+          26.88442531072464,
+          8.773655572410219,
+          8.286562016676994,
+          11.541459863928901,
+          3.6880184405165424,
+          7.063618611468535,
+          11.26353046833916,
+          13.03648605932956,
+          24.204394323879896,
+          8.687409361749173,
+          15.766457418972884,
+          11.011744034917228,
+          19.79998494413186,
+          38.48439718148927,
+          47.60493512516902,
+          15.534476438869804,
+          47.93884801271259,
+          10.233185845306613,
+          91.87357649646046,
+          3.670467899655096,
+          10.121963580017555,
+          123.46228585884514,
+          57.082799960264644,
+          26.899893748154177,
+          11.171049612928067,
+          11.929360488864972,
+          12.978960933315708,
+          11.354610473106732,
+          13.336788130962223,
+          11.331176014003004,
+          9.716419575617696,
+          30.419596723517444,
+          31.699036774648967,
+          9.46598208326704,
+          12.277885632083628,
+          10.496279678364111,
+          12.138440147249215,
+          12.80583813694657,
+          76.82398477836536,
+          52.615071245141245,
+          109.34338886662378,
+          21.43098791668965,
+          14.756520631155778,
+          13.699654855174488,
+          12.038884654915096,
+          10.795497822147855,
+          13.480769331828652,
+          11.82904830203147,
+          12.096992064728715,
+          12.107093914575685,
+          11.867881191885013,
+          11.42866308170699,
+          12.125955997543489,
+          12.236492754084647,
+          11.434467387470576,
+          12.782163392950554,
+          13.639100436329976,
+          9.804824393361498,
+          14.23960265159571,
+          11.494642064476247,
+          11.494643823620011,
+          13.172809241329057,
+          12.233421404611056,
+          11.801402629140659,
+          11.702328570776265,
+          12.872999633973457,
+          12.457148240993366,
+          11.241757290720447,
+          11.67863673104889,
+          12.814276770283826,
+          11.540203339725808,
+          12.023078294281445,
+          10.453229471190792,
+          13.571715271363768,
+          41.35030622388508,
+          20.49732179989009,
+          20.108468717431858,
+          21.975781056234165,
+          573.3042220847976,
+          11.682784357919843,
+          40.35203490221492,
+          15.243393976413918,
+          16.28177914959824,
+          7.24245580297287,
+          12.373991131795512,
+          12.09223545991123,
+          24.30377191771349,
+          26.909572062742487,
+          15.34013404861736,
+          4.393174180545851,
+          22.02846437780892,
+          5.549865737485873,
+          6.73259317853067,
+          19.180879989335164,
+          11.689542172891377,
+          8.09784442095843,
+          8.302019099927117,
+          10.075058776770751,
+          7.310200973445124,
+          10.20038285045596,
+          8.572072699900744,
+          7.692363144996296,
+          4.887303452208483,
+          10.398502293037346,
+          8.346544068784082,
+          10.26245456490087,
+          10.17327844882796,
+          7.08530159755483,
+          9.138121601630067,
+          9.921379600584192,
+          10.409673010371908,
+          14.635967210948808,
+          14.565595863130937,
+          14.896510192838436,
+          31.524480206982677,
+          99.54843524562678,
+          9.605354866353753,
+          16.07460448607342,
+          12.17438481272874,
+          13.411128671089877,
+          11.731465642546171,
+          13.15142623987353,
+          35.82761485949523,
+          12.149302295344219,
+          13.111184546776997,
+          11.077760319994834,
+          13.606424459330066,
+          12.101436753466361,
+          26.111413761034584,
+          10.535480994362477,
+          11.916944923141065,
+          10.914341380009768,
+          13.95853900777947,
+          12.278550947321854,
+          24.953598918361482,
+          11.070240831952525,
+          14.116326257922754,
+          10.67942971232131,
+          12.088954047272217,
+          5.887434882332495,
+          16.910842622555027,
+          12.836511243950214,
+          15.975230071553453,
+          21.24991328606639,
+          12.308353591394498,
+          13.91014934121349,
+          12.228273026896535,
+          10.763971355997644,
+          14.227863446635295,
+          38.24216256224373,
+          55.177805074583546,
+          54.476380595881366,
+          58.52355391056025,
+          52.70668410797062,
+          39.307544348751364,
+          46.19978500433309,
+          57.73726353567591,
+          24.12796835407637,
+          40.15239176561367,
+          70.39330679435281,
+          80.90800501923178,
+          75.96276306245399,
+          144.40929510729495,
+          78.29455598352595,
+          70.97676293396027,
+          50.11460764619348,
+          36.611752652570296,
+          72.57212156863059,
+          52.72872939940242,
+          111.10348617097867,
+          87.00556284460255,
+          53.40016528229418,
+          52.46699124345272,
+          16.340584710776294,
+          7.170982190708245,
+          9.842943330617127,
+          65.13587690638528,
+          175.20334751427745,
+          84.1327518646081,
+          129.20744385752033,
+          246.90237999508702,
+          175.18283495528323,
+          8.897346775185966,
+          9.517830887254721,
+          31.90535974244204,
+          28.251260277802665,
+          22.038471025493017,
+          17.454824118319852,
+          16.81089709524918,
+          9.700497983891593,
+          9.042362697752017,
+          15.274074055814237,
+          14.200634768538585,
+          16.47784451713422,
+          18.327676817812048,
+          18.2047143931314,
+          20.674251992771868,
+          18.72525501646079,
+          16.644953600882907,
+          16.094003816534354,
+          10.519059648686351,
+          25.390205612427525,
+          2.747288296445695,
+          9.00027523557004,
+          9.930303715032938,
+          7.42620542109291,
+          14.893880162071582,
+          33.038503040292376,
+          23.363304785265168,
+          24.980246384735242,
+          21.72069177482355,
+          6.566468384922253,
+          10.241937391391712,
+          4.658765042763374,
+          4.005083688836618,
+          5.032096720816979,
+          4.159805363117051,
+          10.368837650221343,
+          16.73980658847202,
+          34.88615855398514,
+          43.45029030514001,
+          17.48171138670239,
+          13.142202055836053,
+          10.251914489538015,
+          26.85967714647106,
+          29.251816895935566,
+          84.74865279638763,
+          62.73883185243276,
+          17.578403955426676,
+          36.359259676175434,
+          15.245543327336055,
+          22.02030579126877,
+          45.4486633657973,
+          10.344778539602087,
+          2.7366260087080505,
+          2.045261306648125,
+          3.577253649938107,
+          3.177921662103168,
+          3.6128558251186815,
+          3.8272201314010195,
+          5.334604682969003,
+          5.689274269792364,
+          7.630300992425,
+          9.544461329782614,
+          9.560290314816626,
+          6.9298424729748795,
+          7.048131579177713,
+          6.317923252383939,
+          15.626292535764625,
+          17.445079670483405,
+          9.686428533343005,
+          3.606633583311431,
+          6.402547988326485,
+          8.235970602271586,
+          7.808776614164883,
+          7.549400039598351,
+          11.833085303345566,
+          4.741531183282134,
+          4.100195292626688,
+          7.2457045269443405,
+          5.757332994738323
+        ],
+        "congestion": [
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "heavy",
+          "heavy",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "moderate",
+          "moderate",
+          "moderate",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "heavy",
+          "moderate",
+          "heavy",
+          "heavy",
+          "moderate",
+          "heavy",
+          "heavy",
+          "low",
+          "low",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "moderate",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "severe",
+          "low",
+          "moderate",
+          "low",
+          "moderate",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "moderate",
+          "low",
+          "low",
+          "moderate",
+          "moderate",
+          "moderate",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low",
+          "low"
+        ]
+      }
+    }
+  ],
+  "routeOptions": {
+    "baseUrl": "https://api.mapbox.com",
+    "user": "mapbox",
+    "profile": "driving-traffic",
+    "coordinates": [
+      [
+        -77.0340178,
+        38.8999709
+      ],
+      [
+        -77.0416226,
+        38.8491572
+      ]
+    ],
+    "alternatives": true,
+    "language": "en",
+    "bearings": ";",
+    "continueStraight": true,
+    "roundaboutExits": true,
+    "geometries": "polyline6",
+    "overview": "full",
+    "steps": true,
+    "annotations": "congestion,distance",
+    "voiceInstructions": true,
+    "bannerInstructions": true,
+    "voiceUnits": "imperial",
+    "accessToken": "pk.xxx",
+    "requestUuid": "testUuid"
+  },
+  "voiceLocale": "en-US"
+}

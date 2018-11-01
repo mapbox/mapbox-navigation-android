@@ -3,13 +3,15 @@ package testapp;
 import android.content.res.Configuration;
 import android.support.test.espresso.ViewAction;
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.testapp.R;
-import com.mapbox.services.android.navigation.testapp.test.TestNavigationActivity;
+import com.mapbox.services.android.navigation.testapp.test.TestNavigationViewActivity;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 
 import org.junit.Test;
 
-import testapp.activity.BaseNavigationActivityTest;
+import testapp.activity.BaseNavigationViewActivityTest;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -19,14 +21,15 @@ import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static junit.framework.Assert.assertFalse;
+import static testapp.action.NavigationViewAction.invoke;
 import static testapp.action.OrientationChangeAction.orientationLandscape;
 import static testapp.action.OrientationChangeAction.orientationPortrait;
 
-public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
+public class NavigationViewOrientationTest extends BaseNavigationViewActivityTest {
 
   @Override
   protected Class getActivityClass() {
-    return TestNavigationActivity.class;
+    return TestNavigationViewActivity.class;
   }
 
   @Test
@@ -35,6 +38,16 @@ public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
       return;
     }
     validateTestSetup();
+
+    DirectionsRoute testRoute = DirectionsRoute.fromJson(loadJsonFromAsset("dchq_to_dca_route.json"));
+    NavigationViewOptions navigationViewOptions = NavigationViewOptions.builder()
+      .directionsRoute(testRoute)
+      .shouldSimulateRoute(true)
+      .build();
+
+    invoke(getNavigationView(), (uiController, navigationView) -> {
+      navigationView.startNavigation(navigationViewOptions);
+    });
 
     changeOrientation(orientationLandscape());
   }
@@ -46,6 +59,16 @@ public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
     }
     validateTestSetup();
 
+    DirectionsRoute testRoute = DirectionsRoute.fromJson(loadJsonFromAsset("dchq_to_dca_route.json"));
+    NavigationViewOptions navigationViewOptions = NavigationViewOptions.builder()
+      .directionsRoute(testRoute)
+      .shouldSimulateRoute(true)
+      .build();
+
+    invoke(getNavigationView(), (uiController, navigationView) -> {
+      navigationView.startNavigation(navigationViewOptions);
+    });
+
     changeOrientation(orientationPortrait());
   }
 
@@ -55,6 +78,16 @@ public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
       return;
     }
     validateTestSetup();
+
+    DirectionsRoute testRoute = DirectionsRoute.fromJson(loadJsonFromAsset("dchq_to_dca_route.json"));
+    NavigationViewOptions navigationViewOptions = NavigationViewOptions.builder()
+      .directionsRoute(testRoute)
+      .shouldSimulateRoute(true)
+      .build();
+
+    invoke(getNavigationView(), (uiController, navigationView) -> {
+      navigationView.startNavigation(navigationViewOptions);
+    });
 
     onView(withId(R.id.routeOverviewBtn)).perform(click());
     changeOrientation(orientationLandscape());
@@ -67,6 +100,16 @@ public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
       return;
     }
     validateTestSetup();
+
+    DirectionsRoute testRoute = DirectionsRoute.fromJson(loadJsonFromAsset("dchq_to_dca_route.json"));
+    NavigationViewOptions navigationViewOptions = NavigationViewOptions.builder()
+      .directionsRoute(testRoute)
+      .shouldSimulateRoute(true)
+      .build();
+
+    invoke(getNavigationView(), (uiController, navigationView) -> {
+      navigationView.startNavigation(navigationViewOptions);
+    });
 
     onView(withId(R.id.navigationMapView)).perform(swipeUp());
     changeOrientation(orientationLandscape());
@@ -82,6 +125,16 @@ public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
       return;
     }
     validateTestSetup();
+
+    DirectionsRoute testRoute = DirectionsRoute.fromJson(loadJsonFromAsset("dchq_to_dca_route.json"));
+    NavigationViewOptions navigationViewOptions = NavigationViewOptions.builder()
+      .directionsRoute(testRoute)
+      .shouldSimulateRoute(true)
+      .build();
+
+    invoke(getNavigationView(), (uiController, navigationView) -> {
+      navigationView.startNavigation(navigationViewOptions);
+    });
 
     onView(withId(R.id.navigationMapView)).perform(swipeUp());
     changeOrientation(orientationLandscape());

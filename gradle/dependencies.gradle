@@ -33,7 +33,8 @@ ext {
       picasso            : '2.71828',
       gmsLocation        : '15.0.1',
       kotlinStdLib       : '1.2.61',
-      ankoCommon         : '0.10.0'
+      ankoCommon         : '0.10.0',
+      uiAutomator        : '2.1.3'
   ]
 
   dependenciesList = [
@@ -84,6 +85,7 @@ ext {
       testRules              : "com.android.support.test:rules:${version.testRunnerVersion}",
       testEspressoCore       : "com.android.support.test.espresso:espresso-core:${version.espressoVersion}",
       testEspressoIntents    : "com.android.support.test.espresso:espresso-intents:${version.espressoVersion}",
+      testUiAutomator        : "com.android.support.test.uiautomator:uiautomator-v18:${version.uiAutomator}",
 
       // unit test
       junit                  : "junit:junit:${version.junit}",

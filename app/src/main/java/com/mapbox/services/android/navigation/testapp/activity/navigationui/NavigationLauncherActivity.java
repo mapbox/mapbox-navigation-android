@@ -57,6 +57,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Response;
+import timber.log.Timber;
 
 import static com.mapbox.android.core.location.LocationEnginePriority.HIGH_ACCURACY;
 
@@ -272,6 +273,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
           if (validRouteResponse(response)) {
             hideLoading();
             route = response.body().routes().get(0);
+            Timber.d("Route JSON %s", route.toJson());
             if (route.distance() > 25d) {
               launchRouteBtn.setEnabled(true);
               mapRoute.addRoutes(response.body().routes());

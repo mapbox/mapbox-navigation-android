@@ -42,7 +42,7 @@ import timber.log.Timber;
 public class NavigationMapRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
   MapboxMap.OnMapLongClickListener, Callback<DirectionsResponse>, OnRouteSelectionChangeListener {
 
-  private static final String DIRECTIONS_RESPONSE = "directions-route.json";
+  private static final String DIRECTIONS_RESPONSE = "directions_route.json";
 
   @BindView(R.id.mapView)
   MapView mapView;
@@ -87,7 +87,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       "admin-3-4-boundaries-bg");
     Gson gson = new GsonBuilder().registerTypeAdapterFactory(DirectionsAdapterFactory.create())
       .create();
-    DirectionsResponse response = gson.fromJson(loadJsonFromAsset(DIRECTIONS_RESPONSE),
+    DirectionsResponse response = gson.fromJson(loadTestRouteJson(),
       DirectionsResponse.class);
     navigationMapRoute.addRoute(response.routes().get(0));
     mapboxMap.addOnMapLongClickListener(this);
@@ -185,15 +185,9 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
     mapView.onSaveInstanceState(outState);
   }
 
-  public NavigationMapRoute getNavigationMapRoute() {
-    return navigationMapRoute;
-  }
-
-  private String loadJsonFromAsset(String filename) {
-    // Using this method to load in GeoJSON files from the assets folder.
-
+  private String loadTestRouteJson() {
     try {
-      InputStream is = getAssets().open(filename);
+      InputStream is = getAssets().open(NavigationMapRouteActivity.DIRECTIONS_RESPONSE);
       int size = is.available();
       byte[] buffer = new byte[size];
       is.read(buffer);

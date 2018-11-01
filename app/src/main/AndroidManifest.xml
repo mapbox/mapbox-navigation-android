@@ -3,6 +3,7 @@
           package="com.mapbox.services.android.navigation.testapp">
 
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:name=".NavigationApplication"
@@ -122,6 +123,6 @@
         <activity android:name=".activity.HistoryActivity"/>
 
         <!-- Testing -->
-        <activity android:name=".test.TestNavigationActivity"/>
+        <activity android:name=".test.TestNavigationViewActivity"/>
     </application>
 </manifest>
