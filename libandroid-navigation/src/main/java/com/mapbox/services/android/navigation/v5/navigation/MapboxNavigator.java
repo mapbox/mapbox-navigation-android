@@ -46,11 +46,12 @@ class MapboxNavigator {
   /**
    * Uses libvalhalla and local tile data to generate mapbox-directions-api-like json
    *
-   * @param directionsUri the uri used when hitting the http service
+   * @param offlineRoute an offline navigation route
    * @return a RouterResult object with the json and a success/fail bool
    */
-  synchronized RouterResult retrieveRouteFor(String directionsUri) {
-    return navigator.getRoute(directionsUri);
+  synchronized RouterResult retrieveRouteFor(OfflineRoute offlineRoute) {
+    String offlineUri = offlineRoute.buildUrl();
+    return navigator.getRoute(offlineUri);
   }
 
   /**

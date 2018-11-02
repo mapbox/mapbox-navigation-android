@@ -38,8 +38,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOpti
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineCriteria;
-import com.mapbox.services.android.navigation.v5.navigation.OfflineNavigationOptions;
-import com.mapbox.services.android.navigation.v5.navigation.OfflineNavigationRoute;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -166,8 +165,8 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     mockLocationEngine.addLocationEngineListener(this);
     navigation.setLocationEngine(mockLocationEngine);
 
-    String routeUri = obtainRouteUri(origin, destination);
-    route = navigation.findOfflineRouteFor(routeUri);
+    OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
+    route = navigation.findOfflineRoute(offlineRoute);
     handleNewRoute(route);
   }
 
@@ -212,8 +211,8 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     Snackbar.make(contentLayout, "User Off Route", Snackbar.LENGTH_SHORT).show();
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
     Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    String routeUri = obtainRouteUri(newOrigin, newDestination);
-    route = navigation.findOfflineRouteFor(routeUri);
+    OfflineRoute offlineRoute = obtainOfflineRoute(newOrigin, newDestination);
+    route = navigation.findOfflineRoute(offlineRoute);
     handleNewRoute(route);
   }
 
@@ -279,15 +278,14 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
-  private String obtainRouteUri(Point origin, Point destination) {
-    NavigationRoute route = NavigationRoute.builder(this)
+  private OfflineRoute obtainOfflineRoute(Point origin, Point destination) {
+    NavigationRoute.Builder onlineRouteBuilder = NavigationRoute.builder(this)
       .origin(origin)
       .destination(destination)
-      .accessToken(Mapbox.getAccessToken())
-      .build();
-    OfflineNavigationOptions offlineOptions = OfflineNavigationOptions.builder()
+      .accessToken(Mapbox.getAccessToken());
+    OfflineRoute offlineRoute = OfflineRoute.builder(onlineRouteBuilder)
       .bicycleType(OfflineCriteria.MOUNTAIN).build();
-    return OfflineNavigationRoute.buildUrl(route, offlineOptions);
+    return offlineRoute;
   }
 
   private void handleNewRoute(DirectionsRoute route) {
