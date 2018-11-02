@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 android {
   compileSdkVersion androidVersions.compileSdkVersion
@@ -16,6 +18,7 @@ android {
     versionCode 1
     versionName "0.1"
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    vectorDrawables.useSupportLibrary = true
   }
 
   buildTypes {
@@ -39,9 +42,14 @@ android {
 }
 
 dependencies {
+  // Kotlin support
+  implementation dependenciesList.kotlinStdLib
+  implementation dependenciesList.ankoCommon
+
   // Mapbox Navigation SDK
   implementation project(':libandroid-navigation-ui')
   implementation dependenciesList.mapboxMapSdk
+  implementation dependenciesList.searchSdk
 
   // Support libraries
   implementation dependenciesList.supportAppcompatV7
