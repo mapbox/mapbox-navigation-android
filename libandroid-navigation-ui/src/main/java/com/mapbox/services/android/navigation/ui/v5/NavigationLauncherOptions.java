@@ -10,10 +10,6 @@ import com.mapbox.mapboxsdk.camera.CameraPosition;
 @AutoValue
 public abstract class NavigationLauncherOptions extends NavigationUiOptions {
 
-  public abstract boolean enableOffRouteDetection();
-
-  public abstract boolean snapToRoute();
-
   @Nullable
   public abstract CameraPosition initialMapCameraPosition();
 
@@ -32,10 +28,6 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
 
     public abstract Builder waynameChipEnabled(boolean waynameChipEnabled);
 
-    public abstract Builder enableOffRouteDetection(boolean enableOffRouteDetection);
-
-    public abstract Builder snapToRoute(boolean snapToRoute);
-
     public abstract Builder initialMapCameraPosition(@Nullable CameraPosition initialMapCameraPosition);
 
     public abstract NavigationLauncherOptions build();
@@ -44,8 +36,6 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
   public static NavigationLauncherOptions.Builder builder() {
     return new AutoValue_NavigationLauncherOptions.Builder()
       .shouldSimulateRoute(false)
-      .enableOffRouteDetection(true)
-      .snapToRoute(true)
       .waynameChipEnabled(true);
   }
 }

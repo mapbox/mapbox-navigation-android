@@ -71,8 +71,6 @@ public class NavigationLauncher {
   private static void storeConfiguration(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
     editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, options.shouldSimulateRoute());
     editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_PROFILE_KEY, options.directionsProfile());
-    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_OFF_ROUTE_ENABLED_KEY, options.enableOffRouteDetection());
-    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SNAP_ENABLED_KEY, options.snapToRoute());
   }
 
   private static void storeThemePreferences(NavigationLauncherOptions options, SharedPreferences.Editor editor) {

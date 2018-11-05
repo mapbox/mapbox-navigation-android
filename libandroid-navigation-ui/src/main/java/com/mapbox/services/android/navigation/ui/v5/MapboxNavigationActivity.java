@@ -92,12 +92,11 @@ public class MapboxNavigationActivity extends AppCompatActivity implements OnNav
 
   @Override
   public void onNavigationReady(boolean isRunning) {
-    MapboxNavigationOptions.Builder navigationOptions = MapboxNavigationOptions.builder();
     NavigationViewOptions.Builder options = NavigationViewOptions.builder();
     options.navigationListener(this);
     extractRoute(options);
-    extractConfiguration(options, navigationOptions);
-    options.navigationOptions(navigationOptions.build());
+    extractConfiguration(options);
+    options.navigationOptions(MapboxNavigationOptions.builder().build());
     navigationView.startNavigation(options.build());
   }
 
@@ -132,16 +131,11 @@ public class MapboxNavigationActivity extends AppCompatActivity implements OnNav
     options.directionsRoute(route);
   }
 
-  private void extractConfiguration(NavigationViewOptions.Builder options,
-                                    MapboxNavigationOptions.Builder navigationOptions) {
+  private void extractConfiguration(NavigationViewOptions.Builder options) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
     options.shouldSimulateRoute(preferences
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
     options.directionsProfile(preferences
       .getString(NavigationConstants.NAVIGATION_VIEW_ROUTE_PROFILE_KEY, DirectionsCriteria.PROFILE_DRIVING_TRAFFIC));
-    navigationOptions.enableOffRouteDetection(preferences
-      .getBoolean(NavigationConstants.NAVIGATION_VIEW_OFF_ROUTE_ENABLED_KEY, true));
-    navigationOptions.snapToRoute(preferences
-      .getBoolean(NavigationConstants.NAVIGATION_VIEW_SNAP_ENABLED_KEY, true));
   }
 }
