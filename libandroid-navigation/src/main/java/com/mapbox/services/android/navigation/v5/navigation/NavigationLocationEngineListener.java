@@ -1,28 +1,26 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.annotation.SuppressLint;
 import android.location.Location;
 
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineListener;
-import com.mapbox.services.android.navigation.v5.location.LocationValidator;
 
 class NavigationLocationEngineListener implements LocationEngineListener {
 
   private final RouteProcessorBackgroundThread thread;
   private final LocationEngine locationEngine;
-  private final LocationValidator validator;
 
-  NavigationLocationEngineListener(RouteProcessorBackgroundThread thread, LocationEngine locationEngine,
-                                   LocationValidator validator) {
+  NavigationLocationEngineListener(RouteProcessorBackgroundThread thread, LocationEngine locationEngine) {
     this.thread = thread;
     this.locationEngine = locationEngine;
-    this.validator = validator;
   }
 
   @Override
   @SuppressWarnings("MissingPermission")
   public void onConnected() {
     locationEngine.requestLocationUpdates();
+    sendLastKnownLocation();
   }
 
   @Override
@@ -32,7 +30,11 @@ class NavigationLocationEngineListener implements LocationEngineListener {
     }
   }
 
-  boolean isValidLocationUpdate(Location location) {
-    return location != null && validator.isValidUpdate(location);
+  @SuppressLint("MissingPermission")
+  private void sendLastKnownLocation() {
+    Location lastLocation = locationEngine.getLastLocation();
+    if (lastLocation != null) {
+      onLocationChanged(lastLocation);
+    }
   }
 }

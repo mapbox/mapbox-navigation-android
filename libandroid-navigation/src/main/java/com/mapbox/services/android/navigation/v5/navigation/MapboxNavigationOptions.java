@@ -32,8 +32,6 @@ public abstract class MapboxNavigationOptions {
   @NavigationTimeFormat.Type
   public abstract int timeFormatType();
 
-  public abstract int locationAcceptableAccuracyInMetersThreshold();
-
   public abstract int navigationLocationEngineIntervalLagInMilliseconds();
 
   public abstract Builder toBuilder();
@@ -55,8 +53,6 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder timeFormatType(@NavigationTimeFormat.Type int type);
 
-    public abstract Builder locationAcceptableAccuracyInMetersThreshold(int accuracyInMetersThreshold);
-
     public abstract Builder navigationLocationEngineIntervalLagInMilliseconds(int lagInMilliseconds);
 
     public abstract MapboxNavigationOptions build();
@@ -70,7 +66,6 @@ public abstract class MapboxNavigationOptions {
       .isDebugLoggingEnabled(false)
       .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
       .timeFormatType(NavigationTimeFormat.NONE_SPECIFIED)
-      .locationAcceptableAccuracyInMetersThreshold(NavigationConstants.ONE_HUNDRED_METER_ACCEPTABLE_ACCURACY_THRESHOLD)
       .navigationLocationEngineIntervalLagInMilliseconds(NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG);
   }
 }
