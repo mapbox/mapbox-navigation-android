@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -153,6 +154,7 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
     if (!dropoffDialogShown && !points.isEmpty()) {
       showDropoffDialog();
       dropoffDialogShown = true; // Accounts for multiple arrival events
+      Toast.makeText(this, "You have arrived!", Toast.LENGTH_SHORT).show();
     }
   }
 

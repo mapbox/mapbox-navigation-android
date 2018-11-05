@@ -7,7 +7,6 @@ import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.geojson.Point;
@@ -15,6 +14,7 @@ import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressState;
 
 import org.junit.Test;
 
@@ -65,66 +65,23 @@ public class RouteUtilsTest extends BaseTest {
   }
 
   @Test
-  public void isArrivalEvent_returnsTrueWhenManeuverTypeIsArrival_andIsLastInstruction() throws Exception {
-    DirectionsRoute route = buildTestDirectionsRoute();
-    int first = 0;
-    int lastInstruction = 1;
-    RouteLeg routeLeg = route.legs().get(first);
-    List<LegStep> routeSteps = routeLeg.steps();
-    int currentStepIndex = routeSteps.size() - 2;
-    int upcomingStepIndex = routeSteps.size() - 1;
-    LegStep currentStep = routeSteps.get(currentStepIndex);
-    LegStep upcomingStep = routeSteps.get(upcomingStepIndex);
-    RouteProgress routeProgress = buildRouteProgress(first, route, currentStep, upcomingStep);
-    BannerInstructionMilestone bannerInstructionMilestone = mock(BannerInstructionMilestone.class);
-    List<BannerInstructions> currentStepBannerInstructions = currentStep.bannerInstructions();
-    buildBannerInstruction(lastInstruction, bannerInstructionMilestone, currentStepBannerInstructions);
-
+  public void isArrivalEvent_returnsTrueWhenRouteProgressStateIsArrived() {
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.currentState()).thenReturn(RouteProgressState.ROUTE_ARRIVED);
     RouteUtils routeUtils = new RouteUtils();
 
-    boolean isArrivalEvent = routeUtils.isArrivalEvent(routeProgress, bannerInstructionMilestone);
+    boolean isArrivalEvent = routeUtils.isArrivalEvent(routeProgress);
 
     assertTrue(isArrivalEvent);
   }
 
   @Test
-  public void isArrivalEvent_returnsFalseWhenManeuverTypeIsArrival_andIsNotLastInstruction() throws Exception {
-    DirectionsRoute route = buildTestDirectionsRoute();
-    int first = 0;
-    RouteLeg routeLeg = route.legs().get(first);
-    List<LegStep> routeSteps = routeLeg.steps();
-    int currentStepIndex = routeSteps.size() - 2;
-    int upcomingStepIndex = routeSteps.size() - 1;
-    LegStep currentStep = routeSteps.get(currentStepIndex);
-    LegStep upcomingStep = routeSteps.get(upcomingStepIndex);
-    RouteProgress routeProgress = buildRouteProgress(first, route, currentStep, upcomingStep);
-    BannerInstructionMilestone bannerInstructionMilestone = mock(BannerInstructionMilestone.class);
-    List<BannerInstructions> currentStepBannerInstructions = currentStep.bannerInstructions();
-    buildBannerInstruction(first, bannerInstructionMilestone, currentStepBannerInstructions);
-
+  public void isArrivalEvent_returnsFalseWhenRouteProgressStateIsNotArrived() {
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.currentState()).thenReturn(RouteProgressState.LOCATION_TRACKING);
     RouteUtils routeUtils = new RouteUtils();
 
-    boolean isArrivalEvent = routeUtils.isArrivalEvent(routeProgress, bannerInstructionMilestone);
-
-    assertFalse(isArrivalEvent);
-  }
-
-  @Test
-  public void isArrivalEvent_returnsFalseWhenManeuverTypeIsNotArrival() throws Exception {
-    DirectionsRoute route = buildTestDirectionsRoute();
-    int first = 0;
-    RouteLeg routeLeg = route.legs().get(first);
-    List<LegStep> routeSteps = routeLeg.steps();
-    LegStep currentStep = routeSteps.get(first);
-    LegStep upcomingStep = routeSteps.get(first + 1);
-    RouteProgress routeProgress = buildRouteProgress(first, route, currentStep, upcomingStep);
-    BannerInstructionMilestone bannerInstructionMilestone = mock(BannerInstructionMilestone.class);
-    List<BannerInstructions> currentStepBannerInstructions = currentStep.bannerInstructions();
-    buildBannerInstruction(first, bannerInstructionMilestone, currentStepBannerInstructions);
-
-    RouteUtils routeUtils = new RouteUtils();
-
-    boolean isArrivalEvent = routeUtils.isArrivalEvent(routeProgress, bannerInstructionMilestone);
+    boolean isArrivalEvent = routeUtils.isArrivalEvent(routeProgress);
 
     assertFalse(isArrivalEvent);
   }
