@@ -113,18 +113,6 @@ public final class NavigationConstants {
   public static final int NAVIGATION_HIGH_ALERT_DURATION = 15;
 
   /**
-   * Default location acceptable accuracy threshold
-   * used in {@link com.mapbox.services.android.navigation.v5.location.LocationValidator}.
-   * <p>
-   * If a new {@link android.location.Location} update is received from the LocationEngine that has
-   * an accuracy less than this threshold, the update will be considered valid and all other validation
-   * is not considered.
-   *
-   * @since 0.17.0
-   */
-  static final int ONE_HUNDRED_METER_ACCEPTABLE_ACCURACY_THRESHOLD = 100;
-
-  /**
    * Default approximate location engine interval lag in milliseconds
    * <p>
    * This value will be used to offset the time at which the current location was calculated

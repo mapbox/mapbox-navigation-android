@@ -10,7 +10,6 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.v5.location.LocationValidator;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
@@ -120,11 +119,7 @@ public class NavigationService extends Service {
 
   private void initializeLocationProvider(MapboxNavigation mapboxNavigation) {
     LocationEngine locationEngine = mapboxNavigation.getLocationEngine();
-    int accuracyThreshold = mapboxNavigation.options().locationAcceptableAccuracyInMetersThreshold();
-    LocationValidator validator = new LocationValidator(accuracyThreshold);
-    NavigationLocationEngineListener listener = new NavigationLocationEngineListener(
-      thread, locationEngine, validator
-    );
+    NavigationLocationEngineListener listener = new NavigationLocationEngineListener(thread, locationEngine);
     locationUpdater = new NavigationLocationEngineUpdater(locationEngine, listener);
   }
 
