@@ -331,9 +331,7 @@ public class MapboxNavigation implements ServiceConnection {
 
   /**
    * Call this when the navigation session needs to end before the user reaches their final
-   * destination. There isn't a need to manually end the navigation session using this API when the
-   * user arrives unless you set {@link MapboxNavigationOptions#manuallyEndNavigationUponCompletion()}
-   * to true.
+   * destination.
    * <p>
    * Ending the navigation session ends and unbinds the navigation service meaning any milestone,
    * progress change, or off-route listeners will not be invoked anymore. A call returning false
