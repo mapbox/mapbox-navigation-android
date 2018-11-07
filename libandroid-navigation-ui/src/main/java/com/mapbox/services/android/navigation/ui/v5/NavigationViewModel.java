@@ -300,6 +300,7 @@ public class NavigationViewModel extends AndroidViewModel {
       instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
       summaryModel.setValue(new SummaryModel(getApplication(), distanceFormatter, routeProgress, timeFormatType));
       navigationLocation.setValue(location);
+      sendEventArrival(routeProgress);
     }
   };
 
@@ -319,7 +320,6 @@ public class NavigationViewModel extends AndroidViewModel {
     public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
       playVoiceAnnouncement(milestone);
       updateBannerInstruction(routeProgress, milestone);
-      sendEventArrival(routeProgress, milestone);
     }
   };
 
@@ -445,8 +445,8 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void sendEventArrival(RouteProgress routeProgress, Milestone milestone) {
-    if (navigationViewEventDispatcher != null && routeUtils.isArrivalEvent(routeProgress, milestone)) {
+  private void sendEventArrival(RouteProgress routeProgress) {
+    if (navigationViewEventDispatcher != null && routeUtils.isArrivalEvent(routeProgress)) {
       navigationViewEventDispatcher.onArrival();
     }
   }

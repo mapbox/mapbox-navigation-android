@@ -14,9 +14,8 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
-import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressState;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,31 +76,15 @@ public class RouteUtils {
   }
 
   /**
-   * Looks at the current {@link RouteProgress} maneuverType for type "arrival", then
-   * checks if the arrival meter threshold has been hit.
+   * Looks at the current {@link RouteProgressState} and returns if
+   * is {@link RouteProgressState#ROUTE_ARRIVED}.
    *
    * @param routeProgress the current route progress
-   * @param milestone     the current milestone from the MilestoneEventListener
    * @return true if in arrival state, false if not
-   * @since 0.8.0
    */
-  public boolean isArrivalEvent(@NonNull RouteProgress routeProgress, @NonNull Milestone milestone) {
-    if (!(milestone instanceof BannerInstructionMilestone)) {
-      return false;
-    }
-    boolean isValidArrivalManeuverType = upcomingStepIsArrivalManeuverType(routeProgress)
-      || currentStepIsArrivalManeuverType(routeProgress);
-    if (isValidArrivalManeuverType) {
-      LegStep currentStep = routeProgress.currentLegProgress().currentStep();
-      BannerInstructions currentInstructions = ((BannerInstructionMilestone) milestone).getBannerInstructions();
-      List<BannerInstructions> bannerInstructions = currentStep.bannerInstructions();
-      if (hasValidInstructions(bannerInstructions, currentInstructions)) {
-        int lastInstructionIndex = bannerInstructions.size() - 1;
-        BannerInstructions lastInstructions = bannerInstructions.get(lastInstructionIndex);
-        return currentInstructions.equals(lastInstructions);
-      }
-    }
-    return false;
+  public boolean isArrivalEvent(@NonNull RouteProgress routeProgress) {
+    RouteProgressState currentState = routeProgress.currentState();
+    return currentState != null && currentState == RouteProgressState.ROUTE_ARRIVED;
   }
 
   /**
