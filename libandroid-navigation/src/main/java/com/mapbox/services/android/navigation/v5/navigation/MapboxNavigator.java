@@ -38,9 +38,8 @@ class MapboxNavigator {
     }
   }
 
-  // TODO this call should be done in the background - it's currently blocking the UI
-  synchronized void configureRouter(String tileFilePath, String translationsDirPath) {
-    navigator.configureRouter(tileFilePath, translationsDirPath);
+  void configureRouter(String tileFilePath, String translationsDirPath, OnOfflineDataInitialized callback) {
+    new ConfigureRouterTask(navigator, tileFilePath, translationsDirPath, callback).execute();
   }
 
   /**

@@ -89,13 +89,6 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     navigation.addNavigationEventListener(this);
     navigation.addMilestoneEventListener(this);
 
-    String tilesDirPath = obtainOfflineDirectoryFor("tiles");
-    Timber.d("Tiles directory path: %s", tilesDirPath);
-    String translationsDirPath = obtainOfflineDirectoryFor("translations");
-    Timber.d("Translations directory path: %s", translationsDirPath);
-
-    navigation.initializeOfflineData(tilesDirPath, translationsDirPath);
-
     mapView.getMapAsync(this);
   }
 
@@ -159,9 +152,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     mockLocationEngine.addLocationEngineListener(this);
     navigation.setLocationEngine(mockLocationEngine);
 
-    OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
-    route = navigation.findOfflineRoute(offlineRoute);
-    handleNewRoute(route);
+    findRoute();
   }
 
   @Override
@@ -228,6 +219,25 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     Timber.d("onMilestoneEvent - Current Instruction: " + instruction);
   }
 
+  private OfflineRoute obtainOfflineRoute(Point origin, Point destination) {
+    NavigationRoute.Builder onlineRouteBuilder = NavigationRoute.builder(this)
+      .origin(origin)
+      .destination(destination)
+      .accessToken(Mapbox.getAccessToken());
+    OfflineRoute offlineRoute = OfflineRoute.builder(onlineRouteBuilder)
+      .bicycleType(OfflineCriteria.MOUNTAIN).build();
+    return offlineRoute;
+  }
+
+  private void handleNewRoute(DirectionsRoute route) {
+    if (!checkRoute()) {
+      return;
+    }
+    drawRoute(route);
+    resetLocationEngine(route);
+    startNavigation(route);
+  }
+
   private boolean checkRoute() {
     if (route != null) {
       Snackbar.make(contentLayout, "Offline route found", Snackbar.LENGTH_SHORT).show();
@@ -236,21 +246,6 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
       Snackbar.make(contentLayout, "Offline route not found", Snackbar.LENGTH_SHORT).show();
       return false;
     }
-  }
-
-  private String obtainOfflineDirectoryFor(String fileName) {
-    File offline = Environment.getExternalStoragePublicDirectory("Offline");
-    if (!offline.exists()) {
-      Timber.d("Offline directory does not exist");
-    }
-    File file = new File(offline, fileName);
-    return file.getAbsolutePath();
-  }
-
-  private void startNavigation(DirectionsRoute route) {
-    navigation.startNavigation(route);
-    mapboxMap.addOnMapClickListener(this);
-    tracking = true;
   }
 
   private void drawRoute(DirectionsRoute route) {
@@ -272,23 +267,37 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     }
   }
 
-  private OfflineRoute obtainOfflineRoute(Point origin, Point destination) {
-    NavigationRoute.Builder onlineRouteBuilder = NavigationRoute.builder(this)
-      .origin(origin)
-      .destination(destination)
-      .accessToken(Mapbox.getAccessToken());
-    OfflineRoute offlineRoute = OfflineRoute.builder(onlineRouteBuilder)
-      .bicycleType(OfflineCriteria.MOUNTAIN).build();
-    return offlineRoute;
+  private void resetLocationEngine(DirectionsRoute directionsRoute) {
+    mockLocationEngine.deactivate();
+    mockLocationEngine.assign(directionsRoute);
   }
 
-  private void handleNewRoute(DirectionsRoute route) {
-    if (!checkRoute()) {
-      return;
+  private void startNavigation(DirectionsRoute route) {
+    navigation.startNavigation(route);
+    mapboxMap.addOnMapClickListener(this);
+    tracking = true;
+  }
+
+  private void findRoute() {
+    String tilesDirPath = obtainOfflineDirectoryFor("tiles");
+    Timber.d("Tiles directory path: %s", tilesDirPath);
+    String translationsDirPath = obtainOfflineDirectoryFor("translations");
+    Timber.d("Translations directory path: %s", translationsDirPath);
+
+    navigation.initializeOfflineData(tilesDirPath, translationsDirPath, () -> {
+      OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
+      route = navigation.findOfflineRoute(offlineRoute);
+      handleNewRoute(route);
+    });
+  }
+
+  private String obtainOfflineDirectoryFor(String fileName) {
+    File offline = Environment.getExternalStoragePublicDirectory("Offline");
+    if (!offline.exists()) {
+      Timber.d("Offline directory does not exist");
     }
-    drawRoute(route);
-    resetLocationEngine(route);
-    startNavigation(route);
+    File file = new File(offline, fileName);
+    return file.getAbsolutePath();
   }
 
   private void animateCameraFor(Location location) {
@@ -298,11 +307,6 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
       .bearing(location.getBearing())
       .build();
     mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000);
-  }
-
-  private void resetLocationEngine(DirectionsRoute directionsRoute) {
-    mockLocationEngine.deactivate();
-    mockLocationEngine.assign(directionsRoute);
   }
 
   private void shutdownLocationEngine() {
