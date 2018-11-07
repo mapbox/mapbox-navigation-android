@@ -2,6 +2,30 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.23.0 - November 7, 2018
+
+* Add RouteProgressState to RouteProgress for current Navigator information [#1502](https://github.com/mapbox/mapbox-navigation-android/pull/1502)
+* Remove LocationValidator and force last Location if found [#1498](https://github.com/mapbox/mapbox-navigation-android/pull/1498)
+* Update MapRouteProgressChangeListener to be aware of route visibility [#1482](https://github.com/mapbox/mapbox-navigation-android/pull/1482)
+* Remove MapboxNavigationOptions ignored by Navigator [#1500](https://github.com/mapbox/mapbox-navigation-android/pull/1500)
+* Check for valid geocoding response in ExamplePresenter [#1499](https://github.com/mapbox/mapbox-navigation-android/pull/1499)
+* Better clarify the Mapbox Navigator dependency [#1496](https://github.com/mapbox/mapbox-navigation-android/pull/1496)
+* Add example test Activity for Navigation Test Application [#1317](https://github.com/mapbox/mapbox-navigation-android/pull/1317)
+* Bump mapbox-navigation-native version to 3.3.1 [#1495](https://github.com/mapbox/mapbox-navigation-android/pull/1495)
+* Add Mapbox Navigator TOS to the license [#1494](https://github.com/mapbox/mapbox-navigation-android/pull/1494)
+* Bump Maps SDK and Events versions [#1493](https://github.com/mapbox/mapbox-navigation-android/pull/1493)
+* Resume simulation for multi leg routes [#1490](https://github.com/mapbox/mapbox-navigation-android/pull/1490)
+* Remove dynamic padding way name adjustment for MapWayname [#1473](https://github.com/mapbox/mapbox-navigation-android/pull/1473)
+* Remove unnecessary force first location update from route (origin) [#1488](https://github.com/mapbox/mapbox-navigation-android/pull/1488)
+* Add CameraPosition option for initializing NavigationView [#1483](https://github.com/mapbox/mapbox-navigation-android/pull/1483)
+* Rebuild RemoteViews for MapboxNavigationNotification on each update [#1474](https://github.com/mapbox/mapbox-navigation-android/pull/1474)
+* Update time remaining TextView to auto-size for longer durations [#1479](https://github.com/mapbox/mapbox-navigation-android/pull/1479)
+* Fix mock location generation in ReplayRouteLocationConverter [#1476](https://github.com/mapbox/mapbox-navigation-android/pull/1476)
+* Update Maps SDK to 6.6.2 [#1475](https://github.com/mapbox/mapbox-navigation-android/pull/1475)
+* Bump mapbox-navigation-native version to 3.2.1 [#1470](https://github.com/mapbox/mapbox-navigation-android/pull/1470)
+* Allow access to AlertView and the ability to enable or disable [#1466](https://github.com/mapbox/mapbox-navigation-android/pull/1466)
+* Update Transifex to latest German translations [#1476](https://github.com/mapbox/mapbox-navigation-android/pull/1476)
+
 ### v0.22.0 - October 24, 2018
 
 * Replace LocationLayerPlugin with LocationComponent [#1438](https://github.com/mapbox/mapbox-navigation-android/pull/1438)
