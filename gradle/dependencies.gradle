@@ -101,7 +101,6 @@ ext {
   pluginVersion = [
       checkstyle       : '8.2',
       pmd              : '5.8.1',
-      jacoco           : '0.8.1',
       errorprone       : '0.0.13',
       coveralls        : '2.8.1',
       spotbugs         : '1.3',
