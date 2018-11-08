@@ -281,10 +281,8 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   private void findRoute() {
     String tilesDirPath = obtainOfflineDirectoryFor("tiles");
     Timber.d("Tiles directory path: %s", tilesDirPath);
-    String translationsDirPath = obtainOfflineDirectoryFor("translations");
-    Timber.d("Translations directory path: %s", translationsDirPath);
 
-    navigation.initializeOfflineData(tilesDirPath, translationsDirPath, () -> {
+    navigation.initializeOfflineData(tilesDirPath, () -> {
       OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
       route = navigation.findOfflineRoute(offlineRoute);
       handleNewRoute(route);

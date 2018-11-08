@@ -721,13 +721,11 @@ public class MapboxNavigation implements ServiceConnection {
    * Configures the navigator for getting offline routes
    *
    * @param tilesDirPath        directory path where the tiles are located
-   * @param translationsDirPath directory path where the translations are located
    * @param callback            a callback that will be fired when the offline data is initialized and
    *                            {@link MapboxNavigation#findOfflineRoute(OfflineRoute)} could be called safely
    */
-  public void initializeOfflineData(String tilesDirPath, String translationsDirPath,
-                                    OnOfflineDataInitialized callback) {
-    mapboxNavigator.configureRouter(tilesDirPath, translationsDirPath, callback);
+  public void initializeOfflineData(String tilesDirPath, OnOfflineDataInitialized callback) {
+    mapboxNavigator.configureRouter(tilesDirPath, callback);
   }
 
   /**
