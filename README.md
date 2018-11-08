@@ -10,8 +10,8 @@
   <a href="https://circleci.com/gh/mapbox/mapbox-navigation-android">
     <img src="https://circleci.com/gh/mapbox/mapbox-navigation-android.svg?style=shield&circle-token=:circle-token">
   </a>
-  <a href="https://codecov.io/gh/mapbox/mapbox-events-android">
-    <img src="https://codecov.io/gh/mapbox/mapbox-events-android/branch/master/graph/badge.svg">
+  <a href="https://codecov.io/gh/mapbox/mapbox-navigation-android">
+    <img src="https://codecov.io/gh/mapbox/mapbox-navigation-android/branch/master/graph/badge.svg">
   </a>
 </p>
 
