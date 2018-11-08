@@ -14,6 +14,7 @@ import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.navigator.RouterResult;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -716,6 +717,30 @@ public class MapboxNavigation implements ServiceConnection {
     mapboxNavigator.toggleHistory(isEnabled);
   }
 
+  /**
+   * Configures the navigator for getting offline routes
+   *
+   * @param tilesDirPath        directory path where the tiles are located
+   * @param translationsDirPath directory path where the translations are located
+   * @param callback            a callback that will be fired when the offline data is initialized and
+   *                            {@link MapboxNavigation#findOfflineRoute(OfflineRoute)} could be called safely
+   */
+  public void initializeOfflineData(String tilesDirPath, String translationsDirPath,
+                                    OnOfflineDataInitialized callback) {
+    mapboxNavigator.configureRouter(tilesDirPath, translationsDirPath, callback);
+  }
+
+  /**
+   * Uses libvalhalla and local tile data to generate mapbox-directions-api-like JSON
+   *
+   * @param route the {@link OfflineRoute} to get a {@link DirectionsRoute} from
+   * @return the offline {@link DirectionsRoute}
+   */
+  @Nullable
+  public DirectionsRoute findOfflineRoute(@NonNull OfflineRoute route) {
+    return retrieveOfflineRoute(route);
+  }
+
   @Override
   public void onServiceConnected(ComponentName name, IBinder service) {
     Timber.d("Connected to service.");
@@ -874,5 +899,11 @@ public class MapboxNavigation implements ServiceConnection {
 
   private boolean isServiceAvailable() {
     return navigationService != null && isBound;
+  }
+
+  @Nullable
+  private DirectionsRoute retrieveOfflineRoute(@NonNull OfflineRoute offlineRoute) {
+    RouterResult response = mapboxNavigator.retrieveRouteFor(offlineRoute);
+    return offlineRoute.retrieveOfflineRoute(response);
   }
 }

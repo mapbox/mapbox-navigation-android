@@ -1,8 +1,11 @@
 package com.mapbox.services.android.navigation.testapp;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +18,7 @@ import android.widget.Toast;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
+import com.mapbox.services.android.navigation.testapp.activity.OfflineRerouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.ComponentNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.DualNavigationMapActivity;
@@ -28,6 +32,8 @@ import com.mapbox.services.android.navigation.testapp.activity.navigationui.frag
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class MainActivity extends AppCompatActivity implements PermissionsListener {
   private RecyclerView recyclerView;
@@ -63,6 +69,11 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         getString(R.string.title_reroute),
         getString(R.string.description_reroute),
         RerouteActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_offline_reroute),
+        getString(R.string.description_offline_reroute),
+        OfflineRerouteActivity.class
       ),
       new SampleItem(
         getString(R.string.title_navigation_route_ui),
@@ -106,30 +117,49 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     // Check for location permission
     permissionsManager = new PermissionsManager(this);
     if (!PermissionsManager.areLocationPermissionsGranted(this)) {
-      recyclerView.setEnabled(false);
+      recyclerView.setVisibility(View.INVISIBLE);
       permissionsManager.requestLocationPermissions(this);
+    } else {
+      requestPermissionIfNotGranted(WRITE_EXTERNAL_STORAGE);
     }
   }
 
   @Override
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                          @NonNull int[] grantResults) {
-    permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    if (requestCode == 0) {
+      permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    } else {
+      boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+      if (!granted) {
+        recyclerView.setVisibility(View.INVISIBLE);
+        Toast.makeText(this, "You didn't grant storage permissions.", Toast.LENGTH_LONG).show();
+      } else {
+        recyclerView.setVisibility(View.VISIBLE);
+      }
+    }
   }
 
   @Override
   public void onExplanationNeeded(List<String> permissionsToExplain) {
-    Toast.makeText(this, "This app needs location permissions in order to show its functionality.",
-      Toast.LENGTH_LONG).show();
+    Toast.makeText(this, "This app needs location and storage permissions"
+      + "in order to show its functionality.", Toast.LENGTH_LONG).show();
   }
 
   @Override
   public void onPermissionResult(boolean granted) {
     if (granted) {
-      recyclerView.setEnabled(true);
+      requestPermissionIfNotGranted(WRITE_EXTERNAL_STORAGE);
     } else {
-      Toast.makeText(this, "You didn't grant location permissions.",
-        Toast.LENGTH_LONG).show();
+      Toast.makeText(this, "You didn't grant location permissions.", Toast.LENGTH_LONG).show();
+    }
+  }
+
+  private void requestPermissionIfNotGranted(String permission) {
+    List<String> permissionsNeeded = new ArrayList<>();
+    if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+      permissionsNeeded.add(permission);
+      ActivityCompat.requestPermissions(this, permissionsNeeded.toArray(new String[0]), 10);
     }
   }
 

@@ -4,13 +4,13 @@ import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Toast;
 
 import com.mapbox.android.core.location.LocationEngineListener;
-import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
@@ -37,22 +37,22 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineCriteria;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import timber.log.Timber;
 
-public class RerouteActivity extends HistoryActivity implements OnMapReadyCallback, LocationEngineListener,
-  Callback<DirectionsResponse>, MapboxMap.OnMapClickListener, NavigationEventListener, OffRouteListener,
+public class OfflineRerouteActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener,
+  MapboxMap.OnMapClickListener, NavigationEventListener, OffRouteListener,
   ProgressChangeListener, MilestoneEventListener {
 
   @BindView(R.id.mapView)
@@ -62,8 +62,8 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   @BindView(R.id.instructionView)
   InstructionView instructionView;
 
-  private Point origin = Point.fromLngLat(-0.358764, 39.494876);
-  private Point destination = Point.fromLngLat(-0.383524, 39.497825);
+  private Point origin = Point.fromLngLat(-3.714873, 40.397389);
+  private Point destination = Point.fromLngLat(-3.712331, 40.401686);
   private Polyline polyline;
 
   private ReplayRouteLocationEngine mockLocationEngine;
@@ -71,7 +71,8 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   private MapboxMap mapboxMap;
   private boolean running;
   private boolean tracking;
-  private boolean wasInTunnel = false;
+  private DirectionsRoute route;
+  private Point newDestination;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -81,18 +82,14 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     ButterKnife.bind(this);
 
     mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(this);
 
+    // Initialize MapboxNavigation and add listeners
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().isDebugLoggingEnabled(true).build();
     navigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken(), options);
     navigation.addNavigationEventListener(this);
     navigation.addMilestoneEventListener(this);
-    addNavigationForHistory(navigation);
 
-    instructionView.retrieveSoundButton().show();
-    instructionView.retrieveSoundButton().addOnClickListener(
-      v -> Toast.makeText(RerouteActivity.this, "Sound button clicked!", Toast.LENGTH_SHORT).show()
-    );
+    mapView.getMapAsync(this);
   }
 
   @Override
@@ -150,11 +147,12 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.GPS);
 
+    // Setup the mockLocationEngine
     mockLocationEngine = new ReplayRouteLocationEngine();
     mockLocationEngine.addLocationEngineListener(this);
     navigation.setLocationEngine(mockLocationEngine);
 
-    getRoute(origin, destination, null);
+    findRoute();
   }
 
   @Override
@@ -178,7 +176,7 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     mapboxMap.addMarker(new MarkerOptions().position(point));
     mapboxMap.removeOnMapClickListener(this);
 
-    Point newDestination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
+    newDestination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     mockLocationEngine.moveTo(newDestination);
     destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     tracking = false;
@@ -195,31 +193,19 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
 
   @Override
   public void userOffRoute(Location location) {
-    Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    getRoute(newOrigin, destination, location.getBearing());
     Snackbar.make(contentLayout, "User Off Route", Snackbar.LENGTH_SHORT).show();
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
+    Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    OfflineRoute offlineRoute = obtainOfflineRoute(newOrigin, newDestination);
+    route = navigation.findOfflineRoute(offlineRoute);
+    handleNewRoute(route);
   }
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    boolean isInTunnel = routeProgress.inTunnel();
-    if (!wasInTunnel && isInTunnel) {
-      wasInTunnel = true;
-      Snackbar.make(contentLayout, "Enter tunnel!", Snackbar.LENGTH_SHORT).show();
-    }
-    if (wasInTunnel && !isInTunnel) {
-      wasInTunnel = false;
-      Snackbar.make(contentLayout, "Exit tunnel!", Snackbar.LENGTH_SHORT).show();
-    }
     if (tracking) {
       mapboxMap.getLocationComponent().forceLocationUpdate(location);
-      CameraPosition cameraPosition = new CameraPosition.Builder()
-        .zoom(15)
-        .target(new LatLng(location.getLatitude(), location.getLongitude()))
-        .bearing(location.getBearing())
-        .build();
-      mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000);
+      animateCameraFor(location);
     }
     instructionView.updateDistanceWith(routeProgress);
   }
@@ -233,33 +219,33 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     Timber.d("onMilestoneEvent - Current Instruction: " + instruction);
   }
 
-  @Override
-  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-    Timber.d(call.request().url().toString());
-    if (response.body() != null) {
-      if (!response.body().routes().isEmpty()) {
-        DirectionsRoute route = response.body().routes().get(0);
-        drawRoute(route);
-        resetLocationEngine(route);
-        navigation.startNavigation(route);
-        mapboxMap.addOnMapClickListener(this);
-        tracking = true;
-      }
-    }
-  }
-
-  @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-    Timber.e(throwable);
-  }
-
-  private void getRoute(Point origin, Point destination, Float bearing) {
-    Double heading = bearing == null ? null : bearing.doubleValue();
-    NavigationRoute.builder(this)
-      .origin(origin, heading, 90d)
+  private OfflineRoute obtainOfflineRoute(Point origin, Point destination) {
+    NavigationRoute.Builder onlineRouteBuilder = NavigationRoute.builder(this)
+      .origin(origin)
       .destination(destination)
-      .accessToken(Mapbox.getAccessToken())
-      .build().getRoute(this);
+      .accessToken(Mapbox.getAccessToken());
+    OfflineRoute offlineRoute = OfflineRoute.builder(onlineRouteBuilder)
+      .bicycleType(OfflineCriteria.MOUNTAIN).build();
+    return offlineRoute;
+  }
+
+  private void handleNewRoute(DirectionsRoute route) {
+    if (!checkRoute()) {
+      return;
+    }
+    drawRoute(route);
+    resetLocationEngine(route);
+    startNavigation(route);
+  }
+
+  private boolean checkRoute() {
+    if (route != null) {
+      Snackbar.make(contentLayout, "Offline route found", Snackbar.LENGTH_SHORT).show();
+      return true;
+    } else {
+      Snackbar.make(contentLayout, "Offline route not found", Snackbar.LENGTH_SHORT).show();
+      return false;
+    }
   }
 
   private void drawRoute(DirectionsRoute route) {
@@ -286,6 +272,43 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     mockLocationEngine.assign(directionsRoute);
   }
 
+  private void startNavigation(DirectionsRoute route) {
+    navigation.startNavigation(route);
+    mapboxMap.addOnMapClickListener(this);
+    tracking = true;
+  }
+
+  private void findRoute() {
+    String tilesDirPath = obtainOfflineDirectoryFor("tiles");
+    Timber.d("Tiles directory path: %s", tilesDirPath);
+    String translationsDirPath = obtainOfflineDirectoryFor("translations");
+    Timber.d("Translations directory path: %s", translationsDirPath);
+
+    navigation.initializeOfflineData(tilesDirPath, translationsDirPath, () -> {
+      OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
+      route = navigation.findOfflineRoute(offlineRoute);
+      handleNewRoute(route);
+    });
+  }
+
+  private String obtainOfflineDirectoryFor(String fileName) {
+    File offline = Environment.getExternalStoragePublicDirectory("Offline");
+    if (!offline.exists()) {
+      Timber.d("Offline directory does not exist");
+    }
+    File file = new File(offline, fileName);
+    return file.getAbsolutePath();
+  }
+
+  private void animateCameraFor(Location location) {
+    CameraPosition cameraPosition = new CameraPosition.Builder()
+      .zoom(15)
+      .target(new LatLng(location.getLatitude(), location.getLongitude()))
+      .bearing(location.getBearing())
+      .build();
+    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000);
+  }
+
   private void shutdownLocationEngine() {
     if (mockLocationEngine != null) {
       mockLocationEngine.removeLocationEngineListener(this);
@@ -295,8 +318,10 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   }
 
   private void shutdownNavigation() {
-    navigation.removeNavigationEventListener(this);
-    navigation.removeProgressChangeListener(this);
-    navigation.onDestroy();
+    if (navigation != null) {
+      navigation.removeNavigationEventListener(this);
+      navigation.removeProgressChangeListener(this);
+      navigation.onDestroy();
+    }
   }
 }
