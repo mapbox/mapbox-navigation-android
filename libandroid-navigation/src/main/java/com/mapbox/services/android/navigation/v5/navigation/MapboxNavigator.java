@@ -12,6 +12,7 @@ import java.util.Date;
 
 class MapboxNavigator {
 
+  private static final String EMPTY_TRANSLATIONS_DIR_PATH = "";
   private final Navigator navigator;
 
   MapboxNavigator(Navigator navigator) {
@@ -38,8 +39,8 @@ class MapboxNavigator {
     }
   }
 
-  void configureRouter(String tileFilePath, String translationsDirPath, OnOfflineDataInitialized callback) {
-    new ConfigureRouterTask(navigator, tileFilePath, translationsDirPath, callback).execute();
+  void configureRouter(String tileFilePath, OnOfflineDataInitialized callback) {
+    new ConfigureRouterTask(navigator, tileFilePath, EMPTY_TRANSLATIONS_DIR_PATH, callback).execute();
   }
 
   /**
@@ -75,7 +76,7 @@ class MapboxNavigator {
     navigator.toggleHistory(isEnabled);
   }
 
-  FixLocation buildFixLocationFromLocation(Location location) {
+  private FixLocation buildFixLocationFromLocation(Location location) {
     Date time = new Date();
     Point rawPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     Float speed = checkFor(location.getSpeed());
