@@ -10,6 +10,9 @@
   <a href="https://circleci.com/gh/mapbox/mapbox-navigation-android">
     <img src="https://circleci.com/gh/mapbox/mapbox-navigation-android.svg?style=shield&circle-token=:circle-token">
   </a>
+  <a href="https://codecov.io/gh/mapbox/mapbox-events-android">
+    <img src="https://codecov.io/gh/mapbox/mapbox-events-android/branch/master/graph/badge.svg">
+  </a>
 </p>
 
 When your users want to get from one location to another, don’t push them out of your application into a generic map application. Instead, keep them engaged with your application 100% of the time with in-app turn-by-turn navigation.
