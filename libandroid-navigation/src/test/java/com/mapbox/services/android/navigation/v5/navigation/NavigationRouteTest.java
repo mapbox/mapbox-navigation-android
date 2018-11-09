@@ -3,6 +3,8 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.content.Context;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.api.directions.v5.MapboxDirections;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.BaseTest;
@@ -18,9 +20,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import retrofit2.Call;
+
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class NavigationRouteTest extends BaseTest {
@@ -151,5 +158,31 @@ public class NavigationRouteTest extends BaseTest {
     assertThat(request, containsString("walking"));
     assertThat(request, containsString("curb"));
     assertThat(request, containsString("Origin"));
+  }
+
+  @Test
+  public void cancelCall_cancelsCallNotExecuted() {
+    MapboxDirections mapboxDirections = mock(MapboxDirections.class);
+    Call<DirectionsResponse> routeCall = mock(Call.class);
+    when(routeCall.isExecuted()).thenReturn(false);
+    when(mapboxDirections.cloneCall()).thenReturn(routeCall);
+    NavigationRoute navigationRoute = new NavigationRoute(mapboxDirections);
+
+    navigationRoute.cancelCall();
+
+    verify(routeCall).cancel();
+  }
+
+  @Test
+  public void cancelCall_doesNotCancelExecutedCall() {
+    MapboxDirections mapboxDirections = mock(MapboxDirections.class);
+    Call<DirectionsResponse> routeCall = mock(Call.class);
+    when(routeCall.isExecuted()).thenReturn(true);
+    when(mapboxDirections.cloneCall()).thenReturn(routeCall);
+    NavigationRoute navigationRoute = new NavigationRoute(mapboxDirections);
+
+    navigationRoute.cancelCall();
+
+    verify(routeCall, times(0)).cancel();
   }
 }
