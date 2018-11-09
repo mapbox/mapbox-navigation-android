@@ -293,7 +293,8 @@ public class OfflineRoute {
      * @return a new instance of {@link OfflineRoute}
      */
     public OfflineRoute build() {
-      return new OfflineRoute(navigationRouteBuilder.build(), bicycleType, cyclingSpeed, cyclewayBias, hillBias, ferryBias, roughSurfaceBias, waypointTypes);
+      return new OfflineRoute(navigationRouteBuilder.build(), bicycleType, cyclingSpeed, cyclewayBias,
+              hillBias, ferryBias, roughSurfaceBias, waypointTypes);
     }
   }
 }
