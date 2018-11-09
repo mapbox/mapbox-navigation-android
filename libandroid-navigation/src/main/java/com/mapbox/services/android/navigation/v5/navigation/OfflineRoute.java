@@ -25,7 +25,7 @@ public class OfflineRoute {
   private static final String BICYCLE_TYPE_QUERY_PARAMETER = "bicycle_type";
   private static final String CYCLING_SPEED_QUERY_PARAMETER = "cycling_speed";
   private static final String CYCLEWAY_BIAS_QUERY_PARAMETER = "cycleway_bias";
-  private static final String HILL_BIAS_QUERY_PARAMETER = "hill_bias	";
+  private static final String HILL_BIAS_QUERY_PARAMETER = "hill_bias";
   private static final String FERRY_BIAS_QUERY_PARAMETER = "ferry_bias";
   private static final String ROUGH_SURFACE_BIAS_QUERY_PARAMETER = "rough_surface_bias";
   private static final String WAYPOINT_TYPES_QUERY_PARAMETER = "waypoint_types";
