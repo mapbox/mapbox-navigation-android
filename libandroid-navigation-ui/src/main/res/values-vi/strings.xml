@@ -36,6 +36,12 @@
     <!-- Feedback type for Road Closed -->
     <string name="feedback_road_closure">Đường\nĐóng cửa</string>
 
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="feedback_submitted">Đã Gửi Phản hồi</string>
+
+    <!-- Shown in off-route scenarios to provide feedback -->
+    <string name="report_problem">Báo cáo Sự cố</string>
+
     <!-- Test app dialog text -->
     <string name="dropoff_dialog_text">Bạn có muốn đi tiếp đến nơi sau?</string>
 

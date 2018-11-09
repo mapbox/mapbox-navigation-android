@@ -31,6 +31,9 @@
     <string name="title_fragment_navigation">NavigationView thực hiện bằng Fragment</string>
     <string name="description_fragment_navigation">NavigationView thực hiện bằng Fragment</string>
 
+    <string name="title_component_navigation">MapboxNavigation có bộ phận giao diện</string>
+    <string name="description_component_navigation">MapboxNavigation có bộ phận giao diện</string>
+
     <string name="settings">Thiết lập</string>
     <string name="simulate_route">Mô phỏng Tuyến đường</string>
     <string name="language">Ngôn ngữ</string>

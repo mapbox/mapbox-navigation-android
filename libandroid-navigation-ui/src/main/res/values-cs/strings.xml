@@ -36,6 +36,12 @@
     <!-- Feedback type for Road Closed -->
     <string name="feedback_road_closure">Cesta\nUzavřeno</string>
 
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="feedback_submitted">Zpětná vazba byla odeslána</string>
+
+    <!-- Shown in off-route scenarios to provide feedback -->
+    <string name="report_problem">Zaslat problém</string>
+
     <!-- Test app dialog text -->
     <string name="dropoff_dialog_text">Přejete si navigovat k dalšímu cíli?</string>
 
