@@ -259,12 +259,12 @@ public class OfflineRoute {
     }
 
     /**
-     * This value is meant to represent how much a cyclist wants to favor or avoid roads with poor/rough 
-     * surfaces relative to the bicycle type being used. This is a range of values between -1 and 1. 
-     * When the value approaches -1, we attempt to penalize heavier or avoid roads with rough surface types 
+     * This value is meant to represent how much a cyclist wants to favor or avoid roads with poor/rough
+     * surfaces relative to the bicycle type being used. This is a range of values between -1 and 1.
+     * When the value approaches -1, we attempt to penalize heavier or avoid roads with rough surface types
      * so that they are only taken if they significantly improve travel time; only bicycle
      * speed on each surface is taken into account. As the value approaches 1, we will favor rough surfaces.
-     * When the value is equal to -1, all bad surfaces are completely disallowed from routing, 
+     * When the value is equal to -1, all bad surfaces are completely disallowed from routing,
      * including start and end points. The default value is 0.
      *
      * @param roughSurfaceBias how much a cyclist wants to avoid roads with poor surfaces
