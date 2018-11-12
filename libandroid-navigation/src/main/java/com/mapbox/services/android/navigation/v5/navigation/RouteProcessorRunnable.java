@@ -82,7 +82,7 @@ class RouteProcessorRunnable implements Runnable {
                                        NavigationEngineFactory engineFactory) {
     Snap snap = engineFactory.retrieveSnapEngine();
     if (snap instanceof SnapToRoute) {
-      return ((SnapToRoute) snap).getSnappedLocationWith(status);
+      return ((SnapToRoute) snap).getSnappedLocationWith(status, rawLocation);
     }
     return snap.getSnappedLocation(rawLocation, routeProgress);
   }
