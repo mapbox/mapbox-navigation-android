@@ -10,6 +10,9 @@
   <a href="https://circleci.com/gh/mapbox/mapbox-navigation-android">
     <img src="https://circleci.com/gh/mapbox/mapbox-navigation-android.svg?style=shield&circle-token=:circle-token">
   </a>
+  <a href="https://codecov.io/gh/mapbox/mapbox-navigation-android">
+    <img src="https://codecov.io/gh/mapbox/mapbox-navigation-android/branch/master/graph/badge.svg">
+  </a>
 </p>
 
 When your users want to get from one location to another, don’t push them out of your application into a generic map application. Instead, keep them engaged with your application 100% of the time with in-app turn-by-turn navigation.
@@ -26,13 +29,13 @@ If you are looking to include this inside your project, please take a look at [t
 Add this snippet to your `build.gradle` file to use this SDK (`libandroid-navigation`):
 
 ```
-implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.22.0'
+implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.23.0'
 ```
 
 And for `libandroid-navigation-ui`:
 
 ```
-implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.22.0'
+implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.23.0'
 ```
 **Note**:  When using the UI library, you _do not_ need to add both dependencies.  The UI library will automatically pull in `libandroid-navigation`.
 
@@ -67,7 +70,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.23.0-SNAPSHOT'
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.24.0-SNAPSHOT'
 }
 ```
 

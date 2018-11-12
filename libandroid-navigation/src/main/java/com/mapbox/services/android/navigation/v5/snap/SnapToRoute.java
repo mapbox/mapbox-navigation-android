@@ -8,21 +8,19 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 public class SnapToRoute extends Snap {
 
-  private static final String NAVIGATOR_SNAPPED_LOCATION = "NavigatorSnappedLocation";
-
   @Override
   public Location getSnappedLocation(Location location, RouteProgress routeProgress) {
     // No impl
     return location;
   }
 
-  public Location getSnappedLocationWith(NavigationStatus status) {
-    return buildSnappedLocation(status);
+  public Location getSnappedLocationWith(NavigationStatus status, Location rawLocation) {
+    return buildSnappedLocation(status, rawLocation);
   }
 
   @NonNull
-  private Location buildSnappedLocation(NavigationStatus status) {
-    Location snappedLocation = new Location(NAVIGATOR_SNAPPED_LOCATION);
+  private Location buildSnappedLocation(NavigationStatus status, Location rawLocation) {
+    Location snappedLocation = new Location(rawLocation);
     snappedLocation.setLatitude(status.getLocation().latitude());
     snappedLocation.setLongitude(status.getLocation().longitude());
     snappedLocation.setBearing(status.getBearing());
