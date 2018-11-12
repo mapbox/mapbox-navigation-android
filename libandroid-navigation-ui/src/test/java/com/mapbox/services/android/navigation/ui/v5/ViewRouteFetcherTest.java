@@ -31,7 +31,7 @@ public class ViewRouteFetcherTest extends BaseTest {
   private static final String DIRECTIONS_PRECISION_6 = "directions_v5_precision_6.json";
 
   @Test
-  public void sanity() throws Exception {
+  public void sanity() {
     ViewRouteListener routeEngineListener = mock(ViewRouteListener.class);
     ViewRouteFetcher routeEngine = buildRouteEngine(routeEngineListener);
 
@@ -76,7 +76,7 @@ public class ViewRouteFetcherTest extends BaseTest {
   }
 
   @Test
-  public void onErrorReceived_errorListenerIsTriggered() throws Exception {
+  public void onErrorReceived_errorListenerIsTriggered() {
     ViewRouteListener routeEngineListener = mock(ViewRouteListener.class);
     ViewRouteFetcher routeEngine = buildRouteEngine(routeEngineListener);
     Throwable throwable = mock(Throwable.class);

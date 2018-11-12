@@ -75,6 +75,14 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
     this.rawLocation = rawLocation;
   }
 
+  /**
+   * Call when your {@link android.app.Activity} or {@link android.app.Fragment} is being
+   * destroyed to cancel any outstanding Directions API calls.
+   */
+  public void onDestroy() {
+    cancelRouteCall();
+  }
+
   private void extractRouteFromOptions(NavigationViewOptions options) {
     DirectionsRoute route = options.directionsRoute();
     cacheRouteOptions(route.routeOptions());

@@ -65,7 +65,7 @@ public class NavigationViewModel extends AndroidViewModel {
   final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
-  private ViewRouteFetcher navigationViewRouteEngine;
+  private ViewRouteFetcher routeFetcher;
   private LocationEngineConductor locationEngineConductor;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
   private SpeechPlayer speechPlayer;
@@ -103,6 +103,7 @@ public class NavigationViewModel extends AndroidViewModel {
     this.isChangingConfigurations = isChangingConfigurations;
     if (!isChangingConfigurations) {
       locationEngineConductor.onDestroy();
+      routeFetcher.onDestroy();
       deactivateInstructionPlayer();
       endNavigation();
       isRunning = false;
@@ -187,7 +188,7 @@ public class NavigationViewModel extends AndroidViewModel {
       initializeNavigation(getApplication(), navigationOptions, locationEngine);
       addMilestones(options);
     }
-    navigationViewRouteEngine.extractRouteOptions(options);
+    routeFetcher.extractRouteOptions(options);
     return navigation;
   }
 
@@ -211,7 +212,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initializeNavigationRouteEngine() {
-    navigationViewRouteEngine = new ViewRouteFetcher(getApplication(), accessToken, routeEngineListener);
+    routeFetcher = new ViewRouteFetcher(getApplication(), accessToken, routeEngineListener);
   }
 
   private void initializeNavigationLocationEngine() {
@@ -361,7 +362,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private LocationEngineConductorListener locationEngineCallback = new LocationEngineConductorListener() {
     @Override
     public void onLocationUpdate(Location location) {
-      navigationViewRouteEngine.updateRawLocation(location);
+      routeFetcher.updateRawLocation(location);
     }
   };
 
@@ -455,7 +456,7 @@ public class NavigationViewModel extends AndroidViewModel {
     if (navigationViewEventDispatcher != null && navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
       navigationViewEventDispatcher.onOffRoute(newOrigin);
       OffRouteEvent event = new OffRouteEvent(newOrigin, routeProgress);
-      navigationViewRouteEngine.fetchRouteFromOffRouteEvent(event);
+      routeFetcher.fetchRouteFromOffRouteEvent(event);
       isOffRoute.setValue(true);
     }
   }
