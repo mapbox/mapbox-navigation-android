@@ -36,6 +36,14 @@ android {
     unitTests.returnDefaultValues = true
     unitTests.includeAndroidResources = true
   }
+
+  testOptions {
+    unitTests.all {
+      jacoco {
+        includeNoLocationClasses = true
+      }
+    }
+  }
 }
 
 dependencies {

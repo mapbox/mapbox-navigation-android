@@ -107,7 +107,8 @@ ext {
       gradle           : '3.2.0',
       dependencyGraph  : '0.3.0',
       dependencyUpdates: '0.20.0',
-      kotlin           : '1.2.61'
+      kotlin           : '1.2.61',
+      jacoco           : '0.8.2'
   ]
 
   pluginDependencies = [
@@ -118,6 +119,7 @@ ext {
       coveralls        : "org.kt3k.gradle.plugin:coveralls-gradle-plugin:${pluginVersion.coveralls}",
       errorprone       : "net.ltgt.gradle:gradle-errorprone-plugin:${pluginVersion.errorprone}",
       dependencyGraph  : "com.vanniktech:gradle-dependency-graph-generator-plugin:${pluginVersion.dependencyGraph}",
-      dependencyUpdates: "com.github.ben-manes:gradle-versions-plugin:${pluginVersion.dependencyUpdates}"
+      dependencyUpdates: "com.github.ben-manes:gradle-versions-plugin:${pluginVersion.dependencyUpdates}",
+      jacoco           : "com.github.ben-manes:gradle-versions-plugin:${pluginVersion.jacoco}"
   ]
 }
