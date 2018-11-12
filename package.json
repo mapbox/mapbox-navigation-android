@@ -1,0 +1,26 @@
+{
+  "name": "@mapbox/mapbox-navigation-android",
+  "version": "0.23.0",
+  "description": "Navigation Services",
+  "keywords": [
+    "mapbox",
+    "navigation",
+    "location"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mapbox/mapbox-navigation-android.git"
+  },
+  "devDependencies": {
+    "express": "^4.11.1",
+    "@octokit/rest": "^15.15.1",
+    "jsonwebtoken": "^8.3.0",
+    "pretty-bytes": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=6"
+  },
+  "dependencies": {
+    "@mapbox/cloudfriend": "^2.5.0"
+  }
+}
