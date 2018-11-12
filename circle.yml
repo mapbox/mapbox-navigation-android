@@ -120,6 +120,18 @@ jobs:
       - run:
           name: Build Navigation SDK
           command: make build-release
+      - restore_cache: # special step to restore the dependency cache
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Setup Environment
+          command: npm install
+      - save_cache: # special step to save the dependency cache
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: Check & Publish Binary Size
+          command: ./scripts/check_binary_size.sh
       - deploy:
           name: Publish Navigation SDK To Maven Central
           command: |
