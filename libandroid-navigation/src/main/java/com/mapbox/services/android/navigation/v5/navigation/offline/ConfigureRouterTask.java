@@ -1,8 +1,9 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.navigation.offline;
 
 import android.os.AsyncTask;
 
 import com.mapbox.navigator.Navigator;
+import com.mapbox.services.android.navigation.v5.navigation.OnOfflineDataInitialized;
 
 class ConfigureRouterTask extends AsyncTask<Void, Void, Void> {
   private final Navigator navigator;

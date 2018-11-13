@@ -10,6 +10,9 @@
     <string name="title_offline_reroute">Offline Reroute</string>
     <string name="description_offline_reroute">Test the offline reroute function inside the navigation SDK</string>
 
+    <string name="title_offline_region_download">Offline region download</string>
+    <string name="description_offline_region_download">Download offline routing tiles</string>
+
     <string name="title_reroute">Reroute</string>
     <string name="description_reroute">Test the reroute function inside the navigation SDK</string>
 
@@ -66,4 +69,5 @@
     <string name="hint_where_to">Where to?</string>
     <string name="offline_routing">Offline routing</string>
     <string name="autocompleteBehavior" translatable="false">com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.AutocompleteBottomSheetBehavior</string>
+    <string name="download_complete">Download is complete!</string>
 </resources>

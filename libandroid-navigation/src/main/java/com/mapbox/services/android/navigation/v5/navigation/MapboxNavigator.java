@@ -6,15 +6,17 @@ import com.mapbox.geojson.Point;
 import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
-import com.mapbox.navigator.RouterResult;
 import com.mapbox.navigator.VoiceInstruction;
 
 import java.util.Date;
 
 class MapboxNavigator {
 
-  private static final String EMPTY_TRANSLATIONS_DIR_PATH = "";
   private final Navigator navigator;
+
+  MapboxNavigator() {
+    this(new Navigator());
+  }
 
   MapboxNavigator(Navigator navigator) {
     this.navigator = navigator;
@@ -38,21 +40,6 @@ class MapboxNavigator {
     synchronized (this) {
       navigator.updateLocation(fixedLocation);
     }
-  }
-
-  void configureRouter(String tileFilePath, OnOfflineDataInitialized callback) {
-    new ConfigureRouterTask(navigator, tileFilePath, EMPTY_TRANSLATIONS_DIR_PATH, callback).execute();
-  }
-
-  /**
-   * Uses libvalhalla and local tile data to generate mapbox-directions-api-like json
-   *
-   * @param offlineRoute an offline navigation route
-   * @return a RouterResult object with the json and a success/fail bool
-   */
-  synchronized RouterResult retrieveRouteFor(OfflineRoute offlineRoute) {
-    String offlineUri = offlineRoute.buildUrl();
-    return navigator.getRoute(offlineUri);
   }
 
   /**
@@ -108,4 +95,5 @@ class MapboxNavigator {
     }
     return value;
   }
+
 }

@@ -12,6 +12,7 @@ import android.view.View;
 
 import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.routetiles.v1.versions.models.RouteTileVersionsResponse;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
@@ -39,6 +40,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListe
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineCriteria;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
+import com.mapbox.services.android.navigation.v5.navigation.offline.OfflineTileVersions;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -49,6 +51,9 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import timber.log.Timber;
 
 public class OfflineRerouteActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener,
@@ -279,22 +284,39 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void findRoute() {
-    String tilesDirPath = obtainOfflineDirectoryFor("tiles");
-    Timber.d("Tiles directory path: %s", tilesDirPath);
+    getVersionsAndRoute();
+  }
 
-    navigation.initializeOfflineData(tilesDirPath, () -> {
-      OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
-      route = navigation.findOfflineRoute(offlineRoute);
-      handleNewRoute(route);
+  private void getVersionsAndRoute() {
+    OfflineTileVersions versions = new OfflineTileVersions(Mapbox.getAccessToken());
+
+    versions.getRouteTileVersions(new Callback<RouteTileVersionsResponse>() {
+      @Override
+      public void onResponse(Call<RouteTileVersionsResponse> call, Response<RouteTileVersionsResponse> response) {
+        String version = response.body().availableVersions().get(0);
+        String tilesDirPath = obtainOfflineDirectoryFor("tiles", version);
+        Timber.d("Tiles directory path: %s", tilesDirPath);
+
+        navigation.initializeOfflineData(tilesDirPath, () -> {
+          OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
+          route = navigation.findOfflineRoute(offlineRoute);
+          handleNewRoute(route);
+        });
+      }
+
+      @Override
+      public void onFailure(Call call, Throwable throwable) {
+
+      }
     });
   }
 
-  private String obtainOfflineDirectoryFor(String fileName) {
+  private String obtainOfflineDirectoryFor(String fileName, String version) {
     File offline = Environment.getExternalStoragePublicDirectory("Offline");
     if (!offline.exists()) {
       Timber.d("Offline directory does not exist");
     }
-    File file = new File(offline, fileName);
+    File file = new File(offline, fileName + "/" + version);
     return file.getAbsolutePath();
   }
 

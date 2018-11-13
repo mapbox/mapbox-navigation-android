@@ -13,7 +13,6 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.RouterResult;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -22,6 +21,7 @@ import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMiles
 import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
 import com.mapbox.services.android.navigation.v5.navigation.camera.SimpleCamera;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
+import com.mapbox.services.android.navigation.v5.navigation.offline.MapboxOfflineRouter;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
@@ -57,6 +57,7 @@ public class MapboxNavigation implements ServiceConnection {
   private NavigationTelemetry navigationTelemetry = null;
   private NavigationService navigationService;
   private MapboxNavigator mapboxNavigator;
+  private MapboxOfflineRouter mapboxOfflineRouter;
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
   private LocationEngine locationEngine = null;
@@ -724,7 +725,7 @@ public class MapboxNavigation implements ServiceConnection {
    *                            {@link MapboxNavigation#findOfflineRoute(OfflineRoute)} could be called safely
    */
   public void initializeOfflineData(String tilesDirPath, OnOfflineDataInitialized callback) {
-    mapboxNavigator.configureRouter(tilesDirPath, callback);
+    mapboxOfflineRouter.configure(tilesDirPath, callback);
   }
 
   /**
@@ -808,7 +809,9 @@ public class MapboxNavigation implements ServiceConnection {
    */
   private void initialize() {
     // Initialize event dispatcher and add internal listeners
-    mapboxNavigator = new MapboxNavigator(new Navigator());
+    mapboxNavigator = new MapboxNavigator();
+    mapboxOfflineRouter = new MapboxOfflineRouter();
+
     navigationEventDispatcher = new NavigationEventDispatcher();
     navigationEngineFactory = new NavigationEngineFactory();
     initializeDefaultLocationEngine();
@@ -904,7 +907,7 @@ public class MapboxNavigation implements ServiceConnection {
 
   @Nullable
   private DirectionsRoute retrieveOfflineRoute(@NonNull OfflineRoute offlineRoute) {
-    RouterResult response = mapboxNavigator.retrieveRouteFor(offlineRoute);
+    RouterResult response = mapboxOfflineRouter.retrieveRouteFor(offlineRoute);
     return offlineRoute.retrieveOfflineRoute(response);
   }
 }
