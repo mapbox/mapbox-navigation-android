@@ -37,6 +37,9 @@ dependencies {
 
   // Mapbox Map SDK
   implementation dependenciesList.mapboxMapSdk
+  implementation(dependenciesList.mapboxSdkServices) {
+    force true
+  }
 
   // Support libraries
   implementation dependenciesList.supportDesign

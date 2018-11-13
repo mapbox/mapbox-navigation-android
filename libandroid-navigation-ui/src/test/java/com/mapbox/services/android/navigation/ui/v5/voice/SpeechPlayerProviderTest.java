@@ -51,6 +51,7 @@ public class SpeechPlayerProviderTest {
   private SpeechPlayerProvider buildSpeechPlayerProvider(boolean voiceLanguageSupported) {
     Context context = mock(Context.class);
     String language = Locale.US.getLanguage();
-    return new SpeechPlayerProvider(context, language, voiceLanguageSupported, "PK.XXX");
+    VoiceInstructionLoader voiceInstructionLoader = mock(VoiceInstructionLoader.class);
+    return new SpeechPlayerProvider(context, language, voiceLanguageSupported, voiceInstructionLoader);
   }
 }

@@ -716,6 +716,10 @@ public class MapboxNavigation implements ServiceConnection {
     mapboxNavigator.toggleHistory(isEnabled);
   }
 
+  public String retrieveSsmlAnnouncementInstruction(int index) {
+    return mapboxNavigator.retrieveVoiceInstruction(index).getSsmlAnnouncement();
+  }
+
   @Override
   public void onServiceConnected(ComponentName name, IBinder service) {
     Timber.d("Connected to service.");
