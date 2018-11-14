@@ -9,9 +9,6 @@
 # --- Java ---
 -dontwarn java.awt.Color
 
-# --- com.mapbox.api.directions.v5.MapboxDirections ---
--dontwarn com.sun.xml.internal.ws.spi.db.BindingContextFactory
-
 # --- AutoValue ---
 # AutoValue annotations are retained but dependency is compileOnly.
 -dontwarn com.google.auto.value.**
