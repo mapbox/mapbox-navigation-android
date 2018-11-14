@@ -42,7 +42,7 @@ public class ImageCoordinator {
   /**
    * Primary access method (using singleton pattern)
    *
-   * @return InstructionLoader
+   * @return ImageCoordinator
    */
   public static synchronized ImageCoordinator getInstance() {
     if (instance == null) {
@@ -197,7 +197,7 @@ public class ImageCoordinator {
 
   private void checkIsInitialized() {
     if (!isInitialized) {
-      throw new RuntimeException("InstructionLoader must be initialized prior to loading image URLs");
+      throw new RuntimeException("ImageCoordinator must be initialized prior to loading image URLs");
     }
   }
 

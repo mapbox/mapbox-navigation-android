@@ -35,12 +35,11 @@ public class SpeechPlayerProvider {
    * @param context                for the initialization of the speech players
    * @param language               to be used
    * @param voiceLanguageSupported true if <tt>voiceLanguage</tt> is not null, false otherwise
-   * @param accessToken            your given Mapbox access token
-   * @since 0.16.0
+   * @param voiceInstructionLoader voice instruction loader
    */
   public SpeechPlayerProvider(@NonNull Context context, String language,
-                              boolean voiceLanguageSupported, String accessToken) {
-    initialize(context, language, voiceLanguageSupported, accessToken);
+                              boolean voiceLanguageSupported, VoiceInstructionLoader voiceInstructionLoader) {
+    initialize(context, language, voiceLanguageSupported, voiceInstructionLoader);
   }
 
   SpeechPlayer retrieveSpeechPlayer() {
@@ -70,11 +69,11 @@ public class SpeechPlayerProvider {
   }
 
   private void initialize(@NonNull Context context, String language,
-                          boolean voiceLanguageSupported, String accessToken) {
+                          boolean voiceLanguageSupported, VoiceInstructionLoader voiceInstructionLoader) {
     AudioFocusDelegateProvider provider = buildAudioFocusDelegateProvider(context);
     SpeechAudioFocusManager audioFocusManager = new SpeechAudioFocusManager(provider);
     SpeechListener speechListener = new NavigationSpeechListener(this, audioFocusManager);
-    initMapboxSpeechPlayer(context, language, voiceLanguageSupported, accessToken, speechListener);
+    initMapboxSpeechPlayer(context, language, voiceLanguageSupported, speechListener, voiceInstructionLoader);
     initAndroidSpeechPlayer(context, language, speechListener);
   }
 
@@ -83,12 +82,13 @@ public class SpeechPlayerProvider {
     return new AudioFocusDelegateProvider(audioManager);
   }
 
-  private void initMapboxSpeechPlayer(Context context, String language,
-                                      boolean voiceLanguageSupported, String accessToken, SpeechListener listener) {
+  private void initMapboxSpeechPlayer(Context context, String language, boolean voiceLanguageSupported,
+                                      SpeechListener listener, VoiceInstructionLoader voiceInstructionLoader) {
     if (!voiceLanguageSupported) {
       return;
     }
-    MapboxSpeechPlayer mapboxSpeechPlayer = new MapboxSpeechPlayer(context, language, listener, accessToken);
+    voiceInstructionLoader.setupMapboxSpeechBuilder(language);
+    MapboxSpeechPlayer mapboxSpeechPlayer = new MapboxSpeechPlayer(context, listener, voiceInstructionLoader);
     speechPlayers.add(mapboxSpeechPlayer);
   }
 

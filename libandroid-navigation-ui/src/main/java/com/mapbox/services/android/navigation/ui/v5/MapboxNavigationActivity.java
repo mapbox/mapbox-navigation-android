@@ -102,14 +102,12 @@ public class MapboxNavigationActivity extends AppCompatActivity implements OnNav
 
   @Override
   public void onCancelNavigation() {
-    // Navigation canceled, finish the activity
-    finish();
+    finishNavigation();
   }
 
   @Override
   public void onNavigationFinished() {
-    // Navigation finished, finish the activity
-    finish();
+    finishNavigation();
   }
 
   @Override
@@ -137,5 +135,10 @@ public class MapboxNavigationActivity extends AppCompatActivity implements OnNav
       .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
     options.directionsProfile(preferences
       .getString(NavigationConstants.NAVIGATION_VIEW_ROUTE_PROFILE_KEY, DirectionsCriteria.PROFILE_DRIVING_TRAFFIC));
+  }
+
+  private void finishNavigation() {
+    NavigationLauncher.cleanUpPreferences(this);
+    finish();
   }
 }

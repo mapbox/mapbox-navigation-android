@@ -7,6 +7,7 @@ import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.RouterResult;
+import com.mapbox.navigator.VoiceInstruction;
 
 import java.util.Date;
 
@@ -76,7 +77,12 @@ class MapboxNavigator {
     navigator.toggleHistory(isEnabled);
   }
 
-  private FixLocation buildFixLocationFromLocation(Location location) {
+
+  synchronized VoiceInstruction retrieveVoiceInstruction(int index) {
+    return navigator.getVoiceInstruction(index);
+  }
+
+  FixLocation buildFixLocationFromLocation(Location location) {
     Date time = new Date();
     Point rawPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     Float speed = checkFor(location.getSpeed());

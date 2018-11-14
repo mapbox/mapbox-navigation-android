@@ -7,14 +7,11 @@ import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
-import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoader;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import okhttp3.Cache;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -28,39 +25,31 @@ import timber.log.Timber;
  */
 class MapboxSpeechPlayer implements SpeechPlayer {
 
-  private static final long TEN_MEGABYTE_CACHE_SIZE = 10 * 1098 * 1098;
-  private static final String OKHTTP_INSTRUCTION_CACHE = "okhttp_instruction_cache";
   private static final String MAPBOX_INSTRUCTION_CACHE = "mapbox_instruction_cache";
   private static final String ERROR_TEXT = "Unable to set data source for the media mediaPlayer! %s";
   private static final SpeechAnnouncementMap SPEECH_ANNOUNCEMENT_MAP = new SpeechAnnouncementMap();
 
-  private VoiceInstructionLoader voiceInstructionLoader;
   private SpeechAnnouncement announcement;
   private SpeechListener speechListener;
   private MediaPlayer mediaPlayer;
   private Queue<File> instructionQueue;
   private File mapboxCache;
-  private Cache okhttpCache;
   private boolean isPlaying;
   private boolean isMuted;
+  private VoiceInstructionLoader voiceInstructionLoader;
 
   /**
    * Construct an instance of {@link MapboxSpeechPlayer}
    *
-   * @param context     to setup the caches
-   * @param language    for which language
-   * @param accessToken a valid Mapbox access token
+   * @param context                to setup the caches
+   * @param voiceInstructionLoader voice instruction loader
    */
-  MapboxSpeechPlayer(Context context, String language, @NonNull SpeechListener speechListener,
-                     String accessToken) {
+  MapboxSpeechPlayer(Context context, @NonNull SpeechListener speechListener,
+                     VoiceInstructionLoader voiceInstructionLoader) {
     this.speechListener = speechListener;
+    this.voiceInstructionLoader = voiceInstructionLoader;
     setupCaches(context);
     instructionQueue = new ConcurrentLinkedQueue();
-    voiceInstructionLoader = VoiceInstructionLoader.builder()
-      .language(language)
-      .cache(okhttpCache)
-      .accessToken(accessToken)
-      .build();
   }
 
   /**
@@ -98,13 +87,10 @@ class MapboxSpeechPlayer implements SpeechPlayer {
   @Override
   public void onDestroy() {
     stopMediaPlayerPlaying();
-    flushCache();
+    voiceInstructionLoader.flushCache();
   }
 
   private void setupCaches(Context context) {
-    File okHttpDirectory = new File(context.getCacheDir(), OKHTTP_INSTRUCTION_CACHE);
-    okHttpDirectory.mkdir();
-    okhttpCache = new Cache(okHttpDirectory, TEN_MEGABYTE_CACHE_SIZE);
     mapboxCache = new File(context.getCacheDir(), MAPBOX_INSTRUCTION_CACHE);
     mapboxCache.mkdir();
   }
@@ -127,14 +113,6 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     }
   }
 
-  private void flushCache() {
-    try {
-      okhttpCache.flush();
-    } catch (IOException exception) {
-      Timber.e(exception);
-    }
-  }
-
   private void stopMediaPlayerPlaying() {
     if (isPlaying) {
       isPlaying = false;
@@ -150,7 +128,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
       return;
     }
 
-    voiceInstructionLoader.getInstruction(instruction, textType, new Callback<ResponseBody>() {
+    voiceInstructionLoader.requestInstruction(instruction, textType, new Callback<ResponseBody>() {
       @Override
       public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
         if (response.isSuccessful()) {
