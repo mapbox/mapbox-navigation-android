@@ -60,6 +60,7 @@ class MapboxNavigator {
     navigator.toggleHistory(isEnabled);
   }
 
+
   synchronized VoiceInstruction retrieveVoiceInstruction(int index) {
     return navigator.getVoiceInstruction(index);
   }

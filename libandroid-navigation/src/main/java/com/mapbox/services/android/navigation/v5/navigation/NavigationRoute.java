@@ -27,13 +27,13 @@ import retrofit2.Callback;
 
 /**
  * The NavigationRoute class wraps the {@link MapboxDirections} class with parameters which
- * <u>must</u> be set inorder for a navigation session to successfully begin. While it is possible
+ * <u>must</u> be set in order for a navigation session to successfully begin. While it is possible
  * to pass in any {@link com.mapbox.api.directions.v5.models.DirectionsRoute} into
  * {@link MapboxNavigation#startNavigation(DirectionsRoute)}, using this class will ensure your
  * request includes all the proper information needed for the navigation session to begin.
  * <p>
  * <p>
- * Developer Note: MapboxDirections cannot be directly extended since it id an AutoValue class.
+ * Developer Note: MapboxDirections cannot be directly extended since it is an AutoValue class.
  * </p>
  * 0.5.0
  */

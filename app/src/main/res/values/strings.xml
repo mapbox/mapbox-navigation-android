@@ -7,6 +7,9 @@
     <string name="title_off_route_detection">Off route detection</string>
     <string name="description_off_route_detection">Uses the Route Utils class to determine if a users off route.</string>
 
+    <string name="title_offline_reroute">Offline Reroute</string>
+    <string name="description_offline_reroute">Test the offline reroute function inside the navigation SDK</string>
+
     <string name="title_reroute">Reroute</string>
     <string name="description_reroute">Test the reroute function inside the navigation SDK</string>
 
