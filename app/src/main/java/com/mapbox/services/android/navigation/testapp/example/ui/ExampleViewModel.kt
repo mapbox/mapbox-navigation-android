@@ -33,7 +33,7 @@ import java.io.File
 import java.util.Locale.US
 
 private const val ONE_SECOND_INTERVAL = 1000
-private const val EXAMPLE_INSTRUCTION_CACHE = "component-navigation-instruction-cache"
+private const val EXAMPLE_INSTRUCTION_CACHE = "example-navigation-instruction-cache"
 private const val TEN_MEGABYTE_CACHE_SIZE: Long = 10 * 1024 * 1024
 
 class ExampleViewModel(application: Application) : AndroidViewModel(application) {
