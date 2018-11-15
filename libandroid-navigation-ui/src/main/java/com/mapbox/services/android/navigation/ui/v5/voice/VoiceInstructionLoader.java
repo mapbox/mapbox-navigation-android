@@ -82,16 +82,20 @@ public class VoiceInstructionLoader {
   }
 
   void requestInstruction(String instruction, String textType, Callback<ResponseBody> callback) {
-    MapboxSpeech mapboxSpeech = mapboxSpeechBuilder
-      .instruction(instruction)
-      .textType(textType)
-      .build();
-    mapboxSpeech.enqueueCall(callback);
+    if (!cache.isClosed()) {
+      MapboxSpeech mapboxSpeech = mapboxSpeechBuilder
+        .instruction(instruction)
+        .textType(textType)
+        .build();
+      mapboxSpeech.enqueueCall(callback);
+    }
   }
 
   void flushCache() {
     try {
-      cache.delete();
+      if (cache.directory().listFiles() != null) {
+        cache.delete();
+      }
     } catch (IOException exception) {
       Timber.e(exception);
     }
