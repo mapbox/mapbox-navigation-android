@@ -35,6 +35,7 @@ import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListene
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineNavigator;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineCriteria;
@@ -68,6 +69,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
 
   private ReplayRouteLocationEngine mockLocationEngine;
   private MapboxNavigation navigation;
+  private MapboxOfflineNavigator offlineRouting;
   private MapboxMap mapboxMap;
   private boolean running;
   private boolean tracking;
@@ -141,6 +143,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     mapboxMap.addOnMapClickListener(this);
+    offlineRouting = new MapboxOfflineNavigator();
 
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
     locationComponent.activateLocationComponent(this);
@@ -197,7 +200,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
     Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     OfflineRoute offlineRoute = obtainOfflineRoute(newOrigin, newDestination);
-    route = navigation.findOfflineRoute(offlineRoute);
+    route = offlineRouting.findOfflineRoute(offlineRoute);
     handleNewRoute(route);
   }
 
@@ -282,9 +285,9 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     String tilesDirPath = obtainOfflineDirectoryFor("tiles");
     Timber.d("Tiles directory path: %s", tilesDirPath);
 
-    navigation.initializeOfflineData(tilesDirPath, () -> {
+    offlineRouting.initializeOfflineData(tilesDirPath, () -> {
       OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
-      route = navigation.findOfflineRoute(offlineRoute);
+      route = offlineRouting.findOfflineRoute(offlineRoute);
       handleNewRoute(route);
     });
   }
