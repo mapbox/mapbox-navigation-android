@@ -13,6 +13,7 @@ import java.util.Date;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -78,11 +79,11 @@ public class SnapToRouteTest {
   }
 
   private NavigationStatus buildMockStatus() {
-    NavigationStatus status = mock(NavigationStatus.class);
+    NavigationStatus status = mock(NavigationStatus.class, RETURNS_DEEP_STUBS);
     Point location = Point.fromLngLat(0.0, 0.0);
-    when(status.getLocation()).thenReturn(location);
-    when(status.getTime()).thenReturn(new Date());
-    when(status.getBearing()).thenReturn(0.0f);
+    when(status.getLocation().getCoordinate()).thenReturn(location);
+    when(status.getLocation().getTime()).thenReturn(new Date());
+    when(status.getLocation().getBearing()).thenReturn(0.0f);
     return status;
   }
 }

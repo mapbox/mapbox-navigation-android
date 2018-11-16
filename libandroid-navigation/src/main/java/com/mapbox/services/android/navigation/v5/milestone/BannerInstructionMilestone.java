@@ -1,10 +1,15 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
+import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
-import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
+import com.mapbox.api.directions.v5.models.BannerText;
+import com.mapbox.navigator.BannerComponent;
+import com.mapbox.navigator.BannerInstruction;
+import com.mapbox.navigator.BannerSection;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A default milestone that is added to {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}
@@ -16,24 +21,72 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 public class BannerInstructionMilestone extends Milestone {
 
   private BannerInstructions instructions;
-  private RouteUtils routeUtils;
 
-  BannerInstructionMilestone(Builder builder) {
+  private BannerInstructionMilestone(Builder builder) {
     super(builder);
-    routeUtils = new RouteUtils();
   }
 
   @Override
   public boolean isOccurring(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-    RouteLegProgress legProgress = routeProgress.currentLegProgress();
-    LegStep currentStep = legProgress.currentStep();
-    double stepDistanceRemaining = legProgress.currentStepProgress().distanceRemaining();
-    BannerInstructions instructions = routeUtils.findCurrentBannerInstructions(currentStep, stepDistanceRemaining);
-    if (shouldBeShown(instructions, stepDistanceRemaining)) {
-      this.instructions = instructions;
+    return updateCurrentBanner(routeProgress);
+  }
+
+  private boolean updateCurrentBanner(RouteProgress routeProgress) {
+    BannerInstruction currentBannerInstruction = routeProgress.bannerInstruction();
+    if (currentBannerInstruction != null) {
+      BannerSection currentPrimary = currentBannerInstruction.getPrimary();
+      BannerText primary = retrieveBannerFrom(currentPrimary);
+      BannerSection currentSecondary = currentBannerInstruction.getSecondary();
+      BannerText secondary = retrieveBannerFrom(currentSecondary);
+      BannerSection currentSub = currentBannerInstruction.getSub();
+      BannerText sub = retrieveBannerFrom(currentSub);
+
+      this.instructions = BannerInstructions.builder()
+        .primary(primary)
+        .secondary(secondary)
+        .sub(sub)
+        .distanceAlongGeometry(currentBannerInstruction.getRemainingStepDistance())
+        .build();
       return true;
     }
     return false;
+  }
+
+  private BannerText retrieveBannerFrom(BannerSection bannerSection) {
+    BannerText banner = null;
+    if (bannerSection == null) {
+      return banner;
+    }
+    List<BannerComponent> currentComponents = bannerSection.getComponents();
+    if (currentComponents != null) {
+      List<BannerComponents> primaryComponents = new ArrayList<>();
+      for (BannerComponent bannerComponent : currentComponents) {
+        BannerComponents bannerComponents = BannerComponents.builder()
+          .text(bannerComponent.getText())
+          .type(bannerComponent.getType())
+          .abbreviation(bannerComponent.getAbbr())
+          .abbreviationPriority(bannerComponent.getAbbrPriority())
+          .imageBaseUrl(bannerComponent.getImageBaseurl())
+          .directions(bannerComponent.getDirections())
+          .active(bannerComponent.getActive())
+          .build();
+        primaryComponents.add(bannerComponents);
+      }
+      Integer bannerSectionDegrees = bannerSection.getDegrees();
+      Double degrees = null;
+      if (bannerSectionDegrees != null) {
+        degrees = Double.valueOf(bannerSectionDegrees);
+      }
+      banner = BannerText.builder()
+        .text(bannerSection.getText())
+        .type(bannerSection.getType())
+        .modifier(bannerSection.getModifier())
+        .degrees(degrees)
+        .drivingSide(bannerSection.getDrivingSide())
+        .components(primaryComponents)
+        .build();
+    }
+    return banner;
   }
 
   /**
@@ -44,22 +97,6 @@ public class BannerInstructionMilestone extends Milestone {
    */
   public BannerInstructions getBannerInstructions() {
     return instructions;
-  }
-
-  /**
-   * Uses the current step distance remaining to check against banner instructions distance.
-   *
-   * @param instructions          given banner instructions from the list of step instructions
-   * @param stepDistanceRemaining distance remaining along the current step
-   * @return true if time to show the instructions, false if not
-   */
-  private boolean shouldBeShown(BannerInstructions instructions, double stepDistanceRemaining) {
-    boolean isNewInstruction = this.instructions == null || !this.instructions.equals(instructions);
-    boolean isValidNewInstruction = instructions != null && isNewInstruction;
-    boolean withinDistanceAlongGeometry = isValidNewInstruction
-      && instructions.distanceAlongGeometry() >= stepDistanceRemaining;
-    boolean isFirstInstruction = this.instructions == null && instructions != null;
-    return isFirstInstruction || withinDistanceAlongGeometry;
   }
 
   public static final class Builder extends Milestone.Builder {
