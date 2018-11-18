@@ -14,7 +14,6 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +29,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@Config(manifest=Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class MapWaynameTest {
 
@@ -59,11 +57,7 @@ public class MapWaynameTest {
     String roadName = "roadName";
     PointF point = mock(PointF.class);
     SymbolLayer waynameLayer = mock(SymbolLayer.class);
-    List<Feature> roads = new ArrayList<>();
-    Feature road = mock(Feature.class);
-    when(road.hasNonNullValueForProperty("name")).thenReturn(true);
-    when(road.getStringProperty("name")).thenReturn(roadName);
-    roads.add(road);
+    List<Feature> roads = buildRoadFeatureList(roadName);
     WaynameLayoutProvider layoutProvider = mock(WaynameLayoutProvider.class);
     when(layoutProvider.generateLayoutBitmap(roadName)).thenReturn(mock(Bitmap.class));
     MapWayname mapWayname = buildMapWayname(point, layoutProvider, waynameLayer, roads);
@@ -75,6 +69,86 @@ public class MapWaynameTest {
     mapWayname.updateWaynameWithPoint(point, waynameLayer);
 
     verify(layoutProvider, times(1)).generateLayoutBitmap(roadName);
+  }
+
+  @Test
+  public void updateWaynameWithPointWhileVisible_listenerIsTriggered() {
+    String roadName = "roadName";
+    PointF point = mock(PointF.class);
+    SymbolLayer waynameLayer = mock(SymbolLayer.class);
+    List<Feature> roads = buildRoadFeatureList(roadName);
+    WaynameLayoutProvider layoutProvider = mock(WaynameLayoutProvider.class);
+    MapWayname mapWayname = buildMapWayname(point, layoutProvider, waynameLayer, roads);
+    List<Point> stepPoints = new ArrayList<>();
+    stepPoints.add(mock(Point.class));
+    mapWayname.updateProgress(mock(Location.class), stepPoints);
+    OnWayNameChangedListener listener = mock(OnWayNameChangedListener.class);
+    mapWayname.addOnWayNameChangedListener(listener);
+
+    mapWayname.updateWaynameVisibility(true, waynameLayer);
+    mapWayname.updateWaynameWithPoint(point, waynameLayer);
+
+    verify(listener).onWayNameChanged(roadName);
+  }
+
+  @Test
+  public void updateWaynameWithPointWhileInvisible_listenerIsTriggered() {
+    String roadName = "roadName";
+    PointF point = mock(PointF.class);
+    SymbolLayer waynameLayer = mock(SymbolLayer.class);
+    List<Feature> roads = buildRoadFeatureList(roadName);
+    WaynameLayoutProvider layoutProvider = mock(WaynameLayoutProvider.class);
+    MapWayname mapWayname = buildMapWayname(point, layoutProvider, waynameLayer, roads);
+    List<Point> stepPoints = new ArrayList<>();
+    stepPoints.add(mock(Point.class));
+    mapWayname.updateProgress(mock(Location.class), stepPoints);
+    OnWayNameChangedListener listener = mock(OnWayNameChangedListener.class);
+    mapWayname.addOnWayNameChangedListener(listener);
+
+    mapWayname.updateWaynameVisibility(false, waynameLayer);
+    mapWayname.updateWaynameWithPoint(point, waynameLayer);
+
+    verify(listener).onWayNameChanged(roadName);
+  }
+
+  @Test
+  public void addOnWayNameChangedListener_duplicateListenerIgnored() {
+    String roadName = "roadName";
+    PointF point = mock(PointF.class);
+    SymbolLayer waynameLayer = mock(SymbolLayer.class);
+    List<Feature> roads = buildRoadFeatureList(roadName);
+    WaynameLayoutProvider layoutProvider = mock(WaynameLayoutProvider.class);
+    MapWayname mapWayname = buildMapWayname(point, layoutProvider, waynameLayer, roads);
+    List<Point> stepPoints = new ArrayList<>();
+    stepPoints.add(mock(Point.class));
+    mapWayname.updateProgress(mock(Location.class), stepPoints);
+    mapWayname.updateWaynameVisibility(true, waynameLayer);
+    OnWayNameChangedListener listener = mock(OnWayNameChangedListener.class);
+
+    mapWayname.addOnWayNameChangedListener(listener);
+    boolean wasAdded = mapWayname.addOnWayNameChangedListener(listener);
+
+    assertFalse(wasAdded);
+  }
+
+  @Test
+  public void removeOnWayNameChangedListener_duplicateListenerIgnored() {
+    String roadName = "roadName";
+    PointF point = mock(PointF.class);
+    SymbolLayer waynameLayer = mock(SymbolLayer.class);
+    List<Feature> roads = buildRoadFeatureList(roadName);
+    WaynameLayoutProvider layoutProvider = mock(WaynameLayoutProvider.class);
+    MapWayname mapWayname = buildMapWayname(point, layoutProvider, waynameLayer, roads);
+    List<Point> stepPoints = new ArrayList<>();
+    stepPoints.add(mock(Point.class));
+    mapWayname.updateProgress(mock(Location.class), stepPoints);
+    mapWayname.updateWaynameVisibility(true, waynameLayer);
+    OnWayNameChangedListener listener = mock(OnWayNameChangedListener.class);
+
+    mapWayname.removeOnWayNameChangedListener(listener);
+    boolean wasRemoved = mapWayname.removeOnWayNameChangedListener(listener);
+
+    assertFalse(wasRemoved);
   }
 
   @Test
@@ -151,11 +225,7 @@ public class MapWaynameTest {
     String roadName = "roadName";
     PointF point = mock(PointF.class);
     SymbolLayer waynameLayer = mock(SymbolLayer.class);
-    List<Feature> roads = new ArrayList<>();
-    Feature road = mock(Feature.class);
-    when(road.hasNonNullValueForProperty("name")).thenReturn(true);
-    when(road.getStringProperty("name")).thenReturn(roadName);
-    roads.add(road);
+    List<Feature> roads = buildRoadFeatureList(roadName);
     WaynameLayoutProvider layoutProvider = mock(WaynameLayoutProvider.class);
     when(layoutProvider.generateLayoutBitmap(roadName)).thenReturn(mock(Bitmap.class));
     MapWayname mapWayname = buildMapWayname(point, layoutProvider, waynameLayer, roads);
@@ -234,6 +304,15 @@ public class MapWaynameTest {
     MapWayname mapWayname = new MapWayname(layoutProvider, layerInteractor, featureInteractor, paddingAdjustor);
     mapWayname.updateWaynameQueryMap(true);
     return mapWayname;
+  }
 
+  @NonNull
+  private List<Feature> buildRoadFeatureList(String roadName) {
+    List<Feature> roads = new ArrayList<>();
+    Feature road = mock(Feature.class);
+    when(road.hasNonNullValueForProperty("name")).thenReturn(true);
+    when(road.getStringProperty("name")).thenReturn(roadName);
+    roads.add(road);
+    return roads;
   }
 }
