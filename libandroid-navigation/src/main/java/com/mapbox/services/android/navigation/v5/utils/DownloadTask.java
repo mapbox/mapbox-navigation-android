@@ -65,8 +65,8 @@ public class DownloadTask extends AsyncTask<ResponseBody, Void, File> {
    */
   private File saveAsFile(ResponseBody responseBody) {
     try {
-      File file = new File(
-        destDirectory + File.separator + fileName + getDistinguisher() + "." + extension);
+      File file = new File(destDirectory + File.separator + fileName + getDistinguisher() + "."
+        + extension);
       InputStream inputStream = null;
       OutputStream outputStream = null;
 
@@ -102,7 +102,7 @@ public class DownloadTask extends AsyncTask<ResponseBody, Void, File> {
   }
 
   private String getDistinguisher() {
-    return instructionNamingInt++ > 0 ? "" + instructionNamingInt : "";
+    return instructionNamingInt++ > 0 ? fileName + instructionNamingInt : fileName;
   }
 
   @Override

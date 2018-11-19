@@ -8,10 +8,10 @@ import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.RouterResult;
 
 public class MapboxOfflineNavigator {
-  private OfflineNavigator router;
+  private OfflineNavigator offlineNavigator;
 
   public MapboxOfflineNavigator() {
-    router = new OfflineNavigator(new Navigator());
+    offlineNavigator = new OfflineNavigator(new Navigator());
   }
 
   /**
@@ -24,7 +24,7 @@ public class MapboxOfflineNavigator {
    *                            safely
    */
   public void initializeOfflineData(String tilesDirPath, OnOfflineDataInitialized callback) {
-    router.configure(tilesDirPath, callback);
+    offlineNavigator.configure(tilesDirPath, callback);
   }
 
   /**
@@ -40,7 +40,17 @@ public class MapboxOfflineNavigator {
 
   @Nullable
   private DirectionsRoute retrieveOfflineRoute(@NonNull OfflineRoute offlineRoute) {
-    RouterResult response = router.retrieveRouteFor(offlineRoute);
+    RouterResult response = offlineNavigator.retrieveRouteFor(offlineRoute);
     return offlineRoute.retrieveOfflineRoute(response);
+  }
+
+  /**
+   * Unpacks a TAR file at the srcPath into the destination directory.
+   *
+   * @param srcPath where TAR file is located
+   * @param destPath to the destination directory
+   */
+  synchronized void unpackTiles(String srcPath, String destPath) {
+    offlineNavigator.unpackTiles(srcPath, destPath);
   }
 }

@@ -41,7 +41,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListe
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineCriteria;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
-import com.mapbox.services.android.navigation.v5.navigation.offline.OfflineTileVersions;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineTileVersions;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;

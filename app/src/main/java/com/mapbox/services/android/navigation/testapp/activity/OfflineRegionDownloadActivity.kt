@@ -15,9 +15,9 @@ import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.services.android.navigation.testapp.R
-import com.mapbox.services.android.navigation.v5.navigation.offline.OfflineTileVersions
-import com.mapbox.services.android.navigation.v5.navigation.offline.OfflineTiles
-import com.mapbox.services.android.navigation.v5.navigation.offline.RoutingTileDownloadManager
+import com.mapbox.services.android.navigation.v5.navigation.OfflineTileVersions
+import com.mapbox.services.android.navigation.v5.navigation.OfflineTiles
+import com.mapbox.services.android.navigation.v5.navigation.RoutingTileDownloadManager
 import kotlinx.android.synthetic.main.activity_offline_region_download.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -37,9 +37,9 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
             val right = left + selectionBox.width
             val bottom = top + selectionBox.height
 
-            val southWest = mapboxMap?.projection?.fromScreenLocation(
+            val southWest = mapboxMap.projection.fromScreenLocation(
                     PointF(left.toFloat(), bottom.toFloat()))
-            val northEast = mapboxMap?.projection?.fromScreenLocation(
+            val northEast = mapboxMap.projection.fromScreenLocation(
                     PointF(right.toFloat(), top.toFloat()))
 
             return BoundingBox.fromLngLats(
@@ -67,7 +67,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
                     override fun onFailure(call: Call<RouteTileVersionsResponse>, throwable: Throwable) {
 
                     }
-                });
+                })
 
     }
 
@@ -100,15 +100,15 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
             return
         }
 
-        setDownloadEnabled(false, "(Pt 1/3) Requesting tiles....")
+        setDownloadEnabled(false, "Requesting tiles....")
         val builder = OfflineTiles.builder()
                 .accessToken(Mapbox.getAccessToken())
-                .version(versionSpinner!!.selectedItem as String)
+                .version(versionSpinner.selectedItem as String)
                 .boundingBox(boundingBox)
 
         val routingTileDownloadManager = RoutingTileDownloadManager()
         routingTileDownloadManager.setListener(this)
-        routingTileDownloadManager.startDownloadChain(builder.build())
+        routingTileDownloadManager.startDownload(builder.build())
     }
 
     private fun setDownloadEnabled(enabled: Boolean, text: String) {
@@ -142,7 +142,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
    * Basic mapView boilerplate
    */
 
-    public override fun onResume() {
+    override fun onResume() {
         super.onResume()
         mapView.onResume()
     }
@@ -157,14 +157,14 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
         mapView.onStop()
     }
 
-    public override fun onPause() {
+    override fun onPause() {
         super.onPause()
         mapView.onPause()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     override fun onDestroy() {

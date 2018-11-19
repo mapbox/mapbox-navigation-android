@@ -1,8 +1,9 @@
-package com.mapbox.services.android.navigation.v5.navigation.offline;
+package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresPermission;
 
 import com.mapbox.services.android.navigation.v5.utils.DownloadTask;
 
@@ -18,18 +19,11 @@ import retrofit2.Response;
  * offline routing tiles. It creates and maintains a directory structure with the root in the
  * Offline directory, or wherever someone specifies.
  */
+
 public class RoutingTileDownloadManager {
-
-  enum State {
-    NOT_STARTED, WAITING_FOR_RESPONSE, DOWNLOADING_TAR, UNPACKING_TAR, COMPLETED
-  }
-
-  private State state = State.NOT_STARTED;
   private final File tileDirectory;
   private String version;
-
   private RoutingTileDownloadListener listener;
-
   private DownloadTask.DownloadListener downloadFinishedListener;
   private DownloadTask downloadTask;
 
@@ -45,31 +39,26 @@ public class RoutingTileDownloadManager {
     this.listener = listener;
   }
 
-  public void startDownloadChain(final OfflineTiles offlineTiles) {
-    startDownloadChain(offlineTiles, new TarCallback());
-  }
-
-  private void startDownloadChain(final OfflineTiles offlineTiles, Callback<ResponseBody> callback) {
-    state = State.WAITING_FOR_RESPONSE;
+  @RequiresPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+  public void startDownload(final OfflineTiles offlineTiles) {
     version = offlineTiles.version();
-    offlineTiles.getRouteTiles(new TarCallback());
+    offlineTiles.getRouteTiles(new TarFetchedCallback());
   }
 
   private void onError(Throwable throwable) {
-    state = State.NOT_STARTED;
-
     if (listener != null) {
       listener.onError(throwable);
     }
   }
 
-  private class TarCallback implements Callback<ResponseBody> {
+  /**
+   * Triggers the downloading of the TAR file included in the {@link ResponseBody} onto disk.
+   */
+  private class TarFetchedCallback implements Callback<ResponseBody> {
 
     @Override
     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-
-      state = State.DOWNLOADING_TAR;
-      downloadFinishedListener = new DownloadFinishedListener();
+      downloadFinishedListener = new DownloadUpdateListener();
 
       downloadTask = new DownloadTask(
         tileDirectory.getAbsolutePath(),
@@ -85,33 +74,39 @@ public class RoutingTileDownloadManager {
     }
   }
 
-  private class DownloadFinishedListener implements DownloadTask.DownloadListener {
+  /**
+   * Triggers a {@link TileUnpacker} to unpack the TAR file into routing tiles once the TAR
+   * download is complete.
+   */
+  private class DownloadUpdateListener implements DownloadTask.DownloadListener {
 
     @Override
     public void onFinishedDownloading(@NonNull File file) {
-      state = State.UNPACKING_TAR;
-
       String destPath = new File(tileDirectory, version).getAbsolutePath();
-      new TileUnpacker().unpack(file, destPath, new UnpackUpdateTask.UpdateListener() {
-        @Override
-        public void onProgressUpdate(Long progress) {
-          if (progress == 100) {
-            if (listener != null) {
-              listener.onCompletion(true);
-            }
-            state = State.COMPLETED;
-          } else {
-            if (listener != null) {
-              listener.onProgressUpdate(progress.intValue());
-            }
-          }
-        }
-      });
+      new TileUnpacker().unpack(file, destPath, new UnpackUpdateListener());
     }
 
     @Override
     public void onErrorDownloading() {
       onError(new Throwable("Error downloading"));
+    }
+  }
+
+  /**
+   * Updates any UI elements on the status of the TAR unpacking.
+   */
+  private class UnpackUpdateListener implements UnpackUpdateTask.UpdateListener {
+
+    @Override
+    public void onProgressUpdate(Long progress) {
+      if (listener != null) {
+        listener.onProgressUpdate(progress.intValue());
+      }
+    }
+
+    @Override
+    public void onCompletion() {
+      listener.onCompletion(true);
     }
   }
 

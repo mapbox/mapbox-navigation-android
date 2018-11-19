@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation.offline;
+package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.os.AsyncTask;
 
@@ -36,7 +36,7 @@ public class UnpackUpdateTask extends AsyncTask<File, Long, File> {
   @Override
   protected void onPostExecute(File file) {
     super.onPostExecute(file);
-    updateListener.onProgressUpdate(100L);
+    updateListener.onCompletion();
   }
 
   @Override
@@ -51,5 +51,7 @@ public class UnpackUpdateTask extends AsyncTask<File, Long, File> {
    */
   public interface UpdateListener {
     void onProgressUpdate(Long progress);
+
+    void onCompletion();
   }
 }

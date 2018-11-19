@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation.offline;
+package com.mapbox.services.android.navigation.v5.navigation;
 
 import com.mapbox.api.routetiles.v1.versions.MapboxRouteTileVersions;
 

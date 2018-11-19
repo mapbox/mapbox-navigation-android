@@ -1,8 +1,6 @@
-package com.mapbox.services.android.navigation.v5.navigation.offline;
+package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.os.AsyncTask;
-
-import com.mapbox.services.android.navigation.v5.navigation.NavigationLibraryLoader;
 
 import java.io.File;
 
@@ -14,14 +12,10 @@ import java.io.File;
  */
 public class UnpackerTask extends AsyncTask<String, Integer, File> {
 
-  static {
-    NavigationLibraryLoader.load();
-  }
-
   @Override
   protected File doInBackground(String... strings) {
-    MapboxOfflineRouter router = new MapboxOfflineRouter();
-    router.unpackTiles(strings[0], strings[1]);
+    MapboxOfflineNavigator offlineNavigator = new MapboxOfflineNavigator();
+    offlineNavigator.unpackTiles(strings[0], strings[1]);
     return new File(strings[0]);
   }
 

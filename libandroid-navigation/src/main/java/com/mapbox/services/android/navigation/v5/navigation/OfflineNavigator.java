@@ -38,4 +38,14 @@ class OfflineNavigator {
       return navigator.getRoute(offlineUri);
     }
   }
+
+  /**
+   * Unpacks a TAR file at the srcPath into the destination directory.
+   *
+   * @param srcPath where TAR file is located
+   * @param destPath to the destination directory
+   */
+  void unpackTiles(String srcPath, String destPath) {
+    navigator.unpackTiles(srcPath, destPath);
+  }
 }
