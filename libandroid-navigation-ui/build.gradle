@@ -37,10 +37,6 @@ dependencies {
 
   // Mapbox Map SDK
   implementation dependenciesList.mapboxMapSdk
-  // TODO Remove SNAPSHOT when 4.1.0 gets released
-  implementation(dependenciesList.mapboxSdkServices) {
-    force true
-  }
 
   // Support libraries
   implementation dependenciesList.supportDesign
