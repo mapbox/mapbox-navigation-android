@@ -474,14 +474,16 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   private void addDirectionWaypoints() {
-    if (featureCollections.isEmpty()) {
-      MapUtils.updateMapSourceFromFeatureCollection(
-        mapboxMap, featureCollections.get(featureCollections.size() - 1), WAYPOINT_SOURCE_ID);
-      drawWaypointMarkers(mapboxMap,
-        AppCompatResources.getDrawable(mapView.getContext(), originWaypointIcon),
-        AppCompatResources.getDrawable(mapView.getContext(), destinationWaypointIcon)
-      );
+    FeatureCollection wayPointFeatureCollection = null;
+    if (!featureCollections.isEmpty()) {
+      wayPointFeatureCollection = featureCollections.get(featureCollections.size() - 1);
     }
+    MapUtils.updateMapSourceFromFeatureCollection(
+      mapboxMap, wayPointFeatureCollection, WAYPOINT_SOURCE_ID);
+    drawWaypointMarkers(mapboxMap,
+      AppCompatResources.getDrawable(mapView.getContext(), originWaypointIcon),
+      AppCompatResources.getDrawable(mapView.getContext(), destinationWaypointIcon)
+    );
   }
 
   private void updateArrowLayersVisibilityTo(boolean visible) {
@@ -867,9 +869,6 @@ public class NavigationMapRoute implements LifecycleObserver {
   private void placeRouteBelow() {
     if (belowLayer == null || belowLayer.isEmpty()) {
       List<Layer> styleLayers = mapboxMap.getLayers();
-      if (styleLayers == null) {
-        return;
-      }
       for (int i = 0; i < styleLayers.size(); i++) {
         if (!(styleLayers.get(i) instanceof SymbolLayer)
           // Avoid placing the route on top of the user location layer
