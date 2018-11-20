@@ -94,9 +94,9 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
 
         ArrayAdapter(this, android.R.layout.simple_spinner_item, versions)
                 .also { arrayAdapter ->
-            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            versionSpinner.adapter = arrayAdapter
-        }
+                    arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    versionSpinner.adapter = arrayAdapter
+                }
 
         versionSpinner.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -105,7 +105,6 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 setDownloadButtonEnabled(position != 0)
-
             }
         }
     }
@@ -220,6 +219,6 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
 
     private fun showToast(str: String) {
         Toast.makeText(applicationContext, str,
-                Toast.LENGTH_LONG).show()
+                Toast.LENGTH_SHORT).show()
     }
 }
