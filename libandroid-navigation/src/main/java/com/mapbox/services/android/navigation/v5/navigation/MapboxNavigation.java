@@ -56,7 +56,6 @@ public class MapboxNavigation implements ServiceConnection {
   private NavigationTelemetry navigationTelemetry = null;
   private NavigationService navigationService;
   private MapboxNavigator mapboxNavigator;
-  private MapboxOfflineNavigator mapboxOfflineNavigator;
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
   private LocationEngine locationEngine = null;
@@ -716,28 +715,6 @@ public class MapboxNavigation implements ServiceConnection {
     mapboxNavigator.toggleHistory(isEnabled);
   }
 
-  /**
-   * Configures the navigator for getting offline routes
-   *
-   * @param tilesDirPath        directory path where the tiles are located
-   * @param callback            a callback that will be fired when the offline data is initialized and
-   *                            {@link MapboxNavigation#findOfflineRoute(OfflineRoute)} could be called safely
-   */
-  public void initializeOfflineData(String tilesDirPath, OnOfflineDataInitialized callback) {
-    mapboxOfflineNavigator.initializeOfflineData(tilesDirPath, callback);
-  }
-
-  /**
-   * Uses libvalhalla and local tile data to generate mapbox-directions-api-like JSON
-   *
-   * @param route the {@link OfflineRoute} to get a {@link DirectionsRoute} from
-   * @return the offline {@link DirectionsRoute}
-   */
-  @Nullable
-  public DirectionsRoute findOfflineRoute(@NonNull OfflineRoute route) {
-    return mapboxOfflineNavigator.findOfflineRoute(route);
-  }
-
   public String retrieveSsmlAnnouncementInstruction(int index) {
     return mapboxNavigator.retrieveVoiceInstruction(index).getSsmlAnnouncement();
   }
@@ -809,8 +786,6 @@ public class MapboxNavigation implements ServiceConnection {
   private void initialize() {
     // Initialize event dispatcher and add internal listeners
     mapboxNavigator = new MapboxNavigator(new Navigator());
-    mapboxOfflineNavigator = new MapboxOfflineNavigator();
-
     navigationEventDispatcher = new NavigationEventDispatcher();
     navigationEngineFactory = new NavigationEngineFactory();
     initializeDefaultLocationEngine();
