@@ -14,7 +14,9 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
@@ -24,13 +26,14 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 class MapWayname {
 
   private static final String NAME_PROPERTY = "name";
+  private final MapWaynameProgressChangeListener progressChangeListener = new MapWaynameProgressChangeListener(this);
+  private final Set<OnWayNameChangedListener> onWayNameChangedListeners;
   private WaynameLayoutProvider layoutProvider;
   private MapLayerInteractor layerInteractor;
   private WaynameFeatureFinder featureInteractor;
   private List<Point> currentStepPoints = new ArrayList<>();
   private Location currentLocation = null;
   private MapboxNavigation navigation;
-  private final MapWaynameProgressChangeListener progressChangeListener = new MapWaynameProgressChangeListener(this);
   private boolean isAutoQueryEnabled;
   private boolean isVisible;
   private FeatureFilterTask filterTask;
@@ -42,33 +45,26 @@ class MapWayname {
     this.layerInteractor = layerInteractor;
     this.featureInteractor = featureInteractor;
     paddingAdjustor.updatePaddingWithDefault();
+    this.onWayNameChangedListeners = new HashSet<>();
   }
 
   void updateWaynameWithPoint(PointF point, SymbolLayer waynameLayer) {
-    if (!isAutoQueryEnabled || !isVisible) {
+    if (!isAutoQueryEnabled) {
       return;
     }
-    List<Feature> roads = findRoadLabelFeatures(point);
-    boolean shouldBeVisible = !roads.isEmpty();
-    adjustWaynameVisibility(shouldBeVisible, waynameLayer);
-    if (!shouldBeVisible) {
+    List<Feature> roadLabelFeatures = findRoadLabelFeatures(point);
+    boolean invalidLabelFeatures = roadLabelFeatures.isEmpty();
+    if (invalidLabelFeatures) {
+      updateVisibility(false, waynameLayer);
       return;
     }
-    updateLayerWithRoadLabelFeatures(roads, waynameLayer);
+    executeFeatureFilterTask(roadLabelFeatures, waynameLayer);
   }
 
   void updateWaynameLayer(String wayname, SymbolLayer waynameLayer) {
     if (waynameLayer != null) {
       createWaynameIcon(wayname, waynameLayer);
     }
-  }
-
-  void updateWaynameVisibility(boolean isVisible, SymbolLayer waynameLayer) {
-    this.isVisible = isVisible;
-    if (checkWaynameVisibility(isVisible, waynameLayer)) {
-      return;
-    }
-    adjustWaynameVisibility(isVisible, waynameLayer);
   }
 
   void updateProgress(Location currentLocation, List<Point> currentStepPoints) {
@@ -78,6 +74,11 @@ class MapWayname {
     if (this.currentLocation == null || !this.currentLocation.equals(currentLocation)) {
       this.currentLocation = currentLocation;
     }
+  }
+
+  void updateWaynameVisibility(boolean isVisible, SymbolLayer waynameLayer) {
+    this.isVisible = isVisible;
+    updateVisibility(isVisible, waynameLayer);
   }
 
   void updateWaynameQueryMap(boolean isEnabled) {
@@ -95,6 +96,14 @@ class MapWayname {
   void addProgressChangeListener(MapboxNavigation navigation) {
     this.navigation = navigation;
     navigation.addProgressChangeListener(progressChangeListener);
+  }
+
+  boolean addOnWayNameChangedListener(OnWayNameChangedListener listener) {
+    return onWayNameChangedListeners.add(listener);
+  }
+
+  boolean removeOnWayNameChangedListener(OnWayNameChangedListener listener) {
+    return onWayNameChangedListeners.remove(listener);
   }
 
   void onStart() {
@@ -117,15 +126,6 @@ class MapWayname {
     return featureInteractor.queryRenderedFeatures(point, layerIds);
   }
 
-  private void updateLayerWithRoadLabelFeatures(List<Feature> roadFeatures, final SymbolLayer waynameLayer) {
-    boolean isValidFeatureList = !roadFeatures.isEmpty();
-    if (isValidFeatureList) {
-      executeFeatureFilterTask(roadFeatures, waynameLayer);
-    } else {
-      updateWaynameVisibility(false, waynameLayer);
-    }
-  }
-
   private void executeFeatureFilterTask(List<Feature> roadFeatures, final SymbolLayer waynameLayer) {
     if (isTaskRunning()) {
       filterTask.cancel(true);
@@ -145,7 +145,8 @@ class MapWayname {
 
   private boolean isTaskRunning() {
     return filterTask != null
-      && (filterTask.getStatus() == AsyncTask.Status.PENDING || filterTask.getStatus() == AsyncTask.Status.RUNNING);
+      && (filterTask.getStatus() == AsyncTask.Status.PENDING
+      || filterTask.getStatus() == AsyncTask.Status.RUNNING);
   }
 
   private boolean hasValidProgressData() {
@@ -153,14 +154,18 @@ class MapWayname {
   }
 
   private void createWaynameIcon(String wayname, Layer waynameLayer) {
-    boolean isVisible = waynameLayer.getVisibility().getValue().contentEquals(Property.VISIBLE);
-    if (isVisible) {
-      Bitmap waynameLayoutBitmap = layoutProvider.generateLayoutBitmap(wayname);
-      if (waynameLayoutBitmap != null) {
-        layerInteractor.addLayerImage(MAPBOX_WAYNAME_ICON, waynameLayoutBitmap);
-        waynameLayer.setProperties(iconImage(MAPBOX_WAYNAME_ICON));
-      }
+    Bitmap waynameLayoutBitmap = layoutProvider.generateLayoutBitmap(wayname);
+    if (waynameLayoutBitmap != null) {
+      layerInteractor.addLayerImage(MAPBOX_WAYNAME_ICON, waynameLayoutBitmap);
+      waynameLayer.setProperties(iconImage(MAPBOX_WAYNAME_ICON));
     }
+  }
+
+  private void updateVisibility(boolean isVisible, SymbolLayer waynameLayer) {
+    if (checkWaynameVisibility(isVisible, waynameLayer)) {
+      return;
+    }
+    adjustWaynameVisibility(isVisible, waynameLayer);
   }
 
   private boolean checkWaynameVisibility(boolean isVisible, Layer waynameLayer) {
@@ -183,10 +188,21 @@ class MapWayname {
       String currentWayname = roadFeature.getStringProperty(NAME_PROPERTY);
       boolean newWayname = !wayname.contentEquals(currentWayname);
       if (newWayname) {
+        updateListenersWith(currentWayname);
         wayname = currentWayname;
-        updateWaynameVisibility(true, waynameLayer);
+        if (isVisible) {
+          updateVisibility(true, waynameLayer);
+        }
         updateWaynameLayer(wayname, waynameLayer);
       }
+    } else {
+      updateVisibility(false, waynameLayer);
+    }
+  }
+
+  private void updateListenersWith(String currentWayName) {
+    for (OnWayNameChangedListener listener : onWayNameChangedListeners) {
+      listener.onWayNameChanged(currentWayName);
     }
   }
 }
