@@ -5,6 +5,10 @@ import android.graphics.PointF
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.mapbox.api.routetiles.v1.versions.models.RouteTileVersionsResponse
@@ -61,21 +65,45 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
                 .getRouteTileVersions(object : Callback<RouteTileVersionsResponse> {
                     override fun onResponse(call: Call<RouteTileVersionsResponse>, response:
                     Response<RouteTileVersionsResponse>) {
-                        setupSpinner(response.body()!!.availableVersions())
+                        response.body().let {
+                            if (it != null) setupSpinner(it.availableVersions()) else onVersionFetchFailed()
+                        }
                     }
 
                     override fun onFailure(call: Call<RouteTileVersionsResponse>, throwable: Throwable) {
-
+                        onVersionFetchFailed()
                     }
                 })
+    }
+    fun onVersionFetchFailed() {
+        showToast("Unable to fetch versions")
+        setDownloadEnabled(false)
+        downloadButton.visibility = GONE
+        restartVersionFetchButton.visibility = VISIBLE
+        restartVersionFetchButton.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+                setupSpinner()
+                restartVersionFetchButton.setOnClickListener(null)
+            }
 
+        })
     }
 
     fun setupSpinner(versions: MutableList<String>) {
         val arrayAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, versions)
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         versionSpinner.adapter = arrayAdapter
-        setDownloadEnabled(true, "Download Region")
+        versionSpinner.onItemSelectedListener = object : OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                setDownloadEnabled(true, "Download Region")
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                setDownloadEnabled(false, "Download Region")
+            }
+        }
+
+        versionSpinner.visibility = VISIBLE
     }
 
     private fun setupMapView(savedInstanceState: Bundle?) {
@@ -109,6 +137,11 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
         val routingTileDownloadManager = RoutingTileDownloadManager()
         routingTileDownloadManager.setListener(this)
         routingTileDownloadManager.startDownload(builder.build())
+    }
+
+    private fun setDownloadEnabled(enabled: Boolean) {
+        setDownloadEnabled(enabled, "Download Region")
+
     }
 
     private fun setDownloadEnabled(enabled: Boolean, text: String) {

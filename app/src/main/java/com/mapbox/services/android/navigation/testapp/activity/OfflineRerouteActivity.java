@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Toast;
 
 import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -309,7 +310,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
 
       @Override
       public void onFailure(Call call, Throwable throwable) {
-
+        Toast.makeText(getApplicationContext(), "Unable to get versions", Toast.LENGTH_LONG).show();
       }
     });
   }

@@ -22,26 +22,42 @@
             mapbox:mapbox_uiLogo="false"
             mapbox:mapbox_styleUrl="@string/mapbox_style_light"
             mapbox:mapbox_cameraZoom="14"/>
-        <LinearLayout
+
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@color/white"
-            android:layout_alignParentTop="true">
-            <TextView
+            android:id="@+id/versionSpinnerContainer"
+            android:layout_alignParentTop="true"
+            android:visibility="gone">
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/versionText"
-                android:text="Tile Version:"
-                android:paddingLeft="8dp"
-                android:paddingTop="8dp" />
-            <Spinner
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:padding="8dp"
-                android:id="@+id/versionSpinner"
-                android:layout_below="@+id/versionText" />
-        </LinearLayout>
+                android:orientation="vertical"
+                android:background="@color/white">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/versionText"
+                    android:text="Tile Version:"
+                    android:paddingLeft="8dp"
+                    android:paddingTop="8dp" />
+                <Spinner
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:padding="8dp"
+                    android:id="@+id/versionSpinner" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/restartVersionFetchButton"
+            android:text="Version fetching failed, click to try again"
+            android:padding="8dp"
+            android:visibility="gone"/>
+
+
 
         <include layout="@layout/attribution"
             android:layout_width="wrap_content"
@@ -72,7 +88,7 @@
             android:layout_margin="16dp"
             android:gravity="center"
             android:text="Download Region"
-            android:background="@color/mapbox_blue"
+            android:background="@color/md_grey_700"
             android:textColor="@color/white"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"/>
