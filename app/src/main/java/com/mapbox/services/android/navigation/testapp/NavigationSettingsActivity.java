@@ -12,6 +12,7 @@ public class NavigationSettingsActivity extends PreferenceActivity {
 
   public static final String UNIT_TYPE_CHANGED = "unit_type_changed";
   public static final String LANGUAGE_CHANGED = "language_changed";
+  public static final String OFFLINE_CHANGED = "offline_changed";
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -20,6 +21,7 @@ public class NavigationSettingsActivity extends PreferenceActivity {
       Intent resultIntent = new Intent();
       resultIntent.putExtra(UNIT_TYPE_CHANGED, key.equals(getString(R.string.unit_type_key)));
       resultIntent.putExtra(LANGUAGE_CHANGED, key.equals(getString(R.string.language_key)));
+      resultIntent.putExtra(OFFLINE_CHANGED, key.equals(getString(R.string.offline_preference_key)));
       setResult(RESULT_OK, resultIntent);
     };
     PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(listener);

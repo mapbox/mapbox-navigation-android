@@ -37,4 +37,9 @@
         android:entryValues="@array/route_profile_values_array"
         android:key="@string/route_profile_key"
         android:title="@string/route_profile"/>
+
+    <CheckBoxPreference
+        android:key="@string/offline_preference_key"
+        android:title="Offline Navigation"
+        android:defaultValue="false"/>
 </PreferenceScreen>

@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.testapp.example.ui
 
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
+import android.content.Intent
 import android.location.Location
 import android.support.design.widget.BottomSheetBehavior
 import android.view.View
@@ -33,6 +34,7 @@ private const val ONE_SECOND = 1000
 class ExamplePresenter(private val view: ExampleView, private val viewModel: ExampleViewModel) {
 
   private var state: PresenterState = PresenterState.SHOW_LOCATION
+  private var offline = false
 
   fun onPermissionResult(granted: Boolean) {
     if (granted) {
@@ -40,6 +42,15 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     } else {
       view.showPermissionDialog()
     }
+  }
+
+  fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//    if (requestCode == CHANGE_SETTING_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+//      val shouldRefetch = data.getBooleanExtra(NavigationSettingsActivity.UNIT_TYPE_CHANGED, false) || data.getBooleanExtra(NavigationSettingsActivity.LANGUAGE_CHANGED, false)
+//      if (destination != null && shouldRefetch) {
+//        fetchRoute()
+//      }
+//    }
   }
 
   fun onAutocompleteClick() {
