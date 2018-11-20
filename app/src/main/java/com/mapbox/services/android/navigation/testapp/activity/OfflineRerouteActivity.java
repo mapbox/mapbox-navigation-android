@@ -37,7 +37,7 @@ import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListene
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineNavigator;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineCriteria;
@@ -75,7 +75,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
 
   private ReplayRouteLocationEngine mockLocationEngine;
   private MapboxNavigation navigation;
-  private MapboxOfflineNavigator offlineNavigator;
+  private MapboxOfflineNavigation offlineNavigator;
   private MapboxMap mapboxMap;
   private boolean running;
   private boolean tracking;
@@ -149,7 +149,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     mapboxMap.addOnMapClickListener(this);
-    offlineNavigator = new MapboxOfflineNavigator();
+    offlineNavigator = new MapboxOfflineNavigation();
 
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
     locationComponent.activateLocationComponent(this);
