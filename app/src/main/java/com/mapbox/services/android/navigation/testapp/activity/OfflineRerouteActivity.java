@@ -75,7 +75,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
 
   private ReplayRouteLocationEngine mockLocationEngine;
   private MapboxNavigation navigation;
-  private MapboxOfflineNavigator offlineRouting;
+  private MapboxOfflineNavigator offlineNavigator;
   private MapboxMap mapboxMap;
   private boolean running;
   private boolean tracking;
@@ -149,7 +149,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     mapboxMap.addOnMapClickListener(this);
-    offlineRouting = new MapboxOfflineNavigator();
+    offlineNavigator = new MapboxOfflineNavigator();
 
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
     locationComponent.activateLocationComponent(this);
@@ -206,8 +206,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
     Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     OfflineRoute offlineRoute = obtainOfflineRoute(newOrigin, newDestination);
-    route = offlineRouting.findOfflineRoute(offlineRoute);
-    handleNewRoute(route);
+    offlineNavigator.findOfflineRoute(offlineRoute, result -> handleNewRoute(route));
   }
 
   @Override
@@ -239,6 +238,8 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void handleNewRoute(DirectionsRoute route) {
+    this.route = route;
+
     if (!checkRoute()) {
       return;
     }
@@ -301,9 +302,9 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
         String tilesDirPath = obtainOfflineDirectoryFor("tiles", version);
         Timber.d("Tiles directory path: %s", tilesDirPath);
 
-        navigation.initializeOfflineData(tilesDirPath, () -> {
+        offlineNavigator.initializeOfflineData(tilesDirPath, () -> {
           OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
-          route = navigation.findOfflineRoute(offlineRoute);
+          offlineNavigator.findOfflineRoute(offlineRoute, result -> handleNewRoute(route));
           handleNewRoute(route);
         });
       }

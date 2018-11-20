@@ -83,7 +83,7 @@ public class RoutingTileDownloadManager {
     @Override
     public void onFinishedDownloading(@NonNull File file) {
       String destPath = new File(tileDirectory, version).getAbsolutePath();
-      new TileUnpacker().unpack(file, destPath, new UnpackUpdateListener());
+      new TileUnpacker().unpack(file, destPath, new UnpackProgressUpdateListener());
     }
 
     @Override
@@ -95,7 +95,7 @@ public class RoutingTileDownloadManager {
   /**
    * Updates any UI elements on the status of the TAR unpacking.
    */
-  private class UnpackUpdateListener implements UnpackUpdateTask.UpdateListener {
+  private class UnpackProgressUpdateListener implements UnpackUpdateTask.ProgressUpdateListener {
 
     @Override
     public void onProgressUpdate(Long progress) {

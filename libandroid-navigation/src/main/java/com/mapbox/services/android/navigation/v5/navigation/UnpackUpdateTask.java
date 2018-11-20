@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 
 import java.io.File;
 
@@ -10,15 +11,15 @@ import java.io.File;
  * periodically checking the file size, because as it's unpacked, the file size will decrease.
  */
 public class UnpackUpdateTask extends AsyncTask<File, Long, File> {
-  private UpdateListener updateListener;
+  private ProgressUpdateListener progressUpdateListener;
 
   /**
-   * Creates a new UnpackUpdateTask to update the view via a passed {@link UpdateListener}.
+   * Creates a new UnpackUpdateTask to update the view via a passed {@link ProgressUpdateListener}.
    *
-   * @param updateListener listener to update
+   * @param progressUpdateListener listener to update
    */
-  UnpackUpdateTask(UpdateListener updateListener) {
-    this.updateListener = updateListener;
+  UnpackUpdateTask(@NonNull ProgressUpdateListener progressUpdateListener) {
+    this.progressUpdateListener = progressUpdateListener;
   }
 
   @Override
@@ -36,20 +37,22 @@ public class UnpackUpdateTask extends AsyncTask<File, Long, File> {
   @Override
   protected void onPostExecute(File file) {
     super.onPostExecute(file);
-    updateListener.onCompletion();
+    if (progressUpdateListener != null) {
+      progressUpdateListener.onCompletion();
+    }
   }
 
   @Override
   protected void onProgressUpdate(Long... values) {
-    if (updateListener != null) {
-      updateListener.onProgressUpdate(values[0]);
+    if (progressUpdateListener != null) {
+      progressUpdateListener.onProgressUpdate(values[0]);
     }
   }
 
   /**
    * Interface to allow view to receive updates about the progress of a file unpacking.
    */
-  public interface UpdateListener {
+  public interface ProgressUpdateListener {
     void onProgressUpdate(Long progress);
 
     void onCompletion();

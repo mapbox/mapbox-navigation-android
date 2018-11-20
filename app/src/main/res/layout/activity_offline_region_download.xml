@@ -45,7 +45,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:padding="8dp"
-                    android:id="@+id/versionSpinner" />
+                android:id="@+id/versionSpinner" />
             </LinearLayout>
         </FrameLayout>
 
@@ -54,10 +54,11 @@
             android:layout_height="wrap_content"
             android:id="@+id/restartVersionFetchButton"
             android:text="Version fetching failed, click to try again"
-            android:padding="8dp"
+            android:padding="16dp"
+            android:layout_margin="16dp"
+            android:gravity="center"
+            android:background="@color/white"
             android:visibility="gone"/>
-
-
 
         <include layout="@layout/attribution"
             android:layout_width="wrap_content"

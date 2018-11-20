@@ -20,7 +20,7 @@ class ConfigureRouterTask extends AsyncTask<Void, Void, Void> {
 
   @Override
   protected Void doInBackground(Void... paramsUnused) {
-    synchronized (this) {
+    synchronized (navigator) {
       navigator.configureRouter(tileFilePath, translationsDirPath);
     }
     return null;

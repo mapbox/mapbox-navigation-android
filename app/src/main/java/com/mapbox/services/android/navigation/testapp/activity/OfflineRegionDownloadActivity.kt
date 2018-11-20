@@ -75,35 +75,39 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
                     }
                 })
     }
+
     fun onVersionFetchFailed() {
         showToast("Unable to fetch versions")
-        setDownloadEnabled(false)
-        downloadButton.visibility = GONE
+        setDownloadButtonEnabled(false)
+        versionSpinnerContainer.visibility = GONE
         restartVersionFetchButton.visibility = VISIBLE
-        restartVersionFetchButton.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(v: View?) {
-                setupSpinner()
-                restartVersionFetchButton.setOnClickListener(null)
-            }
-
-        })
+        restartVersionFetchButton.setOnClickListener {
+            setupSpinner()
+            restartVersionFetchButton.setOnClickListener(null)
+        }
     }
 
-    fun setupSpinner(versions: MutableList<String>) {
-        val arrayAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, versions)
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        versionSpinner.adapter = arrayAdapter
-        versionSpinner.onItemSelectedListener = object : OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                setDownloadEnabled(true, "Download Region")
-            }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                setDownloadEnabled(false, "Download Region")
-            }
+    fun setupSpinner(versions: MutableList<String>) {
+        restartVersionFetchButton.visibility = GONE
+        versionSpinnerContainer.visibility = VISIBLE
+
+        ArrayAdapter(this, android.R.layout.simple_spinner_item, versions)
+                .also { arrayAdapter ->
+            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            versionSpinner.adapter = arrayAdapter
         }
 
-        versionSpinner.visibility = VISIBLE
+        versionSpinner.onItemSelectedListener = object : OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                setDownloadButtonEnabled(false)
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                setDownloadButtonEnabled(position != 0)
+
+            }
+        }
     }
 
     private fun setupMapView(savedInstanceState: Bundle?) {
@@ -128,7 +132,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
             return
         }
 
-        setDownloadEnabled(false, "Requesting tiles....")
+        showDownloading(false, "Requesting tiles....")
         val builder = OfflineTiles.builder()
                 .accessToken(Mapbox.getAccessToken())
                 .version(versionSpinner.selectedItem as String)
@@ -139,15 +143,19 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
         routingTileDownloadManager.startDownload(builder.build())
     }
 
-    private fun setDownloadEnabled(enabled: Boolean) {
-        setDownloadEnabled(enabled, "Download Region")
-
+    private fun showDownloading(downloading: Boolean, message: String) {
+        versionSpinner.isEnabled = !downloading
+        loading.visibility = if (downloading) View.VISIBLE else View.GONE
+        setDownloadButtonEnabled(!downloading, message)
     }
 
-    private fun setDownloadEnabled(enabled: Boolean, text: String) {
+    private fun setDownloadButtonEnabled(enabled: Boolean) {
+        setDownloadButtonEnabled(enabled, "Download Region")
+    }
+
+    private fun setDownloadButtonEnabled(enabled: Boolean, text: String) {
         downloadButtonEnabled = enabled
-        versionSpinner.isEnabled = enabled
-        loading.visibility = if (enabled) View.GONE else View.VISIBLE
+
         downloadButton.setBackgroundColor(if (enabled) enabledBlue else disabledGrey)
         downloadButton.text = text
     }
@@ -157,17 +165,17 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
    */
 
     override fun onError(throwable: Throwable) {
-        setDownloadEnabled(true, "Download Region")
+        setDownloadButtonEnabled(true)
         showToast("There was an error with the download. Please try again.")
     }
 
     override fun onProgressUpdate(percent: Int) {
-        setDownloadEnabled(false, percent.toString() + "%...")
+        showDownloading(false, percent.toString() + "%...")
 
     }
 
     override fun onCompletion(successful: Boolean) {
-        setDownloadEnabled(true, "Download Region")
+        setDownloadButtonEnabled(true)
         showToast(if (successful) "Download complete" else "Download cancelled")
     }
 
