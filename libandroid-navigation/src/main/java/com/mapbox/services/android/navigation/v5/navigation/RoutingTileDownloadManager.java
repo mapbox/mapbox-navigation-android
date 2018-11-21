@@ -58,13 +58,11 @@ public class RoutingTileDownloadManager {
 
     @Override
     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-      downloadFinishedListener = new DownloadUpdateListener();
-
       downloadTask = new DownloadTask(
         tileDirectory.getAbsolutePath(),
         version,
         "tar",
-        downloadFinishedListener);
+        new DownloadUpdateListener());
       downloadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, response.body());
     }
 
@@ -82,8 +80,11 @@ public class RoutingTileDownloadManager {
 
     @Override
     public void onFinishedDownloading(@NonNull File file) {
-      String destPath = new File(tileDirectory, version).getAbsolutePath();
-      new TileUnpacker().unpack(file, destPath, new UnpackProgressUpdateListener());
+      File destination = new File(tileDirectory, version);
+      if (!destination.exists()) {
+        destination.mkdir();
+      }
+//      new TileUnpacker().unpack(file, destination.getAbsolutePath(), new UnpackProgressUpdateListener());
     }
 
     @Override

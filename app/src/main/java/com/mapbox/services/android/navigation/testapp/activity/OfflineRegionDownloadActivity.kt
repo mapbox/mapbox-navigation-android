@@ -132,14 +132,17 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
         }
 
         showDownloading(false, "Requesting tiles....")
+        var s = versionSpinner.selectedItem
         val builder = OfflineTiles.builder()
                 .accessToken(Mapbox.getAccessToken())
                 .version(versionSpinner.selectedItem as String)
                 .boundingBox(boundingBox)
 
-        val routingTileDownloadManager = RoutingTileDownloadManager()
-        routingTileDownloadManager.setListener(this)
-        routingTileDownloadManager.startDownload(builder.build())
+                RoutingTileDownloadManager().let {
+
+                    it.setListener(this)
+                    it.startDownload(builder.build())
+                }
     }
 
     private fun showDownloading(downloading: Boolean, message: String) {

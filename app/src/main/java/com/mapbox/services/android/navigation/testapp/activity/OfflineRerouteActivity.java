@@ -75,7 +75,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
 
   private ReplayRouteLocationEngine mockLocationEngine;
   private MapboxNavigation navigation;
-  private MapboxOfflineNavigation offlineNavigator;
+  private MapboxOfflineNavigation offlineNavigation;
   private MapboxMap mapboxMap;
   private boolean running;
   private boolean tracking;
@@ -149,7 +149,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     mapboxMap.addOnMapClickListener(this);
-    offlineNavigator = new MapboxOfflineNavigation();
+    offlineNavigation = new MapboxOfflineNavigation();
 
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
     locationComponent.activateLocationComponent(this);
@@ -206,7 +206,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
     Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     OfflineRoute offlineRoute = obtainOfflineRoute(newOrigin, newDestination);
-    offlineNavigator.findOfflineRoute(offlineRoute, result -> handleNewRoute(route));
+    offlineNavigation.findOfflineRoute(offlineRoute, result -> handleNewRoute(route));
   }
 
   @Override
@@ -302,9 +302,9 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
         String tilesDirPath = obtainOfflineDirectoryFor("tiles", version);
         Timber.d("Tiles directory path: %s", tilesDirPath);
 
-        offlineNavigator.initializeOfflineData(tilesDirPath, () -> {
+        offlineNavigation.initializeOfflineData(tilesDirPath, () -> {
           OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
-          offlineNavigator.findOfflineRoute(offlineRoute, result -> handleNewRoute(route));
+          offlineNavigation.findOfflineRoute(offlineRoute, result -> handleNewRoute(route));
           handleNewRoute(route);
         });
       }
@@ -321,7 +321,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     if (!offline.exists()) {
       Timber.d("Offline directory does not exist");
     }
-    File file = new File(offline, fileName + "/" + version);
+    File file = new File(offline, fileName + File.separator + version);
     return file.getAbsolutePath();
   }
 

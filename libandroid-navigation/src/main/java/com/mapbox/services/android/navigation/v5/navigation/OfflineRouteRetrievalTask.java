@@ -4,6 +4,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.RouterResult;
 
+import timber.log.Timber;
+
 class OfflineRouteRetrievalTask extends CallbackAsyncTask<OfflineRoute, Void, DirectionsRoute> {
   private final Navigator navigator;
 
@@ -18,6 +20,7 @@ class OfflineRouteRetrievalTask extends CallbackAsyncTask<OfflineRoute, Void, Di
 
     synchronized (navigator) {
       routerResult = navigator.getRoute(offlineRoutes[0].buildUrl());
+      Timber.d("RouterResult: " + routerResult.getJson());
     }
 
     return offlineRoutes[0].retrieveOfflineRoute(routerResult);

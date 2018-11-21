@@ -46,10 +46,10 @@ public class DownloadTask extends AsyncTask<ResponseBody, Void, File> {
    */
   public DownloadTask(String destDirectory, String fileName, String extension,
                       DownloadListener downloadListener) {
-    this.fileName = fileName;
     this.destDirectory = destDirectory;
-    this.downloadListener = downloadListener;
+    this.fileName = fileName;
     this.extension = extension;
+    this.downloadListener = downloadListener;
   }
 
   @Override
@@ -102,7 +102,7 @@ public class DownloadTask extends AsyncTask<ResponseBody, Void, File> {
   }
 
   private String getDistinguisher() {
-    return instructionNamingInt++ > 0 ? fileName + instructionNamingInt : fileName;
+    return instructionNamingInt++ > 0 ? "" + instructionNamingInt : "";
   }
 
   @Override

@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.mapbox.navigator.Navigator;
 
@@ -25,8 +26,10 @@ class TileUnpacker {
    * @param updateListener listener to listen for progress updates
    */
   void unpack(File src, String destPath, UnpackUpdateTask.ProgressUpdateListener updateListener) {
+    Log.d("source path", "" + src.getAbsolutePath());
+    Log.d("dest path", "" + destPath);
     new UnpackerTask(navigator).executeOnExecutor(
-      AsyncTask.THREAD_POOL_EXECUTOR, src.getAbsolutePath(), destPath);
+      AsyncTask.THREAD_POOL_EXECUTOR, src.getAbsolutePath(), destPath + File.separator);
     new UnpackUpdateTask(updateListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, src);
   }
 }
