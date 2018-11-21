@@ -21,6 +21,7 @@ import retrofit2.Response;
  */
 
 public class RoutingTileDownloadManager {
+  private final File offlineDirectory;
   private final File tileDirectory;
   private String version;
   private RoutingTileDownloadListener listener;
@@ -31,8 +32,9 @@ public class RoutingTileDownloadManager {
     this(Environment.getExternalStoragePublicDirectory("Offline"));
   }
 
-  public RoutingTileDownloadManager(File destDirectory) {
-    tileDirectory = new File(destDirectory, "tiles");
+  public RoutingTileDownloadManager(File offlineDirectory) {
+    this.offlineDirectory = offlineDirectory;
+    tileDirectory = new File(offlineDirectory, "tiles");
   }
 
   public void setListener(RoutingTileDownloadListener listener) {
@@ -84,7 +86,7 @@ public class RoutingTileDownloadManager {
       if (!destination.exists()) {
         destination.mkdir();
       }
-//      new TileUnpacker().unpack(file, destination.getAbsolutePath(), new UnpackProgressUpdateListener());
+      new TileUnpacker().unpack(file, offlineDirectory.getAbsolutePath(), new UnpackProgressUpdateListener());
     }
 
     @Override
