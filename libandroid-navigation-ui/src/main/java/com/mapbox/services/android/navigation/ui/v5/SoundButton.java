@@ -2,38 +2,46 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.support.constraint.ConstraintLayout;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.view.AsyncLayoutInflater;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
-public class SoundButton extends ConstraintLayout implements NavigationButton {
+public class SoundButton extends FrameLayout implements NavigationButton {
+
   private static final float ALPHA_VALUE_ZERO = 0;
   private static final float ALPHA_VALUE_ONE = 1;
   private static final long ANIMATION_DURATION_THREE_HUNDRED_MILLIS = 300;
   private static final long ANIMATION_DURATION_ONE_THOUSAND_MILLIS = 1000;
 
+  private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();
   private FloatingActionButton soundFab;
   private TextView soundChipText;
   private AnimationSet fadeInSlowOut;
+  private CustomLayoutUpdater layoutUpdater;
   private boolean isMuted;
-  private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();
 
-  public SoundButton(Context context) {
-    this(context, null);
+  public SoundButton(@NonNull Context context) {
+    super(context);
+    initialize(context);
   }
 
-  public SoundButton(Context context, AttributeSet attrs) {
-    this(context, attrs, -1);
+  public SoundButton(@NonNull Context context, @Nullable AttributeSet attrs) {
+    super(context, attrs);
+    initialize(context);
   }
 
-  public SoundButton(Context context, AttributeSet attrs, int defStyleAttr) {
+  public SoundButton(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     initialize(context);
   }
@@ -75,6 +83,30 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
   }
 
   /**
+   * Replace this component with a pre-built {@link View}.
+   *
+   * @param view to be used in place of the component.
+   */
+  @Override
+  public void replaceWith(View view) {
+    CustomLayoutUpdater layoutUpdater = retrieveLayoutUpdater();
+    layoutUpdater.update(this, view);
+  }
+
+  /**
+   * Replace this component with a layout resource ID.  The component
+   * will inflate and add the layout once it is ready.
+   *
+   * @param layoutResId to be inflated and added
+   * @param listener    to notify when the replacement is finished
+   */
+  @Override
+  public void replaceWith(int layoutResId, OnLayoutReplacedListener listener) {
+    CustomLayoutUpdater layoutUpdater = retrieveLayoutUpdater();
+    layoutUpdater.update(this, layoutResId, listener);
+  }
+
+  /**
    * Will toggle the view between muted and unmuted states.
    *
    * @return boolean true if muted, false if not
@@ -88,7 +120,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
   protected void onFinishInflate() {
     super.onFinishInflate();
     bind();
-    setupColors();
+    initializeBackground();
     initializeAnimation();
   }
 
@@ -104,14 +136,22 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
     clearListeners();
   }
 
-  private void setupOnClickListeners() {
-    setOnClickListener(multiOnClickListener);
+  private void initialize(Context context) {
+    inflate(context, R.layout.sound_layout, this);
   }
 
-  private void clearListeners() {
-    multiOnClickListener.clearListeners();
-    multiOnClickListener = null;
-    setOnClickListener(null);
+  private void bind() {
+    soundFab = findViewById(R.id.soundFab);
+    soundChipText = findViewById(R.id.soundText);
+  }
+
+  private void initializeBackground() {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+      Drawable soundChipBackground = DrawableCompat.wrap(soundChipText.getBackground()).mutate();
+      int navigationViewPrimaryColor = ThemeSwitcher.retrieveThemeColor(getContext(),
+        R.attr.navigationViewPrimary);
+      DrawableCompat.setTint(soundChipBackground, navigationViewPrimaryColor);
+    }
   }
 
   private void initializeAnimation() {
@@ -129,13 +169,14 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
     fadeInSlowOut.addAnimation(fadeOut);
   }
 
-  private void setupColors() {
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-      Drawable soundChipBackground = DrawableCompat.wrap(soundChipText.getBackground()).mutate();
-      int navigationViewPrimaryColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-        R.attr.navigationViewPrimary);
-      DrawableCompat.setTint(soundChipBackground, navigationViewPrimaryColor);
-    }
+  private void setupOnClickListeners() {
+    setOnClickListener(multiOnClickListener);
+  }
+
+  private void clearListeners() {
+    multiOnClickListener.clearListeners();
+    multiOnClickListener = null;
+    setOnClickListener(null);
   }
 
   /**
@@ -192,15 +233,6 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
     soundChipText.startAnimation(fadeInSlowOut);
   }
 
-  private void bind() {
-    soundFab = findViewById(R.id.soundFab);
-    soundChipText = findViewById(R.id.soundText);
-  }
-
-  private void initialize(Context context) {
-    inflate(context, R.layout.sound_layout, this);
-  }
-
   /**
    * Changes sound {@link FloatingActionButton}
    * {@link android.graphics.drawable.Drawable} to denote sound is off.
@@ -215,5 +247,14 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
    */
   private void soundFabOn() {
     soundFab.setImageResource(R.drawable.ic_sound_on);
+  }
+
+  private CustomLayoutUpdater retrieveLayoutUpdater() {
+    if (layoutUpdater != null) {
+      return layoutUpdater;
+    }
+    AsyncLayoutInflater layoutInflater = new AsyncLayoutInflater(getContext());
+    layoutUpdater = new CustomLayoutUpdater(layoutInflater);
+    return layoutUpdater;
   }
 }

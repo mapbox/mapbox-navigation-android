@@ -3,8 +3,9 @@ package com.mapbox.services.android.navigation.ui.v5.summary;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
+import android.support.v4.view.AsyncLayoutInflater;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -12,7 +13,10 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.mapbox.services.android.navigation.ui.v5.CustomLayoutUpdater;
+import com.mapbox.services.android.navigation.ui.v5.NavigationBottomSheet;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
+import com.mapbox.services.android.navigation.ui.v5.OnLayoutReplacedListener;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
@@ -21,8 +25,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
-
-import java.text.DecimalFormat;
 
 /**
  * A view with {@link android.support.design.widget.BottomSheetBehavior}
@@ -33,7 +35,7 @@ import java.text.DecimalFormat;
  *
  * @since 0.6.0
  */
-public class SummaryBottomSheet extends FrameLayout {
+public class SummaryBottomSheet extends FrameLayout implements NavigationBottomSheet {
 
   private static final String EMPTY_STRING = "";
   private TextView distanceRemainingText;
@@ -44,29 +46,61 @@ public class SummaryBottomSheet extends FrameLayout {
   @NavigationTimeFormat.Type
   private int timeFormatType;
   private DistanceFormatter distanceFormatter;
+  private CustomLayoutUpdater layoutUpdater;
 
-  public SummaryBottomSheet(Context context) {
-    this(context, null);
+  public SummaryBottomSheet(@NonNull Context context) {
+    super(context);
+    initialize();
   }
 
-  public SummaryBottomSheet(Context context, AttributeSet attrs) {
-    this(context, attrs, -1);
+  public SummaryBottomSheet(@NonNull Context context, @Nullable AttributeSet attrs) {
+    super(context, attrs);
+    initialize();
   }
 
-  public SummaryBottomSheet(Context context, AttributeSet attrs, int defStyleAttr) {
+  public SummaryBottomSheet(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     initialize();
   }
 
-  /**
-   * After the layout inflates, binds all necessary views,
-   * create a {@link RecyclerView} for the list of directions,
-   * and a new {@link DecimalFormat} for formatting distance remaining.
-   */
   @Override
   protected void onFinishInflate() {
     super.onFinishInflate();
     bind();
+  }
+
+  @Override
+  public void hide() {
+    setVisibility(INVISIBLE);
+  }
+
+  @Override
+  public void show() {
+    setVisibility(VISIBLE);
+  }
+
+  /**
+   * Replace this component with a pre-built {@link View}.
+   *
+   * @param view to be used in place of the component.
+   */
+  @Override
+  public void replaceWith(View view) {
+    CustomLayoutUpdater layoutUpdater = retrieveLayoutUpdater();
+    layoutUpdater.update(this, view);
+  }
+
+  /**
+   * Replace this component with a layout resource ID.  The component
+   * will inflate and add the layout once it is ready.
+   *
+   * @param layoutResId to be inflated and added
+   * @param listener    to notify when the replacement is finished
+   */
+  @Override
+  public void replaceWith(int layoutResId, OnLayoutReplacedListener listener) {
+    CustomLayoutUpdater layoutUpdater = retrieveLayoutUpdater();
+    layoutUpdater.update(this, layoutResId, listener);
   }
 
   public void subscribe(NavigationViewModel navigationViewModel) {
@@ -135,7 +169,9 @@ public class SummaryBottomSheet extends FrameLayout {
   }
 
   /**
-   * Sets the time format type to use
+   * Sets the time format type to use.
+   * <p>
+   * This will determine how the arrival time with be formatted (12hr or 24hr).
    *
    * @param type to use
    */
@@ -144,9 +180,12 @@ public class SummaryBottomSheet extends FrameLayout {
   }
 
   /**
-   * Sets the distance formatter
+   * Sets the distance formatter which will determine how the distance remaining
+   * will be formatted, localized, and decremented.
+   * <p>
+   * Please see {@link DistanceFormatter} javadoc for further details.
    *
-   * @param distanceFormatter to set
+   * @param distanceFormatter to be set
    */
   public void setDistanceFormatter(DistanceFormatter distanceFormatter) {
     if (distanceFormatter != null && !distanceFormatter.equals(this.distanceFormatter)) {
@@ -154,9 +193,6 @@ public class SummaryBottomSheet extends FrameLayout {
     }
   }
 
-  /**
-   * Inflates this layout needed for this view and initializes the locale as the device locale.
-   */
   private void initialize() {
     initializeDistanceFormatter();
     inflate(getContext(), R.layout.summary_bottomsheet_layout, this);
@@ -170,9 +206,6 @@ public class SummaryBottomSheet extends FrameLayout {
     distanceFormatter = new DistanceFormatter(getContext(), language, unitType, roundingIncrement);
   }
 
-  /**
-   * Finds and binds all necessary views
-   */
   private void bind() {
     distanceRemainingText = findViewById(R.id.distanceRemainingText);
     timeRemainingText = findViewById(R.id.timeRemainingText);
@@ -186,12 +219,18 @@ public class SummaryBottomSheet extends FrameLayout {
     routeOverviewBtn.setImageDrawable(ThemeSwitcher.retrieveThemeOverviewDrawable(getContext()));
   }
 
-  /**
-   * Clears all {@link View}s.
-   */
   private void clearViews() {
     arrivalTimeText.setText(EMPTY_STRING);
     timeRemainingText.setText(EMPTY_STRING);
     distanceRemainingText.setText(EMPTY_STRING);
+  }
+
+  private CustomLayoutUpdater retrieveLayoutUpdater() {
+    if (layoutUpdater != null) {
+      return layoutUpdater;
+    }
+    AsyncLayoutInflater layoutInflater = new AsyncLayoutInflater(getContext());
+    layoutUpdater = new CustomLayoutUpdater(layoutInflater);
+    return layoutUpdater;
   }
 }

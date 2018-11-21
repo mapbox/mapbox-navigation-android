@@ -2,7 +2,7 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.view.View;
 
-public interface NavigationButton {
+public interface NavigationButton extends ReplaceableNavigationComponent {
 
   /**
    * Adds an onClickListener to the button

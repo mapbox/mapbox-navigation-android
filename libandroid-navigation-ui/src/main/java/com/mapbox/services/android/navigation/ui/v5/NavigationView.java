@@ -481,6 +481,16 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     return instructionView.retrieveAlertView();
   }
 
+  /**
+   * Returns the bottom sheet that is used to display summary information
+   * for the {@link NavigationView}.
+   *
+   * @return the current bottom sheet
+   */
+  public NavigationBottomSheet retrieveBottomSheet() {
+    return summaryBottomSheet;
+  }
+
   private void initializeView() {
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();

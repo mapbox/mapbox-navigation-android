@@ -1,12 +1,15 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.CardView;
+import android.support.v4.view.AsyncLayoutInflater;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
+import android.widget.FrameLayout;
 
 /**
  * Button used to re-activate following user location during navigation.
@@ -20,21 +23,25 @@ import android.view.animation.TranslateAnimation;
  *
  * @since 0.6.0
  */
-public class RecenterButton extends CardView implements NavigationButton {
+public class RecenterButton extends FrameLayout implements NavigationButton {
+
   private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();
+  private CustomLayoutUpdater layoutUpdater;
   private Animation slideUpBottom;
 
-  public RecenterButton(Context context) {
-    this(context, null);
+  public RecenterButton(@NonNull Context context) {
+    super(context);
+    initialize();
   }
 
-  public RecenterButton(Context context, @Nullable AttributeSet attrs) {
-    this(context, attrs, -1);
+  public RecenterButton(@NonNull Context context, @Nullable AttributeSet attrs) {
+    super(context, attrs);
+    initialize();
   }
 
-  public RecenterButton(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+  public RecenterButton(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
-    init();
+    initialize();
   }
 
   /**
@@ -83,13 +90,37 @@ public class RecenterButton extends CardView implements NavigationButton {
   }
 
   /**
+   * Replace this component with a pre-built {@link View}.
+   *
+   * @param view to be used in place of the component.
+   */
+  @Override
+  public void replaceWith(View view) {
+    CustomLayoutUpdater layoutUpdater = retrieveLayoutUpdater();
+    layoutUpdater.update(this, view);
+  }
+
+  /**
+   * Replace this component with a layout resource ID.  The component
+   * will inflate and add the layout once it is ready.
+   *
+   * @param layoutResId to be inflated and added
+   * @param listener    to notify when the replacement is finished
+   */
+  @Override
+  public void replaceWith(int layoutResId, OnLayoutReplacedListener listener) {
+    CustomLayoutUpdater layoutUpdater = retrieveLayoutUpdater();
+    layoutUpdater.update(this, layoutResId, listener);
+  }
+
+  /**
    * Once inflation of the view has finished,
    * create the custom animation.
    */
   @Override
   protected void onFinishInflate() {
     super.onFinishInflate();
-    initAnimation();
+    initializeAnimation();
   }
 
   @Override
@@ -117,16 +148,25 @@ public class RecenterButton extends CardView implements NavigationButton {
   /**
    * Inflates the layout.
    */
-  private void init() {
+  private void initialize() {
     inflate(getContext(), R.layout.recenter_btn_layout, this);
   }
 
   /**
    * Creates the custom animation used to show this button.
    */
-  private void initAnimation() {
+  private void initializeAnimation() {
     slideUpBottom = new TranslateAnimation(0f, 0f, 125f, 0f);
     slideUpBottom.setDuration(300);
     slideUpBottom.setInterpolator(new OvershootInterpolator(2.0f));
+  }
+
+  private CustomLayoutUpdater retrieveLayoutUpdater() {
+    if (layoutUpdater != null) {
+      return layoutUpdater;
+    }
+    AsyncLayoutInflater layoutInflater = new AsyncLayoutInflater(getContext());
+    layoutUpdater = new CustomLayoutUpdater(layoutInflater);
+    return layoutUpdater;
   }
 }
