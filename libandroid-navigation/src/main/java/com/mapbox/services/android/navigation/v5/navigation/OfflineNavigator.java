@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
 
 class OfflineNavigator {
@@ -20,7 +19,7 @@ class OfflineNavigator {
    *
    * @param tilesPath directory path where the tiles are located
    * @param callback a callback that will be fired when the offline data is initialized and
-   * {@link MapboxOfflineNavigation#findOfflineRoute(OfflineRoute, CallbackAsyncTask.Callback)}
+   * {@link MapboxOfflineRouter#findOfflineRoute(OfflineRoute, OfflineRouteFoundCallback)}
    *                 can be called safely
    */
   void configure(String tilesPath, OnOfflineDataInitialized callback) {
@@ -33,7 +32,7 @@ class OfflineNavigator {
    * @param offlineRoute an offline navigation route
    * @return a RouterResult object with the json and a success/fail bool
    */
-  void retrieveRouteFor(OfflineRoute offlineRoute, CallbackAsyncTask.Callback<DirectionsRoute> callback) {
+  void retrieveRouteFor(OfflineRoute offlineRoute, OfflineRouteFoundCallback callback) {
     new OfflineRouteRetrievalTask(navigator, callback).execute(offlineRoute);
   }
 }
