@@ -18,7 +18,7 @@ public class MapboxOfflineNavigation {
    *
    * @param tilesDirPath directory path where the tiles are located
    * @param callback a callback that will be fired when the offline data is initialized and
-   * {@link MapboxOfflineNavigation#findOfflineRoute(OfflineRoute, CallbackAsyncTask.Callback)}
+   * {@link MapboxOfflineNavigation#findOfflineRoute(OfflineRoute, OfflineRouteFoundCallback)}
    *                 can be called safely.
    */
   public void initializeOfflineData(String tilesDirPath, OnOfflineDataInitialized callback) {
@@ -33,8 +33,7 @@ public class MapboxOfflineNavigation {
    * @return the offline {@link DirectionsRoute}
    */
   @Nullable
-  public void findOfflineRoute(@NonNull OfflineRoute route,
-                               CallbackAsyncTask.Callback<DirectionsRoute> callback) {
+  public void findOfflineRoute(@NonNull OfflineRoute route, OfflineRouteFoundCallback callback) {
     offlineNavigator.retrieveRouteFor(route, callback);
   }
 }
