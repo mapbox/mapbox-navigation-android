@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.SpannableString;
 import android.text.format.DateFormat;
@@ -122,15 +123,19 @@ class MapboxNavigationNotification implements NavigationNotification {
   }
 
   private Notification buildNotification(Context applicationContext) {
-    return new NotificationCompat.Builder(applicationContext, NAVIGATION_NOTIFICATION_CHANNEL)
-      .setContentIntent(pendingOpenIntent)
+    String channelId = NAVIGATION_NOTIFICATION_CHANNEL;
+    NotificationCompat.Builder builder = new NotificationCompat.Builder(applicationContext, channelId)
       .setCategory(NotificationCompat.CATEGORY_SERVICE)
       .setPriority(NotificationCompat.PRIORITY_MAX)
       .setSmallIcon(R.drawable.ic_navigation)
       .setCustomContentView(collapsedNotificationRemoteViews)
       .setCustomBigContentView(expandedNotificationRemoteViews)
-      .setOngoing(true)
-      .build();
+      .setOngoing(true);
+
+    if (pendingOpenIntent != null) {
+      builder.setContentIntent(pendingOpenIntent);
+    }
+    return builder.build();
   }
 
   private void buildRemoteViews() {
@@ -141,9 +146,13 @@ class MapboxNavigationNotification implements NavigationNotification {
     expandedNotificationRemoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent);
   }
 
+  @Nullable
   private PendingIntent createPendingOpenIntent(Context applicationContext) {
     PackageManager pm = applicationContext.getPackageManager();
     Intent intent = pm.getLaunchIntentForPackage(applicationContext.getPackageName());
+    if (intent == null) {
+      return null;
+    }
     intent.setPackage(null);
     return PendingIntent.getActivity(applicationContext, 0, intent, 0);
   }

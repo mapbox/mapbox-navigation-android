@@ -80,7 +80,7 @@ public class NavigationMapboxMap {
   private NavigationMapRoute mapRoute;
   private LocationComponent locationComponent;
   private MapPaddingAdjustor mapPaddingAdjustor;
-  private MapWayname mapWayname;
+  private MapWayname mapWayName;
   private SymbolLayer waynameLayer;
   private MapLayerInteractor layerInteractor;
   private List<Marker> mapMarkers = new ArrayList<>();
@@ -115,6 +115,11 @@ public class NavigationMapboxMap {
   // Package private (no modifier) for testing purposes
   NavigationMapboxMap(NavigationMapRoute mapRoute) {
     this.mapRoute = mapRoute;
+  }
+
+  // Package private (no modifier) for testing purposes
+  NavigationMapboxMap(MapWayname mapWayName) {
+    this.mapWayName = mapWayName;
   }
 
   /**
@@ -178,7 +183,7 @@ public class NavigationMapboxMap {
   public void addProgressChangeListener(MapboxNavigation navigation) {
     mapRoute.addProgressChangeListener(navigation);
     mapCamera.addProgressChangeListener(navigation);
-    mapWayname.addProgressChangeListener(navigation);
+    mapWayName.addProgressChangeListener(navigation);
   }
 
   /**
@@ -192,8 +197,8 @@ public class NavigationMapboxMap {
    * @param outState to store state variables
    */
   public void saveStateWith(String key, Bundle outState) {
-    boolean isVisible = mapWayname.isVisible();
-    String waynameText = mapWayname.retrieveWayname();
+    boolean isVisible = mapWayName.isVisible();
+    String waynameText = mapWayName.retrieveWayname();
     int[] mapPadding = mapPaddingAdjustor.retrieveCurrentPadding();
     boolean isUsingDefault = mapPaddingAdjustor.isUsingDefault();
     @NavigationCamera.TrackingMode
@@ -366,7 +371,7 @@ public class NavigationMapboxMap {
    * @param wayname text to be set
    */
   public void updateWaynameView(String wayname) {
-    mapWayname.updateWaynameLayer(wayname, waynameLayer);
+    mapWayName.updateWaynameLayer(wayname, waynameLayer);
   }
 
   /**
@@ -375,7 +380,7 @@ public class NavigationMapboxMap {
    * @param isVisible true to show, false to hide
    */
   public void updateWaynameVisibility(boolean isVisible) {
-    mapWayname.updateWaynameVisibility(isVisible, waynameLayer);
+    mapWayName.updateWaynameVisibility(isVisible, waynameLayer);
   }
 
   /**
@@ -384,7 +389,7 @@ public class NavigationMapboxMap {
    * @return true if visible, false if not
    */
   public boolean isWaynameVisible() {
-    return mapWayname.isVisible();
+    return mapWayName.isVisible();
   }
 
   /**
@@ -393,7 +398,7 @@ public class NavigationMapboxMap {
    * @param isEnabled true to enable, false to disable
    */
   public void updateWaynameQueryMap(boolean isEnabled) {
-    mapWayname.updateWaynameQueryMap(isEnabled);
+    mapWayName.updateWaynameQueryMap(isEnabled);
   }
 
   /**
@@ -403,7 +408,7 @@ public class NavigationMapboxMap {
   public void onStart() {
     mapCamera.onStart();
     mapRoute.onStart();
-    mapWayname.onStart();
+    mapWayName.onStart();
   }
 
   /**
@@ -413,7 +418,7 @@ public class NavigationMapboxMap {
   public void onStop() {
     mapCamera.onStop();
     mapRoute.onStop();
-    mapWayname.onStop();
+    mapWayName.onStop();
   }
 
   /**
@@ -497,6 +502,28 @@ public class NavigationMapboxMap {
   }
 
   /**
+   * Add a {@link OnWayNameChangedListener} for listening to updates
+   * to the way name shown on the map below the location icon.
+   *
+   * @param listener to be added
+   * @return true if added, false if listener was not found
+   */
+  public boolean addOnWayNameChangedListener(OnWayNameChangedListener listener) {
+    return mapWayName.addOnWayNameChangedListener(listener);
+  }
+
+  /**
+   * Remove a {@link OnWayNameChangedListener} for listening to updates
+   * to the way name shown on the map below the location icon.
+   *
+   * @param listener to be removed
+   * @return true if removed, false if listener was not found
+   */
+  public boolean removeOnWayNameChangedListener(OnWayNameChangedListener listener) {
+    return mapWayName.removeOnWayNameChangedListener(listener);
+  }
+
+  /**
    * Use this method to position the location icon on the map.
    * <p>
    * For example, to position the icon in the center of the map, you can pass {0, 0, 0, 0} which
@@ -541,7 +568,7 @@ public class NavigationMapboxMap {
     WaynameLayoutProvider layoutProvider = new WaynameLayoutProvider(mapView.getContext());
     WaynameFeatureFinder featureInteractor = new WaynameFeatureFinder(mapboxMap);
     initializeWaynameLayer(layerInteractor);
-    mapWayname = new MapWayname(layoutProvider, layerInteractor, featureInteractor, paddingAdjustor);
+    mapWayName = new MapWayname(layoutProvider, layerInteractor, featureInteractor, paddingAdjustor);
   }
 
   private void initializeWaynameLayer(MapLayerInteractor layerInteractor) {
@@ -607,6 +634,6 @@ public class NavigationMapboxMap {
   private void updateMapWaynameWithLocation(Location location) {
     LatLng latLng = new LatLng(location);
     PointF mapPoint = mapboxMap.getProjection().toScreenLocation(latLng);
-    mapWayname.updateWaynameWithPoint(mapPoint, waynameLayer);
+    mapWayName.updateWaynameWithPoint(mapPoint, waynameLayer);
   }
 }

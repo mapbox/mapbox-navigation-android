@@ -1,11 +1,11 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
-import com.mapbox.navigator.RouterResult;
 
 class OfflineNavigator {
   private static final String EMPTY_TRANSLATIONS_DIR_PATH = "";
-  private Navigator navigator;
+  private final Navigator navigator;
 
   static {
     NavigationLibraryLoader.load();
@@ -20,7 +20,8 @@ class OfflineNavigator {
    *
    * @param tilesPath directory path where the tiles are located
    * @param callback a callback that will be fired when the offline data is initialized and
-   * {@link MapboxOfflineNavigator#findOfflineRoute(OfflineRoute)} could be called safely
+   * {@link MapboxOfflineNavigation#findOfflineRoute(OfflineRoute, CallbackAsyncTask.Callback)}
+   *                 can be called safely
    */
   void configure(String tilesPath, OnOfflineDataInitialized callback) {
     new ConfigureRouterTask(navigator, tilesPath, EMPTY_TRANSLATIONS_DIR_PATH, callback).execute();
@@ -32,10 +33,7 @@ class OfflineNavigator {
    * @param offlineRoute an offline navigation route
    * @return a RouterResult object with the json and a success/fail bool
    */
-  RouterResult retrieveRouteFor(OfflineRoute offlineRoute) {
-    String offlineUri = offlineRoute.buildUrl();
-    synchronized (this) {
-      return navigator.getRoute(offlineUri);
-    }
+  void retrieveRouteFor(OfflineRoute offlineRoute, CallbackAsyncTask.Callback<DirectionsRoute> callback) {
+    new OfflineRouteRetrievalTask(navigator, callback).execute(offlineRoute);
   }
 }
