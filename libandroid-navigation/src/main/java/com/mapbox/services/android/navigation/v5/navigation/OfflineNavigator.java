@@ -1,11 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.os.AsyncTask;
-
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
-
-import java.io.File;
 
 class OfflineNavigator {
   private static final String EMPTY_TRANSLATIONS_DIR_PATH = "";
@@ -39,18 +35,5 @@ class OfflineNavigator {
    */
   void retrieveRouteFor(OfflineRoute offlineRoute, CallbackAsyncTask.Callback<DirectionsRoute> callback) {
     new OfflineRouteRetrievalTask(navigator, callback).execute(offlineRoute);
-  }
-
-  /**
-   * Unpacks a TAR file at the srcPath into the destination directory.
-   *
-   * @param srcPath where TAR file is located
-   * @param destPath to the destination directory
-   */
-  void unpackTiles(String srcPath, String destPath, UnpackUpdateTask.ProgressUpdateListener
-    progressUpdateListener) {
-    new UnpackerTask(navigator).execute(srcPath, destPath);
-    new UnpackUpdateTask(progressUpdateListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new
-      File(srcPath));
   }
 }
