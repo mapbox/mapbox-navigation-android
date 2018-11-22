@@ -13,6 +13,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
 /**
  * This class serves to contain the complicated chain of events that must happen to download
@@ -60,6 +61,9 @@ public class RoutingTileDownloadManager {
 
     @Override
     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+      Timber.d("TAR Url: " + call.request().url());
+
+
       downloadTask = new DownloadTask(
         tileDirectory.getAbsolutePath(),
         version,
@@ -86,7 +90,7 @@ public class RoutingTileDownloadManager {
       if (!destination.exists()) {
         destination.mkdir();
       }
-      new TileUnpacker().unpack(file, offlineDirectory.getAbsolutePath(), new UnpackProgressUpdateListener());
+      new TileUnpacker().unpack(file, destination.getAbsolutePath(), new UnpackProgressUpdateListener());
     }
 
     @Override

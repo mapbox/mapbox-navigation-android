@@ -49,7 +49,6 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   var primaryRoute: DirectionsRoute? = null
   var collapsedBottomSheet: Boolean = false
   var isOffRoute: Boolean = false
-  var isOffline: Boolean = false
 
   private val locationEngine: LocationEngine
   private val locationEngineListener: ExampleLocationEngineListener
@@ -58,12 +57,11 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
   // todo: is a hard-coded access token ok?
   private val accessToken: String = instance.resources.getString(R.string.mapbox_access_token)
-  private val version = "2018-10-16"
-
-  private val routeFinderDelegator = RouteFinderDelegator(
-          this, routes, accessToken, version)
+  private val routeFinderDelegator: RouteFinderDelegator
 
   init {
+    routeFinderDelegator = RouteFinderDelegator(this, routes, accessToken,
+            getVersionFromSharedPreferences())
     // Initialize the location engine
     locationEngine = FusedLocationEngine(getApplication())
     locationEngineListener = ExampleLocationEngineListener(locationEngine, location)
@@ -84,6 +82,14 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     navigation.addMilestoneEventListener(ExampleMilestoneEventListener(milestone, speechPlayer))
     navigation.addProgressChangeListener(ExampleProgressChangeListener(location, progress))
     navigation.addOffRouteListener(ExampleOffRouteListener(this))
+  }
+
+  private fun getVersionFromSharedPreferences(): String {
+    return getApplication<Application>().run {
+      PreferenceManager.getDefaultSharedPreferences(this)
+              .getString(this.getString(R.string.offline_preference_key), getString(R.string
+                      .offline_disabled))
+    }
   }
 
   override fun onCleared() {
@@ -107,8 +113,9 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   private fun getOfflineFromSharedPreferences(): Boolean {
     getApplication<Application>().run {
       val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-      return sharedPreferences.getBoolean(this.getString(R.string
-              .simulate_route_key), false)
+      val default = this.getString(R.string.offline_disabled)
+      return sharedPreferences.getString(this.getString(R.string
+              .offline_preference_key), default) != default
     }
   }
 

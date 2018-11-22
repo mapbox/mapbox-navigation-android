@@ -305,8 +305,6 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
         offlineRouting.initializeOfflineData(tilesDirPath, () -> {
           OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
           offlineRouting.findOfflineRoute(offlineRoute, result -> handleNewRoute(result));
-
-          handleNewRoute(route);
         });
       }
 

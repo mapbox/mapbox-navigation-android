@@ -6,6 +6,8 @@ import com.mapbox.navigator.Navigator;
 
 import java.io.File;
 
+import timber.log.Timber;
+
 
 /**
  * Takes in a string for a path to a TAR file containing routing tiles, and unpacks them to the
@@ -23,7 +25,9 @@ class UnpackerTask extends AsyncTask<String, Integer, File> {
 
   @Override
   protected File doInBackground(String... strings) {
-    navigator.unpackTiles(strings[0], strings[1]);
+    long i = navigator.unpackTiles(strings[0], strings[1]);
+    Timber.e("Unpacker NUMBER " + i);
+
     return new File(strings[0]);
   }
 

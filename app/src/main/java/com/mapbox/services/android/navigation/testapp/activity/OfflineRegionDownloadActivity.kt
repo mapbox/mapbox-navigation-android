@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.testapp.activity
 import android.graphics.Color
 import android.graphics.PointF
 import android.os.Bundle
+import android.support.annotation.RequiresPermission
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.View.GONE
@@ -26,6 +27,7 @@ import kotlinx.android.synthetic.main.activity_offline_region_download.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import timber.log.Timber
 
 class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadManager.RoutingTileDownloadListener {
 
@@ -105,6 +107,10 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 setDownloadButtonEnabled(position != 0)
+
+                versionSpinner.selectedItem.run {
+                    setDownloadButtonEnabled((this as String).isNotEmpty())
+                }
             }
         }
     }
@@ -125,6 +131,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
     private fun onDownloadClick() {
         // todo check that download is less than 1.5 million square kilometers
         if (!downloadButtonEnabled) {
@@ -132,17 +139,21 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
         }
 
         showDownloading(false, "Requesting tiles....")
-        var s = versionSpinner.selectedItem
         val builder = OfflineTiles.builder()
                 .accessToken(Mapbox.getAccessToken())
                 .version(versionSpinner.selectedItem as String)
                 .boundingBox(boundingBox)
 
-                RoutingTileDownloadManager().let {
+//        Timber.d("Offline Route Url", builder)`1
 
-                    it.setListener(this)
-                    it.startDownload(builder.build())
-                }
+
+
+        RoutingTileDownloadManager().let {
+
+            it.setListener(this)
+            var offlineTiles = builder.build()
+            it.startDownload(offlineTiles)
+        }
     }
 
     private fun showDownloading(downloading: Boolean, message: String) {

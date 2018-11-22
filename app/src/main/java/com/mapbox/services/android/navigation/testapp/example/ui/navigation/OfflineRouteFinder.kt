@@ -6,27 +6,28 @@ import android.os.Environment
 import android.widget.Toast
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineNavigation
+import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute
 import java.io.File
 
-class OfflineRouteFinder(private val version: String, private val callback: RouteFoundCallback) {
+class OfflineRouteFinder(version: String, private val callback: RouteFoundCallback) {
 
-    private val offlineNavigation = MapboxOfflineNavigation()
-    private val offlineTileDir = Environment.getExternalStoragePublicDirectory("Offline")
+    private val offlineRouter = MapboxOfflineRouter()
+    private val offlineTileDir =
+            File(Environment.getExternalStoragePublicDirectory("Offline"), "tiles")
     private val offlineTileVersionDir = File(offlineTileDir, version)
     private var ready = false
 
     init {
-        offlineNavigation.initializeOfflineData(
+        offlineRouter.initializeOfflineData(
                 offlineTileVersionDir.absolutePath) { ready = true }
     }
 
     fun findRoute(context: Context, location: Location, destination: Point) {
         if (ready) {
             buildOfflineRoute(context, location, destination).let {
-                offlineNavigation.findOfflineRoute(it) {
+                offlineRouter.findOfflineRoute(it) {
                     callback.routeFound(listOf(it)) }
             }
         } else {

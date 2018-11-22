@@ -54,14 +54,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
         getBooleanExtra(NavigationSettingsActivity.OFFLINE_CHANGED, false).let {
           offline = if (it) !offline else offline
         }
-
-        // simulate route??
-//        getBooleanExtra(NavigationSettingsActivity., false).let {
-//          offline = if (it) !offline else offline
-//        }
-
       }
-
     }
   }
 

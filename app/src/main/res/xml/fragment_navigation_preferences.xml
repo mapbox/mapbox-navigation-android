@@ -38,8 +38,8 @@
         android:key="@string/route_profile_key"
         android:title="@string/route_profile"/>
 
-    <CheckBoxPreference
+    <ListPreference
         android:key="@string/offline_preference_key"
         android:title="Offline Navigation"
-        android:defaultValue="false"/>
+        android:defaultValue="@string/offline_disabled"/>
 </PreferenceScreen>

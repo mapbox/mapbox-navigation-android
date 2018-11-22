@@ -4,9 +4,16 @@ package com.mapbox.services.android.navigation.testapp;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
+import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class NavigationSettingsActivity extends PreferenceActivity {
 
@@ -21,7 +28,7 @@ public class NavigationSettingsActivity extends PreferenceActivity {
       Intent resultIntent = new Intent();
       resultIntent.putExtra(UNIT_TYPE_CHANGED, key.equals(getString(R.string.unit_type_key)));
       resultIntent.putExtra(LANGUAGE_CHANGED, key.equals(getString(R.string.language_key)));
-      resultIntent.putExtra(OFFLINE_CHANGED, key.equals(getString(R.string.offline_preference_key)));
+//      resultIntent.putExtra(OFFLINE_CHANGED, key.equals(getString(R.string.offline_preference_key)));
       setResult(RESULT_OK, resultIntent);
     };
     PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(listener);
@@ -40,6 +47,20 @@ public class NavigationSettingsActivity extends PreferenceActivity {
     public void onCreate(final Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       addPreferencesFromResource(R.xml.fragment_navigation_preferences);
+      ListPreference offlineVersions = (ListPreference) findPreference(getString(R.string
+        .offline_preference_key));
+
+      File file = new File(Environment.getExternalStoragePublicDirectory("Offline"), "tiles");
+      List<String> list = new ArrayList<>(Arrays.asList(file.list()));
+      String s = getString(R.string.offline_disabled);
+      list.add(s);
+
+      String[] entries = list.toArray(new String[list.size()]);
+
+        offlineVersions.setEntries(entries);
+      offlineVersions.setEntryValues(entries);
+
+
       PreferenceManager.setDefaultValues(getActivity(), R.xml.fragment_navigation_preferences, false);
     }
   }

@@ -11,8 +11,8 @@ import com.mapbox.services.android.navigation.testapp.example.ui.ExampleViewMode
 
 class RouteFinderDelegator(private val viewModel: ExampleViewModel,
                            private val routes: MutableLiveData<List<DirectionsRoute>>,
-                           private val accessToken: String,
-                           private val tileVersion: String): RouteFoundCallback {
+                           accessToken: String,
+                           tileVersion: String): RouteFoundCallback {
 
     private val offlineRouteFinder = OfflineRouteFinder(tileVersion, this)
     private val routeFinder: ExampleRouteFinder = ExampleRouteFinder(accessToken, this)

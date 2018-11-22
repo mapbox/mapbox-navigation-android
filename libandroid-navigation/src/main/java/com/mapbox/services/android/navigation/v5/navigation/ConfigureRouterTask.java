@@ -4,6 +4,8 @@ import android.os.AsyncTask;
 
 import com.mapbox.navigator.Navigator;
 
+import timber.log.Timber;
+
 class ConfigureRouterTask extends AsyncTask<Void, Void, Void> {
   private final Navigator navigator;
   private final String tileFilePath;
@@ -21,7 +23,8 @@ class ConfigureRouterTask extends AsyncTask<Void, Void, Void> {
   @Override
   protected Void doInBackground(Void... paramsUnused) {
     synchronized (navigator) {
-      navigator.configureRouter(tileFilePath, translationsDirPath);
+      long i = navigator.configureRouter(tileFilePath, translationsDirPath);
+      Timber.e("NUMBER " + i + " " + tileFilePath);
     }
     return null;
   }

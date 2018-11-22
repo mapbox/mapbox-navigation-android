@@ -12,6 +12,7 @@ import timber.log.Timber;
 class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, DirectionsRoute> {
   private final Navigator navigator;
   private final OfflineRouteFoundCallback callback;
+  RouterResult routerResult;
 
   OfflineRouteRetrievalTask(Navigator navigator, OfflineRouteFoundCallback callback) {
     this.navigator = navigator;
@@ -20,11 +21,11 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, Directions
 
   @Override
   protected DirectionsRoute doInBackground(OfflineRoute... offlineRoutes) {
-    RouterResult routerResult;
-
     synchronized (navigator) {
-      routerResult = navigator.getRoute(offlineRoutes[0].buildUrl());
-      Timber.d("RouterResult: " + routerResult.getJson());
+      String s = offlineRoutes[0].buildUrl();
+      Timber.d("Offline Route Url: " + s);
+
+      routerResult = navigator.getRoute(s);
     }
 
     return offlineRoutes[0].retrieveOfflineRoute(routerResult);
@@ -32,6 +33,6 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, Directions
 
   @Override
   protected void onPostExecute(DirectionsRoute directionsRoute) {
-    callback.onOfflineRouteFound(directionsRoute);
+      callback.onOfflineRouteFound(directionsRoute);
   }
 }
