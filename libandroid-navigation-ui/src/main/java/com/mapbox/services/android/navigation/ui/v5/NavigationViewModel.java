@@ -102,6 +102,12 @@ public class NavigationViewModel extends AndroidViewModel {
     localeUtils = new LocaleUtils();
   }
 
+  // Package private (no modifier) for testing purposes
+  NavigationViewModel(Application application, MapboxNavigation navigation) {
+    super(application);
+    this.navigation = navigation;
+  }
+
   public void onCreate() {
     if (!isRunning) {
       locationEngineConductor.onCreate();
@@ -213,6 +219,8 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   void stopNavigation() {
+    navigation.removeProgressChangeListener(null);
+    navigation.removeMilestoneEventListener(null);
     navigation.stopNavigation();
   }
 
