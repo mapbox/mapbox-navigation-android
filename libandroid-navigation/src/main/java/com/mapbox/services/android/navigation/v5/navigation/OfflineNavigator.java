@@ -19,7 +19,7 @@ class OfflineNavigator {
    *
    * @param tilesPath directory path where the tiles are located
    * @param callback a callback that will be fired when the offline data is initialized and
-   * {@link MapboxOfflineRouter#findOfflineRoute(OfflineRoute, OfflineRouteFoundCallback)}
+   * {@link MapboxOfflineRouter#findOfflineRoute(OfflineRoute, RouteFoundCallback)}
    *                 can be called safely
    */
   void configure(String tilesPath, OnOfflineDataInitialized callback) {
@@ -32,7 +32,7 @@ class OfflineNavigator {
    * @param offlineRoute an offline navigation route
    * @return a RouterResult object with the json and a success/fail bool
    */
-  void retrieveRouteFor(OfflineRoute offlineRoute, OfflineRouteFoundCallback callback) {
+  void retrieveRouteFor(OfflineRoute offlineRoute, RouteFoundCallback callback) {
     new OfflineRouteRetrievalTask(navigator, callback).execute(offlineRoute);
   }
 }

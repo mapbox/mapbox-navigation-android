@@ -32,4 +32,3 @@ class ConfigureRouterTask extends AsyncTask<Void, Void, Void> {
     callback.onOfflineDataInitialized();
   }
 }
-

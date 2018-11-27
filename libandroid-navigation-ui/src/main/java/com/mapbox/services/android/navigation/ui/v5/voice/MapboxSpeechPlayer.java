@@ -7,6 +7,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
+import com.mapbox.services.android.navigation.v5.utils.DownloadTask;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Queue;
@@ -28,6 +30,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
   private static final String MAPBOX_INSTRUCTION_CACHE = "mapbox_instruction_cache";
   private static final String ERROR_TEXT = "Unable to set data source for the media mediaPlayer! %s";
   private static final SpeechAnnouncementMap SPEECH_ANNOUNCEMENT_MAP = new SpeechAnnouncementMap();
+  private static final String MP3_POSTFIX = "mp3";
 
   private SpeechAnnouncement announcement;
   private SpeechListener speechListener;
@@ -226,7 +229,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
   }
 
   private void executeInstructionTask(ResponseBody responseBody) {
-    new SpeechDownloadTask(mapboxCache.getPath(), new SpeechDownloadTask.TaskListener() {
+    new DownloadTask(mapboxCache.getPath(), MP3_POSTFIX, new DownloadTask.DownloadListener() {
       @Override
       public void onFinishedDownloading(@NonNull File instructionFile) {
         playInstructionIfUpNext(instructionFile);

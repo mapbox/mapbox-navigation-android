@@ -18,7 +18,7 @@ public class MapboxOfflineRouter {
    *
    * @param tilesDirPath directory path where the tiles are located
    * @param callback a callback that will be fired when the offline data is initialized and
-   * {@link MapboxOfflineRouter#findOfflineRoute(OfflineRoute, OfflineRouteFoundCallback)}
+   * {@link MapboxOfflineRouter#findOfflineRoute(OfflineRoute, RouteFoundCallback)}
    *                 can be called safely.
    */
   public void initializeOfflineData(String tilesDirPath, OnOfflineDataInitialized callback) {
@@ -34,7 +34,7 @@ public class MapboxOfflineRouter {
    */
   @Nullable
   public void findOfflineRoute(@NonNull OfflineRoute route,
-                               OfflineRouteFoundCallback callback) {
+                               RouteFoundCallback callback) {
     offlineNavigator.retrieveRouteFor(route, callback);
   }
 }

@@ -52,6 +52,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import timber.log.Timber;
+
 import static com.mapbox.mapboxsdk.style.expressions.Expression.color;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.exponential;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
@@ -452,6 +454,11 @@ public class NavigationMapRoute implements LifecycleObserver {
     // Each route contains traffic information and should be recreated considering this traffic
     // information.
     for (int i = 0; i < directionsRoutes.size(); i++) {
+
+      Timber.d("DirectionsRoutes.size " + directionsRoutes.size());
+      Timber.d("direction route " + directionsRoutes.get(i));
+
+
       featureCollections.add(addTrafficToSource(directionsRoutes.get(i), i));
     }
 
@@ -1097,7 +1104,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    * the source into pieces so data-driven styling can be used to change the route colors
    * accordingly.
    */
-  private FeatureCollection addTrafficToSource(DirectionsRoute route, int index) {
+  private FeatureCollection addTrafficToSource(@NonNull DirectionsRoute route, int index) {
     final List<Feature> features = new ArrayList<>();
     LineString originalGeometry = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
     buildRouteFeatureFromGeometry(index, features, originalGeometry);

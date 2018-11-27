@@ -9,9 +9,11 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Toast;
 
 import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.routetiles.v1.versions.models.RouteTileVersionsResponse;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
@@ -40,6 +42,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListe
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineCriteria;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineTileVersions;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -50,6 +53,9 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import timber.log.Timber;
 
 public class OfflineRerouteActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener,
@@ -200,7 +206,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
     Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     OfflineRoute offlineRoute = obtainOfflineRoute(newOrigin, newDestination);
-    offlineRouting.findOfflineRoute(offlineRoute, result -> handleNewRoute(result));
+    offlineRouting.findOfflineRoute(offlineRoute, result -> handleNewRoute(result.get(0)));
   }
 
   @Override
@@ -283,21 +289,38 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void findRoute() {
-    String tilesDirPath = obtainOfflineDirectoryFor("tiles");
-    Timber.d("Tiles directory path: %s", tilesDirPath);
+    getVersionsAndRoute();
+  }
 
-    offlineRouting.initializeOfflineData(tilesDirPath, () -> {
-      OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
-      offlineRouting.findOfflineRoute(offlineRoute, result -> handleNewRoute(result));
+  private void getVersionsAndRoute() {
+    OfflineTileVersions versions = new OfflineTileVersions(Mapbox.getAccessToken());
+
+    versions.getRouteTileVersions(new Callback<RouteTileVersionsResponse>() {
+      @Override
+      public void onResponse(Call<RouteTileVersionsResponse> call, Response<RouteTileVersionsResponse> response) {
+        String version = response.body().availableVersions().get(0);
+        String tilesDirPath = obtainOfflineDirectoryFor("tiles", version);
+        Timber.d("Tiles directory path: %s", tilesDirPath);
+
+        offlineRouting.initializeOfflineData(tilesDirPath, () -> {
+          OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
+          offlineRouting.findOfflineRoute(offlineRoute, result -> handleNewRoute(result.get(0)));
+        });
+      }
+
+      @Override
+      public void onFailure(Call call, Throwable throwable) {
+        Toast.makeText(getApplicationContext(), "Unable to get versions", Toast.LENGTH_LONG).show();
+      }
     });
   }
 
-  private String obtainOfflineDirectoryFor(String fileName) {
+  private String obtainOfflineDirectoryFor(String fileName, String version) {
     File offline = Environment.getExternalStoragePublicDirectory("Offline");
     if (!offline.exists()) {
       Timber.d("Offline directory does not exist");
     }
-    File file = new File(offline, fileName);
+    File file = new File(offline, fileName + File.separator + version);
     return file.getAbsolutePath();
   }
 

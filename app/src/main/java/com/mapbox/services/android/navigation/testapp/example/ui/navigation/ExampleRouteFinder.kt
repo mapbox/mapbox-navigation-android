@@ -1,13 +1,11 @@
 package com.mapbox.services.android.navigation.testapp.example.ui.navigation
 
-import android.arch.lifecycle.MutableLiveData
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
-import com.mapbox.services.android.navigation.testapp.example.ui.ExampleViewModel
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
+import com.mapbox.services.android.navigation.v5.navigation.RouteFoundCallback
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -15,9 +13,8 @@ import timber.log.Timber
 
 private const val BEARING_TOLERANCE = 90.0
 
-class ExampleRouteFinder(private val viewModel: ExampleViewModel,
-                         private val routes: MutableLiveData<List<DirectionsRoute>>,
-                         private val accessToken: String) : Callback<DirectionsResponse> {
+class ExampleRouteFinder(private val accessToken: String,
+                         private val callback: RouteFoundCallback): Callback<DirectionsResponse> {
 
   fun findRoute(location: Location, destination: Point) {
     find(location, destination)
@@ -35,30 +32,19 @@ class ExampleRouteFinder(private val viewModel: ExampleViewModel,
     val origin = Point.fromLngLat(location.longitude, location.latitude)
     val bearing = location.bearing.toDouble()
     NavigationRoute.builder(NavigationApplication.instance)
-        .accessToken(accessToken)
-        .origin(origin, bearing, BEARING_TOLERANCE)
-        .destination(destination)
-        .alternatives(true)
-        .build()
-        .getRoute(this)
+            .accessToken(accessToken)
+            .origin(origin, bearing, BEARING_TOLERANCE)
+            .destination(destination)
+            .alternatives(true)
+            .build()
+            .getRoute(this)
   }
 
   private fun handle(directionsResponse: DirectionsResponse?) {
     directionsResponse?.routes()?.let {
       if (it.isNotEmpty()) {
-        updateRoutes(it)
+        callback.routeFound(it)
       }
-    }
-  }
-
-  private fun updateRoutes(routes: List<DirectionsRoute>) {
-    this.routes.value = routes
-    viewModel.primaryRoute = routes.first()
-
-    // Handle off-route scenarios
-    if (viewModel.isOffRoute) {
-      viewModel.isOffRoute = false
-      viewModel.startNavigation()
     }
   }
 }

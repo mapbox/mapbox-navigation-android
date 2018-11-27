@@ -4,6 +4,7 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.location.Location
+import android.preference.PreferenceManager
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEnginePriority
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -53,10 +54,14 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   private val locationEngineListener: ExampleLocationEngineListener
   private val speechPlayer: NavigationSpeechPlayer
   private val navigation: MapboxNavigation
-  private val routeFinder: ExampleRouteFinder
+
+  // todo: is a hard-coded access token ok?
   private val accessToken: String = instance.resources.getString(R.string.mapbox_access_token)
+  private val routeFinderDelegator: RouteFinderDelegator
 
   init {
+    routeFinderDelegator = RouteFinderDelegator(this, routes, accessToken,
+            getVersionFromSharedPreferences())
     // Initialize the location engine
     locationEngine = FusedLocationEngine(getApplication())
     locationEngineListener = ExampleLocationEngineListener(locationEngine, location)
@@ -77,9 +82,14 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     navigation.addMilestoneEventListener(ExampleMilestoneEventListener(milestone, speechPlayer))
     navigation.addProgressChangeListener(ExampleProgressChangeListener(location, progress))
     navigation.addOffRouteListener(ExampleOffRouteListener(this))
+  }
 
-    // For fetching new routes
-    routeFinder = ExampleRouteFinder(this, routes, accessToken)
+  private fun getVersionFromSharedPreferences(): String {
+    return getApplication<Application>().run {
+      PreferenceManager.getDefaultSharedPreferences(this)
+              .getString(this.getString(R.string.offline_preference_key), getString(R.string
+                      .offline_disabled))
+    }
   }
 
   override fun onCleared() {
@@ -94,8 +104,18 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   fun findRouteToDestination() {
     location.value?.let { location ->
       destination.value?.let { destination ->
-        routeFinder.findRoute(location, destination)
+        routeFinderDelegator.findRoute(getApplication(), location, destination,
+                getOfflineFromSharedPreferences())
       }
+    }
+  }
+
+  private fun getOfflineFromSharedPreferences(): Boolean {
+    getApplication<Application>().run {
+      val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+      val default = this.getString(R.string.offline_disabled)
+      return sharedPreferences.getString(this.getString(R.string
+              .offline_preference_key), default) != default
     }
   }
 
