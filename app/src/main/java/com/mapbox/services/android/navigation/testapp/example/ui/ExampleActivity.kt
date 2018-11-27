@@ -232,13 +232,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   }
 
   override fun showSettings() {
-    startActivityForResult(Intent(this, NavigationSettingsActivity::class.java), 1)
-  }
-
-  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-    super.onActivityResult(requestCode, resultCode, data)
-
-    presenter.onActivityResult(requestCode, resultCode, data)
+    startActivity(Intent(this, NavigationSettingsActivity::class.java))
   }
 
   override fun adjustMapPaddingForNavigation() {

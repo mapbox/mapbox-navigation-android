@@ -1,9 +1,7 @@
 package com.mapbox.services.android.navigation.testapp.example.ui
 
-import android.app.Activity
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
-import android.content.Intent
 import android.location.Location
 import android.support.design.widget.BottomSheetBehavior
 import android.view.View
@@ -21,7 +19,6 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
-import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
@@ -34,27 +31,14 @@ private const val TWO_SECONDS = 2000
 private const val ONE_SECOND = 1000
 
 class ExamplePresenter(private val view: ExampleView, private val viewModel: ExampleViewModel) {
-  private val CHANGE_SETTING_REQUEST_CODE = 1
 
   private var state: PresenterState = PresenterState.SHOW_LOCATION
-  private var offline = true
 
   fun onPermissionResult(granted: Boolean) {
     if (granted) {
       view.initialize()
     } else {
       view.showPermissionDialog()
-    }
-  }
-
-  fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-    if (requestCode == CHANGE_SETTING_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-      data!!.run {
-
-        getBooleanExtra(NavigationSettingsActivity.OFFLINE_CHANGED, false).let {
-          offline = if (it) !offline else offline
-        }
-      }
     }
   }
 
@@ -227,29 +211,29 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   private fun buildCameraUpdateFrom(location: Location): CameraUpdate {
     return CameraUpdateFactory.newCameraPosition(CameraPosition.Builder()
-            .zoom(DEFAULT_ZOOM)
-            .target(LatLng(location.latitude, location.longitude))
-            .bearing(DEFAULT_BEARING)
-            .tilt(DEFAULT_TILT)
-            .build())
+        .zoom(DEFAULT_ZOOM)
+        .target(LatLng(location.latitude, location.longitude))
+        .bearing(DEFAULT_BEARING)
+        .tilt(DEFAULT_TILT)
+        .build())
   }
 
   private fun buildCameraUpdateFrom(point: Point): CameraUpdate {
     return CameraUpdateFactory.newCameraPosition(CameraPosition.Builder()
-            .zoom(DEFAULT_ZOOM)
-            .target(LatLng(point.latitude(), point.longitude()))
-            .bearing(DEFAULT_BEARING)
-            .tilt(DEFAULT_TILT)
-            .build())
+        .zoom(DEFAULT_ZOOM)
+        .target(LatLng(point.latitude(), point.longitude()))
+        .bearing(DEFAULT_BEARING)
+        .tilt(DEFAULT_TILT)
+        .build())
   }
 
   private fun moveCameraToInclude(destination: Point) {
     viewModel.location.value?.let {
       val origin = LatLng(it)
       val bounds = LatLngBounds.Builder()
-              .include(origin)
-              .include(LatLng(destination.latitude(), destination.longitude()))
-              .build()
+          .include(origin)
+          .include(LatLng(destination.latitude(), destination.longitude()))
+          .build()
 
       val resources = NavigationApplication.instance.resources
       val left = resources.getDimension(R.dimen.route_overview_padding_left).toInt()
