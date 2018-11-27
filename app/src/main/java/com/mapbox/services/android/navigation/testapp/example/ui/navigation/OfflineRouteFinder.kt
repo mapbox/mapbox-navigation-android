@@ -6,10 +6,7 @@ import android.os.Environment
 import android.widget.Toast
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
-import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute
-import com.mapbox.services.android.navigation.v5.navigation.RouteFoundCallback
+import com.mapbox.services.android.navigation.v5.navigation.*
 import java.io.File
 
 class OfflineRouteFinder(version: String, private val callback: RouteFoundCallback) {
@@ -37,11 +34,10 @@ class OfflineRouteFinder(version: String, private val callback: RouteFoundCallba
 
     fun findRoute(context: Context, location: Location, destination: Point) {
         if (ready) {
-            buildOfflineRoute(context, location, destination).let {
-                offlineRouter.findOfflineRoute(it) {
-                    callback.routeFound(it) }
-            }
+            val offlineRoute = buildOfflineRoute(context, location, destination)
+            offlineRouter.findOfflineRoute(offlineRoute, callback)
         } else {
+            callback.onError(OfflineData(OfflineData.Status.ROUTER_BEING_INITIALIZED))
             Toast.makeText(context, "Still initializing data, try again", Toast.LENGTH_SHORT).show()
         }
     }

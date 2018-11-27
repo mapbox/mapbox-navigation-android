@@ -57,10 +57,10 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
   // todo: is a hard-coded access token ok?
   private val accessToken: String = instance.resources.getString(R.string.mapbox_access_token)
-  private val routeFinderDelegator: RouteFinderDelegator
+  private val routeFinder: RouteFinder
 
   init {
-    routeFinderDelegator = RouteFinderDelegator(this, routes, accessToken,
+    routeFinder = RouteFinder(this, routes, accessToken,
             getVersionFromSharedPreferences())
     // Initialize the location engine
     locationEngine = FusedLocationEngine(getApplication())
@@ -104,7 +104,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   fun findRouteToDestination() {
     location.value?.let { location ->
       destination.value?.let { destination ->
-        routeFinderDelegator.findRoute(getApplication(), location, destination,
+        routeFinder.findRoute(getApplication(), location, destination,
                 getOfflineFromSharedPreferences())
       }
     }

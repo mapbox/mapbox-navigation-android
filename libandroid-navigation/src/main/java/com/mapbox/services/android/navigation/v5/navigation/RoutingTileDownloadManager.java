@@ -22,11 +22,9 @@ import timber.log.Timber;
  */
 
 public class RoutingTileDownloadManager {
-  private final File offlineDirectory;
   private final File tileDirectory;
   private String version;
   private RoutingTileDownloadListener listener;
-  private DownloadTask.DownloadListener downloadFinishedListener;
   private DownloadTask downloadTask;
 
   public RoutingTileDownloadManager() {
@@ -34,7 +32,6 @@ public class RoutingTileDownloadManager {
   }
 
   public RoutingTileDownloadManager(File offlineDirectory) {
-    this.offlineDirectory = offlineDirectory;
     tileDirectory = new File(offlineDirectory, "tiles");
   }
 

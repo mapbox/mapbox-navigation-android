@@ -7,14 +7,15 @@ import android.widget.Toast
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.testapp.example.ui.ExampleViewModel
+import com.mapbox.services.android.navigation.v5.navigation.OfflineData
 import com.mapbox.services.android.navigation.v5.navigation.RouteFoundCallback
 import timber.log.Timber
 
 
-class RouteFinderDelegator(private val viewModel: ExampleViewModel,
-                           private val routes: MutableLiveData<List<DirectionsRoute>>,
-                           accessToken: String,
-                           tileVersion: String): RouteFoundCallback {
+class RouteFinder(private val viewModel: ExampleViewModel,
+                  private val routes: MutableLiveData<List<DirectionsRoute>>,
+                  accessToken: String,
+                  tileVersion: String): RouteFoundCallback {
 
     private val offlineRouteFinder: OfflineRouteFinder?
     private val routeFinder: ExampleRouteFinder = ExampleRouteFinder(accessToken, this)
@@ -49,13 +50,16 @@ class RouteFinderDelegator(private val viewModel: ExampleViewModel,
         offlineRouteFinder?.findRoute(context, location, destination)
     }
 
-    override fun routeFound(routes: List<DirectionsRoute>) {
+    override fun routesFound(routes: MutableList<DirectionsRoute>) {
         if (routes == null || routes.isEmpty()) {
             toast.show()
             return
         }
 
         updateRoutes(routes)
+    }
+
+    override fun onError(offlineData: OfflineData) {
     }
 
     private fun updateRoutes(routes: List<DirectionsRoute>) {

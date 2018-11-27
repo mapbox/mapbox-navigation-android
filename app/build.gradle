@@ -50,7 +50,6 @@ dependencies {
   implementation project(':libandroid-navigation-ui')
   implementation dependenciesList.mapboxMapSdk
   implementation dependenciesList.searchSdk
-  implementation dependenciesList.mapboxSdkServices
 
   // Support libraries
   implementation dependenciesList.supportAppcompatV7

@@ -45,6 +45,6 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, List<Direc
 
   @Override
   protected void onPostExecute(List<DirectionsRoute> routes) {
-    callback.routeFound(routes);
+    callback.routesFound(routes);
   }
 }

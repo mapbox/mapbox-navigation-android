@@ -4,7 +4,7 @@ import android.os.AsyncTask;
 
 import com.mapbox.navigator.Navigator;
 
-class ConfigureRouterTask extends AsyncTask<Void, Void, Void> {
+class ConfigureRouterTask extends AsyncTask<Void, Void, OfflineData> {
   private final Navigator navigator;
   private final String tileFilePath;
   private final String translationsDirPath;
@@ -19,16 +19,21 @@ class ConfigureRouterTask extends AsyncTask<Void, Void, Void> {
   }
 
   @Override
-  protected Void doInBackground(Void... paramsUnused) {
+  protected OfflineData doInBackground(Void... paramsUnused) {
     synchronized (this) {
-      navigator.configureRouter(tileFilePath, translationsDirPath);
+      long result = navigator.configureRouter(tileFilePath, translationsDirPath);
+
+      return new OfflineData(getStatus(result), String.valueOf(result));
     }
-    return null;
+  }
+
+  private OfflineData.Status getStatus(long configureRouterResult) {
+    return configureRouterResult > 0 ? OfflineData.Status.CONFIGURE_ROUTER_RESULT_SUCCESS :
+      OfflineData.Status.CONFIGURE_ROUTER_RESULT_FAILURE;
   }
 
   @Override
-  protected void onPostExecute(Void paramUnused) {
-    super.onPostExecute(paramUnused);
-    callback.onOfflineDataInitialized();
+  protected void onPostExecute(OfflineData offlineData) {
+    callback.onOfflineDataInitialized(offlineData);
   }
 }

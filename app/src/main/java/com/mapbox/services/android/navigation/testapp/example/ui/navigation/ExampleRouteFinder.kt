@@ -43,7 +43,7 @@ class ExampleRouteFinder(private val accessToken: String,
   private fun handle(directionsResponse: DirectionsResponse?) {
     directionsResponse?.routes()?.let {
       if (it.isNotEmpty()) {
-        callback.routeFound(it)
+        callback.routesFound(it)
       }
     }
   }

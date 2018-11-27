@@ -41,8 +41,10 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineCriteria;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineData;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineTileVersions;
+import com.mapbox.services.android.navigation.v5.navigation.RouteFoundCallback;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -60,7 +62,7 @@ import timber.log.Timber;
 
 public class OfflineRerouteActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener,
   MapboxMap.OnMapClickListener, NavigationEventListener, OffRouteListener,
-  ProgressChangeListener, MilestoneEventListener {
+  ProgressChangeListener, MilestoneEventListener, RouteFoundCallback {
 
   @BindView(R.id.mapView)
   MapView mapView;
@@ -75,7 +77,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
 
   private ReplayRouteLocationEngine mockLocationEngine;
   private MapboxNavigation navigation;
-  private MapboxOfflineRouter offlineRouting;
+  private MapboxOfflineRouter offlineRouter;
   private MapboxMap mapboxMap;
   private boolean running;
   private boolean tracking;
@@ -149,7 +151,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     mapboxMap.addOnMapClickListener(this);
-    offlineRouting = new MapboxOfflineRouter();
+    offlineRouter = new MapboxOfflineRouter();
 
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
     locationComponent.activateLocationComponent(this);
@@ -206,7 +208,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
     Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     OfflineRoute offlineRoute = obtainOfflineRoute(newOrigin, newDestination);
-    offlineRouting.findOfflineRoute(offlineRoute, result -> handleNewRoute(result.get(0)));
+    offlineRouter.findOfflineRoute(offlineRoute, this);
   }
 
   @Override
@@ -302,9 +304,9 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
         String tilesDirPath = obtainOfflineDirectoryFor("tiles", version);
         Timber.d("Tiles directory path: %s", tilesDirPath);
 
-        offlineRouting.initializeOfflineData(tilesDirPath, () -> {
+        offlineRouter.initializeOfflineData(tilesDirPath, offlineData -> {
           OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
-          offlineRouting.findOfflineRoute(offlineRoute, result -> handleNewRoute(result.get(0)));
+          offlineRouter.findOfflineRoute(offlineRoute, OfflineRerouteActivity.this);
         });
       }
 
@@ -347,5 +349,15 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
       navigation.removeProgressChangeListener(this);
       navigation.onDestroy();
     }
+  }
+
+  @Override
+  public void routesFound(List<DirectionsRoute> routes) {
+    handleNewRoute(routes.get(0));
+  }
+
+  @Override
+  public void onError(OfflineData offlineData) {
+    // todo
   }
 }

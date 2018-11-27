@@ -11,5 +11,5 @@ public interface OnOfflineDataInitialized {
    * Will be fired when the offline data is initialized and {@link MapboxNavigation#findOfflineRoute(OfflineRoute)}
    * could be called safely.
    */
-  void onOfflineDataInitialized();
+  void onOfflineDataInitialized(OfflineData offlineData);
 }

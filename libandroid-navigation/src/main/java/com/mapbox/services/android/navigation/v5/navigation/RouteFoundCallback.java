@@ -14,5 +14,7 @@ public interface RouteFoundCallback {
    *
    * @param routes offline route
    */
-  void routeFound(List<DirectionsRoute> routes);
+  void routesFound(List<DirectionsRoute> routes);
+
+  void onError(OfflineData offlineData);
 }
