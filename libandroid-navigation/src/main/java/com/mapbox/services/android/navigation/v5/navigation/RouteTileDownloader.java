@@ -20,27 +20,26 @@ import timber.log.Timber;
  * offline routing tiles. It creates and maintains a directory structure with the root in the
  * Offline directory, or wherever someone specifies.
  */
-
-public class RoutingTileDownloader {
+class RouteTileDownloader {
   private final File tileDirectory;
   private String version;
-  private RoutingTileDownloadListener listener;
+  private RouteTileDownloadListener listener;
   private DownloadTask downloadTask;
 
-  public RoutingTileDownloader() {
+  RouteTileDownloader() {
     this(Environment.getExternalStoragePublicDirectory("Offline"));
   }
 
-  public RoutingTileDownloader(File offlineDirectory) {
+  RouteTileDownloader(File offlineDirectory) {
     tileDirectory = new File(offlineDirectory, "tiles");
   }
 
-  public void setListener(RoutingTileDownloadListener listener) {
+  void setListener(RouteTileDownloadListener listener) {
     this.listener = listener;
   }
 
   @RequiresPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-  public void startDownload(final OfflineTiles offlineTiles) {
+  void startDownload(final OfflineTiles offlineTiles) {
     version = offlineTiles.version();
     offlineTiles.getRouteTiles(new TarFetchedCallback());
   }
@@ -112,13 +111,5 @@ public class RoutingTileDownloader {
     public void onCompletion() {
       listener.onCompletion(true);
     }
-  }
-
-  public interface RoutingTileDownloadListener {
-    void onError(Throwable throwable);
-
-    void onProgressUpdate(int percent);
-
-    void onCompletion(boolean successful);
   }
 }

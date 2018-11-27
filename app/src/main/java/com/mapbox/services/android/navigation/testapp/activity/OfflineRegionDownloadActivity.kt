@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.testapp.activity
 import android.graphics.Color
 import android.graphics.PointF
 import android.os.Bundle
-import android.support.annotation.RequiresPermission
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.View.GONE
@@ -20,15 +19,16 @@ import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.services.android.navigation.testapp.R
+import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter
 import com.mapbox.services.android.navigation.v5.navigation.OfflineTileVersions
 import com.mapbox.services.android.navigation.v5.navigation.OfflineTiles
-import com.mapbox.services.android.navigation.v5.navigation.RoutingTileDownloader
+import com.mapbox.services.android.navigation.v5.navigation.RouteTileDownloadListener
 import kotlinx.android.synthetic.main.activity_offline_region_download.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloader.RoutingTileDownloadListener {
+class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadListener {
 
     lateinit var mapboxMap: MapboxMap
     private val disabledGrey by lazy { resources.getColor(R.color.md_grey_700) }
@@ -131,7 +131,6 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloader
         }
     }
 
-    @RequiresPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
     private fun onDownloadClick() {
         // todo check that download is less than 1.5 million square kilometers
         if (!downloadButtonEnabled) {
@@ -144,12 +143,9 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloader
                 .version(versionSpinner.selectedItem as String)
                 .boundingBox(boundingBox)
 
-        RoutingTileDownloader().let {
+        val router = MapboxOfflineRouter()
 
-            it.setListener(this)
-            var offlineTiles = builder.build()
-            it.startDownload(offlineTiles)
-        }
+        router.downloadTiles(this, builder.build(), this)
     }
 
     private fun showDownloading(downloading: Boolean, message: String) {

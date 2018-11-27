@@ -1,7 +1,11 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
@@ -36,5 +40,22 @@ public class MapboxOfflineRouter {
   public void findOfflineRoute(@NonNull OfflineRoute route,
                                RouteFoundCallback callback) {
     offlineNavigator.retrieveRouteFor(route, callback);
+  }
+
+  public void downloadTiles(Context context, OfflineTiles offlineTiles, RouteTileDownloadListener listener) {
+    RouteTileDownloader routeTileDownloader = new RouteTileDownloader();
+    routeTileDownloader.setListener(listener);
+    if (ActivityCompat.checkSelfPermission(context,
+      Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+      // TODO: Consider calling
+      //    ActivityCompat#requestPermissions
+      // here to request the missing permissions, and then overriding
+      //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+      //                                          int[] grantResults)
+      // to handle the case where the user grants the permission. See the documentation
+      // for ActivityCompat#requestPermissions for more details.
+      return;
+    }
+    routeTileDownloader.startDownload(offlineTiles);
   }
 }
