@@ -138,7 +138,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   }
 
   override fun showPermissionDialog() {
-    PermissionRequestDialog(this, permissionsManager).show()
+    PermissionRequestDialog(this).show()
   }
 
   override fun updateMapCamera(cameraUpdate: CameraUpdate, duration: Int) {

@@ -22,13 +22,13 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.v5.navigation.OfflineTileVersions
 import com.mapbox.services.android.navigation.v5.navigation.OfflineTiles
-import com.mapbox.services.android.navigation.v5.navigation.RoutingTileDownloadManager
+import com.mapbox.services.android.navigation.v5.navigation.RoutingTileDownloader
 import kotlinx.android.synthetic.main.activity_offline_region_download.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadManager.RoutingTileDownloadListener {
+class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloader.RoutingTileDownloadListener {
 
     lateinit var mapboxMap: MapboxMap
     private val disabledGrey by lazy { resources.getColor(R.color.md_grey_700) }
@@ -144,7 +144,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RoutingTileDownloadMa
                 .version(versionSpinner.selectedItem as String)
                 .boundingBox(boundingBox)
 
-        RoutingTileDownloadManager().let {
+        RoutingTileDownloader().let {
 
             it.setListener(this)
             var offlineTiles = builder.build()

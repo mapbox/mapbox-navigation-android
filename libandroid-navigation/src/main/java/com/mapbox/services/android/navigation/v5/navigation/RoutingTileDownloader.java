@@ -21,17 +21,17 @@ import timber.log.Timber;
  * Offline directory, or wherever someone specifies.
  */
 
-public class RoutingTileDownloadManager {
+public class RoutingTileDownloader {
   private final File tileDirectory;
   private String version;
   private RoutingTileDownloadListener listener;
   private DownloadTask downloadTask;
 
-  public RoutingTileDownloadManager() {
+  public RoutingTileDownloader() {
     this(Environment.getExternalStoragePublicDirectory("Offline"));
   }
 
-  public RoutingTileDownloadManager(File offlineDirectory) {
+  public RoutingTileDownloader(File offlineDirectory) {
     tileDirectory = new File(offlineDirectory, "tiles");
   }
 
