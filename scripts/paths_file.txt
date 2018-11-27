@@ -1,0 +1,2 @@
+libandroid-navigation/build/outputs/aar/libandroid-navigation-release.aar
+libandroid-navigation-ui/build/outputs/aar/libandroid-navigation-ui-release.aar
