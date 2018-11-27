@@ -93,9 +93,7 @@ public class VoiceInstructionLoader {
 
   void flushCache() {
     try {
-      if (cache.directory().listFiles() != null) {
-        cache.delete();
-      }
+      cache.evictAll();
     } catch (IOException exception) {
       Timber.e(exception);
     }

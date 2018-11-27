@@ -113,8 +113,8 @@ public class NavigationViewModel extends AndroidViewModel {
     if (!isChangingConfigurations) {
       locationEngineConductor.onDestroy();
       routeFetcher.onDestroy();
-      deactivateInstructionPlayer();
       endNavigation();
+      deactivateInstructionPlayer();
       isRunning = false;
     }
     clearDynamicCameraMap();
