@@ -36,8 +36,8 @@ public class MapboxOfflineRouter {
    * {@link MapboxOfflineRouter#findOfflineRoute(OfflineRoute, RouteFoundCallback)}
    *                 can be called safely.
    */
-  public void initializeOfflineData(OnOfflineDataInitialized callback) {
-    offlineNavigator.configure(tilePath, callback);
+  public void initializeOfflineData(String version, OnOfflineDataInitialized callback) {
+    offlineNavigator.configure(new File(tilePath, version).getAbsolutePath(), callback);
   }
 
   /**

@@ -7,27 +7,20 @@ import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.services.android.navigation.v5.navigation.*
 
-class OfflineRouteFinder(tilePath: String,
+class OfflineRouteFinder(offlinePath: String,
+                         version: String,
                          private val callback: RouteFoundCallback) {
 
     private val offlineRouter: MapboxOfflineRouter
     private var ready = false
 
     init {
-        offlineRouter = MapboxOfflineRouter(tilePath)
+        offlineRouter = MapboxOfflineRouter(offlinePath)
 
 //        initDirectory(offlineTileVersionDir)
 
-        offlineRouter.initializeOfflineData { ready = true }
+        offlineRouter.initializeOfflineData(version) { ready = true }
     }
-
-//    fun initDirectory(directory: File) {
-//        directory.let {
-//            if (!it.exists()) {
-//                it.mkdir()
-//            }
-//        }
-//    }
 
     fun findRoute(context: Context, location: Location, destination: Point) {
         if (ready) {
