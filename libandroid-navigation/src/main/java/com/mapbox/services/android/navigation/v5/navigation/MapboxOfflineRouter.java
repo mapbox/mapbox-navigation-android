@@ -1,32 +1,43 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
 
-public class MapboxOfflineRouter {
-  private final OfflineNavigator offlineNavigator;
+import java.io.File;
 
-  public MapboxOfflineRouter() {
+public class MapboxOfflineRouter {
+  private final String TILE_PATH_NAME = "tiles";
+  private final OfflineNavigator offlineNavigator;
+  private final String tilePath;
+
+  /**
+   * Creates an offline router which uses the specified offline path for storing and retrieving
+   * data.
+   *
+   * @param offlinePath directory path where the offline data is located
+   */
+  public MapboxOfflineRouter(String offlinePath) {
+    File tileDir = new File(offlinePath, TILE_PATH_NAME);
+    if (!tileDir.exists()) {
+      tileDir.mkdirs();
+    }
+
+    this.tilePath = tileDir.getAbsolutePath();
     offlineNavigator = new OfflineNavigator(new Navigator());
   }
 
   /**
-   * Configures the navigator for getting offline routes
+   * Configures the navigator for getting offline routes.
    *
-   * @param tilesDirPath directory path where the tiles are located
    * @param callback a callback that will be fired when the offline data is initialized and
    * {@link MapboxOfflineRouter#findOfflineRoute(OfflineRoute, RouteFoundCallback)}
    *                 can be called safely.
    */
-  public void initializeOfflineData(String tilesDirPath, OnOfflineDataInitialized callback) {
-    offlineNavigator.configure(tilesDirPath, callback);
+  public void initializeOfflineData(OnOfflineDataInitialized callback) {
+    offlineNavigator.configure(tilePath, callback);
   }
 
   /**
@@ -37,25 +48,17 @@ public class MapboxOfflineRouter {
    * @return the offline {@link DirectionsRoute}
    */
   @Nullable
-  public void findOfflineRoute(@NonNull OfflineRoute route,
-                               RouteFoundCallback callback) {
+  public void findOfflineRoute(@NonNull OfflineRoute route, RouteFoundCallback callback) {
     offlineNavigator.retrieveRouteFor(route, callback);
   }
 
-  public void downloadTiles(Context context, OfflineTiles offlineTiles, RouteTileDownloadListener listener) {
-    RouteTileDownloader routeTileDownloader = new RouteTileDownloader();
-    routeTileDownloader.setListener(listener);
-    if (ActivityCompat.checkSelfPermission(context,
-      Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-      // TODO: Consider calling
-      //    ActivityCompat#requestPermissions
-      // here to request the missing permissions, and then overriding
-      //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-      //                                          int[] grantResults)
-      // to handle the case where the user grants the permission. See the documentation
-      // for ActivityCompat#requestPermissions for more details.
-      return;
-    }
-    routeTileDownloader.startDownload(offlineTiles);
+  /**
+   * Starts the download of tiles specified by the provided {@link OfflineTiles} object.
+   *
+   * @param offlineTiles object specifying parameters for the tile request
+   * @param listener which is updated on error, on progress update and on completion
+   */
+  public void downloadTiles(OfflineTiles offlineTiles, RouteTileDownloadListener listener) {
+    new RouteTileDownloader(tilePath, listener).startDownload(offlineTiles);
   }
 }

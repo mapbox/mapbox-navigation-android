@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import com.mapbox.navigator.Navigator;
 
 class OfflineNavigator {
-  private static final String EMPTY_TRANSLATIONS_DIR_PATH = "";
   private final Navigator navigator;
 
   static {
@@ -17,13 +16,13 @@ class OfflineNavigator {
   /**
    * Configures the navigator for getting offline routes
    *
-   * @param tilesPath directory path where the tiles are located
+   * @param tilePath directory path where the tiles are located
    * @param callback a callback that will be fired when the offline data is initialized and
    * {@link MapboxOfflineRouter#findOfflineRoute(OfflineRoute, RouteFoundCallback)}
    *                 can be called safely
    */
-  void configure(String tilesPath, OnOfflineDataInitialized callback) {
-    new ConfigureRouterTask(navigator, tilesPath, EMPTY_TRANSLATIONS_DIR_PATH, callback).execute();
+  void configure(String tilePath, OnOfflineDataInitialized callback) {
+    new ConfigureRouterTask(navigator, tilePath, callback).execute();
   }
 
   /**

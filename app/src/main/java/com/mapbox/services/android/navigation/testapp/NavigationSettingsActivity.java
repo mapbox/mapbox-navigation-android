@@ -47,7 +47,11 @@ public class NavigationSettingsActivity extends PreferenceActivity {
     public void onCreate(final Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       addPreferencesFromResource(R.xml.fragment_navigation_preferences);
+    }
 
+    @Override
+    public void onResume() {
+      super.onResume();
       File file = new File(Environment.getExternalStoragePublicDirectory("Offline"), "tiles");
       if (!file.exists()) {
         file.mkdirs();

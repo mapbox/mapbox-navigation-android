@@ -60,8 +60,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   private val routeFinder: RouteFinder
 
   init {
-    routeFinder = RouteFinder(this, routes, accessToken,
-            getVersionFromSharedPreferences())
+    routeFinder = RouteFinder(this, routes, accessToken, getVersionFromSharedPreferences())
     // Initialize the location engine
     locationEngine = FusedLocationEngine(getApplication())
     locationEngineListener = ExampleLocationEngineListener(locationEngine, location)

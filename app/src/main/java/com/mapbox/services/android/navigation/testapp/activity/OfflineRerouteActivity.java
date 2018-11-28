@@ -151,7 +151,8 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     mapboxMap.addOnMapClickListener(this);
-    offlineRouter = new MapboxOfflineRouter();
+    File offline = Environment.getExternalStoragePublicDirectory("Offline");
+    offlineRouter = new MapboxOfflineRouter(offline.getAbsolutePath());
 
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
     locationComponent.activateLocationComponent(this);
@@ -301,10 +302,10 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
       @Override
       public void onResponse(Call<RouteTileVersionsResponse> call, Response<RouteTileVersionsResponse> response) {
         String version = response.body().availableVersions().get(0);
-        String tilesDirPath = obtainOfflineDirectoryFor("tiles", version);
+        String tilesDirPath = obtainOfflineDirectory();
         Timber.d("Tiles directory path: %s", tilesDirPath);
 
-        offlineRouter.initializeOfflineData(tilesDirPath, offlineData -> {
+        offlineRouter.initializeOfflineData(offlineData -> {
           OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
           offlineRouter.findOfflineRoute(offlineRoute, OfflineRerouteActivity.this);
         });
@@ -317,13 +318,13 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     });
   }
 
-  private String obtainOfflineDirectoryFor(String fileName, String version) {
+  private String obtainOfflineDirectory() {
     File offline = Environment.getExternalStoragePublicDirectory("Offline");
     if (!offline.exists()) {
       Timber.d("Offline directory does not exist");
+      offline.mkdirs();
     }
-    File file = new File(offline, fileName + File.separator + version);
-    return file.getAbsolutePath();
+    return offline.getAbsolutePath();
   }
 
   private void animateCameraFor(Location location) {

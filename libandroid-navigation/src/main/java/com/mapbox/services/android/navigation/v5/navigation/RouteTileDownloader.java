@@ -1,9 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresPermission;
 
 import com.mapbox.services.android.navigation.v5.utils.DownloadTask;
 
@@ -21,24 +19,16 @@ import timber.log.Timber;
  * Offline directory, or wherever someone specifies.
  */
 class RouteTileDownloader {
-  private final File tileDirectory;
+  private final String tilePath;
+  private final RouteTileDownloadListener listener;
   private String version;
-  private RouteTileDownloadListener listener;
   private DownloadTask downloadTask;
 
-  RouteTileDownloader() {
-    this(Environment.getExternalStoragePublicDirectory("Offline"));
-  }
-
-  RouteTileDownloader(File offlineDirectory) {
-    tileDirectory = new File(offlineDirectory, "tiles");
-  }
-
-  void setListener(RouteTileDownloadListener listener) {
+  RouteTileDownloader(String tilePath, RouteTileDownloadListener listener) {
+    this.tilePath = tilePath;
     this.listener = listener;
   }
 
-  @RequiresPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
   void startDownload(final OfflineTiles offlineTiles) {
     version = offlineTiles.version();
     offlineTiles.getRouteTiles(new TarFetchedCallback());
@@ -61,7 +51,7 @@ class RouteTileDownloader {
 
 
       downloadTask = new DownloadTask(
-        tileDirectory.getAbsolutePath(),
+        tilePath,
         version,
         "tar",
         new DownloadUpdateListener());
@@ -82,7 +72,7 @@ class RouteTileDownloader {
 
     @Override
     public void onFinishedDownloading(@NonNull File file) {
-      File destination = new File(tileDirectory, version);
+      File destination = new File(tilePath, version);
       if (!destination.exists()) {
         destination.mkdirs();
       }

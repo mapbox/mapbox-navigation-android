@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.testapp.example.ui.navigation
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import android.location.Location
+import android.os.Environment
 import android.widget.Toast
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
@@ -10,25 +11,28 @@ import com.mapbox.services.android.navigation.testapp.example.ui.ExampleViewMode
 import com.mapbox.services.android.navigation.v5.navigation.OfflineData
 import com.mapbox.services.android.navigation.v5.navigation.RouteFoundCallback
 import timber.log.Timber
+import java.io.File
 
 
 class RouteFinder(private val viewModel: ExampleViewModel,
                   private val routes: MutableLiveData<List<DirectionsRoute>>,
                   accessToken: String,
-                  tileVersion: String): RouteFoundCallback {
+                  private val tileVersion: String): RouteFoundCallback {
+    private var isOffline = tileVersion != "Offline Disabled"
 
-    private val offlineRouteFinder: OfflineRouteFinder?
+    private var pathSeparator = File.pathSeparator
+    private var tiles = "tiles"
+
+
+    private var offlineRouteFinder =
+            if (isOffline) {
+                OfflineRouteFinder(obtainTileDirectory(), this)
+            } else {
+                null
+            }
+
     private val routeFinder: ExampleRouteFinder = ExampleRouteFinder(accessToken, this)
     private lateinit var toast:Toast
-
-    init {
-        if (tileVersion == "Offline Disabled") {
-            offlineRouteFinder = null
-        } else {
-            offlineRouteFinder = OfflineRouteFinder(tileVersion, this)
-        }
-
-    }
 
     internal fun findRoute(
             context: Context, location: Location, destination: Point, isOffline: Boolean) {
@@ -40,6 +44,18 @@ class RouteFinder(private val viewModel: ExampleViewModel,
         } else {
             findOnlineRoute(location, destination)
         }
+    }
+
+
+    private fun obtainTileDirectory(): String {
+        val offline = Environment.getExternalStoragePublicDirectory("Offline")
+        val tileDir = File("$offline$pathSeparator$tiles$pathSeparator$tile")
+
+        if (!offline.exists()) {
+            Timber.d("Offline directory does not exist")
+            offline.mkdirs()
+        }
+        return offline.absolutePath
     }
 
     private fun findOnlineRoute(location: Location, destination: Point) {
@@ -60,6 +76,7 @@ class RouteFinder(private val viewModel: ExampleViewModel,
     }
 
     override fun onError(offlineData: OfflineData) {
+        Timber.d("OfflineData: " + offlineData.toString())
     }
 
     private fun updateRoutes(routes: List<DirectionsRoute>) {

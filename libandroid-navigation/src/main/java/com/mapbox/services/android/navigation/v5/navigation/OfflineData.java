@@ -11,6 +11,10 @@ public class OfflineData {
     Status(boolean success) {
       this.success = success;
     }
+
+    public boolean isSuccess() {
+      return success;
+    }
   }
 
   public OfflineData(Status status) {
@@ -31,6 +35,6 @@ public class OfflineData {
   }
 
   public String toString() {
-    return "" + status.toString() + " " + result;
+    return "" + status.toString() + " " + status.isSuccess() + " " + result;
   }
 }

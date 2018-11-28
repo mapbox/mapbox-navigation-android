@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.testapp.activity
 import android.graphics.Color
 import android.graphics.PointF
 import android.os.Bundle
+import android.os.Environment
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.View.GONE
@@ -27,6 +28,7 @@ import kotlinx.android.synthetic.main.activity_offline_region_download.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import timber.log.Timber
 
 class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadListener {
 
@@ -143,9 +145,18 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
                 .version(versionSpinner.selectedItem as String)
                 .boundingBox(boundingBox)
 
-        val router = MapboxOfflineRouter()
+        val router = MapboxOfflineRouter(obtainOfflineDirectory())
 
-        router.downloadTiles(this, builder.build(), this)
+        router.downloadTiles(builder.build(), this)
+    }
+
+    private fun obtainOfflineDirectory(): String {
+        val offline = Environment.getExternalStoragePublicDirectory("Offline")
+        if (!offline.exists()) {
+            Timber.d("Offline directory does not exist")
+            offline.mkdirs()
+        }
+        return offline.absolutePath
     }
 
     private fun showDownloading(downloading: Boolean, message: String) {
