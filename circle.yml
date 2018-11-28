@@ -141,4 +141,4 @@ jobs:
       - run:
           name: Check & Publish Binary Size
           command: |
-            ./scripts/check_binary_size.sh ./scripts/paths_file.txt ./scripts/labels_file.txt 'mapbox-navigation-android' 'android' ./scripts/platforms_file.txt
+            ./scripts/check_binary_size.sh ./scripts/paths_file.txt ./scripts/labels_file.txt 'mapbox-navigation-android' 'android' ./scripts/sdks_file.txt
