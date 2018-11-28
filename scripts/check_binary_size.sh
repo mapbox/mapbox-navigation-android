@@ -16,8 +16,8 @@ sdks_file=$5
 
 source=mobile.binarysize
 scripts_path="scripts"
-json_name="$scripts_path/${platform}-binarysize.json"
-json_gz="$scripts_path/${platform}-binarysize.json.gz"
+json_name="$scripts_path/${repo_name}.json"
+json_gz="$scripts_path/${repo_name}.json.gz"
 
 date=`date '+%Y-%m-%d'`
 utc_iso_date=`date -u +'%Y-%m-%dT%H:%M:%SZ'`
