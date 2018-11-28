@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 class NavigationTelemetry implements LocationEngineListener, NavigationMetricListener {
 
+  private Context context;
   private static NavigationTelemetry instance;
   private boolean isInitialized = false;
 
@@ -102,7 +103,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
         .startTimestamp(new Date())
         .build();
       updateLifecyclePercentages();
-      NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
+      NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, metricLocation.getLocation(),
+        context);
     }
   }
 
@@ -124,7 +126,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       .build();
     updateLifecyclePercentages();
     // Send arrival event
-    NavigationMetricsWrapper.arriveEvent(navigationSessionState, routeProgress, metricLocation.getLocation());
+    NavigationMetricsWrapper.arriveEvent(navigationSessionState, routeProgress, metricLocation.getLocation(), context);
   }
 
   void initialize(@NonNull Context context, @NonNull String accessToken,
@@ -133,6 +135,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       updateLocationEngine(locationEngine);
 
       validateAccessToken(accessToken);
+      this.context = context;
       NavigationMetricsWrapper.init(context, accessToken, BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT);
 
       MapboxNavigationOptions options = navigation.options();
@@ -194,7 +197,8 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       if (navigationSessionState.startTimestamp() != null) {
         flushEventQueues();
         updateLifecyclePercentages();
-        NavigationMetricsWrapper.cancelEvent(navigationSessionState, metricProgress, metricLocation.getLocation());
+        NavigationMetricsWrapper.cancelEvent(navigationSessionState, metricProgress, metricLocation.getLocation(),
+          context);
       }
       lifecycleMonitor = null;
       NavigationMetricsWrapper.disable();
@@ -253,7 +257,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
       navigationLocationEngine = locationEngine;
       navigationLocationEngine.addLocationEngineListener(this);
       String locationEngineName = locationEngine.getClass().getName();
-      navigationSessionState.toBuilder().locationEngineName(locationEngineName);
+      navigationSessionState = navigationSessionState.toBuilder().locationEngineName(locationEngineName).build();
     }
   }
 
@@ -473,7 +477,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     rerouteEvent.setRerouteSessionState(rerouteSessionState);
 
     NavigationMetricsWrapper.rerouteEvent(rerouteEvent, metricProgress,
-      rerouteEvent.getSessionState().eventLocation());
+      rerouteEvent.getSessionState().eventLocation(), context);
   }
 
   private void sendFeedbackEvent(FeedbackEvent feedbackEvent) {
@@ -491,7 +495,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
 
     NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, metricProgress,
       feedbackEvent.getSessionState().eventLocation(), feedbackEvent.getDescription(),
-      feedbackEvent.getFeedbackType(), feedbackEvent.getScreenshot(), feedbackEvent.getFeedbackSource());
+      feedbackEvent.getFeedbackType(), feedbackEvent.getScreenshot(), feedbackEvent.getFeedbackSource(), context);
   }
 
   private long dateDiff(Date firstDate, Date secondDate, TimeUnit timeUnit) {
