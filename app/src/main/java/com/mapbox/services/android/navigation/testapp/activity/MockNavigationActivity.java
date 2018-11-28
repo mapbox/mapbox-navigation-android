@@ -64,6 +64,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   MilestoneEventListener, OffRouteListener {
 
   private static final int BEGIN_ROUTE_MILESTONE = 1001;
+  private static final double TWENTY_FIVE_METERS = 25d;
 
   // Map variables
   @BindView(R.id.mapView)
@@ -131,7 +132,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   @OnClick(R.id.startRouteButton)
   public void onStartRouteClick() {
-    if (navigation != null && route != null) {
+    boolean isValidNavigation = navigation != null;
+    boolean isValidRoute = route != null && route.distance() > TWENTY_FIVE_METERS;
+    if (isValidNavigation && isValidRoute) {
 
       // Hide the start button
       startRouteButton.setVisibility(View.INVISIBLE);
