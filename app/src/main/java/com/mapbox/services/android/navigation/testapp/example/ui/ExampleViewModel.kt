@@ -141,7 +141,10 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   }
 
   private fun shutdown() {
-    (navigation.cameraEngine as DynamicCamera).clearMap()
+    val cameraEngine = navigation.cameraEngine
+    if (cameraEngine is DynamicCamera) {
+      cameraEngine.clearMap()
+    }
     navigation.onDestroy()
     speechPlayer.onDestroy()
     removeLocationEngineListener()
