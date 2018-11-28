@@ -9,15 +9,15 @@ paths_file=$1
 labels_file=$2
 # Argument 3 is the repo name
 repo_name=$3
-# Argument 4 is the SDK
-sdk=$4
-# Argument 5 is a file including the platforms (one per line) - Must match paths_file number of lines / size
-platforms_file=$5
+# Argument 4 is the platform
+platform=$4
+# Argument 5 is a file including the different SDKs / modules (one per line) - Must match paths_file number of lines / size
+sdks_file=$5
 
 source=mobile.binarysize
 scripts_path="scripts"
-json_name="$scripts_path/${sdk}-binarysize.json"
-json_gz="$scripts_path/${sdk}-binarysize.json.gz"
+json_name="$scripts_path/${platform}-binarysize.json"
+json_gz="$scripts_path/${platform}-binarysize.json.gz"
 
 date=`date '+%Y-%m-%d'`
 utc_iso_date=`date -u +'%Y-%m-%dT%H:%M:%SZ'`
@@ -31,22 +31,22 @@ done <"$labels_file"
 i=0
 while read path
 do
-    file_size=$(wc -c <"$path" | sed -e 's/^[[:space:]]*//')
+	file_size=$(wc -c <"$path" | sed -e 's/^[[:space:]]*//')
 	"$scripts_path"/publish_to_sizechecker.js "${file_size}" "${labels[${i}]}" "$repo_name"
 	i=$(($i + 1))
 done <"$paths_file"
 
-while read platform
+while read sdk
 do
-    platforms+=("$platform")
-done <"$platforms_file"
+    sdks+=("$sdk")
+done <"$sdks_file"
 
 # Write binary size to json file
 i=0
 while read path
 do
-    file_size=$(wc -c <"$path" | sed -e 's/^[[:space:]]*//')
-	echo "{"sdk": ${sdk}, "platform": ${platforms[${i}]}, "size": ${file_size}, "created_at": "${utc_iso_date}"}" >> "$json_name"
+	file_size=$(wc -c <"$path" | sed -e 's/^[[:space:]]*//')
+	echo "{\"platform\": \"${platform}\", \"sdk\": \"${sdks[${i}]}\", \"size\": ${file_size}, \"created_at\": \"${utc_iso_date}\"}" >> "$json_name"
 	i=$(($i + 1))
 done <"$paths_file"
 
