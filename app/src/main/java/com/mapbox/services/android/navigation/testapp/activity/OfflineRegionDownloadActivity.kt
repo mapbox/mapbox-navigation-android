@@ -1,9 +1,13 @@
 package com.mapbox.services.android.navigation.testapp.activity
 
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.graphics.Color
 import android.graphics.PointF
 import android.os.Bundle
 import android.os.Environment
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.View.GONE
@@ -32,6 +36,7 @@ import timber.log.Timber
 
 class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadListener {
     lateinit var mapboxMap: MapboxMap
+    private val EXTERNAL_STORAGE_PERMISSION = 1
     private val disabledGrey by lazy { resources.getColor(R.color.md_grey_700) }
     private val enabledBlue by lazy { resources.getColor(R.color.mapbox_blue) }
     private var downloadButtonEnabled: Boolean = false
@@ -137,6 +142,28 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
             return
         }
 
+        if (ContextCompat.checkSelfPermission(
+                        this, WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(WRITE_EXTERNAL_STORAGE), 1)
+        } else {
+            downloadSelectedRegion()
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            EXTERNAL_STORAGE_PERMISSION -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PERMISSION_GRANTED)) {
+                    downloadSelectedRegion()
+                } else {
+                    setDownloadButtonEnabled(false)
+                }
+            }
+        }
+    }
+
+    private fun downloadSelectedRegion() {
         showDownloading(false, "Requesting tiles....")
         val builder = OfflineTiles.builder()
                 .accessToken(Mapbox.getAccessToken())

@@ -91,6 +91,11 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     }
   }
 
+  fun isOffline(): Boolean {
+      val default = getApplication<Application>().getString(R.string.offline_disabled)
+      return getVersionFromSharedPreferences() != default
+  }
+
   override fun onCleared() {
     super.onCleared()
     shutdown()
@@ -104,17 +109,8 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     location.value?.let { location ->
       destination.value?.let { destination ->
         routeFinder.findRoute(getApplication(), location, destination,
-                getOfflineFromSharedPreferences())
+                isOffline())
       }
-    }
-  }
-
-  private fun getOfflineFromSharedPreferences(): Boolean {
-    getApplication<Application>().run {
-      val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-      val default = this.getString(R.string.offline_disabled)
-      return sharedPreferences.getString(this.getString(R.string
-              .offline_preference_key), default) != default
     }
   }
 

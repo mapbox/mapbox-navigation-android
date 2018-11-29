@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.testapp.example.ui
 
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
+import android.content.pm.PackageManager
 import android.location.Location
 import android.support.design.widget.BottomSheetBehavior
 import android.view.View
@@ -34,11 +35,17 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   private var state: PresenterState = PresenterState.SHOW_LOCATION
 
-  fun onPermissionResult(granted: Boolean) {
+  fun onLocationPermissionResult(granted: Boolean) {
     if (granted) {
       view.initialize()
     } else {
       view.showPermissionDialog()
+    }
+  }
+
+  fun onStoragePermissionResult(grantResults: IntArray) {
+    if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+      findRoute()
     }
   }
 
@@ -64,6 +71,17 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   fun onDirectionsFabClick() {
+    if (viewModel.isOffline()) {
+      if (!view.isStoragePermissionGranted()) {
+        view.requestStoragePermission()
+        return
+      }
+    }
+
+    findRoute()
+  }
+
+  fun findRoute() {
     state = PresenterState.FIND_ROUTE
     viewModel.findRouteToDestination()
   }
@@ -211,29 +229,29 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   private fun buildCameraUpdateFrom(location: Location): CameraUpdate {
     return CameraUpdateFactory.newCameraPosition(CameraPosition.Builder()
-        .zoom(DEFAULT_ZOOM)
-        .target(LatLng(location.latitude, location.longitude))
-        .bearing(DEFAULT_BEARING)
-        .tilt(DEFAULT_TILT)
-        .build())
+            .zoom(DEFAULT_ZOOM)
+            .target(LatLng(location.latitude, location.longitude))
+            .bearing(DEFAULT_BEARING)
+            .tilt(DEFAULT_TILT)
+            .build())
   }
 
   private fun buildCameraUpdateFrom(point: Point): CameraUpdate {
     return CameraUpdateFactory.newCameraPosition(CameraPosition.Builder()
-        .zoom(DEFAULT_ZOOM)
-        .target(LatLng(point.latitude(), point.longitude()))
-        .bearing(DEFAULT_BEARING)
-        .tilt(DEFAULT_TILT)
-        .build())
+            .zoom(DEFAULT_ZOOM)
+            .target(LatLng(point.latitude(), point.longitude()))
+            .bearing(DEFAULT_BEARING)
+            .tilt(DEFAULT_TILT)
+            .build())
   }
 
   private fun moveCameraToInclude(destination: Point) {
     viewModel.location.value?.let {
       val origin = LatLng(it)
       val bounds = LatLngBounds.Builder()
-          .include(origin)
-          .include(LatLng(destination.latitude(), destination.longitude()))
-          .build()
+              .include(origin)
+              .include(LatLng(destination.latitude(), destination.longitude()))
+              .build()
 
       val resources = NavigationApplication.instance.resources
       val left = resources.getDimension(R.dimen.route_overview_padding_left).toInt()
