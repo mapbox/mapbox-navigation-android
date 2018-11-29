@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Callback used for getting routes
  */
-public interface RouteFoundCallback {
+public interface OnOfflineRouteFoundCallback {
 
   /**
    * Called when route is found.

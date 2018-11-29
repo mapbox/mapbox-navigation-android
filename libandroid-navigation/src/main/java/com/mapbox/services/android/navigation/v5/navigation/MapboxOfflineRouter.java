@@ -34,22 +34,22 @@ public class MapboxOfflineRouter {
   /**
    * Configures the navigator for getting offline routes.
    *
-   * @param version version of offline tiles to use
-   * @param callback a callback that will be fired when the offline data is initialized and
-   * {@link MapboxOfflineRouter#findOfflineRoute(OfflineRoute, RouteFoundCallback)}
+   * @param version  version of offline tiles to use
+   * @param callback a callback that will be fired when the offline data is configured and
+   *                 {@link MapboxOfflineRouter#findRoute(OfflineRoute, OnOfflineRouteFoundCallback)}
    *                 can be called safely
    */
-  public void initializeOfflineData(String version, OnOfflineDataInitialized callback) {
+  public void configure(String version, OnOfflineTilesConfiguredCallback callback) {
     offlineNavigator.configure(new File(tilePath, version).getAbsolutePath(), callback);
   }
 
   /**
    * Uses libvalhalla and local tile data to generate mapbox-directions-api-like JSON.
    *
-   * @param route the {@link OfflineRoute} to get a {@link DirectionsRoute} from
+   * @param route    the {@link OfflineRoute} to get a {@link DirectionsRoute} from
    * @param callback a callback to pass back the result
    */
-  public void findOfflineRoute(@NonNull OfflineRoute route, RouteFoundCallback callback) {
+  public void findRoute(@NonNull OfflineRoute route, OnOfflineRouteFoundCallback callback) {
     offlineNavigator.retrieveRouteFor(route, callback);
   }
 
@@ -57,7 +57,7 @@ public class MapboxOfflineRouter {
    * Starts the download of tiles specified by the provided {@link OfflineTiles} object.
    *
    * @param offlineTiles object specifying parameters for the tile request
-   * @param listener which is updated on error, on progress update and on completion
+   * @param listener     which is updated on error, on progress update and on completion
    */
   public void downloadTiles(OfflineTiles offlineTiles, RouteTileDownloadListener listener) {
     new RouteTileDownloader(tilePath, listener).startDownload(offlineTiles);

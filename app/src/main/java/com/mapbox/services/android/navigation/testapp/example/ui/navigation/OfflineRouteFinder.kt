@@ -9,20 +9,20 @@ import com.mapbox.services.android.navigation.v5.navigation.*
 
 class OfflineRouteFinder(offlinePath: String,
                          version: String,
-                         private val callback: RouteFoundCallback) {
+                         private val callback: OnOfflineRouteFoundCallback) {
 
     private val offlineRouter: MapboxOfflineRouter
     private var ready = false
 
     init {
         offlineRouter = MapboxOfflineRouter(offlinePath)
-        offlineRouter.initializeOfflineData(version) { ready = true }
+        offlineRouter.configure(version) { ready = true }
     }
 
     fun findRoute(context: Context, location: Location, destination: Point) {
         if (ready) {
             val offlineRoute = buildOfflineRoute(context, location, destination)
-            offlineRouter.findOfflineRoute(offlineRoute, callback)
+            offlineRouter.findRoute(offlineRoute, callback)
         } else {
             callback.onError(OfflineData(OfflineData.Status.ROUTER_BEING_INITIALIZED))
             Toast.makeText(context, "Still initializing data, try again", Toast.LENGTH_SHORT).show()

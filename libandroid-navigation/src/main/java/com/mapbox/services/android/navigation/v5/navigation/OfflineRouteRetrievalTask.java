@@ -13,9 +13,9 @@ import timber.log.Timber;
 
 class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, List<DirectionsRoute>> {
   private final Navigator navigator;
-  private final RouteFoundCallback callback;
+  private final OnOfflineRouteFoundCallback callback;
 
-  OfflineRouteRetrievalTask(Navigator navigator, RouteFoundCallback callback) {
+  OfflineRouteRetrievalTask(Navigator navigator, OnOfflineRouteFoundCallback callback) {
     this.navigator = navigator;
     this.callback = callback;
   }
