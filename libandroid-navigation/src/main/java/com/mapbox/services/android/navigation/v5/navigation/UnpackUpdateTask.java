@@ -26,15 +26,16 @@ class UnpackUpdateTask extends AsyncTask<File, Long, File> {
   protected File doInBackground(File... files) {
     // As the data is unpacked from the file, the file is truncated
     // We are finished unpacking the data when the file is fully 0 bytes
-    File tile_pack = files[0];
-    double size = tile_pack.length();
+    File tilePack = files[0];
+    double size = tilePack.length();
     long progress = 0;
     do {
-      progress = (long)(100.0 * (1.0 - (tile_pack.length() / size)));
+      progress = (long)(100.0 * (1.0 - (tilePack.length() / size)));
       publishProgress(progress);
-    } while (progress < 100L);
+    }
+    while (progress < 100L);
 
-    return tile_pack;
+    return tilePack;
   }
 
   @Override
