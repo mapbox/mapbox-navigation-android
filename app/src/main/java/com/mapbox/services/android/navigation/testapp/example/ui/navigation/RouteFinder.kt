@@ -9,13 +9,13 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.testapp.example.ui.ExampleViewModel
 import com.mapbox.services.android.navigation.v5.navigation.OfflineData
-import com.mapbox.services.android.navigation.v5.navigation.RouteFoundCallback
+import com.mapbox.services.android.navigation.v5.navigation.OnOfflineRouteFoundCallback
 import timber.log.Timber
 
 class RouteFinder(private val viewModel: ExampleViewModel,
                   private val routes: MutableLiveData<List<DirectionsRoute>>,
                   accessToken: String,
-                  private val tileVersion: String): RouteFoundCallback {
+                  private val tileVersion: String): OnOfflineRouteFoundCallback {
     private var isOffline = tileVersion != "Offline Disabled"
     private val routeFinder: ExampleRouteFinder = ExampleRouteFinder(accessToken, this)
     private lateinit var toast:Toast

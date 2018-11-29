@@ -44,7 +44,7 @@ import com.mapbox.services.android.navigation.v5.navigation.OfflineCriteria;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineData;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineTileVersions;
-import com.mapbox.services.android.navigation.v5.navigation.RouteFoundCallback;
+import com.mapbox.services.android.navigation.v5.navigation.OnOfflineRouteFoundCallback;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -62,7 +62,7 @@ import timber.log.Timber;
 
 public class OfflineRerouteActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener,
   MapboxMap.OnMapClickListener, NavigationEventListener, OffRouteListener,
-  ProgressChangeListener, MilestoneEventListener, RouteFoundCallback {
+  ProgressChangeListener, MilestoneEventListener, OnOfflineRouteFoundCallback {
 
   @BindView(R.id.mapView)
   MapView mapView;
@@ -209,7 +209,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
     Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     OfflineRoute offlineRoute = obtainOfflineRoute(newOrigin, newDestination);
-    offlineRouter.findOfflineRoute(offlineRoute, this);
+    offlineRouter.findRoute(offlineRoute, this);
   }
 
   @Override
@@ -305,9 +305,9 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
         String tilesDirPath = obtainOfflineDirectory();
         Timber.d("Tiles directory path: %s", tilesDirPath);
 
-        offlineRouter.initializeOfflineData(version, offlineData -> {
+        offlineRouter.configure(version, offlineData -> {
           OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
-          offlineRouter.findOfflineRoute(offlineRoute, OfflineRerouteActivity.this);
+          offlineRouter.findRoute(offlineRoute, OfflineRerouteActivity.this);
         });
       }
 

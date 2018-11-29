@@ -8,9 +8,9 @@ class ConfigureRouterTask extends AsyncTask<Void, Void, OfflineData> {
   private static final String EMPTY_TRANSLATIONS_DIR_PATH = "";
   private final Navigator navigator;
   private final String tilePath;
-  private final OnOfflineDataInitialized callback;
+  private final OnOfflineTilesConfiguredCallback callback;
 
-  ConfigureRouterTask(Navigator navigator, String tilePath, OnOfflineDataInitialized callback) {
+  ConfigureRouterTask(Navigator navigator, String tilePath, OnOfflineTilesConfiguredCallback callback) {
     this.navigator = navigator;
     this.tilePath = tilePath;
     this.callback = callback;
