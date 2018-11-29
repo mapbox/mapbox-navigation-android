@@ -24,14 +24,17 @@ class UnpackUpdateTask extends AsyncTask<File, Long, File> {
 
   @Override
   protected File doInBackground(File... files) {
-    File tar = files[0];
-    long size = tar.length();
+    // As the data is unpacked from the file, the file is truncated
+    // We are finished unpacking the data when the file is fully 0 bytes
+    File tile_pack = files[0];
+    double size = tile_pack.length();
+    long progress = 0;
+    do {
+      progress = (long)(100.0 * (1.0 - (tile_pack.length() / size)));
+      publishProgress(progress);
+    } while (progress < 100L);
 
-    while (tar.length() > 0) {
-      publishProgress((((tar.length() / size)) * 100));
-    }
-
-    return tar;
+    return tile_pack;
   }
 
   @Override
