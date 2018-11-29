@@ -12,13 +12,13 @@ import com.mapbox.services.android.navigation.v5.navigation.OfflineData
 import com.mapbox.services.android.navigation.v5.navigation.RouteFoundCallback
 import timber.log.Timber
 
-
 class RouteFinder(private val viewModel: ExampleViewModel,
                   private val routes: MutableLiveData<List<DirectionsRoute>>,
                   accessToken: String,
                   private val tileVersion: String): RouteFoundCallback {
     private var isOffline = tileVersion != "Offline Disabled"
-
+    private val routeFinder: ExampleRouteFinder = ExampleRouteFinder(accessToken, this)
+    private lateinit var toast:Toast
     private var offlineRouteFinder =
             if (isOffline) {
                 OfflineRouteFinder(obtainOfflineDirectory(), tileVersion, this)
@@ -34,9 +34,6 @@ class RouteFinder(private val viewModel: ExampleViewModel,
         }
         return offline.absolutePath
     }
-
-    private val routeFinder: ExampleRouteFinder = ExampleRouteFinder(accessToken, this)
-    private lateinit var toast:Toast
 
     internal fun findRoute(
             context: Context, location: Location, destination: Point, isOffline: Boolean) {

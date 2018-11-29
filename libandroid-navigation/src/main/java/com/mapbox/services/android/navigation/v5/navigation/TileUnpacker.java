@@ -15,7 +15,7 @@ class TileUnpacker {
   }
 
   TileUnpacker() {
-    navigator = new Navigator();
+    this.navigator = new Navigator();
   }
 
   /**

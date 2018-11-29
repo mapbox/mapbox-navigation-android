@@ -10,7 +10,7 @@ import java.io.File;
  * listener so that the view can show the unpacking progress. It monitors the unpacking by
  * periodically checking the file size, because as it's unpacked, the file size will decrease.
  */
-public class UnpackUpdateTask extends AsyncTask<File, Long, File> {
+class UnpackUpdateTask extends AsyncTask<File, Long, File> {
   private ProgressUpdateListener progressUpdateListener;
 
   /**

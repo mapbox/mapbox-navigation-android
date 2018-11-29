@@ -16,9 +16,6 @@ class OfflineRouteFinder(offlinePath: String,
 
     init {
         offlineRouter = MapboxOfflineRouter(offlinePath)
-
-//        initDirectory(offlineTileVersionDir)
-
         offlineRouter.initializeOfflineData(version) { ready = true }
     }
 

@@ -18,11 +18,11 @@ class ConfigureRouterTask extends AsyncTask<Void, Void, OfflineData> {
 
   @Override
   protected OfflineData doInBackground(Void... paramsUnused) {
+    long result;
     synchronized (this) {
-      long result = navigator.configureRouter(tilePath, EMPTY_TRANSLATIONS_DIR_PATH);
-
-      return new OfflineData(getStatus(result), String.valueOf(result));
+      result = navigator.configureRouter(tilePath, EMPTY_TRANSLATIONS_DIR_PATH);
     }
+    return new OfflineData(getStatus(result), String.valueOf(result));
   }
 
   private OfflineData.Status getStatus(long configureRouterResult) {

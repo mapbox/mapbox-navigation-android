@@ -49,7 +49,6 @@ class RouteTileDownloader {
     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
       Timber.d("TAR Url: " + call.request().url());
 
-
       downloadTask = new DownloadTask(
         tilePath,
         version,

@@ -64,6 +64,10 @@ public class DownloadTask extends AsyncTask<ResponseBody, Void, File> {
    * @return resulting file, or null if there were any IO exceptions
    */
   private File saveAsFile(ResponseBody responseBody) {
+    if (responseBody == null) {
+      return null;
+    }
+
     try {
       File file = new File(destDirectory + File.separator + fileName + getDistinguisher() + "."
         + extension);
@@ -84,6 +88,9 @@ public class DownloadTask extends AsyncTask<ResponseBody, Void, File> {
         return file;
 
       } catch (IOException exception) {
+        return null;
+
+      } catch (Exception exception) {
         return null;
 
       } finally {

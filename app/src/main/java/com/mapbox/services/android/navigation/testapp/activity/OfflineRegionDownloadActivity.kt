@@ -31,12 +31,10 @@ import retrofit2.Response
 import timber.log.Timber
 
 class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadListener {
-
     lateinit var mapboxMap: MapboxMap
     private val disabledGrey by lazy { resources.getColor(R.color.md_grey_700) }
     private val enabledBlue by lazy { resources.getColor(R.color.mapbox_blue) }
     private var downloadButtonEnabled: Boolean = false
-
     private val boundingBox: BoundingBox
         get() {
             val top = selectionBox.top - mapView.top

@@ -29,7 +29,7 @@ class OfflineNavigator {
    * Uses libvalhalla and local tile data to generate mapbox-directions-api-like json
    *
    * @param offlineRoute an offline navigation route
-   * @return a RouterResult object with the json and a success/fail bool
+   * @param callback which receives a RouterResult object with the json and a success/fail bool
    */
   void retrieveRouteFor(OfflineRoute offlineRoute, RouteFoundCallback callback) {
     new OfflineRouteRetrievalTask(navigator, callback).execute(offlineRoute);

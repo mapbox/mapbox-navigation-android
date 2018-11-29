@@ -1,15 +1,17 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
 
 import java.io.File;
 
+/**
+ * Class used for offline routing.
+ */
 public class MapboxOfflineRouter {
-  private final String TILE_PATH_NAME = "tiles";
+  private static final String TILE_PATH_NAME = "tiles";
   private final OfflineNavigator offlineNavigator;
   private final String tilePath;
 
@@ -32,22 +34,21 @@ public class MapboxOfflineRouter {
   /**
    * Configures the navigator for getting offline routes.
    *
+   * @param version version of offline tiles to use
    * @param callback a callback that will be fired when the offline data is initialized and
    * {@link MapboxOfflineRouter#findOfflineRoute(OfflineRoute, RouteFoundCallback)}
-   *                 can be called safely.
+   *                 can be called safely
    */
   public void initializeOfflineData(String version, OnOfflineDataInitialized callback) {
     offlineNavigator.configure(new File(tilePath, version).getAbsolutePath(), callback);
   }
 
   /**
-   * Uses libvalhalla and local tile data to generate mapbox-directions-api-like JSON
+   * Uses libvalhalla and local tile data to generate mapbox-directions-api-like JSON.
    *
    * @param route the {@link OfflineRoute} to get a {@link DirectionsRoute} from
    * @param callback a callback to pass back the result
-   * @return the offline {@link DirectionsRoute}
    */
-  @Nullable
   public void findOfflineRoute(@NonNull OfflineRoute route, RouteFoundCallback callback) {
     offlineNavigator.retrieveRouteFor(route, callback);
   }

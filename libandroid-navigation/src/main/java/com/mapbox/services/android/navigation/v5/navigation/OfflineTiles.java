@@ -76,15 +76,6 @@ public class OfflineTiles {
     }
 
     /**
-     * Returns the version that was passed into this Builder object.
-     *
-     * @return version that was passed to the builder
-     */
-    public String version() {
-      return version;
-    }
-
-    /**
      *
      * Required to call when this is being built. If no access token provided,
      * {@link ServicesException} will be thrown by the {@link MapboxRouteTiles.Builder}.

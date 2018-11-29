@@ -5,10 +5,6 @@ import android.content.DialogInterface
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AlertDialog
 
-
-
-
-
 class PermissionRequestDialog(private val activity: Activity) : AlertDialog(activity) {
 
   init {
@@ -21,7 +17,7 @@ class PermissionRequestDialog(private val activity: Activity) : AlertDialog(acti
       val PERMISSIONS = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION,
               android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
-        ActivityCompat.requestPermissions(activity, PERMISSIONS, 1)
+      ActivityCompat.requestPermissions(activity, PERMISSIONS, 1)
     }
     setButton(DialogInterface.BUTTON_NEGATIVE, "Close Navigation") { dialog, _ ->
       dialog.dismiss()

@@ -24,20 +24,18 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, List<Direc
   protected List<DirectionsRoute> doInBackground(OfflineRoute... offlineRoutes) {
     RouterResult routerResult;
 
-    synchronized (navigator) {
-      String str = offlineRoutes[0].buildUrl();
-      Timber.d("Request Url: " + str);
+    String url = offlineRoutes[0].buildUrl();
+    Timber.d("Request Url: " + url);
 
-      routerResult = navigator.getRoute(str);
+    synchronized (navigator) {
+      routerResult = navigator.getRoute(url);
     }
 
     List<DirectionsRoute> routes = new ArrayList<>();
 
-    for (OfflineRoute offlineRoute : offlineRoutes) {
-      DirectionsRoute directionsRoute = offlineRoute.retrieveOfflineRoute(routerResult);
-      if (directionsRoute != null) {
-        routes.add(directionsRoute);
-      }
+    DirectionsRoute directionsRoute = offlineRoutes[0].retrieveOfflineRoute(routerResult);
+    if (directionsRoute != null) {
+      routes.add(directionsRoute);
     }
 
     return routes;

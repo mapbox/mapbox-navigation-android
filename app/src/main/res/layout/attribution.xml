@@ -25,4 +25,5 @@
         android:src="@drawable/mapbox_info_bg_selector"
         tools:layout_editor_absoluteX="92dp"
         tools:layout_editor_absoluteY="0dp" />
+
 </RelativeLayout>

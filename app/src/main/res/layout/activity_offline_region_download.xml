@@ -29,11 +29,13 @@
             android:id="@+id/versionSpinnerContainer"
             android:layout_alignParentTop="true"
             android:visibility="gone">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="@color/white">
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -41,12 +43,15 @@
                     android:text="Tile Version:"
                     android:paddingLeft="8dp"
                     android:paddingTop="8dp" />
+
                 <Spinner
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:padding="8dp"
-                android:id="@+id/versionSpinner" />
+                    android:id="@+id/versionSpinner" />
+
             </LinearLayout>
+
         </FrameLayout>
 
         <TextView
@@ -81,6 +86,7 @@
             android:layout_centerInParent="true"
             android:alpha="0.3"
             android:background="#A4A4E5"/>
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
