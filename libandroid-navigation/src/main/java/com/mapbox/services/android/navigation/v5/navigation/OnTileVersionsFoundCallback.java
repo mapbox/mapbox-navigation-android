@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.support.annotation.NonNull;
+
 import java.util.List;
 
 /**
@@ -13,8 +15,14 @@ public interface OnTileVersionsFoundCallback {
    *
    * @param availableVersions for offline tiles
    */
-  void onVersionsFound(List<String> availableVersions);
+  void onVersionsFound(@NonNull List<String> availableVersions);
 
-  // TODO provide error object?
-  void onError();
+
+  /**
+   * Called when an error has occurred fetching
+   * offline versions.
+   *
+   * @param error with message explanation
+   */
+  void onError(@NonNull OfflineError error);
 }

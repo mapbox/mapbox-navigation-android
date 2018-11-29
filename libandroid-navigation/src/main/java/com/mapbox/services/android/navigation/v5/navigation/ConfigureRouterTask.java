@@ -4,7 +4,7 @@ import android.os.AsyncTask;
 
 import com.mapbox.navigator.Navigator;
 
-class ConfigureRouterTask extends AsyncTask<Void, Void, OfflineData> {
+class ConfigureRouterTask extends AsyncTask<Void, Void, Long> {
   private static final String EMPTY_TRANSLATIONS_DIR_PATH = "";
   private final Navigator navigator;
   private final String tilePath;
@@ -17,21 +17,19 @@ class ConfigureRouterTask extends AsyncTask<Void, Void, OfflineData> {
   }
 
   @Override
-  protected OfflineData doInBackground(Void... paramsUnused) {
-    long result;
+  protected Long doInBackground(Void... paramsUnused) {
     synchronized (this) {
-      result = navigator.configureRouter(tilePath, EMPTY_TRANSLATIONS_DIR_PATH);
+      return navigator.configureRouter(tilePath, EMPTY_TRANSLATIONS_DIR_PATH);
     }
-    return new OfflineData(getStatus(result), String.valueOf(result));
-  }
-
-  private OfflineData.Status getStatus(long configureRouterResult) {
-    return configureRouterResult > 0 ? OfflineData.Status.CONFIGURE_ROUTER_RESULT_SUCCESS :
-      OfflineData.Status.CONFIGURE_ROUTER_RESULT_FAILURE;
   }
 
   @Override
-  protected void onPostExecute(OfflineData offlineData) {
-    callback.onOfflineDataInitialized(offlineData);
+  protected void onPostExecute(Long numberOfTiles) {
+    if (numberOfTiles > 0) {
+      callback.onConfigured(numberOfTiles.intValue());
+    } else {
+      OfflineError error = new OfflineError("Offline tile configuration error: 0 tiles found in directory");
+      callback.onConfigurationError(error);
+    }
   }
 }

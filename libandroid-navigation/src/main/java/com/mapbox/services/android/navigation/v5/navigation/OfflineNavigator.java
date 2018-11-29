@@ -5,10 +5,6 @@ import com.mapbox.navigator.Navigator;
 class OfflineNavigator {
   private final Navigator navigator;
 
-  static {
-    NavigationLibraryLoader.load();
-  }
-
   OfflineNavigator(Navigator navigator) {
     this.navigator = navigator;
   }

@@ -40,9 +40,10 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineCriteria;
-import com.mapbox.services.android.navigation.v5.navigation.OfflineData;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineError;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OnOfflineRouteFoundCallback;
+import com.mapbox.services.android.navigation.v5.navigation.OnOfflineTilesConfiguredCallback;
 import com.mapbox.services.android.navigation.v5.navigation.OnTileVersionsFoundCallback;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -299,14 +300,22 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
         String tilesDirPath = obtainOfflineDirectory();
         Timber.d("Tiles directory path: %s", tilesDirPath);
 
-        offlineRouter.configure(version, offlineData -> {
-          OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
-          offlineRouter.findRoute(offlineRoute, OfflineRerouteActivity.this);
+        offlineRouter.configure(version, new OnOfflineTilesConfiguredCallback() {
+          @Override
+          public void onConfigured(int numberOfTiles) {
+            OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
+            offlineRouter.findRoute(offlineRoute, OfflineRerouteActivity.this);
+          }
+
+          @Override
+          public void onConfigurationError(@NonNull OfflineError error) {
+            Timber.d("Error configuring offline tiles %s", error.getMessage());
+          }
         });
       }
 
       @Override
-      public void onError() {
+      public void onError(@NonNull OfflineError error) {
         Toast.makeText(getApplicationContext(), "Unable to get versions", Toast.LENGTH_LONG).show();
       }
     });
@@ -347,15 +356,12 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   }
 
   @Override
-  public void routesFound(List<DirectionsRoute> routes) {
-    if (routes.isEmpty()) {
-      Toast.makeText(getApplicationContext(), "Offline route not found", Toast.LENGTH_LONG).show();
-    }
-    handleNewRoute(routes.get(0));
+  public void onRouteFound(@NonNull DirectionsRoute route) {
+    handleNewRoute(route);
   }
 
   @Override
-  public void onError(OfflineData offlineData) {
-    // todo
+  public void onError(@NonNull OfflineError error) {
+    Timber.d("Error fetching offline route: %s", error.getMessage());
   }
 }

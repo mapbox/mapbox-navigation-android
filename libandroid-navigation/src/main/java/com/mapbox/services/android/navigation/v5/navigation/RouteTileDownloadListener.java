@@ -1,15 +1,18 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.support.annotation.NonNull;
+
 /**
  * Listener for receiving updates about a route tile download.
  */
 public interface RouteTileDownloadListener {
+
   /**
    * Called if there is an error with the downloading.
    *
-   * @param throwable error
+   * @param error with message description
    */
-  void onError(Throwable throwable);
+  void onError(@NonNull OfflineError error);
 
   /**
    * Called with percentage progress updates of the download.
@@ -20,8 +23,6 @@ public interface RouteTileDownloadListener {
 
   /**
    * Called when download was completed.
-   *
-   * @param successful whether it was successful or not
    */
-  void onCompletion(boolean successful);
+  void onCompletion();
 }
