@@ -13,7 +13,6 @@ import android.widget.Toast;
 
 import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.routetiles.v1.versions.models.RouteTileVersionsResponse;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
@@ -43,8 +42,8 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineCriteria;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineData;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
-import com.mapbox.services.android.navigation.v5.navigation.OfflineTileVersions;
-import com.mapbox.services.android.navigation.v5.navigation.RouteFoundCallback;
+import com.mapbox.services.android.navigation.v5.navigation.OnOfflineRouteFoundCallback;
+import com.mapbox.services.android.navigation.v5.navigation.OnTileVersionsFoundCallback;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -55,14 +54,11 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import timber.log.Timber;
 
 public class OfflineRerouteActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener,
   MapboxMap.OnMapClickListener, NavigationEventListener, OffRouteListener,
-  ProgressChangeListener, MilestoneEventListener, RouteFoundCallback {
+  ProgressChangeListener, MilestoneEventListener, OnOfflineRouteFoundCallback {
 
   @BindView(R.id.mapView)
   MapView mapView;
@@ -209,7 +205,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
     Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     OfflineRoute offlineRoute = obtainOfflineRoute(newOrigin, newDestination);
-    offlineRouter.findOfflineRoute(offlineRoute, this);
+    offlineRouter.findRoute(offlineRoute, this);
   }
 
   @Override
@@ -296,23 +292,21 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void getVersionsAndRoute() {
-    OfflineTileVersions versions = new OfflineTileVersions(Mapbox.getAccessToken());
-
-    versions.getRouteTileVersions(new Callback<RouteTileVersionsResponse>() {
+    offlineRouter.fetchAvailableTileVersions(Mapbox.getAccessToken(), new OnTileVersionsFoundCallback() {
       @Override
-      public void onResponse(Call<RouteTileVersionsResponse> call, Response<RouteTileVersionsResponse> response) {
-        String version = response.body().availableVersions().get(0);
+      public void onVersionsFound(List<String> availableVersions) {
+        String version = availableVersions.get(0);
         String tilesDirPath = obtainOfflineDirectory();
         Timber.d("Tiles directory path: %s", tilesDirPath);
 
-        offlineRouter.initializeOfflineData(version, offlineData -> {
+        offlineRouter.configure(version, offlineData -> {
           OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
-          offlineRouter.findOfflineRoute(offlineRoute, OfflineRerouteActivity.this);
+          offlineRouter.findRoute(offlineRoute, OfflineRerouteActivity.this);
         });
       }
 
       @Override
-      public void onFailure(Call call, Throwable throwable) {
+      public void onError() {
         Toast.makeText(getApplicationContext(), "Unable to get versions", Toast.LENGTH_LONG).show();
       }
     });
@@ -354,6 +348,9 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void routesFound(List<DirectionsRoute> routes) {
+    if (routes.isEmpty()) {
+      Toast.makeText(getApplicationContext(), "Offline route not found", Toast.LENGTH_LONG).show();
+    }
     handleNewRoute(routes.get(0));
   }
 

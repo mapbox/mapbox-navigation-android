@@ -16,7 +16,6 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import com.mapbox.api.routetiles.v1.versions.models.RouteTileVersionsResponse
 import com.mapbox.geojson.BoundingBox
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -25,13 +24,10 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter
-import com.mapbox.services.android.navigation.v5.navigation.OfflineTileVersions
 import com.mapbox.services.android.navigation.v5.navigation.OfflineTiles
+import com.mapbox.services.android.navigation.v5.navigation.OnTileVersionsFoundCallback
 import com.mapbox.services.android.navigation.v5.navigation.RouteTileDownloadListener
 import kotlinx.android.synthetic.main.activity_offline_region_download.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import timber.log.Timber
 
 class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadListener {
@@ -67,19 +63,19 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     }
 
     fun setupSpinner() {
-        OfflineTileVersions(Mapbox.getAccessToken())
-                .getRouteTileVersions(object : Callback<RouteTileVersionsResponse> {
-                    override fun onResponse(call: Call<RouteTileVersionsResponse>, response:
-                    Response<RouteTileVersionsResponse>) {
-                        response.body().let {
-                            if (it != null) setupSpinner(it.availableVersions()) else onVersionFetchFailed()
-                        }
+        MapboxOfflineRouter("")
+            .fetchAvailableTileVersions(Mapbox.getAccessToken(),
+                object : OnTileVersionsFoundCallback {
+                override fun onVersionsFound(availableVersions: MutableList<String>?) {
+                    availableVersions?.let {
+                        setupSpinner(it)
                     }
+                }
 
-                    override fun onFailure(call: Call<RouteTileVersionsResponse>, throwable: Throwable) {
-                        onVersionFetchFailed()
-                    }
-                })
+                override fun onError() {
+                    onVersionFetchFailed()
+                }
+            })
     }
 
     fun onVersionFetchFailed() {
