@@ -31,7 +31,7 @@ class RouteTileDownloader {
 
   void startDownload(final OfflineTiles offlineTiles) {
     version = offlineTiles.version();
-    offlineTiles.getRouteTiles(new TarFetchedCallback());
+    offlineTiles.fetchRouteTiles(new TarFetchedCallback());
   }
 
   private void onError(Throwable throwable) {

@@ -37,7 +37,7 @@ public class OfflineTiles {
    *
    * @param callback for retrofit
    */
-  public void getRouteTiles(Callback callback) {
+  void fetchRouteTiles(Callback callback) {
     mapboxRouteTiles.enqueueCall(callback);
   }
 

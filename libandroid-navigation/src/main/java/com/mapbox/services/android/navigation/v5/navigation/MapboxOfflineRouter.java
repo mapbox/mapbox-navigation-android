@@ -12,8 +12,9 @@ import java.io.File;
  */
 public class MapboxOfflineRouter {
   private static final String TILE_PATH_NAME = "tiles";
-  private final OfflineNavigator offlineNavigator;
   private final String tilePath;
+  private final OfflineNavigator offlineNavigator;
+  private final OfflineTileVersions offlineTileVersions;
 
   /**
    * Creates an offline router which uses the specified offline path for storing and retrieving
@@ -29,6 +30,14 @@ public class MapboxOfflineRouter {
 
     this.tilePath = tileDir.getAbsolutePath();
     offlineNavigator = new OfflineNavigator(new Navigator());
+    offlineTileVersions = new OfflineTileVersions();
+  }
+
+  // Package private (no modifier) for testing purposes
+  MapboxOfflineRouter(String tilePath, OfflineNavigator offlineNavigator, OfflineTileVersions offlineTileVersions) {
+    this.tilePath = tilePath;
+    this.offlineNavigator = offlineNavigator;
+    this.offlineTileVersions = offlineTileVersions;
   }
 
   /**
@@ -61,5 +70,16 @@ public class MapboxOfflineRouter {
    */
   public void downloadTiles(OfflineTiles offlineTiles, RouteTileDownloadListener listener) {
     new RouteTileDownloader(tilePath, listener).startDownload(offlineTiles);
+  }
+
+  /**
+   * Call this method to fetch the latest available offline tile versions that
+   * can be used with {@link MapboxOfflineRouter#downloadTiles(OfflineTiles, RouteTileDownloadListener)}.
+   *
+   * @param accessToken Mapbox access token to call the version API
+   * @param callback    with the available versions
+   */
+  public void fetchAvailableTileVersions(String accessToken, OnTileVersionsFoundCallback callback) {
+    offlineTileVersions.fetchRouteTileVersions(accessToken, callback);
   }
 }
