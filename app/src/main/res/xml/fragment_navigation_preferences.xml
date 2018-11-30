@@ -64,7 +64,8 @@
 
         <ListPreference
             android:key="@string/offline_version_key"
-            android:title="@string/offline_version_title"/>
+            android:title="@string/offline_version_title"
+            android:enabled="false"/>
 
     </PreferenceCategory>
 
