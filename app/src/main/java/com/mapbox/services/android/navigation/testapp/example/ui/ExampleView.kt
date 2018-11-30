@@ -82,8 +82,4 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
   fun updateLocationRenderMode(@RenderMode.Mode renderMode: Int)
 
   fun updateCameraTrackingMode(@NavigationCamera.TrackingMode trackingMode: Int)
-
-  fun isStoragePermissionGranted(): Boolean
-
-  fun requestStoragePermission()
 }
