@@ -55,17 +55,15 @@ public class NavigationSettingsActivity extends PreferenceActivity {
       super.onCreate(savedInstanceState);
 
       addPreferencesFromResource(R.xml.fragment_navigation_preferences);
+      checkOfflinePermission();
     }
 
     @Override
     public void onResume() {
       super.onResume();
 
+      getOfflineVersions();
       PreferenceManager.setDefaultValues(getActivity(), R.xml.fragment_navigation_preferences, false);
-
-      if (checkOfflinePermission()) {
-        getOfflineVersions();
-      }
     }
 
     private void getOfflineVersions() {
@@ -86,7 +84,7 @@ public class NavigationSettingsActivity extends PreferenceActivity {
       ListPreference offlineVersions =
         (ListPreference) findPreference(getString(R.string.offline_preference_key));
       offlineVersions.setOnPreferenceClickListener(preference -> checkOfflinePermission());
-      
+
       String[] entries = list.toArray(new String[list.size()]);
       offlineVersions.setEntries(entries);
       offlineVersions.setEntryValues(entries);
@@ -96,9 +94,9 @@ public class NavigationSettingsActivity extends PreferenceActivity {
       if (ContextCompat.checkSelfPermission(getActivity(), WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
         ActivityCompat.requestPermissions(
           getActivity(), new String[] { WRITE_EXTERNAL_STORAGE }, EXTERNAL_STORAGE_PERMISSION);
-        return true;
+        return false;
       }
-      return false;
+      return true;
     }
   }
 }
