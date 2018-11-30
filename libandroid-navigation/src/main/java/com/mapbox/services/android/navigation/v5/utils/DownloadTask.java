@@ -17,7 +17,7 @@ import okhttp3.ResponseBody;
 public class DownloadTask extends AsyncTask<ResponseBody, Void, File> {
 
   private static final int END_OF_FILE_DENOTER = -1;
-  private int uniqueId = 0;
+  private static int uniqueId = 0;
   private final String destDirectory;
   private final DownloadListener downloadListener;
   private final String extension;
