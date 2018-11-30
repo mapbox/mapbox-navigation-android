@@ -71,11 +71,9 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   fun onDirectionsFabClick() {
-    if (viewModel.isOffline()) {
-      if (!view.isStoragePermissionGranted()) {
-        view.requestStoragePermission()
-        return
-      }
+    if (viewModel.isOffline() && !view.isStoragePermissionGranted()) {
+      view.requestStoragePermission()
+      return
     }
 
     findRoute()

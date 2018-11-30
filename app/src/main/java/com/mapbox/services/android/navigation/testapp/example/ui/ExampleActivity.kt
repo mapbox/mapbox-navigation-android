@@ -273,7 +273,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
 
   override fun isStoragePermissionGranted() : Boolean {
     return ContextCompat.checkSelfPermission(this,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+            Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
   }
 
   override fun requestStoragePermission() {
