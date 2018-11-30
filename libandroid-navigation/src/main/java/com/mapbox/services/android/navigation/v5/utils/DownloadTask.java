@@ -17,7 +17,7 @@ import okhttp3.ResponseBody;
 public class DownloadTask extends AsyncTask<ResponseBody, Void, File> {
 
   private static final int END_OF_FILE_DENOTER = -1;
-  private static int instructionNamingInt = 0;
+  private int uniqueId = 0;
   private final String destDirectory;
   private final DownloadListener downloadListener;
   private final String extension;
@@ -69,8 +69,7 @@ public class DownloadTask extends AsyncTask<ResponseBody, Void, File> {
     }
 
     try {
-      File file = new File(destDirectory + File.separator + fileName + getDistinguisher() + "."
-        + extension);
+      File file = new File(destDirectory + File.separator + fileName + retrieveUniqueId() + "." + extension);
       InputStream inputStream = null;
       OutputStream outputStream = null;
 
@@ -108,8 +107,8 @@ public class DownloadTask extends AsyncTask<ResponseBody, Void, File> {
     }
   }
 
-  private String getDistinguisher() {
-    return instructionNamingInt++ > 0 ? "" + instructionNamingInt : "";
+  private String retrieveUniqueId() {
+    return uniqueId++ > 0 ? "" + uniqueId : "";
   }
 
   @Override
