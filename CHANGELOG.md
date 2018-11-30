@@ -2,6 +2,8 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.24.0-beta.2 - November 29, 2018
+
 ### v0.24.0-beta.1 - November 15, 2018
 
 * Prevent from requesting voice instructions if the cache has been previously closed and add a check to delete the cache if there are files [#1540](https://github.com/mapbox/mapbox-navigation-android/pull/1540)
