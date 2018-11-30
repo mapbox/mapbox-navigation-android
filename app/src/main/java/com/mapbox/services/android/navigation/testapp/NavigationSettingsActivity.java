@@ -67,12 +67,15 @@ public class NavigationSettingsActivity extends PreferenceActivity {
         file.mkdirs();
       }
 
+      ListPreference offlineVersions = (ListPreference) findPreference(getString(R.string.offline_version_key));
       List<String> list = buildFileList(file);
       if (!list.isEmpty()) {
-        ListPreference offlineVersions = (ListPreference) findPreference(getString(R.string.offline_version_key));
         String[] entries = list.toArray(new String[list.size() - 1]);
         offlineVersions.setEntries(entries);
         offlineVersions.setEntryValues(entries);
+        offlineVersions.setEnabled(true);
+      } else {
+        offlineVersions.setEnabled(false);
       }
     }
 
