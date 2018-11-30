@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.testapp.example.ui
 
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
+import android.content.pm.PackageManager
 import android.location.Location
 import android.support.design.widget.BottomSheetBehavior
 import android.view.View
@@ -21,6 +22,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
+import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
@@ -34,11 +36,17 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   private var state: PresenterState = PresenterState.SHOW_LOCATION
 
-  fun onPermissionResult(granted: Boolean) {
+  fun onLocationPermissionResult(granted: Boolean) {
     if (granted) {
       view.initialize()
     } else {
       view.showPermissionDialog()
+    }
+  }
+
+  fun onStoragePermissionResult(grantResults: IntArray) {
+    if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+      findRoute()
     }
   }
 
@@ -64,6 +72,15 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   fun onDirectionsFabClick() {
+    if (viewModel.isOffline() && !view.isStoragePermissionGranted()) {
+      view.requestStoragePermission()
+      return
+    }
+
+    findRoute()
+  }
+
+  fun findRoute() {
     state = PresenterState.FIND_ROUTE
     viewModel.findRouteToDestination()
   }
@@ -77,6 +94,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       view.updateCancelFabVisibility(VISIBLE)
       view.updateInstructionViewVisibility(VISIBLE)
       view.updateLocationRenderMode(RenderMode.GPS)
+      view.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
       view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_HIDDEN)
       view.adjustMapPaddingForNavigation()
       viewModel.startNavigation()
@@ -90,6 +108,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     view.clearMarkers()
     view.resetMapPadding()
     view.updateLocationRenderMode(RenderMode.NORMAL)
+    view.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
     view.updateLocationFabVisibility(VISIBLE)
     view.updateSettingsFabVisibility(VISIBLE)
     view.updateCancelFabVisibility(INVISIBLE)
@@ -205,35 +224,34 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   fun buildDynamicCameraFrom(mapboxMap: MapboxMap) {
-    // TODO fix this leak
     viewModel.retrieveNavigation().cameraEngine = DynamicCamera(mapboxMap)
   }
 
   private fun buildCameraUpdateFrom(location: Location): CameraUpdate {
     return CameraUpdateFactory.newCameraPosition(CameraPosition.Builder()
-        .zoom(DEFAULT_ZOOM)
-        .target(LatLng(location.latitude, location.longitude))
-        .bearing(DEFAULT_BEARING)
-        .tilt(DEFAULT_TILT)
-        .build())
+            .zoom(DEFAULT_ZOOM)
+            .target(LatLng(location.latitude, location.longitude))
+            .bearing(DEFAULT_BEARING)
+            .tilt(DEFAULT_TILT)
+            .build())
   }
 
   private fun buildCameraUpdateFrom(point: Point): CameraUpdate {
     return CameraUpdateFactory.newCameraPosition(CameraPosition.Builder()
-        .zoom(DEFAULT_ZOOM)
-        .target(LatLng(point.latitude(), point.longitude()))
-        .bearing(DEFAULT_BEARING)
-        .tilt(DEFAULT_TILT)
-        .build())
+            .zoom(DEFAULT_ZOOM)
+            .target(LatLng(point.latitude(), point.longitude()))
+            .bearing(DEFAULT_BEARING)
+            .tilt(DEFAULT_TILT)
+            .build())
   }
 
   private fun moveCameraToInclude(destination: Point) {
     viewModel.location.value?.let {
       val origin = LatLng(it)
       val bounds = LatLngBounds.Builder()
-          .include(origin)
-          .include(LatLng(destination.latitude(), destination.longitude()))
-          .build()
+              .include(origin)
+              .include(LatLng(destination.latitude(), destination.longitude()))
+              .build()
 
       val resources = NavigationApplication.instance.resources
       val left = resources.getDimension(R.dimen.route_overview_padding_left).toInt()

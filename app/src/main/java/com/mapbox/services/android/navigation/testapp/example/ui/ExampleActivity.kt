@@ -1,11 +1,15 @@
 package com.mapbox.services.android.navigation.testapp.example.ui
 
+import android.Manifest
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
 import android.support.transition.TransitionManager
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.Toast
@@ -34,6 +38,7 @@ import kotlinx.android.synthetic.main.activity_example.*
 
 private const val ZERO_PADDING = 0
 private const val BOTTOMSHEET_MULTIPLIER = 4
+private const val EXTERNAL_STORAGE_PERMISSION_REQUEST = 1
 
 class ExampleActivity : AppCompatActivity(), ExampleView {
 
@@ -96,7 +101,11 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
 
   override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
                                           grantResults: IntArray) {
-    permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    if (requestCode == EXTERNAL_STORAGE_PERMISSION_REQUEST) {
+      presenter.onStoragePermissionResult(grantResults)
+    } else {
+      permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
   }
 
   override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
@@ -121,7 +130,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   }
 
   override fun onPermissionResult(granted: Boolean) {
-    presenter.onPermissionResult(granted)
+    presenter.onLocationPermissionResult(granted)
   }
 
   override fun initialize() {
@@ -138,7 +147,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   }
 
   override fun showPermissionDialog() {
-    PermissionRequestDialog(this, permissionsManager).show()
+    PermissionRequestDialog(this).show()
   }
 
   override fun updateMapCamera(cameraUpdate: CameraUpdate, duration: Int) {
@@ -262,6 +271,19 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     map?.updateLocationLayerRenderMode(renderMode)
   }
 
+  override fun updateCameraTrackingMode(trackingMode: Int) {
+    map?.updateCameraTrackingMode(trackingMode)
+  }
+
+  override fun isStoragePermissionGranted() : Boolean {
+    return ContextCompat.checkSelfPermission(this,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+  }
+
+  override fun requestStoragePermission() {
+    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+  }
+
   private fun setupWith(savedInstanceState: Bundle?) {
     mapView.onCreate(savedInstanceState)
 
@@ -285,6 +307,8 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     attribution.setOnClickListener { presenter.onAttributionsClick(it) }
 
     val granted = PermissionsManager.areLocationPermissionsGranted(this)
-    presenter.onPermissionResult(granted)
+    presenter.onLocationPermissionResult(granted)
   }
+
+
 }

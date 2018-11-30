@@ -1097,7 +1097,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    * the source into pieces so data-driven styling can be used to change the route colors
    * accordingly.
    */
-  private FeatureCollection addTrafficToSource(DirectionsRoute route, int index) {
+  private FeatureCollection addTrafficToSource(@NonNull DirectionsRoute route, int index) {
     final List<Feature> features = new ArrayList<>();
     LineString originalGeometry = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
     buildRouteFeatureFromGeometry(index, features, originalGeometry);

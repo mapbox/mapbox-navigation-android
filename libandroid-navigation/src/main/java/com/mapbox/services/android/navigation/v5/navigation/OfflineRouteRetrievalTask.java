@@ -7,10 +7,11 @@ import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.RouterResult;
 
 class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, DirectionsRoute> {
+  private static final int FIRST_ROUTE = 0;
   private final Navigator navigator;
-  private final OfflineRouteFoundCallback callback;
+  private final OnOfflineRouteFoundCallback callback;
 
-  OfflineRouteRetrievalTask(Navigator navigator, OfflineRouteFoundCallback callback) {
+  OfflineRouteRetrievalTask(Navigator navigator, OnOfflineRouteFoundCallback callback) {
     this.navigator = navigator;
     this.callback = callback;
   }
@@ -18,16 +19,22 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, Directions
   @Override
   protected DirectionsRoute doInBackground(OfflineRoute... offlineRoutes) {
     RouterResult routerResult;
+    String url = offlineRoutes[FIRST_ROUTE].buildUrl();
 
     synchronized (navigator) {
-      routerResult = navigator.getRoute(offlineRoutes[0].buildUrl());
+      routerResult = navigator.getRoute(url);
     }
 
-    return offlineRoutes[0].retrieveOfflineRoute(routerResult);
+    return offlineRoutes[FIRST_ROUTE].retrieveOfflineRoute(routerResult);
   }
 
   @Override
-  protected void onPostExecute(DirectionsRoute directionsRoute) {
-    callback.onOfflineRouteFound(directionsRoute);
+  protected void onPostExecute(DirectionsRoute offlineRoute) {
+    if (offlineRoute != null) {
+      callback.onRouteFound(offlineRoute);
+    } else {
+      OfflineError error = new OfflineError("Offline route was not found");
+      callback.onError(error);
+    }
   }
 }

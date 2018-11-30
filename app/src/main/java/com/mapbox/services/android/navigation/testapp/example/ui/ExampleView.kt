@@ -10,6 +10,7 @@ import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
@@ -79,4 +80,10 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
   fun showAlternativeRoutes(alternativesVisible: Boolean)
 
   fun updateLocationRenderMode(@RenderMode.Mode renderMode: Int)
+
+  fun updateCameraTrackingMode(@NavigationCamera.TrackingMode trackingMode: Int)
+
+  fun isStoragePermissionGranted(): Boolean
+
+  fun requestStoragePermission()
 }

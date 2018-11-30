@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Toast;
 
 import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -39,7 +40,11 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineCriteria;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineError;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
+import com.mapbox.services.android.navigation.v5.navigation.OnOfflineRouteFoundCallback;
+import com.mapbox.services.android.navigation.v5.navigation.OnOfflineTilesConfiguredCallback;
+import com.mapbox.services.android.navigation.v5.navigation.OnTileVersionsFoundCallback;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -54,7 +59,7 @@ import timber.log.Timber;
 
 public class OfflineRerouteActivity extends AppCompatActivity implements OnMapReadyCallback, LocationEngineListener,
   MapboxMap.OnMapClickListener, NavigationEventListener, OffRouteListener,
-  ProgressChangeListener, MilestoneEventListener {
+  ProgressChangeListener, MilestoneEventListener, OnOfflineRouteFoundCallback {
 
   @BindView(R.id.mapView)
   MapView mapView;
@@ -69,7 +74,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
 
   private ReplayRouteLocationEngine mockLocationEngine;
   private MapboxNavigation navigation;
-  private MapboxOfflineRouter offlineRouting;
+  private MapboxOfflineRouter offlineRouter;
   private MapboxMap mapboxMap;
   private boolean running;
   private boolean tracking;
@@ -143,7 +148,8 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     mapboxMap.addOnMapClickListener(this);
-    offlineRouting = new MapboxOfflineRouter();
+    File offline = Environment.getExternalStoragePublicDirectory("Offline");
+    offlineRouter = new MapboxOfflineRouter(offline.getAbsolutePath());
 
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
     locationComponent.activateLocationComponent(this);
@@ -200,7 +206,7 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
     Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     OfflineRoute offlineRoute = obtainOfflineRoute(newOrigin, newDestination);
-    offlineRouting.findOfflineRoute(offlineRoute, result -> handleNewRoute(result));
+    offlineRouter.findRoute(offlineRoute, this);
   }
 
   @Override
@@ -283,22 +289,45 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void findRoute() {
-    String tilesDirPath = obtainOfflineDirectoryFor("tiles");
-    Timber.d("Tiles directory path: %s", tilesDirPath);
+    getVersionsAndRoute();
+  }
 
-    offlineRouting.initializeOfflineData(tilesDirPath, () -> {
-      OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
-      offlineRouting.findOfflineRoute(offlineRoute, result -> handleNewRoute(result));
+  private void getVersionsAndRoute() {
+    offlineRouter.fetchAvailableTileVersions(Mapbox.getAccessToken(), new OnTileVersionsFoundCallback() {
+      @Override
+      public void onVersionsFound(List<String> availableVersions) {
+        String version = availableVersions.get(0);
+        String tilesDirPath = obtainOfflineDirectory();
+        Timber.d("Tiles directory path: %s", tilesDirPath);
+
+        offlineRouter.configure(version, new OnOfflineTilesConfiguredCallback() {
+          @Override
+          public void onConfigured(int numberOfTiles) {
+            OfflineRoute offlineRoute = obtainOfflineRoute(origin, destination);
+            offlineRouter.findRoute(offlineRoute, OfflineRerouteActivity.this);
+          }
+
+          @Override
+          public void onConfigurationError(@NonNull OfflineError error) {
+            Timber.d("Error configuring offline tiles %s", error.getMessage());
+          }
+        });
+      }
+
+      @Override
+      public void onError(@NonNull OfflineError error) {
+        Toast.makeText(getApplicationContext(), "Unable to get versions", Toast.LENGTH_LONG).show();
+      }
     });
   }
 
-  private String obtainOfflineDirectoryFor(String fileName) {
+  private String obtainOfflineDirectory() {
     File offline = Environment.getExternalStoragePublicDirectory("Offline");
     if (!offline.exists()) {
       Timber.d("Offline directory does not exist");
+      offline.mkdirs();
     }
-    File file = new File(offline, fileName);
-    return file.getAbsolutePath();
+    return offline.getAbsolutePath();
   }
 
   private void animateCameraFor(Location location) {
@@ -324,5 +353,15 @@ public class OfflineRerouteActivity extends AppCompatActivity implements OnMapRe
       navigation.removeProgressChangeListener(this);
       navigation.onDestroy();
     }
+  }
+
+  @Override
+  public void onRouteFound(@NonNull DirectionsRoute route) {
+    handleNewRoute(route);
+  }
+
+  @Override
+  public void onError(@NonNull OfflineError error) {
+    Timber.d("Error fetching offline route: %s", error.getMessage());
   }
 }

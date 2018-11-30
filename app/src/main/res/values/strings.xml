@@ -10,6 +10,9 @@
     <string name="title_offline_reroute">Offline Reroute</string>
     <string name="description_offline_reroute">Test the offline reroute function inside the navigation SDK</string>
 
+    <string name="title_offline_region_download">Offline region download</string>
+    <string name="description_offline_region_download">Download offline routing tiles</string>
+
     <string name="title_reroute">Reroute</string>
     <string name="description_reroute">Test the reroute function inside the navigation SDK</string>
 
@@ -48,7 +51,7 @@
     <string name="language_key" translatable="false">language</string>
     <string name="route_profile_key" translatable="false">route_profile</string>
     <string name="offline_preference_key"
-            translatable="false">offline_preference_key</string>
+        translatable="false">offline_preference_key</string>
     <string name="view_examples_key" translatable="false">view_examples</string>
     <string name="default_locale" translatable="false">default_for_device</string>
     <string name="default_unit_type" translatable="false">default_for_device</string>
@@ -60,10 +63,12 @@
     <string name="error_select_longer_route">Please select a longer route</string>
     <string name="error_valid_route_not_found">Valid route not found.</string>
     <string name="explanation_long_press_waypoint">Long press map to place waypoint</string>
+    <string name="offline_disabled">Offline Disabled</string>
 
     <string name="blue" translatable="false">#4264fb</string>
 
     <string name="hint_where_to">Where to?</string>
     <string name="offline_routing">Offline routing</string>
     <string name="autocompleteBehavior" translatable="false">com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.AutocompleteBottomSheetBehavior</string>
+    <string name="download_complete">Download is complete!</string>
 </resources>
