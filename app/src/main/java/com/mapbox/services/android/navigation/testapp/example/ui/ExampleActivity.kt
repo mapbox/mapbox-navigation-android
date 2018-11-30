@@ -25,6 +25,7 @@ import com.mapbox.mapboxsdk.maps.AttributionDialogManager
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity
 import com.mapbox.services.android.navigation.testapp.R
+import com.mapbox.services.android.navigation.testapp.activity.HistoryActivity
 import com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.AutoCompleteBottomSheetCallback
 import com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.ExampleAutocompleteAdapter
 import com.mapbox.services.android.navigation.testapp.example.ui.permissions.PermissionRequestDialog
@@ -40,12 +41,13 @@ private const val ZERO_PADDING = 0
 private const val BOTTOMSHEET_MULTIPLIER = 4
 private const val EXTERNAL_STORAGE_PERMISSION_REQUEST = 1
 
-class ExampleActivity : AppCompatActivity(), ExampleView {
+class ExampleActivity : HistoryActivity(), ExampleView {
 
   private val permissionsManager = PermissionsManager(this)
   private var map: NavigationMapboxMap? = null
   private val presenter by lazy(mode = LazyThreadSafetyMode.NONE) {
     val viewModel = ViewModelProviders.of(this).get(ExampleViewModel::class.java)
+    addNavigationForHistory(viewModel.retrieveNavigation())
     ExamplePresenter(this, viewModel)
   }
 
