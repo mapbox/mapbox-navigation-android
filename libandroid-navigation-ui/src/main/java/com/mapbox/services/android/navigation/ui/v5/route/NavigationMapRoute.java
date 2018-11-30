@@ -52,8 +52,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import timber.log.Timber;
-
 import static com.mapbox.mapboxsdk.style.expressions.Expression.color;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.exponential;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.get;

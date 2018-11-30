@@ -11,7 +11,6 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
 /**
  * This class serves to contain the complicated chain of events that must happen to download
