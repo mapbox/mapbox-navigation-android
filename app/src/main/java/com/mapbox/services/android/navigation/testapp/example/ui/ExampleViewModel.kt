@@ -55,12 +55,11 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   private val speechPlayer: NavigationSpeechPlayer
   private val navigation: MapboxNavigation
 
-  // todo: is a hard-coded access token ok?
   private val accessToken: String = instance.resources.getString(R.string.mapbox_access_token)
   private val routeFinder: RouteFinder
 
   init {
-    routeFinder = RouteFinder(this, routes, accessToken, getVersionFromSharedPreferences())
+    routeFinder = RouteFinder(this, routes, accessToken, retrieveOfflineVersionFromPreferences())
     // Initialize the location engine
     locationEngine = FusedLocationEngine(getApplication())
     locationEngineListener = ExampleLocationEngineListener(locationEngine, location)
@@ -71,6 +70,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     // Initialize navigation and pass the LocationEngine
     navigation = MapboxNavigation(getApplication(), accessToken)
     navigation.locationEngine = locationEngine
+
     // Initialize the speech player and pass to milestone event listener for instructions
     val english = US.language // TODO localization
     val cache = Cache(File(application.cacheDir, EXAMPLE_INSTRUCTION_CACHE),
@@ -81,19 +81,6 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     navigation.addMilestoneEventListener(ExampleMilestoneEventListener(milestone, speechPlayer))
     navigation.addProgressChangeListener(ExampleProgressChangeListener(location, progress))
     navigation.addOffRouteListener(ExampleOffRouteListener(this))
-  }
-
-  private fun getVersionFromSharedPreferences(): String {
-    return getApplication<Application>().run {
-      PreferenceManager.getDefaultSharedPreferences(this)
-              .getString(this.getString(R.string.offline_preference_key), getString(R.string
-                      .offline_disabled))
-    }
-  }
-
-  fun isOffline(): Boolean {
-      val default = getApplication<Application>().getString(R.string.offline_disabled)
-      return getVersionFromSharedPreferences() != default
   }
 
   override fun onCleared() {
@@ -108,8 +95,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   fun findRouteToDestination() {
     location.value?.let { location ->
       destination.value?.let { destination ->
-        routeFinder.findRoute(getApplication(), location, destination,
-                isOffline())
+        routeFinder.findRoute(location, destination)
       }
     }
   }
@@ -155,6 +141,11 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     })
   }
 
+  fun refreshOfflineVersionFromPreferences() {
+    val version = retrieveOfflineVersionFromPreferences()
+    routeFinder.updateOfflineVersion(version)
+  }
+
   private fun shutdown() {
     val cameraEngine = navigation.cameraEngine
     if (cameraEngine is DynamicCamera) {
@@ -171,5 +162,11 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
   private fun removeLocationEngineListener() {
     locationEngine.removeLocationEngineListener(locationEngineListener)
+  }
+
+  private fun retrieveOfflineVersionFromPreferences(): String {
+    val context = getApplication<Application>()
+    return PreferenceManager.getDefaultSharedPreferences(context)
+      .getString(context.getString(R.string.offline_version_key), "")
   }
 }

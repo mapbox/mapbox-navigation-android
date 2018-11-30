@@ -50,9 +50,10 @@
     <string name="simulate_route_key" translatable="false">simulate_route</string>
     <string name="language_key" translatable="false">language</string>
     <string name="route_profile_key" translatable="false">route_profile</string>
-    <string name="offline_preference_key"
-        translatable="false">offline_preference_key</string>
     <string name="view_examples_key" translatable="false">view_examples</string>
+    <string name="offline_version_key" translatable="false">offline_preference_key</string>
+    <string name="offline_region_download" translatable="false">offline_region_download</string>
+    <string name="offline_enabled" translatable="false">offline_region_download</string>
     <string name="default_locale" translatable="false">default_for_device</string>
     <string name="default_unit_type" translatable="false">default_for_device</string>
     <string name="current_night_mode" translatable="false">current_night_mode</string>
@@ -68,7 +69,12 @@
     <string name="blue" translatable="false">#4264fb</string>
 
     <string name="hint_where_to">Where to?</string>
-    <string name="offline_routing">Offline routing</string>
     <string name="autocompleteBehavior" translatable="false">com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.AutocompleteBottomSheetBehavior</string>
     <string name="download_complete">Download is complete!</string>
+    <string name="offline_routing">Offline routing</string>
+    <string name="offline_enabled_title">Offline routing enabled</string>
+    <string name="offline_category_title">Offline</string>
+    <string name="offline_region_download_title">Download offline region</string>
+    <string name="offline_version_title">Choose offline version</string>
+    <string name="general_category_title">General</string>
 </resources>
