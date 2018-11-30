@@ -11,6 +11,8 @@ import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.v5.navigation.*
 import timber.log.Timber
 
+private const val BEARING_TOLERANCE = 90.0
+
 class OfflineRouteFinder(offlinePath: String,
                          version: String,
                          private val callback: OnRoutesFoundCallback) {
@@ -71,9 +73,9 @@ class OfflineRouteFinder(offlinePath: String,
 
   private fun buildOfflineRoute(location: Location, destination: Point): OfflineRoute {
     val origin = Point.fromLngLat(location.longitude, location.latitude)
-
+    val bearing = location.bearing.toDouble()
     return NavigationRoute.builder(NavigationApplication.instance)
-        .origin(origin)
+        .origin(origin, bearing, BEARING_TOLERANCE)
         .destination(destination)
         .accessToken(Mapbox.getAccessToken()!!)
         .let {
