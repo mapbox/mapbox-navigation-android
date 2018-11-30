@@ -454,11 +454,6 @@ public class NavigationMapRoute implements LifecycleObserver {
     // Each route contains traffic information and should be recreated considering this traffic
     // information.
     for (int i = 0; i < directionsRoutes.size(); i++) {
-
-      Timber.d("DirectionsRoutes.size " + directionsRoutes.size());
-      Timber.d("direction route " + directionsRoutes.get(i));
-
-
       featureCollections.add(addTrafficToSource(directionsRoutes.get(i), i));
     }
 
