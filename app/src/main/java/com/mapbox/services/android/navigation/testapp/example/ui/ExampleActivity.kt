@@ -271,6 +271,10 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     map?.updateLocationLayerRenderMode(renderMode)
   }
 
+  override fun updateCameraTrackingMode(trackingMode: Int) {
+    map?.updateCameraTrackingMode(trackingMode)
+  }
+
   override fun isStoragePermissionGranted() : Boolean {
     return ContextCompat.checkSelfPermission(this,
             Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED

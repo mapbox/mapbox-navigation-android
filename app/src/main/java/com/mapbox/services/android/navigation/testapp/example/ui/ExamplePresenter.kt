@@ -22,6 +22,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
+import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
@@ -93,6 +94,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       view.updateCancelFabVisibility(VISIBLE)
       view.updateInstructionViewVisibility(VISIBLE)
       view.updateLocationRenderMode(RenderMode.GPS)
+      view.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
       view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_HIDDEN)
       view.adjustMapPaddingForNavigation()
       viewModel.startNavigation()
@@ -106,6 +108,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     view.clearMarkers()
     view.resetMapPadding()
     view.updateLocationRenderMode(RenderMode.NORMAL)
+    view.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
     view.updateLocationFabVisibility(VISIBLE)
     view.updateSettingsFabVisibility(VISIBLE)
     view.updateCancelFabVisibility(INVISIBLE)
@@ -221,7 +224,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   fun buildDynamicCameraFrom(mapboxMap: MapboxMap) {
-    // TODO fix this leak
     viewModel.retrieveNavigation().cameraEngine = DynamicCamera(mapboxMap)
   }
 
