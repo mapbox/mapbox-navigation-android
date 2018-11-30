@@ -68,10 +68,12 @@ public class NavigationSettingsActivity extends PreferenceActivity {
       }
 
       List<String> list = buildFileList(file);
-      ListPreference offlineVersions = (ListPreference) findPreference(getString(R.string.offline_version_key));
-      String[] entries = list.toArray(new String[list.size() - 1]);
-      offlineVersions.setEntries(entries);
-      offlineVersions.setEntryValues(entries);
+      if (!list.isEmpty()) {
+        ListPreference offlineVersions = (ListPreference) findPreference(getString(R.string.offline_version_key));
+        String[] entries = list.toArray(new String[list.size() - 1]);
+        offlineVersions.setEntries(entries);
+        offlineVersions.setEntryValues(entries);
+      }
     }
 
     @NonNull
