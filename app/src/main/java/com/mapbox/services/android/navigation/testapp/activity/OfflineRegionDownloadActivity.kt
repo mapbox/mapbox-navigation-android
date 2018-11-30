@@ -23,10 +23,7 @@ import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.services.android.navigation.testapp.R
-import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter
-import com.mapbox.services.android.navigation.v5.navigation.OfflineTiles
-import com.mapbox.services.android.navigation.v5.navigation.OnTileVersionsFoundCallback
-import com.mapbox.services.android.navigation.v5.navigation.RouteTileDownloadListener
+import com.mapbox.services.android.navigation.v5.navigation.*
 import kotlinx.android.synthetic.main.activity_offline_region_download.*
 import timber.log.Timber
 
@@ -66,13 +63,11 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         MapboxOfflineRouter("")
             .fetchAvailableTileVersions(Mapbox.getAccessToken(),
                 object : OnTileVersionsFoundCallback {
-                override fun onVersionsFound(availableVersions: MutableList<String>?) {
-                    availableVersions?.let {
-                        setupSpinner(it)
-                    }
+                override fun onVersionsFound(availableVersions: MutableList<String>) {
+                    setupSpinner(availableVersions)
                 }
 
-                override fun onError() {
+                override fun onError(error: OfflineError) {
                     onVersionFetchFailed()
                 }
             })
@@ -201,19 +196,18 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
    * Download listeners
    */
 
-    override fun onError(throwable: Throwable) {
+    override fun onError(error: OfflineError) {
         setDownloadButtonEnabled(true)
         showToast("There was an error with the download. Please try again.")
     }
 
     override fun onProgressUpdate(percent: Int) {
         showDownloading(false, percent.toString() + "%...")
-
     }
 
-    override fun onCompletion(successful: Boolean) {
+    override fun onCompletion() {
         setDownloadButtonEnabled(true)
-        showToast(if (successful) "Download complete" else "Download cancelled")
+        showToast("Download complete")
     }
 
     /*

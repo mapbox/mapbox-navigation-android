@@ -31,13 +31,14 @@ class OfflineTileVersions {
         if (response.isSuccessful() && response.body() != null) {
           callback.onVersionsFound(response.body().availableVersions());
         } else {
-          callback.onError();
+          callback.onError(new OfflineError("Tile version response was unsuccessful"));
         }
       }
 
       @Override
       public void onFailure(@NonNull Call<RouteTileVersionsResponse> call, @NonNull Throwable throwable) {
-        callback.onError();
+        OfflineError error = new OfflineError(throwable.getMessage());
+        callback.onError(error);
       }
     });
   }

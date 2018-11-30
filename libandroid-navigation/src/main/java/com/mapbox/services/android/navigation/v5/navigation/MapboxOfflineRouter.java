@@ -11,6 +11,11 @@ import java.io.File;
  * Class used for offline routing.
  */
 public class MapboxOfflineRouter {
+
+  static {
+    NavigationLibraryLoader.load();
+  }
+
   private static final String TILE_PATH_NAME = "tiles";
   private final String tilePath;
   private final OfflineNavigator offlineNavigator;

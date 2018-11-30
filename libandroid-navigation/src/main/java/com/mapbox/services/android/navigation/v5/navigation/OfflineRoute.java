@@ -158,7 +158,7 @@ public class OfflineRoute {
   private boolean checkOfflineRoute(boolean isSuccess, String json) {
     if (!isSuccess) {
       Gson gson = new Gson();
-      OfflineError error = gson.fromJson(json, OfflineError.class);
+      OfflineRouteError error = gson.fromJson(json, OfflineRouteError.class);
       Timber.e("Error occurred fetching offline route: %s - Code: %d", error.getError(), error.getErrorCode());
       return true;
     }

@@ -34,9 +34,9 @@ class RouteTileDownloader {
     offlineTiles.fetchRouteTiles(new TarFetchedCallback());
   }
 
-  private void onError(Throwable throwable) {
+  private void onError(OfflineError error) {
     if (listener != null) {
-      listener.onError(throwable);
+      listener.onError(error);
     }
   }
 
@@ -59,7 +59,8 @@ class RouteTileDownloader {
 
     @Override
     public void onFailure(Call<ResponseBody> call, Throwable throwable) {
-      onError(throwable);
+      OfflineError error = new OfflineError(throwable.getMessage());
+      onError(error);
     }
   }
 
@@ -80,7 +81,8 @@ class RouteTileDownloader {
 
     @Override
     public void onErrorDownloading() {
-      onError(new Throwable("Error downloading"));
+      OfflineError error = new OfflineError("Error occurred downloading tiles: null file");
+      onError(error);
     }
   }
 
@@ -98,7 +100,7 @@ class RouteTileDownloader {
 
     @Override
     public void onCompletion() {
-      listener.onCompletion(true);
+      listener.onCompletion();
     }
   }
 }

@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.support.annotation.NonNull;
+
 /**
  * Listener that needs to be added to
  * {@link MapboxOfflineRouter#configure(String, OnOfflineTilesConfiguredCallback)} to know when
@@ -9,9 +11,19 @@ package com.mapbox.services.android.navigation.v5.navigation;
 public interface OnOfflineTilesConfiguredCallback {
 
   /**
-   * Will be fired when the offline data is initialized and
-   * {@link MapboxOfflineRouter#findRoute(OfflineRoute, OnOfflineRouteFoundCallback)}
+   * Called whe the offline data is initialized and
+   * {@link MapboxOfflineRouter#findRoute(OfflineRoute, OnOfflineRouteFoundCallback)}.
    * could be called safely.
+   *
+   * @param numberOfTiles initialized in the path provided
    */
-  void onOfflineDataInitialized(OfflineData offlineData);
+  void onConfigured(int numberOfTiles);
+
+  /**
+   * Called when an error has occurred configuring
+   * the offline tile data.
+   *
+   * @param error with message explanation
+   */
+  void onConfigurationError(@NonNull OfflineError error);
 }

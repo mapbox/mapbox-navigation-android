@@ -1,20 +1,25 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.support.annotation.NonNull;
+
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 
-import java.util.List;
-
 /**
- * Callback used for getting routes
+ * Callback used for finding offline routes.
  */
 public interface OnOfflineRouteFoundCallback {
 
   /**
-   * Called when route is found.
+   * Called when an offline route is found.
    *
-   * @param routes offline route
+   * @param route offline route
    */
-  void routesFound(List<DirectionsRoute> routes);
+  void onRouteFound(@NonNull DirectionsRoute route);
 
-  void onError(OfflineData offlineData);
+  /**
+   * Called when there was an error fetching the offline route.
+   *
+   * @param error with message explanation
+   */
+  void onError(@NonNull OfflineError error);
 }
