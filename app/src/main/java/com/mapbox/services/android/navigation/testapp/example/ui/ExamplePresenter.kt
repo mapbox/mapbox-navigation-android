@@ -21,6 +21,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
+import com.mapbox.services.android.navigation.testapp.example.ui.permissions.NAVIGATION_PERMISSIONS_REQUEST
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
@@ -36,7 +37,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   private var state: PresenterState = PresenterState.SHOW_LOCATION
 
-  fun onLocationPermissionResult(granted: Boolean) {
+  fun onPermissionsGranted(granted: Boolean) {
     if (granted) {
       view.initialize()
     } else {
@@ -44,9 +45,12 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     }
   }
 
-  fun onStoragePermissionResult(grantResults: IntArray) {
-    if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-      findRoute()
+  fun onPermissionResult(requestCode: Int, grantResults: IntArray) {
+    if (requestCode == NAVIGATION_PERMISSIONS_REQUEST) {
+      val granted = grantResults.isNotEmpty()
+          && grantResults[0] == PackageManager.PERMISSION_GRANTED
+          && grantResults[1] == PackageManager.PERMISSION_GRANTED
+      onPermissionsGranted(granted)
     }
   }
 
@@ -72,15 +76,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   fun onDirectionsFabClick() {
-    if (viewModel.isOffline() && !view.isStoragePermissionGranted()) {
-      view.requestStoragePermission()
-      return
-    }
-
-    findRoute()
-  }
-
-  fun findRoute() {
     state = PresenterState.FIND_ROUTE
     viewModel.findRouteToDestination()
   }
