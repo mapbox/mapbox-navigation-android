@@ -1,6 +1,8 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.github.triplet.play'
+apply from: "${rootDir}/gradle/script-git-version.gradle"
 
 android {
   compileSdkVersion androidVersions.compileSdkVersion
@@ -11,14 +13,31 @@ android {
     targetCompatibility JavaVersion.VERSION_1_8
   }
 
+  playAccountConfigs {
+    defaultAccountConfig {
+      serviceAccountEmail = 'navigation-testapp-publisher@android-gl-native.iam.gserviceaccount.com'
+      jsonFile = file("$project.rootDir/android-gl-native-15d95ab30d0f.json")
+    }
+  }
+
   defaultConfig {
-    applicationId "com.mapbox.services.android.navigation.testapp"
+    applicationId "com.mapbox.services.android.navigation.app"
     minSdkVersion androidVersions.minSdkVersion
     targetSdkVersion androidVersions.targetSdkVersion
-    versionCode 1
-    versionName "0.1"
+    versionCode gitVersionCode
+    versionName gitVersionName
+    playAccountConfig = playAccountConfigs.defaultAccountConfig
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true
+  }
+
+  signingConfigs {
+    release {
+      keyAlias System.getenv("CIRCLECI_ANDROID_KEYSTORE_ALIAS")
+      keyPassword System.getenv("CIRCLECI_ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD")
+      storeFile file("$project.rootDir/navigation_testapp.keystore")
+      storePassword System.getenv("CIRCLECI_ANDROID_KEYSTORE_PASSWORD")
+    }
   }
 
   buildTypes {
@@ -27,6 +46,7 @@ android {
     }
     release {
       minifyEnabled true
+      signingConfig signingConfigs.release
     }
   }
 
@@ -38,6 +58,10 @@ android {
 
   lintOptions {
     abortOnError false
+  }
+
+  play {
+    track = System.getenv("GOOGLE_PLAY_TRACK") ?: "internal"
   }
 }
 

@@ -69,7 +69,7 @@
     <string name="blue" translatable="false">#4264fb</string>
 
     <string name="hint_where_to">Where to?</string>
-    <string name="autocompleteBehavior" translatable="false">com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.AutocompleteBottomSheetBehavior</string>
+    <string name="autocompleteBehavior" translatable="false">com.mapbox.services.android.navigation.app.example.ui.autocomplete.AutocompleteBottomSheetBehavior</string>
     <string name="download_complete">Download is complete!</string>
     <string name="offline_routing">Offline routing</string>
     <string name="offline_enabled_title">Offline routing enabled</string>
