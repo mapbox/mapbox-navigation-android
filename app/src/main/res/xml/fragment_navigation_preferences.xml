@@ -13,9 +13,12 @@
             android:targetPackage="com.mapbox.services.android.navigation.testapp"/>
     </Preference>
 
+    <Preference
+        android:key="@string/git_hash_key"
+        android:title="Latest git Hash"/>
+
     <PreferenceCategory
-        android:title="@string/general_category_title"
-        android:textSize="22sp">
+        android:title="@string/general_category_title">
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -45,8 +48,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/offline_category_title"
-        android:textSize="22sp">
+        android:title="@string/offline_category_title">
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -63,9 +65,9 @@
         </Preference>
 
         <ListPreference
+            android:enabled="false"
             android:key="@string/offline_version_key"
-            android:title="@string/offline_version_title"
-            android:enabled="false"/>
+            android:title="@string/offline_version_title"/>
 
     </PreferenceCategory>
 
