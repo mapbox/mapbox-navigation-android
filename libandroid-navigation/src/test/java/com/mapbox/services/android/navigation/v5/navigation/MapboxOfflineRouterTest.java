@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import org.junit.Test;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -32,6 +33,28 @@ public class MapboxOfflineRouterTest {
   }
 
   @Test
+  public void configure_errorWithEmptyTilePath() {
+    String emptyTilePath = "";
+    OnOfflineTilesConfiguredCallback callback = mock(OnOfflineTilesConfiguredCallback.class);
+    MapboxOfflineRouter offlineRouter = buildRouter(emptyTilePath);
+
+    offlineRouter.configure("some_version", callback);
+
+    verify(callback).onConfigurationError(any(OfflineError.class));
+  }
+
+  @Test
+  public void downloadTiles_errorWithEmptyTilePath() {
+    String emptyTilePath = "";
+    RouteTileDownloadListener listener = mock(RouteTileDownloadListener.class);
+    MapboxOfflineRouter offlineRouter = buildRouter(emptyTilePath);
+
+    offlineRouter.downloadTiles(mock(OfflineTiles.class), listener);
+
+    verify(listener).onError(any(OfflineError.class));
+  }
+
+  @Test
   public void fetchAvailableTileVersions() {
     String accessToken = "access_token";
     OnTileVersionsFoundCallback callback = mock(OnTileVersionsFoundCallback.class);
@@ -41,6 +64,10 @@ public class MapboxOfflineRouterTest {
     offlineRouter.fetchAvailableTileVersions(accessToken, callback);
 
     verify(offlineTileVersions).fetchRouteTileVersions(accessToken, callback);
+  }
+
+  private MapboxOfflineRouter buildRouter(String tilePath) {
+    return new MapboxOfflineRouter(tilePath, mock(OfflineNavigator.class), mock(OfflineTileVersions.class));
   }
 
   private MapboxOfflineRouter buildRouter(String tilePath, OfflineNavigator offlineNavigator) {

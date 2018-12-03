@@ -60,7 +60,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     }
 
     fun setupSpinner() {
-        MapboxOfflineRouter("")
+        MapboxOfflineRouter()
             .fetchAvailableTileVersions(Mapbox.getAccessToken(),
                 object : OnTileVersionsFoundCallback {
                 override fun onVersionsFound(availableVersions: MutableList<String>) {

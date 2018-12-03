@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.support.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.core.utils.TextUtils;
 import com.mapbox.navigator.Navigator;
 
 import java.io.File;
@@ -16,6 +17,7 @@ public class MapboxOfflineRouter {
     NavigationLibraryLoader.load();
   }
 
+  private static final String EMPTY_TILE_PATH = "";
   private static final String TILE_PATH_NAME = "tiles";
   private final String tilePath;
   private final OfflineNavigator offlineNavigator;
@@ -33,7 +35,19 @@ public class MapboxOfflineRouter {
       tileDir.mkdirs();
     }
 
-    this.tilePath = tileDir.getAbsolutePath();
+    tilePath = tileDir.getAbsolutePath();
+    offlineNavigator = new OfflineNavigator(new Navigator());
+    offlineTileVersions = new OfflineTileVersions();
+  }
+
+  /**
+   * Creates an offline router.
+   * <p>
+   * This constructor does not take a offline file path.  This file path is not required for calling
+   * methods such as {@link MapboxOfflineRouter#fetchAvailableTileVersions(String, OnTileVersionsFoundCallback)}.
+   */
+  public MapboxOfflineRouter() {
+    tilePath = EMPTY_TILE_PATH;
     offlineNavigator = new OfflineNavigator(new Navigator());
     offlineTileVersions = new OfflineTileVersions();
   }
@@ -54,6 +68,11 @@ public class MapboxOfflineRouter {
    *                 can be called safely
    */
   public void configure(String version, OnOfflineTilesConfiguredCallback callback) {
+    if (TextUtils.isEmpty(tilePath)) {
+      OfflineError error = new OfflineError("Offline file path is empty");
+      callback.onConfigurationError(error);
+      return;
+    }
     offlineNavigator.configure(new File(tilePath, version).getAbsolutePath(), callback);
   }
 
@@ -74,6 +93,11 @@ public class MapboxOfflineRouter {
    * @param listener     which is updated on error, on progress update and on completion
    */
   public void downloadTiles(OfflineTiles offlineTiles, RouteTileDownloadListener listener) {
+    if (TextUtils.isEmpty(tilePath)) {
+      OfflineError error = new OfflineError("Offline file path is empty");
+      listener.onError(error);
+      return;
+    }
     new RouteTileDownloader(tilePath, listener).startDownload(offlineTiles);
   }
 
