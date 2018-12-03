@@ -15,3 +15,6 @@
 
 # --- Navigator ---
 -keep class com.mapbox.navigator.** { *; }
+
+# --- Telemetry ---
+-keep class com.mapbox.android.telemetry.** { *; }
