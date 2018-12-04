@@ -10,7 +10,7 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:targetClass="com.mapbox.services.android.navigation.testapp.MainActivity"
-            android:targetPackage="com.mapbox.services.android.navigation.testapp"/>
+            android:targetPackage="com.mapbox.services.android.navigation.app"/>
     </Preference>
 
     <Preference
@@ -61,7 +61,7 @@
             <intent
                 android:action="android.intent.action.VIEW"
                 android:targetClass="com.mapbox.services.android.navigation.testapp.activity.OfflineRegionDownloadActivity"
-                android:targetPackage="com.mapbox.services.android.navigation.testapp"/>
+                android:targetPackage="com.mapbox.services.android.navigation.app"/>
         </Preference>
 
         <ListPreference
