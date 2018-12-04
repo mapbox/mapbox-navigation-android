@@ -51,6 +51,8 @@ public class NavigationSettingsActivity extends PreferenceActivity {
     public void onCreate(final Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       addPreferencesFromResource(R.xml.fragment_navigation_preferences);
+      String gitHashTitle = String.format("Last Commit Hash: %s", BuildConfig.GIT_HASH);
+      findPreference(getString(R.string.git_hash_key)).setTitle(gitHashTitle);
     }
 
     @Override

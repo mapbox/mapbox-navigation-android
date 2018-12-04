@@ -11,6 +11,15 @@ android {
     targetCompatibility JavaVersion.VERSION_1_8
   }
 
+  def getGitHash = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+      commandLine 'git', 'rev-parse', '--short', 'HEAD'
+      standardOutput = stdout
+    }
+    return stdout.toString().trim()
+  }
+
   defaultConfig {
     applicationId "com.mapbox.services.android.navigation.testapp"
     minSdkVersion androidVersions.minSdkVersion
@@ -19,6 +28,7 @@ android {
     versionName "0.1"
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true
+    buildConfigField "String", "GIT_HASH", "\"${getGitHash()}\""
   }
 
   buildTypes {
