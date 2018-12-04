@@ -6,6 +6,12 @@ workflows:
     jobs:
       - build
       - release
+      - publish:
+          filters:
+            tags:
+              only: /^testapp-.*/
+            branches:
+              ignore: /.*/
 jobs:
   build:
     working_directory: ~/code
@@ -142,3 +148,34 @@ jobs:
           name: Check & Publish Binary Size
           command: |
             ./scripts/check_binary_size.sh ./scripts/paths_file.txt ./scripts/labels_file.txt 'mapbox-navigation-android' 'android' ./scripts/sdks_file.txt
+# ------------------------------------------------------------------------------
+  publish:
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    working_directory: ~/code
+    environment:
+      JVM_OPTS: -Xmx3200m
+      BUILDTYPE: Debug
+      IS_LOCAL_DEVELOPMENT: false
+      GOOGLE_PLAY_TRACK: internal
+    steps:
+      - checkout
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      - run:
+          name: Export Google Play authentication json
+          command: |
+            #!/bin/bash
+            echo "${MAPBOX_DEVELOPER_CONFIG}" > /root/code/app/src/main/res/values/developer-config.xml
+            echo "${PLAY_PUBLISH_AUTH_JSON}" > android-gl-native-15d95ab30d0f.json
+      - run:
+          name: Release to Google Play
+          command: ./gradlew :app:publishRelease
+# ------------------------------------------------------------------------------
