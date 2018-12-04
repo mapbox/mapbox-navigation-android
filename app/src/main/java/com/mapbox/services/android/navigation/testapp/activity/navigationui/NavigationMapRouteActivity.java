@@ -154,12 +154,18 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   protected void onStart() {
     super.onStart();
     mapView.onStart();
+    if (navigationMapRoute != null) {
+      navigationMapRoute.onStart();
+    }
   }
 
   @Override
   protected void onStop() {
     super.onStop();
     mapView.onStop();
+    if (navigationMapRoute != null) {
+      navigationMapRoute.onStop();
+    }
   }
 
   @Override
@@ -178,16 +184,15 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
+    if (navigationMapRoute != null) {
+      navigationMapRoute.onDestroy();
+    }
   }
 
   @Override
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
-  }
-
-  public NavigationMapRoute getNavigationMapRoute() {
-    return navigationMapRoute;
   }
 
   private String loadJsonFromAsset(String filename) {

@@ -709,6 +709,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private void shutdown() {
     if (navigationMap != null) {
       navigationMap.removeOnCameraTrackingChangedListener(onTrackingChangedListener);
+      navigationMap.onDestroy();
     }
     navigationViewEventDispatcher.onDestroy(navigationViewModel.retrieveNavigation());
     mapView.onDestroy();

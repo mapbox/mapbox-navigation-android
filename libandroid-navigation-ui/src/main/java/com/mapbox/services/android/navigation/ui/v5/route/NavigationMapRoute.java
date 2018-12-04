@@ -39,6 +39,7 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   @StyleRes
   private final int styleRes;
+  private final String belowLayer;
   private final MapboxMap mapboxMap;
   private final MapView mapView;
   private final MapRouteClickListener mapRouteClickListener;
@@ -131,6 +132,7 @@ public class NavigationMapRoute implements LifecycleObserver {
                             @NonNull MapboxMap mapboxMap, @StyleRes int styleRes,
                             @Nullable String belowLayer) {
     this.styleRes = styleRes;
+    this.belowLayer = belowLayer;
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
@@ -144,11 +146,12 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   // For testing only
   NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
-                     @NonNull MapboxMap mapboxMap, @StyleRes int styleRes,
+                     @NonNull MapboxMap mapboxMap, @StyleRes int styleRes, @Nullable String belowLayer,
                      MapRouteClickListener mapClickListener,
                      MapView.OnDidFinishLoadingStyleListener didFinishLoadingStyleListener,
                      MapRouteProgressChangeListener progressChangeListener) {
     this.styleRes = styleRes;
+    this.belowLayer = belowLayer;
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
@@ -160,13 +163,14 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   // For testing only
   NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
-                     @NonNull MapboxMap mapboxMap, @StyleRes int styleRes,
+                     @NonNull MapboxMap mapboxMap, @StyleRes int styleRes, @Nullable String belowLayer,
                      MapRouteClickListener mapClickListener,
                      MapView.OnDidFinishLoadingStyleListener didFinishLoadingStyleListener,
                      MapRouteProgressChangeListener progressChangeListener,
                      MapRouteLine routeLine,
                      MapRouteArrow routeArrow) {
     this.styleRes = styleRes;
+    this.belowLayer = belowLayer;
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
@@ -296,12 +300,21 @@ public class NavigationMapRoute implements LifecycleObserver {
     removeListeners();
   }
 
+  /**
+   * This method should be added in your {@link Activity#onDestroy()} or {@link Fragment#onDestroyView()}
+   * to handle removing resources that were added to the map.
+   */
+  @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+  public void onDestroy() {
+    routeLine.onDestroy();
+    routeArrow.onDestroy();
+  }
+
   private void initializeDidFinishLoadingStyleListener() {
     didFinishLoadingStyleListener = new MapView.OnDidFinishLoadingStyleListener() {
       @Override
       public void onDidFinishLoadingStyle() {
-        routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes);
-        routeLine.redraw();
+        redraw();
       }
     };
   }
@@ -332,5 +345,15 @@ public class NavigationMapRoute implements LifecycleObserver {
       mapView.removeOnDidFinishLoadingStyleListener(didFinishLoadingStyleListener);
       isDidFinishLoadingStyleListenerAdded = false;
     }
+  }
+
+  private void redraw() {
+    routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes);
+    List<DirectionsRoute> routes = routeLine.retrieveDirectionsRoutes();
+    boolean alternativesVisible = routeLine.retrieveAlternativesVisible();
+    int primaryRouteIndex = routeLine.retrievePrimaryRouteIndex();
+    boolean isVisible = routeLine.retrieveVisibilty();
+    routeLine = new MapRouteLine(mapView.getContext(), mapboxMap, styleRes, belowLayer);
+    routeLine.redraw(routes, alternativesVisible, primaryRouteIndex, isVisible);
   }
 }

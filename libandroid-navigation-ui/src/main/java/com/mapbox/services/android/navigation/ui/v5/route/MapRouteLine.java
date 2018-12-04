@@ -71,42 +71,44 @@ import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.
 class MapRouteLine {
 
   @ColorInt
-  private final int routeDefaultColor;
+  private int routeDefaultColor;
   @ColorInt
-  private final int routeModerateColor;
+  private int routeModerateColor;
   @ColorInt
-  private final int routeSevereColor;
+  private int routeSevereColor;
   @ColorInt
-  private final int alternativeRouteDefaultColor;
+  private int alternativeRouteDefaultColor;
   @ColorInt
-  private final int alternativeRouteModerateColor;
+  private int alternativeRouteModerateColor;
   @ColorInt
-  private final int alternativeRouteSevereColor;
+  private int alternativeRouteSevereColor;
   @ColorInt
-  private final int alternativeRouteShieldColor;
+  private int alternativeRouteShieldColor;
   @ColorInt
-  private final int routeShieldColor;
-  private final float routeScale;
-  private final float alternativeRouteScale;
+  private int routeShieldColor;
+  private float routeScale;
+  private float alternativeRouteScale;
 
   private final HashMap<LineString, DirectionsRoute> routeLineStrings = new HashMap<>();
   private final List<FeatureCollection> routeFeatureCollections = new ArrayList<>();
   private final List<DirectionsRoute> directionsRoutes = new ArrayList<>();
-  private final MapboxMap mapboxMap;
-  private final Drawable originIcon;
-  private final Drawable destinationIcon;
-  private final GeoJsonSource wayPointSource;
-  private final GeoJsonSource routeLineSource;
-  private final List<Layer> layers = new ArrayList<>();
+  private final List<Layer> routeLayers;
 
+  private MapboxMap mapboxMap;
+  private Drawable originIcon;
+  private Drawable destinationIcon;
+  private GeoJsonSource wayPointSource;
+  private GeoJsonSource routeLineSource;
   private FeatureCollection wayPointFeatureCollection;
   private String belowLayer;
   private int primaryRouteIndex;
+  private boolean isVisible = true;
   private boolean alternativesVisible = true;
 
   MapRouteLine(Context context, MapboxMap mapboxMap, int styleRes, String belowLayer) {
     this.mapboxMap = mapboxMap;
     this.belowLayer = belowLayer;
+    this.routeLayers = new ArrayList<>();
 
     TypedArray typedArray = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute);
     // Primary Route attributes
@@ -162,6 +164,13 @@ class MapRouteLine {
     initializeLayers(mapboxMap);
   }
 
+  // For testing only
+  MapRouteLine(GeoJsonSource routeLineSource, GeoJsonSource wayPointSource, List<Layer> routeLayers) {
+    this.routeLineSource = routeLineSource;
+    this.wayPointSource = wayPointSource;
+    this.routeLayers = routeLayers;
+  }
+
   void draw(DirectionsRoute directionsRoute) {
     List<DirectionsRoute> route = new ArrayList<>();
     route.add(directionsRoute);
@@ -176,11 +185,12 @@ class MapRouteLine {
     generateRouteFeatureCollectionsFrom(directionsRoutes);
   }
 
-  void redraw() {
-    findRouteBelowLayerId();
-    drawRoutes(routeFeatureCollections);
-    wayPointSource.setGeoJson(wayPointFeatureCollection);
+  void redraw(List<DirectionsRoute> routes, boolean alternativesVisible,
+              int primaryRouteIndex, boolean isVisible) {
+    draw(routes);
     toggleAlternativeVisibilityWith(alternativesVisible);
+    updatePrimaryRouteIndex(primaryRouteIndex);
+    updateVisibilityTo(isVisible);
   }
 
   void toggleAlternativeVisibilityWith(boolean alternativesVisible) {
@@ -188,8 +198,16 @@ class MapRouteLine {
     updateAlternativeVisibilityTo(alternativesVisible);
   }
 
+  boolean retrieveAlternativesVisible() {
+    return alternativesVisible;
+  }
+
   void updateVisibilityTo(boolean isVisible) {
     updateAllLayersVisibilityTo(isVisible);
+  }
+
+  boolean retrieveVisibilty() {
+    return isVisible;
   }
 
   HashMap<LineString, DirectionsRoute> retrieveRouteLineStrings() {
@@ -201,7 +219,8 @@ class MapRouteLine {
   }
 
   boolean updatePrimaryRouteIndex(int primaryRouteIndex) {
-    boolean isNewIndex = this.primaryRouteIndex != primaryRouteIndex;
+    boolean isNewIndex = this.primaryRouteIndex != primaryRouteIndex
+      && primaryRouteIndex < directionsRoutes.size();
     if (isNewIndex) {
       this.primaryRouteIndex = primaryRouteIndex;
       updateRoutesFor(primaryRouteIndex);
@@ -211,6 +230,12 @@ class MapRouteLine {
 
   int retrievePrimaryRouteIndex() {
     return primaryRouteIndex;
+  }
+
+  void onDestroy() {
+    for (Layer routeLayer : routeLayers) {
+      mapboxMap.removeLayer(routeLayer);
+    }
   }
 
   private void drawRoutes(List<FeatureCollection> routeFeatureCollections) {
@@ -305,15 +330,15 @@ class MapRouteLine {
   private void initializeLayers(MapboxMap mapboxMap) {
     LineLayer routeShieldLayer = initializeRouteShieldLayer(mapboxMap);
     MapUtils.addLayerToMap(mapboxMap, routeShieldLayer, belowLayer);
-    layers.add(routeShieldLayer);
+    routeLayers.add(routeShieldLayer);
 
     LineLayer routeLayer = initializeRouteLayer(mapboxMap);
     MapUtils.addLayerToMap(mapboxMap, routeLayer, belowLayer);
-    layers.add(routeLayer);
+    routeLayers.add(routeLayer);
 
     SymbolLayer wayPointLayer = initializeWayPointLayer(mapboxMap);
     MapUtils.addLayerToMap(mapboxMap, wayPointLayer, belowLayer);
-    layers.add(wayPointLayer);
+    routeLayers.add(wayPointLayer);
   }
 
   private LineLayer initializeRouteShieldLayer(MapboxMap mapboxMap) {
@@ -452,7 +477,7 @@ class MapRouteLine {
   }
 
   private void updateAlternativeVisibilityTo(boolean isVisible) {
-    for (Layer layer : layers) {
+    for (Layer layer : routeLayers) {
       String layerId = layer.getId();
       if (layerId.equals(ROUTE_LAYER_ID) || layerId.equals(ROUTE_SHIELD_LAYER_ID)) {
         LineLayer route = (LineLayer) layer;
@@ -466,7 +491,8 @@ class MapRouteLine {
   }
 
   private void updateAllLayersVisibilityTo(boolean isVisible) {
-    for (Layer layer : layers) {
+    this.isVisible = isVisible;
+    for (Layer layer : routeLayers) {
       layer.setProperties(
         visibility(isVisible ? VISIBLE : NONE)
       );

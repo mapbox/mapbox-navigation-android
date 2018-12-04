@@ -374,6 +374,14 @@ public class NavigationMapboxMap {
   }
 
   /**
+   * Should be used in {@link FragmentActivity#onDestroy()} to ensure proper
+   * accounting for the lifecycle.
+   */
+  public void onDestroy() {
+    mapRoute.onDestroy();
+  }
+
+  /**
    * Hide or show the location icon on the map.
    *
    * @param isVisible true to show, false to hide
