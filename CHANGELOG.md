@@ -2,6 +2,14 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.24.1 - December 5, 2018
+
+* Increment leg index upon way point arrival #1604
+* Update Navigator 3.4.9 #1603
+* Bump mapboxSdkServices version to 4.2.0 #1599
+* Setup CI to publish the sample app to Google Play #1597
+* Add last commit hash to test app settings #1590
+
 ### v0.24.0 - December 3, 2018
 
 * Add proguard rule for MapboxTelemetry #1593
