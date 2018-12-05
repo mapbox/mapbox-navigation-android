@@ -12,6 +12,8 @@ import java.util.Date;
 
 class MapboxNavigator {
 
+  private static final int INDEX_FIRST_ROUTE = 0;
+  private static final int INDEX_FIRST_LEG = 0;
   private final Navigator navigator;
 
   MapboxNavigator(Navigator navigator) {
@@ -20,7 +22,7 @@ class MapboxNavigator {
 
   synchronized void updateRoute(String routeJson) {
     // TODO route_index (Which route to follow) and leg_index (Which leg to follow) are hardcoded for now
-    navigator.setRoute(routeJson, 0, 0);
+    navigator.setRoute(routeJson, INDEX_FIRST_ROUTE, INDEX_FIRST_LEG);
   }
 
   synchronized NavigationStatus retrieveStatus(Date date, long lagInMilliseconds) {
@@ -36,6 +38,10 @@ class MapboxNavigator {
     synchronized (this) {
       navigator.updateLocation(fixedLocation);
     }
+  }
+
+  synchronized NavigationStatus updateLegIndex(int index) {
+    return navigator.changeRouteLeg(INDEX_FIRST_ROUTE, index);
   }
 
   /**

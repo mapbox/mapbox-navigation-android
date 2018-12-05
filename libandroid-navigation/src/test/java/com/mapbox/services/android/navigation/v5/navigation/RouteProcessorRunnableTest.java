@@ -2,10 +2,13 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.NavigationStatus;
+import com.mapbox.navigator.RouteState;
 import com.mapbox.services.android.navigation.v5.navigation.camera.SimpleCamera;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteDetector;
@@ -16,10 +19,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -82,6 +89,61 @@ public class RouteProcessorRunnableTest {
     verify(snapToRoute).getSnappedLocationWith(status, rawLocation);
   }
 
+  @Test
+  public void onRun_legIndexIncrementsOnLegCompletionWithValidDistanceRemaining() {
+    SnapToRoute snapToRoute = mock(SnapToRoute.class);
+    NavigationEngineFactory factory = buildMockFactory(snapToRoute);
+    NavigationStatus status = buildMockStatus();
+    when(status.getRouteState()).thenReturn(RouteState.COMPLETE);
+    when(status.getRemainingLegDistance()).thenReturn(20f);
+    MapboxNavigator navigator = mock(MapboxNavigator.class);
+    DirectionsRoute route = buildTwoLegRoute();
+    RouteProcessorRunnable runnable = buildRouteProcessorRunnableWith(navigator, factory, status, route);
+    Location rawLocation = mock(Location.class);
+    runnable.updateRawLocation(rawLocation);
+
+    runnable.run();
+
+    verify(navigator).updateLegIndex(anyInt());
+  }
+
+  @Test
+  public void onRun_legIndexDoesNotIncrementsOnLegCompletionWithInvalidDistanceRemaining() {
+    SnapToRoute snapToRoute = mock(SnapToRoute.class);
+    NavigationEngineFactory factory = buildMockFactory(snapToRoute);
+    NavigationStatus status = buildMockStatus();
+    when(status.getRouteState()).thenReturn(RouteState.COMPLETE);
+    when(status.getRemainingLegDistance()).thenReturn(50f);
+    MapboxNavigator navigator = mock(MapboxNavigator.class);
+    DirectionsRoute route = buildTwoLegRoute();
+    RouteProcessorRunnable runnable = buildRouteProcessorRunnableWith(navigator, factory, status, route);
+    Location rawLocation = mock(Location.class);
+    runnable.updateRawLocation(rawLocation);
+
+    runnable.run();
+
+    verify(navigator, times(0)).updateLegIndex(anyInt());
+  }
+
+  @Test
+  public void onRun_legIndexDoesNotIncrementsOnLegCompletionWithInvalidLegsRemaining() {
+    SnapToRoute snapToRoute = mock(SnapToRoute.class);
+    NavigationEngineFactory factory = buildMockFactory(snapToRoute);
+    NavigationStatus status = buildMockStatus();
+    when(status.getRouteState()).thenReturn(RouteState.COMPLETE);
+    when(status.getRemainingLegDistance()).thenReturn(20f);
+    when(status.getLegIndex()).thenReturn(1);
+    MapboxNavigator navigator = mock(MapboxNavigator.class);
+    DirectionsRoute route = buildTwoLegRoute();
+    RouteProcessorRunnable runnable = buildRouteProcessorRunnableWith(navigator, factory, status, route);
+    Location rawLocation = mock(Location.class);
+    runnable.updateRawLocation(rawLocation);
+
+    runnable.run();
+
+    verify(navigator, times(0)).updateLegIndex(1);
+  }
+
   private RouteProcessorRunnable buildRouteProcessorRunnableWith(NavigationRouteProcessor processor,
                                                                  NavigationStatus status, DirectionsRoute route) {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().build();
@@ -100,6 +162,27 @@ public class RouteProcessorRunnableTest {
       mock(RouteProcessorBackgroundThread.Listener.class)
     );
   }
+
+  private RouteProcessorRunnable buildRouteProcessorRunnableWith(MapboxNavigator navigator,
+                                                                 NavigationEngineFactory factory,
+                                                                 NavigationStatus status,
+                                                                 DirectionsRoute route) {
+    MapboxNavigationOptions options = MapboxNavigationOptions.builder().build();
+    when(navigator.retrieveStatus(any(Date.class), any(Long.class))).thenReturn(status);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+    when(navigation.options()).thenReturn(options);
+    when(navigation.getRoute()).thenReturn(route);
+    when(navigation.retrieveMapboxNavigator()).thenReturn(navigator);
+    when(navigation.retrieveEngineFactory()).thenReturn(factory);
+    return new RouteProcessorRunnable(
+      mock(NavigationRouteProcessor.class),
+      navigation,
+      mock(Handler.class),
+      mock(Handler.class),
+      mock(RouteProcessorBackgroundThread.Listener.class)
+    );
+  }
+
 
   private RouteProcessorRunnable buildRouteProcessorRunnableWith(NavigationEngineFactory factory,
                                                                  NavigationStatus status) {
@@ -145,5 +228,15 @@ public class RouteProcessorRunnableTest {
     when(status.getTime()).thenReturn(new Date());
     when(status.getBearing()).thenReturn(0.0f);
     return status;
+  }
+
+  @NonNull
+  private DirectionsRoute buildTwoLegRoute() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    List<RouteLeg> routeLegs = new ArrayList<>();
+    routeLegs.add(mock(RouteLeg.class));
+    routeLegs.add(mock(RouteLeg.class));
+    when(route.legs()).thenReturn(routeLegs);
+    return route;
   }
 }
