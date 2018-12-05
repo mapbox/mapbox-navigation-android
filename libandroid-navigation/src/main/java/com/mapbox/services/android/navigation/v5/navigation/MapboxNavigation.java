@@ -39,8 +39,7 @@ import retrofit2.Callback;
 import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.BANNER_INSTRUCTION_MILESTONE_ID;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
-  .NON_NULL_APPLICATION_CONTEXT_REQUIRED;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NON_NULL_APPLICATION_CONTEXT_REQUIRED;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID;
 
 /**
@@ -332,9 +331,7 @@ public class MapboxNavigation implements ServiceConnection {
 
   /**
    * Call this when the navigation session needs to end before the user reaches their final
-   * destination. There isn't a need to manually end the navigation session using this API when the
-   * user arrives unless you set {@link MapboxNavigationOptions#manuallyEndNavigationUponCompletion()}
-   * to true.
+   * destination.
    * <p>
    * Ending the navigation session ends and unbinds the navigation service meaning any milestone,
    * progress change, or off-route listeners will not be invoked anymore. A call returning false
@@ -726,6 +723,10 @@ public class MapboxNavigation implements ServiceConnection {
   @Nullable
   public DirectionsRoute findOfflineRoute(@NonNull OfflineRoute route) {
     return retrieveOfflineRoute(route);
+  }
+    
+  public String retrieveSsmlAnnouncementInstruction(int index) {
+    return mapboxNavigator.retrieveVoiceInstruction(index).getSsmlAnnouncement();
   }
 
   @Override

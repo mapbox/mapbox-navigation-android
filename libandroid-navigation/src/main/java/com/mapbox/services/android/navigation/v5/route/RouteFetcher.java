@@ -40,6 +40,7 @@ public class RouteFetcher {
   private final String accessToken;
   private final WeakReference<Context> contextWeakReference;
 
+  private NavigationRoute navigationRoute;
   private RouteProgress routeProgress;
   protected RouteUtils routeUtils;
 
@@ -49,12 +50,29 @@ public class RouteFetcher {
     routeUtils = new RouteUtils();
   }
 
+  // Package private (no modifier) for testing purposes
+  RouteFetcher(Context context, String accessToken, NavigationRoute navigationRoute) {
+    this.contextWeakReference = new WeakReference<>(context);
+    this.navigationRoute = navigationRoute;
+    this.accessToken = accessToken;
+  }
+
+  /**
+   * Adds a {@link RouteListener} to this class to be triggered when a route
+   * response has been received.
+   *
+   * @param listener to be added
+   */
   public void addRouteListener(RouteListener listener) {
     if (!routeListeners.contains(listener)) {
       routeListeners.add(listener);
     }
   }
 
+  /**
+   * Clears any listeners that have been added to this class via
+   * {@link RouteFetcher#addRouteListener(RouteListener)}.
+   */
   public void clearListeners() {
     routeListeners.clear();
   }
@@ -77,6 +95,15 @@ public class RouteFetcher {
     this.routeProgress = routeProgress;
     NavigationRoute.Builder builder = buildRequestFromLocation(location, routeProgress);
     executeRouteCall(builder);
+  }
+
+  /**
+   * Cancels the Directions API call if it has not been executed yet.
+   */
+  public void cancelRouteCall() {
+    if (navigationRoute != null) {
+      navigationRoute.cancelCall();
+    }
   }
 
   @Nullable
@@ -156,7 +183,8 @@ public class RouteFetcher {
   private void executeRouteCall(NavigationRoute.Builder builder) {
     if (builder != null) {
       builder.accessToken(accessToken);
-      builder.build().getRoute(directionsResponseCallback);
+      navigationRoute = builder.build();
+      navigationRoute.getRoute(directionsResponseCallback);
     }
   }
 

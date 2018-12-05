@@ -168,6 +168,15 @@ public abstract class RouteProgress {
   @Nullable
   public abstract VoiceInstruction voiceInstruction();
 
+  /**
+   * Returns the current state of progress along the route.  Provides route and location tracking
+   * information.
+   *
+   * @return the current state of progress along the route.
+   */
+  @Nullable
+  public abstract RouteProgressState currentState();
+
   public abstract RouteProgress.Builder toBuilder();
 
   abstract int stepIndex();
@@ -254,6 +263,8 @@ public abstract class RouteProgress {
     public abstract Builder inTunnel(boolean inTunnel);
 
     public abstract Builder voiceInstruction(@Nullable VoiceInstruction voiceInstruction);
+
+    public abstract Builder currentState(@Nullable RouteProgressState currentState);
 
     abstract RouteProgress autoBuild(); // not public
 

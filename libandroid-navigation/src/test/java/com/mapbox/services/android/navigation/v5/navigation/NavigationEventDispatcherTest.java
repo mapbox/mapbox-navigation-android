@@ -315,7 +315,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
     String instruction = "";
     BannerInstructionMilestone milestone = mock(BannerInstructionMilestone.class);
     RouteUtils routeUtils = mock(RouteUtils.class);
-    when(routeUtils.isArrivalEvent(routeProgress, milestone)).thenReturn(false);
+    when(routeUtils.isArrivalEvent(routeProgress)).thenReturn(false);
     NavigationEventDispatcher navigationEventDispatcher = new NavigationEventDispatcher(routeUtils);
     navigationEventDispatcher.addMetricEventListeners(metricEventListener);
 
@@ -329,7 +329,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
     String instruction = "";
     BannerInstructionMilestone milestone = mock(BannerInstructionMilestone.class);
     RouteUtils routeUtils = mock(RouteUtils.class);
-    when(routeUtils.isArrivalEvent(routeProgress, milestone)).thenReturn(true);
+    when(routeUtils.isArrivalEvent(routeProgress)).thenReturn(true);
     NavigationEventDispatcher navigationEventDispatcher = new NavigationEventDispatcher(routeUtils);
     navigationEventDispatcher.addMetricEventListeners(metricEventListener);
 
@@ -344,7 +344,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
     Location location = mock(Location.class);
     BannerInstructionMilestone milestone = mock(BannerInstructionMilestone.class);
     RouteUtils routeUtils = mock(RouteUtils.class);
-    when(routeUtils.isArrivalEvent(routeProgress, milestone)).thenReturn(true);
+    when(routeUtils.isArrivalEvent(routeProgress)).thenReturn(true);
     when(routeUtils.isLastLeg(routeProgress)).thenReturn(true);
     NavigationEventDispatcher dispatcher = buildEventDispatcherHasArrived(instruction, routeUtils, milestone);
 
@@ -359,7 +359,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
     Location location = mock(Location.class);
     BannerInstructionMilestone milestone = mock(BannerInstructionMilestone.class);
     RouteUtils routeUtils = mock(RouteUtils.class);
-    when(routeUtils.isArrivalEvent(routeProgress, milestone)).thenReturn(true);
+    when(routeUtils.isArrivalEvent(routeProgress)).thenReturn(true);
     when(routeUtils.isLastLeg(routeProgress)).thenReturn(true);
     NavigationEventDispatcher dispatcher = buildEventDispatcherHasArrived(instruction, routeUtils, milestone);
 

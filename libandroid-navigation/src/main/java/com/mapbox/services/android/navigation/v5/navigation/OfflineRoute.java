@@ -24,29 +24,29 @@ public class OfflineRoute {
 
   private static final String BICYCLE_TYPE_QUERY_PARAMETER = "bicycle_type";
   private static final String CYCLING_SPEED_QUERY_PARAMETER = "cycling_speed";
-  private static final String USE_ROADS_QUERY_PARAMETER = "use_roads";
-  private static final String USE_HILLS_QUERY_PARAMETER = "use_hills";
-  private static final String USE_FERRY_QUERY_PARAMETER = "use_ferry";
-  private static final String AVOID_BAD_SURFACES_QUERY_PARAMETER = "avoid_bad_surfaces";
+  private static final String CYCLEWAY_BIAS_QUERY_PARAMETER = "cycleway_bias";
+  private static final String HILL_BIAS_QUERY_PARAMETER = "hill_bias";
+  private static final String FERRY_BIAS_QUERY_PARAMETER = "ferry_bias";
+  private static final String ROUGH_SURFACE_BIAS_QUERY_PARAMETER = "rough_surface_bias";
   private static final String WAYPOINT_TYPES_QUERY_PARAMETER = "waypoint_types";
   private final NavigationRoute onlineRoute;
   private final String bicycleType;
   private final Float cyclingSpeed;
-  private final Float useRoads;
-  private final Float useHills;
-  private final Float useFerry;
-  private final Float avoidBadSurfaces;
+  private final Float cyclewayBias;
+  private final Float hillBias;
+  private final Float ferryBias;
+  private final Float roughSurfaceBias;
   private final String waypointTypes;
 
-  private OfflineRoute(NavigationRoute onlineRoute, String bicycleType, Float cyclingSpeed, Float useRoads,
-                       Float useHills, Float useFerry, Float avoidBadSurfaces, List<String> waypointTypes) {
+  private OfflineRoute(NavigationRoute onlineRoute, String bicycleType, Float cyclingSpeed, Float cyclewayBias,
+                       Float hillBias, Float ferryBias, Float roughSurfaceBias, List<String> waypointTypes) {
     this.onlineRoute = onlineRoute;
     this.bicycleType = checkBicycleType(bicycleType);
     this.cyclingSpeed = cyclingSpeed;
-    this.useRoads = useRoads;
-    this.useHills = useHills;
-    this.useFerry = useFerry;
-    this.avoidBadSurfaces = avoidBadSurfaces;
+    this.cyclewayBias = cyclewayBias;
+    this.hillBias = hillBias;
+    this.ferryBias = ferryBias;
+    this.roughSurfaceBias = roughSurfaceBias;
     this.waypointTypes = checkWaypointTypes(waypointTypes);
   }
 
@@ -133,20 +133,20 @@ public class OfflineRoute {
       offlineUrlBuilder.addQueryParameter(CYCLING_SPEED_QUERY_PARAMETER, cyclingSpeed.toString());
     }
 
-    if (useRoads != null) {
-      offlineUrlBuilder.addQueryParameter(USE_ROADS_QUERY_PARAMETER, useRoads.toString());
+    if (cyclewayBias != null) {
+      offlineUrlBuilder.addQueryParameter(CYCLEWAY_BIAS_QUERY_PARAMETER, cyclewayBias.toString());
     }
 
-    if (useHills != null) {
-      offlineUrlBuilder.addQueryParameter(USE_HILLS_QUERY_PARAMETER, useHills.toString());
+    if (hillBias != null) {
+      offlineUrlBuilder.addQueryParameter(HILL_BIAS_QUERY_PARAMETER, hillBias.toString());
     }
 
-    if (useFerry != null) {
-      offlineUrlBuilder.addQueryParameter(USE_FERRY_QUERY_PARAMETER, useFerry.toString());
+    if (ferryBias != null) {
+      offlineUrlBuilder.addQueryParameter(FERRY_BIAS_QUERY_PARAMETER, ferryBias.toString());
     }
 
-    if (avoidBadSurfaces != null) {
-      offlineUrlBuilder.addQueryParameter(AVOID_BAD_SURFACES_QUERY_PARAMETER, avoidBadSurfaces.toString());
+    if (roughSurfaceBias != null) {
+      offlineUrlBuilder.addQueryParameter(ROUGH_SURFACE_BIAS_QUERY_PARAMETER, roughSurfaceBias.toString());
     }
 
     if (waypointTypes != null) {
@@ -158,7 +158,7 @@ public class OfflineRoute {
   private boolean checkOfflineRoute(boolean isSuccess, String json) {
     if (!isSuccess) {
       Gson gson = new Gson();
-      OfflineError error = gson.fromJson(json, OfflineError.class);
+      OfflineRouteError error = gson.fromJson(json, OfflineRouteError.class);
       Timber.e("Error occurred fetching offline route: %s - Code: %d", error.getError(), error.getErrorCode());
       return true;
     }
@@ -174,10 +174,10 @@ public class OfflineRoute {
     private final NavigationRoute.Builder navigationRouteBuilder;
     private String bicycleType;
     private Float cyclingSpeed;
-    private Float useRoads;
-    private Float useHills;
-    private Float useFerry;
-    private Float avoidBadSurfaces;
+    private Float cyclewayBias;
+    private Float hillBias;
+    private Float ferryBias;
+    private Float roughSurfaceBias;
     private List<String> waypointTypes;
 
     private Builder(NavigationRoute.Builder onlineRouteBuilder) {
@@ -213,65 +213,65 @@ public class OfflineRoute {
     }
 
     /**
-     * A cyclist's propensity to use roads alongside other vehicles. This is a range of values from 0
-     * to 1, where 0 attempts to avoid roads and stay on cycleways and paths, and 1 indicates the
+     * A cyclist's propensity to use roads alongside other vehicles. This is a range of values from -1
+     * to 1, where -1 attempts to avoid roads and stay on cycleways and paths, and 1 indicates the
      * rider is more comfortable riding on roads. Based on the use_roads factor, roads with certain
      * classifications and higher speeds are penalized in an attempt to avoid them when finding the
-     * best path. The default value is 0.5.
+     * best path. The default value is 0.
      *
-     * @param useRoads a cyclist's propensity to use roads alongside other vehicles
+     * @param cyclewayBias a cyclist's propensity to use roads alongside other vehicles
      * @return this builder for chaining options together
      */
-    public Builder useRoads(@Nullable @FloatRange(from = 0.0, to = 1.0) Float useRoads) {
-      this.useRoads = useRoads;
+    public Builder cyclewayBias(@Nullable @FloatRange(from = -1.0, to = 1.0) Float cyclewayBias) {
+      this.cyclewayBias = cyclewayBias;
       return this;
     }
 
     /**
-     * A cyclist's desire to tackle hills in their routes. This is a range of values from 0 to 1,
-     * where 0 attempts to avoid hills and steep grades even if it means a longer (time and
+     * A cyclist's desire to tackle hills in their routes. This is a range of values from -1 to 1,
+     * where -1 attempts to avoid hills and steep grades even if it means a longer (time and
      * distance) path, while 1 indicates the rider does not fear hills and steeper grades. Based on
-     * the use_hills factor, penalties are applied to roads based on elevation change and grade.
+     * the hill bias factor, penalties are applied to roads based on elevation change and grade.
      * These penalties help the path avoid hilly roads in favor of flatter roads or less steep
      * grades where available. Note that it is not always possible to find alternate paths to avoid
-     * hills (for example when route locations are in mountainous areas). The default value is 0.5.
+     * hills (for example when route locations are in mountainous areas). The default value is 0.
      *
-     * @param useHills a cyclist's desire to tackle hills in their routes
+     * @param hillBias a cyclist's desire to tackle hills in their routes
      * @return this builder for chaining options together
      */
-    public Builder useHills(@Nullable @FloatRange(from = 0.0, to = 1.0) Float useHills) {
-      this.useHills = useHills;
+    public Builder hillBias(@Nullable @FloatRange(from = -1.0, to = 1.0) Float hillBias) {
+      this.hillBias = hillBias;
       return this;
     }
 
     /**
-     * This value indicates the willingness to take ferries. This is a range of values between 0 and 1.
-     * Values near 0 attempt to avoid ferries and values near 1 will favor ferries. Note that
-     * sometimes ferries are required to complete a route so values of 0 are not guaranteed to avoid
-     * ferries entirely. The default value is 0.5.
+     * This value indicates the willingness to take ferries. This is a range of values between -1 and 1.
+     * Values near -1 attempt to avoid ferries and values near 1 will favor ferries. Note that
+     * sometimes ferries are required to complete a route so values of -1 are not guaranteed to avoid
+     * ferries entirely. The default value is 0.
      *
-     * @param useFerry the willingness to take ferries
+     * @param ferryBias the willingness to take ferries
      * @return this builder for chaining options together
      */
-    public Builder useFerry(@Nullable @FloatRange(from = 0.0, to = 1.0) Float useFerry) {
-      this.useFerry = useFerry;
+    public Builder ferryBias(@Nullable @FloatRange(from = -1.0, to = 1.0) Float ferryBias) {
+      this.ferryBias = ferryBias;
       return this;
     }
 
     /**
-     * This value is meant to represent how much a cyclist wants to avoid roads with poor surfaces
-     * relative to the bicycle type being used. This is a range of values between 0 and 1. When the
-     * value is 0, there is no penalization of roads with different surface types; only bicycle
-     * speed on each surface is taken into account. As the value approaches 1, roads with poor
-     * surfaces for the bike are penalized heavier so that they are only taken if they
-     * significantly improve travel time. When the value is equal to 1, all bad surfaces are
-     * completely disallowed from routing, including start and end points. The default value is 0.25.
+     * This value is meant to represent how much a cyclist wants to favor or avoid roads with poor/rough
+     * surfaces relative to the bicycle type being used. This is a range of values between -1 and 1.
+     * When the value approaches -1, we attempt to penalize heavier or avoid roads with rough surface types
+     * so that they are only taken if they significantly improve travel time; only bicycle
+     * speed on each surface is taken into account. As the value approaches 1, we will favor rough surfaces.
+     * When the value is equal to -1, all bad surfaces are completely disallowed from routing,
+     * including start and end points. The default value is 0.
      *
-     * @param avoidBadSurfaces how much a cyclist wants to avoid roads with poor surfaces
+     * @param roughSurfaceBias how much a cyclist wants to avoid roads with poor surfaces
      * @return this builder for chaining options together
      */
-    public Builder avoidBadSurfaces(@Nullable @FloatRange(from = 0.0, to = 1.0) Float avoidBadSurfaces) {
-      this.avoidBadSurfaces = avoidBadSurfaces;
+    public Builder roughSurfaceBias(@Nullable @FloatRange(from = -1.0, to = 1.0) Float roughSurfaceBias) {
+      this.roughSurfaceBias = roughSurfaceBias;
       return this;
     }
 
@@ -293,8 +293,8 @@ public class OfflineRoute {
      * @return a new instance of {@link OfflineRoute}
      */
     public OfflineRoute build() {
-      return new OfflineRoute(navigationRouteBuilder.build(), bicycleType, cyclingSpeed, useRoads, useHills,
-        useFerry, avoidBadSurfaces, waypointTypes);
+      return new OfflineRoute(navigationRouteBuilder.build(), bicycleType, cyclingSpeed, cyclewayBias,
+              hillBias, ferryBias, roughSurfaceBias, waypointTypes);
     }
   }
 }

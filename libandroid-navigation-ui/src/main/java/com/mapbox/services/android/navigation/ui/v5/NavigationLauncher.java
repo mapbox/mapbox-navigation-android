@@ -7,8 +7,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
@@ -63,16 +61,27 @@ public class NavigationLauncher {
     return DirectionsRoute.fromJson(directionsRouteJson);
   }
 
+  static void cleanUpPreferences(Context context) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    SharedPreferences.Editor editor = preferences.edit();
+    editor
+      .remove(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY)
+      .remove(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE)
+      .remove(NavigationConstants.NAVIGATION_VIEW_ROUTE_PROFILE_KEY)
+      .remove(NavigationConstants.NAVIGATION_VIEW_PREFERENCE_SET_THEME)
+      .remove(NavigationConstants.NAVIGATION_VIEW_PREFERENCE_SET_THEME)
+      .remove(NavigationConstants.NAVIGATION_VIEW_LIGHT_THEME)
+      .remove(NavigationConstants.NAVIGATION_VIEW_DARK_THEME)
+      .apply();
+  }
+
   private static void storeDirectionsRouteValue(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
-    editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, new GsonBuilder()
-      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create().toJson(options.directionsRoute()));
+    editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, options.directionsRoute().toJson());
   }
 
   private static void storeConfiguration(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
     editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, options.shouldSimulateRoute());
     editor.putString(NavigationConstants.NAVIGATION_VIEW_ROUTE_PROFILE_KEY, options.directionsProfile());
-    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_OFF_ROUTE_ENABLED_KEY, options.enableOffRouteDetection());
-    editor.putBoolean(NavigationConstants.NAVIGATION_VIEW_SNAP_ENABLED_KEY, options.snapToRoute());
   }
 
   private static void storeThemePreferences(NavigationLauncherOptions options, SharedPreferences.Editor editor) {

@@ -9,9 +9,12 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.NavigationStatus;
+import com.mapbox.navigator.RouteState;
 import com.mapbox.navigator.VoiceInstruction;
 import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressState;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressStateMap;
 
 import java.util.List;
 
@@ -27,6 +30,7 @@ class NavigationRouteProcessor {
 
   private static final int ONE_INDEX = 1;
   private static final double ONE_SECOND_IN_MILLISECONDS = 1000.0;
+  private final RouteProgressStateMap progressStateMap = new RouteProgressStateMap();
   private RouteProgress previousRouteProgress;
   private DirectionsRoute route;
   private RouteLeg currentLeg;
@@ -79,6 +83,8 @@ class NavigationRouteProcessor {
     StepIntersection upcomingIntersection = findUpcomingIntersection(
       currentIntersections, upcomingStep, currentIntersection
     );
+    RouteState routeState = status.getRouteState();
+    RouteProgressState currentRouteState = progressStateMap.get(routeState);
 
     RouteProgress.Builder progressBuilder = RouteProgress.builder()
       .distanceRemaining(routeDistanceRemaining)
@@ -95,7 +101,8 @@ class NavigationRouteProcessor {
       .upcomingIntersection(upcomingIntersection)
       .intersectionDistancesAlongStep(currentIntersectionDistances)
       .currentLegAnnotation(currentLegAnnotation)
-      .inTunnel(status.getInTunnel());
+      .inTunnel(status.getInTunnel())
+      .currentState(currentRouteState);
 
     // TODO build banner instructions from status here
     addVoiceInstructions(status, progressBuilder);

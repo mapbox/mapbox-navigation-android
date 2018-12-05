@@ -3,8 +3,10 @@ package testapp;
 import android.content.res.Configuration;
 import android.support.test.espresso.ViewAction;
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.test.TestNavigationActivity;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 
 import org.junit.Test;
@@ -19,6 +21,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static junit.framework.Assert.assertFalse;
+import static testapp.action.NavigationViewAction.invoke;
 import static testapp.action.OrientationChangeAction.orientationLandscape;
 import static testapp.action.OrientationChangeAction.orientationPortrait;
 
@@ -36,6 +39,15 @@ public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
     }
     validateTestSetup();
 
+    invoke(getNavigationView(), (uiController, navigationView) -> {
+      DirectionsRoute testRoute = DirectionsRoute.fromJson(loadJsonFromAsset("lancaster-1.json"));
+      NavigationViewOptions options = NavigationViewOptions.builder()
+        .directionsRoute(testRoute)
+        .build();
+
+      navigationView.startNavigation(options);
+    });
+
     changeOrientation(orientationLandscape());
   }
 
@@ -46,6 +58,15 @@ public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
     }
     validateTestSetup();
 
+    invoke(getNavigationView(), (uiController, navigationView) -> {
+      DirectionsRoute testRoute = DirectionsRoute.fromJson(loadJsonFromAsset("lancaster-1.json"));
+      NavigationViewOptions options = NavigationViewOptions.builder()
+        .directionsRoute(testRoute)
+        .build();
+
+      navigationView.startNavigation(options);
+    });
+
     changeOrientation(orientationPortrait());
   }
 
@@ -55,6 +76,15 @@ public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
       return;
     }
     validateTestSetup();
+
+    invoke(getNavigationView(), (uiController, navigationView) -> {
+      DirectionsRoute testRoute = DirectionsRoute.fromJson(loadJsonFromAsset("lancaster-1.json"));
+      NavigationViewOptions options = NavigationViewOptions.builder()
+        .directionsRoute(testRoute)
+        .build();
+
+      navigationView.startNavigation(options);
+    });
 
     onView(withId(R.id.routeOverviewBtn)).perform(click());
     changeOrientation(orientationLandscape());
@@ -67,6 +97,15 @@ public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
       return;
     }
     validateTestSetup();
+
+    invoke(getNavigationView(), (uiController, navigationView) -> {
+      DirectionsRoute testRoute = DirectionsRoute.fromJson(loadJsonFromAsset("lancaster-1.json"));
+      NavigationViewOptions options = NavigationViewOptions.builder()
+        .directionsRoute(testRoute)
+        .build();
+
+      navigationView.startNavigation(options);
+    });
 
     onView(withId(R.id.navigationMapView)).perform(swipeUp());
     changeOrientation(orientationLandscape());
@@ -82,6 +121,15 @@ public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
       return;
     }
     validateTestSetup();
+
+    invoke(getNavigationView(), (uiController, navigationView) -> {
+      DirectionsRoute testRoute = DirectionsRoute.fromJson(loadJsonFromAsset("lancaster-1.json"));
+      NavigationViewOptions options = NavigationViewOptions.builder()
+        .directionsRoute(testRoute)
+        .build();
+
+      navigationView.startNavigation(options);
+    });
 
     onView(withId(R.id.navigationMapView)).perform(swipeUp());
     changeOrientation(orientationLandscape());

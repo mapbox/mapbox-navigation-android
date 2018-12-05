@@ -3,8 +3,6 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.support.annotation.IntDef;
 import android.support.annotation.StringDef;
 
-import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
-
 /**
  * Navigation constants
  *
@@ -50,72 +48,6 @@ public final class NavigationConstants {
    * @since 0.5.0
    */
   public static final int NAVIGATION_NOTIFICATION_ID = 5678;
-
-  /**
-   * Threshold user must be within to count as completing a step. One of two heuristics used to know
-   * when a user completes a step, see {@link #MANEUVER_ZONE_RADIUS}. The users heading and the
-   * finalHeading are compared. If this number is within this defined constant, the user has
-   * completed the step.
-   *
-   * @since 0.1.0
-   */
-  static final int MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION = 30;
-
-  /**
-   * Radius in meters the user must enter to count as completing a step. One of two heuristics used
-   * to know when a user completes a step, see
-   * {@link #MAXIMUM_ALLOWED_DEGREE_OFFSET_FOR_TURN_COMPLETION}.
-   *
-   * @since 0.1.0
-   */
-  public static final int MANEUVER_ZONE_RADIUS = 40;
-
-  /**
-   * Maximum number of meters the user can travel away from step before the
-   * {@link OffRouteListener}'s called.
-   *
-   * @since 0.2.0
-   */
-  static final double MAXIMUM_DISTANCE_BEFORE_OFF_ROUTE = 20;
-
-  /**
-   * Seconds used before a reroute occurs.
-   *
-   * @since 0.2.0
-   */
-  static final int SECONDS_BEFORE_REROUTE = 3;
-
-  /**
-   * Accepted deviation excluding horizontal accuracy before the user is considered to be off route.
-   *
-   * @since 0.1.0
-   */
-  static final double USER_LOCATION_SNAPPING_DISTANCE = 10;
-
-  /**
-   * When calculating whether or not the user is on the route, we look where the user will be given
-   * their speed and this variable.
-   *
-   * @since 0.2.0
-   */
-  static final double DEAD_RECKONING_TIME_INTERVAL = 1.0;
-
-  /**
-   * Maximum angle the user puck will be rotated when snapping the user's course to the route line.
-   *
-   * @since 0.3.0
-   */
-  static final int MAX_MANIPULATED_COURSE_ANGLE = 25;
-
-  /**
-   * Meter radius which the user must be inside for an arrival milestone to be triggered and
-   * navigation to end.
-   */
-  public static final double METERS_REMAINING_TILL_ARRIVAL = 40;
-
-  public static final double MINIMUM_BACKUP_DISTANCE_FOR_OFF_ROUTE = 50;
-
-  public static final double MINIMUM_DISTANCE_BEFORE_REROUTING = 50;
 
   /**
    * Duration in which the AlertView is shown with the "Report Problem" text.
@@ -181,18 +113,6 @@ public final class NavigationConstants {
   public static final int NAVIGATION_HIGH_ALERT_DURATION = 15;
 
   /**
-   * Default location acceptable accuracy threshold
-   * used in {@link com.mapbox.services.android.navigation.v5.location.LocationValidator}.
-   * <p>
-   * If a new {@link android.location.Location} update is received from the LocationEngine that has
-   * an accuracy less than this threshold, the update will be considered valid and all other validation
-   * is not considered.
-   *
-   * @since 0.17.0
-   */
-  static final int ONE_HUNDRED_METER_ACCEPTABLE_ACCURACY_THRESHOLD = 100;
-
-  /**
    * Default approximate location engine interval lag in milliseconds
    * <p>
    * This value will be used to offset the time at which the current location was calculated
@@ -234,8 +154,6 @@ public final class NavigationConstants {
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
   public static final String NAVIGATION_VIEW_SIMULATE_ROUTE = "navigation_view_simulate_route";
   public static final String NAVIGATION_VIEW_ROUTE_PROFILE_KEY = "navigation_view_route_profile";
-  public static final String NAVIGATION_VIEW_OFF_ROUTE_ENABLED_KEY = "navigation_view_off_route_enabled";
-  public static final String NAVIGATION_VIEW_SNAP_ENABLED_KEY = "navigation_view_snap_enabled";
 
   // Step Maneuver Types
   public static final String STEP_MANEUVER_TYPE_TURN = "turn";

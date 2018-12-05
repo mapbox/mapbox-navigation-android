@@ -85,8 +85,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
  *
  * @since 0.4.0
  */
-public class NavigationMapRoute implements MapView.OnMapChangedListener,
-  MapboxMap.OnMapClickListener, LifecycleObserver {
+public class NavigationMapRoute implements LifecycleObserver {
 
   private static final String CONGESTION_KEY = "congestion";
   private static final String SOURCE_KEY = "source";
@@ -173,6 +172,10 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
   private Feature arrowShaftGeoJsonFeature = Feature.fromGeometry(Point.fromLngLat(0, 0));
   private Feature arrowHeadGeoJsonFeature = Feature.fromGeometry(Point.fromLngLat(0, 0));
   private MapRouteProgressChangeListener progressChangeListener = new MapRouteProgressChangeListener(this);
+  private MapboxMap.OnMapClickListener mapClickListener;
+  private boolean isMapClickListenerAdded = false;
+  private MapView.OnDidFinishLoadingStyleListener didFinishLoadingStyleListener;
+  private boolean isDidFinishLoadingStyleListenerAdded = false;
 
   /**
    * Construct an instance of {@link NavigationMapRoute}.
@@ -266,6 +269,28 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
     initialize();
     addListeners();
   }
+
+  // For testing only
+  NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
+                     @NonNull MapboxMap mapboxMap, @StyleRes int styleRes,
+                     @Nullable String belowLayer, MapboxMap.OnMapClickListener mapClickListener,
+                     MapView.OnDidFinishLoadingStyleListener didFinishLoadingStyleListener,
+                     MapRouteProgressChangeListener progressChangeListener) {
+    this.styleRes = styleRes;
+    this.mapView = mapView;
+    this.mapboxMap = mapboxMap;
+    this.navigation = navigation;
+    this.belowLayer = belowLayer;
+    featureCollections = new ArrayList<>();
+    directionsRoutes = new ArrayList<>();
+    routeLineStrings = new HashMap<>();
+    layerIds = new ArrayList<>();
+    this.mapClickListener = mapClickListener;
+    this.didFinishLoadingStyleListener = didFinishLoadingStyleListener;
+    this.progressChangeListener = progressChangeListener;
+    addListeners();
+  }
+
 
   /**
    * Allows adding a single primary route for the user to traverse along. No alternative routes will
@@ -449,8 +474,12 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
   }
 
   private void addDirectionWaypoints() {
+    FeatureCollection wayPointFeatureCollection = null;
+    if (!featureCollections.isEmpty()) {
+      wayPointFeatureCollection = featureCollections.get(featureCollections.size() - 1);
+    }
     MapUtils.updateMapSourceFromFeatureCollection(
-      mapboxMap, featureCollections.get(featureCollections.size() - 1), WAYPOINT_SOURCE_ID);
+      mapboxMap, wayPointFeatureCollection, WAYPOINT_SOURCE_ID);
     drawWaypointMarkers(mapboxMap,
       AppCompatResources.getDrawable(mapView.getContext(), originWaypointIcon),
       AppCompatResources.getDrawable(mapView.getContext(), destinationWaypointIcon)
@@ -840,9 +869,6 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
   private void placeRouteBelow() {
     if (belowLayer == null || belowLayer.isEmpty()) {
       List<Layer> styleLayers = mapboxMap.getLayers();
-      if (styleLayers == null) {
-        return;
-      }
       for (int i = 0; i < styleLayers.size(); i++) {
         if (!(styleLayers.get(i) instanceof SymbolLayer)
           // Avoid placing the route on top of the user location layer
@@ -906,14 +932,62 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
     getAttributes();
     placeRouteBelow();
     initializeUpcomingManeuverArrow();
+    initializeListeners();
+  }
+
+  private void initializeListeners() {
+    mapClickListener = new MapboxMap.OnMapClickListener() {
+      @Override
+      public void onMapClick(@NonNull LatLng point) {
+        if (invalidMapClick()) {
+          return;
+        }
+        final int currentRouteIndex = primaryRouteIndex;
+
+        if (findClickedRoute(point)) {
+          return;
+        }
+        checkNewRouteFound(currentRouteIndex);
+      }
+    };
+    didFinishLoadingStyleListener = new MapView.OnDidFinishLoadingStyleListener() {
+      @Override
+      public void onDidFinishLoadingStyle() {
+        placeRouteBelow();
+        initializeUpcomingManeuverArrow();
+        drawRoutes();
+        addDirectionWaypoints();
+        showAlternativeRoutes(alternativesVisible);
+      }
+    };
   }
 
   private void addListeners() {
-    mapboxMap.addOnMapClickListener(this);
+    if (!isMapClickListenerAdded) {
+      mapboxMap.addOnMapClickListener(mapClickListener);
+      isMapClickListenerAdded = true;
+    }
     if (navigation != null) {
       navigation.addProgressChangeListener(progressChangeListener);
     }
-    mapView.addOnMapChangedListener(this);
+    if (!isDidFinishLoadingStyleListenerAdded) {
+      mapView.addOnDidFinishLoadingStyleListener(didFinishLoadingStyleListener);
+      isDidFinishLoadingStyleListenerAdded = true;
+    }
+  }
+
+  private void removeListeners() {
+    if (isMapClickListenerAdded) {
+      mapboxMap.removeOnMapClickListener(mapClickListener);
+      isMapClickListenerAdded = false;
+    }
+    if (navigation != null) {
+      navigation.removeProgressChangeListener(progressChangeListener);
+    }
+    if (isDidFinishLoadingStyleListenerAdded) {
+      mapView.removeOnDidFinishLoadingStyleListener(didFinishLoadingStyleListener);
+      isDidFinishLoadingStyleListenerAdded = false;
+    }
   }
 
   /**
@@ -923,19 +997,6 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
    */
   public void removeRoute() {
     clearRoutes();
-  }
-
-  @Override
-  public void onMapClick(@NonNull LatLng point) {
-    if (invalidMapClick()) {
-      return;
-    }
-    final int currentRouteIndex = primaryRouteIndex;
-
-    if (findClickedRoute(point)) {
-      return;
-    }
-    checkNewRouteFound(currentRouteIndex);
   }
 
   private boolean invalidMapClick() {
@@ -1004,24 +1065,6 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
   }
 
   /**
-   * Called when a map change events occurs. Used specifically to detect loading of a new style, if
-   * applicable reapply the route line source and layers.
-   *
-   * @param change the map change event that occurred
-   * @since 0.4.0
-   */
-  @Override
-  public void onMapChanged(int change) {
-    if (change == MapView.DID_FINISH_LOADING_STYLE) {
-      placeRouteBelow();
-      initializeUpcomingManeuverArrow();
-      drawRoutes();
-      addDirectionWaypoints();
-      showAlternativeRoutes(alternativesVisible);
-    }
-  }
-
-  /**
    * This method should be called only if you have passed {@link MapboxNavigation}
    * into the constructor.
    * <p>
@@ -1032,9 +1075,7 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_START)
   public void onStart() {
-    if (navigation != null) {
-      navigation.addProgressChangeListener(progressChangeListener);
-    }
+    addListeners();
   }
 
   /**
@@ -1048,9 +1089,7 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
   public void onStop() {
-    if (navigation != null) {
-      navigation.removeProgressChangeListener(progressChangeListener);
-    }
+    removeListeners();
   }
 
   /**
@@ -1058,7 +1097,7 @@ public class NavigationMapRoute implements MapView.OnMapChangedListener,
    * the source into pieces so data-driven styling can be used to change the route colors
    * accordingly.
    */
-  private FeatureCollection addTrafficToSource(DirectionsRoute route, int index) {
+  private FeatureCollection addTrafficToSource(@NonNull DirectionsRoute route, int index) {
     final List<Feature> features = new ArrayList<>();
     LineString originalGeometry = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);
     buildRouteFeatureFromGeometry(index, features, originalGeometry);

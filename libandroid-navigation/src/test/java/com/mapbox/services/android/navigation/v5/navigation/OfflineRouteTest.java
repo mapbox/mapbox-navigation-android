@@ -66,47 +66,47 @@ public class OfflineRouteTest {
   }
 
   @Test
-  public void addUseRoadsIncludedInRequest() {
+  public void addCyclewayBiasIncludedInRequest() {
     NavigationRoute.Builder onlineBuilder = provideOnlineRouteBuilder();
     OfflineRoute offlineRoute = OfflineRoute.builder(onlineBuilder)
-      .useRoads(0.5f).build();
+      .cyclewayBias(0.0f).build();
 
     String offlineUrl = offlineRoute.buildUrl();
 
-    assertTrue(offlineUrl.contains("use_roads=0.5"));
+    assertTrue(offlineUrl.contains("cycleway_bias=0.0"));
   }
 
   @Test
-  public void addUseHillsIncludedInRequest() {
+  public void addHillBiasIncludedInRequest() {
     NavigationRoute.Builder onlineBuilder = provideOnlineRouteBuilder();
     OfflineRoute offlineRoute = OfflineRoute.builder(onlineBuilder)
-      .useHills(0.5f).build();
+      .hillBias(0.0f).build();
 
     String offlineUrl = offlineRoute.buildUrl();
 
-    assertTrue(offlineUrl.contains("use_hills=0.5"));
+    assertTrue(offlineUrl.contains("hill_bias=0.0"));
   }
 
   @Test
-  public void addUseFerryIncludedInRequest() {
+  public void addFerryBiasIncludedInRequest() {
     NavigationRoute.Builder onlineBuilder = provideOnlineRouteBuilder();
     OfflineRoute offlineRoute = OfflineRoute.builder(onlineBuilder)
-      .useFerry(0.5f).build();
+      .ferryBias(0.0f).build();
 
     String offlineUrl = offlineRoute.buildUrl();
 
-    assertTrue(offlineUrl.contains("use_ferry=0.5"));
+    assertTrue(offlineUrl.contains("ferry_bias=0.0"));
   }
 
   @Test
-  public void addAvoidBadSurfacesIncludedInRequest() {
+  public void addRoughSurfaceBiasIncludedInRequest() {
     NavigationRoute.Builder onlineBuilder = provideOnlineRouteBuilder();
     OfflineRoute offlineRoute = OfflineRoute.builder(onlineBuilder)
-      .avoidBadSurfaces(0.5f).build();
+      .roughSurfaceBias(0.0f).build();
 
     String offlineUrl = offlineRoute.buildUrl();
 
-    assertTrue(offlineUrl.contains("avoid_bad_surfaces=0.5"));
+    assertTrue(offlineUrl.contains("rough_surface_bias=0.0"));
   }
 
   @Test

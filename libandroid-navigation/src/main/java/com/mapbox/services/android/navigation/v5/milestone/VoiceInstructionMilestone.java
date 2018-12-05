@@ -1,9 +1,7 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.VoiceInstruction;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
-import com.mapbox.services.android.navigation.v5.navigation.VoiceInstructionLoader;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 /**
@@ -25,7 +23,6 @@ public class VoiceInstructionMilestone extends Milestone {
 
   @Override
   public boolean isOccurring(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-    checkForNewRoute(previousRouteProgress, routeProgress);
     return updateCurrentAnnouncement(routeProgress);
   }
 
@@ -89,27 +86,11 @@ public class VoiceInstructionMilestone extends Milestone {
     }
   }
 
-  private void checkForNewRoute(RouteProgress previousRouteProgress, RouteProgress routeProgress) {
-    DirectionsRoute previousRoute = previousRouteProgress.directionsRoute();
-    DirectionsRoute currentRoute = routeProgress.directionsRoute();
-    if (!previousRoute.equals(currentRoute)) {
-      cacheInstructions(routeProgress, true);
-    }
-  }
-
-  private void cacheInstructions(RouteProgress routeProgress, boolean isFirst) {
-    VoiceInstructionLoader voiceInstructionLoader = VoiceInstructionLoader.getInstance();
-    if (voiceInstructionLoader != null) {
-      voiceInstructionLoader.cacheInstructions(routeProgress, isFirst);
-    }
-  }
-
   private boolean updateCurrentAnnouncement(RouteProgress routeProgress) {
     VoiceInstruction currentVoiceInstruction = routeProgress.voiceInstruction();
     if (currentVoiceInstruction != null) {
       announcement = currentVoiceInstruction.getAnnouncement();
       ssmlAnnouncement = currentVoiceInstruction.getSsmlAnnouncement();
-      cacheInstructions(routeProgress, false);
       return true;
     }
     return false;

@@ -132,7 +132,7 @@ class NavigationEventDispatcher {
   }
 
   void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
-    checkForArrivalEvent(routeProgress, milestone);
+    checkForArrivalEvent(routeProgress);
     for (MilestoneEventListener milestoneEventListener : milestoneEventListeners) {
       milestoneEventListener.onMilestoneEvent(routeProgress, instruction, milestone);
     }
@@ -172,8 +172,8 @@ class NavigationEventDispatcher {
     }
   }
 
-  private void checkForArrivalEvent(RouteProgress routeProgress, Milestone milestone) {
-    if (metricEventListener != null && routeUtils.isArrivalEvent(routeProgress, milestone)) {
+  private void checkForArrivalEvent(RouteProgress routeProgress) {
+    if (metricEventListener != null && routeUtils.isArrivalEvent(routeProgress)) {
       metricEventListener.onArrival(routeProgress);
       if (routeUtils.isLastLeg(routeProgress)) {
         metricEventListener = null;
