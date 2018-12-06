@@ -38,7 +38,7 @@ jobs:
       - run:
           name: Run unit-test, generate Jacoco test report and Post code coverage report to Codecov.io
           command: |
-            ./gradlew testDebugUnitTestCoverage
+            ./gradlew testDebugUnitTestCoverage --no-daemon
             pip install --user codecov && /root/.local/bin/codecov
       - run:
           name: Build release to test ProGuard rules
