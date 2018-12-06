@@ -2,8 +2,8 @@ ext {
 
   androidVersions = [
       minSdkVersion    : 14,
-      targetSdkVersion : 27,
-      compileSdkVersion: 27,
+      targetSdkVersion : 28,
+      compileSdkVersion: 28,
       buildToolsVersion: '28.0.3'
   ]
 
@@ -28,7 +28,7 @@ ext {
       espressoVersion    : '3.0.2',
       spoonRunner        : '1.6.2',
       commonsIO          : '2.6',
-      robolectric        : '3.8',
+      robolectric        : '4.0.2',
       lifecycle          : '1.1.1',
       picasso            : '2.71828',
       gmsLocation        : '15.0.1',
