@@ -1,13 +1,16 @@
 package com.mapbox.services.android.navigation.v5.location.replay;
 
-import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.location.Location;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.android.core.location.LocationEngineListener;
+import com.mapbox.android.core.location.LocationEngineCallback;
+import com.mapbox.android.core.location.LocationEngineRequest;
+import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
@@ -15,8 +18,10 @@ import com.mapbox.geojson.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
 
-public class ReplayRouteLocationEngine extends LocationEngine implements Runnable {
+
+public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
 
   private static final int HEAD = 0;
   private static final int MOCKED_POINTS_LEFT_THRESHOLD = 5;
@@ -36,37 +41,23 @@ public class ReplayRouteLocationEngine extends LocationEngine implements Runnabl
   private Handler handler;
   private List<Location> mockedLocations;
   private ReplayLocationDispatcher dispatcher;
+  private ReplayRouteLocationListener replayLocationListener;
   private Location lastLocation = null;
-  private final ReplayLocationListener replayLocationListener = new ReplayLocationListener() {
-    @Override
-    public void onLocationReplay(Location location) {
-      for (LocationEngineListener listener : locationListeners) {
-        listener.onLocationChanged(location);
-      }
-      lastLocation = location;
-      if (!mockedLocations.isEmpty()) {
-        mockedLocations.remove(HEAD);
-      }
-    }
-  };
+  private DirectionsRoute route = null;
+  private Point point = null;
 
   public ReplayRouteLocationEngine() {
     this.handler = new Handler();
   }
 
-  @SuppressLint("MissingPermission")
   public void assign(DirectionsRoute route) {
-    start(route);
+    this.route = route;
+    this.point = null;
   }
 
-  @SuppressLint("MissingPermission")
   public void moveTo(Point point) {
-    Location lastLocation = getLastLocation();
-    if (lastLocation == null) {
-      return;
-    }
-
-    startRoute(point, lastLocation);
+    this.point = point;
+    this.route = null;
   }
 
   public void assignLastLocation(Point currentPosition) {
@@ -105,96 +96,85 @@ public class ReplayRouteLocationEngine extends LocationEngine implements Runnabl
     scheduleNextDispatch();
   }
 
-  /**
-   * Connect all the location listeners.
-   */
   @Override
-  public void activate() {
-    for (LocationEngineListener listener : locationListeners) {
-      listener.onConnected();
+  public void getLastLocation(@NonNull LocationEngineCallback<LocationEngineResult> callback) throws SecurityException {
+    if (lastLocation == null) {
+      callback.onFailure(new Exception("Last location can't be null"));
+      return;
     }
+    callback.onSuccess(LocationEngineResult.create(lastLocation));
   }
 
   @Override
-  public void deactivate() {
+  public void requestLocationUpdates(@NonNull LocationEngineRequest request,
+                                     @NonNull LocationEngineCallback<LocationEngineResult> callback,
+                                     @Nullable Looper looper) throws SecurityException {
+    beginReplayWith(callback);
+  }
+
+  @Override
+  public void requestLocationUpdates(@NonNull LocationEngineRequest request,
+                                     PendingIntent pendingIntent) throws SecurityException {
+    Timber.e("ReplayEngine does not support PendingIntent.");
+  }
+
+  @Override
+  public void removeLocationUpdates(@NonNull LocationEngineCallback<LocationEngineResult> callback) {
+    deactivate();
+  }
+
+  @Override
+  public void removeLocationUpdates(PendingIntent pendingIntent) {
+    Timber.e("ReplayEngine does not support PendingIntent.");
+  }
+
+  void updateLastLocation(Location lastLocation) {
+    this.lastLocation = lastLocation;
+  }
+
+  void removeLastMockedLocation() {
+    if (!mockedLocations.isEmpty()) {
+      mockedLocations.remove(HEAD);
+    }
+  }
+
+  private void deactivate() {
     if (dispatcher != null) {
       dispatcher.stop();
     }
     handler.removeCallbacks(this);
   }
 
-  /**
-   * While the {@link ReplayRouteLocationEngine} is in use, you are always connected to it.
-   *
-   * @return true.
-   */
-  @Override
-  public boolean isConnected() {
-    return true;
-  }
-
-  @SuppressLint("MissingPermission")
-  @Override
-  @Nullable
-  public Location getLastLocation() {
-    return lastLocation;
-  }
-
-  /**
-   * Nothing needs to happen here since we are mocking the user location along a route.
-   */
-  @Override
-  public void requestLocationUpdates() {
-
-  }
-
-  /**
-   * Removes location updates for the LocationListener.
-   */
-  @Override
-  public void removeLocationUpdates() {
-    for (LocationEngineListener listener : locationListeners) {
-      locationListeners.remove(listener);
-    }
-    if (dispatcher != null) {
-      dispatcher.removeReplayLocationListener(replayLocationListener);
-    }
-  }
-
-  @Override
-  public Type obtainType() {
-    return Type.MOCK;
-  }
-
-  private void start(DirectionsRoute route) {
+  private void start(DirectionsRoute route, LocationEngineCallback<LocationEngineResult> callback) {
     handler.removeCallbacks(this);
     converter = new ReplayRouteLocationConverter(route, speed, delay);
     converter.initializeTime();
     mockedLocations = converter.toLocations();
-    dispatcher = obtainDispatcher();
+    dispatcher = obtainDispatcher(callback);
     dispatcher.run();
     scheduleNextDispatch();
   }
 
-  private ReplayLocationDispatcher obtainDispatcher() {
-    if (dispatcher != null) {
+  private ReplayLocationDispatcher obtainDispatcher(LocationEngineCallback<LocationEngineResult> callback) {
+    if (dispatcher != null && replayLocationListener != null) {
       dispatcher.stop();
       dispatcher.removeReplayLocationListener(replayLocationListener);
     }
     dispatcher = new ReplayLocationDispatcher(mockedLocations);
+    replayLocationListener = new ReplayRouteLocationListener(this, callback);
     dispatcher.addReplayLocationListener(replayLocationListener);
 
     return dispatcher;
   }
 
-  private void startRoute(Point point, Location lastLocation) {
+  private void startRoute(Point point, Location lastLocation, LocationEngineCallback<LocationEngineResult> callback) {
     handler.removeCallbacks(this);
     converter.updateSpeed(speed);
     converter.updateDelay(delay);
     converter.initializeTime();
     LineString route = obtainRoute(point, lastLocation);
     mockedLocations = converter.calculateMockLocations(converter.sliceRoute(route));
-    dispatcher = obtainDispatcher();
+    dispatcher = obtainDispatcher(callback);
     dispatcher.run();
   }
 
@@ -214,6 +194,20 @@ public class ReplayRouteLocationEngine extends LocationEngine implements Runnabl
       handler.postDelayed(this, ONE_SECOND_IN_MILLISECONDS);
     } else {
       handler.postDelayed(this, (currentMockedPoints - MOCKED_POINTS_LEFT_THRESHOLD) * ONE_SECOND_IN_MILLISECONDS);
+    }
+  }
+
+  private void beginReplayWith(@NonNull LocationEngineCallback<LocationEngineResult> callback) {
+    if (route != null) {
+      start(route, callback);
+    } else if (point != null) {
+      if (lastLocation == null) {
+        callback.onFailure(new Exception("Cannot move to point without last location assigned."));
+        return;
+      }
+      startRoute(point, lastLocation, callback);
+    } else {
+      callback.onFailure(new Exception("No route found to replay."));
     }
   }
 

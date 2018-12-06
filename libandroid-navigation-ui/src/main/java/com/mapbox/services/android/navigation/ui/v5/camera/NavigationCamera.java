@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5.camera;
 
-import android.annotation.SuppressLint;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
@@ -48,7 +47,6 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 public class NavigationCamera implements LifecycleObserver {
 
   private static final int ONE_POINT = 1;
-  private static final int ONE_SECOND_IN_MILLISECONDS = 1000;
 
   private MapboxMap mapboxMap;
   private LocationComponent locationComponent;
@@ -353,6 +351,17 @@ public class NavigationCamera implements LifecycleObserver {
     }
   }
 
+  private void resetWith(@TrackingMode int trackingMode) {
+    updateCameraTrackingMode(trackingMode);
+    if (currentRouteInformation != null) {
+      Camera camera = navigation.getCameraEngine();
+      if (camera instanceof DynamicCamera) {
+        ((DynamicCamera) camera).forceResetZoomLevel();
+      }
+      adjustCameraFromLocation(currentRouteInformation);
+    }
+  }
+
   private void adjustCameraFromLocation(RouteInformation routeInformation) {
     Camera cameraEngine = navigation.getCameraEngine();
 
@@ -377,39 +386,5 @@ public class NavigationCamera implements LifecycleObserver {
       500 * tiltDiff,
       NAVIGATION_MIN_CAMERA_TILT_ADJUSTMENT_ANIMATION_DURATION,
       NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION);
-  }
-
-  @SuppressLint("MissingPermission")
-  private void resetWith(@TrackingMode int trackingMode) {
-    updateCameraTrackingMode(NAVIGATION_TRACKING_MODE_NONE);
-    Location lastLocation = locationComponent.getLastKnownLocation();
-    if (lastLocation != null && currentRouteInformation != null) {
-      Camera camera = navigation.getCameraEngine();
-      if (camera instanceof DynamicCamera) {
-        ((DynamicCamera) camera).forceResetZoomLevel();
-      }
-      CameraUpdate update = buildResetUpdateWith(lastLocation, currentRouteInformation);
-      ResetTrackingModeCancelableCallback callback = new ResetTrackingModeCancelableCallback(this, trackingMode);
-      mapboxMap.animateCamera(update, ONE_SECOND_IN_MILLISECONDS, callback);
-    } else {
-      updateCameraTrackingMode(trackingMode);
-    }
-  }
-
-  private CameraUpdate buildResetUpdateWith(@NonNull Location lastLocation,
-                                            RouteInformation currentRouteInformation) {
-    Camera cameraEngine = navigation.getCameraEngine();
-
-    LatLng target = new LatLng(lastLocation);
-    float tilt = (float) cameraEngine.tilt(currentRouteInformation);
-    double zoom = cameraEngine.zoom(currentRouteInformation);
-    double bearing = lastLocation.getBearing();
-
-    return CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-      .target(target)
-      .tilt(tilt)
-      .zoom(zoom)
-      .bearing(bearing)
-      .build());
   }
 }

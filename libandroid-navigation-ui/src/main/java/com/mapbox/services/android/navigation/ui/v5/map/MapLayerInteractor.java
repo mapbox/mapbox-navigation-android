@@ -20,18 +20,18 @@ class MapLayerInteractor {
   }
 
   Layer retrieveLayerFromId(String layerId) {
-    return mapboxMap.getLayerAs(layerId);
+    return mapboxMap.getStyle().getLayerAs(layerId);
   }
 
   void updateLayerVisibility(boolean isVisible, String layerIdentifier) {
     // TODO add sourceIdentifier logic when https://github.com/mapbox/mapbox-gl-native/issues/12691 lands
-    List<Layer> layers = mapboxMap.getLayers();
+    List<Layer> layers = mapboxMap.getStyle().getLayers();
     updateLayerWithVisibility(layerIdentifier, layers, isVisible);
   }
 
   boolean isLayerVisible(String layerIdentifier) {
     // TODO add sourceIdentifier logic when https://github.com/mapbox/mapbox-gl-native/issues/12691 lands
-    List<Layer> layers = mapboxMap.getLayers();
+    List<Layer> layers = mapboxMap.getStyle().getLayers();
     return findLayerVisibility(layerIdentifier, layers);
   }
 

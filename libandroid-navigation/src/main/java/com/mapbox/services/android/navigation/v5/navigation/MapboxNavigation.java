@@ -10,8 +10,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
+import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
@@ -51,6 +51,8 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  */
 public class MapboxNavigation implements ServiceConnection {
 
+  private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
+  private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 500;
   private NavigationEventDispatcher navigationEventDispatcher;
   private NavigationEngineFactory navigationEngineFactory;
   private NavigationTelemetry navigationTelemetry = null;
@@ -58,7 +60,8 @@ public class MapboxNavigation implements ServiceConnection {
   private MapboxNavigator mapboxNavigator;
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
-  private LocationEngine locationEngine = null;
+  private LocationEngine locationEngine;
+  private LocationEngineRequest locationEngineRequest;
   private Set<Milestone> milestones;
   private final String accessToken;
   private Context applicationContext;
@@ -167,7 +170,6 @@ public class MapboxNavigation implements ServiceConnection {
    */
   public void onDestroy() {
     stopNavigation();
-    disableLocationEngine();
     removeOffRouteListener(null);
     removeProgressChangeListener(null);
     removeMilestoneEventListener(null);
@@ -255,29 +257,18 @@ public class MapboxNavigation implements ServiceConnection {
 
   /**
    * Navigation needs an instance of location engine in order to acquire user location information
-   * and handle events based off of the current information. By default, a LOST location engine is
-   * created with the optimal navigation settings. Passing in a custom location engine using this
-   * API assumes you have set it to the ideal parameters which are specified below.
+   * and handle events based off of the current information. By default, a {@link LocationEngine} is
+   * created using {@link LocationEngineProvider#getBestLocationEngine(Context)}.
    * <p>
-   * Although it is not required to set your location engine to these parameters, these values are
-   * what we found works best. Note that this also depends on which underlying location service you
-   * are using. Reference the corresponding location service documentation for more information and
-   * way's you could improve the performance.
-   * </p><p>
-   * An ideal conditions, the Navigation SDK will receive location updates once every second with
+   * In ideal conditions, the Navigation SDK will receive location updates once every second with
    * mild to high horizontal accuracy. The location update must also contain all information an
    * Android location object would expect including bearing, speed, timestamp, and
    * latitude/longitude.
-   * </p><p>
-   * Listed below are the ideal conditions for both a LOST location engine and a Google Play
-   * Services Location engine.
-   * </p><p><ul>
-   * <li>Set the location priority to {@code HIGH_ACCURACY}.</li>
-   * <li>The fastest interval should be set around 1 second (1000ms). Note that the interval isn't
-   * a guaranteed to match this value exactly and is only an estimate.</li>
-   * <li>Setting the location engine interval to 0 will result in location updates occurring as
-   * quickly as possible within the fastest interval limit placed on it.</li>
-   * </ul>
+   * </p>
+   * <p>
+   * This method can be called during an active navigation session.  The active {@link LocationEngine} will be
+   * replaced and the new one (passed via this method) will be activated with the current {@link LocationEngineRequest}.
+   * </p>
    *
    * @param locationEngine a {@link LocationEngine} used for the navigation session
    * @since 0.1.0
@@ -285,7 +276,7 @@ public class MapboxNavigation implements ServiceConnection {
   public void setLocationEngine(@NonNull LocationEngine locationEngine) {
     this.locationEngine = locationEngine;
     // Setup telemetry with new engine
-    navigationTelemetry.updateLocationEngine(locationEngine);
+    navigationTelemetry.updateLocationEngineName(locationEngine);
     // Notify service to get new location engine.
     if (isServiceAvailable()) {
       navigationService.updateLocationEngine(locationEngine);
@@ -305,6 +296,27 @@ public class MapboxNavigation implements ServiceConnection {
   @NonNull
   public LocationEngine getLocationEngine() {
     return locationEngine;
+  }
+
+  /**
+   * This method updates the {@link LocationEngineRequest} that is used with the {@link LocationEngine}.
+   * <p>
+   * If a request is not provided via {@link MapboxNavigation#setLocationEngineRequest(LocationEngineRequest)},
+   * a default will be provided with optimized settings for navigation.
+   * </p>
+   * <p>
+   * This method can be called during an active navigation session.  The active {@link LocationEngineRequest} will be
+   * replaced and the new one (passed via this method) will be activated with the current {@link LocationEngine}.
+   * </p>
+   *
+   * @param locationEngineRequest to be used with the current {@link LocationEngine}
+   */
+  public void setLocationEngineRequest(@NonNull LocationEngineRequest locationEngineRequest) {
+    this.locationEngineRequest = locationEngineRequest;
+
+    if (isServiceAvailable()) {
+      navigationService.updateLocationEngineRequest(locationEngineRequest);
+    }
   }
 
   /**
@@ -711,7 +723,7 @@ public class MapboxNavigation implements ServiceConnection {
   /**
    * Use this method to update the leg index of the current {@link DirectionsRoute}
    * being traveled along.
-   *
+   * <p>
    * An index passed here that is not valid will be ignored.  Please note, the leg index
    * will automatically increment by default.  To disable this,
    * use {@link MapboxNavigationOptions#enableAutoIncrementLegIndex()}.
@@ -783,11 +795,17 @@ public class MapboxNavigation implements ServiceConnection {
     return mapboxNavigator;
   }
 
+  @NonNull
+  LocationEngineRequest retrieveLocationEngineRequest() {
+    return locationEngineRequest;
+  }
+
   private void initializeForTest() {
     // Initialize event dispatcher and add internal listeners
     navigationEventDispatcher = new NavigationEventDispatcher();
     navigationEngineFactory = new NavigationEngineFactory();
-    initializeDefaultLocationEngine();
+    locationEngine = obtainLocationEngine();
+    locationEngineRequest = obtainLocationEngineRequest();
     initializeTelemetry();
 
     // Create and add default milestones if enabled.
@@ -808,7 +826,8 @@ public class MapboxNavigation implements ServiceConnection {
     mapboxNavigator = new MapboxNavigator(new Navigator());
     navigationEventDispatcher = new NavigationEventDispatcher();
     navigationEngineFactory = new NavigationEngineFactory();
-    initializeDefaultLocationEngine();
+    locationEngine = obtainLocationEngine();
+    locationEngineRequest = obtainLocationEngineRequest();
     initializeTelemetry();
 
     // Create and add default milestones if enabled.
@@ -838,34 +857,25 @@ public class MapboxNavigation implements ServiceConnection {
     return navigationTelemetry;
   }
 
-  /**
-   * Since navigation requires location information there should always be a valid location engine
-   * which we can use to get information. Therefore, by default we build one.
-   */
-  private void initializeDefaultLocationEngine() {
-    locationEngine = obtainLocationEngine();
-    locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
-    locationEngine.setFastestInterval(1000);
-    locationEngine.setInterval(0);
-    locationEngine.activate();
-  }
-
+  @NonNull
   private LocationEngine obtainLocationEngine() {
     if (locationEngine == null) {
-      return new LocationEngineProvider(applicationContext).obtainBestLocationEngineAvailable();
+      return LocationEngineProvider.getBestLocationEngine(applicationContext);
     }
 
     return locationEngine;
   }
 
-  /**
-   * When onDestroy gets called, it is safe to remove location updates and deactivate the engine.
-   */
-  private void disableLocationEngine() {
-    if (locationEngine != null) {
-      locationEngine.removeLocationUpdates();
-      locationEngine.deactivate();
+  @NonNull
+  private LocationEngineRequest obtainLocationEngineRequest() {
+    if (locationEngineRequest == null) {
+      return new LocationEngineRequest.Builder(UPDATE_INTERVAL_IN_MILLISECONDS)
+        .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+        .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
+        .build();
     }
+
+    return locationEngineRequest;
   }
 
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute) {

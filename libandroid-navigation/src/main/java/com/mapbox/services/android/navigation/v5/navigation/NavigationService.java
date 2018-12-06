@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
@@ -31,7 +32,7 @@ public class NavigationService extends Service {
 
   private final IBinder localBinder = new LocalBinder();
   private RouteProcessorBackgroundThread thread;
-  private NavigationLocationEngineUpdater locationUpdater;
+  private LocationUpdater locationUpdater;
   private RouteFetcher routeFetcher;
   private NavigationNotificationProvider notificationProvider;
 
@@ -71,19 +72,17 @@ public class NavigationService extends Service {
    */
   void endNavigation() {
     routeFetcher.clearListeners();
-    locationUpdater.removeLocationEngineListener();
+    locationUpdater.removeLocationUpdates();
     notificationProvider.shutdown(getApplication());
     thread.quit();
   }
 
-  /**
-   * Called with {@link MapboxNavigation#setLocationEngine(LocationEngine)}.
-   * Updates this service with the new {@link LocationEngine}.
-   *
-   * @param locationEngine to update the provider
-   */
   void updateLocationEngine(LocationEngine locationEngine) {
     locationUpdater.updateLocationEngine(locationEngine);
+  }
+
+  void updateLocationEngineRequest(LocationEngineRequest request) {
+    locationUpdater.updateLocationEngineRequest(request);
   }
 
   private void initialize(MapboxNavigation mapboxNavigation) {
@@ -92,7 +91,7 @@ public class NavigationService extends Service {
     initializeRouteFetcher(dispatcher, accessToken, mapboxNavigation.retrieveEngineFactory());
     initializeNotificationProvider(mapboxNavigation);
     initializeRouteProcessorThread(mapboxNavigation, dispatcher, routeFetcher, notificationProvider);
-    initializeLocationProvider(mapboxNavigation);
+    initializeLocationUpdater(mapboxNavigation);
   }
 
   private void initializeRouteFetcher(NavigationEventDispatcher dispatcher, String accessToken,
@@ -117,10 +116,10 @@ public class NavigationService extends Service {
     thread = new RouteProcessorBackgroundThread(mapboxNavigation, new Handler(), listener);
   }
 
-  private void initializeLocationProvider(MapboxNavigation mapboxNavigation) {
+  private void initializeLocationUpdater(MapboxNavigation mapboxNavigation) {
     LocationEngine locationEngine = mapboxNavigation.getLocationEngine();
-    NavigationLocationEngineListener listener = new NavigationLocationEngineListener(thread, locationEngine);
-    locationUpdater = new NavigationLocationEngineUpdater(locationEngine, listener);
+    LocationEngineRequest locationEngineRequest = mapboxNavigation.retrieveLocationEngineRequest();
+    locationUpdater = new LocationUpdater(thread, locationEngine, locationEngineRequest);
   }
 
   private void startForegroundNotification(NavigationNotification navigationNotification) {

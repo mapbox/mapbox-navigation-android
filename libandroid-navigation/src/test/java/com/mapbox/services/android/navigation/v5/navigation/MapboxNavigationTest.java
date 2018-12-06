@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.content.Context;
 
 import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
@@ -308,11 +309,40 @@ public class MapboxNavigationTest extends BaseTest {
     assertTrue(didUpdate);
   }
 
+  @Test
+  public void updateLocationEngine_engineIsSet() {
+    LocationEngine locationEngine = mock(LocationEngine.class);
+    MapboxNavigation navigation = buildMapboxNavigationWith(locationEngine);
+    LocationEngine newLocationEngine = mock(LocationEngine.class);
+
+    navigation.setLocationEngine(newLocationEngine);
+
+    LocationEngine currentLocationEngine = navigation.getLocationEngine();
+    assertNotSame(locationEngine, currentLocationEngine);
+  }
+
+  @Test
+  public void defaultLocationEngineRequest_createdOnInitialization() {
+    LocationEngine locationEngine = mock(LocationEngine.class);
+    MapboxNavigation navigation = buildMapboxNavigationWith(locationEngine);
+
+    LocationEngineRequest request = navigation.retrieveLocationEngineRequest();
+
+    assertNotNull(request);
+  }
+
   private MapboxNavigation buildMapboxNavigationWith(MapboxNavigator mapboxNavigator) {
     Context context = mock(Context.class);
     when(context.getApplicationContext()).thenReturn(context);
     return new MapboxNavigation(context, ACCESS_TOKEN, mock(NavigationTelemetry.class),
       mock(LocationEngine.class), mapboxNavigator);
+  }
+
+  private MapboxNavigation buildMapboxNavigationWith(LocationEngine locationEngine) {
+    Context context = mock(Context.class);
+    when(context.getApplicationContext()).thenReturn(context);
+    return new MapboxNavigation(context, ACCESS_TOKEN, mock(NavigationTelemetry.class),
+      locationEngine, mock(MapboxNavigator.class));
   }
 
   private MapboxNavigation buildMapboxNavigation() {

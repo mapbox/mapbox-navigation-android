@@ -17,8 +17,10 @@ import android.support.transition.TransitionManager;
 import android.view.View;
 
 import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.android.core.location.LocationEngineListener;
-import com.mapbox.android.core.location.LocationEnginePriority;
+import com.mapbox.android.core.location.LocationEngineCallback;
+import com.mapbox.android.core.location.LocationEngineProvider;
+import com.mapbox.android.core.location.LocationEngineRequest;
+import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -30,9 +32,9 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.activity.HistoryActivity;
-import com.mapbox.services.android.navigation.testapp.activity.location.FusedLocationEngine;
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
@@ -51,6 +53,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Locale;
 
@@ -64,8 +67,7 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class ComponentNavigationActivity extends HistoryActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, LocationEngineListener, ProgressChangeListener,
-  MilestoneEventListener, OffRouteListener {
+  MapboxMap.OnMapLongClickListener, ProgressChangeListener, MilestoneEventListener, OffRouteListener {
 
   private static final int FIRST = 0;
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
@@ -80,7 +82,8 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private static final double DEFAULT_ZOOM = 12.0;
   private static final double DEFAULT_TILT = 0d;
   private static final double DEFAULT_BEARING = 0d;
-  private static final int ONE_SECOND_INTERVAL = 1000;
+  private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
+  private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 500;
 
   @BindView(R.id.componentNavigationLayout)
   ConstraintLayout navigationLayout;
@@ -97,6 +100,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   @BindView(R.id.cancelNavigationFab)
   FloatingActionButton cancelNavigationFab;
 
+  private final ComponentActivityLocationCallback callback = new ComponentActivityLocationCallback(this);
   private LocationEngine locationEngine;
   private MapboxNavigation navigation;
   private NavigationSpeechPlayer speechPlayer;
@@ -125,26 +129,28 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   }
 
   @Override
-  public void onMapReady(MapboxMap mapboxMap) {
-    mapState = MapState.INFO;
-    navigationMap = new NavigationMapboxMap(mapView, mapboxMap);
+  public void onMapReady(@NonNull MapboxMap mapboxMap) {
+    mapboxMap.setStyle(new Style.Builder().fromUrl(getString(R.string.navigation_guidance_day)), style -> {
+      mapState = MapState.INFO;
+      navigationMap = new NavigationMapboxMap(mapView, mapboxMap);
 
-    // For Location updates
-    initializeLocationEngine();
+      // For Location updates
+      initializeLocationEngine();
 
-    // For navigation logic / processing
-    initializeNavigation(mapboxMap);
-    navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE);
+      // For navigation logic / processing
+      initializeNavigation(mapboxMap);
+      navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE);
 
-    // For voice instructions
-    initializeSpeechPlayer();
+      // For voice instructions
+      initializeSpeechPlayer();
+    });
   }
 
   @Override
-  public void onMapLongClick(@NonNull LatLng point) {
+  public boolean onMapLongClick(@NonNull LatLng point) {
     // Only reverse geocode while we are not in navigation
     if (mapState.equals(MapState.NAVIGATION)) {
-      return;
+      return true;
     }
 
     // Fetch the route with this given point
@@ -158,6 +164,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     // Update camera to new destination
     moveCameraToInclude(destination);
     vibrate();
+    return true;
   }
 
   @OnClick(R.id.startNavigationFab)
@@ -198,31 +205,6 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
     // Add back regular location listener
     addLocationEngineListener();
-  }
-
-  /*
-   * LocationEngine listeners
-   */
-
-  @SuppressLint("MissingPermission")
-  @Override
-  public void onConnected() {
-    locationEngine.requestLocationUpdates();
-  }
-
-  @Override
-  public void onLocationChanged(Location location) {
-    if (lastLocation == null) {
-      // Move the navigationMap camera to the first Location
-      moveCameraTo(location);
-
-      // Allow navigationMap clicks now that we have the current Location
-      navigationMap.retrieveMap().addOnMapLongClickListener(this);
-      showSnackbar(LONG_PRESS_MAP_MESSAGE, BaseTransientBottomBar.LENGTH_LONG);
-    }
-
-    // Cache for fetching the route later
-    updateLocation(location);
   }
 
   /*
@@ -315,6 +297,20 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     navigation.onDestroy();
   }
 
+  void checkFirstUpdate(Location location) {
+    if (lastLocation == null) {
+      moveCameraTo(location);
+      // Allow navigationMap clicks now that we have the current Location
+      navigationMap.retrieveMap().addOnMapLongClickListener(this);
+      showSnackbar(LONG_PRESS_MAP_MESSAGE, BaseTransientBottomBar.LENGTH_LONG);
+    }
+  }
+
+  void updateLocation(Location location) {
+    lastLocation = location;
+    navigationMap.updateLocation(location);
+  }
+
   private void initializeSpeechPlayer() {
     String english = Locale.US.getLanguage();
     Cache cache = new Cache(new File(getApplication().getCacheDir(), COMPONENT_NAVIGATION_INSTRUCTION_CACHE),
@@ -326,13 +322,11 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     speechPlayer = new NavigationSpeechPlayer(speechPlayerProvider);
   }
 
+  @SuppressLint("MissingPermission")
   private void initializeLocationEngine() {
-    locationEngine = new FusedLocationEngine(getApplicationContext());
-    locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
-    locationEngine.addLocationEngineListener(this);
-    locationEngine.setInterval(ONE_SECOND_INTERVAL);
-    locationEngine.setFastestInterval(500);
-    locationEngine.activate();
+    locationEngine = LocationEngineProvider.getBestLocationEngine(getApplicationContext());
+    LocationEngineRequest request = buildEngineRequest();
+    locationEngine.requestLocationUpdates(request, callback, null);
     showSnackbar(SEARCHING_FOR_GPS_MESSAGE, BaseTransientBottomBar.LENGTH_SHORT);
   }
 
@@ -358,11 +352,6 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
         .build();
       speechPlayer.play(announcement);
     }
-  }
-
-  private void updateLocation(Location location) {
-    lastLocation = location;
-    navigationMap.updateLocation(location);
   }
 
   private void moveCameraTo(Location location) {
@@ -424,13 +413,15 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   private void removeLocationEngineListener() {
     if (locationEngine != null) {
-      locationEngine.removeLocationEngineListener(this);
+      locationEngine.removeLocationUpdates(callback);
     }
   }
 
+  @SuppressLint("MissingPermission")
   private void addLocationEngineListener() {
     if (locationEngine != null) {
-      locationEngine.addLocationEngineListener(this);
+      LocationEngineRequest request = buildEngineRequest();
+      locationEngine.requestLocationUpdates(request, callback, null);
     }
   }
 
@@ -475,6 +466,45 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
       vibrator.vibrate(VibrationEffect.createOneShot(ONE_HUNDRED_MILLISECONDS, VibrationEffect.DEFAULT_AMPLITUDE));
     } else {
       vibrator.vibrate(ONE_HUNDRED_MILLISECONDS);
+    }
+  }
+
+  @NonNull
+  private LocationEngineRequest buildEngineRequest() {
+    return new LocationEngineRequest.Builder(UPDATE_INTERVAL_IN_MILLISECONDS)
+      .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+      .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
+      .build();
+  }
+
+  /*
+   * LocationEngine callback
+   */
+
+  private static class ComponentActivityLocationCallback implements LocationEngineCallback<LocationEngineResult> {
+
+    private final WeakReference<ComponentNavigationActivity> activityWeakReference;
+
+    ComponentActivityLocationCallback(ComponentNavigationActivity activity) {
+      this.activityWeakReference = new WeakReference<>(activity);
+    }
+
+    @Override
+    public void onSuccess(LocationEngineResult result) {
+      ComponentNavigationActivity activity = activityWeakReference.get();
+      if (activity != null) {
+        Location location = result.getLastLocation();
+        if (location == null) {
+          return;
+        }
+        activity.checkFirstUpdate(location);
+        activity.updateLocation(location);
+      }
+    }
+
+    @Override
+    public void onFailure(@NonNull Exception exception) {
+      Timber.e(exception);
     }
   }
 }

@@ -20,6 +20,7 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.AttributionDialogManager
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.activity.HistoryActivity
@@ -109,12 +110,14 @@ class ExampleActivity : HistoryActivity(), ExampleView {
   }
 
   override fun onMapReady(mapboxMap: MapboxMap) {
-    map = NavigationMapboxMap(mapView, mapboxMap)
-    map?.setOnRouteSelectionChangeListener(this)
-    map?.updateLocationLayerRenderMode(RenderMode.NORMAL)
-    mapboxMap.addOnMapLongClickListener { presenter.onMapLongClick(it) }
-    presenter.buildDynamicCameraFrom(mapboxMap)
-    resetMapPadding() // Ignore navigation padding default
+    mapboxMap.setStyle(Style.Builder().fromUrl(getString(R.string.navigation_guidance_day))) {
+      map = NavigationMapboxMap(mapView, mapboxMap)
+      map?.setOnRouteSelectionChangeListener(this)
+      map?.updateLocationLayerRenderMode(RenderMode.NORMAL)
+      mapboxMap.addOnMapLongClickListener { point -> presenter.onMapLongClick(point) }
+      presenter.buildDynamicCameraFrom(mapboxMap)
+      resetMapPadding() // Ignore navigation padding default
+    }
   }
 
   override fun onFeatureClicked(feature: CarmenFeature) {
@@ -151,9 +154,11 @@ class ExampleActivity : HistoryActivity(), ExampleView {
   }
 
   override fun updateMapCameraFor(bounds: LatLngBounds, padding: IntArray, duration: Int) {
-    map?.retrieveMap()?.let {
-      val position = it.getCameraForLatLngBounds(bounds, padding)
-      it.animateCamera(CameraUpdateFactory.newCameraPosition(position), duration)
+    map?.retrieveMap()?.let { map ->
+      val position = map.getCameraForLatLngBounds(bounds, padding)
+      position?.let {
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(it), duration)
+      }
     }
   }
 

@@ -18,8 +18,10 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.android.core.location.LocationEngineListener;
+import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineProvider;
+import com.mapbox.android.core.location.LocationEngineRequest;
+import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -28,7 +30,7 @@ import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Marker;
-import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.exceptions.InvalidLatLngBoundsException;
@@ -39,6 +41,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
@@ -48,6 +51,7 @@ import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChange
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -57,17 +61,19 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Response;
-
-import static com.mapbox.android.core.location.LocationEnginePriority.HIGH_ACCURACY;
+import timber.log.Timber;
 
 public class NavigationLauncherActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, LocationEngineListener, OnRouteSelectionChangeListener {
+  MapboxMap.OnMapLongClickListener, OnRouteSelectionChangeListener {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
   private static final int CHANGE_SETTING_REQUEST_CODE = 1;
   private static final int INITIAL_ZOOM = 16;
+  private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
+  private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 500;
 
+  private final NavigationLauncherLocationCallback callback = new NavigationLauncherLocationCallback(this);
   private LocationEngine locationEngine;
   private NavigationMapRoute mapRoute;
   private MapboxMap mapboxMap;
@@ -115,10 +121,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     }
   }
 
-  private void showSettings() {
-    startActivityForResult(new Intent(this, NavigationSettingsActivity.class), CHANGE_SETTING_REQUEST_CODE);
-  }
-
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
@@ -143,10 +145,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     super.onResume();
     mapView.onResume();
     if (locationEngine != null) {
-      locationEngine.addLocationEngineListener(this);
-      if (!locationEngine.isConnected()) {
-        locationEngine.activate();
-      }
+      locationEngine.requestLocationUpdates(buildEngineRequest(), callback, null);
     }
   }
 
@@ -155,7 +154,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     super.onPause();
     mapView.onPause();
     if (locationEngine != null) {
-      locationEngine.removeLocationEngineListener(this);
+      locationEngine.removeLocationUpdates(callback);
     }
   }
 
@@ -175,10 +174,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
-    if (locationEngine != null) {
-      locationEngine.removeLocationUpdates();
-      locationEngine.deactivate();
-    }
   }
 
   @Override
@@ -195,14 +190,16 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    this.mapboxMap.addOnMapLongClickListener(this);
-    initLocationEngine();
-    initializeLocationComponent();
-    initMapRoute();
+    mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+      mapboxMap.addOnMapLongClickListener(this);
+      initializeLocationEngine();
+      initializeLocationComponent(style);
+      initializeMapRoute();
+    });
   }
 
   @Override
-  public void onMapLongClick(@NonNull LatLng point) {
+  public boolean onMapLongClick(@NonNull LatLng point) {
     destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     launchRouteBtn.setEnabled(false);
     loading.setVisibility(View.VISIBLE);
@@ -210,18 +207,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     if (currentLocation != null) {
       fetchRoute();
     }
-  }
-
-  @SuppressWarnings( {"MissingPermission"})
-  @Override
-  public void onConnected() {
-    locationEngine.requestLocationUpdates();
-  }
-
-  @Override
-  public void onLocationChanged(Location location) {
-    currentLocation = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    onLocationFound(location);
+    return true;
   }
 
   @Override
@@ -229,31 +215,40 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     route = directionsRoute;
   }
 
-  @SuppressWarnings( {"MissingPermission"})
-  private void initLocationEngine() {
-    locationEngine = new LocationEngineProvider(this).obtainBestLocationEngineAvailable();
-    locationEngine.setPriority(HIGH_ACCURACY);
-    locationEngine.setInterval(0);
-    locationEngine.setFastestInterval(1000);
-    locationEngine.addLocationEngineListener(this);
-    locationEngine.activate();
+  void updateCurrentLocation(Point currentLocation) {
+    this.currentLocation = currentLocation;
+  }
 
-    if (locationEngine.getLastLocation() != null) {
-      Location lastLocation = locationEngine.getLastLocation();
-      onLocationChanged(lastLocation);
-      currentLocation = Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude());
+  void onLocationFound(Location location) {
+    if (!locationFound) {
+      animateCamera(new LatLng(location.getLatitude(), location.getLongitude()));
+      Snackbar.make(mapView, R.string.explanation_long_press_waypoint, Snackbar.LENGTH_LONG).show();
+      locationFound = true;
+      hideLoading();
     }
   }
 
+  private void showSettings() {
+    startActivityForResult(new Intent(this, NavigationSettingsActivity.class), CHANGE_SETTING_REQUEST_CODE);
+  }
+
   @SuppressWarnings( {"MissingPermission"})
-  private void initializeLocationComponent() {
+  private void initializeLocationEngine() {
+    locationEngine = LocationEngineProvider.getBestLocationEngine(getApplicationContext());
+    LocationEngineRequest request = buildEngineRequest();
+    locationEngine.requestLocationUpdates(request, callback, null);
+    locationEngine.getLastLocation(callback);
+  }
+
+  @SuppressWarnings( {"MissingPermission"})
+  private void initializeLocationComponent(Style style) {
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
-    locationComponent.activateLocationComponent(this, locationEngine);
+    locationComponent.activateLocationComponent(this, style, locationEngine);
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.COMPASS);
   }
 
-  private void initMapRoute() {
+  private void initializeMapRoute() {
     mapRoute = new NavigationMapRoute(mapView, mapboxMap);
     mapRoute.setOnRouteSelectionChangeListener(this);
   }
@@ -353,15 +348,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     }
   }
 
-  private void onLocationFound(Location location) {
-    if (!locationFound) {
-      animateCamera(new LatLng(location.getLatitude(), location.getLongitude()));
-      Snackbar.make(mapView, R.string.explanation_long_press_waypoint, Snackbar.LENGTH_LONG).show();
-      locationFound = true;
-      hideLoading();
-    }
-  }
-
   public void boundCameraToRoute() {
     if (route != null) {
       List<Point> routeCoords = LineString.fromPolyline(route.geometry(),
@@ -395,12 +381,47 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   private void setCurrentMarkerPosition(LatLng position) {
     if (position != null) {
       if (currentMarker == null) {
-        MarkerViewOptions markerViewOptions = new MarkerViewOptions()
+        MarkerOptions markerViewOptions = new MarkerOptions()
           .position(position);
         currentMarker = mapboxMap.addMarker(markerViewOptions);
       } else {
         currentMarker.setPosition(position);
       }
+    }
+  }
+
+  @NonNull
+  private LocationEngineRequest buildEngineRequest() {
+    return new LocationEngineRequest.Builder(UPDATE_INTERVAL_IN_MILLISECONDS)
+      .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+      .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
+      .build();
+  }
+
+  private static class NavigationLauncherLocationCallback implements LocationEngineCallback<LocationEngineResult> {
+
+    private final WeakReference<NavigationLauncherActivity> activityWeakReference;
+
+    NavigationLauncherLocationCallback(NavigationLauncherActivity activity) {
+      this.activityWeakReference = new WeakReference<>(activity);
+    }
+
+    @Override
+    public void onSuccess(LocationEngineResult result) {
+      NavigationLauncherActivity activity = activityWeakReference.get();
+      if (activity != null) {
+        Location location = result.getLastLocation();
+        if (location == null) {
+          return;
+        }
+        activity.updateCurrentLocation(Point.fromLngLat(location.getLongitude(), location.getLatitude()));
+        activity.onLocationFound(location);
+      }
+    }
+
+    @Override
+    public void onFailure(@NonNull Exception exception) {
+      Timber.e(exception);
     }
   }
 }
