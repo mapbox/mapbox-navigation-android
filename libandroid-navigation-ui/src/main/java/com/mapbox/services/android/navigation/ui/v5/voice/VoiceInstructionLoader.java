@@ -38,6 +38,12 @@ public class VoiceInstructionLoader {
     this.cache = cache;
   }
 
+  // Package private (no modifier) for testing purposes
+  VoiceInstructionLoader(Context context, String accessToken, Cache cache, MapboxSpeech.Builder mapboxSpeechBuilder) {
+    this(context, accessToken, cache);
+    this.mapboxSpeechBuilder = mapboxSpeechBuilder;
+  }
+
   public List<String> evictVoiceInstructions() {
     List<String> urlsToRemove = new ArrayList<>();
     for (int i = 0; i < urlsCached.size() && i < VOICE_INSTRUCTIONS_TO_EVICT_THRESHOLD; i++) {
@@ -82,7 +88,7 @@ public class VoiceInstructionLoader {
   }
 
   void requestInstruction(String instruction, String textType, Callback<ResponseBody> callback) {
-    if (!cache.isClosed()) {
+    if (!cache.isClosed() && mapboxSpeechBuilder != null) {
       MapboxSpeech mapboxSpeech = mapboxSpeechBuilder
         .instruction(instruction)
         .textType(textType)
