@@ -259,16 +259,11 @@ public class NavigationMapboxMap {
   }
 
   /**
-   * This method will update the route visibility.
-   * <p>
-   * The visibility will include the main route, alternatives,
-   * and the upcoming maneuver arrow.
-   *
-   * @param isVisible true to show, false otherwise.
+   * Will remove the drawn route displayed on the map.  Does nothing
+   * if no route is drawn.
    */
-  public void updateRouteVisibility(boolean isVisible) {
-    mapRoute.updateRouteVisibilityTo(isVisible);
-    mapRoute.updateRouteArrowVisibilityTo(isVisible);
+  public void removeRoute() {
+    mapRoute.removeRoute();
   }
 
   /**
@@ -371,14 +366,6 @@ public class NavigationMapboxMap {
     mapCamera.onStop();
     mapRoute.onStop();
     mapWayName.onStop();
-  }
-
-  /**
-   * Should be used in {@link FragmentActivity#onDestroy()} to ensure proper
-   * accounting for the lifecycle.
-   */
-  public void onDestroy() {
-    mapRoute.onDestroy();
   }
 
   /**

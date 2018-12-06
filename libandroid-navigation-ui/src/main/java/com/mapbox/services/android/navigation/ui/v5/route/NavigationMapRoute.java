@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.route;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
@@ -42,8 +41,8 @@ public class NavigationMapRoute implements LifecycleObserver {
   private final String belowLayer;
   private final MapboxMap mapboxMap;
   private final MapView mapView;
-  private final MapRouteClickListener mapRouteClickListener;
-  private final MapRouteProgressChangeListener mapRouteProgressChangeListener;
+  private MapRouteClickListener mapRouteClickListener;
+  private MapRouteProgressChangeListener mapRouteProgressChangeListener;
   private boolean isMapClickListenerAdded = false;
   private MapView.OnDidFinishLoadingStyleListener didFinishLoadingStyleListener;
   private boolean isDidFinishLoadingStyleListenerAdded = false;
@@ -208,6 +207,18 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   /**
+   * Hides all routes / route arrows on the map drawn by this class.
+   *
+   * @deprecated you can now use a combination of {@link NavigationMapRoute#updateRouteVisibilityTo(boolean)}
+   * and {@link NavigationMapRoute#updateRouteArrowVisibilityTo(boolean)} to hide the route line and arrow.
+   */
+  @Deprecated
+  public void removeRoute() {
+    updateRouteVisibilityTo(false);
+    updateRouteArrowVisibilityTo(false);
+  }
+
+  /**
    * Hides all routes on the map drawn by this class.
    *
    * @param isVisible true to show routes, false to hide
@@ -283,8 +294,9 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   /**
-   * This method should be added in your {@link Activity#onStart()} or {@link Fragment#onStart()}
-   * to handle adding and removing of listeners, preventing memory leaks.
+   * This method should be added in your {@link Activity#onStart()} or
+   * {@link android.support.v4.app.Fragment#onStart()} to handle adding and removing of listeners,
+   * preventing memory leaks.
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_START)
   public void onStart() {
@@ -292,22 +304,12 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   /**
-   * This method should be added in your {@link Activity#onStop()} or {@link Fragment#onStop()}
+   * This method should be added in your {@link Activity#onStop()} or {@link android.support.v4.app.Fragment#onStop()}
    * to handle adding and removing of listeners, preventing memory leaks.
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
   public void onStop() {
     removeListeners();
-  }
-
-  /**
-   * This method should be added in your {@link Activity#onDestroy()} or {@link Fragment#onDestroyView()}
-   * to handle removing resources that were added to the map.
-   */
-  @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-  public void onDestroy() {
-    routeLine.onDestroy();
-    routeArrow.onDestroy();
   }
 
   private void initializeDidFinishLoadingStyleListener() {
@@ -352,8 +354,16 @@ public class NavigationMapRoute implements LifecycleObserver {
     List<DirectionsRoute> routes = routeLine.retrieveDirectionsRoutes();
     boolean alternativesVisible = routeLine.retrieveAlternativesVisible();
     int primaryRouteIndex = routeLine.retrievePrimaryRouteIndex();
-    boolean isVisible = routeLine.retrieveVisibilty();
-    routeLine = new MapRouteLine(mapView.getContext(), mapboxMap, styleRes, belowLayer);
+    boolean isVisible = routeLine.retrieveVisibility();
+    buildNewRouteLine();
     routeLine.redraw(routes, alternativesVisible, primaryRouteIndex, isVisible);
+  }
+
+  private void buildNewRouteLine() {
+    routeLine = new MapRouteLine(mapView.getContext(), mapboxMap, styleRes, belowLayer);
+    mapboxMap.removeOnMapClickListener(mapRouteClickListener);
+    mapRouteClickListener = new MapRouteClickListener(routeLine);
+    mapboxMap.addOnMapClickListener(mapRouteClickListener);
+    mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow);
   }
 }

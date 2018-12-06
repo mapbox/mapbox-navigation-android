@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,13 +16,13 @@ class PrimaryRouteUpdateTask extends AsyncTask<Void, Void, List<FeatureCollectio
 
   private final int newPrimaryIndex;
   private final List<FeatureCollection> routeFeatureCollections;
-  private final OnPrimaryRouteUpdatedCallback callback;
+  private final WeakReference<OnPrimaryRouteUpdatedCallback> callbackWeakReference;
 
   PrimaryRouteUpdateTask(int newPrimaryIndex, List<FeatureCollection> routeFeatureCollections,
-                                OnPrimaryRouteUpdatedCallback callback) {
+                         OnPrimaryRouteUpdatedCallback callback) {
     this.newPrimaryIndex = newPrimaryIndex;
     this.routeFeatureCollections = routeFeatureCollections;
-    this.callback = callback;
+    this.callbackWeakReference = new WeakReference<>(callback);
   }
 
   @Override
@@ -52,6 +53,10 @@ class PrimaryRouteUpdateTask extends AsyncTask<Void, Void, List<FeatureCollectio
 
   @Override
   protected void onPostExecute(List<FeatureCollection> updatedRouteCollections) {
-    callback.onPrimaryRouteUpdated(updatedRouteCollections);
+    Runtime.getRuntime().gc();
+    OnPrimaryRouteUpdatedCallback callback = callbackWeakReference.get();
+    if (callback != null) {
+      callback.onPrimaryRouteUpdated(updatedRouteCollections);
+    }
   }
 }

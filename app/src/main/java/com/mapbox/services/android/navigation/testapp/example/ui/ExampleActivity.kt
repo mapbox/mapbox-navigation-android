@@ -221,7 +221,7 @@ class ExampleActivity : HistoryActivity(), ExampleView {
   }
 
   override fun removeRoute() {
-    map?.updateRouteVisibility(false)
+    map?.removeRoute()
   }
 
   override fun clearMarkers() {

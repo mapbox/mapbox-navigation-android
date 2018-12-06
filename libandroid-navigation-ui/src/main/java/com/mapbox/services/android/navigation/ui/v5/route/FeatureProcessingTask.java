@@ -10,6 +10,7 @@ import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,13 +20,13 @@ import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.
 class FeatureProcessingTask extends AsyncTask<Void, Void, Void> {
 
   private final List<DirectionsRoute> routes;
-  private final OnRouteFeaturesProcessedCallback callback;
   private final List<FeatureCollection> routeFeatureCollections = new ArrayList<>();
+  private final WeakReference<OnRouteFeaturesProcessedCallback> callbackWeakReference;
   private final HashMap<LineString, DirectionsRoute> routeLineStrings = new HashMap<>();
 
   FeatureProcessingTask(List<DirectionsRoute> routes, OnRouteFeaturesProcessedCallback callback) {
     this.routes = routes;
-    this.callback = callback;
+    this.callbackWeakReference = new WeakReference<>(callback);
   }
 
   @Override
@@ -42,7 +43,11 @@ class FeatureProcessingTask extends AsyncTask<Void, Void, Void> {
   @Override
   protected void onPostExecute(Void result) {
     super.onPostExecute(result);
-    callback.onRouteFeaturesProcessed(routeFeatureCollections, routeLineStrings);
+    Runtime.getRuntime().gc();
+    OnRouteFeaturesProcessedCallback callback = callbackWeakReference.get();
+    if (callback != null) {
+      callback.onRouteFeaturesProcessed(routeFeatureCollections, routeLineStrings);
+    }
   }
 
   private FeatureCollection createRouteFeatureCollection(DirectionsRoute route, boolean isPrimary) {

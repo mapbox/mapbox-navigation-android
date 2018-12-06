@@ -99,7 +99,6 @@ class MapRouteLine {
   private Drawable destinationIcon;
   private GeoJsonSource wayPointSource;
   private GeoJsonSource routeLineSource;
-  private FeatureCollection wayPointFeatureCollection;
   private String belowLayer;
   private int primaryRouteIndex;
   private boolean isVisible = true;
@@ -178,19 +177,23 @@ class MapRouteLine {
   }
 
   void draw(List<DirectionsRoute> directionsRoutes) {
+    if (directionsRoutes.isEmpty()) {
+      return;
+    }
     clearRouteData();
     this.directionsRoutes.addAll(directionsRoutes);
     primaryRouteIndex = 0;
     alternativesVisible = directionsRoutes.size() > 1;
+    isVisible = true;
     generateRouteFeatureCollectionsFrom(directionsRoutes);
   }
 
   void redraw(List<DirectionsRoute> routes, boolean alternativesVisible,
               int primaryRouteIndex, boolean isVisible) {
     draw(routes);
-    toggleAlternativeVisibilityWith(alternativesVisible);
-    updatePrimaryRouteIndex(primaryRouteIndex);
-    updateVisibilityTo(isVisible);
+    this.alternativesVisible = alternativesVisible;
+    this.primaryRouteIndex = primaryRouteIndex;
+    this.isVisible = isVisible;
   }
 
   void toggleAlternativeVisibilityWith(boolean alternativesVisible) {
@@ -206,7 +209,7 @@ class MapRouteLine {
     updateAllLayersVisibilityTo(isVisible);
   }
 
-  boolean retrieveVisibilty() {
+  boolean retrieveVisibility() {
     return isVisible;
   }
 
@@ -232,19 +235,12 @@ class MapRouteLine {
     return primaryRouteIndex;
   }
 
-  void onDestroy() {
-    for (Layer routeLayer : routeLayers) {
-      mapboxMap.removeLayer(routeLayer);
-    }
-  }
-
   private void drawRoutes(List<FeatureCollection> routeFeatureCollections) {
     List<Feature> routeFeatures = new ArrayList<>();
     for (int i = routeFeatureCollections.size() - 1; i >= 0; i--) {
       routeFeatures.addAll(routeFeatureCollections.get(i).features());
     }
     routeLineSource.setGeoJson(FeatureCollection.fromFeatures(routeFeatures));
-    updateVisibilityTo(true);
   }
 
   private void clearRouteData() {
@@ -266,21 +262,26 @@ class MapRouteLine {
   }
 
   private void generateRouteFeatureCollectionsFrom(List<DirectionsRoute> routes) {
-    new FeatureProcessingTask(routes, new OnRouteFeaturesProcessedCallback() {
-      @Override
-      public void onRouteFeaturesProcessed(List<FeatureCollection> routeFeatureCollections,
-                                           HashMap<LineString, DirectionsRoute> routeLineStrings) {
-        MapRouteLine.this.routeFeatureCollections.addAll(routeFeatureCollections);
-        MapRouteLine.this.routeLineStrings.putAll(routeLineStrings);
-        drawRoutes(routeFeatureCollections);
-        drawWayPoints();
-      }
-    }).execute();
+    new FeatureProcessingTask(routes, routeFeaturesProcessedCallback).execute();
   }
+
+  private OnRouteFeaturesProcessedCallback routeFeaturesProcessedCallback = new OnRouteFeaturesProcessedCallback() {
+    @Override
+    public void onRouteFeaturesProcessed(List<FeatureCollection> routeFeatureCollections,
+                                         HashMap<LineString, DirectionsRoute> routeLineStrings) {
+      MapRouteLine.this.routeFeatureCollections.addAll(routeFeatureCollections);
+      MapRouteLine.this.routeLineStrings.putAll(routeLineStrings);
+      drawRoutes(routeFeatureCollections);
+      drawWayPoints();
+      updateAlternativeVisibilityTo(alternativesVisible);
+      updateRoutesFor(primaryRouteIndex);
+      updateVisibilityTo(isVisible);
+    }
+  };
 
   private void drawWayPoints() {
     DirectionsRoute primaryRoute = directionsRoutes.get(primaryRouteIndex);
-    wayPointFeatureCollection = buildWayPointFeatureCollectionFrom(primaryRoute);
+    FeatureCollection wayPointFeatureCollection = buildWayPointFeatureCollectionFrom(primaryRoute);
     wayPointSource.setGeoJson(wayPointFeatureCollection);
   }
 
@@ -306,13 +307,15 @@ class MapRouteLine {
     if (newPrimaryIndex < 0 || newPrimaryIndex > routeFeatureCollections.size() - 1) {
       return;
     }
-    new PrimaryRouteUpdateTask(newPrimaryIndex, routeFeatureCollections, new OnPrimaryRouteUpdatedCallback() {
-      @Override
-      public void onPrimaryRouteUpdated(List<FeatureCollection> updatedRouteCollections) {
-        drawRoutes(updatedRouteCollections);
-      }
-    }).execute();
+    new PrimaryRouteUpdateTask(newPrimaryIndex, routeFeatureCollections, primaryRouteUpdatedCallback).execute();
   }
+
+  private OnPrimaryRouteUpdatedCallback primaryRouteUpdatedCallback = new OnPrimaryRouteUpdatedCallback() {
+    @Override
+    public void onPrimaryRouteUpdated(List<FeatureCollection> updatedRouteCollections) {
+      drawRoutes(updatedRouteCollections);
+    }
+  };
 
   private void findRouteBelowLayerId() {
     if (belowLayer == null || belowLayer.isEmpty()) {
@@ -443,9 +446,9 @@ class MapRouteLine {
   }
 
   private SymbolLayer initializeWayPointLayer(@NonNull MapboxMap mapboxMap) {
-    SymbolLayer waypointLayer = mapboxMap.getLayerAs(WAYPOINT_LAYER_ID);
-    if (waypointLayer != null) {
-      mapboxMap.removeLayer(waypointLayer);
+    SymbolLayer wayPointLayer = mapboxMap.getLayerAs(WAYPOINT_LAYER_ID);
+    if (wayPointLayer != null) {
+      mapboxMap.removeLayer(wayPointLayer);
     }
 
     Bitmap bitmap = MapImageUtils.getBitmapFromDrawable(originIcon);
@@ -453,7 +456,7 @@ class MapRouteLine {
     bitmap = MapImageUtils.getBitmapFromDrawable(destinationIcon);
     mapboxMap.addImage(DESTINATION_MARKER_NAME, bitmap);
 
-    waypointLayer = new SymbolLayer(WAYPOINT_LAYER_ID, WAYPOINT_SOURCE_ID).withProperties(
+    wayPointLayer = new SymbolLayer(WAYPOINT_LAYER_ID, WAYPOINT_SOURCE_ID).withProperties(
       iconImage(
         match(
           Expression.toString(get(WAYPOINT_PROPERTY_KEY)), literal(ORIGIN_MARKER_NAME),
@@ -473,7 +476,7 @@ class MapRouteLine {
       iconAllowOverlap(true),
       iconIgnorePlacement(true)
     );
-    return waypointLayer;
+    return wayPointLayer;
   }
 
   private void updateAlternativeVisibilityTo(boolean isVisible) {
