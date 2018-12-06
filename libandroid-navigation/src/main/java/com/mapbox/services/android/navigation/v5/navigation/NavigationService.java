@@ -31,7 +31,7 @@ public class NavigationService extends Service {
 
   private final IBinder localBinder = new LocalBinder();
   private RouteProcessorBackgroundThread thread;
-  private NavigationLocationEngineUpdater locationUpdater;
+  private LocationUpdater locationUpdater;
   private RouteFetcher routeFetcher;
   private NavigationNotificationProvider notificationProvider;
 
@@ -71,7 +71,7 @@ public class NavigationService extends Service {
    */
   void endNavigation() {
     routeFetcher.clearListeners();
-    locationUpdater.removeLocationEngineListener();
+    locationUpdater.removeLocationUpdates();
     notificationProvider.shutdown(getApplication());
     thread.quit();
   }
@@ -119,8 +119,7 @@ public class NavigationService extends Service {
 
   private void initializeLocationProvider(MapboxNavigation mapboxNavigation) {
     LocationEngine locationEngine = mapboxNavigation.getLocationEngine();
-    NavigationLocationEngineListener listener = new NavigationLocationEngineListener(thread, locationEngine);
-    locationUpdater = new NavigationLocationEngineUpdater(locationEngine, listener);
+    locationUpdater = new LocationUpdater(thread, locationEngine);
   }
 
   private void startForegroundNotification(NavigationNotification navigationNotification) {

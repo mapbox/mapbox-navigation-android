@@ -16,7 +16,6 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -42,21 +41,15 @@ import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.turf.TurfConstants;
-import com.mapbox.turf.TurfMeasurement;
 
 import java.lang.ref.WeakReference;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
@@ -201,45 +194,46 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void calculateRoute() {
-    Location userLocation = locationEngine.getLastLocation();
-    if (userLocation == null) {
-      Timber.d("calculateRoute: User location is null, therefore, origin can't be set.");
-      return;
-    }
-
-    Point origin = Point.fromLngLat(userLocation.getLongitude(), userLocation.getLatitude());
-    if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) < 50) {
-      startRouteButton.setVisibility(View.GONE);
-      return;
-    }
-
-    final NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder(this)
-      .accessToken(Mapbox.getAccessToken());
-    navigationRouteBuilder.origin(origin);
-    navigationRouteBuilder.destination(destination);
-    if (waypoint != null) {
-      navigationRouteBuilder.addWaypoint(waypoint);
-    }
-
-    navigationRouteBuilder.build().getRoute(new Callback<DirectionsResponse>() {
-      @Override
-      public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-        Timber.d("Url: %s", call.request().url().toString());
-        if (response.body() != null) {
-          if (!response.body().routes().isEmpty()) {
-            DirectionsRoute directionsRoute = response.body().routes().get(0);
-            MockNavigationActivity.this.route = directionsRoute;
-            navigationMapRoute.addRoutes(response.body().routes());
-            startRouteButton.setVisibility(View.VISIBLE);
-          }
-        }
-      }
-
-      @Override
-      public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-        Timber.e(throwable, "onFailure: navigation.getRoute()");
-      }
-    });
+    // TODO
+//    Location userLocation = locationEngine.getLastLocation();
+//    if (userLocation == null) {
+//      Timber.d("calculateRoute: User location is null, therefore, origin can't be set.");
+//      return;
+//    }
+//
+//    Point origin = Point.fromLngLat(userLocation.getLongitude(), userLocation.getLatitude());
+//    if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) < 50) {
+//      startRouteButton.setVisibility(View.GONE);
+//      return;
+//    }
+//
+//    final NavigationRoute.Builder navigationRouteBuilder = NavigationRoute.builder(this)
+//      .accessToken(Mapbox.getAccessToken());
+//    navigationRouteBuilder.origin(origin);
+//    navigationRouteBuilder.destination(destination);
+//    if (waypoint != null) {
+//      navigationRouteBuilder.addWaypoint(waypoint);
+//    }
+//
+//    navigationRouteBuilder.build().getRoute(new Callback<DirectionsResponse>() {
+//      @Override
+//      public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+//        Timber.d("Url: %s", call.request().url().toString());
+//        if (response.body() != null) {
+//          if (!response.body().routes().isEmpty()) {
+//            DirectionsRoute directionsRoute = response.body().routes().get(0);
+//            MockNavigationActivity.this.route = directionsRoute;
+//            navigationMapRoute.addRoutes(response.body().routes());
+//            startRouteButton.setVisibility(View.VISIBLE);
+//          }
+//        }
+//      }
+//
+//      @Override
+//      public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+//        Timber.e(throwable, "onFailure: navigation.getRoute()");
+//      }
+//    });
   }
 
   /*
@@ -310,8 +304,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   protected void onDestroy() {
     super.onDestroy();
     navigation.onDestroy();
-    locationEngine.removeLocationUpdates();
-    locationEngine.deactivate();
+    // TODO
+//    locationEngine.removeLocationUpdates();
+//    locationEngine.deactivate();
     if (mapboxMap != null) {
       mapboxMap.removeOnMapClickListener(this);
     }

@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.testapp.activity.navigationui;
 
+import android.annotation.SuppressLint;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,8 +14,10 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.android.core.location.LocationEngineListener;
+import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineProvider;
+import com.mapbox.android.core.location.LocationEngineRequest;
+import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -39,15 +42,16 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static com.mapbox.android.core.location.LocationEnginePriority.HIGH_ACCURACY;
+import timber.log.Timber;
 
 public class DualNavigationMapActivity extends AppCompatActivity implements OnNavigationReadyCallback,
   NavigationListener, Callback<DirectionsResponse>, OnMapReadyCallback, MapboxMap.OnMapLongClickListener,
-  LocationEngineListener, OnRouteSelectionChangeListener {
+  LocationEngineCallback<LocationEngineResult>, OnRouteSelectionChangeListener {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
+  private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
+  private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 500;
   private ConstraintLayout dualNavigationMap;
   private NavigationView navigationView;
   private MapView mapView;
@@ -140,16 +144,19 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   public void onNavigationRunning() {
   }
 
-  @SuppressWarnings( {"MissingPermission"})
   @Override
-  public void onConnected() {
-    locationEngine.requestLocationUpdates();
+  public void onSuccess(LocationEngineResult result) {
+    Location location = result.getLastLocation();
+    if (location == null) {
+      return;
+    }
+    origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    onLocationFound(location);
   }
 
   @Override
-  public void onLocationChanged(Location location) {
-    origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    onLocationFound(location);
+  public void onFailure(@NonNull Exception exception) {
+    Timber.e(exception);
   }
 
   @Override
@@ -164,16 +171,15 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     mapView.onStart();
   }
 
+  @SuppressLint("MissingPermission")
   @Override
   public void onResume() {
     super.onResume();
     navigationView.onResume();
     mapView.onResume();
     if (locationEngine != null) {
-      locationEngine.addLocationEngineListener(this);
-      if (!locationEngine.isConnected()) {
-        locationEngine.activate();
-      }
+      LocationEngineRequest request = buildEngineRequest();
+      locationEngine.requestLocationUpdates(request, this, null);
     }
   }
 
@@ -210,7 +216,7 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     navigationView.onPause();
     mapView.onPause();
     if (locationEngine != null) {
-      locationEngine.removeLocationEngineListener(this);
+      locationEngine.removeLocationUpdates(this);
     }
   }
 
@@ -227,8 +233,7 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     navigationView.onDestroy();
     mapView.onDestroy();
     if (locationEngine != null) {
-      locationEngine.removeLocationUpdates();
-      locationEngine.deactivate();
+      locationEngine.removeLocationUpdates(this);
     }
   }
 
@@ -286,25 +291,21 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
     return response.body() != null && !response.body().routes().isEmpty();
   }
-
-
-  @SuppressWarnings( {"MissingPermission"})
+  
+  @SuppressWarnings("MissingPermission")
   private void initLocationEngine() {
-    locationEngine = new LocationEngineProvider(this).obtainBestLocationEngineAvailable();
-    locationEngine.setPriority(HIGH_ACCURACY);
-    locationEngine.setInterval(0);
-    locationEngine.setFastestInterval(1000);
-    locationEngine.addLocationEngineListener(this);
-    locationEngine.activate();
-
-    if (locationEngine.getLastLocation() != null) {
-      Location lastLocation = locationEngine.getLastLocation();
-      onLocationChanged(lastLocation);
-      origin = Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude());
-    }
+    locationEngine = LocationEngineProvider.getBestLocationEngine(getApplicationContext());
+    locationEngine.getLastLocation(this);
   }
 
-  @SuppressWarnings( {"MissingPermission"})
+  @NonNull
+  private LocationEngineRequest buildEngineRequest() {
+    return new LocationEngineRequest.Builder(UPDATE_INTERVAL_IN_MILLISECONDS)
+      .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+      .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
+      .build();
+  }
+
   private void initializeLocationLayer() {
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
     locationComponent.activateLocationComponent(this, locationEngine);

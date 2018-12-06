@@ -18,8 +18,10 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.android.core.location.LocationEngineListener;
+import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineProvider;
+import com.mapbox.android.core.location.LocationEngineRequest;
+import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -57,16 +59,17 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Response;
-
-import static com.mapbox.android.core.location.LocationEnginePriority.HIGH_ACCURACY;
+import timber.log.Timber;
 
 public class NavigationLauncherActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, LocationEngineListener, OnRouteSelectionChangeListener {
+  MapboxMap.OnMapLongClickListener, LocationEngineCallback<LocationEngineResult>, OnRouteSelectionChangeListener {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
   private static final int CHANGE_SETTING_REQUEST_CODE = 1;
   private static final int INITIAL_ZOOM = 16;
+  private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
+  private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 500;
 
   private LocationEngine locationEngine;
   private NavigationMapRoute mapRoute;
@@ -143,10 +146,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     super.onResume();
     mapView.onResume();
     if (locationEngine != null) {
-      locationEngine.addLocationEngineListener(this);
-      if (!locationEngine.isConnected()) {
-        locationEngine.activate();
-      }
+      locationEngine.requestLocationUpdates(buildEngineRequest(), this, null);
     }
   }
 
@@ -155,7 +155,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     super.onPause();
     mapView.onPause();
     if (locationEngine != null) {
-      locationEngine.removeLocationEngineListener(this);
+      locationEngine.removeLocationUpdates(this);
     }
   }
 
@@ -176,8 +176,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     super.onDestroy();
     mapView.onDestroy();
     if (locationEngine != null) {
-      locationEngine.removeLocationUpdates();
-      locationEngine.deactivate();
+      locationEngine.removeLocationUpdates(this);
     }
   }
 
@@ -212,16 +211,19 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     }
   }
 
-  @SuppressWarnings( {"MissingPermission"})
   @Override
-  public void onConnected() {
-    locationEngine.requestLocationUpdates();
+  public void onSuccess(LocationEngineResult result) {
+    Location location = result.getLastLocation();
+    if (location == null) {
+      return;
+    }
+    currentLocation = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    onLocationFound(location);
   }
 
   @Override
-  public void onLocationChanged(Location location) {
-    currentLocation = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    onLocationFound(location);
+  public void onFailure(@NonNull Exception exception) {
+    Timber.e(exception);
   }
 
   @Override
@@ -231,18 +233,10 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
   @SuppressWarnings( {"MissingPermission"})
   private void initLocationEngine() {
-    locationEngine = new LocationEngineProvider(this).obtainBestLocationEngineAvailable();
-    locationEngine.setPriority(HIGH_ACCURACY);
-    locationEngine.setInterval(0);
-    locationEngine.setFastestInterval(1000);
-    locationEngine.addLocationEngineListener(this);
-    locationEngine.activate();
-
-    if (locationEngine.getLastLocation() != null) {
-      Location lastLocation = locationEngine.getLastLocation();
-      onLocationChanged(lastLocation);
-      currentLocation = Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude());
-    }
+    locationEngine = LocationEngineProvider.getBestLocationEngine(getApplicationContext());
+    LocationEngineRequest request = buildEngineRequest();
+    locationEngine.getLastLocation(this);
+    locationEngine.requestLocationUpdates(request, this, null);
   }
 
   @SuppressWarnings( {"MissingPermission"})
@@ -402,5 +396,13 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         currentMarker.setPosition(position);
       }
     }
+  }
+
+  @NonNull
+  private LocationEngineRequest buildEngineRequest() {
+    return new LocationEngineRequest.Builder(UPDATE_INTERVAL_IN_MILLISECONDS)
+      .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+      .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
+      .build();
   }
 }

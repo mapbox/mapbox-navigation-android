@@ -10,7 +10,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
@@ -167,7 +166,6 @@ public class MapboxNavigation implements ServiceConnection {
    */
   public void onDestroy() {
     stopNavigation();
-    disableLocationEngine();
     removeOffRouteListener(null);
     removeProgressChangeListener(null);
     removeMilestoneEventListener(null);
@@ -285,7 +283,7 @@ public class MapboxNavigation implements ServiceConnection {
   public void setLocationEngine(@NonNull LocationEngine locationEngine) {
     this.locationEngine = locationEngine;
     // Setup telemetry with new engine
-    navigationTelemetry.updateLocationEngine(locationEngine);
+    navigationTelemetry.updateLocationEngineName(locationEngine);
     // Notify service to get new location engine.
     if (isServiceAvailable()) {
       navigationService.updateLocationEngine(locationEngine);
@@ -844,28 +842,14 @@ public class MapboxNavigation implements ServiceConnection {
    */
   private void initializeDefaultLocationEngine() {
     locationEngine = obtainLocationEngine();
-    locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
-    locationEngine.setFastestInterval(1000);
-    locationEngine.setInterval(0);
-    locationEngine.activate();
   }
 
   private LocationEngine obtainLocationEngine() {
     if (locationEngine == null) {
-      return new LocationEngineProvider(applicationContext).obtainBestLocationEngineAvailable();
+      return LocationEngineProvider.getBestLocationEngine(applicationContext);
     }
 
     return locationEngine;
-  }
-
-  /**
-   * When onDestroy gets called, it is safe to remove location updates and deactivate the engine.
-   */
-  private void disableLocationEngine() {
-    if (locationEngine != null) {
-      locationEngine.removeLocationUpdates();
-      locationEngine.deactivate();
-    }
   }
 
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute) {

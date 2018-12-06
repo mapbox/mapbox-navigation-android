@@ -9,7 +9,8 @@ import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.Toast;
 
-import com.mapbox.android.core.location.LocationEngineListener;
+import com.mapbox.android.core.location.LocationEngineCallback;
+import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.constants.Constants;
@@ -51,9 +52,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
-public class RerouteActivity extends HistoryActivity implements OnMapReadyCallback, LocationEngineListener,
-  Callback<DirectionsResponse>, MapboxMap.OnMapClickListener, NavigationEventListener, OffRouteListener,
-  ProgressChangeListener, MilestoneEventListener {
+public class RerouteActivity extends HistoryActivity implements OnMapReadyCallback,
+  LocationEngineCallback<LocationEngineResult>, Callback<DirectionsResponse>, MapboxMap.OnMapClickListener,
+  NavigationEventListener, OffRouteListener, ProgressChangeListener, MilestoneEventListener {
 
   @BindView(R.id.mapView)
   MapView mapView;
@@ -151,22 +152,21 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     locationComponent.setRenderMode(RenderMode.GPS);
 
     mockLocationEngine = new ReplayRouteLocationEngine();
-    mockLocationEngine.addLocationEngineListener(this);
-    navigation.setLocationEngine(mockLocationEngine);
 
     getRoute(origin, destination, null);
   }
 
   @Override
-  public void onConnected() {
-    // No-op - mock automatically begins pushing updates
+  public void onSuccess(LocationEngineResult result) {
+    Location location = result.getLastLocation();
+    if (!tracking && location != null) {
+      mapboxMap.getLocationComponent().forceLocationUpdate(location);
+    }
   }
 
   @Override
-  public void onLocationChanged(Location location) {
-    if (!tracking) {
-      mapboxMap.getLocationComponent().forceLocationUpdate(location);
-    }
+  public void onFailure(@NonNull Exception exception) {
+    Timber.e(exception);
   }
 
   @Override
@@ -282,15 +282,14 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   }
 
   private void resetLocationEngine(DirectionsRoute directionsRoute) {
-    mockLocationEngine.deactivate();
+    mockLocationEngine.removeLocationUpdates(this);
     mockLocationEngine.assign(directionsRoute);
+    navigation.setLocationEngine(mockLocationEngine);
   }
 
   private void shutdownLocationEngine() {
     if (mockLocationEngine != null) {
-      mockLocationEngine.removeLocationEngineListener(this);
-      mockLocationEngine.removeLocationUpdates();
-      mockLocationEngine.deactivate();
+      mockLocationEngine.removeLocationUpdates(this);
     }
   }
 
