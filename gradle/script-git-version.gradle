@@ -22,12 +22,18 @@ import org.ajoberstar.grgit.Grgit
  */
 
 ext {
-    git = Grgit.open(currentDir: projectDir)
-    gitVersionName = git.describe()
-    gitVersionCode = git.tag.list().count{
-        it.getName().contains("testapp")
+    try {
+        git = Grgit.open(currentDir: projectDir)
+        gitVersionName = git.describe()
+        gitVersionCode = git.tag.list().count {
+            it.getName().contains("testapp")
+        }
+        gitVersionCodeTime = git.head().time
+    } catch (Exception exception) {
+        gitVersionName = "1.0"
+        gitVersionCode = 2
+        gitVersionCodeTime = 1484407970
     }
-    gitVersionCodeTime = git.head().time
 }
 
 task printVersion() {
