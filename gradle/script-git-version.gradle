@@ -22,6 +22,9 @@ import org.ajoberstar.grgit.Grgit
  */
 
 ext {
+    gitVersionName = "YOUR VERSION NAME GOES HERE"
+    gitVersionCode = -1
+    gitVersionCodeTime = -1
     try {
         git = Grgit.open(currentDir: projectDir)
         gitVersionName = git.describe()
@@ -30,9 +33,9 @@ ext {
         }
         gitVersionCodeTime = git.head().time
     } catch (Exception exception) {
-        gitVersionName = "1.0"
-        gitVersionCode = 2
-        gitVersionCodeTime = 1484407970
+        println("Does your build of mapbox-navigation-android have a Git directory? The try/catch in the script-git-version.gradle file
+        is for the situation when there is no Git setup. Try cloning the mapbox-navigation-android repo, rather than downloading
+        the repo as a .zip file.")
     }
 }
 
