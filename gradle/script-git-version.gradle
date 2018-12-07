@@ -33,9 +33,10 @@ ext {
         }
         gitVersionCodeTime = git.head().time
     } catch (Exception exception) {
-        println("Does your build of mapbox-navigation-android have a Git directory? The try/catch in the script-git-version.gradle file
-        is for the situation when there is no Git setup. Try cloning the mapbox-navigation-android repo, rather than downloading
-        the repo as a .zip file.")
+        println("Does your build of mapbox-navigation-android have a Git directory?" +
+                "The try/catch in the script-git-version.gradle file is for the situation " +
+                "when there is no Git setup. Try cloning the mapbox-navigation-android repo, " +
+                "rather than downloading the repo as a .zip file.")
     }
 }
 
