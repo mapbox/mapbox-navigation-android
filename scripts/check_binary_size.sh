@@ -13,11 +13,13 @@ repo_name=$3
 platform=$4
 # Argument 5 is a file including the different SDKs / modules (one per line) - Must match paths_file number of lines / size
 sdks_file=$5
+# Argument 6 is the commit SHA
+commit_sha=$6
 
 source=mobile.binarysize
 scripts_path="scripts"
-json_name="$scripts_path/${repo_name}.json"
-json_gz="$scripts_path/${repo_name}.json.gz"
+json_name="$scripts_path/${repo_name}-${commit_sha}.json"
+json_gz="$scripts_path/${repo_name}-${commit_sha}.json.gz"
 
 date=`date '+%Y-%m-%d'`
 utc_iso_date=`date -u +'%Y-%m-%dT%H:%M:%SZ'`
