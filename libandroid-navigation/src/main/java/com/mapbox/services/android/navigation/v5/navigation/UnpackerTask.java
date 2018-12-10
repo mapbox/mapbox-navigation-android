@@ -2,8 +2,6 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.os.AsyncTask;
 
-import com.mapbox.navigator.Navigator;
-
 import java.io.File;
 
 
@@ -15,15 +13,15 @@ import java.io.File;
  * to the destination directory for the resulting tiles.
  */
 class UnpackerTask extends AsyncTask<String, Integer, File> {
-  private final Navigator navigator;
+  private final OfflineNavigator offlineNavigator;
 
-  UnpackerTask(Navigator navigator) {
-    this.navigator = navigator;
+  UnpackerTask(OfflineNavigator offlineNavigator) {
+    this.offlineNavigator = offlineNavigator;
   }
 
   @Override
   protected File doInBackground(String... strings) {
-    navigator.unpackTiles(strings[0], strings[1]);
+    offlineNavigator.unpackTiles(strings[0], strings[1]);
 
     return new File(strings[0]);
   }
