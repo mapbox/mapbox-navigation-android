@@ -4,15 +4,20 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 class NavigationViewInstanceState implements Parcelable {
+
   private int bottomSheetBehaviorState;
   private int recenterButtonVisibility;
   private boolean instructionViewVisible;
+  private boolean isWayNameVisible;
+  private String wayNameText;
 
   NavigationViewInstanceState(int bottomSheetBehaviorState, int recenterButtonVisibility,
-                              boolean instructionViewVisible) {
+                              boolean instructionViewVisible, boolean isWayNameVisible, String wayNameText) {
     this.bottomSheetBehaviorState = bottomSheetBehaviorState;
     this.recenterButtonVisibility = recenterButtonVisibility;
     this.instructionViewVisible = instructionViewVisible;
+    this.isWayNameVisible = isWayNameVisible;
+    this.wayNameText = wayNameText;
   }
 
   int getBottomSheetBehaviorState() {
@@ -27,10 +32,29 @@ class NavigationViewInstanceState implements Parcelable {
     return instructionViewVisible;
   }
 
-  private NavigationViewInstanceState(Parcel parcel) {
-    bottomSheetBehaviorState = parcel.readInt();
-    recenterButtonVisibility = parcel.readInt();
-    instructionViewVisible = parcel.readByte() != 0x00;
+  boolean isWayNameVisible() {
+    return isWayNameVisible;
+  }
+
+  String getWayNameText() {
+    return wayNameText;
+  }
+
+  private NavigationViewInstanceState(Parcel in) {
+    bottomSheetBehaviorState = in.readInt();
+    recenterButtonVisibility = in.readInt();
+    instructionViewVisible = in.readByte() != 0;
+    isWayNameVisible = in.readByte() != 0;
+    wayNameText = in.readString();
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeInt(bottomSheetBehaviorState);
+    dest.writeInt(recenterButtonVisibility);
+    dest.writeByte((byte) (instructionViewVisible ? 1 : 0));
+    dest.writeByte((byte) (isWayNameVisible ? 1 : 0));
+    dest.writeString(wayNameText);
   }
 
   @Override
@@ -38,24 +62,15 @@ class NavigationViewInstanceState implements Parcelable {
     return 0;
   }
 
-  @Override
-  public void writeToParcel(Parcel dest, int flags) {
-    dest.writeInt(bottomSheetBehaviorState);
-    dest.writeInt(recenterButtonVisibility);
-    dest.writeByte((byte) (instructionViewVisible ? 0x01 : 0x00));
-  }
+  public static final Creator<NavigationViewInstanceState> CREATOR = new Creator<NavigationViewInstanceState>() {
+    @Override
+    public NavigationViewInstanceState createFromParcel(Parcel in) {
+      return new NavigationViewInstanceState(in);
+    }
 
-  public static final Parcelable.Creator<NavigationViewInstanceState> CREATOR =
-    new Parcelable.Creator<NavigationViewInstanceState>() {
-
-      @Override
-      public NavigationViewInstanceState createFromParcel(Parcel source) {
-        return new NavigationViewInstanceState(source);
-      }
-
-      @Override
-      public NavigationViewInstanceState[] newArray(int size) {
-        return new NavigationViewInstanceState[size];
-      }
-    };
+    @Override
+    public NavigationViewInstanceState[] newArray(int size) {
+      return new NavigationViewInstanceState[size];
+    }
+  };
 }

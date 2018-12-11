@@ -1,7 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5.map;
 
-import android.graphics.Bitmap;
-
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
@@ -21,16 +19,8 @@ class MapLayerInteractor {
     this.mapboxMap = mapboxMap;
   }
 
-  void addLayer(Layer layer) {
-    mapboxMap.addLayer(layer);
-  }
-
   Layer retrieveLayerFromId(String layerId) {
     return mapboxMap.getLayerAs(layerId);
-  }
-
-  void addLayerImage(String imageName, Bitmap image) {
-    mapboxMap.addImage(imageName, image);
   }
 
   void updateLayerVisibility(boolean isVisible, String layerIdentifier) {

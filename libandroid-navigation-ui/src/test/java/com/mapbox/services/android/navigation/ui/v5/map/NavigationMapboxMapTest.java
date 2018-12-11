@@ -105,7 +105,7 @@ public class NavigationMapboxMapTest {
 
   @Test
   public void addOnWayNameChangedListener_listenerIsAddedToMapWayname() {
-    MapWayname mapWayName = mock(MapWayname.class);
+    MapWayName mapWayName = mock(MapWayName.class);
     NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName);
     OnWayNameChangedListener listener = mock(OnWayNameChangedListener.class);
 
@@ -116,7 +116,7 @@ public class NavigationMapboxMapTest {
 
   @Test
   public void removeOnWayNameChangedListener_listenerIsRemovedFromMapWayname() {
-    MapWayname mapWayName = mock(MapWayname.class);
+    MapWayName mapWayName = mock(MapWayName.class);
     NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName);
     OnWayNameChangedListener listener = mock(OnWayNameChangedListener.class);
 

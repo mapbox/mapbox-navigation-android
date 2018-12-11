@@ -7,14 +7,14 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 class MapWaynameProgressChangeListener implements ProgressChangeListener {
 
-  private final MapWayname mapWayname;
+  private final MapWayName mapWayName;
 
-  MapWaynameProgressChangeListener(MapWayname mapWayname) {
-    this.mapWayname = mapWayname;
+  MapWaynameProgressChangeListener(MapWayName mapWayName) {
+    this.mapWayName = mapWayName;
   }
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    mapWayname.updateProgress(location, routeProgress.currentStepPoints());
+    mapWayName.updateProgress(location, routeProgress.currentStepPoints());
   }
 }

@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/waynameText"
     android:layout_width="wrap_content"
-    android:layout_height="@dimen/wayname_view_height"
-    android:background="@drawable/wayname_text_background"
-    android:ellipsize="end"
-    android:gravity="center"
-    android:maxLines="1"
-    android:maxWidth="200dp"
-    android:paddingBottom="2dp"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:textColor="?attr/navigationViewAccent"
-    android:textStyle="bold"
-    tools:text="Wayname Text"/>
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/wayname_bottom_padding">
+
+    <TextView
+        android:id="@+id/waynameText"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/wayname_view_height"
+        android:background="@drawable/wayname_text_background"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxWidth="@dimen/wayname_max_width"
+        android:maxLines="1"
+        android:paddingLeft="@dimen/wayname_padding"
+        android:paddingRight="@dimen/wayname_padding"
+        android:paddingBottom="@dimen/wayname_padding_bottom"
+        android:textColor="?attr/navigationViewAccent"
+        android:textStyle="bold"
+        tools:text="Wayname Text"/>
+
+</FrameLayout>

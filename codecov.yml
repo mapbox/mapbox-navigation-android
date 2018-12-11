@@ -28,3 +28,6 @@ comment:
 ignore:
   - "**/ManeuversStyleKit.java"
   - "**/LaneStyleKit.java"
+  - "**/NavigationViewInstanceState.java"
+  - "**/NavigationMapboxMapInstanceState.java"
+  - "**/NavigationConstants.java"

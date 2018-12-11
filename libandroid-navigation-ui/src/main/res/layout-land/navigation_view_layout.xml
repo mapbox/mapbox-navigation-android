@@ -37,6 +37,15 @@
         app:layout_anchor="@id/summaryBottomSheet"
         app:layout_anchorGravity="top|left"/>
 
+    <com.mapbox.services.android.navigation.ui.v5.map.WayNameView
+        android:id="@+id/wayNameView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|top"
+        android:visibility="invisible"
+        app:layout_anchor="@id/summaryBottomSheet"
+        app:layout_anchorGravity="center|top"/>
+
     <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView
         android:id="@+id/instructionView"
         android:layout_width="match_parent"

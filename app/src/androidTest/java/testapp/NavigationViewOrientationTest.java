@@ -134,8 +134,7 @@ public class NavigationViewOrientationTest extends BaseNavigationActivityTest {
     onView(withId(R.id.navigationMapView)).perform(swipeUp());
     changeOrientation(orientationLandscape());
 
-    NavigationMapboxMap navigationMapboxMap = getNavigationView().retrieveNavigationMapboxMap();
-    boolean isWaynameVisible = navigationMapboxMap.isWaynameVisible();
+    boolean isWaynameVisible = getNavigationView().isWayNameVisible();
     assertFalse(isWaynameVisible);
   }
 
