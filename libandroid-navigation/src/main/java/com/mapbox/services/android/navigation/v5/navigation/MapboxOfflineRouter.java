@@ -74,7 +74,7 @@ public class MapboxOfflineRouter {
    * @param listener     which is updated on error, on progress update and on completion
    */
   public void downloadTiles(OfflineTiles offlineTiles, RouteTileDownloadListener listener) {
-    new RouteTileDownloader(tilePath, listener).startDownload(offlineTiles);
+    new RouteTileDownloader(offlineNavigator, tilePath, listener).startDownload(offlineTiles);
   }
 
   /**
