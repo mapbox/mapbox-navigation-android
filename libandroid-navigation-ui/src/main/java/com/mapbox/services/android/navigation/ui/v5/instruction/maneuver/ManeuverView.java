@@ -27,6 +27,8 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_EXIT_ROTARY;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
+  .STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_FORK;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROTARY;
@@ -59,6 +61,8 @@ public class ManeuverView extends View {
       add(STEP_MANEUVER_TYPE_ROTARY);
       add(STEP_MANEUVER_TYPE_ROUNDABOUT);
       add(STEP_MANEUVER_TYPE_ROUNDABOUT_TURN);
+      add(STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT);
+      add(STEP_MANEUVER_TYPE_EXIT_ROTARY);
     }
   };
   private static final Set<String> MANEUVER_TYPES_WITH_NULL_MODIFIERS = new HashSet<String>() {
@@ -67,6 +71,7 @@ public class ManeuverView extends View {
       add(STEP_MANEUVER_TYPE_FORK);
       add(STEP_MANEUVER_TYPE_ROUNDABOUT);
       add(STEP_MANEUVER_TYPE_ROUNDABOUT_TURN);
+      add(STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT);
       add(STEP_MANEUVER_TYPE_ROTARY);
       add(STEP_MANEUVER_TYPE_EXIT_ROTARY);
     }
