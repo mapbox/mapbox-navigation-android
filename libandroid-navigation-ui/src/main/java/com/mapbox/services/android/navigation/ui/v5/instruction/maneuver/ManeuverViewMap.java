@@ -16,6 +16,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_EXIT_ROTARY;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_FORK;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_MERGE;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP;
@@ -55,6 +56,13 @@ class ManeuverViewMap extends HashMap<Pair<String, String>, ManeuverViewUpdate> 
       }
     });
     put(new Pair<String, String>(STEP_MANEUVER_TYPE_ROUNDABOUT_TURN, null), new ManeuverViewUpdate() {
+      @Override
+      public void updateManeuverView(Canvas canvas, int primaryColor, int secondaryColor,
+                                     PointF size, float roundaboutAngle) {
+        ManeuversStyleKit.drawRoundabout(canvas, primaryColor, secondaryColor, size, roundaboutAngle);
+      }
+    });
+    put(new Pair<String, String>(STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT, null), new ManeuverViewUpdate() {
       @Override
       public void updateManeuverView(Canvas canvas, int primaryColor, int secondaryColor,
                                      PointF size, float roundaboutAngle) {
