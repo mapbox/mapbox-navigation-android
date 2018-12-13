@@ -202,6 +202,8 @@ public class NavigationViewModel extends AndroidViewModel {
       initializeNavigation(getApplication(), navigationOptions, locationEngine);
       addMilestones(options);
     }
+    initializeVoiceInstructionLoader();
+    initializeVoiceInstructionCache();
     initializeNavigationSpeechPlayer(options);
     routeFetcher.extractRouteOptions(options);
     return navigation;
@@ -304,14 +306,20 @@ public class NavigationViewModel extends AndroidViewModel {
     boolean isVoiceLanguageSupported = options.directionsRoute().voiceLanguage() != null;
     SpeechPlayerProvider speechPlayerProvider = initializeSpeechPlayerProvider(isVoiceLanguageSupported);
     this.speechPlayer = new NavigationSpeechPlayer(speechPlayerProvider);
-    this.voiceInstructionCache = new VoiceInstructionCache(navigation, voiceInstructionLoader);
+  }
+
+  private void initializeVoiceInstructionLoader() {
+    Cache cache = new Cache(new File(getApplication().getCacheDir(), OKHTTP_INSTRUCTION_CACHE),
+      TEN_MEGABYTE_CACHE_SIZE);
+    voiceInstructionLoader = new VoiceInstructionLoader(getApplication(), accessToken, cache);
+  }
+
+  private void initializeVoiceInstructionCache() {
+    voiceInstructionCache = new VoiceInstructionCache(navigation, voiceInstructionLoader);
   }
 
   @NonNull
   private SpeechPlayerProvider initializeSpeechPlayerProvider(boolean voiceLanguageSupported) {
-    Cache cache = new Cache(new File(getApplication().getCacheDir(), OKHTTP_INSTRUCTION_CACHE),
-      TEN_MEGABYTE_CACHE_SIZE);
-    voiceInstructionLoader = new VoiceInstructionLoader(getApplication(), accessToken, cache);
     return new SpeechPlayerProvider(getApplication(), language, voiceLanguageSupported, voiceInstructionLoader);
   }
 
