@@ -27,7 +27,7 @@ class NavigationViewSubscriber {
       }
     });
 
-    navigationViewModel.destination.observe(owner, new Observer<Point>() {
+    navigationViewModel.retrieveDestination().observe(owner, new Observer<Point>() {
       @Override
       public void onChanged(@Nullable Point point) {
         if (point != null) {

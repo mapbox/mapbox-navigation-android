@@ -10,7 +10,6 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.MaxSpeed;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
-import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
@@ -58,26 +57,6 @@ public class NavigationHelper {
   }
 
   /**
-   * Calculates the distance remaining in the step from the current users snapped position, to the
-   * next maneuver position.
-   */
-  static double stepDistanceRemaining(Point snappedPosition, int legIndex, int stepIndex,
-                                      DirectionsRoute directionsRoute, List<Point> coordinates) {
-    List<LegStep> steps = directionsRoute.legs().get(legIndex).steps();
-    Point nextManeuverPosition = nextManeuverPosition(stepIndex, steps, coordinates);
-
-    LineString lineString = LineString.fromPolyline(steps.get(stepIndex).geometry(),
-      Constants.PRECISION_6);
-    // If the users snapped position equals the next maneuver
-    // position or the linestring coordinate size is less than 2,the distance remaining is zero.
-    if (snappedPosition.equals(nextManeuverPosition) || lineString.coordinates().size() < 2) {
-      return 0;
-    }
-    LineString slicedLine = TurfMisc.lineSlice(snappedPosition, nextManeuverPosition, lineString);
-    return TurfMeasurement.length(slicedLine, TurfConstants.UNIT_METERS);
-  }
-
-  /**
    * Takes in the leg distance remaining value already calculated and if additional legs need to be
    * traversed along after the current one, adds those distances and returns the new distance.
    * Otherwise, if the route only contains one leg or the users on the last leg, this value will
@@ -93,41 +72,6 @@ public class NavigationHelper {
       legDistanceRemaining += directionsRoute.legs().get(i).distance();
     }
     return legDistanceRemaining;
-  }
-
-  /**
-   * This is used when a user has completed a step maneuver and the indices need to be incremented.
-   * The main purpose of this class is to determine if an additional leg exist and the step index
-   * has met the first legs total size, a leg index needs to occur and step index should be reset.
-   * Otherwise, the step index is incremented while the leg index remains the same.
-   * <p>
-   * Rather than returning an int array, a new instance of Navigation Indices gets returned. This
-   * provides type safety and making the code a bit more readable.
-   * </p>
-   *
-   * @param routeProgress   need a routeProgress in order to get the directions route leg list size
-   * @param previousIndices used for adjusting the indices
-   * @return a {@link NavigationIndices} object which contains the new leg and step indices
-   */
-  static NavigationIndices increaseIndex(RouteProgress routeProgress,
-                                         NavigationIndices previousIndices) {
-    DirectionsRoute route = routeProgress.directionsRoute();
-    int previousStepIndex = previousIndices.stepIndex();
-    int previousLegIndex = previousIndices.legIndex();
-    int routeLegSize = route.legs().size();
-    int legStepSize = route.legs().get(routeProgress.legIndex()).steps().size();
-
-    boolean isOnLastLeg = previousLegIndex == routeLegSize - 1;
-    boolean isOnLastStep = previousStepIndex == legStepSize - 1;
-
-    if (isOnLastStep && !isOnLastLeg) {
-      return NavigationIndices.create((previousLegIndex + 1), 0);
-    }
-
-    if (isOnLastStep) {
-      return previousIndices;
-    }
-    return NavigationIndices.create(previousLegIndex, (previousStepIndex + 1));
   }
 
   /**
@@ -337,18 +281,6 @@ public class NavigationHelper {
     }
     annotationBuilder.index(annotationIndex);
     return annotationBuilder.build();
-  }
-
-  /**
-   * Retrieves the next steps maneuver position if one exist, otherwise it decodes the current steps
-   * geometry and uses the last coordinate in the position list.
-   */
-  static Point nextManeuverPosition(int stepIndex, List<LegStep> steps, List<Point> coords) {
-    // If there is an upcoming step, use it's maneuver as the position.
-    if (steps.size() > (stepIndex + 1)) {
-      return steps.get(stepIndex + 1).maneuver().location();
-    }
-    return !coords.isEmpty() ? coords.get(coords.size() - 1) : coords.get(coords.size());
   }
 
   private static int findAnnotationIndex(CurrentLegAnnotation currentLegAnnotation,

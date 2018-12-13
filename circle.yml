@@ -6,6 +6,12 @@ workflows:
     jobs:
       - build
       - release
+      - publish:
+          filters:
+            tags:
+              only: /^testapp-.*/
+            branches:
+              ignore: /.*/
 jobs:
   build:
     working_directory: ~/code
@@ -32,7 +38,7 @@ jobs:
       - run:
           name: Run unit-test, generate Jacoco test report and Post code coverage report to Codecov.io
           command: |
-            ./gradlew testDebugUnitTestCoverage
+            ./gradlew testDebugUnitTestCoverage --no-daemon
             pip install --user codecov && /root/.local/bin/codecov
       - run:
           name: Build release to test ProGuard rules
@@ -42,10 +48,10 @@ jobs:
           command: |
             ./gradlew accessToken
             ./gradlew app:assembleDebug
-#      - run:
-#          name: Build Instrumentation Test APK
-#          command: |
-#            ./gradlew app:assembleAndroidTest
+      - run:
+          name: Build Instrumentation Test APK
+          command: |
+            ./gradlew app:assembleAndroidTest
       - run:
           name: Log in to Google Cloud Platform
           shell: /bin/bash -euo pipefail
@@ -53,19 +59,19 @@ jobs:
             echo "${GCLOUD_SERVICE_ACCOUNT_JSON}" > secret.json
             gcloud auth activate-service-account --key-file secret.json --project mapbox-navigation-android
             rm secret.json
-#      - run:
-#          name: Run instrumentation tests on Firebase
-#          no_output_timeout: 1200
-#          shell: /bin/bash -euo pipefail
-#          command: |
-#            gcloud firebase test android run --type instrumentation \
-#              --app app/build/outputs/apk/debug/app-debug.apk \
-#              --test app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
-#              --device model=hammerhead,version=21,locale=en,orientation=portrait  \
-#              --device model=athene,version=23,locale=fr,orientation=landscape \
-#              --device model=sailfish,version=26,locale=es,orientation=portrait \
-#              --device model=walleye,version=28,locale=de,orientation=landscape \
-#              --timeout 5m
+      - run:
+          name: Run instrumentation tests on Firebase
+          no_output_timeout: 1200
+          shell: /bin/bash -euo pipefail
+          command: |
+            gcloud firebase test android run --type instrumentation \
+              --app app/build/outputs/apk/debug/app-debug.apk \
+              --test app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+              --device model=hammerhead,version=21,locale=en,orientation=portrait  \
+              --device model=athene,version=23,locale=fr,orientation=landscape \
+              --device model=sailfish,version=26,locale=es,orientation=portrait \
+              --device model=walleye,version=28,locale=de,orientation=landscape \
+              --timeout 5m
       - run:
           name: Run robo test on Firebase
           no_output_timeout: 1200
@@ -129,3 +135,47 @@ jobs:
       - store_artifacts:
           path: app/build/reports
           destination: reports
+      - restore_cache: # special step to restore the dependency cache
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Setup Environment
+          command: npm install
+      - save_cache: # special step to save the dependency cache
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: Check & Publish Binary Size
+          command: |
+            ./scripts/check_binary_size.sh ./scripts/paths_file.txt ./scripts/labels_file.txt 'mapbox-navigation-android' 'android' ./scripts/sdks_file.txt "${CIRCLE_SHA1}"
+# ------------------------------------------------------------------------------
+  publish:
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    working_directory: ~/code
+    environment:
+      JVM_OPTS: -Xmx3200m
+      BUILDTYPE: Debug
+      IS_LOCAL_DEVELOPMENT: false
+      GOOGLE_PLAY_TRACK: internal
+    steps:
+      - checkout
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      - run:
+          name: Export Google Play authentication json
+          command: |
+            #!/bin/bash
+            echo "${MAPBOX_DEVELOPER_CONFIG}" > /root/code/app/src/main/res/values/developer-config.xml
+            echo "${PLAY_PUBLISH_AUTH_JSON}" > android-gl-native-15d95ab30d0f.json
+      - run:
+          name: Release to Google Play
+          command: ./gradlew :app:publishRelease
+# ------------------------------------------------------------------------------

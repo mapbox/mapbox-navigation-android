@@ -5,6 +5,7 @@ import android.os.Handler;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.NavigationStatus;
+import com.mapbox.navigator.RouteState;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
@@ -20,6 +21,7 @@ import java.util.List;
 class RouteProcessorRunnable implements Runnable {
 
   private static final int ONE_SECOND_IN_MILLISECONDS = 1000;
+  private static final int ARRIVAL_ZONE_RADIUS = 40;
   private final NavigationRouteProcessor routeProcessor;
   private final MapboxNavigation navigation;
   private final Handler workerHandler;
@@ -57,6 +59,8 @@ class RouteProcessorRunnable implements Runnable {
       options.navigationLocationEngineIntervalLagInMilliseconds());
     RouteProgress routeProgress = routeProcessor.buildNewRouteProgress(status, route);
 
+    status = checkForNewLegIndex(mapboxNavigator, route, status);
+
     NavigationEngineFactory engineFactory = navigation.retrieveEngineFactory();
     final boolean userOffRoute = isUserOffRoute(options, status, rawLocation, routeProgress, engineFactory);
     final Location snappedLocation = findSnappedLocation(status, rawLocation, routeProgress, engineFactory);
@@ -67,6 +71,20 @@ class RouteProcessorRunnable implements Runnable {
     sendUpdateToResponseHandler(userOffRoute, milestones, snappedLocation, checkFasterRoute, routeProgress);
     routeProcessor.updatePreviousRouteProgress(routeProgress);
     workerHandler.postDelayed(this, ONE_SECOND_IN_MILLISECONDS);
+  }
+
+  private NavigationStatus checkForNewLegIndex(MapboxNavigator mapboxNavigator, DirectionsRoute route,
+                                               NavigationStatus currentStatus) {
+    RouteState currentState = currentStatus.getRouteState();
+    int currentLegIndex = currentStatus.getLegIndex();
+    int routeLegsSize = route.legs().size() - 1;
+    boolean canUpdateLeg = currentState == RouteState.COMPLETE && currentLegIndex < routeLegsSize;
+    boolean isValidDistanceRemaining = currentStatus.getRemainingLegDistance() < ARRIVAL_ZONE_RADIUS;
+    if (canUpdateLeg && isValidDistanceRemaining) {
+      int newLegIndex = currentLegIndex + 1;
+      return mapboxNavigator.updateLegIndex(newLegIndex);
+    }
+    return currentStatus;
   }
 
   private boolean isUserOffRoute(MapboxNavigationOptions options, NavigationStatus status, Location rawLocation,

@@ -17,6 +17,7 @@ buildscript {
     classpath pluginDependencies.errorprone
     classpath pluginDependencies.dependencyUpdates
     classpath pluginDependencies.jacoco
+    classpath pluginDependencies.playPublisher
   }
 }
 

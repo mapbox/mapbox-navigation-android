@@ -2,6 +2,66 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.24.1 - December 5, 2018
+
+* Increment leg index upon way point arrival #1604
+* Update Navigator 3.4.9 #1603
+* Bump mapboxSdkServices version to 4.2.0 #1599
+* Setup CI to publish the sample app to Google Play #1597
+* Add last commit hash to test app settings #1590
+
+### v0.24.0 - December 3, 2018
+
+* Add proguard rule for MapboxTelemetry #1593
+* Update Navigator to 3.4.7 #1592
+* Bump mapbox-navigation-native version to 3.4.6 #1586
+* Update Java Services 4.1.1 #1585
+* Bump mapbox-android-sdk and mapbox-android-telemetry versions #1584
+* Only allow choosing an offline version with valid data #1583
+* Add bearing to origin of offline route requests in OfflineRouteFinder #1582
+* Update permissions and preferences for ExampleActivity #1581
+* Enable history recording in example activity #1580
+* Add write external permission storage to app AndroidManifest #1578
+
+### v0.24.0-beta.2 - November 29, 2018
+
+* Route tile download #1559
+* Update OfflineTileVersions visibility and add to MapboxOfflineRouter #1571
+* Fix the progressUpdateListener for Tile Pack Unpacking #1567
+* Update MapboxOfflineRoute APIs and callback naming #1569
+* Fix milestone / progress listener leaks from NavigationView #1552
+* Fix JSON file names (repo name) in check binary size script #1564
+* Fix malformed binary size JSON #1563
+* Integrate navigation state changes from latest events library version #1562
+* Ignore StyleKit files for codecov #1561
+* Check for DynamicCamera in ExampleViewModel shutdown #1560
+* Fix cache is closed crash #1555
+* Bump mapboxEvents and mapboxNavigator versions #1558
+* Check for valid route with length in MockNavigationActivity #1556
+* Update processor tests and remove unused helper code #1536
+* Add binary size metric and push to loading dock #1554
+* Fix UI tests with DirectionsRoute test fixture #1548
+* Add codecov.yml #1551
+* Nav Native API update #1547
+* Add listener for updates to map way name #1544
+* Ignore PendingIntent to re-open package with null Intent #1546
+* Always add FeatureCollection for way points in NavigationMapRoute #1542
+
+### v0.24.0-beta.1 - November 15, 2018
+
+* Prevent from requesting voice instructions if the cache has been previously closed and add a check to delete the cache if there are files [#1540](https://github.com/mapbox/mapbox-navigation-android/pull/1540)
+* Add offline functionality [#1539](https://github.com/mapbox/mapbox-navigation-android/pull/1539)
+* Remove unnecessary proguard rule resolved in Java services 4.1.0 [#1532](https://github.com/mapbox/mapbox-navigation-android/pull/1532)
+* Fix navigation map route array index out of bounds exception and add clean up navigation launcher preferences support [#1530](https://github.com/mapbox/mapbox-navigation-android/pull/1530)
+* Fix voice instructions cache [#1481](https://github.com/mapbox/mapbox-navigation-android/pull/1481)
+* Update Navigator to 3.4.0 [#1525](https://github.com/mapbox/mapbox-navigation-android/pull/1525)
+* Cancel outstanding Directions API requests onDestroy NavigationViewModel [#1515](https://github.com/mapbox/mapbox-navigation-android/pull/1515)
+* Use most recent raw Location when building snapped Location [#1522](https://github.com/mapbox/mapbox-navigation-android/pull/1522)
+* Update translations to latest Transifex [#1513](https://github.com/mapbox/mapbox-navigation-android/pull/1513)
+* Update codecov badge to Navigation 😅 [#1510](https://github.com/mapbox/mapbox-navigation-android/pull/1510)
+* Update README.md with codecov badge [#1509](https://github.com/mapbox/mapbox-navigation-android/pull/1509)
+* Generate and push code coverage to codecov.io in CI [#1506](https://github.com/mapbox/mapbox-navigation-android/pull/1506)
+
 ### v0.23.0 - November 7, 2018
 
 * Add RouteProgressState to RouteProgress for current Navigator information [#1502](https://github.com/mapbox/mapbox-navigation-android/pull/1502)

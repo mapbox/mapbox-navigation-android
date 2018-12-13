@@ -4,6 +4,7 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.location.Location
+import android.preference.PreferenceManager
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEnginePriority
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -33,7 +34,7 @@ import java.io.File
 import java.util.Locale.US
 
 private const val ONE_SECOND_INTERVAL = 1000
-private const val EXAMPLE_INSTRUCTION_CACHE = "component-navigation-instruction-cache"
+private const val EXAMPLE_INSTRUCTION_CACHE = "example-navigation-instruction-cache"
 private const val TEN_MEGABYTE_CACHE_SIZE: Long = 10 * 1024 * 1024
 
 class ExampleViewModel(application: Application) : AndroidViewModel(application) {
@@ -53,10 +54,12 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   private val locationEngineListener: ExampleLocationEngineListener
   private val speechPlayer: NavigationSpeechPlayer
   private val navigation: MapboxNavigation
-  private val routeFinder: ExampleRouteFinder
+
   private val accessToken: String = instance.resources.getString(R.string.mapbox_access_token)
+  private val routeFinder: RouteFinder
 
   init {
+    routeFinder = RouteFinder(this, routes, accessToken, retrieveOfflineVersionFromPreferences())
     // Initialize the location engine
     locationEngine = FusedLocationEngine(getApplication())
     locationEngineListener = ExampleLocationEngineListener(locationEngine, location)
@@ -67,6 +70,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     // Initialize navigation and pass the LocationEngine
     navigation = MapboxNavigation(getApplication(), accessToken)
     navigation.locationEngine = locationEngine
+
     // Initialize the speech player and pass to milestone event listener for instructions
     val english = US.language // TODO localization
     val cache = Cache(File(application.cacheDir, EXAMPLE_INSTRUCTION_CACHE),
@@ -77,9 +81,6 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     navigation.addMilestoneEventListener(ExampleMilestoneEventListener(milestone, speechPlayer))
     navigation.addProgressChangeListener(ExampleProgressChangeListener(location, progress))
     navigation.addOffRouteListener(ExampleOffRouteListener(this))
-
-    // For fetching new routes
-    routeFinder = ExampleRouteFinder(this, routes, accessToken)
   }
 
   override fun onCleared() {
@@ -140,8 +141,16 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     })
   }
 
+  fun refreshOfflineVersionFromPreferences() {
+    val version = retrieveOfflineVersionFromPreferences()
+    routeFinder.updateOfflineVersion(version)
+  }
+
   private fun shutdown() {
-    (navigation.cameraEngine as DynamicCamera).clearMap()
+    val cameraEngine = navigation.cameraEngine
+    if (cameraEngine is DynamicCamera) {
+      cameraEngine.clearMap()
+    }
     navigation.onDestroy()
     speechPlayer.onDestroy()
     removeLocationEngineListener()
@@ -153,5 +162,11 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
   private fun removeLocationEngineListener() {
     locationEngine.removeLocationEngineListener(locationEngineListener)
+  }
+
+  private fun retrieveOfflineVersionFromPreferences(): String {
+    val context = getApplication<Application>()
+    return PreferenceManager.getDefaultSharedPreferences(context)
+      .getString(context.getString(R.string.offline_version_key), "")
   }
 }

@@ -3,6 +3,7 @@
           package="com.mapbox.services.android.navigation.testapp">
 
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:name=".NavigationApplication"
@@ -117,6 +118,15 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
+        </activity>
+
+        <activity
+            android:name=".activity.OfflineRegionDownloadActivity"
+            android:label="@string/title_component_navigation"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".NavigationSettingsActivity"/>
         </activity>
 
         <activity android:name=".activity.HistoryActivity"/>

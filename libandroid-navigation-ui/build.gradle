@@ -29,6 +29,16 @@ android {
       testCoverageEnabled = true
     }
   }
+
+  testOptions {
+    unitTests.returnDefaultValues = true
+    unitTests.includeAndroidResources = true
+    unitTests.all {
+      jacoco {
+        includeNoLocationClasses = true
+      }
+    }
+  }
 }
 
 dependencies {
@@ -37,9 +47,6 @@ dependencies {
 
   // Mapbox Map SDK
   implementation dependenciesList.mapboxMapSdk
-  implementation(dependenciesList.mapboxSdkServices) {
-    force true
-  }
 
   // Support libraries
   implementation dependenciesList.supportDesign

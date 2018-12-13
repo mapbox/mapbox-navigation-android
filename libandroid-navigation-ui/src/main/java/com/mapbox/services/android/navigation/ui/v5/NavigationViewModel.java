@@ -67,8 +67,8 @@ public class NavigationViewModel extends AndroidViewModel {
   public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
   final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
   final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
-  final MutableLiveData<Point> destination = new MutableLiveData<>();
   final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
+  private final MutableLiveData<Point> destination = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
   private ViewRouteFetcher routeFetcher;
@@ -102,8 +102,14 @@ public class NavigationViewModel extends AndroidViewModel {
     localeUtils = new LocaleUtils();
   }
 
+  // Package private (no modifier) for testing purposes
+  NavigationViewModel(Application application, MapboxNavigation navigation) {
+    super(application);
+    this.navigation = navigation;
+  }
+
   public void onCreate() {
-    if (!isRunning) {
+    if (!isRunning()) {
       locationEngineConductor.onCreate();
     }
   }
@@ -113,8 +119,8 @@ public class NavigationViewModel extends AndroidViewModel {
     if (!isChangingConfigurations) {
       locationEngineConductor.onDestroy();
       routeFetcher.onDestroy();
-      deactivateInstructionPlayer();
       endNavigation();
+      deactivateInstructionPlayer();
       isRunning = false;
     }
     clearDynamicCameraMap();
@@ -191,11 +197,13 @@ public class NavigationViewModel extends AndroidViewModel {
     initializeLanguage(options);
     initializeTimeFormat(navigationOptions);
     initializeDistanceFormatter(options);
-    if (!isRunning) {
+    if (!isRunning()) {
       LocationEngine locationEngine = initializeLocationEngineFrom(options);
       initializeNavigation(getApplication(), navigationOptions, locationEngine);
       addMilestones(options);
     }
+    initializeVoiceInstructionLoader();
+    initializeVoiceInstructionCache();
     initializeNavigationSpeechPlayer(options);
     routeFetcher.extractRouteOptions(options);
     return navigation;
@@ -213,7 +221,36 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   void stopNavigation() {
+    navigation.removeProgressChangeListener(null);
+    navigation.removeMilestoneEventListener(null);
     navigation.stopNavigation();
+  }
+
+  boolean isOffRoute() {
+    try {
+      return isOffRoute.getValue();
+    } catch (NullPointerException exception) {
+      return false;
+    }
+  }
+
+  void updateRoute(DirectionsRoute route) {
+    this.route.setValue(route);
+    startNavigation(route);
+    updateSimulatedRoute(route);
+    resetConfigurationFlag();
+    sendEventOnRerouteAlong(route);
+    isOffRoute.setValue(false);
+  }
+
+  void sendEventFailedReroute(String errorMessage) {
+    if (navigationViewEventDispatcher != null) {
+      navigationViewEventDispatcher.onFailedReroute(errorMessage);
+    }
+  }
+
+  MutableLiveData<Point> retrieveDestination() {
+    return destination;
   }
 
   private void initializeConnectivityManager(Application application) {
@@ -269,14 +306,20 @@ public class NavigationViewModel extends AndroidViewModel {
     boolean isVoiceLanguageSupported = options.directionsRoute().voiceLanguage() != null;
     SpeechPlayerProvider speechPlayerProvider = initializeSpeechPlayerProvider(isVoiceLanguageSupported);
     this.speechPlayer = new NavigationSpeechPlayer(speechPlayerProvider);
-    this.voiceInstructionCache = new VoiceInstructionCache(navigation, voiceInstructionLoader);
+  }
+
+  private void initializeVoiceInstructionLoader() {
+    Cache cache = new Cache(new File(getApplication().getCacheDir(), OKHTTP_INSTRUCTION_CACHE),
+      TEN_MEGABYTE_CACHE_SIZE);
+    voiceInstructionLoader = new VoiceInstructionLoader(getApplication(), accessToken, cache);
+  }
+
+  private void initializeVoiceInstructionCache() {
+    voiceInstructionCache = new VoiceInstructionCache(navigation, voiceInstructionLoader);
   }
 
   @NonNull
   private SpeechPlayerProvider initializeSpeechPlayerProvider(boolean voiceLanguageSupported) {
-    Cache cache = new Cache(new File(getApplication().getCacheDir(), OKHTTP_INSTRUCTION_CACHE),
-      TEN_MEGABYTE_CACHE_SIZE);
-    voiceInstructionLoader = new VoiceInstructionLoader(getApplication(), accessToken, cache);
     return new SpeechPlayerProvider(getApplication(), language, voiceLanguageSupported, voiceInstructionLoader);
   }
 
@@ -353,25 +396,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };
 
-  private ViewRouteListener routeEngineListener = new ViewRouteListener() {
-    @Override
-    public void onRouteUpdate(DirectionsRoute directionsRoute) {
-      updateRoute(directionsRoute);
-    }
-
-    @Override
-    public void onRouteRequestError(Throwable throwable) {
-      if (isOffRoute()) {
-        String errorMessage = throwable.getMessage();
-        sendEventFailedReroute(errorMessage);
-      }
-    }
-
-    @Override
-    public void onDestinationSet(Point destination) {
-      NavigationViewModel.this.destination.setValue(destination);
-    }
-  };
+  private ViewRouteListener routeEngineListener = new NavigationViewRouteEngineListener(this);
 
   private LocationEngineConductorListener locationEngineCallback = new LocationEngineConductorListener() {
     @Override
@@ -379,23 +404,6 @@ public class NavigationViewModel extends AndroidViewModel {
       routeFetcher.updateRawLocation(location);
     }
   };
-
-  private void updateRoute(DirectionsRoute route) {
-    this.route.setValue(route);
-    startNavigation(route);
-    updateSimulatedRoute(route);
-    resetConfigurationFlag();
-    sendEventOnRerouteAlong(route);
-    isOffRoute.setValue(false);
-  }
-
-  private boolean isOffRoute() {
-    try {
-      return isOffRoute.getValue();
-    } catch (NullPointerException exception) {
-      return false;
-    }
-  }
 
   private void startNavigation(DirectionsRoute route) {
     if (route != null) {
@@ -486,12 +494,6 @@ public class NavigationViewModel extends AndroidViewModel {
       } else {
         navigationViewEventDispatcher.onNavigationFinished();
       }
-    }
-  }
-
-  private void sendEventFailedReroute(String errorMessage) {
-    if (navigationViewEventDispatcher != null) {
-      navigationViewEventDispatcher.onFailedReroute(errorMessage);
     }
   }
 

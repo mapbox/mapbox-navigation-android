@@ -168,9 +168,10 @@ public final class NavigationConstants {
   public static final String STEP_MANEUVER_TYPE_CONTINUE = "continue";
   public static final String STEP_MANEUVER_TYPE_ROUNDABOUT = "roundabout";
   public static final String STEP_MANEUVER_TYPE_ROTARY = "rotary";
-  public static final String STEP_MANEUVER_TYPE_EXIT_ROTARY = "exit rotary";
   public static final String STEP_MANEUVER_TYPE_ROUNDABOUT_TURN = "roundabout turn";
   public static final String STEP_MANEUVER_TYPE_NOTIFICATION = "notification";
+  public static final String STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT = "exit roundabout";
+  public static final String STEP_MANEUVER_TYPE_EXIT_ROTARY = "exit rotary";
 
   @StringDef( {
     STEP_MANEUVER_TYPE_TURN,
@@ -186,7 +187,9 @@ public final class NavigationConstants {
     STEP_MANEUVER_TYPE_ROUNDABOUT,
     STEP_MANEUVER_TYPE_ROTARY,
     STEP_MANEUVER_TYPE_ROUNDABOUT_TURN,
-    STEP_MANEUVER_TYPE_NOTIFICATION
+    STEP_MANEUVER_TYPE_NOTIFICATION,
+    STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT,
+    STEP_MANEUVER_TYPE_EXIT_ROTARY
   })
   public @interface ManeuverType {
   }

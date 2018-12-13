@@ -1,15 +1,16 @@
 package com.mapbox.services.android.navigation.testapp.example.ui
 
+import android.Manifest
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
 import android.support.transition.TransitionManager
-import android.support.v7.app.AppCompatActivity
+import android.support.v4.content.ContextCompat
 import android.view.View
 import android.widget.Toast
-import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
 import com.mapbox.geojson.Point
@@ -21,6 +22,7 @@ import com.mapbox.mapboxsdk.maps.AttributionDialogManager
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity
 import com.mapbox.services.android.navigation.testapp.R
+import com.mapbox.services.android.navigation.testapp.activity.HistoryActivity
 import com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.AutoCompleteBottomSheetCallback
 import com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.ExampleAutocompleteAdapter
 import com.mapbox.services.android.navigation.testapp.example.ui.permissions.PermissionRequestDialog
@@ -35,12 +37,13 @@ import kotlinx.android.synthetic.main.activity_example.*
 private const val ZERO_PADDING = 0
 private const val BOTTOMSHEET_MULTIPLIER = 4
 
-class ExampleActivity : AppCompatActivity(), ExampleView {
+class ExampleActivity : HistoryActivity(), ExampleView {
 
-  private val permissionsManager = PermissionsManager(this)
   private var map: NavigationMapboxMap? = null
+  private val viewModel by lazy(mode = LazyThreadSafetyMode.NONE) {
+    ViewModelProviders.of(this).get(ExampleViewModel::class.java)
+  }
   private val presenter by lazy(mode = LazyThreadSafetyMode.NONE) {
-    val viewModel = ViewModelProviders.of(this).get(ExampleViewModel::class.java)
     ExamplePresenter(this, viewModel)
   }
 
@@ -48,6 +51,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_example)
     setupWith(savedInstanceState)
+    addNavigationForHistory(viewModel.retrieveNavigation())
   }
 
   public override fun onStart() {
@@ -59,6 +63,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   public override fun onResume() {
     super.onResume()
     mapView.onResume()
+    viewModel.refreshOfflineVersionFromPreferences()
   }
 
   override fun onLowMemory() {
@@ -96,7 +101,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
 
   override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
                                           grantResults: IntArray) {
-    permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    presenter.onPermissionResult(requestCode, grantResults)
   }
 
   override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
@@ -121,7 +126,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   }
 
   override fun onPermissionResult(granted: Boolean) {
-    presenter.onPermissionResult(granted)
+    presenter.onPermissionsGranted(granted)
   }
 
   override fun initialize() {
@@ -138,7 +143,7 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
   }
 
   override fun showPermissionDialog() {
-    PermissionRequestDialog(this, permissionsManager).show()
+    PermissionRequestDialog(this).show()
   }
 
   override fun updateMapCamera(cameraUpdate: CameraUpdate, duration: Int) {
@@ -262,6 +267,10 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     map?.updateLocationLayerRenderMode(renderMode)
   }
 
+  override fun updateCameraTrackingMode(trackingMode: Int) {
+    map?.updateCameraTrackingMode(trackingMode)
+  }
+
   private fun setupWith(savedInstanceState: Bundle?) {
     mapView.onCreate(savedInstanceState)
 
@@ -284,7 +293,12 @@ class ExampleActivity : AppCompatActivity(), ExampleView {
     cancelFab.setOnClickListener { presenter.onCancelFabClick() }
     attribution.setOnClickListener { presenter.onAttributionsClick(it) }
 
-    val granted = PermissionsManager.areLocationPermissionsGranted(this)
-    presenter.onPermissionResult(granted)
+    val storagePermission = Manifest.permission.WRITE_EXTERNAL_STORAGE
+    val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
+    val permissionGranted = PackageManager.PERMISSION_GRANTED
+    val allPermissionsGranted =
+        ContextCompat.checkSelfPermission(this, storagePermission) == permissionGranted &&
+            ContextCompat.checkSelfPermission(this, locationPermission) == permissionGranted
+    presenter.onPermissionsGranted(allPermissionsGranted)
   }
 }
