@@ -14,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
@@ -494,6 +495,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private void bind() {
     mapView = findViewById(R.id.navigationMapView);
     instructionView = findViewById(R.id.instructionView);
+    ViewCompat.setElevation(instructionView, 10);
     summaryBottomSheet = findViewById(R.id.summaryBottomSheet);
     cancelBtn = findViewById(R.id.cancelBtn);
     recenterBtn = findViewById(R.id.recenterBtn);

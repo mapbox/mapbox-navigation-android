@@ -67,16 +67,6 @@ class NavigationPresenter {
     view.updateNavigationMap(location);
   }
 
-  void onInstructionListVisibilityChanged(boolean visible) {
-    if (visible) {
-      view.hideRecenterBtn();
-    } else {
-      if (view.isSummaryBottomSheetHidden()) {
-        view.showRecenterBtn();
-      }
-    }
-  }
-
   void onRouteOverviewClick() {
     view.updateWaynameVisibility(false);
     view.updateCameraRouteOverview();
