@@ -28,6 +28,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
@@ -143,11 +144,12 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   @SuppressLint("MissingPermission")
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
+    mapboxMap.setStyle(Style.DARK);
     this.mapboxMap = mapboxMap;
     mapboxMap.addOnMapClickListener(this);
 
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
-    locationComponent.activateLocationComponent(this);
+    locationComponent.activateLocationComponent(this, mapboxMap.getStyle());
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.GPS);
 
@@ -170,9 +172,9 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   }
 
   @Override
-  public void onMapClick(@NonNull LatLng point) {
+  public boolean onMapClick(@NonNull LatLng point) {
     if (!running || mapboxMap == null) {
-      return;
+      return true;
     }
 
     mapboxMap.addMarker(new MarkerOptions().position(point));
@@ -182,6 +184,7 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     mockLocationEngine.moveTo(newDestination);
     destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     tracking = false;
+    return true;
   }
 
   @Override

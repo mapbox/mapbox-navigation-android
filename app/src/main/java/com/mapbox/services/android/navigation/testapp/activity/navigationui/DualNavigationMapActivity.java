@@ -22,7 +22,7 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.annotations.Marker;
-import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
@@ -104,13 +104,14 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   }
 
   @Override
-  public void onMapLongClick(@NonNull LatLng point) {
+  public boolean onMapLongClick(@NonNull LatLng point) {
     destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     updateLoadingTo(true);
     setCurrentMarkerPosition(point);
     if (origin != null) {
       fetchRoute();
     }
+    return true;
   }
 
   @Override
@@ -308,7 +309,7 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
 
   private void initializeLocationLayer() {
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
-    locationComponent.activateLocationComponent(this, locationEngine);
+    locationComponent.activateLocationComponent(this, mapboxMap.getStyle(), locationEngine);
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.COMPASS);
   }
@@ -321,7 +322,7 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   private void setCurrentMarkerPosition(LatLng position) {
     if (position != null) {
       if (currentMarker == null) {
-        MarkerViewOptions markerViewOptions = new MarkerViewOptions()
+        MarkerOptions markerViewOptions = new MarkerOptions()
           .position(position);
         currentMarker = mapboxMap.addMarker(markerViewOptions);
       } else {

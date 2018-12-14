@@ -20,7 +20,6 @@
             mapbox:mapbox_cameraTargetLng="-77.021529"
             mapbox:mapbox_uiAttribution="false"
             mapbox:mapbox_uiLogo="false"
-            mapbox:mapbox_styleUrl="@string/mapbox_style_light"
             mapbox:mapbox_cameraZoom="14"/>
 
         <FrameLayout

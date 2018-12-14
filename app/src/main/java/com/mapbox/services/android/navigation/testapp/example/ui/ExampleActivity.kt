@@ -20,6 +20,7 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.AttributionDialogManager
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.activity.HistoryActivity
@@ -109,12 +110,14 @@ class ExampleActivity : HistoryActivity(), ExampleView {
   }
 
   override fun onMapReady(mapboxMap: MapboxMap) {
-    map = NavigationMapboxMap(mapView, mapboxMap)
-    map?.setOnRouteSelectionChangeListener(this)
-    map?.updateLocationLayerRenderMode(RenderMode.NORMAL)
-    mapboxMap.addOnMapLongClickListener { presenter.onMapLongClick(it) }
-    presenter.buildDynamicCameraFrom(mapboxMap)
-    resetMapPadding() // Ignore navigation padding default
+    mapboxMap.setStyle(Style.Builder().fromUrl("mapbox://styles/mapbox/navigation-guidance-day-v4")) {
+      map = NavigationMapboxMap(mapView, mapboxMap)
+      map?.setOnRouteSelectionChangeListener(this)
+      map?.updateLocationLayerRenderMode(RenderMode.NORMAL)
+      mapboxMap.addOnMapLongClickListener { presenter.onMapLongClick(it) }
+      presenter.buildDynamicCameraFrom(mapboxMap)
+      resetMapPadding() // Ignore navigation padding default
+    }
   }
 
   override fun onFeatureClicked(feature: CarmenFeature) {

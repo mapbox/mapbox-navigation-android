@@ -30,7 +30,7 @@ import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Marker;
-import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.exceptions.InvalidLatLngBoundsException;
@@ -201,7 +201,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   }
 
   @Override
-  public void onMapLongClick(@NonNull LatLng point) {
+  public boolean onMapLongClick(@NonNull LatLng point) {
     destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     launchRouteBtn.setEnabled(false);
     loading.setVisibility(View.VISIBLE);
@@ -209,6 +209,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     if (currentLocation != null) {
       fetchRoute();
     }
+    return true;
   }
 
   @Override
@@ -242,7 +243,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   @SuppressWarnings( {"MissingPermission"})
   private void initializeLocationComponent() {
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
-    locationComponent.activateLocationComponent(this, locationEngine);
+    locationComponent.activateLocationComponent(this, mapboxMap.getStyle(), locationEngine);
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.COMPASS);
   }
@@ -389,7 +390,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   private void setCurrentMarkerPosition(LatLng position) {
     if (position != null) {
       if (currentMarker == null) {
-        MarkerViewOptions markerViewOptions = new MarkerViewOptions()
+        MarkerOptions markerViewOptions = new MarkerOptions()
           .position(position);
         currentMarker = mapboxMap.addMarker(markerViewOptions);
       } else {

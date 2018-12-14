@@ -493,10 +493,11 @@ public class NavigationMapboxMap {
 
     LocationComponentOptions locationComponentOptions =
       LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
-    locationComponentOptions = locationComponentOptions.toBuilder().minZoom(NAVIGATION_MINIMUM_MAP_ZOOM).build();
+    locationComponentOptions = locationComponentOptions.toBuilder()
+      .minZoomIconScale((float) NAVIGATION_MINIMUM_MAP_ZOOM).build();
 
     locationComponent = map.getLocationComponent();
-    locationComponent.activateLocationComponent(context, null, locationComponentOptions);
+    locationComponent.activateLocationComponent(context, map.getStyle(), locationComponentOptions);
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.GPS);
   }
@@ -521,14 +522,14 @@ public class NavigationMapboxMap {
 
   private void initializeStreetsSource(MapboxMap mapboxMap) {
     VectorSource streetSource = new VectorSource(STREETS_SOURCE_ID, MAPBOX_STREETS_V7);
-    mapboxMap.addSource(streetSource);
+    mapboxMap.getStyle().addSource(streetSource);
     LineLayer streetsLayer = new LineLayer(STREETS_LAYER_ID, STREETS_SOURCE_ID)
       .withProperties(
         lineWidth(DEFAULT_WIDTH),
         lineColor(Color.WHITE)
       )
       .withSourceLayer(ROAD_LABEL);
-    mapboxMap.addLayerAt(streetsLayer, LAST_INDEX);
+    mapboxMap.getStyle().addLayerAt(streetsLayer, LAST_INDEX);
   }
 
   private void initializeRoute(MapView mapView, MapboxMap map) {

@@ -14,7 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:mapbox_cameraZoom="14"
-        app:mapbox_styleUrl="@string/mapbox_style_mapbox_streets"
         app:mapbox_uiAttribution="false"/>
 
     <Button

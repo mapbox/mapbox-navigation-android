@@ -32,6 +32,7 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.activity.HistoryActivity;
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera;
@@ -128,6 +129,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
+    mapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/designevokes/cjksybfj600xj2roja7iwnygu"));
     mapState = MapState.INFO;
     navigationMap = new NavigationMapboxMap(mapView, mapboxMap);
 
@@ -143,10 +145,10 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   }
 
   @Override
-  public void onMapLongClick(@NonNull LatLng point) {
+  public boolean onMapLongClick(@NonNull LatLng point) {
     // Only reverse geocode while we are not in navigation
     if (mapState.equals(MapState.NAVIGATION)) {
-      return;
+      return true;
     }
 
     // Fetch the route with this given point
@@ -160,6 +162,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     // Update camera to new destination
     moveCameraToInclude(destination);
     vibrate();
+    return true;
   }
 
   @OnClick(R.id.startNavigationFab)

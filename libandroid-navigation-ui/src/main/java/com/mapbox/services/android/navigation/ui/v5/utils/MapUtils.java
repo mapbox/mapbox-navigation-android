@@ -27,13 +27,13 @@ public final class MapUtils {
    */
   public static void addLayerToMap(@NonNull MapboxMap mapboxMap, @NonNull Layer layer,
                                    @Nullable String idBelowLayer) {
-    if (mapboxMap.getLayer(layer.getId()) != null) {
+    if (mapboxMap.getStyle().getLayer(layer.getId()) != null) {
       return;
     }
     if (idBelowLayer == null) {
-      mapboxMap.addLayer(layer);
+      mapboxMap.getStyle().addLayer(layer);
     } else {
-      mapboxMap.addLayerBelow(layer, idBelowLayer);
+      mapboxMap.getStyle().addLayerBelow(layer, idBelowLayer);
     }
   }
 }
