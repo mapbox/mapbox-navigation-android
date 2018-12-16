@@ -2,6 +2,22 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.25.0 - December 16, 2018
+
+* Update Navigator to 3.4.11 #1635
+* Bump mapbox-navigation-native version to 3.4.10 #1631
+* Changed the elevation of the InstructionView so that it doesn't encounter overlapping issues. #1089
+* Include 'exit roundabout' in Navigation Constants #1628
+* Fix voice instruction cache not getting initialized with injected speech player #1627
+* Fix turn-by-turn UI voice instructions repeated after a config change #1622
+* Check for successful tar response in TarFetchedCallback #1620
+* Generate unique filenames for archives in check binary size script #1619
+* Move SummaryBottomSheet above RecenterBtn in navigation_view_layout.xml #1616
+* Update script-git-version.gradle with try/catch #1617
+* Target API 28 and add FOREGROUND_SERVICE permission #1612
+* Add check to only cache instructions if the language setup is supported by Voice API #1610
+* Attempt to fix the coverage job #1601
+
 ### v0.24.1 - December 5, 2018
 
 * Increment leg index upon way point arrival #1604
