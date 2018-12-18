@@ -115,6 +115,8 @@ public final class NavigationRoute {
    */
   public static final class Builder {
 
+    private static final String SEMICOLON = ";";
+    private static final String COMMA = ",";
     private final MapboxDirections.Builder directionsBuilder;
 
     /**
@@ -482,6 +484,26 @@ public final class NavigationRoute {
     }
 
     /**
+     * A list of coordinate pairs used to specify drop-off
+     * locations that are distinct from the locations specified in coordinates.
+     * If this parameter is provided, the Directions API will compute the side of the street,
+     * <tt>left</tt> or <tt>right</tt>, for each target based on the <tt>waypoint_targets</tt>
+     * and the driving direction.
+     * The <tt>maneuver.modifier</tt>, banner and voice instructions will be updated with the computed
+     * side of street. The number of waypoint targets must be the same as the number of coordinates,
+     * but you can skip a coordinate pair and show its position in the list adding <tt>null</tt>.
+     * Must be used with <tt>steps=true</tt>.
+     *
+     * @param waypointTargets {@link Point} coordinates for drop-off locations
+     * @return this builder for chaining options together
+     * @since 0.26.0
+     */
+    public Builder addWaypointTargets(@Nullable Point... waypointTargets) {
+      directionsBuilder.addWaypointTargets(waypointTargets);
+      return this;
+    }
+
+    /**
      * Optionally create a {@link Builder} based on all variables
      * from given {@link RouteOptions}.
      * <p>
@@ -532,13 +554,19 @@ public final class NavigationRoute {
       }
 
       if (!TextUtils.isEmpty(options.approaches())) {
-        String[] approaches = options.approaches().split(";");
+        String[] approaches = options.approaches().split(SEMICOLON);
         directionsBuilder.addApproaches(approaches);
       }
 
       if (!TextUtils.isEmpty(options.waypointNames())) {
-        String[] waypointNames = options.waypointNames().split(";");
+        String[] waypointNames = options.waypointNames().split(SEMICOLON);
         directionsBuilder.addWaypointNames(waypointNames);
+      }
+
+      String waypointTargets = options.waypointTargets();
+      if (!TextUtils.isEmpty(waypointTargets)) {
+        Point[] splittedWaypointTargets = parseWaypointTargets(waypointTargets);
+        directionsBuilder.addWaypointTargets(splittedWaypointTargets);
       }
 
       return this;
@@ -562,6 +590,24 @@ public final class NavigationRoute {
         .bannerInstructions(true)
         .roundaboutExits(true);
       return new NavigationRoute(directionsBuilder.build());
+    }
+
+    @NonNull
+    private Point[] parseWaypointTargets(String waypointTargets) {
+      String[] splittedWaypointTargets = waypointTargets.split(SEMICOLON);
+      Point[] waypoints = new Point[splittedWaypointTargets.length];
+      int index = 0;
+      for (String waypointTarget : splittedWaypointTargets) {
+        String[] point = waypointTarget.split(COMMA);
+        if (waypointTarget.isEmpty()) {
+          waypoints[index++] = null;
+        } else {
+          double longitude = Double.valueOf(point[0]);
+          double latitude = Double.valueOf(point[0]);
+          waypoints[index++] = Point.fromLngLat(longitude, latitude);
+        }
+      }
+      return waypoints;
     }
   }
 }
