@@ -148,12 +148,13 @@ public class MapboxNavigation implements ServiceConnection {
 
   // Package private (no modifier) for testing purposes
   MapboxNavigation(@NonNull Context context, @NonNull String accessToken, NavigationTelemetry navigationTelemetry,
-                   LocationEngine locationEngine) {
+                   LocationEngine locationEngine, MapboxNavigator mapboxNavigator) {
     initializeContext(context);
     this.accessToken = accessToken;
     this.options = MapboxNavigationOptions.builder().build();
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
+    this.mapboxNavigator = mapboxNavigator;
     initializeForTest();
   }
 
@@ -707,6 +708,25 @@ public class MapboxNavigation implements ServiceConnection {
     navigationTelemetry.cancelFeedback(feedbackId);
   }
 
+  /**
+   * Use this method to update the leg index of the current {@link DirectionsRoute}
+   * being traveled along.
+   *
+   * An index passed here that is not valid will be ignored.  Please note, the leg index
+   * will automatically increment by default.  To disable this,
+   * use {@link MapboxNavigationOptions#enableAutoIncrementLegIndex()}.
+   *
+   * @param legIndex to be set
+   * @return true if leg index updated, false otherwise
+   */
+  public boolean updateRouteLegIndex(int legIndex) {
+    if (checkInvalidLegIndex(legIndex)) {
+      return false;
+    }
+    mapboxNavigator.updateLegIndex(legIndex);
+    return true;
+  }
+
   public String retrieveHistory() {
     return mapboxNavigator.retrieveHistory();
   }
@@ -877,5 +897,14 @@ public class MapboxNavigation implements ServiceConnection {
 
   private boolean isServiceAvailable() {
     return navigationService != null && isBound;
+  }
+
+  private boolean checkInvalidLegIndex(int legIndex) {
+    int legSize = directionsRoute.legs().size();
+    if (legIndex < 0 || legIndex > legSize - 1) {
+      Timber.e("Invalid leg index update: %s Current leg index size: %s", legIndex, legSize);
+      return true;
+    }
+    return false;
   }
 }

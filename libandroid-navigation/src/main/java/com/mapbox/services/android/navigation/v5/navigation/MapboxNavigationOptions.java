@@ -19,6 +19,8 @@ public abstract class MapboxNavigationOptions {
 
   public abstract boolean enableFasterRouteDetection();
 
+  public abstract boolean enableAutoIncrementLegIndex();
+
   public abstract boolean isFromNavigationUi();
 
   public abstract boolean isDebugLoggingEnabled();
@@ -43,6 +45,8 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder enableFasterRouteDetection(boolean enableFasterRouteDetection);
 
+    public abstract Builder enableAutoIncrementLegIndex(boolean enableAutoIncrementLegIndex);
+
     public abstract Builder isFromNavigationUi(boolean isFromNavigationUi);
 
     public abstract Builder isDebugLoggingEnabled(boolean debugLoggingEnabled);
@@ -61,6 +65,7 @@ public abstract class MapboxNavigationOptions {
   public static Builder builder() {
     return new AutoValue_MapboxNavigationOptions.Builder()
       .enableFasterRouteDetection(false)
+      .enableAutoIncrementLegIndex(true)
       .defaultMilestonesEnabled(true)
       .isFromNavigationUi(false)
       .isDebugLoggingEnabled(false)

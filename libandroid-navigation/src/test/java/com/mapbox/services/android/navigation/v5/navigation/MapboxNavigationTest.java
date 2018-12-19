@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.content.Context;
 
 import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -16,12 +17,14 @@ import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.BANNER_INSTRUCTION_MILESTONE_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
@@ -268,11 +271,55 @@ public class MapboxNavigationTest extends BaseTest {
     assertTrue(navigation.getCameraEngine() instanceof SimpleCamera);
   }
 
+  @Test
+  public void updateRouteLegIndex_negativeIndexIsIgnored() throws IOException {
+    MapboxNavigator navigator = mock(MapboxNavigator.class);
+    MapboxNavigation navigation = buildMapboxNavigationWith(navigator);
+    DirectionsRoute directionsRoute = buildTestDirectionsRoute();
+    navigation.startNavigation(directionsRoute);
+
+    boolean didUpdate = navigation.updateRouteLegIndex(-1);
+
+    assertFalse(didUpdate);
+  }
+
+  @Test
+  public void updateRouteLegIndex_invalidIndexIsIgnored() throws IOException {
+    MapboxNavigator navigator = mock(MapboxNavigator.class);
+    MapboxNavigation navigation = buildMapboxNavigationWith(navigator);
+    DirectionsRoute directionsRoute = buildTestDirectionsRoute();
+    navigation.startNavigation(directionsRoute);
+
+    boolean didUpdate = navigation.updateRouteLegIndex(100);
+
+    assertFalse(didUpdate);
+  }
+
+  @Test
+  public void updateRouteLegIndex_validIndexIsUpdated() throws IOException {
+    MapboxNavigator navigator = mock(MapboxNavigator.class);
+    MapboxNavigation navigation = buildMapboxNavigationWith(navigator);
+    DirectionsRoute directionsRoute = buildTestDirectionsRoute();
+    navigation.startNavigation(directionsRoute);
+    int legIndex = 0;
+
+    boolean didUpdate = navigation.updateRouteLegIndex(legIndex);
+
+    assertTrue(didUpdate);
+  }
+
+  private MapboxNavigation buildMapboxNavigationWith(MapboxNavigator mapboxNavigator) {
+    Context context = mock(Context.class);
+    when(context.getApplicationContext()).thenReturn(context);
+    return new MapboxNavigation(context, ACCESS_TOKEN, mock(NavigationTelemetry.class),
+      mock(LocationEngine.class), mapboxNavigator);
+  }
+
   private MapboxNavigation buildMapboxNavigation() {
     Context context = mock(Context.class);
     when(context.getApplicationContext()).thenReturn(context);
     return new MapboxNavigation(context, ACCESS_TOKEN, mock(NavigationTelemetry.class),
-      mock(LocationEngine.class));
+      mock(LocationEngine.class), mock(MapboxNavigator.class));
   }
 
   private MapboxNavigation buildMapboxNavigationWithOptions(MapboxNavigationOptions options) {
