@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.ViewModelProviders;
@@ -33,6 +32,7 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.NavigationAlertView;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMapInstanceState;
+import com.mapbox.services.android.navigation.ui.v5.map.WayNameView;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
@@ -75,6 +75,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private BottomSheetBehavior summaryBehavior;
   private ImageButton cancelBtn;
   private RecenterButton recenterBtn;
+  private WayNameView wayNameView;
   private ImageButton routeOverviewBtn;
 
   private NavigationPresenter navigationPresenter;
@@ -141,8 +142,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    */
   public void onSaveInstanceState(Bundle outState) {
     int bottomSheetBehaviorState = summaryBehavior == null ? INVALID_STATE : summaryBehavior.getState();
-    NavigationViewInstanceState navigationViewInstanceState = new NavigationViewInstanceState(bottomSheetBehaviorState,
-      recenterBtn.getVisibility(), instructionView.isShowingInstructionList());
+    boolean isWayNameVisible = wayNameView.getVisibility() == VISIBLE;
+    NavigationViewInstanceState navigationViewInstanceState = new NavigationViewInstanceState(
+      bottomSheetBehaviorState, recenterBtn.getVisibility(), instructionView.isShowingInstructionList(),
+      isWayNameVisible, wayNameView.retrieveWayNameText());
     String instanceKey = getContext().getString(R.string.navigation_view_instance_state);
     outState.putParcelable(instanceKey, navigationViewInstanceState);
     outState.putBoolean(getContext().getString(R.string.navigation_running), navigationViewModel.isRunning());
@@ -161,6 +164,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     String instanceKey = getContext().getString(R.string.navigation_view_instance_state);
     NavigationViewInstanceState navigationViewInstanceState = savedInstanceState.getParcelable(instanceKey);
     recenterBtn.setVisibility(navigationViewInstanceState.getRecenterButtonVisibility());
+    wayNameView.setVisibility(navigationViewInstanceState.isWayNameVisible() ? VISIBLE : INVISIBLE);
+    wayNameView.updateWayNameText(navigationViewInstanceState.getWayNameText());
     resetBottomSheetState(navigationViewInstanceState.getBottomSheetBehaviorState());
     updateInstructionListState(navigationViewInstanceState.isInstructionViewVisible());
     mapInstanceState = savedInstanceState.getParcelable(MAP_INSTANCE_STATE_KEY);
@@ -172,7 +177,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * <p>
    * In an {@link Activity} this should be in {@link Activity#onDestroy()}.
    * <p>
-   * In a {@link android.app.Fragment}, this should be in {@link Fragment#onDestroyView()}.
+   * In a {@link android.support.v4.app.Fragment}, this should
+   * be in {@link android.support.v4.app.Fragment#onDestroyView()}.
    */
   public void onDestroy() {
     shutdown();
@@ -212,6 +218,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     initializeNavigationMap(mapView, mapboxMap);
+    initializeWayNameListener();
     onNavigationReadyCallback.onNavigationReady(navigationViewModel.isRunning());
     isMapInitialized = true;
   }
@@ -269,17 +276,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     }
   }
 
-  private void initializeNavigationMap(MapView mapView, MapboxMap map) {
-    navigationMap = new NavigationMapboxMap(mapView, map);
-    if (mapInstanceState != null) {
-      navigationMap.restoreFrom(mapInstanceState);
-      return;
-    }
-    if (initialMapCameraPosition != null) {
-      map.setCameraPosition(initialMapCameraPosition);
-    }
-  }
-
   @Override
   public void addMarker(Point position) {
     if (navigationMap != null) {
@@ -293,23 +289,43 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     }
   }
 
-  public void updateWaynameView(String wayname) {
-    if (navigationMap != null) {
-      navigationMap.updateWaynameView(wayname);
-    }
+  /**
+   * Provides the current visibility of the way name view.
+   *
+   * @return true if visible, false if not visible
+   */
+  public boolean isWayNameVisible() {
+    return wayNameView.getVisibility() == VISIBLE;
   }
 
+  /**
+   * Updates the text of the way name view below the
+   * navigation icon.
+   * <p>
+   * If you'd like to use this method without being overridden by the default way names
+   * values we provide, please disabled auto-query with
+   * {@link NavigationMapboxMap#updateWaynameQueryMap(boolean)}.
+   *
+   * @param wayName to update the view
+   */
   @Override
-  public void updateWaynameVisibility(boolean isVisible) {
-    if (navigationMap != null) {
-      navigationMap.updateWaynameVisibility(isVisible);
-    }
+  public void updateWayNameView(@NonNull String wayName) {
+    wayNameView.updateWayNameText(wayName);
   }
 
-  public void updateWaynameQueryMap(boolean isEnabled) {
-    if (navigationMap != null) {
-      navigationMap.updateWaynameQueryMap(isEnabled);
-    }
+  /**
+   * Updates the visibility of the way name view that is show below
+   * the navigation icon.
+   * <p>
+   * If you'd like to use this method without being overridden by the default visibility values
+   * values we provide, please disabled auto-query with
+   * {@link NavigationMapboxMap#updateWaynameQueryMap(boolean)}.
+   *
+   * @param isVisible true to show, false to hide
+   */
+  @Override
+  public void updateWayNameVisibility(boolean isVisible) {
+    wayNameView.updateVisibility(isVisible);
   }
 
   @Override
@@ -377,6 +393,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @since 0.16.0
    */
   public void stopNavigation() {
+    navigationPresenter.onNavigationStopped();
     navigationViewModel.stopNavigation();
   }
 
@@ -499,6 +516,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     summaryBottomSheet = findViewById(R.id.summaryBottomSheet);
     cancelBtn = findViewById(R.id.cancelBtn);
     recenterBtn = findViewById(R.id.recenterBtn);
+    wayNameView = findViewById(R.id.wayNameView);
     routeOverviewBtn = findViewById(R.id.routeOverviewBtn);
   }
 
@@ -525,6 +543,22 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private void initializeInstructionListListener() {
     instructionView.setInstructionListListener(new NavigationInstructionListListener(navigationPresenter,
       navigationViewEventDispatcher));
+  }
+
+  private void initializeNavigationMap(MapView mapView, MapboxMap map) {
+    navigationMap = new NavigationMapboxMap(mapView, map);
+    if (mapInstanceState != null) {
+      navigationMap.restoreFrom(mapInstanceState);
+      return;
+    }
+    if (initialMapCameraPosition != null) {
+      map.setCameraPosition(initialMapCameraPosition);
+    }
+  }
+
+  private void initializeWayNameListener() {
+    NavigationViewWayNameListener wayNameListener = new NavigationViewWayNameListener(navigationPresenter);
+    navigationMap.addOnWayNameChangedListener(wayNameListener);
   }
 
   private void updateSavedInstanceStateMapStyle(@Nullable Bundle savedInstanceState) {

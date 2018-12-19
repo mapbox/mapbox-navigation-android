@@ -1,9 +1,11 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.location.Location;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 
@@ -23,7 +25,7 @@ class NavigationPresenter {
   void onRecenterClick() {
     view.setSummaryBehaviorHideable(false);
     view.setSummaryBehaviorState(BottomSheetBehavior.STATE_EXPANDED);
-    view.updateWaynameVisibility(true);
+    view.updateWayNameVisibility(true);
     view.resetCameraPosition();
     view.hideRecenterBtn();
   }
@@ -33,7 +35,7 @@ class NavigationPresenter {
       view.setSummaryBehaviorHideable(true);
       view.setSummaryBehaviorState(BottomSheetBehavior.STATE_HIDDEN);
       view.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE);
-      view.updateWaynameVisibility(false);
+      view.updateWayNameVisibility(false);
     }
   }
 
@@ -46,7 +48,6 @@ class NavigationPresenter {
   void onRouteUpdate(DirectionsRoute directionsRoute) {
     view.drawRoute(directionsRoute);
     if (!resumeState) {
-      view.updateWaynameVisibility(true);
       view.startCamera(directionsRoute);
     }
   }
@@ -67,8 +68,21 @@ class NavigationPresenter {
     view.updateNavigationMap(location);
   }
 
+  void onWayNameChanged(@NonNull String wayName) {
+    if (TextUtils.isEmpty(wayName)) {
+      view.updateWayNameVisibility(false);
+      return;
+    }
+    view.updateWayNameView(wayName);
+    view.updateWayNameVisibility(true);
+  }
+
+  void onNavigationStopped() {
+    view.updateWayNameVisibility(false);
+  }
+
   void onRouteOverviewClick() {
-    view.updateWaynameVisibility(false);
+    view.updateWayNameVisibility(false);
     view.updateCameraRouteOverview();
     view.showRecenterBtn();
   }

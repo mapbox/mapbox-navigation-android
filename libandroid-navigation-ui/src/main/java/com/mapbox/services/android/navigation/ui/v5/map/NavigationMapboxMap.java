@@ -23,7 +23,6 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.services.android.navigation.ui.v5.NavigationSnapshotReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.R;
@@ -36,24 +35,9 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mapbox.mapboxsdk.style.expressions.Expression.exponential;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.interpolate;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.stop;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.zoom;
-import static com.mapbox.mapboxsdk.style.layers.Property.ICON_ANCHOR_TOP;
-import static com.mapbox.mapboxsdk.style.layers.Property.ICON_ROTATION_ALIGNMENT_VIEWPORT;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAnchor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconRotationAlignment;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconSize;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MAPBOX_LOCATION_SOURCE;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MAPBOX_WAYNAME_LAYER;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MINIMUM_MAP_ZOOM;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.WAYNAME_OFFSET;
 
 /**
  * Wrapper class for {@link MapboxMap}.
@@ -80,8 +64,7 @@ public class NavigationMapboxMap {
   private NavigationMapRoute mapRoute;
   private LocationComponent locationComponent;
   private MapPaddingAdjustor mapPaddingAdjustor;
-  private MapWayname mapWayName;
-  private SymbolLayer waynameLayer;
+  private MapWayName mapWayName;
   private MapLayerInteractor layerInteractor;
   private List<Marker> mapMarkers = new ArrayList<>();
 
@@ -97,7 +80,7 @@ public class NavigationMapboxMap {
     initializeLocationComponent(mapView, mapboxMap);
     initializeMapPaddingAdjustor(mapView, mapboxMap);
     initializeMapLayerInteractor(mapboxMap);
-    initializeWayname(mapView, mapboxMap, layerInteractor, mapPaddingAdjustor);
+    initializeWayname(mapboxMap, mapPaddingAdjustor);
     initializeRoute(mapView, mapboxMap);
     initializeCamera(mapboxMap);
   }
@@ -118,7 +101,7 @@ public class NavigationMapboxMap {
   }
 
   // Package private (no modifier) for testing purposes
-  NavigationMapboxMap(MapWayname mapWayName) {
+  NavigationMapboxMap(MapWayName mapWayName) {
     this.mapWayName = mapWayName;
   }
 
@@ -197,14 +180,12 @@ public class NavigationMapboxMap {
    * @param outState to store state variables
    */
   public void saveStateWith(String key, Bundle outState) {
-    boolean isVisible = mapWayName.isVisible();
-    String waynameText = mapWayName.retrieveWayname();
     int[] mapPadding = mapPaddingAdjustor.retrieveCurrentPadding();
     boolean isUsingDefault = mapPaddingAdjustor.isUsingDefault();
     @NavigationCamera.TrackingMode
     int cameraTrackingMode = mapCamera.getCameraTrackingMode();
     NavigationMapboxMapInstanceState instanceState = new NavigationMapboxMapInstanceState(
-      isVisible, waynameText, mapPadding, isUsingDefault, cameraTrackingMode
+      mapPadding, isUsingDefault, cameraTrackingMode
     );
     outState.putParcelable(key, instanceState);
   }
@@ -221,11 +202,6 @@ public class NavigationMapboxMap {
    * @param instanceState to extract state variables
    */
   public void restoreFrom(NavigationMapboxMapInstanceState instanceState) {
-    boolean isVisible = instanceState.isWaynameVisible();
-    updateWaynameVisibility(isVisible);
-    if (isVisible) {
-      updateWaynameView(instanceState.retrieveWayname());
-    }
     updateCameraTrackingMode(instanceState.getCameraTrackingMode());
     MapPaddingInstanceState mapPadding = instanceState.retrieveMapPadding();
     if (mapPadding.shouldUseDefault()) {
@@ -364,41 +340,12 @@ public class NavigationMapboxMap {
   }
 
   /**
-   * Set the text of the way name chip underneath the location icon.
-   * <p>
-   * The text will only be set if the way name is visible / enabled.
-   *
-   * @param wayname text to be set
-   */
-  public void updateWaynameView(String wayname) {
-    mapWayName.updateWaynameLayer(wayname, waynameLayer);
-  }
-
-  /**
-   * Hide or show the way name chip underneath the location icon.
-   *
-   * @param isVisible true to show, false to hide
-   */
-  public void updateWaynameVisibility(boolean isVisible) {
-    mapWayName.updateWaynameVisibility(isVisible, waynameLayer);
-  }
-
-  /**
-   * Provides current visibility of the map way name.
-   *
-   * @return true if visible, false if not
-   */
-  public boolean isWaynameVisible() {
-    return mapWayName.isVisible();
-  }
-
-  /**
    * Enables or disables the way name chip underneath the location icon.
    *
    * @param isEnabled true to enable, false to disable
    */
   public void updateWaynameQueryMap(boolean isEnabled) {
-    mapWayName.updateWaynameQueryMap(isEnabled);
+    mapWayName.updateWayNameQueryMap(isEnabled);
   }
 
   /**
@@ -562,35 +509,10 @@ public class NavigationMapboxMap {
     mapCamera = new NavigationCamera(map, locationComponent);
   }
 
-  private void initializeWayname(MapView mapView, MapboxMap mapboxMap, MapLayerInteractor layerInteractor,
-                                 MapPaddingAdjustor paddingAdjustor) {
+  private void initializeWayname(MapboxMap mapboxMap, MapPaddingAdjustor paddingAdjustor) {
     initializeStreetsSource(mapboxMap);
-    WaynameLayoutProvider layoutProvider = new WaynameLayoutProvider(mapView.getContext());
-    WaynameFeatureFinder featureInteractor = new WaynameFeatureFinder(mapboxMap);
-    initializeWaynameLayer(layerInteractor);
-    mapWayName = new MapWayname(layoutProvider, layerInteractor, featureInteractor, paddingAdjustor);
-  }
-
-  private void initializeWaynameLayer(MapLayerInteractor layerInteractor) {
-    waynameLayer = createWaynameLayer();
-    layerInteractor.addLayer(waynameLayer);
-  }
-
-  private SymbolLayer createWaynameLayer() {
-    return new SymbolLayer(MAPBOX_WAYNAME_LAYER, MAPBOX_LOCATION_SOURCE)
-      .withProperties(
-        iconAllowOverlap(true),
-        iconIgnorePlacement(true),
-        iconSize(
-          interpolate(exponential(1f), zoom(),
-            stop(0f, 0.6f),
-            stop(18f, 1.2f)
-          )
-        ),
-        iconAnchor(ICON_ANCHOR_TOP),
-        iconOffset(WAYNAME_OFFSET),
-        iconRotationAlignment(ICON_ROTATION_ALIGNMENT_VIEWPORT)
-      );
+    WaynameFeatureFinder featureFinder = new WaynameFeatureFinder(mapboxMap);
+    mapWayName = new MapWayName(featureFinder, paddingAdjustor);
   }
 
   private void initializeMapLayerInteractor(MapboxMap mapboxMap) {
@@ -634,6 +556,6 @@ public class NavigationMapboxMap {
   private void updateMapWaynameWithLocation(Location location) {
     LatLng latLng = new LatLng(location);
     PointF mapPoint = mapboxMap.getProjection().toScreenLocation(latLng);
-    mapWayName.updateWaynameWithPoint(mapPoint, waynameLayer);
+    mapWayName.updateWayNameWithPoint(mapPoint);
   }
 }

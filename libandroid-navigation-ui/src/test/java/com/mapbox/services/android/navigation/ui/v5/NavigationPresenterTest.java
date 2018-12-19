@@ -34,7 +34,7 @@ public class NavigationPresenterTest {
 
     presenter.onRouteOverviewClick();
 
-    verify(view).updateWaynameVisibility(false);
+    verify(view).updateWayNameVisibility(false);
   }
 
   @Test
@@ -58,12 +58,53 @@ public class NavigationPresenterTest {
   }
 
   @Test
-  public void onRecenterBtnClick_mapWaynmeIsShown() {
+  public void onRecenterBtnClick_mapWayNameIsShown() {
     NavigationContract.View view = mock(NavigationContract.View.class);
     NavigationPresenter presenter = new NavigationPresenter(view);
 
     presenter.onRecenterClick();
 
-    verify(view).updateWaynameVisibility(true);
+    verify(view).updateWayNameVisibility(true);
+  }
+
+  @Test
+  public void onWayNameChanged_mapWayNameIsShown() {
+    NavigationContract.View view = mock(NavigationContract.View.class);
+    NavigationPresenter presenter = new NavigationPresenter(view);
+
+    presenter.onWayNameChanged("Some way name");
+
+    verify(view).updateWayNameVisibility(true);
+  }
+
+  @Test
+  public void onWayNameChanged_mapWayNameIsUpdated() {
+    String someWayName = "Some way name";
+    NavigationContract.View view = mock(NavigationContract.View.class);
+    NavigationPresenter presenter = new NavigationPresenter(view);
+
+    presenter.onWayNameChanged(someWayName);
+
+    verify(view).updateWayNameView(someWayName);
+  }
+
+  @Test
+  public void onWayNameChanged_mapWayNameIsHidden() {
+    NavigationContract.View view = mock(NavigationContract.View.class);
+    NavigationPresenter presenter = new NavigationPresenter(view);
+
+    presenter.onWayNameChanged("");
+
+    verify(view).updateWayNameVisibility(false);
+  }
+
+  @Test
+  public void onNavigationStopped_mapWayNameIsHidden() {
+    NavigationContract.View view = mock(NavigationContract.View.class);
+    NavigationPresenter presenter = new NavigationPresenter(view);
+
+    presenter.onNavigationStopped();
+
+    verify(view).updateWayNameVisibility(false);
   }
 }
