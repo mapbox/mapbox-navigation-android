@@ -96,6 +96,19 @@ public class NavigationRouteTest extends BaseTest {
   }
 
   @Test
+  public void addWaypointTargetsIncludedInRequest() {
+    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+      .accessToken(ACCESS_TOKEN)
+      .origin(Point.fromLngLat(1.0, 2.0))
+      .destination(Point.fromLngLat(1.0, 5.0))
+      .addWaypointTargets(null, Point.fromLngLat(0.99, 4.99))
+      .build();
+
+    assertThat(navigationRoute.getCall().request().url().toString(),
+      containsString("waypoint_targets"));
+  }
+
+  @Test
   public void addingPointAndBearingKeepsCorrectOrder() throws Exception {
     NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
       .accessToken(ACCESS_TOKEN)
@@ -140,6 +153,7 @@ public class NavigationRouteTest extends BaseTest {
       .geometries("mocked_geometries")
       .approaches("curb;unrestricted")
       .waypointNames("Origin;Destination")
+      .waypointTargets(";0.99,4.99")
       .build();
 
     NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
@@ -158,6 +172,7 @@ public class NavigationRouteTest extends BaseTest {
     assertThat(request, containsString("walking"));
     assertThat(request, containsString("curb"));
     assertThat(request, containsString("Origin"));
+    assertThat(request, containsString("waypoint_targets"));
   }
 
   @Test
