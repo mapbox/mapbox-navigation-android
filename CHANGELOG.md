@@ -2,6 +2,13 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.26.0 - December 20, 2018
+
+* NavigationMapRoute 2.0 #1387
+* Use Android View instead of runtime styling for way name #1621
+* Update Maps SDK 6.8.0 #1642
+* Add waypoint targets support into NavigationRoute #1640
+
 ### v0.25.0 - December 16, 2018
 
 * Update Navigator to 3.4.11 #1635
