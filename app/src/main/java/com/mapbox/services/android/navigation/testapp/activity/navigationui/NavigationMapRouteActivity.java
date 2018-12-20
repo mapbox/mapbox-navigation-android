@@ -1,16 +1,18 @@
 package com.mapbox.services.android.navigation.testapp.activity.navigationui;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ProgressBar;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
-import com.mapbox.api.directions.v5.DirectionsCriteria;
-import com.mapbox.api.directions.v5.MapboxDirections;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -19,16 +21,16 @@ import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.constants.Style;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.modes.CameraMode;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
-import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -40,14 +42,16 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class NavigationMapRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, Callback<DirectionsResponse>, OnRouteSelectionChangeListener {
+  MapboxMap.OnMapLongClickListener, Callback<DirectionsResponse> {
 
-  private static final String DIRECTIONS_RESPONSE = "directions-route.json";
+  private static final int ONE_HUNDRED_MILLISECONDS = 100;
 
   @BindView(R.id.mapView)
   MapView mapView;
-  @BindView(R.id.primaryRouteIndexTextView)
-  TextView primaryRouteIndexTextView;
+  @BindView(R.id.routeLoadingProgressBar)
+  ProgressBar routeLoading;
+  @BindView(R.id.fabRemoveRoute)
+  FloatingActionButton fabRemoveRoute;
 
   private MapboxMap mapboxMap;
   private NavigationMapRoute navigationMapRoute;
@@ -55,7 +59,6 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
 
   private Marker originMarker;
   private Marker destinationMarker;
-  private List<DirectionsRoute> routes = new ArrayList<>();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -69,77 +72,46 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   }
 
   @OnClick(R.id.fabStyles)
-  public void onStyleFabClick(View view) {
+  public void onStyleFabClick() {
     if (mapboxMap != null) {
       mapboxMap.setStyleUrl(styleCycle.getNextStyle());
     }
   }
 
-  @Override
-  public void onNewPrimaryRouteSelected(DirectionsRoute directionsRoute) {
-    primaryRouteIndexTextView.setText(String.valueOf(routes.indexOf(directionsRoute)));
+  @OnClick(R.id.fabRemoveRoute)
+  public void onRemoveRouteClick(View fabRemoveRoute) {
+    removeRouteAndMarkers();
+    fabRemoveRoute.setVisibility(View.INVISIBLE);
   }
 
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap,
-      "admin-3-4-boundaries-bg");
-    Gson gson = new GsonBuilder().registerTypeAdapterFactory(DirectionsAdapterFactory.create())
-      .create();
-    DirectionsResponse response = gson.fromJson(loadJsonFromAsset(DIRECTIONS_RESPONSE),
-      DirectionsResponse.class);
-    navigationMapRoute.addRoute(response.routes().get(0));
+    initializeLocationComponent(mapboxMap);
+    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap);
     mapboxMap.addOnMapLongClickListener(this);
-    navigationMapRoute.setOnRouteSelectionChangeListener(this);
+    Snackbar.make(mapView, "Long press to select route", Snackbar.LENGTH_SHORT).show();
   }
 
   @Override
   public void onMapLongClick(@NonNull LatLng point) {
-    if (originMarker == null) {
-      originMarker = mapboxMap.addMarker(new MarkerOptions().position(point));
-    } else if (destinationMarker == null) {
-      destinationMarker = mapboxMap.addMarker(new MarkerOptions().position(point));
-      Point originPoint = Point.fromLngLat(
-        originMarker.getPosition().getLongitude(), originMarker.getPosition().getLatitude());
-      Point destinationPoint = Point.fromLngLat(
-        destinationMarker.getPosition().getLongitude(), destinationMarker.getPosition().getLatitude());
-      requestDirectionsRoute(originPoint, destinationPoint);
-      mapboxMap.removeMarker(originMarker);
-      mapboxMap.removeMarker(destinationMarker);
-    } else {
-      originMarker = null;
-      destinationMarker = null;
-      navigationMapRoute.removeRoute();
-    }
-  }
-
-  public void requestDirectionsRoute(Point origin, Point destination) {
-    MapboxDirections directions = MapboxDirections.builder()
-      .origin(origin)
-      .destination(destination)
-      .accessToken(Mapbox.getAccessToken())
-      .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-      .overview(DirectionsCriteria.OVERVIEW_FULL)
-      .annotations(DirectionsCriteria.ANNOTATION_CONGESTION)
-      .alternatives(true)
-      .steps(true)
-      .build();
-
-    directions.enqueueCall(this);
+    handleClicked(point);
   }
 
   @Override
-  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-    if (response.body() != null && !response.body().routes().isEmpty()) {
+  public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
+    if (response.isSuccessful()
+      && response.body() != null
+      && !response.body().routes().isEmpty()) {
       List<DirectionsRoute> routes = response.body().routes();
-      this.routes = routes;
       navigationMapRoute.addRoutes(routes);
+      routeLoading.setVisibility(View.INVISIBLE);
+      fabRemoveRoute.setVisibility(View.VISIBLE);
     }
   }
 
   @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+  public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
     Timber.e(throwable);
   }
 
@@ -153,12 +125,18 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   protected void onStart() {
     super.onStart();
     mapView.onStart();
+    if (navigationMapRoute != null) {
+      navigationMapRoute.onStart();
+    }
   }
 
   @Override
   protected void onStop() {
     super.onStop();
     mapView.onStop();
+    if (navigationMapRoute != null) {
+      navigationMapRoute.onStop();
+    }
   }
 
   @Override
@@ -185,25 +163,62 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
     mapView.onSaveInstanceState(outState);
   }
 
-  public NavigationMapRoute getNavigationMapRoute() {
-    return navigationMapRoute;
+  @SuppressWarnings("MissingPermission")
+  private void initializeLocationComponent(MapboxMap mapboxMap) {
+    LocationComponent locationComponent = mapboxMap.getLocationComponent();
+    locationComponent.activateLocationComponent(this);
+    locationComponent.setLocationComponentEnabled(true);
+    locationComponent.setRenderMode(RenderMode.COMPASS);
+    locationComponent.setCameraMode(CameraMode.TRACKING);
+    locationComponent.zoomWhileTracking(10d);
   }
 
-  private String loadJsonFromAsset(String filename) {
-    // Using this method to load in GeoJSON files from the assets folder.
-
-    try {
-      InputStream is = getAssets().open(filename);
-      int size = is.available();
-      byte[] buffer = new byte[size];
-      is.read(buffer);
-      is.close();
-      return new String(buffer, "UTF-8");
-
-    } catch (IOException ex) {
-      ex.printStackTrace();
-      return null;
+  private void handleClicked(@NonNull LatLng point) {
+    vibrate();
+    if (originMarker == null) {
+      originMarker = mapboxMap.addMarker(new MarkerOptions().position(point));
+      Snackbar.make(mapView, "Origin selected", Snackbar.LENGTH_SHORT).show();
+    } else if (destinationMarker == null) {
+      destinationMarker = mapboxMap.addMarker(new MarkerOptions().position(point));
+      Point originPoint = Point.fromLngLat(
+        originMarker.getPosition().getLongitude(), originMarker.getPosition().getLatitude());
+      Point destinationPoint = Point.fromLngLat(
+        destinationMarker.getPosition().getLongitude(), destinationMarker.getPosition().getLatitude());
+      Snackbar.make(mapView, "Destination selected", Snackbar.LENGTH_SHORT).show();
+      findRoute(originPoint, destinationPoint);
+      routeLoading.setVisibility(View.VISIBLE);
     }
+  }
+
+  @SuppressLint("MissingPermission")
+  private void vibrate() {
+    Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+    if (vibrator == null) {
+      return;
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      vibrator.vibrate(VibrationEffect.createOneShot(ONE_HUNDRED_MILLISECONDS, VibrationEffect.DEFAULT_AMPLITUDE));
+    } else {
+      vibrator.vibrate(ONE_HUNDRED_MILLISECONDS);
+    }
+  }
+
+  private void removeRouteAndMarkers() {
+    mapboxMap.removeMarker(originMarker);
+    originMarker = null;
+    mapboxMap.removeMarker(destinationMarker);
+    destinationMarker = null;
+    navigationMapRoute.removeRoute();
+  }
+
+  public void findRoute(Point origin, Point destination) {
+    NavigationRoute.builder(this)
+      .accessToken(Mapbox.getAccessToken())
+      .origin(origin)
+      .destination(destination)
+      .alternatives(true)
+      .build()
+      .getRoute(this);
   }
 
   private static class StyleCycle {

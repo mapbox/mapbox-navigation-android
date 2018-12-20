@@ -5,33 +5,48 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context=".activity.navigationui.NavigationMapRouteActivity">
 
-  <com.mapbox.mapboxsdk.maps.MapView
-      android:id="@+id/mapView"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      app:mapbox_cameraTargetLat="40.7448"
-      app:mapbox_cameraTargetLng="-73.9861"
-      app:mapbox_cameraZoom="12"
-      app:mapbox_uiAttribution="false"/>
+    <com.mapbox.mapboxsdk.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:mapbox_cameraZoom="12"/>
 
-  <TextView
-      android:id="@+id/primaryRouteIndexTextView"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="top|start"
-      android:background="@android:color/transparent"/>
+    <ProgressBar
+        android:id="@+id/routeLoadingProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="invisible"/>
 
-  <android.support.design.widget.FloatingActionButton
-      android:id="@+id/fabStyles"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="end|bottom"
-      android:layout_margin="16dp"
-      android:src="@drawable/ic_layers"
-      android:tint="@android:color/white"
-      app:backgroundTint="@color/colorAccent"/>
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
+        app:layout_anchor="@id/fabStyles"
+        app:layout_anchorGravity="top|center">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fabRemoveRoute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            app:backgroundTint="@color/red"
+            app:srcCompat="@drawable/ic_cancel"/>
+
+    </FrameLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabStyles"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="16dp"
+        android:tint="@android:color/white"
+        app:backgroundTint="@color/colorAccent"
+        app:srcCompat="@drawable/ic_layers"/>
 
 </android.support.design.widget.CoordinatorLayout>
