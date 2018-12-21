@@ -4,8 +4,10 @@ Mapbox welcomes participation and contributions from everyone.
 
 ### v0.26.0 - December 20, 2018
 
+Note: This release breaks `SEMVER` / contains API breaking changes.  Please consult this [migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/0.26.0-Migration-Guide) for the necessary updates required.
+
 * NavigationMapRoute 2.0 #1387
-* Use Android View instead of runtime styling for way name #1621
+* [SEMVER] Use Android View instead of runtime styling for way name #1621
 * Update Maps SDK 6.8.0 #1642
 * Add waypoint targets support into NavigationRoute #1640
 
@@ -34,6 +36,8 @@ Mapbox welcomes participation and contributions from everyone.
 * Add last commit hash to test app settings #1590
 
 ### v0.24.0 - December 3, 2018
+
+Note: This release breaks `SEMVER` / contains API breaking changes.  Please consult this [migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/0.24.0-Migration-Guide) for the necessary updates required.
 
 * Add proguard rule for MapboxTelemetry #1593
 * Update Navigator to 3.4.7 #1592
@@ -75,11 +79,11 @@ Mapbox welcomes participation and contributions from everyone.
 * Prevent from requesting voice instructions if the cache has been previously closed and add a check to delete the cache if there are files [#1540](https://github.com/mapbox/mapbox-navigation-android/pull/1540)
 * Add offline functionality [#1539](https://github.com/mapbox/mapbox-navigation-android/pull/1539)
 * Remove unnecessary proguard rule resolved in Java services 4.1.0 [#1532](https://github.com/mapbox/mapbox-navigation-android/pull/1532)
-* Fix navigation map route array index out of bounds exception and add clean up navigation launcher preferences support [#1530](https://github.com/mapbox/mapbox-navigation-android/pull/1530)
-* Fix voice instructions cache [#1481](https://github.com/mapbox/mapbox-navigation-android/pull/1481)
+* [SEMVER] Fix navigation map route array index out of bounds exception and add clean up navigation launcher preferences support [#1530](https://github.com/mapbox/mapbox-navigation-android/pull/1530)
+* [SEMVER] Fix voice instructions cache [#1481](https://github.com/mapbox/mapbox-navigation-android/pull/1481)
 * Update Navigator to 3.4.0 [#1525](https://github.com/mapbox/mapbox-navigation-android/pull/1525)
 * Cancel outstanding Directions API requests onDestroy NavigationViewModel [#1515](https://github.com/mapbox/mapbox-navigation-android/pull/1515)
-* Use most recent raw Location when building snapped Location [#1522](https://github.com/mapbox/mapbox-navigation-android/pull/1522)
+* [SEMVER] Use most recent raw Location when building snapped Location [#1522](https://github.com/mapbox/mapbox-navigation-android/pull/1522)
 * Update translations to latest Transifex [#1513](https://github.com/mapbox/mapbox-navigation-android/pull/1513)
 * Update codecov badge to Navigation 😅 [#1510](https://github.com/mapbox/mapbox-navigation-android/pull/1510)
 * Update README.md with codecov badge [#1509](https://github.com/mapbox/mapbox-navigation-android/pull/1509)
@@ -87,10 +91,12 @@ Mapbox welcomes participation and contributions from everyone.
 
 ### v0.23.0 - November 7, 2018
 
-* Add RouteProgressState to RouteProgress for current Navigator information [#1502](https://github.com/mapbox/mapbox-navigation-android/pull/1502)
-* Remove LocationValidator and force last Location if found [#1498](https://github.com/mapbox/mapbox-navigation-android/pull/1498)
+Note: This release breaks `SEMVER` / contains API breaking changes.  Please consult this [migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/0.23.0-Migration-Guide) for the necessary updates required.
+
+* [SEMVER] Add RouteProgressState to RouteProgress for current Navigator information [#1502](https://github.com/mapbox/mapbox-navigation-android/pull/1502)
+* [SEMVER] Remove LocationValidator and force last Location if found [#1498](https://github.com/mapbox/mapbox-navigation-android/pull/1498)
 * Update MapRouteProgressChangeListener to be aware of route visibility [#1482](https://github.com/mapbox/mapbox-navigation-android/pull/1482)
-* Remove MapboxNavigationOptions ignored by Navigator [#1500](https://github.com/mapbox/mapbox-navigation-android/pull/1500)
+* [SEMVER] Remove MapboxNavigationOptions ignored by Navigator [#1500](https://github.com/mapbox/mapbox-navigation-android/pull/1500)
 * Check for valid geocoding response in ExamplePresenter [#1499](https://github.com/mapbox/mapbox-navigation-android/pull/1499)
 * Better clarify the Mapbox Navigator dependency [#1496](https://github.com/mapbox/mapbox-navigation-android/pull/1496)
 * Add example test Activity for Navigation Test Application [#1317](https://github.com/mapbox/mapbox-navigation-android/pull/1317)
@@ -106,12 +112,14 @@ Mapbox welcomes participation and contributions from everyone.
 * Fix mock location generation in ReplayRouteLocationConverter [#1476](https://github.com/mapbox/mapbox-navigation-android/pull/1476)
 * Update Maps SDK to 6.6.2 [#1475](https://github.com/mapbox/mapbox-navigation-android/pull/1475)
 * Bump mapbox-navigation-native version to 3.2.1 [#1470](https://github.com/mapbox/mapbox-navigation-android/pull/1470)
-* Allow access to AlertView and the ability to enable or disable [#1466](https://github.com/mapbox/mapbox-navigation-android/pull/1466)
+* [SEMVER] Allow access to AlertView and the ability to enable or disable [#1466](https://github.com/mapbox/mapbox-navigation-android/pull/1466)
 * Update Transifex to latest German translations [#1476](https://github.com/mapbox/mapbox-navigation-android/pull/1476)
 
 ### v0.22.0 - October 24, 2018
 
-* Replace LocationLayerPlugin with LocationComponent [#1438](https://github.com/mapbox/mapbox-navigation-android/pull/1438)
+Note: This release breaks `SEMVER` / contains API breaking changes.  Please consult this [migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/0.22.0-Migration-Guide) for the necessary updates required.
+
+* [SEMVER] Replace LocationLayerPlugin with LocationComponent [#1438](https://github.com/mapbox/mapbox-navigation-android/pull/1438)
 * Makes gradle.properties license listing consisting with repo [#1456](https://github.com/mapbox/mapbox-navigation-android/pull/1456)
 * Rebuild MapboxNavigationNotification for each update [#1455](https://github.com/mapbox/mapbox-navigation-android/pull/1455)
 * Update progruard rules to ensure Navigator is kept in release builds [#1454](https://github.com/mapbox/mapbox-navigation-android/pull/1454)
@@ -138,16 +146,18 @@ Mapbox welcomes participation and contributions from everyone.
 * Load sub-banner Shield Images [#1418](https://github.com/mapbox/mapbox-navigation-android/pull/1418)
 * Fix shields not showing up for some display densities [#1414](https://github.com/mapbox/mapbox-navigation-android/pull/1414)
 * Bump Android Gradle plugin version to 3.2.1 [#1415](https://github.com/mapbox/mapbox-navigation-android/pull/1415)
-* Added nav-native ETAs [#1412](https://github.com/mapbox/mapbox-navigation-android/pull/1412)
+* [SEMVER] Added nav-native ETAs [#1412](https://github.com/mapbox/mapbox-navigation-android/pull/1412)
 * Delay start navigation until route received in MockNavigationActivity [#1411](https://github.com/mapbox/mapbox-navigation-android/pull/1411)
 * Update Maps v6.6.0 release [#1310](https://github.com/mapbox/mapbox-navigation-android/pull/1310)
-* Consume Sub BannerText in InstructionView [#1408](https://github.com/mapbox/mapbox-navigation-android/pull/1408)
+* [SEMVER] Consume Sub BannerText in InstructionView [#1408](https://github.com/mapbox/mapbox-navigation-android/pull/1408)
 * Fix component navigation activity camera issues [#1407](https://github.com/mapbox/mapbox-navigation-android/pull/1407)
 
 ### v0.21.0 - October 5, 2018
 
+Note: This release breaks `SEMVER` / contains API breaking changes.
+
 * Add CustomNavigationNotification notification channel [#1388](https://github.com/mapbox/mapbox-navigation-android/pull/1388)
-* Add OnCameraTrackingChangedListener to NavigationMapboxMap [#1386](https://github.com/mapbox/mapbox-navigation-android/pull/1386)
+* [SEMVER] Add OnCameraTrackingChangedListener to NavigationMapboxMap [#1386](https://github.com/mapbox/mapbox-navigation-android/pull/1386)
 * Bump mapbox-android-plugin-locationlayer version to 0.10.0 [#1382](https://github.com/mapbox/mapbox-navigation-android/pull/1382)
 * Camera tracking modes selection with GPS and North as options [#1377](https://github.com/mapbox/mapbox-navigation-android/pull/1377)
 * Match min and max pitch values with iOS [#1379](https://github.com/mapbox/mapbox-navigation-android/pull/1379)
@@ -156,6 +166,8 @@ Mapbox welcomes participation and contributions from everyone.
 * Fix multi on click listener NPE in recenter button [#1374](https://github.com/mapbox/mapbox-navigation-android/pull/1374)
 
 ### v0.20.0 - September 30, 2018
+
+Note: This release breaks `SEMVER` / contains API breaking changes.
 
 * Update Navigator to 3.1.3 [#1364](https://github.com/mapbox/mapbox-navigation-android/pull/1364)
 * Delay adding InstructionView default click listeners until subscribed [#1362](https://github.com/mapbox/mapbox-navigation-android/pull/1362)
@@ -166,7 +178,7 @@ Mapbox welcomes participation and contributions from everyone.
 * Refine InstructionView update APIs [#1355](https://github.com/mapbox/mapbox-navigation-android/pull/1355)
 * Puck Gymnastics [#1354](https://github.com/mapbox/mapbox-navigation-android/pull/1354)
 * Fix MultiOnClickListener NPE [#1353](https://github.com/mapbox/mapbox-navigation-android/pull/1353)
-* Ignore null locations [#1352](https://github.com/mapbox/mapbox-navigation-android/pull/1352)
+* [SEMVER] Ignore null locations [#1352](https://github.com/mapbox/mapbox-navigation-android/pull/1352)
 * Update nav native to 3.0.1 [#1348](https://github.com/mapbox/mapbox-navigation-android/pull/1348)
 * Add separate APIs for updating InstructionView [#1340](https://github.com/mapbox/mapbox-navigation-android/pull/1340)
 * Create MultiOnClickListener before View is attached [#1345](https://github.com/mapbox/mapbox-navigation-android/pull/1345)
@@ -182,19 +194,21 @@ Mapbox welcomes participation and contributions from everyone.
 
 ### v0.19.0 - September 24, 2018
 
+Note: This release breaks `SEMVER` / contains API breaking changes.
+
 * Fix route requests that include approaches and fix calculate remaining waypoints and waypoint names logic [#1303](https://github.com/mapbox/mapbox-navigation-android/pull/1303)
 * Added ability to hide/add listeners to buttons/alert views [#1251](https://github.com/mapbox/mapbox-navigation-android/pull/1251)
-* Allow custom LocationEngine from NavigationViewOptions [#1257](https://github.com/mapbox/mapbox-navigation-android/pull/1257)
+* [SEMVER] Allow custom LocationEngine from NavigationViewOptions [#1257](https://github.com/mapbox/mapbox-navigation-android/pull/1257)
 * Add debug logging support back [#1298](https://github.com/mapbox/mapbox-navigation-android/pull/1298)
 * Make last location from replay route location engine null (by default) until the first location is received or assigned explicitly [#1296](https://github.com/mapbox/mapbox-navigation-android/pull/1296)
-* Do not update MockLocationEngine route on rotation [#1289](https://github.com/mapbox/mapbox-navigation-android/pull/1289)
+* [SEMVER] Do not update MockLocationEngine route on rotation [#1289](https://github.com/mapbox/mapbox-navigation-android/pull/1289)
 * Fix mock navigation activity leak and fix location puck flying from current location to mock [#1294](https://github.com/mapbox/mapbox-navigation-android/pull/1294)
-* Add location dispatcher to replay raw GPS traces [#1039](https://github.com/mapbox/mapbox-navigation-android/pull/1089)
+* [SEMVER] Add location dispatcher to replay raw GPS traces [#1039](https://github.com/mapbox/mapbox-navigation-android/pull/1089)
 * Remove sonarqube integration [#1290](https://github.com/mapbox/mapbox-navigation-android/pull/1290)
 * Update Maps SDK to 6.5.0 and Events to 3.2.0 [#1241](https://github.com/mapbox/mapbox-navigation-android/pull/1241)
-* Add onNavigationStopped callback for NavigationNotification [#1283](https://github.com/mapbox/mapbox-navigation-android/pull/1283)
-* Added custom rounding increments for formatting distance [#1231](https://github.com/mapbox/mapbox-navigation-android/pull/1231)
-* Simplify will voice api [#1281](https://github.com/mapbox/mapbox-navigation-android/pull/1281)
+* [SEMVER] Add onNavigationStopped callback for NavigationNotification [#1283](https://github.com/mapbox/mapbox-navigation-android/pull/1283)
+* [SEMVER] Added custom rounding increments for formatting distance [#1231](https://github.com/mapbox/mapbox-navigation-android/pull/1231)
+* [SEMVER] Simplify will voice api [#1281](https://github.com/mapbox/mapbox-navigation-android/pull/1281)
 * Update RouteEngine for NavigationView duplicate starts [#1277](https://github.com/mapbox/mapbox-navigation-android/pull/1277)
 * Fix recenter problem with Remove onMoveListener in onDestroy [#1263](https://github.com/mapbox/mapbox-navigation-android/pull/1263)
 * Update Milestone javadoc to explain ignored trigger behavior [#1269](https://github.com/mapbox/mapbox-navigation-android/pull/1269)
@@ -207,7 +221,7 @@ Mapbox welcomes participation and contributions from everyone.
 * Save and restore map state on rotation for way name and camera tracking [#1215](https://github.com/mapbox/mapbox-navigation-android/pull/1215)
 * Add example with MapboxNavigation driving separate UI components [#1219](https://github.com/mapbox/mapbox-navigation-android/pull/1219)
 * Update NavigationView to guard against duplicate initializations [#1247](https://github.com/mapbox/mapbox-navigation-android/pull/1247)
-* Add NavigationViewOption for default or custom SpeechPlayer [#1232](https://github.com/mapbox/mapbox-navigation-android/pull/1232)
+* [SEMVER] Add NavigationViewOption for default or custom SpeechPlayer [#1232](https://github.com/mapbox/mapbox-navigation-android/pull/1232)
 * Added Burmese, Finnish, Korean, Norwegian guidance
 * Add toggles in NavigationMapboxMap for traffic and incident data [#1226](https://github.com/mapbox/mapbox-navigation-android/pull/1226)
 * Update Map styles to V4 with incident coverage [#1234](https://github.com/mapbox/mapbox-navigation-android/pull/1234)
@@ -227,16 +241,18 @@ Mapbox welcomes participation and contributions from everyone.
 
 ### v0.17.0 - August 10, 2018
 
+Note: This release breaks `SEMVER` / contains API breaking changes.
+
 * Bump MAS version to 3.4.1 [#1203](https://github.com/mapbox/mapbox-navigation-android/pull/1203)
 * Notify InstructionListAdapter after animation finishes [#1143](https://github.com/mapbox/mapbox-navigation-android/pull/1143)
 * Revert MAS version from 3.4.0 to 3.3.0 [#1200](https://github.com/mapbox/mapbox-navigation-android/pull/1200)
 * Update Java SDK to 3.4.0 [#1196](https://github.com/mapbox/mapbox-navigation-android/pull/1196)
-* Allow access to NavigationMapboxMap and MapboxNavigation [#1179](https://github.com/mapbox/mapbox-navigation-android/pull/1179)
+* [SEMVER] Allow access to NavigationMapboxMap and MapboxNavigation [#1179](https://github.com/mapbox/mapbox-navigation-android/pull/1179)
 * Retrieve feedback Strings from Resources [#1194](https://github.com/mapbox/mapbox-navigation-android/pull/1194)
 * Update README Snapshot [#1186](https://github.com/mapbox/mapbox-navigation-android/pull/1186)
 * Add gradle-versions-plugin to the project [#1187](https://github.com/mapbox/mapbox-navigation-android/pull/1187)
 * Add a null check to prevent NPE in NavigationViewModel onDestroy [#1192](https://github.com/mapbox/mapbox-navigation-android/pull/1192)
-* Remove Location filter and check Location#getAccuracy [#1157](https://github.com/mapbox/mapbox-navigation-android/pull/1157)
+* [SEMVER] Remove Location filter and check Location#getAccuracy [#1157](https://github.com/mapbox/mapbox-navigation-android/pull/1157)
 * Provide example of showing and hiding Fragment with NavigationView [#1113](https://github.com/mapbox/mapbox-navigation-android/pull/1113)
 * Added InstanceState to simplify saving the state [#1162](https://github.com/mapbox/mapbox-navigation-android/pull/1162)
 * Fix OffRoute engine cleared before service shutdown [#1167](https://github.com/mapbox/mapbox-navigation-android/pull/1167)
@@ -258,10 +274,13 @@ Mapbox welcomes participation and contributions from everyone.
 
 ### v0.16.0 - July 20, 2018
 
+Note: This release breaks `SEMVER` / contains API breaking changes.
+
 * Fixed error by only accepting SUCCESS state [#1127](https://github.com/mapbox/mapbox-navigation-android/pull/1127)
 * Make navigation map null when shutting navigation view down [#1125](https://github.com/mapbox/mapbox-navigation-android/pull/1125)
 * Update Maps SDK 6.3.0 and Telem 3.1.4 [#1124](https://github.com/mapbox/mapbox-navigation-android/pull/1124)
 * Fix IllegalArgumentException when updating InstructionList [#1123](https://github.com/mapbox/mapbox-navigation-android/pull/1123)
+* [SEMVER] Update MapboxNavigationNotification to consider 24 hour time formatting [#1115](https://github.com/mapbox/mapbox-navigation-android/pull/1123)
 * Prevent route overview animation with insufficient route data [#1120](https://github.com/mapbox/mapbox-navigation-android/pull/1120)
 * Prevent NavigationNotification update after unregistered [#1118](https://github.com/mapbox/mapbox-navigation-android/pull/1118)
 * Refactor InstructionListAdapter and limit roundabout degrees in ManeuverView [#1064](https://github.com/mapbox/mapbox-navigation-android/pull/1064)
@@ -500,6 +519,8 @@ Mapbox welcomes participation and contributions from everyone.
 
 ### v0.7.1 - December 6, 2017
 
+Note: This release breaks `SEMVER` / contains API breaking changes.
+
 * Fix NPE with reroute metric events [#565](https://github.com/mapbox/mapbox-navigation-android/pull/565)
 * Adjust metric listener reset [#566](https://github.com/mapbox/mapbox-navigation-android/pull/566)
 * Update distance completed in off-route scenario [#568](https://github.com/mapbox/mapbox-navigation-android/pull/568)
@@ -510,7 +531,7 @@ Mapbox welcomes participation and contributions from everyone.
 * Expanded the width of route lines when zoomed out
 * Added support for displaying alternative routes on map
 * Adds exclude, voiceUnits, and banner instruction info to request/response [#500](https://github.com/mapbox/mapbox-navigation-android/pull/500)
-* Add Imperial / Metric support for UI & Notification [#501](https://github.com/mapbox/mapbox-navigation-android/pull/501)
+* [SEMVER] Add Imperial / Metric support for UI & Notification [#501](https://github.com/mapbox/mapbox-navigation-android/pull/501)
 * Add NavigationView as a lifecycle observer [#506](https://github.com/mapbox/mapbox-navigation-android/pull/506)
 * Add Custom themes via XML for light / dark mode [#507](https://github.com/mapbox/mapbox-navigation-android/pull/507)
 * Navigation Metrics Refactor [#511](https://github.com/mapbox/mapbox-navigation-android/pull/511)
