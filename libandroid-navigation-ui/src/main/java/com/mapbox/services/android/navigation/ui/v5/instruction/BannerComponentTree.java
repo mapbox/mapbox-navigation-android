@@ -29,7 +29,7 @@ public class BannerComponentTree {
    * @param bannerComponents to parse
    * @return the list of nodes representing the bannerComponents
    */
-  List<BannerComponentNode> parseBannerComponents(List<BannerComponents> bannerComponents) {
+  private List<BannerComponentNode> parseBannerComponents(List<BannerComponents> bannerComponents) {
     int length = 0;
     List<BannerComponentNode> bannerComponentNodes = new ArrayList<>();
 
@@ -38,7 +38,7 @@ public class BannerComponentTree {
 
       for (NodeCreator nodeCreator : nodeCreators) {
         if (nodeCreator.isNodeType(components)) {
-          node = nodeCreator.setupNode(components, bannerComponentNodes.size(), length - 1);
+          node = nodeCreator.setupNode(components, bannerComponentNodes.size(), length);
           break;
         }
       }

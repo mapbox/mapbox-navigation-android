@@ -21,14 +21,19 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
   private Map<Integer, List<Integer>> abbreviations;
   private TextViewUtils textViewUtils;
 
-  AbbreviationCreator(TextViewUtils textViewUtils, AbbreviationVerifier abbreviationVerifier) {
+  AbbreviationCreator(AbbreviationVerifier abbreviationVerifier, TextViewUtils textViewUtils,
+                      HashMap abbreviations) {
     super(abbreviationVerifier);
-    this.abbreviations = new HashMap<>();
     this.textViewUtils = textViewUtils;
+    this.abbreviations = abbreviations;
+  }
+
+  AbbreviationCreator(AbbreviationVerifier abbreviationVerifier, TextViewUtils textViewUtils) {
+    this(abbreviationVerifier, textViewUtils, new HashMap());
   }
 
   AbbreviationCreator() {
-    this(new TextViewUtils(), new AbbreviationVerifier());
+    this(new AbbreviationVerifier(), new TextViewUtils());
   }
 
   /**
@@ -39,7 +44,7 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
    * @param bannerComponents object holding the abbreviation information
    * @param index in the list of BannerComponentNodes
    */
-  void addPriorityInfo(BannerComponents bannerComponents, int index) {
+  private void addPriorityInfo(BannerComponents bannerComponents, int index) {
     Integer abbreviationPriority = bannerComponents.abbreviationPriority();
     if (abbreviations.get(abbreviationPriority) == null) {
       abbreviations.put(abbreviationPriority, new ArrayList<Integer>());
@@ -55,7 +60,8 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
    * @param bannerComponentNodes containing the text to construct
    * @return the properly abbreviated string that will fit in the TextView
    */
-  String abbreviateBannerText(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
+  private String abbreviateBannerText(TextView textView, List<BannerComponentNode>
+    bannerComponentNodes) {
     String bannerText = join(bannerComponentNodes);
 
     if (abbreviations.isEmpty()) {
@@ -146,7 +152,7 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
    * Class used by InstructionLoader to determine that a BannerComponent contains an abbreviation
    */
   static class AbbreviationNode extends BannerComponentNode {
-    boolean abbreviate;
+    private boolean abbreviate;
 
     AbbreviationNode(BannerComponents bannerComponents, int startIndex) {
       super(bannerComponents, startIndex);
@@ -160,5 +166,10 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
     void setAbbreviate(boolean abbreviate) {
       this.abbreviate = abbreviate;
     }
+
+    boolean getAbbreviate() {
+      return abbreviate;
+    }
+
   }
 }

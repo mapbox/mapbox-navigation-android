@@ -7,34 +7,46 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import org.junit.Test;
 import org.mockito.InOrder;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
 public class BannerComponentTreeTest {
 
   @Test
+  public void parseComponents() {
+    BannerComponents bannerComponents = BannerComponentsFaker.bannerComponents();
+    List<BannerComponents> bannerComponentsList = Collections.singletonList(bannerComponents);
+    TestCreator testCreator = mock(TestCreator.class);
+    when(testCreator.isNodeType(bannerComponents)).thenReturn(true);
+
+    new BannerComponentTree(bannerComponentsList, testCreator);
+
+    verify(testCreator).setupNode(bannerComponents, 0, 0);
+  }
+
+  @Test
   public void loadInstruction() {
-    List<BannerComponents> bannerComponentsList = new ArrayList<>();
-    BannerComponents bannerComponents = BannerComponentsFaker.bannerComponentsWithAbbreviation();
-    bannerComponentsList.add(bannerComponents);
+    BannerComponents bannerComponents = BannerComponentsFaker.bannerComponents();
+    List<BannerComponents> bannerComponentsList = Collections.singletonList(bannerComponents);
     TestNode testNode = mock(TestNode.class);
-    TestCreator nodeCoordinator = mock(TestCreator.class);
-    when(nodeCoordinator.isNodeType(bannerComponents)).thenReturn(true);
-    when(nodeCoordinator.setupNode(any(BannerComponents.class), anyInt(), anyInt())).thenReturn(testNode);
+    TestCreator testCreator = mock(TestCreator.class);
+    when(testCreator.isNodeType(bannerComponents)).thenReturn(true);
+    when(testCreator.setupNode(bannerComponents, 0, 0)).thenReturn(testNode);
     TextView textView = mock(TextView.class);
-    BannerComponentTree bannerComponentTree = new BannerComponentTree(bannerComponentsList, nodeCoordinator);
+    BannerComponentTree bannerComponentTree = new BannerComponentTree(bannerComponentsList, testCreator);
+
     bannerComponentTree.loadInstruction(textView);
 
-    InOrder inOrder = inOrder(nodeCoordinator, nodeCoordinator);
-    inOrder.verify(nodeCoordinator).preProcess(any(TextView.class), any(List.class));
-    inOrder.verify(nodeCoordinator).postProcess(any(TextView.class), any(List.class));
+    InOrder inOrder = inOrder(testCreator, testCreator);
+    inOrder.verify(testCreator).preProcess(any(TextView.class), any(List.class));
+    inOrder.verify(testCreator).postProcess(any(TextView.class), any(List.class));
   }
 
   class TestNode extends BannerComponentNode {
@@ -51,7 +63,6 @@ public class BannerComponentTreeTest {
     }
   }
 
-
   class TestCreator extends NodeCreator<TestNode, TestVerifier> {
     TestCreator(TestVerifier nodeVerifier) {
       super(nodeVerifier);
@@ -62,5 +73,4 @@ public class BannerComponentTreeTest {
       return new TestNode(components, startIndex);
     }
   }
-
 }

@@ -8,18 +8,22 @@ import com.mapbox.services.android.navigation.ui.v5.BaseTest;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class AbbreviationCoordinatorTest extends BaseTest {
+public class AbbreviationCreatorTest extends BaseTest {
+
   @Test
-  public void onAbbreviateBannerText_textIsAbbreviated() {
+  public void preProcess_abbreviate() {
     String abbreviation = "smtxt";
     BannerComponents bannerComponents =
-      BannerComponentsFaker.bannerComponents()
+      BannerComponentsFaker.bannerComponentsBuilder()
         .abbreviation(abbreviation)
         .abbreviationPriority(0)
         .build();
@@ -29,38 +33,40 @@ public class AbbreviationCoordinatorTest extends BaseTest {
     when(abbreviationVerifier.isNodeType(bannerComponents)).thenReturn(true);
     when(textViewUtils.textFits(textView, abbreviation)).thenReturn(true);
     when(textViewUtils.textFits(textView, bannerComponents.text())).thenReturn(false);
-    AbbreviationCreator abbreviationCoordinator = new AbbreviationCreator(textViewUtils, abbreviationVerifier);
-    abbreviationCoordinator.addPriorityInfo(bannerComponents, 0);
-    List<BannerComponentNode> bannerComponentNodes = new ArrayList<>();
-    bannerComponentNodes.add(new AbbreviationCreator.AbbreviationNode(bannerComponents, 0));
+    BannerComponentNode node = mock(AbbreviationCreator.AbbreviationNode.class);
+    when(((AbbreviationCreator.AbbreviationNode) node).getAbbreviate()).thenReturn(true);
+    when(node.toString()).thenReturn(abbreviation);
+    AbbreviationCreator abbreviationCreator = new AbbreviationCreator(abbreviationVerifier, textViewUtils);
 
-    String abbreviatedTextFromCoordinator = abbreviationCoordinator.abbreviateBannerText(textView, bannerComponentNodes);
+    abbreviationCreator.preProcess(textView, Collections.singletonList(node));
 
-    assertEquals(abbreviation, abbreviatedTextFromCoordinator);
+    verify(textView).setText(abbreviation);
   }
 
   @Test
-  public void onAbbreviateBannerText_textIsNotAbbreviated() {
+  public void setupNode() {
     String abbreviation = "smtxt";
-    String text = "some text";
+    int abbreviationPriority = 0;
     BannerComponents bannerComponents =
-      BannerComponentsFaker.bannerComponents()
+      BannerComponentsFaker.bannerComponentsBuilder()
         .abbreviation(abbreviation)
-        .abbreviationPriority(0)
-        .text(text)
+        .abbreviationPriority(abbreviationPriority)
         .build();
     TextViewUtils textViewUtils = mock(TextViewUtils.class);
     TextView textView = mock(TextView.class);
     AbbreviationVerifier abbreviationVerifier = mock(AbbreviationVerifier.class);
     when(abbreviationVerifier.isNodeType(bannerComponents)).thenReturn(true);
-    when(textViewUtils.textFits(textView, bannerComponents.text())).thenReturn(true);
-    AbbreviationCreator abbreviationCoordinator = new AbbreviationCreator(textViewUtils, abbreviationVerifier);
-    abbreviationCoordinator.addPriorityInfo(bannerComponents, 0);
+    when(textViewUtils.textFits(textView, abbreviation)).thenReturn(true);
+    when(textViewUtils.textFits(textView, bannerComponents.text())).thenReturn(false);
+    HashMap<Integer, List<Integer>> abbreviations = new HashMap();
+    AbbreviationCreator abbreviationCreator = new AbbreviationCreator(abbreviationVerifier,
+      textViewUtils, abbreviations);
     List<BannerComponentNode> bannerComponentNodes = new ArrayList<>();
     bannerComponentNodes.add(new AbbreviationCreator.AbbreviationNode(bannerComponents, 0));
 
-    String abbreviatedTextFromCoordinator = abbreviationCoordinator.abbreviateBannerText(textView, bannerComponentNodes);
+    abbreviationCreator.setupNode(bannerComponents, 0, 0);
 
-    assertEquals(text, abbreviatedTextFromCoordinator);
+    assertEquals(abbreviations.size(), 1);
+    assertEquals(abbreviations.get(abbreviationPriority).get(0), Integer.valueOf(0));
   }
 }
