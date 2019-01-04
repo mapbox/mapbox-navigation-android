@@ -59,7 +59,7 @@ class RouteProcessorRunnable implements Runnable {
       options.navigationLocationEngineIntervalLagInMilliseconds());
     RouteProgress routeProgress = routeProcessor.buildNewRouteProgress(status, route);
 
-    status = checkForNewLegIndex(mapboxNavigator, route, status);
+    status = checkForNewLegIndex(mapboxNavigator, route, status, options.enableAutoIncrementLegIndex());
 
     NavigationEngineFactory engineFactory = navigation.retrieveEngineFactory();
     final boolean userOffRoute = isUserOffRoute(options, status, rawLocation, routeProgress, engineFactory);
@@ -74,13 +74,13 @@ class RouteProcessorRunnable implements Runnable {
   }
 
   private NavigationStatus checkForNewLegIndex(MapboxNavigator mapboxNavigator, DirectionsRoute route,
-                                               NavigationStatus currentStatus) {
+                                               NavigationStatus currentStatus, boolean autoIncrementEnabled) {
     RouteState currentState = currentStatus.getRouteState();
     int currentLegIndex = currentStatus.getLegIndex();
     int routeLegsSize = route.legs().size() - 1;
     boolean canUpdateLeg = currentState == RouteState.COMPLETE && currentLegIndex < routeLegsSize;
     boolean isValidDistanceRemaining = currentStatus.getRemainingLegDistance() < ARRIVAL_ZONE_RADIUS;
-    if (canUpdateLeg && isValidDistanceRemaining) {
+    if (autoIncrementEnabled && (canUpdateLeg && isValidDistanceRemaining)) {
       int newLegIndex = currentLegIndex + 1;
       return mapboxNavigator.updateLegIndex(newLegIndex);
     }
