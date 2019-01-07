@@ -1,7 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.widget.TextView;
-
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.services.android.navigation.ui.v5.BaseTest;
 
@@ -27,20 +25,19 @@ public class AbbreviationCreatorTest extends BaseTest {
         .abbreviation(abbreviation)
         .abbreviationPriority(0)
         .build();
-    TextViewUtils textViewUtils = mock(TextViewUtils.class);
-    TextView textView = mock(TextView.class);
+    InstructionTextView textView = mock(InstructionTextView.class);
     AbbreviationVerifier abbreviationVerifier = mock(AbbreviationVerifier.class);
     when(abbreviationVerifier.isNodeType(bannerComponents)).thenReturn(true);
-    when(textViewUtils.textFits(textView, abbreviation)).thenReturn(true);
-    when(textViewUtils.textFits(textView, bannerComponents.text())).thenReturn(false);
+    when(textView.textFits(abbreviation)).thenReturn(true);
+    when(textView.textFits(bannerComponents.text())).thenReturn(false);
     BannerComponentNode node = mock(AbbreviationCreator.AbbreviationNode.class);
     when(((AbbreviationCreator.AbbreviationNode) node).getAbbreviate()).thenReturn(true);
     when(node.toString()).thenReturn(abbreviation);
-    AbbreviationCreator abbreviationCreator = new AbbreviationCreator(abbreviationVerifier, textViewUtils);
+    AbbreviationCreator abbreviationCreator = new AbbreviationCreator(abbreviationVerifier);
 
     abbreviationCreator.preProcess(textView, Collections.singletonList(node));
 
-    verify(textView).setText(abbreviation);
+    verify(textView).setInstructionText(abbreviation);
   }
 
   @Test
@@ -52,15 +49,10 @@ public class AbbreviationCreatorTest extends BaseTest {
         .abbreviation(abbreviation)
         .abbreviationPriority(abbreviationPriority)
         .build();
-    TextViewUtils textViewUtils = mock(TextViewUtils.class);
-    TextView textView = mock(TextView.class);
     AbbreviationVerifier abbreviationVerifier = mock(AbbreviationVerifier.class);
     when(abbreviationVerifier.isNodeType(bannerComponents)).thenReturn(true);
-    when(textViewUtils.textFits(textView, abbreviation)).thenReturn(true);
-    when(textViewUtils.textFits(textView, bannerComponents.text())).thenReturn(false);
     HashMap<Integer, List<Integer>> abbreviations = new HashMap();
-    AbbreviationCreator abbreviationCreator = new AbbreviationCreator(abbreviationVerifier,
-      textViewUtils, abbreviations);
+    AbbreviationCreator abbreviationCreator = new AbbreviationCreator(abbreviationVerifier, abbreviations);
     List<BannerComponentNode> bannerComponentNodes = new ArrayList<>();
     bannerComponentNodes.add(new AbbreviationCreator.AbbreviationNode(bannerComponents, 0));
 

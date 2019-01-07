@@ -22,15 +22,15 @@ import java.util.List;
  * a new {@link ImageSpan} is created and set to the appropriate position of the {@link Spannable}/
  */
 class InstructionLoader {
-  private TextView textView;
+  private InstructionTextView textView;
   private BannerComponentTree bannerComponentTree;
 
-  InstructionLoader(TextView textView, @NonNull List<BannerComponents> bannerComponents) {
-    this(textView, new BannerComponentTree(bannerComponents, new AbbreviationCreator(),
-      ImageCreator.getInstance(), new TextCreator()));
+  InstructionLoader(InstructionTextView textView, @NonNull List<BannerComponents> bannerComponents) {
+    this(textView, new BannerComponentTree(bannerComponents, new ExitSignCreator(),
+      new AbbreviationCreator(), ImageCreator.getInstance(), new TextCreator()));
   }
 
-  InstructionLoader(TextView textView, BannerComponentTree bannerComponentTree) {
+  InstructionLoader(InstructionTextView textView, BannerComponentTree bannerComponentTree) {
     this.textView = textView;
     this.bannerComponentTree = bannerComponentTree;
   }
@@ -38,7 +38,7 @@ class InstructionLoader {
   /**
    * Takes the given components from the {@link BannerText} and creates
    * a new {@link Spannable} with text / {@link ImageSpan}s which is loaded
-   * into the given {@link TextView}.
+   * into the given {@link InstructionTextView}.
    */
   void loadInstruction() {
     bannerComponentTree.loadInstruction(textView);

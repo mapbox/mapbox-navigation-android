@@ -216,7 +216,7 @@ public class ImageCreator extends NodeCreator<ImageCreator.ImageNode, ImageVerif
   }
 
   @Override
-  void postProcess(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
-    loadImages(textView, bannerComponentNodes);
+  void postProcess(InstructionTextView textView, List<BannerComponentNode> bannerComponentNodes) {
+    loadImages(textView.getInstructionTextView(), bannerComponentNodes);
   }
 }

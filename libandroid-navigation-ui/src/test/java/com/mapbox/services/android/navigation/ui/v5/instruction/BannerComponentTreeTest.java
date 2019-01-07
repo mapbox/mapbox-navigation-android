@@ -1,7 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.widget.TextView;
-
 import com.mapbox.api.directions.v5.models.BannerComponents;
 
 import org.junit.Test;
@@ -39,14 +37,14 @@ public class BannerComponentTreeTest {
     TestCreator testCreator = mock(TestCreator.class);
     when(testCreator.isNodeType(bannerComponents)).thenReturn(true);
     when(testCreator.setupNode(bannerComponents, 0, 0)).thenReturn(testNode);
-    TextView textView = mock(TextView.class);
+    InstructionTextView textView = mock(InstructionTextView.class);
     BannerComponentTree bannerComponentTree = new BannerComponentTree(bannerComponentsList, testCreator);
 
     bannerComponentTree.loadInstruction(textView);
 
     InOrder inOrder = inOrder(testCreator, testCreator);
-    inOrder.verify(testCreator).preProcess(any(TextView.class), any(List.class));
-    inOrder.verify(testCreator).postProcess(any(TextView.class), any(List.class));
+    inOrder.verify(testCreator).preProcess(any(InstructionTextView.class), any(List.class));
+    inOrder.verify(testCreator).postProcess(any(InstructionTextView.class), any(List.class));
   }
 
   class TestNode extends BannerComponentNode {

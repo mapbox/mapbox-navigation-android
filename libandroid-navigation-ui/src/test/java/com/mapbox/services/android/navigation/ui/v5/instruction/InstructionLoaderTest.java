@@ -1,7 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.widget.TextView;
-
 import org.junit.Test;
 
 import static org.mockito.Mockito.mock;
@@ -11,7 +9,7 @@ public class InstructionLoaderTest {
 
   @Test
   public void loadInstruction() {
-    TextView textView = mock(TextView.class);
+    InstructionTextView textView = mock(InstructionTextView.class);
     BannerComponentTree bannerComponentTree = mock(BannerComponentTree.class);
     InstructionLoader instructionLoader = new InstructionLoader(textView, bannerComponentTree);
 

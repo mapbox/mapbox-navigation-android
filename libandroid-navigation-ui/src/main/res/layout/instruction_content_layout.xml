@@ -62,33 +62,23 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.65">
 
-        <TextView
+        <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionTextView
             android:id="@+id/stepPrimaryText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="center_vertical"
-            android:includeFontPadding="false"
-            android:maxLines="1"
-            android:minHeight="35dp"
-            android:textColor="?attr/navigationViewBannerPrimaryText"
-            android:textSize="30sp"
-            android:textStyle="bold"
+            app:minHeight="35dp"
+            app:textColor="?attr/navigationViewBannerPrimaryText"
+            app:textSize="30sp"
             tools:text="I-580 South"/>
 
-        <TextView
+        <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionTextView
             android:id="@+id/stepSecondaryText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="center_vertical"
-            android:includeFontPadding="false"
             android:lineSpacingMultiplier="0.8"
-            android:maxLines="1"
-            android:minHeight="31dp"
-            android:textColor="?attr/navigationViewBannerSecondaryText"
-            android:textSize="26sp"
-            android:textStyle="bold"
+            app:minHeight="31dp"
+            app:textColor="?attr/navigationViewBannerSecondaryText"
+            app:textSize="26sp"
             tools:text="San Jose / Cupertino"/>
 
     </LinearLayout>

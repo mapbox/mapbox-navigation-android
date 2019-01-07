@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.support.annotation.NonNull;
-import android.widget.TextView;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
 
@@ -60,7 +59,7 @@ public class BannerComponentTree {
    *
    * @param textView in which to load text and images
    */
-  void loadInstruction(TextView textView) {
+  void loadInstruction(InstructionTextView textView) {
     for (NodeCreator nodeCreator : nodeCreators) {
       nodeCreator.preProcess(textView, bannerComponentNodes);
     }
