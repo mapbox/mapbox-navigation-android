@@ -19,7 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <TextView
+    <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionTextView
         android:id="@+id/subStepText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,8 +28,8 @@
         android:ellipsize="end"
         android:includeFontPadding="false"
         android:maxLines="1"
-        android:textColor="?attr/navigationViewBannerSecondaryText"
-        android:textSize="18sp"
+        app:textColor="?attr/navigationViewBannerSecondaryText"
+        app:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

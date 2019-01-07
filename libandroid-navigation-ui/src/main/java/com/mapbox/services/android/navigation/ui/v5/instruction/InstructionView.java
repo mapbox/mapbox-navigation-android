@@ -655,7 +655,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   private void showSubLayout() {
-    if (subStepLayout.getVisibility() == GONE) {
+    if (!(subStepLayout.getVisibility() == VISIBLE)) {
       beginDelayedTransition();
       subStepLayout.setVisibility(VISIBLE);
     }

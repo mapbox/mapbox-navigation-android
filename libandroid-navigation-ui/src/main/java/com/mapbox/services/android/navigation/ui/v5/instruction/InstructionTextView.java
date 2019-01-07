@@ -15,7 +15,6 @@ public class InstructionTextView extends LinearLayout {
   private TextView instructionText;
   private TextView exitView;
 
-
   public InstructionTextView(Context context) {
     this(context, null);
   }
@@ -72,19 +71,21 @@ public class InstructionTextView extends LinearLayout {
     exitView.setText("");
   }
 
-  public float getFullWidth() {
-    measure(0, 0);
-    return getMeasuredWidth();
-  }
-
   public void setMaxLines(int maxLines) {
     instructionText.setMaxLines(maxLines);
   }
 
-  public boolean textFits(String text) { //todo make sure this works
+  public boolean textFits(String text) {
+    return getWidthWithText(text) < getTextViewWidth();
+  }
+
+  private float getTextViewWidth() {
+    return instructionText.getWidth();
+  }
+
+  private float getWidthWithText(String text) {
     Paint paint = new Paint(instructionText.getPaint());
-    float width = paint.measureText(text);
-    return width < instructionText.getWidth();
+    return paint.measureText(text);
   }
 
   public TextView getInstructionTextView() {
