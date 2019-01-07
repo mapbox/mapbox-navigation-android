@@ -41,6 +41,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
@@ -194,10 +195,12 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    this.mapboxMap.addOnMapLongClickListener(this);
-    initLocationEngine();
-    initializeLocationComponent();
-    initMapRoute();
+    mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+      mapboxMap.addOnMapLongClickListener(this);
+      initLocationEngine();
+      initializeLocationComponent(style);
+      initMapRoute();
+    });
   }
 
   @Override
@@ -236,14 +239,14 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   private void initLocationEngine() {
     locationEngine = LocationEngineProvider.getBestLocationEngine(getApplicationContext());
     LocationEngineRequest request = buildEngineRequest();
-    locationEngine.getLastLocation(this);
     locationEngine.requestLocationUpdates(request, this, null);
+    locationEngine.getLastLocation(this);
   }
 
   @SuppressWarnings( {"MissingPermission"})
-  private void initializeLocationComponent() {
+  private void initializeLocationComponent(Style style) {
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
-    locationComponent.activateLocationComponent(this, mapboxMap.getStyle(), locationEngine);
+    locationComponent.activateLocationComponent(this, style, locationEngine);
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.COMPASS);
   }

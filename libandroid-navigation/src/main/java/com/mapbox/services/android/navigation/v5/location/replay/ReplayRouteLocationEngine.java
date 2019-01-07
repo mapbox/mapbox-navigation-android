@@ -97,6 +97,11 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
 
   @Override
   public void getLastLocation(@NonNull LocationEngineCallback<LocationEngineResult> callback) throws SecurityException {
+    // TODO Revisit this, it's failing in some scenarios
+    if (lastLocation == null) {
+      callback.onFailure(new Exception("location can't be null"));
+      return;
+    }
     callback.onSuccess(LocationEngineResult.create(lastLocation));
   }
 

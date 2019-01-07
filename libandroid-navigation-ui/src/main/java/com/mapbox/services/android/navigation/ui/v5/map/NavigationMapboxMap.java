@@ -493,10 +493,9 @@ public class NavigationMapboxMap {
 
     LocationComponentOptions locationComponentOptions =
       LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
-    locationComponentOptions = locationComponentOptions.toBuilder()
-      .minZoomIconScale((float) NAVIGATION_MINIMUM_MAP_ZOOM).build();
 
     locationComponent = map.getLocationComponent();
+    map.setMinZoomPreference(NAVIGATION_MINIMUM_MAP_ZOOM);
     locationComponent.activateLocationComponent(context, map.getStyle(), locationComponentOptions);
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.GPS);
