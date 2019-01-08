@@ -144,18 +144,19 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   @SuppressLint("MissingPermission")
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
-    mapboxMap.setStyle(Style.DARK);
     this.mapboxMap = mapboxMap;
-    mapboxMap.addOnMapClickListener(this);
+    mapboxMap.setStyle(Style.DARK, style -> {
+      mapboxMap.addOnMapClickListener(this);
 
-    LocationComponent locationComponent = mapboxMap.getLocationComponent();
-    locationComponent.activateLocationComponent(this, mapboxMap.getStyle());
-    locationComponent.setLocationComponentEnabled(true);
-    locationComponent.setRenderMode(RenderMode.GPS);
+      LocationComponent locationComponent = mapboxMap.getLocationComponent();
+      locationComponent.activateLocationComponent(this, mapboxMap.getStyle());
+      locationComponent.setLocationComponentEnabled(true);
+      locationComponent.setRenderMode(RenderMode.GPS);
 
-    mockLocationEngine = new ReplayRouteLocationEngine();
+      mockLocationEngine = new ReplayRouteLocationEngine();
 
-    getRoute(origin, destination, null);
+      getRoute(origin, destination, null);
+    });
   }
 
   @Override

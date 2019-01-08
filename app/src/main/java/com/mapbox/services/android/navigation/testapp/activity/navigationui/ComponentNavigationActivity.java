@@ -129,19 +129,20 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
-    mapboxMap.setStyle(new Style.Builder().fromUrl("mapbox://styles/designevokes/cjksybfj600xj2roja7iwnygu"));
-    mapState = MapState.INFO;
-    navigationMap = new NavigationMapboxMap(mapView, mapboxMap);
+    mapboxMap.setStyle(new Style.Builder().fromUrl(getString(R.string.navigation_guidance_day)), style -> {
+      mapState = MapState.INFO;
+      navigationMap = new NavigationMapboxMap(mapView, mapboxMap);
 
-    // For Location updates
-    initializeLocationEngine();
+      // For Location updates
+      initializeLocationEngine();
 
-    // For navigation logic / processing
-    initializeNavigation(mapboxMap);
-    navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE);
+      // For navigation logic / processing
+      initializeNavigation(mapboxMap);
+      navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE);
 
-    // For voice instructions
-    initializeSpeechPlayer();
+      // For voice instructions
+      initializeSpeechPlayer();
+    });
   }
 
   @Override

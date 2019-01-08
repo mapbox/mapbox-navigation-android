@@ -165,21 +165,21 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @SuppressLint("MissingPermission")
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
-    mapboxMap.setStyle(Style.MAPBOX_STREETS);
     this.mapboxMap = mapboxMap;
+    mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+      LocationComponent locationComponent = mapboxMap.getLocationComponent();
+      locationComponent.activateLocationComponent(this, mapboxMap.getStyle());
+      locationComponent.setRenderMode(RenderMode.GPS);
+      locationComponent.setLocationComponentEnabled(false);
+      navigationMapRoute = new NavigationMapRoute(navigation, mapView, mapboxMap);
 
-    LocationComponent locationComponent = mapboxMap.getLocationComponent();
-    locationComponent.activateLocationComponent(this, mapboxMap.getStyle());
-    locationComponent.setRenderMode(RenderMode.GPS);
-    locationComponent.setLocationComponentEnabled(false);
-    navigationMapRoute = new NavigationMapRoute(navigation, mapView, mapboxMap);
+      mapboxMap.addOnMapClickListener(this);
+      Snackbar.make(findViewById(R.id.container), "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
 
-    mapboxMap.addOnMapClickListener(this);
-    Snackbar.make(findViewById(R.id.container), "Tap map to place waypoint", BaseTransientBottomBar.LENGTH_LONG).show();
+      locationEngine = new ReplayRouteLocationEngine();
 
-    locationEngine = new ReplayRouteLocationEngine();
-
-    newOrigin();
+      newOrigin();
+    });
   }
 
   @Override

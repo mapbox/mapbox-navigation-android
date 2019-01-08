@@ -110,11 +110,11 @@ class ExampleActivity : HistoryActivity(), ExampleView {
   }
 
   override fun onMapReady(mapboxMap: MapboxMap) {
-    mapboxMap.setStyle(Style.Builder().fromUrl("mapbox://styles/mapbox/navigation-guidance-day-v4")) {
+    mapboxMap.setStyle(Style.Builder().fromUrl(getString(R.string.navigation_guidance_day))) {
       map = NavigationMapboxMap(mapView, mapboxMap)
       map?.setOnRouteSelectionChangeListener(this)
       map?.updateLocationLayerRenderMode(RenderMode.NORMAL)
-      mapboxMap.addOnMapLongClickListener { presenter.onMapLongClick(it) }
+      mapboxMap.addOnMapLongClickListener { point -> presenter.onMapLongClick(point) }
       presenter.buildDynamicCameraFrom(mapboxMap)
       resetMapPadding() // Ignore navigation padding default
     }
@@ -154,9 +154,11 @@ class ExampleActivity : HistoryActivity(), ExampleView {
   }
 
   override fun updateMapCameraFor(bounds: LatLngBounds, padding: IntArray, duration: Int) {
-    map?.retrieveMap()?.let {
-      val position = it.getCameraForLatLngBounds(bounds, padding)
-      it.animateCamera(CameraUpdateFactory.newCameraPosition(position), duration)
+    map?.retrieveMap()?.let { map ->
+      val position = map.getCameraForLatLngBounds(bounds, padding)
+      position?.let {
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(it), duration)
+      }
     }
   }
 

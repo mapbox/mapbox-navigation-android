@@ -153,12 +153,12 @@ class MapRouteLine {
     GeoJsonOptions wayPointGeoJsonOptions = new GeoJsonOptions().withMaxZoom(16);
     FeatureCollection emptyWayPointFeatureCollection = FeatureCollection.fromFeatures(new Feature[] {});
     wayPointSource = new GeoJsonSource(WAYPOINT_SOURCE_ID, emptyWayPointFeatureCollection, wayPointGeoJsonOptions);
-    mapboxMap.addSource(wayPointSource);
+    mapboxMap.getStyle().addSource(wayPointSource);
 
     GeoJsonOptions routeLineGeoJsonOptions = new GeoJsonOptions().withMaxZoom(16);
     FeatureCollection emptyRouteLineFeatureCollection = FeatureCollection.fromFeatures(new Feature[] {});
     routeLineSource = new GeoJsonSource(ROUTE_SOURCE_ID, emptyRouteLineFeatureCollection, routeLineGeoJsonOptions);
-    mapboxMap.addSource(routeLineSource);
+    mapboxMap.getStyle().addSource(routeLineSource);
 
     initializeLayers(mapboxMap);
   }
@@ -319,7 +319,7 @@ class MapRouteLine {
 
   private void findRouteBelowLayerId() {
     if (belowLayer == null || belowLayer.isEmpty()) {
-      List<Layer> styleLayers = mapboxMap.getLayers();
+      List<Layer> styleLayers = mapboxMap.getStyle().getLayers();
       for (int i = 0; i < styleLayers.size(); i++) {
         if (!(styleLayers.get(i) instanceof SymbolLayer)
           // Avoid placing the route on top of the user location layer
@@ -345,9 +345,9 @@ class MapRouteLine {
   }
 
   private LineLayer initializeRouteShieldLayer(MapboxMap mapboxMap) {
-    LineLayer shieldLayer = mapboxMap.getLayerAs(ROUTE_SHIELD_LAYER_ID);
+    LineLayer shieldLayer = mapboxMap.getStyle().getLayerAs(ROUTE_SHIELD_LAYER_ID);
     if (shieldLayer != null) {
-      mapboxMap.removeLayer(shieldLayer);
+      mapboxMap.getStyle().removeLayer(shieldLayer);
     }
 
     shieldLayer = new LineLayer(ROUTE_SHIELD_LAYER_ID, ROUTE_SOURCE_ID).withProperties(
@@ -386,9 +386,9 @@ class MapRouteLine {
   }
 
   private LineLayer initializeRouteLayer(MapboxMap mapboxMap) {
-    LineLayer routeLayer = mapboxMap.getLayerAs(ROUTE_LAYER_ID);
+    LineLayer routeLayer = mapboxMap.getStyle().getLayerAs(ROUTE_LAYER_ID);
     if (routeLayer != null) {
-      mapboxMap.removeLayer(routeLayer);
+      mapboxMap.getStyle().removeLayer(routeLayer);
     }
 
     routeLayer = new LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID).withProperties(
@@ -446,15 +446,15 @@ class MapRouteLine {
   }
 
   private SymbolLayer initializeWayPointLayer(@NonNull MapboxMap mapboxMap) {
-    SymbolLayer wayPointLayer = mapboxMap.getLayerAs(WAYPOINT_LAYER_ID);
+    SymbolLayer wayPointLayer = mapboxMap.getStyle().getLayerAs(WAYPOINT_LAYER_ID);
     if (wayPointLayer != null) {
-      mapboxMap.removeLayer(wayPointLayer);
+      mapboxMap.getStyle().removeLayer(wayPointLayer);
     }
 
     Bitmap bitmap = MapImageUtils.getBitmapFromDrawable(originIcon);
-    mapboxMap.addImage(ORIGIN_MARKER_NAME, bitmap);
+    mapboxMap.getStyle().addImage(ORIGIN_MARKER_NAME, bitmap);
     bitmap = MapImageUtils.getBitmapFromDrawable(destinationIcon);
-    mapboxMap.addImage(DESTINATION_MARKER_NAME, bitmap);
+    mapboxMap.getStyle().addImage(DESTINATION_MARKER_NAME, bitmap);
 
     wayPointLayer = new SymbolLayer(WAYPOINT_LAYER_ID, WAYPOINT_SOURCE_ID).withProperties(
       iconImage(

@@ -30,6 +30,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
@@ -96,11 +97,13 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    this.mapboxMap.addOnMapLongClickListener(this);
-    initLocationEngine();
-    initializeLocationLayer();
-    initMapRoute();
-    fetchRoute();
+    mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+      this.mapboxMap.addOnMapLongClickListener(this);
+      initLocationEngine();
+      initializeLocationComponent();
+      initMapRoute();
+      fetchRoute();
+    });
   }
 
   @Override
@@ -292,7 +295,7 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   private boolean validRouteResponse(Response<DirectionsResponse> response) {
     return response.body() != null && !response.body().routes().isEmpty();
   }
-  
+
   @SuppressWarnings("MissingPermission")
   private void initLocationEngine() {
     locationEngine = LocationEngineProvider.getBestLocationEngine(getApplicationContext());
@@ -307,7 +310,8 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
       .build();
   }
 
-  private void initializeLocationLayer() {
+  @SuppressLint("MissingPermission")
+  private void initializeLocationComponent() {
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
     locationComponent.activateLocationComponent(this, mapboxMap.getStyle(), locationEngine);
     locationComponent.setLocationComponentEnabled(true);

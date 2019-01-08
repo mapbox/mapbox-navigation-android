@@ -85,12 +85,13 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
 
   @Override
   public void onMapReady(MapboxMap mapboxMap) {
-    mapboxMap.setStyle(styleCycle.getStyle());
     this.mapboxMap = mapboxMap;
-    initializeLocationComponent(mapboxMap);
-    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap);
-    mapboxMap.addOnMapLongClickListener(this);
-    Snackbar.make(mapView, "Long press to select route", Snackbar.LENGTH_SHORT).show();
+    mapboxMap.setStyle(styleCycle.getStyle(), style -> {
+      initializeLocationComponent(mapboxMap);
+      navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap);
+      mapboxMap.addOnMapLongClickListener(this);
+      Snackbar.make(mapView, "Long press to select route", Snackbar.LENGTH_SHORT).show();
+    });
   }
 
   @Override
@@ -167,7 +168,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   @SuppressWarnings("MissingPermission")
   private void initializeLocationComponent(MapboxMap mapboxMap) {
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
-    locationComponent.activateLocationComponent(this);
+    locationComponent.activateLocationComponent(this, mapboxMap.getStyle());
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.COMPASS);
     locationComponent.setCameraMode(CameraMode.TRACKING);
