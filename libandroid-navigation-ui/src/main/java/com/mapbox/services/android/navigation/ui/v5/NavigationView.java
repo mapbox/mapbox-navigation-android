@@ -111,7 +111,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public void onCreate(@Nullable Bundle savedInstanceState) {
     mapView.onCreate(savedInstanceState);
     updatePresenterState(savedInstanceState);
-    navigationViewModel.onCreate();
   }
 
   /**

@@ -119,16 +119,9 @@ public class NavigationViewModel extends AndroidViewModel {
     this.voiceInstructionCache = cache;
   }
 
-  public void onCreate() {
-    if (!isRunning()) {
-      locationEngineConductor.onCreate();
-    }
-  }
-
   public void onDestroy(boolean isChangingConfigurations) {
     this.isChangingConfigurations = isChangingConfigurations;
     if (!isChangingConfigurations) {
-      locationEngineConductor.onDestroy();
       routeFetcher.onDestroy();
       endNavigation();
       deactivateInstructionPlayer();
@@ -275,7 +268,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initializeNavigationLocationEngine() {
-    locationEngineConductor = new LocationEngineConductor(locationEngineCallback);
+    locationEngineConductor = new LocationEngineConductor();
   }
 
   private void initializeLanguage(NavigationUiOptions options) {
