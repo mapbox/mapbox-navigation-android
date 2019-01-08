@@ -53,6 +53,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Locale;
 
@@ -66,8 +67,7 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class ComponentNavigationActivity extends HistoryActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, LocationEngineCallback<LocationEngineResult>, ProgressChangeListener,
-  MilestoneEventListener, OffRouteListener {
+  MapboxMap.OnMapLongClickListener, ProgressChangeListener, MilestoneEventListener, OffRouteListener {
 
   private static final int FIRST = 0;
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
@@ -100,6 +100,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   @BindView(R.id.cancelNavigationFab)
   FloatingActionButton cancelNavigationFab;
 
+  private final ComponentActivityLocationCallback callback = new ComponentActivityLocationCallback(this);
   private LocationEngine locationEngine;
   private MapboxNavigation navigation;
   private NavigationSpeechPlayer speechPlayer;
@@ -128,7 +129,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   }
 
   @Override
-  public void onMapReady(MapboxMap mapboxMap) {
+  public void onMapReady(@NonNull MapboxMap mapboxMap) {
     mapboxMap.setStyle(new Style.Builder().fromUrl(getString(R.string.navigation_guidance_day)), style -> {
       mapState = MapState.INFO;
       navigationMap = new NavigationMapboxMap(mapView, mapboxMap);
@@ -204,35 +205,6 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
     // Add back regular location listener
     addLocationEngineListener();
-  }
-
-  /*
-   * LocationEngine callback
-   */
-
-  @Override
-  public void onSuccess(LocationEngineResult result) {
-    Location location = result.getLastLocation();
-    if (location == null) {
-      return;
-    }
-
-    if (lastLocation == null) {
-      // Move the navigationMap camera to the first Location
-      moveCameraTo(location);
-
-      // Allow navigationMap clicks now that we have the current Location
-      navigationMap.retrieveMap().addOnMapLongClickListener(this);
-      showSnackbar(LONG_PRESS_MAP_MESSAGE, BaseTransientBottomBar.LENGTH_LONG);
-    }
-
-    // Cache for fetching the route later
-    updateLocation(location);
-  }
-
-  @Override
-  public void onFailure(@NonNull Exception exception) {
-    Timber.e(exception);
   }
 
   /*
@@ -325,6 +297,20 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     navigation.onDestroy();
   }
 
+  void checkFirstUpdate(Location location) {
+    if (lastLocation == null) {
+      moveCameraTo(location);
+      // Allow navigationMap clicks now that we have the current Location
+      navigationMap.retrieveMap().addOnMapLongClickListener(this);
+      showSnackbar(LONG_PRESS_MAP_MESSAGE, BaseTransientBottomBar.LENGTH_LONG);
+    }
+  }
+
+  void updateLocation(Location location) {
+    lastLocation = location;
+    navigationMap.updateLocation(location);
+  }
+
   private void initializeSpeechPlayer() {
     String english = Locale.US.getLanguage();
     Cache cache = new Cache(new File(getApplication().getCacheDir(), COMPONENT_NAVIGATION_INSTRUCTION_CACHE),
@@ -340,7 +326,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private void initializeLocationEngine() {
     locationEngine = LocationEngineProvider.getBestLocationEngine(getApplicationContext());
     LocationEngineRequest request = buildEngineRequest();
-    locationEngine.requestLocationUpdates(request, this, null);
+    locationEngine.requestLocationUpdates(request, callback, null);
     showSnackbar(SEARCHING_FOR_GPS_MESSAGE, BaseTransientBottomBar.LENGTH_SHORT);
   }
 
@@ -366,11 +352,6 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
         .build();
       speechPlayer.play(announcement);
     }
-  }
-
-  private void updateLocation(Location location) {
-    lastLocation = location;
-    navigationMap.updateLocation(location);
   }
 
   private void moveCameraTo(Location location) {
@@ -432,7 +413,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   private void removeLocationEngineListener() {
     if (locationEngine != null) {
-      locationEngine.removeLocationUpdates(this);
+      locationEngine.removeLocationUpdates(callback);
     }
   }
 
@@ -440,7 +421,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private void addLocationEngineListener() {
     if (locationEngine != null) {
       LocationEngineRequest request = buildEngineRequest();
-      locationEngine.requestLocationUpdates(request, this, null);
+      locationEngine.requestLocationUpdates(request, callback, null);
     }
   }
 
@@ -494,5 +475,36 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
       .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
       .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
       .build();
+  }
+
+  /*
+   * LocationEngine callback
+   */
+
+  private static class ComponentActivityLocationCallback implements LocationEngineCallback<LocationEngineResult> {
+
+    private final WeakReference<ComponentNavigationActivity> activityWeakReference;
+
+    ComponentActivityLocationCallback(ComponentNavigationActivity activity) {
+      this.activityWeakReference = new WeakReference<>(activity);
+    }
+
+    @Override
+    public void onSuccess(LocationEngineResult result) {
+      ComponentNavigationActivity activity = activityWeakReference.get();
+      if (activity != null) {
+        Location location = result.getLastLocation();
+        if (location == null) {
+          return;
+        }
+        activity.checkFirstUpdate(location);
+        activity.updateLocation(location);
+      }
+    }
+
+    @Override
+    public void onFailure(@NonNull Exception exception) {
+      Timber.e(exception);
+    }
   }
 }

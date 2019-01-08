@@ -40,6 +40,8 @@ import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
+import java.lang.ref.WeakReference;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,12 +49,13 @@ import timber.log.Timber;
 
 public class DualNavigationMapActivity extends AppCompatActivity implements OnNavigationReadyCallback,
   NavigationListener, Callback<DirectionsResponse>, OnMapReadyCallback, MapboxMap.OnMapLongClickListener,
-  LocationEngineCallback<LocationEngineResult>, OnRouteSelectionChangeListener {
+  OnRouteSelectionChangeListener {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
   private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
   private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 500;
+  private final DualNavigationLocationCallback callback = new DualNavigationLocationCallback(this);
   private ConstraintLayout dualNavigationMap;
   private NavigationView navigationView;
   private MapView mapView;
@@ -95,12 +98,12 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   }
 
   @Override
-  public void onMapReady(MapboxMap mapboxMap) {
+  public void onMapReady(@NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
+    this.mapboxMap.addOnMapLongClickListener(this);
     mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
-      this.mapboxMap.addOnMapLongClickListener(this);
-      initLocationEngine();
-      initializeLocationComponent();
+      initializeLocationEngine();
+      initializeLocationComponent(style);
       initMapRoute();
       fetchRoute();
     });
@@ -149,21 +152,6 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   }
 
   @Override
-  public void onSuccess(LocationEngineResult result) {
-    Location location = result.getLastLocation();
-    if (location == null) {
-      return;
-    }
-    origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    onLocationFound(location);
-  }
-
-  @Override
-  public void onFailure(@NonNull Exception exception) {
-    Timber.e(exception);
-  }
-
-  @Override
   public void onNewPrimaryRouteSelected(DirectionsRoute directionsRoute) {
     route = directionsRoute;
   }
@@ -183,7 +171,7 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     mapView.onResume();
     if (locationEngine != null) {
       LocationEngineRequest request = buildEngineRequest();
-      locationEngine.requestLocationUpdates(request, this, null);
+      locationEngine.requestLocationUpdates(request, callback, null);
     }
   }
 
@@ -220,7 +208,7 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     navigationView.onPause();
     mapView.onPause();
     if (locationEngine != null) {
-      locationEngine.removeLocationUpdates(this);
+      locationEngine.removeLocationUpdates(callback);
     }
   }
 
@@ -236,8 +224,14 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     super.onDestroy();
     navigationView.onDestroy();
     mapView.onDestroy();
-    if (locationEngine != null) {
-      locationEngine.removeLocationUpdates(this);
+  }
+
+  void onLocationFound(Location location) {
+    origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    if (!locationFound) {
+      animateCamera(new LatLng(location.getLatitude(), location.getLongitude()));
+      locationFound = true;
+      updateLoadingTo(false);
     }
   }
 
@@ -297,9 +291,9 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   }
 
   @SuppressWarnings("MissingPermission")
-  private void initLocationEngine() {
+  private void initializeLocationEngine() {
     locationEngine = LocationEngineProvider.getBestLocationEngine(getApplicationContext());
-    locationEngine.getLastLocation(this);
+    locationEngine.getLastLocation(callback);
   }
 
   @NonNull
@@ -311,9 +305,9 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   }
 
   @SuppressLint("MissingPermission")
-  private void initializeLocationComponent() {
+  private void initializeLocationComponent(Style style) {
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
-    locationComponent.activateLocationComponent(this, mapboxMap.getStyle(), locationEngine);
+    locationComponent.activateLocationComponent(this, style, locationEngine);
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.COMPASS);
   }
@@ -335,15 +329,33 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     }
   }
 
-  private void onLocationFound(Location location) {
-    if (!locationFound) {
-      animateCamera(new LatLng(location.getLatitude(), location.getLongitude()));
-      locationFound = true;
-      updateLoadingTo(false);
-    }
-  }
-
   private void animateCamera(LatLng point) {
     mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(point, DEFAULT_CAMERA_ZOOM), CAMERA_ANIMATION_DURATION);
+  }
+
+  private static class DualNavigationLocationCallback implements LocationEngineCallback<LocationEngineResult> {
+
+    private final WeakReference<DualNavigationMapActivity> activityWeakReference;
+
+    DualNavigationLocationCallback(DualNavigationMapActivity activity) {
+      this.activityWeakReference = new WeakReference<>(activity);
+    }
+
+    @Override
+    public void onSuccess(LocationEngineResult result) {
+      DualNavigationMapActivity activity = activityWeakReference.get();
+      if (activity != null) {
+        Location location = result.getLastLocation();
+        if (location == null) {
+          return;
+        }
+        activity.onLocationFound(location);
+      }
+    }
+
+    @Override
+    public void onFailure(@NonNull Exception exception) {
+      Timber.e(exception);
+    }
   }
 }

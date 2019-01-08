@@ -12,11 +12,11 @@ import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import timber.log.Timber;
 
 
 public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
@@ -49,14 +49,6 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
 
   public void assign(DirectionsRoute route) {
     this.route = route;
-  }
-
-  public void moveTo(Point point) {
-    // TODO maybe it makes sense for this engine to have it's own listeners
-//    if (lastLocation == null) {
-//      return;
-//    }
-//    startRoute(point, lastLocation);
   }
 
   public void assignLastLocation(Point currentPosition) {
@@ -97,9 +89,8 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
 
   @Override
   public void getLastLocation(@NonNull LocationEngineCallback<LocationEngineResult> callback) throws SecurityException {
-    // TODO Revisit this, it's failing in some scenarios
     if (lastLocation == null) {
-      callback.onFailure(new Exception("location can't be null"));
+      callback.onFailure(new Exception("Last location can't be null"));
       return;
     }
     callback.onSuccess(LocationEngineResult.create(lastLocation));
@@ -119,7 +110,7 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
   @Override
   public void requestLocationUpdates(@NonNull LocationEngineRequest request,
                                      PendingIntent pendingIntent) throws SecurityException {
-    // TODO ignore this?
+    Timber.e("ReplayEngine does not support PendingIntent.");
   }
 
   @Override
@@ -169,25 +160,6 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
     dispatcher.addReplayLocationListener(replayLocationListener);
 
     return dispatcher;
-  }
-
-//  private void startRoute(Point point, Location lastLocation) {
-//    handler.removeCallbacks(this);
-//    converter.updateSpeed(speed);
-//    converter.updateDelay(delay);
-//    converter.initializeTime();
-//    LineString route = obtainRoute(point, lastLocation);
-//    mockedLocations = converter.calculateMockLocations(converter.sliceRoute(route));
-//    dispatcher = obtainDispatcher();
-//    dispatcher.run();
-//  }
-
-  @NonNull
-  private LineString obtainRoute(Point point, Location lastLocation) {
-    List<Point> pointList = new ArrayList<>();
-    pointList.add(Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude()));
-    pointList.add(point);
-    return LineString.fromLngLats(pointList);
   }
 
   private void scheduleNextDispatch() {

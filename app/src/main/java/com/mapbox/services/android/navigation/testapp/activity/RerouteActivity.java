@@ -43,6 +43,7 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,8 +55,8 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class RerouteActivity extends HistoryActivity implements OnMapReadyCallback,
-  LocationEngineCallback<LocationEngineResult>, Callback<DirectionsResponse>, MapboxMap.OnMapClickListener,
-  NavigationEventListener, OffRouteListener, ProgressChangeListener, MilestoneEventListener {
+  Callback<DirectionsResponse>, MapboxMap.OnMapClickListener, NavigationEventListener,
+  OffRouteListener, ProgressChangeListener, MilestoneEventListener {
 
   @BindView(R.id.mapView)
   MapView mapView;
@@ -68,6 +69,8 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   private Point destination = Point.fromLngLat(-0.383524, 39.497825);
   private Polyline polyline;
 
+  private final RerouteActivityLocationCallback callback = new RerouteActivityLocationCallback(this);
+  private Location lastLocation;
   private ReplayRouteLocationEngine mockLocationEngine;
   private MapboxNavigation navigation;
   private MapboxMap mapboxMap;
@@ -143,47 +146,33 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
 
   @SuppressLint("MissingPermission")
   @Override
-  public void onMapReady(MapboxMap mapboxMap) {
+  public void onMapReady(@NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
+    this.mapboxMap.addOnMapClickListener(this);
     mapboxMap.setStyle(Style.DARK, style -> {
-      mapboxMap.addOnMapClickListener(this);
-
       LocationComponent locationComponent = mapboxMap.getLocationComponent();
-      locationComponent.activateLocationComponent(this, mapboxMap.getStyle());
+      locationComponent.activateLocationComponent(this, style);
       locationComponent.setLocationComponentEnabled(true);
       locationComponent.setRenderMode(RenderMode.GPS);
 
       mockLocationEngine = new ReplayRouteLocationEngine();
-
-      getRoute(origin, destination, null);
+      getRoute(origin, destination);
     });
   }
 
   @Override
-  public void onSuccess(LocationEngineResult result) {
-    Location location = result.getLastLocation();
-    if (!tracking && location != null) {
-      mapboxMap.getLocationComponent().forceLocationUpdate(location);
-    }
-  }
-
-  @Override
-  public void onFailure(@NonNull Exception exception) {
-    Timber.e(exception);
-  }
-
-  @Override
   public boolean onMapClick(@NonNull LatLng point) {
-    if (!running || mapboxMap == null) {
+    if (!running || mapboxMap == null || lastLocation == null) {
       return true;
     }
 
     mapboxMap.addMarker(new MarkerOptions().position(point));
     mapboxMap.removeOnMapClickListener(this);
 
-    Point newDestination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
-    mockLocationEngine.moveTo(newDestination);
+    origin = Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude());
     destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
+    getRoute(origin, destination);
+
     tracking = false;
     return true;
   }
@@ -200,7 +189,7 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   @Override
   public void userOffRoute(Location location) {
     Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    getRoute(newOrigin, destination, location.getBearing());
+    getRoute(newOrigin, destination);
     Snackbar.make(contentLayout, "User Off Route", Snackbar.LENGTH_SHORT).show();
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
   }
@@ -208,6 +197,7 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     boolean isInTunnel = routeProgress.inTunnel();
+    lastLocation = location;
     if (!wasInTunnel && isInTunnel) {
       wasInTunnel = true;
       Snackbar.make(contentLayout, "Enter tunnel!", Snackbar.LENGTH_SHORT).show();
@@ -234,11 +224,11 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
       Snackbar.make(contentLayout, instruction, Snackbar.LENGTH_SHORT).show();
     }
     instructionView.updateBannerInstructionsWith(milestone);
-    Timber.d("onMilestoneEvent - Current Instruction: " + instruction);
+    Timber.d("onMilestoneEvent - Current Instruction: %s", instruction);
   }
 
   @Override
-  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+  public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
     Timber.d(call.request().url().toString());
     if (response.body() != null) {
       if (!response.body().routes().isEmpty()) {
@@ -253,14 +243,19 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   }
 
   @Override
-  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+  public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
     Timber.e(throwable);
   }
 
-  private void getRoute(Point origin, Point destination, Float bearing) {
-    Double heading = bearing == null ? null : bearing.doubleValue();
+  void updateLocation(Location location) {
+    if (!tracking) {
+      mapboxMap.getLocationComponent().forceLocationUpdate(location);
+    }
+  }
+
+  private void getRoute(Point origin, Point destination) {
     NavigationRoute.builder(this)
-      .origin(origin, heading, 90d)
+      .origin(origin)
       .destination(destination)
       .accessToken(Mapbox.getAccessToken())
       .build().getRoute(this);
@@ -286,14 +281,14 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   }
 
   private void resetLocationEngine(DirectionsRoute directionsRoute) {
-    mockLocationEngine.removeLocationUpdates(this);
+    mockLocationEngine.removeLocationUpdates(callback);
     mockLocationEngine.assign(directionsRoute);
     navigation.setLocationEngine(mockLocationEngine);
   }
 
   private void shutdownLocationEngine() {
     if (mockLocationEngine != null) {
-      mockLocationEngine.removeLocationUpdates(this);
+      mockLocationEngine.removeLocationUpdates(callback);
     }
   }
 
@@ -301,5 +296,31 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     navigation.removeNavigationEventListener(this);
     navigation.removeProgressChangeListener(this);
     navigation.onDestroy();
+  }
+
+  private static class RerouteActivityLocationCallback implements LocationEngineCallback<LocationEngineResult> {
+
+    private final WeakReference<RerouteActivity> activityWeakReference;
+
+    RerouteActivityLocationCallback(RerouteActivity activity) {
+      this.activityWeakReference = new WeakReference<>(activity);
+    }
+
+    @Override
+    public void onSuccess(LocationEngineResult result) {
+      RerouteActivity activity = activityWeakReference.get();
+      if (activity != null) {
+        Location location = result.getLastLocation();
+        if (location == null) {
+          return;
+        }
+        activity.updateLocation(location);
+      }
+    }
+
+    @Override
+    public void onFailure(@NonNull Exception exception) {
+      Timber.e(exception);
+    }
   }
 }

@@ -51,6 +51,7 @@ import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChange
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -63,7 +64,7 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class NavigationLauncherActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, LocationEngineCallback<LocationEngineResult>, OnRouteSelectionChangeListener {
+  MapboxMap.OnMapLongClickListener, OnRouteSelectionChangeListener {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
@@ -72,6 +73,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
   private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 500;
 
+  private final NavigationLauncherLocationCallback callback = new NavigationLauncherLocationCallback(this);
   private LocationEngine locationEngine;
   private NavigationMapRoute mapRoute;
   private MapboxMap mapboxMap;
@@ -119,10 +121,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     }
   }
 
-  private void showSettings() {
-    startActivityForResult(new Intent(this, NavigationSettingsActivity.class), CHANGE_SETTING_REQUEST_CODE);
-  }
-
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
@@ -147,7 +145,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     super.onResume();
     mapView.onResume();
     if (locationEngine != null) {
-      locationEngine.requestLocationUpdates(buildEngineRequest(), this, null);
+      locationEngine.requestLocationUpdates(buildEngineRequest(), callback, null);
     }
   }
 
@@ -156,7 +154,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     super.onPause();
     mapView.onPause();
     if (locationEngine != null) {
-      locationEngine.removeLocationUpdates(this);
+      locationEngine.removeLocationUpdates(callback);
     }
   }
 
@@ -176,9 +174,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
-    if (locationEngine != null) {
-      locationEngine.removeLocationUpdates(this);
-    }
   }
 
   @Override
@@ -197,9 +192,9 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     this.mapboxMap = mapboxMap;
     mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
       mapboxMap.addOnMapLongClickListener(this);
-      initLocationEngine();
+      initializeLocationEngine();
       initializeLocationComponent(style);
-      initMapRoute();
+      initializeMapRoute();
     });
   }
 
@@ -216,31 +211,33 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   }
 
   @Override
-  public void onSuccess(LocationEngineResult result) {
-    Location location = result.getLastLocation();
-    if (location == null) {
-      return;
-    }
-    currentLocation = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    onLocationFound(location);
-  }
-
-  @Override
-  public void onFailure(@NonNull Exception exception) {
-    Timber.e(exception);
-  }
-
-  @Override
   public void onNewPrimaryRouteSelected(DirectionsRoute directionsRoute) {
     route = directionsRoute;
   }
 
+  void updateCurrentLocation(Point currentLocation) {
+    this.currentLocation = currentLocation;
+  }
+
+  void onLocationFound(Location location) {
+    if (!locationFound) {
+      animateCamera(new LatLng(location.getLatitude(), location.getLongitude()));
+      Snackbar.make(mapView, R.string.explanation_long_press_waypoint, Snackbar.LENGTH_LONG).show();
+      locationFound = true;
+      hideLoading();
+    }
+  }
+
+  private void showSettings() {
+    startActivityForResult(new Intent(this, NavigationSettingsActivity.class), CHANGE_SETTING_REQUEST_CODE);
+  }
+
   @SuppressWarnings( {"MissingPermission"})
-  private void initLocationEngine() {
+  private void initializeLocationEngine() {
     locationEngine = LocationEngineProvider.getBestLocationEngine(getApplicationContext());
     LocationEngineRequest request = buildEngineRequest();
-    locationEngine.requestLocationUpdates(request, this, null);
-    locationEngine.getLastLocation(this);
+    locationEngine.requestLocationUpdates(request, callback, null);
+    locationEngine.getLastLocation(callback);
   }
 
   @SuppressWarnings( {"MissingPermission"})
@@ -251,7 +248,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     locationComponent.setRenderMode(RenderMode.COMPASS);
   }
 
-  private void initMapRoute() {
+  private void initializeMapRoute() {
     mapRoute = new NavigationMapRoute(mapView, mapboxMap);
     mapRoute.setOnRouteSelectionChangeListener(this);
   }
@@ -351,15 +348,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     }
   }
 
-  private void onLocationFound(Location location) {
-    if (!locationFound) {
-      animateCamera(new LatLng(location.getLatitude(), location.getLongitude()));
-      Snackbar.make(mapView, R.string.explanation_long_press_waypoint, Snackbar.LENGTH_LONG).show();
-      locationFound = true;
-      hideLoading();
-    }
-  }
-
   public void boundCameraToRoute() {
     if (route != null) {
       List<Point> routeCoords = LineString.fromPolyline(route.geometry(),
@@ -408,5 +396,32 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
       .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
       .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
       .build();
+  }
+
+  private static class NavigationLauncherLocationCallback implements LocationEngineCallback<LocationEngineResult> {
+
+    private final WeakReference<NavigationLauncherActivity> activityWeakReference;
+
+    NavigationLauncherLocationCallback(NavigationLauncherActivity activity) {
+      this.activityWeakReference = new WeakReference<>(activity);
+    }
+
+    @Override
+    public void onSuccess(LocationEngineResult result) {
+      NavigationLauncherActivity activity = activityWeakReference.get();
+      if (activity != null) {
+        Location location = result.getLastLocation();
+        if (location == null) {
+          return;
+        }
+        activity.updateCurrentLocation(Point.fromLngLat(location.getLongitude(), location.getLatitude()));
+        activity.onLocationFound(location);
+      }
+    }
+
+    @Override
+    public void onFailure(@NonNull Exception exception) {
+      Timber.e(exception);
+    }
   }
 }

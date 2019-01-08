@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductor;
-import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductorListener;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 
 import org.junit.Test;
@@ -16,23 +15,20 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class LocationEngineConductorTest extends BaseTest {
 
   @Test
   public void sanity() {
-    LocationEngineConductorListener mockCallback = mock(LocationEngineConductorListener.class);
-    LocationEngineConductor locationEngineConductor = new LocationEngineConductor(mockCallback);
+    LocationEngineConductor locationEngineConductor = new LocationEngineConductor();
 
     assertNotNull(locationEngineConductor);
   }
 
   @Test
   public void onInitWithSimulation_replayEngineIsProvided() {
-    LocationEngineConductorListener mockCallback = mock(LocationEngineConductorListener.class);
-    LocationEngineConductor locationEngineConductor = new LocationEngineConductor(mockCallback);
+    LocationEngineConductor locationEngineConductor = new LocationEngineConductor();
     boolean simulateRouteEnabled = true;
     locationEngineConductor.initializeLocationEngine(createMockContext(), null, simulateRouteEnabled);
 
@@ -43,8 +39,7 @@ public class LocationEngineConductorTest extends BaseTest {
 
   @Test
   public void onInitWithSimulationAndCustomEngine_customEngineIsProvided() {
-    LocationEngineConductorListener mockCallback = mock(LocationEngineConductorListener.class);
-    LocationEngineConductor locationEngineConductor = new LocationEngineConductor(mockCallback);
+    LocationEngineConductor locationEngineConductor = new LocationEngineConductor();
     LocationEngine customEngine = mock(LocationEngine.class);
     boolean simulateRouteEnabled = true;
     locationEngineConductor.initializeLocationEngine(createMockContext(), customEngine, simulateRouteEnabled);
@@ -52,18 +47,6 @@ public class LocationEngineConductorTest extends BaseTest {
     LocationEngine locationEngine = locationEngineConductor.obtainLocationEngine();
 
     assertEquals(customEngine, locationEngine);
-  }
-
-  @Test
-  public void onInitWithCustomEngine_customEngineIsActivated() {
-    LocationEngineConductorListener mockCallback = mock(LocationEngineConductorListener.class);
-    LocationEngineConductor locationEngineConductor = new LocationEngineConductor(mockCallback);
-    LocationEngine customEngine = mock(LocationEngine.class);
-    boolean simulateRouteEnabled = false;
-
-    locationEngineConductor.initializeLocationEngine(createMockContext(), customEngine, simulateRouteEnabled);
-
-    verify(customEngine).activate();
   }
 
   @NonNull
