@@ -237,10 +237,7 @@ class NavigationTelemetry implements NavigationMetricListener {
   void updateLocation(Location location) {
     metricLocation = new MetricsLocation(location);
     locationBuffer.addLast(location);
-
-    // Check queued reroute events
     checkRerouteQueue();
-    // Check queued feedback events
     checkFeedbackQueue();
   }
 

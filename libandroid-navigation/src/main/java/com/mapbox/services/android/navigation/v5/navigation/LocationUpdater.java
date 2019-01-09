@@ -52,7 +52,6 @@ class LocationUpdater {
 
   @SuppressLint("MissingPermission")
   private void requestInitialLocationUpdates(LocationEngine locationEngine, LocationEngineRequest request) {
-    locationEngine.getLastLocation(callback);
     locationEngine.requestLocationUpdates(request, callback, null);
   }
 

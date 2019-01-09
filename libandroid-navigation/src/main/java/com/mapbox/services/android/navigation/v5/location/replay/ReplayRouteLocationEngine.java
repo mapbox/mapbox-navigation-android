@@ -30,12 +30,8 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
   private static final int DEFAULT_DELAY = ONE_SECOND;
   private static final int DO_NOT_DELAY = 0;
   private static final int ZERO = 0;
-  private static final String SPEED_MUST_BE_GREATER_THAN_ZERO_KM_H = "Speed must be greater than 0 km/h.";
-  private static final String DELAY_MUST_BE_GREATER_THAN_ZERO_SECONDS = "Delay must be greater than 0 seconds.";
   private static final String REPLAY_ROUTE = "ReplayRouteLocation";
   private ReplayRouteLocationConverter converter;
-  private int speed = DEFAULT_SPEED;
-  private int delay = DEFAULT_DELAY;
   private Handler handler;
   private List<Location> mockedLocations;
   private ReplayLocationDispatcher dispatcher;
@@ -55,20 +51,6 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
     initializeLastLocation();
     lastLocation.setLongitude(currentPosition.longitude());
     lastLocation.setLatitude(currentPosition.latitude());
-  }
-
-  public void updateSpeed(int customSpeedInKmPerHour) {
-    if (customSpeedInKmPerHour <= 0) {
-      throw new IllegalArgumentException(SPEED_MUST_BE_GREATER_THAN_ZERO_KM_H);
-    }
-    this.speed = customSpeedInKmPerHour;
-  }
-
-  public void updateDelay(int customDelayInSeconds) {
-    if (customDelayInSeconds <= 0) {
-      throw new IllegalArgumentException(DELAY_MUST_BE_GREATER_THAN_ZERO_SECONDS);
-    }
-    this.delay = customDelayInSeconds;
   }
 
   @Override
@@ -120,7 +102,7 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
 
   @Override
   public void removeLocationUpdates(PendingIntent pendingIntent) {
-    deactivate();
+    Timber.e("ReplayEngine does not support PendingIntent.");
   }
 
   void updateLastLocation(Location lastLocation) {
@@ -142,7 +124,7 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
 
   private void start(DirectionsRoute route, LocationEngineCallback<LocationEngineResult> callback) {
     handler.removeCallbacks(this);
-    converter = new ReplayRouteLocationConverter(route, speed, delay);
+    converter = new ReplayRouteLocationConverter(route, DEFAULT_SPEED, DEFAULT_DELAY);
     converter.initializeTime();
     mockedLocations = converter.toLocations();
     dispatcher = obtainDispatcher(callback);

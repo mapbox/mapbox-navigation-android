@@ -25,7 +25,7 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
   private final ViewRouteListener listener;
   private RouteOptions routeOptions;
   private DirectionsRoute currentRoute;
-  private Location rawLocation;
+  private Location location;
 
   public ViewRouteFetcher(Context context, String accessToken, ViewRouteListener listener) {
     super(context, accessToken);
@@ -62,17 +62,17 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
   public void fetchRouteFromOffRouteEvent(OffRouteEvent event) {
     if (OffRouteEvent.isValid(event)) {
       RouteProgress routeProgress = event.getRouteProgress();
-      findRouteFromRouteProgress(rawLocation, routeProgress);
+      findRouteFromRouteProgress(location, routeProgress);
     }
   }
 
   /**
-   * Updates this object's awareness of the raw location
+   * Updates this object's awareness of the current location.
    *
-   * @param rawLocation to set
+   * @param location to set
    */
-  public void updateRawLocation(@NonNull Location rawLocation) {
-    this.rawLocation = rawLocation;
+  public void updateLocation(@NonNull Location location) {
+    this.location = location;
   }
 
   /**

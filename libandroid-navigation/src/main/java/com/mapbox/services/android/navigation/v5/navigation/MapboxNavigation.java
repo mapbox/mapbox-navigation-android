@@ -60,8 +60,8 @@ public class MapboxNavigation implements ServiceConnection {
   private MapboxNavigator mapboxNavigator;
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
-  private LocationEngine locationEngine = null;
-  private LocationEngineRequest locationEngineRequest = null;
+  private LocationEngine locationEngine;
+  private LocationEngineRequest locationEngineRequest;
   private Set<Milestone> milestones;
   private final String accessToken;
   private Context applicationContext;
