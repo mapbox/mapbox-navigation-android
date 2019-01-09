@@ -16,9 +16,8 @@ import static org.mockito.Mockito.when;
 public class NavigationViewRouteEngineListenerTest {
 
   @Test
-  public void checksUpdateRouteCalledIfNavigationIsNotRunning() {
+  public void onRouteUpdate_checksUpdateRouteCalled() {
     NavigationViewModel mockedNavigationViewModel = mock(NavigationViewModel.class);
-    when(mockedNavigationViewModel.isRunning()).thenReturn(false);
     DirectionsRoute aDirectionsRoute = mock(DirectionsRoute.class);
     NavigationViewRouteEngineListener theRouteEngineListener
       = new NavigationViewRouteEngineListener(mockedNavigationViewModel);
@@ -26,34 +25,6 @@ public class NavigationViewRouteEngineListenerTest {
     theRouteEngineListener.onRouteUpdate(aDirectionsRoute);
 
     verify(mockedNavigationViewModel).updateRoute(eq(aDirectionsRoute));
-  }
-
-  @Test
-  public void checksUpdateRouteCalledIfNavigationIsOffRoute() {
-    NavigationViewModel mockedNavigationViewModel = mock(NavigationViewModel.class);
-    when(mockedNavigationViewModel.isRunning()).thenReturn(true);
-    when(mockedNavigationViewModel.isOffRoute()).thenReturn(true);
-    DirectionsRoute aDirectionsRoute = mock(DirectionsRoute.class);
-    NavigationViewRouteEngineListener theRouteEngineListener
-      = new NavigationViewRouteEngineListener(mockedNavigationViewModel);
-
-    theRouteEngineListener.onRouteUpdate(aDirectionsRoute);
-
-    verify(mockedNavigationViewModel).updateRoute(eq(aDirectionsRoute));
-  }
-
-  @Test
-  public void checksUpdateRouteNotCalledIfNavigationIsRunningAndIsNotOffRoute() {
-    NavigationViewModel mockedNavigationViewModel = mock(NavigationViewModel.class);
-    when(mockedNavigationViewModel.isRunning()).thenReturn(true);
-    when(mockedNavigationViewModel.isOffRoute()).thenReturn(false);
-    DirectionsRoute aDirectionsRoute = mock(DirectionsRoute.class);
-    NavigationViewRouteEngineListener theRouteEngineListener
-      = new NavigationViewRouteEngineListener(mockedNavigationViewModel);
-
-    theRouteEngineListener.onRouteUpdate(aDirectionsRoute);
-
-    verify(mockedNavigationViewModel, times(0)).updateRoute(eq(aDirectionsRoute));
   }
 
   @Test

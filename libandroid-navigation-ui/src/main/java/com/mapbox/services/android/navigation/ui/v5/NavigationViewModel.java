@@ -108,6 +108,17 @@ public class NavigationViewModel extends AndroidViewModel {
     this.navigation = navigation;
   }
 
+  // Package private (no modifier) for testing purposes
+  NavigationViewModel(Application application, MapboxNavigation navigation,
+                      LocationEngineConductor conductor, NavigationViewEventDispatcher dispatcher,
+                      VoiceInstructionCache cache) {
+    super(application);
+    this.navigation = navigation;
+    this.locationEngineConductor = conductor;
+    this.navigationViewEventDispatcher = dispatcher;
+    this.voiceInstructionCache = cache;
+  }
+
   public void onCreate() {
     if (!isRunning()) {
       locationEngineConductor.onCreate();
@@ -236,11 +247,13 @@ public class NavigationViewModel extends AndroidViewModel {
 
   void updateRoute(DirectionsRoute route) {
     this.route.setValue(route);
-    startNavigation(route);
-    updateSimulatedRoute(route);
+    if (!isChangingConfigurations) {
+      startNavigation(route);
+      locationEngineConductor.updateSimulatedRoute(route);
+      sendEventOnRerouteAlong(route);
+      isOffRoute.setValue(false);
+    }
     resetConfigurationFlag();
-    sendEventOnRerouteAlong(route);
-    isOffRoute.setValue(false);
   }
 
   void sendEventFailedReroute(String errorMessage) {
@@ -497,21 +510,15 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void updateSimulatedRoute(DirectionsRoute route) {
-    if (!isChangingConfigurations) {
-      locationEngineConductor.updateSimulatedRoute(route);
+  private void sendEventOnRerouteAlong(DirectionsRoute route) {
+    if (navigationViewEventDispatcher != null && isOffRoute()) {
+      navigationViewEventDispatcher.onRerouteAlong(route);
     }
   }
 
   private void resetConfigurationFlag() {
     if (isChangingConfigurations) {
       isChangingConfigurations = false;
-    }
-  }
-
-  private void sendEventOnRerouteAlong(DirectionsRoute route) {
-    if (navigationViewEventDispatcher != null && isOffRoute()) {
-      navigationViewEventDispatcher.onRerouteAlong(route);
     }
   }
 

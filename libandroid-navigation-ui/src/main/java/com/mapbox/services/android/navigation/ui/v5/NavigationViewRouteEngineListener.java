@@ -15,9 +15,7 @@ class NavigationViewRouteEngineListener implements ViewRouteListener {
 
   @Override
   public void onRouteUpdate(DirectionsRoute directionsRoute) {
-    if (!navigationViewModel.isRunning() || navigationViewModel.isOffRoute()) {
-      navigationViewModel.updateRoute(directionsRoute);
-    }
+    navigationViewModel.updateRoute(directionsRoute);
   }
 
   @Override
