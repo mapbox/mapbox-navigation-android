@@ -38,9 +38,7 @@ class RouteProcessorBackgroundThread extends HandlerThread {
     if (workerHandler == null) {
       workerHandler = new Handler(getLooper());
     }
-    runnable = new RouteProcessorRunnable(
-      routeProcessor, navigation, workerHandler, responseHandler, listener
-    );
+    runnable = new RouteProcessorRunnable(routeProcessor, navigation, workerHandler, responseHandler, listener);
     workerHandler.post(runnable);
   }
 
@@ -53,11 +51,11 @@ class RouteProcessorBackgroundThread extends HandlerThread {
   }
 
   void updateRawLocation(Location rawLocation) {
+    navigation.retrieveMapboxNavigator().updateLocation(rawLocation);
     if (!isAlive()) {
       start();
     }
     runnable.updateRawLocation(rawLocation);
-    navigation.retrieveMapboxNavigator().updateLocation(rawLocation);
   }
 
   /**

@@ -57,9 +57,8 @@ class RouteProcessorRunnable implements Runnable {
 
     NavigationStatus status = mapboxNavigator.retrieveStatus(new Date(),
       options.navigationLocationEngineIntervalLagInMilliseconds());
-    RouteProgress routeProgress = routeProcessor.buildNewRouteProgress(status, route);
-
     status = checkForNewLegIndex(mapboxNavigator, route, status, options.enableAutoIncrementLegIndex());
+    RouteProgress routeProgress = routeProcessor.buildNewRouteProgress(status, route);
 
     NavigationEngineFactory engineFactory = navigation.retrieveEngineFactory();
     final boolean userOffRoute = isUserOffRoute(options, status, rawLocation, routeProgress, engineFactory);
