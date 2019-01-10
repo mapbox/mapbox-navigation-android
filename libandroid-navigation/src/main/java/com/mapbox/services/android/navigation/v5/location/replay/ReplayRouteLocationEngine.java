@@ -12,8 +12,10 @@ import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import timber.log.Timber;
@@ -30,14 +32,19 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
   private static final int DEFAULT_DELAY = ONE_SECOND;
   private static final int DO_NOT_DELAY = 0;
   private static final int ZERO = 0;
+  private static final String SPEED_MUST_BE_GREATER_THAN_ZERO_KM_H = "Speed must be greater than 0 km/h.";
+  private static final String DELAY_MUST_BE_GREATER_THAN_ZERO_SECONDS = "Delay must be greater than 0 seconds.";
   private static final String REPLAY_ROUTE = "ReplayRouteLocation";
   private ReplayRouteLocationConverter converter;
+  private int speed = DEFAULT_SPEED;
+  private int delay = DEFAULT_DELAY;
   private Handler handler;
   private List<Location> mockedLocations;
   private ReplayLocationDispatcher dispatcher;
   private ReplayRouteLocationListener replayLocationListener;
   private Location lastLocation = null;
   private DirectionsRoute route = null;
+  private Point point = null;
 
   public ReplayRouteLocationEngine() {
     this.handler = new Handler();
@@ -45,12 +52,32 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
 
   public void assign(DirectionsRoute route) {
     this.route = route;
+    this.point = null;
+  }
+
+  public void moveTo(Point point) {
+    this.point = point;
+    this.route = null;
   }
 
   public void assignLastLocation(Point currentPosition) {
     initializeLastLocation();
     lastLocation.setLongitude(currentPosition.longitude());
     lastLocation.setLatitude(currentPosition.latitude());
+  }
+
+  public void updateSpeed(int customSpeedInKmPerHour) {
+    if (customSpeedInKmPerHour <= 0) {
+      throw new IllegalArgumentException(SPEED_MUST_BE_GREATER_THAN_ZERO_KM_H);
+    }
+    this.speed = customSpeedInKmPerHour;
+  }
+
+  public void updateDelay(int customDelayInSeconds) {
+    if (customDelayInSeconds <= 0) {
+      throw new IllegalArgumentException(DELAY_MUST_BE_GREATER_THAN_ZERO_SECONDS);
+    }
+    this.delay = customDelayInSeconds;
   }
 
   @Override
@@ -82,11 +109,7 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
   public void requestLocationUpdates(@NonNull LocationEngineRequest request,
                                      @NonNull LocationEngineCallback<LocationEngineResult> callback,
                                      @Nullable Looper looper) throws SecurityException {
-    if (route != null) {
-      start(route, callback);
-    } else {
-      callback.onFailure(new Exception("No route found to replay."));
-    }
+    beginReplayWith(callback);
   }
 
   @Override
@@ -124,7 +147,7 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
 
   private void start(DirectionsRoute route, LocationEngineCallback<LocationEngineResult> callback) {
     handler.removeCallbacks(this);
-    converter = new ReplayRouteLocationConverter(route, DEFAULT_SPEED, DEFAULT_DELAY);
+    converter = new ReplayRouteLocationConverter(route, speed, delay);
     converter.initializeTime();
     mockedLocations = converter.toLocations();
     dispatcher = obtainDispatcher(callback);
@@ -144,6 +167,25 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
     return dispatcher;
   }
 
+  private void startRoute(Point point, Location lastLocation, LocationEngineCallback<LocationEngineResult> callback) {
+    handler.removeCallbacks(this);
+    converter.updateSpeed(speed);
+    converter.updateDelay(delay);
+    converter.initializeTime();
+    LineString route = obtainRoute(point, lastLocation);
+    mockedLocations = converter.calculateMockLocations(converter.sliceRoute(route));
+    dispatcher = obtainDispatcher(callback);
+    dispatcher.run();
+  }
+
+  @NonNull
+  private LineString obtainRoute(Point point, Location lastLocation) {
+    List<Point> pointList = new ArrayList<>();
+    pointList.add(Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude()));
+    pointList.add(point);
+    return LineString.fromLngLats(pointList);
+  }
+
   private void scheduleNextDispatch() {
     int currentMockedPoints = mockedLocations.size();
     if (currentMockedPoints == ZERO) {
@@ -152,6 +194,20 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
       handler.postDelayed(this, ONE_SECOND_IN_MILLISECONDS);
     } else {
       handler.postDelayed(this, (currentMockedPoints - MOCKED_POINTS_LEFT_THRESHOLD) * ONE_SECOND_IN_MILLISECONDS);
+    }
+  }
+
+  private void beginReplayWith(@NonNull LocationEngineCallback<LocationEngineResult> callback) {
+    if (route != null) {
+      start(route, callback);
+    } else if (point != null) {
+      if (lastLocation == null) {
+        callback.onFailure(new Exception("Cannot move to point without last location assigned."));
+        return;
+      }
+      startRoute(point, lastLocation, callback);
+    } else {
+      callback.onFailure(new Exception("No route found to replay."));
     }
   }
 

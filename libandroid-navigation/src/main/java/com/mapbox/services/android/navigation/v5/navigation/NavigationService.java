@@ -118,7 +118,7 @@ public class NavigationService extends Service {
 
   private void initializeLocationUpdater(MapboxNavigation mapboxNavigation) {
     LocationEngine locationEngine = mapboxNavigation.getLocationEngine();
-    LocationEngineRequest locationEngineRequest = mapboxNavigation.getLocationEngineRequest();
+    LocationEngineRequest locationEngineRequest = mapboxNavigation.retrieveLocationEngineRequest();
     locationUpdater = new LocationUpdater(thread, locationEngine, locationEngineRequest);
   }
 

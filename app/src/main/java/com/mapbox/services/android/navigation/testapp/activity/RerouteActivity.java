@@ -169,9 +169,8 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     mapboxMap.addMarker(new MarkerOptions().position(point));
     mapboxMap.removeOnMapClickListener(this);
 
-    origin = Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude());
     destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
-    getRoute(origin, destination);
+    resetLocationEngine(destination);
 
     tracking = false;
     return true;
@@ -188,8 +187,8 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
 
   @Override
   public void userOffRoute(Location location) {
-    Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    getRoute(newOrigin, destination);
+    origin = Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude());
+    getRoute(origin, destination);
     Snackbar.make(contentLayout, "User Off Route", Snackbar.LENGTH_SHORT).show();
     mapboxMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())));
   }
@@ -280,8 +279,12 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     }
   }
 
+  private void resetLocationEngine(Point point) {
+    mockLocationEngine.moveTo(point);
+    navigation.setLocationEngine(mockLocationEngine);
+  }
+
   private void resetLocationEngine(DirectionsRoute directionsRoute) {
-    mockLocationEngine.removeLocationUpdates(callback);
     mockLocationEngine.assign(directionsRoute);
     navigation.setLocationEngine(mockLocationEngine);
   }

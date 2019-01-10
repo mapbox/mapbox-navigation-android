@@ -320,20 +320,6 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   /**
-   * Returns the current {@link LocationEngineRequest} either being used or going to be used
-   * by the SDK for {@link android.location.Location} updates.
-   * <p>
-   * If a request is not provided via {@link MapboxNavigation#setLocationEngineRequest(LocationEngineRequest)},
-   * a default will be provided with optimized settings for navigation.
-   *
-   * @return the current {@link LocationEngineRequest} used by the SDK
-   */
-  @NonNull
-  public LocationEngineRequest getLocationEngineRequest() {
-    return locationEngineRequest;
-  }
-
-  /**
    * Calling This begins a new navigation session using the provided directions route. this API is
    * also intended to be used when a reroute occurs passing in the updated directions route.
    * <p>
@@ -807,6 +793,11 @@ public class MapboxNavigation implements ServiceConnection {
 
   MapboxNavigator retrieveMapboxNavigator() {
     return mapboxNavigator;
+  }
+
+  @NonNull
+  LocationEngineRequest retrieveLocationEngineRequest() {
+    return locationEngineRequest;
   }
 
   private void initializeForTest() {

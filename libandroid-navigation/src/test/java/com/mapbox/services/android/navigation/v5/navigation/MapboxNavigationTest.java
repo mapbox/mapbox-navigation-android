@@ -326,7 +326,7 @@ public class MapboxNavigationTest extends BaseTest {
     LocationEngine locationEngine = mock(LocationEngine.class);
     MapboxNavigation navigation = buildMapboxNavigationWith(locationEngine);
 
-    LocationEngineRequest request = navigation.getLocationEngineRequest();
+    LocationEngineRequest request = navigation.retrieveLocationEngineRequest();
 
     assertNotNull(request);
   }

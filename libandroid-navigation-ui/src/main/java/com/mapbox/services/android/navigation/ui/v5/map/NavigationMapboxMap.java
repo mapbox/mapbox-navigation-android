@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.map;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PointF;
@@ -486,6 +487,7 @@ public class NavigationMapboxMap {
     mapboxMap.snapshot(navigationSnapshotReadyCallback);
   }
 
+  @SuppressLint("MissingPermission")
   private void initializeLocationComponent(MapView mapView, MapboxMap map) {
     Context context = mapView.getContext();
     int locationLayerStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context,
