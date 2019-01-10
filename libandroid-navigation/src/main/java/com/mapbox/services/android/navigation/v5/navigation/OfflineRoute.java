@@ -4,7 +4,6 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.google.gson.Gson;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.exceptions.ServicesException;
@@ -14,7 +13,6 @@ import com.mapbox.navigator.RouterResult;
 import java.util.List;
 
 import okhttp3.HttpUrl;
-import timber.log.Timber;
 
 /**
  * The {@link OfflineRoute} class wraps the {@link NavigationRoute} class with parameters which
@@ -73,10 +71,10 @@ public class OfflineRoute {
   @Nullable
   DirectionsRoute retrieveOfflineRoute(@NonNull RouterResult response) {
     boolean success = response.getSuccess();
-    String jsonResponse = response.getJson();
-    if (checkOfflineRoute(success, jsonResponse)) {
+    if (!checkOfflineRoute(success)) {
       return null;
     }
+    String jsonResponse = response.getJson();
     return obtainRouteFor(jsonResponse);
   }
 
@@ -155,11 +153,8 @@ public class OfflineRoute {
     return offlineUrlBuilder.build().toString();
   }
 
-  private boolean checkOfflineRoute(boolean isSuccess, String json) {
-    if (!isSuccess) {
-      Gson gson = new Gson();
-      OfflineRouteError error = gson.fromJson(json, OfflineRouteError.class);
-      Timber.e("Error occurred fetching offline route: %s - Code: %d", error.getError(), error.getErrorCode());
+  private boolean checkOfflineRoute(boolean isSuccess) {
+    if (isSuccess) {
       return true;
     }
     return false;
