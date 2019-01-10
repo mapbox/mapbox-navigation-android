@@ -371,6 +371,10 @@ final class NavigationMetricsWrapper {
     mapboxTelemetry.push(feedbackEvent);
   }
 
+  static void routeRetrievalEvent(long elapsedTime, boolean isOffline) {
+    push(new RouteRetrievalEvent(elapsedTime, isOffline));
+  }
+
   static Event turnstileEvent() {
     Event navTurnstileEvent = new AppUserTurnstile(sdkIdentifier,
       BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);
