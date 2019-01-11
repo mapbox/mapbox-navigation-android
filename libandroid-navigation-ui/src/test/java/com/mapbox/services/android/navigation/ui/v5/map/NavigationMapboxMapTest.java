@@ -124,4 +124,26 @@ public class NavigationMapboxMapTest {
 
     verify(mapWayName).removeOnWayNameChangedListener(listener);
   }
+
+  @Test
+  public void updateMapFpsThrottle_mapFpsDelegateIsUpdated() {
+    MapFpsDelegate delegate = mock(MapFpsDelegate.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(delegate);
+    int maxFpsThreshold = 10;
+
+    theNavigationMap.updateMapFpsThrottle(maxFpsThreshold);
+
+    verify(delegate).updateMaxFpsThreshold(maxFpsThreshold);
+  }
+
+  @Test
+  public void updateMapFpsThrottleEnabled_mapFpsDelegateIsEnabled() {
+    MapFpsDelegate delegate = mock(MapFpsDelegate.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(delegate);
+    boolean isEnabled = false;
+
+    theNavigationMap.updateMapFpsThrottleEnabled(isEnabled);
+
+    verify(delegate).updateEnabled(isEnabled);
+  }
 }
