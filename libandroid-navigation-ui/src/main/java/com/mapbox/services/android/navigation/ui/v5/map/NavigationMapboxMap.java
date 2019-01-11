@@ -61,13 +61,14 @@ public class NavigationMapboxMap {
   private static final int[] ZERO_MAP_PADDING = {0, 0, 0, 0};
 
   private MapboxMap mapboxMap;
-  private NavigationCamera mapCamera;
-  private NavigationMapRoute mapRoute;
   private LocationComponent locationComponent;
   private MapPaddingAdjustor mapPaddingAdjustor;
-  private MapWayName mapWayName;
   private MapLayerInteractor layerInteractor;
-  private List<Marker> mapMarkers = new ArrayList<>();
+  private MapWayName mapWayName;
+  private NavigationMapRoute mapRoute;
+  private NavigationCamera mapCamera;
+  private MapFpsDelegate mapFpsDelegate;
+  private final List<Marker> mapMarkers = new ArrayList<>();
 
   /**
    * Constructor that can be used once {@link com.mapbox.mapboxsdk.maps.OnMapReadyCallback}
@@ -84,6 +85,7 @@ public class NavigationMapboxMap {
     initializeWayname(mapboxMap, mapPaddingAdjustor);
     initializeRoute(mapView, mapboxMap);
     initializeCamera(mapboxMap);
+    initializeFpsDelegate(mapView);
   }
 
   // Package private (no modifier) for testing purposes
@@ -142,6 +144,28 @@ public class NavigationMapboxMap {
   }
 
   /**
+   * The maximum preferred frames per second at which to render the map.
+   * <p>
+   * This property only takes effect when the application has limited resources, such as when
+   * the device is running on battery power. By default, this is set to {@link MapFpsDelegate#DEFAULT_MAX_FPS}.
+   *
+   * @param maxFps to be used to limit map frames per second
+   */
+  public void updateMaxFps(int maxFps) {
+    mapFpsDelegate.updateMaxFps(maxFps);
+  }
+
+  /**
+   * Enabled by default, the navigation map will throttle frames per second when the application has
+   * limited resources, such as when the device is running on battery power.
+   *
+   * @param isEnabled true to enable (default), false to render at device ability
+   */
+  public void updateMaxFpsEnabled(boolean isEnabled) {
+    mapFpsDelegate.updateEnabled(isEnabled);
+  }
+
+  /**
    * Updates how the user location is shown on the map.
    * <p>
    * <ul>
@@ -168,6 +192,7 @@ public class NavigationMapboxMap {
     mapRoute.addProgressChangeListener(navigation);
     mapCamera.addProgressChangeListener(navigation);
     mapWayName.addProgressChangeListener(navigation);
+    mapFpsDelegate.addProgressChangeListener(navigation);
   }
 
   /**
@@ -185,8 +210,10 @@ public class NavigationMapboxMap {
     boolean isUsingDefault = mapPaddingAdjustor.isUsingDefault();
     @NavigationCamera.TrackingMode
     int cameraTrackingMode = mapCamera.getCameraTrackingMode();
+    int maxFps = mapFpsDelegate.retrieveMaxFps();
+    boolean maxFpsEnabled = mapFpsDelegate.isEnabled();
     NavigationMapboxMapInstanceState instanceState = new NavigationMapboxMapInstanceState(
-      mapPadding, isUsingDefault, cameraTrackingMode
+      mapPadding, isUsingDefault, cameraTrackingMode, maxFps, maxFpsEnabled
     );
     outState.putParcelable(key, instanceState);
   }
@@ -210,6 +237,9 @@ public class NavigationMapboxMap {
     } else {
       adjustLocationIconWith(mapPadding.retrieveCurrentPadding());
     }
+    MapFpsInstanceState mapFps = instanceState.retrieveMapFps();
+    mapFpsDelegate.updateMaxFps(mapFps.retrieveMaxFps());
+    mapFpsDelegate.updateEnabled(mapFps.isMaxFpsEnabled());
   }
 
   /**
@@ -285,6 +315,7 @@ public class NavigationMapboxMap {
    */
   public void updateCameraTrackingMode(@NavigationCamera.TrackingMode int trackingMode) {
     mapCamera.updateCameraTrackingMode(trackingMode);
+    mapFpsDelegate.updateCameraTracking(trackingMode);
   }
 
   /**
@@ -357,6 +388,7 @@ public class NavigationMapboxMap {
     mapCamera.onStart();
     mapRoute.onStart();
     mapWayName.onStart();
+    mapFpsDelegate.onStart();
   }
 
   /**
@@ -367,6 +399,7 @@ public class NavigationMapboxMap {
     mapCamera.onStop();
     mapRoute.onStop();
     mapWayName.onStop();
+    mapFpsDelegate.onStop();
   }
 
   /**
@@ -507,18 +540,14 @@ public class NavigationMapboxMap {
     mapPaddingAdjustor = new MapPaddingAdjustor(mapView, mapboxMap);
   }
 
-  private void initializeCamera(MapboxMap map) {
-    mapCamera = new NavigationCamera(map, locationComponent);
+  private void initializeMapLayerInteractor(MapboxMap mapboxMap) {
+    layerInteractor = new MapLayerInteractor(mapboxMap);
   }
 
   private void initializeWayname(MapboxMap mapboxMap, MapPaddingAdjustor paddingAdjustor) {
     initializeStreetsSource(mapboxMap);
     WaynameFeatureFinder featureFinder = new WaynameFeatureFinder(mapboxMap);
     mapWayName = new MapWayName(featureFinder, paddingAdjustor);
-  }
-
-  private void initializeMapLayerInteractor(MapboxMap mapboxMap) {
-    layerInteractor = new MapLayerInteractor(mapboxMap);
   }
 
   private void initializeStreetsSource(MapboxMap mapboxMap) {
@@ -537,6 +566,15 @@ public class NavigationMapboxMap {
     Context context = mapView.getContext();
     int routeStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context, R.attr.navigationViewRouteStyle);
     mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes);
+  }
+
+  private void initializeCamera(MapboxMap map) {
+    mapCamera = new NavigationCamera(map, locationComponent);
+  }
+
+  private void initializeFpsDelegate(MapView mapView) {
+    MapBatteryMonitor batteryMonitor = new MapBatteryMonitor();
+    mapFpsDelegate = new MapFpsDelegate(mapView, batteryMonitor);
   }
 
   @NonNull
