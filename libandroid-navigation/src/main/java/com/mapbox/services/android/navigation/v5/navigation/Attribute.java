@@ -3,12 +3,8 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.gson.annotations.SerializedName;
-
 public class Attribute implements Parcelable {
-  @SerializedName("name")
   private final String name;
-  @SerializedName("value")
   private final String value;
 
   public Attribute(String name, String value) {

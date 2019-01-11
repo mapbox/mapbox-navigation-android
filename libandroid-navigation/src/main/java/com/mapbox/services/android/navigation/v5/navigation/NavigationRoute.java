@@ -23,6 +23,7 @@ import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 
 
 /**
@@ -76,8 +77,21 @@ public final class NavigationRoute {
    * @param callback a RetroFit callback which contains an onResponse and onFailure
    * @since 0.5.0
    */
-  public void getRoute(Callback<DirectionsResponse> callback) {
-    mapboxDirections.enqueueCall(callback);
+  public void getRoute(final Callback<DirectionsResponse> callback) {
+    final long start = System.nanoTime();
+    mapboxDirections.enqueueCall(new Callback<DirectionsResponse>() {
+      @Override
+      public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+        long end = System.nanoTime();
+        callback.onResponse(call, response);
+        NavigationMetricsWrapper.routeRetrievalEvent(end - start, false);
+      }
+
+      @Override
+      public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+        callback.onFailure(call, throwable);
+      }
+    });
   }
 
   /**

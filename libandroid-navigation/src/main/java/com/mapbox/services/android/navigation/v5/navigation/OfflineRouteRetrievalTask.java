@@ -15,6 +15,8 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, Directions
   private final Navigator navigator;
   private final OnOfflineRouteFoundCallback callback;
   private RouterResult routerResult;
+  private long start;
+  private long end;
 
   OfflineRouteRetrievalTask(Navigator navigator, OnOfflineRouteFoundCallback callback) {
     this.navigator = navigator;
@@ -29,6 +31,7 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, Directions
 
   @Override
   protected DirectionsRoute doInBackground(OfflineRoute... offlineRoutes) {
+    start = System.nanoTime();
     String url = offlineRoutes[FIRST_ROUTE].buildUrl();
 
     synchronized (navigator) {
@@ -41,7 +44,9 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, Directions
   @Override
   protected void onPostExecute(DirectionsRoute offlineRoute) {
     if (offlineRoute != null) {
+      end = System.nanoTime();
       callback.onRouteFound(offlineRoute);
+      NavigationMetricsWrapper.routeRetrievalEvent(end - start, true);
     } else {
       String errorMessage = generateErrorMessage();
       OfflineError error = new OfflineError(errorMessage);

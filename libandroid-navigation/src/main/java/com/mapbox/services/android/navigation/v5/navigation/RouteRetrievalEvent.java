@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.gson.annotations.SerializedName;
 import com.mapbox.android.telemetry.Event;
 
 import java.util.Collections;
@@ -13,13 +12,9 @@ public class RouteRetrievalEvent extends Event implements Parcelable {
   private static final String NAVIGATION_ROUTE_RETRIEVAL = "performance.trace";
   private static final String ELAPSED_TIME_NAME = "elapsed_time";
   private static final String IS_OFFLINE_NAME = "is_offline";
-  @SerializedName("event")
   private final String event;
-  @SerializedName("created")
   private final String created;
-  @SerializedName("counters")
   private final List<LongCounter> counters;
-  @SerializedName("attributes")
   private final List<Attribute> attributes;
 
   private RouteRetrievalEvent(String event, String created, List<LongCounter> counters,

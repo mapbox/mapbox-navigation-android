@@ -3,12 +3,8 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.gson.annotations.SerializedName;
-
 public class LongCounter implements Parcelable {
-  @SerializedName("name")
   private final String name;
-  @SerializedName("value")
   private final long value;
 
   public LongCounter(String name, long value) {
