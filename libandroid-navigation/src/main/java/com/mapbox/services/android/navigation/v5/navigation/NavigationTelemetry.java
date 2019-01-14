@@ -6,7 +6,6 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 
 import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.android.core.location.LocationEngineListener;
 import com.mapbox.android.telemetry.Event;
 import com.mapbox.android.telemetry.TelemetryUtils;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -34,7 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-class NavigationTelemetry implements LocationEngineListener, NavigationMetricListener {
+class NavigationTelemetry implements NavigationMetricListener {
 
   private Context context;
   private static NavigationTelemetry instance;
@@ -46,15 +45,12 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     + ".ReplayRouteLocationEngine";
   private static final int TWENTY_SECOND_INTERVAL = 20;
 
-  private List<RerouteEvent> queuedRerouteEvents = new ArrayList<>();
-  private List<FeedbackEvent> queuedFeedbackEvents = new ArrayList<>();
-
+  private final List<RerouteEvent> queuedRerouteEvents = new ArrayList<>();
+  private final List<FeedbackEvent> queuedFeedbackEvents = new ArrayList<>();
   private MetricsRouteProgress metricProgress;
   private MetricsLocation metricLocation;
-
   private NavigationEventDispatcher eventDispatcher;
   private NavigationLifecycleMonitor lifecycleMonitor;
-  private LocationEngine navigationLocationEngine;
   private SessionState navigationSessionState;
   private RingBuffer<Location> locationBuffer;
   private Date lastRerouteDate;
@@ -80,16 +76,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     }
 
     return instance;
-  }
-
-  @Override
-  public void onConnected() {
-    // No-op
-  }
-
-  @Override
-  public void onLocationChanged(Location location) {
-    updateCurrentLocation(location);
   }
 
   @Override
@@ -132,7 +118,7 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   void initialize(@NonNull Context context, @NonNull String accessToken,
                   MapboxNavigation navigation, LocationEngine locationEngine) {
     if (!isInitialized) {
-      updateLocationEngine(locationEngine);
+      updateLocationEngineName(locationEngine);
 
       validateAccessToken(accessToken);
       this.context = context;
@@ -240,25 +226,19 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
   /**
    * Called during {@link NavigationTelemetry#initialize(Context, String, MapboxNavigation, LocationEngine)}
    * and any time {@link MapboxNavigation} gets an updated location engine.
-   * <p>
-   * Removes the current location engine listener if it exists, then
-   * sets up the new one / updates the location engine name.
-   *
-   * @param locationEngine to be used to update
    */
-  void updateLocationEngine(LocationEngine locationEngine) {
-    // Remove listener from previous engine
-    if (navigationLocationEngine != null) {
-      navigationLocationEngine.removeLocationEngineListener(this);
-    }
-
-    // Store the new engine and setup a new listener
+  void updateLocationEngineName(LocationEngine locationEngine) {
     if (locationEngine != null) {
-      navigationLocationEngine = locationEngine;
-      navigationLocationEngine.addLocationEngineListener(this);
       String locationEngineName = locationEngine.getClass().getName();
       navigationSessionState = navigationSessionState.toBuilder().locationEngineName(locationEngineName).build();
     }
+  }
+
+  void updateLocation(Location location) {
+    metricLocation = new MetricsLocation(location);
+    locationBuffer.addLast(location);
+    checkRerouteQueue();
+    checkFeedbackQueue();
   }
 
   /**
@@ -339,16 +319,6 @@ class NavigationTelemetry implements LocationEngineListener, NavigationMetricLis
     for (RerouteEvent rerouteEvent : queuedRerouteEvents) {
       sendRerouteEvent(rerouteEvent);
     }
-  }
-
-  private void updateCurrentLocation(Location rawLocation) {
-    metricLocation = new MetricsLocation(rawLocation);
-    locationBuffer.addLast(rawLocation);
-
-    // Check queued reroute events
-    checkRerouteQueue();
-    // Check queued feedback events
-    checkFeedbackQueue();
   }
 
   private void checkRerouteQueue() {

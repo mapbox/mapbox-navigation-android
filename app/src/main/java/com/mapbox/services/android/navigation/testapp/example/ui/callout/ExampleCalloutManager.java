@@ -45,8 +45,8 @@ public class ExampleCalloutManager {
   public ExampleCalloutManager(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     this.geoJsonSource = new GeoJsonSource(SOURCE_ID);
-    mapboxMap.addSource(geoJsonSource);
-    mapboxMap.addLayer(new SymbolLayer(LAYER_ID, SOURCE_ID).withProperties(
+    mapboxMap.getStyle().addSource(geoJsonSource);
+    mapboxMap.getStyle().addLayer(new SymbolLayer(LAYER_ID, SOURCE_ID).withProperties(
       iconImage(string(get(literal(ExampleCallout.KEY_ID)))),
       iconAllowOverlap(true),
       iconIgnorePlacement(true),
@@ -135,7 +135,7 @@ public class ExampleCalloutManager {
     @Override
     protected void onPostExecute(HashMap<String, Bitmap> bitmapHashMap) {
       super.onPostExecute(bitmapHashMap);
-      mapboxMap.addImages(bitmapHashMap);
+      mapboxMap.getStyle().addImages(bitmapHashMap);
     }
   }
 

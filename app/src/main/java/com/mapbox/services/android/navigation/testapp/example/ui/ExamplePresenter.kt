@@ -197,8 +197,9 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     }
   }
 
-  fun onMapLongClick(point: LatLng) {
+  fun onMapLongClick(point: LatLng): Boolean {
     viewModel.reverseGeocode(point)
+    return true
   }
 
   fun onBackPressed(): Boolean {

@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.map;
 
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.layers.CircleLayer;
 import com.mapbox.mapboxsdk.style.layers.HeatmapLayer;
 import com.mapbox.mapboxsdk.style.layers.Layer;
@@ -31,7 +32,8 @@ public class MapLayerInteractorTest {
     when(anySymbolOrLineLayer.getSourceLayer()).thenReturn("any");
     List<Layer> layers = buildLayerListWith(anySymbolOrLineLayer);
     MapboxMap map = mock(MapboxMap.class);
-    when(map.getLayers()).thenReturn(layers);
+    when(map.getStyle()).thenReturn(mock(Style.class));
+    when(map.getStyle().getLayers()).thenReturn(layers);
     MapLayerInteractor layerInteractor = new MapLayerInteractor(map);
 
     layerInteractor.updateLayerVisibility(true, "any");
@@ -45,7 +47,8 @@ public class MapLayerInteractorTest {
     when(anySymbolOrLineLayer.getSourceLayer()).thenReturn("any");
     List<Layer> layers = buildLayerListWith(anySymbolOrLineLayer);
     MapboxMap map = mock(MapboxMap.class);
-    when(map.getLayers()).thenReturn(layers);
+    when(map.getStyle()).thenReturn(mock(Style.class));
+    when(map.getStyle().getLayers()).thenReturn(layers);
     MapLayerInteractor layerInteractor = new MapLayerInteractor(map);
 
     layerInteractor.updateLayerVisibility(true, "random");
@@ -58,7 +61,8 @@ public class MapLayerInteractorTest {
     CircleLayer invalidLayer = mock(CircleLayer.class);
     List<Layer> layers = buildLayerListWith(invalidLayer);
     MapboxMap map = mock(MapboxMap.class);
-    when(map.getLayers()).thenReturn(layers);
+    when(map.getStyle()).thenReturn(mock(Style.class));
+    when(map.getStyle().getLayers()).thenReturn(layers);
     MapLayerInteractor layerInteractor = new MapLayerInteractor(map);
 
     layerInteractor.updateLayerVisibility(true, "circle");
@@ -73,7 +77,8 @@ public class MapLayerInteractorTest {
     when(anySymbolOrLineLayer.getVisibility()).thenReturn(visibility(Property.VISIBLE));
     List<Layer> layers = buildLayerListWith(anySymbolOrLineLayer);
     MapboxMap map = mock(MapboxMap.class);
-    when(map.getLayers()).thenReturn(layers);
+    when(map.getStyle()).thenReturn(mock(Style.class));
+    when(map.getStyle().getLayers()).thenReturn(layers);
     MapLayerInteractor layerInteractor = new MapLayerInteractor(map);
 
     boolean isVisible = layerInteractor.isLayerVisible("any");
@@ -88,7 +93,8 @@ public class MapLayerInteractorTest {
     when(anySymbolOrLineLayer.getVisibility()).thenReturn(visibility(Property.NONE));
     List<Layer> layers = buildLayerListWith(anySymbolOrLineLayer);
     MapboxMap map = mock(MapboxMap.class);
-    when(map.getLayers()).thenReturn(layers);
+    when(map.getStyle()).thenReturn(mock(Style.class));
+    when(map.getStyle().getLayers()).thenReturn(layers);
     MapLayerInteractor layerInteractor = new MapLayerInteractor(map);
 
     boolean isVisible = layerInteractor.isLayerVisible("any");
@@ -101,7 +107,8 @@ public class MapLayerInteractorTest {
     HeatmapLayer invalidLayer = mock(HeatmapLayer.class);
     List<Layer> layers = buildLayerListWith(invalidLayer);
     MapboxMap map = mock(MapboxMap.class);
-    when(map.getLayers()).thenReturn(layers);
+    when(map.getStyle()).thenReturn(mock(Style.class));
+    when(map.getStyle().getLayers()).thenReturn(layers);
     MapLayerInteractor layerInteractor = new MapLayerInteractor(map);
 
     boolean isVisible = layerInteractor.isLayerVisible("heatmap");

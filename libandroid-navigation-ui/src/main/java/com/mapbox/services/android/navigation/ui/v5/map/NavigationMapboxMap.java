@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.map;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PointF;
@@ -58,6 +59,7 @@ public class NavigationMapboxMap {
   private static final String INCIDENTS_LAYER_ID = "closures";
   private static final String TRAFFIC_LAYER_ID = "traffic";
   private static final int[] ZERO_MAP_PADDING = {0, 0, 0, 0};
+  private static final double NAVIGATION_MAXIMUM_MAP_ZOOM = 18d;
 
   private MapboxMap mapboxMap;
   private NavigationCamera mapCamera;
@@ -486,17 +488,17 @@ public class NavigationMapboxMap {
     mapboxMap.snapshot(navigationSnapshotReadyCallback);
   }
 
+  @SuppressLint("MissingPermission")
   private void initializeLocationComponent(MapView mapView, MapboxMap map) {
+    locationComponent = map.getLocationComponent();
+    map.setMinZoomPreference(NAVIGATION_MINIMUM_MAP_ZOOM);
+    map.setMaxZoomPreference(NAVIGATION_MAXIMUM_MAP_ZOOM);
     Context context = mapView.getContext();
     int locationLayerStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context,
       R.attr.navigationViewLocationLayerStyle);
-
     LocationComponentOptions locationComponentOptions =
       LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
-    locationComponentOptions = locationComponentOptions.toBuilder().minZoom(NAVIGATION_MINIMUM_MAP_ZOOM).build();
-
-    locationComponent = map.getLocationComponent();
-    locationComponent.activateLocationComponent(context, null, locationComponentOptions);
+    locationComponent.activateLocationComponent(context, map.getStyle(), locationComponentOptions);
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.GPS);
   }
@@ -521,14 +523,14 @@ public class NavigationMapboxMap {
 
   private void initializeStreetsSource(MapboxMap mapboxMap) {
     VectorSource streetSource = new VectorSource(STREETS_SOURCE_ID, MAPBOX_STREETS_V7);
-    mapboxMap.addSource(streetSource);
+    mapboxMap.getStyle().addSource(streetSource);
     LineLayer streetsLayer = new LineLayer(STREETS_LAYER_ID, STREETS_SOURCE_ID)
       .withProperties(
         lineWidth(DEFAULT_WIDTH),
         lineColor(Color.WHITE)
       )
       .withSourceLayer(ROAD_LABEL);
-    mapboxMap.addLayerAt(streetsLayer, LAST_INDEX);
+    mapboxMap.getStyle().addLayerAt(streetsLayer, LAST_INDEX);
   }
 
   private void initializeRoute(MapView mapView, MapboxMap map) {

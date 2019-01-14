@@ -22,10 +22,10 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
-import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.instruction.ImageCoordinator;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
@@ -109,10 +109,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @param savedInstanceState to restore state if not null
    */
   public void onCreate(@Nullable Bundle savedInstanceState) {
-    updateSavedInstanceStateMapStyle(savedInstanceState);
     mapView.onCreate(savedInstanceState);
     updatePresenterState(savedInstanceState);
-    navigationViewModel.onCreate();
   }
 
   /**
@@ -216,11 +214,16 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
    * @since 0.6.0
    */
   @Override
-  public void onMapReady(MapboxMap mapboxMap) {
-    initializeNavigationMap(mapView, mapboxMap);
-    initializeWayNameListener();
-    onNavigationReadyCallback.onNavigationReady(navigationViewModel.isRunning());
-    isMapInitialized = true;
+  public void onMapReady(final MapboxMap mapboxMap) {
+    mapboxMap.setStyle(ThemeSwitcher.retrieveMapStyle(getContext()), new Style.OnStyleLoaded() {
+      @Override
+      public void onStyleLoaded(@NonNull Style style) {
+        initializeNavigationMap(mapView, mapboxMap);
+        initializeWayNameListener();
+        onNavigationReadyCallback.onNavigationReady(navigationViewModel.isRunning());
+        isMapInitialized = true;
+      }
+    });
   }
 
   @Override
@@ -559,13 +562,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private void initializeWayNameListener() {
     NavigationViewWayNameListener wayNameListener = new NavigationViewWayNameListener(navigationPresenter);
     navigationMap.addOnWayNameChangedListener(wayNameListener);
-  }
-
-  private void updateSavedInstanceStateMapStyle(@Nullable Bundle savedInstanceState) {
-    if (savedInstanceState != null) {
-      String mapStyleUrl = ThemeSwitcher.retrieveMapStyle(getContext());
-      savedInstanceState.putString(MapboxConstants.STATE_STYLE_URL, mapStyleUrl);
-    }
   }
 
   private void saveNavigationMapInstanceState(Bundle outState) {

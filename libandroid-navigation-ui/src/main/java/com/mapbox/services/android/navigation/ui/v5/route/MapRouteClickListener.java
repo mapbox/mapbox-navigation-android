@@ -29,13 +29,14 @@ class MapRouteClickListener implements MapboxMap.OnMapClickListener {
   }
 
   @Override
-  public void onMapClick(@NonNull LatLng point) {
+  public boolean onMapClick(@NonNull LatLng point) {
     HashMap<LineString, DirectionsRoute> routeLineStrings = routeLine.retrieveRouteLineStrings();
     if (invalidMapClick(routeLineStrings)) {
-      return;
+      return true;
     }
     List<DirectionsRoute> directionsRoutes = routeLine.retrieveDirectionsRoutes();
     findClickedRoute(point, routeLineStrings, directionsRoutes);
+    return true;
   }
 
   void setOnRouteSelectionChangeListener(OnRouteSelectionChangeListener listener) {

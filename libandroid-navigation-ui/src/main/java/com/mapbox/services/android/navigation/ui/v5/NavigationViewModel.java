@@ -22,7 +22,6 @@ import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductor;
-import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductorListener;
 import com.mapbox.services.android.navigation.ui.v5.route.OffRouteEvent;
 import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteFetcher;
 import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteListener;
@@ -119,16 +118,9 @@ public class NavigationViewModel extends AndroidViewModel {
     this.voiceInstructionCache = cache;
   }
 
-  public void onCreate() {
-    if (!isRunning()) {
-      locationEngineConductor.onCreate();
-    }
-  }
-
   public void onDestroy(boolean isChangingConfigurations) {
     this.isChangingConfigurations = isChangingConfigurations;
     if (!isChangingConfigurations) {
-      locationEngineConductor.onDestroy();
       routeFetcher.onDestroy();
       endNavigation();
       deactivateInstructionPlayer();
@@ -275,7 +267,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initializeNavigationLocationEngine() {
-    locationEngineConductor = new LocationEngineConductor(locationEngineCallback);
+    locationEngineConductor = new LocationEngineConductor();
   }
 
   private void initializeLanguage(NavigationUiOptions options) {
@@ -367,6 +359,7 @@ public class NavigationViewModel extends AndroidViewModel {
     @Override
     public void onProgressChange(Location location, RouteProgress routeProgress) {
       NavigationViewModel.this.routeProgress = routeProgress;
+      routeFetcher.updateLocation(location);
       instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
       summaryModel.setValue(new SummaryModel(getApplication(), distanceFormatter, routeProgress, timeFormatType));
       navigationLocation.setValue(location);
@@ -410,13 +403,6 @@ public class NavigationViewModel extends AndroidViewModel {
   };
 
   private ViewRouteListener routeEngineListener = new NavigationViewRouteEngineListener(this);
-
-  private LocationEngineConductorListener locationEngineCallback = new LocationEngineConductorListener() {
-    @Override
-    public void onLocationUpdate(Location location) {
-      routeFetcher.updateRawLocation(location);
-    }
-  };
 
   private void startNavigation(DirectionsRoute route) {
     if (route != null) {
