@@ -110,9 +110,6 @@ public abstract class RouteStepProgress {
 
   abstract LegStep step();
 
-  @Nullable
-  abstract LegStep nextStep();
-
   @AutoValue.Builder
   abstract static class Builder {
 
@@ -123,8 +120,6 @@ public abstract class RouteStepProgress {
     abstract Builder distanceRemaining(double distanceRemaining);
 
     abstract double distanceRemaining();
-
-    abstract Builder nextStep(@Nullable LegStep nextStep);
 
     abstract Builder distanceTraveled(double distanceTraveled);
 
