@@ -290,6 +290,10 @@ class NavigationTelemetry implements NavigationMetricListener {
     queuedFeedbackEvents.remove(feedbackEvent);
   }
 
+  void routeRetrievalEvent(long elapsedTime, boolean isOffline) {
+    NavigationMetricsWrapper.routeRetrievalEvent(elapsedTime, isOffline, navigationSessionState.sessionIdentifier());
+  }
+
   private void validateAccessToken(String accessToken) {
     if (TextUtils.isEmpty(accessToken) || (!accessToken.toLowerCase(Locale.US).startsWith("pk.")
       && !accessToken.toLowerCase(Locale.US).startsWith("sk."))) {

@@ -84,7 +84,7 @@ public final class NavigationRoute {
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
         long end = System.nanoTime();
         callback.onResponse(call, response);
-        NavigationMetricsWrapper.routeRetrievalEvent(end - start, false);
+        NavigationTelemetry.getInstance().routeRetrievalEvent(end - start, false);
       }
 
       @Override
