@@ -167,9 +167,7 @@ class NavigationViewEventDispatcher {
 
   SpeechAnnouncement onAnnouncement(SpeechAnnouncement announcement) {
     if (speechAnnouncementListener != null) {
-      String textAnnouncement = speechAnnouncementListener.willVoice(announcement);
-      SpeechAnnouncement announcementToBeVoiced = SpeechAnnouncement.builder().announcement(textAnnouncement).build();
-      return announcementToBeVoiced;
+      return speechAnnouncementListener.willVoice(announcement);
     }
     return announcement;
   }

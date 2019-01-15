@@ -378,8 +378,9 @@ public class NavigationViewEventDispatcherTest {
   public void onNewVoiceAnnouncement_instructionListenerIsCalled() {
     SpeechAnnouncement originalAnnouncement = mock(SpeechAnnouncement.class);
     SpeechAnnouncementListener speechAnnouncementListener = mock(SpeechAnnouncementListener.class);
-    String textAnnouncement = "announcement to be voiced";
-    when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(textAnnouncement);
+    SpeechAnnouncement newAnnouncement = SpeechAnnouncement.builder()
+      .announcement("New announcement").build();
+    when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(newAnnouncement);
     NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(speechAnnouncementListener);
 
     eventDispatcher.onAnnouncement(originalAnnouncement);
@@ -391,11 +392,29 @@ public class NavigationViewEventDispatcherTest {
   public void onNewVoiceAnnouncement_announcementToBeVoicedIsReturned() {
     SpeechAnnouncement originalAnnouncement = SpeechAnnouncement.builder().announcement("announcement").build();
     SpeechAnnouncementListener speechAnnouncementListener = mock(SpeechAnnouncementListener.class);
-    String textAnnouncement = "announcement to be voiced";
-    when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(textAnnouncement);
+    SpeechAnnouncement newAnnouncement = SpeechAnnouncement.builder()
+      .announcement("New announcement").build();
+    when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(newAnnouncement);
     NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(speechAnnouncementListener);
+
     SpeechAnnouncement modifiedAnnouncement = eventDispatcher.onAnnouncement(originalAnnouncement);
-    assertEquals("announcement to be voiced", modifiedAnnouncement.announcement());
+
+    assertEquals("New announcement", modifiedAnnouncement.announcement());
+  }
+
+  @Test
+  public void onNewVoiceAnnouncement_ssmlAnnouncementToBeVoicedIsReturned() {
+    SpeechAnnouncement originalAnnouncement = SpeechAnnouncement.builder().announcement("announcement").build();
+    SpeechAnnouncementListener speechAnnouncementListener = mock(SpeechAnnouncementListener.class);
+    SpeechAnnouncement newAnnouncement = SpeechAnnouncement.builder()
+      .announcement("New announcement")
+      .ssmlAnnouncement("New SSML announcement").build();
+    when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(newAnnouncement);
+    NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(speechAnnouncementListener);
+
+    SpeechAnnouncement modifiedAnnouncement = eventDispatcher.onAnnouncement(originalAnnouncement);
+
+    assertEquals("New SSML announcement", modifiedAnnouncement.ssmlAnnouncement());
   }
 
   @NonNull
