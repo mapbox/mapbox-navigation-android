@@ -69,7 +69,7 @@ class NavigationPresenter {
   }
 
   void onWayNameChanged(@NonNull String wayName) {
-    if (TextUtils.isEmpty(wayName)) {
+    if (TextUtils.isEmpty(wayName) || view.isSummaryBottomSheetHidden()) {
       view.updateWayNameVisibility(false);
       return;
     }
