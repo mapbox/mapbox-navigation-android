@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class NavigationPresenterTest {
 
@@ -94,6 +95,17 @@ public class NavigationPresenterTest {
     NavigationPresenter presenter = new NavigationPresenter(view);
 
     presenter.onWayNameChanged("");
+
+    verify(view).updateWayNameVisibility(false);
+  }
+
+  @Test
+  public void onWayNameChanged_mapWayNameIsHiddenWithCollapsedBottomsheet() {
+    NavigationContract.View view = mock(NavigationContract.View.class);
+    when(view.isSummaryBottomSheetHidden()).thenReturn(true);
+    NavigationPresenter presenter = new NavigationPresenter(view);
+
+    presenter.onWayNameChanged("some valid way name");
 
     verify(view).updateWayNameVisibility(false);
   }
