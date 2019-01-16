@@ -1,63 +1,26 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-import com.mapbox.api.directions.v5.models.BannerInstructions;
-import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.navigator.BannerComponent;
+import com.mapbox.navigator.BannerInstruction;
+import com.mapbox.navigator.BannerSection;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import org.junit.Test;
 
-import java.util.List;
+import java.util.ArrayList;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class BannerInstructionMilestoneTest extends BaseTest {
 
   @Test
-  public void sanity() {
-    BannerInstructionMilestone milestone = buildBannerInstructionMilestone();
-
-    assertNotNull(milestone);
-  }
-
-  @Test
-  public void onBeginningOfStep_bannerInstructionsShouldTrigger() throws Exception {
+  public void checksNotBannerShownIfBannerInstructionIsNull() throws Exception {
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    routeProgress = createBeginningOfStepRouteProgress(routeProgress);
-    BannerInstructionMilestone milestone = buildBannerInstructionMilestone();
-
-    boolean isOccurring = milestone.isOccurring(routeProgress, routeProgress);
-
-    assertTrue(isOccurring);
-  }
-
-  @Test
-  public void onSameInstructionOccurring_milestoneDoesNotTriggerTwice() throws Exception {
-    RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    RouteProgress firstProgress = createBeginningOfStepRouteProgress(routeProgress);
-    double fortyMetersIntoStep = routeProgress.currentLegProgress().currentStep().distance() - 40;
-    RouteProgress secondProgress = routeProgress.toBuilder()
-      .stepDistanceRemaining(fortyMetersIntoStep)
-      .stepIndex(0)
-      .build();
-    BannerInstructionMilestone milestone = buildBannerInstructionMilestone();
-
-    milestone.isOccurring(firstProgress, firstProgress);
-    boolean shouldNotBeOccurring = milestone.isOccurring(firstProgress, secondProgress);
-
-    assertFalse(shouldNotBeOccurring);
-  }
-
-  @Test
-  public void nullInstructions_MilestoneDoesNotGetTriggered() throws Exception {
-    RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
-    List<BannerInstructions> instructions = currentStep.bannerInstructions();
-    instructions.clear();
-    routeProgress = createBeginningOfStepRouteProgress(routeProgress);
+    BannerInstruction nullBannerInstruction = null;
+    routeProgress = add(nullBannerInstruction, routeProgress);
     BannerInstructionMilestone milestone = buildBannerInstructionMilestone();
 
     boolean isOccurring = milestone.isOccurring(routeProgress, routeProgress);
@@ -66,42 +29,48 @@ public class BannerInstructionMilestoneTest extends BaseTest {
   }
 
   @Test
-  public void onOccurringMilestone_beginningOfStep_bannerInstructionsAreReturned() throws Exception {
+  public void checksBannerShownIfBannerInstructionIsNotNull() throws Exception {
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    routeProgress = routeProgress.toBuilder()
-      .stepDistanceRemaining(routeProgress.currentLegProgress().currentStep().distance())
-      .stepIndex(1)
-      .build();
-    BannerInstructions instructions = routeProgress.currentLegProgress().currentStep().bannerInstructions().get(0);
+    BannerInstruction emptyBannerInstruction = buildEmptyBannerInstructionWithPrimary(null);
+    routeProgress = add(emptyBannerInstruction, routeProgress);
     BannerInstructionMilestone milestone = buildBannerInstructionMilestone();
 
-    milestone.isOccurring(routeProgress, routeProgress);
+    boolean isOccurring = milestone.isOccurring(routeProgress, routeProgress);
 
-    assertEquals(instructions, milestone.getBannerInstructions());
+    assertTrue(isOccurring);
   }
 
   @Test
-  public void onOccurringMilestone_endOfStep_bannerInstructionsAreReturned() throws Exception {
+  public void checksBannerMappingIfBannerSectionHasComponents() throws Exception {
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    int tenMetersRemainingInStep = 10;
-    routeProgress = routeProgress.toBuilder()
-      .stepDistanceRemaining(tenMetersRemainingInStep)
-      .stepIndex(1)
-      .build();
-    List<BannerInstructions> bannerInstructions = routeProgress.currentLegProgress().currentStep().bannerInstructions();
-    BannerInstructions instructions = bannerInstructions.get(bannerInstructions.size() - 1);
+    int anAbbrPriority = 0;
+    boolean isActive = true;
+    ArrayList<String> anyDirections = new ArrayList<>();
+    anyDirections.add("a direction");
+    BannerComponent aComponent = new BannerComponent("a type", "a text", "an abbr", anAbbrPriority,
+      "an image base url", isActive, anyDirections);
+    ArrayList<BannerComponent> components = new ArrayList<>();
+    components.add(aComponent);
+    BannerSection sectionWithComponents = new BannerSection("a text", "a type", "a modifier", 60, "a driving side",
+      components);
+    BannerInstruction emptyBannerInstruction = buildEmptyBannerInstructionWithPrimary(sectionWithComponents);
+    routeProgress = add(emptyBannerInstruction, routeProgress);
     BannerInstructionMilestone milestone = buildBannerInstructionMilestone();
 
-    milestone.isOccurring(routeProgress, routeProgress);
+    boolean isOccurring = milestone.isOccurring(routeProgress, routeProgress);
 
-    assertEquals(instructions, milestone.getBannerInstructions());
+    assertTrue(isOccurring);
+    assertEquals(1, routeProgress.bannerInstruction().getPrimary().getComponents().size());
   }
 
-  private RouteProgress createBeginningOfStepRouteProgress(RouteProgress routeProgress) {
+  private RouteProgress add(BannerInstruction bannerInstruction, RouteProgress routeProgress) {
     return routeProgress.toBuilder()
-      .stepDistanceRemaining(routeProgress.currentLegProgress().currentStep().distance())
-      .stepIndex(0)
+      .bannerInstruction(bannerInstruction)
       .build();
+  }
+
+  private BannerInstruction buildEmptyBannerInstructionWithPrimary(BannerSection section) {
+    return new BannerInstruction(section, null, null, -1, -1);
   }
 
   private BannerInstructionMilestone buildBannerInstructionMilestone() {

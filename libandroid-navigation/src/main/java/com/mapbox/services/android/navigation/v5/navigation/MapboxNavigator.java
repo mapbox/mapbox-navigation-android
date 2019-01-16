@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.location.Location;
 
 import com.mapbox.geojson.Point;
+import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
@@ -69,6 +70,10 @@ class MapboxNavigator {
 
   synchronized VoiceInstruction retrieveVoiceInstruction(int index) {
     return navigator.getVoiceInstruction(index);
+  }
+
+  synchronized BannerInstruction retrieveBannerInstruction(int index) {
+    return navigator.getBannerInstruction(index);
   }
 
   FixLocation buildFixLocationFromLocation(Location location) {

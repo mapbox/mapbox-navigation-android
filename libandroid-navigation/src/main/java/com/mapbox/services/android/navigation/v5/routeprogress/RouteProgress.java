@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
+import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.navigator.VoiceInstruction;
 
 import java.util.List;
@@ -169,6 +170,15 @@ public abstract class RouteProgress {
   public abstract VoiceInstruction voiceInstruction();
 
   /**
+   * Current banner instruction.
+   *
+   * @return current banner instruction
+   * @since 0.25.0
+   */
+  @Nullable
+  public abstract BannerInstruction bannerInstruction();
+
+  /**
    * Returns the current state of progress along the route.  Provides route and location tracking
    * information.
    *
@@ -263,6 +273,8 @@ public abstract class RouteProgress {
     public abstract Builder inTunnel(boolean inTunnel);
 
     public abstract Builder voiceInstruction(@Nullable VoiceInstruction voiceInstruction);
+
+    public abstract Builder bannerInstruction(@Nullable BannerInstruction bannerInstruction);
 
     public abstract Builder currentState(@Nullable RouteProgressState currentState);
 
