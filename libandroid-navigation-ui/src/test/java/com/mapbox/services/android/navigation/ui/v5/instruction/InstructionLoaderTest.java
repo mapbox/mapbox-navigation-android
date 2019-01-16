@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 import android.widget.TextView;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
+import com.mapbox.api.directions.v5.models.BannerText;
 
 import org.junit.Test;
 
@@ -27,8 +28,10 @@ public class InstructionLoaderTest {
       .build();
     List<BannerComponents> bannerComponentsList = new ArrayList<>();
     bannerComponentsList.add(bannerComponents);
+    BannerText bannerText = mock(BannerText.class);
+    when(bannerText.components()).thenReturn(bannerComponentsList);
 
-    new InstructionLoader(textView, bannerComponentsList, imageCoordinator, abbreviationCoordinator);
+    new InstructionLoader(textView, bannerText, imageCoordinator, abbreviationCoordinator);
 
     verify(abbreviationCoordinator).addPriorityInfo(bannerComponents, 0);
   }
@@ -43,8 +46,10 @@ public class InstructionLoaderTest {
       .build();
     List<BannerComponents> bannerComponentsList = new ArrayList<>();
     bannerComponentsList.add(bannerComponents);
+    BannerText bannerText = mock(BannerText.class);
+    when(bannerText.components()).thenReturn(bannerComponentsList);
 
-    new InstructionLoader(textView, bannerComponentsList, imageCoordinator, abbreviationCoordinator);
+    new InstructionLoader(textView, bannerText, imageCoordinator, abbreviationCoordinator);
 
     verify(imageCoordinator).addShieldInfo(bannerComponents, 0);
   }
@@ -62,7 +67,10 @@ public class InstructionLoaderTest {
     bannerComponentsList.add(bannerComponents);
     String abbreviatedText = "abbreviated text";
     when(abbreviationCoordinator.abbreviateBannerText(any(List.class), any(TextView.class))).thenReturn(abbreviatedText);
-    InstructionLoader instructionLoader = new InstructionLoader(textView, bannerComponentsList, imageCoordinator, abbreviationCoordinator);
+    BannerText bannerText = mock(BannerText.class);
+    when(bannerText.components()).thenReturn(bannerComponentsList);
+    InstructionLoader instructionLoader = new InstructionLoader(textView, bannerText, imageCoordinator,
+      abbreviationCoordinator);
 
     instructionLoader.loadInstruction();
 
@@ -81,7 +89,10 @@ public class InstructionLoaderTest {
     bannerComponentsList.add(bannerComponents);
     String abbreviatedText = "abbreviated text";
     when(abbreviationCoordinator.abbreviateBannerText(any(List.class), any(TextView.class))).thenReturn(abbreviatedText);
-    InstructionLoader instructionLoader = new InstructionLoader(textView, bannerComponentsList, imageCoordinator, abbreviationCoordinator);
+    BannerText bannerText = mock(BannerText.class);
+    when(bannerText.components()).thenReturn(bannerComponentsList);
+    InstructionLoader instructionLoader = new InstructionLoader(textView, bannerText, imageCoordinator,
+      abbreviationCoordinator);
 
     instructionLoader.loadInstruction();
 

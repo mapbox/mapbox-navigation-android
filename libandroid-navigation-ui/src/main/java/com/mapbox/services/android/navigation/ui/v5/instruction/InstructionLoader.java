@@ -25,24 +25,31 @@ import java.util.List;
  * If a shield URL is found, {@link Picasso} is used to load the image.  Then, once the image is loaded,
  * a new {@link ImageSpan} is created and set to the appropriate position of the {@link Spannable}/
  */
-class InstructionLoader {
+public class InstructionLoader {
   private ImageCoordinator imageCoordinator;
   private AbbreviationCoordinator abbreviationCoordinator;
   private TextView textView;
   private List<BannerComponentNode> bannerComponentNodes;
 
-  InstructionLoader(TextView textView, @NonNull List<BannerComponents> bannerComponents) {
-    this(textView, bannerComponents, ImageCoordinator.getInstance(), new AbbreviationCoordinator());
+  /**
+   * Creates an InstructionLoader which can handle highway shields and also takes into account
+   * abbreviations.
+   *
+   * @param textView to populate with instruction
+   * @param bannerText containing components to populate into textView
+   */
+  public InstructionLoader(TextView textView, BannerText bannerText) {
+    this(textView, bannerText, ImageCoordinator.getInstance(), new AbbreviationCoordinator());
   }
 
-  InstructionLoader(TextView textView, @NonNull List<BannerComponents> bannerComponents,
+  InstructionLoader(TextView textView, @NonNull BannerText bannerText,
                     ImageCoordinator imageCoordinator, AbbreviationCoordinator abbreviationCoordinator) {
     this.abbreviationCoordinator = abbreviationCoordinator;
     this.textView = textView;
     bannerComponentNodes = new ArrayList<>();
     this.imageCoordinator = imageCoordinator;
 
-    bannerComponentNodes = parseBannerComponents(bannerComponents);
+    bannerComponentNodes = parseBannerComponents(bannerText.components());
   }
 
   /**
@@ -50,7 +57,7 @@ class InstructionLoader {
    * a new {@link Spannable} with text / {@link ImageSpan}s which is loaded
    * into the given {@link TextView}.
    */
-  void loadInstruction() {
+  public void loadInstruction() {
     setText(textView, bannerComponentNodes);
     loadImages(textView, bannerComponentNodes);
   }
