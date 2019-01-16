@@ -2,6 +2,30 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.26.0 - January 16, 2019
+
+Note: This release breaks `SEMVER` / contains API breaking changes.  Please consult this [migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/0.27.0-Migration-Guide) for the necessary updates required.
+
+* Consume banner instructions from NN [#1543](https://github.com/mapbox/mapbox-navigation-android/pull/1543)
+* Update InstructionLoader API as public / taking BannerText [#1683](https://github.com/mapbox/mapbox-navigation-android/pull/1683)
+* Removed multiple instantiations of MapboxOfflineRouter from OfflineRegionDownloadActivity [#1684](https://github.com/mapbox/mapbox-navigation-android/pull/1684)
+* Add Streets Source v7 and v8 checks for way name layer [#1679](https://github.com/mapbox/mapbox-navigation-android/pull/1679)
+* Add dynamic map FPS adjustment for NavigationMapboxMap [#1669](https://github.com/mapbox/mapbox-navigation-android/pull/1669)
+* Add ability to disable auto-increment of RouteLeg index [#1643](https://github.com/mapbox/mapbox-navigation-android/pull/1643)
+* Tracking gestures management to true in default NavigationView styles [#1682](https://github.com/mapbox/mapbox-navigation-android/pull/1682)
+* Fix AlertView animation leak [#1667](https://github.com/mapbox/mapbox-navigation-android/pull/1667)
+* NavigationView do not allow way name to show in overview mode [#1676](https://github.com/mapbox/mapbox-navigation-android/pull/1676)
+* Set ssmlAnouncement when using SpeechAnnouncementListener [#1675](https://github.com/mapbox/mapbox-navigation-android/pull/1675)
+* Update Maps SDK 7.x and events 4.x with new location APIs [#1615](https://github.com/mapbox/mapbox-navigation-android/pull/1615)
+* Update dependencies: ConstraintLayout, mockito, leakCanary, robolectric [#1668](https://github.com/mapbox/mapbox-navigation-android/pull/1668)
+* Remove unused / package-private RouteStepProgress#nextStep [#1666](https://github.com/mapbox/mapbox-navigation-android/pull/1666)
+* Return the actual error coming back from NN when fetching an offline route fails [#1660](https://github.com/mapbox/mapbox-navigation-android/pull/1660)
+* Create RouteProgress after leg index check in RouteProcessorRunnable [#1657](https://github.com/mapbox/mapbox-navigation-android/pull/1657)
+* Use MapboxMap camera animation for resetting NavigationCamera [#1658](https://github.com/mapbox/mapbox-navigation-android/pull/1658)
+* Allow NavigationView to start navigation during existing session [#1655](https://github.com/mapbox/mapbox-navigation-android/pull/1655)
+* Happy 2019 🎉🚗 [#1654](https://github.com/mapbox/mapbox-navigation-android/pull/1654)
+* Bump Maps and Events dependencies [#1651](https://github.com/mapbox/mapbox-navigation-android/pull/1651)
+
 ### v0.26.0 - December 20, 2018
 
 Note: This release breaks `SEMVER` / contains API breaking changes.  Please consult this [migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/0.26.0-Migration-Guide) for the necessary updates required.
