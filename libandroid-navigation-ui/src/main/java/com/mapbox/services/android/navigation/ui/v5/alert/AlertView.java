@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5.alert;
 
-import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.PorterDuff;
@@ -30,12 +29,12 @@ import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
  */
 public class AlertView extends CardView {
 
+  private static final String ALERT_VIEW_PROGRESS = "progress";
   private TextView alertText;
   private ProgressBar alertProgressBar;
 
   private Animation fadeOut;
   private Animation slideDownTop;
-  private ObjectAnimator countdownAnimation;
 
   public AlertView(Context context) {
     this(context, null);
@@ -56,14 +55,6 @@ public class AlertView extends CardView {
     bind();
     initAnimations();
     initBackground();
-  }
-
-  @Override
-  protected void onDetachedFromWindow() {
-    super.onDetachedFromWindow();
-    if (countdownAnimation != null) {
-      countdownAnimation.cancel();
-    }
   }
 
   /**
@@ -157,31 +148,10 @@ public class AlertView extends CardView {
   }
 
   private void startCountdown(long duration) {
-    countdownAnimation = ObjectAnimator.ofInt(alertProgressBar,
-      "progress", 0);
+    ObjectAnimator countdownAnimation = ObjectAnimator.ofInt(alertProgressBar, ALERT_VIEW_PROGRESS, 0);
     countdownAnimation.setInterpolator(new LinearInterpolator());
     countdownAnimation.setDuration(duration);
-    countdownAnimation.addListener(new Animator.AnimatorListener() {
-      @Override
-      public void onAnimationStart(Animator animation) {
-
-      }
-
-      @Override
-      public void onAnimationEnd(Animator animation) {
-        hide();
-      }
-
-      @Override
-      public void onAnimationCancel(Animator animation) {
-
-      }
-
-      @Override
-      public void onAnimationRepeat(Animator animation) {
-
-      }
-    });
+    countdownAnimation.addListener(new AlertViewAnimatorListener(this));
     countdownAnimation.start();
   }
 
