@@ -9,7 +9,7 @@ import com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener;
  * <p>
  * If the camera tracking is dismissed, we notify the presenter to adjust UI accordingly.
  */
-public class NavigationOnCameraTrackingChangedListener implements OnCameraTrackingChangedListener {
+class NavigationOnCameraTrackingChangedListener implements OnCameraTrackingChangedListener {
 
   private final NavigationPresenter navigationPresenter;
   private final BottomSheetBehavior summaryBehavior;
