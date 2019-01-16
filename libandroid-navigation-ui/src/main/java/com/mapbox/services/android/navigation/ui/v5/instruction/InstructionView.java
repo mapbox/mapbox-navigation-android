@@ -598,7 +598,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
   private InstructionLoader createInstructionLoader(TextView textView, BannerText bannerText) {
     if (hasComponents(bannerText)) {
-      return new InstructionLoader(textView, bannerText.components());
+      return new InstructionLoader(textView, bannerText);
     } else {
       return null;
     }
