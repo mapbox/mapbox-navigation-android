@@ -50,6 +50,10 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
                     southWest.longitude, southWest.latitude,
                     northEast.longitude, northEast.latitude)
         }
+    private val mapboxOfflineRouter: MapboxOfflineRouter
+        get() {
+            return MapboxOfflineRouter(obtainOfflineDirectory())
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,17 +65,17 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     }
 
     fun setupSpinner() {
-        MapboxOfflineRouter("")
-            .fetchAvailableTileVersions(Mapbox.getAccessToken(),
-                object : OnTileVersionsFoundCallback {
-                override fun onVersionsFound(availableVersions: MutableList<String>) {
-                    setupSpinner(availableVersions)
-                }
+        mapboxOfflineRouter
+                .fetchAvailableTileVersions(Mapbox.getAccessToken(),
+                        object : OnTileVersionsFoundCallback {
+                            override fun onVersionsFound(availableVersions: MutableList<String>) {
+                                setupSpinner(availableVersions)
+                            }
 
-                override fun onError(error: OfflineError) {
-                    onVersionFetchFailed()
-                }
-            })
+                            override fun onError(error: OfflineError) {
+                                onVersionFetchFailed()
+                            }
+                        })
     }
 
     fun onVersionFetchFailed() {
@@ -158,9 +162,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
                 .version(versionSpinner.selectedItem as String)
                 .boundingBox(boundingBox)
 
-        val router = MapboxOfflineRouter(obtainOfflineDirectory())
-
-        router.downloadTiles(builder.build(), this)
+        mapboxOfflineRouter.downloadTiles(builder.build(), this)
     }
 
     private fun obtainOfflineDirectory(): String {
