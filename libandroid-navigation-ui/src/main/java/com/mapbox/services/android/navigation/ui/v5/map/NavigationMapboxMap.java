@@ -2,12 +2,12 @@ package com.mapbox.services.android.navigation.ui.v5.map;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -23,7 +23,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.style.layers.LineLayer;
+import com.mapbox.mapboxsdk.style.sources.Source;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.services.android.navigation.ui.v5.NavigationSnapshotReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.R;
@@ -36,8 +36,6 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineColor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MINIMUM_MAP_ZOOM;
 
 /**
@@ -51,11 +49,11 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 public class NavigationMapboxMap {
 
   static final String STREETS_LAYER_ID = "streetsLayer";
-  private static final String MAPBOX_STREETS_V7 = "mapbox://mapbox.mapbox-streets-v7";
-  private static final String STREETS_SOURCE_ID = "streetsSource";
-  private static final String ROAD_LABEL = "road_label";
-  private static final float DEFAULT_WIDTH = 20f;
-  private static final int LAST_INDEX = 0;
+  private static final String MAPBOX_STREETS_V7_URL = "mapbox.mapbox-streets-v7";
+  private static final String MAPBOX_STREETS_V8_URL = "mapbox.mapbox-streets-v8";
+  private static final String STREETS_SOURCE_ID = "com.mapbox.services.android.navigation.streets";
+  private static final String STREETS_V7_ROAD_LABEL = "road_label";
+  private static final String STREETS_V8_ROAD_LABEL = "road";
   private static final String INCIDENTS_LAYER_ID = "closures";
   private static final String TRAFFIC_LAYER_ID = "traffic";
   private static final int[] ZERO_MAP_PADDING = {0, 0, 0, 0};
@@ -111,6 +109,12 @@ public class NavigationMapboxMap {
   // Package private (no modifier) for testing purposes
   NavigationMapboxMap(MapFpsDelegate mapFpsDelegate) {
     this.mapFpsDelegate = mapFpsDelegate;
+  }
+
+  // Package private (no modifier) for testing purposes
+  NavigationMapboxMap(MapboxMap mapboxMap, MapLayerInteractor layerInteractor, MapPaddingAdjustor adjustor) {
+    this.layerInteractor = layerInteractor;
+    initializeWayname(mapboxMap, adjustor);
   }
 
   /**
@@ -562,15 +566,33 @@ public class NavigationMapboxMap {
   }
 
   private void initializeStreetsSource(MapboxMap mapboxMap) {
-    VectorSource streetSource = new VectorSource(STREETS_SOURCE_ID, MAPBOX_STREETS_V7);
-    mapboxMap.getStyle().addSource(streetSource);
-    LineLayer streetsLayer = new LineLayer(STREETS_LAYER_ID, STREETS_SOURCE_ID)
-      .withProperties(
-        lineWidth(DEFAULT_WIDTH),
-        lineColor(Color.WHITE)
-      )
-      .withSourceLayer(ROAD_LABEL);
-    mapboxMap.getStyle().addLayerAt(streetsLayer, LAST_INDEX);
+    List<Source> sources = mapboxMap.getStyle().getSources();
+    Source sourceV7 = findSourceByUrl(sources, MAPBOX_STREETS_V7_URL);
+    Source sourceV8 = findSourceByUrl(sources, MAPBOX_STREETS_V8_URL);
+
+    if (sourceV7 != null) {
+      layerInteractor.addStreetsLayer(sourceV7.getId(), STREETS_V7_ROAD_LABEL);
+    } else if (sourceV8 != null) {
+      layerInteractor.addStreetsLayer(sourceV8.getId(), STREETS_V8_ROAD_LABEL);
+    } else {
+      VectorSource streetSource = new VectorSource(STREETS_SOURCE_ID, MAPBOX_STREETS_V8_URL);
+      mapboxMap.getStyle().addSource(streetSource);
+      layerInteractor.addStreetsLayer(STREETS_SOURCE_ID, STREETS_V8_ROAD_LABEL);
+    }
+  }
+
+  @Nullable
+  private Source findSourceByUrl(List<Source> sources, String streetsUrl) {
+    for (Source source : sources) {
+      if (source instanceof VectorSource) {
+        VectorSource vectorSource = (VectorSource) source;
+        String url = vectorSource.getUrl();
+        if (url != null && url.contains(streetsUrl)) {
+          return vectorSource;
+        }
+      }
+    }
+    return null;
   }
 
   private void initializeRoute(MapView mapView, MapboxMap map) {

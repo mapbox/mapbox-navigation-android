@@ -3,6 +3,11 @@ package com.mapbox.services.android.navigation.ui.v5.map;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import com.mapbox.mapboxsdk.style.sources.Source;
+import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 
@@ -14,6 +19,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class NavigationMapboxMapTest {
 
@@ -145,5 +151,50 @@ public class NavigationMapboxMapTest {
     theNavigationMap.updateMapFpsThrottleEnabled(isEnabled);
 
     verify(delegate).updateEnabled(isEnabled);
+  }
+
+  @Test
+  public void onInitializeWayName_existingV7StreetSourceIsUsed() {
+    Style style = mock(Style.class);
+    String urlV7 = "mapbox://mapbox.mapbox-streets-v7";
+    List<Source> sources = buildMockSourcesWith(urlV7);
+    when(style.getSources()).thenReturn(sources);
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    when(mapboxMap.getStyle()).thenReturn(style);
+    MapLayerInteractor layerInteractor = mock(MapLayerInteractor.class);
+    MapPaddingAdjustor adjustor = mock(MapPaddingAdjustor.class);
+
+    new NavigationMapboxMap(mapboxMap, layerInteractor, adjustor);
+
+    verify(layerInteractor).addStreetsLayer("composite", "road_label");
+  }
+
+  @Test
+  public void onInitializeWayName_exisitingV8StreetSourceIsUsed() {
+    Style style = mock(Style.class);
+    String urlV7 = "mapbox://mapbox.mapbox-streets-v8";
+    List<Source> sources = buildMockSourcesWith(urlV7);
+    when(style.getSources()).thenReturn(sources);
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    when(mapboxMap.getStyle()).thenReturn(style);
+    MapLayerInteractor layerInteractor = mock(MapLayerInteractor.class);
+    MapPaddingAdjustor adjustor = mock(MapPaddingAdjustor.class);
+
+    new NavigationMapboxMap(mapboxMap, layerInteractor, adjustor);
+
+    verify(layerInteractor).addStreetsLayer("composite", "road");
+  }
+
+  private List<Source> buildMockSourcesWith(String url) {
+    List<Source> sources = new ArrayList<>();
+    VectorSource vectorSource1 = mock(VectorSource.class);
+    VectorSource vectorSource2 = mock(VectorSource.class);
+    when(vectorSource2.getId()).thenReturn("composite");
+    when(vectorSource2.getUrl()).thenReturn(url);
+    GeoJsonSource geoJsonSource = mock(GeoJsonSource.class);
+    sources.add(vectorSource1);
+    sources.add(vectorSource2);
+    sources.add(geoJsonSource);
+    return sources;
   }
 }
