@@ -174,6 +174,5 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
     boolean getAbbreviate() {
       return abbreviate;
     }
-
   }
 }

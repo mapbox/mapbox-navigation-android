@@ -30,8 +30,9 @@ public class AbbreviationCreatorTest extends BaseTest {
     TextView textView = mock(TextView.class);
     AbbreviationVerifier abbreviationVerifier = mock(AbbreviationVerifier.class);
     when(abbreviationVerifier.isNodeType(bannerComponents)).thenReturn(true);
-    when(textView.textFits(abbreviation)).thenReturn(true);
-    when(textView.textFits(bannerComponents.text())).thenReturn(false);
+    TextViewUtils textViewUtils = mock(TextViewUtils.class);
+    when(textViewUtils.textFits(textView, abbreviation)).thenReturn(true);
+    when(textViewUtils.textFits(textView, bannerComponents.text())).thenReturn(false);
     BannerComponentNode node = mock(AbbreviationCreator.AbbreviationNode.class);
     when(((AbbreviationCreator.AbbreviationNode) node).getAbbreviate()).thenReturn(true);
     when(node.toString()).thenReturn(abbreviation);
@@ -39,7 +40,7 @@ public class AbbreviationCreatorTest extends BaseTest {
 
     abbreviationCreator.preProcess(textView, Collections.singletonList(node));
 
-    verify(textView).setInstructionText(abbreviation);
+    verify(textView).setText(abbreviation);
   }
 
   @Test
@@ -54,11 +55,12 @@ public class AbbreviationCreatorTest extends BaseTest {
     AbbreviationVerifier abbreviationVerifier = mock(AbbreviationVerifier.class);
     when(abbreviationVerifier.isNodeType(bannerComponents)).thenReturn(true);
     HashMap<Integer, List<Integer>> abbreviations = new HashMap();
-    AbbreviationCreator abbreviationCreator = new AbbreviationCreator(abbreviationVerifier, abbreviations);
+    AbbreviationCreator abbreviationCreator = new AbbreviationCreator(abbreviationVerifier,
+      abbreviations, mock(TextViewUtils.class));
     List<BannerComponentNode> bannerComponentNodes = new ArrayList<>();
     bannerComponentNodes.add(new AbbreviationCreator.AbbreviationNode(bannerComponents, 0));
 
-    abbreviationCreator.setupNode(bannerComponents, 0, 0);
+    abbreviationCreator.setupNode(bannerComponents, 0, 0, "");
 
     assertEquals(abbreviations.size(), 1);
     assertEquals(abbreviations.get(abbreviationPriority).get(0), Integer.valueOf(0));

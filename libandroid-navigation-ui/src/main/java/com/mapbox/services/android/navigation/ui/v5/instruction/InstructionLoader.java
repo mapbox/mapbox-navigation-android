@@ -32,7 +32,7 @@ public class InstructionLoader {
    */
   InstructionLoader(TextView textView, @NonNull BannerText bannerText) {
     this(textView, new BannerComponentTree(bannerText, new ExitSignCreator(),
-      new AbbreviationCreator(), ImageCreator.getInstance(), new TextCreator()));
+      ImageCreator.getInstance(), new AbbreviationCreator(), new TextCreator()));
   }
 
   InstructionLoader(TextView textView, BannerComponentTree bannerComponentTree) {
