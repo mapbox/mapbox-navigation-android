@@ -9,6 +9,8 @@ import com.mapbox.api.directions.v5.models.BannerText;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
+
 public class BannerComponentTree {
   private final NodeCreator[] nodeCreators;
   private List<BannerComponentNode> bannerComponentNodes;
@@ -36,7 +38,7 @@ public class BannerComponentTree {
 
     for (BannerComponents components : bannerText.components()) {
       BannerComponentNode node = null;
-
+      Timber.d(("~~~~~~~~~~~" + components.text() + "\t" + components.abbreviation()));
       for (NodeCreator nodeCreator : nodeCreators) {
         if (nodeCreator.isNodeType(components)) {
           node = nodeCreator.setupNode(components, bannerComponentNodes.size(), length,
