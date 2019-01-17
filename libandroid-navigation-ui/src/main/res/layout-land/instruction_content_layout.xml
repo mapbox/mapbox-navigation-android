@@ -52,28 +52,28 @@
         app:layout_constraintStart_toEndOf="@id/guideline"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionTextView
+        <TextView
             android:id="@+id/stepPrimaryText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            app:textColor="?attr/navigationViewBannerPrimaryText"
-            app:textSize="28sp"
+            android:textColor="?attr/navigationViewBannerPrimaryText"
+            android:textSize="28sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Fulton St."/>
 
-        <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionTextView
+        <TextView
             android:id="@+id/stepSecondaryText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            app:textColor="?attr/navigationViewBannerSecondaryText"
-            app:textSize="22sp"
+            android:textColor="?attr/navigationViewBannerSecondaryText"
+            android:textSize="22sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

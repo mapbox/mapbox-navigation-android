@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
+import android.widget.TextView;
+
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.services.android.navigation.ui.v5.BaseTest;
 
@@ -25,7 +27,7 @@ public class AbbreviationCreatorTest extends BaseTest {
         .abbreviation(abbreviation)
         .abbreviationPriority(0)
         .build();
-    InstructionTextView textView = mock(InstructionTextView.class);
+    TextView textView = mock(TextView.class);
     AbbreviationVerifier abbreviationVerifier = mock(AbbreviationVerifier.class);
     when(abbreviationVerifier.isNodeType(bannerComponents)).thenReturn(true);
     when(textView.textFits(abbreviation)).thenReturn(true);

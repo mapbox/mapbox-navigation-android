@@ -68,7 +68,7 @@
         app:layout_constraintStart_toEndOf="@+id/instructionManeuverLayout"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionTextView
+        <TextView
             android:id="@+id/stepPrimaryText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -77,20 +77,20 @@
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:maxLines="1"
-            app:textColor="?attr/navigationViewBannerPrimaryText"
-            app:textSize="28sp"
+            android:textColor="?attr/navigationViewBannerPrimaryText"
+            android:textSize="28sp"
             android:textStyle="bold"
             tools:text="Fulton St."/>
 
-        <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionTextView
+        <TextView
             android:id="@+id/stepSecondaryText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:includeFontPadding="false"
             android:maxLines="1"
-            app:textColor="?attr/navigationViewBannerSecondaryText"
-            app:textSize="22sp"
+            android:textColor="?attr/navigationViewBannerSecondaryText"
+            android:textSize="22sp"
             android:textStyle="bold"
             tools:text="San Jose / Cupertino / Saratoga Montery / SR-1"/>
 

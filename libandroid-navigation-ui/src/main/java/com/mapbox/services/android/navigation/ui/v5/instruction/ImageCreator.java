@@ -2,7 +2,6 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.content.Context;
 import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.style.ImageSpan;
 import android.widget.TextView;
 
@@ -25,7 +24,7 @@ import java.util.List;
  * If a shield URL is found, {@link Picasso} is used to load the image.  Then, once the image is loaded,
  * a new {@link ImageSpan} is created and set to the appropriate position of the {@link Spannable}
  */
-public class ImageCreator extends NodeCreator<ImageCreator.ImageNode, ImageVerifier> {
+public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier> {
 
   private static ImageCreator instance;
   private boolean isInitialized;
@@ -39,9 +38,10 @@ public class ImageCreator extends NodeCreator<ImageCreator.ImageNode, ImageVerif
   }
 
   @Override
-  ImageCreator.ImageNode setupNode(BannerComponents components, int index, int startIndex) {
+  BannerComponentNode setupNode(BannerComponents components, int index, int startIndex,
+                                String modifier) {
     addShieldInfo(components, index);
-    return new ImageCreator.ImageNode(components, startIndex);
+    return new BannerComponentNode(components, startIndex);
   }
 
   /**
@@ -53,13 +53,6 @@ public class ImageCreator extends NodeCreator<ImageCreator.ImageNode, ImageVerif
    */
   public void addShieldInfo(BannerComponents bannerComponents, int index) {
     bannerShieldList.add(new BannerShield(bannerComponents, index));
-  }
-
-  static class ImageNode extends BannerComponentNode {
-
-    ImageNode(BannerComponents bannerComponents, int startIndex) {
-      super(bannerComponents, startIndex);
-    }
   }
 
   /**
@@ -189,9 +182,8 @@ public class ImageCreator extends NodeCreator<ImageCreator.ImageNode, ImageVerif
   }
 
   private void createTargets(TextView textView) {
-    Spannable instructionSpannable = new SpannableString(textView.getText());
     for (final BannerShield bannerShield : bannerShieldList) {
-      targets.add(new InstructionTarget(textView, instructionSpannable, bannerShieldList, bannerShield,
+      targets.add(new InstructionTarget(textView, bannerShieldList, bannerShield,
         new InstructionTarget.InstructionLoadedCallback() {
           @Override
           public void onInstructionLoaded(InstructionTarget target) {
@@ -211,12 +203,12 @@ public class ImageCreator extends NodeCreator<ImageCreator.ImageNode, ImageVerif
 
   private void checkIsInitialized() {
     if (!isInitialized) {
-      throw new RuntimeException("ImageCoordinator must be initialized prior to loading image URLs");
+      throw new RuntimeException("ImageCreator must be initialized prior to loading image URLs");
     }
   }
 
   @Override
-  void postProcess(InstructionTextView textView, List<BannerComponentNode> bannerComponentNodes) {
-    loadImages(textView.getInstructionTextView(), bannerComponentNodes);
+  void postProcess(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
+    loadImages(textView, bannerComponentNodes);
   }
 }

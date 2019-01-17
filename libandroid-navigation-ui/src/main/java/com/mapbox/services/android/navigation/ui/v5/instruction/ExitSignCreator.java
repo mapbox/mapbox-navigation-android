@@ -1,26 +1,39 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
 import com.mapbox.api.directions.v5.models.BannerComponents;
+import com.mapbox.services.android.navigation.ui.v5.R;
 
 import java.util.List;
 
 public class ExitSignCreator extends NodeCreator<BannerComponentNode, ExitSignVerifier> {
-  private String exitText;
   private String exitNumber;
+  private int startIndex;
+  private TextViewUtils textViewUtils;
+  private String modifier;
 
   ExitSignCreator() {
     super(new ExitSignVerifier());
+    textViewUtils = new TextViewUtils();
+
   }
 
   @Override
-  BannerComponentNode setupNode(BannerComponents components, int index, int startIndex) {
+  BannerComponentNode setupNode(BannerComponents components, int index, int startIndex, String
+    modifier) {
     if (components.type().equals("exit")) {
-      exitText = components.text();
+      return null;
     } else if (components.type().equals("exit-number")) {
       exitNumber = components.text();
+      this.startIndex = startIndex;
+      this.modifier = modifier;
     }
 
-    return null;
+    return new BannerComponentNode(components, startIndex);
   }
 
   /**
@@ -31,11 +44,25 @@ public class ExitSignCreator extends NodeCreator<BannerComponentNode, ExitSignVe
    * @param bannerComponentNodes containing instructions
    */
   @Override
-  void preProcess(InstructionTextView textView, List<BannerComponentNode> bannerComponentNodes) {
-    textView.hideExitView();
+  void postProcess(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
+    if (exitNumber != null) {
+      LayoutInflater inflater = (LayoutInflater) textView.getContext().getSystemService(Context
+        .LAYOUT_INFLATER_SERVICE);
 
-    if (exitText != null && exitNumber != null) {
-      textView.showExitView(exitText + " " + exitNumber);
+      ViewGroup root = (ViewGroup) textView.getParent();
+
+      TextView exitSignView;
+
+      if (modifier.equals("left")) {
+        exitSignView = (TextView) inflater.inflate(R.layout.exit_sign_view_left, root, false);
+      } else {
+        exitSignView = (TextView) inflater.inflate(R.layout.exit_sign_view_right, root, false);
+      }
+
+      exitSignView.setText(exitNumber);
+
+      textViewUtils.setImageSpan(textView, exitSignView, startIndex, startIndex + exitNumber
+        .length());
     }
   }
 }

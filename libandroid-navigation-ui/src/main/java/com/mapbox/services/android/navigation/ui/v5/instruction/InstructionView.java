@@ -77,10 +77,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
   private ManeuverView upcomingManeuverView;
   private TextView upcomingDistanceText;
-  private InstructionTextView upcomingPrimaryText;
-  private InstructionTextView upcomingSecondaryText;
+  private TextView upcomingPrimaryText;
+  private TextView upcomingSecondaryText;
   private ManeuverView subManeuverView;
-  private InstructionTextView subStepText;
+  private TextView subStepText;
   private NavigationAlertView alertView;
   private View rerouteLayout;
   private View turnLaneLayout;
@@ -596,10 +596,10 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     upcomingDistanceText.setText(model.retrieveStepDistanceRemaining());
   }
 
-  private InstructionLoader createInstructionLoader(InstructionTextView textView, BannerText
+  private InstructionLoader createInstructionLoader(TextView textView, BannerText
     bannerText) {
     if (hasComponents(bannerText)) {
-      return new InstructionLoader(textView, bannerText.components());
+      return new InstructionLoader(textView, bannerText);
     } else {
       return null;
     }
@@ -770,7 +770,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     loadTextWith(secondaryBannerText, upcomingSecondaryText);
   }
 
-  private void loadTextWith(BannerText bannerText, InstructionTextView textView) {
+  private void loadTextWith(BannerText bannerText, TextView textView) {
     InstructionLoader instructionLoader = createInstructionLoader(textView, bannerText);
     if (instructionLoader != null) {
       instructionLoader.loadInstruction();

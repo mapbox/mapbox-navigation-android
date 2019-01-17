@@ -8,15 +8,14 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionTextView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView;
 
 class InstructionViewHolder extends RecyclerView.ViewHolder implements InstructionListView {
 
   private ManeuverView maneuverView;
   private TextView distanceText;
-  private InstructionTextView primaryText;
-  private InstructionTextView secondaryText;
+  private TextView primaryText;
+  private TextView secondaryText;
   private View instructionLayoutText;
 
   InstructionViewHolder(View itemView) {
@@ -45,7 +44,7 @@ class InstructionViewHolder extends RecyclerView.ViewHolder implements Instructi
 
   @Override
   public void updatePrimaryText(String primaryText) {
-    this.primaryText.setInstructionText(primaryText);
+    this.primaryText.setText(primaryText);
   }
 
   @Override
@@ -55,7 +54,7 @@ class InstructionViewHolder extends RecyclerView.ViewHolder implements Instructi
 
   @Override
   public void updateSecondaryText(String secondaryText) {
-    this.secondaryText.setInstructionText(secondaryText);
+    this.secondaryText.setText(secondaryText);
   }
 
   @Override

@@ -68,11 +68,4 @@
     <attr name="navigationDarkTheme" format="reference"/>
 
   </declare-styleable>
-    <declare-styleable name="InstructionTextView">
-      <attr name="text" format="string" />
-      <attr name="textSize" format="dimension" />
-      <attr name="textColor" format="reference" />
-      <attr name="minHeight" format="dimension" />
-      <attr name="lineSpacingMultiplier" format="float" />
-    </declare-styleable>
 </resources>

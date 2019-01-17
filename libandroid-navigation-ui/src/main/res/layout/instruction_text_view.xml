@@ -6,23 +6,7 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:orientation="horizontal">
-    <TextView
-        android:id="@+id/exit_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:visibility="gone"
-        android:textSize="20sp"
-        android:background="@drawable/rounded_corners"
-        android:textColor="@android:color/black"
-        android:textStyle="bold"
-        android:layout_marginEnd="6dp"
-        android:layout_marginRight="6dp"
-        android:includeFontPadding="false"
-        tools:text="Exit 33"
-        tools:visibility="visible"
-        android:drawableRight="@drawable/ic_exit_arrow"
-        android:drawableEnd="@drawable/ic_exit_arrow" />
+
     <TextView
         android:id="@+id/instruction_text"
         android:layout_width="0dp"

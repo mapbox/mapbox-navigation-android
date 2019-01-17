@@ -15,7 +15,8 @@ class TextCreator extends NodeCreator<BannerComponentNode, TextVerifier> {
   }
 
   @Override
-  BannerComponentNode setupNode(BannerComponents components, int index, int startIndex) {
+  BannerComponentNode setupNode(BannerComponents components, int index, int startIndex, String
+    modifier) {
     return new BannerComponentNode(components, startIndex);
   }
 }
