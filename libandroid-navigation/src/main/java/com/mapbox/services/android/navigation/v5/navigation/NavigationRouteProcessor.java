@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
+import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.RouteState;
 import com.mapbox.navigator.VoiceInstruction;
@@ -30,6 +31,7 @@ class NavigationRouteProcessor {
 
   private static final int ONE_INDEX = 1;
   private static final double ONE_SECOND_IN_MILLISECONDS = 1000.0;
+  private static final int FIRST_BANNER_INSTRUCTION = 0;
   private final RouteProgressStateMap progressStateMap = new RouteProgressStateMap();
   private RouteProgress previousRouteProgress;
   private DirectionsRoute route;
@@ -42,9 +44,9 @@ class NavigationRouteProcessor {
   private List<Pair<StepIntersection, Double>> currentIntersectionDistances;
   private CurrentLegAnnotation currentLegAnnotation;
 
-  RouteProgress buildNewRouteProgress(NavigationStatus status, DirectionsRoute route) {
+  RouteProgress buildNewRouteProgress(MapboxNavigator navigator, NavigationStatus status, DirectionsRoute route) {
     updateRoute(route);
-    return buildRouteProgressFrom(status);
+    return buildRouteProgressFrom(status, navigator);
   }
 
   void updatePreviousRouteProgress(RouteProgress routeProgress) {
@@ -62,7 +64,7 @@ class NavigationRouteProcessor {
     }
   }
 
-  private RouteProgress buildRouteProgressFrom(NavigationStatus status) {
+  private RouteProgress buildRouteProgressFrom(NavigationStatus status, MapboxNavigator navigator) {
     int legIndex = status.getLegIndex();
     int stepIndex = status.getStepIndex();
     int upcomingStepIndex = stepIndex + ONE_INDEX;
@@ -104,8 +106,8 @@ class NavigationRouteProcessor {
       .inTunnel(status.getInTunnel())
       .currentState(currentRouteState);
 
-    // TODO build banner instructions from status here
     addVoiceInstructions(status, progressBuilder);
+    addBannerInstructions(status, navigator, progressBuilder);
     addUpcomingStepPoints(progressBuilder);
     return progressBuilder.build();
   }
@@ -141,5 +143,14 @@ class NavigationRouteProcessor {
   private void addVoiceInstructions(NavigationStatus status, RouteProgress.Builder progressBuilder) {
     VoiceInstruction voiceInstruction = status.getVoiceInstruction();
     progressBuilder.voiceInstruction(voiceInstruction);
+  }
+
+  private void addBannerInstructions(NavigationStatus status, MapboxNavigator navigator,
+                                     RouteProgress.Builder progressBuilder) {
+    BannerInstruction bannerInstruction = status.getBannerInstruction();
+    if (status.getRouteState() == RouteState.INITIALIZED) {
+      bannerInstruction = navigator.retrieveBannerInstruction(FIRST_BANNER_INSTRUCTION);
+    }
+    progressBuilder.bannerInstruction(bannerInstruction);
   }
 }

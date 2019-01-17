@@ -20,7 +20,7 @@ public class NavigationRouteProcessorTest extends BaseTest {
     NavigationRouteProcessor processor = new NavigationRouteProcessor();
 
     // TODO mock final status
-    RouteProgress progress = processor.buildNewRouteProgress(mock(NavigationStatus.class), buildTestDirectionsRoute());
+    RouteProgress progress = processor.buildNewRouteProgress(mock(MapboxNavigator.class), mock(NavigationStatus.class), buildTestDirectionsRoute());
 
     assertNotNull(progress);
   }

@@ -25,6 +25,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,24 +37,26 @@ public class RouteProcessorRunnableTest {
   @Test
   public void onRun_buildNewRouteProgressReceivesStatusAndRoute() {
     NavigationRouteProcessor processor = mock(NavigationRouteProcessor.class);
+    MapboxNavigator navigator = mock(MapboxNavigator.class);
     NavigationStatus status = buildMockStatus();
     DirectionsRoute route = mock(DirectionsRoute.class);
-    RouteProcessorRunnable runnable = buildRouteProcessorRunnableWith(processor, status, route);
+    RouteProcessorRunnable runnable = buildRouteProcessorRunnableWith(navigator,processor, status, route);
     runnable.updateRawLocation(mock(Location.class));
 
     runnable.run();
 
-    verify(processor).buildNewRouteProgress(status, route);
+    verify(processor).buildNewRouteProgress(navigator, status, route);
   }
 
   @Test
   public void onRun_previousRouteProgressIsUpdated() {
     NavigationRouteProcessor processor = mock(NavigationRouteProcessor.class);
+    MapboxNavigator navigator = mock(MapboxNavigator.class);
     NavigationStatus status = buildMockStatus();
     DirectionsRoute route = mock(DirectionsRoute.class);
     RouteProgress progress = mock(RouteProgress.class);
-    when(processor.buildNewRouteProgress(status, route)).thenReturn(progress);
-    RouteProcessorRunnable runnable = buildRouteProcessorRunnableWith(processor, status, route);
+    when(processor.buildNewRouteProgress(navigator, status, route)).thenReturn(progress);
+    RouteProcessorRunnable runnable = buildRouteProcessorRunnableWith(navigator, processor, status, route);
     runnable.updateRawLocation(mock(Location.class));
 
     runnable.run();
@@ -174,10 +177,9 @@ public class RouteProcessorRunnableTest {
     verify(navigator, times(0)).updateLegIndex(anyInt());
   }
 
-  private RouteProcessorRunnable buildRouteProcessorRunnableWith(NavigationRouteProcessor processor,
+  private RouteProcessorRunnable buildRouteProcessorRunnableWith(MapboxNavigator navigator, NavigationRouteProcessor processor,
                                                                  NavigationStatus status, DirectionsRoute route) {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().build();
-    MapboxNavigator navigator = mock(MapboxNavigator.class);
     when(navigator.retrieveStatus(any(Date.class), any(Long.class))).thenReturn(status);
     MapboxNavigation navigation = mock(MapboxNavigation.class);
     when(navigation.options()).thenReturn(options);
@@ -255,11 +257,11 @@ public class RouteProcessorRunnableTest {
   }
 
   private NavigationStatus buildMockStatus() {
-    NavigationStatus status = mock(NavigationStatus.class);
+    NavigationStatus status = mock(NavigationStatus.class, RETURNS_DEEP_STUBS);
     Point location = Point.fromLngLat(0.0, 0.0);
-    when(status.getLocation()).thenReturn(location);
-    when(status.getTime()).thenReturn(new Date());
-    when(status.getBearing()).thenReturn(0.0f);
+    when(status.getLocation().getCoordinate()).thenReturn(location);
+    when(status.getLocation().getTime()).thenReturn(new Date());
+    when(status.getLocation().getBearing()).thenReturn(0.0f);
     return status;
   }
 
