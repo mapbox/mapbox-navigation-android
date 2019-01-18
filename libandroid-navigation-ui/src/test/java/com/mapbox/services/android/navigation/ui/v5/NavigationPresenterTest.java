@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+
 import org.junit.Test;
 
 import static org.mockito.Mockito.mock;
@@ -118,5 +120,40 @@ public class NavigationPresenterTest {
     presenter.onNavigationStopped();
 
     verify(view).updateWayNameVisibility(false);
+  }
+
+  @Test
+  public void onRouteUpdate_routeIsDrawn() {
+    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
+    NavigationContract.View view = mock(NavigationContract.View.class);
+    NavigationPresenter presenter = new NavigationPresenter(view);
+
+    presenter.onRouteUpdate(directionsRoute);
+
+    verify(view).drawRoute(directionsRoute);
+  }
+
+  @Test
+  public void onRouteUpdate_overviewIsShownWhenResumeState() {
+    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
+    NavigationContract.View view = mock(NavigationContract.View.class);
+    when(view.isRecenterButtonVisible()).thenReturn(true);
+    NavigationPresenter presenter = new NavigationPresenter(view);
+    presenter.updateResumeState(true);
+
+    presenter.onRouteUpdate(directionsRoute);
+
+    verify(view).updateCameraRouteOverview();
+  }
+
+  @Test
+  public void onRouteUpdate_cameraIsStartedOnFirstRoute() {
+    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
+    NavigationContract.View view = mock(NavigationContract.View.class);
+    NavigationPresenter presenter = new NavigationPresenter(view);
+
+    presenter.onRouteUpdate(directionsRoute);
+
+    verify(view).startCamera(directionsRoute);
   }
 }
