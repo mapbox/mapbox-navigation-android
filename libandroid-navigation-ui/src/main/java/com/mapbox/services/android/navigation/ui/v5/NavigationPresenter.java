@@ -47,7 +47,9 @@ class NavigationPresenter {
 
   void onRouteUpdate(DirectionsRoute directionsRoute) {
     view.drawRoute(directionsRoute);
-    if (!resumeState) {
+    if (resumeState && view.isRecenterButtonVisible()) {
+      view.updateCameraRouteOverview();
+    } else {
       view.startCamera(directionsRoute);
     }
   }
