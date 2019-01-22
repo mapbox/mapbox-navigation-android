@@ -51,7 +51,7 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
    * @param bannerComponents containing image info
    * @param index of the BannerComponentNode which refers to the given BannerComponents
    */
-  public void addShieldInfo(BannerComponents bannerComponents, int index) {
+  private void addShieldInfo(BannerComponents bannerComponents, int index) {
     bannerShieldList.add(new BannerShield(bannerComponents, index));
   }
 
@@ -61,12 +61,8 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
    * @return ImageCoordinator
    */
   public static ImageCreator getInstance() {
-    return getInstance(new ImageVerifier());
-  }
-
-  public static synchronized ImageCreator getInstance(ImageVerifier imageVerifier) {
     if (instance == null) {
-      instance = new ImageCreator(imageVerifier);
+      instance = new ImageCreator(new ImageVerifier());
     }
 
     return instance;
@@ -87,8 +83,6 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
       isInitialized = true;
     }
   }
-
-
 
   /**
    * Will pre-fetch images for a given {@link LegStep}.
@@ -115,7 +109,7 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
    * @param textView   target for the banner text
    * @since 0.9.0
    */
-  public void loadImages(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
+  private void loadImages(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
     if (!hasImages()) {
       return;
     }

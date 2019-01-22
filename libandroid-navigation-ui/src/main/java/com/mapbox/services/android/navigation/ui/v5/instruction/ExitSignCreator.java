@@ -10,7 +10,7 @@ import com.mapbox.services.android.navigation.ui.v5.R;
 
 import java.util.List;
 
-public class ExitSignCreator extends NodeCreator<BannerComponentNode, ExitSignVerifier> {
+class ExitSignCreator extends NodeCreator<BannerComponentNode, ExitSignVerifier> {
   private String exitNumber;
   private int startIndex;
   private TextViewUtils textViewUtils;
@@ -19,7 +19,6 @@ public class ExitSignCreator extends NodeCreator<BannerComponentNode, ExitSignVe
   ExitSignCreator() {
     super(new ExitSignVerifier());
     textViewUtils = new TextViewUtils();
-
   }
 
   @Override

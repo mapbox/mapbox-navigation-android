@@ -11,9 +11,9 @@ import java.util.List;
 
 import timber.log.Timber;
 
-public class BannerComponentTree {
+class BannerComponentTree {
   private final NodeCreator[] nodeCreators;
-  private List<BannerComponentNode> bannerComponentNodes;
+  private final List<BannerComponentNode> bannerComponentNodes;
 
   /**
    * Creates a master coordinator to make sure the coordinators passed in are used appropriately
@@ -38,6 +38,7 @@ public class BannerComponentTree {
 
     for (BannerComponents components : bannerText.components()) {
       BannerComponentNode node = null;
+      // todo remove logging
       Timber.d(("~~~~~~~~~~~" + components.text() + "\t" + components.abbreviation()));
       for (NodeCreator nodeCreator : nodeCreators) {
         if (nodeCreator.isNodeType(components)) {
@@ -49,7 +50,7 @@ public class BannerComponentTree {
 
       if (node != null) {
         bannerComponentNodes.add(node);
-        length += components.text().length() + 1; //node.length?
+        length += components.text().length();
       }
     }
 

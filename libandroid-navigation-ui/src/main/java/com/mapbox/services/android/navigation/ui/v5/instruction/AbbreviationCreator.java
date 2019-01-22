@@ -103,7 +103,7 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
 
   private boolean abbreviateAtAbbreviationPriority(List<BannerComponentNode> bannerComponentNodes,
                                                    List<Integer> indices) {
-    if (indices == null) {
+    if (indices == null || indices.isEmpty()) {
       return false;
     }
 
