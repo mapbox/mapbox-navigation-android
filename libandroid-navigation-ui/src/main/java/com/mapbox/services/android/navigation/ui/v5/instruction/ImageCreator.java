@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.content.Context;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.style.ImageSpan;
 import android.widget.TextView;
 
@@ -176,8 +177,10 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
   }
 
   private void createTargets(TextView textView) {
+    Spannable instructionSpannable = new SpannableString(textView.getText());
+
     for (final BannerShield bannerShield : bannerShieldList) {
-      targets.add(new InstructionTarget(textView, bannerShieldList, bannerShield,
+      targets.add(new InstructionTarget(textView, instructionSpannable, bannerShieldList, bannerShield,
         new InstructionTarget.InstructionLoadedCallback() {
           @Override
           public void onInstructionLoaded(InstructionTarget target) {
