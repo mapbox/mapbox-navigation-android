@@ -30,7 +30,7 @@ public class InstructionLoader {
    * @param textView to populate with instruction
    * @param bannerText containing components to populate into textView
    */
-  InstructionLoader(TextView textView, @NonNull BannerText bannerText) {
+  public InstructionLoader(TextView textView, @NonNull BannerText bannerText) {
     this(textView, new BannerComponentTree(bannerText, new ExitSignCreator(),
       ImageCreator.getInstance(), new AbbreviationCreator(), new TextCreator()));
   }

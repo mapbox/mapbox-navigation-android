@@ -766,7 +766,14 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     upcomingPrimaryText.setMaxLines(1);
     upcomingSecondaryText.setVisibility(VISIBLE);
     adjustBannerTextVerticalBias(0.65f);
+
+    upcomingPrimaryText.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+      LinearLayout.LayoutParams.WRAP_CONTENT));
     loadTextWith(primaryBannerText, upcomingPrimaryText);
+    upcomingPrimaryText.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+      LinearLayout.LayoutParams.WRAP_CONTENT));
+
+
     loadTextWith(secondaryBannerText, upcomingSecondaryText);
   }
 
