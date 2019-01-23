@@ -178,7 +178,7 @@ class ManeuverMap {
       R.drawable.ic_maneuver_turn_0);
   }
 
-  public int getManeuverResource(String maneuver) {
+  int getManeuverResource(String maneuver) {
     if (maneuverMap.get(maneuver) != null) {
       return maneuverMap.get(maneuver);
     } else {
