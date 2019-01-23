@@ -9,7 +9,6 @@ import android.graphics.drawable.Drawable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.text.style.ImageSpan;
 import android.view.View;
 import android.widget.TextView;
@@ -33,30 +32,21 @@ class TextViewUtils {
 
   void setImageSpan(TextView textView, View view, int start, int end) {
     Bitmap bitmap = createBitmapFromView(view);
-    setImageSpan(textView, bitmap, start, end, true);
+    setImageSpan(textView, bitmap, start, end);
   }
 
-  void setImageSpan(TextView textView, Bitmap bitmap, int start, int end, boolean shouldTruncate) {
+  void setImageSpan(TextView textView, Bitmap bitmap, int start, int end) {
     Drawable drawable = createDrawable(textView, bitmap);
-    setImageSpan(textView, drawable, start, end, shouldTruncate);
+    setImageSpan(textView, drawable, start, end);
   }
 
   void setImageSpan(TextView textView, Drawable drawable, int start, int end) {
-    setImageSpan(textView, drawable, start, end, false);
-  }
-
-  void setImageSpan(TextView textView, Drawable drawable, int start, int end, boolean
-    shouldTruncate) {
     Spannable instructionSpannable = new SpannableString(textView.getText());
 
     instructionSpannable.setSpan(new ImageSpan(drawable),
       start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-    // todo make sure this is necessary
-    if (shouldTruncate) {
-      CharSequence truncatedSequence = truncateImageSpan(instructionSpannable, textView);
-      textView.setText(truncatedSequence);
-    }
+    textView.setText(instructionSpannable);
   }
 
   private Bitmap createBitmapFromView(View view) {
@@ -72,15 +62,5 @@ class TextViewUtils {
     Canvas canvas = new Canvas(bitmap);
     view.draw(canvas);
     return bitmap;
-  }
-
-  // todo make sure this is necessary
-  private static CharSequence truncateImageSpan(Spannable instructionSpannable, TextView textView) {
-    int availableSpace = textView.getWidth() - textView.getPaddingRight() - textView.getPaddingLeft();
-    if (availableSpace > 0) {
-      return TextUtils.ellipsize(instructionSpannable, textView.getPaint(), availableSpace, TextUtils.TruncateAt.END);
-    } else {
-      return instructionSpannable;
-    }
   }
 }

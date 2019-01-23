@@ -70,8 +70,9 @@
 
         <TextView
             android:id="@+id/stepPrimaryText"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
             android:ellipsize="end"
@@ -84,8 +85,10 @@
 
         <TextView
             android:id="@+id/stepSecondaryText"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:visibility="gone"
             android:ellipsize="end"
             android:includeFontPadding="false"
             android:maxLines="1"
