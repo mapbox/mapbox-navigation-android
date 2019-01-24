@@ -22,6 +22,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -553,6 +554,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   private void initializeNavigationMap(MapView mapView, MapboxMap map) {
     navigationMap = new NavigationMapboxMap(mapView, map);
+    navigationMap.updateLocationLayerRenderMode(RenderMode.GPS);
     if (mapInstanceState != null) {
       navigationMap.restoreFrom(mapInstanceState);
       return;
