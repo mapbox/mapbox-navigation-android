@@ -1,6 +1,8 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.content.Context;
+import android.support.graphics.drawable.VectorDrawableCompat;
+import android.support.v7.widget.AppCompatTextView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -53,12 +55,24 @@ class ExitSignCreator extends NodeCreator<BannerComponentNode, ExitSignVerifier>
 
       ViewGroup root = (ViewGroup) textView.getParent();
 
-      TextView exitSignView;
+      AppCompatTextView exitSignView = (AppCompatTextView) inflater.inflate(R.layout.exit_sign_view, root,
+        false);
+
+      // todo figure out why this isn't working pre-lolipop
+//      VectorDrawableCompat background = VectorDrawableCompat.create(exitSignView.getResources(),
+//        R.drawable.styled_rounded_corners, exitSignView.getContext().getTheme());
+//
+//      exitSignView.setBackgroundDrawable(background);
 
       if (modifier.equals(LEFT)) {
-        exitSignView = (TextView) inflater.inflate(R.layout.exit_sign_view_left, root, false);
+        VectorDrawableCompat left = VectorDrawableCompat.create(textView.getResources(),
+          R.drawable.ic_exit_arrow_left, textView.getContext().getTheme());
+
+        exitSignView.setCompoundDrawablesWithIntrinsicBounds(left, null, null, null);
       } else {
-        exitSignView = (TextView) inflater.inflate(R.layout.exit_sign_view_right, root, false);
+        VectorDrawableCompat right = VectorDrawableCompat.create(textView.getResources(),
+          R.drawable.ic_exit_arrow_right, textView.getContext().getTheme());
+        exitSignView.setCompoundDrawablesWithIntrinsicBounds(null, null, right, null);
       }
 
       exitSignView.setText(exitNumber);
