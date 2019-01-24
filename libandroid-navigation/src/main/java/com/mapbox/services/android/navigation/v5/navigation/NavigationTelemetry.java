@@ -290,8 +290,8 @@ class NavigationTelemetry implements NavigationMetricListener {
     queuedFeedbackEvents.remove(feedbackEvent);
   }
 
-  void routeRetrievalEvent(long elapsedTime, boolean isOffline) {
-    NavigationMetricsWrapper.routeRetrievalEvent(elapsedTime, isOffline, navigationSessionState.sessionIdentifier());
+  void routeRetrievalEvent(RouteRetrievalInfo routeRetrievalInfo) {
+    NavigationMetricsWrapper.routeRetrievalEvent(routeRetrievalInfo, navigationSessionState.sessionIdentifier());
   }
 
   private void validateAccessToken(String accessToken) {

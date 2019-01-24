@@ -2,31 +2,26 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.os.Parcel;
 
-public class LongCounter extends Counter<Long> {
+public class IntCounter extends Counter<Integer> {
 
-  LongCounter(String name, Long value) {
+  IntCounter(String name, Integer value) {
     super(name, value);
   }
 
-  private LongCounter(Parcel parcel) {
-    super(parcel.readString(), parcel.readLong());
-  }
-
-  @Override
-  public int describeContents() {
-    return 0;
+  private IntCounter(Parcel parcel) {
+    super(parcel.readString(), parcel.readInt());
   }
 
   @Override
   public void writeToParcel(Parcel parcel, int flags) {
     parcel.writeString(name);
-    parcel.writeLong(value);
+    parcel.writeInt(value);
   }
 
   public static Creator<Counter> CREATOR = new Creator<Counter>() {
     @Override
     public Counter createFromParcel(Parcel parcel) {
-      return new LongCounter(parcel);
+      return new IntCounter(parcel);
     }
 
     @Override

@@ -46,7 +46,14 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, Directions
     if (offlineRoute != null) {
       end = System.nanoTime();
       callback.onRouteFound(offlineRoute);
-      NavigationTelemetry.getInstance().routeRetrievalEvent(end - start, true);
+
+      NavigationTelemetry.getInstance().routeRetrievalEvent(
+        RouteRetrievalInfo.builder()
+          .route(offlineRoute)
+          .numberOfRoutes(1)
+          .elapsedTime(end - start)
+          .isOffline(true)
+          .build());
     } else {
       String errorMessage = generateErrorMessage();
       OfflineError error = new OfflineError(errorMessage);
