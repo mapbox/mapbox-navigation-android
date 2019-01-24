@@ -67,5 +67,8 @@
     <attr name="navigationLightTheme" format="reference"/>
     <attr name="navigationDarkTheme" format="reference"/>
 
+    <attr name="navigationExitSignMainColor" format="color" />
+    <attr name="navigationExitSignBackgroundColor" format="color" />
+
   </declare-styleable>
 </resources>
