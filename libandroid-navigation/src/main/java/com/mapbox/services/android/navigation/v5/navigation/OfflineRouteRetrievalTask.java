@@ -47,13 +47,14 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, Directions
       routerResult = navigator.getRoute(url);
     }
 
-    return offlineRoutes[FIRST_ROUTE].retrieveOfflineRoute(routerResult);
+    DirectionsRoute directionsRoute = offlineRoutes[FIRST_ROUTE].retrieveOfflineRoute(routerResult);
+    routeRetrievalBuilder.end();
+    return directionsRoute;
   }
 
   @Override
   protected void onPostExecute(DirectionsRoute offlineRoute) {
     if (offlineRoute != null) {
-      routeRetrievalBuilder.end();
       callback.onRouteFound(offlineRoute);
 
       navigationTelemetry.routeRetrievalEvent(

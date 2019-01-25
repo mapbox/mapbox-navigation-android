@@ -44,7 +44,7 @@ abstract class RouteRetrievalInfo {
         throw new NavigationException("Must call `start` before calling `end`.");
       }
 
-      elapsedTime(start - end);
+      elapsedTime(end - start);
       return this;
     }
 

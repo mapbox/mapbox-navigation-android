@@ -2,7 +2,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.os.Parcel;
 
-public class DoubleCounter extends Counter<Double> {
+class DoubleCounter extends Counter<Double> {
 
   DoubleCounter(String name, Double value) {
     super(name, value);

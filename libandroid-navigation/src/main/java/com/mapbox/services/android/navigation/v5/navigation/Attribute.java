@@ -3,25 +3,17 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Attribute implements Parcelable {
+class Attribute implements Parcelable {
   private final String name;
   private final String value;
 
-  public Attribute(String name, String value) {
+  Attribute(String name, String value) {
     this.name = name;
     this.value = value;
   }
 
   private Attribute(Parcel parcel) {
     this(parcel.readString(), parcel.readString());
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public String getValue() {
-    return value;
   }
 
   @Override

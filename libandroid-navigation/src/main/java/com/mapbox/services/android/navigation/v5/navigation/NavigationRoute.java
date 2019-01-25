@@ -93,11 +93,13 @@ public final class NavigationRoute {
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
         routeRetrievalInfoBuilder.end();
         callback.onResponse(call, response);
-        navigationTelemetry.routeRetrievalEvent(
-          routeRetrievalInfoBuilder
-            .route(response.body().routes().get(0))
-            .numberOfRoutes(response.body().routes().size())
-            .isOffline(false));
+        if (response.body().routes() != null && !response.body().routes().isEmpty()) {
+          navigationTelemetry.routeRetrievalEvent(
+            routeRetrievalInfoBuilder
+              .route(response.body().routes().get(0))
+              .numberOfRoutes(response.body().routes().size())
+              .isOffline(false));
+        }
       }
 
       @Override
