@@ -546,7 +546,7 @@ public class NavigationMapboxMap {
       R.attr.navigationViewLocationLayerStyle);
     LocationComponentOptions locationComponentOptions =
       LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
-    locationComponent.activateLocationComponent(context, map.getStyle(), locationComponentOptions);
+    locationComponent.activateLocationComponent(context, map.getStyle(), null, locationComponentOptions);
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.GPS);
   }
