@@ -41,6 +41,8 @@ import retrofit2.Response;
 public final class NavigationRoute {
 
   private final MapboxDirections mapboxDirections;
+  private final NavigationTelemetry navigationTelemetry;
+  private final RouteRetrievalInfo.Builder routeRetrievalInfoBuilder;
 
   /**
    * Package private constructor used for the {@link Builder#build()} method.
@@ -49,7 +51,14 @@ public final class NavigationRoute {
    * @since 0.5.0
    */
   NavigationRoute(MapboxDirections mapboxDirections) {
+    this(mapboxDirections, NavigationTelemetry.getInstance(), RouteRetrievalInfo.builder());
+  }
+
+  NavigationRoute(MapboxDirections mapboxDirections, NavigationTelemetry navigationTelemetry,
+                  RouteRetrievalInfo.Builder routeRetrievalInfoBuilder) {
     this.mapboxDirections = mapboxDirections;
+    this.navigationTelemetry = navigationTelemetry;
+    this.routeRetrievalInfoBuilder = routeRetrievalInfoBuilder;
   }
 
   /**
@@ -78,19 +87,17 @@ public final class NavigationRoute {
    * @since 0.5.0
    */
   public void getRoute(final Callback<DirectionsResponse> callback) {
-    final long start = System.nanoTime();
+    routeRetrievalInfoBuilder.start();
     mapboxDirections.enqueueCall(new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-        long end = System.nanoTime();
+        routeRetrievalInfoBuilder.end();
         callback.onResponse(call, response);
-        NavigationTelemetry.getInstance().routeRetrievalEvent(
-          RouteRetrievalInfo.builder()
+        navigationTelemetry.routeRetrievalEvent(
+          routeRetrievalInfoBuilder
             .route(response.body().routes().get(0))
             .numberOfRoutes(response.body().routes().size())
-            .elapsedTime(end - start)
-            .isOffline(false)
-            .build());
+            .isOffline(false));
       }
 
       @Override

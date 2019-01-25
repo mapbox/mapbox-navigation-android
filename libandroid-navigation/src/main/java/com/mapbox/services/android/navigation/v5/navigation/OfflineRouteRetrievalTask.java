@@ -15,12 +15,20 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, Directions
   private final Navigator navigator;
   private final OnOfflineRouteFoundCallback callback;
   private RouterResult routerResult;
-  private long start;
-  private long end;
+  private RouteRetrievalInfo.Builder routeRetrievalBuilder;
+  private NavigationTelemetry navigationTelemetry;
 
   OfflineRouteRetrievalTask(Navigator navigator, OnOfflineRouteFoundCallback callback) {
+    this(navigator, callback, NavigationTelemetry.getInstance(), RouteRetrievalInfo.builder());
+  }
+
+
+  OfflineRouteRetrievalTask(Navigator navigator, OnOfflineRouteFoundCallback callback,
+                            NavigationTelemetry navigationTelemetry, RouteRetrievalInfo.Builder builder) {
     this.navigator = navigator;
     this.callback = callback;
+    this.navigationTelemetry = navigationTelemetry;
+    routeRetrievalBuilder = builder;
   }
 
   // For testing only
@@ -31,7 +39,8 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, Directions
 
   @Override
   protected DirectionsRoute doInBackground(OfflineRoute... offlineRoutes) {
-    start = System.nanoTime();
+    routeRetrievalBuilder.start();
+
     String url = offlineRoutes[FIRST_ROUTE].buildUrl();
 
     synchronized (navigator) {
@@ -44,16 +53,14 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, Directions
   @Override
   protected void onPostExecute(DirectionsRoute offlineRoute) {
     if (offlineRoute != null) {
-      end = System.nanoTime();
+      routeRetrievalBuilder.end();
       callback.onRouteFound(offlineRoute);
 
-      NavigationTelemetry.getInstance().routeRetrievalEvent(
-        RouteRetrievalInfo.builder()
+      navigationTelemetry.routeRetrievalEvent(
+        routeRetrievalBuilder
           .route(offlineRoute)
           .numberOfRoutes(1)
-          .elapsedTime(end - start)
-          .isOffline(true)
-          .build());
+          .isOffline(true));
     } else {
       String errorMessage = generateErrorMessage();
       OfflineError error = new OfflineError(errorMessage);

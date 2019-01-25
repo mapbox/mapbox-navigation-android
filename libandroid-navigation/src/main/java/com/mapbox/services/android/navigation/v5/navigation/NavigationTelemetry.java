@@ -290,8 +290,9 @@ class NavigationTelemetry implements NavigationMetricListener {
     queuedFeedbackEvents.remove(feedbackEvent);
   }
 
-  void routeRetrievalEvent(RouteRetrievalInfo routeRetrievalInfo) {
-    NavigationMetricsWrapper.routeRetrievalEvent(routeRetrievalInfo, navigationSessionState.sessionIdentifier());
+  void routeRetrievalEvent(RouteRetrievalInfo.Builder routeRetrievalInfoBuilder) {
+    NavigationMetricsWrapper.routeRetrievalEvent(routeRetrievalInfoBuilder.build(),
+      navigationSessionState.sessionIdentifier());
   }
 
   private void validateAccessToken(String accessToken) {

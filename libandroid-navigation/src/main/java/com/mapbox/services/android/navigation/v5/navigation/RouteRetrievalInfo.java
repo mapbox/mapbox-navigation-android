@@ -2,9 +2,9 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 
 import java.util.List;
 
@@ -30,6 +30,24 @@ abstract class RouteRetrievalInfo {
 
   @AutoValue.Builder
   abstract static class Builder {
+    private Long start = null;
+
+    Builder start() {
+      start = System.nanoTime();
+      return this;
+    }
+
+    Builder end() {
+      long end = System.nanoTime();
+
+      if (start == null) {
+        throw new NavigationException("Must call `start` before calling `end`.");
+      }
+
+      elapsedTime(start - end);
+      return this;
+    }
+
     abstract Builder elapsedTime(long elapsedTime);
 
     abstract Builder distance(double distance);
@@ -56,9 +74,7 @@ abstract class RouteRetrievalInfo {
     private int getStepCount(List<RouteLeg> legs) {
       int count = 0;
       for (RouteLeg leg : legs) {
-        for (LegStep step : leg.steps()) {
-          count++;
-        }
+        count += leg.steps().size();
       }
       return count;
     }
