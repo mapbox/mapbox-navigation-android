@@ -6,6 +6,7 @@ import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.support.annotation.AnyRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
@@ -542,13 +543,24 @@ public class NavigationMapboxMap {
     map.setMinZoomPreference(NAVIGATION_MINIMUM_MAP_ZOOM);
     map.setMaxZoomPreference(NAVIGATION_MAXIMUM_MAP_ZOOM);
     Context context = mapView.getContext();
-    int locationLayerStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context,
-      R.attr.navigationViewLocationLayerStyle);
-    LocationComponentOptions locationComponentOptions =
-      LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
-    locationComponent.activateLocationComponent(context, map.getStyle(), locationComponentOptions);
+    int locationLayerStyleRes = findLayerStyleRes(context);
+    LocationComponentOptions options = LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
+    locationComponent.activateLocationComponent(context, map.getStyle(), null, options);
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.GPS);
+  }
+
+  private int findLayerStyleRes(Context context) {
+    int locationLayerStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context,
+      R.attr.navigationViewLocationLayerStyle);
+    if (!isValid(locationLayerStyleRes)) {
+      locationLayerStyleRes = R.style.NavigationLocationLayerStyle;
+    }
+    return locationLayerStyleRes;
+  }
+
+  private boolean isValid(@AnyRes int resId) {
+    return resId != -1 && (resId & 0xff000000) != 0 && (resId & 0x00ff0000) != 0;
   }
 
   private void initializeMapPaddingAdjustor(MapView mapView, MapboxMap mapboxMap) {

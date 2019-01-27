@@ -13,11 +13,11 @@ class AutocompleteBottomSheetBehavior<V : View> : BottomSheetBehavior<V> {
 
   constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-  override fun onInterceptTouchEvent(parent: CoordinatorLayout?, child: V, event: MotionEvent?): Boolean {
+  override fun onInterceptTouchEvent(parent: CoordinatorLayout, child: V, event: MotionEvent): Boolean {
     return false
   }
 
-  override fun onTouchEvent(parent: CoordinatorLayout?, child: V, event: MotionEvent?): Boolean {
+  override fun onTouchEvent(parent: CoordinatorLayout, child: V, event: MotionEvent): Boolean {
     return false
   }
 }
