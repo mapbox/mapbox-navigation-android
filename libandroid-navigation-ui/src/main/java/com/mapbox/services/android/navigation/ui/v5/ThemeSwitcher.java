@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -12,8 +13,7 @@ import android.support.v7.content.res.AppCompatResources;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 
-import com.mapbox.mapboxsdk.annotations.Icon;
-import com.mapbox.mapboxsdk.annotations.IconFactory;
+import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 
 /**
@@ -39,16 +39,16 @@ public class ThemeSwitcher {
   }
 
   /**
-   * Returns a map marker {@link Icon} based on the current theme setting.
+   * Returns a map marker {@link Bitmap} based on the current theme setting.
    *
-   * @param context to retrieve an instance of {@link IconFactory}
-   * @return {@link Icon} map marker dark or light
+   * @param context to retrieve the drawable for the given resource ID
+   * @return {@link Bitmap} map marker dark or light
    */
-  public static Icon retrieveThemeMapMarker(Context context) {
+  public static Bitmap retrieveThemeMapMarker(Context context) {
     TypedValue destinationMarkerResId = resolveAttributeFromId(context, R.attr.navigationViewDestinationMarker);
     int markerResId = destinationMarkerResId.resourceId;
-    IconFactory iconFactory = IconFactory.getInstance(context);
-    return iconFactory.fromResource(markerResId);
+    Drawable markerDrawable = ContextCompat.getDrawable(context, markerResId);
+    return BitmapUtils.getBitmapFromDrawable(markerDrawable);
   }
 
   /**
