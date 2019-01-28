@@ -9,4 +9,7 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">Attivato</string>
 
+    <!-- Shown in off-route scenarios to provide feedback -->
+    <string name="report_problem">Riporta un problema</string>
+
 </resources>

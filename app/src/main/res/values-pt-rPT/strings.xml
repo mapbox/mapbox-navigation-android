@@ -31,6 +31,9 @@
     <string name="title_fragment_navigation">NavigationView implementado com Fragment</string>
     <string name="description_fragment_navigation">NavigationView implementado com Fragment</string>
 
+    <string name="title_component_navigation">MapboxNavigation com componentes UI</string>
+    <string name="description_component_navigation">MapboxNavigation com componentes UI</string>
+
     <string name="settings">Definições</string>
     <string name="simulate_route">Simular Rota</string>
     <string name="language">Idioma</string>
