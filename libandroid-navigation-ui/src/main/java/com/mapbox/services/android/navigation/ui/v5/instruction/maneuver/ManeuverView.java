@@ -1,17 +1,20 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction.maneuver;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.PointF;
+import android.support.annotation.ColorInt;
+import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -20,21 +23,17 @@ import java.util.Set;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ManeuverModifier;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ManeuverType;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
-  .STEP_MANEUVER_MODIFIER_SHARP_LEFT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
-  .STEP_MANEUVER_MODIFIER_SLIGHT_LEFT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_EXIT_ROTARY;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
-  .STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_FORK;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROTARY;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
-  .STEP_MANEUVER_TYPE_ROUNDABOUT_TURN;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT_TURN;
 
 
 /**
@@ -81,32 +80,66 @@ public class ManeuverView extends View {
   private String maneuverType = null;
   @ManeuverModifier
   private String maneuverModifier = null;
-  private Pair<String, String> maneuverTypeAndModifier = new Pair<>(null, null);
+  @ColorInt
   private int primaryColor;
+  @ColorInt
   private int secondaryColor;
   private float roundaboutAngle = DEFAULT_ROUNDABOUT_ANGLE;
+  private Pair<String, String> maneuverTypeAndModifier = new Pair<>(null, null);
   private PointF size;
 
+  /**
+   * A custom view that can be used with the Mapbox Directions API.
+   * <p>
+   * By providing a {@link String} maneuver type and maneuver modifier, the
+   * corresponding maneuver icon will be rendered in this view.
+   *
+   * @param context to use when creating a view from code
+   */
   public ManeuverView(Context context) {
     super(context);
   }
 
+  /**
+   * A custom view that can be used with the Mapbox Directions API.
+   * <p>
+   * By providing a {@link String} maneuver type and maneuver modifier, the
+   * corresponding maneuver icon will be rendered in this view.
+   *
+   * @param context for inflating a view from XML
+   * @param attrs   for inflating a view from XML
+   */
   public ManeuverView(Context context, AttributeSet attrs) {
     super(context, attrs);
+    initializeColorFrom(attrs);
   }
 
+  /**
+   * A custom view that can be used with the Mapbox Directions API.
+   * <p>
+   * By providing a {@link String} maneuver type and maneuver modifier, the
+   * corresponding maneuver icon will be rendered in this view.
+   *
+   * @param context  for inflation from XML and apply a class-specific base style
+   * @param attrs    for inflation from XML and apply a class-specific base style
+   * @param defStyle for inflation from XML and apply a class-specific base style
+   */
   public ManeuverView(Context context, AttributeSet attrs, int defStyle) {
     super(context, attrs, defStyle);
+    initializeColorFrom(attrs);
   }
 
-  @Override
-  protected void onFinishInflate() {
-    super.onFinishInflate();
-    setLayerType(LAYER_TYPE_SOFTWARE, null);
-    initManeuverColor();
-  }
-
-  public void setManeuverTypeAndModifier(@NonNull String maneuverType, String maneuverModifier) {
+  /**
+   * Updates the maneuver type and modifier which determine how this view will
+   * render itself.
+   * <p>
+   * If determined the provided maneuver type and modifier will render a new image,
+   * the view will invalidate and redraw itself with the new data.
+   *
+   * @param maneuverType     to determine the maneuver icon to render
+   * @param maneuverModifier to determine the maneuver icon to render
+   */
+  public void setManeuverTypeAndModifier(@NonNull String maneuverType, @Nullable String maneuverModifier) {
     if (isNewTypeOrModifier(maneuverType, maneuverModifier)) {
       this.maneuverType = maneuverType;
       this.maneuverModifier = maneuverModifier;
@@ -119,11 +152,51 @@ public class ManeuverView extends View {
     }
   }
 
-  public void setRoundaboutAngle(float roundaboutAngle) {
+  /**
+   * Updates the angle to render the roundabout maneuver.
+   * <p>
+   * This value will only be considered if the current maneuver type is
+   * a roundabout.
+   *
+   * @param roundaboutAngle angle to be rendered
+   */
+  public void setRoundaboutAngle(@FloatRange(from = 60f, to = 300f) float roundaboutAngle) {
     if (ROUNDABOUT_MANEUVER_TYPES.contains(maneuverType) && this.roundaboutAngle != roundaboutAngle) {
       updateRoundaboutAngle(roundaboutAngle);
       invalidate();
     }
+  }
+
+  /**
+   * Updates maneuver view primary color.
+   * <p>
+   * The {@link ManeuverView} will be invalidated and redrawn
+   * with the new color provided.
+   *
+   * @param primaryColor to be set
+   */
+  public void setPrimaryColor(@ColorInt int primaryColor) {
+    this.primaryColor = primaryColor;
+    invalidate();
+  }
+
+  /**
+   * Updates maneuver view secondary color.
+   * <p>
+   * The {@link ManeuverView} will be invalidated and redrawn
+   * with the new color provided.
+   *
+   * @param secondaryColor to be set
+   */
+  public void setSecondaryColor(@ColorInt int secondaryColor) {
+    this.secondaryColor = secondaryColor;
+    invalidate();
+  }
+
+  @Override
+  protected void onFinishInflate() {
+    super.onFinishInflate();
+    setLayerType(LAYER_TYPE_SOFTWARE, null);
   }
 
   @Override
@@ -156,11 +229,13 @@ public class ManeuverView extends View {
     setScaleX(flip ? -1 : 1);
   }
 
-  private void initManeuverColor() {
-    this.primaryColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-      R.attr.navigationViewBannerManeuverPrimary);
-    this.secondaryColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-      R.attr.navigationViewBannerManeuverSecondary);
+  private void initializeColorFrom(AttributeSet attributeSet) {
+    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.ManeuverView);
+    primaryColor = typedArray.getColor(R.styleable.ManeuverView_maneuverViewPrimaryColor,
+      ContextCompat.getColor(getContext(), R.color.mapbox_navigation_view_color_banner_maneuver_primary));
+    secondaryColor = typedArray.getColor(R.styleable.ManeuverView_maneuverViewSecondaryColor,
+      ContextCompat.getColor(getContext(), R.color.mapbox_navigation_view_color_banner_maneuver_secondary));
+    typedArray.recycle();
   }
 
   private boolean isNewTypeOrModifier(String maneuverType, String maneuverModifier) {

@@ -12,12 +12,14 @@
         android:id="@+id/subManeuverView"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_marginBottom="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:maneuverViewPrimaryColor="?attr/navigationViewBannerManeuverPrimary"
+        app:maneuverViewSecondaryColor="?attr/navigationViewBannerManeuverSecondary"/>
 
     <TextView
         android:id="@+id/subStepText"
