@@ -1,42 +1,41 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-  import android.content.Context;
+import android.content.Context;
 
-  import com.mapbox.api.directions.v5.DirectionsCriteria;
-  import com.mapbox.api.directions.v5.MapboxDirections;
-  import com.mapbox.api.directions.v5.models.DirectionsResponse;
-  import com.mapbox.api.directions.v5.models.DirectionsRoute;
-  import com.mapbox.api.directions.v5.models.RouteOptions;
-  import com.mapbox.geojson.Point;
-  import com.mapbox.services.android.navigation.v5.BaseTest;
-  import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.api.directions.v5.MapboxDirections;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.BaseTest;
+import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
-  import org.junit.Before;
-  import org.junit.Ignore;
-  import org.junit.Test;
-  import org.mockito.ArgumentCaptor;
-  import org.mockito.Mock;
-  import org.mockito.MockitoAnnotations;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-  import java.util.ArrayList;
-  import java.util.List;
-  import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
-  import edu.emory.mathcs.backport.java.util.Collections;
-  import retrofit2.Call;
-  import retrofit2.Callback;
-  import retrofit2.Response;
+import edu.emory.mathcs.backport.java.util.Collections;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-  import static junit.framework.Assert.assertNotNull;
-  import static org.hamcrest.CoreMatchers.containsString;
-  import static org.junit.Assert.assertThat;
-  import static org.mockito.ArgumentMatchers.any;
-  import static org.mockito.ArgumentMatchers.anyBoolean;
-  import static org.mockito.ArgumentMatchers.anyInt;
-  import static org.mockito.Mockito.mock;
-  import static org.mockito.Mockito.times;
-  import static org.mockito.Mockito.verify;
-  import static org.mockito.Mockito.when;
+import static junit.framework.Assert.assertNotNull;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class NavigationRouteTest extends BaseTest {
 
@@ -213,11 +212,9 @@ public class NavigationRouteTest extends BaseTest {
   public void getRoute_routeRetrievalEventSent() {
     MapboxDirections mapboxDirections = mock(MapboxDirections.class);
     NavigationTelemetry navigationTelemetry = mock(NavigationTelemetry.class);
-    RouteRetrievalInfo.Builder builder = mock(RouteRetrievalInfo.Builder.class);
-    when(builder.route(any(DirectionsRoute.class))).thenReturn(builder);
-    when(builder.numberOfRoutes(anyInt())).thenReturn(builder);
-    when(builder.isOffline(anyBoolean())).thenReturn(builder);
-    NavigationRoute navigationRoute = new NavigationRoute(mapboxDirections, navigationTelemetry, builder);
+    ElapsedTime.Builder elapsedTime = mock(ElapsedTime.Builder.class);
+    NavigationRoute navigationRoute = new NavigationRoute(mapboxDirections, navigationTelemetry,
+      elapsedTime);
     Callback<DirectionsResponse> callback = mock(Callback.class);
     ArgumentCaptor<Callback<DirectionsResponse>> argumentCaptor =
       ArgumentCaptor.forClass(Callback.class);
@@ -231,6 +228,9 @@ public class NavigationRouteTest extends BaseTest {
     Callback<DirectionsResponse> innerCallback = argumentCaptor.getValue();
     innerCallback.onResponse(mock(Call.class), response);
 
-    verify(navigationTelemetry).routeRetrievalEvent(builder);
+    InOrder inOrder = inOrder(elapsedTime);
+    inOrder.verify(elapsedTime).start();
+    inOrder.verify(elapsedTime).end();
+    verify(navigationTelemetry).routeRetrievalEvent(elapsedTime.build());
   }
 }

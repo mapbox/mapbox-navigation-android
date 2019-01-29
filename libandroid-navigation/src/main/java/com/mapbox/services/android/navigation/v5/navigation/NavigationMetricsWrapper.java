@@ -371,8 +371,8 @@ final class NavigationMetricsWrapper {
     mapboxTelemetry.push(feedbackEvent);
   }
 
-  static void routeRetrievalEvent(RouteRetrievalInfo routeRetrievalInfo, String sessionId) {
-    push(new RouteRetrievalEvent(routeRetrievalInfo, sessionId));
+  static void routeRetrievalEvent(long elapsedTime, String sessionId) {
+    push(new RouteRetrievalEvent(elapsedTime, sessionId));
   }
 
   static Event turnstileEvent() {

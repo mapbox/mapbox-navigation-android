@@ -8,9 +8,9 @@ import android.os.Parcelable;
 class RouteRetrievalEvent extends NavigationPerformanceEvent implements Parcelable {
   private static final String ELAPSED_TIME_NAME = "elapsed_time";
 
-  RouteRetrievalEvent(RouteRetrievalInfo routeRetrievalInfo, String sessionId) {
+  RouteRetrievalEvent(long elapsedTime, String sessionId) {
     super(sessionId);
 
-    addCounter(new LongCounter(ELAPSED_TIME_NAME, routeRetrievalInfo.elapsedTime()));
+    addCounter(new LongCounter(ELAPSED_TIME_NAME, elapsedTime));
   }
 }

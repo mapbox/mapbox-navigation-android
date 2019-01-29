@@ -14,32 +14,26 @@ import java.util.Locale;
 
 @SuppressLint("ParcelCreator")
 @SuppressWarnings("ParcelableCreator")
-public class NavigationPerformanceEvent extends Event implements Parcelable {
+class NavigationPerformanceEvent extends Event implements Parcelable {
   private static final String DATE_AND_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
   private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_AND_TIME_PATTERN, Locale.US);
   private static final String PERFORMANCE_TRACE = "performance.trace";
 
-  protected final String event;
-  protected final String created;
-  protected final String sessionId;
-  protected final List<Counter> counters;
-  protected final List<Attribute> attributes;
-
-  NavigationPerformanceEvent(String event, String created, String sessionId,
-                             List<Counter> counters, List<Attribute> attributes) {
-    this.event = event;
-    this.created = created;
-    this.sessionId = sessionId;
-    this.counters = counters;
-    this.attributes = attributes;
-  }
+  private final String event;
+  private final String created;
+  private final String sessionId;
+  private final List<Counter> counters;
+  private final List<Attribute> attributes;
 
   NavigationPerformanceEvent(String sessionId) {
-    this(PERFORMANCE_TRACE, obtainCurrentDate(), sessionId,
-      new ArrayList<Counter>(), new ArrayList<Attribute>());
+    this.event = PERFORMANCE_TRACE;
+    this.created = obtainCurrentDate();
+    this.sessionId = sessionId;
+    this.counters = new ArrayList<>();
+    this.attributes = new ArrayList<>();
   }
 
-  private static String obtainCurrentDate() {
+  private String obtainCurrentDate() {
     return dateFormat.format(new Date());
   }
 

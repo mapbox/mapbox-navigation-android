@@ -57,7 +57,7 @@ class NavigationTelemetry implements NavigationMetricListener {
 
   private boolean isOffRoute;
   private boolean isConfigurationChange;
-  private RouteRetrievalInfo.Builder routeRetrievalInfoBuilder = RouteRetrievalInfo.builder();
+  private ElapsedTime routeRetrievalElapsedTime = null;
 
   private NavigationTelemetry() {
     locationBuffer = new RingBuffer<>(40);
@@ -176,9 +176,9 @@ class NavigationTelemetry implements NavigationMetricListener {
   }
 
   private void sendRouteRetrievalEventIfExists() {
-    if (routeRetrievalInfoBuilder != null) {
-      routeRetrievalEvent(routeRetrievalInfoBuilder);
-      routeRetrievalInfoBuilder = null;
+    if (routeRetrievalElapsedTime != null) {
+      routeRetrievalEvent(routeRetrievalElapsedTime);
+      routeRetrievalElapsedTime = null;
     }
   }
 
@@ -299,12 +299,12 @@ class NavigationTelemetry implements NavigationMetricListener {
     queuedFeedbackEvents.remove(feedbackEvent);
   }
 
-  void routeRetrievalEvent(RouteRetrievalInfo.Builder routeRetrievalInfoBuilder) {
+  void routeRetrievalEvent(ElapsedTime elapsedTime) {
     if (navigationSessionState != null && !navigationSessionState.sessionIdentifier().isEmpty()) {
-      NavigationMetricsWrapper.routeRetrievalEvent(routeRetrievalInfoBuilder.build(),
+      NavigationMetricsWrapper.routeRetrievalEvent(elapsedTime.getElapsedTime(),
         navigationSessionState.sessionIdentifier());
     } else {
-      this.routeRetrievalInfoBuilder = routeRetrievalInfoBuilder;
+      routeRetrievalElapsedTime = elapsedTime;
     }
   }
 

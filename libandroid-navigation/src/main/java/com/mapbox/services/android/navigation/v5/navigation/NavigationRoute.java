@@ -42,7 +42,7 @@ public final class NavigationRoute {
 
   private final MapboxDirections mapboxDirections;
   private final NavigationTelemetry navigationTelemetry;
-  private final RouteRetrievalInfo.Builder routeRetrievalInfoBuilder;
+  private final ElapsedTime.Builder elapsedTimeBuilder;
 
   /**
    * Package private constructor used for the {@link Builder#build()} method.
@@ -51,14 +51,14 @@ public final class NavigationRoute {
    * @since 0.5.0
    */
   NavigationRoute(MapboxDirections mapboxDirections) {
-    this(mapboxDirections, NavigationTelemetry.getInstance(), RouteRetrievalInfo.builder());
+    this(mapboxDirections, NavigationTelemetry.getInstance(), ElapsedTime.builder());
   }
 
   NavigationRoute(MapboxDirections mapboxDirections, NavigationTelemetry navigationTelemetry,
-                  RouteRetrievalInfo.Builder routeRetrievalInfoBuilder) {
+                  ElapsedTime.Builder elapsedTimeBuilder) {
     this.mapboxDirections = mapboxDirections;
     this.navigationTelemetry = navigationTelemetry;
-    this.routeRetrievalInfoBuilder = routeRetrievalInfoBuilder;
+    this.elapsedTimeBuilder = elapsedTimeBuilder;
   }
 
   /**
@@ -87,18 +87,15 @@ public final class NavigationRoute {
    * @since 0.5.0
    */
   public void getRoute(final Callback<DirectionsResponse> callback) {
-    routeRetrievalInfoBuilder.start();
+    elapsedTimeBuilder.start();
+
     mapboxDirections.enqueueCall(new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-        routeRetrievalInfoBuilder.end();
+        elapsedTimeBuilder.end();
         callback.onResponse(call, response);
         if (response.body().routes() != null && !response.body().routes().isEmpty()) {
-          navigationTelemetry.routeRetrievalEvent(
-            routeRetrievalInfoBuilder
-              .route(response.body().routes().get(0))
-              .numberOfRoutes(response.body().routes().size())
-              .isOffline(false));
+          navigationTelemetry.routeRetrievalEvent(elapsedTimeBuilder.build());
         }
       }
 
