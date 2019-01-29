@@ -16,7 +16,9 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:maneuverViewPrimaryColor="?attr/navigationViewBannerManeuverPrimary"
+        app:maneuverViewSecondaryColor="?attr/navigationViewBannerManeuverSecondary"/>
 
     <TextView
         android:id="@+id/subStepText"

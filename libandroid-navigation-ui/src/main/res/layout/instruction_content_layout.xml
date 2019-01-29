@@ -30,7 +30,9 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.75"/>
+            app:layout_constraintVertical_bias="0.75"
+            app:maneuverViewPrimaryColor="?attr/navigationViewBannerManeuverPrimary"
+            app:maneuverViewSecondaryColor="?attr/navigationViewBannerManeuverSecondary"/>
 
         <TextView
             android:id="@+id/stepDistanceText"

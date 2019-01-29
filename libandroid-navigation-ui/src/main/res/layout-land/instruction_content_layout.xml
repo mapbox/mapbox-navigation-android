@@ -27,7 +27,9 @@
             android:id="@+id/maneuverView"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_margin="8dp"/>
+            android:layout_margin="8dp"
+            app:maneuverViewPrimaryColor="?attr/navigationViewBannerManeuverPrimary"
+            app:maneuverViewSecondaryColor="?attr/navigationViewBannerManeuverSecondary"/>
 
         <TextView
             android:id="@+id/stepDistanceText"
