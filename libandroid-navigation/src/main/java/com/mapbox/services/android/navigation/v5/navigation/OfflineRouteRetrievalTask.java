@@ -15,20 +15,10 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, Directions
   private final Navigator navigator;
   private final OnOfflineRouteFoundCallback callback;
   private RouterResult routerResult;
-  private RouteRetrievalInfo.Builder routeRetrievalBuilder;
-  private NavigationTelemetry navigationTelemetry;
 
   OfflineRouteRetrievalTask(Navigator navigator, OnOfflineRouteFoundCallback callback) {
-    this(navigator, callback, NavigationTelemetry.getInstance(), RouteRetrievalInfo.builder());
-  }
-
-
-  OfflineRouteRetrievalTask(Navigator navigator, OnOfflineRouteFoundCallback callback,
-                            NavigationTelemetry navigationTelemetry, RouteRetrievalInfo.Builder builder) {
     this.navigator = navigator;
     this.callback = callback;
-    this.navigationTelemetry = navigationTelemetry;
-    routeRetrievalBuilder = builder;
   }
 
   // For testing only
@@ -39,29 +29,19 @@ class OfflineRouteRetrievalTask extends AsyncTask<OfflineRoute, Void, Directions
 
   @Override
   protected DirectionsRoute doInBackground(OfflineRoute... offlineRoutes) {
-    routeRetrievalBuilder.start();
-
     String url = offlineRoutes[FIRST_ROUTE].buildUrl();
 
     synchronized (navigator) {
       routerResult = navigator.getRoute(url);
     }
 
-    DirectionsRoute directionsRoute = offlineRoutes[FIRST_ROUTE].retrieveOfflineRoute(routerResult);
-    routeRetrievalBuilder.end();
-    return directionsRoute;
+    return offlineRoutes[FIRST_ROUTE].retrieveOfflineRoute(routerResult);
   }
 
   @Override
   protected void onPostExecute(DirectionsRoute offlineRoute) {
     if (offlineRoute != null) {
       callback.onRouteFound(offlineRoute);
-
-      navigationTelemetry.routeRetrievalEvent(
-        routeRetrievalBuilder
-          .route(offlineRoute)
-          .numberOfRoutes(1)
-          .isOffline(true));
     } else {
       String errorMessage = generateErrorMessage();
       OfflineError error = new OfflineError(errorMessage);

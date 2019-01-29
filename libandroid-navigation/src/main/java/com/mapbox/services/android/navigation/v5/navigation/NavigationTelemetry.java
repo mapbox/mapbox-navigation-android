@@ -57,6 +57,7 @@ class NavigationTelemetry implements NavigationMetricListener {
 
   private boolean isOffRoute;
   private boolean isConfigurationChange;
+  private RouteRetrievalInfo.Builder routeRetrievalInfoBuilder = RouteRetrievalInfo.builder();
 
   private NavigationTelemetry() {
     locationBuffer = new RingBuffer<>(40);
@@ -171,6 +172,14 @@ class NavigationTelemetry implements NavigationMetricListener {
         .build();
     }
     isConfigurationChange = false;
+    sendRouteRetrievalEventIfExists();
+  }
+
+  private void sendRouteRetrievalEventIfExists() {
+    if (routeRetrievalInfoBuilder != null) {
+      routeRetrievalEvent(routeRetrievalInfoBuilder);
+      routeRetrievalInfoBuilder = null;
+    }
   }
 
   /**
@@ -291,8 +300,12 @@ class NavigationTelemetry implements NavigationMetricListener {
   }
 
   void routeRetrievalEvent(RouteRetrievalInfo.Builder routeRetrievalInfoBuilder) {
-    NavigationMetricsWrapper.routeRetrievalEvent(routeRetrievalInfoBuilder.build(),
-      navigationSessionState.sessionIdentifier());
+    if (navigationSessionState != null && !navigationSessionState.sessionIdentifier().isEmpty()) {
+      NavigationMetricsWrapper.routeRetrievalEvent(routeRetrievalInfoBuilder.build(),
+        navigationSessionState.sessionIdentifier());
+    } else {
+      this.routeRetrievalInfoBuilder = routeRetrievalInfoBuilder;
+    }
   }
 
   private void validateAccessToken(String accessToken) {
