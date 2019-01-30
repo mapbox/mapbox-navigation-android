@@ -13,8 +13,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteStepProgress
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -72,25 +70,6 @@ public class MapFpsDelegateTest {
     delegate.updateEnabled(false);
 
     mapView.setMaximumFps(eq(Integer.MAX_VALUE));
-  }
-
-  @Test
-  public void isEnabled_returnsCurrentEnabledState() {
-    MapFpsDelegate delegate = new MapFpsDelegate(mock(MapView.class), mock(MapBatteryMonitor.class));
-
-    delegate.updateEnabled(false);
-
-    assertFalse(delegate.isEnabled());
-  }
-
-  @Test
-  public void updateMaxFpsThreshold_isCorrectlySet() {
-    MapFpsDelegate delegate = new MapFpsDelegate(mock(MapView.class), mock(MapBatteryMonitor.class));
-    int maxFpsThreshold = 5;
-
-    delegate.updateMaxFpsThreshold(maxFpsThreshold);
-
-    assertEquals(maxFpsThreshold, delegate.retrieveMaxFpsThreshold());
   }
 
   @Test

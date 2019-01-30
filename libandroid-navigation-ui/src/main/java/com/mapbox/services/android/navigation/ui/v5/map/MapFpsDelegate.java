@@ -14,11 +14,11 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTransitionListener {
 
+  static final int DEFAULT_MAX_FPS_THRESHOLD = 20;
   private static final double VALID_DURATION_IN_SECONDS_UNTIL_NEXT_MANEUVER = 7d;
   private static final double VALID_DURATION_IN_SECONDS_SINCE_PREVIOUS_MANEUVER = 5d;
   private static final int DEVICE_MAX_FPS = Integer.MAX_VALUE;
   private static final int LOW_POWER_MAX_FPS = 30;
-  private static final int DEFAULT_MAX_FPS_THRESHOLD = 20;
 
   private final MapView mapView;
   private final MapBatteryMonitor batteryMonitor;
@@ -73,16 +73,8 @@ class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTra
     resetMaxFps(!isEnabled);
   }
 
-  boolean isEnabled() {
-    return isEnabled;
-  }
-
   void updateMaxFpsThreshold(int maxFps) {
     this.maxFpsThreshold = maxFps;
-  }
-
-  int retrieveMaxFpsThreshold() {
-    return maxFpsThreshold;
   }
 
   void adjustFpsFor(RouteProgress routeProgress) {
