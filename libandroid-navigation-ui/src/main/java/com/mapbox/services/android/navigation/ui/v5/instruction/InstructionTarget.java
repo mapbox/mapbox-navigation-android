@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Spannable;
 import android.text.Spanned;
@@ -23,15 +22,22 @@ public class InstructionTarget implements Target {
   private List<BannerShield> shields;
   private BannerShield shield;
   private InstructionLoadedCallback instructionLoadedCallback;
+  private TextViewUtils textViewUtils;
 
-  InstructionTarget(TextView textView, Spannable instructionSpannable,
-                    List<BannerShield> shields, BannerShield shield,
-                    InstructionLoadedCallback instructionLoadedCallback) {
+  InstructionTarget(TextView textView, Spannable instructionSpannable, List<BannerShield> shields,
+                    BannerShield shield, InstructionLoadedCallback instructionLoadedCallback) {
+    this(textView, instructionSpannable, shields, shield, new TextViewUtils(), instructionLoadedCallback);
+  }
+
+  private InstructionTarget(TextView textView, Spannable instructionSpannable, List<BannerShield> shields,
+                            BannerShield shield, TextViewUtils textViewUtils,
+                            InstructionLoadedCallback instructionLoadedCallback) {
     this.textView = textView;
     this.instructionSpannable = instructionSpannable;
     this.shields = shields;
     this.shield = shield;
     this.instructionLoadedCallback = instructionLoadedCallback;
+    this.textViewUtils = textViewUtils;
   }
 
   BannerShield getShield() {
@@ -40,7 +46,7 @@ public class InstructionTarget implements Target {
 
   @Override
   public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-    Drawable drawable = createDrawable(bitmap);
+    Drawable drawable = textViewUtils.createDrawable(textView, bitmap);
     createAndSetImageSpan(drawable);
     sendInstructionLoadedCallback();
   }
@@ -73,14 +79,6 @@ public class InstructionTarget implements Target {
       CharSequence truncatedSequence = truncateImageSpan(instructionSpannable, textView);
       textView.setText(truncatedSequence);
     }
-  }
-
-  private Drawable createDrawable(Bitmap bitmap) {
-    Drawable drawable = new BitmapDrawable(textView.getContext().getResources(), bitmap);
-    int bottom = textView.getLineHeight();
-    int right = bottom * bitmap.getWidth() / bitmap.getHeight();
-    drawable.setBounds(0, 0, right, bottom);
-    return drawable;
   }
 
   private void sendInstructionLoadedCallback() {
