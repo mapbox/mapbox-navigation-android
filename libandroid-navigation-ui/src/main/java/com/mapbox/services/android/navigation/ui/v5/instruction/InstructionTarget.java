@@ -29,9 +29,9 @@ public class InstructionTarget implements Target {
     this(textView, instructionSpannable, shields, shield, new TextViewUtils(), instructionLoadedCallback);
   }
 
-  InstructionTarget(TextView textView, Spannable instructionSpannable, List<BannerShield> shields,
-                    BannerShield shield, TextViewUtils textViewUtils,
-                    InstructionLoadedCallback instructionLoadedCallback) {
+  private InstructionTarget(TextView textView, Spannable instructionSpannable, List<BannerShield> shields,
+                            BannerShield shield, TextViewUtils textViewUtils,
+                            InstructionLoadedCallback instructionLoadedCallback) {
     this.textView = textView;
     this.instructionSpannable = instructionSpannable;
     this.shields = shields;

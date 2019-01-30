@@ -35,12 +35,12 @@ class TextViewUtils {
     setImageSpan(textView, bitmap, start, end);
   }
 
-  void setImageSpan(TextView textView, Bitmap bitmap, int start, int end) {
+  private void setImageSpan(TextView textView, Bitmap bitmap, int start, int end) {
     Drawable drawable = createDrawable(textView, bitmap);
     setImageSpan(textView, drawable, start, end);
   }
 
-  void setImageSpan(TextView textView, Drawable drawable, int start, int end) {
+  private void setImageSpan(TextView textView, Drawable drawable, int start, int end) {
     Spannable instructionSpannable = new SpannableString(textView.getText());
 
     instructionSpannable.setSpan(new ImageSpan(drawable),

@@ -10,7 +10,7 @@ class TextCreator extends NodeCreator<BannerComponentNode, TextVerifier> {
     this(new TextVerifier());
   }
 
-  TextCreator(TextVerifier textVerifier) {
+  private TextCreator(TextVerifier textVerifier) {
     super(textVerifier);
   }
 

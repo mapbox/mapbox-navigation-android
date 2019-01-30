@@ -61,7 +61,7 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
    *
    * @return ImageCoordinator
    */
-  public static ImageCreator getInstance() {
+  public static synchronized ImageCreator getInstance() {
     if (instance == null) {
       instance = new ImageCreator(new ImageVerifier());
     }
