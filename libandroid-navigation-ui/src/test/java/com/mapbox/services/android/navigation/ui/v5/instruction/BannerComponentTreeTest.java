@@ -60,10 +60,10 @@ public class BannerComponentTreeTest {
     }
   }
 
-  class TestVerifier extends NodeVerifier {
+  class TestVerifier implements NodeVerifier {
 
     @Override
-    boolean isNodeType(BannerComponents bannerComponents) {
+    public boolean isNodeType(BannerComponents bannerComponents) {
       return true;
     }
   }

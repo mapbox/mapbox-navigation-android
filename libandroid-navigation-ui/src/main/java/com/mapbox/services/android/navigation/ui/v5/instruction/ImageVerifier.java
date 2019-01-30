@@ -4,10 +4,10 @@ import android.text.TextUtils;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
 
-class ImageVerifier extends NodeVerifier {
+class ImageVerifier implements NodeVerifier {
 
   @Override
-  boolean isNodeType(BannerComponents bannerComponents) {
+  public boolean isNodeType(BannerComponents bannerComponents) {
     return hasImageUrl(bannerComponents);
   }
 

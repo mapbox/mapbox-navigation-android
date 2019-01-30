@@ -314,12 +314,15 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   public void hideInstructionList() {
     rvInstructions.stopScroll();
     beginDelayedTransition();
-    int orientation = getContext().getResources().getConfiguration().orientation;
-    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+    if (isLandscape()) {
       updateLandscapeConstraintsTo(R.layout.instruction_layout);
     }
     instructionListLayout.setVisibility(GONE);
     onInstructionListVisibilityChanged(false);
+  }
+
+  private boolean isLandscape() {
+    return getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
   }
 
   /**
@@ -332,8 +335,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     onInstructionListVisibilityChanged(true);
     instructionLayout.requestFocus();
     beginDelayedListTransition();
-    int orientation = getContext().getResources().getConfiguration().orientation;
-    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+    if (isLandscape()) {
       updateLandscapeConstraintsTo(R.layout.instruction_layout_alt);
     }
     instructionListLayout.setVisibility(VISIBLE);
@@ -435,7 +437,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       int navigationViewListBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
         R.attr.navigationViewListBackground);
       // Instruction Layout landscape - banner background
-      if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      if (isLandscape()) {
         View instructionLayoutManeuver = findViewById(R.id.instructionManeuverLayout);
         Drawable maneuverBackground = DrawableCompat.wrap(instructionLayoutManeuver.getBackground()).mutate();
         DrawableCompat.setTint(maneuverBackground, navigationViewBannerBackgroundColor);
@@ -525,9 +527,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   private void initializeStepListClickListener() {
-    int deviceOrientation = getContext().getResources().getConfiguration().orientation;
-    boolean isOrientationLandscape = deviceOrientation == Configuration.ORIENTATION_LANDSCAPE;
-    if (isOrientationLandscape) {
+    if (isLandscape()) {
       initializeLandscapeListListener();
     } else {
       initializePortraitListListener();
@@ -710,8 +710,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param percentBias to be set to the text layout
    */
   private void adjustBannerTextVerticalBias(float percentBias) {
-    int orientation = getContext().getResources().getConfiguration().orientation;
-    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+    if (!isLandscape()) {
       ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) instructionLayoutText.getLayoutParams();
       params.verticalBias = percentBias;
       instructionLayoutText.setLayoutParams(params);
@@ -748,6 +747,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Sets new instruction text if found.
    */
   private void updateDataFromBannerText(@NonNull BannerText primaryBannerText, BannerText secondaryBannerText) {
+    updatePrimaryTextLandscapeWidthParam(isLandscape(), LinearLayout.LayoutParams.MATCH_PARENT);
+
     if (secondaryBannerText == null) {
       loadPrimary(primaryBannerText);
       return;
@@ -766,15 +767,17 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     upcomingPrimaryText.setMaxLines(1);
     upcomingSecondaryText.setVisibility(VISIBLE);
     adjustBannerTextVerticalBias(0.65f);
-
-    upcomingPrimaryText.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-      LinearLayout.LayoutParams.WRAP_CONTENT));
     loadTextWith(primaryBannerText, upcomingPrimaryText);
-    upcomingPrimaryText.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-      LinearLayout.LayoutParams.WRAP_CONTENT));
 
-
+    updatePrimaryTextLandscapeWidthParam(isLandscape(), LinearLayout.LayoutParams.WRAP_CONTENT);
     loadTextWith(secondaryBannerText, upcomingSecondaryText);
+  }
+
+  private void updatePrimaryTextLandscapeWidthParam(boolean isLandscape, int widthParam) {
+    if (isLandscape) {
+      upcomingPrimaryText.setLayoutParams(new LinearLayout.LayoutParams(widthParam,
+        LinearLayout.LayoutParams.WRAP_CONTENT));
+    }
   }
 
   private void loadTextWith(BannerText bannerText, TextView textView) {
