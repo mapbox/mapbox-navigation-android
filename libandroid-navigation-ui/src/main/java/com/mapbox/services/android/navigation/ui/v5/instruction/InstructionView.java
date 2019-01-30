@@ -747,8 +747,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Sets new instruction text if found.
    */
   private void updateDataFromBannerText(@NonNull BannerText primaryBannerText, BannerText secondaryBannerText) {
-    updatePrimaryTextLandscapeWidthParam(isLandscape(), LinearLayout.LayoutParams.MATCH_PARENT);
-
     if (secondaryBannerText == null) {
       loadPrimary(primaryBannerText);
       return;
@@ -769,15 +767,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     adjustBannerTextVerticalBias(0.65f);
     loadTextWith(primaryBannerText, upcomingPrimaryText);
 
-    updatePrimaryTextLandscapeWidthParam(isLandscape(), LinearLayout.LayoutParams.WRAP_CONTENT);
     loadTextWith(secondaryBannerText, upcomingSecondaryText);
-  }
-
-  private void updatePrimaryTextLandscapeWidthParam(boolean isLandscape, int widthParam) {
-    if (isLandscape) {
-      upcomingPrimaryText.setLayoutParams(new LinearLayout.LayoutParams(widthParam,
-        LinearLayout.LayoutParams.WRAP_CONTENT));
-    }
   }
 
   private void loadTextWith(BannerText bannerText, TextView textView) {
