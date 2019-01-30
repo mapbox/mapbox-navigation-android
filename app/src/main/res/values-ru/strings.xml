@@ -31,6 +31,9 @@
     <string name="title_fragment_navigation">Маршрут внутри фрагмента</string>
     <string name="description_fragment_navigation">Отображение маршрута в области-фрагменте</string>
 
+    <string name="title_component_navigation">Маршрут</string>
+    <string name="description_component_navigation">Управление маршрутами</string>
+
     <string name="settings">Настройки</string>
     <string name="simulate_route">Моделирование маршрута</string>
     <string name="language">Язык</string>

@@ -36,6 +36,12 @@
     <!-- Feedback type for Road Closed -->
     <string name="feedback_road_closure">Estrada\nFechada</string>
 
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="feedback_submitted">Opinião Enviada</string>
+
+    <!-- Shown in off-route scenarios to provide feedback -->
+    <string name="report_problem">Reportar Problema</string>
+
     <!-- Test app dialog text -->
     <string name="dropoff_dialog_text">Deseja navegar para o destino seguinte?</string>
 
