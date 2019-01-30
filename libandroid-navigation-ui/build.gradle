@@ -66,6 +66,9 @@ dependencies {
   // Picasso
   implementation dependenciesList.picasso
 
+  // Timber
+  implementation dependenciesList.timber
+
   // Mapbox Map SDK Javadoc
   javadocDeps dependenciesList.mapboxMapSdk
 
