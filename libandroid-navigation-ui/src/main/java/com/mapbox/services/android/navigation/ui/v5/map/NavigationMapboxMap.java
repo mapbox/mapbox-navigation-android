@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.ui.v5.map;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
@@ -13,9 +14,6 @@ import android.support.v4.app.FragmentActivity;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
-import com.mapbox.mapboxsdk.annotations.Icon;
-import com.mapbox.mapboxsdk.annotations.Marker;
-import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentOptions;
@@ -24,6 +22,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.style.sources.Source;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.services.android.navigation.ui.v5.NavigationSnapshotReadyCallback;
@@ -34,9 +33,9 @@ import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import static com.mapbox.services.android.navigation.ui.v5.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MINIMUM_MAP_ZOOM;
 
 /**
@@ -59,10 +58,10 @@ public class NavigationMapboxMap {
   private static final String TRAFFIC_LAYER_ID = "traffic";
   private static final int[] ZERO_MAP_PADDING = {0, 0, 0, 0};
   private static final double NAVIGATION_MAXIMUM_MAP_ZOOM = 18d;
-  private final List<Marker> mapMarkers = new ArrayList<>();
   private MapboxMap mapboxMap;
   private LocationComponent locationComponent;
   private MapPaddingAdjustor mapPaddingAdjustor;
+  private NavigationSymbolManager navigationSymbolManager;
   private MapLayerInteractor layerInteractor;
   private MapWayName mapWayName;
   private NavigationMapRoute mapRoute;
@@ -80,6 +79,7 @@ public class NavigationMapboxMap {
     this.mapboxMap = mapboxMap;
     initializeLocationComponent(mapView, mapboxMap);
     initializeMapPaddingAdjustor(mapView, mapboxMap);
+    initializeNavigationSymbolManager(mapView, mapboxMap);
     initializeMapLayerInteractor(mapboxMap);
     initializeWayname(mapboxMap, mapPaddingAdjustor);
     initializeRoute(mapView, mapboxMap);
@@ -128,8 +128,7 @@ public class NavigationMapboxMap {
    * @param position the point at which the marker will be placed
    */
   public void addMarker(Context context, Point position) {
-    Marker marker = createMarkerFromIcon(context, position);
-    mapMarkers.add(marker);
+    navigationSymbolManager.addMarkerFor(position);
   }
 
   /**
@@ -139,7 +138,7 @@ public class NavigationMapboxMap {
    * if no markers have been added.
    */
   public void clearMarkers() {
-    removeAllMarkers();
+    navigationSymbolManager.removeAllMarkerSymbols();
   }
 
   /**
@@ -567,6 +566,13 @@ public class NavigationMapboxMap {
     mapPaddingAdjustor = new MapPaddingAdjustor(mapView, mapboxMap);
   }
 
+  private void initializeNavigationSymbolManager(MapView mapView, MapboxMap mapboxMap) {
+    Bitmap markerBitmap = ThemeSwitcher.retrieveThemeMapMarker(mapView.getContext());
+    mapboxMap.getStyle().addImage(MAPBOX_NAVIGATION_MARKER_NAME, markerBitmap);
+    SymbolManager symbolManager = new SymbolManager(mapView, mapboxMap, mapboxMap.getStyle());
+    navigationSymbolManager = new NavigationSymbolManager(symbolManager);
+  }
+
   private void initializeMapLayerInteractor(MapboxMap mapboxMap) {
     layerInteractor = new MapLayerInteractor(mapboxMap);
   }
@@ -631,22 +637,6 @@ public class NavigationMapboxMap {
   private void removeFpsListenersFromCamera() {
     mapCamera.removeOnTrackingModeTransitionListener(mapFpsDelegate);
     mapCamera.removeOnTrackingModeChangedListener(mapFpsDelegate);
-  }
-
-  @NonNull
-  private Marker createMarkerFromIcon(Context context, Point position) {
-    LatLng markerPosition = new LatLng(position.latitude(),
-      position.longitude());
-    Icon markerIcon = ThemeSwitcher.retrieveThemeMapMarker(context);
-    return mapboxMap.addMarker(new MarkerOptions()
-      .position(markerPosition)
-      .icon(markerIcon));
-  }
-
-  private void removeAllMarkers() {
-    for (Marker marker : mapMarkers) {
-      mapboxMap.removeMarker(marker);
-    }
   }
 
   private void updateMapWaynameWithLocation(Location location) {
