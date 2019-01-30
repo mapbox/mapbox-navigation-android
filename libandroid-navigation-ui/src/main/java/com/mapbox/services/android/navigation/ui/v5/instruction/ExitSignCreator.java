@@ -15,6 +15,9 @@ class ExitSignCreator extends NodeCreator<BannerComponentNode, ExitSignVerifier>
   private int startIndex;
   private TextViewUtils textViewUtils;
   private String modifier;
+  private static final String EXIT = "exit";
+  private static final String EXIT_NUMBER = "exit-number";
+  private static final String LEFT = "left";
 
   ExitSignCreator() {
     super(new ExitSignVerifier());
@@ -24,9 +27,9 @@ class ExitSignCreator extends NodeCreator<BannerComponentNode, ExitSignVerifier>
   @Override
   BannerComponentNode setupNode(BannerComponents components, int index, int startIndex, String
     modifier) {
-    if (components.type().equals("exit")) {
+    if (components.type().equals(EXIT)) {
       return null;
-    } else if (components.type().equals("exit-number")) {
+    } else if (components.type().equals(EXIT_NUMBER)) {
       exitNumber = components.text();
       this.startIndex = startIndex;
       this.modifier = modifier;
@@ -52,7 +55,7 @@ class ExitSignCreator extends NodeCreator<BannerComponentNode, ExitSignVerifier>
 
       TextView exitSignView;
 
-      if (modifier.equals("left")) {
+      if (modifier.equals(LEFT)) {
         exitSignView = (TextView) inflater.inflate(R.layout.exit_sign_view_left, root, false);
       } else {
         exitSignView = (TextView) inflater.inflate(R.layout.exit_sign_view_right, root, false);
