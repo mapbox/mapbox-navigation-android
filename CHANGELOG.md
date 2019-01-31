@@ -2,6 +2,22 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.28.0 - January 30, 2019
+
+Note: This release breaks `SEMVER` / contains API breaking changes.  Please consult this [migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/0.28.0-Migration-Guide) for the necessary updates required.
+
+* Delay initialization of FpsDelegate / WayName in NavigationMapboxMap [#1700](https://github.com/mapbox/mapbox-navigation-android/pull/1700)
+* Update Maps SDK 7.1.0 [#1712](https://github.com/mapbox/mapbox-navigation-android/pull/1712)
+* [SEMVER] Added exit signs to the instruction banner and refactored instruction loader [#1195](https://github.com/mapbox/mapbox-navigation-android/pull/1195)
+* [SEMVER] Replace deprecated maker usage in NavigationMapboxMap with SymbolManager [#1707](https://github.com/mapbox/mapbox-navigation-android/pull/1707)
+* Add ManeuverView APIs for adjusting primary and secondary color [#1709](https://github.com/mapbox/mapbox-navigation-android/pull/1709)
+* Update translations from Transifex [#1704](https://github.com/mapbox/mapbox-navigation-android/pull/1704)
+* Provide default LocationComponent style when not found [#1696](https://github.com/mapbox/mapbox-navigation-android/pull/1696)
+* Update support lib 28.0.0 to fix issue with ViewModel restoration [#1690](https://github.com/mapbox/mapbox-navigation-android/pull/1690)
+* [SEMVER] Update TurnLaneView to use VectorDrawable instead of StyleKit [#1695](https://github.com/mapbox/mapbox-navigation-android/pull/1695)
+* Fix activation of default LocationEngine for LocationComponent [#1701](https://github.com/mapbox/mapbox-navigation-android/pull/1701)
+* Adjust route overview to account for lifecycle [#1688](https://github.com/mapbox/mapbox-navigation-android/pull/1688)
+
 ### v0.27.0 - January 16, 2019
 
 Note: This release breaks `SEMVER` / contains API breaking changes.  Please consult this [migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/0.27.0-Migration-Guide) for the necessary updates required.
