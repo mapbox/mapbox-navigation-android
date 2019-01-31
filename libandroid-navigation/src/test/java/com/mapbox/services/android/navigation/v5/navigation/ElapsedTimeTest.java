@@ -10,17 +10,17 @@ public class ElapsedTimeTest {
 
   @Test(expected = NavigationException.class)
   public void errorThrownIfEndCalledBeforeStart() {
-    ElapsedTime.builder().end();
+    new ElapsedTime().end();
   }
 
   @Test
   public void elapsedTime() {
-    ElapsedTime.Builder builder = ElapsedTime.builder();
-    builder.start();
-    builder.end();
-    long start = builder.getStart();
-    long end = builder.getEnd();
+    ElapsedTime elapsedTime = new ElapsedTime();
+    elapsedTime.start();
+    elapsedTime.end();
+    long start = elapsedTime.getStart();
+    long end = elapsedTime.getEnd();
 
-    assertEquals(builder.build().getElapsedTime(), end - start);
+    assertEquals(elapsedTime.getElapsedTime(), end - start);
   }
 }

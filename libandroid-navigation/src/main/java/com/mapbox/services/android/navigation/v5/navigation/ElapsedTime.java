@@ -1,50 +1,38 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import com.google.auto.value.AutoValue;
+import android.support.annotation.Nullable;
+
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 
-@AutoValue
-abstract class ElapsedTime {
+class ElapsedTime {
+  private Long start = null;
+  private Long end = null;
 
-  abstract long getElapsedTime();
-
-  public static Builder builder() {
-    return new AutoValue_ElapsedTime.Builder();
+  void start() {
+    start = System.nanoTime();
   }
 
-  @AutoValue.Builder
-  public abstract static class Builder {
-    private Long start = null;
-    private Long end = null;
+  @Nullable
+  Long getStart() {
+    return start;
+  }
 
-    Builder start() {
-      start = System.nanoTime();
-      return this;
+  void end() {
+    if (start == null) {
+      throw new NavigationException("Must call start() before calling end()");
     }
+    end = System.nanoTime();
+  }
 
-    long getStart() {
-      return start;
+  @Nullable
+  Long getEnd() {
+    return end;
+  }
+
+  long getElapsedTime() {
+    if (start == null || end == null) {
+      throw new NavigationException("Must call start() and end() before calling getElapsedTime()");
     }
-
-    Builder end() {
-      if (start == null) {
-        throw new NavigationException("Must call start() before calling end()");
-      }
-      end = System.nanoTime();
-      return this;
-    }
-
-    long getEnd() {
-      return end;
-    }
-
-    abstract Builder elapsedTime(long elapsedTime);
-
-    abstract ElapsedTime autoBuild();
-
-    ElapsedTime build() {
-      elapsedTime(end - start);
-      return autoBuild();
-    }
+    return end - start;
   }
 }

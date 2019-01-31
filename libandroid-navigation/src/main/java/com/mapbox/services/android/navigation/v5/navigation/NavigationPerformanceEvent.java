@@ -17,7 +17,7 @@ import java.util.Locale;
 class NavigationPerformanceEvent extends Event implements Parcelable {
   private static final String DATE_AND_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
   private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_AND_TIME_PATTERN, Locale.US);
-  private static final String PERFORMANCE_TRACE = "performance.trace";
+  private static final String PERFORMANCE_TRACE = "mobile.performance_trace";
 
   private final String event;
   private final String created;

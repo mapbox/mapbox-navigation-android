@@ -42,7 +42,7 @@ public final class NavigationRoute {
 
   private final MapboxDirections mapboxDirections;
   private final NavigationTelemetry navigationTelemetry;
-  private final ElapsedTime.Builder elapsedTimeBuilder;
+  private final ElapsedTime elapsedTime;
 
   /**
    * Package private constructor used for the {@link Builder#build()} method.
@@ -51,14 +51,14 @@ public final class NavigationRoute {
    * @since 0.5.0
    */
   NavigationRoute(MapboxDirections mapboxDirections) {
-    this(mapboxDirections, NavigationTelemetry.getInstance(), ElapsedTime.builder());
+    this(mapboxDirections, NavigationTelemetry.getInstance(), new ElapsedTime());
   }
 
   NavigationRoute(MapboxDirections mapboxDirections, NavigationTelemetry navigationTelemetry,
-                  ElapsedTime.Builder elapsedTimeBuilder) {
+                  ElapsedTime elapsedTime) {
     this.mapboxDirections = mapboxDirections;
     this.navigationTelemetry = navigationTelemetry;
-    this.elapsedTimeBuilder = elapsedTimeBuilder;
+    this.elapsedTime = elapsedTime;
   }
 
   /**
@@ -87,15 +87,15 @@ public final class NavigationRoute {
    * @since 0.5.0
    */
   public void getRoute(final Callback<DirectionsResponse> callback) {
-    elapsedTimeBuilder.start();
+    elapsedTime.start();
 
     mapboxDirections.enqueueCall(new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-        elapsedTimeBuilder.end();
+        elapsedTime.end();
         callback.onResponse(call, response);
         if (response.body().routes() != null && !response.body().routes().isEmpty()) {
-          navigationTelemetry.routeRetrievalEvent(elapsedTimeBuilder.build());
+          navigationTelemetry.routeRetrievalEvent(elapsedTime);
         }
       }
 

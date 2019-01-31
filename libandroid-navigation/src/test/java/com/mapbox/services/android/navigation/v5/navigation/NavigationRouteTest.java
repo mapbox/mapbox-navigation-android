@@ -212,7 +212,7 @@ public class NavigationRouteTest extends BaseTest {
   public void getRoute_routeRetrievalEventSent() {
     MapboxDirections mapboxDirections = mock(MapboxDirections.class);
     NavigationTelemetry navigationTelemetry = mock(NavigationTelemetry.class);
-    ElapsedTime.Builder elapsedTime = mock(ElapsedTime.Builder.class);
+    ElapsedTime elapsedTime = mock(ElapsedTime.class);
     NavigationRoute navigationRoute = new NavigationRoute(mapboxDirections, navigationTelemetry,
       elapsedTime);
     Callback<DirectionsResponse> callback = mock(Callback.class);
@@ -231,6 +231,6 @@ public class NavigationRouteTest extends BaseTest {
     InOrder inOrder = inOrder(elapsedTime);
     inOrder.verify(elapsedTime).start();
     inOrder.verify(elapsedTime).end();
-    verify(navigationTelemetry).routeRetrievalEvent(elapsedTime.build());
+    verify(navigationTelemetry).routeRetrievalEvent(elapsedTime);
   }
 }
