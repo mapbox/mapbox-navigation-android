@@ -150,7 +150,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   public boolean onMapLongClick(@NonNull LatLng point) {
     // Only reverse geocode while we are not in navigation
     if (mapState.equals(MapState.NAVIGATION)) {
-      return true;
+      return false;
     }
 
     // Fetch the route with this given point
@@ -164,7 +164,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     // Update camera to new destination
     moveCameraToInclude(destination);
     vibrate();
-    return true;
+    return false;
   }
 
   @OnClick(R.id.startNavigationFab)

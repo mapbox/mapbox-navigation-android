@@ -163,7 +163,7 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   @Override
   public boolean onMapClick(@NonNull LatLng point) {
     if (!running || mapboxMap == null || lastLocation == null) {
-      return true;
+      return false;
     }
 
     mapboxMap.addMarker(new MarkerOptions().position(point));
@@ -173,7 +173,7 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     resetLocationEngine(destination);
 
     tracking = false;
-    return true;
+    return false;
   }
 
   @Override

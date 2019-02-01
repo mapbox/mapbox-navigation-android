@@ -207,7 +207,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     if (currentLocation != null) {
       fetchRoute();
     }
-    return true;
+    return false;
   }
 
   @Override

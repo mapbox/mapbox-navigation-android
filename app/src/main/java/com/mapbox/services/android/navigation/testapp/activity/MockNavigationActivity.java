@@ -200,7 +200,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     }
     mapboxMap.addMarker(new MarkerOptions().position(point));
     calculateRoute();
-    return true;
+    return false;
   }
 
   @SuppressLint("MissingPermission")
