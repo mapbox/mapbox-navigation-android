@@ -32,11 +32,11 @@ class MapRouteClickListener implements MapboxMap.OnMapClickListener {
   public boolean onMapClick(@NonNull LatLng point) {
     HashMap<LineString, DirectionsRoute> routeLineStrings = routeLine.retrieveRouteLineStrings();
     if (invalidMapClick(routeLineStrings)) {
-      return true;
+      return false;
     }
     List<DirectionsRoute> directionsRoutes = routeLine.retrieveDirectionsRoutes();
     findClickedRoute(point, routeLineStrings, directionsRoutes);
-    return true;
+    return false;
   }
 
   void setOnRouteSelectionChangeListener(OnRouteSelectionChangeListener listener) {
