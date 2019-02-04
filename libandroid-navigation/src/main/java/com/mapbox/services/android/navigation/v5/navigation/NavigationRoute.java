@@ -95,7 +95,8 @@ public final class NavigationRoute {
         elapsedTime.end();
         callback.onResponse(call, response);
         if (response.body().routes() != null && !response.body().routes().isEmpty()) {
-          navigationTelemetry.routeRetrievalEvent(elapsedTime);
+          navigationTelemetry.routeRetrievalEvent(elapsedTime,
+            response.body().routes().get(0).routeOptions().requestUuid());
         }
       }
 

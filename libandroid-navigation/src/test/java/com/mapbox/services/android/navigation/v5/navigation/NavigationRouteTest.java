@@ -222,7 +222,12 @@ public class NavigationRouteTest extends BaseTest {
     Response<DirectionsResponse> response = mock(Response.class);
     DirectionsResponse directionsResponse = mock(DirectionsResponse.class);
     when(response.body()).thenReturn(directionsResponse);
-    when(directionsResponse.routes()).thenReturn(Collections.singletonList(mock(DirectionsRoute.class)));
+    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(directionsResponse.routes()).thenReturn(Collections.singletonList(directionsRoute));
+    when(directionsRoute.routeOptions()).thenReturn(routeOptions);
+    String uuid = "uuid";
+    when(routeOptions.requestUuid()).thenReturn(uuid);
 
     verify(mapboxDirections).enqueueCall(argumentCaptor.capture());
     Callback<DirectionsResponse> innerCallback = argumentCaptor.getValue();
@@ -231,6 +236,6 @@ public class NavigationRouteTest extends BaseTest {
     InOrder inOrder = inOrder(elapsedTime);
     inOrder.verify(elapsedTime).start();
     inOrder.verify(elapsedTime).end();
-    verify(navigationTelemetry).routeRetrievalEvent(elapsedTime);
+    verify(navigationTelemetry).routeRetrievalEvent(elapsedTime, uuid);
   }
 }
