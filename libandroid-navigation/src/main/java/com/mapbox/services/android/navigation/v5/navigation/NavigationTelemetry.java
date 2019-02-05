@@ -180,6 +180,7 @@ class NavigationTelemetry implements NavigationMetricListener {
     if (routeRetrievalElapsedTime != null) {
       routeRetrievalEvent(routeRetrievalElapsedTime, routeRetrievalUuid);
       routeRetrievalElapsedTime = null;
+      routeRetrievalUuid = null;
     }
   }
 
@@ -306,6 +307,7 @@ class NavigationTelemetry implements NavigationMetricListener {
         navigationSessionState.sessionIdentifier());
     } else {
       routeRetrievalElapsedTime = elapsedTime;
+      routeRetrievalUuid = routeUuid;
     }
   }
 
