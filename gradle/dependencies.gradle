@@ -8,11 +8,11 @@ ext {
   ]
 
   version = [
-      mapboxMapSdk           : '7.1.0',
+      mapboxMapSdk           : '7.1.1',
       mapboxSdkServices      : '4.3.0',
       mapboxEvents           : '4.2.0',
       mapboxNavigator        : '4.0.0',
-      mapboxAnnotationPlugin : '0.4.0',
+      mapboxAnnotationPlugin : '0.5.0',
       mapboxSearchSdk        : '0.1.0-SNAPSHOT',
       autoValue              : '1.5.4',
       autoValueParcel        : '0.2.5',
