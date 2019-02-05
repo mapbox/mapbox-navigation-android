@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.ui.v5;
 import android.app.Application;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductor;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
 import org.junit.Test;

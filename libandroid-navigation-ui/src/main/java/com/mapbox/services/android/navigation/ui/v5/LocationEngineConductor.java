@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.ui.v5.location;
+package com.mapbox.services.android.navigation.ui.v5;
 
 import android.content.Context;
 
@@ -7,21 +7,23 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 
-public class LocationEngineConductor {
+class LocationEngineConductor {
 
   private LocationEngine locationEngine;
 
-  public void initializeLocationEngine(Context context, LocationEngine locationEngine, boolean shouldReplayRoute) {
+  void initializeLocationEngine(Context context, LocationEngine locationEngine, boolean shouldReplayRoute) {
     initialize(context, locationEngine, shouldReplayRoute);
   }
 
-  public void updateSimulatedRoute(DirectionsRoute route) {
+  boolean updateSimulatedRoute(DirectionsRoute route) {
     if (locationEngine instanceof ReplayRouteLocationEngine) {
       ((ReplayRouteLocationEngine) locationEngine).assign(route);
+      return true;
     }
+    return false;
   }
 
-  public LocationEngine obtainLocationEngine() {
+  LocationEngine obtainLocationEngine() {
     return locationEngine;
   }
 
