@@ -21,7 +21,6 @@ import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
-import com.mapbox.services.android.navigation.ui.v5.location.LocationEngineConductor;
 import com.mapbox.services.android.navigation.ui.v5.route.OffRouteEvent;
 import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteFetcher;
 import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteListener;
@@ -241,7 +240,7 @@ public class NavigationViewModel extends AndroidViewModel {
     this.route.setValue(route);
     if (!isChangingConfigurations) {
       startNavigation(route);
-      locationEngineConductor.updateSimulatedRoute(route);
+      updateReplayEngine(route);
       sendEventOnRerouteAlong(route);
       isOffRoute.setValue(false);
     }
@@ -409,6 +408,13 @@ public class NavigationViewModel extends AndroidViewModel {
       navigation.startNavigation(route);
       voiceInstructionsToAnnounce = 0;
       voiceInstructionCache.preCache(route);
+    }
+  }
+
+  private void updateReplayEngine(DirectionsRoute route) {
+    if (locationEngineConductor.updateSimulatedRoute(route)) {
+      LocationEngine replayEngine = locationEngineConductor.obtainLocationEngine();
+      navigation.setLocationEngine(replayEngine);
     }
   }
 
