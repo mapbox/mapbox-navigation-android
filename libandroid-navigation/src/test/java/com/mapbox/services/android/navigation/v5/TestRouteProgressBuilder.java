@@ -54,6 +54,9 @@ class TestRouteProgressBuilder {
       currentIntersection);
 
     return RouteProgress.builder()
+      .totalFractionTraveled(0f)
+      .totalDurationTraveled(0f)
+      .totalDistanceTraveled(0d)
       .stepDistanceRemaining(stepDistanceRemaining)
       .legDistanceRemaining(legDistanceRemaining)
       .legDurationRemaining(legDurationRemaining)

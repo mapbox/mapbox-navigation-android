@@ -10,14 +10,18 @@ import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.navigator.NavigationStatus;
+import com.mapbox.navigator.Progress;
 import com.mapbox.navigator.RouteState;
+import com.mapbox.navigator.TrackedRoute;
 import com.mapbox.navigator.VoiceInstruction;
 import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressState;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressStateMap;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createCurrentAnnotation;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createDistancesToIntersections;
@@ -106,6 +110,7 @@ class NavigationRouteProcessor {
       .inTunnel(status.getInTunnel())
       .currentState(currentRouteState);
 
+    addTotalTraveled(navigator, progressBuilder);
     addVoiceInstructions(status, progressBuilder);
     addBannerInstructions(status, navigator, progressBuilder);
     addUpcomingStepPoints(progressBuilder);
@@ -134,10 +139,40 @@ class NavigationRouteProcessor {
     currentIntersectionDistances = createDistancesToIntersections(currentStepPoints, currentIntersections);
   }
 
-  private void addUpcomingStepPoints(RouteProgress.Builder progressBuilder) {
-    if (upcomingStepPoints != null && !upcomingStepPoints.isEmpty()) {
-      progressBuilder.upcomingStepPoints(upcomingStepPoints);
+  private void addTotalTraveled(MapboxNavigator navigator, RouteProgress.Builder progressBuilder) {
+    List<TrackedRoute> history = navigator.retrieveRouteHistory();
+    double totalDistanceTraveled = 0d;
+    float totalDurationTraveled = 0f;
+    float totalFractionTraveled = 0f;
+    double totalDistance = 0f;
+    if (history.isEmpty()) {
+      addTotalsToBuilder(progressBuilder, totalDistanceTraveled, totalDurationTraveled, totalFractionTraveled);
+      return;
     }
+    TrackedRoute lastRoute = history.get(history.size() - 1);
+    for (TrackedRoute route : history) {
+      ArrayList<Progress> routeProgress = route.getProgresses();
+      for (Progress progress : routeProgress) {
+        NavigationStatus initialStatus = progress.getInitialStatus();
+        NavigationStatus finalStatus = progress.getFinalStatus();
+        totalDistanceTraveled += initialStatus.getRemainingLegDistance() - finalStatus.getRemainingLegDistance();
+        totalDurationTraveled += initialStatus.getRemainingLegDuration() - finalStatus.getRemainingLegDuration();
+        if (!route.equals(lastRoute)) {
+          totalDistance = totalDistanceTraveled;
+        }
+      }
+    }
+    totalDistance += lastRoute.getDistance();
+    totalFractionTraveled = (float) (totalDistanceTraveled / totalDistance);
+    totalDurationTraveled = TimeUnit.MILLISECONDS.toSeconds((long) totalDurationTraveled);
+    addTotalsToBuilder(progressBuilder, totalDistanceTraveled, totalDurationTraveled, totalFractionTraveled);
+  }
+
+  private void addTotalsToBuilder(RouteProgress.Builder progressBuilder, double totalDistanceTraveled,
+                                  float totalDurationTraveled, float totalFractionTraveled) {
+    progressBuilder.totalDistanceTraveled(totalDistanceTraveled);
+    progressBuilder.totalDurationTraveled(totalDurationTraveled);
+    progressBuilder.totalFractionTraveled(totalFractionTraveled);
   }
 
   private void addVoiceInstructions(NavigationStatus status, RouteProgress.Builder progressBuilder) {
@@ -152,5 +187,11 @@ class NavigationRouteProcessor {
       bannerInstruction = navigator.retrieveBannerInstruction(FIRST_BANNER_INSTRUCTION);
     }
     progressBuilder.bannerInstruction(bannerInstruction);
+  }
+
+  private void addUpcomingStepPoints(RouteProgress.Builder progressBuilder) {
+    if (upcomingStepPoints != null && !upcomingStepPoints.isEmpty()) {
+      progressBuilder.upcomingStepPoints(upcomingStepPoints);
+    }
   }
 }

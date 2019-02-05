@@ -7,9 +7,11 @@ import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.navigator.TrackedRoute;
 import com.mapbox.navigator.VoiceInstruction;
 
 import java.util.Date;
+import java.util.List;
 
 class MapboxNavigator {
 
@@ -32,6 +34,10 @@ class MapboxNavigator {
       date.setTime(date.getTime() + lagInMilliseconds);
     }
     return navigator.getStatus(date);
+  }
+
+  synchronized List<TrackedRoute> retrieveRouteHistory() {
+    return navigator.getTrackedRoutes();
   }
 
   void updateLocation(Location raw) {

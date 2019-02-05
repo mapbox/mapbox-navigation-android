@@ -78,6 +78,14 @@ public abstract class RouteProgress {
   }
 
   /**
+   * Provides the distance traveled along the total route progress.
+   *
+   * @return {@code double} value representing the distance traveled along the total route progress, in unit
+   * meters
+   */
+  public abstract double totalDistanceTraveled();
+
+  /**
    * Provides the duration remaining in seconds till the user reaches the end of the route.
    *
    * @return {@code long} value representing the duration remaining till end of route, in unit
@@ -88,11 +96,20 @@ public abstract class RouteProgress {
     return (1 - fractionTraveled()) * directionsRoute().duration();
   }
 
+
+  /**
+   * Provides the duration traveled along the total route progress.
+   *
+   * @return {@code long} value representing the duration traveled along the total route progress, in unit
+   * seconds
+   */
+  public abstract float totalDurationTraveled();
+
   /**
    * Get the fraction traveled along the current route, this is a float value between 0 and 1 and
    * isn't guaranteed to reach 1 before the user reaches the end of the route.
    *
-   * @return a float value between 0 and 1 representing the fraction the user has traveled along the
+   * @return a float value between 0 and 1 representing the fraction the user has traveled along the current
    * route
    * @since 0.1.0
    */
@@ -104,6 +121,16 @@ public abstract class RouteProgress {
     }
     return fractionRemaining;
   }
+
+
+  /**
+   * Get the fraction traveled along the total route progress, this is a float value between 0 and 1 and
+   * isn't guaranteed to reach 1 before the user reaches the end of the route.
+   *
+   * @return a float value between 0 and 1 representing the fraction the user has traveled along the
+   * total route
+   */
+  public abstract float totalFractionTraveled();
 
   /**
    * Provides the distance remaining in meters till the user reaches the end of the route.
@@ -215,6 +242,12 @@ public abstract class RouteProgress {
     public abstract Builder directionsRoute(DirectionsRoute directionsRoute);
 
     abstract DirectionsRoute directionsRoute();
+
+    public abstract Builder totalDistanceTraveled(double totalDistanceTraveled);
+
+    public abstract Builder totalDurationTraveled(float totalDurationTraveled);
+
+    public abstract Builder totalFractionTraveled(float totalFractionTraveled);
 
     public abstract Builder legIndex(int legIndex);
 
