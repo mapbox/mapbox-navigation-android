@@ -104,6 +104,14 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
     clearListeners();
   }
 
+  /**
+   * Changes sound {@link FloatingActionButton}
+   * {@link android.graphics.drawable.Drawable} to denote sound is off.
+   */
+  void soundFabOff() {
+    soundFab.setImageResource(R.drawable.ic_sound_off);
+  }
+
   private void setupOnClickListeners() {
     setOnClickListener(multiOnClickListener);
   }
@@ -199,14 +207,6 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
 
   private void initialize(Context context) {
     inflate(context, R.layout.sound_layout, this);
-  }
-
-  /**
-   * Changes sound {@link FloatingActionButton}
-   * {@link android.graphics.drawable.Drawable} to denote sound is off.
-   */
-  private void soundFabOff() {
-    soundFab.setImageResource(R.drawable.ic_sound_off);
   }
 
   /**
