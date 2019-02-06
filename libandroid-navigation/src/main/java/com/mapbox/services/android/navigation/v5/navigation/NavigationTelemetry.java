@@ -57,6 +57,8 @@ class NavigationTelemetry implements NavigationMetricListener {
 
   private boolean isOffRoute;
   private boolean isConfigurationChange;
+  private ElapsedTime routeRetrievalElapsedTime = null;
+  private String routeRetrievalUuid = null;
 
   private NavigationTelemetry() {
     locationBuffer = new RingBuffer<>(40);
@@ -171,6 +173,15 @@ class NavigationTelemetry implements NavigationMetricListener {
         .build();
     }
     isConfigurationChange = false;
+    sendRouteRetrievalEventIfExists();
+  }
+
+  private void sendRouteRetrievalEventIfExists() {
+    if (routeRetrievalElapsedTime != null) {
+      routeRetrievalEvent(routeRetrievalElapsedTime, routeRetrievalUuid);
+      routeRetrievalElapsedTime = null;
+      routeRetrievalUuid = null;
+    }
   }
 
   /**
@@ -288,6 +299,16 @@ class NavigationTelemetry implements NavigationMetricListener {
     // Find the event and remove it from the queue
     FeedbackEvent feedbackEvent = (FeedbackEvent) findQueuedTelemetryEvent(feedbackId);
     queuedFeedbackEvents.remove(feedbackEvent);
+  }
+
+  void routeRetrievalEvent(ElapsedTime elapsedTime, String routeUuid) {
+    if (navigationSessionState != null && !navigationSessionState.sessionIdentifier().isEmpty()) {
+      NavigationMetricsWrapper.routeRetrievalEvent(elapsedTime.getElapsedTime(), routeUuid,
+        navigationSessionState.sessionIdentifier());
+    } else {
+      routeRetrievalElapsedTime = elapsedTime;
+      routeRetrievalUuid = routeUuid;
+    }
   }
 
   private void validateAccessToken(String accessToken) {

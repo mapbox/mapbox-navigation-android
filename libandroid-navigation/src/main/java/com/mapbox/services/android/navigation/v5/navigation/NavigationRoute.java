@@ -23,6 +23,7 @@ import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 
 
 /**
@@ -40,6 +41,8 @@ import retrofit2.Callback;
 public final class NavigationRoute {
 
   private final MapboxDirections mapboxDirections;
+  private final NavigationTelemetry navigationTelemetry;
+  private final ElapsedTime elapsedTime;
 
   /**
    * Package private constructor used for the {@link Builder#build()} method.
@@ -48,7 +51,14 @@ public final class NavigationRoute {
    * @since 0.5.0
    */
   NavigationRoute(MapboxDirections mapboxDirections) {
+    this(mapboxDirections, NavigationTelemetry.getInstance(), new ElapsedTime());
+  }
+
+  NavigationRoute(MapboxDirections mapboxDirections, NavigationTelemetry navigationTelemetry,
+                  ElapsedTime elapsedTime) {
     this.mapboxDirections = mapboxDirections;
+    this.navigationTelemetry = navigationTelemetry;
+    this.elapsedTime = elapsedTime;
   }
 
   /**
@@ -76,8 +86,25 @@ public final class NavigationRoute {
    * @param callback a RetroFit callback which contains an onResponse and onFailure
    * @since 0.5.0
    */
-  public void getRoute(Callback<DirectionsResponse> callback) {
-    mapboxDirections.enqueueCall(callback);
+  public void getRoute(final Callback<DirectionsResponse> callback) {
+    elapsedTime.start();
+
+    mapboxDirections.enqueueCall(new Callback<DirectionsResponse>() {
+      @Override
+      public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+        elapsedTime.end();
+        callback.onResponse(call, response);
+        if (response.body().routes() != null && !response.body().routes().isEmpty()) {
+          navigationTelemetry.routeRetrievalEvent(elapsedTime,
+            response.body().routes().get(0).routeOptions().requestUuid());
+        }
+      }
+
+      @Override
+      public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+        callback.onFailure(call, throwable);
+      }
+    });
   }
 
   /**
