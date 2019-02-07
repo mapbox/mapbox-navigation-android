@@ -9,15 +9,18 @@ class NavigationViewInstanceState implements Parcelable {
   private int recenterButtonVisibility;
   private boolean instructionViewVisible;
   private boolean isWayNameVisible;
+  private boolean isMuted;
   private String wayNameText;
 
   NavigationViewInstanceState(int bottomSheetBehaviorState, int recenterButtonVisibility,
-                              boolean instructionViewVisible, boolean isWayNameVisible, String wayNameText) {
+                              boolean instructionViewVisible, boolean isWayNameVisible, String wayNameText,
+                              boolean isMuted) {
     this.bottomSheetBehaviorState = bottomSheetBehaviorState;
     this.recenterButtonVisibility = recenterButtonVisibility;
     this.instructionViewVisible = instructionViewVisible;
     this.isWayNameVisible = isWayNameVisible;
     this.wayNameText = wayNameText;
+    this.isMuted = isMuted;
   }
 
   int getBottomSheetBehaviorState() {
@@ -40,11 +43,16 @@ class NavigationViewInstanceState implements Parcelable {
     return wayNameText;
   }
 
+  boolean isMuted() {
+    return isMuted;
+  }
+
   private NavigationViewInstanceState(Parcel in) {
     bottomSheetBehaviorState = in.readInt();
     recenterButtonVisibility = in.readInt();
     instructionViewVisible = in.readByte() != 0;
     isWayNameVisible = in.readByte() != 0;
+    isMuted = in.readByte() != 0;
     wayNameText = in.readString();
   }
 
@@ -54,6 +62,7 @@ class NavigationViewInstanceState implements Parcelable {
     dest.writeInt(recenterButtonVisibility);
     dest.writeByte((byte) (instructionViewVisible ? 1 : 0));
     dest.writeByte((byte) (isWayNameVisible ? 1 : 0));
+    dest.writeByte((byte) (isMuted ? 1 : 0));
     dest.writeString(wayNameText);
   }
 

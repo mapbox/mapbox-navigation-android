@@ -109,12 +109,13 @@ public class NavigationViewModel extends AndroidViewModel {
   // Package private (no modifier) for testing purposes
   NavigationViewModel(Application application, MapboxNavigation navigation,
                       LocationEngineConductor conductor, NavigationViewEventDispatcher dispatcher,
-                      VoiceInstructionCache cache) {
+                      VoiceInstructionCache cache, SpeechPlayer speechPlayer) {
     super(application);
     this.navigation = navigation;
     this.locationEngineConductor = conductor;
     this.navigationViewEventDispatcher = dispatcher;
     this.voiceInstructionCache = cache;
+    this.speechPlayer = speechPlayer;
   }
 
   public void onDestroy(boolean isChangingConfigurations) {
@@ -203,10 +204,10 @@ public class NavigationViewModel extends AndroidViewModel {
       LocationEngine locationEngine = initializeLocationEngineFrom(options);
       initializeNavigation(getApplication(), navigationOptions, locationEngine);
       addMilestones(options);
+      initializeVoiceInstructionLoader();
+      initializeVoiceInstructionCache();
+      initializeNavigationSpeechPlayer(options);
     }
-    initializeVoiceInstructionLoader();
-    initializeVoiceInstructionCache();
-    initializeNavigationSpeechPlayer(options);
     routeFetcher.extractRouteOptions(options);
     return navigation;
   }
@@ -220,6 +221,13 @@ public class NavigationViewModel extends AndroidViewModel {
 
   boolean isRunning() {
     return isRunning;
+  }
+
+  boolean isMuted() {
+    if (speechPlayer == null) {
+      return false;
+    }
+    return speechPlayer.isMuted();
   }
 
   void stopNavigation() {

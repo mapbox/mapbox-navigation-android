@@ -144,7 +144,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     boolean isWayNameVisible = wayNameView.getVisibility() == VISIBLE;
     NavigationViewInstanceState navigationViewInstanceState = new NavigationViewInstanceState(
       bottomSheetBehaviorState, recenterBtn.getVisibility(), instructionView.isShowingInstructionList(),
-      isWayNameVisible, wayNameView.retrieveWayNameText());
+      isWayNameVisible, wayNameView.retrieveWayNameText(), navigationViewModel.isMuted());
     String instanceKey = getContext().getString(R.string.navigation_view_instance_state);
     outState.putParcelable(instanceKey, navigationViewInstanceState);
     outState.putBoolean(getContext().getString(R.string.navigation_running), navigationViewModel.isRunning());
@@ -167,6 +167,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     wayNameView.updateWayNameText(navigationViewInstanceState.getWayNameText());
     resetBottomSheetState(navigationViewInstanceState.getBottomSheetBehaviorState());
     updateInstructionListState(navigationViewInstanceState.isInstructionViewVisible());
+    updateInstructionMutedState(navigationViewInstanceState.isMuted());
     mapInstanceState = savedInstanceState.getParcelable(MAP_INSTANCE_STATE_KEY);
   }
 
@@ -588,6 +589,12 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       instructionView.showInstructionList();
     } else {
       instructionView.hideInstructionList();
+    }
+  }
+
+  private void updateInstructionMutedState(boolean isMuted) {
+    if (isMuted) {
+      ((SoundButton) instructionView.retrieveSoundButton()).soundFabOff();
     }
   }
 
