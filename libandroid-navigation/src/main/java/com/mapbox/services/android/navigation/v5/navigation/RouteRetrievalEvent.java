@@ -9,10 +9,10 @@ class RouteRetrievalEvent extends NavigationPerformanceEvent implements Parcelab
   private static final String ELAPSED_TIME_NAME = "elapsed_time";
   private static final String ROUTE_UUID_NAME = "route_uuid";
 
-  RouteRetrievalEvent(long elapsedTime, String routeUuid, String sessionId) {
+  RouteRetrievalEvent(double elapsedTime, String routeUuid, String sessionId) {
     super(sessionId);
 
-    addCounter(new LongCounter(ELAPSED_TIME_NAME, elapsedTime));
+    addCounter(new DoubleCounter(ELAPSED_TIME_NAME, elapsedTime));
     addAttribute(new Attribute(ROUTE_UUID_NAME, routeUuid));
   }
 }

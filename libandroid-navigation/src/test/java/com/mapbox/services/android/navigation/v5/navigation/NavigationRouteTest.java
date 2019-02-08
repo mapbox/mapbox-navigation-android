@@ -5,7 +5,6 @@ import android.content.Context;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.MapboxDirections;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.BaseTest;
@@ -14,8 +13,6 @@ import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -23,17 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import okhttp3.EventListener;
 import okhttp3.Interceptor;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -248,36 +241,5 @@ public class NavigationRouteTest extends BaseTest {
     builder.interceptor(interceptor);
 
     verify(mapboxDirectionsBuilder).interceptor(interceptor);
-  }
-
-  @Test
-  public void getRoute_routeRetrievalEventSent() {
-    MapboxDirections mapboxDirections = mock(MapboxDirections.class);
-    NavigationTelemetry navigationTelemetry = mock(NavigationTelemetry.class);
-    ElapsedTime elapsedTime = mock(ElapsedTime.class);
-    NavigationRoute navigationRoute = new NavigationRoute(mapboxDirections, navigationTelemetry,
-      elapsedTime);
-    Callback<DirectionsResponse> callback = mock(Callback.class);
-    ArgumentCaptor<Callback<DirectionsResponse>> argumentCaptor =
-      ArgumentCaptor.forClass(Callback.class);
-    navigationRoute.getRoute(callback);
-    Response<DirectionsResponse> response = mock(Response.class);
-    DirectionsResponse directionsResponse = mock(DirectionsResponse.class);
-    when(response.body()).thenReturn(directionsResponse);
-    DirectionsRoute directionsRoute = mock(DirectionsRoute.class);
-    RouteOptions routeOptions = mock(RouteOptions.class);
-    when(directionsResponse.routes()).thenReturn(Collections.singletonList(directionsRoute));
-    when(directionsRoute.routeOptions()).thenReturn(routeOptions);
-    String uuid = "uuid";
-    when(routeOptions.requestUuid()).thenReturn(uuid);
-
-    verify(mapboxDirections).enqueueCall(argumentCaptor.capture());
-    Callback<DirectionsResponse> innerCallback = argumentCaptor.getValue();
-    innerCallback.onResponse(mock(Call.class), response);
-
-    InOrder inOrder = inOrder(elapsedTime);
-    inOrder.verify(elapsedTime).start();
-    inOrder.verify(elapsedTime).end();
-    verify(navigationTelemetry).routeRetrievalEvent(elapsedTime, uuid);
   }
 }
