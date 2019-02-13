@@ -2,31 +2,24 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directionsrefresh.v1.MapboxDirectionsRefresh;
-import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  *
  */
 public final class RouteRefresh {
   private final RefreshCallback refreshCallback;
-  private final RouteAnnotationUpdater routeAnnotationUpdater;
-//  private final MapboxDirectionsRefresh mapboxDirectionsRefresh;
+  private final String accessToken;
 
   /**
-   * Creates a {@link RouteRefresh} object configured with the specified {@link RouteProgress}.
+   * Creates a {@link RouteRefresh} object which calls the {@link RefreshCallback} with updated
+   * routes.
    *
-   * @param routeProgress to extract a route and current leg index
+   * @param accessToken mapbox access token
+   * @param refreshCallback to call with updated routes
    */
-  public RouteRefresh(RefreshCallback refreshCallback) {
-    this(refreshCallback, new RouteAnnotationUpdater());
-  }
-
-  RouteRefresh(RefreshCallback refreshCallback, RouteAnnotationUpdater routeAnnotationUpdater) {
+  RouteRefresh(String accessToken, RefreshCallback refreshCallback) {
+    this.accessToken = accessToken;
     this.refreshCallback = refreshCallback;
   }
 
@@ -37,28 +30,18 @@ public final class RouteRefresh {
    * returned in this response. The leg annotations start at the current leg index of the
    * {@link RouteProgress}
    *
-   * @param routeProgress to refresh
+   * @param routeProgress to refresh via the route and current leg index
    */
   public void refresh(RouteProgress routeProgress) {
     refresh(routeProgress.directionsRoute(), routeProgress.legIndex());
   }
 
-  void refresh(final DirectionsRoute directionsRoute, final int legIndex) {
+  private void refresh(final DirectionsRoute directionsRoute, final int legIndex) {
     MapboxDirectionsRefresh.builder()
       .requestId(directionsRoute.routeOptions().requestUuid())
       .routeIndex(Integer.valueOf(directionsRoute.routeIndex()))
       .legIndex(legIndex)
-      .build().enqueueCall(new Callback<DirectionsRefreshResponse>() {
-      @Override
-      public void onResponse(Call<DirectionsRefreshResponse> call, Response<DirectionsRefreshResponse> response) {
-        refreshCallback.onRefresh(routeAnnotationUpdater.update(directionsRoute,
-          response.body().route(), legIndex));
-      }
-
-      @Override
-      public void onFailure(Call<DirectionsRefreshResponse> call, Throwable throwable) {
-        refreshCallback.onError("There was a network error.");
-      }
-    });
+      .accessToken(accessToken)
+      .build().enqueueCall(new RouteRefreshCallback(directionsRoute, legIndex, refreshCallback));
   }
 }
