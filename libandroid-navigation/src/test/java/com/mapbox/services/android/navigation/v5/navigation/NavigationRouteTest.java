@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Locale;
 
 import edu.emory.mathcs.backport.java.util.Collections;
+import okhttp3.EventListener;
+import okhttp3.Interceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -224,6 +226,28 @@ public class NavigationRouteTest extends BaseTest {
     navigationRoute.cancelCall();
 
     verify(routeCall, times(0)).cancel();
+  }
+
+  @Test
+  public void builderInterceptor_setsMapboxDirections() {
+    MapboxDirections.Builder mapboxDirectionsBuilder = mock(MapboxDirections.Builder.class);
+    NavigationRoute.Builder builder = new NavigationRoute.Builder(mapboxDirectionsBuilder);
+    EventListener eventListener = mock(EventListener.class);
+
+    builder.eventListener(eventListener);
+
+    verify(mapboxDirectionsBuilder).eventListener(eventListener);
+  }
+
+  @Test
+  public void builderEventListener_setsMapboxDirections() {
+    MapboxDirections.Builder mapboxDirectionsBuilder = mock(MapboxDirections.Builder.class);
+    NavigationRoute.Builder builder = new NavigationRoute.Builder(mapboxDirectionsBuilder);
+    Interceptor interceptor = mock(Interceptor.class);
+
+    builder.interceptor(interceptor);
+
+    verify(mapboxDirectionsBuilder).interceptor(interceptor);
   }
 
   @Test

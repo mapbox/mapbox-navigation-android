@@ -22,6 +22,8 @@ import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.Locale;
 
+import okhttp3.EventListener;
+import okhttp3.Interceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -151,7 +153,11 @@ public final class NavigationRoute {
      * Private constructor for initializing the raw MapboxDirections.Builder
      */
     private Builder() {
-      directionsBuilder = MapboxDirections.builder();
+      this(MapboxDirections.builder());
+    }
+
+    Builder(MapboxDirections.Builder directionsBuilder) {
+      this.directionsBuilder = directionsBuilder;
     }
 
     /**
@@ -545,6 +551,28 @@ public final class NavigationRoute {
      */
     public Builder addWaypointTargets(@Nullable Point... waypointTargets) {
       directionsBuilder.addWaypointTargets(waypointTargets);
+      return this;
+    }
+
+    /**
+     * Adds an optional interceptor to set in the OkHttp client.
+     *
+     * @param interceptor to set for OkHttp
+     * @return this builder for chaining options together
+     */
+    public Builder interceptor(Interceptor interceptor) {
+      directionsBuilder.interceptor(interceptor);
+      return this;
+    }
+
+    /**
+     * Adds an optional event listener to set in the OkHttp client.
+     *
+     * @param eventListener to set for OkHttp
+     * @return this builder for chaining options together
+     */
+    public Builder eventListener(EventListener eventListener) {
+      directionsBuilder.eventListener(eventListener);
       return this;
     }
 
