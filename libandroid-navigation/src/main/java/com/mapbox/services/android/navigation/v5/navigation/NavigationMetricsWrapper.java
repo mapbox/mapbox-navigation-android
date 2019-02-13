@@ -371,7 +371,7 @@ final class NavigationMetricsWrapper {
     mapboxTelemetry.push(feedbackEvent);
   }
 
-  static void routeRetrievalEvent(long elapsedTime, String routeUuid, String sessionId) {
+  static void routeRetrievalEvent(double elapsedTime, String routeUuid, String sessionId) {
     push(new RouteRetrievalEvent(elapsedTime, routeUuid, sessionId));
   }
 

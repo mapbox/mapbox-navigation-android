@@ -26,7 +26,6 @@ import okhttp3.EventListener;
 import okhttp3.Interceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Response;
 
 
 /**
@@ -44,8 +43,7 @@ import retrofit2.Response;
 public final class NavigationRoute {
 
   private final MapboxDirections mapboxDirections;
-  private final NavigationTelemetry navigationTelemetry;
-  private final ElapsedTime elapsedTime;
+  private static final NavigationRouteEventListener EVENT_LISTENER = new NavigationRouteEventListener();
 
   /**
    * Package private constructor used for the {@link Builder#build()} method.
@@ -54,14 +52,7 @@ public final class NavigationRoute {
    * @since 0.5.0
    */
   NavigationRoute(MapboxDirections mapboxDirections) {
-    this(mapboxDirections, NavigationTelemetry.getInstance(), new ElapsedTime());
-  }
-
-  NavigationRoute(MapboxDirections mapboxDirections, NavigationTelemetry navigationTelemetry,
-                  ElapsedTime elapsedTime) {
     this.mapboxDirections = mapboxDirections;
-    this.navigationTelemetry = navigationTelemetry;
-    this.elapsedTime = elapsedTime;
   }
 
   /**
@@ -90,24 +81,7 @@ public final class NavigationRoute {
    * @since 0.5.0
    */
   public void getRoute(final Callback<DirectionsResponse> callback) {
-    elapsedTime.start();
-
-    mapboxDirections.enqueueCall(new Callback<DirectionsResponse>() {
-      @Override
-      public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-        elapsedTime.end();
-        callback.onResponse(call, response);
-        if (response.body() != null && !response.body().routes().isEmpty()) {
-          navigationTelemetry.routeRetrievalEvent(elapsedTime,
-            response.body().routes().get(0).routeOptions().requestUuid());
-        }
-      }
-
-      @Override
-      public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-        callback.onFailure(call, throwable);
-      }
-    });
+    mapboxDirections.enqueueCall(new NavigationRouteCallback(EVENT_LISTENER, callback));
   }
 
   /**
@@ -148,6 +122,7 @@ public final class NavigationRoute {
     private static final String SEMICOLON = ";";
     private static final String COMMA = ",";
     private final MapboxDirections.Builder directionsBuilder;
+    private final NavigationRouteEventListener eventListener;
 
     /**
      * Private constructor for initializing the raw MapboxDirections.Builder
@@ -158,6 +133,7 @@ public final class NavigationRoute {
 
     Builder(MapboxDirections.Builder directionsBuilder) {
       this.directionsBuilder = directionsBuilder;
+      this.eventListener = EVENT_LISTENER;
     }
 
     /**
@@ -667,7 +643,8 @@ public final class NavigationRoute {
         .overview(DirectionsCriteria.OVERVIEW_FULL)
         .voiceInstructions(true)
         .bannerInstructions(true)
-        .roundaboutExits(true);
+        .roundaboutExits(true)
+        .eventListener(eventListener);
       return new NavigationRoute(directionsBuilder.build());
     }
 

@@ -309,7 +309,8 @@ class NavigationTelemetry implements NavigationMetricListener {
 
   void routeRetrievalEvent(ElapsedTime elapsedTime, String routeUuid) {
     if (navigationSessionState != null && !navigationSessionState.sessionIdentifier().isEmpty()) {
-      NavigationMetricsWrapper.routeRetrievalEvent(elapsedTime.getElapsedTime(), routeUuid,
+      double time = elapsedTime.getElapsedTime();
+      NavigationMetricsWrapper.routeRetrievalEvent(time, routeUuid,
         navigationSessionState.sessionIdentifier());
     } else {
       routeRetrievalElapsedTime = elapsedTime;

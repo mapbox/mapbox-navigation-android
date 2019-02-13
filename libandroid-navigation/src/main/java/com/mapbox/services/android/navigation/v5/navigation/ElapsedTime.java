@@ -5,6 +5,9 @@ import android.support.annotation.Nullable;
 import com.mapbox.services.android.navigation.v5.exception.NavigationException;
 
 class ElapsedTime {
+
+  private static final double ELAPSED_TIME_DENOMINATOR = 1e+9;
+  private static final double PRECISION = 100d;
   private Long start = null;
   private Long end = null;
 
@@ -29,10 +32,12 @@ class ElapsedTime {
     return end;
   }
 
-  long getElapsedTime() {
+  double getElapsedTime() {
     if (start == null || end == null) {
       throw new NavigationException("Must call start() and end() before calling getElapsedTime()");
     }
-    return end - start;
+    long elapsedTimeInNanoseconds = end - start;
+    double elapsedTimeInSeconds = elapsedTimeInNanoseconds / ELAPSED_TIME_DENOMINATOR;
+    return Math.round(elapsedTimeInSeconds * PRECISION) / PRECISION;
   }
 }
