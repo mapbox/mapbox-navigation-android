@@ -31,6 +31,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 class NavigationTelemetry implements NavigationMetricListener {
@@ -44,6 +46,7 @@ class NavigationTelemetry implements NavigationMetricListener {
   private static final String MOCK_PROVIDER = "com.mapbox.services.android.navigation.v5.location.replay"
     + ".ReplayRouteLocationEngine";
   private static final int TWENTY_SECOND_INTERVAL = 20;
+  private static final int ONE_MINUTE_IN_MILLISECONDS = 1 * 60 * 1000;
 
   private final List<RerouteEvent> queuedRerouteEvents = new ArrayList<>();
   private final List<FeedbackEvent> queuedFeedbackEvents = new ArrayList<>();
@@ -59,8 +62,9 @@ class NavigationTelemetry implements NavigationMetricListener {
   private boolean isConfigurationChange;
   private ElapsedTime routeRetrievalElapsedTime = null;
   private String routeRetrievalUuid = null;
+  private BatteryChargeReporter batteryChargeReporter;
 
-  private NavigationTelemetry() {
+  NavigationTelemetry() {
     locationBuffer = new RingBuffer<>(40);
     metricLocation = new MetricsLocation(null);
     metricProgress = new MetricsRouteProgress(null);
@@ -174,6 +178,7 @@ class NavigationTelemetry implements NavigationMetricListener {
     }
     isConfigurationChange = false;
     sendRouteRetrievalEventIfExists();
+    fireOffBatteryScheduler();
   }
 
   private void sendRouteRetrievalEventIfExists() {
@@ -201,6 +206,7 @@ class NavigationTelemetry implements NavigationMetricListener {
       NavigationMetricsWrapper.disable();
       isInitialized = false;
     }
+    cancelBatteryScheduler();
   }
 
   /**
@@ -538,5 +544,29 @@ class NavigationTelemetry implements NavigationMetricListener {
       long millisSinceLastReroute = eventDate.getTime() - lastRerouteDate.getTime();
       return (int) TimeUnit.MILLISECONDS.toSeconds(millisSinceLastReroute);
     }
+  }
+
+  private void fireOffBatteryScheduler() {
+    Timer batteryTimer = new Timer();
+    TimerTask batteryTask = new TimerTask() {
+      @Override
+      public void run() {
+        BatteryEvent batteryEvent = buildBatteryEvent();
+        NavigationMetricsWrapper.push(batteryEvent);
+      }
+    };
+    batteryChargeReporter = new BatteryChargeReporter(batteryTimer, batteryTask);
+    batteryChargeReporter.scheduleAt(ONE_MINUTE_IN_MILLISECONDS);
+  }
+
+  private BatteryEvent buildBatteryEvent() {
+    BatteryMonitor batteryMonitor = new BatteryMonitor();
+    float batteryPercentage = batteryMonitor.obtainPercentage(context);
+    boolean isPluggedIn = batteryMonitor.isPluggedIn(context);
+    return new BatteryEvent(navigationSessionState.sessionIdentifier(), batteryPercentage, isPluggedIn);
+  }
+
+  private void cancelBatteryScheduler() {
+    batteryChargeReporter.stop();
   }
 }
