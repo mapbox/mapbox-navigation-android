@@ -18,7 +18,7 @@ public final class RouteRefresh {
    * @param accessToken mapbox access token
    * @param refreshCallback to call with updated routes
    */
-  RouteRefresh(String accessToken, RefreshCallback refreshCallback) {
+  public RouteRefresh(String accessToken, RefreshCallback refreshCallback) {
     this.accessToken = accessToken;
     this.refreshCallback = refreshCallback;
   }
