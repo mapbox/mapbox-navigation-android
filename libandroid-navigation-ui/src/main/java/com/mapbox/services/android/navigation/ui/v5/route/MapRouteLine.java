@@ -304,7 +304,8 @@ class MapRouteLine {
   }
 
   private void updateRoutesFor(int newPrimaryIndex) {
-    if (newPrimaryIndex < 0 || newPrimaryIndex > routeFeatureCollections.size() - 1) {
+    boolean isRouteFeatureCollectionsEmpty = routeFeatureCollections.isEmpty();
+    if (newPrimaryIndex < 0 || isRouteFeatureCollectionsEmpty || newPrimaryIndex > routeFeatureCollections.size() - 1) {
       return;
     }
     new PrimaryRouteUpdateTask(newPrimaryIndex, routeFeatureCollections, primaryRouteUpdatedCallback).execute();
