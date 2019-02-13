@@ -89,6 +89,21 @@ public class NavigationRouteTest extends BaseTest {
   }
 
   @Test
+  public void checksWaypointIndicesIncludedInRequest() {
+    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+      .accessToken(ACCESS_TOKEN)
+      .origin(Point.fromLngLat(1.0, 2.0))
+      .addWaypoint(Point.fromLngLat(1.0, 3.0))
+      .addWaypoint(Point.fromLngLat(1.0, 3.0))
+      .destination(Point.fromLngLat(1.0, 5.0))
+      .addWaypointIndices(0, 2, 3)
+      .build();
+
+    assertThat(navigationRoute.getCall().request().url().toString(),
+      containsString("waypoints"));
+  }
+
+  @Test
   public void addWaypointNamesIncludedInRequest() {
     NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
       .accessToken(ACCESS_TOKEN)
@@ -142,9 +157,10 @@ public class NavigationRouteTest extends BaseTest {
   }
 
   @Test
-  public void addRouteOptionsIncludedInRequest() throws Exception {
+  public void addRouteOptionsIncludedInRequest() {
     List<Point> coordinates = new ArrayList<>();
     coordinates.add(Point.fromLngLat(1.0, 2.0));
+    coordinates.add(Point.fromLngLat(1.0, 3.0));
     coordinates.add(Point.fromLngLat(1.0, 5.0));
 
     RouteOptions routeOptions = RouteOptions.builder()
@@ -158,14 +174,16 @@ public class NavigationRouteTest extends BaseTest {
       .voiceUnits(DirectionsCriteria.METRIC)
       .user("example_user")
       .geometries("mocked_geometries")
-      .approaches("curb;unrestricted")
-      .waypointNames("Origin;Destination")
-      .waypointTargets(";0.99,4.99")
+      .approaches("curb;;unrestricted")
+      .waypointNames("Origin;Pickup;Destination")
+      .waypointTargets(";;0.99,4.99")
+      .waypointIndices("0;2")
       .build();
 
     NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
       .origin(coordinates.get(0))
-      .destination(coordinates.get(1))
+      .addWaypoint(coordinates.get(1))
+      .destination(coordinates.get(2))
       .routeOptions(routeOptions)
       .build();
 

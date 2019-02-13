@@ -44,6 +44,7 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
   private FloatingActionButton launchNavigationFab;
   private Point origin = Point.fromLngLat(-122.423579, 37.761689);
   private Point pickup = Point.fromLngLat(-122.424467, 37.761027);
+  private Point middlePickup = Point.fromLngLat(-122.428604, 37.763559);
   private Point destination = Point.fromLngLat(-122.426183, 37.760872);
   private DirectionsRoute route;
   private boolean paellaPickedUp = false;
@@ -115,7 +116,9 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
       .accessToken(getString(R.string.mapbox_access_token))
       .origin(origin)
       .addWaypoint(pickup)
+      .addWaypoint(middlePickup)
       .destination(destination)
+      .addWaypointIndices(0, 2, 3)
       .alternatives(true)
       .build();
     builder.getRoute(this);
