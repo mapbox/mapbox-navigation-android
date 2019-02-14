@@ -46,6 +46,9 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.navigation.RefreshCallback;
+import com.mapbox.services.android.navigation.v5.navigation.RefreshError;
+import com.mapbox.services.android.navigation.v5.navigation.RouteRefresh;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -64,7 +67,7 @@ import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
   MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener,
-  MilestoneEventListener, OffRouteListener {
+  MilestoneEventListener, OffRouteListener, RefreshCallback {
 
   private static final int BEGIN_ROUTE_MILESTONE = 1001;
   private static final double TWENTY_FIVE_METERS = 25d;
@@ -88,6 +91,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   private NavigationMapRoute navigationMapRoute;
   private Point destination;
   private Point waypoint;
+  private RouteRefresh routeRefresh;
+  private boolean isRefreshing = false;
 
   private static class MyBroadcastReceiver extends BroadcastReceiver {
     private final WeakReference<MapboxNavigation> weakNavigation;
@@ -108,6 +113,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_mock_navigation);
     ButterKnife.bind(this);
+    routeRefresh = new RouteRefresh(Mapbox.getAccessToken(), this);
 
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
@@ -237,7 +243,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     if (waypoint != null) {
       navigationRouteBuilder.addWaypoint(waypoint);
     }
-
+    navigationRouteBuilder.enableRefresh(true);
     navigationRouteBuilder.build().getRoute(new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
@@ -285,6 +291,10 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     mapboxMap.getLocationComponent().forceLocationUpdate(location);
+    if (!isRefreshing) {
+      isRefreshing = true;
+      routeRefresh.refresh(routeProgress);
+    }
     Timber.d("onProgressChange: fraction of route traveled: %f", routeProgress.fractionTraveled());
   }
 
@@ -336,6 +346,17 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
+  }
+
+  @Override
+  public void onRefresh(DirectionsRoute directionsRoute) {
+    navigation.startNavigation(directionsRoute);
+    isRefreshing = false;
+  }
+
+  @Override
+  public void onError(RefreshError error) {
+    isRefreshing = false;
   }
 
   private static class BeginRouteInstruction extends Instruction {

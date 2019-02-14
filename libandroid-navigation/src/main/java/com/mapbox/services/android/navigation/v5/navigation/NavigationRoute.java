@@ -553,6 +553,17 @@ public final class NavigationRoute {
     }
 
     /**
+     * Enables a route to be refreshable
+     *
+     * @param enableRefresh whether or not to enable refresh
+     * @return this builder for chaining options together
+     */
+    public Builder enableRefresh(boolean enableRefresh) {
+      directionsBuilder.enableRefresh(enableRefresh);
+      return this;
+    }
+
+    /**
      * Optionally create a {@link Builder} based on all variables
      * from given {@link RouteOptions}.
      * <p>
