@@ -28,6 +28,10 @@ class PrimaryRouteUpdateTask extends AsyncTask<Void, Void, List<FeatureCollectio
   @Override
   protected List<FeatureCollection> doInBackground(Void... voids) {
     List<FeatureCollection> updatedRouteCollections = new ArrayList<>(routeFeatureCollections);
+    if (updatedRouteCollections.isEmpty()) {
+      return routeFeatureCollections;
+    }
+
     // Update the primary new collection
     FeatureCollection primaryCollection = updatedRouteCollections.remove(newPrimaryIndex);
     List<Feature> primaryFeatures = primaryCollection.features();
