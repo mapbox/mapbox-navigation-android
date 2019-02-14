@@ -243,7 +243,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     if (waypoint != null) {
       navigationRouteBuilder.addWaypoint(waypoint);
     }
-
+    navigationRouteBuilder.enableRefresh(true);
     navigationRouteBuilder.build().getRoute(new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
