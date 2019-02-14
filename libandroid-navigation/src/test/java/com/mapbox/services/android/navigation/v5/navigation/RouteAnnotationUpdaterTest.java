@@ -6,43 +6,55 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static junit.framework.Assert.assertEquals;
 
 public class RouteAnnotationUpdaterTest {
-
   @Test
   public void updateRoute() {
-    DirectionsRoute oldRoute = mock(DirectionsRoute.class);
-    DirectionsRoute annotationHolder = mock(DirectionsRoute.class);
-    DirectionsRoute.Builder routeBuilder = spy(DirectionsRoute.Builder.class);
-    DirectionsRoute refreshedRoute = mock(DirectionsRoute.class);
-    RouteLeg originalRouteLeg = mock(RouteLeg.class);
-    RouteLeg annotationRouteLeg = mock(RouteLeg.class);
-    List oldLegList = Collections.singletonList(originalRouteLeg);
-    List newLegList = Collections.singletonList(annotationRouteLeg);
-    RouteLeg refreshedRouteLeg = mock(RouteLeg.class);
-    RouteLeg.Builder originalRouteLegBuilder = mock(RouteLeg.Builder.class);
-    when(originalRouteLeg.toBuilder()).thenReturn(originalRouteLegBuilder);
-    LegAnnotation legAnnotation = spy(LegAnnotation.class);
-    when(originalRouteLegBuilder.annotation(legAnnotation)).thenReturn(originalRouteLegBuilder);
-    when(originalRouteLegBuilder.build()).thenReturn(refreshedRouteLeg);
+    DirectionsRoute oldRoute =
+      DirectionsRoute.builder().legs(getRouteLegs(getAnnotation(getOldCongestionAnnotations()))).build();
+    DirectionsRoute newRoute =
+      DirectionsRoute.builder().legs(getRouteLegs(getAnnotation(getNewCongestionAnnotations()))).build();
 
-    when(oldRoute.legs()).thenReturn(oldLegList);
-    when(oldRoute.toBuilder()).thenReturn(routeBuilder);
-    when(routeBuilder.legs(any(List.class))).thenReturn(routeBuilder);
-    when(routeBuilder.build()).thenReturn(refreshedRoute);
-    when(annotationHolder.legs()).thenReturn(newLegList);
+    DirectionsRoute updatedRoute = new RouteAnnotationUpdater().update(oldRoute, newRoute, 0);
 
-    DirectionsRoute resultRoute = new RouteAnnotationUpdater().update(oldRoute,
-      annotationHolder, 0);
+    LegAnnotation expected = LegAnnotation.builder().congestion(getNewCongestionAnnotations()).build();
+    assertEquals(updatedRoute.legs().get(0).annotation(), expected);
+  }
 
-    verify(routeBuilder).legs(newLegList);
+  private List<String> getOldCongestionAnnotations() {
+    List<String> oldCongestionAnnotations = new ArrayList<>();
+    oldCongestionAnnotations.add("zero");
+    oldCongestionAnnotations.add("one");
+    oldCongestionAnnotations.add("two");
+    oldCongestionAnnotations.add("three");
+    oldCongestionAnnotations.add("four");
+    oldCongestionAnnotations.add("five");
+    oldCongestionAnnotations.add("six");
+    return oldCongestionAnnotations;
+  }
+
+  private List<String> getNewCongestionAnnotations() {
+    List<String> newCongestionAnnotations = new ArrayList<>();
+    newCongestionAnnotations.add("seven");
+    newCongestionAnnotations.add("eight");
+    newCongestionAnnotations.add("nine");
+    newCongestionAnnotations.add("ten");
+    newCongestionAnnotations.add("eleven");
+    newCongestionAnnotations.add("twelve");
+    newCongestionAnnotations.add("thirteen");
+    return newCongestionAnnotations;
+  }
+
+  private List<RouteLeg> getRouteLegs(LegAnnotation legAnnotation) {
+    return Collections.singletonList(RouteLeg.builder().annotation(legAnnotation).build());
+  }
+
+  private LegAnnotation getAnnotation(List<String> annotations) {
+    return LegAnnotation.builder().congestion(annotations).build();
   }
 }

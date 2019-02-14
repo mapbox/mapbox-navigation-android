@@ -47,6 +47,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOpti
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.RefreshCallback;
+import com.mapbox.services.android.navigation.v5.navigation.RefreshError;
 import com.mapbox.services.android.navigation.v5.navigation.RouteRefresh;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -354,7 +355,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   }
 
   @Override
-  public void onError(String error) {
+  public void onError(RefreshError error) {
     isRefreshing = false;
   }
 

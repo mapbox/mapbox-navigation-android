@@ -5,5 +5,5 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 public interface RefreshCallback {
   void onRefresh(DirectionsRoute directionsRoute);
 
-  void onError(String error);
+  void onError(RefreshError error);
 }

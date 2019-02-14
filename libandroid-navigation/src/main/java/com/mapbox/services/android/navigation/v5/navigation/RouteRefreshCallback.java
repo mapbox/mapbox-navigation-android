@@ -29,7 +29,7 @@ class RouteRefreshCallback implements Callback<DirectionsRefreshResponse> {
   @Override
   public void onResponse(Call<DirectionsRefreshResponse> call, Response<DirectionsRefreshResponse> response) {
     if (response.body() == null || response.body().route() == null) {
-      refreshCallback.onError(response.message());
+      refreshCallback.onError(new RefreshError(response.message()));
     } else {
       refreshCallback.onRefresh(routeAnnotationUpdater.update(directionsRoute,
         response.body().route(), legIndex));
@@ -38,6 +38,6 @@ class RouteRefreshCallback implements Callback<DirectionsRefreshResponse> {
 
   @Override
   public void onFailure(Call<DirectionsRefreshResponse> call, Throwable throwable) {
-    refreshCallback.onError("There was a network error.");
+    refreshCallback.onError(new RefreshError("There was a network error."));
   }
 }
