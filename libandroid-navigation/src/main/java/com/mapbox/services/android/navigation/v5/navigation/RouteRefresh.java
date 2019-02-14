@@ -5,7 +5,8 @@ import com.mapbox.api.directionsrefresh.v1.MapboxDirectionsRefresh;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 /**
- *
+ * This class allows the developer to interact with the Directions Refresh API, receiving updated
+ * annotations for a route previously requested with the enableRefresh flag.
  */
 public final class RouteRefresh {
   private final RefreshCallback refreshCallback;

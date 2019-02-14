@@ -23,7 +23,7 @@ public class RouteAnnotationUpdaterTest {
     DirectionsRoute updatedRoute = new RouteAnnotationUpdater().update(oldRoute, newRoute, 0);
 
     LegAnnotation expected = LegAnnotation.builder().congestion(getNewCongestionAnnotations()).build();
-    assertEquals(updatedRoute.legs().get(0).annotation(), expected);
+    assertEquals(expected, updatedRoute.legs().get(0).annotation());
   }
 
   private List<String> getOldCongestionAnnotations() {
