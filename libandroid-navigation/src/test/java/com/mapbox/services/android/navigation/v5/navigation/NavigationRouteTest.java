@@ -242,4 +242,15 @@ public class NavigationRouteTest extends BaseTest {
 
     verify(mapboxDirectionsBuilder).interceptor(interceptor);
   }
+
+  @Test
+  public void builderContinueStraight_setsMapboxDirections() {
+    MapboxDirections.Builder mapboxDirectionsBuilder = mock(MapboxDirections.Builder.class);
+    NavigationRoute.Builder builder = new NavigationRoute.Builder(mapboxDirectionsBuilder);
+    boolean continueStraight = false;
+
+    builder.continueStraight(continueStraight);
+
+    verify(mapboxDirectionsBuilder).continueStraight(continueStraight);
+  }
 }

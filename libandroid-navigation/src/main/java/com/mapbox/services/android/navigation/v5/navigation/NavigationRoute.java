@@ -70,7 +70,8 @@ public final class NavigationRoute {
       .annotations(DirectionsCriteria.ANNOTATION_CONGESTION, DirectionsCriteria.ANNOTATION_DISTANCE)
       .language(context, localeUtils)
       .voiceUnits(context, localeUtils)
-      .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC);
+      .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+      .continueStraight(true);
   }
 
   /**
@@ -564,6 +565,21 @@ public final class NavigationRoute {
     }
 
     /**
+     * Sets allowed direction of travel when departing intermediate waypoints. If true the route
+     * will continue in the same direction of travel. If false the route may continue in the
+     * opposite direction of travel. API defaults to true for
+     * {@link DirectionsCriteria#PROFILE_DRIVING} and false for
+     * {@link DirectionsCriteria#PROFILE_WALKING} and {@link DirectionsCriteria#PROFILE_CYCLING}.
+     *
+     * @param continueStraight boolean true if you want to always continue straight, else false.
+     * @return this builder for chaining options together
+     */
+    public Builder continueStraight(boolean continueStraight) {
+      directionsBuilder.continueStraight(continueStraight);
+      return this;
+    }
+
+    /**
      * Optionally create a {@link Builder} based on all variables
      * from given {@link RouteOptions}.
      * <p>
@@ -649,7 +665,6 @@ public final class NavigationRoute {
       // Set the default values which the user cannot alter.
       directionsBuilder
         .steps(true)
-        .continueStraight(true)
         .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
         .overview(DirectionsCriteria.OVERVIEW_FULL)
         .voiceInstructions(true)
