@@ -568,6 +568,8 @@ class NavigationTelemetry implements NavigationMetricListener {
   }
 
   private void cancelBatteryScheduler() {
-    batteryChargeReporter.stop();
+    if (batteryChargeReporter != null) {
+      batteryChargeReporter.stop();
+    }
   }
 }
