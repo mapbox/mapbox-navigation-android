@@ -37,6 +37,7 @@ android {
     applicationId "com.mapbox.services.android.navigation.app"
     minSdkVersion androidVersions.minSdkVersion
     targetSdkVersion androidVersions.targetSdkVersion
+    multiDexEnabled true
     versionCode gitVersionCode
     versionName gitVersionName
     playAccountConfig = playAccountConfigs.defaultAccountConfig
@@ -98,6 +99,11 @@ dependencies {
   implementation dependenciesList.lifecycleExtensions
 
   implementation dependenciesList.gmsLocation
+
+  implementation dependenciesList.firebaseCore
+  implementation dependenciesList.crashlytics
+
+  implementation dependenciesList.multidex
 
   // Logging
   implementation dependenciesList.timber
