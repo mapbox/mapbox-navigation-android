@@ -67,8 +67,8 @@
     <attr name="navigationLightTheme" format="reference"/>
     <attr name="navigationDarkTheme" format="reference"/>
 
-    <attr name="navigationExitSignMainColor" format="color" />
-    <attr name="navigationExitSignBackgroundColor" format="color" />
+    <attr name="navigationViewExitSignMainColor" format="color" />
+    <attr name="navigationViewExitSignBackgroundColor" format="color" />
   </declare-styleable>
 
   <declare-styleable name="ManeuverView">
