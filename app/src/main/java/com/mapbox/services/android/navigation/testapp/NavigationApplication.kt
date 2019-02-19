@@ -1,7 +1,7 @@
 package com.mapbox.services.android.navigation.testapp
 
-import android.app.Application
 import android.os.StrictMode
+import android.support.multidex.MultiDexApplication
 import android.text.TextUtils
 import com.mapbox.android.search.MapboxSearch
 import com.mapbox.android.search.MapboxSearchOptions
@@ -12,7 +12,7 @@ import timber.log.Timber
 
 private const val DEFAULT_MAPBOX_ACCESS_TOKEN = "YOUR_MAPBOX_ACCESS_TOKEN_GOES_HERE"
 
-class NavigationApplication : Application() {
+class NavigationApplication : MultiDexApplication() {
 
   companion object {
     var instance: NavigationApplication by DelegatesExt.notNullSingleValue()
