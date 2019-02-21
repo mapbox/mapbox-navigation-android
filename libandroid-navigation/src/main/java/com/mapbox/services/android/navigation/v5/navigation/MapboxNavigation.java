@@ -794,6 +794,10 @@ public class MapboxNavigation implements ServiceConnection {
     mapboxNavigator.toggleHistory(isEnabled);
   }
 
+  public void addHistoryEvent(String eventType, String eventJsonProperties) {
+    mapboxNavigator.addHistoryEvent(eventType, eventJsonProperties);
+  }
+
   public String retrieveSsmlAnnouncementInstruction(int index) {
     return mapboxNavigator.retrieveVoiceInstruction(index).getSsmlAnnouncement();
   }

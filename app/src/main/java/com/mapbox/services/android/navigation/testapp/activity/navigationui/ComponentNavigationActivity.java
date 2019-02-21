@@ -58,6 +58,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -187,6 +188,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     // Start navigation
     adjustMapPaddingForNavigation();
     navigation.startNavigation(route);
+    addEventToHistoryFile("start_navigation");
 
     // Location updates will be received from ProgressChangeListener
     removeLocationEngineListener();
@@ -428,6 +430,8 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private void resetMapAfterNavigation() {
     navigationMap.removeRoute();
     navigationMap.clearMarkers();
+    addEventToHistoryFile("cancel_navigation");
+    executeStoreHistoryTask();
     navigation.stopNavigation();
     moveCameraOverhead();
   }
@@ -488,6 +492,11 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     } else {
       vibrator.vibrate(ONE_HUNDRED_MILLISECONDS);
     }
+  }
+
+  private void addEventToHistoryFile(String type) {
+    double secondsFromEpoch = new Date().getTime() / 1000.0;
+    navigation.addHistoryEvent(type, Double.toString(secondsFromEpoch));
   }
 
   @NonNull
