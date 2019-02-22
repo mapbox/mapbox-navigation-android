@@ -18,6 +18,8 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.core.exceptions.ServicesException;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationRouteCallback;
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationRouteEventListener;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.ArrayList;
