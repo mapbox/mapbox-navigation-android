@@ -57,23 +57,6 @@
         android:layout_centerHorizontal="true"
         android:visibility="invisible"/>
 
-    <com.mapbox.services.android.navigation.ui.v5.SoundButton
-        android:id="@+id/soundLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/extraInstructionContentLayout"/>
 
-    <com.mapbox.services.android.navigation.ui.v5.FeedbackButton
-        android:id="@+id/feedbackLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/soundLayout"
-        android:layout_alignWithParentIfMissing="true"/>
 
 </RelativeLayout>

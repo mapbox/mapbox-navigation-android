@@ -8,11 +8,13 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
@@ -28,6 +30,9 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheetListener;
+import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.ImageCreator;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.NavigationAlertView;
@@ -38,10 +43,14 @@ import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
+
+import timber.log.Timber;
 
 /**
  * View that creates the drop-in UI.
@@ -66,7 +75,7 @@ import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
  * @since 0.7.0
  */
 public class NavigationView extends CoordinatorLayout implements LifecycleObserver, OnMapReadyCallback,
-  NavigationContract.View {
+  FeedbackBottomSheetListener, NavigationContract.View {
 
   private static final String MAP_INSTANCE_STATE_KEY = "navgation_mapbox_map_instance_state";
   private static final int INVALID_STATE = 0;
@@ -78,6 +87,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private RecenterButton recenterBtn;
   private WayNameView wayNameView;
   private ImageButton routeOverviewBtn;
+  private ControlPanel controlPanel;
 
   private NavigationPresenter navigationPresenter;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
@@ -386,6 +396,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     }
   }
 
+  @Override
+  public void toggleMuted() {
+    navigationViewModel.setMuted(controlPanel.toggleMute());
+  }
+
   /**
    * Should be called when this view is completely initialized.
    *
@@ -471,24 +486,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   /**
-   * Returns the sound button used for muting instructions
-   *
-   * @return sound button
-   */
-  public NavigationButton retrieveSoundButton() {
-    return instructionView.retrieveSoundButton();
-  }
-
-  /**
-   * Returns the feedback button for sending feedback about navigation
-   *
-   * @return feedback button
-   */
-  public NavigationButton retrieveFeedbackButton() {
-    return instructionView.retrieveFeedbackButton();
-  }
-
-  /**
    * Returns the re-center button for recentering on current location
    *
    * @return recenter button
@@ -498,17 +495,37 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   /**
-   * Returns the {@link NavigationAlertView} that is shown during off-route events with
-   * "Report a Problem" text.
-   *
-   * @return alert view that is used in the instruction view
+   * Shows {@link FeedbackBottomSheet} and adds a listener so
+   * the proper feedback information is collected or the user dismisses the UI.
    */
-  public NavigationAlertView retrieveAlertView() {
-    return instructionView.retrieveAlertView();
+  @Override
+  public void showFeedbackBottomSheet() {
+    navigationViewModel.recordFeedback(FeedbackEvent.FEEDBACK_SOURCE_UI);
+
+    FragmentManager fragmentManager = obtainSupportFragmentManager();
+    if (fragmentManager != null) {
+      long duration = NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION;
+      FeedbackBottomSheet.newInstance(this, duration).show(fragmentManager, FeedbackBottomSheet.TAG);
+    }
+  }
+
+  @Override
+  public void showReportProblem() {
+    controlPanel.showReportProblem();
+  }
+
+  @Nullable
+  private FragmentManager obtainSupportFragmentManager() {
+    try {
+      return ((FragmentActivity) getContext()).getSupportFragmentManager();
+    } catch (ClassCastException exception) {
+      Timber.e(exception);
+      return null;
+    }
   }
 
   private void initializeView() {
-    inflate(getContext(), R.layout.navigation_view_layout, this);
+    inflate(getContext(), getLayoutRes(), this);
     bind();
     initializeNavigationViewModel();
     initializeNavigationEventDispatcher();
@@ -526,6 +543,25 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     recenterBtn = findViewById(R.id.recenterBtn);
     wayNameView = findViewById(R.id.wayNameView);
     routeOverviewBtn = findViewById(R.id.routeOverviewBtn);
+    bindControlPanel();
+  }
+
+  private void bindControlPanel() {
+    SoundButton soundButton = findViewById(R.id.soundLayout);
+    NavigationButton feedbackButton = findViewById(R.id.feedbackLayout);
+    NavigationAlertView navigationAlertView = findViewById(R.id.alertView);
+    controlPanel = new ControlPanel(soundButton, feedbackButton, navigationAlertView);
+  }
+
+  /**
+   * To provide custom UI components while using {@link NavigationView}, create a subclass and
+   * override this method with a custom layout with the necessary implementations.
+   *
+   * @return layout to inflate, including all necessary UI components
+   */
+  @LayoutRes
+  protected int getLayoutRes() {
+    return R.layout.navigation_view_layout;
   }
 
   private void initializeNavigationViewModel() {
@@ -593,9 +629,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void updateInstructionMutedState(boolean isMuted) {
-    if (isMuted) {
-      ((SoundButton) instructionView.retrieveSoundButton()).soundFabOff();
-    }
+    controlPanel.setMuted(isMuted);
   }
 
   private int[] buildRouteOverviewPadding(Context context) {
@@ -637,6 +671,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
       initializeClickListeners();
       initializeOnCameraTrackingChangedListener();
       subscribeViewModels();
+      showButtons();
     }
   }
 
@@ -644,6 +679,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     cancelBtn.setOnClickListener(new CancelBtnClickListener(navigationViewEventDispatcher));
     recenterBtn.addOnClickListener(new RecenterBtnClickListener(navigationPresenter));
     routeOverviewBtn.setOnClickListener(new RouteOverviewBtnClickListener(navigationPresenter));
+    controlPanel.initializeClickListeners(navigationPresenter);
   }
 
   private void initializeOnCameraTrackingChangedListener() {
@@ -708,6 +744,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private void subscribeViewModels() {
     instructionView.subscribe(navigationViewModel);
     summaryBottomSheet.subscribe(navigationViewModel);
+    controlPanel.subscribe(navigationViewModel);
 
     NavigationViewSubscriber subscriber = new NavigationViewSubscriber(navigationPresenter);
     subscriber.subscribe(((LifecycleOwner) getContext()), navigationViewModel);
@@ -723,5 +760,47 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     navigationViewModel.onDestroy(isChangingConfigurations());
     ImageCreator.getInstance().shutdown();
     navigationMap = null;
+  }
+
+  private void showButtons() {
+    controlPanel.showButtons();
+  }
+
+  private void initializeButtons() {
+    controlPanel.hideButtons();
+  }
+
+  @Override
+  protected void onFinishInflate() {
+    super.onFinishInflate();
+    initializeButtons();
+  }
+
+  @Override
+  public void onAttachedToWindow() {
+    super.onAttachedToWindow();
+    addBottomSheetListener();
+  }
+
+  private void addBottomSheetListener() {
+    FragmentManager fragmentManager = obtainSupportFragmentManager();
+    if (fragmentManager != null) {
+      String tag = FeedbackBottomSheet.TAG;
+      FeedbackBottomSheet feedbackBottomSheet = (FeedbackBottomSheet) fragmentManager.findFragmentByTag(tag);
+      if (feedbackBottomSheet != null) {
+        feedbackBottomSheet.setFeedbackBottomSheetListener(this);
+      }
+    }
+  }
+
+  @Override
+  public void onFeedbackSelected(FeedbackItem feedbackItem) {
+    navigationViewModel.updateFeedback(feedbackItem);
+    controlPanel.showFeedbackSubmitted();
+  }
+
+  @Override
+  public void onFeedbackDismissed() {
+    navigationViewModel.cancelFeedback();
   }
 }

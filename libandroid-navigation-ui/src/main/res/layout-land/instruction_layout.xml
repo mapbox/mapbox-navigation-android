@@ -151,20 +151,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/instructionManeuverLayout"/>
 
-    <com.mapbox.services.android.navigation.ui.v5.SoundButton
-        android:id="@+id/soundLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText"/>
-
-    <com.mapbox.services.android.navigation.ui.v5.FeedbackButton
-        android:id="@+id/feedbackLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/soundLayout"/>
-
     <LinearLayout
         android:id="@+id/rerouteLayout"
         android:layout_width="0dp"

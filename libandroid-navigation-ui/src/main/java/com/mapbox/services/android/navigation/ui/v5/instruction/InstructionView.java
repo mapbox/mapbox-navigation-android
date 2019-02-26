@@ -12,8 +12,6 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.transition.AutoTransition;
 import android.support.transition.TransitionManager;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -31,15 +29,9 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.services.android.navigation.ui.v5.FeedbackButton;
-import com.mapbox.services.android.navigation.ui.v5.NavigationButton;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.ui.v5.SoundButton;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
-import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet;
-import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheetListener;
-import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.ManeuverView;
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
@@ -47,15 +39,12 @@ import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionList
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
-
-import timber.log.Timber;
 
 /**
  * A view that can be used to display upcoming maneuver information and control
@@ -71,7 +60,7 @@ import timber.log.Timber;
  *
  * @since 0.6.0
  */
-public class InstructionView extends RelativeLayout implements FeedbackBottomSheetListener {
+public class InstructionView extends RelativeLayout {
 
   private static final String COMPONENT_TYPE_LANE = "lane";
 
@@ -81,7 +70,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private TextView upcomingSecondaryText;
   private ManeuverView subManeuverView;
   private TextView subStepText;
-  private NavigationAlertView alertView;
   private View rerouteLayout;
   private View turnLaneLayout;
   private View subStepLayout;
@@ -100,8 +88,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
 
   private DistanceFormatter distanceFormatter;
   private boolean isRerouting;
-  private SoundButton soundButton;
-  private FeedbackButton feedbackButton;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -140,31 +126,18 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     initializeInstructionListRecyclerView();
     initializeAnimations();
     initializeStepListClickListener();
-    initializeButtons();
     ImageCreator.getInstance().initialize(getContext());
   }
 
   @Override
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
-    addBottomSheetListener();
   }
 
   @Override
   protected void onDetachedFromWindow() {
     super.onDetachedFromWindow();
     cancelDelayedTransition();
-  }
-
-  @Override
-  public void onFeedbackSelected(FeedbackItem feedbackItem) {
-    navigationViewModel.updateFeedback(feedbackItem);
-    alertView.showFeedbackSubmitted();
-  }
-
-  @Override
-  public void onFeedbackDismissed() {
-    navigationViewModel.cancelFeedback();
   }
 
   /**
@@ -206,15 +179,11 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
             showRerouteState();
           } else if (isRerouting) {
             hideRerouteState();
-            alertView.showReportProblem();
           }
           isRerouting = isOffRoute;
         }
       }
     });
-    subscribeAlertView();
-    initializeButtonListeners();
-    showButtons();
   }
 
   /**
@@ -256,19 +225,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       updateSubStep(instructions.sub(), primaryManeuverModifier);
     }
   }
-
-  /**
-   * Shows {@link FeedbackBottomSheet} and adds a listener so
-   * the proper feedback information is collected or the user dismisses the UI.
-   */
-  public void showFeedbackBottomSheet() {
-    FragmentManager fragmentManager = obtainSupportFragmentManager();
-    if (fragmentManager != null) {
-      long duration = NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION;
-      FeedbackBottomSheet.newInstance(this, duration).show(fragmentManager, FeedbackBottomSheet.TAG);
-    }
-  }
-
 
   /**
    * Will slide the reroute view down from the top of the screen
@@ -362,36 +318,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   /**
-   * Gets the sound button which is used for muting/unmuting, for uses such as adding listeners and
-   * hiding the button.
-   *
-   * @return sound button with {@link NavigationButton} API
-   */
-  public NavigationButton retrieveSoundButton() {
-    return soundButton;
-  }
-
-  /**
-   * Gets the feedback button which is used for sending feedback, for uses such as adding listeners
-   * and hiding the button.
-   *
-   * @return feedback button with {@link NavigationButton} API
-   */
-  public NavigationButton retrieveFeedbackButton() {
-    return feedbackButton;
-  }
-
-  /**
-   * Returns the {@link NavigationAlertView} that is shown during off-route events with
-   * "Report a Problem" text.
-   *
-   * @return alert view that is used in the instruction view
-   */
-  public NavigationAlertView retrieveAlertView() {
-    return alertView;
-  }
-
-  /**
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void initialize() {
@@ -413,7 +339,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     upcomingSecondaryText = findViewById(R.id.stepSecondaryText);
     subManeuverView = findViewById(R.id.subManeuverView);
     subStepText = findViewById(R.id.subStepText);
-    alertView = findViewById(R.id.alertView);
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
     subStepLayout = findViewById(R.id.subStepLayout);
@@ -422,8 +347,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     instructionLayoutText = findViewById(R.id.instructionLayoutText);
     instructionListLayout = findViewById(R.id.instructionListLayout);
     rvInstructions = findViewById(R.id.rvInstructions);
-    soundButton = findViewById(R.id.soundLayout);
-    feedbackButton = findViewById(R.id.feedbackLayout);
   }
 
   /**
@@ -490,53 +413,12 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     }
   }
 
-  private void addBottomSheetListener() {
-    FragmentManager fragmentManager = obtainSupportFragmentManager();
-    if (fragmentManager != null) {
-      String tag = FeedbackBottomSheet.TAG;
-      FeedbackBottomSheet feedbackBottomSheet = (FeedbackBottomSheet) fragmentManager.findFragmentByTag(tag);
-      if (feedbackBottomSheet != null) {
-        feedbackBottomSheet.setFeedbackBottomSheetListener(this);
-      }
-    }
-  }
-
-  private void subscribeAlertView() {
-    alertView.subscribe(navigationViewModel);
-  }
-
-  private void initializeButtonListeners() {
-    feedbackButton.addOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        navigationViewModel.recordFeedback(FeedbackEvent.FEEDBACK_SOURCE_UI);
-        showFeedbackBottomSheet();
-      }
-    });
-    soundButton.addOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        navigationViewModel.setMuted(soundButton.toggleMute());
-      }
-    });
-  }
-
-  private void showButtons() {
-    feedbackButton.show();
-    soundButton.show();
-  }
-
   private void initializeStepListClickListener() {
     if (isLandscape()) {
       initializeLandscapeListListener();
     } else {
       initializePortraitListListener();
     }
-  }
-
-  private void initializeButtons() {
-    feedbackButton.hide();
-    soundButton.hide();
   }
 
   /**
@@ -691,16 +573,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     if (turnLaneLayout.getVisibility() == VISIBLE) {
       beginDelayedTransition();
       turnLaneLayout.setVisibility(GONE);
-    }
-  }
-
-  @Nullable
-  private FragmentManager obtainSupportFragmentManager() {
-    try {
-      return ((FragmentActivity) getContext()).getSupportFragmentManager();
-    } catch (ClassCastException exception) {
-      Timber.e(exception);
-      return null;
     }
   }
 

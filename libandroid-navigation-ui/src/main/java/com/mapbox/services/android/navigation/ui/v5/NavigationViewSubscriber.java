@@ -53,5 +53,12 @@ class NavigationViewSubscriber {
         }
       }
     });
+
+    navigationViewModel.isOffRoute.observe(owner, new Observer<Boolean>() {
+      @Override
+      public void onChanged(@Nullable Boolean isOffRoute) {
+        navigationPresenter.onIsOffRouteChange(isOffRoute);
+      }
+    });
   }
 }
