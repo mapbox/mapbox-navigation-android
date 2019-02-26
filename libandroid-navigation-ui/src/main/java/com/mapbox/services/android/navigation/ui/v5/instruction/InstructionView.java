@@ -83,7 +83,6 @@ public class InstructionView extends RelativeLayout {
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
   private LegStep currentStep;
-  private NavigationViewModel navigationViewModel;
   private InstructionListListener instructionListListener;
 
   private DistanceFormatter distanceFormatter;
@@ -150,7 +149,6 @@ public class InstructionView extends RelativeLayout {
    * @since 0.6.2
    */
   public void subscribe(NavigationViewModel navigationViewModel) {
-    this.navigationViewModel = navigationViewModel;
     LifecycleOwner owner = (LifecycleOwner) getContext();
     navigationViewModel.instructionModel.observe(owner, new Observer<InstructionModel>() {
       @Override

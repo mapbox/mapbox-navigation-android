@@ -55,23 +55,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_gravity="top|end"
-        android:gravity="top|end"
-        app:layout_anchorGravity="bottom|end"
+        app:layout_anchorGravity="top|end"
         app:layout_anchor="@id/instructionView">
         <com.mapbox.services.android.navigation.ui.v5.SoundButtonImpl
             android:id="@+id/soundLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:layout_gravity="top|end" />
+            android:layout_marginTop="70dp"
+            android:layout_gravity="top|end"/>
 
         <com.mapbox.services.android.navigation.ui.v5.FeedbackButton
             android:id="@+id/feedbackLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|end" />
+            android:layout_gravity="top|end"/>
     </LinearLayout>
 
 </merge>
