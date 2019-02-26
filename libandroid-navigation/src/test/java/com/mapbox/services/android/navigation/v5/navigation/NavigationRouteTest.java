@@ -11,7 +11,6 @@ import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -126,29 +125,31 @@ public class NavigationRouteTest extends BaseTest {
   }
 
   @Test
-  public void addingPointAndBearingKeepsCorrectOrder() throws Exception {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
-      .accessToken(ACCESS_TOKEN)
-      .origin(Point.fromLngLat(1.0, 2.0), 90d, 90d)
-      .addBearing(2.0, 3.0)
-      .destination(Point.fromLngLat(1.0, 5.0))
-      .build();
-
-    String requestUrl = navigationRoute.getCall().request().url().toString();
-    assertThat(requestUrl, containsString("bearings=90%2C90%3B2%2C3%3B"));
-  }
-
-  @Test
-  @Ignore
-  public void reverseOriginDestinationDoesntMessUpBearings() throws Exception {
+  public void reverseOriginDestination_bearingsAreFormattedCorrectly() {
     NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
       .accessToken(ACCESS_TOKEN)
       .destination(Point.fromLngLat(1.0, 5.0), 1d, 5d)
       .origin(Point.fromLngLat(1.0, 2.0), 90d, 90d)
       .build();
 
-    assertThat(navigationRoute.getCall().request().url().toString(),
-      containsString("bearings=90,90;1,5"));
+    String requestUrl = navigationRoute.getCall().request().url().toString();
+
+    assertThat(requestUrl, containsString("bearings=90%2C90%3B1%2C5"));
+  }
+
+  @Test
+  public void addWaypointsThenOriginDestination_bearingsAreFormattedCorrectly() {
+    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+      .accessToken(ACCESS_TOKEN)
+      .addWaypoint(Point.fromLngLat(3.0, 4.0), 20d, 20d)
+      .addWaypoint(Point.fromLngLat(5.0, 6.0), 30d, 30d)
+      .destination(Point.fromLngLat(7.0, 8.0), 40d, 40d)
+      .origin(Point.fromLngLat(1.0, 2.0), 10d, 10d)
+      .build();
+
+    String requestUrl = navigationRoute.getCall().request().url().toString();
+
+    assertThat(requestUrl, containsString("bearings=10%2C10%3B20%2C20%3B30%2C30%3B40%2C40"));
   }
 
   @Test
