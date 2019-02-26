@@ -2,7 +2,7 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.view.View;
 
-public class SoundBtnClickListener implements View.OnClickListener {
+class SoundBtnClickListener implements View.OnClickListener {
   private final NavigationPresenter presenter;
 
   SoundBtnClickListener(NavigationPresenter presenter) {

@@ -10,21 +10,21 @@ import android.widget.TextView;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.SoundButton;
 
-public class CustomSoundButton extends FrameLayout implements SoundButton {
+class CustomSoundButton extends FrameLayout implements SoundButton {
   FloatingActionButton floatingActionButton;
   TextView textView;
   boolean isMuted;
 
 
-  public CustomSoundButton(Context context) {
+  CustomSoundButton(Context context) {
     this(context, null);
   }
 
-  public CustomSoundButton(Context context, AttributeSet attrs) {
+  CustomSoundButton(Context context, AttributeSet attrs) {
     this(context, attrs, -1);
   }
 
-  public CustomSoundButton(Context context, AttributeSet attrs, int defStyleAttr) {
+  CustomSoundButton(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     initialize(context);
   }
@@ -92,7 +92,7 @@ public class CustomSoundButton extends FrameLayout implements SoundButton {
 
   @Override
   public void removeOnClickListener(OnClickListener onClickListener) {
-
+    floatingActionButton.setOnClickListener(null);
   }
 
   @Override

@@ -7,17 +7,16 @@ import android.util.AttributeSet;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 
-public class CustomNavigationView extends NavigationView {
-
-  public CustomNavigationView(Context context) {
+class CustomNavigationView extends NavigationView {
+  CustomNavigationView(Context context) {
     super(context);
   }
 
-  public CustomNavigationView(Context context, @Nullable AttributeSet attrs) {
+  CustomNavigationView(Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
   }
 
-  public CustomNavigationView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+  CustomNavigationView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
   }
 

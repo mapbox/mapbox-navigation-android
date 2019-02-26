@@ -5,19 +5,19 @@ import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.util.AttributeSet;
 
-public class FeedbackButton extends ConstraintLayout implements NavigationButton {
+class FeedbackButton extends ConstraintLayout implements NavigationButton {
   private FloatingActionButton feedbackFab;
   private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();
 
-  public FeedbackButton(Context context) {
+  FeedbackButton(Context context) {
     this(context, null);
   }
 
-  public FeedbackButton(Context context, AttributeSet attrs) {
+  FeedbackButton(Context context, AttributeSet attrs) {
     this(context, attrs, -1);
   }
 
-  public FeedbackButton(Context context, AttributeSet attrs, int defStyleAttr) {
+  FeedbackButton(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     initialize(context);
   }
