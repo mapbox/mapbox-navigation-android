@@ -356,6 +356,7 @@ public class MapboxNavigation implements ServiceConnection {
   public void stopNavigation() {
     Timber.d("MapboxNavigation stopNavigation called");
     if (isServiceAvailable()) {
+      navigationTelemetry.stopSession();
       applicationContext.unbindService(this);
       isBound = false;
       navigationService.endNavigation();
