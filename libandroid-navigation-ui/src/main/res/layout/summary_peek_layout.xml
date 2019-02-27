@@ -48,7 +48,7 @@
         app:layout_constraintEnd_toStartOf="@+id/cancelBtn"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <ImageButton
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/cancelBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
