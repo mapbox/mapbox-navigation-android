@@ -13,7 +13,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
-class SoundButtonImpl extends ConstraintLayout implements SoundButton {
+public class SoundButtonImpl extends ConstraintLayout implements SoundButton {
   private static final float ALPHA_VALUE_ZERO = 0;
   private static final float ALPHA_VALUE_ONE = 1;
   private static final long ANIMATION_DURATION_THREE_HUNDRED_MILLIS = 300;
@@ -25,15 +25,15 @@ class SoundButtonImpl extends ConstraintLayout implements SoundButton {
   private boolean isMuted;
   private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();
 
-  SoundButtonImpl(Context context) {
+  public SoundButtonImpl(Context context) {
     this(context, null);
   }
 
-  SoundButtonImpl(Context context, AttributeSet attrs) {
+  public SoundButtonImpl(Context context, AttributeSet attrs) {
     this(context, attrs, -1);
   }
 
-  SoundButtonImpl(Context context, AttributeSet attrs, int defStyleAttr) {
+  public SoundButtonImpl(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     initialize(context);
   }
