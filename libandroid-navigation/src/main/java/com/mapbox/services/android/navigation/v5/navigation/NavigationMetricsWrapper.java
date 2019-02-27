@@ -375,6 +375,10 @@ final class NavigationMetricsWrapper {
     push(new RouteRetrievalEvent(elapsedTime, routeUuid, sessionId));
   }
 
+  static void sendInitialGpsEvent(double elapsedTime, String sessionId) {
+    push(new InitialGpsEvent(elapsedTime, sessionId));
+  }
+
   static Event turnstileEvent() {
     Event navTurnstileEvent = new AppUserTurnstile(sdkIdentifier,
       BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME);

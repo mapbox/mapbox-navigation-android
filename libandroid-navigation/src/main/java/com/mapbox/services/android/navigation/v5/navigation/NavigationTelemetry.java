@@ -65,6 +65,7 @@ class NavigationTelemetry implements NavigationMetricListener {
   private String routeRetrievalUuid = null;
   private BatteryChargeReporter batteryChargeReporter;
   private DepartEventFactory departEventFactory;
+  private InitialGpsEventFactory gpsEventFactory = new InitialGpsEventFactory();
 
   NavigationTelemetry() {
     locationBuffer = new RingBuffer<>(40);
@@ -117,6 +118,7 @@ class NavigationTelemetry implements NavigationMetricListener {
   void initialize(@NonNull Context context, @NonNull String accessToken,
                   MapboxNavigation navigation, LocationEngine locationEngine) {
     if (!isInitialized) {
+      updateLocationEngineName(locationEngine);
       validateAccessToken(accessToken);
       updateLocationEngineName(locationEngine);
       DepartEventHandler departEventHandler = new DepartEventHandler(context);
@@ -171,6 +173,7 @@ class NavigationTelemetry implements NavigationMetricListener {
     isConfigurationChange = false;
     sendRouteRetrievalEventIfExists();
     fireOffBatteryScheduler();
+    gpsEventFactory.navigationStarted(navigationSessionState.sessionIdentifier());
   }
 
   void stopSession() {
@@ -179,6 +182,7 @@ class NavigationTelemetry implements NavigationMetricListener {
         navigationSessionState, metricProgress, metricLocation.getLocation(), context
       );
     }
+    gpsEventFactory.reset();
     resetDepartFactory();
   }
 
@@ -235,6 +239,7 @@ class NavigationTelemetry implements NavigationMetricListener {
   }
 
   void updateLocation(Location location) {
+    gpsEventFactory.gpsReceived();
     metricLocation = new MetricsLocation(location);
     locationBuffer.addLast(location);
     checkRerouteQueue();
