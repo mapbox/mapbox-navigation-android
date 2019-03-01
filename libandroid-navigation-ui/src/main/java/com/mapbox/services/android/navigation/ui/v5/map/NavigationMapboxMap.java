@@ -69,6 +69,7 @@ public class NavigationMapboxMap {
   private LocationComponent locationComponent;
   private MapPaddingAdjustor mapPaddingAdjustor;
   private NavigationSymbolManager navigationSymbolManager;
+  private SymbolOnStyleLoadedListener onStyleLoadedListener;
   private MapLayerInteractor layerInteractor;
   private NavigationMapRoute mapRoute;
   private NavigationCamera mapCamera;
@@ -417,6 +418,7 @@ public class NavigationMapboxMap {
     mapRoute.onStart();
     handleWayNameOnStart();
     handleFpsOnStart();
+    mapView.addOnDidFinishLoadingStyleListener(onStyleLoadedListener);
   }
 
   /**
@@ -428,6 +430,7 @@ public class NavigationMapboxMap {
     mapRoute.onStop();
     handleWayNameOnStop();
     handleFpsOnStop();
+    mapView.removeOnDidFinishLoadingStyleListener(onStyleLoadedListener);
   }
 
   /**
@@ -582,6 +585,8 @@ public class NavigationMapboxMap {
     mapboxMap.getStyle().addImage(MAPBOX_NAVIGATION_MARKER_NAME, markerBitmap);
     SymbolManager symbolManager = new SymbolManager(mapView, mapboxMap, mapboxMap.getStyle());
     navigationSymbolManager = new NavigationSymbolManager(symbolManager);
+    onStyleLoadedListener = new SymbolOnStyleLoadedListener(navigationSymbolManager);
+    mapView.addOnDidFinishLoadingStyleListener(onStyleLoadedListener);
   }
 
   private void initializeMapLayerInteractor(MapboxMap mapboxMap) {
