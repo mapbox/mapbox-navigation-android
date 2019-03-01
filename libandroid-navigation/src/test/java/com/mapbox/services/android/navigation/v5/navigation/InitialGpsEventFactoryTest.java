@@ -95,10 +95,6 @@ public class InitialGpsEventFactoryTest {
   }
 
   private void waitingForGps() {
-    try {
-      Thread.sleep(1500);
-    } catch (InterruptedException exception) {
-      exception.printStackTrace();
-    }
+    // Empty operation to simulate waiting for GPS
   }
 }
