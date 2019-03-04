@@ -37,7 +37,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:src="@drawable/ic_route_preview"/>
 
-    <ImageButton
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/cancelBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
