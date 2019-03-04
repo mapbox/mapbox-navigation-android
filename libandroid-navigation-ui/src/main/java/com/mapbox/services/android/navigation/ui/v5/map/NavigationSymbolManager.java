@@ -14,17 +14,17 @@ import java.util.List;
 class NavigationSymbolManager {
 
   static final String MAPBOX_NAVIGATION_MARKER_NAME = "mapbox-navigation-marker";
-  private final List<SymbolOptions> mapMarkersSymbolOptions = new ArrayList<>();
   private final List<Symbol> mapMarkersSymbols = new ArrayList<>();
   private final SymbolManager symbolManager;
 
   NavigationSymbolManager(SymbolManager symbolManager) {
     this.symbolManager = symbolManager;
+    symbolManager.setIconAllowOverlap(true);
+    symbolManager.setIconIgnorePlacement(true);
   }
 
   void addMarkerFor(Point position) {
     SymbolOptions options = createSymbolOptionsFor(position);
-    mapMarkersSymbolOptions.add(options);
     Symbol markerSymbol = symbolManager.create(options);
     mapMarkersSymbols.add(markerSymbol);
   }
@@ -33,14 +33,7 @@ class NavigationSymbolManager {
     for (Symbol markerSymbol : mapMarkersSymbols) {
       symbolManager.delete(markerSymbol);
     }
-    mapMarkersSymbolOptions.clear();
     mapMarkersSymbols.clear();
-  }
-
-  void redrawMarkers() {
-    for (SymbolOptions options : mapMarkersSymbolOptions) {
-      symbolManager.create(options);
-    }
   }
 
   @NonNull

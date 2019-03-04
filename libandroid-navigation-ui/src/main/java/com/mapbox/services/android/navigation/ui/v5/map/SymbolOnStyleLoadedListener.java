@@ -1,17 +1,24 @@
 package com.mapbox.services.android.navigation.ui.v5.map;
 
+import android.graphics.Bitmap;
+
 import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
+
+import static com.mapbox.services.android.navigation.ui.v5.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
 
 class SymbolOnStyleLoadedListener implements MapView.OnDidFinishLoadingStyleListener {
 
-  private final NavigationSymbolManager symbolManager;
+  private final MapboxMap mapboxMap;
+  private final Bitmap markerBitmap;
 
-  SymbolOnStyleLoadedListener(NavigationSymbolManager symbolManager) {
-    this.symbolManager = symbolManager;
+  SymbolOnStyleLoadedListener(MapboxMap mapboxMap, Bitmap markerBitmap) {
+    this.mapboxMap = mapboxMap;
+    this.markerBitmap = markerBitmap;
   }
 
   @Override
   public void onDidFinishLoadingStyle() {
-    symbolManager.redrawMarkers();
+    mapboxMap.getStyle().addImage(MAPBOX_NAVIGATION_MARKER_NAME, markerBitmap);
   }
 }

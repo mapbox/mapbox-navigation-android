@@ -169,25 +169,23 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   @OnClick(R.id.startNavigationFab)
   public void onStartNavigationClick(FloatingActionButton floatingActionButton) {
-    // TODO reset after testing
-    navigationMap.retrieveMap().setStyle(Style.DARK);
-//    navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
-//    // Transition to navigation state
-//    mapState = MapState.NAVIGATION;
-//
-//    floatingActionButton.hide();
-//    cancelNavigationFab.show();
-//
-//    // Show the InstructionView
-//    TransitionManager.beginDelayedTransition(navigationLayout);
-//    instructionView.setVisibility(View.VISIBLE);
-//
-//    // Start navigation
-//    adjustMapPaddingForNavigation();
-//    navigation.startNavigation(route);
-//
-//    // Location updates will be received from ProgressChangeListener
-//    removeLocationEngineListener();
+    navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
+    // Transition to navigation state
+    mapState = MapState.NAVIGATION;
+
+    floatingActionButton.hide();
+    cancelNavigationFab.show();
+
+    // Show the InstructionView
+    TransitionManager.beginDelayedTransition(navigationLayout);
+    instructionView.setVisibility(View.VISIBLE);
+
+    // Start navigation
+    adjustMapPaddingForNavigation();
+    navigation.startNavigation(route);
+
+    // Location updates will be received from ProgressChangeListener
+    removeLocationEngineListener();
   }
 
   @OnClick(R.id.cancelNavigationFab)
