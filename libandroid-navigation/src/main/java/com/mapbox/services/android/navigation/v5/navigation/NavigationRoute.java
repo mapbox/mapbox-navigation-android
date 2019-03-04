@@ -20,6 +20,8 @@ import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import okhttp3.EventListener;
@@ -124,6 +126,9 @@ public final class NavigationRoute {
     private static final String COMMA = ",";
     private final MapboxDirections.Builder directionsBuilder;
     private final NavigationRouteEventListener eventListener;
+    private NavigationRouteWaypoint origin;
+    private NavigationRouteWaypoint destination;
+    private List<NavigationRouteWaypoint> waypoints = new ArrayList<>();
 
     /**
      * Private constructor for initializing the raw MapboxDirections.Builder
@@ -174,7 +179,7 @@ public final class NavigationRoute {
      * @since 0.5.0
      */
     public Builder origin(@NonNull Point origin) {
-      origin(origin, null, null);
+      this.origin = new NavigationRouteWaypoint(origin, null, null);
       return this;
     }
 
@@ -193,8 +198,7 @@ public final class NavigationRoute {
      */
     public Builder origin(@NonNull Point origin, @Nullable Double angle,
                           @Nullable Double tolerance) {
-      directionsBuilder.origin(origin);
-      directionsBuilder.addBearing(angle, tolerance);
+      this.origin = new NavigationRouteWaypoint(origin, angle, tolerance);
       return this;
     }
 
@@ -208,7 +212,7 @@ public final class NavigationRoute {
      * @since 0.50
      */
     public Builder destination(@NonNull Point destination) {
-      destination(destination, null, null);
+      this.destination = new NavigationRouteWaypoint(destination, null, null);
       return this;
     }
 
@@ -227,8 +231,7 @@ public final class NavigationRoute {
      */
     public Builder destination(@NonNull Point destination, @Nullable Double angle,
                                @Nullable Double tolerance) {
-      directionsBuilder.destination(destination);
-      directionsBuilder.addBearing(angle, tolerance);
+      this.destination = new NavigationRouteWaypoint(destination, angle, tolerance);
       return this;
     }
 
@@ -245,16 +248,19 @@ public final class NavigationRoute {
      * @since 0.5.0
      */
     public Builder addWaypoint(@NonNull Point waypoint) {
-      directionsBuilder.addWaypoint(waypoint);
-      directionsBuilder.addBearing(null, null);
+      this.waypoints.add(new NavigationRouteWaypoint(waypoint, null, null));
       return this;
     }
 
     /**
      * This can be used to set up to 23 additional in-between points which will act as pit-stops
-     * along the users route. Note that if you are using the
+     * along the users route.
+     * <p>
+     * Note that if you are using the
      * {@link DirectionsCriteria#PROFILE_DRIVING_TRAFFIC} that the max number of waypoints allowed
      * in the request is currently limited to 1.
+     * <p>
+     * These waypoints are added to the request in the order you add them to the builder with this method.
      *
      * @param waypoint  a {@link Point} which represents the pit-stop or waypoint where you'd like
      *                  one of the {@link com.mapbox.api.directions.v5.models.RouteLeg} to
@@ -268,8 +274,7 @@ public final class NavigationRoute {
      */
     public Builder addWaypoint(@NonNull Point waypoint, @Nullable Double angle,
                                @Nullable Double tolerance) {
-      directionsBuilder.addWaypoint(waypoint);
-      directionsBuilder.addBearing(angle, tolerance);
+      this.waypoints.add(new NavigationRouteWaypoint(waypoint, angle, tolerance));
       return this;
     }
 
@@ -365,7 +370,11 @@ public final class NavigationRoute {
      *                  recommended to be either 45 or 90 degree tolerance
      * @return this builder for chaining options together
      * @since 0.5.0
+     * @deprecated use the bearing paired with {@link Builder#origin(Point, Double, Double)},
+     * {@link Builder#destination(Point, Double, Double)},
+     * or {@link Builder#addWaypoint(Point, Double, Double)} instead.
      */
+    @Deprecated
     public Builder addBearing(@Nullable @FloatRange(from = 0, to = 360) Double angle,
                               @Nullable @FloatRange(from = 0, to = 360) Double tolerance) {
       directionsBuilder.addBearing(angle, tolerance);
@@ -663,6 +672,7 @@ public final class NavigationRoute {
      */
     public NavigationRoute build() {
       // Set the default values which the user cannot alter.
+      assembleWaypoints();
       directionsBuilder
         .steps(true)
         .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
@@ -702,6 +712,23 @@ public final class NavigationRoute {
         }
       }
       return waypoints;
+    }
+
+    private void assembleWaypoints() {
+      if (origin != null) {
+        directionsBuilder.origin(origin.getWaypoint());
+        directionsBuilder.addBearing(origin.getBearingAngle(), origin.getTolerance());
+      }
+
+      for (NavigationRouteWaypoint waypoint : waypoints) {
+        directionsBuilder.addWaypoint(waypoint.getWaypoint());
+        directionsBuilder.addBearing(waypoint.getBearingAngle(), waypoint.getTolerance());
+      }
+
+      if (destination != null) {
+        directionsBuilder.destination(destination.getWaypoint());
+        directionsBuilder.addBearing(destination.getBearingAngle(), destination.getTolerance());
+      }
     }
   }
 }
