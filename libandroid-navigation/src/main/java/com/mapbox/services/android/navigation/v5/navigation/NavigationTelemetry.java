@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.app.Application;
 import android.content.Context;
 import android.location.Location;
+import android.os.Build;
 import android.support.annotation.NonNull;
 
 import com.mapbox.android.core.location.LocationEngine;
@@ -561,7 +562,8 @@ class NavigationTelemetry implements NavigationMetricListener {
   }
 
   private BatteryEvent buildBatteryEvent() {
-    BatteryMonitor batteryMonitor = new BatteryMonitor();
+    SdkVersionChecker currentSdkVersionChecker = new SdkVersionChecker(Build.VERSION.SDK_INT);
+    BatteryMonitor batteryMonitor = new BatteryMonitor(currentSdkVersionChecker);
     float batteryPercentage = batteryMonitor.obtainPercentage(context);
     boolean isPluggedIn = batteryMonitor.isPluggedIn(context);
     return new BatteryEvent(navigationSessionState.sessionIdentifier(), batteryPercentage, isPluggedIn);
