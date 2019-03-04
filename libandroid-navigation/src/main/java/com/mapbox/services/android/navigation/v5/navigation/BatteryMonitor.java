@@ -12,14 +12,10 @@ class BatteryMonitor {
   private static final int DEFAULT_BATTERY_LEVEL = -1;
   private static final int DEFAULT_SCALE = 100;
   private static final float PERCENT_SCALE = 100.0f;
-  private final SdkVersionChecker jellyBeanVersionChecker;
+  private final SdkVersionChecker currentVersionChecker;
 
-  BatteryMonitor() {
-    this.jellyBeanVersionChecker = new SdkVersionChecker(Build.VERSION_CODES.JELLY_BEAN);
-  }
-
-  BatteryMonitor(SdkVersionChecker jellyBeanVersionChecker) {
-    this.jellyBeanVersionChecker = jellyBeanVersionChecker;
+  BatteryMonitor(SdkVersionChecker currentVersionChecker) {
+    this.currentVersionChecker = currentVersionChecker;
   }
 
   float obtainPercentage(Context context) {
@@ -42,7 +38,7 @@ class BatteryMonitor {
     boolean pluggedUsb = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
     boolean pluggedAc = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
     boolean pluggedWireless = false;
-    if (jellyBeanVersionChecker.isGreaterThan(Build.VERSION.SDK_INT)) {
+    if (currentVersionChecker.isGreaterThan(Build.VERSION_CODES.JELLY_BEAN)) {
       pluggedWireless = chargePlug == BatteryManager.BATTERY_PLUGGED_WIRELESS;
     }
     boolean isPlugged = pluggedUsb || pluggedAc || pluggedWireless;

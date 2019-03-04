@@ -20,7 +20,9 @@ public class BatteryMonitorTest {
 
   @Test
   public void checksBatteryPercentageIsReturned() {
-    BatteryMonitor theBatteryMonitor = new BatteryMonitor();
+    int anySdkVersion = 21;
+    SdkVersionChecker anySdkVersionChecker = new SdkVersionChecker(anySdkVersion);
+    BatteryMonitor theBatteryMonitor = new BatteryMonitor(anySdkVersionChecker);
     Context mockedContext = mock(Context.class);
     Intent mockedIntent = mock(Intent.class);
     BroadcastReceiver mockedBroadcastReceiver = null;
@@ -35,7 +37,9 @@ public class BatteryMonitorTest {
 
   @Test
   public void checksBatteryPercentageUnavailable() {
-    BatteryMonitor theBatteryMonitor = new BatteryMonitor();
+    int anySdkVersion = 19;
+    SdkVersionChecker anySdkVersionChecker = new SdkVersionChecker(anySdkVersion);
+    BatteryMonitor theBatteryMonitor = new BatteryMonitor(anySdkVersionChecker);
     Context mockedContext = mock(Context.class);
     Intent nullIntent = null;
     BroadcastReceiver mockedBroadcastReceiver = null;
@@ -48,7 +52,9 @@ public class BatteryMonitorTest {
 
   @Test
   public void checksBatteryIsUsbPlugged() {
-    BatteryMonitor theBatteryMonitor = new BatteryMonitor();
+    int anySdkVersion = 14;
+    SdkVersionChecker anySdkVersionChecker = new SdkVersionChecker(anySdkVersion);
+    BatteryMonitor theBatteryMonitor = new BatteryMonitor(anySdkVersionChecker);
     Context mockedContext = mock(Context.class);
     Intent mockedIntent = mock(Intent.class);
     BroadcastReceiver mockedBroadcastReceiver = null;
@@ -62,7 +68,9 @@ public class BatteryMonitorTest {
 
   @Test
   public void checksBatteryIsAcPlugged() {
-    BatteryMonitor theBatteryMonitor = new BatteryMonitor();
+    int anySdkVersion = 5;
+    SdkVersionChecker anySdkVersionChecker = new SdkVersionChecker(anySdkVersion);
+    BatteryMonitor theBatteryMonitor = new BatteryMonitor(anySdkVersionChecker);
     Context mockedContext = mock(Context.class);
     Intent mockedIntent = mock(Intent.class);
     BroadcastReceiver mockedBroadcastReceiver = null;
@@ -92,7 +100,9 @@ public class BatteryMonitorTest {
 
   @Test
   public void checksBatteryPluggedUnavailable() {
-    BatteryMonitor theBatteryMonitor = new BatteryMonitor();
+    int anySdkVersion = 3;
+    SdkVersionChecker anySdkVersionChecker = new SdkVersionChecker(anySdkVersion);
+    BatteryMonitor theBatteryMonitor = new BatteryMonitor(anySdkVersionChecker);
     Context mockedContext = mock(Context.class);
     Intent nullIntent = null;
     BroadcastReceiver mockedBroadcastReceiver = null;
