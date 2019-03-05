@@ -1,14 +1,18 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-class SdkVersionChecker {
+public class SdkVersionChecker {
 
   private final int currentSdkVersion;
 
-  SdkVersionChecker(int currentSdkVersion) {
+  public SdkVersionChecker(int currentSdkVersion) {
     this.currentSdkVersion = currentSdkVersion;
   }
 
-  boolean isGreaterThan(int sdkCode) {
+  public boolean isGreaterThan(int sdkCode) {
     return currentSdkVersion > sdkCode;
+  }
+
+  public boolean isEqualOrGreaterThan(int sdkCode) {
+    return currentSdkVersion >= sdkCode;
   }
 }

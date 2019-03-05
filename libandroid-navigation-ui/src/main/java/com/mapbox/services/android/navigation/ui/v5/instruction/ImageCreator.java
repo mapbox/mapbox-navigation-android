@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.content.Context;
+import android.os.Build;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ImageSpan;
@@ -10,6 +11,7 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.services.android.navigation.v5.navigation.SdkVersionChecker;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -126,7 +128,9 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
   }
 
   private void initializeData(Context context) {
-    urlDensityMap = new UrlDensityMap(context);
+    SdkVersionChecker currentVersionChecker = new SdkVersionChecker(Build.VERSION.SDK_INT);
+    int displayDensity = context.getResources().getDisplayMetrics().densityDpi;
+    urlDensityMap = new UrlDensityMap(displayDensity, currentVersionChecker);
     targets = new ArrayList<>();
     bannerShieldList = new ArrayList<>();
   }
