@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.ui.v5;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 
@@ -17,8 +16,6 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
   public abstract static class Builder {
 
     public abstract Builder directionsRoute(DirectionsRoute directionsRoute);
-
-    public abstract Builder directionsProfile(@DirectionsCriteria.ProfileCriteria String directionsProfile);
 
     public abstract Builder lightThemeResId(Integer lightThemeResId);
 

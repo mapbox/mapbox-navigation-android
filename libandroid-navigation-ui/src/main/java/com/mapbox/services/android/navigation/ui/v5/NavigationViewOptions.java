@@ -5,7 +5,6 @@ import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.ui.v5.listeners.BannerInstructionsListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.FeedbackListener;
@@ -66,8 +65,6 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
   public abstract static class Builder {
 
     public abstract Builder directionsRoute(DirectionsRoute directionsRoute);
-
-    public abstract Builder directionsProfile(@DirectionsCriteria.ProfileCriteria String directionsProfile);
 
     public abstract Builder lightThemeResId(Integer lightThemeResId);
 

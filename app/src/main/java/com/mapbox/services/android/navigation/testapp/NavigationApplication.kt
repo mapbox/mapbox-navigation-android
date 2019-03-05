@@ -61,7 +61,7 @@ class NavigationApplication : MultiDexApplication() {
       Timber.w("Mapbox access token isn't set!")
     }
 
-    val cachingMode = MapboxSearchOptions().setCachingMode(MapboxSearchOptions.CACHE_EXTERNAL)
+    val cachingMode = MapboxSearchOptions().setCachingEnabled(true)
     MapboxSearch.getInstance(applicationContext, mapboxAccessToken, cachingMode)
     Mapbox.getInstance(applicationContext, mapboxAccessToken)
   }

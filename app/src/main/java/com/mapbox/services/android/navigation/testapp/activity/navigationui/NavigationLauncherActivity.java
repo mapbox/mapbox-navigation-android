@@ -258,6 +258,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
       .accessToken(Mapbox.getAccessToken())
       .origin(currentLocation)
       .destination(destination)
+      .profile(getRouteProfileFromSharedPreferences())
       .alternatives(true);
     setFieldsFromSharedPreferences(builder);
     builder.build()
@@ -327,8 +328,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     }
 
     NavigationLauncherOptions.Builder optionsBuilder = NavigationLauncherOptions.builder()
-      .shouldSimulateRoute(getShouldSimulateRouteFromSharedPreferences())
-      .directionsProfile(getRouteProfileFromSharedPreferences());
+      .shouldSimulateRoute(getShouldSimulateRouteFromSharedPreferences());
     CameraPosition initialPosition = new CameraPosition.Builder()
       .target(new LatLng(currentLocation.latitude(), currentLocation.longitude()))
       .zoom(INITIAL_ZOOM)
