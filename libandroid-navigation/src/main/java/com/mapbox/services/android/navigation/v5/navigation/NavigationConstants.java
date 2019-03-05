@@ -145,11 +145,6 @@ public final class NavigationConstants {
 
   static final String NON_NULL_APPLICATION_CONTEXT_REQUIRED = "Non-null application context required.";
 
-  public static final Float[] WAYNAME_OFFSET = {0.0f, 40.0f};
-  public static final String MAPBOX_LOCATION_SOURCE = "mapbox-location-source";
-  public static final String MAPBOX_WAYNAME_LAYER = "mapbox-wayname-layer";
-  public static final String MAPBOX_WAYNAME_ICON = "mapbox-wayname-icon";
-
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
   public static final String NAVIGATION_VIEW_SIMULATE_ROUTE = "navigation_view_simulate_route";

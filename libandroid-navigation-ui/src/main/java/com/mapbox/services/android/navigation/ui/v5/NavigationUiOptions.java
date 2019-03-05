@@ -9,9 +9,6 @@ public abstract class NavigationUiOptions {
   public abstract DirectionsRoute directionsRoute();
 
   @Nullable
-  public abstract String directionsProfile();
-
-  @Nullable
   public abstract Integer lightThemeResId();
 
   @Nullable
