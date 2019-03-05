@@ -582,6 +582,8 @@ public class NavigationMapboxMap {
     mapboxMap.getStyle().addImage(MAPBOX_NAVIGATION_MARKER_NAME, markerBitmap);
     SymbolManager symbolManager = new SymbolManager(mapView, mapboxMap, mapboxMap.getStyle());
     navigationSymbolManager = new NavigationSymbolManager(symbolManager);
+    SymbolOnStyleLoadedListener onStyleLoadedListener = new SymbolOnStyleLoadedListener(mapboxMap, markerBitmap);
+    mapView.addOnDidFinishLoadingStyleListener(onStyleLoadedListener);
   }
 
   private void initializeMapLayerInteractor(MapboxMap mapboxMap) {

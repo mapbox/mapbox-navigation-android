@@ -19,6 +19,8 @@ class NavigationSymbolManager {
 
   NavigationSymbolManager(SymbolManager symbolManager) {
     this.symbolManager = symbolManager;
+    symbolManager.setIconAllowOverlap(true);
+    symbolManager.setIconIgnorePlacement(true);
   }
 
   void addMarkerFor(Point position) {
@@ -31,6 +33,7 @@ class NavigationSymbolManager {
     for (Symbol markerSymbol : mapMarkersSymbols) {
       symbolManager.delete(markerSymbol);
     }
+    mapMarkersSymbols.clear();
   }
 
   @NonNull
