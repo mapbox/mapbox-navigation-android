@@ -64,6 +64,7 @@ class NavigationTelemetry implements NavigationMetricListener {
   private ElapsedTime routeRetrievalElapsedTime = null;
   private String routeRetrievalUuid = null;
   private BatteryChargeReporter batteryChargeReporter;
+  private DepartEventFactory departEventFactory;
 
   NavigationTelemetry() {
     locationBuffer = new RingBuffer<>(40);
@@ -88,17 +89,8 @@ class NavigationTelemetry implements NavigationMetricListener {
   @Override
   public void onRouteProgressUpdate(RouteProgress routeProgress) {
     this.metricProgress = new MetricsRouteProgress(routeProgress);
-
-    boolean isValidDeparture = navigationSessionState.startTimestamp() == null
-      && routeProgress.currentLegProgress().distanceTraveled() > 0;
-    if (isValidDeparture) {
-      navigationSessionState = navigationSessionState.toBuilder()
-        .startTimestamp(new Date())
-        .build();
-      updateLifecyclePercentages();
-      NavigationMetricsWrapper.departEvent(navigationSessionState, metricProgress, metricLocation.getLocation(),
-        context);
-    }
+    updateLifecyclePercentages();
+    navigationSessionState = departEventFactory.send(navigationSessionState, metricProgress, metricLocation);
   }
 
   @Override
@@ -125,12 +117,12 @@ class NavigationTelemetry implements NavigationMetricListener {
   void initialize(@NonNull Context context, @NonNull String accessToken,
                   MapboxNavigation navigation, LocationEngine locationEngine) {
     if (!isInitialized) {
-      updateLocationEngineName(locationEngine);
-
       validateAccessToken(accessToken);
+      updateLocationEngineName(locationEngine);
+      DepartEventHandler departEventHandler = new DepartEventHandler(context);
+      departEventFactory = new DepartEventFactory(departEventHandler);
       this.context = context;
       NavigationMetricsWrapper.init(context, accessToken, BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT);
-
       MapboxNavigationOptions options = navigation.options();
       String sdkIdentifier = obtainSdkIdentifier(options);
       NavigationMetricsWrapper.sdkIdentifier = sdkIdentifier;
@@ -139,7 +131,6 @@ class NavigationTelemetry implements NavigationMetricListener {
       // TODO Check if we are sending two turnstile events (Maps and Nav) and if so, do we want to track them
       // separately?
       NavigationMetricsWrapper.push(navTurnstileEvent);
-
       isInitialized = true;
     }
     initEventDispatcherListeners(navigation);
@@ -182,27 +173,19 @@ class NavigationTelemetry implements NavigationMetricListener {
     fireOffBatteryScheduler();
   }
 
-  private void sendRouteRetrievalEventIfExists() {
-    if (routeRetrievalElapsedTime != null) {
-      routeRetrievalEvent(routeRetrievalElapsedTime, routeRetrievalUuid);
-      routeRetrievalElapsedTime = null;
-      routeRetrievalUuid = null;
+  void stopSession() {
+    if (navigationSessionState.startTimestamp() != null) {
+      NavigationMetricsWrapper.cancelEvent(
+        navigationSessionState, metricProgress, metricLocation.getLocation(), context
+      );
     }
+    resetDepartFactory();
   }
 
-  /**
-   * Flushes any remaining events from the reroute / feedback queue and fires
-   * a cancel event indicating a terminated session.
-   */
   void endSession(boolean isConfigurationChange) {
     this.isConfigurationChange = isConfigurationChange;
     if (!isConfigurationChange) {
-      if (navigationSessionState.startTimestamp() != null) {
-        flushEventQueues();
-        updateLifecyclePercentages();
-        NavigationMetricsWrapper.cancelEvent(navigationSessionState, metricProgress, metricLocation.getLocation(),
-          context);
-      }
+      flushEventQueues();
       lifecycleMonitor = null;
       NavigationMetricsWrapper.disable();
       isInitialized = false;
@@ -231,12 +214,11 @@ class NavigationTelemetry implements NavigationMetricListener {
       boolean hasRouteOptions = directionsRoute.routeOptions() != null;
       navigationBuilder.requestIdentifier(hasRouteOptions ? directionsRoute.routeOptions().requestUuid() : null);
       navigationSessionState = navigationBuilder.build();
-
       updateLastRerouteEvent(directionsRoute);
       lastRerouteDate = new Date();
       isOffRoute = false;
     } else {
-      // Not current off-route - just update the session
+      // Not current off-route - update the session
       navigationSessionState = navigationBuilder.build();
     }
   }
@@ -286,7 +268,7 @@ class NavigationTelemetry implements NavigationMetricListener {
    */
   void updateFeedbackEvent(String feedbackId, @FeedbackEvent.FeedbackType String feedbackType,
                            String description, String screenshot) {
-    // Find the event and update
+    // Find the event and send
     FeedbackEvent feedbackEvent = (FeedbackEvent) findQueuedTelemetryEvent(feedbackId);
     if (feedbackEvent != null) {
       feedbackEvent.setFeedbackType(feedbackType);
@@ -339,6 +321,14 @@ class NavigationTelemetry implements NavigationMetricListener {
       sdkIdentifier = MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER;
     }
     return sdkIdentifier;
+  }
+
+  private void sendRouteRetrievalEventIfExists() {
+    if (routeRetrievalElapsedTime != null) {
+      routeRetrievalEvent(routeRetrievalElapsedTime, routeRetrievalUuid);
+      routeRetrievalElapsedTime = null;
+      routeRetrievalUuid = null;
+    }
   }
 
   private void flushEventQueues() {
@@ -567,6 +557,12 @@ class NavigationTelemetry implements NavigationMetricListener {
     float batteryPercentage = batteryMonitor.obtainPercentage(context);
     boolean isPluggedIn = batteryMonitor.isPluggedIn(context);
     return new BatteryEvent(navigationSessionState.sessionIdentifier(), batteryPercentage, isPluggedIn);
+  }
+
+  private void resetDepartFactory() {
+    if (departEventFactory != null) {
+      departEventFactory.reset();
+    }
   }
 
   private void cancelBatteryScheduler() {
