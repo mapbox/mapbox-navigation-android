@@ -2,6 +2,21 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.31.0 - March 6, 2019
+
+Note: This release breaks `SEMVER` / contains API breaking changes.  Please consult this [migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/0.31.0-Migration-Guide) for the necessary updates required.
+
+* [SEMVER] Remove directionsProfile from NavigationUiOptions [#1787](https://github.com/mapbox/mapbox-navigation-android/pull/1787)
+* Add initial GPS event [#1777](https://github.com/mapbox/mapbox-navigation-android/pull/1777)
+* Add Android P 440 density support to UrlDensityMap [#1785](https://github.com/mapbox/mapbox-navigation-android/pull/1785)
+* Add DepartEventFactory for handling route departure events [#1772](https://github.com/mapbox/mapbox-navigation-android/pull/1772)
+* Fix destination marker not drawn on Style reload [#1779](https://github.com/mapbox/mapbox-navigation-android/pull/1779)
+* Fix plugged wireless battery monitor check [#1782](https://github.com/mapbox/mapbox-navigation-android/pull/1782)
+* Fix navigation cancel button [#1776](https://github.com/mapbox/mapbox-navigation-android/pull/1776)
+* Fix NavigationRoute bearing order [#1775](https://github.com/mapbox/mapbox-navigation-android/pull/1775)
+* Add Github PR template [#1766](https://github.com/mapbox/mapbox-navigation-android/pull/1766)
+* Add Crashlytics to test app [#1775](https://github.com/mapbox/mapbox-navigation-android/pull/1775)
+
 ### v0.30.0 - February 18, 2019
 
 * Fix battery charge reporter NPE [#1750](https://github.com/mapbox/mapbox-navigation-android/pull/1750)
