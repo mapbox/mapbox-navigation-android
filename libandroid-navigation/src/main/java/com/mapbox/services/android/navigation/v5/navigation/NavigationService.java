@@ -71,6 +71,7 @@ public class NavigationService extends Service {
    * Removes the location / route listeners and  quits the thread.
    */
   void endNavigation() {
+    NavigationTelemetry.getInstance().endSession();
     routeFetcher.clearListeners();
     locationUpdater.removeLocationUpdates();
     notificationProvider.shutdown(getApplication());
