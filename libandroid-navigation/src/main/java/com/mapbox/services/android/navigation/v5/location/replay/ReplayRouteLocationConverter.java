@@ -18,7 +18,8 @@ class ReplayRouteLocationConverter {
   private static final int ONE_SECOND_IN_MILLISECONDS = 1000;
   private static final double ONE_KM_IN_METERS = 1000d;
   private static final int ONE_HOUR_IN_SECONDS = 3600;
-  private static final String REPLAY_ROUTE = "ReplayRouteLocation";
+  private static final String REPLAY_ROUTE = "com.mapbox.services.android.navigation.v5.location.replay"
+    + ".ReplayRouteLocationEngine";
   private DirectionsRoute route;
   private int speed;
   private int delay;

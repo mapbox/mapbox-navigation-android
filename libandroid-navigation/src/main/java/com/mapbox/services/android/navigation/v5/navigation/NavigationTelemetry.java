@@ -114,12 +114,9 @@ class NavigationTelemetry implements NavigationMetricListener {
     NavigationMetricsWrapper.arriveEvent(navigationSessionState, routeProgress, metricLocation.getLocation(), context);
   }
 
-  void initialize(@NonNull Context context, @NonNull String accessToken,
-                  MapboxNavigation navigation, LocationEngine locationEngine) {
+  void initialize(@NonNull Context context, @NonNull String accessToken, MapboxNavigation navigation) {
     if (!isInitialized) {
-      updateLocationEngineName(locationEngine);
       validateAccessToken(accessToken);
-      updateLocationEngineName(locationEngine);
       DepartEventHandler departEventHandler = new DepartEventHandler(context);
       departEventFactory = new DepartEventFactory(departEventHandler);
       this.context = context;
@@ -155,7 +152,8 @@ class NavigationTelemetry implements NavigationMetricListener {
    *
    * @param directionsRoute first route passed to navigation
    */
-  void startSession(DirectionsRoute directionsRoute) {
+  void startSession(DirectionsRoute directionsRoute, LocationEngine locationEngineName) {
+    updateLocationEngineNameAndSimulation(locationEngineName);
     navigationSessionState = navigationSessionState.toBuilder()
       .sessionIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier())
       .tripIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier())
@@ -164,7 +162,6 @@ class NavigationTelemetry implements NavigationMetricListener {
       .requestIdentifier(directionsRoute.routeOptions().requestUuid())
       .currentDirectionRoute(directionsRoute)
       .eventRouteDistanceCompleted(0)
-      .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
       .rerouteCount(0)
       .build();
     sendRouteRetrievalEventIfExists();
@@ -217,13 +214,17 @@ class NavigationTelemetry implements NavigationMetricListener {
   }
 
   /**
-   * Called during {@link NavigationTelemetry#initialize(Context, String, MapboxNavigation, LocationEngine)}
+   * Called during {@link NavigationTelemetry#initialize(Context, String, MapboxNavigation)}
    * and any time {@link MapboxNavigation} gets an updated location engine.
    */
-  void updateLocationEngineName(LocationEngine locationEngine) {
+  void updateLocationEngineNameAndSimulation(LocationEngine locationEngine) {
     if (locationEngine != null) {
       String locationEngineName = locationEngine.getClass().getName();
-      navigationSessionState = navigationSessionState.toBuilder().locationEngineName(locationEngineName).build();
+      boolean isSimulationEnabled = locationEngineName.equals(MOCK_PROVIDER);
+      navigationSessionState = navigationSessionState.toBuilder()
+        .locationEngineName(locationEngineName)
+        .mockLocation(isSimulationEnabled)
+        .build();
     }
   }
 
@@ -419,7 +420,6 @@ class NavigationTelemetry implements NavigationMetricListener {
       .eventRouteProgress(metricProgress)
       .eventLocation(metricLocation.getLocation())
       .secondsSinceLastReroute(getSecondsSinceLastReroute(eventDate))
-      .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
       .build();
 
     RerouteEvent rerouteEvent = new RerouteEvent(rerouteEventSessionState);
@@ -440,7 +440,6 @@ class NavigationTelemetry implements NavigationMetricListener {
       .eventRouteProgress(metricProgress)
       .eventRouteDistanceCompleted(distanceCompleted)
       .eventLocation(metricLocation.getLocation())
-      .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
       .build();
 
     FeedbackEvent feedbackEvent = new FeedbackEvent(feedbackEventSessionState, feedbackSource);
