@@ -60,7 +60,6 @@ class NavigationTelemetry implements NavigationMetricListener {
   private Date lastRerouteDate;
 
   private boolean isOffRoute;
-  private boolean isConfigurationChange;
   private ElapsedTime routeRetrievalElapsedTime = null;
   private String routeRetrievalUuid = null;
   private BatteryChargeReporter batteryChargeReporter;
@@ -157,43 +156,33 @@ class NavigationTelemetry implements NavigationMetricListener {
    * @param directionsRoute first route passed to navigation
    */
   void startSession(DirectionsRoute directionsRoute) {
-    if (!isConfigurationChange) {
-      navigationSessionState = navigationSessionState.toBuilder()
-        .sessionIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier())
-        .tripIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier())
-        .originalDirectionRoute(directionsRoute)
-        .originalRequestIdentifier(directionsRoute.routeOptions().requestUuid())
-        .requestIdentifier(directionsRoute.routeOptions().requestUuid())
-        .currentDirectionRoute(directionsRoute)
-        .eventRouteDistanceCompleted(0)
-        .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
-        .rerouteCount(0)
-        .build();
-    }
-    isConfigurationChange = false;
+    navigationSessionState = navigationSessionState.toBuilder()
+      .sessionIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier())
+      .tripIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier())
+      .originalDirectionRoute(directionsRoute)
+      .originalRequestIdentifier(directionsRoute.routeOptions().requestUuid())
+      .requestIdentifier(directionsRoute.routeOptions().requestUuid())
+      .currentDirectionRoute(directionsRoute)
+      .eventRouteDistanceCompleted(0)
+      .mockLocation(metricLocation.getLocation().getProvider().equals(MOCK_PROVIDER))
+      .rerouteCount(0)
+      .build();
     sendRouteRetrievalEventIfExists();
     fireOffBatteryScheduler();
     gpsEventFactory.navigationStarted(navigationSessionState.sessionIdentifier());
   }
 
   void stopSession() {
-    if (navigationSessionState.startTimestamp() != null) {
-      NavigationMetricsWrapper.cancelEvent(
-        navigationSessionState, metricProgress, metricLocation.getLocation(), context
-      );
-    }
+    sendCancelEvent();
     gpsEventFactory.reset();
     resetDepartFactory();
   }
 
-  void endSession(boolean isConfigurationChange) {
-    this.isConfigurationChange = isConfigurationChange;
-    if (!isConfigurationChange) {
-      flushEventQueues();
-      lifecycleMonitor = null;
-      NavigationMetricsWrapper.disable();
-      isInitialized = false;
-    }
+  void endSession() {
+    flushEventQueues();
+    lifecycleMonitor = null;
+    NavigationMetricsWrapper.disable();
+    isInitialized = false;
     cancelBatteryScheduler();
   }
 
@@ -333,6 +322,14 @@ class NavigationTelemetry implements NavigationMetricListener {
       routeRetrievalEvent(routeRetrievalElapsedTime, routeRetrievalUuid);
       routeRetrievalElapsedTime = null;
       routeRetrievalUuid = null;
+    }
+  }
+
+  private void sendCancelEvent() {
+    if (navigationSessionState.startTimestamp() != null) {
+      NavigationMetricsWrapper.cancelEvent(
+        navigationSessionState, metricProgress, metricLocation.getLocation(), context
+      );
     }
   }
 
