@@ -34,7 +34,8 @@ public class ReplayRouteLocationEngine implements LocationEngine, Runnable {
   private static final int ZERO = 0;
   private static final String SPEED_MUST_BE_GREATER_THAN_ZERO_KM_H = "Speed must be greater than 0 km/h.";
   private static final String DELAY_MUST_BE_GREATER_THAN_ZERO_SECONDS = "Delay must be greater than 0 seconds.";
-  private static final String REPLAY_ROUTE = "ReplayRouteLocation";
+  private static final String REPLAY_ROUTE = "com.mapbox.services.android.navigation.v5.location.replay"
+    + ".ReplayRouteLocationEngine";
   private ReplayRouteLocationConverter converter;
   private int speed = DEFAULT_SPEED;
   private int delay = DEFAULT_DELAY;

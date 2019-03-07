@@ -276,7 +276,7 @@ public class MapboxNavigation implements ServiceConnection {
   public void setLocationEngine(@NonNull LocationEngine locationEngine) {
     this.locationEngine = locationEngine;
     // Setup telemetry with new engine
-    navigationTelemetry.updateLocationEngineName(locationEngine);
+    navigationTelemetry.updateLocationEngineNameAndSimulation(locationEngine);
     // Notify service to get new location engine.
     if (isServiceAvailable()) {
       navigationService.updateLocationEngine(locationEngine);
@@ -848,7 +848,7 @@ public class MapboxNavigation implements ServiceConnection {
 
   private void initializeTelemetry() {
     navigationTelemetry = obtainTelemetry();
-    navigationTelemetry.initialize(applicationContext, accessToken, this, locationEngine);
+    navigationTelemetry.initialize(applicationContext, accessToken, this);
   }
 
   private NavigationTelemetry obtainTelemetry() {
@@ -884,7 +884,7 @@ public class MapboxNavigation implements ServiceConnection {
     this.directionsRoute = directionsRoute;
     mapboxNavigator.updateRoute(directionsRoute.toJson());
     if (!isBound) {
-      navigationTelemetry.startSession(directionsRoute);
+      navigationTelemetry.startSession(directionsRoute, locationEngine);
       startNavigationService();
       navigationEventDispatcher.onNavigationEvent(true);
     } else {
