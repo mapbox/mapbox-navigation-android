@@ -11,6 +11,7 @@ import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.BaseTest;
+import com.mapbox.services.android.navigation.v5.location.RawLocationListener;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -29,6 +30,7 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -363,6 +365,31 @@ public class NavigationEventDispatcherTest extends BaseTest {
     dispatcher.onMilestoneEvent(routeProgress, instruction, milestone);
 
     verify(metricEventListener, times(0)).onOffRouteEvent(location);
+  }
+
+  @Test
+  public void onLocationUpdate_rawLocationListenerIsInvoked() {
+    RawLocationListener listener = mock(RawLocationListener.class);
+    Location location = mock(Location.class);
+    NavigationEventDispatcher dispatcher = new NavigationEventDispatcher(mock(RouteUtils.class));
+    dispatcher.addRawLocationListener(listener);
+
+    dispatcher.onLocationUpdate(location);
+
+    verify(listener).onLocationUpdate(eq(location));
+  }
+
+  @Test
+  public void onLocationUpdate_removedRawLocationListenerIsNotInvoked() {
+    RawLocationListener listener = mock(RawLocationListener.class);
+    Location location = mock(Location.class);
+    NavigationEventDispatcher dispatcher = new NavigationEventDispatcher(mock(RouteUtils.class));
+    dispatcher.addRawLocationListener(listener);
+    dispatcher.removeRawLocationListener(listener);
+
+    dispatcher.onLocationUpdate(location);
+
+    verify(listener, times(0)).onLocationUpdate(eq(location));
   }
 
   @NonNull

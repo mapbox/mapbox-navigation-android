@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.android.navigation.v5.location.RawLocationListener;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListener;
@@ -25,6 +26,7 @@ class NavigationEventDispatcher {
   private CopyOnWriteArrayList<ProgressChangeListener> progressChangeListeners;
   private CopyOnWriteArrayList<OffRouteListener> offRouteListeners;
   private CopyOnWriteArrayList<FasterRouteListener> fasterRouteListeners;
+  private CopyOnWriteArrayList<RawLocationListener> rawLocationListeners;
   private NavigationMetricListener metricEventListener;
   private RouteUtils routeUtils;
 
@@ -38,6 +40,7 @@ class NavigationEventDispatcher {
     progressChangeListeners = new CopyOnWriteArrayList<>();
     offRouteListeners = new CopyOnWriteArrayList<>();
     fasterRouteListeners = new CopyOnWriteArrayList<>();
+    rawLocationListeners = new CopyOnWriteArrayList<>();
     this.routeUtils = routeUtils;
   }
 
@@ -131,6 +134,24 @@ class NavigationEventDispatcher {
     }
   }
 
+  void addRawLocationListener(@NonNull RawLocationListener rawLocationListener) {
+    if (rawLocationListeners.contains(rawLocationListener)) {
+      Timber.w("The specified RawLocationListener has already been added to the stack.");
+      return;
+    }
+    rawLocationListeners.add(rawLocationListener);
+  }
+
+  void removeRawLocationListener(@Nullable RawLocationListener rawLocationListener) {
+    if (rawLocationListener == null) {
+      rawLocationListeners.clear();
+    } else if (!rawLocationListeners.contains(rawLocationListener)) {
+      Timber.w("The specified RawLocationListener isn't found in stack, therefore, cannot be removed.");
+    } else {
+      rawLocationListeners.remove(rawLocationListener);
+    }
+  }
+
   void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
     checkForArrivalEvent(routeProgress);
     for (MilestoneEventListener milestoneEventListener : milestoneEventListeners) {
@@ -163,6 +184,12 @@ class NavigationEventDispatcher {
   void onFasterRouteEvent(DirectionsRoute directionsRoute) {
     for (FasterRouteListener fasterRouteListener : fasterRouteListeners) {
       fasterRouteListener.fasterRouteFound(directionsRoute);
+    }
+  }
+
+  void onLocationUpdate(Location location) {
+    for (RawLocationListener listener : rawLocationListeners) {
+      listener.onLocationUpdate(location);
     }
   }
 

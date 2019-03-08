@@ -17,13 +17,15 @@ class LocationUpdater {
 
   private final LocationEngineCallback<LocationEngineResult> callback = new CurrentLocationEngineCallback(this);
   private final RouteProcessorBackgroundThread thread;
+  private final NavigationEventDispatcher dispatcher;
   private LocationEngine locationEngine;
   private LocationEngineRequest request;
 
   @SuppressLint("MissingPermission")
-  LocationUpdater(RouteProcessorBackgroundThread thread, LocationEngine locationEngine,
-                  LocationEngineRequest request) {
+  LocationUpdater(RouteProcessorBackgroundThread thread, NavigationEventDispatcher dispatcher,
+                  LocationEngine locationEngine, LocationEngineRequest request) {
     this.thread = thread;
+    this.dispatcher = dispatcher;
     this.locationEngine = locationEngine;
     this.request = request;
     requestInitialLocationUpdates(locationEngine, request);
@@ -42,6 +44,7 @@ class LocationUpdater {
   void onLocationChanged(Location location) {
     if (location != null) {
       thread.updateLocation(location);
+      dispatcher.onLocationUpdate(location);
       NavigationTelemetry.getInstance().updateLocation(location);
     }
   }

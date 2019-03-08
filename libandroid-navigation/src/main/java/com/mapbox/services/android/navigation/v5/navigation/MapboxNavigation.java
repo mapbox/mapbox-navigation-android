@@ -14,6 +14,7 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.services.android.navigation.v5.location.RawLocationListener;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -174,6 +175,8 @@ public class MapboxNavigation implements ServiceConnection {
     removeProgressChangeListener(null);
     removeMilestoneEventListener(null);
     removeNavigationEventListener(null);
+    removeFasterRouteListener(null);
+    removeRawLocationListener(null);
   }
 
   // Public APIs
@@ -551,6 +554,33 @@ public class MapboxNavigation implements ServiceConnection {
   @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
   public void removeFasterRouteListener(@Nullable FasterRouteListener fasterRouteListener) {
     navigationEventDispatcher.removeFasterRouteListener(fasterRouteListener);
+  }
+
+  /**
+   * This adds a new raw location listener which is invoked when a new {@link android.location.Location}
+   * has been pushed by the {@link LocationEngine}.
+   * <p>
+   * It is not possible to add the same listener implementation more then once and a warning will be
+   * printed in the log if attempted.
+   *
+   * @param rawLocationListener an implementation of {@code RawLocationListener}
+   */
+  public void addRawLocationListener(@NonNull RawLocationListener rawLocationListener) {
+    navigationEventDispatcher.addRawLocationListener(rawLocationListener);
+  }
+
+  /**
+   * This removes a specific raw location listener by passing in the instance of it or you can pass in
+   * null to remove all the listeners. When {@link #onDestroy()} is called, all listeners
+   * get removed automatically, removing the requirement for developers to manually handle this.
+   * <p>
+   * If the listener you are trying to remove does not exist in the list, a warning will be printed
+   * in the log.
+   *
+   * @param rawLocationListener an implementation of {@code RawLocationListener}
+   */
+  public void removeRawLocationListener(@Nullable RawLocationListener rawLocationListener) {
+    navigationEventDispatcher.removeRawLocationListener(rawLocationListener);
   }
 
   // Custom engines
