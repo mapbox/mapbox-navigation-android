@@ -51,6 +51,17 @@ public class DynamicCameraTest extends BaseTest {
   }
 
   @Test
+  public void onIsResetting_dynamicCameraReturnsDefault() throws Exception {
+    RouteInformation routeInformation = RouteInformation.create(buildDirectionsRoute(), null, null);
+    DynamicCamera cameraEngine = buildDynamicCamera();
+    cameraEngine.forceResetZoomLevel();
+
+    double zoom = cameraEngine.zoom(routeInformation);
+
+    assertEquals(15d, zoom);
+  }
+
+  @Test
   public void onInformationFromRoute_engineCreatesCorrectTilt() throws Exception {
     DynamicCamera cameraEngine = buildDynamicCamera();
     RouteInformation routeInformation = RouteInformation.create(buildDirectionsRoute(), null, null);
