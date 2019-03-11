@@ -42,11 +42,12 @@ class NavigationViewEventDispatcher {
    *
    * @param navigationViewOptions that contains all listeners to attach
    */
-  void initializeListeners(NavigationViewOptions navigationViewOptions, MapboxNavigation navigation) {
+  void initializeListeners(NavigationViewOptions navigationViewOptions, NavigationViewModel navigationViewModel) {
     assignFeedbackListener(navigationViewOptions.feedbackListener());
-    assignNavigationListener(navigationViewOptions.navigationListener());
+    assignNavigationListener(navigationViewOptions.navigationListener(), navigationViewModel);
     assignRouteListener(navigationViewOptions.routeListener());
     assignBottomSheetCallback(navigationViewOptions.bottomSheetCallback());
+    MapboxNavigation navigation = navigationViewModel.retrieveNavigation();
     assignProgressChangeListener(navigationViewOptions, navigation);
     assignMilestoneEventListener(navigationViewOptions, navigation);
     assignInstructionListListener(navigationViewOptions.instructionListListener());
@@ -65,8 +66,12 @@ class NavigationViewEventDispatcher {
     this.feedbackListener = feedbackListener;
   }
 
-  void assignNavigationListener(@Nullable NavigationListener navigationListener) {
+  void assignNavigationListener(@Nullable NavigationListener navigationListener,
+                                NavigationViewModel navigationViewModel) {
     this.navigationListener = navigationListener;
+    if (navigationListener != null && navigationViewModel.isRunning()) {
+      navigationListener.onNavigationRunning();
+    }
   }
 
   void assignRouteListener(@Nullable RouteListener routeListener) {
