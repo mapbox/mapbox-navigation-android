@@ -24,7 +24,8 @@ public class LocationUpdaterTest {
     RouteProcessorBackgroundThread thread = mock(RouteProcessorBackgroundThread.class);
     LocationEngine locationEngine = mock(LocationEngine.class);
     LocationEngineRequest locationEngineRequest = mock(LocationEngineRequest.class);
-    LocationUpdater locationUpdater = new LocationUpdater(thread, locationEngine, locationEngineRequest);
+    LocationUpdater locationUpdater = new LocationUpdater(thread, mock(NavigationEventDispatcher.class),
+      locationEngine, locationEngineRequest);
 
     locationUpdater.updateLocationEngine(mock(LocationEngine.class));
 
@@ -36,7 +37,8 @@ public class LocationUpdaterTest {
     RouteProcessorBackgroundThread thread = mock(RouteProcessorBackgroundThread.class);
     LocationEngine locationEngine = mock(LocationEngine.class);
     LocationEngineRequest locationEngineRequest = mock(LocationEngineRequest.class);
-    LocationUpdater locationUpdater = new LocationUpdater(thread, locationEngine, locationEngineRequest);
+    LocationUpdater locationUpdater = new LocationUpdater(thread, mock(NavigationEventDispatcher.class),
+      locationEngine, locationEngineRequest);
 
     locationUpdater.updateLocationEngineRequest(mock(LocationEngineRequest.class));
 
@@ -48,7 +50,8 @@ public class LocationUpdaterTest {
     RouteProcessorBackgroundThread thread = mock(RouteProcessorBackgroundThread.class);
     LocationEngine locationEngine = mock(LocationEngine.class);
     LocationEngineRequest locationEngineRequest = mock(LocationEngineRequest.class);
-    LocationUpdater locationUpdater = new LocationUpdater(thread, locationEngine, locationEngineRequest);
+    LocationUpdater locationUpdater = new LocationUpdater(thread, mock(NavigationEventDispatcher.class),
+      locationEngine, locationEngineRequest);
 
     locationUpdater.removeLocationUpdates();
 
@@ -60,7 +63,8 @@ public class LocationUpdaterTest {
     RouteProcessorBackgroundThread thread = mock(RouteProcessorBackgroundThread.class);
     LocationEngine locationEngine = mock(LocationEngine.class);
     LocationEngineRequest locationEngineRequest = mock(LocationEngineRequest.class);
-    LocationUpdater locationUpdater = new LocationUpdater(thread, locationEngine, locationEngineRequest);
+    LocationUpdater locationUpdater = new LocationUpdater(thread, mock(NavigationEventDispatcher.class),
+      locationEngine, locationEngineRequest);
 
     locationUpdater.updateLocationEngine(mock(LocationEngine.class));
 
@@ -73,7 +77,8 @@ public class LocationUpdaterTest {
     RouteProcessorBackgroundThread thread = mock(RouteProcessorBackgroundThread.class);
     LocationEngine locationEngine = mock(LocationEngine.class);
     LocationEngineRequest locationEngineRequest = mock(LocationEngineRequest.class);
-    LocationUpdater locationUpdater = new LocationUpdater(thread, locationEngine, locationEngineRequest);
+    LocationUpdater locationUpdater = new LocationUpdater(thread, mock(NavigationEventDispatcher.class),
+      locationEngine, locationEngineRequest);
 
     locationUpdater.updateLocationEngineRequest(mock(LocationEngineRequest.class));
 
@@ -94,5 +99,19 @@ public class LocationUpdaterTest {
     callback.onSuccess(result);
 
     verify(locationUpdater).onLocationChanged(location);
+  }
+
+  @Test
+  public void onSuccess_dispatcherReceivesLocation() {
+    RouteProcessorBackgroundThread thread = mock(RouteProcessorBackgroundThread.class);
+    NavigationEventDispatcher dispatcher = mock(NavigationEventDispatcher.class);
+    LocationEngine locationEngine = mock(LocationEngine.class);
+    LocationEngineRequest locationEngineRequest = mock(LocationEngineRequest.class);
+    Location location = mock(Location.class);
+    LocationUpdater locationUpdater = new LocationUpdater(thread, dispatcher, locationEngine, locationEngineRequest);
+
+    locationUpdater.onLocationChanged(location);
+
+    verify(dispatcher).onLocationUpdate(eq(location));
   }
 }
