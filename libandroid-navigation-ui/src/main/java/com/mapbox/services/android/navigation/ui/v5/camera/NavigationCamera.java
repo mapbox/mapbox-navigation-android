@@ -81,13 +81,16 @@ public class NavigationCamera implements LifecycleObserver {
   private RouteProgress currentRouteProgress;
   @TrackingMode
   private int trackingCameraMode = NAVIGATION_TRACKING_MODE_GPS;
+  private boolean isCameraResetting;
   private ProgressChangeListener progressChangeListener = new ProgressChangeListener() {
     @Override
     public void onProgressChange(Location location, RouteProgress routeProgress) {
       currentRouteProgress = routeProgress;
       if (isTrackingEnabled()) {
         currentRouteInformation = buildRouteInformationFromLocation(location, routeProgress);
-        adjustCameraFromLocation(currentRouteInformation);
+        if (!isCameraResetting) {
+          adjustCameraFromLocation(currentRouteInformation);
+        }
       }
     }
   };
@@ -125,11 +128,12 @@ public class NavigationCamera implements LifecycleObserver {
    * Used for testing only.
    */
   NavigationCamera(MapboxMap mapboxMap, MapboxNavigation navigation, ProgressChangeListener progressChangeListener,
-                   LocationComponent locationComponent) {
+                   LocationComponent locationComponent, RouteInformation currentRouteInformation) {
     this.mapboxMap = mapboxMap;
     this.locationComponent = locationComponent;
     this.navigation = navigation;
     this.progressChangeListener = progressChangeListener;
+    this.currentRouteInformation = currentRouteInformation;
   }
 
   /**
@@ -285,6 +289,7 @@ public class NavigationCamera implements LifecycleObserver {
   }
 
   void updateTransitionListenersFinished(@CameraMode.Mode int cameraMode) {
+    onCameraTransitionFinished();
     Integer trackingCameraMode = findTrackingModeFor(cameraMode);
     if (trackingCameraMode == null) {
       return;
@@ -302,6 +307,10 @@ public class NavigationCamera implements LifecycleObserver {
     for (OnTrackingModeTransitionListener listener : onTrackingModeTransitionListeners) {
       listener.onTransitionCancelled(trackingCameraMode);
     }
+  }
+
+  void updateIsResetting(boolean isResetting) {
+    this.isCameraResetting = isResetting;
   }
 
   private void initializeWith(MapboxNavigation navigation) {
@@ -343,6 +352,12 @@ public class NavigationCamera implements LifecycleObserver {
       return RouteInformation.create(null, null, null);
     }
     return RouteInformation.create(routeProgress.directionsRoute(), null, null);
+  }
+
+  private void onCameraTransitionFinished() {
+    if (isCameraResetting && currentRouteInformation != null) {
+      adjustCameraForReset(currentRouteInformation);
+    }
   }
 
   private void animateCameraForRouteOverview(RouteInformation routeInformation, int[] padding) {
@@ -434,22 +449,29 @@ public class NavigationCamera implements LifecycleObserver {
   }
 
   private void resetWith(@TrackingMode int trackingMode) {
+    updateIsResetting(true);
+    resetDynamicCamera(navigation.getCameraEngine());
     updateCameraTrackingMode(trackingMode);
-    if (currentRouteInformation != null) {
-      Camera camera = navigation.getCameraEngine();
-      if (camera instanceof DynamicCamera) {
-        ((DynamicCamera) camera).forceResetZoomLevel();
-      }
-      adjustCameraFromLocation(currentRouteInformation);
+  }
+
+  private void resetDynamicCamera(Camera camera) {
+    if (camera instanceof DynamicCamera) {
+      ((DynamicCamera) camera).forceResetZoomLevel();
     }
   }
 
+  private void adjustCameraForReset(RouteInformation routeInformation) {
+    Camera camera = navigation.getCameraEngine();
+    float tilt = (float) camera.tilt(routeInformation);
+    double zoom = camera.zoom(routeInformation);
+    locationComponent.zoomWhileTracking(zoom, getZoomAnimationDuration(zoom), new ResetCancelableCallback(this));
+    locationComponent.tiltWhileTracking(tilt, getTiltAnimationDuration(tilt));
+  }
+
   private void adjustCameraFromLocation(RouteInformation routeInformation) {
-    Camera cameraEngine = navigation.getCameraEngine();
-
-    float tilt = (float) cameraEngine.tilt(routeInformation);
-    double zoom = cameraEngine.zoom(routeInformation);
-
+    Camera camera = navigation.getCameraEngine();
+    float tilt = (float) camera.tilt(routeInformation);
+    double zoom = camera.zoom(routeInformation);
     locationComponent.zoomWhileTracking(zoom, getZoomAnimationDuration(zoom));
     locationComponent.tiltWhileTracking(tilt, getTiltAnimationDuration(tilt));
   }
