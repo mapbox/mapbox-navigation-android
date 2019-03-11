@@ -2,6 +2,16 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.32.0 - March 11, 2019
+
+* Adjust NavigationCamera zoom reset behavior [#1802](https://github.com/mapbox/mapbox-navigation-android/pull/1802)
+* Update Android Core to 1.2.0 [#1805](https://github.com/mapbox/mapbox-navigation-android/pull/1805)
+* Update Maps SDK to 7.2.0 [#1804](https://github.com/mapbox/mapbox-navigation-android/pull/1804)
+* Add RawLocationListener for direct updates from LocationEngine [#1803](https://github.com/mapbox/mapbox-navigation-android/pull/1803)
+* Fix event simulation flag field wrongly reported [#1799](https://github.com/mapbox/mapbox-navigation-android/pull/1799)
+* Fix missing cancel event / not sent [#1796](https://github.com/mapbox/mapbox-navigation-android/pull/1796)
+* Add manifest placeholder for enabling / disabling Crashlytics automatically [#1795](https://github.com/mapbox/mapbox-navigation-android/pull/1795)
+
 ### v0.31.0 - March 6, 2019
 
 Note: This release breaks `SEMVER` / contains API breaking changes.  Please consult this [migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/0.31.0-Migration-Guide) for the necessary updates required.
