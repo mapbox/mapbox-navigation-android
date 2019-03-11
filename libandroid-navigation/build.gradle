@@ -44,9 +44,12 @@ android {
 }
 
 dependencies {
-  api dependenciesList.mapboxEvents
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
+  api dependenciesList.mapboxCore
+  api (dependenciesList.mapboxEvents) {
+    exclude group: "com.mapbox.mapboxsdk", module: "mapbox-android-core"
+  }
 
   // Navigator
   implementation dependenciesList.mapboxNavigator
