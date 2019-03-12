@@ -15,6 +15,7 @@ class NavigationMapSettings implements Parcelable {
   private int maxFps = DEFAULT_MAX_FPS_THRESHOLD;
   private boolean maxFpsEnabled = true;
   private boolean mapWayNameEnabled;
+  private boolean locationFpsEnabled = true;
 
   NavigationMapSettings() {
   }
@@ -68,6 +69,14 @@ class NavigationMapSettings implements Parcelable {
     return mapWayNameEnabled;
   }
 
+  void updateLocationFpsEnabled(boolean locationFpsEnabled) {
+    this.locationFpsEnabled = locationFpsEnabled;
+  }
+
+  boolean isLocationFpsEnabled() {
+    return locationFpsEnabled;
+  }
+
   private NavigationMapSettings(Parcel in) {
     cameraTrackingMode = in.readInt();
     currentPadding = in.createIntArray();
@@ -75,6 +84,7 @@ class NavigationMapSettings implements Parcelable {
     maxFps = in.readInt();
     maxFpsEnabled = in.readByte() != 0;
     mapWayNameEnabled = in.readByte() != 0;
+    locationFpsEnabled = in.readByte() != 0;
   }
 
   @Override
@@ -85,6 +95,7 @@ class NavigationMapSettings implements Parcelable {
     dest.writeInt(maxFps);
     dest.writeByte((byte) (maxFpsEnabled ? 1 : 0));
     dest.writeByte((byte) (mapWayNameEnabled ? 1 : 0));
+    dest.writeByte((byte) (locationFpsEnabled ? 1 : 0));
   }
 
   @Override
