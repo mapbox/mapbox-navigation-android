@@ -18,7 +18,6 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import retrofit2.Call;
 import retrofit2.Callback;
 import timber.log.Timber;
 
@@ -105,20 +104,12 @@ public class VoiceInstructionLoader {
     }
   }
 
-  private void cacheInstruction(String instruction) {
-    requestInstruction(instruction, SSML_TEXT_TYPE, new Callback<ResponseBody>() {
-      @Override
-      public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
-        response.body().byteStream();
-        response.body().close();
-        urlsCached.add(call.request().url().toString());
-      }
+  void addCachedUrl(String url) {
+    urlsCached.add(url);
+  }
 
-      @Override
-      public void onFailure(Call<ResponseBody> call, Throwable throwable) {
-        Timber.e("onFailure cache instruction");
-      }
-    });
+  private void cacheInstruction(String instruction) {
+    requestInstruction(instruction, SSML_TEXT_TYPE, new InstructionCacheCallback(this));
   }
 
   private Interceptor provideOfflineCacheInterceptor() {
