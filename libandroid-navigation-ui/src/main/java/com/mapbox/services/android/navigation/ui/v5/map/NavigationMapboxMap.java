@@ -76,6 +76,7 @@ public class NavigationMapboxMap {
   private MapWayName mapWayName;
   @Nullable
   private MapFpsDelegate mapFpsDelegate;
+  private LocationFpsDelegate locationFpsDelegate;
 
   /**
    * Constructor that can be used once {@link com.mapbox.mapboxsdk.maps.OnMapReadyCallback}
@@ -92,7 +93,8 @@ public class NavigationMapboxMap {
     initializeNavigationSymbolManager(mapView, mapboxMap);
     initializeMapLayerInteractor(mapboxMap);
     initializeRoute(mapView, mapboxMap);
-    initializeCamera(mapboxMap);
+    initializeCamera(mapboxMap, locationComponent);
+    initializeLocationFpsDelegate(mapboxMap, locationComponent);
   }
 
   // Package private (no modifier) for testing purposes
@@ -118,11 +120,13 @@ public class NavigationMapboxMap {
 
   // Package private (no modifier) for testing purposes
   NavigationMapboxMap(@NonNull MapWayName mapWayName, @NonNull MapFpsDelegate mapFpsDelegate,
-                      NavigationMapRoute mapRoute, NavigationCamera mapCamera) {
+                      NavigationMapRoute mapRoute, NavigationCamera mapCamera,
+                      LocationFpsDelegate locationFpsDelegate) {
     this.mapWayName = mapWayName;
     this.mapFpsDelegate = mapFpsDelegate;
     this.mapRoute = mapRoute;
     this.mapCamera = mapCamera;
+    this.locationFpsDelegate = locationFpsDelegate;
   }
 
   // Package private (no modifier) for testing purposes
@@ -202,6 +206,16 @@ public class NavigationMapboxMap {
   }
 
   /**
+   * Enabled by default, the navigation map will throttle frames per second of the location icon
+   * based on the map zoom level.
+   *
+   * @param isEnabled true to enable (default), false to render at device ability
+   */
+  public void updateLocationFpsThrottleEnabled(boolean isEnabled) {
+    locationFpsDelegate.updateEnabled(isEnabled);
+  }
+
+  /**
    * Updates how the user location is shown on the map.
    * <p>
    * <ul>
@@ -247,6 +261,7 @@ public class NavigationMapboxMap {
     settings.updateCurrentPadding(mapPaddingAdjustor.retrieveCurrentPadding());
     settings.updateShouldUseDefaultPadding(mapPaddingAdjustor.isUsingDefault());
     settings.updateCameraTrackingMode(mapCamera.getCameraTrackingMode());
+    settings.updateLocationFpsEnabled(locationFpsDelegate.isEnabled());
     NavigationMapboxMapInstanceState instanceState = new NavigationMapboxMapInstanceState(settings);
     outState.putParcelable(key, instanceState);
   }
@@ -417,6 +432,7 @@ public class NavigationMapboxMap {
     mapRoute.onStart();
     handleWayNameOnStart();
     handleFpsOnStart();
+    locationFpsDelegate.onStart();
   }
 
   /**
@@ -428,6 +444,7 @@ public class NavigationMapboxMap {
     mapRoute.onStop();
     handleWayNameOnStop();
     handleFpsOnStop();
+    locationFpsDelegate.onStop();
   }
 
   /**
@@ -596,8 +613,12 @@ public class NavigationMapboxMap {
     mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes);
   }
 
-  private void initializeCamera(MapboxMap map) {
+  private void initializeCamera(MapboxMap map, LocationComponent locationComponent) {
     mapCamera = new NavigationCamera(map, locationComponent);
+  }
+
+  private void initializeLocationFpsDelegate(MapboxMap map, LocationComponent locationComponent) {
+    locationFpsDelegate = new LocationFpsDelegate(map, locationComponent);
   }
 
   private void initializeWayName(MapboxMap mapboxMap, MapPaddingAdjustor paddingAdjustor) {
@@ -673,6 +694,7 @@ public class NavigationMapboxMap {
 
   private void restoreMapWith(NavigationMapSettings settings) {
     updateCameraTrackingMode(settings.retrieveCameraTrackingMode());
+    updateLocationFpsThrottleEnabled(settings.isLocationFpsEnabled());
     if (settings.shouldUseDefaultPadding()) {
       mapPaddingAdjustor.updatePaddingWithDefault();
     } else {

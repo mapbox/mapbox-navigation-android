@@ -166,7 +166,9 @@ public class NavigationMapboxMapTest {
     MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
     NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
     NavigationCamera mapCamera = mock(NavigationCamera.class);
-    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate, mapRoute, mapCamera);
+    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
+      mapRoute, mapCamera, locationFpsDelegate);
 
     theNavigationMap.onStart();
 
@@ -179,7 +181,9 @@ public class NavigationMapboxMapTest {
     MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
     NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
     NavigationCamera mapCamera = mock(NavigationCamera.class);
-    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate, mapRoute, mapCamera);
+    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
+      mapRoute, mapCamera, locationFpsDelegate);
 
     theNavigationMap.onStop();
 
@@ -192,7 +196,9 @@ public class NavigationMapboxMapTest {
     MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
     NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
     NavigationCamera mapCamera = mock(NavigationCamera.class);
-    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate, mapRoute, mapCamera);
+    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
+      mapRoute, mapCamera, locationFpsDelegate);
 
     theNavigationMap.onStart();
 
@@ -205,7 +211,9 @@ public class NavigationMapboxMapTest {
     MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
     NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
     NavigationCamera mapCamera = mock(NavigationCamera.class);
-    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate, mapRoute, mapCamera);
+    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
+      mapRoute, mapCamera, locationFpsDelegate);
 
     theNavigationMap.onStop();
 
@@ -226,6 +234,51 @@ public class NavigationMapboxMapTest {
     new NavigationMapboxMap(mapboxMap, layerInteractor, adjustor);
 
     verify(layerInteractor).addStreetsLayer("composite", "road_label");
+  }
+
+  @Test
+  public void updateLocationFpsThrottleEnabled_locationFpsUpdateEnabledIsSet() {
+    MapWayName mapWayName = mock(MapWayName.class);
+    MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
+    NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
+    NavigationCamera mapCamera = mock(NavigationCamera.class);
+    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
+      mapRoute, mapCamera, locationFpsDelegate);
+
+    theNavigationMap.updateLocationFpsThrottleEnabled(false);
+
+    verify(locationFpsDelegate).updateEnabled(eq(false));
+  }
+
+  @Test
+  public void onStart_locationFpsUpdateOnStartIsCalled() {
+    MapWayName mapWayName = mock(MapWayName.class);
+    MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
+    NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
+    NavigationCamera mapCamera = mock(NavigationCamera.class);
+    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
+      mapRoute, mapCamera, locationFpsDelegate);
+
+    theNavigationMap.onStart();
+
+    verify(locationFpsDelegate).onStart();
+  }
+
+  @Test
+  public void onStop_locationFpsUpdateOnStopIsCalled() {
+    MapWayName mapWayName = mock(MapWayName.class);
+    MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
+    NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
+    NavigationCamera mapCamera = mock(NavigationCamera.class);
+    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
+      mapRoute, mapCamera, locationFpsDelegate);
+
+    theNavigationMap.onStop();
+
+    verify(locationFpsDelegate).onStop();
   }
 
   @Test
