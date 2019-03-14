@@ -52,7 +52,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   val geocode: MutableLiveData<GeocodingResponse> = MutableLiveData()
 
   var primaryRoute: DirectionsRoute? = null
-  var collapsedBottomSheet: Boolean = false
+  var collapsedBottomSheet: Boolean = true
   var isOffRoute: Boolean = false
 
   private val locationEngine: LocationEngine
