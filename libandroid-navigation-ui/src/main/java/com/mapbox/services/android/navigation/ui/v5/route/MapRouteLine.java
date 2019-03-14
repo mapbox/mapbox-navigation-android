@@ -2,12 +2,9 @@ package com.mapbox.services.android.navigation.ui.v5.route;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.content.res.AppCompatResources;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
@@ -19,51 +16,25 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
-import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.ui.v5.utils.MapImageUtils;
 import com.mapbox.services.android.navigation.ui.v5.utils.MapUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.mapbox.mapboxsdk.style.expressions.Expression.color;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.exponential;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.interpolate;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.match;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.product;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.stop;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.switchCase;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.zoom;
 import static com.mapbox.mapboxsdk.style.layers.Property.NONE;
 import static com.mapbox.mapboxsdk.style.layers.Property.VISIBLE;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconPitchAlignment;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconSize;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineCap;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineColor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineJoin;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
-import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.DESTINATION_MARKER_NAME;
-import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.HEAVY_CONGESTION_VALUE;
-import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.MODERATE_CONGESTION_VALUE;
-import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.ORIGIN_MARKER_NAME;
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.PRIMARY_ROUTE_PROPERTY_KEY;
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.ROUTE_LAYER_ID;
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.ROUTE_SHIELD_LAYER_ID;
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.ROUTE_SOURCE_ID;
-import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.SEVERE_CONGESTION_VALUE;
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.WAYPOINT_DESTINATION_VALUE;
-import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.WAYPOINT_LAYER_ID;
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.WAYPOINT_ORIGIN_VALUE;
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.WAYPOINT_PROPERTY_KEY;
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.WAYPOINT_SOURCE_ID;
@@ -88,6 +59,7 @@ class MapRouteLine {
   private int routeShieldColor;
   private float routeScale;
   private float alternativeRouteScale;
+  private boolean roundedLineCap;
 
   private final HashMap<LineString, DirectionsRoute> routeLineStrings = new HashMap<>();
   private final List<FeatureCollection> routeFeatureCollections = new ArrayList<>();
@@ -104,7 +76,13 @@ class MapRouteLine {
   private boolean isVisible = true;
   private boolean alternativesVisible = true;
 
-  MapRouteLine(Context context, MapboxMap mapboxMap, int styleRes, String belowLayer) {
+  MapRouteLine(Context context,
+               MapboxMap mapboxMap,
+               int styleRes,
+               String belowLayer,
+               MapRouteDrawableProvider drawableProvider,
+               MapRouteSourceProvider sourceProvider,
+               MapRouteLayerProvider layerProvider) {
     this.mapboxMap = mapboxMap;
     this.belowLayer = belowLayer;
     this.routeLayers = new ArrayList<>();
@@ -122,6 +100,7 @@ class MapRouteLine {
     routeShieldColor = typedArray.getColor(R.styleable.NavigationMapRoute_routeShieldColor,
       ContextCompat.getColor(context, R.color.mapbox_navigation_route_shield_layer_color));
     routeScale = typedArray.getFloat(R.styleable.NavigationMapRoute_routeScale, 1.0f);
+    roundedLineCap = typedArray.getBoolean(R.styleable.NavigationMapRoute_roundedLineCap, true);
 
     // Secondary Routes attributes
     alternativeRouteDefaultColor = typedArray.getColor(
@@ -146,21 +125,21 @@ class MapRouteLine {
       R.styleable.NavigationMapRoute_destinationWaypointIcon, R.drawable.ic_route_destination);
     typedArray.recycle();
 
-    originIcon = AppCompatResources.getDrawable(context, originWaypointIcon);
-    destinationIcon = AppCompatResources.getDrawable(context, destinationWaypointIcon);
+    originIcon = drawableProvider.retrieveDrawable(originWaypointIcon);
+    destinationIcon = drawableProvider.retrieveDrawable(destinationWaypointIcon);
     findRouteBelowLayerId();
 
     GeoJsonOptions wayPointGeoJsonOptions = new GeoJsonOptions().withMaxZoom(16);
     FeatureCollection emptyWayPointFeatureCollection = FeatureCollection.fromFeatures(new Feature[] {});
-    wayPointSource = new GeoJsonSource(WAYPOINT_SOURCE_ID, emptyWayPointFeatureCollection, wayPointGeoJsonOptions);
+    wayPointSource = sourceProvider.build(WAYPOINT_SOURCE_ID, emptyWayPointFeatureCollection, wayPointGeoJsonOptions);
     mapboxMap.getStyle().addSource(wayPointSource);
 
     GeoJsonOptions routeLineGeoJsonOptions = new GeoJsonOptions().withMaxZoom(16);
     FeatureCollection emptyRouteLineFeatureCollection = FeatureCollection.fromFeatures(new Feature[] {});
-    routeLineSource = new GeoJsonSource(ROUTE_SOURCE_ID, emptyRouteLineFeatureCollection, routeLineGeoJsonOptions);
+    routeLineSource = sourceProvider.build(ROUTE_SOURCE_ID, emptyRouteLineFeatureCollection, routeLineGeoJsonOptions);
     mapboxMap.getStyle().addSource(routeLineSource);
 
-    initializeLayers(mapboxMap);
+    initializeLayers(mapboxMap, layerProvider);
   }
 
   // For testing only
@@ -330,153 +309,28 @@ class MapRouteLine {
     }
   }
 
-  private void initializeLayers(MapboxMap mapboxMap) {
-    LineLayer routeShieldLayer = initializeRouteShieldLayer(mapboxMap);
+  private void initializeLayers(MapboxMap mapboxMap, MapRouteLayerProvider layerProvider) {
+    LineLayer routeShieldLayer = layerProvider.initializeRouteShieldLayer(
+      mapboxMap, routeScale, alternativeRouteScale,
+      routeShieldColor, alternativeRouteShieldColor
+    );
     MapUtils.addLayerToMap(mapboxMap, routeShieldLayer, belowLayer);
     routeLayers.add(routeShieldLayer);
 
-    LineLayer routeLayer = initializeRouteLayer(mapboxMap);
+    LineLayer routeLayer = layerProvider.initializeRouteLayer(
+      mapboxMap, roundedLineCap, routeScale, alternativeRouteScale,
+      routeDefaultColor, routeModerateColor, routeSevereColor,
+      alternativeRouteDefaultColor, alternativeRouteModerateColor,
+      alternativeRouteSevereColor
+    );
     MapUtils.addLayerToMap(mapboxMap, routeLayer, belowLayer);
     routeLayers.add(routeLayer);
 
-    SymbolLayer wayPointLayer = initializeWayPointLayer(mapboxMap);
+    SymbolLayer wayPointLayer = layerProvider.initializeWayPointLayer(
+      mapboxMap, originIcon, destinationIcon
+    );
     MapUtils.addLayerToMap(mapboxMap, wayPointLayer, belowLayer);
     routeLayers.add(wayPointLayer);
-  }
-
-  private LineLayer initializeRouteShieldLayer(MapboxMap mapboxMap) {
-    LineLayer shieldLayer = mapboxMap.getStyle().getLayerAs(ROUTE_SHIELD_LAYER_ID);
-    if (shieldLayer != null) {
-      mapboxMap.getStyle().removeLayer(shieldLayer);
-    }
-
-    shieldLayer = new LineLayer(ROUTE_SHIELD_LAYER_ID, ROUTE_SOURCE_ID).withProperties(
-      lineCap(Property.LINE_CAP_ROUND),
-      lineJoin(Property.LINE_JOIN_ROUND),
-      lineWidth(
-        interpolate(
-          exponential(1.5f), zoom(),
-          stop(10f, 7f),
-          stop(14f, product(literal(10.5f),
-            switchCase(
-              get(PRIMARY_ROUTE_PROPERTY_KEY), literal(routeScale),
-              literal(alternativeRouteScale)))),
-          stop(16.5f, product(literal(15.5f),
-            switchCase(
-              get(PRIMARY_ROUTE_PROPERTY_KEY), literal(routeScale),
-              literal(alternativeRouteScale)))),
-          stop(19f, product(literal(24f),
-            switchCase(
-              get(PRIMARY_ROUTE_PROPERTY_KEY), literal(routeScale),
-              literal(alternativeRouteScale)))),
-          stop(22f, product(literal(29f),
-            switchCase(
-              get(PRIMARY_ROUTE_PROPERTY_KEY), literal(routeScale),
-              literal(alternativeRouteScale))))
-        )
-      ),
-      lineColor(
-        switchCase(
-          get(PRIMARY_ROUTE_PROPERTY_KEY), color(routeShieldColor),
-          color(alternativeRouteShieldColor)
-        )
-      )
-    );
-    return shieldLayer;
-  }
-
-  private LineLayer initializeRouteLayer(MapboxMap mapboxMap) {
-    LineLayer routeLayer = mapboxMap.getStyle().getLayerAs(ROUTE_LAYER_ID);
-    if (routeLayer != null) {
-      mapboxMap.getStyle().removeLayer(routeLayer);
-    }
-
-    routeLayer = new LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID).withProperties(
-      lineCap(Property.LINE_CAP_ROUND),
-      lineJoin(Property.LINE_JOIN_ROUND),
-      lineWidth(
-        interpolate(
-          exponential(1.5f), zoom(),
-          stop(4f, product(literal(3f),
-            switchCase(
-              get(PRIMARY_ROUTE_PROPERTY_KEY), literal(routeScale),
-              literal(alternativeRouteScale)))),
-          stop(10f, product(literal(4f),
-            switchCase(
-              get(PRIMARY_ROUTE_PROPERTY_KEY), literal(routeScale),
-              literal(alternativeRouteScale)))),
-          stop(13f, product(literal(6f),
-            switchCase(
-              get(PRIMARY_ROUTE_PROPERTY_KEY), literal(routeScale),
-              literal(alternativeRouteScale)))),
-          stop(16f, product(literal(10f),
-            switchCase(
-              get(PRIMARY_ROUTE_PROPERTY_KEY), literal(routeScale),
-              literal(alternativeRouteScale)))),
-          stop(19f, product(literal(14f),
-            switchCase(
-              get(PRIMARY_ROUTE_PROPERTY_KEY), literal(routeScale),
-              literal(alternativeRouteScale)))),
-          stop(22f, product(literal(18f),
-            switchCase(
-              get(PRIMARY_ROUTE_PROPERTY_KEY), literal(routeScale),
-              literal(alternativeRouteScale))))
-        )
-      ),
-      lineColor(
-        switchCase(
-          get(PRIMARY_ROUTE_PROPERTY_KEY), match(
-            Expression.toString(get(RouteConstants.CONGESTION_KEY)),
-            color(routeDefaultColor),
-            stop(MODERATE_CONGESTION_VALUE, color(routeModerateColor)),
-            stop(HEAVY_CONGESTION_VALUE, color(routeSevereColor)),
-            stop(SEVERE_CONGESTION_VALUE, color(routeSevereColor))
-          ),
-          match(
-            Expression.toString(get(RouteConstants.CONGESTION_KEY)),
-            color(alternativeRouteDefaultColor),
-            stop(MODERATE_CONGESTION_VALUE, color(alternativeRouteModerateColor)),
-            stop(HEAVY_CONGESTION_VALUE, color(alternativeRouteSevereColor)),
-            stop(SEVERE_CONGESTION_VALUE, color(alternativeRouteSevereColor))
-          )
-        )
-      )
-    );
-    return routeLayer;
-  }
-
-  private SymbolLayer initializeWayPointLayer(@NonNull MapboxMap mapboxMap) {
-    SymbolLayer wayPointLayer = mapboxMap.getStyle().getLayerAs(WAYPOINT_LAYER_ID);
-    if (wayPointLayer != null) {
-      mapboxMap.getStyle().removeLayer(wayPointLayer);
-    }
-
-    Bitmap bitmap = MapImageUtils.getBitmapFromDrawable(originIcon);
-    mapboxMap.getStyle().addImage(ORIGIN_MARKER_NAME, bitmap);
-    bitmap = MapImageUtils.getBitmapFromDrawable(destinationIcon);
-    mapboxMap.getStyle().addImage(DESTINATION_MARKER_NAME, bitmap);
-
-    wayPointLayer = new SymbolLayer(WAYPOINT_LAYER_ID, WAYPOINT_SOURCE_ID).withProperties(
-      iconImage(
-        match(
-          Expression.toString(get(WAYPOINT_PROPERTY_KEY)), literal(ORIGIN_MARKER_NAME),
-          stop(WAYPOINT_ORIGIN_VALUE, literal(ORIGIN_MARKER_NAME)),
-          stop(WAYPOINT_DESTINATION_VALUE, literal(DESTINATION_MARKER_NAME))
-        )),
-      iconSize(
-        interpolate(
-          exponential(1.5f), zoom(),
-          stop(0f, 0.6f),
-          stop(10f, 0.8f),
-          stop(12f, 1.3f),
-          stop(22f, 2.8f)
-        )
-      ),
-      iconPitchAlignment(Property.ICON_PITCH_ALIGNMENT_MAP),
-      iconAllowOverlap(true),
-      iconIgnorePlacement(true)
-    );
-    return wayPointLayer;
   }
 
   private void updateAlternativeVisibilityTo(boolean isVisible) {

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="NavigationMapRoute">
-
         <!-- Colors -->
         <item name="routeColor">@color/mapbox_navigation_route_layer_blue</item>
         <item name="routeModerateCongestionColor">@color/mapbox_navigation_route_layer_congestion_yellow</item>
@@ -12,6 +11,9 @@
         <item name="routeScale">1.0</item>
         <item name="upcomingManeuverArrowColor">@color/mapbox_navigation_route_upcoming_maneuver_arrow_color</item>
         <item name="upcomingManeuverArrowBorderColor">@color/mapbox_navigation_route_upcoming_maneuver_arrow_border_color</item>
+
+        <!-- Expression styling -->
+        <item name="roundedLineCap">true</item>
     </style>
 
     <style name="NavigationViewLight" parent="Theme.AppCompat.Light.NoActionBar">

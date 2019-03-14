@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
@@ -135,7 +136,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
-    this.routeLine = new MapRouteLine(mapView.getContext(), mapboxMap, styleRes, belowLayer);
+    this.routeLine = buildMapRouteLine(mapView, mapboxMap, styleRes, belowLayer);
     this.routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes);
     this.mapRouteClickListener = new MapRouteClickListener(routeLine);
     this.mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow);
@@ -312,6 +313,17 @@ public class NavigationMapRoute implements LifecycleObserver {
     removeListeners();
   }
 
+  private MapRouteLine buildMapRouteLine(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap,
+                                         @StyleRes int styleRes, @Nullable String belowLayer) {
+    Context context = mapView.getContext();
+    MapRouteDrawableProvider drawableProvider = new MapRouteDrawableProvider(context);
+    MapRouteSourceProvider sourceProvider = new MapRouteSourceProvider();
+    MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
+    return new MapRouteLine(context, mapboxMap, styleRes, belowLayer,
+      drawableProvider, sourceProvider, layerProvider
+    );
+  }
+
   private void initializeDidFinishLoadingStyleListener() {
     didFinishLoadingStyleListener = new MapView.OnDidFinishLoadingStyleListener() {
       @Override
@@ -360,7 +372,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   private void buildNewRouteLine() {
-    routeLine = new MapRouteLine(mapView.getContext(), mapboxMap, styleRes, belowLayer);
+    routeLine = buildMapRouteLine(mapView, mapboxMap, styleRes, belowLayer);
     mapboxMap.removeOnMapClickListener(mapRouteClickListener);
     mapRouteClickListener = new MapRouteClickListener(routeLine);
     mapboxMap.addOnMapClickListener(mapRouteClickListener);
