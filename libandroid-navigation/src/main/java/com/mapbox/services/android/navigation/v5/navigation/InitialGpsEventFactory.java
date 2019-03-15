@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.content.Context;
+
 import com.mapbox.core.utils.TextUtils;
 
 class InitialGpsEventFactory {
@@ -27,12 +29,12 @@ class InitialGpsEventFactory {
     time.start();
   }
 
-  void gpsReceived() {
+  void gpsReceived(Context context) {
     if (time.getStart() == null) {
       return;
     }
     time.end();
-    send(time);
+    send(context, time);
   }
 
   void reset() {
@@ -40,10 +42,10 @@ class InitialGpsEventFactory {
     hasSent = false;
   }
 
-  private void send(ElapsedTime time) {
+  private void send(Context context, ElapsedTime time) {
     if (!hasSent && !TextUtils.isEmpty(sessionId)) {
       double elapsedTime = time.getElapsedTime();
-      handler.send(elapsedTime, sessionId, metadata);
+      handler.send(context, elapsedTime, sessionId, metadata);
       hasSent = true;
     }
   }

@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Parcelable;
 
 @SuppressLint("ParcelCreator")
@@ -10,9 +11,9 @@ class RouteRetrievalEvent extends NavigationPerformanceEvent implements Parcelab
   private static final String ROUTE_UUID_NAME = "route_uuid";
   private static final String ROUTE_RETRIEVAL_EVENT_NAME = "route_retrieval_event";
 
-  RouteRetrievalEvent(double elapsedTime, String routeUuid, String sessionId,
+  RouteRetrievalEvent(Context context, double elapsedTime, String routeUuid, String sessionId,
                       NavigationPerformanceMetadata metadata) {
-    super(sessionId, ROUTE_RETRIEVAL_EVENT_NAME, metadata);
+    super(context, sessionId, ROUTE_RETRIEVAL_EVENT_NAME, metadata);
 
     addCounter(new DoubleCounter(ELAPSED_TIME_NAME, elapsedTime));
     addAttribute(new Attribute(ROUTE_UUID_NAME, routeUuid));

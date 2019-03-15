@@ -232,7 +232,7 @@ class NavigationTelemetry implements NavigationMetricListener {
   }
 
   void updateLocation(Location location) {
-    gpsEventFactory.gpsReceived();
+    gpsEventFactory.gpsReceived(context);
     metricLocation = new MetricsLocation(location);
     locationBuffer.addLast(location);
     checkRerouteQueue();
@@ -291,7 +291,7 @@ class NavigationTelemetry implements NavigationMetricListener {
   void routeRetrievalEvent(ElapsedTime elapsedTime, String routeUuid) {
     if (navigationSessionState != null && !navigationSessionState.sessionIdentifier().isEmpty()) {
       double time = elapsedTime.getElapsedTime();
-      NavigationMetricsWrapper.routeRetrievalEvent(time, routeUuid,
+      NavigationMetricsWrapper.routeRetrievalEvent(context, time, routeUuid,
         navigationSessionState.sessionIdentifier(), performanceMetadata);
     } else {
       routeRetrievalElapsedTime = elapsedTime;
@@ -560,7 +560,7 @@ class NavigationTelemetry implements NavigationMetricListener {
     BatteryMonitor batteryMonitor = new BatteryMonitor(currentSdkVersionChecker);
     float batteryPercentage = batteryMonitor.obtainPercentage(context);
     boolean isPluggedIn = batteryMonitor.isPluggedIn(context);
-    return new BatteryEvent(navigationSessionState.sessionIdentifier(), batteryPercentage,
+    return new BatteryEvent(context, navigationSessionState.sessionIdentifier(), batteryPercentage,
       isPluggedIn, performanceMetadata);
   }
 

@@ -49,8 +49,6 @@ class NavigationPerformanceMetadata {
 
   private String getScreenSize(Context context) {
     DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-    return String.format("%d h, %d w, %d dpi", displayMetrics.heightPixels,
-      displayMetrics.widthPixels,
-      displayMetrics.densityDpi);
+    return String.format("%dx%d", displayMetrics.widthPixels, displayMetrics.heightPixels);
   }
 }
