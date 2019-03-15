@@ -371,12 +371,14 @@ final class NavigationMetricsWrapper {
     mapboxTelemetry.push(feedbackEvent);
   }
 
-  static void routeRetrievalEvent(double elapsedTime, String routeUuid, String sessionId) {
-    push(new RouteRetrievalEvent(elapsedTime, routeUuid, sessionId));
+  static void routeRetrievalEvent(double elapsedTime, String routeUuid, String sessionId,
+                                  NavigationPerformanceMetadata metadata) {
+    push(new RouteRetrievalEvent(elapsedTime, routeUuid, sessionId, metadata));
   }
 
-  static void sendInitialGpsEvent(double elapsedTime, String sessionId) {
-    push(new InitialGpsEvent(elapsedTime, sessionId));
+  static void sendInitialGpsEvent(double elapsedTime, String sessionId,
+                                  NavigationPerformanceMetadata metadata) {
+    push(new InitialGpsEvent(elapsedTime, sessionId, metadata));
   }
 
   static Event turnstileEvent() {

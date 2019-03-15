@@ -64,7 +64,8 @@ class NavigationTelemetry implements NavigationMetricListener {
   private String routeRetrievalUuid = null;
   private BatteryChargeReporter batteryChargeReporter;
   private DepartEventFactory departEventFactory;
-  private InitialGpsEventFactory gpsEventFactory = new InitialGpsEventFactory();
+  private InitialGpsEventFactory gpsEventFactory;
+  private NavigationPerformanceMetadata performanceMetadata;
 
   NavigationTelemetry() {
     locationBuffer = new RingBuffer<>(40);
@@ -129,6 +130,8 @@ class NavigationTelemetry implements NavigationMetricListener {
       // TODO Check if we are sending two turnstile events (Maps and Nav) and if so, do we want to track them
       // separately?
       NavigationMetricsWrapper.push(navTurnstileEvent);
+      performanceMetadata = new NavigationPerformanceMetadata(context);
+      gpsEventFactory = new InitialGpsEventFactory(performanceMetadata);
       isInitialized = true;
     }
     initEventDispatcherListeners(navigation);
@@ -289,7 +292,7 @@ class NavigationTelemetry implements NavigationMetricListener {
     if (navigationSessionState != null && !navigationSessionState.sessionIdentifier().isEmpty()) {
       double time = elapsedTime.getElapsedTime();
       NavigationMetricsWrapper.routeRetrievalEvent(time, routeUuid,
-        navigationSessionState.sessionIdentifier());
+        navigationSessionState.sessionIdentifier(), performanceMetadata);
     } else {
       routeRetrievalElapsedTime = elapsedTime;
       routeRetrievalUuid = routeUuid;
@@ -557,7 +560,8 @@ class NavigationTelemetry implements NavigationMetricListener {
     BatteryMonitor batteryMonitor = new BatteryMonitor(currentSdkVersionChecker);
     float batteryPercentage = batteryMonitor.obtainPercentage(context);
     boolean isPluggedIn = batteryMonitor.isPluggedIn(context);
-    return new BatteryEvent(navigationSessionState.sessionIdentifier(), batteryPercentage, isPluggedIn);
+    return new BatteryEvent(navigationSessionState.sessionIdentifier(), batteryPercentage,
+      isPluggedIn, performanceMetadata);
   }
 
   private void resetDepartFactory() {

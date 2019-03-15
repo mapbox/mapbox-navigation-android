@@ -9,14 +9,17 @@ class InitialGpsEventFactory {
   private ElapsedTime time;
   private InitialGpsEventHandler handler;
   private boolean hasSent;
+  private NavigationPerformanceMetadata metadata;
 
-  InitialGpsEventFactory() {
-    this(new ElapsedTime(), new InitialGpsEventHandler());
+  InitialGpsEventFactory(NavigationPerformanceMetadata metadata) {
+    this(new ElapsedTime(), new InitialGpsEventHandler(), metadata);
   }
 
-  InitialGpsEventFactory(ElapsedTime time, InitialGpsEventHandler handler) {
+  InitialGpsEventFactory(ElapsedTime time, InitialGpsEventHandler handler,
+                         NavigationPerformanceMetadata metadata) {
     this.time = time;
     this.handler = handler;
+    this.metadata = metadata;
   }
 
   void navigationStarted(String sessionId) {
@@ -40,7 +43,7 @@ class InitialGpsEventFactory {
   private void send(ElapsedTime time) {
     if (!hasSent && !TextUtils.isEmpty(sessionId)) {
       double elapsedTime = time.getElapsedTime();
-      handler.send(elapsedTime, sessionId);
+      handler.send(elapsedTime, sessionId, metadata);
       hasSent = true;
     }
   }
