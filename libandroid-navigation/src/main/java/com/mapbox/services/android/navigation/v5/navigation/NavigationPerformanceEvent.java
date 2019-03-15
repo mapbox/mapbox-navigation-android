@@ -18,6 +18,7 @@ class NavigationPerformanceEvent extends Event implements Parcelable {
   private static final String DATE_AND_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
   private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_AND_TIME_PATTERN, Locale.US);
   private static final String PERFORMANCE_TRACE = "mobile.performance_trace";
+  private static final String EVENT_NAME = "event_name";
 
   private final String event;
   private final String created;
@@ -25,12 +26,13 @@ class NavigationPerformanceEvent extends Event implements Parcelable {
   private final List<Counter> counters;
   private final List<Attribute> attributes;
 
-  NavigationPerformanceEvent(String sessionId) {
+  NavigationPerformanceEvent(String sessionId, String eventName) {
     this.event = PERFORMANCE_TRACE;
     this.created = obtainCurrentDate();
     this.sessionId = sessionId;
     this.counters = new ArrayList<>();
     this.attributes = new ArrayList<>();
+    attributes.add(new Attribute(EVENT_NAME, eventName));
   }
 
   private String obtainCurrentDate() {
