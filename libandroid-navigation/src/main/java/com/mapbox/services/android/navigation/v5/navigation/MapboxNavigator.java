@@ -1,7 +1,9 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
+import android.support.annotation.NonNull;
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.navigator.FixLocation;
@@ -14,16 +16,24 @@ import java.util.Date;
 class MapboxNavigator {
 
   private static final int INDEX_FIRST_ROUTE = 0;
-  private static final int INDEX_FIRST_LEG = 0;
   private final Navigator navigator;
+  private final RouteHandler routeHandler;
 
   MapboxNavigator(Navigator navigator) {
     this.navigator = navigator;
+    this.routeHandler = new RouteHandler(this);
   }
 
-  synchronized void updateRoute(String routeJson) {
-    // TODO route_index (Which route to follow) and leg_index (Which leg to follow) are hardcoded for now
-    navigator.setRoute(routeJson, INDEX_FIRST_ROUTE, INDEX_FIRST_LEG);
+  void updateRoute(DirectionsRoute route, DirectionsRouteType routeType) {
+    routeHandler.updateRoute(route, routeType);
+  }
+
+  synchronized NavigationStatus setRoute(@NonNull String routeJson, int routeIndex, int legIndex) {
+    return navigator.setRoute(routeJson, routeIndex, legIndex);
+  }
+
+  synchronized boolean updateAnnotations(@NonNull String legAnnotationJson, int routeIndex, int legIndex) {
+    return navigator.updateAnnotations(legAnnotationJson, routeIndex, legIndex);
   }
 
   synchronized NavigationStatus retrieveStatus(Date date, long lagInMilliseconds) {
