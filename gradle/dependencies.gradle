@@ -34,7 +34,7 @@ ext {
       lifecycle              : '1.1.1',
       picasso                : '2.71828',
       gmsLocation            : '16.0.0',
-      kotlinStdLib           : '1.2.61',
+      kotlinStdLib           : '1.2.30',
       ankoCommon             : '0.10.0',
       firebaseCore           : '16.0.7',
       crashlytics            : '2.9.9',
