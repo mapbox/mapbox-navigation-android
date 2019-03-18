@@ -2,6 +2,13 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.33.0 - March 18, 2019
+
+* Add DirectionsRouteType for starting navigation with annotation data [#1819](https://github.com/mapbox/mapbox-navigation-android/pull/1819)
+* Added attribute to capture event name in performance trace event [#1800](https://github.com/mapbox/mapbox-navigation-android/pull/1800)
+* Add LocationComponent FPS throttle based on map zoom [#1815](https://github.com/mapbox/mapbox-navigation-android/pull/1815)
+* Fix null ResponseBody in VoiceInstructionLoader [#1813](https://github.com/mapbox/mapbox-navigation-android/pull/1813)
+
 ### v0.32.0 - March 11, 2019
 
 * Adjust NavigationCamera zoom reset behavior [#1802](https://github.com/mapbox/mapbox-navigation-android/pull/1802)
