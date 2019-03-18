@@ -323,7 +323,7 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   /**
-   * Calling This begins a new navigation session using the provided directions route. this API is
+   * Calling this method begins a new navigation session using the provided directions route. This API is
    * also intended to be used when a reroute occurs passing in the updated directions route.
    * <p>
    * On initial start of the navigation session, the navigation services gets created and bound to
@@ -341,7 +341,21 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.1.0
    */
   public void startNavigation(@NonNull DirectionsRoute directionsRoute) {
-    startNavigationWith(directionsRoute);
+    startNavigationWith(directionsRoute, DirectionsRouteType.NEW_ROUTE);
+  }
+
+  /**
+   * Calling this method with {@link DirectionsRouteType#NEW_ROUTE} begins a new navigation session using the
+   * provided directions route.  If called with {@link DirectionsRouteType#FRESH_ROUTE}, only leg annotation data
+   * will be update - can be used with {@link RouteRefresh}.
+   *
+   * @param directionsRoute a {@link DirectionsRoute} that makes up the path your user should
+   *                        traverse along
+   * @param routeType       either new or fresh to determine what data navigation should consider
+   * @see MapboxNavigation#startNavigation(DirectionsRoute)
+   */
+  public void startNavigation(@NonNull DirectionsRoute directionsRoute, @NonNull DirectionsRouteType routeType) {
+    startNavigationWith(directionsRoute, routeType);
   }
 
   /**
@@ -909,10 +923,10 @@ public class MapboxNavigation implements ServiceConnection {
     return locationEngineRequest;
   }
 
-  private void startNavigationWith(@NonNull DirectionsRoute directionsRoute) {
+  private void startNavigationWith(@NonNull DirectionsRoute directionsRoute, DirectionsRouteType routeType) {
     ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
-    mapboxNavigator.updateRoute(directionsRoute.toJson());
+    mapboxNavigator.updateRoute(directionsRoute, routeType);
     if (!isBound) {
       navigationTelemetry.startSession(directionsRoute, locationEngine);
       startNavigationService();
