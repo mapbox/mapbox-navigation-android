@@ -12,7 +12,7 @@ class ResetCancelableCallback implements MapboxMap.CancelableCallback {
 
   @Override
   public void onCancel() {
-    // No-impl
+    camera.updateIsResetting(false);
   }
 
   @Override
