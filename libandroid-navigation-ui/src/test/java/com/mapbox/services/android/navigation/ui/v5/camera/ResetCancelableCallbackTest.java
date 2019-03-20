@@ -17,4 +17,14 @@ public class ResetCancelableCallbackTest {
 
     verify(camera).updateIsResetting(eq(false));
   }
+
+  @Test
+  public void onCancel_dynamicCameraIsReset() {
+    NavigationCamera camera = mock(NavigationCamera.class);
+    ResetCancelableCallback callback = new ResetCancelableCallback(camera);
+
+    callback.onCancel();
+
+    verify(camera).updateIsResetting(eq(false));
+  }
 }
