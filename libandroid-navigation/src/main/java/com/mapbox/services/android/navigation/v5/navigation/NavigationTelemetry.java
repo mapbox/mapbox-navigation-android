@@ -64,7 +64,7 @@ class NavigationTelemetry implements NavigationMetricListener {
   private String routeRetrievalUuid = null;
   private BatteryChargeReporter batteryChargeReporter;
   private DepartEventFactory departEventFactory;
-  private InitialGpsEventFactory gpsEventFactory;
+  private InitialGpsEventFactory gpsEventFactory = new InitialGpsEventFactory();
   private NavigationPerformanceMetadata performanceMetadata;
 
   NavigationTelemetry() {
@@ -131,7 +131,6 @@ class NavigationTelemetry implements NavigationMetricListener {
       // separately?
       NavigationMetricsWrapper.push(navTurnstileEvent);
       performanceMetadata = new NavigationPerformanceMetadata(context);
-      gpsEventFactory = new InitialGpsEventFactory(performanceMetadata);
       isInitialized = true;
     }
     initEventDispatcherListeners(navigation);
@@ -232,7 +231,7 @@ class NavigationTelemetry implements NavigationMetricListener {
   }
 
   void updateLocation(Location location) {
-    gpsEventFactory.gpsReceived(context);
+    gpsEventFactory.gpsReceived();
     metricLocation = new MetricsLocation(location);
     locationBuffer.addLast(location);
     checkRerouteQueue();

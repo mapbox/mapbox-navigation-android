@@ -24,7 +24,7 @@ class NavigationPerformanceMetadata {
   private final String gpu;
   private final String manufacturer;
 
-  public NavigationPerformanceMetadata(Context context) {
+  NavigationPerformanceMetadata(Context context) {
     this.version = VERSION;
     this.screenSize = getScreenSize(context);
     this.country = getCountry(context);
@@ -40,7 +40,7 @@ class NavigationPerformanceMetadata {
   private String getTotalMemory(Context context) {
     ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
     ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryInfo(memoryInfo);
-    return String.valueOf(memoryInfo.totalMem /(1024 * 1024));
+    return String.valueOf(memoryInfo.totalMem / (1024 * 1024));
   }
 
   private String getCountry(Context context) {

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 
 import com.mapbox.android.telemetry.Event;
 
@@ -29,7 +30,12 @@ class NavigationPerformanceEvent extends Event implements Parcelable {
   private final List<Attribute> attributes;
   NavigationPerformanceMetadata metadata;
 
-  NavigationPerformanceEvent(Context context, String sessionId, String eventName,
+  NavigationPerformanceEvent(String sessionId, String eventName,
+                             NavigationPerformanceMetadata metadata) {
+    this(null, sessionId, eventName, metadata);
+  }
+
+  NavigationPerformanceEvent(@Nullable Context context, String sessionId, String eventName,
                              NavigationPerformanceMetadata metadata) {
     this.event = PERFORMANCE_TRACE;
     this.created = obtainCurrentDate();
@@ -38,7 +44,9 @@ class NavigationPerformanceEvent extends Event implements Parcelable {
     this.attributes = new ArrayList<>();
     this.metadata = metadata;
     attributes.add(new Attribute(EVENT_NAME, eventName));
-    attributes.add(new Attribute(SCREEN_DENSITY, getScreenDensity(context)));
+    if (context != null) {
+      attributes.add(new Attribute(SCREEN_DENSITY, getScreenDensity(context)));
+    }
   }
 
   private String getScreenDensity(Context context) {

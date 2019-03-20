@@ -1,7 +1,5 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.content.Context;
-
 import com.mapbox.core.utils.TextUtils;
 
 class InitialGpsEventFactory {
@@ -11,17 +9,14 @@ class InitialGpsEventFactory {
   private ElapsedTime time;
   private InitialGpsEventHandler handler;
   private boolean hasSent;
-  private NavigationPerformanceMetadata metadata;
 
-  InitialGpsEventFactory(NavigationPerformanceMetadata metadata) {
-    this(new ElapsedTime(), new InitialGpsEventHandler(), metadata);
+  InitialGpsEventFactory() {
+    this(new ElapsedTime(), new InitialGpsEventHandler());
   }
 
-  InitialGpsEventFactory(ElapsedTime time, InitialGpsEventHandler handler,
-                         NavigationPerformanceMetadata metadata) {
+  InitialGpsEventFactory(ElapsedTime time, InitialGpsEventHandler handler) {
     this.time = time;
     this.handler = handler;
-    this.metadata = metadata;
   }
 
   void navigationStarted(String sessionId) {
@@ -29,12 +24,12 @@ class InitialGpsEventFactory {
     time.start();
   }
 
-  void gpsReceived(Context context) {
+  void gpsReceived() {
     if (time.getStart() == null) {
       return;
     }
     time.end();
-    send(context, time);
+    send(time);
   }
 
   void reset() {
@@ -42,10 +37,10 @@ class InitialGpsEventFactory {
     hasSent = false;
   }
 
-  private void send(Context context, ElapsedTime time) {
+  private void send(ElapsedTime time) {
     if (!hasSent && !TextUtils.isEmpty(sessionId)) {
       double elapsedTime = time.getElapsedTime();
-      handler.send(context, elapsedTime, sessionId, metadata);
+      handler.send(elapsedTime, sessionId);
       hasSent = true;
     }
   }
