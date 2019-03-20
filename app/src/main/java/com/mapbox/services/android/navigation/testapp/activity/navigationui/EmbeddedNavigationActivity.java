@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
@@ -39,8 +40,11 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.io.File;
+
 import retrofit2.Call;
 import retrofit2.Response;
+import timber.log.Timber;
 
 public class EmbeddedNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
   NavigationListener, ProgressChangeListener, InstructionListListener, SpeechAnnouncementListener,
@@ -194,11 +198,27 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
         .progressChangeListener(this)
         .instructionListListener(this)
         .speechAnnouncementListener(this)
-        .bannerInstructionsListener(this);
+        .bannerInstructionsListener(this)
+        .offlineRoutingTilesPath(obtainOfflineDirectory())
+        .offlineRoutingTilesVersion(obtainOfflineTileVersion());
     setBottomSheetCallback(options);
     setupNightModeFab();
 
     navigationView.startNavigation(options.build());
+  }
+
+  private String obtainOfflineDirectory() {
+    File offline = Environment.getExternalStoragePublicDirectory("Offline");
+    if (!offline.exists()) {
+      Timber.d("Offline directory does not exist");
+      offline.mkdirs();
+    }
+    return offline.getAbsolutePath();
+  }
+
+  private String obtainOfflineTileVersion() {
+    return PreferenceManager.getDefaultSharedPreferences(this)
+      .getString(getString(R.string.offline_version_key), "");
   }
 
   private void fetchRoute() {

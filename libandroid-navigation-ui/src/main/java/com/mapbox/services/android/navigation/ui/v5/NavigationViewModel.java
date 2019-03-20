@@ -5,8 +5,6 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.location.Location;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -21,9 +19,6 @@ import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
-import com.mapbox.services.android.navigation.ui.v5.route.OffRouteEvent;
-import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteFetcher;
-import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteListener;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
@@ -42,6 +37,7 @@ import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
+import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
@@ -69,14 +65,13 @@ public class NavigationViewModel extends AndroidViewModel {
   private final MutableLiveData<Point> destination = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
-  private ViewRouteFetcher routeFetcher;
+  private NavigationViewRouter router;
   private LocationEngineConductor locationEngineConductor;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
   private SpeechPlayer speechPlayer;
   private VoiceInstructionLoader voiceInstructionLoader;
   private VoiceInstructionCache voiceInstructionCache;
   private int voiceInstructionsToAnnounce = 0;
-  private ConnectivityManager connectivityManager;
   private RouteProgress routeProgress;
   private String feedbackId;
   private String screenshot;
@@ -93,9 +88,8 @@ public class NavigationViewModel extends AndroidViewModel {
   public NavigationViewModel(Application application) {
     super(application);
     this.accessToken = Mapbox.getAccessToken();
-    initializeConnectivityManager(application);
-    initializeNavigationRouteEngine();
-    initializeNavigationLocationEngine();
+    initializeLocationEngine();
+    initializeRouter();
     routeUtils = new RouteUtils();
     localeUtils = new LocaleUtils();
   }
@@ -121,7 +115,7 @@ public class NavigationViewModel extends AndroidViewModel {
   public void onDestroy(boolean isChangingConfigurations) {
     this.isChangingConfigurations = isChangingConfigurations;
     if (!isChangingConfigurations) {
-      routeFetcher.onDestroy();
+      router.onDestroy();
       endNavigation();
       deactivateInstructionPlayer();
       isRunning = false;
@@ -208,7 +202,7 @@ public class NavigationViewModel extends AndroidViewModel {
       initializeVoiceInstructionCache();
       initializeNavigationSpeechPlayer(options);
     }
-    routeFetcher.extractRouteOptions(options);
+    router.extractRouteOptions(options);
   }
 
   void updateFeedbackScreenshot(String screenshot) {
@@ -264,15 +258,14 @@ public class NavigationViewModel extends AndroidViewModel {
     return destination;
   }
 
-  private void initializeConnectivityManager(Application application) {
-    connectivityManager = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
+  private void initializeRouter() {
+    RouteFetcher onlineRouter = new RouteFetcher(getApplication(), accessToken);
+    Context applicationContext = getApplication().getApplicationContext();
+    ConnectivityStatusProvider connectivityStatus = new ConnectivityStatusProvider(applicationContext);
+    router = new NavigationViewRouter(onlineRouter, connectivityStatus, routeEngineListener);
   }
 
-  private void initializeNavigationRouteEngine() {
-    routeFetcher = new ViewRouteFetcher(getApplication(), accessToken, routeEngineListener);
-  }
-
-  private void initializeNavigationLocationEngine() {
+  private void initializeLocationEngine() {
     locationEngineConductor = new LocationEngineConductor();
   }
 
@@ -365,7 +358,7 @@ public class NavigationViewModel extends AndroidViewModel {
     @Override
     public void onProgressChange(Location location, RouteProgress routeProgress) {
       NavigationViewModel.this.routeProgress = routeProgress;
-      routeFetcher.updateLocation(location);
+      router.updateLocation(location);
       instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
       summaryModel.setValue(new SummaryModel(getApplication(), distanceFormatter, routeProgress, timeFormatType));
       navigationLocation.setValue(location);
@@ -376,11 +369,9 @@ public class NavigationViewModel extends AndroidViewModel {
   private OffRouteListener offRouteListener = new OffRouteListener() {
     @Override
     public void userOffRoute(Location location) {
-      if (hasNetworkConnection()) {
-        speechPlayer.onOffRoute();
-        Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-        handleOffRouteEvent(newOrigin);
-      }
+      speechPlayer.onOffRoute();
+      Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+      handleOffRouteEvent(newOrigin);
     }
   };
 
@@ -469,15 +460,6 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  @SuppressWarnings( {"MissingPermission"})
-  private boolean hasNetworkConnection() {
-    if (connectivityManager == null) {
-      return false;
-    }
-    NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-    return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-  }
-
   private void sendEventFeedback(FeedbackItem feedbackItem) {
     if (navigationViewEventDispatcher != null) {
       navigationViewEventDispatcher.onFeedbackSent(feedbackItem);
@@ -493,8 +475,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private void handleOffRouteEvent(Point newOrigin) {
     if (navigationViewEventDispatcher != null && navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
       navigationViewEventDispatcher.onOffRoute(newOrigin);
-      OffRouteEvent event = new OffRouteEvent(newOrigin, routeProgress);
-      routeFetcher.fetchRouteFromOffRouteEvent(event);
+      router.findRouteFrom(routeProgress);
       isOffRoute.setValue(true);
     }
   }
