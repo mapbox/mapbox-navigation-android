@@ -130,7 +130,7 @@ class NavigationTelemetry implements NavigationMetricListener {
       // TODO Check if we are sending two turnstile events (Maps and Nav) and if so, do we want to track them
       // separately?
       NavigationMetricsWrapper.push(navTurnstileEvent);
-      performanceMetadata = new NavigationPerformanceMetadata(context);
+      performanceMetadata = new MetadataBuilder().constructMetadata(context);
       isInitialized = true;
     }
     initEventDispatcherListeners(navigation);
@@ -290,7 +290,7 @@ class NavigationTelemetry implements NavigationMetricListener {
   void routeRetrievalEvent(ElapsedTime elapsedTime, String routeUuid) {
     if (navigationSessionState != null && !navigationSessionState.sessionIdentifier().isEmpty()) {
       double time = elapsedTime.getElapsedTime();
-      NavigationMetricsWrapper.routeRetrievalEvent(context, time, routeUuid,
+      NavigationMetricsWrapper.routeRetrievalEvent(time, routeUuid,
         navigationSessionState.sessionIdentifier(), performanceMetadata);
     } else {
       routeRetrievalElapsedTime = elapsedTime;
@@ -559,7 +559,7 @@ class NavigationTelemetry implements NavigationMetricListener {
     BatteryMonitor batteryMonitor = new BatteryMonitor(currentSdkVersionChecker);
     float batteryPercentage = batteryMonitor.obtainPercentage(context);
     boolean isPluggedIn = batteryMonitor.isPluggedIn(context);
-    return new BatteryEvent(context, navigationSessionState.sessionIdentifier(), batteryPercentage,
+    return new BatteryEvent(navigationSessionState.sessionIdentifier(), batteryPercentage,
       isPluggedIn, performanceMetadata);
   }
 

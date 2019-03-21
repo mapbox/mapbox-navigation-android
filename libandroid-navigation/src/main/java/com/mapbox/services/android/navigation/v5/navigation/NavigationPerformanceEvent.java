@@ -1,10 +1,8 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.Nullable;
 
 import com.mapbox.android.telemetry.Event;
 
@@ -21,7 +19,6 @@ class NavigationPerformanceEvent extends Event implements Parcelable {
   private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_AND_TIME_PATTERN, Locale.US);
   private static final String PERFORMANCE_TRACE = "mobile.performance_trace";
   private static final String EVENT_NAME = "event_name";
-  private static final String SCREEN_DENSITY = "screen_density";
 
   private final String event;
   private final String created;
@@ -32,11 +29,6 @@ class NavigationPerformanceEvent extends Event implements Parcelable {
 
   NavigationPerformanceEvent(String sessionId, String eventName,
                              NavigationPerformanceMetadata metadata) {
-    this(null, sessionId, eventName, metadata);
-  }
-
-  NavigationPerformanceEvent(@Nullable Context context, String sessionId, String eventName,
-                             NavigationPerformanceMetadata metadata) {
     this.event = PERFORMANCE_TRACE;
     this.created = obtainCurrentDate();
     this.sessionId = sessionId;
@@ -44,13 +36,6 @@ class NavigationPerformanceEvent extends Event implements Parcelable {
     this.attributes = new ArrayList<>();
     this.metadata = metadata;
     attributes.add(new Attribute(EVENT_NAME, eventName));
-    if (context != null) {
-      attributes.add(new Attribute(SCREEN_DENSITY, getScreenDensity(context)));
-    }
-  }
-
-  private String getScreenDensity(Context context) {
-    return String.valueOf(context.getResources().getDisplayMetrics().densityDpi);
   }
 
   private String obtainCurrentDate() {
