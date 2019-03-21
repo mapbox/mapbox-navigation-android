@@ -18,5 +18,6 @@ class NavigationCameraTransitionListener implements OnLocationCameraTransitionLi
   @Override
   public void onLocationCameraTransitionCanceled(int cameraMode) {
     camera.updateTransitionListenersCancelled(cameraMode);
+    camera.updateIsResetting(false);
   }
 }
