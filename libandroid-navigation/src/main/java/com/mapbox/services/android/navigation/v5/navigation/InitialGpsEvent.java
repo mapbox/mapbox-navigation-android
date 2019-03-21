@@ -10,7 +10,7 @@ class InitialGpsEvent extends NavigationPerformanceEvent implements Parcelable {
   private static final String INITIAL_GPS_EVENT_NAME = "initial_gps_event";
 
   InitialGpsEvent(double elapsedTime, String sessionId) {
-    super(sessionId, INITIAL_GPS_EVENT_NAME, null);
+    super(sessionId, INITIAL_GPS_EVENT_NAME, null); // TODO send metadata
     addCounter(new DoubleCounter(TIME_TO_FIRST_GPS, elapsedTime));
   }
 }
