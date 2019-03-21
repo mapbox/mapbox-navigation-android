@@ -29,6 +29,7 @@ import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -140,6 +141,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
       // For navigation logic / processing
       initializeNavigation(mapboxMap);
       navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE);
+      navigationMap.updateLocationLayerRenderMode(RenderMode.GPS);
 
       // For voice instructions
       initializeSpeechPlayer();
