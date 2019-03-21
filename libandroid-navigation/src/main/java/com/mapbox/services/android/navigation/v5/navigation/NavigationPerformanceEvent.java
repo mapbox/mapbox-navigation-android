@@ -25,13 +25,16 @@ class NavigationPerformanceEvent extends Event implements Parcelable {
   private final String sessionId;
   private final List<Counter> counters;
   private final List<Attribute> attributes;
+  NavigationPerformanceMetadata metadata;
 
-  NavigationPerformanceEvent(String sessionId, String eventName) {
+  NavigationPerformanceEvent(String sessionId, String eventName,
+                             NavigationPerformanceMetadata metadata) {
     this.event = PERFORMANCE_TRACE;
     this.created = obtainCurrentDate();
     this.sessionId = sessionId;
     this.counters = new ArrayList<>();
     this.attributes = new ArrayList<>();
+    this.metadata = metadata;
     attributes.add(new Attribute(EVENT_NAME, eventName));
   }
 
