@@ -194,7 +194,7 @@ public class NavigationViewModel extends AndroidViewModel {
    *
    * @param options to init MapboxNavigation
    */
-  MapboxNavigation initialize(NavigationViewOptions options) {
+  void initialize(NavigationViewOptions options) {
     MapboxNavigationOptions navigationOptions = options.navigationOptions();
     navigationOptions = navigationOptions.toBuilder().isFromNavigationUi(true).build();
     initializeLanguage(options);
@@ -209,7 +209,6 @@ public class NavigationViewModel extends AndroidViewModel {
       initializeNavigationSpeechPlayer(options);
     }
     routeFetcher.extractRouteOptions(options);
-    return navigation;
   }
 
   void updateFeedbackScreenshot(String screenshot) {

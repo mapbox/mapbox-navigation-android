@@ -629,8 +629,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   private void initializeNavigation(NavigationViewOptions options) {
     establish(options);
-    MapboxNavigation navigation = navigationViewModel.initialize(options);
-    initializeNavigationListeners(options, navigation);
+    navigationViewModel.initialize(options);
+    initializeNavigationListeners(options, navigationViewModel);
     setupNavigationMapboxMap(options);
 
     if (!isSubscribed) {
@@ -688,9 +688,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     summaryBottomSheet.setTimeFormat(timeFormatType);
   }
 
-  private void initializeNavigationListeners(NavigationViewOptions options, MapboxNavigation navigation) {
-    navigationMap.addProgressChangeListener(navigation);
-    navigationViewEventDispatcher.initializeListeners(options, navigation);
+  private void initializeNavigationListeners(NavigationViewOptions options, NavigationViewModel navigationViewModel) {
+    navigationMap.addProgressChangeListener(navigationViewModel.retrieveNavigation());
+    navigationViewEventDispatcher.initializeListeners(options, navigationViewModel);
   }
 
   private void setupNavigationMapboxMap(NavigationViewOptions options) {

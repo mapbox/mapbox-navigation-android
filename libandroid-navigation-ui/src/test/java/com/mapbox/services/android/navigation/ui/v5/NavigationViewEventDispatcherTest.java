@@ -40,7 +40,8 @@ public class NavigationViewEventDispatcherTest {
   public void setNavigationListener_cancelListenerIsCalled() throws Exception {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     NavigationListener navigationListener = mock(NavigationListener.class);
-    eventDispatcher.assignNavigationListener(navigationListener);
+    NavigationViewModel viewModel = mock(NavigationViewModel.class);
+    eventDispatcher.assignNavigationListener(navigationListener, viewModel);
 
     eventDispatcher.onCancelNavigation();
 
@@ -48,10 +49,23 @@ public class NavigationViewEventDispatcherTest {
   }
 
   @Test
+  public void setNavigationListener_runningListenerCalledIfRunning() throws Exception {
+    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
+    NavigationListener navigationListener = mock(NavigationListener.class);
+    NavigationViewModel viewModel = mock(NavigationViewModel.class);
+    when(viewModel.isRunning()).thenReturn(true);
+
+    eventDispatcher.assignNavigationListener(navigationListener, viewModel);
+
+    verify(navigationListener, times(1)).onNavigationRunning();
+  }
+
+  @Test
   public void setNavigationListener_finishedListenerIsCalled() throws Exception {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     NavigationListener navigationListener = mock(NavigationListener.class);
-    eventDispatcher.assignNavigationListener(navigationListener);
+    NavigationViewModel viewModel = mock(NavigationViewModel.class);
+    eventDispatcher.assignNavigationListener(navigationListener, viewModel);
 
     eventDispatcher.onNavigationFinished();
 
@@ -62,7 +76,8 @@ public class NavigationViewEventDispatcherTest {
   public void setNavigationListener_runningListenerIsCalled() throws Exception {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     NavigationListener navigationListener = mock(NavigationListener.class);
-    eventDispatcher.assignNavigationListener(navigationListener);
+    NavigationViewModel viewModel = mock(NavigationViewModel.class);
+    eventDispatcher.assignNavigationListener(navigationListener, viewModel);
 
     eventDispatcher.onNavigationRunning();
 
@@ -316,9 +331,11 @@ public class NavigationViewEventDispatcherTest {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     NavigationViewOptions options = mock(NavigationViewOptions.class);
     ProgressChangeListener progressChangeListener = setupProgressChangeListener(options);
+    NavigationViewModel navigationViewModel = mock(NavigationViewModel.class);
     MapboxNavigation navigation = mock(MapboxNavigation.class);
+    when(navigationViewModel.retrieveNavigation()).thenReturn(navigation);
 
-    eventDispatcher.initializeListeners(options, navigation);
+    eventDispatcher.initializeListeners(options, navigationViewModel);
 
     verify(navigation, times(1)).addProgressChangeListener(progressChangeListener);
   }
@@ -328,8 +345,10 @@ public class NavigationViewEventDispatcherTest {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     NavigationViewOptions options = mock(NavigationViewOptions.class);
     ProgressChangeListener progressChangeListener = setupProgressChangeListener(options);
+    NavigationViewModel navigationViewModel = mock(NavigationViewModel.class);
     MapboxNavigation navigation = mock(MapboxNavigation.class);
-    eventDispatcher.initializeListeners(options, navigation);
+    when(navigationViewModel.retrieveNavigation()).thenReturn(navigation);
+    eventDispatcher.initializeListeners(options, navigationViewModel);
 
     eventDispatcher.onDestroy(navigation);
 
@@ -341,9 +360,11 @@ public class NavigationViewEventDispatcherTest {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     NavigationViewOptions options = mock(NavigationViewOptions.class);
     MilestoneEventListener milestoneEventListener = setupMilestoneEventListener(options);
+    NavigationViewModel navigationViewModel = mock(NavigationViewModel.class);
     MapboxNavigation navigation = mock(MapboxNavigation.class);
+    when(navigationViewModel.retrieveNavigation()).thenReturn(navigation);
 
-    eventDispatcher.initializeListeners(options, navigation);
+    eventDispatcher.initializeListeners(options, navigationViewModel);
 
     verify(navigation, times(1)).addMilestoneEventListener(milestoneEventListener);
   }
@@ -353,8 +374,10 @@ public class NavigationViewEventDispatcherTest {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     NavigationViewOptions options = mock(NavigationViewOptions.class);
     MilestoneEventListener milestoneEventListener = setupMilestoneEventListener(options);
+    NavigationViewModel navigationViewModel = mock(NavigationViewModel.class);
     MapboxNavigation navigation = mock(MapboxNavigation.class);
-    eventDispatcher.initializeListeners(options, navigation);
+    when(navigationViewModel.retrieveNavigation()).thenReturn(navigation);
+    eventDispatcher.initializeListeners(options, navigationViewModel);
 
     eventDispatcher.onDestroy(navigation);
 
