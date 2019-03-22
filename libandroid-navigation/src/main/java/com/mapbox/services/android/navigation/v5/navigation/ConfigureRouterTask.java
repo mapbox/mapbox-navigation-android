@@ -5,7 +5,6 @@ import android.os.AsyncTask;
 import com.mapbox.navigator.Navigator;
 
 class ConfigureRouterTask extends AsyncTask<Void, Void, Long> {
-  private static final String EMPTY_TRANSLATIONS_DIR_PATH = "";
   private final Navigator navigator;
   private final String tilePath;
   private final OnOfflineTilesConfiguredCallback callback;
@@ -19,7 +18,7 @@ class ConfigureRouterTask extends AsyncTask<Void, Void, Long> {
   @Override
   protected Long doInBackground(Void... paramsUnused) {
     synchronized (this) {
-      return navigator.configureRouter(tilePath, EMPTY_TRANSLATIONS_DIR_PATH);
+      return navigator.configureRouter(tilePath);
     }
   }
 
