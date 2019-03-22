@@ -2,6 +2,13 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.33.2 - March 22, 2019
+
+* Bump mapbox-navigation-native version to 6.0.0 [#1836](https://github.com/mapbox/mapbox-navigation-android/pull/1836)
+* Update NavigationCamera resetting state if transition cancelled [#1835](https://github.com/mapbox/mapbox-navigation-android/pull/1835)
+* Added metadata to NavigationPerformanceEvent [#1820](https://github.com/mapbox/mapbox-navigation-android/pull/1820)
+* Update NavigationView NavigationListener to triggered when initialized [#1807](https://github.com/mapbox/mapbox-navigation-android/pull/1807)
+
 ### v0.33.1 - March 20, 2019
 
 * Finish camera reset during MapboxMap cancel events [#1830](https://github.com/mapbox/mapbox-navigation-android/pull/1830)
