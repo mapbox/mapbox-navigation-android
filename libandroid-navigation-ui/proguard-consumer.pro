@@ -16,3 +16,6 @@
 
 # --- com.amazonaws.util.json.JacksonFactory ---
 -dontwarn com.fasterxml.jackson.core.**
+
+# --- Mapbox ---
+-dontwarn com.mapbox.services.android.navigation.ui.v5.**
