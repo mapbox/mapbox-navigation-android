@@ -166,7 +166,7 @@ public class NavigationMapboxMapTest {
     MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
     NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
     NavigationCamera mapCamera = mock(NavigationCamera.class);
-    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    FpsDelegate locationFpsDelegate = mock(FpsDelegate.class);
     NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
       mapRoute, mapCamera, locationFpsDelegate);
 
@@ -181,7 +181,7 @@ public class NavigationMapboxMapTest {
     MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
     NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
     NavigationCamera mapCamera = mock(NavigationCamera.class);
-    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    FpsDelegate locationFpsDelegate = mock(FpsDelegate.class);
     NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
       mapRoute, mapCamera, locationFpsDelegate);
 
@@ -196,7 +196,7 @@ public class NavigationMapboxMapTest {
     MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
     NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
     NavigationCamera mapCamera = mock(NavigationCamera.class);
-    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    FpsDelegate locationFpsDelegate = mock(FpsDelegate.class);
     NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
       mapRoute, mapCamera, locationFpsDelegate);
 
@@ -211,7 +211,7 @@ public class NavigationMapboxMapTest {
     MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
     NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
     NavigationCamera mapCamera = mock(NavigationCamera.class);
-    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    FpsDelegate locationFpsDelegate = mock(FpsDelegate.class);
     NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
       mapRoute, mapCamera, locationFpsDelegate);
 
@@ -242,7 +242,7 @@ public class NavigationMapboxMapTest {
     MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
     NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
     NavigationCamera mapCamera = mock(NavigationCamera.class);
-    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    FpsDelegate locationFpsDelegate = mock(FpsDelegate.class);
     NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
       mapRoute, mapCamera, locationFpsDelegate);
 
@@ -257,7 +257,7 @@ public class NavigationMapboxMapTest {
     MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
     NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
     NavigationCamera mapCamera = mock(NavigationCamera.class);
-    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    FpsDelegate locationFpsDelegate = mock(FpsDelegate.class);
     NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
       mapRoute, mapCamera, locationFpsDelegate);
 
@@ -272,7 +272,7 @@ public class NavigationMapboxMapTest {
     MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
     NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
     NavigationCamera mapCamera = mock(NavigationCamera.class);
-    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    FpsDelegate locationFpsDelegate = mock(FpsDelegate.class);
     NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
       mapRoute, mapCamera, locationFpsDelegate);
 

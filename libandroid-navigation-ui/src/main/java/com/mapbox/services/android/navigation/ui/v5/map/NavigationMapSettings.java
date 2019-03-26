@@ -3,19 +3,21 @@ package com.mapbox.services.android.navigation.ui.v5.map;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.mapbox.services.android.navigation.ui.v5.ThrottleConfigFactory;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
-
-import static com.mapbox.services.android.navigation.ui.v5.map.MapFpsDelegate.DEFAULT_MAX_FPS_THRESHOLD;
 
 class NavigationMapSettings implements Parcelable {
 
   private int cameraTrackingMode;
   private int[] currentPadding;
   private boolean shouldUseDefaultPadding;
-  private int maxFps = DEFAULT_MAX_FPS_THRESHOLD;
-  private boolean maxFpsEnabled = true;
   private boolean mapWayNameEnabled;
-  private boolean locationFpsEnabled = true;
+
+  private boolean locationThrottlingEnabled = true;
+  private ThrottleConfig locationThrottleConfig = ThrottleConfigFactory.defaultLocationProfile();
+
+  private boolean mapThrottlingEnabled = true;
+  private ThrottleConfig mapThrottleConfig = ThrottleConfigFactory.defaultMapProfile();
 
   NavigationMapSettings() {
   }
@@ -45,20 +47,36 @@ class NavigationMapSettings implements Parcelable {
     return shouldUseDefaultPadding;
   }
 
-  void updateMaxFps(int maxFps) {
-    this.maxFps = maxFps;
+  void updateMapThrottlingEnabled(boolean mapThrottlingEnabled) {
+    this.mapThrottlingEnabled = mapThrottlingEnabled;
   }
 
-  int retrieveMaxFps() {
-    return maxFps;
+  boolean isMapThrottlingEnabled() {
+    return mapThrottlingEnabled;
   }
 
-  void updateMaxFpsEnabled(boolean maxFpsEnabled) {
-    this.maxFpsEnabled = maxFpsEnabled;
+  void updateMapThrottleConfig(ThrottleConfig throttleConfig) {
+    this.mapThrottleConfig = throttleConfig;
   }
 
-  boolean isMaxFpsEnabled() {
-    return maxFpsEnabled;
+  ThrottleConfig retrieveMapThrottleConfig() {
+    return mapThrottleConfig;
+  }
+
+  void updateLocationThrottlingEnabled(boolean locationThrottlingEnabled) {
+    this.locationThrottlingEnabled = locationThrottlingEnabled;
+  }
+
+  boolean isLocationThrottlingEnabled() {
+    return locationThrottlingEnabled;
+  }
+
+  void updateLocationThrottleConfig(ThrottleConfig throttleConfig) {
+    this.locationThrottleConfig = throttleConfig;
+  }
+
+  ThrottleConfig retrieveLocationThrottleConfig() {
+    return locationThrottleConfig;
   }
 
   void updateWayNameEnabled(boolean mapWayNameEnabled) {
@@ -69,22 +87,15 @@ class NavigationMapSettings implements Parcelable {
     return mapWayNameEnabled;
   }
 
-  void updateLocationFpsEnabled(boolean locationFpsEnabled) {
-    this.locationFpsEnabled = locationFpsEnabled;
-  }
-
-  boolean isLocationFpsEnabled() {
-    return locationFpsEnabled;
-  }
-
   private NavigationMapSettings(Parcel in) {
     cameraTrackingMode = in.readInt();
     currentPadding = in.createIntArray();
     shouldUseDefaultPadding = in.readByte() != 0;
-    maxFps = in.readInt();
-    maxFpsEnabled = in.readByte() != 0;
     mapWayNameEnabled = in.readByte() != 0;
-    locationFpsEnabled = in.readByte() != 0;
+    locationThrottlingEnabled = in.readByte() != 0;
+    locationThrottleConfig = in.readParcelable(ThrottleConfig.class.getClassLoader());
+    mapThrottlingEnabled = in.readByte() != 0;
+    mapThrottleConfig = in.readParcelable(ThrottleConfig.class.getClassLoader());
   }
 
   @Override
@@ -92,10 +103,11 @@ class NavigationMapSettings implements Parcelable {
     dest.writeInt(cameraTrackingMode);
     dest.writeIntArray(currentPadding);
     dest.writeByte((byte) (shouldUseDefaultPadding ? 1 : 0));
-    dest.writeInt(maxFps);
-    dest.writeByte((byte) (maxFpsEnabled ? 1 : 0));
     dest.writeByte((byte) (mapWayNameEnabled ? 1 : 0));
-    dest.writeByte((byte) (locationFpsEnabled ? 1 : 0));
+    dest.writeByte((byte) (locationThrottlingEnabled ? 1 : 0));
+    dest.writeParcelable(locationThrottleConfig, flags);
+    dest.writeByte((byte) (mapThrottlingEnabled ? 1 : 0));
+    dest.writeParcelable(mapThrottleConfig, flags);
   }
 
   @Override

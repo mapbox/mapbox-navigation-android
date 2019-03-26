@@ -555,6 +555,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   private void initializeNavigationMap(MapView mapView, MapboxMap map) {
     navigationMap = new NavigationMapboxMap(mapView, map);
+
     navigationMap.updateLocationLayerRenderMode(RenderMode.GPS);
     if (mapInstanceState != null) {
       navigationMap.restoreFrom(mapInstanceState);
@@ -695,6 +696,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   private void setupNavigationMapboxMap(NavigationViewOptions options) {
     navigationMap.updateWaynameQueryMap(options.waynameChipEnabled());
+    navigationMap.updateAnimationOptions(options.animationOptions());
   }
 
   /**

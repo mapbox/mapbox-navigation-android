@@ -131,7 +131,7 @@ public final class NavigationConstants {
   /**
    * Maximum duration of the zoom/tilt adjustment animation while tracking.
    */
-  public static final long NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION = 1500L;
+  public static final long NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION = 1000L;
 
   /**
    * Minimum duration of the zoom adjustment animation while tracking.

@@ -61,6 +61,8 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
   @Nullable
   public abstract LocationEngine locationEngine();
 
+  public abstract NavigationAnimationOptions animationOptions();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -100,6 +102,8 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
 
     public abstract Builder locationEngine(LocationEngine locationEngine);
 
+    public abstract Builder animationOptions(NavigationAnimationOptions navigationAnimationOptions);
+
     public abstract NavigationViewOptions build();
   }
 
@@ -107,6 +111,13 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
     return new AutoValue_NavigationViewOptions.Builder()
       .navigationOptions(MapboxNavigationOptions.builder().build())
       .shouldSimulateRoute(false)
-      .waynameChipEnabled(true);
+      .waynameChipEnabled(true)
+      .animationOptions(NavigationAnimationOptions.defaultProfile().build());
+  }
+
+  public static Builder efficiencyProfile() {
+    return builder()
+      .waynameChipEnabled(false)
+      .animationOptions(NavigationAnimationOptions.efficiencyProfile().build());
   }
 }
