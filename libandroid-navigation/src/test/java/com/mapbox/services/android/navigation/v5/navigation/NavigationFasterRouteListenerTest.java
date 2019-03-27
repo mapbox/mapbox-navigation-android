@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEventDispatcher;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 

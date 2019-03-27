@@ -15,6 +15,8 @@ import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.location.RawLocationListener;
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEventDispatcher;
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationTelemetry;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -152,9 +154,11 @@ public class MapboxNavigation implements ServiceConnection {
     initializeForTest();
   }
 
+  // TODO public?
   // Package private (no modifier) for testing purposes
-  MapboxNavigation(@NonNull Context context, @NonNull String accessToken, NavigationTelemetry navigationTelemetry,
-                   LocationEngine locationEngine, MapboxNavigator mapboxNavigator) {
+  public MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
+                          NavigationTelemetry navigationTelemetry, LocationEngine locationEngine,
+                          MapboxNavigator mapboxNavigator) {
     initializeContext(context);
     this.accessToken = accessToken;
     this.options = MapboxNavigationOptions.builder().build();
@@ -830,11 +834,13 @@ public class MapboxNavigation implements ServiceConnection {
     return new ArrayList<>(milestones);
   }
 
-  MapboxNavigationOptions options() {
+  // TODO public?
+  public MapboxNavigationOptions options() {
     return options;
   }
 
-  NavigationEventDispatcher getEventDispatcher() {
+  // TODO public?
+  public NavigationEventDispatcher getEventDispatcher() {
     return navigationEventDispatcher;
   }
 
