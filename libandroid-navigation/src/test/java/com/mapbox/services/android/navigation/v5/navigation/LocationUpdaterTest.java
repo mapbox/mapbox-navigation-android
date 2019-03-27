@@ -7,6 +7,7 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.location.LocationEngineResult;
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEventDispatcher;
 
 import org.junit.Test;
 

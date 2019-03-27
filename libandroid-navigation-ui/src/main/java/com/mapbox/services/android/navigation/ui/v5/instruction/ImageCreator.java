@@ -11,7 +11,7 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.services.android.navigation.v5.navigation.SdkVersionChecker;
+import com.mapbox.services.android.navigation.v5.internal.navigation.SdkVersionChecker;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
