@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.location.Location;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEventDispatcher;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;

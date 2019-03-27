@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
-import com.mapbox.services.android.navigation.v5.exception.NavigationException;
+import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 

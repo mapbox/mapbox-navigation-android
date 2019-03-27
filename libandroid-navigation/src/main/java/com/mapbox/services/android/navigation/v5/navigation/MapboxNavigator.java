@@ -17,7 +17,8 @@ import com.mapbox.navigator.VoiceInstruction;
 
 import java.util.Date;
 
-class MapboxNavigator {
+// TODO internal
+public class MapboxNavigator {
 
   private static final int INDEX_FIRST_ROUTE = 0;
   private static final float GRID_SIZE = 0.0025f;
