@@ -2,7 +2,6 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.ui.v5.route.ViewRouteListener;
 
 
 class NavigationViewRouteEngineListener implements ViewRouteListener {
@@ -19,9 +18,8 @@ class NavigationViewRouteEngineListener implements ViewRouteListener {
   }
 
   @Override
-  public void onRouteRequestError(Throwable throwable) {
+  public void onRouteRequestError(String errorMessage) {
     if (navigationViewModel.isOffRoute()) {
-      String errorMessage = throwable.getMessage();
       navigationViewModel.sendEventFailedReroute(errorMessage);
     }
   }

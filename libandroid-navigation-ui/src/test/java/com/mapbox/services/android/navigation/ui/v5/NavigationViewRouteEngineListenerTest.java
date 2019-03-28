@@ -31,13 +31,11 @@ public class NavigationViewRouteEngineListenerTest {
   public void checksSendEventFailedRerouteCalledIfNavigationIsOffRoute() {
     NavigationViewModel mockedNavigationViewModel = mock(NavigationViewModel.class);
     when(mockedNavigationViewModel.isOffRoute()).thenReturn(true);
-    Throwable aThrowable = mock(Throwable.class);
     String anError = "An error occurred!";
-    when(aThrowable.getMessage()).thenReturn(anError);
     NavigationViewRouteEngineListener theRouteEngineListener
       = new NavigationViewRouteEngineListener(mockedNavigationViewModel);
 
-    theRouteEngineListener.onRouteRequestError(aThrowable);
+    theRouteEngineListener.onRouteRequestError(anError);
 
     verify(mockedNavigationViewModel).sendEventFailedReroute(eq(anError));
   }
@@ -46,13 +44,11 @@ public class NavigationViewRouteEngineListenerTest {
   public void checksSendEventFailedRerouteNotCalledIfNavigationIsNotOffRoute() {
     NavigationViewModel mockedNavigationViewModel = mock(NavigationViewModel.class);
     when(mockedNavigationViewModel.isOffRoute()).thenReturn(false);
-    Throwable aThrowable = mock(Throwable.class);
     String anError = "An error occurred!";
-    when(aThrowable.getMessage()).thenReturn(anError);
     NavigationViewRouteEngineListener theRouteEngineListener
       = new NavigationViewRouteEngineListener(mockedNavigationViewModel);
 
-    theRouteEngineListener.onRouteRequestError(aThrowable);
+    theRouteEngineListener.onRouteRequestError(anError);
 
     verify(mockedNavigationViewModel, times(0)).sendEventFailedReroute(eq(anError));
   }
