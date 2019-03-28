@@ -61,6 +61,12 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
   @Nullable
   public abstract LocationEngine locationEngine();
 
+  @Nullable
+  public abstract String offlineRoutingTilesPath();
+
+  @Nullable
+  public abstract String offlineRoutingTilesVersion();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -99,6 +105,28 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
     public abstract Builder speechPlayer(SpeechPlayer speechPlayer);
 
     public abstract Builder locationEngine(LocationEngine locationEngine);
+
+    /**
+     * Add an offline path for loading offline routing data.
+     * <p>
+     * When added, the {@link NavigationView} will try to initialize and use this data
+     * for offline routing when no or poor internet connection is found.
+     *
+     * @param offlinePath to offline data on device
+     * @return this builder
+     */
+    public abstract Builder offlineRoutingTilesPath(String offlinePath);
+
+    /**
+     * Add an offline tile version.  When providing a routing tile path, this version
+     * is also required for configuration.
+     * <p>
+     * This version should directly correspond to the data in the offline path also provided.
+     *
+     * @param offlineVersion of data in tile path
+     * @return this builder
+     */
+    public abstract Builder offlineRoutingTilesVersion(String offlineVersion);
 
     public abstract NavigationViewOptions build();
   }

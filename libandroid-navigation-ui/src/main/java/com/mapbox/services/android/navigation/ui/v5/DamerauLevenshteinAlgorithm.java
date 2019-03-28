@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.ui.v5.route;
+package com.mapbox.services.android.navigation.ui.v5;
 
 import java.util.HashMap;
 import java.util.Map;
