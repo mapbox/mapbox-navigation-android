@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 
 public interface NavigationContract {
 
@@ -20,8 +19,6 @@ public interface NavigationContract {
     void updateWayNameVisibility(boolean isVisible);
 
     void updateWayNameView(@NonNull String wayName);
-
-    void updateCameraTrackingMode(@NavigationCamera.TrackingMode int trackingMode);
 
     void resetCameraPosition();
 
