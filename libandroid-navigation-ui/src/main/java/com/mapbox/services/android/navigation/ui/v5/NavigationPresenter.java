@@ -7,7 +7,6 @@ import android.support.design.widget.BottomSheetBehavior;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 
 class NavigationPresenter {
 
@@ -34,7 +33,6 @@ class NavigationPresenter {
     if (!view.isSummaryBottomSheetHidden()) {
       view.setSummaryBehaviorHideable(true);
       view.setSummaryBehaviorState(BottomSheetBehavior.STATE_HIDDEN);
-      view.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE);
       view.updateWayNameVisibility(false);
     }
   }

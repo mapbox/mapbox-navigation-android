@@ -243,14 +243,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     return summaryBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN;
   }
 
-
-  @Override
-  public void updateCameraTrackingMode(int trackingMode) {
-    if (navigationMap != null) {
-      navigationMap.updateCameraTrackingMode(trackingMode);
-    }
-  }
-
   @Override
   public void resetCameraPosition() {
     if (navigationMap != null) {
