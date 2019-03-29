@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import com.mapbox.geojson.Point;
 import com.mapbox.navigator.Navigator;
 
 class OfflineNavigator {
@@ -40,5 +41,17 @@ class OfflineNavigator {
    */
   void unpackTiles(String tarPath, String destinationPath) {
     navigator.unpackTiles(tarPath, destinationPath);
+  }
+
+  /**
+   * Removes tiles within / intersected by a bounding box
+   *
+   * @param tilePath  directory path where the tiles are located
+   * @param southwest lower left {@link Point} of the bounding box
+   * @param northeast upper right {@link Point} of the bounding box
+   * @param callback  a callback that will be fired when the routing tiles have been removed completely
+   */
+  void removeTiles(String tilePath, Point southwest, Point northeast, OnOfflineTilesRemovedCallback callback) {
+    new RemoveTilesTask(navigator, tilePath, southwest, northeast, callback).execute();
   }
 }

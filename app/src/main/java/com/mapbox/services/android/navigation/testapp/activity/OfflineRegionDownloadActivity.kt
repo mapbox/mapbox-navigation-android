@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.PointF
 import android.os.Bundle
 import android.os.Environment
+import android.preference.PreferenceManager
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
@@ -28,7 +29,7 @@ import com.mapbox.services.android.navigation.v5.navigation.*
 import kotlinx.android.synthetic.main.activity_offline_region_download.*
 import timber.log.Timber
 
-class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadListener {
+class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadListener, OnOfflineTilesRemovedCallback {
     lateinit var mapboxMap: MapboxMap
     private val EXTERNAL_STORAGE_PERMISSION = 1
     private val disabledGrey by lazy { resources.getColor(R.color.md_grey_700) }
@@ -60,6 +61,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         setContentView(R.layout.activity_offline_region_download)
 
         downloadButton.setOnClickListener { onDownloadClick() }
+        removeButton.setOnClickListener { onRemoveClick() }
         setupSpinner()
         setupMapView(savedInstanceState)
     }
@@ -142,6 +144,14 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         }
     }
 
+    private fun onRemoveClick() {
+        if (ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
+            showToast("Storage permissions should be granted. Please try again.")
+        } else {
+            removeSelectedRegion()
+        }
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
@@ -165,6 +175,18 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         mapboxOfflineRouter.downloadTiles(builder.build(), this)
     }
 
+    private fun removeSelectedRegion() {
+        showRemoving(true, "Removing tiles....")
+        val version: String = retrieveOfflineVersionFromPreferences()
+        mapboxOfflineRouter.removeTiles(version, boundingBox, this)
+    }
+
+    private fun retrieveOfflineVersionFromPreferences(): String {
+        val context = application
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(context.getString(R.string.offline_version_key), "")
+    }
+
     private fun obtainOfflineDirectory(): String {
         val offline = Environment.getExternalStoragePublicDirectory("Offline")
         if (!offline.exists()) {
@@ -180,6 +202,12 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         setDownloadButtonEnabled(!downloading, message)
     }
 
+    private fun showRemoving(removing: Boolean, message: String) {
+        versionSpinner.isEnabled = !removing
+        loading.visibility = if (removing) View.VISIBLE else View.GONE
+        updateRemoveButton(!removing, message)
+    }
+
     private fun setDownloadButtonEnabled(enabled: Boolean) {
         setDownloadButtonEnabled(enabled, "Download Region")
     }
@@ -189,6 +217,11 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
 
         downloadButton.setBackgroundColor(if (enabled) enabledBlue else disabledGrey)
         downloadButton.text = text
+    }
+
+    private fun updateRemoveButton(enabled: Boolean, text: String) {
+        removeButton.text = text
+        removeButton.isEnabled = enabled
     }
 
     /*
@@ -207,6 +240,11 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     override fun onCompletion() {
         setDownloadButtonEnabled(true)
         showToast("Download complete")
+    }
+
+    override fun onRemoved(numberOfTiles: Long) {
+        showRemoving(false, "Remove Region")
+        showToast("$numberOfTiles routing tiles were removed")
     }
 
     /*
