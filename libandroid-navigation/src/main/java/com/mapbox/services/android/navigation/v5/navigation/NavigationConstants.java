@@ -123,6 +123,8 @@ public final class NavigationConstants {
    */
   static final int NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG = 1500;
 
+  static final long ROUTE_REFRESH_INTERVAL = 5 * 60 * 1000L;
+
   /**
    * Defines the minimum zoom level of the displayed map.
    */
