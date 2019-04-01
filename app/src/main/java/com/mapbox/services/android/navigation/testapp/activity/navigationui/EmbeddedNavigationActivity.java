@@ -27,6 +27,7 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.ui.v5.NavigationAnimationOptions;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
@@ -194,6 +195,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
         .progressChangeListener(this)
         .instructionListListener(this)
         .speechAnnouncementListener(this)
+        .animationOptions(NavigationAnimationOptions.efficiencyProfile().build())
         .bannerInstructionsListener(this);
     setBottomSheetCallback(options);
     setupNightModeFab();

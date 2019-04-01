@@ -205,6 +205,12 @@ public class NavigationMapboxMap {
 
   public void updateMapFpsConfig(ThrottleConfig throttleConfig) {
     fpsDelegate.updateMapThrottleConfig(throttleConfig);
+    fpsDelegate.updateMapThrottlingEnabled(true); // ?
+  }
+
+  public void updateLocationFpsConfig(ThrottleConfig throttleConfig) {
+    fpsDelegate.updateLocationThrottleConfig(throttleConfig);
+    fpsDelegate.updateLocationThrottlingEnabled(true); // ?
   }
 
   /**
@@ -683,10 +689,10 @@ public class NavigationMapboxMap {
       mapWayName.updateWayNameQueryMap(settings.isMapWayNameEnabled());
     }
     if (fpsDelegate != null) {
-      fpsDelegate.updateLocationThrottlingEnabled(settings.isLocationThrottlingEnabled());
       fpsDelegate.updateLocationThrottleConfig(settings.retrieveLocationThrottleConfig());
-      fpsDelegate.updateMapThrottlingEnabled(settings.isMapThrottlingEnabled());
+      fpsDelegate.updateLocationThrottlingEnabled(settings.isLocationThrottlingEnabled());
       fpsDelegate.updateMapThrottleConfig(settings.retrieveMapThrottleConfig());
+      fpsDelegate.updateMapThrottlingEnabled(settings.isMapThrottlingEnabled());
     }
   }
 
@@ -705,6 +711,9 @@ public class NavigationMapboxMap {
   }
 
   public void updateAnimationOptions(NavigationAnimationOptions animationOptions) {
-
+    updateMapFpsConfig(animationOptions.throttleMapFps());
+    updateMapFpsThrottleEnabled(animationOptions.mapThrottleEnabled());
+    updateLocationFpsConfig(animationOptions.throttleLocationComponentFps());
+    updateLocationFpsThrottleEnabled(animationOptions.locationThrottleEnabled());
   }
 }

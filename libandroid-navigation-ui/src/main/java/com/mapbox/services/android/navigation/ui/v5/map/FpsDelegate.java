@@ -14,11 +14,11 @@ class FpsDelegate implements MapboxMap.OnCameraIdleListener, OnTrackingModeChang
   private final MapView mapView;
 
   boolean locationThrottlingEnabled;
-  private FpsMap locationFpsMap;
+  private FpsMap locationFpsMap = null;
   private int currentLocationFps;
 
   boolean mapThrottlingEnabled;
-  private FpsMap mapFpsMap;
+  private FpsMap mapFpsMap = null;
   private int currentMapFps;
 
   FpsDelegate(@NonNull MapboxMap mapboxMap, @NonNull LocationComponent locationComponent,
@@ -41,11 +41,11 @@ class FpsDelegate implements MapboxMap.OnCameraIdleListener, OnTrackingModeChang
   private void throttle() {
     double zoom = getCurrentZoom();
 
-    if (locationThrottlingEnabled) {
+    if (locationThrottlingEnabled && locationFpsMap != null) {
       throttleLocationComponent(zoom);
     }
 
-    if (mapThrottlingEnabled) {
+    if (mapThrottlingEnabled && mapFpsMap != null) {
       throttleMap(zoom);
     }
   }
@@ -95,6 +95,7 @@ class FpsDelegate implements MapboxMap.OnCameraIdleListener, OnTrackingModeChang
     return mapThrottlingEnabled;
   }
 
+  // miust be called after setting throttleconfig
   void updateMapThrottlingEnabled(boolean isEnabled) {
     this.mapThrottlingEnabled = isEnabled;
     if (mapThrottlingEnabled) {
@@ -108,6 +109,7 @@ class FpsDelegate implements MapboxMap.OnCameraIdleListener, OnTrackingModeChang
     return mapFpsMap.getThrottleConfig();
   }
 
+  // miust be called after setting throttleconfig
   void updateMapThrottleConfig(ThrottleConfig throttleConfig) {
     mapFpsMap = new FpsMap(throttleConfig);
   }
