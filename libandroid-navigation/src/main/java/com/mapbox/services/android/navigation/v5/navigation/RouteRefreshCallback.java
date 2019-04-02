@@ -13,8 +13,7 @@ class RouteRefreshCallback implements Callback<DirectionsRefreshResponse> {
   private final int legIndex;
   private final RefreshCallback refreshCallback;
 
-  RouteRefreshCallback(DirectionsRoute directionsRoute,
-                       int legIndex, RefreshCallback refreshCallback) {
+  RouteRefreshCallback(DirectionsRoute directionsRoute, int legIndex, RefreshCallback refreshCallback) {
     this(new RouteAnnotationUpdater(), directionsRoute, legIndex, refreshCallback);
   }
 
@@ -31,13 +30,12 @@ class RouteRefreshCallback implements Callback<DirectionsRefreshResponse> {
     if (response.body() == null || response.body().route() == null) {
       refreshCallback.onError(new RefreshError(response.message()));
     } else {
-      refreshCallback.onRefresh(routeAnnotationUpdater.update(directionsRoute,
-        response.body().route(), legIndex));
+      refreshCallback.onRefresh(routeAnnotationUpdater.update(directionsRoute, response.body().route(), legIndex));
     }
   }
 
   @Override
   public void onFailure(Call<DirectionsRefreshResponse> call, Throwable throwable) {
-    refreshCallback.onError(new RefreshError("There was a network error."));
+    refreshCallback.onError(new RefreshError(throwable.getMessage()));
   }
 }
