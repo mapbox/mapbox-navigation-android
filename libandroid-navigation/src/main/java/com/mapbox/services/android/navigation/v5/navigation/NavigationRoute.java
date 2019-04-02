@@ -680,7 +680,8 @@ public final class NavigationRoute {
         .voiceInstructions(true)
         .bannerInstructions(true)
         .roundaboutExits(true)
-        .eventListener(eventListener);
+        .eventListener(eventListener)
+        .enableRefresh(true);
       return new NavigationRoute(directionsBuilder.build());
     }
 
