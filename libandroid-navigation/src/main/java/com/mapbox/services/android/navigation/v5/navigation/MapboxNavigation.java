@@ -39,7 +39,8 @@ import retrofit2.Callback;
 import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.BANNER_INSTRUCTION_MILESTONE_ID;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NON_NULL_APPLICATION_CONTEXT_REQUIRED;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
+  .NON_NULL_APPLICATION_CONTEXT_REQUIRED;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID;
 
 /**
@@ -67,6 +68,7 @@ public class MapboxNavigation implements ServiceConnection {
   private final String accessToken;
   private Context applicationContext;
   private boolean isBound;
+  private RouteRefresher routeRefresher;
 
   static {
     NavigationLibraryLoader.load();
@@ -845,6 +847,11 @@ public class MapboxNavigation implements ServiceConnection {
     return locationEngineRequest;
   }
 
+  @Nullable
+  RouteRefresher retrieveRouteRefresher() {
+    return routeRefresher;
+  }
+
   private void initializeForTest() {
     // Initialize event dispatcher and add internal listeners
     navigationEventDispatcher = new NavigationEventDispatcher();
@@ -926,6 +933,7 @@ public class MapboxNavigation implements ServiceConnection {
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute, DirectionsRouteType routeType) {
     ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
+    routeRefresher = new RouteRefresher(this, new RouteRefresh(accessToken));
     mapboxNavigator.updateRoute(directionsRoute, routeType);
     if (!isBound) {
       navigationTelemetry.startSession(directionsRoute, locationEngine);
