@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.support.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.BoundingBox;
 import com.mapbox.navigator.Navigator;
 
 import java.io.File;
@@ -86,5 +87,22 @@ public class MapboxOfflineRouter {
    */
   public void fetchAvailableTileVersions(String accessToken, OnTileVersionsFoundCallback callback) {
     offlineTileVersions.fetchRouteTileVersions(accessToken, callback);
+  }
+
+  /**
+   * Removes tiles within / intersected by a bounding box
+   * <p>
+   * Note that calling {@link MapboxOfflineRouter#findRoute(OfflineRoute, OnOfflineRouteFoundCallback)} while
+   * {@link MapboxOfflineRouter#removeTiles(String, BoundingBox, OnOfflineTilesRemovedCallback)} could lead
+   * to undefine behavior
+   * </p>
+   *
+   * @param version     version of offline tiles to use
+   * @param boundingBox bounding box within which routing tiles should be removed
+   * @param callback    a callback that will be fired when the routing tiles have been removed completely
+   */
+  public void removeTiles(String version, BoundingBox boundingBox, OnOfflineTilesRemovedCallback callback) {
+    offlineNavigator.removeTiles(new File(tilePath, version).getAbsolutePath(), boundingBox.southwest(),
+      boundingBox.northeast(), callback);
   }
 }
