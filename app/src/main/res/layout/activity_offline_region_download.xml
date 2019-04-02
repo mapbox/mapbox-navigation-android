@@ -90,14 +90,31 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/downloadButton"
+            android:layout_above="@id/removeButton"
             android:padding="16dp"
-            android:layout_margin="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="8dp"
             android:gravity="center"
             android:text="Download Region"
             android:background="@color/md_grey_700"
-            android:textColor="@color/white"
+            android:textColor="@color/white"/>
+
+        <TextView
+            android:id="@+id/removeButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"/>
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/mapbox_blue"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="Remove Region"
+            android:textColor="@color/white"/>
 
     </RelativeLayout>
 
