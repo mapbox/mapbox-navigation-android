@@ -61,12 +61,6 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
   @Nullable
   public abstract LocationEngine locationEngine();
 
-  @Nullable
-  public abstract String offlineRoutingTilesPath();
-
-  @Nullable
-  public abstract String offlineRoutingTilesVersion();
-
   @AutoValue.Builder
   public abstract static class Builder {
 
