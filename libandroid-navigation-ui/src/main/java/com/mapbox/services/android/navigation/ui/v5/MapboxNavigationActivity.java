@@ -130,8 +130,15 @@ public class MapboxNavigationActivity extends AppCompatActivity implements OnNav
 
   private void extractConfiguration(NavigationViewOptions.Builder options) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-    options.shouldSimulateRoute(preferences
-      .getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
+    options.shouldSimulateRoute(preferences.getBoolean(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE, false));
+    String offlinePath = preferences.getString(NavigationConstants.OFFLINE_PATH_KEY, "");
+    if (!offlinePath.isEmpty()) {
+      options.offlineRoutingTilesPath(offlinePath);
+    }
+    String offlineVersion = preferences.getString(NavigationConstants.OFFLINE_VERSION_KEY, "");
+    if (!offlineVersion.isEmpty()) {
+      options.offlineRoutingTilesVersion(offlineVersion);
+    }
   }
 
   private void finishNavigation() {

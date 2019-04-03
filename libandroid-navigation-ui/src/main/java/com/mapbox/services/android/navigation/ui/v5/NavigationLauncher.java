@@ -38,6 +38,8 @@ public class NavigationLauncher {
     storeConfiguration(options, editor);
 
     storeThemePreferences(options, editor);
+    storeOfflinePath(options, editor);
+    storeOfflineVersion(options, editor);
 
     editor.apply();
 
@@ -71,6 +73,8 @@ public class NavigationLauncher {
       .remove(NavigationConstants.NAVIGATION_VIEW_PREFERENCE_SET_THEME)
       .remove(NavigationConstants.NAVIGATION_VIEW_LIGHT_THEME)
       .remove(NavigationConstants.NAVIGATION_VIEW_DARK_THEME)
+      .remove(NavigationConstants.OFFLINE_PATH_KEY)
+      .remove(NavigationConstants.OFFLINE_VERSION_KEY)
       .apply();
   }
 
@@ -103,4 +107,13 @@ public class NavigationLauncher {
       );
     }
   }
+
+  private static void storeOfflinePath(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
+    editor.putString(NavigationConstants.OFFLINE_PATH_KEY, options.offlineRoutingTilesPath());
+  }
+
+  private static void storeOfflineVersion(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
+    editor.putString(NavigationConstants.OFFLINE_VERSION_KEY, options.offlineRoutingTilesVersion());
+  }
+
 }

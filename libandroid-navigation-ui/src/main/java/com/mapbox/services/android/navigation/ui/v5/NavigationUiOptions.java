@@ -17,4 +17,10 @@ public abstract class NavigationUiOptions {
   public abstract boolean shouldSimulateRoute();
 
   public abstract boolean waynameChipEnabled();
+
+  @Nullable
+  public abstract String offlineRoutingTilesPath();
+
+  @Nullable
+  public abstract String offlineRoutingTilesVersion();
 }

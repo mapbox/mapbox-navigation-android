@@ -27,6 +27,28 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
 
     public abstract Builder initialMapCameraPosition(@Nullable CameraPosition initialMapCameraPosition);
 
+    /**
+     * Add an offline path for loading offline routing data.
+     * <p>
+     * When added, the {@link NavigationView} will try to initialize and use this data
+     * for offline routing when no or poor internet connection is found.
+     *
+     * @param offlinePath to offline data on device
+     * @return this builder
+     */
+    public abstract Builder offlineRoutingTilesPath(String offlinePath);
+
+    /**
+     * Add an offline tile version.  When providing a routing tile path, this version
+     * is also required for configuration.
+     * <p>
+     * This version should directly correspond to the data in the offline path also provided.
+     *
+     * @param offlineVersion of data in tile path
+     * @return this builder
+     */
+    public abstract Builder offlineRoutingTilesVersion(String offlineVersion);
+
     public abstract NavigationLauncherOptions build();
   }
 
