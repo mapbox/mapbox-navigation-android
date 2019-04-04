@@ -34,12 +34,14 @@ class RouteProcessorBackgroundThread extends HandlerThread {
 
   @Override
   public synchronized void start() {
-    super.start();
-    if (workerHandler == null) {
-      workerHandler = new Handler(getLooper());
+    if (super.getState() == Thread.State.NEW) {
+      super.start();
+      if (workerHandler == null) {
+        workerHandler = new Handler(getLooper());
+      }
+      runnable = new RouteProcessorRunnable(routeProcessor, navigation, workerHandler, responseHandler, listener);
+      workerHandler.post(runnable);
     }
-    runnable = new RouteProcessorRunnable(routeProcessor, navigation, workerHandler, responseHandler, listener);
-    workerHandler.post(runnable);
   }
 
   @Override
