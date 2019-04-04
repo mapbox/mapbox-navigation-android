@@ -117,10 +117,13 @@ class NavigationViewRouter implements RouteListener {
 
   private void initializeOfflineFrom(NavigationViewOptions options) {
     String offlinePath = options.offlineRoutingTilesPath();
-    if (!TextUtils.isEmpty(offlinePath)) {
-      MapboxOfflineRouter offlineRouter = new MapboxOfflineRouter(offlinePath);
-      this.offlineRouter = new NavigationViewOfflineRouter(offlineRouter, this);
-      this.offlineRouter.configure(options.offlineRoutingTilesVersion());
+    String offlineTilesVersion = options.offlineRoutingTilesVersion();
+    if (!TextUtils.isEmpty(offlinePath) && !TextUtils.isEmpty(offlineTilesVersion)) {
+      if (this.offlineRouter == null) {
+        MapboxOfflineRouter offlineRouter = new MapboxOfflineRouter(offlinePath);
+        this.offlineRouter = new NavigationViewOfflineRouter(offlineRouter, this);
+      }
+      this.offlineRouter.configure(offlineTilesVersion);
     }
   }
 

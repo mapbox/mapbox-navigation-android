@@ -213,6 +213,118 @@ public class NavigationViewRouterTest extends BaseTest {
     verify(onlineRouter).clearListeners();
   }
 
+  @Test
+  public void checksOfflineRouterIsConfiguredIfPathAndTilesVersionArePresent() throws Exception {
+    NavigationViewOfflineRouter offlineRouter = mock(NavigationViewOfflineRouter.class);
+    String anOfflineRoutingTilesVersion = "offline_routing_tiles_version";
+    NavigationViewOptions options = NavigationViewOptions.builder()
+      .directionsRoute(buildDirectionsRoute())
+      .offlineRoutingTilesPath("offline/routing/tiles/path")
+      .offlineRoutingTilesVersion(anOfflineRoutingTilesVersion)
+      .build();
+    NavigationViewRouter router = new NavigationViewRouter(
+      mock(RouteFetcher.class),
+      offlineRouter,
+      mock(ConnectivityStatusProvider.class),
+      mock(RouteComparator.class),
+      mock(ViewRouteListener.class)
+    );
+
+    router.extractRouteOptions(options);
+
+    verify(offlineRouter).configure(eq(anOfflineRoutingTilesVersion));
+  }
+
+  @Test
+  public void checksOfflineRouterIsNotConfiguredIfPathIsNull() throws Exception {
+    NavigationViewOfflineRouter offlineRouter = mock(NavigationViewOfflineRouter.class);
+    String anyOfflineRoutingTilesVersion = "any_offline_routing_tiles_version";
+    NavigationViewOptions options = NavigationViewOptions.builder()
+      .directionsRoute(buildDirectionsRoute())
+      .offlineRoutingTilesPath(null)
+      .offlineRoutingTilesVersion(anyOfflineRoutingTilesVersion)
+      .build();
+    NavigationViewRouter router = new NavigationViewRouter(
+      mock(RouteFetcher.class),
+      offlineRouter,
+      mock(ConnectivityStatusProvider.class),
+      mock(RouteComparator.class),
+      mock(ViewRouteListener.class)
+    );
+
+    router.extractRouteOptions(options);
+
+    verify(offlineRouter, times(0)).configure(eq(anyOfflineRoutingTilesVersion));
+  }
+
+  @Test
+  public void checksOfflineRouterIsNotConfiguredIfPathIsEmpty() throws Exception {
+    NavigationViewOfflineRouter offlineRouter = mock(NavigationViewOfflineRouter.class);
+    String anyOfflineRoutingTilesVersion = "any_offline_routing_tiles_version";
+    NavigationViewOptions options = NavigationViewOptions.builder()
+      .directionsRoute(buildDirectionsRoute())
+      .offlineRoutingTilesPath("")
+      .offlineRoutingTilesVersion(anyOfflineRoutingTilesVersion)
+      .build();
+    NavigationViewRouter router = new NavigationViewRouter(
+      mock(RouteFetcher.class),
+      offlineRouter,
+      mock(ConnectivityStatusProvider.class),
+      mock(RouteComparator.class),
+      mock(ViewRouteListener.class)
+    );
+
+    router.extractRouteOptions(options);
+
+    verify(offlineRouter, times(0)).configure(eq(anyOfflineRoutingTilesVersion));
+  }
+
+  @Test
+  public void checksOfflineRouterIsNotConfiguredIfTilesVersionIsNull() throws Exception {
+    NavigationViewOfflineRouter offlineRouter = mock(NavigationViewOfflineRouter.class);
+    String anyOfflinePath = "any/offline/routing/tiles/path";
+    String nullOfflineRoutingTilesVersion = null;
+    NavigationViewOptions options = NavigationViewOptions.builder()
+      .directionsRoute(buildDirectionsRoute())
+      .offlineRoutingTilesPath(null)
+      .offlineRoutingTilesVersion(anyOfflinePath)
+      .build();
+    NavigationViewRouter router = new NavigationViewRouter(
+      mock(RouteFetcher.class),
+      offlineRouter,
+      mock(ConnectivityStatusProvider.class),
+      mock(RouteComparator.class),
+      mock(ViewRouteListener.class)
+    );
+
+    router.extractRouteOptions(options);
+
+    verify(offlineRouter, times(0)).configure(eq(nullOfflineRoutingTilesVersion));
+  }
+
+  @Test
+  public void checksOfflineRouterIsNotConfiguredIfTilesVersionIsEmpty() throws Exception {
+    NavigationViewOfflineRouter offlineRouter = mock(NavigationViewOfflineRouter.class);
+    String anyOfflinePath = "any/offline/routing/tiles/path";
+    String emptyOfflineRoutingTilesVersion = "";
+    NavigationViewOptions options = NavigationViewOptions.builder()
+      .directionsRoute(buildDirectionsRoute())
+      .offlineRoutingTilesPath(anyOfflinePath)
+      .offlineRoutingTilesVersion(emptyOfflineRoutingTilesVersion)
+      .build();
+    NavigationViewRouter router = new NavigationViewRouter(
+      mock(RouteFetcher.class),
+      offlineRouter,
+      mock(ConnectivityStatusProvider.class),
+      mock(RouteComparator.class),
+      mock(ViewRouteListener.class)
+    );
+
+    router.extractRouteOptions(options);
+
+    verify(offlineRouter, times(0)).configure(eq(emptyOfflineRoutingTilesVersion));
+  }
+
   @NonNull
   private NavigationViewRouter buildRouteEngine(ViewRouteListener routeEngineListener) {
     return new NavigationViewRouter(mock(RouteFetcher.class), mock(ConnectivityStatusProvider.class),
