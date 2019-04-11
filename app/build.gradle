@@ -89,7 +89,9 @@ dependencies {
 
   // Mapbox Navigation SDK
   implementation project(':libandroid-navigation-ui')
-  implementation dependenciesList.mapboxMapSdk
+  implementation (dependenciesList.mapboxMapSdk) {
+    exclude group: 'com.mapbox.mapboxsdk', module: 'mapbox-sdk-services'
+  }
   implementation dependenciesList.mapboxSearchSdk
   implementation dependenciesList.mapboxCrashMonitor
 

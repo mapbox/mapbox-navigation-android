@@ -33,6 +33,7 @@ class ExampleRouteFinder(private val accessToken: String,
     NavigationRoute.builder(NavigationApplication.instance)
             .accessToken(accessToken)
             .origin(origin, bearing, BEARING_TOLERANCE)
+            .baseUrl("https://api-valhalla-route-staging.tilestream.net/")
             .destination(destination)
             .alternatives(true)
             .build()

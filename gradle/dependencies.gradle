@@ -9,7 +9,7 @@ ext {
 
   version = [
       mapboxMapSdk           : '7.3.0',
-      mapboxSdkServices      : '4.5.0',
+      mapboxSdkServices      : '4.6.0-20190410.193212-15',
       mapboxEvents           : '4.3.0',
       mapboxCore             : '1.2.0',
       mapboxNavigator        : '6.1.0',
@@ -46,7 +46,7 @@ ext {
       // mapbox
       mapboxMapSdk           : "com.mapbox.mapboxsdk:mapbox-android-sdk:${version.mapboxMapSdk}",
       mapboxSdkServices      : "com.mapbox.mapboxsdk:mapbox-sdk-services:${version.mapboxSdkServices}",
-      mapboxSdkTurf          : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${version.mapboxSdkServices}",
+      mapboxSdkTurf          : "com.mapbox.mapboxsdk:mapbox-sdk-turf:4.6.0-20190410.193225-17",
       mapboxEvents           : "com.mapbox.mapboxsdk:mapbox-android-telemetry:${version.mapboxEvents}",
       mapboxCore             : "com.mapbox.mapboxsdk:mapbox-android-core:${version.mapboxCore}",
       mapboxNavigator        : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
