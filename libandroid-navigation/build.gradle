@@ -44,9 +44,16 @@ android {
 }
 
 dependencies {
-  api dependenciesList.mapboxSdkServices
-  api dependenciesList.mapboxSdkTurf
+  api(dependenciesList.mapboxSdkServices) {
+    exclude group: "com.mapbox.mapboxsdk", module: "mapbox-sdk-core"
+    exclude group: "com.mapbox.mapboxsdk", module: "mapbox-sdk-geojson"
+  }
+  api(dependenciesList.mapboxSdkTurf) {
+    exclude group: "com.mapbox.mapboxsdk", module: "mapbox-sdk-geojson"
+  }
   api dependenciesList.mapboxCore
+  api dependenciesList.mapboxSdkCore
+  api dependenciesList.mapboxSdkGeojson
   api (dependenciesList.mapboxEvents) {
     exclude group: "com.mapbox.mapboxsdk", module: "mapbox-android-core"
   }

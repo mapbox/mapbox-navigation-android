@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.testapp.example.ui.navigation
 
 import android.location.Location
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
@@ -31,9 +32,10 @@ class ExampleRouteFinder(private val accessToken: String,
     val origin = Point.fromLngLat(location.longitude, location.latitude)
     val bearing = location.bearing.toDouble()
     NavigationRoute.builder(NavigationApplication.instance)
-            .accessToken(accessToken)
             .origin(origin, bearing, BEARING_TOLERANCE)
-            .baseUrl("https://api-valhalla-route-staging.tilestream.net/")
+            .accessToken("YOUR_VALID_WALKING_ACCESS_TOKEN_GOES_HERE")
+            .baseUrl("https://api-valhalla-route-staging.tilestream.net")
+            .profile(DirectionsCriteria.PROFILE_WALKING)
             .destination(destination)
             .alternatives(true)
             .build()

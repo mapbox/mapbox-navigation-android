@@ -45,8 +45,10 @@ ext {
   dependenciesList = [
       // mapbox
       mapboxMapSdk           : "com.mapbox.mapboxsdk:mapbox-android-sdk:${version.mapboxMapSdk}",
-      mapboxSdkServices      : "com.mapbox.mapboxsdk:mapbox-sdk-services:${version.mapboxSdkServices}",
-      mapboxSdkTurf          : "com.mapbox.mapboxsdk:mapbox-sdk-turf:4.6.0-20190410.193225-17",
+      mapboxSdkCore          : "com.mapbox.mapboxsdk:mapbox-sdk-core:4.6.0-20190411.201218-1",
+      mapboxSdkGeojson       : "com.mapbox.mapboxsdk:mapbox-sdk-geojson:4.6.0-20190411.201227-20",
+      mapboxSdkServices      : "com.mapbox.mapboxsdk:mapbox-sdk-services:4.6.0-20190411.201236-18",
+      mapboxSdkTurf          : "com.mapbox.mapboxsdk:mapbox-sdk-turf:4.6.0-20190411.201246-20",
       mapboxEvents           : "com.mapbox.mapboxsdk:mapbox-android-telemetry:${version.mapboxEvents}",
       mapboxCore             : "com.mapbox.mapboxsdk:mapbox-android-core:${version.mapboxCore}",
       mapboxNavigator        : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
