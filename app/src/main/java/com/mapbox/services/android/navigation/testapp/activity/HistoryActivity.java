@@ -1,12 +1,10 @@
 package com.mapbox.services.android.navigation.testapp.activity;
 
-import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,6 +16,7 @@ public class HistoryActivity extends AppCompatActivity {
 
   private MapboxNavigation navigation;
   private String filename;
+  private ProgressChangeListener progressHistoryListener = (location, routeProgress) -> executeStoreHistoryTask();
 
   public void addNavigationForHistory(@NonNull MapboxNavigation navigation) {
     if (navigation == null) {
@@ -27,6 +26,10 @@ public class HistoryActivity extends AppCompatActivity {
     navigation.addProgressChangeListener(progressHistoryListener);
     navigation.toggleHistory(true);
     filename = buildFileName();
+  }
+
+  protected void executeStoreHistoryTask() {
+    new StoreHistoryTask(navigation, filename).execute();
   }
 
   @Override
@@ -47,11 +50,4 @@ public class HistoryActivity extends AppCompatActivity {
     String strDate = DATE_FORMAT.format(now);
     return strDate;
   }
-
-  private ProgressChangeListener progressHistoryListener = new ProgressChangeListener() {
-    @Override
-    public void onProgressChange(Location location, RouteProgress routeProgress) {
-      new StoreHistoryTask(navigation, filename).execute();
-    }
-  };
 }
