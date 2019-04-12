@@ -34,7 +34,7 @@ Please describe the manual tests that you ran to verify your changes
 
 - [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my own code
-- [ ] I have added an `Activity` example in the test app showing the new feature implemented (where applicable)
-- [ ] I have made corresponding changes to the documentation (where applicable)
-- [ ] Any changes to strings have been published to our translation tool (where applicable)
-- [ ] Publish `testapp` in Google Play `internal` test track (where applicable)
+<!-- - [ ] I have added an `Activity` example in the test app showing the new feature implemented (where applicable) -->
+<!-- - [ ] I have made corresponding changes to the documentation (where applicable) -->
+<!-- - [ ] Any changes to strings have been published to our translation tool (where applicable) -->
+<!-- - [ ] Publish `testapp` in Google Play `internal` test track (where applicable) -->
