@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class BannerInstructionMilestoneTest extends BaseTest {
 
@@ -31,8 +33,11 @@ public class BannerInstructionMilestoneTest extends BaseTest {
   @Test
   public void checksBannerShownIfBannerInstructionIsNotNull() throws Exception {
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    BannerInstruction emptyBannerInstruction = buildEmptyBannerInstructionWithPrimary(null);
-    routeProgress = add(emptyBannerInstruction, routeProgress);
+    BannerSection bannerSection = mock(BannerSection.class);
+    when(bannerSection.getText()).thenReturn("mock text");
+    BannerInstruction bannerInstruction =
+      buildEmptyBannerInstructionWithPrimary(bannerSection);
+    routeProgress = add(bannerInstruction, routeProgress);
     BannerInstructionMilestone milestone = buildBannerInstructionMilestone();
 
     boolean isOccurring = milestone.isOccurring(routeProgress, routeProgress);
