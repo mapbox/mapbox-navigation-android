@@ -77,6 +77,9 @@ class MapboxNavigator {
     navigator.toggleHistory(isEnabled);
   }
 
+  synchronized void addHistoryEvent(String eventType, String eventJsonProperties) {
+    navigator.pushHistory(eventType, eventJsonProperties);
+  }
 
   synchronized VoiceInstruction retrieveVoiceInstruction(int index) {
     return navigator.getVoiceInstruction(index);
@@ -86,7 +89,7 @@ class MapboxNavigator {
     return navigator.getBannerInstruction(index);
   }
 
-  FixLocation buildFixLocationFromLocation(Location location) {
+  private FixLocation buildFixLocationFromLocation(Location location) {
     Date time = new Date();
     Point rawPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     Float speed = checkFor(location.getSpeed());
