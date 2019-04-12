@@ -30,9 +30,9 @@
     </string-array>
 
     <string-array name="route_profile_array">
-        <item>Driving</item>
-        <item>Cycling</item>
-        <item>Walking</item>
+        <item>@string/route_profile_driving</item>
+        <item>@string/route_profile_cycling</item>
+        <item>@string/route_profile_walking</item>
     </string-array>
 
     <string-array name="route_profile_values_array">

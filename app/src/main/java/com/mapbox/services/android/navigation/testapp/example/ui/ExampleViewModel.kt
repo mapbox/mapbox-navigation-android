@@ -26,6 +26,7 @@ import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayerProvider
 import com.mapbox.services.android.navigation.ui.v5.voice.VoiceInstructionLoader
+import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
@@ -52,7 +53,6 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   val geocode: MutableLiveData<GeocodingResponse> = MutableLiveData()
 
   var primaryRoute: DirectionsRoute? = null
-  var collapsedBottomSheet: Boolean = false
   var isOffRoute: Boolean = false
 
   private val locationEngine: LocationEngine
@@ -64,7 +64,8 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   private val routeFinder: RouteFinder
 
   init {
-    routeFinder = RouteFinder(this, routes, accessToken, retrieveOfflineVersionFromPreferences())
+    routeFinder = RouteFinder(this, routes, accessToken, retrieveOfflineVersionFromPreferences(),
+            retrieveProfileFromPreferences())
     // Initialize the location engine
     locationEngine = LocationEngineProvider.getBestLocationEngine(getApplication())
     locationEngineCallback = ExampleLocationEngineCallback(location)
@@ -112,9 +113,22 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
   fun startNavigation() {
     primaryRoute?.let {
+      if (shouldSimulateRoute()) {
+        val replayRouteLocationEngine = ReplayRouteLocationEngine()
+        replayRouteLocationEngine.assign(it)
+        navigation.locationEngine = replayRouteLocationEngine
+      } else {
+        navigation.locationEngine = locationEngine
+      }
+
       navigation.startNavigation(it)
       removeLocation()
     }
+  }
+
+  private fun shouldSimulateRoute(): Boolean {
+    val context = getApplication<Application>()
+    return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.simulate_route_key), false)
   }
 
   fun stopNavigation() {
@@ -172,6 +186,13 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     val context = getApplication<Application>()
     return PreferenceManager.getDefaultSharedPreferences(context)
         .getString(context.getString(R.string.offline_version_key), "")
+  }
+
+  private fun retrieveProfileFromPreferences(): String {
+    val context = getApplication<Application>()
+    return PreferenceManager.getDefaultSharedPreferences(context)
+            .getString(context.getString(R.string.route_profile_key), context.getString(R.string
+                    .default_route_profile))
   }
 
   private fun buildEngineRequest(): LocationEngineRequest {

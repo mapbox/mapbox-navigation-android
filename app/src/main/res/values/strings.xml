@@ -50,6 +50,10 @@
     <string name="simulate_route_key" translatable="false">simulate_route</string>
     <string name="language_key" translatable="false">language</string>
     <string name="route_profile_key" translatable="false">route_profile</string>
+    <string name="route_profile_driving">Driving</string>
+    <string name="route_profile_cycling">Cycling</string>
+    <string name="route_profile_walking">Walking</string>
+    <string name="default_route_profile">@string/route_profile_driving</string>
     <string name="view_examples_key" translatable="false">view_examples</string>
     <string name="git_hash_key" translatable="false">git_hash</string>
     <string name="offline_version_key" translatable="false">offline_preference_key</string>

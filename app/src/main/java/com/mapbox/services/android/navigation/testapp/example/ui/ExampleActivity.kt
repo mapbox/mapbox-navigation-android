@@ -39,7 +39,6 @@ private const val ZERO_PADDING = 0
 private const val BOTTOMSHEET_MULTIPLIER = 4
 
 class ExampleActivity : HistoryActivity(), ExampleView {
-
   private var map: NavigationMapboxMap? = null
   private val viewModel by lazy(mode = LazyThreadSafetyMode.NONE) {
     ViewModelProviders.of(this).get(ExampleViewModel::class.java)
@@ -193,10 +192,6 @@ class ExampleActivity : HistoryActivity(), ExampleView {
     locationFab.visibility = visibility
   }
 
-  override fun updateDirectionsFabVisibility(visibility: Int) {
-    directionsFab.visibility = visibility
-  }
-
   override fun updateNavigationFabVisibility(visibility: Int) {
     navigationFab.visibility = visibility
   }
@@ -293,7 +288,6 @@ class ExampleActivity : HistoryActivity(), ExampleView {
 
     settingsFab.setOnClickListener { presenter.onSettingsFabClick() }
     locationFab.setOnClickListener { presenter.onLocationFabClick() }
-    directionsFab.setOnClickListener { presenter.onDirectionsFabClick() }
     navigationFab.setOnClickListener { presenter.onNavigationFabClick() }
     cancelFab.setOnClickListener { presenter.onCancelFabClick() }
     attribution.setOnClickListener { presenter.onAttributionsClick(it) }

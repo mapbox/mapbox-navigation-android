@@ -14,9 +14,10 @@ import timber.log.Timber
 class RouteFinder(private val viewModel: ExampleViewModel,
                   private val routes: MutableLiveData<List<DirectionsRoute>>,
                   accessToken: String,
-                  private var tileVersion: String) : OnRoutesFoundCallback {
+                  private var tileVersion: String,
+                  private var profile: String) : OnRoutesFoundCallback {
 
-  private val routeFinder: ExampleRouteFinder = ExampleRouteFinder(accessToken, this)
+  private val routeFinder: ExampleRouteFinder = ExampleRouteFinder(accessToken, profile, this)
   private val offlineRouteFinder = OfflineRouteFinder(obtainOfflineDirectory(), tileVersion, this)
 
   internal fun findRoute(location: Location, destination: Point) {

@@ -76,13 +76,6 @@
                 app:srcCompat="@drawable/ic_my_location"/>
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/directionsFab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="invisible"
-                app:srcCompat="@drawable/ic_directions"/>
-
-            <android.support.design.widget.FloatingActionButton
                 android:id="@+id/navigationFab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

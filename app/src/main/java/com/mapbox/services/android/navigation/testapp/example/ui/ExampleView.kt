@@ -45,8 +45,6 @@ interface ExampleView: PermissionsListener, OnMapReadyCallback,
 
   fun updateLocationFabVisibility(visibility: Int)
 
-  fun updateDirectionsFabVisibility(visibility: Int)
-
   fun updateNavigationFabVisibility(visibility: Int)
 
   fun updateCancelFabVisibility(visibility: Int)

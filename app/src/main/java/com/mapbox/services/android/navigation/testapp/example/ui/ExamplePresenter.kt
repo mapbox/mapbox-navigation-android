@@ -35,7 +35,7 @@ private const val ONE_SECOND = 1000
 
 class ExamplePresenter(private val view: ExampleView, private val viewModel: ExampleViewModel) {
 
-  private var state: PresenterState = PresenterState.SHOW_LOCATION
+  private var presenterState: PresenterState = PresenterState.SHOW_LOCATION
 
   fun onPermissionsGranted(granted: Boolean) {
     if (granted) {
@@ -57,7 +57,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   fun onAutocompleteClick() {
     view.selectAllAutocompleteText()
     view.updateLocationFabVisibility(INVISIBLE)
-    view.updateSettingsFabVisibility(INVISIBLE)
     view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_EXPANDED)
   }
 
@@ -75,14 +74,9 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     }
   }
 
-  fun onDirectionsFabClick() {
-    state = PresenterState.FIND_ROUTE
-    viewModel.findRouteToDestination()
-  }
-
   fun onNavigationFabClick() {
     if (viewModel.canNavigate()) {
-      state = PresenterState.NAVIGATE
+      presenterState = PresenterState.NAVIGATE
       view.showAlternativeRoutes(false)
       view.addMapProgressChangeListener(viewModel.retrieveNavigation())
       view.updateNavigationFabVisibility(INVISIBLE)
@@ -97,7 +91,11 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   fun onCancelFabClick() {
-    state = PresenterState.SHOW_LOCATION
+    clearView()
+  }
+
+  private fun clearView() {
+    presenterState = PresenterState.SHOW_LOCATION
     viewModel.stopNavigation()
     view.removeRoute()
     view.clearMarkers()
@@ -111,30 +109,28 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED)
   }
 
-  fun onAutocompleteBottomSheetStateChange(state: Int) {
-    when (state) {
+  fun onAutocompleteBottomSheetStateChange(newState: Int) {
+    when (newState) {
       BottomSheetBehavior.STATE_COLLAPSED -> {
-        viewModel.collapsedBottomSheet = true
         view.hideSoftKeyboard()
-        if (this.state == PresenterState.SHOW_LOCATION) {
-          view.updateLocationFabVisibility(VISIBLE)
-          view.updateSettingsFabVisibility(VISIBLE)
-        }
+        presenterState = PresenterState.SHOW_LOCATION
+
+        view.updateLocationFabVisibility(VISIBLE)
+        view.updateSettingsFabVisibility(VISIBLE)
       }
       BottomSheetBehavior.STATE_EXPANDED -> {
-        viewModel.collapsedBottomSheet = false
+        presenterState = PresenterState.SEARCH
       }
     }
   }
 
   fun onDestinationFound(feature: CarmenFeature) {
     feature.center()?.let {
-      if (state == PresenterState.ROUTE_FOUND) {
+      if (presenterState == PresenterState.SHOW_ROUTE) {
         view.removeRoute()
         viewModel.primaryRoute = null
         view.updateNavigationFabVisibility(INVISIBLE)
       }
-      state = PresenterState.SELECTED_DESTINATION
       viewModel.destination.value = it
       view.clearMarkers()
       view.hideSoftKeyboard()
@@ -143,13 +139,14 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       view.updateMapCamera(buildCameraUpdateFrom(it), TWO_SECONDS)
       view.updateLocationFabVisibility(INVISIBLE)
       view.updateSettingsFabVisibility(INVISIBLE)
-      view.updateDirectionsFabVisibility(VISIBLE)
+      view.updateNavigationFabVisibility(VISIBLE)
+      viewModel.findRouteToDestination()
     }
   }
 
   fun onLocationUpdate(location: Location?) {
     location?.let {
-      if (state == PresenterState.SHOW_LOCATION) {
+      if (presenterState == PresenterState.SHOW_LOCATION) {
         view.updateMapCamera(buildCameraUpdateFrom(location), TWO_SECONDS)
       }
       view.updateAutocompleteProximity(location)
@@ -159,25 +156,17 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   fun onRouteFound(routes: List<DirectionsRoute>?) {
     routes?.let { directionsRoutes ->
-      when (state) {
-        PresenterState.FIND_ROUTE -> {
-          state = PresenterState.ROUTE_FOUND
-          view.transition()
-          view.showAlternativeRoutes(true)
-          view.updateRoutes(directionsRoutes)
-          view.updateDirectionsFabVisibility(INVISIBLE)
-          view.updateNavigationFabVisibility(VISIBLE)
-          viewModel.destination.value?.let { destination ->
-            moveCameraToInclude(destination)
-          }
+      if (presenterState != PresenterState.NAVIGATE) {
+        view.transition()
+        view.showAlternativeRoutes(true)
+        view.updateNavigationFabVisibility(VISIBLE)
+        viewModel.destination.value?.let { destination ->
+          moveCameraToInclude(destination)
         }
-        PresenterState.NAVIGATE -> {
-          view.updateRoutes(directionsRoutes)
-        }
-        else -> {
-          // TODO no impl
-        }
+        presenterState = PresenterState.SHOW_ROUTE
       }
+
+      view.updateRoutes(directionsRoutes)
     }
   }
 
@@ -199,15 +188,29 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   fun onMapLongClick(point: LatLng): Boolean {
     viewModel.reverseGeocode(point)
+    viewModel.destination.value = Point.fromLngLat(point.longitude, point.latitude)
+    viewModel.findRouteToDestination()
     return true
   }
 
   fun onBackPressed(): Boolean {
-    if (!viewModel.collapsedBottomSheet) {
-      view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED)
-      return false
+    when (presenterState) {
+      PresenterState.SEARCH -> {
+        view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED)
+        return false
+      }
+      PresenterState.SHOW_ROUTE -> {
+        clearView()
+        return false
+      }
+
+      PresenterState.NAVIGATE -> {
+        clearView()
+        return false
+      }
+
+      else -> return true
     }
-    return true
   }
 
   fun subscribe(owner: LifecycleOwner) {
