@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.testapp.example.ui
 
 import android.Manifest
+import android.app.Activity
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -34,9 +35,12 @@ import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import kotlinx.android.synthetic.main.activity_example.*
+import org.jetbrains.anko.startActivityForResult
 
 private const val ZERO_PADDING = 0
 private const val BOTTOMSHEET_MULTIPLIER = 4
+private const val CHANGE_SETTING_REQUEST_CODE = 1
+
 
 class ExampleActivity : HistoryActivity(), ExampleView {
   private var map: NavigationMapboxMap? = null
@@ -237,7 +241,14 @@ class ExampleActivity : HistoryActivity(), ExampleView {
   }
 
   override fun showSettings() {
-    startActivity(Intent(this, NavigationSettingsActivity::class.java))
+    startActivityForResult(Intent(this, NavigationSettingsActivity::class.java), CHANGE_SETTING_REQUEST_CODE)
+  }
+
+  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    if (requestCode == CHANGE_SETTING_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+      viewModel.updateProfile()
+    }
   }
 
   override fun adjustMapPaddingForNavigation() {

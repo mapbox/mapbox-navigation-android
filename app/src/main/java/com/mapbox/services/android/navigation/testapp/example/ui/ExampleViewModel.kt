@@ -61,7 +61,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   private val navigation: MapboxNavigation
 
   private val accessToken: String = instance.resources.getString(R.string.mapbox_access_token)
-  private val routeFinder: RouteFinder
+  val routeFinder: RouteFinder
 
   init {
     routeFinder = RouteFinder(this, routes, accessToken, retrieveOfflineVersionFromPreferences(),
@@ -84,6 +84,10 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     navigation.addMilestoneEventListener(ExampleMilestoneEventListener(milestone, speechPlayer))
     navigation.addProgressChangeListener(ExampleProgressChangeListener(location, progress))
     navigation.addOffRouteListener(ExampleOffRouteListener(this))
+  }
+
+  internal fun updateProfile() {
+    routeFinder.updateProfile(retrieveProfileFromPreferences())
   }
 
   override fun onCleared() {
@@ -190,9 +194,18 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
   private fun retrieveProfileFromPreferences(): String {
     val context = getApplication<Application>()
-    return PreferenceManager.getDefaultSharedPreferences(context)
+    return normalizeForTraffic(PreferenceManager.getDefaultSharedPreferences(context)
             .getString(context.getString(R.string.route_profile_key), context.getString(R.string
-                    .default_route_profile))
+                    .default_route_profile)))
+  }
+
+  private fun normalizeForTraffic(string: String): String {
+    var normalizedString = string.toLowerCase()
+    if (string.equals("driving")) {
+      return "driving-traffic"
+    } else {
+      return normalizedString
+    }
   }
 
   private fun buildEngineRequest(): LocationEngineRequest {

@@ -103,6 +103,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     view.updateLocationRenderMode(RenderMode.NORMAL)
     view.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
     view.updateLocationFabVisibility(VISIBLE)
+    view.updateNavigationFabVisibility(INVISIBLE)
     view.updateSettingsFabVisibility(VISIBLE)
     view.updateCancelFabVisibility(INVISIBLE)
     view.updateInstructionViewVisibility(INVISIBLE)
@@ -114,9 +115,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       BottomSheetBehavior.STATE_COLLAPSED -> {
         view.hideSoftKeyboard()
         presenterState = PresenterState.SHOW_LOCATION
-
-        view.updateLocationFabVisibility(VISIBLE)
-        view.updateSettingsFabVisibility(VISIBLE)
       }
       BottomSheetBehavior.STATE_EXPANDED -> {
         presenterState = PresenterState.SEARCH
@@ -165,7 +163,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
         }
         presenterState = PresenterState.SHOW_ROUTE
       }
-
       view.updateRoutes(directionsRoutes)
     }
   }
