@@ -10,7 +10,6 @@ import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
-import com.mapbox.api.geocoding.v5.models.GeocodingResponse
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdate
@@ -162,6 +161,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
           moveCameraToInclude(destination)
         }
         presenterState = PresenterState.SHOW_ROUTE
+        view.updateSettingsFabVisibility(INVISIBLE)
       }
       view.updateRoutes(directionsRoutes)
     }
@@ -184,7 +184,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   fun onMapLongClick(point: LatLng): Boolean {
-    viewModel.reverseGeocode(point)
     viewModel.destination.value = Point.fromLngLat(point.longitude, point.latitude)
     viewModel.findRouteToDestination()
     return true
@@ -215,7 +214,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     viewModel.routes.observe(owner, Observer { onRouteFound(it) })
     viewModel.progress.observe(owner, Observer { onProgressUpdate(it) })
     viewModel.milestone.observe(owner, Observer { onMilestoneUpdate(it) })
-    viewModel.geocode.observe(owner, Observer { onGeocodingResponse(it) })
     viewModel.activateLocationEngine()
   }
 
@@ -256,16 +254,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       val bottom = resources.getDimension(R.dimen.route_overview_padding_bottom).toInt()
       val padding = intArrayOf(left, top, right, bottom)
       view.updateMapCameraFor(bounds, padding, TWO_SECONDS)
-    }
-  }
-
-  private fun onGeocodingResponse(it: GeocodingResponse?) {
-    val features = it?.features()
-    val isValidFeatureList = features?.isNotEmpty() ?: false
-    if (isValidFeatureList) {
-      features?.first()?.let { firstFeature ->
-        onDestinationFound(firstFeature)
-      }
     }
   }
 }
