@@ -103,7 +103,8 @@ public class NavigationViewRouterTest extends BaseTest {
       null, // Null offline (simulate no data)
       status,
       mock(RouteComparator.class),
-      mock(ViewRouteListener.class)
+      mock(ViewRouteListener.class),
+      mock(RouteCallStatus.class)
     );
     router.updateLocation(mock(Location.class));
 
@@ -125,7 +126,8 @@ public class NavigationViewRouterTest extends BaseTest {
       null, // Null offline (simulate no data)
       status,
       mock(RouteComparator.class),
-      mock(ViewRouteListener.class)
+      mock(ViewRouteListener.class),
+      mock(RouteCallStatus.class)
     );
     router.updateLocation(mock(Location.class));
 
@@ -148,7 +150,8 @@ public class NavigationViewRouterTest extends BaseTest {
       offlineRouter,
       status,
       mock(RouteComparator.class),
-      mock(ViewRouteListener.class)
+      mock(ViewRouteListener.class),
+      mock(RouteCallStatus.class)
     );
     router.updateLocation(mock(Location.class));
 
@@ -171,7 +174,8 @@ public class NavigationViewRouterTest extends BaseTest {
       offlineRouter,
       status,
       mock(RouteComparator.class),
-      mock(ViewRouteListener.class)
+      mock(ViewRouteListener.class),
+      mock(RouteCallStatus.class)
     );
     router.updateLocation(mock(Location.class));
 
@@ -189,7 +193,8 @@ public class NavigationViewRouterTest extends BaseTest {
       mock(NavigationViewOfflineRouter.class),
       mock(ConnectivityStatusProvider.class),
       mock(RouteComparator.class),
-      mock(ViewRouteListener.class)
+      mock(ViewRouteListener.class),
+      mock(RouteCallStatus.class)
     );
 
     router.onDestroy();
@@ -205,7 +210,8 @@ public class NavigationViewRouterTest extends BaseTest {
       mock(NavigationViewOfflineRouter.class),
       mock(ConnectivityStatusProvider.class),
       mock(RouteComparator.class),
-      mock(ViewRouteListener.class)
+      mock(ViewRouteListener.class),
+      mock(RouteCallStatus.class)
     );
 
     router.onDestroy();
@@ -227,7 +233,8 @@ public class NavigationViewRouterTest extends BaseTest {
       offlineRouter,
       mock(ConnectivityStatusProvider.class),
       mock(RouteComparator.class),
-      mock(ViewRouteListener.class)
+      mock(ViewRouteListener.class),
+      mock(RouteCallStatus.class)
     );
 
     router.extractRouteOptions(options);
@@ -249,7 +256,8 @@ public class NavigationViewRouterTest extends BaseTest {
       offlineRouter,
       mock(ConnectivityStatusProvider.class),
       mock(RouteComparator.class),
-      mock(ViewRouteListener.class)
+      mock(ViewRouteListener.class),
+      mock(RouteCallStatus.class)
     );
 
     router.extractRouteOptions(options);
@@ -271,7 +279,8 @@ public class NavigationViewRouterTest extends BaseTest {
       offlineRouter,
       mock(ConnectivityStatusProvider.class),
       mock(RouteComparator.class),
-      mock(ViewRouteListener.class)
+      mock(ViewRouteListener.class),
+      mock(RouteCallStatus.class)
     );
 
     router.extractRouteOptions(options);
@@ -294,7 +303,8 @@ public class NavigationViewRouterTest extends BaseTest {
       offlineRouter,
       mock(ConnectivityStatusProvider.class),
       mock(RouteComparator.class),
-      mock(ViewRouteListener.class)
+      mock(ViewRouteListener.class),
+      mock(RouteCallStatus.class)
     );
 
     router.extractRouteOptions(options);
@@ -317,7 +327,8 @@ public class NavigationViewRouterTest extends BaseTest {
       offlineRouter,
       mock(ConnectivityStatusProvider.class),
       mock(RouteComparator.class),
-      mock(ViewRouteListener.class)
+      mock(ViewRouteListener.class),
+      mock(RouteCallStatus.class)
     );
 
     router.extractRouteOptions(options);

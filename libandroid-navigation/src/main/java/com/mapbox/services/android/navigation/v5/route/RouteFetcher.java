@@ -215,9 +215,6 @@ public class RouteFetcher {
   private Callback<DirectionsResponse> directionsResponseCallback = new Callback<DirectionsResponse>() {
     @Override
     public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
-      if (!response.isSuccessful()) {
-        return;
-      }
       updateListeners(response.body(), routeProgress);
     }
 
