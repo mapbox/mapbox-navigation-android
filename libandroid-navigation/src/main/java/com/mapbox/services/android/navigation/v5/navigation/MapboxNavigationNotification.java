@@ -64,6 +64,14 @@ class MapboxNavigationNotification implements NavigationNotification {
     initialize(applicationContext, mapboxNavigation);
   }
 
+  // For testing only
+  MapboxNavigationNotification(Context applicationContext, MapboxNavigation mapboxNavigation,
+                               Notification notification) {
+    this.applicationContext = applicationContext;
+    this.notification = notification;
+    initialize(applicationContext, mapboxNavigation);
+  }
+
   @Override
   public Notification getNotification() {
     return notification;
@@ -77,11 +85,22 @@ class MapboxNavigationNotification implements NavigationNotification {
   @Override
   public void updateNotification(RouteProgress routeProgress) {
     updateNotificationViews(routeProgress);
+    rebuildNotification();
   }
 
   @Override
   public void onNavigationStopped(Context applicationContext) {
     unregisterReceiver(applicationContext);
+  }
+
+  // Package private (no modifier) for testing purposes
+  String generateArrivalTime(RouteProgress routeProgress, Calendar time) {
+    MapboxNavigationOptions options = mapboxNavigation.options();
+    double legDurationRemaining = routeProgress.currentLegProgress().durationRemaining();
+    int timeFormatType = options.timeFormatType();
+    String arrivalTime = formatTime(time, legDurationRemaining, timeFormatType, isTwentyFourHourFormat);
+    String formattedArrivalTime = String.format(etaFormat, arrivalTime);
+    return formattedArrivalTime;
   }
 
   private void initialize(Context applicationContext, MapboxNavigation mapboxNavigation) {
@@ -96,7 +115,9 @@ class MapboxNavigationNotification implements NavigationNotification {
 
     registerReceiver(applicationContext);
     createNotificationChannel(applicationContext);
-    notification = buildNotification(applicationContext);
+    if (notification == null) {
+      notification = buildNotification(applicationContext);
+    }
   }
 
   private void initializeDistanceFormatter(Context applicationContext, MapboxNavigation mapboxNavigation) {
@@ -172,12 +193,16 @@ class MapboxNavigationNotification implements NavigationNotification {
     buildRemoteViews();
     updateInstructionText(routeProgress.currentLegProgress().currentStep());
     updateDistanceText(routeProgress);
-    updateArrivalTime(routeProgress);
+    Calendar time = Calendar.getInstance();
+    String formattedArrivalTime = generateArrivalTime(routeProgress, time);
+    updateViewsWith(formattedArrivalTime);
     LegStep step = routeProgress.currentLegProgress().upComingStep() != null
       ? routeProgress.currentLegProgress().upComingStep()
       : routeProgress.currentLegProgress().currentStep();
     updateManeuverImage(step);
+  }
 
+  private void rebuildNotification() {
     notification = buildNotification(applicationContext);
     notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notification);
   }
@@ -222,13 +247,7 @@ class MapboxNavigationNotification implements NavigationNotification {
       routeProgress.currentLegProgress().currentStepProgress().distanceRemaining()).toString());
   }
 
-  private void updateArrivalTime(RouteProgress routeProgress) {
-    MapboxNavigationOptions options = mapboxNavigation.options();
-    Calendar time = Calendar.getInstance();
-    double durationRemaining = routeProgress.durationRemaining();
-    int timeFormatType = options.timeFormatType();
-    String arrivalTime = formatTime(time, durationRemaining, timeFormatType, isTwentyFourHourFormat);
-    String formattedArrivalTime = String.format(etaFormat, arrivalTime);
+  private void updateViewsWith(String formattedArrivalTime) {
     collapsedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, formattedArrivalTime);
     expandedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, formattedArrivalTime);
   }
