@@ -276,13 +276,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   @Override
   public void addMarker(Point position) {
     if (navigationMap != null) {
-      navigationMap.addMarker(getContext(), position);
-    }
-  }
-
-  public void clearMarkers() {
-    if (navigationMap != null) {
-      navigationMap.clearMarkers();
+      navigationMap.addDestinationMarker(position);
     }
   }
 

@@ -25,6 +25,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.style.sources.Source;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.services.android.navigation.ui.v5.NavigationSnapshotReadyCallback;
@@ -115,6 +116,11 @@ public class NavigationMapboxMap {
   }
 
   // Package private (no modifier) for testing purposes
+  NavigationMapboxMap(NavigationSymbolManager navigationSymbolManager) {
+    this.navigationSymbolManager = navigationSymbolManager;
+  }
+
+  // Package private (no modifier) for testing purposes
   NavigationMapboxMap(@NonNull MapWayName mapWayName, @NonNull MapFpsDelegate mapFpsDelegate) {
     this.mapWayName = mapWayName;
     this.mapFpsDelegate = mapFpsDelegate;
@@ -145,9 +151,36 @@ public class NavigationMapboxMap {
    *
    * @param context  to retrieve the icon drawable from the theme
    * @param position the point at which the marker will be placed
+   * @deprecated Use {@link NavigationMapboxMap#addDestinationMarker(Point)} instead.
+   * A {@link Context} is no longer needed.
    */
+  @Deprecated
   public void addMarker(Context context, Point position) {
-    navigationSymbolManager.addMarkerFor(position);
+    navigationSymbolManager.addDestinationMarkerFor(position);
+  }
+
+  /**
+   * Adds a marker icon on the map at the given position.
+   * <p>
+   * The icon used for this method can be defined in your theme with
+   * the attribute <tt>navigationViewDestinationMarker</tt>.
+   *
+   * @param position the point at which the marker will be placed
+   */
+  public void addDestinationMarker(Point position) {
+    navigationSymbolManager.addDestinationMarkerFor(position);
+  }
+
+  /**
+   * Adds a custom marker to the map based on the options provided.
+   * <p>
+   * Please note, the map will manage all markers added.  Calling {@link NavigationMapboxMap#clearMarkers()}
+   * will clear all destination / custom markers that have been added to the map.
+   *
+   * @param options for the custom {@link com.mapbox.mapboxsdk.plugins.annotation.Symbol}
+   */
+  public void addCustomMarker(SymbolOptions options) {
+    navigationSymbolManager.addCustomSymbolFor(options);
   }
 
   /**

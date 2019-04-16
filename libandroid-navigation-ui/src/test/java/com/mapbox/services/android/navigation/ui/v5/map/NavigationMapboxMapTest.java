@@ -1,10 +1,12 @@
 package com.mapbox.services.android.navigation.ui.v5.map;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.style.sources.Source;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
@@ -295,6 +297,28 @@ public class NavigationMapboxMapTest {
     new NavigationMapboxMap(mapboxMap, layerInteractor, adjustor);
 
     verify(layerInteractor).addStreetsLayer("composite", "road");
+  }
+
+  @Test
+  public void addDestinationMarker_navigationSymbolManagerReceivesPosition() {
+    Point position = mock(Point.class);
+    NavigationSymbolManager navigationSymbolManager = mock(NavigationSymbolManager.class);
+    NavigationMapboxMap map = new NavigationMapboxMap(navigationSymbolManager);
+
+    map.addDestinationMarker(position);
+
+    verify(navigationSymbolManager).addDestinationMarkerFor(position);
+  }
+
+  @Test
+  public void addCustomMarker_navigationSymbolManagerReceivesOptions() {
+    SymbolOptions options = mock(SymbolOptions.class);
+    NavigationSymbolManager navigationSymbolManager = mock(NavigationSymbolManager.class);
+    NavigationMapboxMap map = new NavigationMapboxMap(navigationSymbolManager);
+
+    map.addCustomMarker(options);
+
+    verify(navigationSymbolManager).addCustomSymbolFor(options);
   }
 
   private List<Source> buildMockSourcesWith(String url) {
