@@ -17,10 +17,12 @@ class OfflineRouteFoundCallback implements OnOfflineRouteFoundCallback {
   @Override
   public void onRouteFound(@NonNull DirectionsRoute offlineRoute) {
     router.updateCurrentRoute(offlineRoute);
+    router.updateCallStatusReceived();
   }
 
   @Override
   public void onError(@NonNull OfflineError error) {
     router.onRequestError(error.getMessage());
+    router.updateCallStatusReceived();
   }
 }

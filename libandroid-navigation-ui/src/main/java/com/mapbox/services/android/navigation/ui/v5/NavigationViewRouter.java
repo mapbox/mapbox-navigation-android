@@ -15,6 +15,7 @@ import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
 import com.mapbox.services.android.navigation.v5.route.RouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.util.Date;
 import java.util.List;
 
 class NavigationViewRouter implements RouteListener {
@@ -29,7 +30,7 @@ class NavigationViewRouter implements RouteListener {
   private RouteOptions routeOptions;
   private DirectionsRoute currentRoute;
   private Location location;
-  private boolean isRouting;
+  private RouteCallStatus callStatus;
 
   NavigationViewRouter(RouteFetcher onlineRouter, ConnectivityStatusProvider connectivityStatus,
                        ViewRouteListener listener) {
@@ -43,25 +44,28 @@ class NavigationViewRouter implements RouteListener {
   // Extra fields for testing purposes
   NavigationViewRouter(RouteFetcher onlineRouter, NavigationViewOfflineRouter offlineRouter,
                        ConnectivityStatusProvider connectivityStatus, RouteComparator routeComparator,
-                       ViewRouteListener listener) {
+                       ViewRouteListener listener, RouteCallStatus callStatus) {
     this.onlineRouter = onlineRouter;
     this.offlineRouter = offlineRouter;
     this.connectivityStatus = connectivityStatus;
-    this.listener = listener;
     this.routeComparator = routeComparator;
+    this.listener = listener;
+    this.callStatus = callStatus;
     onlineRouter.addRouteListener(this);
   }
 
   @Override
   public void onResponseReceived(DirectionsResponse response, @Nullable RouteProgress routeProgress) {
-    routeComparator.compare(response, currentRoute);
-    isRouting = false;
+    if (validRouteResponse(response)) {
+      routeComparator.compare(response, currentRoute);
+    }
+    updateCallStatusReceived();
   }
 
   @Override
   public void onErrorReceived(Throwable throwable) {
     onRequestError(throwable.getMessage());
-    isRouting = false;
+    updateCallStatusReceived();
   }
 
   void extractRouteOptions(NavigationViewOptions options) {
@@ -70,19 +74,16 @@ class NavigationViewRouter implements RouteListener {
   }
 
   void findRouteFrom(@Nullable RouteProgress routeProgress) {
-    if (isRouting) {
+    if (isRouting()) {
       return;
     }
     NavigationRoute.Builder builder = onlineRouter.buildRequestFrom(location, routeProgress);
     if (connectivityStatus.isConnectedFast()) {
-      onlineRouter.findRouteWith(builder);
-      isRouting = true;
+      findOnlineRouteWith(builder);
     } else if (isOfflineConfigured()) {
-      offlineRouter.findRouteWith(builder);
-      isRouting = true;
+      findOfflineRouteWith(builder);
     } else if (connectivityStatus.isConnected()) {
-      onlineRouter.findRouteWith(builder);
-      isRouting = true;
+      findOnlineRouteWith(builder);
     }
   }
 
@@ -95,6 +96,12 @@ class NavigationViewRouter implements RouteListener {
     listener.onRouteUpdate(currentRoute);
   }
 
+  void updateCallStatusReceived() {
+    if (callStatus != null) {
+      callStatus.setResponseReceived();
+    }
+  }
+
   void onRequestError(String errorMessage) {
     listener.onRouteRequestError(errorMessage);
   }
@@ -102,6 +109,10 @@ class NavigationViewRouter implements RouteListener {
   void onDestroy() {
     onlineRouter.cancelRouteCall();
     onlineRouter.clearListeners();
+  }
+
+  private boolean validRouteResponse(DirectionsResponse response) {
+    return response != null && !response.routes().isEmpty();
   }
 
   private void extractRouteFrom(NavigationViewOptions options) {
@@ -113,6 +124,16 @@ class NavigationViewRouter implements RouteListener {
   private void cacheRouteOptions(RouteOptions routeOptions) {
     this.routeOptions = routeOptions;
     cacheRouteDestination();
+  }
+
+  private void cacheRouteDestination() {
+    boolean hasValidCoordinates = routeOptions != null && !routeOptions.coordinates().isEmpty();
+    if (hasValidCoordinates) {
+      List<Point> coordinates = routeOptions.coordinates();
+      int destinationCoordinate = coordinates.size() - 1;
+      Point destinationPoint = coordinates.get(destinationCoordinate);
+      listener.onDestinationSet(destinationPoint);
+    }
   }
 
   private void initializeOfflineFrom(NavigationViewOptions options) {
@@ -131,13 +152,21 @@ class NavigationViewRouter implements RouteListener {
     return offlineRouter != null && offlineRouter.isConfigured();
   }
 
-  private void cacheRouteDestination() {
-    boolean hasValidCoordinates = routeOptions != null && !routeOptions.coordinates().isEmpty();
-    if (hasValidCoordinates) {
-      List<Point> coordinates = routeOptions.coordinates();
-      int destinationCoordinate = coordinates.size() - 1;
-      Point destinationPoint = coordinates.get(destinationCoordinate);
-      listener.onDestinationSet(destinationPoint);
+  private void findOnlineRouteWith(NavigationRoute.Builder builder) {
+    onlineRouter.cancelRouteCall();
+    onlineRouter.findRouteWith(builder);
+    callStatus = new RouteCallStatus(new Date());
+  }
+
+  private void findOfflineRouteWith(NavigationRoute.Builder builder) {
+    offlineRouter.findRouteWith(builder);
+    callStatus = new RouteCallStatus(new Date());
+  }
+
+  private boolean isRouting() {
+    if (callStatus == null) {
+      return false;
     }
+    return callStatus.isRouting(new Date());
   }
 }
