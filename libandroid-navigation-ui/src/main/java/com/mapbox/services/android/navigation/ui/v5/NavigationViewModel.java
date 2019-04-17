@@ -15,6 +15,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.offline.OfflineManager;
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructionModel;
@@ -38,7 +39,6 @@ import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEven
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
@@ -201,6 +201,7 @@ public class NavigationViewModel extends AndroidViewModel {
       initializeVoiceInstructionLoader();
       initializeVoiceInstructionCache();
       initializeNavigationSpeechPlayer(options);
+      initializeMapOfflineManager(options);
     }
     router.extractRouteOptions(options);
   }
@@ -246,6 +247,18 @@ public class NavigationViewModel extends AndroidViewModel {
       isOffRoute.setValue(false);
     }
     resetConfigurationFlag();
+  }
+
+  void updateRouteProgress(RouteProgress routeProgress) {
+    this.routeProgress = routeProgress;
+    sendEventArrival(routeProgress);
+    instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
+    summaryModel.setValue(new SummaryModel(getApplication(), distanceFormatter, routeProgress, timeFormatType));
+  }
+
+  void updateLocation(Location location) {
+    router.updateLocation(location);
+    navigationLocation.setValue(location);
   }
 
   void sendEventFailedReroute(String errorMessage) {
@@ -312,6 +325,21 @@ public class NavigationViewModel extends AndroidViewModel {
     this.speechPlayer = new NavigationSpeechPlayer(speechPlayerProvider);
   }
 
+  private void initializeMapOfflineManager(NavigationViewOptions options) {
+    if (TextUtils.isEmpty(options.offlineMapDatabasePath())) {
+      return;
+    }
+    Context applicationContext = getApplication().getApplicationContext();
+    OfflineManager offlineManager = OfflineManager.getInstance(applicationContext);
+    String styleUrl = ThemeSwitcher.retrieveMapStyle(applicationContext);
+    float pixelRatio = applicationContext.getResources().getDisplayMetrics().density;
+    OfflineRegionDefinitionProvider definitionProvider = new OfflineRegionDefinitionProvider(styleUrl, pixelRatio);
+    OfflineMetadataProvider metadataProvider = new OfflineMetadataProvider();
+    MapOfflineManager mapOfflineManager = new MapOfflineManager(offlineManager, definitionProvider, metadataProvider);
+    NavigationOfflineDatabaseCallback callback = new NavigationOfflineDatabaseCallback(navigation, mapOfflineManager);
+    mapOfflineManager.loadDatabase(options.offlineMapDatabasePath(), callback);
+  }
+
   private void initializeVoiceInstructionLoader() {
     Cache cache = new Cache(new File(getApplication().getCacheDir(), OKHTTP_INSTRUCTION_CACHE),
       TEN_MEGABYTE_CACHE_SIZE);
@@ -341,7 +369,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void addNavigationListeners() {
-    navigation.addProgressChangeListener(progressChangeListener);
+    navigation.addProgressChangeListener(new NavigationViewModelProgressChangeListener(this));
     navigation.addOffRouteListener(offRouteListener);
     navigation.addMilestoneEventListener(milestoneEventListener);
     navigation.addNavigationEventListener(navigationEventListener);
@@ -354,18 +382,6 @@ public class NavigationViewModel extends AndroidViewModel {
       navigation.addMilestones(milestones);
     }
   }
-
-  private ProgressChangeListener progressChangeListener = new ProgressChangeListener() {
-    @Override
-    public void onProgressChange(Location location, RouteProgress routeProgress) {
-      NavigationViewModel.this.routeProgress = routeProgress;
-      router.updateLocation(location);
-      instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
-      summaryModel.setValue(new SummaryModel(getApplication(), distanceFormatter, routeProgress, timeFormatType));
-      navigationLocation.setValue(location);
-      sendEventArrival(routeProgress);
-    }
-  };
 
   private OffRouteListener offRouteListener = new OffRouteListener() {
     @Override

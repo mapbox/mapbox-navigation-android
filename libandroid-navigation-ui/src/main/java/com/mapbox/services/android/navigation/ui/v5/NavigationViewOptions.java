@@ -122,6 +122,17 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
      */
     public abstract Builder offlineRoutingTilesVersion(String offlineVersion);
 
+    /**
+     * Add an offline path for loading an offline map database.
+     * <p>
+     * When added, the {@link NavigationView} will try to initialize and use this data
+     * for offline maps while navigating.
+     *
+     * @param offlinePath to offline database on device
+     * @return this builder
+     */
+    public abstract Builder offlineMapDatabasePath(String offlinePath);
+
     public abstract NavigationViewOptions build();
   }
 

@@ -23,4 +23,7 @@ public abstract class NavigationUiOptions {
 
   @Nullable
   public abstract String offlineRoutingTilesVersion();
+
+  @Nullable
+  public abstract String offlineMapDatabasePath();
 }
