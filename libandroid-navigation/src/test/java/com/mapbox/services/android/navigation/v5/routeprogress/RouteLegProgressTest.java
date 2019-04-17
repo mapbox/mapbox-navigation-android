@@ -55,13 +55,11 @@ public class RouteLegProgressTest extends BaseTest {
     DirectionsRoute route = buildTestDirectionsRoute();
     RouteLeg firstLeg = route.legs().get(0);
 
-    routeProgress = routeProgress.toBuilder().stepIndex(5).build();
-
     assertEquals(
-      firstLeg.steps().get(5).geometry(), routeProgress.currentLegProgress().currentStep().geometry()
+      firstLeg.steps().get(0).geometry(), routeProgress.currentLegProgress().currentStep().geometry()
     );
     assertNotSame(
-      firstLeg.steps().get(6).geometry(), routeProgress.currentLegProgress().currentStep().geometry()
+      firstLeg.steps().get(1).geometry(), routeProgress.currentLegProgress().currentStep().geometry()
     );
   }
 

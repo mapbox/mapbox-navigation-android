@@ -111,9 +111,7 @@ public abstract class RouteLegProgress {
    * @since 0.1.0
    */
   @NonNull
-  public LegStep currentStep() {
-    return routeLeg().steps().get(stepIndex());
-  }
+  public abstract LegStep currentStep();
 
   /**
    * Get the next/upcoming step immediately after the current step. If the user is on the last step
@@ -209,11 +207,11 @@ public abstract class RouteLegProgress {
 
     abstract Builder routeLeg(RouteLeg routeLeg);
 
-    abstract RouteLeg routeLeg();
+    abstract Builder currentStep(LegStep currentStep);
+
+    abstract LegStep currentStep();
 
     abstract Builder stepIndex(int stepIndex);
-
-    abstract int stepIndex();
 
     abstract Builder durationRemaining(double durationRemaining);
 
@@ -252,9 +250,8 @@ public abstract class RouteLegProgress {
     abstract RouteLegProgress autoBuild(); // not public
 
     public RouteLegProgress build() {
-      LegStep currentStep = routeLeg().steps().get(stepIndex());
       RouteStepProgress stepProgress = RouteStepProgress.builder()
-        .step(currentStep)
+        .step(currentStep())
         .distanceRemaining(stepDistanceRemaining())
         .intersections(intersections())
         .currentIntersection(currentIntersection())
@@ -262,7 +259,6 @@ public abstract class RouteLegProgress {
         .intersectionDistancesAlongStep(intersectionDistancesAlongStep())
         .build();
       currentStepProgress(stepProgress);
-
       return autoBuild();
     }
   }
