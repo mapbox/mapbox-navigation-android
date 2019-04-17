@@ -1,89 +1,83 @@
 package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.annotation.SuppressLint;
+import android.location.Location;
+import android.support.annotation.NonNull;
 
-import com.google.gson.annotations.JsonAdapter;
-import com.mapbox.android.telemetry.Event;
+import com.mapbox.android.telemetry.TelemetryUtils;
+import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 
-class NavigationRerouteEvent extends Event implements Parcelable {
+@SuppressLint("ParcelCreator")
+public class NavigationRerouteEvent extends NavigationStepEvent {
   private static final String NAVIGATION_REROUTE = "navigation.reroute";
-  private final String event;
-  private NavigationMetadata navigationMetadata;
-  private NavigationRerouteData navigationRerouteData;
-  private NavigationLocationData navigationLocationData;
-  private FeedbackData feedbackData;
-  private NavigationStepMetadata step = null;
+  private final int newDistanceRemaining;
+  private final int newDurationRemaining;
+  private final String feedbackId;
+  private final String newGeometry;
+  private int secondsSinceLastReroute;
+  private Location[] locationsBefore;
+  private Location[] locationsAfter;
+  private String screenshot;
 
-  NavigationRerouteEvent(NavigationState navigationState) {
-    this.event = NAVIGATION_REROUTE;
-    this.feedbackData = navigationState.getFeedbackData();
-    this.navigationMetadata = navigationState.getNavigationMetadata();
-    this.navigationRerouteData = navigationState.getNavigationRerouteData();
-    this.navigationLocationData = navigationState.getNavigationLocationData();
-    this.step = navigationState.getNavigationStepMetadata();
-  }
-
-  Type obtainType() {
-    return Type.NAV_REROUTE;
-  }
-
-  String getEvent() {
-    return event;
-  }
-
-  NavigationLocationData getNavigationLocationData() {
-    return navigationLocationData;
-  }
-
-  NavigationRerouteData getNavigationRerouteData() {
-    return navigationRerouteData;
-  }
-
-  NavigationStepMetadata getStep() {
-    return step;
-  }
-
-  FeedbackData getFeedbackData() {
-    return feedbackData;
-  }
-
-  NavigationMetadata getNavigationMetadata() {
-    return navigationMetadata;
-  }
-
-  private NavigationRerouteEvent(Parcel in) {
-    event = in.readString();
-    navigationMetadata = in.readParcelable(NavigationMetadata.class.getClassLoader());
-    navigationLocationData = in.readParcelable(NavigationLocationData.class.getClassLoader());
-    feedbackData = in.readParcelable(FeedbackData.class.getClassLoader());
-    step = in.readParcelable(NavigationStepMetadata.class.getClassLoader());
+  NavigationRerouteEvent(@NonNull PhoneState phoneState, @NonNull RerouteEvent rerouteEvent,
+                         @NonNull MetricsRouteProgress metricsRouteProgress) {
+    super(phoneState, metricsRouteProgress);
+    this.newDistanceRemaining = rerouteEvent.getNewDistanceRemaining();
+    this.newDurationRemaining = rerouteEvent.getNewDurationRemaining();
+    this.newGeometry = rerouteEvent.getNewRouteGeometry();
+    this.feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier();
   }
 
   @Override
-  public void writeToParcel(Parcel dest, int flags) {
-    dest.writeString(event);
-    dest.writeParcelable(navigationMetadata, flags);
-    dest.writeParcelable(navigationLocationData, flags);
-    dest.writeParcelable(feedbackData, flags);
-    dest.writeParcelable(step, flags);
+  protected String getEventName() {
+    return NAVIGATION_REROUTE;
   }
 
-  @Override
-  public int describeContents() {
-    return 0;
+  public int getNewDistanceRemaining() {
+    return newDistanceRemaining;
   }
 
-  @SuppressWarnings("unused")
-  public static final Creator<NavigationRerouteEvent> CREATOR = new Creator<NavigationRerouteEvent>() {
-    @Override
-    public NavigationRerouteEvent createFromParcel(Parcel in) {
-      return new NavigationRerouteEvent(in);
-    }
+  public int getNewDurationRemaining() {
+    return newDurationRemaining;
+  }
 
-    @Override
-    public NavigationRerouteEvent[] newArray(int size) {
-      return new NavigationRerouteEvent[size];
-    }
-  };
+  public String getNewGeometry() {
+    return newGeometry;
+  }
+
+  public int getSecondsSinceLastReroute() {
+    return secondsSinceLastReroute;
+  }
+
+  public void setSecondsSinceLastReroute(int secondsSinceLastReroute) {
+    this.secondsSinceLastReroute = secondsSinceLastReroute;
+  }
+
+  public Location[] getLocationsBefore() {
+    return locationsBefore;
+  }
+
+  public void setLocationsBefore(Location[] locationsBefore) {
+    this.locationsBefore = locationsBefore;
+  }
+
+  public Location[] getLocationsAfter() {
+    return locationsAfter;
+  }
+
+  public void setLocationsAfter(Location[] locationsAfter) {
+    this.locationsAfter = locationsAfter;
+  }
+
+  public String getFeedbackId() {
+    return feedbackId;
+  }
+
+  public String getScreenshot() {
+    return screenshot;
+  }
+
+  public void setScreenshot(String screenshot) {
+    this.screenshot = screenshot;
+  }
 }

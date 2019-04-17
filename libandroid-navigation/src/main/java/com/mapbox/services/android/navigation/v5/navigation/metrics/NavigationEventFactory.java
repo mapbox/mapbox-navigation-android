@@ -1,91 +1,141 @@
 package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
-import com.mapbox.android.telemetry.Event;
+import android.location.Location;
+import android.support.annotation.NonNull;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.mapbox.android.telemetry.TelemetryUtils;
+import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
+
+import java.util.Date;
+import java.util.List;
 
 public class NavigationEventFactory {
+  private static final int EVENT_VERSION = 7;
 
-  private static final String NOT_A_NAVIGATION_EVENT_TYPE = "Type must be a navigation event.";
-  private static final String NAVIGATION_STATE_ILLEGAL_NULL = "NavigationState cannot be null.";
-  private final Map<Event.Type, NavBuildEvent> BUILD_NAV_EVENT = new HashMap<Event.Type, NavBuildEvent>() {
-    {
-      put(Event.Type.NAV_ARRIVE, new NavBuildEvent() {
-        @Override
-        public Event build(NavigationState navigationState) {
-          return buildNavigationArriveEvent(navigationState);
-        }
-      });
-      put(Event.Type.NAV_DEPART, new NavBuildEvent() {
-        @Override
-        public Event build(NavigationState navigationState) {
-          return buildNavigationDepartEvent(navigationState);
-        }
-      });
-      put(Event.Type.NAV_CANCEL, new NavBuildEvent() {
-        @Override
-        public Event build(NavigationState navigationState) {
-          return buildNavigationCancelEvent(navigationState);
-        }
-      });
-      put(Event.Type.NAV_FEEDBACK, new NavBuildEvent() {
-        @Override
-        public Event build(NavigationState navigationState) {
-          return buildNavigationFeedbackEvent(navigationState);
-        }
-      });
-      put(Event.Type.NAV_REROUTE, new NavBuildEvent() {
-        @Override
-        public Event build(NavigationState navigationState) {
-          return buildNavigationRerouteEvent(navigationState);
-        }
-      });
-      put(Event.Type.NAV_FASTER_ROUTE, new NavBuildEvent() {
-        @Override
-        public Event build(NavigationState navigationState) {
-          return buildNavigationFasterRouteEvent(navigationState);
-        }
-      });
+  private NavigationEventFactory() {
+
+  }
+
+  public static NavigationDepartEvent buildNavigationDepartEvent(@NonNull PhoneState phoneState,
+                                                                 @NonNull SessionState sessionState,
+                                                                 @NonNull MetricsRouteProgress metricProgress,
+                                                                 @NonNull Location location,
+                                                                 @NonNull String sdkIdentifier) {
+    NavigationDepartEvent navigationDepartEvent = new NavigationDepartEvent(phoneState);
+    setEvent(sessionState, metricProgress, location, sdkIdentifier, navigationDepartEvent);
+    return navigationDepartEvent;
+  }
+
+  public static NavigationCancelEvent buildNavigationCancelEvent(@NonNull PhoneState phoneState,
+                                                                 @NonNull SessionState sessionState,
+                                                                 @NonNull MetricsRouteProgress metricProgress,
+                                                                 @NonNull Location location,
+                                                                 @NonNull String sdkIdentifier) {
+
+    NavigationCancelEvent navigationCancelEvent = new NavigationCancelEvent(phoneState);
+    setEvent(sessionState, metricProgress, location, sdkIdentifier, navigationCancelEvent);
+    String arrivalTimestamp = TelemetryUtils.generateCreateDateFormatted(sessionState.arrivalTimestamp());
+    navigationCancelEvent.setArrivalTimestamp(arrivalTimestamp);
+    return navigationCancelEvent;
+  }
+
+  public static NavigationArriveEvent buildNavigationArriveEvent(@NonNull PhoneState phoneState,
+                                                                 @NonNull SessionState sessionState,
+                                                                 @NonNull MetricsRouteProgress metricProgress,
+                                                                 @NonNull Location location,
+                                                                 @NonNull String sdkIdentifier) {
+    NavigationArriveEvent navigationArriveEvent = new NavigationArriveEvent(phoneState);
+    setEvent(sessionState, metricProgress, location, sdkIdentifier, navigationArriveEvent);
+    return navigationArriveEvent;
+  }
+
+
+  public static NavigationRerouteEvent buildNavigationRerouteEvent(@NonNull PhoneState phoneState,
+                                                                   @NonNull SessionState sessionState,
+                                                                   @NonNull MetricsRouteProgress metricProgress,
+                                                                   @NonNull Location location,
+                                                                   @NonNull String sdkIdentifier,
+                                                                   @NonNull RerouteEvent rerouteEvent) {
+    NavigationRerouteEvent navigationRerouteEvent =
+      new NavigationRerouteEvent(phoneState, rerouteEvent, metricProgress);
+    setEvent(sessionState, metricProgress, location, sdkIdentifier, navigationRerouteEvent);
+    navigationRerouteEvent.setLocationsBefore(convertToArray(sessionState.beforeEventLocations()));
+    navigationRerouteEvent.setLocationsAfter(convertToArray(sessionState.afterEventLocations()));
+    navigationRerouteEvent.setSecondsSinceLastReroute(sessionState.secondsSinceLastReroute());
+    return navigationRerouteEvent;
+  }
+
+
+  public static NavigationFeedbackEvent buildNavigationFeedbackEvent(@NonNull PhoneState phoneState,
+                                                                     @NonNull SessionState sessionState,
+                                                                     @NonNull MetricsRouteProgress metricProgress,
+                                                                     @NonNull Location location,
+                                                                     @NonNull String sdkIdentifier,
+                                                                     String description, String feedbackType,
+                                                                     String screenshot, String feedbackSource) {
+    NavigationFeedbackEvent navigationFeedbackEvent = new NavigationFeedbackEvent(phoneState, metricProgress);
+    setEvent(sessionState, metricProgress, location, sdkIdentifier, navigationFeedbackEvent);
+    navigationFeedbackEvent.setLocationsBefore(convertToArray(sessionState.beforeEventLocations()));
+    navigationFeedbackEvent.setLocationsAfter(convertToArray(sessionState.afterEventLocations()));
+    navigationFeedbackEvent.setDescription(description);
+    navigationFeedbackEvent.setFeedbackType(feedbackType);
+    navigationFeedbackEvent.setScreenshot(screenshot);
+    navigationFeedbackEvent.setSource(feedbackSource);
+    return navigationFeedbackEvent;
+  }
+
+  private static void setEvent(SessionState sessionState, MetricsRouteProgress metricProgress, Location location,
+                               String sdkIdentifier, NavigationEvent navigationEvent) {
+    navigationEvent
+      .setAbsoluteDistanceToDestination(DistanceFormatter.calculateAbsoluteDistance(location, metricProgress));
+    navigationEvent
+      .setDistanceCompleted((int) (sessionState.eventRouteDistanceCompleted() + metricProgress.getDistanceTraveled()));
+    navigationEvent.setDistanceRemaining(metricProgress.getDistanceRemaining());
+    navigationEvent.setDurationRemaining(metricProgress.getDurationRemaining());
+    navigationEvent.setProfile(metricProgress.getDirectionsRouteProfile());
+    navigationEvent.setLegIndex(metricProgress.getLegIndex());
+    navigationEvent.setLegCount(metricProgress.getLegCount());
+    navigationEvent.setStepIndex(metricProgress.getStepIndex());
+    navigationEvent.setStepCount(metricProgress.getStepCount());
+    navigationEvent.setEstimatedDistance(metricProgress.getDirectionsRouteDistance());
+    navigationEvent.setEstimatedDuration(metricProgress.getDirectionsRouteDuration());
+    navigationEvent.setStartTimestamp(obtainStartTimestamp(sessionState));
+    navigationEvent.setEventVersion(EVENT_VERSION);
+    navigationEvent.setSdkIdentifier(sdkIdentifier);
+    navigationEvent.setSessionIdentifier(sessionState.sessionIdentifier());
+    navigationEvent.setLat(location.getLatitude());
+    navigationEvent.setLng(location.getLongitude());
+    navigationEvent.setGeometry(sessionState.currentGeometry());
+    navigationEvent.setSimulation(sessionState.mockLocation());
+    navigationEvent.setLocationEngine(sessionState.locationEngineName());
+    navigationEvent.setTripIdentifier(sessionState.tripIdentifier());
+    navigationEvent.setRerouteCount(sessionState.rerouteCount());
+    navigationEvent.setOriginalRequestIdentifier(sessionState.originalRequestIdentifier());
+    navigationEvent.setRequestIdentifier(sessionState.requestIdentifier());
+    navigationEvent.setOriginalGeometry(sessionState.originalGeometry());
+    navigationEvent.setOriginalEstimatedDistance(sessionState.originalDistance());
+    navigationEvent.setOriginalEstimatedDuration(sessionState.originalDuration());
+    navigationEvent.setOriginalStepCount(sessionState.originalStepCount());
+    navigationEvent.setPercentTimeInForeground(sessionState.percentInForeground());
+    navigationEvent.setPercentTimeInPortrait(sessionState.percentInPortrait());
+    navigationEvent.setTotalStepCount(sessionState.currentStepCount());
+  }
+
+  private static String obtainStartTimestamp(SessionState sessionState) {
+    Date data;
+    if (sessionState.startTimestamp() == null) {
+      data = new Date();
+    } else {
+      data = sessionState.startTimestamp();
     }
-  };
-
-  public Event createNavigationEvent(Event.Type type, NavigationState navigationState) {
-    check(type, navigationState);
-    return BUILD_NAV_EVENT.get(type).build(navigationState);
+    return TelemetryUtils.generateCreateDateFormatted(data);
   }
 
-  private NavigationDepartEvent buildNavigationDepartEvent(NavigationState navigationState) {
-    return new NavigationDepartEvent(navigationState);
-  }
-
-  private NavigationArriveEvent buildNavigationArriveEvent(NavigationState navigationState) {
-    return new NavigationArriveEvent(navigationState);
-  }
-
-  private NavigationCancelEvent buildNavigationCancelEvent(NavigationState navigationState) {
-    return new NavigationCancelEvent(navigationState);
-  }
-
-  private NavigationRerouteEvent buildNavigationRerouteEvent(NavigationState navigationState) {
-    return new NavigationRerouteEvent(navigationState);
-  }
-
-  private NavigationFeedbackEvent buildNavigationFeedbackEvent(NavigationState navigationState) {
-    return new NavigationFeedbackEvent(navigationState);
-  }
-
-  private NavigationFasterRouteEvent buildNavigationFasterRouteEvent(NavigationState navigationState) {
-    return new NavigationFasterRouteEvent(navigationState);
-  }
-
-  private void check(Event.Type type, NavigationState navigationState) {
-    isNotNull(navigationState);
-  }
-
-  private void isNotNull(NavigationState navigationState) {
-    if (navigationState == null) {
-      throw new IllegalArgumentException(NAVIGATION_STATE_ILLEGAL_NULL);
+  private static Location[] convertToArray(List<Location> locationList) {
+    if (locationList == null) {
+      return new Location[0];
     }
+    return locationList.toArray(new Location[0]);
   }
 }

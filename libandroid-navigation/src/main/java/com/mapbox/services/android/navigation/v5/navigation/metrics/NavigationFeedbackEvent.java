@@ -1,92 +1,93 @@
 package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.annotation.SuppressLint;
+import android.location.Location;
+import android.support.annotation.NonNull;
 
-import com.google.gson.annotations.JsonAdapter;
-import com.mapbox.android.telemetry.Event;
+import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 
-class NavigationFeedbackEvent extends Event implements Parcelable {
+@SuppressLint("ParcelCreator")
+public class NavigationFeedbackEvent extends NavigationStepEvent {
   private static final String NAVIGATION_FEEDBACK = "navigation.feedback";
-  private final String event;
-  private NavigationMetadata metadata;
-  private FeedbackEventData feedbackEventData;
-  private NavigationLocationData navigationLocationData;
-  private FeedbackData feedbackData;
-  private NavigationStepMetadata step = null;
+  private String userId;
+  private String feedbackType;
+  private String source;
+  private String description;
+  private Location[] locationsBefore;
+  private Location[] locationsAfter;
+  private String feedbackId;
+  private String screenshot;
 
-  NavigationFeedbackEvent(NavigationState navigationState) {
-    this.event = NAVIGATION_FEEDBACK;
-    this.metadata = navigationState.getNavigationMetadata();
-    this.feedbackEventData = navigationState.getFeedbackEventData();
-    this.navigationLocationData = navigationState.getNavigationLocationData();
-    this.feedbackData = navigationState.getFeedbackData();
-    this.step = navigationState.getNavigationStepMetadata();
-  }
-
-  Type obtainType() {
-    return Type.NAV_FEEDBACK;
-  }
-
-  String getEvent() {
-    return event;
-  }
-
-  NavigationMetadata getMetadata() {
-    return metadata;
-  }
-
-  FeedbackEventData getFeedbackEventData() {
-    return feedbackEventData;
-  }
-
-  NavigationLocationData getNavigationLocationData() {
-    return navigationLocationData;
-  }
-
-  FeedbackData getFeedbackData() {
-    return feedbackData;
-  }
-
-  NavigationStepMetadata getStep() {
-    return step;
-  }
-
-  private NavigationFeedbackEvent(Parcel in) {
-    event = in.readString();
-    metadata = (NavigationMetadata) in.readValue(NavigationMetadata.class.getClassLoader());
-    feedbackEventData = (FeedbackEventData) in.readValue(FeedbackEventData.class.getClassLoader());
-    navigationLocationData = (NavigationLocationData) in.readValue(NavigationLocationData.class.getClassLoader());
-    feedbackData = (FeedbackData) in.readValue(FeedbackData.class.getClassLoader());
-    step = (NavigationStepMetadata) in.readValue(NavigationStepMetadata.class.getClassLoader());
+  NavigationFeedbackEvent(PhoneState phoneState, @NonNull MetricsRouteProgress metricsRouteProgress) {
+    super(phoneState, metricsRouteProgress);
   }
 
   @Override
-  public int describeContents() {
-    return 0;
+  protected String getEventName() {
+    return NAVIGATION_FEEDBACK;
   }
 
-  @Override
-  public void writeToParcel(Parcel dest, int flags) {
-    dest.writeString(event);
-    dest.writeValue(metadata);
-    dest.writeValue(feedbackEventData);
-    dest.writeValue(navigationLocationData);
-    dest.writeValue(feedbackData);
-    dest.writeValue(step);
+  public String getUserId() {
+    return userId;
   }
 
-  @SuppressWarnings("unused")
-  public static final Creator<NavigationFeedbackEvent> CREATOR =
-    new Creator<NavigationFeedbackEvent>() {
-      @Override
-      public NavigationFeedbackEvent createFromParcel(Parcel in) {
-        return new NavigationFeedbackEvent(in);
-      }
+  public void setUserId(String userId) {
+    this.userId = userId;
+  }
 
-      @Override
-      public NavigationFeedbackEvent[] newArray(int size) {
-        return new NavigationFeedbackEvent[size];
-      }
-    };
+  public String getFeedbackType() {
+    return feedbackType;
+  }
+
+  public void setFeedbackType(String feedbackType) {
+    this.feedbackType = feedbackType;
+  }
+
+  public String getSource() {
+    return source;
+  }
+
+  public void setSource(String source) {
+    this.source = source;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public Location[] getLocationsBefore() {
+    return locationsBefore;
+  }
+
+  public void setLocationsBefore(Location[] locationsBefore) {
+    this.locationsBefore = locationsBefore;
+  }
+
+  public Location[] getLocationsAfter() {
+    return locationsAfter;
+  }
+
+  public void setLocationsAfter(Location[] locationsAfter) {
+    this.locationsAfter = locationsAfter;
+  }
+
+  public String getFeedbackId() {
+    return feedbackId;
+  }
+
+  public void setFeedbackId(String feedbackId) {
+    this.feedbackId = feedbackId;
+  }
+
+  public String getScreenshot() {
+    return screenshot;
+  }
+
+  public void setScreenshot(String screenshot) {
+    this.screenshot = screenshot;
+  }
 }
