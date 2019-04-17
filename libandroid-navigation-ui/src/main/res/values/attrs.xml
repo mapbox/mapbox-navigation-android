@@ -23,6 +23,9 @@
 
     <attr name="upcomingManeuverArrowColor" format="color"/>
     <attr name="upcomingManeuverArrowBorderColor" format="color"/>
+
+    <!-- Rounded route line cap -->
+    <attr name="roundedLineCap" format="boolean"/>
   </declare-styleable>
 
   <declare-styleable name="NavigationView">
