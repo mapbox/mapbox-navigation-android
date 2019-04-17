@@ -6,6 +6,7 @@ import android.support.v4.util.Pair;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
@@ -189,6 +190,8 @@ public abstract class RouteProgress {
 
   public abstract RouteProgress.Builder toBuilder();
 
+  abstract LegStep currentStep();
+
   abstract int stepIndex();
 
   abstract double legDistanceRemaining();
@@ -235,6 +238,10 @@ public abstract class RouteProgress {
     public abstract Builder stepDistanceRemaining(double stepDistanceRemaining);
 
     abstract double stepDistanceRemaining();
+
+    public abstract Builder currentStep(LegStep currentStep);
+
+    abstract LegStep currentStep();
 
     public abstract Builder currentStepPoints(List<Point> currentStepPoints);
 
@@ -284,6 +291,7 @@ public abstract class RouteProgress {
       RouteLeg currentLeg = directionsRoute().legs().get(legIndex());
       RouteLegProgress legProgress = RouteLegProgress.builder()
         .routeLeg(currentLeg)
+        .currentStep(currentStep())
         .stepIndex(stepIndex())
         .distanceRemaining(legDistanceRemaining())
         .durationRemaining(legDurationRemaining())

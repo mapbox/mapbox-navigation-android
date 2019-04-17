@@ -92,7 +92,6 @@ public class RouteUtilsTest extends BaseTest {
   public void findCurrentBannerInstructions_adjustedDistanceRemainingReturnsCorrectInstruction() throws Exception {
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
     routeProgress = routeProgress.toBuilder()
-      .stepIndex(1)
       .stepDistanceRemaining(50)
       .build();
     LegStep currentStep = routeProgress.currentLegProgress().currentStep();
@@ -103,7 +102,7 @@ public class RouteUtilsTest extends BaseTest {
       currentStep, stepDistanceRemaining
     );
 
-    assertEquals(currentStep.bannerInstructions().get(1), currentBannerInstructions);
+    assertEquals(currentStep.bannerInstructions().get(0), currentBannerInstructions);
   }
 
   @Test

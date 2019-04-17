@@ -94,6 +94,7 @@ class NavigationRouteProcessor {
       .legDurationRemaining(legDurationRemaining)
       .stepDistanceRemaining(stepDistanceRemaining)
       .directionsRoute(route)
+      .currentStep(currentStep)
       .currentStepPoints(currentStepPoints)
       .upcomingStepPoints(upcomingStepPoints)
       .stepIndex(stepIndex)
