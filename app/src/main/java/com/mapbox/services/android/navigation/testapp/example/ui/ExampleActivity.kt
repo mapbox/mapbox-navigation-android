@@ -14,8 +14,10 @@ import android.widget.Toast
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
 import com.mapbox.geojson.Point
+import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
+import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.AttributionDialogManager
@@ -29,6 +31,9 @@ import com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.Ex
 import com.mapbox.services.android.navigation.testapp.example.ui.permissions.PermissionRequestDialog
 import com.mapbox.services.android.navigation.testapp.example.utils.hideKeyboard
 import com.mapbox.services.android.navigation.testapp.example.utils.showKeyboard
+import com.mapbox.services.android.navigation.ui.v5.camera.CameraUpdateMode
+import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera
+import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCameraUpdate
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
@@ -37,6 +42,10 @@ import kotlinx.android.synthetic.main.activity_example.*
 
 private const val ZERO_PADDING = 0
 private const val BOTTOMSHEET_MULTIPLIER = 4
+private const val CHANGE_SETTING_REQUEST_CODE = 1
+private const val DEFAULT_BEARING: Double = 0.0
+private const val DEFAULT_TILT: Double = 0.0
+private const val DEFAULT_ZOOM: Double = 14.0
 
 class ExampleActivity : HistoryActivity(), ExampleView {
 
@@ -150,7 +159,7 @@ class ExampleActivity : HistoryActivity(), ExampleView {
   }
 
   override fun updateMapCamera(cameraUpdate: CameraUpdate, duration: Int) {
-    map?.retrieveMap()?.animateCamera(cameraUpdate, duration)
+    map?.retrieveCamera()?.update(NavigationCameraUpdate(cameraUpdate), duration)
   }
 
   override fun updateMapCameraFor(bounds: LatLngBounds, padding: IntArray, duration: Int) {
@@ -305,5 +314,40 @@ class ExampleActivity : HistoryActivity(), ExampleView {
         ContextCompat.checkSelfPermission(this, storagePermission) == permissionGranted &&
             ContextCompat.checkSelfPermission(this, locationPermission) == permissionGranted
     presenter.onPermissionsGranted(allPermissionsGranted)
+  }
+
+  override fun showOverheadAnimation() {
+    cameraOverheadUpdate()?.let {
+       val update = NavigationCameraUpdate(it)
+      map?.retrieveCamera()?.update(update, 2000, object : MapboxMap
+              .CancelableCallback {
+        /**
+         * Invoked when a task is complete.
+         */
+        override fun onFinish() {
+              map?.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+        }
+
+        /**
+         * Invoked when a task is cancelled.
+         */
+        override fun onCancel() {
+          map?.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+        }
+      })
+    }
+  }
+
+  fun cameraOverheadUpdate(): CameraUpdate? {
+    return viewModel.location.value?.let {
+      CameraUpdateFactory.newCameraPosition(
+              CameraPosition.Builder()
+                      .zoom(DEFAULT_ZOOM)
+                      .target(LatLng(it.latitude, it.longitude))
+                      .bearing(DEFAULT_BEARING)
+                      .tilt(DEFAULT_TILT)
+                      .build()
+      )
+    }
   }
 }
