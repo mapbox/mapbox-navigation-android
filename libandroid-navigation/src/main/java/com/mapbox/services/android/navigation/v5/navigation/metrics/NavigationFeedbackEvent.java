@@ -9,17 +9,19 @@ import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgr
 @SuppressLint("ParcelCreator")
 public class NavigationFeedbackEvent extends NavigationStepEvent {
   private static final String NAVIGATION_FEEDBACK = "navigation.feedback";
-  private String userId;
+  private final String userId;
   private String feedbackType;
   private String source;
   private String description;
   private Location[] locationsBefore;
   private Location[] locationsAfter;
-  private String feedbackId;
+  private final String feedbackId;
   private String screenshot;
 
   NavigationFeedbackEvent(PhoneState phoneState, @NonNull MetricsRouteProgress metricsRouteProgress) {
     super(phoneState, metricsRouteProgress);
+    this.userId = phoneState.getUserId();
+    this.feedbackId = phoneState.getFeedbackId();
   }
 
   @Override
@@ -29,10 +31,6 @@ public class NavigationFeedbackEvent extends NavigationStepEvent {
 
   public String getUserId() {
     return userId;
-  }
-
-  public void setUserId(String userId) {
-    this.userId = userId;
   }
 
   public String getFeedbackType() {
@@ -77,10 +75,6 @@ public class NavigationFeedbackEvent extends NavigationStepEvent {
 
   public String getFeedbackId() {
     return feedbackId;
-  }
-
-  public void setFeedbackId(String feedbackId) {
-    this.feedbackId = feedbackId;
   }
 
   public String getScreenshot() {

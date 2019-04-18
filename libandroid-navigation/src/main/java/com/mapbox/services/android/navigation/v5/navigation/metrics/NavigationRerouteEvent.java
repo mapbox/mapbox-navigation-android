@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.location.Location;
 import android.support.annotation.NonNull;
 
-import com.mapbox.android.telemetry.TelemetryUtils;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 
 @SuppressLint("ParcelCreator")
@@ -25,7 +24,7 @@ public class NavigationRerouteEvent extends NavigationStepEvent {
     this.newDistanceRemaining = rerouteEvent.getNewDistanceRemaining();
     this.newDurationRemaining = rerouteEvent.getNewDurationRemaining();
     this.newGeometry = rerouteEvent.getNewRouteGeometry();
-    this.feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier();
+    this.feedbackId = phoneState.getFeedbackId();
   }
 
   @Override

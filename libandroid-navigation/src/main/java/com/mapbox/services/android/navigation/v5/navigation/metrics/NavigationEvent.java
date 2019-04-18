@@ -60,7 +60,7 @@ public abstract class NavigationEvent extends Event {
   private int totalStepCount;
 
   NavigationEvent(@NonNull PhoneState phoneState) {
-    this.created = TelemetryUtils.obtainCurrentDate();
+    this.created = phoneState.getCreated();
     this.volumeLevel = phoneState.getVolumeLevel();
     this.batteryLevel = phoneState.getBatteryLevel();
     this.screenBrightness = phoneState.getScreenBrightness();

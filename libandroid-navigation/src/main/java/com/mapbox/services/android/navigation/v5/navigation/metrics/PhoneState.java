@@ -15,6 +15,9 @@ public class PhoneState {
   private final String connectivity;
   private final String audioType;
   private final String applicationState;
+  private final String created;
+  private final String feedbackId;
+  private final String userId;
 
   public PhoneState(Context context) {
     this.volumeLevel = NavigationUtils.obtainVolumeLevel(context);
@@ -24,6 +27,13 @@ public class PhoneState {
     this.connectivity = TelemetryUtils.obtainCellularNetworkType(context);
     this.audioType = NavigationUtils.obtainAudioType(context);
     this.applicationState = TelemetryUtils.obtainApplicationState(context);
+    this.created = TelemetryUtils.obtainCurrentDate();
+    this.feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier();
+    this.userId = TelemetryUtils.retrieveVendorId();
+  }
+
+  public String getUserId() {
+    return userId;
   }
 
   public int getVolumeLevel() {
@@ -52,5 +62,13 @@ public class PhoneState {
 
   public String getApplicationState() {
     return applicationState;
+  }
+
+  public String getCreated() {
+    return created;
+  }
+
+  public String getFeedbackId() {
+    return feedbackId;
   }
 }

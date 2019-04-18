@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 public class NavigationEventFactory {
-  private static final int EVENT_VERSION = 7;
+  static final int EVENT_VERSION = 7;
 
   private NavigationEventFactory() {
 
@@ -60,7 +60,8 @@ public class NavigationEventFactory {
     NavigationRerouteEvent navigationRerouteEvent =
       new NavigationRerouteEvent(phoneState, rerouteEvent, metricProgress);
     setEvent(sessionState, metricProgress, location, sdkIdentifier, navigationRerouteEvent);
-    navigationRerouteEvent.setLocationsBefore(convertToArray(sessionState.beforeEventLocations()));
+    List<Location> locationList = sessionState.beforeEventLocations();
+    navigationRerouteEvent.setLocationsBefore(convertToArray(locationList));
     navigationRerouteEvent.setLocationsAfter(convertToArray(sessionState.afterEventLocations()));
     navigationRerouteEvent.setSecondsSinceLastReroute(sessionState.secondsSinceLastReroute());
     return navigationRerouteEvent;
@@ -123,13 +124,13 @@ public class NavigationEventFactory {
   }
 
   private static String obtainStartTimestamp(SessionState sessionState) {
-    Date data;
+    Date date;
     if (sessionState.startTimestamp() == null) {
-      data = new Date();
+      date = new Date();
     } else {
-      data = sessionState.startTimestamp();
+      date = sessionState.startTimestamp();
     }
-    return TelemetryUtils.generateCreateDateFormatted(data);
+    return TelemetryUtils.generateCreateDateFormatted(date);
   }
 
   private static Location[] convertToArray(List<Location> locationList) {
