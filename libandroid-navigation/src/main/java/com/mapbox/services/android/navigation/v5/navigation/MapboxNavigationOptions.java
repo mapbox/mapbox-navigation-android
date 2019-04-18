@@ -1,12 +1,13 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
+import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
-  .NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ROUNDING_INCREMENT_FIFTY;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ROUTE_REFRESH_INTERVAL;
 
@@ -51,6 +52,15 @@ public abstract class MapboxNavigationOptions {
 
   public abstract int navigationLocationEngineIntervalLagInMilliseconds();
 
+  /**
+   * The color resource id for the default notification.  This will be ignored
+   * if a {@link NavigationNotification} is set.
+   *
+   * @return color resource id for notification
+   */
+  @ColorRes
+  public abstract int defaultNotificationColorId();
+
   public abstract Builder toBuilder();
 
   @AutoValue.Builder
@@ -90,6 +100,14 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder navigationLocationEngineIntervalLagInMilliseconds(int lagInMilliseconds);
 
+    /**
+     * Optionally, set the background color of the default notification.
+     *
+     * @param defaultNotificationColorId the color resource to be used
+     * @return this builder for chaining operations together
+     */
+    public abstract Builder defaultNotificationColorId(@ColorRes int defaultNotificationColorId);
+
     public abstract MapboxNavigationOptions build();
   }
 
@@ -104,6 +122,7 @@ public abstract class MapboxNavigationOptions {
       .isDebugLoggingEnabled(false)
       .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
       .timeFormatType(NavigationTimeFormat.NONE_SPECIFIED)
-      .navigationLocationEngineIntervalLagInMilliseconds(NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG);
+      .navigationLocationEngineIntervalLagInMilliseconds(NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG)
+      .defaultNotificationColorId(R.color.mapboxNotificationBlue);
   }
 }

@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/navigationExpandedNotificationLayout"
     style="@android:style/TextAppearance.StatusBar.EventContent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/holo_blue_dark"
+    android:orientation="vertical"
     android:paddingTop="8dp"
-    android:paddingBottom="8dp"
-    android:orientation="vertical">
+    android:paddingBottom="8dp">
 
-    <include layout="@layout/collapsed_navigation_notification_layout" />
+    <include layout="@layout/collapsed_navigation_notification_layout"/>
 
     <LinearLayout
+        android:id="@+id/endNavigationBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:id="@+id/endNavigationBtn"
-        android:gravity="center_vertical"
+        android:layout_marginStart="56dp"
         android:layout_marginLeft="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:padding="8dp">
 
         <ImageView
@@ -35,5 +37,7 @@
             android:text="@string/end_navigation"
             android:textAllCaps="true"
             android:textColor="@android:color/white"/>
+
     </LinearLayout>
+
 </LinearLayout>
