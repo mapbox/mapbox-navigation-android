@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.SpannableString;
 import android.text.format.DateFormat;
 import android.widget.RemoteViews;
@@ -37,6 +38,7 @@ import static com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter
 class MapboxNavigationNotification implements NavigationNotification {
 
   private static final String END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION";
+  private static final String SET_BACKGROUND_COLOR = "setBackgroundColor";
   private NotificationManager notificationManager;
   private Notification notification;
   private RemoteViews collapsedNotificationRemoteViews;
@@ -160,11 +162,19 @@ class MapboxNavigationNotification implements NavigationNotification {
   }
 
   private void buildRemoteViews() {
-    collapsedNotificationRemoteViews = new RemoteViews(applicationContext.getPackageName(),
-      R.layout.collapsed_navigation_notification_layout);
-    expandedNotificationRemoteViews = new RemoteViews(applicationContext.getPackageName(),
-      R.layout.expanded_navigation_notification_layout);
+    int colorResId = mapboxNavigation.options().defaultNotificationColorId();
+    int backgroundColor = ContextCompat.getColor(applicationContext, colorResId);
+
+    int collapsedLayout = R.layout.collapsed_navigation_notification_layout;
+    int collapsedLayoutId = R.id.navigationCollapsedNotificationLayout;
+    collapsedNotificationRemoteViews = new RemoteViews(applicationContext.getPackageName(), collapsedLayout);
+    collapsedNotificationRemoteViews.setInt(collapsedLayoutId, SET_BACKGROUND_COLOR, backgroundColor);
+
+    int expandedLayout = R.layout.expanded_navigation_notification_layout;
+    int expandedLayoutId = R.id.navigationExpandedNotificationLayout;
+    expandedNotificationRemoteViews = new RemoteViews(applicationContext.getPackageName(), expandedLayout);
     expandedNotificationRemoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent);
+    expandedNotificationRemoteViews.setInt(expandedLayoutId, SET_BACKGROUND_COLOR, backgroundColor);
   }
 
   @Nullable
