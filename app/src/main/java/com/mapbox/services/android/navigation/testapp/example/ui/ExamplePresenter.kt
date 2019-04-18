@@ -133,7 +133,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       view.hideSoftKeyboard()
       view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED)
       view.updateDestinationMarker(it)
-      view.updateMapCamera(buildCameraUpdateFrom(it), TWO_SECONDS)
       view.updateLocationFabVisibility(INVISIBLE)
       view.updateSettingsFabVisibility(INVISIBLE)
       view.updateNavigationFabVisibility(VISIBLE)
