@@ -9,6 +9,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
+import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.Geometry;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.navigator.VoiceInstruction;
@@ -188,6 +190,14 @@ public abstract class RouteProgress {
   @Nullable
   public abstract RouteProgressState currentState();
 
+  // TODO javadoc
+  @Nullable
+  public abstract Geometry routeGeometry();
+
+  // TODO javadoc
+  @Nullable
+  public abstract FeatureCollection routeGeometryWithBuffer();
+
   public abstract RouteProgress.Builder toBuilder();
 
   abstract LegStep currentStep();
@@ -284,6 +294,10 @@ public abstract class RouteProgress {
     public abstract Builder bannerInstruction(@Nullable BannerInstruction bannerInstruction);
 
     public abstract Builder currentState(@Nullable RouteProgressState currentState);
+
+    public abstract Builder routeGeometry(@Nullable Geometry routeGeometry);
+
+    public abstract Builder routeGeometryWithBuffer(@Nullable FeatureCollection routeGeometryWithBuffer);
 
     abstract RouteProgress autoBuild(); // not public
 

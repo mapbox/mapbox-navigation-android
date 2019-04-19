@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5;
 import android.location.Location;
 import android.support.annotation.NonNull;
 
+import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Geometry;
 import com.mapbox.mapboxsdk.offline.OfflineGeometryRegionDefinition;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
@@ -17,6 +18,7 @@ class MapOfflineManager implements ProgressChangeListener {
   private final OfflineManager offlineManager;
   private final OfflineRegionDefinitionProvider definitionProvider;
   private final OfflineMetadataProvider metadataProvider;
+  private Geometry currentRouteGeometry;
 
   MapOfflineManager(OfflineManager offlineManager, OfflineRegionDefinitionProvider definitionProvider,
                     OfflineMetadataProvider metadataProvider) {
@@ -27,7 +29,22 @@ class MapOfflineManager implements ProgressChangeListener {
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    // TODO look to download new geometries based on change in route
+    FeatureCollection routeGeometryWithBuffer = routeProgress.routeGeometryWithBuffer();
+    if (currentRouteGeometry == null || !currentRouteGeometry.equals(routeGeometryWithBuffer)) {
+      currentRouteGeometry = routeGeometryWithBuffer.features().get(0).geometry();
+      String routeSummary = routeProgress.directionsRoute().routeOptions().requestUuid(); // TODO unique identifier for download metadata?
+      download(routeSummary, currentRouteGeometry, new OfflineRegionDownloadCallback() {
+        @Override
+        public void onComplete() {
+          // TODO good to go?
+        }
+
+        @Override
+        public void onError(String error) {
+          // TODO fail silently?
+        }
+      });
+    }
   }
 
   void loadDatabase(@NonNull String offlineDatabasePath, final OfflineDatabaseLoadedCallback callback) {

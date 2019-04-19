@@ -7,6 +7,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
+import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.Geometry;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.navigator.NavigationStatus;
@@ -44,10 +46,12 @@ class NavigationRouteProcessor {
   private List<StepIntersection> currentIntersections;
   private List<Pair<StepIntersection, Double>> currentIntersectionDistances;
   private CurrentLegAnnotation currentLegAnnotation;
+  private Geometry routeGeometry;
+  private FeatureCollection routeGeometryWithBuffer;
 
   RouteProgress buildNewRouteProgress(MapboxNavigator navigator, NavigationStatus status, DirectionsRoute route) {
     previousStatus = status;
-    updateRoute(route);
+    updateRoute(route, navigator);
     return buildRouteProgressFrom(status, navigator);
   }
 
@@ -65,9 +69,11 @@ class NavigationRouteProcessor {
     return previousStatus;
   }
 
-  private void updateRoute(DirectionsRoute route) {
+  private void updateRoute(DirectionsRoute route, MapboxNavigator navigator) {
     if (this.route == null || !this.route.equals(route)) {
       this.route = route;
+      routeGeometry = navigator.retrieveRouteGeometry();
+      routeGeometryWithBuffer = navigator.retrieveRouteGeometryWithBuffer();
     }
   }
 
@@ -113,6 +119,10 @@ class NavigationRouteProcessor {
       .currentLegAnnotation(currentLegAnnotation)
       .inTunnel(status.getInTunnel())
       .currentState(currentRouteState);
+
+    // TODO extract to private?
+    progressBuilder.routeGeometry(routeGeometry);
+    progressBuilder.routeGeometryWithBuffer(routeGeometryWithBuffer);
 
     addVoiceInstructions(status, progressBuilder);
     addBannerInstructions(status, navigator, progressBuilder);
