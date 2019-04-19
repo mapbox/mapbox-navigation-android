@@ -19,14 +19,17 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.mapbox.geojson.BoundingBox
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.offline.*
 import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.v5.navigation.*
 import kotlinx.android.synthetic.main.activity_offline_region_download.*
+import org.json.JSONObject
 import timber.log.Timber
 
 class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadListener, OnOfflineTilesRemovedCallback {
@@ -55,6 +58,40 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         get() {
             return MapboxOfflineRouter(obtainOfflineDirectory())
         }
+    private lateinit var offlineManager: OfflineManager
+    private var offlineRegion: OfflineRegion? = null
+    private val offlineRegionCallback = object : OfflineManager.CreateOfflineRegionCallback {
+        override fun onCreate(offlineRegion: OfflineRegion?) {
+            Timber.d("Offline region created: %s", "NavigationOfflineMapsRegion")
+            this@OfflineRegionDownloadActivity.offlineRegion = offlineRegion
+            launchMapsDownload()
+        }
+
+        override fun onError(error: String?) {
+            Timber.e("Error: %s", error)
+        }
+    }
+
+    private val offlineRegionObserver = object : OfflineRegion.OfflineRegionObserver {
+        override fun mapboxTileCountLimitExceeded(limit: Long) {
+            Timber.e("Mapbox tile count limit exceeded: %s", limit)
+        }
+
+        override fun onStatusChanged(status: OfflineRegionStatus?) {
+            Timber.d("%s/%s resources; %s bytes downloaded.",
+                    status?.completedResourceCount,
+                    status?.requiredResourceCount,
+                    status?.completedResourceSize)
+            if (status?.isComplete!!) {
+                downloadSelectedRegion()
+            }
+        }
+
+        override fun onError(error: OfflineRegionError?) {
+            Timber.e("onError reason: %s", error?.reason)
+            Timber.e("onError message: %s", error?.message)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -124,6 +161,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
                 it.addSource(GeoJsonSource("bounding-box-source"))
                 it.addLayer(FillLayer("bounding-box-layer", "bounding-box-source")
                         .withProperties(fillColor(Color.parseColor("#50667F"))))
+                offlineManager = OfflineManager.getInstance(this)
             }
             this.mapboxMap = mapboxMap
             mapboxMap.uiSettings.isRotateGesturesEnabled = false
@@ -140,7 +178,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
                         this, WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(WRITE_EXTERNAL_STORAGE), 1)
         } else {
-            downloadSelectedRegion()
+            downloadMapsRegion()
         }
     }
 
@@ -157,7 +195,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         when (requestCode) {
             EXTERNAL_STORAGE_PERMISSION -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PERMISSION_GRANTED)) {
-                    downloadSelectedRegion()
+                    downloadMapsRegion()
                 } else {
                     setDownloadButtonEnabled(false)
                 }
@@ -165,8 +203,30 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         }
     }
 
-    private fun downloadSelectedRegion() {
+    private fun downloadMapsRegion() {
         showDownloading(false, "Requesting tiles....")
+        val styleUrl: String? = mapboxMap.style?.url
+        val bounds: LatLngBounds = LatLngBounds.from(boundingBox.north(), boundingBox.east(), boundingBox.south(), boundingBox.west())
+        val minZoom: Double = mapboxMap.cameraPosition.zoom
+        val maxZoom: Double = mapboxMap.maxZoomLevel
+        val pixelRatio: Float = this.resources.displayMetrics.density
+        val definition: OfflineTilePyramidRegionDefinition = OfflineTilePyramidRegionDefinition(
+                styleUrl, bounds, minZoom, maxZoom, pixelRatio)
+
+        val metadata: ByteArray
+        val jsonObject: JSONObject = JSONObject()
+        jsonObject.put("FIELD_REGION_NAME", "NavigationOfflineMapsRegion")
+        val json: String = jsonObject.toString()
+        metadata = json.toByteArray()
+        offlineManager.createOfflineRegion(definition, metadata, offlineRegionCallback)
+    }
+
+    private fun launchMapsDownload() {
+        offlineRegion?.setObserver(offlineRegionObserver)
+        offlineRegion?.setDownloadState(OfflineRegion.STATE_ACTIVE)
+    }
+
+    private fun downloadSelectedRegion() {
         val builder = OfflineTiles.builder()
                 .accessToken(Mapbox.getAccessToken())
                 .version(versionSpinner.selectedItem as String)
@@ -278,6 +338,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
 
     override fun onDestroy() {
         super.onDestroy()
+        offlineRegion?.setObserver(null)
         mapView.onDestroy()
     }
 
