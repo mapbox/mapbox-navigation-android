@@ -13,6 +13,8 @@ import com.mapbox.mapboxsdk.offline.OfflineRegionStatus;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import timber.log.Timber;
+
 class MapOfflineManager implements ProgressChangeListener {
 
   private final OfflineManager offlineManager;
@@ -32,16 +34,21 @@ class MapOfflineManager implements ProgressChangeListener {
     FeatureCollection routeGeometryWithBuffer = routeProgress.routeGeometryWithBuffer();
     if (currentRouteGeometry == null || !currentRouteGeometry.equals(routeGeometryWithBuffer)) {
       currentRouteGeometry = routeGeometryWithBuffer.features().get(0).geometry();
-      String routeSummary = routeProgress.directionsRoute().routeOptions().requestUuid(); // TODO unique identifier for download metadata?
+      // TODO unique identifier for download metadata?
+      String routeSummary = routeProgress.directionsRoute().routeOptions().requestUuid();
       download(routeSummary, currentRouteGeometry, new OfflineRegionDownloadCallback() {
         @Override
         public void onComplete() {
           // TODO good to go?
+          // TODO Remove debug log after testing
+          Timber.d("onComplete!");
         }
 
         @Override
         public void onError(String error) {
           // TODO fail silently?
+          // TODO Remove debug log after testing
+          Timber.d("onError %s", error);
         }
       });
     }

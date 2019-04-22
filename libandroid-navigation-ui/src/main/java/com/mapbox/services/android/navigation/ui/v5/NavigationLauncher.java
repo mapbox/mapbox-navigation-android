@@ -40,6 +40,7 @@ public class NavigationLauncher {
     storeThemePreferences(options, editor);
     storeOfflinePath(options, editor);
     storeOfflineVersion(options, editor);
+    storeOfflineMapDatabasePath(options, editor);
 
     editor.apply();
 
@@ -75,6 +76,7 @@ public class NavigationLauncher {
       .remove(NavigationConstants.NAVIGATION_VIEW_DARK_THEME)
       .remove(NavigationConstants.OFFLINE_PATH_KEY)
       .remove(NavigationConstants.OFFLINE_VERSION_KEY)
+      .remove(NavigationConstants.MAP_DATABASE_PATH_KEY)
       .apply();
   }
 
@@ -114,6 +116,10 @@ public class NavigationLauncher {
 
   private static void storeOfflineVersion(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
     editor.putString(NavigationConstants.OFFLINE_VERSION_KEY, options.offlineRoutingTilesVersion());
+  }
+
+  private static void storeOfflineMapDatabasePath(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
+    editor.putString(NavigationConstants.MAP_DATABASE_PATH_KEY, options.offlineMapDatabasePath());
   }
 
 }

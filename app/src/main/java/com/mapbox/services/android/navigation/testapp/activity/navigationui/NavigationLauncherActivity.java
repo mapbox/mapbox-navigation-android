@@ -354,6 +354,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     if (!offlineVersion.isEmpty()) {
       optionsBuilder.offlineRoutingTilesVersion(offlineVersion);
     }
+    // TODO Testing merging previously downloaded region
+    optionsBuilder.offlineMapDatabasePath(getFilesDir().getPath() + "/" + "mbgl-offline.db");
     NavigationLauncher.startNavigation(this, optionsBuilder.build());
   }
 

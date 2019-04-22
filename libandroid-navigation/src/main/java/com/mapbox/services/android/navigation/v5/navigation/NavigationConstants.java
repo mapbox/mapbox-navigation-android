@@ -153,6 +153,7 @@ public final class NavigationConstants {
   public static final String NAVIGATION_VIEW_ROUTE_PROFILE_KEY = "navigation_view_route_profile";
   public static final String OFFLINE_PATH_KEY = "offline_path_key";
   public static final String OFFLINE_VERSION_KEY = "offline_version_key";
+  public static final String MAP_DATABASE_PATH_KEY = "offline_map_database_path_key";
 
   // Step Maneuver Types
   public static final String STEP_MANEUVER_TYPE_TURN = "turn";
