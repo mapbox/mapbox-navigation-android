@@ -319,7 +319,8 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initializeVoiceInstructionCache() {
-    voiceInstructionCache = new VoiceInstructionCache(navigation, voiceInstructionLoader);
+    ConnectivityStatusProvider connectivityStatus = new ConnectivityStatusProvider(getApplication());
+    voiceInstructionCache = new VoiceInstructionCache(navigation, voiceInstructionLoader, connectivityStatus);
   }
 
   @NonNull

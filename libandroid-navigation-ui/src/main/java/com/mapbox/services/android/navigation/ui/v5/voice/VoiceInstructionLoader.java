@@ -1,10 +1,9 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 
 import com.mapbox.api.speech.v1.MapboxSpeech;
+import com.mapbox.services.android.navigation.ui.v5.ConnectivityStatusProvider;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,23 +23,27 @@ import timber.log.Timber;
 public class VoiceInstructionLoader {
   private static final int VOICE_INSTRUCTIONS_TO_EVICT_THRESHOLD = 4;
   private static final String SSML_TEXT_TYPE = "ssml";
-  private final ConnectivityManager connectivityManager;
+  private final ConnectivityStatusProvider connectivityStatus;
   private final String accessToken;
   private List<String> urlsCached;
   private final Cache cache;
   private MapboxSpeech.Builder mapboxSpeechBuilder = null;
 
   public VoiceInstructionLoader(Context context, String accessToken, Cache cache) {
-    this.connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    this.connectivityStatus = new ConnectivityStatusProvider(context);
     this.accessToken = accessToken;
     this.urlsCached = new ArrayList<>();
     this.cache = cache;
   }
 
   // Package private (no modifier) for testing purposes
-  VoiceInstructionLoader(Context context, String accessToken, Cache cache, MapboxSpeech.Builder mapboxSpeechBuilder) {
-    this(context, accessToken, cache);
+  VoiceInstructionLoader(String accessToken, Cache cache, MapboxSpeech.Builder mapboxSpeechBuilder,
+                         ConnectivityStatusProvider connectivityStatus) {
+    this.accessToken = accessToken;
+    this.urlsCached = new ArrayList<>();
+    this.cache = cache;
     this.mapboxSpeechBuilder = mapboxSpeechBuilder;
+    this.connectivityStatus = connectivityStatus;
   }
 
   public List<String> evictVoiceInstructions() {
@@ -96,6 +99,10 @@ public class VoiceInstructionLoader {
     }
   }
 
+  boolean hasCache() {
+    return !urlsCached.isEmpty();
+  }
+
   void flushCache() {
     try {
       cache.evictAll();
@@ -117,7 +124,7 @@ public class VoiceInstructionLoader {
       @Override
       public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
-        if (!hasNetworkConnection()) {
+        if (!connectivityStatus.isConnected()) {
           CacheControl cacheControl = new CacheControl.Builder()
             .maxStale(3, TimeUnit.DAYS)
             .build();
@@ -128,14 +135,5 @@ public class VoiceInstructionLoader {
         return chain.proceed(request);
       }
     };
-  }
-
-  @SuppressWarnings( {"MissingPermission"})
-  private boolean hasNetworkConnection() {
-    if (connectivityManager == null) {
-      return false;
-    }
-    NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-    return activeNetwork != null && activeNetwork.isConnected();
   }
 }
