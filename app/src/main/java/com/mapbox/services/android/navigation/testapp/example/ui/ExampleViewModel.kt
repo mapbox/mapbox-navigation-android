@@ -10,12 +10,7 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.geocoding.v5.GeocodingCriteria
-import com.mapbox.api.geocoding.v5.MapboxGeocoding
-import com.mapbox.api.geocoding.v5.models.GeocodingResponse
 import com.mapbox.geojson.Point
-import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.services.android.navigation.testapp.NavigationApplication.Companion.instance
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.example.ui.navigation.ExampleMilestoneEventListener
@@ -26,14 +21,11 @@ import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayerProvider
 import com.mapbox.services.android.navigation.ui.v5.voice.VoiceInstructionLoader
+import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import okhttp3.Cache
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import timber.log.Timber
 import java.io.File
 import java.util.Locale.US
 
@@ -49,10 +41,8 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   val progress: MutableLiveData<RouteProgress> = MutableLiveData()
   val milestone: MutableLiveData<Milestone> = MutableLiveData()
   val destination: MutableLiveData<Point> = MutableLiveData()
-  val geocode: MutableLiveData<GeocodingResponse> = MutableLiveData()
 
   var primaryRoute: DirectionsRoute? = null
-  var collapsedBottomSheet: Boolean = false
   var isOffRoute: Boolean = false
 
   private val locationEngine: LocationEngine
@@ -61,10 +51,11 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   private val navigation: MapboxNavigation
 
   private val accessToken: String = instance.resources.getString(R.string.mapbox_access_token)
-  private val routeFinder: RouteFinder
+  val routeFinder: RouteFinder
 
   init {
-    routeFinder = RouteFinder(this, routes, accessToken, retrieveOfflineVersionFromPreferences())
+    routeFinder = RouteFinder(this, routes, accessToken, retrieveOfflineVersionFromPreferences(),
+            retrieveProfileFromPreferences())
     // Initialize the location engine
     locationEngine = LocationEngineProvider.getBestLocationEngine(getApplication())
     locationEngineCallback = ExampleLocationEngineCallback(location)
@@ -83,6 +74,10 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     navigation.addMilestoneEventListener(ExampleMilestoneEventListener(milestone, speechPlayer))
     navigation.addProgressChangeListener(ExampleProgressChangeListener(location, progress))
     navigation.addOffRouteListener(ExampleOffRouteListener(this))
+  }
+
+  internal fun updateProfile() {
+    routeFinder.updateProfile(retrieveProfileFromPreferences())
   }
 
   override fun onCleared() {
@@ -112,9 +107,22 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
   fun startNavigation() {
     primaryRoute?.let {
+      if (shouldSimulateRoute()) {
+        val replayRouteLocationEngine = ReplayRouteLocationEngine()
+        replayRouteLocationEngine.assign(it)
+        navigation.locationEngine = replayRouteLocationEngine
+      } else {
+        navigation.locationEngine = locationEngine
+      }
+
       navigation.startNavigation(it)
       removeLocation()
     }
+  }
+
+  private fun shouldSimulateRoute(): Boolean {
+    val context = getApplication<Application>()
+    return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.simulate_route_key), false)
   }
 
   fun stopNavigation() {
@@ -124,23 +132,6 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
   fun retrieveNavigation(): MapboxNavigation {
     return navigation
-  }
-
-  fun reverseGeocode(point: LatLng) {
-    val reverseGeocode = MapboxGeocoding.builder()
-        .accessToken(Mapbox.getAccessToken()!!)
-        .query(Point.fromLngLat(point.longitude, point.latitude))
-        .geocodingTypes(GeocodingCriteria.TYPE_ADDRESS)
-        .build()
-    reverseGeocode.enqueueCall(object : Callback<GeocodingResponse> {
-      override fun onResponse(call: Call<GeocodingResponse>, response: Response<GeocodingResponse>) {
-        geocode.value = response.body()
-      }
-
-      override fun onFailure(call: Call<GeocodingResponse>, throwable: Throwable) {
-        Timber.e(throwable, "Geocoding request failed")
-      }
-    })
   }
 
   fun refreshOfflineVersionFromPreferences() {
@@ -172,6 +163,22 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     val context = getApplication<Application>()
     return PreferenceManager.getDefaultSharedPreferences(context)
         .getString(context.getString(R.string.offline_version_key), "")
+  }
+
+  private fun retrieveProfileFromPreferences(): String {
+    val context = getApplication<Application>()
+    return normalizeForTraffic(PreferenceManager.getDefaultSharedPreferences(context)
+            .getString(context.getString(R.string.route_profile_key), context.getString(R.string
+                    .default_route_profile)))
+  }
+
+  private fun normalizeForTraffic(string: String): String {
+    var normalizedString = string.toLowerCase()
+    if (string.equals("driving")) {
+      return "driving-traffic"
+    } else {
+      return normalizedString
+    }
   }
 
   private fun buildEngineRequest(): LocationEngineRequest {

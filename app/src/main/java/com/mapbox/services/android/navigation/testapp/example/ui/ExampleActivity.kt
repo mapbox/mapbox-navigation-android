@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.testapp.example.ui
 
 import android.Manifest
+import android.app.Activity
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -37,9 +38,9 @@ import kotlinx.android.synthetic.main.activity_example.*
 
 private const val ZERO_PADDING = 0
 private const val BOTTOMSHEET_MULTIPLIER = 4
+private const val CHANGE_SETTING_REQUEST_CODE = 1
 
 class ExampleActivity : HistoryActivity(), ExampleView {
-
   private var map: NavigationMapboxMap? = null
   private val viewModel by lazy(mode = LazyThreadSafetyMode.NONE) {
     ViewModelProviders.of(this).get(ExampleViewModel::class.java)
@@ -193,10 +194,6 @@ class ExampleActivity : HistoryActivity(), ExampleView {
     locationFab.visibility = visibility
   }
 
-  override fun updateDirectionsFabVisibility(visibility: Int) {
-    directionsFab.visibility = visibility
-  }
-
   override fun updateNavigationFabVisibility(visibility: Int) {
     navigationFab.visibility = visibility
   }
@@ -242,7 +239,14 @@ class ExampleActivity : HistoryActivity(), ExampleView {
   }
 
   override fun showSettings() {
-    startActivity(Intent(this, NavigationSettingsActivity::class.java))
+    startActivityForResult(Intent(this, NavigationSettingsActivity::class.java), CHANGE_SETTING_REQUEST_CODE)
+  }
+
+  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    if (requestCode == CHANGE_SETTING_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+      viewModel.updateProfile()
+    }
   }
 
   override fun adjustMapPaddingForNavigation() {
@@ -293,7 +297,6 @@ class ExampleActivity : HistoryActivity(), ExampleView {
 
     settingsFab.setOnClickListener { presenter.onSettingsFabClick() }
     locationFab.setOnClickListener { presenter.onLocationFabClick() }
-    directionsFab.setOnClickListener { presenter.onDirectionsFabClick() }
     navigationFab.setOnClickListener { presenter.onNavigationFabClick() }
     cancelFab.setOnClickListener { presenter.onCancelFabClick() }
     attribution.setOnClickListener { presenter.onAttributionsClick(it) }

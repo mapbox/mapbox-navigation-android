@@ -13,6 +13,7 @@ import timber.log.Timber
 private const val BEARING_TOLERANCE = 90.0
 
 class ExampleRouteFinder(private val accessToken: String,
+                         var profile: String,
                          private val callback: OnRoutesFoundCallback): Callback<DirectionsResponse> {
 
   fun findRoute(location: Location, destination: Point) {
@@ -33,6 +34,7 @@ class ExampleRouteFinder(private val accessToken: String,
     NavigationRoute.builder(NavigationApplication.instance)
             .accessToken(accessToken)
             .origin(origin, bearing, BEARING_TOLERANCE)
+            .profile(profile)
             .destination(destination)
             .alternatives(true)
             .build()
