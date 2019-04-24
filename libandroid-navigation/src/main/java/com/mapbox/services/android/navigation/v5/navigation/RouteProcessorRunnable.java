@@ -58,7 +58,8 @@ class RouteProcessorRunnable implements Runnable {
     Date date = new Date();
     NavigationStatus status = mapboxNavigator.retrieveStatus(date,
       options.navigationLocationEngineIntervalLagInMilliseconds());
-    status = checkForNewLegIndex(mapboxNavigator, route, status, options.enableAutoIncrementLegIndex());
+    NavigationStatus previousStatus = routeProcessor.retrievePreviousStatus();
+    status = checkForNewLegIndex(mapboxNavigator, route, status, previousStatus, options.enableAutoIncrementLegIndex());
     RouteProgress routeProgress = routeProcessor.buildNewRouteProgress(mapboxNavigator, status, route);
 
     RouteRefresher routeRefresher = navigation.retrieveRouteRefresher();
@@ -79,14 +80,18 @@ class RouteProcessorRunnable implements Runnable {
   }
 
   private NavigationStatus checkForNewLegIndex(MapboxNavigator mapboxNavigator, DirectionsRoute route,
-                                               NavigationStatus currentStatus, boolean autoIncrementEnabled) {
-    RouteState currentState = currentStatus.getRouteState();
-    int currentLegIndex = currentStatus.getLegIndex();
+                                               NavigationStatus currentStatus, NavigationStatus previousStatus,
+                                               boolean autoIncrementEnabled) {
+    if (previousStatus == null) {
+      return currentStatus;
+    }
+    RouteState previousState = previousStatus.getRouteState();
+    int previousLegIndex = previousStatus.getLegIndex();
     int routeLegsSize = route.legs().size() - 1;
-    boolean canUpdateLeg = currentState == RouteState.COMPLETE && currentLegIndex < routeLegsSize;
-    boolean isValidDistanceRemaining = currentStatus.getRemainingLegDistance() < ARRIVAL_ZONE_RADIUS;
+    boolean canUpdateLeg = previousState == RouteState.COMPLETE && previousLegIndex < routeLegsSize;
+    boolean isValidDistanceRemaining = previousStatus.getRemainingLegDistance() < ARRIVAL_ZONE_RADIUS;
     if (autoIncrementEnabled && (canUpdateLeg && isValidDistanceRemaining)) {
-      int newLegIndex = currentLegIndex + 1;
+      int newLegIndex = previousLegIndex + 1;
       return mapboxNavigator.updateLegIndex(newLegIndex);
     }
     return currentStatus;

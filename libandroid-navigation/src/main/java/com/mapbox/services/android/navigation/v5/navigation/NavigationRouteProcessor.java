@@ -34,6 +34,7 @@ class NavigationRouteProcessor {
   private static final int FIRST_BANNER_INSTRUCTION = 0;
   private final RouteProgressStateMap progressStateMap = new RouteProgressStateMap();
   private RouteProgress previousRouteProgress;
+  private NavigationStatus previousStatus;
   private DirectionsRoute route;
   private RouteLeg currentLeg;
   private LegStep currentStep;
@@ -45,6 +46,7 @@ class NavigationRouteProcessor {
   private CurrentLegAnnotation currentLegAnnotation;
 
   RouteProgress buildNewRouteProgress(MapboxNavigator navigator, NavigationStatus status, DirectionsRoute route) {
+    previousStatus = status;
     updateRoute(route);
     return buildRouteProgressFrom(status, navigator);
   }
@@ -56,6 +58,11 @@ class NavigationRouteProcessor {
   @Nullable
   RouteProgress retrievePreviousRouteProgress() {
     return previousRouteProgress;
+  }
+
+  @Nullable
+  NavigationStatus retrievePreviousStatus() {
+    return previousStatus;
   }
 
   private void updateRoute(DirectionsRoute route) {
