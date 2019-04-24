@@ -196,7 +196,7 @@ public abstract class RouteProgress {
 
   // TODO javadoc
   @Nullable
-  public abstract FeatureCollection routeGeometryWithBuffer();
+  public abstract Geometry routeGeometryWithBuffer();
 
   public abstract RouteProgress.Builder toBuilder();
 
@@ -297,7 +297,7 @@ public abstract class RouteProgress {
 
     public abstract Builder routeGeometry(@Nullable Geometry routeGeometry);
 
-    public abstract Builder routeGeometryWithBuffer(@Nullable FeatureCollection routeGeometryWithBuffer);
+    public abstract Builder routeGeometryWithBuffer(@Nullable Geometry routeGeometryWithBuffer);
 
     abstract RouteProgress autoBuild(); // not public
 

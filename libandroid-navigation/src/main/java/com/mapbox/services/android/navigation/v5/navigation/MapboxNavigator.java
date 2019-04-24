@@ -5,10 +5,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Geometry;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
+import com.mapbox.geojson.gson.GeometryGeoJson;
 import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.NavigationStatus;
@@ -106,10 +106,10 @@ class MapboxNavigator {
   }
 
   @Nullable
-  synchronized FeatureCollection retrieveRouteGeometryWithBuffer() {
+  synchronized Geometry retrieveRouteGeometryWithBuffer() {
     String routeGeometryWithBuffer = navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION);
     if (routeGeometryWithBuffer != null) {
-      return FeatureCollection.fromJson(routeGeometryWithBuffer);
+      return GeometryGeoJson.fromJson(routeGeometryWithBuffer);
     }
     return null;
   }

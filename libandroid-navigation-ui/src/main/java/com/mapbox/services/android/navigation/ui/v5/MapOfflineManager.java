@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.ui.v5;
 import android.location.Location;
 import android.support.annotation.NonNull;
 
-import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Geometry;
 import com.mapbox.mapboxsdk.offline.OfflineGeometryRegionDefinition;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
@@ -26,8 +25,9 @@ class MapOfflineManager implements ProgressChangeListener {
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    FeatureCollection routeGeometryWithBuffer = routeProgress.routeGeometryWithBuffer();
-    Geometry routeGeometry = routeGeometryWithBuffer.features().get(0).geometry();
+    //FeatureCollection routeGeometryWithBuffer = routeProgress.routeGeometryWithBuffer();
+    //Geometry routeGeometry = routeGeometryWithBuffer.features().get(0).geometry();
+    Geometry routeGeometry = routeProgress.routeGeometryWithBuffer();
     if (currentRouteGeometry == null || !currentRouteGeometry.equals(routeGeometry)) {
       currentRouteGeometry = routeGeometry;
       // TODO unique identifier for download metadata?

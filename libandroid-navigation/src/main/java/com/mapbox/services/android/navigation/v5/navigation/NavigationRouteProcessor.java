@@ -7,7 +7,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
-import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Geometry;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.BannerInstruction;
@@ -47,7 +46,7 @@ class NavigationRouteProcessor {
   private List<Pair<StepIntersection, Double>> currentIntersectionDistances;
   private CurrentLegAnnotation currentLegAnnotation;
   private Geometry routeGeometry;
-  private FeatureCollection routeGeometryWithBuffer;
+  private Geometry routeGeometryWithBuffer;
 
   RouteProgress buildNewRouteProgress(MapboxNavigator navigator, NavigationStatus status, DirectionsRoute route) {
     previousStatus = status;
