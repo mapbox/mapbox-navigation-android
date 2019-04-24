@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -355,7 +356,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
       optionsBuilder.offlineRoutingTilesVersion(offlineVersion);
     }
     // TODO Testing merging previously downloaded region
-    optionsBuilder.offlineMapDatabasePath(getFilesDir().getPath() + "/" + "mbgl-offline.db");
+    optionsBuilder.offlineMapDatabasePath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + "kingfarm.db");
     NavigationLauncher.startNavigation(this, optionsBuilder.build());
   }
 

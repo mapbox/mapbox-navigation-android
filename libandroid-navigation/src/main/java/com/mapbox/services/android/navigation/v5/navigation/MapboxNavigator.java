@@ -21,7 +21,7 @@ import java.util.Date;
 class MapboxNavigator {
 
   private static final int INDEX_FIRST_ROUTE = 0;
-  private static final float GRID_SIZE = 0.315f; // TODO do these make sense?
+  private static final float GRID_SIZE = 0.0025f; // TODO do these make sense?
   private static final short BUFFER_DILATION = 1;
   private final Navigator navigator;
   private final RouteHandler routeHandler;

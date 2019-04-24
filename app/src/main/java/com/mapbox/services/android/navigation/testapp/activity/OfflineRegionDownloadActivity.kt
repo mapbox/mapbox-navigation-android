@@ -205,10 +205,15 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
 
     private fun downloadMapsRegion() {
         showDownloading(false, "Requesting tiles....")
-        val styleUrl: String? = mapboxMap.style?.url
+        // TODO Hardcoding OfflineRegionDefinitionProvider values for testing / debugging purposes
+        val styleUrl: String? = "mapbox://styles/mapbox/navigation-guidance-day-v4"
+        //val styleUrl: String? = mapboxMap.style?.url
         val bounds: LatLngBounds = LatLngBounds.from(boundingBox.north(), boundingBox.east(), boundingBox.south(), boundingBox.west())
-        val minZoom: Double = mapboxMap.cameraPosition.zoom
-        val maxZoom: Double = mapboxMap.maxZoomLevel
+        // TODO Hardcoding OfflineRegionDefinitionProvider values for testing / debugging purposes
+        val minZoom: Double = 11.0
+        val maxZoom: Double = 17.0
+        //val minZoom: Double = mapboxMap.cameraPosition.zoom
+        //val maxZoom: Double = mapboxMap.maxZoomLevel
         val pixelRatio: Float = this.resources.displayMetrics.density
         val definition: OfflineTilePyramidRegionDefinition = OfflineTilePyramidRegionDefinition(
                 styleUrl, bounds, minZoom, maxZoom, pixelRatio)
