@@ -55,7 +55,6 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   fun onAutocompleteClick() {
     view.selectAllAutocompleteText()
-    view.updateLocationFabVisibility(INVISIBLE)
     view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_EXPANDED)
   }
 
@@ -123,19 +122,9 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   fun onDestinationFound(feature: CarmenFeature) {
     feature.center()?.let {
-      if (presenterState == PresenterState.SHOW_ROUTE) {
-        view.removeRoute()
-        viewModel.primaryRoute = null
-        view.updateNavigationFabVisibility(INVISIBLE)
-      }
       viewModel.destination.value = it
-      view.clearMarkers()
       view.hideSoftKeyboard()
       view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED)
-      view.updateDestinationMarker(it)
-      view.updateLocationFabVisibility(INVISIBLE)
-      view.updateSettingsFabVisibility(INVISIBLE)
-      view.updateNavigationFabVisibility(VISIBLE)
       viewModel.findRouteToDestination()
     }
   }
@@ -153,14 +142,17 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   fun onRouteFound(routes: List<DirectionsRoute>?) {
     routes?.let { directionsRoutes ->
       if (presenterState != PresenterState.NAVIGATE) {
+        view.clearMarkers()
         view.transition()
         view.showAlternativeRoutes(true)
+        view.updateLocationFabVisibility(INVISIBLE)
+        view.updateSettingsFabVisibility(INVISIBLE)
         view.updateNavigationFabVisibility(VISIBLE)
         viewModel.destination.value?.let { destination ->
+          view.updateDestinationMarker(destination)
           moveCameraToInclude(destination)
         }
         presenterState = PresenterState.SHOW_ROUTE
-        view.updateSettingsFabVisibility(INVISIBLE)
       }
       view.updateRoutes(directionsRoutes)
     }
