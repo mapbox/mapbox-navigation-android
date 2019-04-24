@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.text.TextUtils;
+
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directionsrefresh.v1.MapboxDirectionsRefresh;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -11,8 +13,10 @@ import timber.log.Timber;
  * annotations for a route previously requested with the enableRefresh flag.
  */
 public final class RouteRefresh {
-  private RefreshCallback refreshCallback;
+
+  private static final String INVALID_DIRECTIONS_ROUTE = "RouteProgress passed has invalid DirectionsRoute";
   private final String accessToken;
+  private RefreshCallback refreshCallback;
 
   /**
    * Creates a {@link RouteRefresh} object which calls the {@link RefreshCallback} with updated
@@ -75,11 +79,23 @@ public final class RouteRefresh {
   }
 
   private void refresh(final DirectionsRoute directionsRoute, final int legIndex, RefreshCallback refreshCallback) {
+    if (isInvalid(directionsRoute, refreshCallback)) {
+      return;
+    }
     MapboxDirectionsRefresh.builder()
       .requestId(directionsRoute.routeOptions().requestUuid())
       .routeIndex(Integer.valueOf(directionsRoute.routeIndex()))
       .legIndex(legIndex)
       .accessToken(accessToken)
       .build().enqueueCall(new RouteRefreshCallback(directionsRoute, legIndex, refreshCallback));
+  }
+
+  private boolean isInvalid(DirectionsRoute directionsRoute, RefreshCallback refreshCallback) {
+    String requestUuid = directionsRoute.routeOptions().requestUuid();
+    if (TextUtils.isEmpty(requestUuid) || directionsRoute.routeIndex() == null) {
+      refreshCallback.onError(new RefreshError(INVALID_DIRECTIONS_ROUTE));
+      return true;
+    }
+    return false;
   }
 }
