@@ -96,14 +96,15 @@ public class RouteProcessorRunnableTest {
   public void onRun_legIndexIncrementsOnLegCompletionWithValidDistanceRemaining() {
     SnapToRoute snapToRoute = mock(SnapToRoute.class);
     NavigationEngineFactory factory = buildMockFactory(snapToRoute);
+    NavigationStatus previousStatus = buildMockStatus();
     NavigationStatus status = buildMockStatus();
-    when(status.getRouteState()).thenReturn(RouteState.COMPLETE);
-    when(status.getRemainingLegDistance()).thenReturn(20f);
+    when(previousStatus.getRouteState()).thenReturn(RouteState.COMPLETE);
+    when(previousStatus.getRemainingLegDistance()).thenReturn(20f);
     MapboxNavigator navigator = mock(MapboxNavigator.class);
     DirectionsRoute route = buildTwoLegRoute();
     boolean autoIncrementEnabled = true;
     RouteProcessorRunnable runnable = buildRouteProcessorRunnableWith(
-      navigator, factory, status, route, autoIncrementEnabled
+      navigator, factory, previousStatus, status, route, autoIncrementEnabled
     );
     Location rawLocation = mock(Location.class);
     runnable.updateRawLocation(rawLocation);
@@ -117,14 +118,15 @@ public class RouteProcessorRunnableTest {
   public void onRun_legIndexDoesNotIncrementsOnLegCompletionWithInvalidDistanceRemaining() {
     SnapToRoute snapToRoute = mock(SnapToRoute.class);
     NavigationEngineFactory factory = buildMockFactory(snapToRoute);
+    NavigationStatus previousStatus = buildMockStatus();
     NavigationStatus status = buildMockStatus();
-    when(status.getRouteState()).thenReturn(RouteState.COMPLETE);
-    when(status.getRemainingLegDistance()).thenReturn(50f);
+    when(previousStatus.getRouteState()).thenReturn(RouteState.COMPLETE);
+    when(previousStatus.getRemainingLegDistance()).thenReturn(50f);
     MapboxNavigator navigator = mock(MapboxNavigator.class);
     DirectionsRoute route = buildTwoLegRoute();
     boolean autoIncrementEnabled = true;
     RouteProcessorRunnable runnable = buildRouteProcessorRunnableWith(
-      navigator, factory, status, route, autoIncrementEnabled
+      navigator, factory, previousStatus, status, route, autoIncrementEnabled
     );
     Location rawLocation = mock(Location.class);
     runnable.updateRawLocation(rawLocation);
@@ -138,15 +140,16 @@ public class RouteProcessorRunnableTest {
   public void onRun_legIndexDoesNotIncrementsOnLegCompletionWithInvalidLegsRemaining() {
     SnapToRoute snapToRoute = mock(SnapToRoute.class);
     NavigationEngineFactory factory = buildMockFactory(snapToRoute);
+    NavigationStatus previousStatus = buildMockStatus();
     NavigationStatus status = buildMockStatus();
-    when(status.getRouteState()).thenReturn(RouteState.COMPLETE);
-    when(status.getRemainingLegDistance()).thenReturn(20f);
-    when(status.getLegIndex()).thenReturn(1);
+    when(previousStatus.getRouteState()).thenReturn(RouteState.COMPLETE);
+    when(previousStatus.getRemainingLegDistance()).thenReturn(20f);
+    when(previousStatus.getLegIndex()).thenReturn(1);
     MapboxNavigator navigator = mock(MapboxNavigator.class);
     DirectionsRoute route = buildTwoLegRoute();
     boolean autoIncrementEnabled = true;
     RouteProcessorRunnable runnable = buildRouteProcessorRunnableWith(
-      navigator, factory, status, route, autoIncrementEnabled
+      navigator, factory, previousStatus, status, route, autoIncrementEnabled
     );
     Location rawLocation = mock(Location.class);
     runnable.updateRawLocation(rawLocation);
@@ -160,14 +163,15 @@ public class RouteProcessorRunnableTest {
   public void onRun_legIndexDoesNotIncrementOnLegCompletionWithAutoIncrementDisabled() {
     SnapToRoute snapToRoute = mock(SnapToRoute.class);
     NavigationEngineFactory factory = buildMockFactory(snapToRoute);
+    NavigationStatus previousStatus = buildMockStatus();
     NavigationStatus status = buildMockStatus();
-    when(status.getRouteState()).thenReturn(RouteState.COMPLETE);
-    when(status.getRemainingLegDistance()).thenReturn(20f);
+    when(previousStatus.getRouteState()).thenReturn(RouteState.COMPLETE);
+    when(previousStatus.getRemainingLegDistance()).thenReturn(20f);
     MapboxNavigator navigator = mock(MapboxNavigator.class);
     DirectionsRoute route = buildTwoLegRoute();
     boolean autoIncrementEnabled = false;
     RouteProcessorRunnable runnable = buildRouteProcessorRunnableWith(
-      navigator, factory, status, route, autoIncrementEnabled
+      navigator, factory, previousStatus, status, route, autoIncrementEnabled
     );
     Location rawLocation = mock(Location.class);
     runnable.updateRawLocation(rawLocation);
@@ -218,6 +222,31 @@ public class RouteProcessorRunnableTest {
     );
   }
 
+  private RouteProcessorRunnable buildRouteProcessorRunnableWith(MapboxNavigator navigator,
+                                                                 NavigationEngineFactory factory,
+                                                                 NavigationStatus previousStatus,
+                                                                 NavigationStatus status,
+                                                                 DirectionsRoute route,
+                                                                 boolean autoIncrementEnabled) {
+    MapboxNavigationOptions options = MapboxNavigationOptions.builder()
+      .enableAutoIncrementLegIndex(autoIncrementEnabled)
+      .build();
+    when(navigator.retrieveStatus(any(Date.class), any(Long.class))).thenReturn(status);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+    when(navigation.options()).thenReturn(options);
+    when(navigation.getRoute()).thenReturn(route);
+    when(navigation.retrieveMapboxNavigator()).thenReturn(navigator);
+    when(navigation.retrieveEngineFactory()).thenReturn(factory);
+    NavigationRouteProcessor routeProcessor = mock(NavigationRouteProcessor.class);
+    when(routeProcessor.retrievePreviousStatus()).thenReturn(previousStatus);
+    return new RouteProcessorRunnable(
+      routeProcessor,
+      navigation,
+      mock(Handler.class),
+      mock(Handler.class),
+      mock(RouteProcessorBackgroundThread.Listener.class)
+    );
+  }
 
   private RouteProcessorRunnable buildRouteProcessorRunnableWith(NavigationEngineFactory factory,
                                                                  NavigationStatus status) {

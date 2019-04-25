@@ -30,14 +30,11 @@ import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.annotations.Marker;
-import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.exceptions.InvalidLatLngBoundsException;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
-import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -47,10 +44,12 @@ import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
-import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -78,14 +77,12 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 500;
 
   private final NavigationLauncherLocationCallback callback = new NavigationLauncherLocationCallback(this);
+  private final LocaleUtils localeUtils = new LocaleUtils();
+  private final List<Point> wayPoints = new ArrayList<>();
   private LocationEngine locationEngine;
-  private NavigationMapRoute mapRoute;
-  private MapboxMap mapboxMap;
-  private Marker currentMarker;
-  private Point currentLocation;
-  private Point destination;
+  private NavigationMapboxMap map;
   private DirectionsRoute route;
-  private LocaleUtils localeUtils;
+  private Point currentLocation;
   private boolean locationFound;
 
   @BindView(R.id.mapView)
@@ -104,7 +101,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     ButterKnife.bind(this);
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
-    localeUtils = new LocaleUtils();
   }
 
   @Override
@@ -131,7 +127,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     if (requestCode == CHANGE_SETTING_REQUEST_CODE && resultCode == RESULT_OK) {
       boolean shouldRefetch = data.getBooleanExtra(NavigationSettingsActivity.UNIT_TYPE_CHANGED, false)
         || data.getBooleanExtra(NavigationSettingsActivity.LANGUAGE_CHANGED, false);
-      if (destination != null && shouldRefetch) {
+      if (!wayPoints.isEmpty() && shouldRefetch) {
         fetchRoute();
       }
     }
@@ -192,23 +188,30 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   }
 
   @Override
-  public void onMapReady(MapboxMap mapboxMap) {
-    this.mapboxMap = mapboxMap;
+  public void onMapReady(@NotNull MapboxMap mapboxMap) {
     mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
       mapboxMap.addOnMapLongClickListener(this);
+      map = new NavigationMapboxMap(mapView, mapboxMap);
+      map.setOnRouteSelectionChangeListener(this);
+      map.updateLocationLayerRenderMode(RenderMode.COMPASS);
       initializeLocationEngine();
-      initializeLocationComponent(style);
-      initializeMapRoute();
     });
   }
 
   @Override
   public boolean onMapLongClick(@NonNull LatLng point) {
-    destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
+    if (wayPoints.size() == 2) {
+      Snackbar.make(mapView, "Max way points exceeded. Clearing route...", Snackbar.LENGTH_SHORT).show();
+      wayPoints.clear();
+      map.clearMarkers();
+      map.removeRoute();
+      return false;
+    }
+    wayPoints.add(Point.fromLngLat(point.getLongitude(), point.getLatitude()));
     launchRouteBtn.setEnabled(false);
     loading.setVisibility(View.VISIBLE);
     setCurrentMarkerPosition(point);
-    if (currentLocation != null) {
+    if (locationFound) {
       fetchRoute();
     }
     return false;
@@ -224,6 +227,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   }
 
   void onLocationFound(Location location) {
+    map.updateLocation(location);
     if (!locationFound) {
       animateCamera(new LatLng(location.getLatitude(), location.getLongitude()));
       Snackbar.make(mapView, R.string.explanation_long_press_waypoint, Snackbar.LENGTH_LONG).show();
@@ -244,44 +248,34 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     locationEngine.getLastLocation(callback);
   }
 
-  @SuppressWarnings( {"MissingPermission"})
-  private void initializeLocationComponent(Style style) {
-    LocationComponent locationComponent = mapboxMap.getLocationComponent();
-    locationComponent.activateLocationComponent(this, style, locationEngine);
-    locationComponent.setLocationComponentEnabled(true);
-    locationComponent.setRenderMode(RenderMode.COMPASS);
-  }
-
-  private void initializeMapRoute() {
-    mapRoute = new NavigationMapRoute(mapView, mapboxMap);
-    mapRoute.setOnRouteSelectionChangeListener(this);
-  }
-
   private void fetchRoute() {
     NavigationRoute.Builder builder = NavigationRoute.builder(this)
       .accessToken(Mapbox.getAccessToken())
       .origin(currentLocation)
-      .destination(destination)
       .profile(getRouteProfileFromSharedPreferences())
       .alternatives(true);
+
+    for (Point wayPoint : wayPoints) {
+      builder.addWaypoint(wayPoint);
+    }
+
     setFieldsFromSharedPreferences(builder);
-    builder.build()
-      .getRoute(new SimplifiedCallback() {
-        @Override
-        public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-          if (validRouteResponse(response)) {
-            hideLoading();
-            route = response.body().routes().get(0);
-            if (route.distance() > 25d) {
-              launchRouteBtn.setEnabled(true);
-              mapRoute.addRoutes(response.body().routes());
-              boundCameraToRoute();
-            } else {
-              Snackbar.make(mapView, R.string.error_select_longer_route, Snackbar.LENGTH_SHORT).show();
-            }
+    builder.build().getRoute(new SimplifiedCallback() {
+      @Override
+      public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+        if (validRouteResponse(response)) {
+          hideLoading();
+          route = response.body().routes().get(0);
+          if (route.distance() > 25d) {
+            launchRouteBtn.setEnabled(true);
+            map.drawRoutes(response.body().routes());
+            boundCameraToRoute();
+          } else {
+            Snackbar.make(mapView, R.string.error_select_longer_route, Snackbar.LENGTH_SHORT).show();
           }
         }
-      });
+      }
+    });
     loading.setVisibility(View.VISIBLE);
   }
 
@@ -392,23 +386,19 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   }
 
   private void animateCameraBbox(LatLngBounds bounds, int animationTime, int[] padding) {
-    CameraPosition position = mapboxMap.getCameraForLatLngBounds(bounds, padding);
-    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), animationTime);
+    CameraPosition position = map.retrieveMap().getCameraForLatLngBounds(bounds, padding);
+    map.retrieveMap().animateCamera(CameraUpdateFactory.newCameraPosition(position), animationTime);
   }
 
   private void animateCamera(LatLng point) {
-    mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(point, DEFAULT_CAMERA_ZOOM), CAMERA_ANIMATION_DURATION);
+    map.retrieveMap().animateCamera(
+      CameraUpdateFactory.newLatLngZoom(point, DEFAULT_CAMERA_ZOOM), CAMERA_ANIMATION_DURATION
+    );
   }
 
   private void setCurrentMarkerPosition(LatLng position) {
     if (position != null) {
-      if (currentMarker == null) {
-        MarkerOptions markerViewOptions = new MarkerOptions()
-          .position(position);
-        currentMarker = mapboxMap.addMarker(markerViewOptions);
-      } else {
-        currentMarker.setPosition(position);
-      }
+      map.addDestinationMarker(Point.fromLngLat(position.getLongitude(), position.getLatitude()));
     }
   }
 
