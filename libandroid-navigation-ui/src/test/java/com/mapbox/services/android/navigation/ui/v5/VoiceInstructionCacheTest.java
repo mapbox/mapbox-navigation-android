@@ -16,6 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 public class VoiceInstructionCacheTest extends BaseTest {
 
@@ -25,8 +26,10 @@ public class VoiceInstructionCacheTest extends BaseTest {
   public void checksPreCachingCachesNineInstructions() throws Exception {
     MapboxNavigation aMapboxNavigation = mock(MapboxNavigation.class);
     VoiceInstructionLoader aVoiceInstructionLoader = mock(VoiceInstructionLoader.class);
+    ConnectivityStatusProvider aConnectivityStatus = mock(ConnectivityStatusProvider.class);
+    when(aConnectivityStatus.isConnected()).thenReturn(true);
     VoiceInstructionCache theVoiceInstructionCache = new VoiceInstructionCache(aMapboxNavigation,
-      aVoiceInstructionLoader);
+      aVoiceInstructionLoader, aConnectivityStatus);
     DirectionsRoute aRoute = buildDirectionsRoute();
     ArgumentCaptor<List> voiceInstructionsToCache = ArgumentCaptor.forClass(List.class);
 
@@ -40,8 +43,9 @@ public class VoiceInstructionCacheTest extends BaseTest {
   public void checksCacheIsNotCalledIfIsVoiceInstructionsToCacheThresholdNotReached() {
     MapboxNavigation aMapboxNavigation = mock(MapboxNavigation.class);
     VoiceInstructionLoader aVoiceInstructionLoader = mock(VoiceInstructionLoader.class);
+    ConnectivityStatusProvider aConnectivityStatus = mock(ConnectivityStatusProvider.class);
     VoiceInstructionCache theVoiceInstructionCache = new VoiceInstructionCache(aMapboxNavigation,
-      aVoiceInstructionLoader);
+      aVoiceInstructionLoader, aConnectivityStatus);
 
     theVoiceInstructionCache.cache();
 
@@ -52,8 +56,10 @@ public class VoiceInstructionCacheTest extends BaseTest {
   public void checksCaching() throws Exception {
     MapboxNavigation aMapboxNavigation = mock(MapboxNavigation.class);
     VoiceInstructionLoader aVoiceInstructionLoader = mock(VoiceInstructionLoader.class);
+    ConnectivityStatusProvider aConnectivityStatus = mock(ConnectivityStatusProvider.class);
+    when(aConnectivityStatus.isConnected()).thenReturn(true);
     VoiceInstructionCache theVoiceInstructionCache = new VoiceInstructionCache(aMapboxNavigation,
-      aVoiceInstructionLoader);
+      aVoiceInstructionLoader, aConnectivityStatus);
     DirectionsRoute twentyOneInstructionsRoute = buildDirectionsRoute();
     ArgumentCaptor<List> voiceInstructionsToCache = ArgumentCaptor.forClass(List.class);
 
@@ -74,8 +80,10 @@ public class VoiceInstructionCacheTest extends BaseTest {
   public void checksEvictVoiceInstructionsIsCalledWhenCaching() throws Exception {
     MapboxNavigation aMapboxNavigation = mock(MapboxNavigation.class);
     VoiceInstructionLoader aVoiceInstructionLoader = mock(VoiceInstructionLoader.class);
+    ConnectivityStatusProvider aConnectivityStatus = mock(ConnectivityStatusProvider.class);
+    when(aConnectivityStatus.isConnected()).thenReturn(true);
     VoiceInstructionCache theVoiceInstructionCache = new VoiceInstructionCache(aMapboxNavigation,
-      aVoiceInstructionLoader);
+      aVoiceInstructionLoader, aConnectivityStatus);
     DirectionsRoute aRoute = buildDirectionsRoute();
 
     theVoiceInstructionCache.preCache(aRoute);
@@ -83,6 +91,35 @@ public class VoiceInstructionCacheTest extends BaseTest {
     theVoiceInstructionCache.cache();
 
     verify(aVoiceInstructionLoader, times(1)).evictVoiceInstructions();
+  }
+
+  @Test
+  public void noConnectivityDoesNotAllowPreCaching() throws Exception {
+    MapboxNavigation aMapboxNavigation = mock(MapboxNavigation.class);
+    VoiceInstructionLoader aVoiceInstructionLoader = mock(VoiceInstructionLoader.class);
+    ConnectivityStatusProvider aConnectivityStatus = mock(ConnectivityStatusProvider.class);
+    when(aConnectivityStatus.isConnected()).thenReturn(false);
+    VoiceInstructionCache theVoiceInstructionCache = new VoiceInstructionCache(aMapboxNavigation,
+      aVoiceInstructionLoader, aConnectivityStatus);
+    DirectionsRoute aRoute = buildDirectionsRoute();
+
+    theVoiceInstructionCache.preCache(aRoute);
+
+    verifyZeroInteractions(aVoiceInstructionLoader);
+  }
+
+  @Test
+  public void noConnectivityDoesNotAllowCaching() {
+    MapboxNavigation aMapboxNavigation = mock(MapboxNavigation.class);
+    VoiceInstructionLoader aVoiceInstructionLoader = mock(VoiceInstructionLoader.class);
+    ConnectivityStatusProvider aConnectivityStatus = mock(ConnectivityStatusProvider.class);
+    when(aConnectivityStatus.isConnected()).thenReturn(false);
+    VoiceInstructionCache theVoiceInstructionCache = new VoiceInstructionCache(aMapboxNavigation,
+      aVoiceInstructionLoader, aConnectivityStatus);
+
+    theVoiceInstructionCache.cache();
+
+    verifyZeroInteractions(aVoiceInstructionLoader);
   }
 
   private DirectionsRoute buildDirectionsRoute() throws IOException {

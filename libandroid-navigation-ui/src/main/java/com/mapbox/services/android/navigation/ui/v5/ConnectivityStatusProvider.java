@@ -9,29 +9,32 @@ import android.net.wifi.WifiManager;
 
 import java.util.HashMap;
 
-class ConnectivityStatusProvider {
+/**
+ * TODO internal package
+ */
+public class ConnectivityStatusProvider {
 
   private final Context context;
   private final WifiNetworkChecker wifiNetworkChecker;
   private final MobileNetworkChecker mobileNetworkChecker;
 
-  ConnectivityStatusProvider(Context applicationContext) {
+  public ConnectivityStatusProvider(Context applicationContext) {
     this.context = applicationContext;
     this.wifiNetworkChecker = new WifiNetworkChecker(new HashMap<Integer, Boolean>());
     this.mobileNetworkChecker = new MobileNetworkChecker(new HashMap<Integer, Boolean>());
   }
 
-  boolean isConnected() {
-    NetworkInfo info = getNetworkInfo(context);
-    return (info != null && info.isConnected());
-  }
-
-  boolean isConnectedFast() {
+  public boolean isConnectedFast() {
     NetworkInfo info = getNetworkInfo(context);
     int wifiLevel = getWifiLevel(context);
     return (info != null
       && info.isConnected()
       && isConnectionFast(info.getType(), info.getSubtype(), wifiLevel));
+  }
+
+  public boolean isConnected() {
+    NetworkInfo info = getNetworkInfo(context);
+    return (info != null && info.isConnected());
   }
 
   @SuppressLint("MissingPermission")

@@ -16,16 +16,23 @@ class VoiceInstructionCache {
   private static final int VOICE_INSTRUCTIONS_TO_CACHE_THRESHOLD = 5;
   private final MapboxNavigation navigation;
   private final VoiceInstructionLoader voiceInstructionLoader;
+  private final ConnectivityStatusProvider connectivityStatus;
   private int totalVoiceInstructions = 0;
   private int currentVoiceInstructionsCachedIndex = 0;
   private boolean isVoiceInstructionsToCacheThresholdReached = false;
 
-  VoiceInstructionCache(MapboxNavigation navigation, VoiceInstructionLoader voiceInstructionLoader) {
+  VoiceInstructionCache(MapboxNavigation navigation, VoiceInstructionLoader voiceInstructionLoader,
+                        ConnectivityStatusProvider connectivityStatus) {
     this.navigation = navigation;
     this.voiceInstructionLoader = voiceInstructionLoader;
+    this.connectivityStatus = connectivityStatus;
   }
 
   void preCache(DirectionsRoute route) {
+    if (!connectivityStatus.isConnected()) {
+      return;
+    }
+
     totalVoiceInstructions = 0;
     currentVoiceInstructionsCachedIndex = 0;
     isVoiceInstructionsToCacheThresholdReached = false;
@@ -50,6 +57,10 @@ class VoiceInstructionCache {
   }
 
   void cache() {
+    if (!connectivityStatus.isConnected()) {
+      return;
+    }
+
     if (isVoiceInstructionsToCacheThresholdReached) {
       isVoiceInstructionsToCacheThresholdReached = false;
       voiceInstructionLoader.evictVoiceInstructions();
