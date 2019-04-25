@@ -356,7 +356,9 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
       optionsBuilder.offlineRoutingTilesVersion(offlineVersion);
     }
     // TODO Testing merging previously downloaded region
-    optionsBuilder.offlineMapDatabasePath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + "kingfarm.db");
+    optionsBuilder.offlineMapDatabasePath(
+      Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + "kingfarm.db"
+    );
     NavigationLauncher.startNavigation(this, optionsBuilder.build());
   }
 

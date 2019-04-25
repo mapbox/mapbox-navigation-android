@@ -4,6 +4,7 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 
 import com.mapbox.geojson.Geometry;
+import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.offline.OfflineGeometryRegionDefinition;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -25,8 +26,6 @@ class MapOfflineManager implements ProgressChangeListener {
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    //FeatureCollection routeGeometryWithBuffer = routeProgress.routeGeometryWithBuffer();
-    //Geometry routeGeometry = routeGeometryWithBuffer.features().get(0).geometry();
     Geometry routeGeometry = routeProgress.routeGeometryWithBuffer();
     if (currentRouteGeometry == null || !currentRouteGeometry.equals(routeGeometry)) {
       currentRouteGeometry = routeGeometry;
@@ -48,6 +47,7 @@ class MapOfflineManager implements ProgressChangeListener {
       callback.onError("An error occurred processing the offline metadata");
       return;
     }
+    Mapbox.setConnected(null);
     offlineManager.createOfflineRegion(definition, metadata, new CreateOfflineRegionCallback(callback));
   }
 }

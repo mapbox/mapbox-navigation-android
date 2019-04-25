@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
 import timber.log.Timber;
@@ -19,7 +18,6 @@ class NavigationOfflineDatabaseCallback implements OfflineDatabaseLoadedCallback
   public void onComplete() {
     // TODO Remove debug log after testing
     Timber.d("NavigationOfflineDatabaseCallback#onComplete");
-    Mapbox.setConnected(false);
     navigation.addProgressChangeListener(mapOfflineManager);
   }
 

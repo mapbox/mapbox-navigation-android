@@ -331,10 +331,10 @@ public class NavigationViewModel extends AndroidViewModel {
     }
     Context applicationContext = getApplication().getApplicationContext();
     OfflineManager offlineManager = OfflineManager.getInstance(applicationContext);
-    // TODO Tried setting a higher limit
-    //offlineManager.setOfflineMapboxTileCountLimit(1000000);
-    //String styleUrl = ThemeSwitcher.retrieveMapStyle(applicationContext);
-    // TODO Getting a runtime crash when retrieving the style, hardcoding the styleUrl for testing / debugging purposes
+    /**
+     * TODO Getting a runtime crash when retrieving the style, hardcoding the styleUrl for testing / debugging purposes
+     * String styleUrl = ThemeSwitcher.retrieveMapStyle(applicationContext);
+     */
     String styleUrl = "mapbox://styles/mapbox/navigation-guidance-day-v4";
     float pixelRatio = applicationContext.getResources().getDisplayMetrics().density;
     OfflineRegionDefinitionProvider definitionProvider = new OfflineRegionDefinitionProvider(styleUrl, pixelRatio);
