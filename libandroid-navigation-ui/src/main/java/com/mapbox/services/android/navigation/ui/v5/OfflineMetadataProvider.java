@@ -12,7 +12,7 @@ class OfflineMetadataProvider {
   private static final String JSON_CHARSET = "UTF-8";
 
   @Nullable
-  byte[] buildMetaDataFor(String routeSummary) {
+  byte[] buildMetadataFor(String routeSummary) {
     try {
       JSONObject jsonObject = new JSONObject();
       jsonObject.put(ROUTE_SUMMARY, routeSummary);

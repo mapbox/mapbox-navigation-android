@@ -339,7 +339,10 @@ public class NavigationViewModel extends AndroidViewModel {
     float pixelRatio = applicationContext.getResources().getDisplayMetrics().density;
     OfflineRegionDefinitionProvider definitionProvider = new OfflineRegionDefinitionProvider(styleUrl, pixelRatio);
     OfflineMetadataProvider metadataProvider = new OfflineMetadataProvider();
-    MapOfflineManager mapOfflineManager = new MapOfflineManager(offlineManager, definitionProvider, metadataProvider);
+    MapConnectivityController connectivityController = new MapConnectivityController();
+    RegionDownloadCallback regionDownloadCallback = new RegionDownloadCallback(connectivityController);
+    MapOfflineManager mapOfflineManager = new MapOfflineManager(offlineManager, definitionProvider, metadataProvider,
+      connectivityController, regionDownloadCallback);
     NavigationOfflineDatabaseCallback callback = new NavigationOfflineDatabaseCallback(navigation, mapOfflineManager);
     mapOfflineManager.loadDatabase(options.offlineMapDatabasePath(), callback);
   }

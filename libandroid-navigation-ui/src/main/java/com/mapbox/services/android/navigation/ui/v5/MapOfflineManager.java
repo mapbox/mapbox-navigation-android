@@ -4,7 +4,6 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 
 import com.mapbox.geojson.Geometry;
-import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.offline.OfflineGeometryRegionDefinition;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -12,42 +11,48 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 class MapOfflineManager implements ProgressChangeListener {
 
+  private static final String OFFLINE_METADATA_ERROR = "An error occurred processing the offline metadata";
   private final OfflineManager offlineManager;
   private final OfflineRegionDefinitionProvider definitionProvider;
   private final OfflineMetadataProvider metadataProvider;
-  private Geometry currentRouteGeometry;
+  private final MapConnectivityController connectivityController;
+  private final RegionDownloadCallback regionDownloadCallback;
+  private Geometry previousRouteGeometry;
 
   MapOfflineManager(OfflineManager offlineManager, OfflineRegionDefinitionProvider definitionProvider,
-                    OfflineMetadataProvider metadataProvider) {
+                    OfflineMetadataProvider metadataProvider, MapConnectivityController connectivityController,
+                    RegionDownloadCallback regionDownloadCallback) {
     this.offlineManager = offlineManager;
     this.definitionProvider = definitionProvider;
     this.metadataProvider = metadataProvider;
+    this.connectivityController = connectivityController;
+    this.regionDownloadCallback = regionDownloadCallback;
   }
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    Geometry routeGeometry = routeProgress.routeGeometryWithBuffer();
-    if (currentRouteGeometry == null || !currentRouteGeometry.equals(routeGeometry)) {
-      currentRouteGeometry = routeGeometry;
+    Geometry currentRouteGeometry = routeProgress.routeGeometryWithBuffer();
+    if (previousRouteGeometry == null || !previousRouteGeometry.equals(currentRouteGeometry)) {
+      previousRouteGeometry = currentRouteGeometry;
       // TODO unique identifier for download metadata?
       String routeSummary = routeProgress.directionsRoute().routeOptions().requestUuid();
-      download(routeSummary, currentRouteGeometry, new RegionDownloadCallback());
+      download(routeSummary, previousRouteGeometry, regionDownloadCallback);
     }
   }
 
-  void loadDatabase(@NonNull String offlineDatabasePath, final OfflineDatabaseLoadedCallback callback) {
+  void loadDatabase(@NonNull String offlineDatabasePath, OfflineDatabaseLoadedCallback callback) {
     offlineManager.mergeOfflineRegions(offlineDatabasePath, new MergeOfflineRegionsCallback(callback));
   }
 
   private void download(@NonNull String routeSummary, @NonNull Geometry routeGeometry,
                         final OfflineRegionDownloadCallback callback) {
     OfflineGeometryRegionDefinition definition = definitionProvider.buildRegionFor(routeGeometry);
-    byte[] metadata = metadataProvider.buildMetaDataFor(routeSummary);
+    byte[] metadata = metadataProvider.buildMetadataFor(routeSummary);
     if (metadata == null) {
-      callback.onError("An error occurred processing the offline metadata");
+      callback.onError(OFFLINE_METADATA_ERROR);
       return;
     }
-    Mapbox.setConnected(null);
+    connectivityController.assign(null);
     offlineManager.createOfflineRegion(definition, metadata, new CreateOfflineRegionCallback(callback));
   }
 }

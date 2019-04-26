@@ -39,7 +39,8 @@ ext {
       ankoCommon             : '0.10.0',
       firebaseCore           : '16.0.7',
       crashlytics            : '2.9.9',
-      multidex               : '1.0.3'
+      multidex               : '1.0.3',
+      json                   : '20180813'
   ]
 
   dependenciesList = [
@@ -100,6 +101,7 @@ ext {
       hamcrest               : "org.hamcrest:hamcrest-junit:${version.hamcrest}",
       commonsIO              : "commons-io:commons-io:${version.commonsIO}",
       robolectric            : "org.robolectric:robolectric:${version.robolectric}",
+      json                   : "org.json:json:${version.json}",
 
       // play services
       gmsLocation            : "com.google.android.gms:play-services-location:${version.gmsLocation}",
