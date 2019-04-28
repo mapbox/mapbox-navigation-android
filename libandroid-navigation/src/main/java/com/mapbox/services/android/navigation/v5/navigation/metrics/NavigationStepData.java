@@ -7,7 +7,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgr
 /**
  * Class that contains step meta data
  */
-class NavigationStepData  {
+class NavigationStepData {
   private final String upcomingInstruction;
   private final String upcomingType;
   private final String upcomingModifier;
@@ -30,8 +30,8 @@ class NavigationStepData  {
     this.previousModifier = metricsRouteProgress.getPreviousStepModifier();
     this.previousType = metricsRouteProgress.getPreviousStepType();
     this.previousName = metricsRouteProgress.getPreviousStepName();
-    this.distanceRemaining= metricsRouteProgress.getDistanceRemaining();
-    this.durationRemaining=metricsRouteProgress.getDurationRemaining();
+    this.distanceRemaining = metricsRouteProgress.getDistanceRemaining();
+    this.durationRemaining = metricsRouteProgress.getDurationRemaining();
   }
 
   String getUpcomingInstruction() {

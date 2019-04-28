@@ -3,7 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation.metrics;
 import android.annotation.SuppressLint;
 
 @SuppressLint("ParcelCreator")
- class NavigationCancelEvent extends NavigationEvent {
+class NavigationCancelEvent extends NavigationEvent {
   private static final String NAVIGATION_CANCEL = "navigation.cancel";
   private String arrivalTimestamp;
   private int rating;
@@ -14,31 +14,31 @@ import android.annotation.SuppressLint;
   }
 
   @Override
-   String getEventName() {
+  String getEventName() {
     return NAVIGATION_CANCEL;
   }
 
-   String getArrivalTimestamp() {
+  String getArrivalTimestamp() {
     return arrivalTimestamp;
   }
 
-   void setArrivalTimestamp(String arrivalTimestamp) {
+  void setArrivalTimestamp(String arrivalTimestamp) {
     this.arrivalTimestamp = arrivalTimestamp;
   }
 
-   int getRating() {
+  int getRating() {
     return rating;
   }
 
-   void setRating(Integer rating) {
+  void setRating(Integer rating) {
     this.rating = rating;
   }
 
-   String getComment() {
+  String getComment() {
     return comment;
   }
 
-   void setComment(String comment) {
+  void setComment(String comment) {
     this.comment = comment;
   }
 }

@@ -7,8 +7,7 @@ import android.support.annotation.NonNull;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 
 @SuppressLint("ParcelCreator")
-public
-class NavigationRerouteEvent extends NavigationEvent {
+public class NavigationRerouteEvent extends NavigationEvent {
   private static final String NAVIGATION_REROUTE = "navigation.reroute";
   private final int newDistanceRemaining;
   private final int newDurationRemaining;
