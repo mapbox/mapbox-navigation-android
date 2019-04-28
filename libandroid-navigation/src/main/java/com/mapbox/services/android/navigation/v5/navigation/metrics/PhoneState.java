@@ -32,43 +32,43 @@ public class PhoneState {
     this.userId = TelemetryUtils.retrieveVendorId();
   }
 
-  public String getUserId() {
+  String getUserId() {
     return userId;
   }
 
-  public int getVolumeLevel() {
+  int getVolumeLevel() {
     return volumeLevel;
   }
 
-  public int getBatteryLevel() {
+  int getBatteryLevel() {
     return batteryLevel;
   }
 
-  public int getScreenBrightness() {
+  int getScreenBrightness() {
     return screenBrightness;
   }
 
-  public boolean isBatteryPluggedIn() {
+  boolean isBatteryPluggedIn() {
     return batteryPluggedIn;
   }
 
-  public String getConnectivity() {
+  String getConnectivity() {
     return connectivity;
   }
 
-  public String getAudioType() {
+  String getAudioType() {
     return audioType;
   }
 
-  public String getApplicationState() {
+  String getApplicationState() {
     return applicationState;
   }
 
-  public String getCreated() {
+  String getCreated() {
     return created;
   }
 
-  public String getFeedbackId() {
+  String getFeedbackId() {
     return feedbackId;
   }
 }

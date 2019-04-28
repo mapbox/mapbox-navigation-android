@@ -5,13 +5,12 @@ import android.os.Parcel;
 import android.support.annotation.NonNull;
 
 import com.mapbox.android.telemetry.Event;
-import com.mapbox.android.telemetry.TelemetryUtils;
 import com.mapbox.services.android.navigation.BuildConfig;
 
 /**
  * Base Event class for navigation events, contains common properties.
  */
-public abstract class NavigationEvent extends Event {
+abstract class NavigationEvent extends Event {
   private static final String OPERATING_SYSTEM = "Android - " + Build.VERSION.RELEASE;
   private final String operatingSystem = OPERATING_SYSTEM;
   private final String device = Build.MODEL;
@@ -71,321 +70,321 @@ public abstract class NavigationEvent extends Event {
     this.event = getEventName();
   }
 
-  protected abstract String getEventName();
+  abstract String getEventName();
 
-  public String getEvent() {
+  String getEvent() {
     return event;
   }
 
-  public String getOperatingSystem() {
+  String getOperatingSystem() {
     return operatingSystem;
   }
 
-  public String getDevice() {
+  String getDevice() {
     return device;
   }
 
-  public String getCreated() {
+  String getCreated() {
     return created;
   }
 
-  public String getApplicationState() {
+  String getApplicationState() {
     return applicationState;
   }
 
-  public String getConnectivity() {
+  String getConnectivity() {
     return connectivity;
   }
 
-  public boolean isBatteryPluggedIn() {
+  boolean isBatteryPluggedIn() {
     return batteryPluggedIn;
   }
 
-  public int getVolumeLevel() {
+  int getVolumeLevel() {
     return volumeLevel;
   }
 
-  public int getScreenBrightness() {
+  int getScreenBrightness() {
     return screenBrightness;
   }
 
-  public int getBatteryLevel() {
+  int getBatteryLevel() {
     return batteryLevel;
   }
 
-  public String getStartTimestamp() {
+  String getStartTimestamp() {
     return startTimestamp;
   }
 
-  public void setStartTimestamp(String startTimestamp) {
+  void setStartTimestamp(String startTimestamp) {
     this.startTimestamp = startTimestamp;
   }
 
-  public String getSdkIdentifier() {
+  String getSdkIdentifier() {
     return sdkIdentifier;
   }
 
-  public void setSdkIdentifier(String sdkIdentifier) {
+  void setSdkIdentifier(String sdkIdentifier) {
     this.sdkIdentifier = sdkIdentifier;
   }
 
-  public String getSdkVersion() {
+  String getSdkVersion() {
     return sdkVersion;
   }
 
-  public String getSessionIdentifier() {
+  String getSessionIdentifier() {
     return sessionIdentifier;
   }
 
-  public void setSessionIdentifier(String sessionIdentifier) {
+  void setSessionIdentifier(String sessionIdentifier) {
     this.sessionIdentifier = sessionIdentifier;
   }
 
-  public String getGeometry() {
+  String getGeometry() {
     return geometry;
   }
 
-  public void setGeometry(String geometry) {
+  void setGeometry(String geometry) {
     this.geometry = geometry;
   }
 
-  public String getProfile() {
+  String getProfile() {
     return profile;
   }
 
-  public void setProfile(String profile) {
+  void setProfile(String profile) {
     this.profile = profile;
   }
 
-  public String getOriginalRequestIdentifier() {
+  String getOriginalRequestIdentifier() {
     return originalRequestIdentifier;
   }
 
-  public void setOriginalRequestIdentifier(String originalRequestIdentifier) {
+  void setOriginalRequestIdentifier(String originalRequestIdentifier) {
     this.originalRequestIdentifier = originalRequestIdentifier;
   }
 
-  public String getRequestIdentifier() {
+  String getRequestIdentifier() {
     return requestIdentifier;
   }
 
-  public void setRequestIdentifier(String requestIdentifier) {
+  void setRequestIdentifier(String requestIdentifier) {
     this.requestIdentifier = requestIdentifier;
   }
 
-  public String getOriginalGeometry() {
+  String getOriginalGeometry() {
     return originalGeometry;
   }
 
-  public void setOriginalGeometry(String originalGeometry) {
+  void setOriginalGeometry(String originalGeometry) {
     this.originalGeometry = originalGeometry;
   }
 
-  public String getAudioType() {
+  String getAudioType() {
     return audioType;
   }
 
-  public void setAudioType(String audioType) {
+  void setAudioType(String audioType) {
     this.audioType = audioType;
   }
 
-  public String getLocationEngine() {
+  String getLocationEngine() {
     return locationEngine;
   }
 
-  public void setLocationEngine(String locationEngine) {
+  void setLocationEngine(String locationEngine) {
     this.locationEngine = locationEngine;
   }
 
-  public String getTripIdentifier() {
+  String getTripIdentifier() {
     return tripIdentifier;
   }
 
-  public void setTripIdentifier(String tripIdentifier) {
+  void setTripIdentifier(String tripIdentifier) {
     this.tripIdentifier = tripIdentifier;
   }
 
-  public double getLat() {
+  double getLat() {
     return lat;
   }
 
-  public void setLat(double lat) {
+  void setLat(double lat) {
     this.lat = lat;
   }
 
-  public double getLng() {
+  double getLng() {
     return lng;
   }
 
-  public void setLng(double lng) {
+  void setLng(double lng) {
     this.lng = lng;
   }
 
-  public boolean isSimulation() {
+  boolean isSimulation() {
     return simulation;
   }
 
-  public void setSimulation(boolean simulation) {
+  void setSimulation(boolean simulation) {
     this.simulation = simulation;
   }
 
-  public int getAbsoluteDistanceToDestination() {
+  int getAbsoluteDistanceToDestination() {
     return absoluteDistanceToDestination;
   }
 
-  public void setAbsoluteDistanceToDestination(int absoluteDistanceToDestination) {
+  void setAbsoluteDistanceToDestination(int absoluteDistanceToDestination) {
     this.absoluteDistanceToDestination = absoluteDistanceToDestination;
   }
 
-  public int getPercentTimeInPortrait() {
+  int getPercentTimeInPortrait() {
     return percentTimeInPortrait;
   }
 
-  public void setPercentTimeInPortrait(int percentTimeInPortrait) {
+  void setPercentTimeInPortrait(int percentTimeInPortrait) {
     this.percentTimeInPortrait = percentTimeInPortrait;
   }
 
-  public int getPercentTimeInForeground() {
+  int getPercentTimeInForeground() {
     return percentTimeInForeground;
   }
 
-  public void setPercentTimeInForeground(int percentTimeInForeground) {
+  void setPercentTimeInForeground(int percentTimeInForeground) {
     this.percentTimeInForeground = percentTimeInForeground;
   }
 
-  public int getDistanceCompleted() {
+  int getDistanceCompleted() {
     return distanceCompleted;
   }
 
-  public void setDistanceCompleted(int distanceCompleted) {
+  void setDistanceCompleted(int distanceCompleted) {
     this.distanceCompleted = distanceCompleted;
   }
 
-  public int getDistanceRemaining() {
+  int getDistanceRemaining() {
     return distanceRemaining;
   }
 
-  public void setDistanceRemaining(int distanceRemaining) {
+  void setDistanceRemaining(int distanceRemaining) {
     this.distanceRemaining = distanceRemaining;
   }
 
-  public int getDurationRemaining() {
+  int getDurationRemaining() {
     return durationRemaining;
   }
 
-  public void setDurationRemaining(int durationRemaining) {
+  void setDurationRemaining(int durationRemaining) {
     this.durationRemaining = durationRemaining;
   }
 
-  public int getEventVersion() {
+  int getEventVersion() {
     return eventVersion;
   }
 
-  public void setEventVersion(int eventVersion) {
+  void setEventVersion(int eventVersion) {
     this.eventVersion = eventVersion;
   }
 
-  public int getEstimatedDistance() {
+  int getEstimatedDistance() {
     return estimatedDistance;
   }
 
-  public void setEstimatedDistance(int estimatedDistance) {
+  void setEstimatedDistance(int estimatedDistance) {
     this.estimatedDistance = estimatedDistance;
   }
 
-  public int getEstimatedDuration() {
+  int getEstimatedDuration() {
     return estimatedDuration;
   }
 
-  public void setEstimatedDuration(int estimatedDuration) {
+  void setEstimatedDuration(int estimatedDuration) {
     this.estimatedDuration = estimatedDuration;
   }
 
-  public int getRerouteCount() {
+  int getRerouteCount() {
     return rerouteCount;
   }
 
-  public void setRerouteCount(int rerouteCount) {
+  void setRerouteCount(int rerouteCount) {
     this.rerouteCount = rerouteCount;
   }
 
-  public int getOriginalEstimatedDistance() {
+  int getOriginalEstimatedDistance() {
     return originalEstimatedDistance;
   }
 
-  public void setOriginalEstimatedDistance(int originalEstimatedDistance) {
+  void setOriginalEstimatedDistance(int originalEstimatedDistance) {
     this.originalEstimatedDistance = originalEstimatedDistance;
   }
 
-  public int getOriginalEstimatedDuration() {
+  int getOriginalEstimatedDuration() {
     return originalEstimatedDuration;
   }
 
-  public void setOriginalEstimatedDuration(int originalEstimatedDuration) {
+  void setOriginalEstimatedDuration(int originalEstimatedDuration) {
     this.originalEstimatedDuration = originalEstimatedDuration;
   }
 
-  public int getStepCount() {
+  int getStepCount() {
     return stepCount;
   }
 
-  public void setStepCount(int stepCount) {
+  void setStepCount(int stepCount) {
     this.stepCount = stepCount;
   }
 
-  public int getOriginalStepCount() {
+  int getOriginalStepCount() {
     return originalStepCount;
   }
 
-  public void setOriginalStepCount(int originalStepCount) {
+  void setOriginalStepCount(int originalStepCount) {
     this.originalStepCount = originalStepCount;
   }
 
-  public int getLegIndex() {
+  int getLegIndex() {
     return legIndex;
   }
 
-  public void setLegIndex(int legIndex) {
+  void setLegIndex(int legIndex) {
     this.legIndex = legIndex;
   }
 
-  public int getLegCount() {
+  int getLegCount() {
     return legCount;
   }
 
-  public void setLegCount(int legCount) {
+  void setLegCount(int legCount) {
     this.legCount = legCount;
   }
 
-  public int getStepIndex() {
+  int getStepIndex() {
     return stepIndex;
   }
 
-  public void setStepIndex(int stepIndex) {
+  void setStepIndex(int stepIndex) {
     this.stepIndex = stepIndex;
   }
 
-  public int getVoiceIndex() {
+  int getVoiceIndex() {
     return voiceIndex;
   }
 
-  public void setVoiceIndex(int voiceIndex) {
+  void setVoiceIndex(int voiceIndex) {
     this.voiceIndex = voiceIndex;
   }
 
-  public int getBannerIndex() {
+  int getBannerIndex() {
     return bannerIndex;
   }
 
-  public void setBannerIndex(int bannerIndex) {
+  void setBannerIndex(int bannerIndex) {
     this.bannerIndex = bannerIndex;
   }
 
-  public int getTotalStepCount() {
+  int getTotalStepCount() {
     return totalStepCount;
   }
 
-  public void setTotalStepCount(int totalStepCount) {
+  void setTotalStepCount(int totalStepCount) {
     this.totalStepCount = totalStepCount;
   }
 

@@ -7,7 +7,8 @@ import android.support.annotation.NonNull;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 
 @SuppressLint("ParcelCreator")
-public class NavigationRerouteEvent extends NavigationStepEvent {
+public
+class NavigationRerouteEvent extends NavigationStepEvent {
   private static final String NAVIGATION_REROUTE = "navigation.reroute";
   private final int newDistanceRemaining;
   private final int newDurationRemaining;
@@ -28,55 +29,55 @@ public class NavigationRerouteEvent extends NavigationStepEvent {
   }
 
   @Override
-  protected String getEventName() {
+  String getEventName() {
     return NAVIGATION_REROUTE;
   }
 
-  public int getNewDistanceRemaining() {
+  int getNewDistanceRemaining() {
     return newDistanceRemaining;
   }
 
-  public int getNewDurationRemaining() {
+  int getNewDurationRemaining() {
     return newDurationRemaining;
   }
 
-  public String getNewGeometry() {
+  String getNewGeometry() {
     return newGeometry;
   }
 
-  public int getSecondsSinceLastReroute() {
+  int getSecondsSinceLastReroute() {
     return secondsSinceLastReroute;
   }
 
-  public void setSecondsSinceLastReroute(int secondsSinceLastReroute) {
+  void setSecondsSinceLastReroute(int secondsSinceLastReroute) {
     this.secondsSinceLastReroute = secondsSinceLastReroute;
   }
 
-  public Location[] getLocationsBefore() {
+  Location[] getLocationsBefore() {
     return locationsBefore;
   }
 
-  public void setLocationsBefore(Location[] locationsBefore) {
+  void setLocationsBefore(Location[] locationsBefore) {
     this.locationsBefore = locationsBefore;
   }
 
-  public Location[] getLocationsAfter() {
+  Location[] getLocationsAfter() {
     return locationsAfter;
   }
 
-  public void setLocationsAfter(Location[] locationsAfter) {
+  void setLocationsAfter(Location[] locationsAfter) {
     this.locationsAfter = locationsAfter;
   }
 
-  public String getFeedbackId() {
+  String getFeedbackId() {
     return feedbackId;
   }
 
-  public String getScreenshot() {
+  String getScreenshot() {
     return screenshot;
   }
 
-  public void setScreenshot(String screenshot) {
+  void setScreenshot(String screenshot) {
     this.screenshot = screenshot;
   }
 }
