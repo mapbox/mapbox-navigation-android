@@ -7,7 +7,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgr
 /**
  * Class that contains step meta data
  */
-abstract class NavigationStepEvent extends NavigationEvent {
+class NavigationStepData  {
   private final String upcomingInstruction;
   private final String upcomingType;
   private final String upcomingModifier;
@@ -18,9 +18,10 @@ abstract class NavigationStepEvent extends NavigationEvent {
   private final String previousName;
   private int distance;
   private int duration;
+  private int distanceRemaining;
+  private int durationRemaining;
 
-  NavigationStepEvent(@NonNull PhoneState phoneState, @NonNull MetricsRouteProgress metricsRouteProgress) {
-    super(phoneState);
+  NavigationStepData(@NonNull MetricsRouteProgress metricsRouteProgress) {
     this.upcomingInstruction = metricsRouteProgress.getUpcomingStepInstruction();
     this.upcomingModifier = metricsRouteProgress.getUpcomingStepModifier();
     this.upcomingName = metricsRouteProgress.getUpcomingStepName();
@@ -29,6 +30,8 @@ abstract class NavigationStepEvent extends NavigationEvent {
     this.previousModifier = metricsRouteProgress.getPreviousStepModifier();
     this.previousType = metricsRouteProgress.getPreviousStepType();
     this.previousName = metricsRouteProgress.getPreviousStepName();
+    this.distanceRemaining= metricsRouteProgress.getDistanceRemaining();
+    this.durationRemaining=metricsRouteProgress.getDurationRemaining();
   }
 
   String getUpcomingInstruction() {
@@ -67,8 +70,12 @@ abstract class NavigationStepEvent extends NavigationEvent {
     return distance;
   }
 
-  void setDistance(int distance) {
-    this.distance = distance;
+  public int getDistanceRemaining() {
+    return distanceRemaining;
+  }
+
+  public int getDurationRemaining() {
+    return durationRemaining;
   }
 
   int getDuration() {

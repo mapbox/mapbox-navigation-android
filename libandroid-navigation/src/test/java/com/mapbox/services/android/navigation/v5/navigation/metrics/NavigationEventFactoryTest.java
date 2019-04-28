@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
 import android.location.Location;
 
+import com.google.gson.Gson;
 import com.mapbox.android.telemetry.TelemetryUtils;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -66,7 +68,7 @@ public class NavigationEventFactoryTest {
   private static final int CURRENT_DURATION = 2001;
   private static final String SDK_ID = "SDK ID";
   private static final Boolean BATTER_PLUGGEDIN = Boolean.TRUE;
-  public static final boolean IS_MOCK = true;
+  private static final boolean IS_MOCK = true;
   private static final int DISTANCE_TRAVELED = 500;
   private static final String FEEDBACK_ID = "100";
   private static final String USER_ID = "110";
@@ -156,13 +158,17 @@ public class NavigationEventFactoryTest {
       .buildNavigationCancelEvent(phoneState, sessionState, metricsRouteProgress, locationBefore, SDK_ID);
     checkNavigationEvent(cancelEvent);
     assertEquals(TelemetryUtils.generateCreateDateFormatted(date), cancelEvent.getArrivalTimestamp());
+    String s = new Gson().toJson(cancelEvent);
+    assertNotNull(s);
   }
 
   @Test
   public void testArriveEvent() {
-    NavigationArriveEvent cancelEvent = NavigationEventFactory
+    NavigationArriveEvent arriveEvent = NavigationEventFactory
       .buildNavigationArriveEvent(phoneState, sessionState, metricsRouteProgress, locationBefore, SDK_ID);
-    checkNavigationEvent(cancelEvent);
+    checkNavigationEvent(arriveEvent);
+    String s = new Gson().toJson(arriveEvent);
+    assertNotNull(s);
   }
 
   @Test
@@ -178,7 +184,7 @@ public class NavigationEventFactoryTest {
     NavigationRerouteEvent navigationRerouteEvent = NavigationEventFactory
       .buildNavigationRerouteEvent(phoneState, sessionState, metricsRouteProgress, locationBefore, SDK_ID, rerouteEvent);
     checkNavigationEvent(navigationRerouteEvent);
-    checkNavigationStepEvent(navigationRerouteEvent);
+    checkNavigationStepData(navigationRerouteEvent.getStep());
     assertEquals(newDistanceRemaining, navigationRerouteEvent.getNewDistanceRemaining(), 0);
     assertEquals(newDurationRemaining, navigationRerouteEvent.getNewDurationRemaining(), 0);
     assertEquals(newRouteGeo, navigationRerouteEvent.getNewGeometry());
@@ -192,6 +198,8 @@ public class NavigationEventFactoryTest {
     assertEquals(LONGITUDE_BEFORE, locationsBefore[0].getLongitude(), 0);
     assertEquals(LATITUDE_BEFORE, locationsBefore[0].getLatitude(), 0);
     assertEquals(FEEDBACK_ID, navigationRerouteEvent.getFeedbackId());
+    String s = new Gson().toJson(rerouteEvent);
+    assertNotNull(s);
   }
 
   @Test
@@ -205,7 +213,7 @@ public class NavigationEventFactoryTest {
         description, feedbackType, screenshot, feedbackSource);
 
     checkNavigationEvent(navigationFeedbackEvent);
-    checkNavigationStepEvent(navigationFeedbackEvent);
+    checkNavigationStepData(navigationFeedbackEvent.getStep());
     Location[] locationsAfter = navigationFeedbackEvent.getLocationsAfter();
     assertEquals(1, locationsAfter.length);
     assertEquals(LONGITUDE_AFTER, locationsAfter[0].getLongitude(), 0);
@@ -220,17 +228,22 @@ public class NavigationEventFactoryTest {
     assertEquals(feedbackType, navigationFeedbackEvent.getFeedbackType());
     assertEquals(screenshot, navigationFeedbackEvent.getScreenshot());
     assertEquals(feedbackSource, navigationFeedbackEvent.getSource());
+
+    String s = new Gson().toJson(navigationFeedbackEvent);
+    assertNotNull(s);
   }
 
-  private void checkNavigationStepEvent(NavigationStepEvent event){
-    assertEquals(PRE_INSTRU, event.getPreviousInstruction());
-    assertEquals(PRE_MODIFIER, event.getPreviousModifier());
-    assertEquals(PRE_NAME, event.getPreviousName());
-    assertEquals(PRE_TYPE, event.getPreviousType());
-    assertEquals(UPCOMING_INSTRU, event.getUpcomingInstruction());
-    assertEquals(UPCOMING_MODIFIER, event.getUpcomingModifier());
-    assertEquals(UPCOMING_NAME, event.getUpcomingName());
-    assertEquals(UPCOMING_TYPE, event.getUpcomingType());
+  private void checkNavigationStepData(NavigationStepData data){
+    assertEquals(PRE_INSTRU, data.getPreviousInstruction());
+    assertEquals(PRE_MODIFIER, data.getPreviousModifier());
+    assertEquals(PRE_NAME, data.getPreviousName());
+    assertEquals(PRE_TYPE, data.getPreviousType());
+    assertEquals(UPCOMING_INSTRU, data.getUpcomingInstruction());
+    assertEquals(UPCOMING_MODIFIER, data.getUpcomingModifier());
+    assertEquals(UPCOMING_NAME, data.getUpcomingName());
+    assertEquals(UPCOMING_TYPE, data.getUpcomingType());
+    assertEquals(DISTANCE_REMAINING, data.getDistanceRemaining());
+    assertEquals(DURATION_REMAINING, data.getDurationRemaining());
   }
   private void checkNavigationEvent(NavigationEvent event) {
     assertEquals(APP_STATE, event.getApplicationState());

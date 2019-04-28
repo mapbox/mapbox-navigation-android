@@ -36,6 +36,8 @@ allprojects {
     jcenter()
     maven { url 'https://plugins.gradle.org/m2' }
     maven { url 'https://mapbox.bintray.com/mapbox' }
+    // Snapshot repository
+     maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
   }
 
   group = GROUP

@@ -37,9 +37,6 @@ jobs:
           name: Check Java code style
           command: make checkstyle
       - run:
-          name: Download schema
-          command:
-      - run:
           name: Run unit-test, generate Jacoco test report and Post code coverage report to Codecov.io
           command: |
             ./gradlew testDebugUnitTestCoverage

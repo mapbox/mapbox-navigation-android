@@ -47,23 +47,18 @@ dependencies {
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
   api dependenciesList.mapboxCore
-  api (dependenciesList.mapboxEvents) {
+  api ('com.mapbox.mapboxsdk:mapbox-android-telemetry:4.5.0-SNAPSHOT') {
     exclude group: "com.mapbox.mapboxsdk", module: "mapbox-android-core"
   }
-
   // Navigator
   implementation dependenciesList.mapboxNavigator
-
   // Support
   implementation dependenciesList.supportAppcompatV7
-
   // Logging
   implementation dependenciesList.timber
-
   // AutoValues
   annotationProcessor dependenciesList.autoValue
   compileOnly dependenciesList.autoValue
-
   // Unit testing
   testImplementation dependenciesList.junit
   testImplementation dependenciesList.mockito
@@ -78,3 +73,4 @@ apply from: "${rootDir}/gradle/checkstyle.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
 apply from: "${rootDir}/gradle/dependencies-graph.gradle"
 apply from: "${rootDir}/gradle/dependency-updates.gradle"
+apply from: "${rootDir}/gradle/download-schema.gradle"
