@@ -31,6 +31,7 @@ import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.camera.CameraUpdate;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.exceptions.InvalidLatLngBoundsException;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -44,6 +45,8 @@ import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
+import com.mapbox.services.android.navigation.ui.v5.camera.CameraUpdateMode;
+import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCameraUpdate;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
@@ -387,13 +390,17 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
   private void animateCameraBbox(LatLngBounds bounds, int animationTime, int[] padding) {
     CameraPosition position = map.retrieveMap().getCameraForLatLngBounds(bounds, padding);
-    map.retrieveMap().animateCamera(CameraUpdateFactory.newCameraPosition(position), animationTime);
+    CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(position);
+    NavigationCameraUpdate navigationCameraUpdate = new NavigationCameraUpdate(cameraUpdate);
+    navigationCameraUpdate.setMode(CameraUpdateMode.OVERRIDE);
+    map.retrieveCamera().update(navigationCameraUpdate, animationTime);
   }
 
   private void animateCamera(LatLng point) {
-    map.retrieveMap().animateCamera(
-      CameraUpdateFactory.newLatLngZoom(point, DEFAULT_CAMERA_ZOOM), CAMERA_ANIMATION_DURATION
-    );
+    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, DEFAULT_CAMERA_ZOOM);
+    NavigationCameraUpdate navigationCameraUpdate = new NavigationCameraUpdate(cameraUpdate);
+    navigationCameraUpdate.setMode(CameraUpdateMode.OVERRIDE);
+    map.retrieveCamera().update(navigationCameraUpdate, CAMERA_ANIMATION_DURATION);
   }
 
   private void setCurrentMarkerPosition(LatLng position) {
