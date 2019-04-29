@@ -143,6 +143,10 @@ public class MapboxNavigationActivity extends AppCompatActivity implements OnNav
     if (!offlineMapDatabasePath.isEmpty()) {
       options.offlineMapDatabasePath(offlineMapDatabasePath);
     }
+    String offlineMapStyleUrl = preferences.getString(NavigationConstants.MAP_STYLE_URL_KEY, "");
+    if (!offlineMapStyleUrl.isEmpty()) {
+      options.offlineMapStyleUrl(offlineMapStyleUrl);
+    }
   }
 
   private void finishNavigation() {

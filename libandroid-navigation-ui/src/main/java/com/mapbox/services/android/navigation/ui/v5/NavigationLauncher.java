@@ -78,6 +78,7 @@ public class NavigationLauncher {
       .remove(NavigationConstants.OFFLINE_PATH_KEY)
       .remove(NavigationConstants.OFFLINE_VERSION_KEY)
       .remove(NavigationConstants.MAP_DATABASE_PATH_KEY)
+      .remove(NavigationConstants.MAP_STYLE_URL_KEY)
       .apply();
   }
 
