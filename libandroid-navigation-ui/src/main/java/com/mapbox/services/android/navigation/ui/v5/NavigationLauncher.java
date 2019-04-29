@@ -41,6 +41,7 @@ public class NavigationLauncher {
     storeOfflinePath(options, editor);
     storeOfflineVersion(options, editor);
     storeOfflineMapDatabasePath(options, editor);
+    storeOfflineMapStyleUrl(options, editor);
 
     editor.apply();
 
@@ -122,4 +123,7 @@ public class NavigationLauncher {
     editor.putString(NavigationConstants.MAP_DATABASE_PATH_KEY, options.offlineMapDatabasePath());
   }
 
+  private static void storeOfflineMapStyleUrl(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
+    editor.putString(NavigationConstants.MAP_STYLE_URL_KEY, options.offlineMapStyleUrl());
+  }
 }

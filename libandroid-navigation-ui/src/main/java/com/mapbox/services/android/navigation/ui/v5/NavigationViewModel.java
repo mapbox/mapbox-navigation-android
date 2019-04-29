@@ -326,25 +326,22 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initializeMapOfflineManager(NavigationViewOptions options) {
-    if (TextUtils.isEmpty(options.offlineMapDatabasePath())) {
+    String mapDatabasePath = options.offlineMapDatabasePath();
+    String mapStyleUrl = options.offlineMapStyleUrl();
+    if (TextUtils.isEmpty(mapDatabasePath) || TextUtils.isEmpty(mapStyleUrl)) {
       return;
     }
     Context applicationContext = getApplication().getApplicationContext();
     OfflineManager offlineManager = OfflineManager.getInstance(applicationContext);
-    /**
-     * TODO Getting a runtime crash when retrieving the style, hardcoding the styleUrl for testing / debugging purposes
-     * String styleUrl = ThemeSwitcher.retrieveMapStyle(applicationContext);
-     */
-    String styleUrl = "mapbox://styles/mapbox/navigation-guidance-day-v4";
     float pixelRatio = applicationContext.getResources().getDisplayMetrics().density;
-    OfflineRegionDefinitionProvider definitionProvider = new OfflineRegionDefinitionProvider(styleUrl, pixelRatio);
+    OfflineRegionDefinitionProvider definitionProvider = new OfflineRegionDefinitionProvider(mapStyleUrl, pixelRatio);
     OfflineMetadataProvider metadataProvider = new OfflineMetadataProvider();
     MapConnectivityController connectivityController = new MapConnectivityController();
     RegionDownloadCallback regionDownloadCallback = new RegionDownloadCallback(connectivityController);
     MapOfflineManager mapOfflineManager = new MapOfflineManager(offlineManager, definitionProvider, metadataProvider,
       connectivityController, regionDownloadCallback);
     NavigationOfflineDatabaseCallback callback = new NavigationOfflineDatabaseCallback(navigation, mapOfflineManager);
-    mapOfflineManager.loadDatabase(options.offlineMapDatabasePath(), callback);
+    mapOfflineManager.loadDatabase(mapDatabasePath, callback);
   }
 
   private void initializeVoiceInstructionLoader() {

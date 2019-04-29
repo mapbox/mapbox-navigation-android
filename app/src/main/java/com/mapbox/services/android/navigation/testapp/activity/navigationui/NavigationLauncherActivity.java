@@ -359,6 +359,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     optionsBuilder.offlineMapDatabasePath(
       Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + "kingfarm.db"
     );
+    optionsBuilder.offlineMapStyleUrl("mapbox://styles/mapbox/navigation-guidance-day-v4");
     NavigationLauncher.startNavigation(this, optionsBuilder.build());
   }
 

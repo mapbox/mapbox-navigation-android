@@ -60,6 +60,17 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
      */
     public abstract Builder offlineMapDatabasePath(String offlinePath);
 
+    /**
+     * Add the map style URL an offline map database.
+     * <p>
+     * When added, this URL must correspond the the offline maps database added in
+     * {@link NavigationViewOptions#builder()#offlineMapDatabasePath(String)}.
+     *
+     * @param offlineUrl for map style of offline data
+     * @return this builder
+     */
+    public abstract Builder offlineMapStyleUrl(String offlineUrl);
+
     public abstract NavigationLauncherOptions build();
   }
 

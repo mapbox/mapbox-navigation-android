@@ -26,4 +26,7 @@ public abstract class NavigationUiOptions {
 
   @Nullable
   public abstract String offlineMapDatabasePath();
+
+  @Nullable
+  public abstract String offlineMapStyleUrl();
 }
