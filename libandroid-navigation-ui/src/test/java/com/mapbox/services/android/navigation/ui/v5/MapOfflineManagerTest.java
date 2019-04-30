@@ -39,7 +39,7 @@ public class MapOfflineManagerTest {
   }
 
   @Test
-  public void checksCreateOfflineRegionIsCalledWhenWhenDownloadingRouteBuffer() {
+  public void checksCreateOfflineRegionIsCalledWhenDownloadingRouteBuffer() {
     OfflineManager mockedOfflineManager = mock(OfflineManager.class);
     OfflineRegionDefinitionProvider mockedOfflineRegionDefinitionProvider = mock(OfflineRegionDefinitionProvider.class);
     String guidanceStyleUrl = "mapbox://styles/mapbox/navigation-guidance-day-v4";
@@ -66,39 +66,6 @@ public class MapOfflineManagerTest {
     theMapOfflineManager.onProgressChange(mockedLocation, mockedRouteProgress);
 
     verify(mockedOfflineManager).createOfflineRegion(eq(routeBufferDefinition), eq(routeSummaryMetadata),
-      any(CreateOfflineRegionCallback.class));
-  }
-
-  @Test
-  public void checksOnErrorRegionDownloadCallbackIsCalledIfMetadataIsNull() {
-    OfflineManager mockedOfflineManager = mock(OfflineManager.class);
-    OfflineRegionDefinitionProvider mockedOfflineRegionDefinitionProvider = mock(OfflineRegionDefinitionProvider.class);
-    String guidanceStyleUrl = "mapbox://styles/mapbox/navigation-guidance-day-v4";
-    float anyPixelRatio = 3.0f;
-    OfflineRegionDefinitionProvider anOfflineRegionDefinitionProvider =
-      new OfflineRegionDefinitionProvider(guidanceStyleUrl, anyPixelRatio);
-    Geometry aRouteBufferGeometry = buildARouteBufferGeometry();
-    OfflineGeometryRegionDefinition routeBufferDefinition =
-      anOfflineRegionDefinitionProvider.buildRegionFor(aRouteBufferGeometry);
-    when(mockedOfflineRegionDefinitionProvider.buildRegionFor(eq(aRouteBufferGeometry))).thenReturn(routeBufferDefinition);
-    OfflineMetadataProvider mockedOfflineMetadataProvider = mock(OfflineMetadataProvider.class);
-    String aRouteSummary = "cjuykbm4705v26pnpvqlbjm5n";
-    byte[] nullMetadata = null;
-    when(mockedOfflineMetadataProvider.buildMetadataFor(eq(aRouteSummary))).thenReturn(nullMetadata);
-    MapConnectivityController mockedMapConnectivityController = mock(MapConnectivityController.class);
-    RegionDownloadCallback mockedRegionDownloadCallback = mock(RegionDownloadCallback.class);
-    MapOfflineManager theMapOfflineManager = new MapOfflineManager(mockedOfflineManager,
-      mockedOfflineRegionDefinitionProvider, mockedOfflineMetadataProvider, mockedMapConnectivityController,
-      mockedRegionDownloadCallback);
-    Location mockedLocation = mock(Location.class);
-    RouteProgress mockedRouteProgress = buildMockRouteProgress(aRouteSummary, aRouteBufferGeometry);
-    Boolean defaultState = null;
-
-    theMapOfflineManager.onProgressChange(mockedLocation, mockedRouteProgress);
-
-    verify(mockedRegionDownloadCallback).onError(eq("An error occurred processing the offline metadata"));
-    verify(mockedMapConnectivityController, times(0)).assign(eq(defaultState));
-    verify(mockedOfflineManager, times(0)).createOfflineRegion(eq(routeBufferDefinition), eq(nullMetadata),
       any(CreateOfflineRegionCallback.class));
   }
 

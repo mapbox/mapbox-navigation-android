@@ -4,8 +4,6 @@ import android.support.annotation.Nullable;
 
 import org.json.JSONObject;
 
-import timber.log.Timber;
-
 class OfflineMetadataProvider {
 
   private static final String ROUTE_SUMMARY = "route_summary";
@@ -19,7 +17,6 @@ class OfflineMetadataProvider {
       String json = jsonObject.toString();
       return json.getBytes(JSON_CHARSET);
     } catch (Exception exception) {
-      Timber.e("Failed to encode metadata: %s", exception.getMessage());
       return null;
     }
   }

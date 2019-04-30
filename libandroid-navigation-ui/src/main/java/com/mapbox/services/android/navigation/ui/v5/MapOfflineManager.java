@@ -11,7 +11,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 class MapOfflineManager implements ProgressChangeListener {
 
-  private static final String OFFLINE_METADATA_ERROR = "An error occurred processing the offline metadata";
   private final OfflineManager offlineManager;
   private final OfflineRegionDefinitionProvider definitionProvider;
   private final OfflineMetadataProvider metadataProvider;
@@ -48,10 +47,6 @@ class MapOfflineManager implements ProgressChangeListener {
                         final OfflineRegionDownloadCallback callback) {
     OfflineGeometryRegionDefinition definition = definitionProvider.buildRegionFor(routeGeometry);
     byte[] metadata = metadataProvider.buildMetadataFor(routeSummary);
-    if (metadata == null) {
-      callback.onError(OFFLINE_METADATA_ERROR);
-      return;
-    }
     connectivityController.assign(null);
     offlineManager.createOfflineRegion(definition, metadata, new CreateOfflineRegionCallback(callback));
   }
