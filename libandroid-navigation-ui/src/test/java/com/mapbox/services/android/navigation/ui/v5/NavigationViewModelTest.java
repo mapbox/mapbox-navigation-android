@@ -10,8 +10,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,7 +25,8 @@ public class NavigationViewModelTest {
   public void stopNavigation_progressListenersAreRemoved() {
     Application application = mock(Application.class);
     MapboxNavigation navigation = mock(MapboxNavigation.class);
-    NavigationViewModel viewModel = new NavigationViewModel(application, navigation);
+    MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
+    NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockedConnectivityController);
 
     viewModel.stopNavigation();
 
@@ -35,7 +37,8 @@ public class NavigationViewModelTest {
   public void stopNavigation_milestoneListenersAreRemoved() {
     Application application = mock(Application.class);
     MapboxNavigation navigation = mock(MapboxNavigation.class);
-    NavigationViewModel viewModel = new NavigationViewModel(application, navigation);
+    MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
+    NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockedConnectivityController);
 
     viewModel.stopNavigation();
 
@@ -43,11 +46,25 @@ public class NavigationViewModelTest {
   }
 
   @Test
+  public void stopNavigation_mapConnectivityControllerStateIsReset() {
+    Application application = mock(Application.class);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+    MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
+    NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockedConnectivityController);
+    Boolean defaultState = null;
+
+    viewModel.onDestroy(false);
+
+    verify(mockedConnectivityController).assign(eq(defaultState));
+  }
+
+  @Test
   public void updateRoute_navigationIsNotUpdatedWhenChangingConfigurations() {
     Application application = mock(Application.class);
     MapboxNavigation navigation = mock(MapboxNavigation.class);
     DirectionsRoute route = mock(DirectionsRoute.class);
-    NavigationViewModel viewModel = new NavigationViewModel(application, navigation);
+    MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
+    NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockedConnectivityController);
     viewModel.onDestroy(true);
 
     viewModel.updateRoute(route);

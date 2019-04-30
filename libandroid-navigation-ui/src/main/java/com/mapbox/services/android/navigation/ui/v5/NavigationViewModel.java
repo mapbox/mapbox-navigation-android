@@ -84,20 +84,24 @@ public class NavigationViewModel extends AndroidViewModel {
   private int timeFormatType;
   private boolean isRunning;
   private boolean isChangingConfigurations;
+  private MapConnectivityController connectivityController;
 
   public NavigationViewModel(Application application) {
     super(application);
     this.accessToken = Mapbox.getAccessToken();
     initializeLocationEngine();
     initializeRouter();
-    routeUtils = new RouteUtils();
-    localeUtils = new LocaleUtils();
+    this.routeUtils = new RouteUtils();
+    this.localeUtils = new LocaleUtils();
+    this.connectivityController = new MapConnectivityController();
   }
 
   // Package private (no modifier) for testing purposes
-  NavigationViewModel(Application application, MapboxNavigation navigation) {
+  NavigationViewModel(Application application, MapboxNavigation navigation,
+                      MapConnectivityController connectivityController) {
     super(application);
     this.navigation = navigation;
+    this.connectivityController = connectivityController;
   }
 
   // Package private (no modifier) for testing purposes
@@ -115,8 +119,9 @@ public class NavigationViewModel extends AndroidViewModel {
   public void onDestroy(boolean isChangingConfigurations) {
     this.isChangingConfigurations = isChangingConfigurations;
     if (!isChangingConfigurations) {
-      router.onDestroy();
+      destroyRouter();
       endNavigation();
+      connectivityController.assign(null);
       deactivateInstructionPlayer();
       isRunning = false;
     }
@@ -336,7 +341,6 @@ public class NavigationViewModel extends AndroidViewModel {
     float pixelRatio = applicationContext.getResources().getDisplayMetrics().density;
     OfflineRegionDefinitionProvider definitionProvider = new OfflineRegionDefinitionProvider(mapStyleUrl, pixelRatio);
     OfflineMetadataProvider metadataProvider = new OfflineMetadataProvider();
-    MapConnectivityController connectivityController = new MapConnectivityController();
     RegionDownloadCallback regionDownloadCallback = new RegionDownloadCallback(connectivityController);
     MapOfflineManager mapOfflineManager = new MapOfflineManager(offlineManager, definitionProvider, metadataProvider,
       connectivityController, regionDownloadCallback);
@@ -434,6 +438,12 @@ public class NavigationViewModel extends AndroidViewModel {
     if (locationEngineConductor.updateSimulatedRoute(route)) {
       LocationEngine replayEngine = locationEngineConductor.obtainLocationEngine();
       navigation.setLocationEngine(replayEngine);
+    }
+  }
+
+  private void destroyRouter() {
+    if (router != null) {
+      router.onDestroy();
     }
   }
 
