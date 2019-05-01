@@ -25,8 +25,5 @@ public abstract class NavigationUiOptions {
   public abstract String offlineRoutingTilesVersion();
 
   @Nullable
-  public abstract String offlineMapDatabasePath();
-
-  @Nullable
-  public abstract String offlineMapStyleUrl();
+  public abstract MapOfflineOptions offlineMapOptions();
 }

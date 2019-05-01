@@ -44,6 +44,7 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity;
 import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.ui.v5.MapOfflineOptions;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.camera.CameraUpdateMode;
@@ -356,10 +357,10 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
       optionsBuilder.offlineRoutingTilesVersion(offlineVersion);
     }
     // TODO Testing merging previously downloaded region
-    optionsBuilder.offlineMapDatabasePath(
-      Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + "kingfarm.db"
-    );
-    optionsBuilder.offlineMapStyleUrl("mapbox://styles/mapbox/navigation-guidance-day-v4");
+    File downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+    String databaseFilePath = downloadDirectory + "/" + "kingfarm.db";
+    String offlineStyleUrl = "mapbox://styles/mapbox/navigation-guidance-day-v4";
+    optionsBuilder.offlineMapOptions(new MapOfflineOptions(databaseFilePath, offlineStyleUrl));
     NavigationLauncher.startNavigation(this, optionsBuilder.build());
   }
 

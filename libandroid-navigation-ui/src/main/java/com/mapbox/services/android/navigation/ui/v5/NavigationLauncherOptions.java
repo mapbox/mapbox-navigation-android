@@ -50,26 +50,12 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
     public abstract Builder offlineRoutingTilesVersion(String offlineVersion);
 
     /**
-     * Add an offline path for loading an offline map database.
-     * <p>
-     * When added, the {@link NavigationView} will try to initialize and use this data
-     * for offline maps while navigating.
+     * Add options to configure offline maps.
      *
-     * @param offlinePath to offline database on device
+     * @param mapOfflineOptions for offline configuration
      * @return this builder
      */
-    public abstract Builder offlineMapDatabasePath(String offlinePath);
-
-    /**
-     * Add the map style URL an offline map database.
-     * <p>
-     * When added, this URL must correspond the the offline maps database added in
-     * {@link NavigationViewOptions#builder()#offlineMapDatabasePath(String)}.
-     *
-     * @param offlineUrl for map style of offline data
-     * @return this builder
-     */
-    public abstract Builder offlineMapStyleUrl(String offlineUrl);
+    public abstract Builder offlineMapOptions(MapOfflineOptions mapOfflineOptions);
 
     public abstract NavigationLauncherOptions build();
   }

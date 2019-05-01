@@ -140,12 +140,10 @@ public class MapboxNavigationActivity extends AppCompatActivity implements OnNav
       options.offlineRoutingTilesVersion(offlineVersion);
     }
     String offlineMapDatabasePath = preferences.getString(NavigationConstants.MAP_DATABASE_PATH_KEY, "");
-    if (!offlineMapDatabasePath.isEmpty()) {
-      options.offlineMapDatabasePath(offlineMapDatabasePath);
-    }
     String offlineMapStyleUrl = preferences.getString(NavigationConstants.MAP_STYLE_URL_KEY, "");
-    if (!offlineMapStyleUrl.isEmpty()) {
-      options.offlineMapStyleUrl(offlineMapStyleUrl);
+    if (!offlineMapDatabasePath.isEmpty() && !offlineMapStyleUrl.isEmpty()) {
+      MapOfflineOptions mapOfflineOptions = new MapOfflineOptions(offlineMapDatabasePath, offlineMapStyleUrl);
+      options.offlineMapOptions(mapOfflineOptions);
     }
   }
 

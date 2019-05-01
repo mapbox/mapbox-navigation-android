@@ -40,8 +40,10 @@ public class NavigationLauncher {
     storeThemePreferences(options, editor);
     storeOfflinePath(options, editor);
     storeOfflineVersion(options, editor);
-    storeOfflineMapDatabasePath(options, editor);
-    storeOfflineMapStyleUrl(options, editor);
+    if (options.offlineMapOptions() != null) {
+      storeOfflineMapDatabasePath(options, editor);
+      storeOfflineMapStyleUrl(options, editor);
+    }
 
     editor.apply();
 
@@ -121,10 +123,10 @@ public class NavigationLauncher {
   }
 
   private static void storeOfflineMapDatabasePath(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
-    editor.putString(NavigationConstants.MAP_DATABASE_PATH_KEY, options.offlineMapDatabasePath());
+    editor.putString(NavigationConstants.MAP_DATABASE_PATH_KEY, options.offlineMapOptions().getDatabasePath());
   }
 
   private static void storeOfflineMapStyleUrl(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
-    editor.putString(NavigationConstants.MAP_STYLE_URL_KEY, options.offlineMapStyleUrl());
+    editor.putString(NavigationConstants.MAP_STYLE_URL_KEY, options.offlineMapOptions().getStyleUrl());
   }
 }

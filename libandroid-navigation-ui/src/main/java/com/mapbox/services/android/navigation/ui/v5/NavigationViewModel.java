@@ -331,11 +331,12 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initializeMapOfflineManager(NavigationViewOptions options) {
-    String mapDatabasePath = options.offlineMapDatabasePath();
-    String mapStyleUrl = options.offlineMapStyleUrl();
-    if (TextUtils.isEmpty(mapDatabasePath) || TextUtils.isEmpty(mapStyleUrl)) {
+    MapOfflineOptions mapOfflineOptions = options.offlineMapOptions();
+    if (mapOfflineOptions == null) {
       return;
     }
+    String mapDatabasePath = mapOfflineOptions.getDatabasePath();
+    String mapStyleUrl = mapOfflineOptions.getStyleUrl();
     Context applicationContext = getApplication().getApplicationContext();
     OfflineManager offlineManager = OfflineManager.getInstance(applicationContext);
     float pixelRatio = applicationContext.getResources().getDisplayMetrics().density;
