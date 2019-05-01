@@ -99,19 +99,19 @@ class MapboxNavigator {
   @Nullable
   synchronized Geometry retrieveRouteGeometry() {
     ArrayList<Point> routeGeometry = navigator.getRouteGeometry();
-    if (routeGeometry != null) {
-      return LineString.fromLngLats(routeGeometry);
+    if (routeGeometry == null) {
+      return null;
     }
-    return null;
+    return LineString.fromLngLats(routeGeometry);
   }
 
   @Nullable
   synchronized Geometry retrieveRouteGeometryWithBuffer() {
     String routeGeometryWithBuffer = navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION);
-    if (routeGeometryWithBuffer != null) {
-      return GeometryGeoJson.fromJson(routeGeometryWithBuffer);
+    if (routeGeometryWithBuffer == null) {
+      return null;
     }
-    return null;
+    return GeometryGeoJson.fromJson(routeGeometryWithBuffer);
   }
 
   private FixLocation buildFixLocationFromLocation(Location location) {
