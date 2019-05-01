@@ -2,6 +2,19 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.37.0 - May 1, 2019
+
+* Added check for legs to route refresh [#1916](https://github.com/mapbox/mapbox-navigation-android/pull/1916)
+* Improve PR Template [#1915](https://github.com/mapbox/mapbox-navigation-android/pull/1915)
+* Fix NavigationLauncherActivity camera animations [#1913](https://github.com/mapbox/mapbox-navigation-android/pull/1913)
+* Fix Navigation Launcher test app Activity incorrect profile regression [#1914](https://github.com/mapbox/mapbox-navigation-android/pull/1914)
+* Update Java Services to 4.7.0 [#1906](https://github.com/mapbox/mapbox-navigation-android/pull/1906)
+* Add connectivity status check to SpeechPlayer provider [#1901](https://github.com/mapbox/mapbox-navigation-android/pull/1901)
+* Fix intermediate way point arrival not triggered [#1908](https://github.com/mapbox/mapbox-navigation-android/pull/1908)
+* Check for valid DirectionsRoute in RouteRefresh [#1909](https://github.com/mapbox/mapbox-navigation-android/pull/1909)
+* ExampleActivity refactor for simplicity/stability [#1884](https://github.com/mapbox/mapbox-navigation-android/pull/1884)
+* Allow default notification color setting via MapboxNavigationOptions [#1899](https://github.com/mapbox/mapbox-navigation-android/pull/1899)
+
 ### v0.36.0 - April 17, 2019
 
 Note: This release breaks `SEMVER` / contains API breaking changes. Please consult this [migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/0.36.0-Migration-Guide) for the necessary updates required.
