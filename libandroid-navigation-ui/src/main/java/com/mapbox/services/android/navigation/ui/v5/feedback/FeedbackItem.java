@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.feedback;
 
-import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent;
 
 public class FeedbackItem {
 

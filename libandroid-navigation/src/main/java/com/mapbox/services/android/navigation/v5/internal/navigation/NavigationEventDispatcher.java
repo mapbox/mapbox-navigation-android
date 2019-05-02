@@ -5,11 +5,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationMetricListener;
 import com.mapbox.services.android.navigation.v5.location.RawLocationListener;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -167,7 +167,13 @@ public class NavigationEventDispatcher {
     }
   }
 
-  public void onUserOffRoute(Location location) {
+  public void onNavigationEvent(boolean isRunning) {
+    for (NavigationEventListener navigationEventListener : navigationEventListeners) {
+      navigationEventListener.onRunning(isRunning);
+    }
+  }
+
+  void onUserOffRoute(Location location) {
     for (OffRouteListener offRouteListener : offRouteListeners) {
       offRouteListener.userOffRoute(location);
     }
@@ -176,19 +182,13 @@ public class NavigationEventDispatcher {
     }
   }
 
-  public void onNavigationEvent(boolean isRunning) {
-    for (NavigationEventListener navigationEventListener : navigationEventListeners) {
-      navigationEventListener.onRunning(isRunning);
-    }
-  }
-
-  public void onFasterRouteEvent(DirectionsRoute directionsRoute) {
+  void onFasterRouteEvent(DirectionsRoute directionsRoute) {
     for (FasterRouteListener fasterRouteListener : fasterRouteListeners) {
       fasterRouteListener.fasterRouteFound(directionsRoute);
     }
   }
 
-  public void onLocationUpdate(Location location) {
+  void onLocationUpdate(Location location) {
     for (RawLocationListener listener : rawLocationListeners) {
       listener.onLocationUpdate(location);
     }
