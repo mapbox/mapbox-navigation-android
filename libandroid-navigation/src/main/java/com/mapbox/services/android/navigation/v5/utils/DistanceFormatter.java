@@ -12,8 +12,8 @@ import android.text.style.StyleSpan;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.R;
+import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfConversion;
 import com.mapbox.turf.TurfMeasurement;
@@ -48,9 +48,9 @@ public class DistanceFormatter {
    * <p>
    * This constructor will infer device language and unit type using the device locale.
    *
-   * @param context  from which to get localized strings from
-   * @param language for which language
-   * @param unitType to use, or NONE_SPECIFIED to use default for locale country
+   * @param context           from which to get localized strings from
+   * @param language          for which language
+   * @param unitType          to use, or NONE_SPECIFIED to use default for locale country
    * @param roundingIncrement increment by which to round small distances
    */
   public DistanceFormatter(Context context, @NonNull String language,

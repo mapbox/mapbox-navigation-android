@@ -17,9 +17,9 @@ import com.mapbox.android.telemetry.NavigationRerouteData;
 import com.mapbox.android.telemetry.NavigationState;
 import com.mapbox.android.telemetry.NavigationStepMetadata;
 import com.mapbox.services.android.navigation.BuildConfig;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.RerouteEvent;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.SessionState;
-import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.RerouteEvent;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.SessionState;
+import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 

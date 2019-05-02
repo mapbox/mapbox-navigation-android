@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation.metrics;
+package com.mapbox.services.android.navigation.v5.internal.navigation.metrics;
 
 import android.location.Location;
 import android.support.annotation.Nullable;
@@ -10,7 +10,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
-import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
+import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress;
 
 import java.util.Date;
 import java.util.List;

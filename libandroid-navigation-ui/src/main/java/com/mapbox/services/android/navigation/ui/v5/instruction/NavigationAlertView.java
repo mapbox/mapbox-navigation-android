@@ -14,8 +14,8 @@ import com.mapbox.services.android.navigation.ui.v5.alert.AlertView;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheetListener;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 
 import timber.log.Timber;
 
