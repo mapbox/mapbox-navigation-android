@@ -29,7 +29,6 @@ Please describe the manual tests that you ran to verify your changes
 - [ ] I have tested via a test drive, or a simulation/mock location app
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing unit tests pass locally with my changes
-- [ ] 
 
 ## Checklist
 
