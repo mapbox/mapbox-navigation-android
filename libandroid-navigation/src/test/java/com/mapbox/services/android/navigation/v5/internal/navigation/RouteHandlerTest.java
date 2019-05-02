@@ -1,7 +1,8 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.BaseTest;
+import com.mapbox.services.android.navigation.v5.navigation.DirectionsRouteType;
 
 import org.junit.Test;
 

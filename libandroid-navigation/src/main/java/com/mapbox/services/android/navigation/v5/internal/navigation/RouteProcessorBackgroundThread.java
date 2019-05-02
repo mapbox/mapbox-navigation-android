@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import android.location.Location;
 import android.os.Handler;
@@ -6,15 +6,17 @@ import android.os.HandlerThread;
 import android.os.Process;
 
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.List;
 
+// TODO public for NavigationConstants?
 /**
  * This class extends handler thread to run most of the navigation calculations on a separate
  * background thread.
  */
-class RouteProcessorBackgroundThread extends HandlerThread {
+public class RouteProcessorBackgroundThread extends HandlerThread {
 
   private static final String MAPBOX_NAVIGATION_THREAD_NAME = "mapbox_navigation_thread";
   private final MapboxNavigation navigation;

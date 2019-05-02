@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
 import com.mapbox.services.android.navigation.v5.navigation.camera.SimpleCamera;
@@ -9,55 +9,55 @@ import com.mapbox.services.android.navigation.v5.route.FasterRouteDetector;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 
-class NavigationEngineFactory {
+public class NavigationEngineFactory {
 
   private OffRoute offRouteEngine;
   private FasterRoute fasterRouteEngine;
   private Snap snapEngine;
   private Camera cameraEngine;
 
-  NavigationEngineFactory() {
+  public NavigationEngineFactory() {
     initializeDefaultEngines();
   }
 
-  OffRoute retrieveOffRouteEngine() {
+  public OffRoute retrieveOffRouteEngine() {
     return offRouteEngine;
   }
 
-  void updateOffRouteEngine(OffRoute offRouteEngine) {
+  public void updateOffRouteEngine(OffRoute offRouteEngine) {
     if (offRouteEngine == null) {
       return;
     }
     this.offRouteEngine = offRouteEngine;
   }
 
-  FasterRoute retrieveFasterRouteEngine() {
+  public FasterRoute retrieveFasterRouteEngine() {
     return fasterRouteEngine;
   }
 
-  void updateFasterRouteEngine(FasterRoute fasterRouteEngine) {
+  public void updateFasterRouteEngine(FasterRoute fasterRouteEngine) {
     if (fasterRouteEngine == null) {
       return;
     }
     this.fasterRouteEngine = fasterRouteEngine;
   }
 
-  Snap retrieveSnapEngine() {
+  public Snap retrieveSnapEngine() {
     return snapEngine;
   }
 
-  void updateSnapEngine(Snap snapEngine) {
+  public void updateSnapEngine(Snap snapEngine) {
     if (snapEngine == null) {
       return;
     }
     this.snapEngine = snapEngine;
   }
 
-  Camera retrieveCameraEngine() {
+  public Camera retrieveCameraEngine() {
     return cameraEngine;
   }
 
-  void updateCameraEngine(Camera cameraEngine) {
+  public void updateCameraEngine(Camera cameraEngine) {
     if (cameraEngine == null) {
       return;
     }

@@ -15,6 +15,7 @@ import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.BaseTest;
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper;
 import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -38,7 +39,8 @@ import static org.mockito.Mockito.when;
 public class NavigationHelperTest extends BaseTest {
 
   private static final String MULTI_LEG_ROUTE_FIXTURE = "directions_two_leg_route.json";
-  private static final String ANNOTATED_DISTANCE_CONGESTION_ROUTE_FIXTURE = "directions_distance_congestion_annotation.json";
+  private static final String ANNOTATED_DISTANCE_CONGESTION_ROUTE_FIXTURE =
+    "directions_distance_congestion_annotation.json";
 
   @Test
   public void createIntersectionList_returnsCompleteIntersectionList() throws Exception {
@@ -302,8 +304,10 @@ public class NavigationHelperTest extends BaseTest {
       legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
   }
 
-  private RouteProgress buildDistanceCongestionAnnotationRouteProgress(double stepDistanceRemaining, double legDistanceRemaining,
-                                                                       double distanceRemaining, int stepIndex, int legIndex) throws Exception {
+  private RouteProgress buildDistanceCongestionAnnotationRouteProgress(double stepDistanceRemaining,
+                                                                       double legDistanceRemaining,
+                                                                       double distanceRemaining, int stepIndex,
+                                                                       int legIndex) throws Exception {
     DirectionsRoute annotatedRoute = buildDistanceCongestionAnnotationRoute();
     return buildTestRouteProgress(annotatedRoute, stepDistanceRemaining,
       legDistanceRemaining, distanceRemaining, stepIndex, legIndex);

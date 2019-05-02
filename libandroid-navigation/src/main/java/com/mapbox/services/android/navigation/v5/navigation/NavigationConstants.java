@@ -3,6 +3,8 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.support.annotation.IntDef;
 import android.support.annotation.StringDef;
 
+import com.mapbox.services.android.navigation.v5.internal.navigation.RouteProcessorBackgroundThread;
+
 /**
  * Navigation constants
  *
@@ -150,7 +152,6 @@ public final class NavigationConstants {
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
   public static final String NAVIGATION_VIEW_SIMULATE_ROUTE = "navigation_view_simulate_route";
-  public static final String NAVIGATION_VIEW_ROUTE_PROFILE_KEY = "navigation_view_route_profile";
   public static final String OFFLINE_PATH_KEY = "offline_path_key";
   public static final String OFFLINE_VERSION_KEY = "offline_version_key";
 

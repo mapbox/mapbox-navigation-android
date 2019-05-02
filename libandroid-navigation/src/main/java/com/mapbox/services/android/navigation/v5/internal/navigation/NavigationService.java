@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import android.app.Notification;
 import android.app.Service;
@@ -11,8 +11,7 @@ import android.support.annotation.Nullable;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEventDispatcher;
-import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationTelemetry;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
@@ -64,7 +63,7 @@ public class NavigationService extends Service {
    * This gets called when {@link MapboxNavigation#startNavigation(DirectionsRoute)} is called and
    * setups variables among other things on the Navigation Service side.
    */
-  void startNavigation(MapboxNavigation mapboxNavigation) {
+  public void startNavigation(MapboxNavigation mapboxNavigation) {
     initialize(mapboxNavigation);
     startForegroundNotification(notificationProvider.retrieveNotification());
   }
@@ -72,7 +71,7 @@ public class NavigationService extends Service {
   /**
    * Removes the location / route listeners and  quits the thread.
    */
-  void endNavigation() {
+  public void endNavigation() {
     NavigationTelemetry.getInstance().endSession();
     routeFetcher.clearListeners();
     locationUpdater.removeLocationUpdates();
@@ -80,11 +79,11 @@ public class NavigationService extends Service {
     thread.quit();
   }
 
-  void updateLocationEngine(LocationEngine locationEngine) {
+  public void updateLocationEngine(LocationEngine locationEngine) {
     locationUpdater.updateLocationEngine(locationEngine);
   }
 
-  void updateLocationEngineRequest(LocationEngineRequest request) {
+  public void updateLocationEngineRequest(LocationEngineRequest request) {
     locationUpdater.updateLocationEngineRequest(request);
   }
 
@@ -133,8 +132,8 @@ public class NavigationService extends Service {
     startForeground(notificationId, notification);
   }
 
-  class LocalBinder extends Binder {
-    NavigationService getService() {
+  public class LocalBinder extends Binder {
+    public NavigationService getService() {
       Timber.d("Local binder called.");
       return NavigationService.this;
     }
