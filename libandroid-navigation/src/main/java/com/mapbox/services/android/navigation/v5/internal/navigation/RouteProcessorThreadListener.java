@@ -1,16 +1,15 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import android.location.Location;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEventDispatcher;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.List;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.buildInstructionString;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.buildInstructionString;
 
 class RouteProcessorThreadListener implements RouteProcessorBackgroundThread.Listener {
 

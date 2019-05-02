@@ -1,8 +1,12 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.android.navigation.v5.navigation.DirectionsRouteType;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.RefreshError;
 
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 
 import java.util.Date;
 
@@ -23,7 +27,7 @@ public class RouteRefresherCallbackTest {
 
     theRouteRefresherCallback.onRefresh(anyRoute);
 
-    verify(mockedMapboxNavigation).startNavigation(eq(anyRoute), eq(DirectionsRouteType.FRESH_ROUTE));
+    verify(mockedMapboxNavigation).startNavigation(eq(anyRoute), ArgumentMatchers.eq(DirectionsRouteType.FRESH_ROUTE));
   }
 
   @Test

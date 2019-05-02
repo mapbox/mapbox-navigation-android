@@ -12,10 +12,10 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import java.util.List;
 
 import static com.mapbox.core.constants.Constants.PRECISION_6;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createDistancesToIntersections;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createIntersectionsList;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.findCurrentIntersection;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.findUpcomingIntersection;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.createDistancesToIntersections;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.createIntersectionsList;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.findCurrentIntersection;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.findUpcomingIntersection;
 
 class TestRouteProgressBuilder {
 

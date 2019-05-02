@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation.notification;
 import android.app.Notification;
 import android.content.Context;
 
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationService;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -14,7 +15,7 @@ public interface NavigationNotification {
 
   /**
    * Provides a custom {@link Notification} to launch
-   * with the {@link com.mapbox.services.android.navigation.v5.navigation.NavigationService}, specifically
+   * with the {@link NavigationService}, specifically
    * {@link android.app.Service#startForeground(int, Notification)}.
    *
    * @return a custom notification
@@ -23,7 +24,7 @@ public interface NavigationNotification {
 
   /**
    * An integer id that will be used to start this notification
-   * from {@link com.mapbox.services.android.navigation.v5.navigation.NavigationService} with
+   * from {@link NavigationService} with
    * {@link android.app.Service#startForeground(int, Notification)}.
    *
    * @return an int id specific to the notification

@@ -19,7 +19,6 @@ import com.mapbox.services.android.navigation.v5.internal.exception.NavigationEx
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationService;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListener;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.RerouteEvent;
@@ -70,7 +69,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
   private InitialGpsEventFactory gpsEventFactory = new InitialGpsEventFactory();
   private NavigationPerformanceMetadata performanceMetadata;
 
-  NavigationTelemetry() {
+  private NavigationTelemetry() {
     locationBuffer = new RingBuffer<>(40);
     metricLocation = new MetricsLocation(null);
     metricProgress = new MetricsRouteProgress(null);
@@ -140,18 +139,6 @@ public class NavigationTelemetry implements NavigationMetricListener {
   }
 
   /**
-   * Added once created in the {@link NavigationService}, this class
-   * provides data regarding the {@link android.app.Activity} lifecycle.
-   *
-   * @param application to register the callbacks
-   */
-  public void initializeLifecycleMonitor(Application application) {
-    if (lifecycleMonitor == null) {
-      lifecycleMonitor = new NavigationLifecycleMonitor(application);
-    }
-  }
-
-  /**
    * Called when navigation is starting for the first time.
    * Initializes the {@link SessionState}.
    *
@@ -178,14 +165,6 @@ public class NavigationTelemetry implements NavigationMetricListener {
     sendCancelEvent();
     gpsEventFactory.reset();
     resetDepartFactory();
-  }
-
-  public void endSession() {
-    flushEventQueues();
-    lifecycleMonitor = null;
-    NavigationMetricsWrapper.disable();
-    isInitialized = false;
-    cancelBatteryScheduler();
   }
 
   /**
@@ -251,7 +230,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
    * @return String feedbackId to identify the event created if needed
    */
   public String recordFeedbackEvent(@FeedbackEvent.FeedbackType String feedbackType, String description,
-                             @FeedbackEvent.FeedbackSource String feedbackSource) {
+                                    @FeedbackEvent.FeedbackSource String feedbackSource) {
     FeedbackEvent feedbackEvent = queueFeedbackEvent(feedbackType, description, feedbackSource);
     return feedbackEvent.getEventId();
   }
@@ -267,7 +246,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
    * @param screenshot   an optional encoded screenshot to provide more detail about the feedback
    */
   public void updateFeedbackEvent(String feedbackId, @FeedbackEvent.FeedbackType String feedbackType,
-                           String description, String screenshot) {
+                                  String description, String screenshot) {
     // Find the event and send
     FeedbackEvent feedbackEvent = (FeedbackEvent) findQueuedTelemetryEvent(feedbackId);
     if (feedbackEvent != null) {
@@ -288,6 +267,26 @@ public class NavigationTelemetry implements NavigationMetricListener {
     // Find the event and remove it from the queue
     FeedbackEvent feedbackEvent = (FeedbackEvent) findQueuedTelemetryEvent(feedbackId);
     queuedFeedbackEvents.remove(feedbackEvent);
+  }
+
+  /**
+   * Added once created in the {@link NavigationService}, this class
+   * provides data regarding the {@link android.app.Activity} lifecycle.
+   *
+   * @param application to register the callbacks
+   */
+  void initializeLifecycleMonitor(Application application) {
+    if (lifecycleMonitor == null) {
+      lifecycleMonitor = new NavigationLifecycleMonitor(application);
+    }
+  }
+
+  void endSession() {
+    flushEventQueues();
+    lifecycleMonitor = null;
+    NavigationMetricsWrapper.disable();
+    isInitialized = false;
+    cancelBatteryScheduler();
   }
 
   void routeRetrievalEvent(ElapsedTime elapsedTime, String routeUuid) {
