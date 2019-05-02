@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.routeprogress;
+package com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress;
 
 import android.text.TextUtils;
 
@@ -9,6 +9,8 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepManeuver;
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 public class MetricsRouteProgress {
 

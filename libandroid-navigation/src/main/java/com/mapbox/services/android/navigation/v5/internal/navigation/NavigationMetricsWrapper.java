@@ -7,12 +7,12 @@ import com.mapbox.android.telemetry.AppUserTurnstile;
 import com.mapbox.android.telemetry.Event;
 import com.mapbox.android.telemetry.MapboxTelemetry;
 import com.mapbox.services.android.navigation.BuildConfig;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationEventFactory;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationRerouteEvent;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.PhoneState;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.RerouteEvent;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.SessionState;
-import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationEventFactory;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationRerouteEvent;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.PhoneState;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.RerouteEvent;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.SessionState;
+import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 final class NavigationMetricsWrapper {

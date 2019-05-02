@@ -1,11 +1,11 @@
-package com.mapbox.services.android.navigation.v5.navigation.metrics;
+package com.mapbox.services.android.navigation.v5.internal.navigation.metrics;
 
 import android.location.Location;
 
 import com.google.gson.Gson;
 import com.mapbox.android.telemetry.TelemetryUtils;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
+import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 
 import org.junit.Before;

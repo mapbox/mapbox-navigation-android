@@ -1,11 +1,11 @@
-package com.mapbox.services.android.navigation.v5.navigation.metrics;
+package com.mapbox.services.android.navigation.v5.internal.navigation.metrics;
 
 import android.content.Context;
 import android.media.AudioManager;
 import android.provider.Settings;
 
-import com.mapbox.services.android.navigation.v5.navigation.metrics.audio.AudioTypeChain;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.audio.AudioTypeResolver;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.audio.AudioTypeChain;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.audio.AudioTypeResolver;
 
 class NavigationUtils {
   private static final double PERCENT_NORMALIZER = 100.0;

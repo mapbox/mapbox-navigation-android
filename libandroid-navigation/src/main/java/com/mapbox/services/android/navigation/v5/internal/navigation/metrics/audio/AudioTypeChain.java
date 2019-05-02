@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation.metrics.audio;
+package com.mapbox.services.android.navigation.v5.internal.navigation.metrics.audio;
 
 public class AudioTypeChain {
 

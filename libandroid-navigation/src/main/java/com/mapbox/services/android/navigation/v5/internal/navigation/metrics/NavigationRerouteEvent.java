@@ -1,9 +1,11 @@
-package com.mapbox.services.android.navigation.v5.navigation.metrics;
+package com.mapbox.services.android.navigation.v5.internal.navigation.metrics;
 
 import android.annotation.SuppressLint;
 import android.location.Location;
+
+import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress;
+
 import androidx.annotation.NonNull;
-import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 
 @SuppressLint("ParcelCreator")
 public class NavigationRerouteEvent extends NavigationEvent {

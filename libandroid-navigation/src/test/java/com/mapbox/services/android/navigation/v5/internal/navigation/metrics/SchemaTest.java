@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation.metrics;
+package com.mapbox.services.android.navigation.v5.internal.navigation.metrics;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;

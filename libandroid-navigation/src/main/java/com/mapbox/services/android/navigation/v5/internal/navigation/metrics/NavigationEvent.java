@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation.metrics;
+package com.mapbox.services.android.navigation.v5.internal.navigation.metrics;
 
 import android.os.Build;
 import android.os.Parcel;
