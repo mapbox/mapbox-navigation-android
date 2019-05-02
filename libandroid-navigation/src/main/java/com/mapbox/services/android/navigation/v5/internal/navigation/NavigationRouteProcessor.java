@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
@@ -19,13 +19,13 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressStat
 
 import java.util.List;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createCurrentAnnotation;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createDistancesToIntersections;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createIntersectionsList;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.decodeStepPoints;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.findCurrentIntersection;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.findUpcomingIntersection;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.routeDistanceRemaining;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.createCurrentAnnotation;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.createDistancesToIntersections;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.createIntersectionsList;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.decodeStepPoints;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.findCurrentIntersection;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.findUpcomingIntersection;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.routeDistanceRemaining;
 
 class NavigationRouteProcessor {
 

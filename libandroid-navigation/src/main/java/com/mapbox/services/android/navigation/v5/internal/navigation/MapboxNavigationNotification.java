@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -20,6 +20,8 @@ import android.widget.RemoteViews;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.services.android.navigation.R;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;

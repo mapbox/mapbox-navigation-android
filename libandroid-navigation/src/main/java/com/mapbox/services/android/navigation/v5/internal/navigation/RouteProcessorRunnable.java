@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import android.location.Location;
 import android.os.Handler;
@@ -7,6 +7,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.RouteState;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;

@@ -1,10 +1,12 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.RouteRefresh;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.Date;
 
-class RouteRefresher {
+public class RouteRefresher {
   private final MapboxNavigation mapboxNavigation;
   private final RouteRefresh routeRefresh;
   private final long refreshIntervalInMilliseconds;
@@ -12,7 +14,7 @@ class RouteRefresher {
   private boolean isChecking;
   private boolean isRefreshRouteEnabled;
 
-  RouteRefresher(MapboxNavigation mapboxNavigation, RouteRefresh routeRefresh) {
+  public RouteRefresher(MapboxNavigation mapboxNavigation, RouteRefresh routeRefresh) {
     this.mapboxNavigation = mapboxNavigation;
     this.routeRefresh = routeRefresh;
     this.refreshIntervalInMilliseconds = mapboxNavigation.options().refreshIntervalInMilliseconds();

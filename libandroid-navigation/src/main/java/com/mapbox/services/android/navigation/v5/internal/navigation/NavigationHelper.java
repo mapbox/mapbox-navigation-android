@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -42,75 +42,6 @@ public class NavigationHelper {
 
   private NavigationHelper() {
     // Empty private constructor to prevent users creating an instance of this class.
-  }
-
-  /**
-   * When a milestones triggered, it's instruction needs to be built either using the provided
-   * string or an empty string.
-   */
-  static String buildInstructionString(RouteProgress routeProgress, Milestone milestone) {
-    if (milestone.getInstruction() != null) {
-      // Create a new custom instruction based on the Instruction packaged with the Milestone
-      return milestone.getInstruction().buildInstruction(routeProgress);
-    }
-    return EMPTY_STRING;
-  }
-
-  /**
-   * Takes in the leg distance remaining value already calculated and if additional legs need to be
-   * traversed along after the current one, adds those distances and returns the new distance.
-   * Otherwise, if the route only contains one leg or the users on the last leg, this value will
-   * equal the leg distance remaining.
-   */
-  static double routeDistanceRemaining(double legDistanceRemaining, int legIndex,
-                                       DirectionsRoute directionsRoute) {
-    if (directionsRoute.legs().size() < 2) {
-      return legDistanceRemaining;
-    }
-
-    for (int i = legIndex + 1; i < directionsRoute.legs().size(); i++) {
-      legDistanceRemaining += directionsRoute.legs().get(i).distance();
-    }
-    return legDistanceRemaining;
-  }
-
-  /**
-   * Given the current {@link DirectionsRoute} and leg / step index,
-   * return a list of {@link Point} representing the current step.
-   * <p>
-   * This method is only used on a per-step basis as {@link PolylineUtils#decode(String, int)}
-   * can be a heavy operation based on the length of the step.
-   * <p>
-   * Returns null if index is invalid.
-   *
-   * @param directionsRoute for list of steps
-   * @param legIndex        to get current step list
-   * @param stepIndex       to get current step
-   * @return list of {@link Point} representing the current step
-   */
-  static List<Point> decodeStepPoints(DirectionsRoute directionsRoute, List<Point> currentPoints,
-                                      int legIndex, int stepIndex) {
-    List<RouteLeg> legs = directionsRoute.legs();
-    if (hasInvalidLegs(legs)) {
-      return currentPoints;
-    }
-    List<LegStep> steps = legs.get(legIndex).steps();
-    if (hasInvalidSteps(steps)) {
-      return currentPoints;
-    }
-    boolean invalidStepIndex = stepIndex < 0 || stepIndex > steps.size() - 1;
-    if (invalidStepIndex) {
-      return currentPoints;
-    }
-    LegStep step = steps.get(stepIndex);
-    if (step == null) {
-      return currentPoints;
-    }
-    String stepGeometry = step.geometry();
-    if (stepGeometry != null) {
-      return PolylineUtils.decode(stepGeometry, PRECISION_6);
-    }
-    return currentPoints;
   }
 
   /**
@@ -219,8 +150,8 @@ public class NavigationHelper {
    * @since 0.13.0
    */
   public static StepIntersection findUpcomingIntersection(@NonNull List<StepIntersection> intersections,
-                                                   @Nullable LegStep upcomingStep,
-                                                   StepIntersection currentIntersection) {
+                                                          @Nullable LegStep upcomingStep,
+                                                          StepIntersection currentIntersection) {
     int intersectionIndex = intersections.indexOf(currentIntersection);
     int nextIntersectionIndex = intersectionIndex + ONE_INDEX;
     int intersectionSize = intersections.size();
@@ -247,7 +178,7 @@ public class NavigationHelper {
    */
   @Nullable
   public static CurrentLegAnnotation createCurrentAnnotation(CurrentLegAnnotation currentLegAnnotation,
-                                                      RouteLeg leg, double legDistanceRemaining) {
+                                                             RouteLeg leg, double legDistanceRemaining) {
     LegAnnotation legAnnotation = leg.annotation();
     if (legAnnotation == null) {
       return null;
@@ -281,6 +212,75 @@ public class NavigationHelper {
     }
     annotationBuilder.index(annotationIndex);
     return annotationBuilder.build();
+  }
+
+  /**
+   * When a milestones triggered, it's instruction needs to be built either using the provided
+   * string or an empty string.
+   */
+  static String buildInstructionString(RouteProgress routeProgress, Milestone milestone) {
+    if (milestone.getInstruction() != null) {
+      // Create a new custom instruction based on the Instruction packaged with the Milestone
+      return milestone.getInstruction().buildInstruction(routeProgress);
+    }
+    return EMPTY_STRING;
+  }
+
+  /**
+   * Takes in the leg distance remaining value already calculated and if additional legs need to be
+   * traversed along after the current one, adds those distances and returns the new distance.
+   * Otherwise, if the route only contains one leg or the users on the last leg, this value will
+   * equal the leg distance remaining.
+   */
+  static double routeDistanceRemaining(double legDistanceRemaining, int legIndex,
+                                       DirectionsRoute directionsRoute) {
+    if (directionsRoute.legs().size() < 2) {
+      return legDistanceRemaining;
+    }
+
+    for (int i = legIndex + 1; i < directionsRoute.legs().size(); i++) {
+      legDistanceRemaining += directionsRoute.legs().get(i).distance();
+    }
+    return legDistanceRemaining;
+  }
+
+  /**
+   * Given the current {@link DirectionsRoute} and leg / step index,
+   * return a list of {@link Point} representing the current step.
+   * <p>
+   * This method is only used on a per-step basis as {@link PolylineUtils#decode(String, int)}
+   * can be a heavy operation based on the length of the step.
+   * <p>
+   * Returns null if index is invalid.
+   *
+   * @param directionsRoute for list of steps
+   * @param legIndex        to get current step list
+   * @param stepIndex       to get current step
+   * @return list of {@link Point} representing the current step
+   */
+  static List<Point> decodeStepPoints(DirectionsRoute directionsRoute, List<Point> currentPoints,
+                                      int legIndex, int stepIndex) {
+    List<RouteLeg> legs = directionsRoute.legs();
+    if (hasInvalidLegs(legs)) {
+      return currentPoints;
+    }
+    List<LegStep> steps = legs.get(legIndex).steps();
+    if (hasInvalidSteps(steps)) {
+      return currentPoints;
+    }
+    boolean invalidStepIndex = stepIndex < 0 || stepIndex > steps.size() - 1;
+    if (invalidStepIndex) {
+      return currentPoints;
+    }
+    LegStep step = steps.get(stepIndex);
+    if (step == null) {
+      return currentPoints;
+    }
+    String stepGeometry = step.geometry();
+    if (stepGeometry != null) {
+      return PolylineUtils.decode(stepGeometry, PRECISION_6);
+    }
+    return currentPoints;
   }
 
   private static int findAnnotationIndex(CurrentLegAnnotation currentLegAnnotation,

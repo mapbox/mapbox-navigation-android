@@ -7,7 +7,7 @@ import android.os.Bundle;
 
 import java.util.ArrayList;
 
-public class NavigationLifecycleMonitor implements Application.ActivityLifecycleCallbacks {
+class NavigationLifecycleMonitor implements Application.ActivityLifecycleCallbacks {
 
   private static final int ONE_HUNDRED_PERCENT = 100;
 

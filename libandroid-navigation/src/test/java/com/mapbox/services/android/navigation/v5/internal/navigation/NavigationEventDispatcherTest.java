@@ -16,7 +16,6 @@ import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMile
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigator;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetricListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;

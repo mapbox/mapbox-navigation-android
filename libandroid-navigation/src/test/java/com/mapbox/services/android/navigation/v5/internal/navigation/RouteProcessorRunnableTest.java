@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import android.location.Location;
 import android.os.Handler;
@@ -9,6 +9,8 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.RouteState;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.camera.SimpleCamera;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteDetector;
@@ -40,7 +42,7 @@ public class RouteProcessorRunnableTest {
     MapboxNavigator navigator = mock(MapboxNavigator.class);
     NavigationStatus status = buildMockStatus();
     DirectionsRoute route = mock(DirectionsRoute.class);
-    RouteProcessorRunnable runnable = buildRouteProcessorRunnableWith(navigator,processor, status, route);
+    RouteProcessorRunnable runnable = buildRouteProcessorRunnableWith(navigator, processor, status, route);
     runnable.updateRawLocation(mock(Location.class));
 
     runnable.run();
@@ -181,7 +183,8 @@ public class RouteProcessorRunnableTest {
     verify(navigator, times(0)).updateLegIndex(anyInt());
   }
 
-  private RouteProcessorRunnable buildRouteProcessorRunnableWith(MapboxNavigator navigator, NavigationRouteProcessor processor,
+  private RouteProcessorRunnable buildRouteProcessorRunnableWith(MapboxNavigator navigator,
+                                                                 NavigationRouteProcessor processor,
                                                                  NavigationStatus status, DirectionsRoute route) {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder().build();
     when(navigator.retrieveStatus(any(Date.class), any(Long.class))).thenReturn(status);
