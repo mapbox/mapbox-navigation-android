@@ -1,6 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation;
-
-import androidx.annotation.Nullable;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegAnnotation;
@@ -15,6 +13,8 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.Nullable;
 
 import static com.mapbox.core.constants.Constants.PRECISION_6;
 
@@ -111,7 +111,7 @@ public class NavigationHelper {
    */
   @Nullable
   public static CurrentLegAnnotation createCurrentAnnotation(CurrentLegAnnotation currentLegAnnotation,
-                                                      RouteLeg leg, double legDistanceRemaining) {
+                                                             RouteLeg leg, double legDistanceRemaining) {
     LegAnnotation legAnnotation = leg.annotation();
     if (legAnnotation == null) {
       return null;

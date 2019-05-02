@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEngineFactory;
+
 import org.junit.Test;
 
 import static junit.framework.Assert.assertNotNull;

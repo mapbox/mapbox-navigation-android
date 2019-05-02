@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import android.app.Notification;
 import android.content.Context;
@@ -14,6 +14,9 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.navigator.BannerSection;
 import com.mapbox.services.android.navigation.v5.BaseTest;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import org.junit.Before;

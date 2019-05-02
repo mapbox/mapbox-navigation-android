@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.v5;
 
-import androidx.annotation.NonNull;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.geojson.Point;
@@ -8,6 +7,8 @@ import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.List;
+
+import androidx.annotation.NonNull;
 
 import static com.mapbox.core.constants.Constants.PRECISION_6;
 

@@ -1,6 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation;
-
-import androidx.annotation.Nullable;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
@@ -18,9 +16,11 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressStat
 
 import java.util.List;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.createCurrentAnnotation;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.decodeStepPoints;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationHelper.routeDistanceRemaining;
+import androidx.annotation.Nullable;
+
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.createCurrentAnnotation;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.decodeStepPoints;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.routeDistanceRemaining;
 
 class NavigationRouteProcessor {
 

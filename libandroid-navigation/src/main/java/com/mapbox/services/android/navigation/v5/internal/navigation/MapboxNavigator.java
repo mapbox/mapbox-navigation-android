@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation;
+package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import android.location.Location;
 
@@ -14,10 +14,10 @@ import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.VoiceInstruction;
+import com.mapbox.services.android.navigation.v5.navigation.DirectionsRouteType;
 
 import java.util.Date;
 
-// TODO internal
 public class MapboxNavigator {
 
   private static final int INDEX_FIRST_ROUTE = 0;
@@ -26,13 +26,47 @@ public class MapboxNavigator {
   private final Navigator navigator;
   private final RouteHandler routeHandler;
 
-  MapboxNavigator(Navigator navigator) {
+  public MapboxNavigator(Navigator navigator) {
     this.navigator = navigator;
     this.routeHandler = new RouteHandler(this);
   }
 
-  void updateRoute(DirectionsRoute route, DirectionsRouteType routeType) {
+  public void updateRoute(DirectionsRoute route, DirectionsRouteType routeType) {
     routeHandler.updateRoute(route, routeType);
+  }
+
+  public synchronized NavigationStatus updateLegIndex(int index) {
+    return navigator.changeRouteLeg(INDEX_FIRST_ROUTE, index);
+  }
+
+  /**
+   * Gets the history of state changing calls to the navigator this can be used to
+   * replay a sequence of events for the purpose of bug fixing.
+   *
+   * @return a json representing the series of events that happened since the last time
+   * history was toggled on
+   */
+  public synchronized String retrieveHistory() {
+    return navigator.getHistory();
+  }
+
+  /**
+   * Toggles the recording of history on or off.
+   *
+   * @param isEnabled set this to true to turn on history recording and false to turn it off
+   *                  toggling will reset all history call getHistory first before toggling
+   *                  to retain a copy
+   */
+  public synchronized void toggleHistory(boolean isEnabled) {
+    navigator.toggleHistory(isEnabled);
+  }
+
+  public synchronized void addHistoryEvent(String eventType, String eventJsonProperties) {
+    navigator.pushHistory(eventType, eventJsonProperties);
+  }
+
+  public synchronized VoiceInstruction retrieveVoiceInstruction(int index) {
+    return navigator.getVoiceInstruction(index);
   }
 
   synchronized NavigationStatus setRoute(@NonNull String routeJson, int routeIndex, int legIndex) {
@@ -56,40 +90,6 @@ public class MapboxNavigator {
     synchronized (this) {
       navigator.updateLocation(fixedLocation);
     }
-  }
-
-  synchronized NavigationStatus updateLegIndex(int index) {
-    return navigator.changeRouteLeg(INDEX_FIRST_ROUTE, index);
-  }
-
-  /**
-   * Gets the history of state changing calls to the navigator this can be used to
-   * replay a sequence of events for the purpose of bug fixing.
-   *
-   * @return a json representing the series of events that happened since the last time
-   * history was toggled on
-   */
-  synchronized String retrieveHistory() {
-    return navigator.getHistory();
-  }
-
-  /**
-   * Toggles the recording of history on or off.
-   *
-   * @param isEnabled set this to true to turn on history recording and false to turn it off
-   *                  toggling will reset all history call getHistory first before toggling
-   *                  to retain a copy
-   */
-  synchronized void toggleHistory(boolean isEnabled) {
-    navigator.toggleHistory(isEnabled);
-  }
-
-  synchronized void addHistoryEvent(String eventType, String eventJsonProperties) {
-    navigator.pushHistory(eventType, eventJsonProperties);
-  }
-
-  synchronized VoiceInstruction retrieveVoiceInstruction(int index) {
-    return navigator.getVoiceInstruction(index);
   }
 
   synchronized BannerInstruction retrieveBannerInstruction(int index) {
