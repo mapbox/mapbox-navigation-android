@@ -4,6 +4,7 @@ import android.support.annotation.IntDef;
 import android.support.annotation.StringDef;
 
 import com.mapbox.services.android.navigation.v5.internal.navigation.RouteProcessorBackgroundThread;
+import com.mapbox.services.android.navigation.v5.internal.route.FasterRouteDetector;
 
 /**
  * Navigation constants
@@ -82,7 +83,7 @@ public final class NavigationConstants {
   public static final String NAVIGATION_VIEW_INITIAL_MAP_POSITION = "navigation_view_initial_map_position";
 
   /**
-   * In seconds, how quickly {@link com.mapbox.services.android.navigation.v5.route.FasterRouteDetector}
+   * In seconds, how quickly {@link FasterRouteDetector}
    * will tell {@link RouteProcessorBackgroundThread} to check
    * for a faster {@link com.mapbox.api.directions.v5.models.DirectionsRoute}.
    *

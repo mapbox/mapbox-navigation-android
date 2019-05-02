@@ -159,10 +159,11 @@ public class MapboxNavigation implements ServiceConnection {
     initializeForTest();
   }
 
+  // TODO public for FasterRouteDetectorTest
   // Package private (no modifier) for testing purposes
-  MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
-                   @NonNull MapboxNavigationOptions options, NavigationTelemetry navigationTelemetry,
-                   LocationEngine locationEngine) {
+  public MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
+                          @NonNull MapboxNavigationOptions options, NavigationTelemetry navigationTelemetry,
+                          LocationEngine locationEngine) {
     initializeContext(context);
     this.accessToken = accessToken;
     this.options = options;

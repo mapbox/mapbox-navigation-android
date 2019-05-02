@@ -12,10 +12,10 @@ import com.mapbox.navigator.RouteState;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.camera.SimpleCamera;
-import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
-import com.mapbox.services.android.navigation.v5.route.FasterRouteDetector;
+import com.mapbox.services.android.navigation.v5.internal.offroute.OffRouteDetector;
+import com.mapbox.services.android.navigation.v5.internal.route.FasterRouteDetector;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
+import com.mapbox.services.android.navigation.v5.internal.snap.SnapToRoute;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

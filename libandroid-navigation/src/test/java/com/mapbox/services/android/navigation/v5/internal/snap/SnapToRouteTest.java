@@ -1,9 +1,10 @@
-package com.mapbox.services.android.navigation.v5.snap;
+package com.mapbox.services.android.navigation.v5.internal.snap;
 
 import android.location.Location;
 
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.NavigationStatus;
+import com.mapbox.services.android.navigation.v5.snap.Snap;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

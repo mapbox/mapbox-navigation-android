@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.offroute;
+package com.mapbox.services.android.navigation.v5.internal.offroute;
 
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.RouteState;

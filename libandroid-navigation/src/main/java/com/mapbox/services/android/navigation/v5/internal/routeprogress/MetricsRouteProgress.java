@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress;
+package com.mapbox.services.android.navigation.v5.internal.routeprogress;
 
 import android.support.annotation.Nullable;
 import android.text.TextUtils;

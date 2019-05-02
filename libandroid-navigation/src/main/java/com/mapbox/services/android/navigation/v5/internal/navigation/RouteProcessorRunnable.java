@@ -6,15 +6,15 @@ import android.os.Handler;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.RouteState;
+import com.mapbox.services.android.navigation.v5.internal.offroute.OffRouteDetector;
+import com.mapbox.services.android.navigation.v5.internal.snap.SnapToRoute;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
-import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
-import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 
 import java.util.ArrayList;
 import java.util.Date;

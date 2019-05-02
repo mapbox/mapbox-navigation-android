@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator;
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationTelemetry;
+import com.mapbox.services.android.navigation.v5.internal.snap.SnapToRoute;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.StepMilestone;
@@ -15,7 +16,6 @@ import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMiles
 import com.mapbox.services.android.navigation.v5.navigation.camera.SimpleCamera;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
-import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
 
 import org.junit.Ignore;
 import org.junit.Test;

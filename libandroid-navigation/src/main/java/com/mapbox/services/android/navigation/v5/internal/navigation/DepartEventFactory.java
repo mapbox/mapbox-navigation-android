@@ -2,7 +2,7 @@ package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation;
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.SessionState;
-import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress;
+import com.mapbox.services.android.navigation.v5.internal.routeprogress.MetricsRouteProgress;
 
 import java.util.Date;
 

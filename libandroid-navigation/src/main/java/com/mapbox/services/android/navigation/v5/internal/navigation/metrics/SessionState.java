@@ -10,7 +10,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
-import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress;
+import com.mapbox.services.android.navigation.v5.internal.routeprogress.MetricsRouteProgress;
 
 import java.util.Date;
 import java.util.List;

@@ -3,11 +3,11 @@ package com.mapbox.services.android.navigation.v5.internal.navigation;
 import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
 import com.mapbox.services.android.navigation.v5.navigation.camera.SimpleCamera;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
-import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector;
+import com.mapbox.services.android.navigation.v5.internal.offroute.OffRouteDetector;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
-import com.mapbox.services.android.navigation.v5.route.FasterRouteDetector;
+import com.mapbox.services.android.navigation.v5.internal.route.FasterRouteDetector;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
-import com.mapbox.services.android.navigation.v5.snap.SnapToRoute;
+import com.mapbox.services.android.navigation.v5.internal.snap.SnapToRoute;
 
 public class NavigationEngineFactory {
 

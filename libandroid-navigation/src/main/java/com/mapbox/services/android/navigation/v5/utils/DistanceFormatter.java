@@ -12,7 +12,7 @@ import android.text.style.StyleSpan;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.R;
-import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress;
+import com.mapbox.services.android.navigation.v5.internal.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfConversion;

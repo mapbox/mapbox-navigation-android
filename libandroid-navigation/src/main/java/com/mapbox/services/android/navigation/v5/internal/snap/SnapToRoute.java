@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.snap;
+package com.mapbox.services.android.navigation.v5.internal.snap;
 
 import android.location.Location;
 import android.support.annotation.NonNull;
@@ -7,6 +7,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.snap.Snap;
 
 public class SnapToRoute extends Snap {
 

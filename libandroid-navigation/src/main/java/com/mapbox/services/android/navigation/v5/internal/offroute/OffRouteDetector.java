@@ -1,10 +1,11 @@
-package com.mapbox.services.android.navigation.v5.offroute;
+package com.mapbox.services.android.navigation.v5.internal.offroute;
 
 import android.location.Location;
 
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.RouteState;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
+import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 public class OffRouteDetector extends OffRoute {
