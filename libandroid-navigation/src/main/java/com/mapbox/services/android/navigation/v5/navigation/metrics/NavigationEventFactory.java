@@ -35,7 +35,7 @@ public class NavigationEventFactory {
 
     NavigationCancelEvent navigationCancelEvent = new NavigationCancelEvent(phoneState);
     setEvent(sessionState, metricProgress, location, sdkIdentifier, navigationCancelEvent);
-    String arrivalTimestamp = TelemetryUtils.generateCreateDateFormatted(sessionState.arrivalTimestamp());
+    String arrivalTimestamp = obtainArriveTimestamp(sessionState);
     navigationCancelEvent.setArrivalTimestamp(arrivalTimestamp);
     return navigationCancelEvent;
   }
@@ -129,6 +129,16 @@ public class NavigationEventFactory {
       date = new Date();
     } else {
       date = sessionState.startTimestamp();
+    }
+    return TelemetryUtils.generateCreateDateFormatted(date);
+  }
+
+  private static String obtainArriveTimestamp(SessionState sessionState) {
+    Date date;
+    if (sessionState.arrivalTimestamp() == null) {
+      date = new Date();
+    } else {
+      date = sessionState.arrivalTimestamp();
     }
     return TelemetryUtils.generateCreateDateFormatted(date);
   }
