@@ -52,6 +52,15 @@ subprojects {
   dependencies {
     errorprone dependenciesList.errorprone
   }
+
+  project.configurations.all {
+    resolutionStrategy.eachDependency { details ->
+      if (details.requested.group == "com.mapbox.mapboxsdk" && details.requested.name
+              == 'mapbox-android-telemetry' ) {
+        details.useVersion "4.5.0-SNAPSHOT"
+      }
+    }
+  }
 }
 
 task clean(type: Delete) {
