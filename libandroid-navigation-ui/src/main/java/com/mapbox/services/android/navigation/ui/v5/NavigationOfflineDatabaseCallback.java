@@ -27,4 +27,8 @@ class NavigationOfflineDatabaseCallback implements OfflineDatabaseLoadedCallback
     Timber.d("NavigationOfflineDatabaseCallback#onError %s", error);
     Timber.e(error);
   }
+
+  void onDestroy() {
+    mapOfflineManager.onDestroy();
+  }
 }

@@ -85,6 +85,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private boolean isRunning;
   private boolean isChangingConfigurations;
   private MapConnectivityController connectivityController;
+  private MapOfflineManager mapOfflineManager;
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -98,10 +99,11 @@ public class NavigationViewModel extends AndroidViewModel {
 
   // Package private (no modifier) for testing purposes
   NavigationViewModel(Application application, MapboxNavigation navigation,
-                      MapConnectivityController connectivityController) {
+                      MapConnectivityController connectivityController, MapOfflineManager mapOfflineManager) {
     super(application);
     this.navigation = navigation;
     this.connectivityController = connectivityController;
+    this.mapOfflineManager = mapOfflineManager;
   }
 
   // Package private (no modifier) for testing purposes
@@ -121,7 +123,7 @@ public class NavigationViewModel extends AndroidViewModel {
     if (!isChangingConfigurations) {
       destroyRouter();
       endNavigation();
-      connectivityController.assign(null);
+      destroyMapOffline();
       deactivateInstructionPlayer();
       isRunning = false;
     }
@@ -343,7 +345,7 @@ public class NavigationViewModel extends AndroidViewModel {
     OfflineRegionDefinitionProvider definitionProvider = new OfflineRegionDefinitionProvider(mapStyleUrl, pixelRatio);
     OfflineMetadataProvider metadataProvider = new OfflineMetadataProvider();
     RegionDownloadCallback regionDownloadCallback = new RegionDownloadCallback(connectivityController);
-    MapOfflineManager mapOfflineManager = new MapOfflineManager(offlineManager, definitionProvider, metadataProvider,
+    mapOfflineManager = new MapOfflineManager(offlineManager, definitionProvider, metadataProvider,
       connectivityController, regionDownloadCallback);
     NavigationOfflineDatabaseCallback callback = new NavigationOfflineDatabaseCallback(navigation, mapOfflineManager);
     mapOfflineManager.loadDatabase(mapDatabasePath, callback);
@@ -462,6 +464,13 @@ public class NavigationViewModel extends AndroidViewModel {
         ((DynamicCamera) cameraEngine).clearMap();
       }
     }
+  }
+
+  private void destroyMapOffline() {
+    if (mapOfflineManager != null) {
+      mapOfflineManager.onDestroy();
+    }
+    connectivityController.assign(null);
   }
 
   private void deactivateInstructionPlayer() {

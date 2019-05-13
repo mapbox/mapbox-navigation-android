@@ -129,6 +129,23 @@ public class MapOfflineManagerTest {
     verify(mockedOfflineManager).mergeOfflineRegions(eq(aDatabasePath), any(MergeOfflineRegionsCallback.class));
   }
 
+  @Test
+  public void checksMergeOfflineRegionsCallbackOnDestroyIsCalledIfNotNullWhenOnDestroy() {
+    OfflineManager mockedOfflineManager = mock(OfflineManager.class);
+    OfflineRegionDefinitionProvider mockedOfflineRegionDefinitionProvider = mock(OfflineRegionDefinitionProvider.class);
+    OfflineMetadataProvider mockedOfflineMetadataProvider = mock(OfflineMetadataProvider.class);
+    MapConnectivityController mockedMapConnectivityController = mock(MapConnectivityController.class);
+    RegionDownloadCallback mockedRegionDownloadCallback = mock(RegionDownloadCallback.class);
+    MergeOfflineRegionsCallback mockedMergeOfflineRegionsCallback = mock(MergeOfflineRegionsCallback.class);
+    MapOfflineManager theMapOfflineManager = new MapOfflineManager(mockedOfflineManager,
+      mockedOfflineRegionDefinitionProvider, mockedOfflineMetadataProvider, mockedMapConnectivityController,
+      mockedRegionDownloadCallback, mockedMergeOfflineRegionsCallback);
+
+    theMapOfflineManager.onDestroy();
+
+    verify(mockedMergeOfflineRegionsCallback).onDestroy();
+  }
+
   private MapOfflineManager buildMapOfflineManager(String routeSummary,
                                                    MapConnectivityController mapConnectivityController) {
     OfflineManager mockedOfflineManager = mock(OfflineManager.class);

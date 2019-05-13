@@ -22,4 +22,15 @@ public class NavigationOfflineDatabaseCallbackTest {
     verify(mockedNavigation).addProgressChangeListener(eq(mockedMapOfflineManager));
   }
 
+  @Test
+  public void checksMapOfflineManagerOnDestroyIsCalledWhenOnDestroy() {
+    MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
+    MapOfflineManager mockedMapOfflineManager = mock(MapOfflineManager.class);
+    NavigationOfflineDatabaseCallback theNavigationOfflineDatabaseCallback =
+      new NavigationOfflineDatabaseCallback(mockedNavigation, mockedMapOfflineManager);
+
+    theNavigationOfflineDatabaseCallback.onDestroy();
+
+    verify(mockedMapOfflineManager).onDestroy();
+  }
 }

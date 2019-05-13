@@ -17,6 +17,7 @@ class MapOfflineManager implements ProgressChangeListener {
   private final MapConnectivityController connectivityController;
   private final RegionDownloadCallback regionDownloadCallback;
   private Geometry previousRouteGeometry;
+  private MergeOfflineRegionsCallback mergeOfflineRegionsCallback;
 
   MapOfflineManager(OfflineManager offlineManager, OfflineRegionDefinitionProvider definitionProvider,
                     OfflineMetadataProvider metadataProvider, MapConnectivityController connectivityController,
@@ -26,6 +27,19 @@ class MapOfflineManager implements ProgressChangeListener {
     this.metadataProvider = metadataProvider;
     this.connectivityController = connectivityController;
     this.regionDownloadCallback = regionDownloadCallback;
+  }
+
+  // Package private (no modifier) for testing purposes
+  MapOfflineManager(OfflineManager offlineManager, OfflineRegionDefinitionProvider definitionProvider,
+                    OfflineMetadataProvider metadataProvider, MapConnectivityController connectivityController,
+                    RegionDownloadCallback regionDownloadCallback,
+                    MergeOfflineRegionsCallback mergeOfflineRegionsCallback) {
+    this.offlineManager = offlineManager;
+    this.definitionProvider = definitionProvider;
+    this.metadataProvider = metadataProvider;
+    this.connectivityController = connectivityController;
+    this.regionDownloadCallback = regionDownloadCallback;
+    this.mergeOfflineRegionsCallback = mergeOfflineRegionsCallback;
   }
 
   @Override
@@ -40,7 +54,14 @@ class MapOfflineManager implements ProgressChangeListener {
   }
 
   void loadDatabase(@NonNull String offlineDatabasePath, OfflineDatabaseLoadedCallback callback) {
-    offlineManager.mergeOfflineRegions(offlineDatabasePath, new MergeOfflineRegionsCallback(callback));
+    mergeOfflineRegionsCallback = new MergeOfflineRegionsCallback(callback);
+    offlineManager.mergeOfflineRegions(offlineDatabasePath, mergeOfflineRegionsCallback);
+  }
+
+  void onDestroy() {
+    if (mergeOfflineRegionsCallback != null) {
+      mergeOfflineRegionsCallback.onDestroy();
+    }
   }
 
   private void download(@NonNull String routeSummary, @NonNull Geometry routeGeometry,

@@ -5,7 +5,7 @@ import com.mapbox.mapboxsdk.offline.OfflineRegion;
 
 class MergeOfflineRegionsCallback implements OfflineManager.MergeOfflineRegionsCallback {
 
-  private final OfflineDatabaseLoadedCallback callback;
+  private OfflineDatabaseLoadedCallback callback;
 
   MergeOfflineRegionsCallback(OfflineDatabaseLoadedCallback callback) {
     this.callback = callback;
@@ -13,11 +13,20 @@ class MergeOfflineRegionsCallback implements OfflineManager.MergeOfflineRegionsC
 
   @Override
   public void onMerge(OfflineRegion[] offlineRegions) {
-    callback.onComplete();
+    if (callback != null) {
+      callback.onComplete();
+    }
   }
 
   @Override
   public void onError(String error) {
-    callback.onError(error);
+    if (callback != null) {
+      callback.onError(error);
+    }
+  }
+
+  OfflineDatabaseLoadedCallback onDestroy() {
+    callback = null;
+    return callback;
   }
 }
