@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.MapboxDirections;
+import com.mapbox.api.directions.v5.WalkingOptions;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
@@ -174,6 +175,7 @@ public class NavigationRouteTest extends BaseTest {
       .waypointNames("Origin;Pickup;Destination")
       .waypointTargets(";;0.99,4.99")
       .waypointIndices("0;2")
+      .walkingOptions(WalkingOptions.builder().alleyBias(0.6).walkwayBias(0.7).walkingSpeed(1.0).build())
       .build();
 
     NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
@@ -194,6 +196,9 @@ public class NavigationRouteTest extends BaseTest {
     assertThat(request, containsString("curb"));
     assertThat(request, containsString("Origin"));
     assertThat(request, containsString("waypoint_targets"));
+    assertThat(request, containsString("alley_bias"));
+    assertThat(request, containsString("walkway_bias"));
+    assertThat(request, containsString("walking_speed"));
   }
 
   @Test
