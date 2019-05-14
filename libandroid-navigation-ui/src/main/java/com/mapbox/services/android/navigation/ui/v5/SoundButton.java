@@ -113,7 +113,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
   }
 
   private void setupOnClickListeners() {
-    setOnClickListener(multiOnClickListener);
+    soundFab.setOnClickListener(multiOnClickListener);
   }
 
   private void clearListeners() {
