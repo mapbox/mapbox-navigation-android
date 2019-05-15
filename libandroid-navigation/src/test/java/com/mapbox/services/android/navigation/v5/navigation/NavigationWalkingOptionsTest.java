@@ -1,44 +1,29 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import com.mapbox.api.directions.v5.WalkingOptions;
-
 import org.junit.Test;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertEquals;
 
 public class NavigationWalkingOptionsTest {
 
   @Test
   public void alleyBias_walkingOptionSet() {
-    WalkingOptions.Builder walkingOptionsBuilder = mock(WalkingOptions.Builder.class);
-    NavigationWalkingOptions.Builder navigationWalkingOptionsBuilder =
-      new NavigationWalkingOptions.Builder(walkingOptionsBuilder);
+    NavigationWalkingOptions options = NavigationWalkingOptions.builder().alleyBias(0.7).build();
 
-    navigationWalkingOptionsBuilder.alleyBias(0.7);
-
-    verify(walkingOptionsBuilder).alleyBias(0.7);
+    assertEquals(Double.valueOf(0.7), options.getWalkingOptions().alleyBias());
   }
 
   @Test
   public void WalkwayBias_walkingOptionSet() {
-    WalkingOptions.Builder walkingOptionsBuilder = mock(WalkingOptions.Builder.class);
-    NavigationWalkingOptions.Builder navigationWalkingOptionsBuilder =
-      new NavigationWalkingOptions.Builder(walkingOptionsBuilder);
+    NavigationWalkingOptions options = NavigationWalkingOptions.builder().walkwayBias(0.8).build();
 
-    navigationWalkingOptionsBuilder.walkwayBias(0.8);
-
-    verify(walkingOptionsBuilder).walkwayBias(0.8);
+    assertEquals(Double.valueOf(0.8), options.getWalkingOptions().walkwayBias());
   }
 
   @Test
   public void walkingSpeed_walkingOptionSet() {
-    WalkingOptions.Builder walkingOptionsBuilder = mock(WalkingOptions.Builder.class);
-    NavigationWalkingOptions.Builder navigationWalkingOptionsBuilder =
-      new NavigationWalkingOptions.Builder(walkingOptionsBuilder);
+    NavigationWalkingOptions options = NavigationWalkingOptions.builder().walkingSpeed(2.0).build();
 
-    navigationWalkingOptionsBuilder.walkingSpeed(1.0);
-
-    verify(walkingOptionsBuilder).walkingSpeed(1.0);
+    assertEquals(Double.valueOf(2.0), options.getWalkingOptions().walkingSpeed());
   }
 }

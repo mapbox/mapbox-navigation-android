@@ -589,6 +589,13 @@ public final class NavigationRoute {
       return this;
     }
 
+    /**
+     * Sets a {@link NavigationWalkingOptions} object which contains options for use with the
+     * walking profile.
+     *
+     * @param navigationWalkingOptions object holding walking options
+     * @return this builder for chaining options together
+     */
     public Builder walkingOptions(NavigationWalkingOptions navigationWalkingOptions) {
       directionsBuilder.walkingOptions(navigationWalkingOptions.getWalkingOptions());
       return this;
@@ -668,7 +675,7 @@ public final class NavigationRoute {
 
       WalkingOptions walkingOptions = options.walkingOptions();
       if (walkingOptions != null) {
-        directionsBuilder.walkingOptions(options.walkingOptions());
+        directionsBuilder.walkingOptions(walkingOptions);
       }
 
       return this;
