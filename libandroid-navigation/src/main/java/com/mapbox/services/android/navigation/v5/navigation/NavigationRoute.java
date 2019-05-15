@@ -12,6 +12,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria.ExcludeCriteria;
 import com.mapbox.api.directions.v5.DirectionsCriteria.ProfileCriteria;
 import com.mapbox.api.directions.v5.DirectionsCriteria.VoiceUnitCriteria;
 import com.mapbox.api.directions.v5.MapboxDirections;
+import com.mapbox.api.directions.v5.WalkingOptions;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
@@ -589,6 +590,18 @@ public final class NavigationRoute {
     }
 
     /**
+     * Sets a {@link NavigationWalkingOptions} object which contains options for use with the
+     * walking profile.
+     *
+     * @param navigationWalkingOptions object holding walking options
+     * @return this builder for chaining options together
+     */
+    public Builder walkingOptions(NavigationWalkingOptions navigationWalkingOptions) {
+      directionsBuilder.walkingOptions(navigationWalkingOptions.getWalkingOptions());
+      return this;
+    }
+
+    /**
      * Optionally create a {@link Builder} based on all variables
      * from given {@link RouteOptions}.
      * <p>
@@ -658,6 +671,11 @@ public final class NavigationRoute {
       if (!TextUtils.isEmpty(waypointTargets)) {
         Point[] splitWaypointTargets = parseWaypointTargets(waypointTargets);
         directionsBuilder.addWaypointTargets(splitWaypointTargets);
+      }
+
+      WalkingOptions walkingOptions = options.walkingOptions();
+      if (walkingOptions != null) {
+        directionsBuilder.walkingOptions(walkingOptions);
       }
 
       return this;
