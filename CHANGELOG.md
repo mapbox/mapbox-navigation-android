@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ### v0.38.0 - May 15, 2019
 
+* Update Maps SDK to 7.4.0 [#1907](https://github.com/mapbox/mapbox-navigation-android/pull/1907)
 * Added walking options [#1934](https://github.com/mapbox/mapbox-navigation-android/pull/1934)
 * SoundButton clicklistener wasn't set properly [#1937](https://github.com/mapbox/mapbox-navigation-android/pull/1937)
 
