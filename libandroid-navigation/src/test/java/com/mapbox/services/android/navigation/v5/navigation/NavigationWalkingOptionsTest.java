@@ -14,7 +14,7 @@ public class NavigationWalkingOptionsTest {
   }
 
   @Test
-  public void WalkwayBias_walkingOptionSet() {
+  public void walkwayBias_walkingOptionSet() {
     NavigationWalkingOptions options = NavigationWalkingOptions.builder().walkwayBias(0.8).build();
 
     assertEquals(Double.valueOf(0.8), options.getWalkingOptions().walkwayBias());

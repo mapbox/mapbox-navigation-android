@@ -59,8 +59,8 @@ public final class NavigationWalkingOptions {
     /**
      * A bias which determines whether the route should prefer or avoid the use of roads or paths
      * that are set aside for pedestrian-only use (walkways). The allowed range of values is from
-     * -1 to 1, where -1 indicates indicates preference to avoid walkways, 1 indicates preference
-     * to favor walkways, and 0 indicates no preference (the default).
+     * -1 to 1, where -1 indicates preference to avoid walkways, 1 indicates preference to favor
+     * walkways, and 0 indicates no preference (the default).
      *
      * @param walkwayBias bias to prefer or avoid walkways
      * @return this builder
@@ -72,8 +72,8 @@ public final class NavigationWalkingOptions {
 
     /**
      * A bias which determines whether the route should prefer or avoid the use of alleys. The
-     * allowed range of values is from -1 to 1, where -1 indicates indicates preference to avoid
-     * alleys, 1 indicates preference to favor alleys, and 0 indicates no preference (the default).
+     * allowed range of values is from -1 to 1, where -1 indicates preference to avoid alleys, 1
+     * indicates preference to favor alleys, and 0 indicates no preference (the default).
      *
      * @param alleyBias bias to prefer or avoid alleys
      * @return this builder
