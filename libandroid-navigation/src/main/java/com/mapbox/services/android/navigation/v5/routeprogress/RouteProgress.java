@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepIntersection;
+import com.mapbox.geojson.Geometry;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.navigator.VoiceInstruction;
@@ -188,6 +189,26 @@ public abstract class RouteProgress {
   @Nullable
   public abstract RouteProgressState currentState();
 
+  /**
+   * Returns the current {@link DirectionsRoute} geometry.
+   *
+   * @return current route geometry
+   */
+  @Nullable
+  public abstract Geometry routeGeometry();
+
+  /**
+   * Returns the current {@link DirectionsRoute} geometry with a buffer
+   * that encompasses visible tile surface are while navigating.
+   * <p>
+   * This {@link Geometry} is ideal for offline downloads of map or routing tile
+   * data.
+   *
+   * @return current route geometry with buffer
+   */
+  @Nullable
+  public abstract Geometry routeGeometryWithBuffer();
+
   public abstract RouteProgress.Builder toBuilder();
 
   abstract LegStep currentStep();
@@ -284,6 +305,10 @@ public abstract class RouteProgress {
     public abstract Builder bannerInstruction(@Nullable BannerInstruction bannerInstruction);
 
     public abstract Builder currentState(@Nullable RouteProgressState currentState);
+
+    public abstract Builder routeGeometry(@Nullable Geometry routeGeometry);
+
+    public abstract Builder routeGeometryWithBuffer(@Nullable Geometry routeGeometryWithBuffer);
 
     abstract RouteProgress autoBuild(); // not public
 

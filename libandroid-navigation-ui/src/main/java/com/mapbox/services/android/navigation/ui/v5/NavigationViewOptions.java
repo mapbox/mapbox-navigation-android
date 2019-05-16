@@ -122,6 +122,14 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
      */
     public abstract Builder offlineRoutingTilesVersion(String offlineVersion);
 
+    /**
+     * Add options to configure offline maps.
+     *
+     * @param mapOfflineOptions for offline configuration
+     * @return this builder
+     */
+    public abstract Builder offlineMapOptions(MapOfflineOptions mapOfflineOptions);
+
     public abstract NavigationViewOptions build();
   }
 

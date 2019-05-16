@@ -2,20 +2,27 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Geometry;
+import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
+import com.mapbox.geojson.gson.GeometryGeoJson;
 import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.VoiceInstruction;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 class MapboxNavigator {
 
   private static final int INDEX_FIRST_ROUTE = 0;
+  private static final float GRID_SIZE = 0.0025f;
+  private static final short BUFFER_DILATION = 1;
   private final Navigator navigator;
   private final RouteHandler routeHandler;
 
@@ -87,6 +94,24 @@ class MapboxNavigator {
 
   synchronized BannerInstruction retrieveBannerInstruction(int index) {
     return navigator.getBannerInstruction(index);
+  }
+
+  @Nullable
+  synchronized Geometry retrieveRouteGeometry() {
+    ArrayList<Point> routeGeometry = navigator.getRouteGeometry();
+    if (routeGeometry == null) {
+      return null;
+    }
+    return LineString.fromLngLats(routeGeometry);
+  }
+
+  @Nullable
+  synchronized Geometry retrieveRouteGeometryWithBuffer() {
+    String routeGeometryWithBuffer = navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION);
+    if (routeGeometryWithBuffer == null) {
+      return null;
+    }
+    return GeometryGeoJson.fromJson(routeGeometryWithBuffer);
   }
 
   private FixLocation buildFixLocationFromLocation(Location location) {

@@ -15,6 +15,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.offline.OfflineManager;
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructionModel;
@@ -38,7 +39,6 @@ import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEven
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
@@ -84,20 +84,26 @@ public class NavigationViewModel extends AndroidViewModel {
   private int timeFormatType;
   private boolean isRunning;
   private boolean isChangingConfigurations;
+  private MapConnectivityController connectivityController;
+  private MapOfflineManager mapOfflineManager;
 
   public NavigationViewModel(Application application) {
     super(application);
     this.accessToken = Mapbox.getAccessToken();
     initializeLocationEngine();
     initializeRouter();
-    routeUtils = new RouteUtils();
-    localeUtils = new LocaleUtils();
+    this.routeUtils = new RouteUtils();
+    this.localeUtils = new LocaleUtils();
+    this.connectivityController = new MapConnectivityController();
   }
 
   // Package private (no modifier) for testing purposes
-  NavigationViewModel(Application application, MapboxNavigation navigation) {
+  NavigationViewModel(Application application, MapboxNavigation navigation,
+                      MapConnectivityController connectivityController, MapOfflineManager mapOfflineManager) {
     super(application);
     this.navigation = navigation;
+    this.connectivityController = connectivityController;
+    this.mapOfflineManager = mapOfflineManager;
   }
 
   // Package private (no modifier) for testing purposes
@@ -115,8 +121,9 @@ public class NavigationViewModel extends AndroidViewModel {
   public void onDestroy(boolean isChangingConfigurations) {
     this.isChangingConfigurations = isChangingConfigurations;
     if (!isChangingConfigurations) {
-      router.onDestroy();
+      destroyRouter();
       endNavigation();
+      destroyMapOffline();
       deactivateInstructionPlayer();
       isRunning = false;
     }
@@ -201,6 +208,7 @@ public class NavigationViewModel extends AndroidViewModel {
       initializeVoiceInstructionLoader();
       initializeVoiceInstructionCache();
       initializeNavigationSpeechPlayer(options);
+      initializeMapOfflineManager(options);
     }
     router.extractRouteOptions(options);
   }
@@ -246,6 +254,18 @@ public class NavigationViewModel extends AndroidViewModel {
       isOffRoute.setValue(false);
     }
     resetConfigurationFlag();
+  }
+
+  void updateRouteProgress(RouteProgress routeProgress) {
+    this.routeProgress = routeProgress;
+    sendEventArrival(routeProgress);
+    instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
+    summaryModel.setValue(new SummaryModel(getApplication(), distanceFormatter, routeProgress, timeFormatType));
+  }
+
+  void updateLocation(Location location) {
+    router.updateLocation(location);
+    navigationLocation.setValue(location);
   }
 
   void sendEventFailedReroute(String errorMessage) {
@@ -312,6 +332,25 @@ public class NavigationViewModel extends AndroidViewModel {
     this.speechPlayer = new NavigationSpeechPlayer(speechPlayerProvider);
   }
 
+  private void initializeMapOfflineManager(NavigationViewOptions options) {
+    MapOfflineOptions mapOfflineOptions = options.offlineMapOptions();
+    if (mapOfflineOptions == null) {
+      return;
+    }
+    String mapDatabasePath = mapOfflineOptions.getDatabasePath();
+    String mapStyleUrl = mapOfflineOptions.getStyleUrl();
+    Context applicationContext = getApplication().getApplicationContext();
+    OfflineManager offlineManager = OfflineManager.getInstance(applicationContext);
+    float pixelRatio = applicationContext.getResources().getDisplayMetrics().density;
+    OfflineRegionDefinitionProvider definitionProvider = new OfflineRegionDefinitionProvider(mapStyleUrl, pixelRatio);
+    OfflineMetadataProvider metadataProvider = new OfflineMetadataProvider();
+    RegionDownloadCallback regionDownloadCallback = new RegionDownloadCallback(connectivityController);
+    mapOfflineManager = new MapOfflineManager(offlineManager, definitionProvider, metadataProvider,
+      connectivityController, regionDownloadCallback);
+    NavigationOfflineDatabaseCallback callback = new NavigationOfflineDatabaseCallback(navigation, mapOfflineManager);
+    mapOfflineManager.loadDatabase(mapDatabasePath, callback);
+  }
+
   private void initializeVoiceInstructionLoader() {
     Cache cache = new Cache(new File(getApplication().getCacheDir(), OKHTTP_INSTRUCTION_CACHE),
       TEN_MEGABYTE_CACHE_SIZE);
@@ -341,7 +380,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void addNavigationListeners() {
-    navigation.addProgressChangeListener(progressChangeListener);
+    navigation.addProgressChangeListener(new NavigationViewModelProgressChangeListener(this));
     navigation.addOffRouteListener(offRouteListener);
     navigation.addMilestoneEventListener(milestoneEventListener);
     navigation.addNavigationEventListener(navigationEventListener);
@@ -354,18 +393,6 @@ public class NavigationViewModel extends AndroidViewModel {
       navigation.addMilestones(milestones);
     }
   }
-
-  private ProgressChangeListener progressChangeListener = new ProgressChangeListener() {
-    @Override
-    public void onProgressChange(Location location, RouteProgress routeProgress) {
-      NavigationViewModel.this.routeProgress = routeProgress;
-      router.updateLocation(location);
-      instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
-      summaryModel.setValue(new SummaryModel(getApplication(), distanceFormatter, routeProgress, timeFormatType));
-      navigationLocation.setValue(location);
-      sendEventArrival(routeProgress);
-    }
-  };
 
   private OffRouteListener offRouteListener = new OffRouteListener() {
     @Override
@@ -417,6 +444,12 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
+  private void destroyRouter() {
+    if (router != null) {
+      router.onDestroy();
+    }
+  }
+
   private void endNavigation() {
     if (navigation != null) {
       navigation.onDestroy();
@@ -431,6 +464,13 @@ public class NavigationViewModel extends AndroidViewModel {
         ((DynamicCamera) cameraEngine).clearMap();
       }
     }
+  }
+
+  private void destroyMapOffline() {
+    if (mapOfflineManager != null) {
+      mapOfflineManager.onDestroy();
+    }
+    connectivityController.assign(null);
   }
 
   private void deactivateInstructionPlayer() {

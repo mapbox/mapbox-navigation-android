@@ -354,6 +354,13 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     if (!offlineVersion.isEmpty()) {
       optionsBuilder.offlineRoutingTilesVersion(offlineVersion);
     }
+    // TODO Testing dynamic offline
+    /**
+     * File downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+     * String databaseFilePath = downloadDirectory + "/" + "kingfarm.db";
+     * String offlineStyleUrl = "mapbox://styles/mapbox/navigation-guidance-day-v4";
+     * optionsBuilder.offlineMapOptions(new MapOfflineOptions(databaseFilePath, offlineStyleUrl));
+     */
     NavigationLauncher.startNavigation(this, optionsBuilder.build());
   }
 

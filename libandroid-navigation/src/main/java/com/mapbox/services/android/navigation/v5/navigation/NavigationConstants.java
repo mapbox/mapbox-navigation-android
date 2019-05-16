@@ -150,9 +150,10 @@ public final class NavigationConstants {
   // Bundle variable keys
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
   public static final String NAVIGATION_VIEW_SIMULATE_ROUTE = "navigation_view_simulate_route";
-  public static final String NAVIGATION_VIEW_ROUTE_PROFILE_KEY = "navigation_view_route_profile";
   public static final String OFFLINE_PATH_KEY = "offline_path_key";
   public static final String OFFLINE_VERSION_KEY = "offline_version_key";
+  public static final String MAP_DATABASE_PATH_KEY = "offline_map_database_path_key";
+  public static final String MAP_STYLE_URL_KEY = "offline_map_style_url_key";
 
   // Step Maneuver Types
   public static final String STEP_MANEUVER_TYPE_TURN = "turn";

@@ -40,6 +40,10 @@ public class NavigationLauncher {
     storeThemePreferences(options, editor);
     storeOfflinePath(options, editor);
     storeOfflineVersion(options, editor);
+    if (options.offlineMapOptions() != null) {
+      storeOfflineMapDatabasePath(options, editor);
+      storeOfflineMapStyleUrl(options, editor);
+    }
 
     editor.apply();
 
@@ -75,6 +79,8 @@ public class NavigationLauncher {
       .remove(NavigationConstants.NAVIGATION_VIEW_DARK_THEME)
       .remove(NavigationConstants.OFFLINE_PATH_KEY)
       .remove(NavigationConstants.OFFLINE_VERSION_KEY)
+      .remove(NavigationConstants.MAP_DATABASE_PATH_KEY)
+      .remove(NavigationConstants.MAP_STYLE_URL_KEY)
       .apply();
   }
 
@@ -116,4 +122,11 @@ public class NavigationLauncher {
     editor.putString(NavigationConstants.OFFLINE_VERSION_KEY, options.offlineRoutingTilesVersion());
   }
 
+  private static void storeOfflineMapDatabasePath(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
+    editor.putString(NavigationConstants.MAP_DATABASE_PATH_KEY, options.offlineMapOptions().getDatabasePath());
+  }
+
+  private static void storeOfflineMapStyleUrl(NavigationLauncherOptions options, SharedPreferences.Editor editor) {
+    editor.putString(NavigationConstants.MAP_STYLE_URL_KEY, options.offlineMapOptions().getStyleUrl());
+  }
 }
