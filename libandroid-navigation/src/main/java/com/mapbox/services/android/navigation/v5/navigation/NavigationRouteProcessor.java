@@ -119,10 +119,7 @@ class NavigationRouteProcessor {
       .inTunnel(status.getInTunnel())
       .currentState(currentRouteState);
 
-    // TODO extract to private?
-    progressBuilder.routeGeometry(routeGeometry);
-    progressBuilder.routeGeometryWithBuffer(routeGeometryWithBuffer);
-
+    addRouteGeometries(progressBuilder);
     addVoiceInstructions(status, progressBuilder);
     addBannerInstructions(status, navigator, progressBuilder);
     addUpcomingStepPoints(progressBuilder);
@@ -155,6 +152,11 @@ class NavigationRouteProcessor {
     if (upcomingStepPoints != null && !upcomingStepPoints.isEmpty()) {
       progressBuilder.upcomingStepPoints(upcomingStepPoints);
     }
+  }
+
+  private void addRouteGeometries(RouteProgress.Builder progressBuilder) {
+    progressBuilder.routeGeometry(routeGeometry);
+    progressBuilder.routeGeometryWithBuffer(routeGeometryWithBuffer);
   }
 
   private void addVoiceInstructions(NavigationStatus status, RouteProgress.Builder progressBuilder) {

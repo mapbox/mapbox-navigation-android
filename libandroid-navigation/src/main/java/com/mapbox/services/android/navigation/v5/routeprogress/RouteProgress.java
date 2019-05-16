@@ -189,11 +189,23 @@ public abstract class RouteProgress {
   @Nullable
   public abstract RouteProgressState currentState();
 
-  // TODO javadoc
+  /**
+   * Returns the current {@link DirectionsRoute} geometry.
+   *
+   * @return current route geometry
+   */
   @Nullable
   public abstract Geometry routeGeometry();
 
-  // TODO javadoc
+  /**
+   * Returns the current {@link DirectionsRoute} geometry with a buffer
+   * that encompasses visible tile surface are while navigating.
+   * <p>
+   * This {@link Geometry} is ideal for offline downloads of map or routing tile
+   * data.
+   *
+   * @return current route geometry with buffer
+   */
   @Nullable
   public abstract Geometry routeGeometryWithBuffer();
 

@@ -47,7 +47,6 @@ class MapOfflineManager implements ProgressChangeListener {
     Geometry currentRouteGeometry = routeProgress.routeGeometryWithBuffer();
     if (previousRouteGeometry == null || !previousRouteGeometry.equals(currentRouteGeometry)) {
       previousRouteGeometry = currentRouteGeometry;
-      // TODO unique identifier for download metadata?
       String routeSummary = routeProgress.directionsRoute().routeOptions().requestUuid();
       download(routeSummary, previousRouteGeometry, regionDownloadCallback);
     }
