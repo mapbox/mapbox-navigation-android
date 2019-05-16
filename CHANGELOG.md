@@ -2,8 +2,9 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
-### v0.38.0 - May 15, 2019
+### v0.38.0 - May 16, 2019
 
+* Add option to load offline maps database for NavigationView [#1895](https://github.com/mapbox/mapbox-navigation-android/pull/1895)
 * Update Maps SDK to 7.4.0 [#1907](https://github.com/mapbox/mapbox-navigation-android/pull/1907)
 * Added walking options [#1934](https://github.com/mapbox/mapbox-navigation-android/pull/1934)
 * SoundButton clicklistener wasn't set properly [#1937](https://github.com/mapbox/mapbox-navigation-android/pull/1937)
