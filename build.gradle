@@ -31,8 +31,6 @@ task testReport(type: TestReport, group: 'Build') {
 
 allprojects {
   repositories {
-    // TODO Remove when Maps SDK is released
-    maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
     google()
     mavenCentral()
     jcenter()

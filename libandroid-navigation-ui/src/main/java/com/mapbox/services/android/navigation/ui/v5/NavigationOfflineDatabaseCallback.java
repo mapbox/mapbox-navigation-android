@@ -16,15 +16,11 @@ class NavigationOfflineDatabaseCallback implements OfflineDatabaseLoadedCallback
 
   @Override
   public void onComplete() {
-    // TODO Remove debug log after testing
-    Timber.d("NavigationOfflineDatabaseCallback#onComplete");
     navigation.addProgressChangeListener(mapOfflineManager);
   }
 
   @Override
   public void onError(String error) {
-    // TODO Remove debug log after testing
-    Timber.d("NavigationOfflineDatabaseCallback#onError %s", error);
     Timber.e(error);
   }
 

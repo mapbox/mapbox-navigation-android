@@ -219,11 +219,11 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         //val minZoom: Double = mapboxMap.cameraPosition.zoom
         //val maxZoom: Double = mapboxMap.maxZoomLevel
         val pixelRatio: Float = this.resources.displayMetrics.density
-        //val definition: OfflineTilePyramidRegionDefinition = OfflineTilePyramidRegionDefinition(
-        //        styleUrl, bounds, minZoom, maxZoom, pixelRatio)
-        // TODO Testing downloading a Geometry and using OfflineGeometryRegionDefinition as definition
-        val definition: OfflineGeometryRegionDefinition = OfflineGeometryRegionDefinition(
-                styleUrl, geometry, minZoom, maxZoom, pixelRatio)
+        val definition: OfflineTilePyramidRegionDefinition = OfflineTilePyramidRegionDefinition(
+                styleUrl, bounds, minZoom, maxZoom, pixelRatio)
+        // TODO Testing downloading a Geometry using OfflineGeometryRegionDefinition as definition
+        //val definition: OfflineGeometryRegionDefinition = OfflineGeometryRegionDefinition(
+        //        styleUrl, geometry, minZoom, maxZoom, pixelRatio)
 
         val metadata: ByteArray
         val jsonObject: JSONObject = JSONObject()

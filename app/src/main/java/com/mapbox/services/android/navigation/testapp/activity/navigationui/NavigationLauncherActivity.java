@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -44,7 +43,6 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity;
 import com.mapbox.services.android.navigation.testapp.R;
-import com.mapbox.services.android.navigation.ui.v5.MapOfflineOptions;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.camera.CameraUpdateMode;
@@ -356,11 +354,13 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     if (!offlineVersion.isEmpty()) {
       optionsBuilder.offlineRoutingTilesVersion(offlineVersion);
     }
-    // TODO Testing merging previously downloaded region
-    File downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-    String databaseFilePath = downloadDirectory + "/" + "kingfarm.db";
-    String offlineStyleUrl = "mapbox://styles/mapbox/navigation-guidance-day-v4";
-    optionsBuilder.offlineMapOptions(new MapOfflineOptions(databaseFilePath, offlineStyleUrl));
+    // TODO Testing dynamic offline
+    /**
+     * File downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+     * String databaseFilePath = downloadDirectory + "/" + "kingfarm.db";
+     * String offlineStyleUrl = "mapbox://styles/mapbox/navigation-guidance-day-v4";
+     * optionsBuilder.offlineMapOptions(new MapOfflineOptions(databaseFilePath, offlineStyleUrl));
+     */
     NavigationLauncher.startNavigation(this, optionsBuilder.build());
   }
 
