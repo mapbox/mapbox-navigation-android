@@ -71,7 +71,7 @@ public class InstructionListPresenterTest extends BaseTest {
   }
 
   @Test
-  public void onBindInstructionListView_maneuverViewIsUpdated() throws Exception {
+  public void onBindInstructionListView_maneuverViewTypeAndModifierAreUpdated() throws Exception {
     SpannableString spannableString = mock(SpannableString.class);
     RouteProgress routeProgress = buildRouteProgress();
     InstructionListPresenter presenter = buildPresenter(spannableString, routeProgress);
@@ -81,6 +81,19 @@ public class InstructionListPresenterTest extends BaseTest {
     presenter.onBindInstructionListViewAtPosition(0, listView);
 
     verify(listView).updateManeuverViewTypeAndModifier(anyString(), anyString());
+  }
+
+  @Test
+  public void onBindInstructionListView_maneuverViewDrivingSideIsUpdated() throws Exception {
+    SpannableString spannableString = mock(SpannableString.class);
+    RouteProgress routeProgress = buildRouteProgress();
+    InstructionListPresenter presenter = buildPresenter(spannableString, routeProgress);
+    presenter.updateBannerListWith(routeProgress);
+    InstructionListView listView = mock(InstructionListView.class);
+
+    presenter.onBindInstructionListViewAtPosition(0, listView);
+
+    verify(listView).updateManeuverViewDrivingSide(anyString());
   }
 
   @Test

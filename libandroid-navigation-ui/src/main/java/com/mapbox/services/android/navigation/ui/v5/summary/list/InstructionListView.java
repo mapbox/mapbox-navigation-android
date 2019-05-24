@@ -8,6 +8,8 @@ interface InstructionListView {
 
   void updateManeuverViewRoundaboutDegrees(float roundaboutAngle);
 
+  void updateManeuverViewDrivingSide(String drivingSide);
+
   void updateDistanceText(SpannableString distanceText);
 
   void updatePrimaryText(String primaryText);

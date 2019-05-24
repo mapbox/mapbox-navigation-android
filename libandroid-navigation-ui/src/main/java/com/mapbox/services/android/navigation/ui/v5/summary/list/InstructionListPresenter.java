@@ -26,6 +26,7 @@ class InstructionListPresenter {
   private DistanceFormatter distanceFormatter;
   private List<BannerInstructions> instructions;
   private RouteLeg currentLeg;
+  private String drivingSide;
 
   InstructionListPresenter(RouteUtils routeUtils, DistanceFormatter distanceFormatter) {
     this.routeUtils = routeUtils;
@@ -106,12 +107,14 @@ class InstructionListPresenter {
     if (roundaboutDegrees != null) {
       listView.updateManeuverViewRoundaboutDegrees(roundaboutDegrees.floatValue());
     }
+    listView.updateManeuverViewDrivingSide(drivingSide);
   }
 
   private void addBannerInstructions(RouteProgress routeProgress) {
     if (isNewLeg(routeProgress)) {
       instructions = new ArrayList<>();
       currentLeg = routeProgress.currentLeg();
+      drivingSide = routeProgress.currentLegProgress().currentStep().drivingSide();
       List<LegStep> steps = currentLeg.steps();
       for (LegStep step : steps) {
         List<BannerInstructions> bannerInstructions = step.bannerInstructions();

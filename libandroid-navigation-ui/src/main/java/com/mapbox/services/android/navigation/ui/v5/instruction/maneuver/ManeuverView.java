@@ -23,6 +23,7 @@ import java.util.Set;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ManeuverModifier;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ManeuverType;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN;
@@ -87,6 +88,7 @@ public class ManeuverView extends View {
   private float roundaboutAngle = DEFAULT_ROUNDABOUT_ANGLE;
   private Pair<String, String> maneuverTypeAndModifier = new Pair<>(null, null);
   private PointF size;
+  private String drivingSide = STEP_MANEUVER_MODIFIER_RIGHT;
 
   /**
    * A custom view that can be used with the Mapbox Directions API.
@@ -167,6 +169,13 @@ public class ManeuverView extends View {
     }
   }
 
+  public void setDrivingSide(String drivingSide) {
+    if (STEP_MANEUVER_MODIFIER_LEFT.equals(drivingSide) || STEP_MANEUVER_MODIFIER_RIGHT.equals(drivingSide)) {
+      updateDrivingSide(drivingSide);
+      invalidate();
+    }
+  }
+
   /**
    * Updates maneuver view primary color.
    * <p>
@@ -225,8 +234,10 @@ public class ManeuverView extends View {
     if (maneuverViewUpdate != null) {
       maneuverViewUpdate.updateManeuverView(canvas, primaryColor, secondaryColor, size, roundaboutAngle);
     }
-    boolean flip = SHOULD_FLIP_MODIFIERS.contains(maneuverModifier);
-    setScaleX(flip ? -1 : 1);
+    if (drivingSide.equals(STEP_MANEUVER_MODIFIER_RIGHT)) {
+      boolean flip = SHOULD_FLIP_MODIFIERS.contains(maneuverModifier);
+      setScaleX(flip ? -1 : 1);
+    }
   }
 
   private void initializeColorFrom(AttributeSet attributeSet) {
@@ -271,6 +282,10 @@ public class ManeuverView extends View {
       return;
     }
     this.roundaboutAngle = roundaboutAngle;
+  }
+
+  private void updateDrivingSide(String drivingSide) {
+    this.drivingSide = drivingSide;
   }
 
   private boolean checkRoundaboutBottomLimit(float roundaboutAngle) {

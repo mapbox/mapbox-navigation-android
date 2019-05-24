@@ -2,6 +2,10 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.39.0 - May 29, 2019
+
+* Fix instruction icon mismatch in between banner and notification [#1946](https://github.com/mapbox/mapbox-navigation-android/pull/1946)
+
 ### v0.38.0 - May 16, 2019
 
 * Add option to load offline maps database for NavigationView [#1895](https://github.com/mapbox/mapbox-navigation-android/pull/1895)

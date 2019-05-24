@@ -191,8 +191,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       @Override
       public void onChanged(@Nullable BannerInstructionModel model) {
         if (model != null) {
-          updateManeuverView(model.retrievePrimaryManeuverType(), model.retrieveSecondaryManeuverModifier(),
-            model.retrievePrimaryRoundaboutAngle());
+          updateManeuverView(model.retrievePrimaryManeuverType(), model.retrievePrimaryManeuverModifier(),
+            model.retrievePrimaryRoundaboutAngle(), model.retrieveDrivingSide());
           updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
           updateSubStep(model.retrieveSubBannerText(), model.retrievePrimaryManeuverType());
         }
@@ -251,7 +251,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       }
       BannerText primary = instructions.primary();
       String primaryManeuverModifier = primary.modifier();
-      updateManeuverView(primary.type(), primaryManeuverModifier, primary.degrees());
+      String drivingSide = currentStep.drivingSide();
+      updateManeuverView(primary.type(), primaryManeuverModifier, primary.degrees(), drivingSide);
       updateDataFromBannerText(primary, instructions.secondary());
       updateSubStep(instructions.sub(), primaryManeuverModifier);
     }
@@ -630,6 +631,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       if (roundaboutAngle != null) {
         subManeuverView.setRoundaboutAngle(roundaboutAngle.floatValue());
       }
+      String drivingSide = currentStep.drivingSide();
+      subManeuverView.setDrivingSide(drivingSide);
       InstructionLoader instructionLoader = createInstructionLoader(subStepText, subText);
       if (instructionLoader != null) {
         instructionLoader.loadInstruction();
@@ -782,11 +785,12 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * Updates new maneuver image if one is found.
    */
   private void updateManeuverView(String maneuverViewType, String maneuverViewModifier,
-                                  @Nullable Double roundaboutAngle) {
+                                  @Nullable Double roundaboutAngle, String drivingSide) {
     upcomingManeuverView.setManeuverTypeAndModifier(maneuverViewType, maneuverViewModifier);
     if (roundaboutAngle != null) {
       upcomingManeuverView.setRoundaboutAngle(roundaboutAngle.floatValue());
     }
+    upcomingManeuverView.setDrivingSide(drivingSide);
   }
 
   /**
