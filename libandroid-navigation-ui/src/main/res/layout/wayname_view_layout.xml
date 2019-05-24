@@ -13,7 +13,6 @@
         android:background="@drawable/wayname_text_background"
         android:ellipsize="end"
         android:gravity="center"
-        android:maxWidth="@dimen/wayname_max_width"
         android:maxLines="1"
         android:paddingLeft="@dimen/wayname_padding"
         android:paddingRight="@dimen/wayname_padding"
