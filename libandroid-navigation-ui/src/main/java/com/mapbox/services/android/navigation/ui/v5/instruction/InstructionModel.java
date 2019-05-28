@@ -9,11 +9,13 @@ public class InstructionModel {
 
   private RouteProgress progress;
   private SpannableString stepDistanceRemaining;
+  private String drivingSide;
 
   public InstructionModel(DistanceFormatter distanceFormatter, RouteProgress progress) {
     this.progress = progress;
     double distanceRemaining = progress.currentLegProgress().currentStepProgress().distanceRemaining();
     stepDistanceRemaining = distanceFormatter.formatDistance(distanceRemaining);
+    this.drivingSide = progress.currentLegProgress().currentStep().drivingSide();
   }
 
   RouteProgress retrieveProgress() {
@@ -22,5 +24,9 @@ public class InstructionModel {
 
   SpannableString retrieveStepDistanceRemaining() {
     return stepDistanceRemaining;
+  }
+
+  String retrieveDrivingSide() {
+    return drivingSide;
   }
 }

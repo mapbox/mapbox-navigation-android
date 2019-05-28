@@ -35,8 +35,12 @@ class ManeuverMap {
   ManeuverMap() {
     maneuverMap = new HashMap<>();
     maneuverMap.put(STEP_MANEUVER_TYPE_TURN + STEP_MANEUVER_MODIFIER_UTURN,
-      R.drawable.ic_maneuver_turn_180);
+      R.drawable.ic_maneuver_turn_180_left);
     maneuverMap.put(STEP_MANEUVER_TYPE_CONTINUE + STEP_MANEUVER_MODIFIER_UTURN,
+      R.drawable.ic_maneuver_turn_180_left);
+    maneuverMap.put(STEP_MANEUVER_TYPE_TURN + STEP_MANEUVER_MODIFIER_UTURN + STEP_MANEUVER_MODIFIER_LEFT,
+      R.drawable.ic_maneuver_turn_180);
+    maneuverMap.put(STEP_MANEUVER_TYPE_CONTINUE + STEP_MANEUVER_MODIFIER_UTURN + STEP_MANEUVER_MODIFIER_LEFT,
       R.drawable.ic_maneuver_turn_180);
 
     maneuverMap.put(STEP_MANEUVER_TYPE_CONTINUE + STEP_MANEUVER_MODIFIER_STRAIGHT,

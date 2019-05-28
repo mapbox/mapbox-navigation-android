@@ -37,7 +37,7 @@ public class BannerInstructionModel extends InstructionModel {
     return primaryBannerText.type();
   }
 
-  String retrieveSecondaryManeuverModifier() {
+  String retrievePrimaryManeuverModifier() {
     return primaryBannerText.modifier();
   }
 

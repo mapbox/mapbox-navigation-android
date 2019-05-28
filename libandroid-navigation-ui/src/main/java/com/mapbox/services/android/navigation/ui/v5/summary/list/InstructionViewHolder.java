@@ -38,6 +38,11 @@ class InstructionViewHolder extends RecyclerView.ViewHolder implements Instructi
   }
 
   @Override
+  public void updateManeuverViewDrivingSide(String drivingSide) {
+    maneuverView.setDrivingSide(drivingSide);
+  }
+
+  @Override
   public void updateDistanceText(SpannableString distanceText) {
     this.distanceText.setText(distanceText);
   }
