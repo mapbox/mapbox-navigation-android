@@ -202,7 +202,7 @@ class MapRouteLine {
 
   boolean updatePrimaryRouteIndex(int primaryRouteIndex) {
     boolean isNewIndex = this.primaryRouteIndex != primaryRouteIndex
-      && primaryRouteIndex < directionsRoutes.size();
+      && primaryRouteIndex < directionsRoutes.size() && primaryRouteIndex >= 0;
     if (isNewIndex) {
       this.primaryRouteIndex = primaryRouteIndex;
       updateRoutesFor(primaryRouteIndex);

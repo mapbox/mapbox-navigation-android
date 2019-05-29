@@ -26,6 +26,9 @@ import java.util.List;
 import edu.emory.mathcs.backport.java.util.Collections;
 
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.ROUTE_LAYER_ID;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -108,6 +111,44 @@ public class MapRouteLineTest extends BaseTest {
     routeLine.updatePrimaryRouteIndex(1);
 
     verify(routeLineSource, times(4)).setGeoJson(any(FeatureCollection.class));
+  }
+
+  @Test
+  public void updatePrimaryIndex_newPrimaryRouteIndexUpdated() throws IOException {
+    GeoJsonSource mockedRouteLineSource = mock(GeoJsonSource.class);
+    GeoJsonSource mockedWayPointSource = mock(GeoJsonSource.class);
+    List<Layer> anyRouteLayers = buildMockLayers();
+    List<DirectionsRoute> routes = new ArrayList<>();
+    routes.add(buildTestDirectionsRoute());
+    routes.add(buildTestDirectionsRoute());
+    routes.add(buildTestDirectionsRoute());
+    routes.add(buildTestDirectionsRoute());
+    MapRouteLine routeLine = new MapRouteLine(mockedRouteLineSource, mockedWayPointSource, anyRouteLayers);
+    routeLine.draw(routes);
+
+    boolean isNewIndex = routeLine.updatePrimaryRouteIndex(3);
+
+    assertTrue(isNewIndex);
+    assertEquals(3, routeLine.retrievePrimaryRouteIndex());
+  }
+
+  @Test
+  public void updatePrimaryIndex_newPrimaryRouteIndexIsNotUpdated() throws IOException {
+    GeoJsonSource mockedRouteLineSource = mock(GeoJsonSource.class);
+    GeoJsonSource mockedWayPointSource = mock(GeoJsonSource.class);
+    List<Layer> anyRouteLayers = buildMockLayers();
+    List<DirectionsRoute> routes = new ArrayList<>();
+    routes.add(buildTestDirectionsRoute());
+    routes.add(buildTestDirectionsRoute());
+    routes.add(buildTestDirectionsRoute());
+    routes.add(buildTestDirectionsRoute());
+    MapRouteLine routeLine = new MapRouteLine(mockedRouteLineSource, mockedWayPointSource, anyRouteLayers);
+    routeLine.draw(routes);
+
+    boolean isNewIndex = routeLine.updatePrimaryRouteIndex(-1);
+
+    assertFalse(isNewIndex);
+    assertEquals(0, routeLine.retrievePrimaryRouteIndex());
   }
 
   @Test

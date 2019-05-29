@@ -70,7 +70,7 @@ class MapRouteClickListener implements MapboxMap.OnMapClickListener {
   }
 
   private void calculateClickDistances(HashMap<Double, DirectionsRoute> routeDistancesAwayFromClick,
-                                          Point clickPoint, HashMap<LineString, DirectionsRoute> routeLineStrings) {
+                                       Point clickPoint, HashMap<LineString, DirectionsRoute> routeLineStrings) {
     for (LineString lineString : routeLineStrings.keySet()) {
       Point pointOnLine = findPointOnLine(clickPoint, lineString);
       if (pointOnLine == null) {
