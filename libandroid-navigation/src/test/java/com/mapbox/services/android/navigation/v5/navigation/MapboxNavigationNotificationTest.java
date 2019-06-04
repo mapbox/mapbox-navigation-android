@@ -11,6 +11,8 @@ import com.google.gson.GsonBuilder;
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.navigator.BannerInstruction;
+import com.mapbox.navigator.BannerSection;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -22,6 +24,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -56,6 +59,59 @@ public class MapboxNavigationNotificationTest extends BaseTest {
     String formattedArrivalTime = mapboxNavigationNotification.generateArrivalTime(routeProgress, mockedTime);
 
     assertEquals("8:46 pm ETA", formattedArrivalTime);
+  }
+
+  @Test
+  public void checksInstructionTextNotUpdatedIfRouteProgressBannerInstructionIsNull() throws Exception {
+    MapboxNavigation mockedMapboxNavigation = createMapboxNavigation();
+    Context mockedContext = createContext();
+    Notification mockedNotification = mock(Notification.class);
+    MapboxNavigationNotification mapboxNavigationNotification = new MapboxNavigationNotification(mockedContext,
+      mockedMapboxNavigation, mockedNotification);
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
+
+    mapboxNavigationNotification.updateNotificationViews(routeProgress);
+
+    assertNull(mapboxNavigationNotification.retrieveInstructionText());
+  }
+
+  @Test
+  public void checksInstructionTextIsUpdatedIfInstructionTextIsNotInitialized() throws Exception {
+    MapboxNavigation mockedMapboxNavigation = createMapboxNavigation();
+    Context mockedContext = createContext();
+    Notification mockedNotification = mock(Notification.class);
+    MapboxNavigationNotification mapboxNavigationNotification = new MapboxNavigationNotification(mockedContext,
+      mockedMapboxNavigation, mockedNotification);
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
+    BannerSection aBannerSection = new BannerSection("You have arrived", null, null, null, null, null);
+    BannerInstruction aBannerInstruction = new BannerInstruction(aBannerSection, null, null, 0.1f, 3);
+    routeProgress = routeProgress.toBuilder().bannerInstruction(aBannerInstruction).build();
+
+    mapboxNavigationNotification.updateNotificationViews(routeProgress);
+
+    assertEquals("You have arrived", mapboxNavigationNotification.retrieveInstructionText());
+  }
+
+  @Test
+  public void checksInstructionTextIsUpdatedIfInstructionTextIsInitializedAndManeuverIsDifferent() throws Exception {
+    MapboxNavigation mockedMapboxNavigation = createMapboxNavigation();
+    Context mockedContext = createContext();
+    Notification mockedNotification = mock(Notification.class);
+    MapboxNavigationNotification mapboxNavigationNotification = new MapboxNavigationNotification(mockedContext,
+      mockedMapboxNavigation, mockedNotification);
+    RouteProgress routeProgress = buildDefaultTestRouteProgress();
+    BannerSection willArriveBannerSection = new BannerSection("You will arrive", null, null, null, null, null);
+    BannerInstruction willArriveBannerInstruction = new BannerInstruction(willArriveBannerSection, null, null, 0.1f, 3);
+    routeProgress = routeProgress.toBuilder().bannerInstruction(willArriveBannerInstruction).build();
+    mapboxNavigationNotification.updateNotificationViews(routeProgress);
+    assertEquals("You will arrive", mapboxNavigationNotification.retrieveInstructionText());
+    BannerSection haveArrivedBannerSection = new BannerSection("You have arrived", null, null, null, null, null);
+    BannerInstruction haveArrivedBannerInstruction = new BannerInstruction(haveArrivedBannerSection, null, null, 0.1f, 3);
+    routeProgress = routeProgress.toBuilder().bannerInstruction(haveArrivedBannerInstruction).build();
+
+    mapboxNavigationNotification.updateNotificationViews(routeProgress);
+
+    assertEquals("You have arrived", mapboxNavigationNotification.retrieveInstructionText());
   }
 
   private MapboxNavigation createMapboxNavigation() {

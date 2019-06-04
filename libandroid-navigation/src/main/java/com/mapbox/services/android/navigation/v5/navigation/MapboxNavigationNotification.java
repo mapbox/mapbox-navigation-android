@@ -19,6 +19,7 @@ import android.widget.RemoteViews;
 
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -103,6 +104,25 @@ class MapboxNavigationNotification implements NavigationNotification {
     String arrivalTime = formatTime(time, legDurationRemaining, timeFormatType, isTwentyFourHourFormat);
     String formattedArrivalTime = String.format(etaFormat, arrivalTime);
     return formattedArrivalTime;
+  }
+
+  // Package private (no modifier) for testing purposes
+  void updateNotificationViews(RouteProgress routeProgress) {
+    buildRemoteViews();
+    updateInstructionText(routeProgress.bannerInstruction());
+    updateDistanceText(routeProgress);
+    Calendar time = Calendar.getInstance();
+    String formattedTime = generateArrivalTime(routeProgress, time);
+    updateViewsWithArrival(formattedTime);
+    LegStep step = routeProgress.currentLegProgress().upComingStep() != null
+      ? routeProgress.currentLegProgress().upComingStep()
+      : routeProgress.currentLegProgress().currentStep();
+    updateManeuverImage(step);
+  }
+
+  // Package private (no modifier) for testing purposes
+  String retrieveInstructionText() {
+    return instructionText;
   }
 
   private void initialize(Context applicationContext, MapboxNavigation mapboxNavigation) {
@@ -199,19 +219,6 @@ class MapboxNavigationNotification implements NavigationNotification {
     }
   }
 
-  private void updateNotificationViews(RouteProgress routeProgress) {
-    buildRemoteViews();
-    updateInstructionText(routeProgress.currentLegProgress().currentStep());
-    updateDistanceText(routeProgress);
-    Calendar time = Calendar.getInstance();
-    String formattedArrivalTime = generateArrivalTime(routeProgress, time);
-    updateViewsWith(formattedArrivalTime);
-    LegStep step = routeProgress.currentLegProgress().upComingStep() != null
-      ? routeProgress.currentLegProgress().upComingStep()
-      : routeProgress.currentLegProgress().currentStep();
-    updateManeuverImage(step);
-  }
-
   private void rebuildNotification() {
     notification = buildNotification(applicationContext);
     notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notification);
@@ -226,20 +233,20 @@ class MapboxNavigationNotification implements NavigationNotification {
     }
   }
 
-  private void updateInstructionText(LegStep step) {
-    if (hasInstructions(step) && (instructionText == null || newInstructionText(step))) {
-      instructionText = step.bannerInstructions().get(0).primary().text();
-      collapsedNotificationRemoteViews.setTextViewText(R.id.notificationInstructionText, instructionText);
-      expandedNotificationRemoteViews.setTextViewText(R.id.notificationInstructionText, instructionText);
+  private void updateInstructionText(BannerInstruction bannerInstruction) {
+    if (bannerInstruction != null && (instructionText == null || newInstructionText(bannerInstruction))) {
+      instructionText = bannerInstruction.getPrimary().getText();
+      updateViewsWithInstruction(instructionText);
     }
   }
 
-  private boolean hasInstructions(LegStep step) {
-    return step.bannerInstructions() != null && !step.bannerInstructions().isEmpty();
+  private void updateViewsWithInstruction(String text) {
+    collapsedNotificationRemoteViews.setTextViewText(R.id.notificationInstructionText, text);
+    expandedNotificationRemoteViews.setTextViewText(R.id.notificationInstructionText, text);
   }
 
-  private boolean newInstructionText(LegStep step) {
-    return !instructionText.equals(step.bannerInstructions().get(0).primary().text());
+  private boolean newInstructionText(BannerInstruction bannerInstruction) {
+    return !instructionText.equals(bannerInstruction.getPrimary().getText());
   }
 
   private void updateDistanceText(RouteProgress routeProgress) {
@@ -252,14 +259,16 @@ class MapboxNavigationNotification implements NavigationNotification {
   }
 
   private boolean newDistanceText(RouteProgress routeProgress) {
-    return currentDistanceText != null
-      && !currentDistanceText.toString().equals(distanceFormatter.formatDistance(
-      routeProgress.currentLegProgress().currentStepProgress().distanceRemaining()).toString());
+    String formattedDistance = distanceFormatter
+      .formatDistance(routeProgress.currentLegProgress().currentStepProgress().distanceRemaining())
+      .toString();
+    String currentDistance = currentDistanceText.toString();
+    return currentDistanceText != null && currentDistance != null && !currentDistance.equals(formattedDistance);
   }
 
-  private void updateViewsWith(String formattedArrivalTime) {
-    collapsedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, formattedArrivalTime);
-    expandedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, formattedArrivalTime);
+  private void updateViewsWithArrival(String time) {
+    collapsedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, time);
+    expandedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, time);
   }
 
   private void updateManeuverImage(LegStep step) {
