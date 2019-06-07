@@ -155,11 +155,12 @@ public class NavigationViewEventDispatcherTest {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     RouteListener routeListener = mock(RouteListener.class);
     Point point = mock(Point.class);
+    float bearing = 1.0f;
     eventDispatcher.assignRouteListener(routeListener);
 
-    eventDispatcher.allowRerouteFrom(point);
+    eventDispatcher.allowRerouteFrom(point, bearing);
 
-    verify(routeListener, times(1)).allowRerouteFrom(point);
+    verify(routeListener, times(1)).allowRerouteFrom(point, bearing);
   }
 
   @Test
@@ -167,10 +168,11 @@ public class NavigationViewEventDispatcherTest {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     RouteListener routeListener = mock(RouteListener.class);
     Point point = mock(Point.class);
+    float bearing = 1.0f;
 
-    boolean shouldAllowReroute = eventDispatcher.allowRerouteFrom(point);
+    boolean shouldAllowReroute = eventDispatcher.allowRerouteFrom(point, bearing);
 
-    verify(routeListener, times(0)).allowRerouteFrom(point);
+    verify(routeListener, times(0)).allowRerouteFrom(point, bearing);
     assertTrue(shouldAllowReroute);
   }
 
@@ -212,10 +214,11 @@ public class NavigationViewEventDispatcherTest {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     RouteListener routeListener = mock(RouteListener.class);
     Point point = mock(Point.class);
+    float bearing = 0.0f;
 
-    eventDispatcher.allowRerouteFrom(point);
+    eventDispatcher.allowRerouteFrom(point, bearing);
 
-    verify(routeListener, times(0)).allowRerouteFrom(point);
+    verify(routeListener, times(0)).allowRerouteFrom(point, bearing);
   }
 
   @Test

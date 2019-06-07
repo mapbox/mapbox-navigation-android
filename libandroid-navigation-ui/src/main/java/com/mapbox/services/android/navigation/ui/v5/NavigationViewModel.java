@@ -399,7 +399,7 @@ public class NavigationViewModel extends AndroidViewModel {
     public void userOffRoute(Location location) {
       speechPlayer.onOffRoute();
       Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-      handleOffRouteEvent(newOrigin);
+      handleOffRouteEvent(newOrigin, location.getBearing());
     }
   };
 
@@ -513,8 +513,8 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void handleOffRouteEvent(Point newOrigin) {
-    if (navigationViewEventDispatcher != null && navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
+  private void handleOffRouteEvent(Point newOrigin, float bearing) {
+    if (navigationViewEventDispatcher != null && navigationViewEventDispatcher.allowRerouteFrom(newOrigin, bearing)) {
       navigationViewEventDispatcher.onOffRoute(newOrigin);
       router.findRouteFrom(routeProgress);
       isOffRoute.setValue(true);

@@ -130,7 +130,7 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public boolean allowRerouteFrom(Point offRoutePoint) {
+  public boolean allowRerouteFrom(Point offRoutePoint, float bearing) {
     return true;
   }
 
