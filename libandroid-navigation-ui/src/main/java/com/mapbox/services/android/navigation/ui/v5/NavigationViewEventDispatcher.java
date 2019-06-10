@@ -130,8 +130,8 @@ class NavigationViewEventDispatcher {
     }
   }
 
-  boolean allowRerouteFrom(Point point) {
-    return routeListener == null || routeListener.allowRerouteFrom(point);
+  boolean allowRerouteFrom(Point point, float bearing) {
+    return routeListener == null || routeListener.allowRerouteFrom(point, bearing);
   }
 
   void onOffRoute(Point point) {

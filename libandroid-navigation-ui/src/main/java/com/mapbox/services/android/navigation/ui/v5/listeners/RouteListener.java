@@ -21,13 +21,14 @@ public interface RouteListener {
    * new route in the direction they are traveling.
    *
    * @param offRoutePoint the given point the user has gone off route
+   * @param bearing the bearing of the point the user has gone off route
    * @return true if the reroute should be allowed, false if not
    * @since 0.8.0
    */
-  boolean allowRerouteFrom(Point offRoutePoint);
+  boolean allowRerouteFrom(Point offRoutePoint, float bearing);
 
   /**
-   * Will triggered only if {@link RouteListener#allowRerouteFrom(Point)} returns true.
+   * Will triggered only if {@link RouteListener#allowRerouteFrom(Point, float)} returns true.
    * <p>
    * This serves as the official off route event and will continue the process to fetch a new route
    * with the given off route {@link Point}.
