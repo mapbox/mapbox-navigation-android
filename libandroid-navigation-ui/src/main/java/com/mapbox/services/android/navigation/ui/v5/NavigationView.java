@@ -492,6 +492,15 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public NavigationAlertView retrieveAlertView() {
     return instructionView.retrieveAlertView();
   }
+  
+
+  public boolean isMuted() {
+    return navigationViewModel.isMuted();
+  }
+
+  public void setMuted() {
+    navigationViewModel.setMuted(((SoundButton)retrieveSoundButton()).toggleMute());
+  }
 
   private void initializeView() {
     inflate(getContext(), R.layout.navigation_view_layout, this);
