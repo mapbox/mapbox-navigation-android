@@ -492,13 +492,13 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   public NavigationAlertView retrieveAlertView() {
     return instructionView.retrieveAlertView();
   }
-  
+
 
   public boolean isMuted() {
     return navigationViewModel.isMuted();
   }
 
-  public void setMuted() {
+  public void toggleMute() {
     navigationViewModel.setMuted(((SoundButton)retrieveSoundButton()).toggleMute());
   }
 
