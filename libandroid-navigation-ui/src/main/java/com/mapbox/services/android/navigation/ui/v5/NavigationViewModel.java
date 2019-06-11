@@ -220,6 +220,10 @@ public class NavigationViewModel extends AndroidViewModel {
     shouldRecordScreenshot.setValue(false);
   }
 
+  SpeechPlayer getSpeechPlayer() {
+    return speechPlayer;
+  }
+
   boolean isRunning() {
     return isRunning;
   }

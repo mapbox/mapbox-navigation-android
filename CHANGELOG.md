@@ -2,6 +2,10 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.41.0 - June 26, 2019
+
+* Allow the ability to mute/unmute speech engine without tapping sound button [#1965](https://github.com/mapbox/mapbox-navigation-android/pull/1970)
+
 ### v0.40.0 - June 12, 2019
 
 * Fix notification instruction not updated for arrive maneuver [#1959](https://github.com/mapbox/mapbox-navigation-android/pull/1959)

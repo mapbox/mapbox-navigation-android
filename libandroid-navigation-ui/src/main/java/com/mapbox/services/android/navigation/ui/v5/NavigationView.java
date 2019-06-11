@@ -493,12 +493,25 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     return instructionView.retrieveAlertView();
   }
 
-
+  /**
+   * Returns the state of speech player whether it is muted or unmuted
+   * @return true if speech player is mute else false
+   */
   public boolean isMuted() {
     return navigationViewModel.isMuted();
   }
 
+  /**
+   * Should be called after {@link NavigationView#startNavigation}.
+   * <p>
+   * This method toggles the mute state of speech player. It also updates the UI
+   * to reflect the new state of speech player.
+   * <p>
+   */
   public void toggleMute() {
+    if (navigationViewModel.getSpeechPlayer() == null) {
+      throw new IllegalStateException("Navigation needs to start before being able to mute/unmute speech player");
+    }
     navigationViewModel.setMuted(((SoundButton)retrieveSoundButton()).toggleMute());
   }
 
