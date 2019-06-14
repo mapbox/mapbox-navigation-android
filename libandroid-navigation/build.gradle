@@ -47,9 +47,7 @@ dependencies {
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
   api dependenciesList.mapboxCore
-  api ('com.mapbox.mapboxsdk:mapbox-android-telemetry:4.5.0-SNAPSHOT') {
-    exclude group: "com.mapbox.mapboxsdk", module: "mapbox-android-core"
-  }
+  api dependenciesList.mapboxEvents
   // Navigator
   implementation dependenciesList.mapboxNavigator
   // Support
