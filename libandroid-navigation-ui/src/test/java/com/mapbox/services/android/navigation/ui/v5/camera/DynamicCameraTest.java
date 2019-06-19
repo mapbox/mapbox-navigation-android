@@ -12,6 +12,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.navigation.camera.RouteInformation;
@@ -26,6 +28,7 @@ import java.util.List;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -48,6 +51,65 @@ public class DynamicCameraTest extends BaseTest {
     double zoom = cameraEngine.zoom(routeInformation);
 
     assertEquals(15d, zoom);
+  }
+
+  @Test
+  public void onCameraPositionNull_engineReturnsDefaultZoom() throws Exception {
+    DynamicCamera theCameraEngine = buildDynamicCamera();
+    RouteInformation anyRouteInformation = RouteInformation.create(null,
+      buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(1000d));
+
+    double defaultZoom = theCameraEngine.zoom(anyRouteInformation);
+
+    assertEquals(15d, defaultZoom);
+  }
+
+  @Test
+  public void onCameraPositionZoomGreaterThanMax_engineReturnsMaxCameraZoom() throws Exception {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    CameraPosition cameraPositionWithZoomGreaterThanMax = new CameraPosition.Builder()
+      .zoom(20d)
+      .build();
+    when(mapboxMap.getCameraForLatLngBounds(any(LatLngBounds.class), any(int[].class))).thenReturn(cameraPositionWithZoomGreaterThanMax);
+    DynamicCamera theCameraEngine = new DynamicCamera(mapboxMap);
+    RouteInformation anyRouteInformation = RouteInformation.create(null,
+      buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(1000d));
+
+    double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
+
+    assertEquals(16d, maxCameraZoom);
+  }
+
+  @Test
+  public void onCameraPositionZoomLessThanMin_engineReturnsMinCameraZoom() throws Exception {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    CameraPosition cameraPositionWithZoomLessThanMin = new CameraPosition.Builder()
+      .zoom(10d)
+      .build();
+    when(mapboxMap.getCameraForLatLngBounds(any(LatLngBounds.class), any(int[].class))).thenReturn(cameraPositionWithZoomLessThanMin);
+    DynamicCamera theCameraEngine = new DynamicCamera(mapboxMap);
+    RouteInformation anyRouteInformation = RouteInformation.create(null,
+      buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(1000d));
+
+    double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
+
+    assertEquals(12d, maxCameraZoom);
+  }
+
+  @Test
+  public void onCameraPositionZoomGreaterThanMinAndLessThanMax_engineReturnsCameraPositionZoom() throws Exception {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    CameraPosition cameraPositionWithZoomGreaterThanMinAndLessThanMax = new CameraPosition.Builder()
+      .zoom(14d)
+      .build();
+    when(mapboxMap.getCameraForLatLngBounds(any(LatLngBounds.class), any(int[].class))).thenReturn(cameraPositionWithZoomGreaterThanMinAndLessThanMax);
+    DynamicCamera theCameraEngine = new DynamicCamera(mapboxMap);
+    RouteInformation anyRouteInformation = RouteInformation.create(null,
+      buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(1000d));
+
+    double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
+
+    assertEquals(14d, maxCameraZoom);
   }
 
   @Test
