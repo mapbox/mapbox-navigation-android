@@ -548,6 +548,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
 
   private void bindControlPanel() {
     SoundButton soundButton = findViewById(R.id.soundLayout);
+    soundButton = soundButton == null ? new EmptyClass() : soundButton;
     NavigationButton feedbackButton = findViewById(R.id.feedbackLayout);
     NavigationAlertView navigationAlertView = findViewById(R.id.alertView);
     controlPanel = new ControlPanel(soundButton, feedbackButton, navigationAlertView);
