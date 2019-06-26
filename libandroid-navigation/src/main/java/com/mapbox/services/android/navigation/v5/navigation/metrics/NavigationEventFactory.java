@@ -14,7 +14,7 @@ public class NavigationEventFactory {
   static final int EVENT_VERSION = 7;
 
   private NavigationEventFactory() {
-
+    // Intentionally empty
   }
 
   public static NavigationDepartEvent buildNavigationDepartEvent(@NonNull PhoneState phoneState,
