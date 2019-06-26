@@ -107,6 +107,9 @@ public class DynamicCamera extends SimpleCamera {
    */
   private double createZoom(RouteInformation routeInformation) {
     CameraPosition position = createCameraPosition(routeInformation.location(), routeInformation.routeProgress());
+    if (position == null) {
+      return DEFAULT_ZOOM;
+    }
     if (position.zoom > MAX_CAMERA_ZOOM) {
       return MAX_CAMERA_ZOOM;
     } else if (position.zoom < MIN_CAMERA_ZOOM) {
