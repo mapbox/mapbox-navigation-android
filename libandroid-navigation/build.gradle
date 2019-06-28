@@ -60,7 +60,7 @@ dependencies {
   }
 
   // Navigator
-  implementation dependenciesList.mapboxNavigator
+  implementation project(':mapbox-navigation-native')
 
   // Support
   implementation dependenciesList.supportAppcompatV7
