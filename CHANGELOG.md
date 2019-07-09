@@ -2,8 +2,9 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
-### v0.41.0 - June 26, 2019
+### v0.41.0
 
+* Move events from telemetry to nav sdk [#1890](https://github.com/mapbox/mapbox-navigation-android/pull/1890)
 * Fix DynamicCamera#CameraPosition.zoom NPE [#1979](https://github.com/mapbox/mapbox-navigation-android/pull/1979)
 * Update ComponentNavigationActivity example [#1978](https://github.com/mapbox/mapbox-navigation-android/pull/1978)
 
