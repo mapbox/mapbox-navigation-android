@@ -131,6 +131,7 @@
                 android:value=".NavigationSettingsActivity"/>
         </activity>
 
+
         <activity android:name=".activity.HistoryActivity"/>
 
         <!-- Testing -->
