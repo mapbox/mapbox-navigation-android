@@ -2,7 +2,7 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
-### v0.41.0
+### v0.41.0 - 
 
 * Fix DynamicCamera#CameraPosition.zoom NPE [#1979](https://github.com/mapbox/mapbox-navigation-android/pull/1979)
 * Update ComponentNavigationActivity example [#1978](https://github.com/mapbox/mapbox-navigation-android/pull/1978)
