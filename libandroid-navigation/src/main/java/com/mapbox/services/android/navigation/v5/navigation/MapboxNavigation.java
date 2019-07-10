@@ -13,6 +13,7 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.mapboxsdk.navigation.plugin.DiagnosticsPlugin;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.location.RawLocationListener;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Set;
 
 import retrofit2.Callback;
+import retrofit2.http.DELETE;
 import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.BANNER_INSTRUCTION_MILESTONE_ID;
@@ -786,14 +788,26 @@ public class MapboxNavigation implements ServiceConnection {
     return true;
   }
 
+  /**
+   * Return builder for diagnostics setup
+   *
+   * @return instance of diagnostics builder
+   */
+  public MapboxNavigationDiagnostics.Builder diagnostics() {
+    return new MapboxNavigationDiagnostics.Builder(mapboxNavigator);
+  }
+
+  @Deprecated
   public String retrieveHistory() {
     return mapboxNavigator.retrieveHistory();
   }
 
+  @Deprecated
   public void toggleHistory(boolean isEnabled) {
     mapboxNavigator.toggleHistory(isEnabled);
   }
 
+  @Deprecated
   public void addHistoryEvent(String eventType, String eventJsonProperties) {
     mapboxNavigator.addHistoryEvent(eventType, eventJsonProperties);
   }
