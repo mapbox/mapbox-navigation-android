@@ -540,14 +540,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   private void initializeNavigationMap(MapView mapView, MapboxMap map) {
+    if (initialMapCameraPosition != null) {
+      map.setCameraPosition(initialMapCameraPosition);
+    }
     navigationMap = new NavigationMapboxMap(mapView, map);
     navigationMap.updateLocationLayerRenderMode(RenderMode.GPS);
     if (mapInstanceState != null) {
       navigationMap.restoreFrom(mapInstanceState);
       return;
-    }
-    if (initialMapCameraPosition != null) {
-      map.setCameraPosition(initialMapCameraPosition);
     }
   }
 
