@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -14,6 +15,8 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.mapboxsdk.navigation.plugin.DiagnosticsPlugin;
+import com.mapbox.mapboxsdk.navigation.plugin.LocalizationPlugin;
+import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.location.RawLocationListener;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
@@ -31,10 +34,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.utils.ValidationUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import retrofit2.Callback;
 import retrofit2.http.DELETE;
@@ -795,6 +795,27 @@ public class MapboxNavigation implements ServiceConnection {
    */
   public MapboxNavigationDiagnostics.Builder diagnostics() {
     return new MapboxNavigationDiagnostics.Builder(mapboxNavigator);
+  }
+
+  /**
+   * Factory method for plugin localization engine
+   *
+   * @param plugin plugin to install
+   * @return instance of the location engine
+   */
+  public LocationEngine localization(LocalizationPlugin<LocationEngine> plugin) {
+    return plugin.build(new LocalizationPlugin.Mediator() {
+      @Override
+      public void updateRawLocation(Location location) {
+        mapboxNavigator.updateLocation(location);
+      }
+
+      @Override
+      public Location getLocation(Date date, long lagMillis, Location fallbackLocation) {
+        NavigationStatus status = mapboxNavigator.retrieveStatus(date, lagMillis);
+        return mapboxNavigator.getSnappedLocation(status, fallbackLocation);
+      }
+    });
   }
 
   @Deprecated
