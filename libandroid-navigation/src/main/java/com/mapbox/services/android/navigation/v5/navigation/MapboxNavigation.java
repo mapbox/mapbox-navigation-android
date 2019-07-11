@@ -61,6 +61,7 @@ public class MapboxNavigation implements ServiceConnection {
   private NavigationEngineFactory navigationEngineFactory;
   private NavigationTelemetry navigationTelemetry = null;
   private NavigationService navigationService;
+  private Navigator navigator;
   private MapboxNavigator mapboxNavigator;
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
@@ -798,6 +799,15 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   /**
+   * Return builder for offline setup
+   *
+   * @return instance of offline builder
+   */
+  public MapboxNavigationOffline.Builder offline() {
+    return new MapboxNavigationOffline.Builder(navigator);
+  }
+
+  /**
    * Factory method for plugin localization engine
    *
    * @param plugin plugin to install
@@ -914,7 +924,8 @@ public class MapboxNavigation implements ServiceConnection {
    */
   private void initialize() {
     // Initialize event dispatcher and add internal listeners
-    mapboxNavigator = new MapboxNavigator(new Navigator());
+    navigator = new Navigator();
+    mapboxNavigator = new MapboxNavigator(navigator);
     navigationEventDispatcher = new NavigationEventDispatcher();
     navigationEngineFactory = new NavigationEngineFactory();
     locationEngine = obtainLocationEngine();
