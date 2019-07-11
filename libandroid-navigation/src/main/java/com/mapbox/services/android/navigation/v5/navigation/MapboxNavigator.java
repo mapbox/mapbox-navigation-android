@@ -58,6 +58,20 @@ class MapboxNavigator {
     }
   }
 
+  Location getSnappedLocation(NavigationStatus status, Location fallbackLocation) {
+    Location snappedLocation = new Location(fallbackLocation);
+    snappedLocation.setProvider("map_matched");
+    FixLocation fixLocation = status.getLocation();
+    Point coordinate = fixLocation.getCoordinate();
+    snappedLocation.setLatitude(coordinate.latitude());
+    snappedLocation.setLongitude(coordinate.longitude());
+    if (fixLocation.getBearing() != null) {
+      snappedLocation.setBearing(fixLocation.getBearing());
+    }
+    snappedLocation.setTime(fixLocation.getTime().getTime());
+    return snappedLocation;
+  }
+
   synchronized NavigationStatus updateLegIndex(int index) {
     return navigator.changeRouteLeg(INDEX_FIRST_ROUTE, index);
   }
