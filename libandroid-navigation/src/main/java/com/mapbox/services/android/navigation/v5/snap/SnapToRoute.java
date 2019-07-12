@@ -1,7 +1,8 @@
 package com.mapbox.services.android.navigation.v5.snap;
 
 import android.location.Location;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.FixLocation;

@@ -1,10 +1,10 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-
-import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -32,7 +32,7 @@ class NavigationViewEventDispatcher {
   private FeedbackListener feedbackListener;
   private NavigationListener navigationListener;
   private RouteListener routeListener;
-  private BottomSheetCallback bottomSheetCallback;
+  private BottomSheetBehavior.BottomSheetCallback bottomSheetCallback;
   private InstructionListListener instructionListListener;
   private SpeechAnnouncementListener speechAnnouncementListener;
   private BannerInstructionsListener bannerInstructionsListener;
@@ -78,7 +78,7 @@ class NavigationViewEventDispatcher {
     this.routeListener = routeListener;
   }
 
-  void assignBottomSheetCallback(@Nullable BottomSheetCallback bottomSheetCallback) {
+  void assignBottomSheetCallback(@Nullable BottomSheetBehavior.BottomSheetCallback bottomSheetCallback) {
     this.bottomSheetCallback = bottomSheetCallback;
   }
 

@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;

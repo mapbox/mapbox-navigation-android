@@ -41,7 +41,7 @@ android {
     versionCode gitVersionCode
     versionName gitVersionName
     playAccountConfig = playAccountConfigs.defaultAccountConfig
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true
     buildConfigField "String", "GIT_HASH", "\"${getGitHash()}\""
   }

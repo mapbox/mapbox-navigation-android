@@ -1,7 +1,7 @@
 package com.mapbox.services.android.navigation.testapp.example.ui
 
-import android.arch.lifecycle.MutableLiveData
 import android.location.Location
+import androidx.lifecycle.MutableLiveData
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import timber.log.Timber

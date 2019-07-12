@@ -1,19 +1,18 @@
 package com.mapbox.services.android.navigation.ui.v5.summary;
 
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
@@ -28,7 +27,7 @@ import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import java.text.DecimalFormat;
 
 /**
- * A view with {@link android.support.design.widget.BottomSheetBehavior}
+ * A view with {@link com.google.android.material.bottomsheet.BottomSheetBehavior}
  * that displays route summary information during navigation.
  * <p>
  * Can be expanded / collapsed to show / hide the list of
@@ -36,7 +35,7 @@ import java.text.DecimalFormat;
  *
  * @since 0.6.0
  */
-public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver {
+public class SummaryBottomSheet extends FrameLayout {
 
   private static final String EMPTY_STRING = "";
   private TextView distanceRemainingText;
@@ -76,7 +75,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
 
   /**
    * Subscribes to a {@link NavigationViewModel} for
-   * updates from {@link android.arch.lifecycle.LiveData}.
+   * updates from {@link androidx.lifecycle.LiveData}.
    * <p>
    * Updates all views with fresh data / shows &amp; hides re-route state.
    *
@@ -114,7 +113,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   }
 
   /**
-   * Unsubscribes {@link NavigationViewModel} {@link android.arch.lifecycle.LiveData} objects
+   * Unsubscribes {@link NavigationViewModel} {@link androidx.lifecycle.LiveData} objects
    * previously added in {@link SummaryBottomSheet#subscribe(NavigationViewModel)}
    * by removing the observers of the {@link LifecycleOwner} when parent view is destroyed
    */

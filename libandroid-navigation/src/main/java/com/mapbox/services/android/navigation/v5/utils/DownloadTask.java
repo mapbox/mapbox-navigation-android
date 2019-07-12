@@ -1,7 +1,8 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.io.FileOutputStream;

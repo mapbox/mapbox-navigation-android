@@ -1,8 +1,9 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 
+import androidx.annotation.Nullable;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.auto.value.AutoValue;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -44,7 +45,7 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
   public abstract List<Milestone> milestones();
 
   @Nullable
-  public abstract BottomSheetCallback bottomSheetCallback();
+  public abstract BottomSheetBehavior.BottomSheetCallback bottomSheetCallback();
 
   @Nullable
   public abstract InstructionListListener instructionListListener();
@@ -88,7 +89,7 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
 
     public abstract Builder milestones(List<Milestone> milestones);
 
-    public abstract Builder bottomSheetCallback(BottomSheetCallback bottomSheetCallback);
+    public abstract Builder bottomSheetCallback(BottomSheetBehavior.BottomSheetCallback bottomSheetCallback);
 
     public abstract Builder instructionListListener(InstructionListListener instructionListListener);
 

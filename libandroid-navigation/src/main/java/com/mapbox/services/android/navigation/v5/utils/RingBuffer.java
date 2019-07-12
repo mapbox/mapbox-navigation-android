@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
-import android.support.annotation.IntRange;
+import androidx.annotation.IntRange;
 
 import java.util.ArrayDeque;
 import java.util.Collection;

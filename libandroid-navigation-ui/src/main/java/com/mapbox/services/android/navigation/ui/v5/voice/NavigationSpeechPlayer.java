@@ -1,7 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 /**
  * Used to play {@link SpeechAnnouncement}s.

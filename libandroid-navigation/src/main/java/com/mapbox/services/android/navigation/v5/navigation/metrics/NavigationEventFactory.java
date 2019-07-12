@@ -1,8 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
 import android.location.Location;
-import android.support.annotation.NonNull;
-
+import androidx.annotation.NonNull;
 import com.mapbox.android.telemetry.TelemetryUtils;
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;

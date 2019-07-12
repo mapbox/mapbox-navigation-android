@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;

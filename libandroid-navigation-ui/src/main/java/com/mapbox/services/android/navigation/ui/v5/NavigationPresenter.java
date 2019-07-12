@@ -1,9 +1,10 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.location.Location;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomSheetBehavior;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;

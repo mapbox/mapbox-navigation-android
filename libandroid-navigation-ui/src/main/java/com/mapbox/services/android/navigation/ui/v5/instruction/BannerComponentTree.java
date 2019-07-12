@@ -1,7 +1,8 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.support.annotation.NonNull;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerText;

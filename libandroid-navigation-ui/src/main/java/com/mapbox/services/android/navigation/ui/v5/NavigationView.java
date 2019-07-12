@@ -1,24 +1,25 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.app.Activity;
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.LifecycleRegistry;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetBehavior;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.view.ViewCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleRegistry;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ViewModelProviders;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
@@ -181,8 +182,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * <p>
    * In an {@link Activity} this should be in {@link Activity#onDestroy()}.
    * <p>
-   * In a {@link android.support.v4.app.Fragment}, this should
-   * be in {@link android.support.v4.app.Fragment#onDestroyView()}.
+   * In a {@link androidx.fragment.app.Fragment}, this should
+   * be in {@link androidx.fragment.app.Fragment#onDestroyView()}.
    */
   public void onDestroy() {
     shutdown();
@@ -702,7 +703,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * Then, creates an instance of {@link NavigationViewSubscriber}, which takes a presenter.
    * <p>
    * The subscriber then subscribes to the view models, setting up the appropriate presenter / listener
-   * method calls based on the {@link android.arch.lifecycle.LiveData} updates.
+   * method calls based on the {@link androidx.lifecycle.LiveData} updates.
    */
   private void subscribeViewModels() {
     instructionView.subscribe(this, navigationViewModel);

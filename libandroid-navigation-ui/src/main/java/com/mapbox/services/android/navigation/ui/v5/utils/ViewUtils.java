@@ -2,9 +2,10 @@ package com.mapbox.services.android.navigation.ui.v5.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.support.design.widget.CoordinatorLayout;
 import android.util.Base64;
 import android.view.View;
+
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import java.io.ByteArrayOutputStream;
 
