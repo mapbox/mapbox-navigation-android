@@ -52,8 +52,8 @@ dependencies {
   }
 
   // Navigator
-  implementation project(':mapbox-navigation-native')
-  implementation project(':plugin')
+  implementation 'com.mapbox.navigator:mapbox-navigation-native-free-driving:0.1.0'
+  implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-plugin:0.1.0'
 
   // Support
   implementation dependenciesList.supportAppcompatV7
