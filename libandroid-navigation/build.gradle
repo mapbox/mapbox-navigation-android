@@ -52,7 +52,7 @@ dependencies {
   }
 
   // Navigator
-  implementation 'com.mapbox.navigator:mapbox-navigation-native-free-driving:0.1.0'
+  implementation 'com.mapbox.navigator:mapbox-navigation-native-free-driving:0.2.0'
   implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-plugin:0.1.0'
 
   // Support
