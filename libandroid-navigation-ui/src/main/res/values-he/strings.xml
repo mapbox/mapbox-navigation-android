@@ -36,6 +36,12 @@
     <!-- Feedback type for Road Closed -->
     <string name="feedback_road_closure">דרך\nסגורה</string>
 
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="feedback_submitted">משוב התקבל</string>
+
+    <!-- Shown in off-route scenarios to provide feedback -->
+    <string name="report_problem">דיווח על בעיה</string>
+
     <!-- Test app dialog text -->
     <string name="dropoff_dialog_text">האם תרצה לנווט אל היעד הבא?</string>
 
@@ -45,4 +51,4 @@
     <!-- Test app dialog text cancel navigation -->
     <string name="dropoff_dialog_negative_text">ביטול</string>
 
-</resources>
+    </resources>

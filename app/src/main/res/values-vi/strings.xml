@@ -44,4 +44,5 @@
     <string name="error_select_longer_route">Vui lòng chọn một tuyến đường dài hơn</string>
     <string name="error_valid_route_not_found">Không tìm thấy tuyến đi được.</string>
     <string name="explanation_long_press_waypoint">Chạm lâu vào bản đồ để thả ghim tọa độ điểm</string>
-</resources>
+
+    </resources>

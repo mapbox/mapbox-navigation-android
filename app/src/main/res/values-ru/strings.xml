@@ -44,4 +44,5 @@
     <string name="error_select_longer_route">Пожалуйста, выберите более длинный маршрут</string>
     <string name="error_valid_route_not_found">Корректный маршрут не найден.</string>
     <string name="explanation_long_press_waypoint">Нажмите и удерживайте, чтобы разместить промежуточную точку маршрута</string>
-</resources>
+
+    </resources>

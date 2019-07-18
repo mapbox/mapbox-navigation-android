@@ -34,4 +34,5 @@
     <string name="error_select_longer_route">Будь ласка, виберіть довший маршрут</string>
     <string name="error_valid_route_not_found">Маршрут не знайдено.</string>
     <string name="explanation_long_press_waypoint">Довге натискання на мапі для додавання дорожньої точки</string>
-</resources>
+
+    </resources>

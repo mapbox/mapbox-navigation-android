@@ -44,4 +44,5 @@
     <string name="error_select_longer_route">Vyberte, prosím, delší trasu</string>
     <string name="error_valid_route_not_found">Trasa nenalezena</string>
     <string name="explanation_long_press_waypoint">Dlouhým dotykem mapy přidáte průjezdní bod</string>
-</resources>
+
+    </resources>

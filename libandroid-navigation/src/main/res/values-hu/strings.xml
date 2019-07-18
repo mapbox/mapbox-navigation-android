@@ -7,6 +7,8 @@
     <string name="meters">m</string>
     <string name="miles">mérföld</string>
     <string name="feet">láb</string>
+    <string name="eta_format">%s érkezés</string>
+
     <!-- Time formatting -->
     <plurals name="numberOfDays">
         <item quantity="one">nap</item>
