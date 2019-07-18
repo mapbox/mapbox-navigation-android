@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.jaredsburrows.license'
 
 android {
   compileSdkVersion androidVersions.compileSdkVersion
@@ -41,6 +42,13 @@ android {
       }
     }
   }
+
+  licenseReport {
+    generateHtmlReport = false
+    generateJsonReport = true
+    copyHtmlReportToAssets = false
+    copyJsonReportToAssets = false
+  }
 }
 
 dependencies {
@@ -75,6 +83,7 @@ dependencies {
 apply from: 'javadoc.gradle'
 apply from: "${rootDir}/gradle/mvn-push-android.gradle"
 apply from: "${rootDir}/gradle/checkstyle.gradle"
+apply from: "${rootDir}/gradle/nitpick.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
 apply from: "${rootDir}/gradle/dependencies-graph.gradle"
 apply from: "${rootDir}/gradle/dependency-updates.gradle"

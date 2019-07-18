@@ -34,6 +34,10 @@ jobs:
             - ~/.gradle
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
+          name: Generate and Validate License
+          command: |
+            make nitpick
+      - run:
           name: Check Java code style
           command: make checkstyle
       - run:
@@ -114,6 +118,10 @@ jobs:
       IS_LOCAL_DEVELOPMENT: false
     steps:
       - checkout
+      - run:
+          name: Generate and Validate License
+          command: |
+            make nitpick
       - run:
           name: Generate Maven credentials
           shell: /bin/bash -euo pipefail

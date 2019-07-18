@@ -1,0 +1,16 @@
+apply from: "${rootDir}/gradle/dependencies.gradle"
+
+task nitpick {
+    doLast {
+        println "Running android nitpick script"
+        verifyLicenseGeneration()
+    }
+}
+
+private def verifyLicenseGeneration() {
+    println "Verify license generation with git diff..."
+    exec {
+        workingDir = "${rootDir}"
+        commandLine "python", "scripts/validate-license.py"
+    }
+}
