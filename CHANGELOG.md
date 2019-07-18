@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ### v0.42.0 - July 24, 2019
 
+* Auto generate license for the SDK [#2002](https://github.com/mapbox/mapbox-navigation-android/pull/2002)
 * Update translations to latest Transifex [#2003](https://github.com/mapbox/mapbox-navigation-android/pull/2003)
 
 ### v0.41.0 - July 11, 2019

@@ -21,6 +21,7 @@ buildscript {
     classpath pluginDependencies.playPublisher
     classpath pluginDependencies.googleServices
     classpath pluginDependencies.crashlytics
+    classpath pluginDependencies.license
   }
 }
 
