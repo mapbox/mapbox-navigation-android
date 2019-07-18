@@ -41,4 +41,5 @@
     <string name="error_select_longer_route">Por favor seleccione una ruta más larga</string>
     <string name="error_valid_route_not_found">Ruta válida no encontrada.</string>
     <string name="explanation_long_press_waypoint">Mantener el cursor sobre el mapa para agregar un punto de referencia</string>
-</resources>
+
+    </resources>

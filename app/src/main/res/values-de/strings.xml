@@ -44,4 +44,5 @@
     <string name="error_select_longer_route">Bitte wähle eine längere Route</string>
     <string name="error_valid_route_not_found">Keine gültige Route gefunden</string>
     <string name="explanation_long_press_waypoint">Lange auf die Karte drücken um ein Wegpunkt zu setzen</string>
-</resources>
+
+    </resources>

@@ -34,4 +34,5 @@
     <string name="error_select_longer_route">ကျေးဇူးပြု၍ရှည်သောလမ်းကြောင်းရွေးချယ်ပါ</string>
     <string name="error_valid_route_not_found">အဆင်ပြေသောလမ်းကြောင်းရှာမတွေ့ပါ</string>
     <string name="explanation_long_press_waypoint">လမ်းကြောင်းမှတ်နေရာချရန်မြေပုံကိုကြာကြာနှိပ်ပါ</string>
-</resources>
+
+    </resources>
