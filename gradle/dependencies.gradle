@@ -14,7 +14,7 @@ ext {
       mapboxCore             : '1.3.0',
       mapboxNavigator        : '6.2.1',
       mapboxCrashMonitor     : '2.0.0',
-      mapboxAnnotationPlugin : '0.6.0',
+      mapboxAnnotationPlugin : '0.7.0',
       mapboxSearchSdk        : '0.1.0-SNAPSHOT',
       autoValue              : '1.5.4',
       autoValueParcel        : '0.2.5',
