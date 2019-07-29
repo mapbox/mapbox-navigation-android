@@ -24,6 +24,8 @@ import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
+import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -149,11 +151,17 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   public void onMapReady(@NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     this.mapboxMap.addOnMapClickListener(this);
+    mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15));
     mapboxMap.setStyle(Style.DARK, style -> {
       LocationComponent locationComponent = mapboxMap.getLocationComponent();
-      locationComponent.activateLocationComponent(this, style);
+      locationComponent.activateLocationComponent(
+        LocationComponentActivationOptions.builder(this, style)
+          .useDefaultLocationEngine(false)
+          .build()
+      );
       locationComponent.setLocationComponentEnabled(true);
       locationComponent.setRenderMode(RenderMode.GPS);
+      locationComponent.setCameraMode(CameraMode.TRACKING_GPS);
 
       mockLocationEngine = new ReplayRouteLocationEngine();
       getRoute(origin, destination);
@@ -212,7 +220,7 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
         .target(new LatLng(location.getLatitude(), location.getLongitude()))
         .bearing(location.getBearing())
         .build();
-      mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000);
+//      mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000);
     }
     instructionView.updateDistanceWith(routeProgress);
   }
