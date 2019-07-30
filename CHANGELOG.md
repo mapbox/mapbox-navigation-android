@@ -2,8 +2,9 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
-### v0.42.0 - July 24, 2019
+### v0.42.0 - 
 
+* Bump Mapbox Annotation Plugin version to v8 0.7.0 [#2014](https://github.com/mapbox/mapbox-navigation-android/pull/2014)
 * Auto generate license for the SDK [#2002](https://github.com/mapbox/mapbox-navigation-android/pull/2002)
 * Update translations to latest Transifex [#2003](https://github.com/mapbox/mapbox-navigation-android/pull/2003)
 
