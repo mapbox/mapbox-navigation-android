@@ -51,7 +51,7 @@ ext {
       mapboxEvents           : "com.mapbox.mapboxsdk:mapbox-android-telemetry:${version.mapboxEvents}",
       mapboxCore             : "com.mapbox.mapboxsdk:mapbox-android-core:${version.mapboxCore}",
       mapboxNavigator        : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
-      mapboxAnnotationPlugin : "com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v7:${version.mapboxAnnotationPlugin}",
+      mapboxAnnotationPlugin : "com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v8:${version.mapboxAnnotationPlugin}",
       mapboxSearchSdk        : "com.mapbox.mapboxsdk:mapbox-search-android:${version.mapboxSearchSdk}",
       mapboxCrashMonitor     : "com.mapbox.crashmonitor:mapbox-crash-monitor-native:${version.mapboxCrashMonitor}",
 
