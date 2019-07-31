@@ -30,8 +30,10 @@ class NavigationStepData {
     this.previousModifier = metricsRouteProgress.getPreviousStepModifier();
     this.previousType = metricsRouteProgress.getPreviousStepType();
     this.previousName = metricsRouteProgress.getPreviousStepName();
-    this.distanceRemaining = metricsRouteProgress.getDistanceRemaining();
-    this.durationRemaining = metricsRouteProgress.getDurationRemaining();
+    this.distance = metricsRouteProgress.getCurrentStepDistance();
+    this.duration = metricsRouteProgress.getCurrentStepDuration();
+    this.distanceRemaining = metricsRouteProgress.getCurrentStepDistanceRemaining();
+    this.durationRemaining = metricsRouteProgress.getCurrentStepDurationRemaining();
   }
 
   String getUpcomingInstruction() {
@@ -70,19 +72,15 @@ class NavigationStepData {
     return distance;
   }
 
+  int getDuration() {
+    return duration;
+  }
+
   public int getDistanceRemaining() {
     return distanceRemaining;
   }
 
   public int getDurationRemaining() {
     return durationRemaining;
-  }
-
-  int getDuration() {
-    return duration;
-  }
-
-  void setDuration(int duration) {
-    this.duration = duration;
   }
 }

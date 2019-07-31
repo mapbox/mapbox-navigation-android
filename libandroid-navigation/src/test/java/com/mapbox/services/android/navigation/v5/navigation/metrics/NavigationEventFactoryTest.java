@@ -49,6 +49,10 @@ public class NavigationEventFactoryTest {
   private static final int SECOND_SINCE_LAST_REROUTE = 5;
   private static final int DISTANCE_REMAINING = 33;
   private static final int DURATION_REMAINING = 1000;
+  private static final int CURRENT_STEP_DISTANCE = 53;
+  private static final int CURRENT_STEP_DURATION = 7;
+  private static final int CURRENT_STEP_DISTANCE_REMAINING = 13;
+  private static final int CURRENT_STEP_DURATION_REMAINING = 3;
   private static final String DIRECTION_PROFILE = "DIRECTION PROFILE";
   private static final int LEG_INDEX = 5;
   private static final int LEG_COUNT = 15;
@@ -64,8 +68,6 @@ public class NavigationEventFactoryTest {
   private static final String PRE_MODIFIER = "PRE MODIFIER";
   private static final String PRE_TYPE = "PRE TYPE";
   private static final String PRE_NAME = "PRE_NAME";
-  private static final int CURRENT_DISTANCE = 200;
-  private static final int CURRENT_DURATION = 2001;
   private static final String SDK_ID = "SDK ID";
   private static final Boolean BATTER_PLUGGEDIN = Boolean.TRUE;
   private static final boolean IS_MOCK = true;
@@ -131,6 +133,8 @@ public class NavigationEventFactoryTest {
     when(metricsRouteProgress.getDistanceTraveled()).thenReturn(DISTANCE_TRAVELED);
     when(metricsRouteProgress.getDistanceRemaining()).thenReturn(DISTANCE_REMAINING);
     when(metricsRouteProgress.getDurationRemaining()).thenReturn(DURATION_REMAINING);
+    when(metricsRouteProgress.getCurrentStepDistanceRemaining()).thenReturn(CURRENT_STEP_DISTANCE_REMAINING);
+    when(metricsRouteProgress.getCurrentStepDurationRemaining()).thenReturn(CURRENT_STEP_DURATION_REMAINING);
     when(metricsRouteProgress.getDirectionsRouteProfile()).thenReturn(DIRECTION_PROFILE);
     when(metricsRouteProgress.getLegIndex()).thenReturn(LEG_INDEX);
     when(metricsRouteProgress.getLegCount()).thenReturn(LEG_COUNT);
@@ -146,8 +150,8 @@ public class NavigationEventFactoryTest {
     when(metricsRouteProgress.getPreviousStepModifier()).thenReturn(PRE_MODIFIER);
     when(metricsRouteProgress.getPreviousStepType()).thenReturn(PRE_TYPE);
     when(metricsRouteProgress.getPreviousStepName()).thenReturn(PRE_NAME);
-    when(metricsRouteProgress.getCurrentStepDistance()).thenReturn(CURRENT_DISTANCE);
-    when(metricsRouteProgress.getCurrentStepDuration()).thenReturn(CURRENT_DURATION);
+    when(metricsRouteProgress.getCurrentStepDistance()).thenReturn(CURRENT_STEP_DISTANCE);
+    when(metricsRouteProgress.getCurrentStepDuration()).thenReturn(CURRENT_STEP_DURATION);
     when(metricsRouteProgress.getDirectionsRouteDestination())
       .thenReturn(Point.fromLngLat(LONGITUDE_AFTER, LATITUDE_AFTER));
   }
@@ -182,7 +186,8 @@ public class NavigationEventFactoryTest {
     when(rerouteEvent.getNewRouteGeometry()).thenReturn(newRouteGeo);
 
     NavigationRerouteEvent navigationRerouteEvent = NavigationEventFactory
-      .buildNavigationRerouteEvent(phoneState, sessionState, metricsRouteProgress, locationBefore, SDK_ID, rerouteEvent);
+      .buildNavigationRerouteEvent(phoneState, sessionState, metricsRouteProgress, locationBefore, SDK_ID,
+        rerouteEvent);
     checkNavigationEvent(navigationRerouteEvent);
     checkNavigationStepData(navigationRerouteEvent.getStep());
     assertEquals(newDistanceRemaining, navigationRerouteEvent.getNewDistanceRemaining(), 0);
@@ -233,7 +238,7 @@ public class NavigationEventFactoryTest {
     assertNotNull(s);
   }
 
-  private void checkNavigationStepData(NavigationStepData data){
+  private void checkNavigationStepData(NavigationStepData data) {
     assertEquals(PRE_INSTRU, data.getPreviousInstruction());
     assertEquals(PRE_MODIFIER, data.getPreviousModifier());
     assertEquals(PRE_NAME, data.getPreviousName());
@@ -242,9 +247,12 @@ public class NavigationEventFactoryTest {
     assertEquals(UPCOMING_MODIFIER, data.getUpcomingModifier());
     assertEquals(UPCOMING_NAME, data.getUpcomingName());
     assertEquals(UPCOMING_TYPE, data.getUpcomingType());
-    assertEquals(DISTANCE_REMAINING, data.getDistanceRemaining());
-    assertEquals(DURATION_REMAINING, data.getDurationRemaining());
+    assertEquals(CURRENT_STEP_DISTANCE, data.getDistance());
+    assertEquals(CURRENT_STEP_DURATION, data.getDuration());
+    assertEquals(CURRENT_STEP_DISTANCE_REMAINING, data.getDistanceRemaining());
+    assertEquals(CURRENT_STEP_DURATION_REMAINING, data.getDurationRemaining());
   }
+
   private void checkNavigationEvent(NavigationEvent event) {
     assertEquals(APP_STATE, event.getApplicationState());
     assertEquals(AUDIO_TYPE, event.getAudioType());
