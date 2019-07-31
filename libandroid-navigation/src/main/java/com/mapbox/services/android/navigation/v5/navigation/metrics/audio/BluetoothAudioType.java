@@ -3,7 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation.metrics.audio;
 import android.content.Context;
 import android.media.AudioManager;
 
-public class BluetoothAudioType implements AudioTypeResolver {
+class BluetoothAudioType implements AudioTypeResolver {
   private static final String BLUETOOTH = "bluetooth";
   private AudioTypeResolver chain;
 

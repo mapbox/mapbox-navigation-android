@@ -3,7 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation.metrics.audio;
 import android.content.Context;
 import android.media.AudioManager;
 
-public class HeadphonesAudioType implements AudioTypeResolver {
+class HeadphonesAudioType implements AudioTypeResolver {
   private static final String HEADPHONES = "headphones";
   private AudioTypeResolver chain;
 
