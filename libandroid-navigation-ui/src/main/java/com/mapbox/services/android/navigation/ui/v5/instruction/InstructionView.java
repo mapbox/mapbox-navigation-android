@@ -218,6 +218,20 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   }
 
   /**
+   * Unsubscribes {@link NavigationViewModel} {@link android.arch.lifecycle.LiveData} objects
+   * previously added in {@link InstructionView#subscribe(NavigationViewModel)}
+   * by removing the observers of the {@link LifecycleOwner}
+   *
+   * @param navigationViewModel to which this View is unsubscribing
+   */
+  public void unsubscribe(@NonNull NavigationViewModel navigationViewModel) {
+    LifecycleOwner owner = (LifecycleOwner) getContext();
+    navigationViewModel.instructionModel.removeObservers(owner);
+    navigationViewModel.bannerInstructionModel.removeObservers(owner);
+    navigationViewModel.isOffRoute.removeObservers(owner);
+  }
+
+  /**
    * Use this method inside a {@link ProgressChangeListener} to update this view with all other information
    * that is not updated by the {@link InstructionView#updateBannerInstructionsWith(Milestone)}.
    * <p>

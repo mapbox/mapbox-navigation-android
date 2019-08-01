@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.summary;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -93,6 +94,19 @@ public class SummaryBottomSheet extends FrameLayout {
         }
       }
     });
+  }
+
+  /**
+   * Unsubscribes {@link NavigationViewModel} {@link android.arch.lifecycle.LiveData} objects
+   * previously added in {@link SummaryBottomSheet#subscribe(NavigationViewModel)}
+   * by removing the observers of the {@link LifecycleOwner}
+   *
+   * @param navigationViewModel to which this View is unsubscribing
+   */
+  public void unsubscribe(@NonNull NavigationViewModel navigationViewModel) {
+    LifecycleOwner owner = (LifecycleOwner) getContext();
+    navigationViewModel.summaryModel.removeObservers(owner);
+    navigationViewModel.isOffRoute.removeObservers(owner);
   }
 
   /**

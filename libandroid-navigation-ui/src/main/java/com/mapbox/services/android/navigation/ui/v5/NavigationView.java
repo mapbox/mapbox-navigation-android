@@ -89,6 +89,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   private CameraPosition initialMapCameraPosition;
   private boolean isMapInitialized;
   private boolean isSubscribed;
+  private LifecycleOwner lifecycleOwner;
+  private NavigationViewSubscriber navigationViesSubscriber;
 
   public NavigationView(Context context) {
     this(context, null);
@@ -695,8 +697,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     instructionView.subscribe(navigationViewModel);
     summaryBottomSheet.subscribe(navigationViewModel);
 
-    NavigationViewSubscriber subscriber = new NavigationViewSubscriber(navigationPresenter);
-    subscriber.subscribe(((LifecycleOwner) getContext()), navigationViewModel);
+    navigationViesSubscriber = new NavigationViewSubscriber(navigationPresenter);
+    lifecycleOwner = (LifecycleOwner) getContext();
+    navigationViesSubscriber.subscribe(lifecycleOwner, navigationViewModel);
     isSubscribed = true;
   }
 
@@ -707,7 +710,16 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     navigationViewEventDispatcher.onDestroy(navigationViewModel.retrieveNavigation());
     mapView.onDestroy();
     navigationViewModel.onDestroy(isChangingConfigurations());
+    unsubscribeViewModels();
     ImageCreator.getInstance().shutdown();
     navigationMap = null;
+  }
+
+  private void unsubscribeViewModels() {
+    if (isSubscribed) {
+      instructionView.unsubscribe(navigationViewModel);
+      summaryBottomSheet.unsubscribe(navigationViewModel);
+      navigationViesSubscriber.unsubscribe(lifecycleOwner, navigationViewModel);
+    }
   }
 }

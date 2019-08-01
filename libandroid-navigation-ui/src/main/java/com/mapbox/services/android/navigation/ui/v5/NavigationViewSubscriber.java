@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.location.Location;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -18,7 +19,7 @@ class NavigationViewSubscriber {
 
   void subscribe(LifecycleOwner owner, final NavigationViewModel navigationViewModel) {
 
-    navigationViewModel.route.observe(owner, new Observer<DirectionsRoute>() {
+    navigationViewModel.retrieveRoute().observe(owner, new Observer<DirectionsRoute>() {
       @Override
       public void onChanged(@Nullable DirectionsRoute directionsRoute) {
         if (directionsRoute != null) {
@@ -36,7 +37,7 @@ class NavigationViewSubscriber {
       }
     });
 
-    navigationViewModel.navigationLocation.observe(owner, new Observer<Location>() {
+    navigationViewModel.retrieveNavigationLocation().observe(owner, new Observer<Location>() {
       @Override
       public void onChanged(@Nullable Location location) {
         if (location != null) {
@@ -45,7 +46,7 @@ class NavigationViewSubscriber {
       }
     });
 
-    navigationViewModel.shouldRecordScreenshot.observe(owner, new Observer<Boolean>() {
+    navigationViewModel.retrieveShouldRecordScreenshot().observe(owner, new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean shouldRecordScreenshot) {
         if (shouldRecordScreenshot != null && shouldRecordScreenshot) {
@@ -53,5 +54,12 @@ class NavigationViewSubscriber {
         }
       }
     });
+  }
+
+  void unsubscribe(@NonNull LifecycleOwner owner, @NonNull NavigationViewModel navigationViewModel) {
+    navigationViewModel.retrieveRoute().removeObservers(owner);
+    navigationViewModel.retrieveDestination().removeObservers(owner);
+    navigationViewModel.retrieveNavigationLocation().removeObservers(owner);
+    navigationViewModel.retrieveShouldRecordScreenshot().removeObservers(owner);
   }
 }

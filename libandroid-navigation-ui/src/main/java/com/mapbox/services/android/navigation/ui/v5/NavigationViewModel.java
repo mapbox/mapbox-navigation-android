@@ -59,9 +59,9 @@ public class NavigationViewModel extends AndroidViewModel {
   public final MutableLiveData<BannerInstructionModel> bannerInstructionModel = new MutableLiveData<>();
   public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
-  final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
-  final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
-  final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
+  private final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
+  private final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
+  private final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
   private final MutableLiveData<Point> destination = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
@@ -272,6 +272,18 @@ public class NavigationViewModel extends AndroidViewModel {
     if (navigationViewEventDispatcher != null) {
       navigationViewEventDispatcher.onFailedReroute(errorMessage);
     }
+  }
+
+  MutableLiveData<Location> retrieveNavigationLocation() {
+    return navigationLocation;
+  }
+
+  MutableLiveData<DirectionsRoute> retrieveRoute() {
+    return route;
+  }
+
+  MutableLiveData<Boolean> retrieveShouldRecordScreenshot() {
+    return shouldRecordScreenshot;
   }
 
   MutableLiveData<Point> retrieveDestination() {
