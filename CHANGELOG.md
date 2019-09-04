@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ### v0.42.0 - 
 
+* Fix rerouting inside the NavigationUI [#2010](https://github.com/mapbox/mapbox-navigation-android/issues/2010)
 * Fix on route selection change listener being called if route is not visible [#2035](https://github.com/mapbox/mapbox-navigation-android/pull/2035)
 * Fix NavigationStepData regression from [#1890](https://github.com/mapbox/mapbox-navigation-android/pull/1890)
 * Bump mapbox-android-sdk version to 8.2.1 [#2013](https://github.com/mapbox/mapbox-navigation-android/pull/2013)

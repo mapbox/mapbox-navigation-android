@@ -92,9 +92,9 @@ public class NavigationViewModel extends AndroidViewModel {
     this.accessToken = Mapbox.getAccessToken();
     initializeLocationEngine();
     initializeRouter();
-    this.routeUtils = new RouteUtils();
-    this.localeUtils = new LocaleUtils();
-    this.connectivityController = new MapConnectivityController();
+    routeUtils = new RouteUtils();
+    localeUtils = new LocaleUtils();
+    connectivityController = new MapConnectivityController();
   }
 
   // Package private (no modifier) for testing purposes
@@ -118,10 +118,15 @@ public class NavigationViewModel extends AndroidViewModel {
     this.speechPlayer = speechPlayer;
   }
 
+  @Override
+  protected void onCleared() {
+    super.onCleared();
+    destroyRouter();
+  }
+
   public void onDestroy(boolean isChangingConfigurations) {
     this.isChangingConfigurations = isChangingConfigurations;
     if (!isChangingConfigurations) {
-      destroyRouter();
       endNavigation();
       destroyMapOffline();
       deactivateInstructionPlayer();
