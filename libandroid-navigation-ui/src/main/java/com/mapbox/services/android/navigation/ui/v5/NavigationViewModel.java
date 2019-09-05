@@ -92,9 +92,9 @@ public class NavigationViewModel extends AndroidViewModel {
     this.accessToken = Mapbox.getAccessToken();
     initializeLocationEngine();
     initializeRouter();
-    routeUtils = new RouteUtils();
-    localeUtils = new LocaleUtils();
-    connectivityController = new MapConnectivityController();
+    this.routeUtils = new RouteUtils();
+    this.localeUtils = new LocaleUtils();
+    this.connectivityController = new MapConnectivityController();
   }
 
   // Package private (no modifier) for testing purposes

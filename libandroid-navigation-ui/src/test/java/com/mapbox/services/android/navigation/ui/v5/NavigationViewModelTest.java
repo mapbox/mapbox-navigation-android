@@ -5,14 +5,18 @@ import android.app.Application;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayer;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -92,6 +96,19 @@ public class NavigationViewModelTest {
     viewModel.updateRoute(route);
 
     verify(navigation, times(0)).startNavigation(route);
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void updateRoute_navigationErrorsOutWhenViewModelIsDestroyed() {
+    Application application = mock(Application.class);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
+    MapOfflineManager mapOfflineManager = mock(MapOfflineManager.class);
+    NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockedConnectivityController,
+            mapOfflineManager);
+    viewModel.onCleared();
+    viewModel.updateRoute(route);
   }
 
   @Test
