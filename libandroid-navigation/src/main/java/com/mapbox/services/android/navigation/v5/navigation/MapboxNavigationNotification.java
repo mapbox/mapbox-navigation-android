@@ -10,27 +10,33 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.SpannableString;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.widget.RemoteViews;
 
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.api.directions.v5.models.StepManeuver;
 import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
-import com.mapbox.services.android.navigation.v5.utils.ManeuverUtils;
 
 import java.util.Calendar;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROTARY;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT;
 import static com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter.formatTime;
 
 /**
@@ -271,17 +277,33 @@ class MapboxNavigationNotification implements NavigationNotification {
     expandedNotificationRemoteViews.setTextViewText(R.id.notificationArrivalText, time);
   }
 
-  private void updateManeuverImage(LegStep step) {
-    if (newManeuverId(step)) {
-      int maneuverResource = ManeuverUtils.getManeuverResource(step);
+  private void updateManeuverImage(@NonNull LegStep step) {
+    int maneuverResource = getManeuverResource(step);
+    if (currentManeuverId != maneuverResource) {
       currentManeuverId = maneuverResource;
       collapsedNotificationRemoteViews.setImageViewResource(R.id.maneuverImage, maneuverResource);
       expandedNotificationRemoteViews.setImageViewResource(R.id.maneuverImage, maneuverResource);
     }
   }
 
-  private boolean newManeuverId(LegStep step) {
-    return currentManeuverId != ManeuverUtils.getManeuverResource(step);
+  private int getManeuverResource(@NonNull LegStep step) {
+    StepManeuver maneuver = step.maneuver();
+    String maneuverType = maneuver.type();
+    String maneuverModifier = maneuver.modifier();
+    if (!TextUtils.isEmpty(maneuverModifier)) {
+      String drivingSide = step.drivingSide();
+      if (isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(maneuverType, maneuverModifier, drivingSide)) {
+        return ManeuverMap.getManeuverResource(maneuverType + maneuverModifier + drivingSide);
+      }
+      return ManeuverMap.getManeuverResource(maneuverType + maneuverModifier);
+    }
+    return ManeuverMap.getManeuverResource(maneuverType);
+  }
+
+  private boolean isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(String maneuverType, String maneuverModifier,
+                                                                String drivingSide) {
+    return STEP_MANEUVER_MODIFIER_LEFT.equals(drivingSide) && (STEP_MANEUVER_TYPE_ROUNDABOUT.equals(maneuverType)
+      || STEP_MANEUVER_TYPE_ROTARY.equals(maneuverType) || STEP_MANEUVER_MODIFIER_UTURN.equals(maneuverModifier));
   }
 
   private void onEndNavigationBtnClick() {
