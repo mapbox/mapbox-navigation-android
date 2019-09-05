@@ -10,6 +10,7 @@
 
 # --- Java ---
 -dontwarn java.awt.Color
+-dontwarn com.sun.istack.internal.NotNull
 
 # --- com.mapbox.api.directions.v5.MapboxDirections ---
 -dontwarn com.sun.xml.internal.ws.spi.db.BindingContextFactory
