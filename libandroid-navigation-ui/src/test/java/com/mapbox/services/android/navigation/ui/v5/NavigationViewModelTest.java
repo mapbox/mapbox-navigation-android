@@ -100,7 +100,7 @@ public class NavigationViewModelTest {
   }
 
   @Test
-  public void updateRoute_navigationErrorsOutWhenViewModelIsDestroyed() {
+  public void navigationRouter_onDestroyInvokedWhenViewModelIsDestroyed() {
     Application application = mock(Application.class);
     MapboxNavigation navigation = mock(MapboxNavigation.class);
     MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
