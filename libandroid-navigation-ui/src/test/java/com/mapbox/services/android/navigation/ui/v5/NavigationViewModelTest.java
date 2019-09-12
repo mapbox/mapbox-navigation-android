@@ -27,8 +27,9 @@ public class NavigationViewModelTest {
     MapboxNavigation navigation = mock(MapboxNavigation.class);
     MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
     MapOfflineManager mapOfflineManager = mock(MapOfflineManager.class);
+    NavigationViewRouter router = mock(NavigationViewRouter.class);
     NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockedConnectivityController,
-      mapOfflineManager);
+            mapOfflineManager, router);
 
     viewModel.stopNavigation();
 
@@ -41,8 +42,9 @@ public class NavigationViewModelTest {
     MapboxNavigation navigation = mock(MapboxNavigation.class);
     MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
     MapOfflineManager mapOfflineManager = mock(MapOfflineManager.class);
+    NavigationViewRouter router = mock(NavigationViewRouter.class);
     NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockedConnectivityController,
-      mapOfflineManager);
+            mapOfflineManager, router);
 
     viewModel.stopNavigation();
 
@@ -55,8 +57,9 @@ public class NavigationViewModelTest {
     MapboxNavigation navigation = mock(MapboxNavigation.class);
     MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
     MapOfflineManager mapOfflineManager = mock(MapOfflineManager.class);
+    NavigationViewRouter router = mock(NavigationViewRouter.class);
     NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockedConnectivityController,
-      mapOfflineManager);
+            mapOfflineManager, router);
 
     viewModel.onDestroy(false);
 
@@ -69,8 +72,9 @@ public class NavigationViewModelTest {
     MapboxNavigation navigation = mock(MapboxNavigation.class);
     MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
     MapOfflineManager mapOfflineManager = mock(MapOfflineManager.class);
+    NavigationViewRouter router = mock(NavigationViewRouter.class);
     NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockedConnectivityController,
-      mapOfflineManager);
+            mapOfflineManager, router);
     Boolean defaultState = null;
 
     viewModel.onDestroy(false);
@@ -85,13 +89,27 @@ public class NavigationViewModelTest {
     DirectionsRoute route = mock(DirectionsRoute.class);
     MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
     MapOfflineManager mapOfflineManager = mock(MapOfflineManager.class);
+    NavigationViewRouter router = mock(NavigationViewRouter.class);
     NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockedConnectivityController,
-      mapOfflineManager);
+            mapOfflineManager, router);
     viewModel.onDestroy(true);
 
     viewModel.updateRoute(route);
 
     verify(navigation, times(0)).startNavigation(route);
+  }
+
+  @Test
+  public void navigationRouter_onDestroyInvokedWhenViewModelIsDestroyed() {
+    Application application = mock(Application.class);
+    MapboxNavigation navigation = mock(MapboxNavigation.class);
+    MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
+    MapOfflineManager mapOfflineManager = mock(MapOfflineManager.class);
+    NavigationViewRouter mockedRouter = mock(NavigationViewRouter.class);
+    NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockedConnectivityController,
+            mapOfflineManager, mockedRouter);
+    viewModel.onCleared();
+    verify(mockedRouter).onDestroy();
   }
 
   @Test
