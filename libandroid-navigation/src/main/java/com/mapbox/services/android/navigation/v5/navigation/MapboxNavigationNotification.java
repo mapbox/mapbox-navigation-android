@@ -149,6 +149,11 @@ class MapboxNavigationNotification implements NavigationNotification {
     return instructionText;
   }
 
+  // Package private (no modifier) for testing purposes
+  int retrieveCurrentManeuverId() {
+    return currentManeuverId;
+  }
+
   private void initialize(Context applicationContext, MapboxNavigation mapboxNavigation) {
     this.mapboxNavigation = mapboxNavigation;
     etaFormat = applicationContext.getString(R.string.eta_format);
