@@ -44,6 +44,8 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
+import timber.log.Timber;
+
 /**
  * View that creates the drop-in UI.
  * <p>
@@ -392,7 +394,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * @param options with containing route / coordinate data
    */
   public void startNavigation(NavigationViewOptions options) {
-    initializeNavigation(options);
+    try {
+      initializeNavigation(options);
+    } catch (NullPointerException exception) {
+      Timber.e(exception);
+    }
   }
 
   /**
