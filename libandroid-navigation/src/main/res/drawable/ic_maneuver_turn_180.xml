@@ -9,7 +9,8 @@
     <group
         android:name="group2"
         android:translateX="24.5"
-        android:translateY="26.5">
+        android:translateY="26.5"
+        android:scaleX="-1">
         <path
             android:name="bezier"
             android:fillColor="#000000"
