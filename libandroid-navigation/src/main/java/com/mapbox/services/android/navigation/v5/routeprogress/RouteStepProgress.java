@@ -1,15 +1,8 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
-
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.api.directions.v5.models.StepIntersection;
-
-import java.util.List;
 
 
 /**
@@ -65,49 +58,6 @@ public abstract class RouteStepProgress {
    */
   public abstract double durationRemaining();
 
-  /**
-   * A collection of all the current steps intersections and the next steps maneuver location
-   * (if one exist).
-   *
-   * @return a list of {@link StepIntersection}s which may include the next steps maneuver
-   * intersection if it exist
-   * @since 0.7.0
-   */
-  public abstract List<StepIntersection> intersections();
-
-  /**
-   * The current intersection that has been passed along the route.
-   * <p>
-   * An intersection is considered a current intersection once passed through
-   * and will remain so until a different intersection is passed through.
-   *
-   * @return current intersection the user has passed through
-   * @since 0.13.0
-   */
-  public abstract StepIntersection currentIntersection();
-
-  /**
-   * The intersection being traveled towards on the route.
-   * <p>
-   * Will be null if the upcoming step is null (last step of the leg).
-   *
-   * @return intersection being traveled towards
-   * @since 0.13.0
-   */
-  @Nullable
-  public abstract StepIntersection upcomingIntersection();
-
-  /**
-   * Provides a list of pairs containing two distances, in meters, along the route.
-   * <p>
-   * The first distance in the pair is the tunnel entrance along the step geometry.
-   * The second distance is the tunnel exit along the step geometry.
-   *
-   * @return list of pairs containing tunnnel entrance and exit distances
-   * @since 0.13.0
-   */
-  public abstract List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep();
-
   abstract LegStep step();
 
   @AutoValue.Builder
@@ -126,14 +76,6 @@ public abstract class RouteStepProgress {
     abstract Builder fractionTraveled(float fractionTraveled);
 
     abstract Builder durationRemaining(double durationRemaining);
-
-    abstract Builder intersections(@NonNull List<StepIntersection> intersections);
-
-    abstract Builder currentIntersection(StepIntersection currentIntersection);
-
-    abstract Builder upcomingIntersection(@Nullable StepIntersection upcomingIntersection);
-
-    abstract Builder intersectionDistancesAlongStep(List<Pair<StepIntersection, Double>> intersections);
 
     abstract RouteStepProgress autoBuild();
 

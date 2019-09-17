@@ -2,13 +2,11 @@ package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
-import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Geometry;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.BannerInstruction;
@@ -190,14 +188,6 @@ public abstract class RouteProgress {
   public abstract RouteProgressState currentState();
 
   /**
-   * Returns the current {@link DirectionsRoute} geometry.
-   *
-   * @return current route geometry
-   */
-  @Nullable
-  public abstract Geometry routeGeometry();
-
-  /**
    * Returns the current {@link DirectionsRoute} geometry with a buffer
    * that encompasses visible tile surface are while navigating.
    * <p>
@@ -218,18 +208,6 @@ public abstract class RouteProgress {
   abstract double legDistanceRemaining();
 
   abstract double stepDistanceRemaining();
-
-  abstract List<StepIntersection> intersections();
-
-  abstract StepIntersection currentIntersection();
-
-  @Nullable
-  abstract StepIntersection upcomingIntersection();
-
-  @Nullable
-  abstract CurrentLegAnnotation currentLegAnnotation();
-
-  abstract List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep();
 
   abstract double legDurationRemaining();
 
@@ -274,28 +252,6 @@ public abstract class RouteProgress {
 
     public abstract Builder distanceRemaining(double distanceRemaining);
 
-    public abstract Builder intersections(List<StepIntersection> intersections);
-
-    abstract List<StepIntersection> intersections();
-
-    public abstract Builder currentIntersection(StepIntersection currentIntersection);
-
-    abstract StepIntersection currentIntersection();
-
-    public abstract Builder upcomingIntersection(@Nullable StepIntersection upcomingIntersection);
-
-    abstract StepIntersection upcomingIntersection();
-
-    public abstract Builder intersectionDistancesAlongStep(
-      List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep
-    );
-
-    abstract List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep();
-
-    public abstract Builder currentLegAnnotation(@Nullable CurrentLegAnnotation currentLegAnnotation);
-
-    abstract CurrentLegAnnotation currentLegAnnotation();
-
     abstract Builder currentLegProgress(RouteLegProgress routeLegProgress);
 
     public abstract Builder inTunnel(boolean inTunnel);
@@ -305,8 +261,6 @@ public abstract class RouteProgress {
     public abstract Builder bannerInstruction(@Nullable BannerInstruction bannerInstruction);
 
     public abstract Builder currentState(@Nullable RouteProgressState currentState);
-
-    public abstract Builder routeGeometry(@Nullable Geometry routeGeometry);
 
     public abstract Builder routeGeometryWithBuffer(@Nullable Geometry routeGeometryWithBuffer);
 
@@ -323,11 +277,6 @@ public abstract class RouteProgress {
         .stepDistanceRemaining(stepDistanceRemaining())
         .currentStepPoints(currentStepPoints())
         .upcomingStepPoints(upcomingStepPoints())
-        .intersections(intersections())
-        .currentIntersection(currentIntersection())
-        .upcomingIntersection(upcomingIntersection())
-        .intersectionDistancesAlongStep(intersectionDistancesAlongStep())
-        .currentLegAnnotation(currentLegAnnotation())
         .build();
       currentLegProgress(legProgress);
 

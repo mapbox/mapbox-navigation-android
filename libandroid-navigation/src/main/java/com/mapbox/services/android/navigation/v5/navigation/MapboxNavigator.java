@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Geometry;
-import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.gson.GeometryGeoJson;
 import com.mapbox.navigator.BannerInstruction;
@@ -15,7 +14,6 @@ import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.VoiceInstruction;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 class MapboxNavigator {
@@ -94,15 +92,6 @@ class MapboxNavigator {
 
   synchronized BannerInstruction retrieveBannerInstruction(int index) {
     return navigator.getBannerInstruction(index);
-  }
-
-  @Nullable
-  synchronized Geometry retrieveRouteGeometry() {
-    ArrayList<Point> routeGeometry = navigator.getRouteGeometry();
-    if (routeGeometry == null) {
-      return null;
-    }
-    return LineString.fromLngLats(routeGeometry);
   }
 
   @Nullable
