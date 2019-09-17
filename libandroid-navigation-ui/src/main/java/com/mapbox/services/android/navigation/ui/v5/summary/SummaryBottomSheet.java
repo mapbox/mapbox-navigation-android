@@ -1,7 +1,10 @@
 package com.mapbox.services.android.navigation.ui.v5.summary;
 
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -33,7 +36,7 @@ import java.text.DecimalFormat;
  *
  * @since 0.6.0
  */
-public class SummaryBottomSheet extends FrameLayout {
+public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver {
 
   private static final String EMPTY_STRING = "";
   private TextView distanceRemainingText;
@@ -44,6 +47,10 @@ public class SummaryBottomSheet extends FrameLayout {
   @NavigationTimeFormat.Type
   private int timeFormatType;
   private DistanceFormatter distanceFormatter;
+
+  private NavigationViewModel navigationViewModel;
+
+  private LifecycleOwner lifecycleOwner;
 
   public SummaryBottomSheet(Context context) {
     this(context, null);
@@ -69,8 +76,13 @@ public class SummaryBottomSheet extends FrameLayout {
     bind();
   }
 
-  public void subscribe(NavigationViewModel navigationViewModel) {
-    navigationViewModel.summaryModel.observe((LifecycleOwner) getContext(), new Observer<SummaryModel>() {
+  public void subscribe(LifecycleOwner owner, NavigationViewModel navigationViewModel) {
+    lifecycleOwner = owner;
+    lifecycleOwner.getLifecycle().addObserver(this);
+
+    this.navigationViewModel = navigationViewModel;
+
+    navigationViewModel.summaryModel.observe(lifecycleOwner, new Observer<SummaryModel>() {
       @Override
       public void onChanged(@Nullable SummaryModel summaryModel) {
         if (summaryModel != null && !isRerouting) {
@@ -80,7 +92,7 @@ public class SummaryBottomSheet extends FrameLayout {
         }
       }
     });
-    navigationViewModel.isOffRoute.observe((LifecycleOwner) getContext(), new Observer<Boolean>() {
+    navigationViewModel.isOffRoute.observe(lifecycleOwner, new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {
@@ -93,6 +105,19 @@ public class SummaryBottomSheet extends FrameLayout {
         }
       }
     });
+  }
+
+  /**
+   * Unsubscribes {@link NavigationViewModel} {@link android.arch.lifecycle.LiveData} objects
+   * previously added in {@link SummaryBottomSheet#subscribe(NavigationViewModel)}
+   * by removing the observers of the {@link LifecycleOwner} when parent view is destroyed
+   */
+  @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+  public void unsubscribe() {
+    if (navigationViewModel != null) {
+      navigationViewModel.summaryModel.removeObservers(lifecycleOwner);
+      navigationViewModel.isOffRoute.removeObservers(lifecycleOwner);
+    }
   }
 
   /**
