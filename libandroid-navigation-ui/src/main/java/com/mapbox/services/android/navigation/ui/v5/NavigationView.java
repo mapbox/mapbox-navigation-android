@@ -2,7 +2,6 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.app.Activity;
 import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LifecycleRegistry;
 import android.arch.lifecycle.ViewModelProviders;
@@ -605,7 +604,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     int paddingBuffer = (int) resources.getDimension(R.dimen.route_overview_buffer_padding);
     int instructionHeight = (int) (resources.getDimension(R.dimen.instruction_layout_height) + paddingBuffer);
     int summaryHeight = (int) resources.getDimension(R.dimen.summary_bottomsheet_height);
-    return new int[] {leftRightPadding, instructionHeight, leftRightPadding, summaryHeight};
+    return new int[]{leftRightPadding, instructionHeight, leftRightPadding, summaryHeight};
   }
 
   private boolean isChangingConfigurations() {
