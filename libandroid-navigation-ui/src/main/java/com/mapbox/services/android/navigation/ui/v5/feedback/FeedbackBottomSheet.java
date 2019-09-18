@@ -10,6 +10,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
@@ -17,7 +18,6 @@ import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +33,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   Animator.AnimatorListener {
 
   public static final String TAG = FeedbackBottomSheet.class.getSimpleName();
+  public static final long CLOSE_BOTTOM_SHEET_AFTER = 100L;
 
   private FeedbackBottomSheetListener feedbackBottomSheetListener;
   private FeedbackAdapter feedbackAdapter;
@@ -40,6 +41,17 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   private ProgressBar feedbackProgressBar;
   private ObjectAnimator countdownAnimation;
   private long duration;
+  private CountDownTimer countDownTimer = new CountDownTimer(CLOSE_BOTTOM_SHEET_AFTER, 0) {
+    @Override
+    public void onTick(long millisUntilFinished) {
+
+    }
+
+    @Override
+    public void onFinish() {
+      dismiss();
+    }
+  };
 
   public static FeedbackBottomSheet newInstance(FeedbackBottomSheetListener feedbackBottomSheetListener,
                                                 long duration) {
@@ -107,7 +119,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   public void onFeedbackItemClick(int feedbackPosition) {
     FeedbackItem feedbackItem = feedbackAdapter.getFeedbackItem(feedbackPosition);
     feedbackBottomSheetListener.onFeedbackSelected(feedbackItem);
-    dismiss();
+    countDownTimer.start();
   }
 
   @Override
@@ -157,10 +169,9 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
     feedbackItems.setOverScrollMode(RecyclerView.OVER_SCROLL_IF_CONTENT_SCROLLS);
     feedbackItems.addOnItemTouchListener(new FeedbackClickListener(context, this));
     if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      feedbackItems.setLayoutManager(new LinearLayoutManager(context,
-        LinearLayoutManager.HORIZONTAL, false));
+      feedbackItems.setLayoutManager(new GridLayoutManager(context, 4));
     } else {
-      feedbackItems.setLayoutManager(new GridLayoutManager(context, 3));
+      feedbackItems.setLayoutManager(new GridLayoutManager(context, 2));
     }
   }
 
