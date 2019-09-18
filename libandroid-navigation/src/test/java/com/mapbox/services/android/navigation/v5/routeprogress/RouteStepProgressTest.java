@@ -10,7 +10,6 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
-import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
@@ -314,46 +313,6 @@ public class RouteStepProgressTest extends BaseTest {
     RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
 
     assertEquals(0, routeStepProgress.durationRemaining(), BaseTest.DELTA);
-  }
-
-  @Test
-  public void stepIntersections_includesAllStepIntersectionsAndNextManeuver() throws Exception {
-    DirectionsRoute route = buildTestDirectionsRoute();
-    RouteLeg firstLeg = route.legs().get(0);
-    int stepIndex = 3;
-    int legIndex = 0;
-    double stepDistanceRemaining = 0;
-    double legDistanceRemaining = firstLeg.distance();
-    double distanceRemaining = route.distance();
-    RouteProgress routeProgress = buildTestRouteProgress(route, stepDistanceRemaining,
-      legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
-    RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
-
-    int stepIntersections = route.legs().get(0).steps().get(3).intersections().size();
-    int intersectionSize = stepIntersections + 1;
-
-    assertEquals(intersectionSize, routeStepProgress.intersections().size());
-  }
-
-  @Test
-  public void stepIntersections_handlesNullNextManeuverCorrectly() throws Exception {
-    DirectionsRoute route = buildTestDirectionsRoute();
-    RouteLeg firstLeg = route.legs().get(0);
-    int stepIndex = (route.legs().get(0).steps().size() - 1);
-    int legIndex = 0;
-    double stepDistanceRemaining = 0;
-    double legDistanceRemaining = firstLeg.distance();
-    double distanceRemaining = route.distance();
-    RouteProgress routeProgress = buildTestRouteProgress(route, stepDistanceRemaining,
-      legDistanceRemaining, distanceRemaining, stepIndex, legIndex);
-    RouteStepProgress routeStepProgress = routeProgress.currentLegProgress().currentStepProgress();
-    int currentStepTotal = route.legs().get(0).steps().get(stepIndex).intersections().size();
-    List<Point> lastStepLocation = PolylineUtils.decode(
-      route.legs().get(0).steps().get(stepIndex).geometry(), Constants.PRECISION_6);
-
-    assertEquals(currentStepTotal, routeStepProgress.intersections().size());
-    assertEquals(routeStepProgress.intersections().get(0).location().latitude(), lastStepLocation.get(0).latitude());
-    assertEquals(routeStepProgress.intersections().get(0).location().longitude(), lastStepLocation.get(0).longitude());
   }
 
   private DirectionsRoute loadChipotleTestRoute() throws IOException {

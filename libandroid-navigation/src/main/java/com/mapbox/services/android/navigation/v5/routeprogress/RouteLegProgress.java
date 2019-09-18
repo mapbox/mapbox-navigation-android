@@ -1,16 +1,12 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
-import com.mapbox.api.directions.v5.models.StepIntersection;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
 import java.util.List;
 
@@ -172,35 +168,11 @@ public abstract class RouteLegProgress {
   public abstract List<Point> upcomingStepPoints();
 
   /**
-   * Provides the current annotation data for a leg segment determined by
-   * the distance traveled along the route.
-   * <p>
-   * This object will only be present when a {@link com.mapbox.api.directions.v5.models.DirectionsRoute}
-   * requested with {@link com.mapbox.api.directions.v5.DirectionsCriteria#ANNOTATION_DISTANCE}.
-   * <p>
-   * This will be provided by default with {@link NavigationRoute#builder(Context)}.
-   *
-   * @return object current annotation data
-   * @since 0.13.0
-   */
-  @Nullable
-  public abstract CurrentLegAnnotation currentLegAnnotation();
-
-  /**
    * Not public since developer can access same information from {@link RouteProgress}.
    */
   abstract RouteLeg routeLeg();
 
   abstract double stepDistanceRemaining();
-
-  abstract List<StepIntersection> intersections();
-
-  abstract StepIntersection currentIntersection();
-
-  @Nullable
-  abstract StepIntersection upcomingIntersection();
-
-  abstract List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep();
 
   @AutoValue.Builder
   public abstract static class Builder {
@@ -227,36 +199,12 @@ public abstract class RouteLegProgress {
 
     abstract Builder upcomingStepPoints(@Nullable List<Point> upcomingStepPoints);
 
-    abstract Builder intersections(List<StepIntersection> intersections);
-
-    abstract List<StepIntersection> intersections();
-
-    abstract Builder intersectionDistancesAlongStep(
-      List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep
-    );
-
-    abstract List<Pair<StepIntersection, Double>> intersectionDistancesAlongStep();
-
-    abstract Builder currentIntersection(StepIntersection currentIntersection);
-
-    abstract StepIntersection currentIntersection();
-
-    abstract Builder upcomingIntersection(@Nullable StepIntersection upcomingIntersection);
-
-    abstract StepIntersection upcomingIntersection();
-
-    abstract Builder currentLegAnnotation(@Nullable CurrentLegAnnotation currentLegAnnotation);
-
     abstract RouteLegProgress autoBuild(); // not public
 
     public RouteLegProgress build() {
       RouteStepProgress stepProgress = RouteStepProgress.builder()
         .step(currentStep())
         .distanceRemaining(stepDistanceRemaining())
-        .intersections(intersections())
-        .currentIntersection(currentIntersection())
-        .upcomingIntersection(upcomingIntersection())
-        .intersectionDistancesAlongStep(intersectionDistancesAlongStep())
         .build();
       currentStepProgress(stepProgress);
       return autoBuild();

@@ -1,27 +1,19 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegAnnotation;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.MaxSpeed;
 import com.mapbox.api.directions.v5.models.RouteLeg;
-import com.mapbox.api.directions.v5.models.StepIntersection;
-import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.turf.TurfConstants;
-import com.mapbox.turf.TurfMeasurement;
-import com.mapbox.turf.TurfMisc;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static com.mapbox.core.constants.Constants.PRECISION_6;
@@ -32,13 +24,8 @@ import static com.mapbox.core.constants.Constants.PRECISION_6;
  */
 public class NavigationHelper {
 
-  private static final int FIRST_POINT = 0;
-  private static final int FIRST_INTERSECTION = 0;
-  private static final int ONE_INDEX = 1;
   private static final int INDEX_ZERO = 0;
   private static final String EMPTY_STRING = "";
-  private static final double ZERO_METERS = 0d;
-  private static final int TWO_POINTS = 2;
 
   private NavigationHelper() {
     // Empty private constructor to prevent users creating an instance of this class.
@@ -111,129 +98,6 @@ public class NavigationHelper {
       return PolylineUtils.decode(stepGeometry, PRECISION_6);
     }
     return currentPoints;
-  }
-
-  /**
-   * Given a current and upcoming step, this method assembles a list of {@link StepIntersection}
-   * consisting of all of the current step intersections, as well as the first intersection of
-   * the upcoming step (if the upcoming step isn't null).
-   *
-   * @param currentStep  for intersections list
-   * @param upcomingStep for first intersection, if not null
-   * @return complete list of intersections
-   * @since 0.13.0
-   */
-  @NonNull
-  public static List<StepIntersection> createIntersectionsList(@NonNull LegStep currentStep, LegStep upcomingStep) {
-    List<StepIntersection> intersectionsWithNextManeuver = new ArrayList<>();
-    intersectionsWithNextManeuver.addAll(currentStep.intersections());
-    if (upcomingStep != null && !upcomingStep.intersections().isEmpty()) {
-      intersectionsWithNextManeuver.add(upcomingStep.intersections().get(FIRST_POINT));
-    }
-    return intersectionsWithNextManeuver;
-  }
-
-  /**
-   * Creates a list of pairs {@link StepIntersection} and double distance in meters along a step.
-   * <p>
-   * Each pair represents an intersection on the given step and its distance along the step geometry.
-   * <p>
-   * The first intersection is the same point as the first point of the list of step points, so will
-   * always be zero meters.
-   *
-   * @param stepPoints    representing the step geometry
-   * @param intersections along the step to be measured
-   * @return list of measured intersection pairs
-   * @since 0.13.0
-   */
-  @NonNull
-  public static List<Pair<StepIntersection, Double>> createDistancesToIntersections(List<Point> stepPoints,
-                                                                             List<StepIntersection> intersections) {
-    boolean lessThanTwoStepPoints = stepPoints.size() < TWO_POINTS;
-    boolean noIntersections = intersections.isEmpty();
-    if (lessThanTwoStepPoints || noIntersections) {
-      return Collections.emptyList();
-    }
-
-    LineString stepLineString = LineString.fromLngLats(stepPoints);
-    Point firstStepPoint = stepPoints.get(FIRST_POINT);
-    List<Pair<StepIntersection, Double>> distancesToIntersections = new ArrayList<>();
-
-    for (StepIntersection intersection : intersections) {
-      Point intersectionPoint = intersection.location();
-      if (firstStepPoint.equals(intersectionPoint)) {
-        distancesToIntersections.add(new Pair<>(intersection, ZERO_METERS));
-      } else {
-        LineString beginningLineString = TurfMisc.lineSlice(firstStepPoint, intersectionPoint, stepLineString);
-        double distanceToIntersectionInMeters = TurfMeasurement.length(beginningLineString, TurfConstants.UNIT_METERS);
-        distancesToIntersections.add(new Pair<>(intersection, distanceToIntersectionInMeters));
-      }
-    }
-    return distancesToIntersections;
-  }
-
-  /**
-   * Based on the list of measured intersections and the step distance traveled, finds
-   * the current intersection a user is traveling along.
-   *
-   * @param intersections         along the step
-   * @param measuredIntersections measured intersections along the step
-   * @param stepDistanceTraveled  how far the user has traveled along the step
-   * @return the current step intersection
-   * @since 0.13.0
-   */
-  public static StepIntersection findCurrentIntersection(@NonNull List<StepIntersection> intersections,
-                                                  @NonNull List<Pair<StepIntersection, Double>> measuredIntersections,
-                                                  double stepDistanceTraveled) {
-    for (Pair<StepIntersection, Double> measuredIntersection : measuredIntersections) {
-      double intersectionDistance = measuredIntersection.second;
-      int intersectionIndex = measuredIntersections.indexOf(measuredIntersection);
-      int nextIntersectionIndex = intersectionIndex + ONE_INDEX;
-      int measuredIntersectionSize = measuredIntersections.size();
-      boolean hasValidNextIntersection = nextIntersectionIndex < measuredIntersectionSize;
-
-      if (hasValidNextIntersection) {
-        double nextIntersectionDistance = measuredIntersections.get(nextIntersectionIndex).second;
-        if (stepDistanceTraveled > intersectionDistance && stepDistanceTraveled < nextIntersectionDistance) {
-          return measuredIntersection.first;
-        }
-      } else if (stepDistanceTraveled > measuredIntersection.second) {
-        return measuredIntersection.first;
-      } else {
-        return measuredIntersections.get(FIRST_INTERSECTION).first;
-      }
-    }
-    return intersections.get(FIRST_INTERSECTION);
-  }
-
-  /**
-   * Based on the current intersection index, add one and try to get the upcoming.
-   * <p>
-   * If there is not an upcoming intersection on the step, check for an upcoming step and
-   * return the first intersection from the upcoming step.
-   *
-   * @param intersections       for the current step
-   * @param upcomingStep        for the first intersection if needed
-   * @param currentIntersection being traveled along
-   * @return the upcoming intersection on the step
-   * @since 0.13.0
-   */
-  public static StepIntersection findUpcomingIntersection(@NonNull List<StepIntersection> intersections,
-                                                   @Nullable LegStep upcomingStep,
-                                                   StepIntersection currentIntersection) {
-    int intersectionIndex = intersections.indexOf(currentIntersection);
-    int nextIntersectionIndex = intersectionIndex + ONE_INDEX;
-    int intersectionSize = intersections.size();
-    boolean isValidUpcomingIntersection = nextIntersectionIndex < intersectionSize;
-    if (isValidUpcomingIntersection) {
-      return intersections.get(nextIntersectionIndex);
-    } else if (upcomingStep != null) {
-      List<StepIntersection> upcomingIntersections = upcomingStep.intersections();
-      if (upcomingIntersections != null && !upcomingIntersections.isEmpty()) {
-        return upcomingIntersections.get(FIRST_INTERSECTION);
-      }
-    }
-    return null;
   }
 
   /**
