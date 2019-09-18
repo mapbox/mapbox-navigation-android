@@ -23,14 +23,14 @@ public class FeedbackClickListener implements RecyclerView.OnItemTouchListener {
   public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent motionEvent) {
     View child = rv.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
     ViewGroup group = (ViewGroup)child;
-    if (group != null && group.getChildCount() > 0 && group.getChildAt(0) instanceof ImageView) {
-      ImageView imageView = (ImageView) group.getChildAt(0);
-      imageView.setPressed(!imageView.isPressed());
+    ImageView imageView = null;
+    if (group != null && group.getChildAt(0) instanceof ImageView) {
+      imageView = (ImageView) group.getChildAt(0);
     }
     if (child != null && gestureDetector.onTouchEvent(motionEvent)) {
       child.playSoundEffect(SoundEffectConstants.CLICK);
       int position = rv.getChildAdapterPosition(child);
-      callback.onFeedbackItemClick(position);
+      callback.onFeedbackItemClick(imageView, position);
     }
     return false;
   }
@@ -54,6 +54,6 @@ public class FeedbackClickListener implements RecyclerView.OnItemTouchListener {
 
   public interface ClickCallback {
 
-    void onFeedbackItemClick(int feedbackPosition);
+    void onFeedbackItemClick(ImageView view, int feedbackPosition);
   }
 }

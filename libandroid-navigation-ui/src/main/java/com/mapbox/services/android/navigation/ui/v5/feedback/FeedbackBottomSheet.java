@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
@@ -33,7 +34,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   Animator.AnimatorListener {
 
   public static final String TAG = FeedbackBottomSheet.class.getSimpleName();
-  public static final long CLOSE_BOTTOM_SHEET_AFTER = 100L;
+  public static final long CLOSE_BOTTOM_SHEET_AFTER = 150L;
 
   private FeedbackBottomSheetListener feedbackBottomSheetListener;
   private FeedbackAdapter feedbackAdapter;
@@ -41,17 +42,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   private ProgressBar feedbackProgressBar;
   private ObjectAnimator countdownAnimation;
   private long duration;
-  private CountDownTimer countDownTimer = new CountDownTimer(CLOSE_BOTTOM_SHEET_AFTER, 0) {
-    @Override
-    public void onTick(long millisUntilFinished) {
-
-    }
-
-    @Override
-    public void onFinish() {
-      dismiss();
-    }
-  };
+  private CountDownTimer timer = null;
 
   public static FeedbackBottomSheet newInstance(FeedbackBottomSheetListener feedbackBottomSheetListener,
                                                 long duration) {
@@ -116,10 +107,13 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   }
 
   @Override
-  public void onFeedbackItemClick(int feedbackPosition) {
+  public void onFeedbackItemClick(ImageView imageView, int feedbackPosition) {
+    if (imageView != null) {
+      imageView.setPressed(!imageView.isPressed());
+    }
     FeedbackItem feedbackItem = feedbackAdapter.getFeedbackItem(feedbackPosition);
     feedbackBottomSheetListener.onFeedbackSelected(feedbackItem);
-    countDownTimer.start();
+    startTimer();
   }
 
   @Override
@@ -216,5 +210,23 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
       countdownAnimation.removeAllListeners();
       countdownAnimation.cancel();
     }
+  }
+
+  private void startTimer() {
+    if (timer != null) {
+      timer.cancel();
+    }
+    timer = new CountDownTimer(CLOSE_BOTTOM_SHEET_AFTER, 1) {
+
+      @Override
+      public void onTick(long millisUntilFinished) {
+      }
+
+      @Override
+      public void onFinish() {
+        dismiss();
+      }
+    };
+    timer.start();
   }
 }
