@@ -13,9 +13,9 @@ import com.mapbox.geojson.Point;
 
 class NavigationViewSubscriber implements LifecycleObserver {
 
-  private NavigationPresenter navigationPresenter;
-  private NavigationViewModel navigationViewModel;
-  private LifecycleOwner lifecycleOwner;
+  private final NavigationPresenter navigationPresenter;
+  private final NavigationViewModel navigationViewModel;
+  private final LifecycleOwner lifecycleOwner;
 
   NavigationViewSubscriber(final LifecycleOwner owner,
                            final NavigationViewModel navigationViewModel,
