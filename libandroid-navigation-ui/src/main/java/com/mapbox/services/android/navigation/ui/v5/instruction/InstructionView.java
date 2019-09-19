@@ -1,7 +1,10 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
@@ -71,7 +74,7 @@ import timber.log.Timber;
  *
  * @since 0.6.0
  */
-public class InstructionView extends RelativeLayout implements FeedbackBottomSheetListener {
+public class InstructionView extends RelativeLayout implements LifecycleObserver, FeedbackBottomSheetListener {
 
   private static final String COMPONENT_TYPE_LANE = "lane";
 
@@ -102,6 +105,8 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private boolean isRerouting;
   private SoundButton soundButton;
   private FeedbackButton feedbackButton;
+
+  private LifecycleOwner lifecycleOwner;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -176,10 +181,13 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    * @param navigationViewModel to which this View is subscribing
    * @since 0.6.2
    */
-  public void subscribe(NavigationViewModel navigationViewModel) {
+  public void subscribe(LifecycleOwner owner, NavigationViewModel navigationViewModel) {
+    lifecycleOwner = owner;
+    lifecycleOwner.getLifecycle().addObserver(this);
+
     this.navigationViewModel = navigationViewModel;
-    LifecycleOwner owner = (LifecycleOwner) getContext();
-    navigationViewModel.instructionModel.observe(owner, new Observer<InstructionModel>() {
+
+    navigationViewModel.instructionModel.observe(lifecycleOwner, new Observer<InstructionModel>() {
       @Override
       public void onChanged(@Nullable InstructionModel model) {
         if (model != null) {
@@ -187,7 +195,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         }
       }
     });
-    navigationViewModel.bannerInstructionModel.observe(owner, new Observer<BannerInstructionModel>() {
+    navigationViewModel.bannerInstructionModel.observe(lifecycleOwner, new Observer<BannerInstructionModel>() {
       @Override
       public void onChanged(@Nullable BannerInstructionModel model) {
         if (model != null) {
@@ -198,7 +206,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         }
       }
     });
-    navigationViewModel.isOffRoute.observe(owner, new Observer<Boolean>() {
+    navigationViewModel.isOffRoute.observe(lifecycleOwner, new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {
@@ -215,6 +223,20 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     subscribeAlertView();
     initializeButtonListeners();
     showButtons();
+  }
+
+  /**
+   * Unsubscribes {@link NavigationViewModel} {@link android.arch.lifecycle.LiveData} objects
+   * previously added in {@link InstructionView#subscribe(NavigationViewModel)}
+   * by removing the observers of the {@link LifecycleOwner} when parent view is destroyed
+   */
+  @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+  public void unsubscribe() {
+    if (navigationViewModel != null) {
+      navigationViewModel.instructionModel.removeObservers(lifecycleOwner);
+      navigationViewModel.bannerInstructionModel.removeObservers(lifecycleOwner);
+      navigationViewModel.isOffRoute.removeObservers(lifecycleOwner);
+    }
   }
 
   /**
