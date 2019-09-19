@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 public class FeedbackClickListener implements RecyclerView.OnItemTouchListener {
 
+  private static final int FEEDBACK_AT_FIRST_POS = 0;
   private GestureDetector gestureDetector;
   private ClickCallback callback;
 
@@ -24,8 +25,8 @@ public class FeedbackClickListener implements RecyclerView.OnItemTouchListener {
     View child = rv.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
     ViewGroup group = (ViewGroup)child;
     ImageView imageView = null;
-    if (group != null && group.getChildAt(0) instanceof ImageView) {
-      imageView = (ImageView) group.getChildAt(0);
+    if (group != null && group.getChildAt(FEEDBACK_AT_FIRST_POS) instanceof ImageView) {
+      imageView = (ImageView) group.getChildAt(FEEDBACK_AT_FIRST_POS);
     }
     if (child != null && gestureDetector.onTouchEvent(motionEvent)) {
       child.playSoundEffect(SoundEffectConstants.CLICK);

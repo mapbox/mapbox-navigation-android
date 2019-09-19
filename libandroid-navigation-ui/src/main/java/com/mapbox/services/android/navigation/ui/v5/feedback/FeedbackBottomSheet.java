@@ -34,7 +34,10 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   Animator.AnimatorListener {
 
   public static final String TAG = FeedbackBottomSheet.class.getSimpleName();
-  public static final long CLOSE_BOTTOM_SHEET_AFTER = 150L;
+  private static final long CLOSE_BOTTOM_SHEET_AFTER = 150L;
+  private static final long TIMER_INTERVAL = 1L;
+  private static final int LANDSCAPE_GRID_SPAN = 4;
+  private static final int PORTRAIT_GRID_SPAN = 2;
 
   private FeedbackBottomSheetListener feedbackBottomSheetListener;
   private FeedbackAdapter feedbackAdapter;
@@ -163,9 +166,9 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
     feedbackItems.setOverScrollMode(RecyclerView.OVER_SCROLL_IF_CONTENT_SCROLLS);
     feedbackItems.addOnItemTouchListener(new FeedbackClickListener(context, this));
     if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-      feedbackItems.setLayoutManager(new GridLayoutManager(context, 4));
+      feedbackItems.setLayoutManager(new GridLayoutManager(context, LANDSCAPE_GRID_SPAN));
     } else {
-      feedbackItems.setLayoutManager(new GridLayoutManager(context, 2));
+      feedbackItems.setLayoutManager(new GridLayoutManager(context, PORTRAIT_GRID_SPAN));
     }
   }
 
@@ -216,10 +219,10 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
     if (timer != null) {
       timer.cancel();
     }
-    timer = new CountDownTimer(CLOSE_BOTTOM_SHEET_AFTER, 1) {
-
+    timer = new CountDownTimer(CLOSE_BOTTOM_SHEET_AFTER, TIMER_INTERVAL) {
       @Override
       public void onTick(long millisUntilFinished) {
+        // We don't need to observe changes in interval, hence left empty
       }
 
       @Override
