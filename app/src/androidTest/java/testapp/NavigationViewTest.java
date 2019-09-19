@@ -13,6 +13,7 @@ import testapp.activity.BaseNavigationActivityTest;
 import testapp.robot.feedback.FeedbackResultRobot;
 import testapp.robot.feedback.FeedbackRobot;
 
+import static java.lang.Thread.sleep;
 import static junit.framework.Assert.assertNotNull;
 import static testapp.action.NavigationViewAction.invoke;
 
@@ -70,8 +71,13 @@ public class NavigationViewTest extends BaseNavigationActivityTest {
 
       navigationView.startNavigation(options);
     });
-    FeedbackRobot feedbackRobot = new FeedbackRobot();
-    FeedbackResultRobot result = feedbackRobot.openFeedback().clickFeedbackAtPos(0);
+    FeedbackRobot feedbackRobot = new FeedbackRobot().openFeedback();
+    try {
+      sleep(2000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    FeedbackResultRobot result = feedbackRobot.clickFeedbackAtPos(0);
     result.isSuccess(getNavigationView().getResources().getString(R.string.feedback_submitted));
   }
 }
