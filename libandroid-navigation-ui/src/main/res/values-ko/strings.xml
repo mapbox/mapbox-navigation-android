@@ -12,14 +12,8 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">음소거 해제</string>
 
-    <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">잘못된\n경로</string>
-
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">\n지시 혼동</string>
-
-    <!-- Feedback type for Other Map Issue Issue -->
-    <string name="feedback_general_issue">기타\n지도 이슈</string>
 
     <!-- Feedback type for Missing Exit -->
     <string name="feedback_missing_exit">없어진\n출구</string>
@@ -29,9 +23,6 @@
 
     <!-- Feedback type for a maneuver that is Not Allowed -->
     <string name="feedback_not_allowed">이용\n불가</string>
-
-    <!-- Feedback type for Report Traffic -->
-    <string name="feedback_report_traffic">교통\n안내</string>
 
     <!-- Feedback type for Road Closed -->
     <string name="feedback_road_closure">통행\n금지</string>
