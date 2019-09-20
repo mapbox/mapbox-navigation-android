@@ -12,14 +12,8 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">שמע פועל</string>
 
-    <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">דרך\nמשובשת</string>
-
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">הוראות\nמבולבלות</string>
-
-    <!-- Feedback type for Other Map Issue Issue -->
-    <string name="feedback_general_issue">בעיה אחרת\nבמפה</string>
 
     <!-- Feedback type for Missing Exit -->
     <string name="feedback_missing_exit">יציאה\nלא קיימת</string>
@@ -29,9 +23,6 @@
 
     <!-- Feedback type for a maneuver that is Not Allowed -->
     <string name="feedback_not_allowed">לא\nמורשה</string>
-
-    <!-- Feedback type for Report Traffic -->
-    <string name="feedback_report_traffic">דיווח\nתנועה</string>
 
     <!-- Feedback type for Road Closed -->
     <string name="feedback_road_closure">דרך\nסגורה</string>

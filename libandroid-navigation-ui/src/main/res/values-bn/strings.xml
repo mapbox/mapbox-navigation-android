@@ -12,14 +12,8 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">সশব্দ</string>
 
-    <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">খারাপ\nরুট</string>
-
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">বিভ্রান্তিকর নির্দেশ</string>
-
-    <!-- Feedback type for Other Map Issue Issue -->
-    <string name="feedback_general_issue">মানচিত্র সমস্যা</string>
 
     <!-- Feedback type for Missing Exit -->
     <string name="feedback_missing_exit">নিখোঁজ প্রস্থান</string>
@@ -29,9 +23,6 @@
 
     <!-- Feedback type for a maneuver that is Not Allowed -->
     <string name="feedback_not_allowed">অনুমতি নেই</string>
-
-    <!-- Feedback type for Report Traffic -->
-    <string name="feedback_report_traffic">রিপোর্ট ট্র্যাফিক</string>
 
     <!-- Feedback type for Road Closed -->
     <string name="feedback_road_closure">রাস্তা বন্ধ</string>
