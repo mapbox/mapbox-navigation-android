@@ -23,7 +23,7 @@ public class FeedbackClickListener implements RecyclerView.OnItemTouchListener {
   @Override
   public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent motionEvent) {
     View child = rv.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
-    ViewGroup group = (ViewGroup)child;
+    ViewGroup group = (ViewGroup) child;
     ImageView imageView = null;
     if (group != null && group.getChildAt(FEEDBACK_AT_FIRST_POS) instanceof ImageView) {
       imageView = (ImageView) group.getChildAt(FEEDBACK_AT_FIRST_POS);
