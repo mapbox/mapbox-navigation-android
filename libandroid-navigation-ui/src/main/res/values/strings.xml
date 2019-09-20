@@ -12,14 +12,14 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">Unmuted</string>
 
+    <!-- Feedback -->
+    <string name="report_feedback">Report feedback</string>
+
     <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">Bad\nRoute</string>
+    <string name="feedback_bad_route">Inefficient or\nBad Route</string>
 
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Confusing\nInstruction</string>
-
-    <!-- Feedback type for Other Map Issue Issue -->
-    <string name="feedback_general_issue">Other\nMap Issue</string>
 
     <!-- Feedback type for Missing Exit -->
     <string name="feedback_missing_exit">Missing\nExit</string>
@@ -29,9 +29,6 @@
 
     <!-- Feedback type for a maneuver that is Not Allowed -->
     <string name="feedback_not_allowed">Not\nAllowed</string>
-
-    <!-- Feedback type for Report Traffic -->
-    <string name="feedback_report_traffic">Report\nTraffic</string>
 
     <!-- Feedback type for Road Closed -->
     <string name="feedback_road_closure">Road\nClosed</string>
