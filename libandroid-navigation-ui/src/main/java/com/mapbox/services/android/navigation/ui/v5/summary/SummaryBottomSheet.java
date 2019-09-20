@@ -47,9 +47,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   @NavigationTimeFormat.Type
   private int timeFormatType;
   private DistanceFormatter distanceFormatter;
-
   private NavigationViewModel navigationViewModel;
-
   private LifecycleOwner lifecycleOwner;
 
   public SummaryBottomSheet(Context context) {
@@ -76,10 +74,18 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
     bind();
   }
 
+  /**
+   * Subscribes to a {@link NavigationViewModel} for
+   * updates from {@link android.arch.lifecycle.LiveData}.
+   * <p>
+   * Updates all views with fresh data / shows &amp; hides re-route state.
+   *
+   * @param navigationViewModel to which this View is subscribing
+   * @since 0.6.2
+   */
   public void subscribe(LifecycleOwner owner, NavigationViewModel navigationViewModel) {
     lifecycleOwner = owner;
     lifecycleOwner.getLifecycle().addObserver(this);
-
     this.navigationViewModel = navigationViewModel;
 
     navigationViewModel.summaryModel.observe(lifecycleOwner, new Observer<SummaryModel>() {

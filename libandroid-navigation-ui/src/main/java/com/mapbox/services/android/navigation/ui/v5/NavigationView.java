@@ -90,7 +90,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private CameraPosition initialMapCameraPosition;
   private boolean isMapInitialized;
   private boolean isSubscribed;
-
   private LifecycleRegistry lifecycleRegistry;
 
   public NavigationView(Context context) {
@@ -604,7 +603,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     int paddingBuffer = (int) resources.getDimension(R.dimen.route_overview_buffer_padding);
     int instructionHeight = (int) (resources.getDimension(R.dimen.instruction_layout_height) + paddingBuffer);
     int summaryHeight = (int) resources.getDimension(R.dimen.summary_bottomsheet_height);
-    return new int[]{leftRightPadding, instructionHeight, leftRightPadding, summaryHeight};
+    return new int[] {leftRightPadding, instructionHeight, leftRightPadding, summaryHeight};
   }
 
   private boolean isChangingConfigurations() {

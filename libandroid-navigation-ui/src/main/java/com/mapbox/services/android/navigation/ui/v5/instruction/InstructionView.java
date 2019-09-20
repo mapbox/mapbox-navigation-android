@@ -105,7 +105,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private boolean isRerouting;
   private SoundButton soundButton;
   private FeedbackButton feedbackButton;
-
   private LifecycleOwner lifecycleOwner;
 
   public InstructionView(Context context) {
@@ -184,7 +183,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   public void subscribe(LifecycleOwner owner, NavigationViewModel navigationViewModel) {
     lifecycleOwner = owner;
     lifecycleOwner.getLifecycle().addObserver(this);
-
     this.navigationViewModel = navigationViewModel;
 
     navigationViewModel.instructionModel.observe(lifecycleOwner, new Observer<InstructionModel>() {

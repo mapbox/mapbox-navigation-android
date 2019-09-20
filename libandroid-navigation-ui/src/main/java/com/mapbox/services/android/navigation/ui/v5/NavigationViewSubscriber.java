@@ -13,18 +13,16 @@ import com.mapbox.geojson.Point;
 
 class NavigationViewSubscriber implements LifecycleObserver {
 
-  private final NavigationPresenter navigationPresenter;
-  private final NavigationViewModel navigationViewModel;
   private final LifecycleOwner lifecycleOwner;
+  private final NavigationViewModel navigationViewModel;
+  private final NavigationPresenter navigationPresenter;
 
-  NavigationViewSubscriber(final LifecycleOwner owner,
-                           final NavigationViewModel navigationViewModel,
+  NavigationViewSubscriber(final LifecycleOwner owner, final NavigationViewModel navigationViewModel,
                            final NavigationPresenter navigationPresenter) {
-    this.navigationPresenter = navigationPresenter;
-    this.navigationViewModel = navigationViewModel;
-
     lifecycleOwner = owner;
     lifecycleOwner.getLifecycle().addObserver(this);
+    this.navigationViewModel = navigationViewModel;
+    this.navigationPresenter = navigationPresenter;
   }
 
   void subscribe() {
