@@ -18,7 +18,7 @@ class ConfigureRouterTask extends AsyncTask<Void, Void, Long> {
   @Override
   protected Long doInBackground(Void... paramsUnused) {
     synchronized (this) {
-      return navigator.configureRouter(tilePath);
+      return navigator.configureRouter(tilePath, null, null);
     }
   }
 
