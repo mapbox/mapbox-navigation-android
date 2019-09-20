@@ -12,14 +12,8 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">Проговаривать</string>
 
-    <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">Плохой\nмаршрут</string>
-
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Непонятная\nинструкция</string>
-
-    <!-- Feedback type for Other Map Issue Issue -->
-    <string name="feedback_general_issue">Ошибка\nна карте</string>
 
     <!-- Feedback type for Missing Exit -->
     <string name="feedback_missing_exit">Нет\nсъезда</string>
@@ -29,9 +23,6 @@
 
     <!-- Feedback type for a maneuver that is Not Allowed -->
     <string name="feedback_not_allowed">Манёвр\nне допустим</string>
-
-    <!-- Feedback type for Report Traffic -->
-    <string name="feedback_report_traffic">Сообщить\nо заторе</string>
 
     <!-- Feedback type for Road Closed -->
     <string name="feedback_road_closure">Дорога\nзакрыта</string>
