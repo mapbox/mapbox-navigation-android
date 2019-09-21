@@ -39,8 +39,9 @@ ext {
       ankoCommon             : '0.10.0',
       firebaseCore           : '16.0.7',
       crashlytics            : '2.9.9',
-      multidex               : '2.0.0',
-      json                   : '20180813'
+      multidex               : '1.0.3',
+      json                   : '20180813',
+      assertJ                : "3.11.1",
   ]
 
   dependenciesList = [
