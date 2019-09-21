@@ -40,7 +40,8 @@ ext {
       firebaseCore           : '16.0.7',
       crashlytics            : '2.9.9',
       multidex               : '1.0.3',
-      json                   : '20180813'
+      json                   : '20180813',
+      assertJ                : "3.11.1",
   ]
 
   dependenciesList = [
@@ -103,6 +104,7 @@ ext {
       commonsIO              : "commons-io:commons-io:${version.commonsIO}",
       robolectric            : "org.robolectric:robolectric:${version.robolectric}",
       json                   : "org.json:json:${version.json}",
+      assertJ                : "org.assertj:assertj-core:${version.assertJ}",
 
       // play services
       gmsLocation            : "com.google.android.gms:play-services-location:${version.gmsLocation}",

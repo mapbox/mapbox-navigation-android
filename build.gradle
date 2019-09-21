@@ -2,7 +2,8 @@ apply plugin: 'com.github.kt3k.coveralls'
 apply plugin: 'jacoco'
 
 buildscript {
-  apply from: "${rootDir}/gradle/dependencies.gradle"
+    ext.kotlin_version = '1.3.50'
+    apply from: "${rootDir}/gradle/dependencies.gradle"
 
   repositories {
     google()
@@ -12,7 +13,7 @@ buildscript {
     maven { url 'https://maven.fabric.io/public' }
   }
   dependencies {
-    classpath pluginDependencies.gradle
+    classpath "com.android.tools.build:gradle:${pluginVersion.gradle}"
     classpath pluginDependencies.kotlin
     classpath pluginDependencies.coveralls
     classpath pluginDependencies.errorprone
@@ -22,6 +23,7 @@ buildscript {
     classpath pluginDependencies.googleServices
     classpath pluginDependencies.crashlytics
     classpath pluginDependencies.license
+      classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
 }
 
