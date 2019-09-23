@@ -4,7 +4,9 @@ import android.app.Application
 import android.content.Context
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.android.internal.InternalMetricsReporter
 import com.mapbox.navigation.api.Navigation
+import com.mapbox.navigation.api.NavigationMetricsDelegate
 import com.mapbox.navigation.api.NavigationSession
 
 object MapboxNavigation: Navigation {
@@ -18,6 +20,8 @@ object MapboxNavigation: Navigation {
 
   @Volatile
   var options: Options = Options()
+  @Volatile
+  var metricsDeleagate: NavigationMetricsDelegate = InternalMetricsReporter
 
   lateinit var applicationContext: Context
   lateinit var mapboxToken: String
