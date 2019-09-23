@@ -12,14 +12,8 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">Visszahangosítva</string>
 
-    <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">Rossz\nútvonal</string>
-
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Megtévesztő\nutasítás</string>
-
-    <!-- Feedback type for Other Map Issue Issue -->
-    <string name="feedback_general_issue">Egyéb\ntérképi hiba</string>
 
     <!-- Feedback type for Missing Exit -->
     <string name="feedback_missing_exit">Hiányzó\nkijárat</string>
@@ -29,9 +23,6 @@
 
     <!-- Feedback type for a maneuver that is Not Allowed -->
     <string name="feedback_not_allowed">Nem\nengedélyezett</string>
-
-    <!-- Feedback type for Report Traffic -->
-    <string name="feedback_report_traffic">Forgalom\njelentése</string>
 
     <!-- Feedback type for Road Closed -->
     <string name="feedback_road_closure">Lezárt\nút</string>

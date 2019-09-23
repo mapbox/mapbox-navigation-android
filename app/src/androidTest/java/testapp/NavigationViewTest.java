@@ -53,4 +53,28 @@ public class NavigationViewTest extends BaseNavigationActivityTest {
 
     assertNotNull(mapboxNavigation);
   }
+
+  //TODO: Test is running locally but not on firebase. Research the root cause
+  /*@Test
+  public void onNavigationStart_mapboxSendFeedback() {
+    validateTestSetup();
+
+    invoke(getNavigationView(), (uiController, navigationView) -> {
+      navigationView.retrieveFeedbackButton().show();
+      DirectionsRoute testRoute = DirectionsRoute.fromJson(loadJsonFromAsset("lancaster-1.json"));
+      NavigationViewOptions options = NavigationViewOptions.builder()
+              .directionsRoute(testRoute)
+              .build();
+
+      navigationView.startNavigation(options);
+    });
+    FeedbackRobot feedbackRobot = new FeedbackRobot().openFeedback();
+    try {
+      sleep(2000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    FeedbackResultRobot result = feedbackRobot.clickFeedbackAtPos(0);
+    result.isSuccess(getNavigationView().getResources().getString(R.string.feedback_submitted));
+  }*/
 }

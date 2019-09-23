@@ -12,7 +12,6 @@ public class FeedbackEvent implements TelemetryEvent {
   @Retention(RetentionPolicy.SOURCE)
   @StringDef( {
     FEEDBACK_TYPE_GENERAL_ISSUE,
-    FEEDBACK_TYPE_OTHER_MAP_ISSUE,
     FEEDBACK_TYPE_ACCIDENT,
     FEEDBACK_TYPE_HAZARD,
     FEEDBACK_TYPE_ROAD_CLOSED,
@@ -20,7 +19,6 @@ public class FeedbackEvent implements TelemetryEvent {
     FEEDBACK_TYPE_ROUTING_ERROR,
     FEEDBACK_TYPE_CONFUSING_INSTRUCTION,
     FEEDBACK_TYPE_INACCURATE_GPS,
-    FEEDBACK_TYPE_REPORT_TRAFFIC,
     FEEDBACK_TYPE_MISSING_ROAD,
     FEEDBACK_TYPE_MISSING_EXIT
   })
@@ -36,7 +34,6 @@ public class FeedbackEvent implements TelemetryEvent {
   }
 
   public static final String FEEDBACK_TYPE_GENERAL_ISSUE = "general";
-  public static final String FEEDBACK_TYPE_OTHER_MAP_ISSUE = "other_map_issue";
   public static final String FEEDBACK_TYPE_ACCIDENT = "accident";
   public static final String FEEDBACK_TYPE_HAZARD = "hazard";
   public static final String FEEDBACK_TYPE_ROAD_CLOSED = "road_closed";
@@ -46,7 +43,6 @@ public class FeedbackEvent implements TelemetryEvent {
   public static final String FEEDBACK_TYPE_MISSING_EXIT = "missing_exit";
   public static final String FEEDBACK_TYPE_CONFUSING_INSTRUCTION = "confusing_instruction";
   public static final String FEEDBACK_TYPE_INACCURATE_GPS = "inaccurate_gps";
-  public static final String FEEDBACK_TYPE_REPORT_TRAFFIC = "report_traffic";
 
   public static final String FEEDBACK_SOURCE_REROUTE = "reroute";
   public static final String FEEDBACK_SOURCE_UI = "user";

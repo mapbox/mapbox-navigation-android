@@ -7,4 +7,15 @@
     <string name="meters">м</string>
     <string name="miles">mi</string>
     <string name="feet">фт</string>
-    </resources>
+    <!-- Time formatting -->
+    <plurals name="numberOfDays">
+        <item quantity="one">день</item>
+        <item quantity="few">дні</item>
+        <item quantity="many">днів</item>
+        <item quantity="other">днів</item>
+    </plurals>
+    <!-- Hour -->
+    <string name="hr">год</string>
+    <!-- Minute -->
+    <string name="min">хв</string>
+</resources>

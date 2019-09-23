@@ -12,14 +12,8 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">Audible</string>
 
-    <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">Mauvaise\nroute</string>
-
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Instructions\nnon précises</string>
-
-    <!-- Feedback type for Other Map Issue Issue -->
-    <string name="feedback_general_issue">Autre erreur\nsur la carte</string>
 
     <!-- Feedback type for Missing Exit -->
     <string name="feedback_missing_exit">Sortie\nmanquante</string>
@@ -29,9 +23,6 @@
 
     <!-- Feedback type for a maneuver that is Not Allowed -->
     <string name="feedback_not_allowed">Passage\ninterdit</string>
-
-    <!-- Feedback type for Report Traffic -->
-    <string name="feedback_report_traffic">Bouchon</string>
 
     <!-- Feedback type for Road Closed -->
     <string name="feedback_road_closure">Route\nfermée</string>

@@ -6,9 +6,12 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 
 public class FeedbackClickListener implements RecyclerView.OnItemTouchListener {
 
+  private static final int FEEDBACK_AT_FIRST_POS = 0;
   private GestureDetector gestureDetector;
   private ClickCallback callback;
 
@@ -20,10 +23,15 @@ public class FeedbackClickListener implements RecyclerView.OnItemTouchListener {
   @Override
   public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent motionEvent) {
     View child = rv.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
+    ViewGroup group = (ViewGroup) child;
+    ImageView imageView = null;
+    if (group != null && group.getChildAt(FEEDBACK_AT_FIRST_POS) instanceof ImageView) {
+      imageView = (ImageView) group.getChildAt(FEEDBACK_AT_FIRST_POS);
+    }
     if (child != null && gestureDetector.onTouchEvent(motionEvent)) {
       child.playSoundEffect(SoundEffectConstants.CLICK);
       int position = rv.getChildAdapterPosition(child);
-      callback.onFeedbackItemClick(position);
+      callback.onFeedbackItemClick(imageView, position);
     }
     return false;
   }
@@ -47,6 +55,6 @@ public class FeedbackClickListener implements RecyclerView.OnItemTouchListener {
 
   public interface ClickCallback {
 
-    void onFeedbackItemClick(int feedbackPosition);
+    void onFeedbackItemClick(ImageView view, int feedbackPosition);
   }
 }

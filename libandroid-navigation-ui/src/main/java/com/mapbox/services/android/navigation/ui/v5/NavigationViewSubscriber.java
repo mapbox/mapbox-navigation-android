@@ -1,24 +1,32 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.OnLifecycleEvent;
 import android.location.Location;
 import android.support.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 
-class NavigationViewSubscriber {
+class NavigationViewSubscriber implements LifecycleObserver {
 
-  private NavigationPresenter navigationPresenter;
+  private final LifecycleOwner lifecycleOwner;
+  private final NavigationViewModel navigationViewModel;
+  private final NavigationPresenter navigationPresenter;
 
-  NavigationViewSubscriber(NavigationPresenter navigationPresenter) {
+  NavigationViewSubscriber(final LifecycleOwner owner, final NavigationViewModel navigationViewModel,
+                           final NavigationPresenter navigationPresenter) {
+    lifecycleOwner = owner;
+    lifecycleOwner.getLifecycle().addObserver(this);
+    this.navigationViewModel = navigationViewModel;
     this.navigationPresenter = navigationPresenter;
   }
 
-  void subscribe(LifecycleOwner owner, final NavigationViewModel navigationViewModel) {
-
-    navigationViewModel.route.observe(owner, new Observer<DirectionsRoute>() {
+  void subscribe() {
+    navigationViewModel.retrieveRoute().observe(lifecycleOwner, new Observer<DirectionsRoute>() {
       @Override
       public void onChanged(@Nullable DirectionsRoute directionsRoute) {
         if (directionsRoute != null) {
@@ -27,7 +35,7 @@ class NavigationViewSubscriber {
       }
     });
 
-    navigationViewModel.retrieveDestination().observe(owner, new Observer<Point>() {
+    navigationViewModel.retrieveDestination().observe(lifecycleOwner, new Observer<Point>() {
       @Override
       public void onChanged(@Nullable Point point) {
         if (point != null) {
@@ -36,7 +44,7 @@ class NavigationViewSubscriber {
       }
     });
 
-    navigationViewModel.navigationLocation.observe(owner, new Observer<Location>() {
+    navigationViewModel.retrieveNavigationLocation().observe(lifecycleOwner, new Observer<Location>() {
       @Override
       public void onChanged(@Nullable Location location) {
         if (location != null) {
@@ -45,7 +53,7 @@ class NavigationViewSubscriber {
       }
     });
 
-    navigationViewModel.shouldRecordScreenshot.observe(owner, new Observer<Boolean>() {
+    navigationViewModel.retrieveShouldRecordScreenshot().observe(lifecycleOwner, new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean shouldRecordScreenshot) {
         if (shouldRecordScreenshot != null && shouldRecordScreenshot) {
@@ -53,5 +61,13 @@ class NavigationViewSubscriber {
         }
       }
     });
+  }
+
+  @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+  void unsubscribe() {
+    navigationViewModel.retrieveRoute().removeObservers(lifecycleOwner);
+    navigationViewModel.retrieveDestination().removeObservers(lifecycleOwner);
+    navigationViewModel.retrieveNavigationLocation().removeObservers(lifecycleOwner);
+    navigationViewModel.retrieveShouldRecordScreenshot().removeObservers(lifecycleOwner);
   }
 }
