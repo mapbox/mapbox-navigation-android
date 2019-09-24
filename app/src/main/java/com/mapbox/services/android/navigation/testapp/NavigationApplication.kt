@@ -1,8 +1,8 @@
 package com.mapbox.services.android.navigation.testapp
 
 import android.os.StrictMode
-import android.support.multidex.MultiDexApplication
 import android.text.TextUtils
+import androidx.multidex.MultiDexApplication
 import com.mapbox.android.search.MapboxSearch
 import com.mapbox.android.search.MapboxSearchOptions
 import com.mapbox.crashmonitor.CrashMonitor

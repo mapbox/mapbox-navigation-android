@@ -1,8 +1,9 @@
 package com.mapbox.services.android.navigation.ui.v5.summary.list;
 
-import android.support.annotation.NonNull;
 import android.text.SpannableString;
 import android.view.View;
+
+import androidx.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.LegStep;

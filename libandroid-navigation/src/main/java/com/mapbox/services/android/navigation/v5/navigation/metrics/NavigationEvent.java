@@ -2,7 +2,8 @@ package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
 import android.os.Build;
 import android.os.Parcel;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.mapbox.android.telemetry.Event;
 import com.mapbox.services.android.navigation.BuildConfig;

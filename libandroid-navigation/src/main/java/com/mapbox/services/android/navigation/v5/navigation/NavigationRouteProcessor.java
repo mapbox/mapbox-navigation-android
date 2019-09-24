@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;

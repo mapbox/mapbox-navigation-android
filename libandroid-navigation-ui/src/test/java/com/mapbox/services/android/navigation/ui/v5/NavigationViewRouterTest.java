@@ -1,7 +1,8 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.location.Location;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

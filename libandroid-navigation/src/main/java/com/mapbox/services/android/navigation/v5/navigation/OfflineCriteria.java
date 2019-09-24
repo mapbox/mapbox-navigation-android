@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.support.annotation.StringDef;
+import androidx.annotation.StringDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import android.support.design.widget.BottomSheetBehavior;
-
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener;
 
 /**

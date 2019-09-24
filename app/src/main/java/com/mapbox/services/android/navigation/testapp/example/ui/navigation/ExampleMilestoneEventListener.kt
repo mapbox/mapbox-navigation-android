@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.testapp.example.ui.navigation
 
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.MutableLiveData
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement
 import com.mapbox.services.android.navigation.v5.milestone.Milestone

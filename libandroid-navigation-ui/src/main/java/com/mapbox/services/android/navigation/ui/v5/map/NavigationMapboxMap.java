@@ -6,11 +6,11 @@ import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.support.annotation.AnyRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
+
+import androidx.annotation.AnyRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -284,7 +284,7 @@ public class NavigationMapboxMap {
 
   /**
    * Can be used to store the current state of the map in
-   * {@link android.support.v4.app.FragmentActivity#onSaveInstanceState(Bundle, PersistableBundle)}.
+   * {@link androidx.fragment.app.Fragment#onSaveInstanceState(Bundle)}.
    * <p>
    * This method uses {@link NavigationMapboxMapInstanceState}, stored with the provided key.  This key
    * can also later be used to extract the {@link NavigationMapboxMapInstanceState}.
@@ -304,7 +304,7 @@ public class NavigationMapboxMap {
   /**
    * Can be used to restore a {@link NavigationMapboxMap} after it has been initialized.
    * <p>
-   * This cannot be called in {@link android.support.v4.app.FragmentActivity#onRestoreInstanceState(Bundle)}
+   * This cannot be called in {@link androidx.fragment.app.Fragment#onViewStateRestored(Bundle)}
    * because we cannot guarantee the map is re-initialized at that point.
    * <p>
    * You can extract the {@link NavigationMapboxMapInstanceState} in <tt>onRestoreInstanceState</tt> and then

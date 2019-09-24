@@ -1,7 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.support.annotation.ColorRes;
-import android.support.annotation.Nullable;
+import androidx.annotation.ColorRes;
+import androidx.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.services.android.navigation.R;

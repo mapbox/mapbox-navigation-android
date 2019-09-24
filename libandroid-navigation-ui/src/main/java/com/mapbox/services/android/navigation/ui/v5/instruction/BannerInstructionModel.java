@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;

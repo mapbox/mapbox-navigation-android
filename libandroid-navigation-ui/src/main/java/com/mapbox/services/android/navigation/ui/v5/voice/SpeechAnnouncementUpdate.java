@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
-import android.support.v4.util.Pair;
+import androidx.core.util.Pair;
 
 interface SpeechAnnouncementUpdate {
 
