@@ -8,7 +8,7 @@ interface DirectionsSession {
 
   fun addWaypoint(point: Point)
   fun removeWaypoint(point: Point)
-  fun reRoute(from: Point)
+  fun recalculate(from: Point)
   fun setProfile(profile: String)
   fun setFasterRouteListener(fasterRouteListener: Listener)
   fun cancel()
