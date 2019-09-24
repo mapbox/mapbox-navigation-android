@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;

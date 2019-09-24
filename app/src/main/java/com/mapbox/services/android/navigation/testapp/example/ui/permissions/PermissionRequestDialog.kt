@@ -2,8 +2,8 @@ package com.mapbox.services.android.navigation.testapp.example.ui.permissions
 
 import android.app.Activity
 import android.content.DialogInterface
-import android.support.v4.app.ActivityCompat
-import android.support.v7.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
 
 const val NAVIGATION_PERMISSIONS_REQUEST = 12345
 

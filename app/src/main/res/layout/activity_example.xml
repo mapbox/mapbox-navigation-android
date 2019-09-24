@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -20,7 +20,7 @@
         app:mapbox_uiAttribution="false"
         app:mapbox_uiLogo="false"/>
 
-    <android.support.design.widget.CoordinatorLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -66,7 +66,7 @@
             app:layout_anchor="@id/autocompleteBottomSheet"
             app:layout_anchorGravity="top|end">
 
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/locationFab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -75,14 +75,14 @@
                 android:layout_marginBottom="@dimen/fab_margin_bottom"
                 app:srcCompat="@drawable/ic_my_location"/>
 
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/navigationFab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="invisible"
                 app:srcCompat="@drawable/ic_navigation"/>
 
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/cancelFab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -92,7 +92,7 @@
 
         </FrameLayout>
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/settingsFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -111,7 +111,7 @@
             android:layout_gravity="top"
             android:visibility="invisible"/>
 
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/autocompleteBottomSheet"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -124,7 +124,7 @@
             app:behavior_hideable="true"
             app:layout_behavior="@string/autocompleteBehavior">
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:id="@+id/autocompleteCardView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -142,10 +142,10 @@
                     android:maxLines="1"
                     android:padding="@dimen/autocomplete_padding"/>
 
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </android.support.design.widget.CoordinatorLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

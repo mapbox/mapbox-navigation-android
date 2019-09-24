@@ -1,7 +1,8 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.mapbox.services.android.navigation.v5.utils.DownloadTask;
 

@@ -4,7 +4,8 @@ import android.app.Application;
 import android.content.Context;
 import android.location.Location;
 import android.os.Build;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.telemetry.Event;

@@ -3,7 +3,8 @@ package com.mapbox.services.android.navigation.ui.v5.voice;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
+
+import androidx.annotation.RequiresApi;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 class Api26AudioFocusDelegate implements AudioFocusDelegate {

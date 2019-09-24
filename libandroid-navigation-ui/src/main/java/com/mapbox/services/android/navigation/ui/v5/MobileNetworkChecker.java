@@ -1,7 +1,9 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import android.support.annotation.NonNull;
+
 import android.telephony.TelephonyManager;
+
+import androidx.annotation.NonNull;
 
 import java.util.HashMap;
 

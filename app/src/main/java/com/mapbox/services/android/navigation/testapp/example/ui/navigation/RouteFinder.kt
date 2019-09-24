@@ -1,9 +1,9 @@
 package com.mapbox.services.android.navigation.testapp.example.ui.navigation
 
-import android.arch.lifecycle.MutableLiveData
 import android.location.Location
 import android.os.Environment
 import android.preference.PreferenceManager
+import androidx.lifecycle.MutableLiveData
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.testapp.NavigationApplication

@@ -1,9 +1,11 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.content.Context;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.util.AttributeSet;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class FeedbackButton extends ConstraintLayout implements NavigationButton {
   private FloatingActionButton feedbackFab;

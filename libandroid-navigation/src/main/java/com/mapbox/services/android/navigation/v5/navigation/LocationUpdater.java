@@ -2,7 +2,8 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.annotation.SuppressLint;
 import android.location.Location;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;

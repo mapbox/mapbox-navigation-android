@@ -3,7 +3,8 @@ package testapp.utils;
 import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.espresso.IdlingResource;
+
+import androidx.test.espresso.IdlingResource;
 
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;

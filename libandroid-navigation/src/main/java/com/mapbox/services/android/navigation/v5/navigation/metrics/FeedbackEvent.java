@@ -1,6 +1,8 @@
 package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
-import android.support.annotation.StringDef;
+
+
+import androidx.annotation.StringDef;
 
 import com.mapbox.android.telemetry.TelemetryUtils;
 

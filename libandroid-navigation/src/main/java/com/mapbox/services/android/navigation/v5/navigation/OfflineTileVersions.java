@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.mapbox.api.routetiles.v1.versions.MapboxRouteTileVersions;
 import com.mapbox.api.routetiles.v1.versions.models.RouteTileVersionsResponse;

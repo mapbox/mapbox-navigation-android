@@ -2,7 +2,8 @@ package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
 import android.annotation.SuppressLint;
 import android.location.Location;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 

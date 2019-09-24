@@ -2,7 +2,8 @@ package com.mapbox.services.android.navigation.ui.v5.instruction.maneuver;
 
 import android.graphics.Canvas;
 import android.graphics.PointF;
-import android.support.v4.util.Pair;
+
+import androidx.core.util.Pair;
 
 import java.util.HashMap;
 

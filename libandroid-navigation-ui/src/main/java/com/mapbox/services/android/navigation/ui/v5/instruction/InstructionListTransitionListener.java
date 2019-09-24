@@ -1,9 +1,9 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.support.annotation.NonNull;
-import android.support.transition.Transition;
-import android.support.transition.TransitionListenerAdapter;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.Transition;
+import androidx.transition.TransitionListenerAdapter;
 
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
 

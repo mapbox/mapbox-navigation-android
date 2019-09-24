@@ -1,13 +1,13 @@
 package com.mapbox.services.android.navigation.testapp.example.ui
 
-import android.arch.lifecycle.LifecycleOwner
-import android.arch.lifecycle.Observer
 import android.content.pm.PackageManager
 import android.location.Location
-import android.support.design.widget.BottomSheetBehavior
 import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
 import com.mapbox.geojson.Point
