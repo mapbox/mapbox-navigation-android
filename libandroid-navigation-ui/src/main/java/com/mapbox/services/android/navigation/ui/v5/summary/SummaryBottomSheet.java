@@ -9,6 +9,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.Lifecycle;
@@ -35,7 +36,7 @@ import java.text.DecimalFormat;
  *
  * @since 0.6.0
  */
-public class SummaryBottomSheet extends FrameLayout {
+public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver {
 
   private static final String EMPTY_STRING = "";
   private TextView distanceRemainingText;
