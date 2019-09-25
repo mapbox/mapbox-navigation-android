@@ -35,10 +35,12 @@ class TripsManagerImpl implements TripsManager {
         requestCount = getRouteRequestCountThreshold();
         requestCount++;
         setTimerExpiry();
+        persistTripsSkuToken();
         break;
       case ROTATE_ON_REQUEST_COUNT_EXPIRE:
         requestCount = 0;
         setTimerExpiry();
+        persistTripsSkuToken();
         break;
       default:
         requestCount = getRouteRequestCountThreshold();
@@ -46,7 +48,6 @@ class TripsManagerImpl implements TripsManager {
         break;
     }
     setRouteRequestCountThreshold(requestCount);
-    persistTripsSkuToken();
   }
 
   private boolean shouldRefreshSku() {
