@@ -15,6 +15,7 @@ ext {
       mapboxNavigator           : '8.1.0',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.7.0',
+      mapboxAccounts            : '0.2.0',
       mapboxSearchSdk           : '0.1.0-SNAPSHOT',
       mapboxAnnotations         : '0.0.1-alpha.1',
       mapboxAnnotationsProcessor: '0.0.1-alpha.1',
@@ -62,6 +63,7 @@ ext {
       mapboxAnnotationPlugin    : "com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v8:${version.mapboxAnnotationPlugin}",
       mapboxSearchSdk           : "com.mapbox.mapboxsdk:mapbox-search-android:${version.mapboxSearchSdk}",
       mapboxCrashMonitor        : "com.mapbox.crashmonitor:mapbox-crash-monitor-native:${version.mapboxCrashMonitor}",
+      mapboxAndroidAccounts     : "com.mapbox.mapboxsdk:mapbox-android-accounts:${version.mapboxAccounts}",
       mapboxAnnotations         : "com.mapbox.base:annotations:${version.mapboxAnnotations}",
       mapboxAnnotationsProcessor: "com.mapbox.base:annotations-processor:${version.mapboxAnnotationsProcessor}",
 
@@ -71,7 +73,6 @@ ext {
 
       // Coroutines and Channels
       coroutinesAndroid         : "org.jetbrains.kotlinx:kotlinx-coroutines-android:${version.coroutinesAndroid}",
-
 
       // code style
       ktlint                    : "com.pinterest:ktlint:${version.ktlint}",

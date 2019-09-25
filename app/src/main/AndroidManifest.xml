@@ -5,8 +5,6 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
-    <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="${enableCrashReporting}" />
-
     <application
         android:name=".NavigationApplication"
         android:allowBackup="true"
@@ -15,6 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="${enableCrashReporting}" />
+        <meta-data android:name="com.mapbox.services.android.navigation.v5.EnableSkuToken" android:value="true"/>
 
         <activity
             android:name=".example.ui.ExampleActivity"
