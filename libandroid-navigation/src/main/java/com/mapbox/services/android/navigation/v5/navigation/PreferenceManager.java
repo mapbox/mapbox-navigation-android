@@ -7,9 +7,10 @@ class PreferenceManager {
 
   private SharedPreferences preferences;
   private final Object lock = new Object();
+  private static final String MAPBOX_NAV_PREFERENCES = "mapbox.navigation.preferences.";
 
   PreferenceManager(Context context, String prefKey) {
-    this.preferences = context.getSharedPreferences(prefKey, Context.MODE_PRIVATE);
+    this.preferences = context.getSharedPreferences(MAPBOX_NAV_PREFERENCES + prefKey, Context.MODE_PRIVATE);
   }
 
   public <T> void set(String key, T value) {

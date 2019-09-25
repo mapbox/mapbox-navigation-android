@@ -3,7 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import timber.log.Timber;
 
 import java.lang.ref.WeakReference;
@@ -51,11 +51,13 @@ class AccountsManagerImpl {
   }
 
   private void setBillingModel(@NonNull Context context) {
-    if (isMauBillingEnabled(context)) {
+    accountsManager = new DisableSkuManagerImpl();
+    // TODO uncomment when ready to use as a part of 1.0
+    /*if (isMauBillingEnabled(context)) {
       accountsManager = new MauManagerImpl(accountsPreference);
     } else {
       accountsManager = new TripsManagerImpl(accountsPreference);
-    }
+    }*/
   }
 
   static String obtainSku() {

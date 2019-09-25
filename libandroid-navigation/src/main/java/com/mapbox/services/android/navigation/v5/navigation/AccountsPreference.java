@@ -5,11 +5,11 @@ import android.content.Context;
 import java.lang.ref.WeakReference;
 
 class AccountsPreference {
-  private static final String MAPBOX_NAV_PREFERENCES = "mapbox.navigation.preferences";
+  private static final String ACCOUNTS = "accounts";
   private final PreferenceManager preferenceManager;
 
   AccountsPreference(WeakReference<Context> context) {
-    this.preferenceManager = new PreferenceManager(context.get(), MAPBOX_NAV_PREFERENCES);
+    this.preferenceManager = new PreferenceManager(context.get(), ACCOUNTS);
   }
 
   PreferenceManager getPreferenceManager() {

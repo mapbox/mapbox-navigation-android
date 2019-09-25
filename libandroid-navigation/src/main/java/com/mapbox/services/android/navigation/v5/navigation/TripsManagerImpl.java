@@ -1,7 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
+import androidx.annotation.NonNull;
 import com.mapbox.android.accounts.v1.MapboxAccounts;
 
 class TripsManagerImpl implements TripsManager {

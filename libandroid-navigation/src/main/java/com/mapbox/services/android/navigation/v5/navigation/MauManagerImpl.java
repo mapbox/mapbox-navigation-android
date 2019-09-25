@@ -2,9 +2,9 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import androidx.annotation.NonNull;
 import com.mapbox.android.accounts.v1.MapboxAccounts;
 
 class MauManagerImpl implements MauManager {
@@ -21,6 +21,7 @@ class MauManagerImpl implements MauManager {
     refreshToken();
   }
 
+  //TODO figure out when exactly to remove callbacks from this handler.
   private void refreshToken() {
     persistMauSkuToken();
     handler.postDelayed(new Runnable() {

@@ -15,7 +15,6 @@
         android:theme="@style/AppTheme">
 
         <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="${enableCrashReporting}" />
-        <meta-data android:name="com.mapbox.services.android.navigation.v5.EnableSkuToken" android:value="true"/>
 
         <activity
             android:name=".example.ui.ExampleActivity"
