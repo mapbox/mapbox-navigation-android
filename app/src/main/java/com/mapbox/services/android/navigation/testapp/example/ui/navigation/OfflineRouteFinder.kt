@@ -13,9 +13,11 @@ import timber.log.Timber
 
 private const val BEARING_TOLERANCE = 90.0
 
-class OfflineRouteFinder(offlinePath: String,
-                         version: String,
-                         private val callback: OnRoutesFoundCallback) {
+class OfflineRouteFinder(
+    offlinePath: String,
+    version: String,
+    private val callback: OnRoutesFoundCallback
+) {
 
   private val offlineRouter: MapboxOfflineRouter = MapboxOfflineRouter(offlinePath)
   private var isConfigured = false

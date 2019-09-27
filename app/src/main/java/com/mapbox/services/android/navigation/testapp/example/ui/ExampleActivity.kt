@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
@@ -102,8 +101,11 @@ class ExampleActivity : HistoryActivity(), ExampleView {
     }
   }
 
-  override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
-                                          grantResults: IntArray) {
+  override fun onRequestPermissionsResult(
+      requestCode: Int,
+      permissions: Array<out String>,
+      grantResults: IntArray
+  ) {
     presenter.onPermissionResult(requestCode, grantResults)
   }
 

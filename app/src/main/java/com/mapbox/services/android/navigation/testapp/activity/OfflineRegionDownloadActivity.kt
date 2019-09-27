@@ -130,7 +130,6 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         }
     }
 
-
     fun setupSpinner(versions: MutableList<String>) {
         restartVersionFetchButton.visibility = GONE
         versionSpinnerContainer.visibility = VISIBLE
@@ -192,8 +191,11 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         when (requestCode) {
             EXTERNAL_STORAGE_PERMISSION -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PERMISSION_GRANTED)) {
@@ -209,20 +211,20 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         showDownloading(false, "Requesting tiles....")
         // TODO Hardcoding OfflineRegionDefinitionProvider values for testing / debugging purposes
         val styleUrl: String? = "mapbox://styles/mapbox/navigation-guidance-day-v4"
-        //val styleUrl: String? = mapboxMap.style?.url
+        // val styleUrl: String? = mapboxMap.style?.url
         val bounds: LatLngBounds = LatLngBounds.from(boundingBox.north(), boundingBox.east(), boundingBox.south(), boundingBox.west())
         // TODO Testing downloading a Geometry
         val geometry: Geometry = GeometryGeoJson.fromJson("{\"type\":\"Polygon\",\"coordinates\":[[[-77.152533,39.085537],[-77.152533,39.083038],[-77.150031,39.083038],[-77.150031,39.085537],[-77.147529,39.085537],[-77.147529,39.088039],[-77.147529,39.090538],[-77.150031,39.090538],[-77.150031,39.093037],[-77.150031,39.095539],[-77.150031,39.098038],[-77.150031,39.100540],[-77.150031,39.103039],[-77.152533,39.103039],[-77.152533,39.105537],[-77.155028,39.105537],[-77.155028,39.108040],[-77.155028,39.110538],[-77.157531,39.110538],[-77.157531,39.113037],[-77.160033,39.113037],[-77.160033,39.115536],[-77.162528,39.115540],[-77.162528,39.118038],[-77.165030,39.118038],[-77.165030,39.115536],[-77.167533,39.115536],[-77.167533,39.113037],[-77.167533,39.110538],[-77.165030,39.110538],[-77.165030,39.108040],[-77.162536,39.108036],[-77.162536,39.105537],[-77.162536,39.103039],[-77.160033,39.103039],[-77.160033,39.100540],[-77.157531,39.100536],[-77.157531,39.098038],[-77.157531,39.095535],[-77.157531,39.093037],[-77.157531,39.090538],[-77.157531,39.088039],[-77.155036,39.088036],[-77.155036,39.085537],[-77.152533,39.085537]]]}")
         // TODO Hardcoding OfflineRegionDefinitionProvider values for testing / debugging purposes
         val minZoom: Double = 11.0
         val maxZoom: Double = 17.0
-        //val minZoom: Double = mapboxMap.cameraPosition.zoom
-        //val maxZoom: Double = mapboxMap.maxZoomLevel
+        // val minZoom: Double = mapboxMap.cameraPosition.zoom
+        // val maxZoom: Double = mapboxMap.maxZoomLevel
         val pixelRatio: Float = this.resources.displayMetrics.density
         val definition: OfflineTilePyramidRegionDefinition = OfflineTilePyramidRegionDefinition(
                 styleUrl, bounds, minZoom, maxZoom, pixelRatio)
         // TODO Testing downloading a Geometry using OfflineGeometryRegionDefinition as definition
-        //val definition: OfflineGeometryRegionDefinition = OfflineGeometryRegionDefinition(
+        // val definition: OfflineGeometryRegionDefinition = OfflineGeometryRegionDefinition(
         //        styleUrl, geometry, minZoom, maxZoom, pixelRatio)
 
         val metadata: ByteArray

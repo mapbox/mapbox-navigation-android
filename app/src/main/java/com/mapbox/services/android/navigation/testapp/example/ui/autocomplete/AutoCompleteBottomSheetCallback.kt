@@ -4,7 +4,7 @@ import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.services.android.navigation.testapp.example.ui.ExamplePresenter
 
-internal class AutoCompleteBottomSheetCallback(private val presenter: ExamplePresenter): BottomSheetBehavior.BottomSheetCallback() {
+internal class AutoCompleteBottomSheetCallback(private val presenter: ExamplePresenter) : BottomSheetBehavior.BottomSheetCallback() {
 
   override fun onSlide(bottomSheet: View, slideOffset: Float) {
     // No impl

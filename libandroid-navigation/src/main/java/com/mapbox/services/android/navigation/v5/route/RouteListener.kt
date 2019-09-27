@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.v5.route
 
-
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 

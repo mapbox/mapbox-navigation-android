@@ -4,15 +4,16 @@ import android.location.Location
 
 class MetricsLocation(private val location: Location?) {
 
-    fun getLocation(): Location {
-        if (location != null) {
-            return location
-        }
-
-        val metricLocation = Location("MetricsLocation")
-        metricLocation.latitude = 0.0
-        metricLocation.longitude = 0.0
-
-        return metricLocation
-    }
+    fun getLocation() =
+            when (location == null) {
+                true -> {
+                    val metricLocation = Location("MetricsLocation")
+                    metricLocation.latitude = 0.0
+                    metricLocation.longitude = 0.0
+                    metricLocation
+                }
+                else -> {
+                    location
+                }
+            }
 }
