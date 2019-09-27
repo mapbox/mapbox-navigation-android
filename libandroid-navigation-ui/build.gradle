@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 apply plugin: 'com.jaredsburrows.license'
 
 android {
@@ -85,6 +87,9 @@ dependencies {
   testImplementation dependenciesList.mockito
   testImplementation dependenciesList.robolectric
   testImplementation dependenciesList.json
+  compile "androidx.core:core-ktx:+"
+  compile "androidx.lifecycle:lifecycle-viewmodel-ktx:2.0.0-rc01"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 apply from: 'javadoc.gradle'
@@ -94,3 +99,6 @@ apply from: "${rootDir}/gradle/nitpick.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
 apply from: "${rootDir}/gradle/dependencies-graph.gradle"
 apply from: "${rootDir}/gradle/dependency-updates.gradle"
+repositories {
+  mavenCentral()
+}
