@@ -57,10 +57,16 @@ class FasterRouteDetector : FasterRoute() {
                     }
                 }
             }
-            // New route must be at least 10% faster
-            if (newRoute.duration() <= 0.9 * currentDurationRemaining) {
-                return true
-            }
+            return newRoute.duration()?.let {duration ->
+                when (duration <= 0.9 * currentDurationRemaining){
+                    true ->{
+                        return true
+                    }
+                    false -> {
+                        false
+                    }
+                }
+            }?: true
         }
         return false
     }

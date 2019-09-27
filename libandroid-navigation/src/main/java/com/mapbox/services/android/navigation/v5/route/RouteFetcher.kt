@@ -193,7 +193,7 @@ class RouteFetcher {
         }
     }
 
-    private fun calculateRemainingApproaches(routeProgress: RouteProgress): Array<String>? {
+    private fun calculateRemainingApproaches(routeProgress: RouteProgress): Array<String?>? {
         val routeOptions = routeProgress.directionsRoute().routeOptions()
         if (routeOptions == null || TextUtils.isEmpty(routeOptions.approaches())) {
             return null
