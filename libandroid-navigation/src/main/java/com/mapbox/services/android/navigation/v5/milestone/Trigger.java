@@ -131,7 +131,7 @@ public class Trigger {
 
     @Override
     public boolean isOccurring(SparseArray<Number[]> statementObjects) {
-      return Operation.greaterThan(statementObjects.get(key), (Number) value);
+      return Operation.INSTANCE.greaterThan(statementObjects.get(key), (Number) value);
     }
   }
 
@@ -152,7 +152,7 @@ public class Trigger {
 
     @Override
     public boolean isOccurring(SparseArray<Number[]> statementObjects) {
-      return Operation.greaterThanEqual(statementObjects.get(key), (Number) value);
+      return Operation.INSTANCE.greaterThanEqual(statementObjects.get(key), (Number) value);
     }
   }
 
@@ -172,7 +172,7 @@ public class Trigger {
 
     @Override
     public boolean isOccurring(SparseArray<Number[]> statementObjects) {
-      return Operation.lessThan(statementObjects.get(key), (Number) value);
+      return Operation.INSTANCE.lessThan(statementObjects.get(key), (Number) value);
     }
   }
 
@@ -193,7 +193,7 @@ public class Trigger {
 
     @Override
     public boolean isOccurring(SparseArray<Number[]> statementObjects) {
-      return Operation.lessThanEqual(statementObjects.get(key), (Number) value);
+      return Operation.INSTANCE.lessThanEqual(statementObjects.get(key), (Number) value);
     }
   }
 
@@ -213,7 +213,7 @@ public class Trigger {
 
     @Override
     public boolean isOccurring(SparseArray<Number[]> statementObjects) {
-      return Operation.notEqual(statementObjects.get(key), (Number) values[0]);
+      return Operation.INSTANCE.notEqual(statementObjects.get(key), (Number) values[0]);
     }
   }
 
@@ -233,7 +233,7 @@ public class Trigger {
 
     @Override
     public boolean isOccurring(SparseArray<Number[]> statementObjects) {
-      return Operation.equal(statementObjects.get(key), (Number) value);
+      return Operation.INSTANCE.equal(statementObjects.get(key), (Number) value);
     }
   }
 
