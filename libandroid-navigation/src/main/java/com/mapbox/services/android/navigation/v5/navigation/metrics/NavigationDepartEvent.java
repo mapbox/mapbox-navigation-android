@@ -11,7 +11,7 @@ class NavigationDepartEvent extends NavigationEvent {
   }
 
   @Override
-  protected String getEventName() {
+  public String getEventName() {
     return NAVIGATION_DEPART;
   }
 }

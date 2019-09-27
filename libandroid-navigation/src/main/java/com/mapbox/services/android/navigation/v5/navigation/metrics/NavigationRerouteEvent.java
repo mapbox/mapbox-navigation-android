@@ -29,7 +29,7 @@ public class NavigationRerouteEvent extends NavigationEvent {
   }
 
   @Override
-  String getEventName() {
+  public String getEventName() {
     return NAVIGATION_REROUTE;
   }
 

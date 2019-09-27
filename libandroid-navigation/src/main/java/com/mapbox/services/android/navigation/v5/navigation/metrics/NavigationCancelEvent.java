@@ -14,7 +14,7 @@ class NavigationCancelEvent extends NavigationEvent {
   }
 
   @Override
-  String getEventName() {
+  public String getEventName() {
     return NAVIGATION_CANCEL;
   }
 

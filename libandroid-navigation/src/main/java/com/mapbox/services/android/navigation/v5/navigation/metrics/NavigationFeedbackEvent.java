@@ -28,7 +28,7 @@ class NavigationFeedbackEvent extends NavigationEvent {
   }
 
   @Override
-  String getEventName() {
+  public String getEventName() {
     return NAVIGATION_FEEDBACK;
   }
 
