@@ -5,7 +5,7 @@ import android.os.Build
 
 import java.util.ArrayList
 
-private class ReplayJsonRouteLocationMapper(private val replayLocations: List<ReplayLocationDto>) {
+internal class ReplayJsonRouteLocationMapper(private val replayLocations: List<ReplayLocationDto>) {
     private val NON_NULL_AND_NON_EMPTY_REPLAY_LOCATION_LIST_REQUIRED = "Non-null and non-empty replay " + "location list required."
     private val REPLAY = "ReplayLocation"
 

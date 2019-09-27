@@ -5,7 +5,7 @@ import android.os.Handler
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
 
-private class ReplayLocationDispatcher : Runnable {
+internal class ReplayLocationDispatcher : Runnable {
     private var locationsToReplay: MutableList<Location>? = null
     private var current: Location? = null
     private var handler: Handler? = null

@@ -9,7 +9,7 @@ import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import java.util.*
 
-private class ReplayRouteLocationConverter(route: DirectionsRoute, private var speed: Int, private var delay: Int) {
+internal class ReplayRouteLocationConverter(route: DirectionsRoute, private var speed: Int, private var delay: Int) {
     private val ONE_SECOND_IN_MILLISECONDS = 1000
     private val ONE_KM_IN_METERS = 1000.0
     private val ONE_HOUR_IN_SECONDS = 3600

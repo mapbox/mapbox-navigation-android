@@ -11,7 +11,7 @@ import java.text.ParseException
 
 import javax.xml.parsers.ParserConfigurationException
 
-private class ParseGpxTask(private val parser: GpxParser, private val listener: Listener) : AsyncTask<InputStream, Void, List<Location>>() {
+internal class ParseGpxTask(private val parser: GpxParser, private val listener: Listener) : AsyncTask<InputStream, Void, List<Location>>() {
 
     override fun doInBackground(vararg inputStreams: InputStream): List<Location>? {
         val inputStream = inputStreams[FIRST_INPUT_STREAM]
