@@ -29,8 +29,10 @@ class NavigationRouteCallback implements Callback<DirectionsResponse> {
   public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
     callback.onResponse(call, response);
     if (isValid(response)) {
-      String uuid = response.body().uuid();
-      sendEventWith(listener.getTime(), uuid);
+      DirectionsResponse directionsResponse = response.body();
+      if (directionsResponse != null) {
+        sendEventWith(listener.getTime(), directionsResponse.uuid());
+      }
     }
   }
 

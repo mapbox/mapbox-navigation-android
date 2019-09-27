@@ -98,7 +98,7 @@ public class RouteFetcherTest {
     when(routeOptions.coordinates()).thenReturn(remainingCoordinates);
     when(route.routeOptions()).thenReturn(routeOptions);
     RouteProgress routeProgress = mock(RouteProgress.class);
-    when(routeProgress.remainingWaypoints()).thenReturn(2);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(2);
     when(routeProgress.directionsRoute()).thenReturn(route);
     return routeProgress;
   }

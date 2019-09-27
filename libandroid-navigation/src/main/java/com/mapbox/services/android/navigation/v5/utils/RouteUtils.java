@@ -18,10 +18,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import timber.log.Timber;
+
 public class RouteUtils {
   private static final int FIRST_INSTRUCTION = 0;
   private static final int ORIGIN_WAYPOINT_NAME_THRESHOLD = 1;
-  private static final int ORIGIN_WAYPOINT_NAME = 0;
+  private static final int ORIGIN_WAYPOINT_INDEX_THRESHOLD = 1;
+  private static final int ORIGIN_WAYPOINT_INDEX = 0;
+  private static final int ORIGIN_APPROACH_THRESHOLD = 1;
+  private static final int ORIGIN_APPROACH_INDEX = 0;
   private static final int FIRST_POSITION = 0;
   private static final int SECOND_POSITION = 1;
   private static final String SEMICOLON = ";";
@@ -35,7 +40,7 @@ public class RouteUtils {
    */
   public boolean isArrivalEvent(@NonNull RouteProgress routeProgress) {
     RouteProgressState currentState = routeProgress.currentState();
-    return currentState != null && currentState == RouteProgressState.ROUTE_ARRIVED;
+    return currentState == RouteProgressState.ROUTE_ARRIVED;
   }
 
   /**
@@ -53,7 +58,7 @@ public class RouteUtils {
   }
 
   /**
-   * Given a {@link RouteProgress}, this method will calculate the remaining coordinates
+   * Given a {@link RouteProgress}, this method will calculate the remaining waypoints coordinates
    * along the given route based on total route coordinates and the progress remaining waypoints.
    * <p>
    * If the coordinate size is less than the remaining waypoints, this method
@@ -65,16 +70,30 @@ public class RouteUtils {
    */
   @Nullable
   public List<Point> calculateRemainingWaypoints(RouteProgress routeProgress) {
-    if (routeProgress.directionsRoute().routeOptions() == null) {
+    RouteOptions routeOptions = routeProgress.directionsRoute().routeOptions();
+    if (routeOptions == null) {
       return null;
     }
-    List<Point> coordinates = new ArrayList<>(routeProgress.directionsRoute().routeOptions().coordinates());
+    List<Point> coordinates = new ArrayList<>(routeOptions.coordinates());
     int coordinatesSize = coordinates.size();
-    int remainingWaypoints = routeProgress.remainingWaypoints();
-    if (coordinatesSize < remainingWaypoints) {
+    int remainingWaypointsCount = routeProgress.remainingWaypointsCount();
+    if (coordinatesSize < remainingWaypointsCount) {
       return null;
     }
-    List<Point> remainingCoordinates = coordinates.subList(coordinatesSize - remainingWaypoints, coordinatesSize);
+    String waypointIndices = routeOptions.waypointIndices();
+    if (waypointIndices == null) {
+      return null;
+    }
+    String[] wayPointIndices = waypointIndices.split(SEMICOLON);
+    String[] remainingWaypointIndices = Arrays.copyOfRange(wayPointIndices,
+      wayPointIndices.length - remainingWaypointsCount, wayPointIndices.length);
+    List<Point> remainingCoordinates = new ArrayList<>();
+    try {
+      int firstRemainingWaypointIndex = Integer.valueOf(remainingWaypointIndices[FIRST_POSITION]);
+      remainingCoordinates = coordinates.subList(firstRemainingWaypointIndex, coordinatesSize);
+    } catch (NumberFormatException ex) {
+      Timber.e("Fail to convert waypoint index to integer");
+    }
     return remainingCoordinates;
   }
 
@@ -94,16 +113,91 @@ public class RouteUtils {
     if (routeOptions == null || TextUtils.isEmpty(routeOptions.waypointNames())) {
       return null;
     }
-    String allWaypointNames = routeOptions.waypointNames();
-    String[] names = allWaypointNames.split(SEMICOLON);
-    int coordinatesSize = routeProgress.directionsRoute().routeOptions().coordinates().size();
-    String[] remainingWaypointNames = Arrays.copyOfRange(names,
-      coordinatesSize - routeProgress.remainingWaypoints(), coordinatesSize);
-    String[] waypointNames = new String[remainingWaypointNames.length + ORIGIN_WAYPOINT_NAME_THRESHOLD];
-    waypointNames[ORIGIN_WAYPOINT_NAME] = names[ORIGIN_WAYPOINT_NAME];
-    System.arraycopy(remainingWaypointNames, FIRST_POSITION, waypointNames, SECOND_POSITION,
+    String waypointNames = routeOptions.waypointNames();
+    if (waypointNames == null) {
+      return null;
+    }
+    int remainingWaypointsCount = routeProgress.remainingWaypointsCount();
+    String[] allWaypointNames = waypointNames.split(SEMICOLON);
+    String[] remainingWaypointNames = Arrays.copyOfRange(allWaypointNames,
+      allWaypointNames.length - remainingWaypointsCount, allWaypointNames.length);
+
+    String[] resultWaypointNames = new String[remainingWaypointNames.length + ORIGIN_WAYPOINT_NAME_THRESHOLD];
+    resultWaypointNames[ORIGIN_WAYPOINT_INDEX] = allWaypointNames[ORIGIN_WAYPOINT_INDEX];
+    System.arraycopy(remainingWaypointNames, FIRST_POSITION, resultWaypointNames, SECOND_POSITION,
       remainingWaypointNames.length);
-    return waypointNames;
+    return resultWaypointNames;
+  }
+
+  /**
+   * Given a {@link RouteProgress}, this method will recalculate the waypoint indices
+   * along the given route based on route option waypoint indices and the progress remaining waypoints coordinates.
+   * <p>
+   * If the waypoint indices are empty, this method will return null.
+   *
+   * @param routeProgress for route waypoint indices and remaining coordinates
+   * @return Integer array including the origin waypoint index and the recalculated remaining ones
+   * @since 0.43.0
+   */
+  @Nullable
+  public Integer[] recalculateWaypointIndices(RouteProgress routeProgress) {
+    RouteOptions routeOptions = routeProgress.directionsRoute().routeOptions();
+    if (routeOptions == null || TextUtils.isEmpty(routeOptions.waypointIndices())) {
+      return null;
+    }
+    String waypointIndices = routeOptions.waypointIndices();
+    if (waypointIndices == null) {
+      return null;
+    }
+    int remainingWaypointsCount = routeProgress.remainingWaypointsCount();
+    String[] allWaypointIndices = waypointIndices.split(SEMICOLON);
+    String[] remainingWaypointIndices = Arrays.copyOfRange(allWaypointIndices,
+      allWaypointIndices.length - remainingWaypointsCount, allWaypointIndices.length);
+    Integer[] resultWaypointIndices = null;
+    try {
+      int firstRemainingWaypointIndex = Integer.valueOf(remainingWaypointIndices[FIRST_POSITION]);
+      int traveledCoordinatesCount = firstRemainingWaypointIndex - ORIGIN_WAYPOINT_INDEX_THRESHOLD;
+      resultWaypointIndices = new Integer[remainingWaypointIndices.length + ORIGIN_WAYPOINT_NAME_THRESHOLD];
+      resultWaypointIndices[ORIGIN_WAYPOINT_INDEX] = Integer.valueOf(allWaypointIndices[ORIGIN_WAYPOINT_INDEX]);
+      for (int i = 0; i < remainingWaypointIndices.length; i++) {
+        resultWaypointIndices[i + 1] = Integer.valueOf(remainingWaypointIndices[i]) - traveledCoordinatesCount;
+      }
+    } catch (NumberFormatException ex) {
+      Timber.e("Fail to convert waypoint index to integer");
+    }
+    return resultWaypointIndices;
+  }
+
+  /**
+   * Given a {@link RouteProgress}, this method will calculate the remaining approaches
+   * along the given route based on route option approaches and the progress remaining approaches.
+   * <p>
+   * If the approaches are empty, this method will return null.
+   *
+   * @param routeProgress for route approaches and remaining coordinates
+   * @return String array including the origin approach and the remaining ones
+   * @since 0.19.0
+   */
+  @Nullable
+  public String[] calculateRemainingApproaches(RouteProgress routeProgress) {
+    RouteOptions routeOptions = routeProgress.directionsRoute().routeOptions();
+    if (routeOptions == null) {
+      return null;
+    }
+    String approaches = routeOptions.approaches();
+    if (approaches == null || TextUtils.isEmpty(routeOptions.approaches())) {
+      return null;
+    }
+    int remainingWaypointsCount = routeProgress.remainingWaypointsCount();
+    String[] allApproaches = approaches.split(SEMICOLON);
+    String[] remainingApproaches = Arrays.copyOfRange(allApproaches,
+      allApproaches.length - remainingWaypointsCount, allApproaches.length);
+
+    String[] resultApproaches = new String[remainingApproaches.length + ORIGIN_APPROACH_THRESHOLD];
+    resultApproaches[ORIGIN_APPROACH_INDEX] = allApproaches[ORIGIN_APPROACH_INDEX];
+    System.arraycopy(remainingApproaches, FIRST_POSITION, resultApproaches, SECOND_POSITION,
+      remainingApproaches.length);
+    return resultApproaches;
   }
 
   /**

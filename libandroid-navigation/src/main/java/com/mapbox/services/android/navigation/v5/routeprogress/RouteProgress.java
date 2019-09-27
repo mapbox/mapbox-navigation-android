@@ -119,7 +119,7 @@ public abstract class RouteProgress {
    * @return integer value representing the number of way points remaining along the route
    * @since 0.5.0
    */
-  public int remainingWaypoints() {
+  public int remainingWaypointsCount() {
     return directionsRoute().legs().size() - legIndex();
   }
 
