@@ -2,20 +2,23 @@ package com.mapbox.services.android.navigation.v5.navigation
 
 import com.mapbox.core.utils.TextUtils
 
-internal class InitialGpsEventFactory @JvmOverloads constructor(private var time: ElapsedTime? = ElapsedTime(), private val handler: InitialGpsEventHandler = InitialGpsEventHandler()) {
+private const val EMPTY_STRING = ""
+
+internal class InitialGpsEventFactory @JvmOverloads constructor(private var time: ElapsedTime = ElapsedTime(), private val handler: InitialGpsEventHandler = InitialGpsEventHandler()) {
     private var sessionId = EMPTY_STRING
     private var hasSent: Boolean = false
 
     fun navigationStarted(sessionId: String) {
         this.sessionId = sessionId
-        time?.start()
+        time.start()
     }
 
     fun gpsReceived() {
-        time?.let { time ->
-            time.end()
-            send(time)
+        if (time.start == null) {
+            return
         }
+        time.end()
+        send(time)
     }
 
     fun reset() {
@@ -31,8 +34,4 @@ internal class InitialGpsEventFactory @JvmOverloads constructor(private var time
         }
     }
 
-    companion object {
-
-        private val EMPTY_STRING = ""
-    }
 }

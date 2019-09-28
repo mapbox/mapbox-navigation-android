@@ -21,13 +21,6 @@ import static org.mockito.Mockito.when;
 public class ReplayLocationDispatcherTest {
 
   @Test(expected = IllegalArgumentException.class)
-  public void checksNonNullLocationListRequired() {
-    List<Location> nullLocations = null;
-
-    new ReplayLocationDispatcher(nullLocations);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
   public void checksNonEmptyLocationListRequired() {
     List<Location> empty = Collections.emptyList();
 
