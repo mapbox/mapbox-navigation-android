@@ -98,6 +98,46 @@ public class RouteUtils {
   }
 
   /**
+   * Given a {@link RouteProgress}, this method will calculate the waypoint indices
+   * along the given route based on route option waypoint indices and the progress remaining waypoints coordinates.
+   * Remaining waypoint indices are recalculated based on count of already achieved waypoints.
+   * <p>
+   * If the waypoint indices are empty, this method will return null.
+   *
+   * @param routeProgress for route waypoint indices and remaining coordinates
+   * @return Integer array including the origin waypoint index and the recalculated remaining ones
+   * @since 0.43.0
+   */
+  @Nullable
+  public Integer[] calculateRemainingWaypointIndices(RouteProgress routeProgress) {
+    RouteOptions routeOptions = routeProgress.directionsRoute().routeOptions();
+    if (routeOptions == null || TextUtils.isEmpty(routeOptions.waypointIndices())) {
+      return null;
+    }
+    String waypointIndices = routeOptions.waypointIndices();
+    if (waypointIndices == null) {
+      return null;
+    }
+    int remainingWaypointsCount = routeProgress.remainingWaypointsCount();
+    String[] allWaypointIndices = waypointIndices.split(SEMICOLON);
+    String[] remainingWaypointIndices = Arrays.copyOfRange(allWaypointIndices,
+      allWaypointIndices.length - remainingWaypointsCount, allWaypointIndices.length);
+    Integer[] resultWaypointIndices = null;
+    try {
+      int firstRemainingWaypointIndex = Integer.valueOf(remainingWaypointIndices[FIRST_POSITION]);
+      int traveledCoordinatesCount = firstRemainingWaypointIndex - ORIGIN_WAYPOINT_INDEX_THRESHOLD;
+      resultWaypointIndices = new Integer[remainingWaypointIndices.length + ORIGIN_WAYPOINT_NAME_THRESHOLD];
+      resultWaypointIndices[ORIGIN_WAYPOINT_INDEX] = Integer.valueOf(allWaypointIndices[ORIGIN_WAYPOINT_INDEX]);
+      for (int i = 0; i < remainingWaypointIndices.length; i++) {
+        resultWaypointIndices[i + 1] = Integer.valueOf(remainingWaypointIndices[i]) - traveledCoordinatesCount;
+      }
+    } catch (NumberFormatException ex) {
+      Timber.e("Fail to convert waypoint index to integer");
+    }
+    return resultWaypointIndices;
+  }
+
+  /**
    * Given a {@link RouteProgress}, this method will calculate the remaining waypoint names
    * along the given route based on route option waypoint names and the progress remaining coordinates.
    * <p>
@@ -127,45 +167,6 @@ public class RouteUtils {
     System.arraycopy(remainingWaypointNames, FIRST_POSITION, resultWaypointNames, SECOND_POSITION,
       remainingWaypointNames.length);
     return resultWaypointNames;
-  }
-
-  /**
-   * Given a {@link RouteProgress}, this method will recalculate the waypoint indices
-   * along the given route based on route option waypoint indices and the progress remaining waypoints coordinates.
-   * <p>
-   * If the waypoint indices are empty, this method will return null.
-   *
-   * @param routeProgress for route waypoint indices and remaining coordinates
-   * @return Integer array including the origin waypoint index and the recalculated remaining ones
-   * @since 0.43.0
-   */
-  @Nullable
-  public Integer[] recalculateWaypointIndices(RouteProgress routeProgress) {
-    RouteOptions routeOptions = routeProgress.directionsRoute().routeOptions();
-    if (routeOptions == null || TextUtils.isEmpty(routeOptions.waypointIndices())) {
-      return null;
-    }
-    String waypointIndices = routeOptions.waypointIndices();
-    if (waypointIndices == null) {
-      return null;
-    }
-    int remainingWaypointsCount = routeProgress.remainingWaypointsCount();
-    String[] allWaypointIndices = waypointIndices.split(SEMICOLON);
-    String[] remainingWaypointIndices = Arrays.copyOfRange(allWaypointIndices,
-      allWaypointIndices.length - remainingWaypointsCount, allWaypointIndices.length);
-    Integer[] resultWaypointIndices = null;
-    try {
-      int firstRemainingWaypointIndex = Integer.valueOf(remainingWaypointIndices[FIRST_POSITION]);
-      int traveledCoordinatesCount = firstRemainingWaypointIndex - ORIGIN_WAYPOINT_INDEX_THRESHOLD;
-      resultWaypointIndices = new Integer[remainingWaypointIndices.length + ORIGIN_WAYPOINT_NAME_THRESHOLD];
-      resultWaypointIndices[ORIGIN_WAYPOINT_INDEX] = Integer.valueOf(allWaypointIndices[ORIGIN_WAYPOINT_INDEX]);
-      for (int i = 0; i < remainingWaypointIndices.length; i++) {
-        resultWaypointIndices[i + 1] = Integer.valueOf(remainingWaypointIndices[i]) - traveledCoordinatesCount;
-      }
-    } catch (NumberFormatException ex) {
-      Timber.e("Fail to convert waypoint index to integer");
-    }
-    return resultWaypointIndices;
   }
 
   /**

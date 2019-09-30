@@ -174,7 +174,7 @@ public class RouteFetcher {
   }
 
   private void addWaypointIndices(RouteProgress routeProgress, NavigationRoute.Builder builder) {
-    Integer[] waypointIndices = routeUtils.recalculateWaypointIndices(routeProgress);
+    Integer[] waypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
     if (waypointIndices != null && waypointIndices.length != 0) {
       builder.addWaypointIndices(waypointIndices);
     }

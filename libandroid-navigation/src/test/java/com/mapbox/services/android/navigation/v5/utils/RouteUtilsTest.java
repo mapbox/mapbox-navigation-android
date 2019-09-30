@@ -16,8 +16,10 @@ import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -46,14 +48,13 @@ public class RouteUtilsTest extends BaseTest {
   }
 
   @Test
-  public void findCurrentBannerInstructions_returnsNullWithNullCurrentStep() throws Exception {
+  public void findCurrentBannerInstructions_returnsNullWithNullCurrentStep() {
     LegStep currentStep = null;
     double stepDistanceRemaining = 0;
     RouteUtils routeUtils = new RouteUtils();
 
     BannerInstructions currentBannerInstructions = routeUtils.findCurrentBannerInstructions(
-      currentStep, stepDistanceRemaining
-    );
+      currentStep, stepDistanceRemaining);
 
     assertNull(currentBannerInstructions);
   }
@@ -84,8 +85,10 @@ public class RouteUtilsTest extends BaseTest {
     BannerInstructions currentBannerInstructions = routeUtils.findCurrentBannerInstructions(
       currentStep, stepDistanceRemaining
     );
+    List<BannerInstructions> bannerInstructions = currentStep.bannerInstructions();
 
-    assertEquals(currentStep.bannerInstructions().get(0), currentBannerInstructions);
+    assertNotNull(bannerInstructions);
+    assertEquals(bannerInstructions.get(0), currentBannerInstructions);
   }
 
   @Test
@@ -101,8 +104,10 @@ public class RouteUtilsTest extends BaseTest {
     BannerInstructions currentBannerInstructions = routeUtils.findCurrentBannerInstructions(
       currentStep, stepDistanceRemaining
     );
+    List<BannerInstructions> bannerInstructions = currentStep.bannerInstructions();
 
-    assertEquals(currentStep.bannerInstructions().get(0), currentBannerInstructions);
+    assertNotNull(bannerInstructions);
+    assertEquals(bannerInstructions.get(0), currentBannerInstructions);
   }
 
   @Test
@@ -119,26 +124,98 @@ public class RouteUtilsTest extends BaseTest {
     BannerInstructions currentBannerInstructions = routeUtils.findCurrentBannerInstructions(
       currentStep, stepDistanceRemaining
     );
+    List<BannerInstructions> bannerInstructions = currentStep.bannerInstructions();
 
-    assertEquals(currentStep.bannerInstructions().get(0), currentBannerInstructions);
+    assertNotNull(bannerInstructions);
+    assertEquals(bannerInstructions.get(0), currentBannerInstructions);
   }
 
   @Test
-  public void calculateRemainingWaypoints() {
+  public void calculateRemainingWaypoints_whenNoMiddleWaypoints() {
     DirectionsRoute route = mock(DirectionsRoute.class);
     RouteOptions routeOptions = mock(RouteOptions.class);
     when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.waypointIndices()).thenReturn("0;6");
     when(route.routeOptions()).thenReturn(routeOptions);
     RouteProgress routeProgress = mock(RouteProgress.class);
-    when(routeProgress.remainingWaypoints()).thenReturn(2);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(1);
     when(routeProgress.directionsRoute()).thenReturn(route);
     RouteUtils routeUtils = new RouteUtils();
 
     List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress);
 
-    assertEquals(2, remainingWaypoints.size());
-    assertEquals(Point.fromLngLat(7.890, 1.234), remainingWaypoints.get(0));
-    assertEquals(Point.fromLngLat(5.678, 9.012), remainingWaypoints.get(1));
+    Point[] expectedRemainingWaypoints = {Point.fromLngLat(4.56789, 0.12345)};
+
+    assertNotNull(remainingWaypoints);
+    assertArrayEquals(expectedRemainingWaypoints, remainingWaypoints.toArray());
+  }
+
+  @Test
+  public void calculateRemainingWaypoints_whenOneMiddleWaypoint() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.waypointIndices()).thenReturn("0;3;6");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(2);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress);
+
+    Point[] expectedRemainingWaypoints = {Point.fromLngLat(7.89012, 3.45678),
+      Point.fromLngLat(9.01234, 5.67890),
+      Point.fromLngLat(2.34567, 8.90123),
+      Point.fromLngLat(4.56789, 0.12345)};
+
+    assertNotNull(remainingWaypoints);
+    assertArrayEquals(expectedRemainingWaypoints, remainingWaypoints.toArray());
+  }
+
+  @Test
+  public void calculateRemainingWaypoints_whenTwoMiddleWaypoints() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.waypointIndices()).thenReturn("0;2;4;6");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(2);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress);
+
+    Point[] expectedRemainingWaypoints = {Point.fromLngLat(9.01234, 5.67890),
+      Point.fromLngLat(2.34567, 8.90123),
+      Point.fromLngLat(4.56789, 0.12345)};
+
+    assertNotNull(remainingWaypoints);
+    assertArrayEquals(expectedRemainingWaypoints, remainingWaypoints.toArray());
+  }
+
+  @Test
+  public void calculateRemainingWaypoints_whenTwoMiddleOneByOneWaypoints() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.waypointIndices()).thenReturn("0;3;4;6");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(3);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress);
+
+    Point[] expectedRemainingWaypoints = {Point.fromLngLat(7.89012, 3.45678),
+      Point.fromLngLat(9.01234, 5.67890),
+      Point.fromLngLat(2.34567, 8.90123),
+      Point.fromLngLat(4.56789, 0.12345)};
+
+    assertNotNull(remainingWaypoints);
+    assertArrayEquals(expectedRemainingWaypoints, remainingWaypoints.toArray());
   }
 
   @Test
@@ -146,7 +223,7 @@ public class RouteUtilsTest extends BaseTest {
     DirectionsRoute route = mock(DirectionsRoute.class);
     when(route.routeOptions()).thenReturn(null);
     RouteProgress routeProgress = mock(RouteProgress.class);
-    when(routeProgress.remainingWaypoints()).thenReturn(2);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(2);
     when(routeProgress.directionsRoute()).thenReturn(route);
     RouteUtils routeUtils = new RouteUtils();
 
@@ -156,23 +233,169 @@ public class RouteUtilsTest extends BaseTest {
   }
 
   @Test
-  public void calculateRemainingWaypointNames() {
+  public void calculateRemainingWaypointsIndices_whenNoMiddleWaypoints() {
     DirectionsRoute route = mock(DirectionsRoute.class);
     RouteOptions routeOptions = mock(RouteOptions.class);
     when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
-    when(routeOptions.waypointNames()).thenReturn("first;second;third;fourth");
+    when(routeOptions.waypointIndices()).thenReturn("0;6");
     when(route.routeOptions()).thenReturn(routeOptions);
     RouteProgress routeProgress = mock(RouteProgress.class);
-    when(routeProgress.remainingWaypoints()).thenReturn(2);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(1);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    Integer[] remainingWaypointsIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
+
+    Integer[] expectedRemainingWaypointsIndices = {0, 1};
+
+    assertArrayEquals(expectedRemainingWaypointsIndices, remainingWaypointsIndices);
+  }
+
+  @Test
+  public void calculateRemainingWaypointsIndices_whenOneMiddleWaypoint() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.waypointIndices()).thenReturn("0;3;6");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(2);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    Integer[] remainingWaypointsIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
+
+    Integer[] expectedRemainingWaypointsIndices = {0, 1, 4};
+
+    assertArrayEquals(expectedRemainingWaypointsIndices, remainingWaypointsIndices);
+  }
+
+  @Test
+  public void calculateRemainingWaypointsIndices_whenTwoMiddleWaypoints() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.waypointIndices()).thenReturn("0;2;4;6");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(2);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    Integer[] remainingWaypointsIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
+
+    Integer[] expectedRemainingWaypointsIndices = {0, 1, 3};
+
+    assertArrayEquals(expectedRemainingWaypointsIndices, remainingWaypointsIndices);
+  }
+
+  @Test
+  public void calculateRemainingWaypointsIndices_whenTwoMiddleOneByOneWaypoints() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.waypointIndices()).thenReturn("0;3;4;6");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(3);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    Integer[] remainingWaypointsIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
+
+    Integer[] expectedRemainingWaypointsIndices = {0, 1, 2, 4};
+
+    assertArrayEquals(expectedRemainingWaypointsIndices, remainingWaypointsIndices);
+  }
+
+  @Test
+  public void calculateRemainingWaypointsIndices_handlesNullOptions() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    when(route.routeOptions()).thenReturn(null);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(2);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    Integer[] remainingWaypointsIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
+
+    assertNull(remainingWaypointsIndices);
+  }
+
+  @Test
+  public void calculateRemainingWaypointNames_whenNoMiddleWaypoints() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.waypointNames()).thenReturn("first;seventh");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(1);
     when(routeProgress.directionsRoute()).thenReturn(route);
     RouteUtils routeUtils = new RouteUtils();
 
     String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(routeProgress);
 
-    assertEquals(3, remainingWaypointNames.length);
-    assertEquals("first", remainingWaypointNames[0]);
-    assertEquals("third", remainingWaypointNames[1]);
-    assertEquals("fourth", remainingWaypointNames[2]);
+    String[] expectedRemainingWaypointNames = {"first", "seventh"};
+
+    assertArrayEquals(expectedRemainingWaypointNames, remainingWaypointNames);
+  }
+
+  @Test
+  public void calculateRemainingWaypointNames_whenOneMiddleWaypoints() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.waypointNames()).thenReturn("first;fourth;seventh");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(2);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(routeProgress);
+
+    String[] expectedRemainingWaypointNames = {"first", "fourth", "seventh"};
+
+    assertArrayEquals(expectedRemainingWaypointNames, remainingWaypointNames);
+  }
+
+  @Test
+  public void calculateRemainingWaypointNames_whenTwoMiddleWaypoints() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.waypointNames()).thenReturn("first;third;fifth;seventh");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(2);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(routeProgress);
+
+    String[] expectedRemainingWaypointNames = {"first", "fifth", "seventh"};
+
+    assertArrayEquals(expectedRemainingWaypointNames, remainingWaypointNames);
+  }
+
+  @Test
+  public void calculateRemainingWaypointNames_whenTwoMiddleOneByOneWaypoints() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.waypointNames()).thenReturn("first;second;fifth;seventh");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(3);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(routeProgress);
+
+    String[] expectedRemainingWaypointNames = {"first", "second", "fifth", "seventh"};
+
+    assertArrayEquals(expectedRemainingWaypointNames, remainingWaypointNames);
   }
 
   @Test
@@ -180,7 +403,7 @@ public class RouteUtilsTest extends BaseTest {
     DirectionsRoute route = mock(DirectionsRoute.class);
     when(route.routeOptions()).thenReturn(null);
     RouteProgress routeProgress = mock(RouteProgress.class);
-    when(routeProgress.remainingWaypoints()).thenReturn(2);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(2);
     when(routeProgress.directionsRoute()).thenReturn(route);
     RouteUtils routeUtils = new RouteUtils();
 
@@ -189,12 +412,105 @@ public class RouteUtilsTest extends BaseTest {
     assertNull(remainingWaypointNames);
   }
 
+  @Test
+  public void calculateRemainingApproaches_whenNoMiddleWaypoints() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.approaches()).thenReturn("curb;unrestricted");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(1);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    String[] remainingApproaches = routeUtils.calculateRemainingApproaches(routeProgress);
+
+    String[] expectedRemainingApproaches = {"curb", "unrestricted"};
+
+    assertArrayEquals(expectedRemainingApproaches, remainingApproaches);
+  }
+
+  @Test
+  public void calculateRemainingApproaches_whenOneMiddleWaypoints() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.approaches()).thenReturn("curb;curb;unrestricted");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(2);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    String[] remainingApproaches = routeUtils.calculateRemainingApproaches(routeProgress);
+
+    String[] expectedRemainingApproaches = {"curb", "curb", "unrestricted"};
+
+    assertArrayEquals(expectedRemainingApproaches, remainingApproaches);
+  }
+
+  @Test
+  public void calculateRemainingApproaches_whenTwoMiddleWaypoints() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.approaches()).thenReturn("curb;curb;curb;unrestricted");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(2);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    String[] remainingApproaches = routeUtils.calculateRemainingApproaches(routeProgress);
+
+    String[] expectedRemainingApproaches = {"curb", "curb", "unrestricted"};
+
+    assertArrayEquals(expectedRemainingApproaches, remainingApproaches);
+  }
+
+  @Test
+  public void calculateRemainingApproaches_whenTwoMiddleOneByOneWaypoints() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    RouteOptions routeOptions = mock(RouteOptions.class);
+    when(routeOptions.coordinates()).thenReturn(buildCoordinateList());
+    when(routeOptions.approaches()).thenReturn("curb;curb;curb;unrestricted");
+    when(route.routeOptions()).thenReturn(routeOptions);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(3);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    String[] remainingApproaches = routeUtils.calculateRemainingApproaches(routeProgress);
+
+    String[] expectedRemainingApproaches = {"curb", "curb", "curb", "unrestricted"};
+
+    assertArrayEquals(expectedRemainingApproaches, remainingApproaches);
+  }
+
+  @Test
+  public void calculateRemainingApproaches_handlesNullOptions() {
+    DirectionsRoute route = mock(DirectionsRoute.class);
+    when(route.routeOptions()).thenReturn(null);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+    when(routeProgress.remainingWaypointsCount()).thenReturn(2);
+    when(routeProgress.directionsRoute()).thenReturn(route);
+    RouteUtils routeUtils = new RouteUtils();
+
+    String[] remainingApproaches = routeUtils.calculateRemainingApproaches(routeProgress);
+
+    assertNull(remainingApproaches);
+  }
+
   private List<Point> buildCoordinateList() {
     List<Point> coordinates = new ArrayList<>();
-    coordinates.add(Point.fromLngLat(1.234, 5.678));
-    coordinates.add(Point.fromLngLat(9.012, 3.456));
-    coordinates.add(Point.fromLngLat(7.890, 1.234));
-    coordinates.add(Point.fromLngLat(5.678, 9.012));
+    coordinates.add(Point.fromLngLat(1.23456, 7.89012));
+    coordinates.add(Point.fromLngLat(3.45678, 9.01234));
+    coordinates.add(Point.fromLngLat(5.67890, 1.23456));
+    coordinates.add(Point.fromLngLat(7.89012, 3.45678));
+    coordinates.add(Point.fromLngLat(9.01234, 5.67890));
+    coordinates.add(Point.fromLngLat(2.34567, 8.90123));
+    coordinates.add(Point.fromLngLat(4.56789, 0.12345));
     return coordinates;
   }
 }
