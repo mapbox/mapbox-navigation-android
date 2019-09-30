@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.location.Location;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
@@ -23,8 +24,8 @@ class LocationUpdater {
   private LocationEngineRequest request;
 
   @SuppressLint("MissingPermission")
-  LocationUpdater(RouteProcessorBackgroundThread thread, NavigationEventDispatcher dispatcher,
-                  LocationEngine locationEngine, LocationEngineRequest request) {
+  LocationUpdater(@NonNull RouteProcessorBackgroundThread thread, @NonNull NavigationEventDispatcher dispatcher,
+                  @NonNull LocationEngine locationEngine, @NonNull LocationEngineRequest request) {
     this.thread = thread;
     this.dispatcher = dispatcher;
     this.locationEngine = locationEngine;
@@ -32,17 +33,17 @@ class LocationUpdater {
     requestInitialLocationUpdates(locationEngine, request);
   }
 
-  void updateLocationEngine(LocationEngine locationEngine) {
+  void updateLocationEngine(@NonNull LocationEngine locationEngine) {
     requestLocationUpdates(request, locationEngine);
     this.locationEngine = locationEngine;
   }
 
-  void updateLocationEngineRequest(LocationEngineRequest request) {
+  void updateLocationEngineRequest(@NonNull LocationEngineRequest request) {
     requestLocationUpdates(request, locationEngine);
     this.request = request;
   }
 
-  void onLocationChanged(Location location) {
+  void onLocationChanged(@Nullable Location location) {
     if (location != null) {
       thread.updateLocation(location);
       dispatcher.onLocationUpdate(location);
@@ -55,12 +56,12 @@ class LocationUpdater {
   }
 
   @SuppressLint("MissingPermission")
-  private void requestInitialLocationUpdates(LocationEngine locationEngine, LocationEngineRequest request) {
+  private void requestInitialLocationUpdates(@NonNull LocationEngine locationEngine, @NonNull LocationEngineRequest request) {
     locationEngine.requestLocationUpdates(request, callback, null);
   }
 
   @SuppressLint("MissingPermission")
-  private void requestLocationUpdates(LocationEngineRequest request, LocationEngine locationEngine) {
+  private void requestLocationUpdates(@NonNull LocationEngineRequest request, @NonNull LocationEngine locationEngine) {
     this.locationEngine.removeLocationUpdates(callback);
     locationEngine.requestLocationUpdates(request, callback, null);
   }
@@ -74,7 +75,7 @@ class LocationUpdater {
     }
 
     @Override
-    public void onSuccess(LocationEngineResult result) {
+    public void onSuccess(@NonNull LocationEngineResult result) {
       LocationUpdater locationUpdater = updaterWeakReference.get();
       if (locationUpdater != null) {
         Location location = result.getLastLocation();
