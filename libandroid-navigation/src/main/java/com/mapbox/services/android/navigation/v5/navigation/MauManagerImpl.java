@@ -7,6 +7,9 @@ import android.text.format.DateUtils;
 import androidx.annotation.NonNull;
 import com.mapbox.android.accounts.v1.MapboxAccounts;
 
+import java.util.HashSet;
+import java.util.Set;
+
 class MauManagerImpl implements MauManager {
 
   private static final String MAPBOX_NAV_PREFERENCE_MAU_SKU = "com.mapbox.navigationsdk.accounts.mau.sku";
@@ -14,22 +17,24 @@ class MauManagerImpl implements MauManager {
   private static final int MAU_TIMER_EXPIRE_THRESHOLD = 1;
   private static final long MAU_TIMER_EXPIRE_AFTER = (DateUtils.HOUR_IN_MILLIS / 1000) * MAU_TIMER_EXPIRE_THRESHOLD;
   private AccountsPreference accountsPreference;
+  private Set<Runnable> taskSet = new HashSet<>();
   private Handler handler = new Handler(Looper.getMainLooper());
+  private Runnable tokenTimer = new Runnable() {
+    @Override
+    public void run() {
+      refreshToken();
+    }
+  };
 
   MauManagerImpl(AccountsPreference accountsPreference) {
     this.accountsPreference = accountsPreference;
-    refreshToken();
+    addAndStartTask(tokenTimer);
   }
 
   //TODO figure out when exactly to remove callbacks from this handler.
   private void refreshToken() {
     persistMauSkuToken();
-    handler.postDelayed(new Runnable() {
-      @Override
-      public void run() {
-        refreshToken();
-      }
-    }, MAU_TIMER_EXPIRE_AFTER);
+    handler.postDelayed(tokenTimer, MAU_TIMER_EXPIRE_AFTER);
   }
 
   private void persistMauSkuToken() {
@@ -62,9 +67,23 @@ class MauManagerImpl implements MauManager {
     return MapboxAccounts.obtainNavigationSkuUserToken(userId);
   }
 
+  private void addAndStartTask(Runnable runnable) {
+    if (taskSet.isEmpty()) {
+      taskSet.add(runnable);
+      refreshToken();
+    }
+  }
+
   @NonNull
   @Override
   public String obtainSkuToken() {
+    addAndStartTask(tokenTimer);
     return retrieveMauSkuToken();
+  }
+
+  @Override
+  public void onEndNavigation() {
+    taskSet.remove(tokenTimer);
+    handler.removeCallbacks(tokenTimer);
   }
 }

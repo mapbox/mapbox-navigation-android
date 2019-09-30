@@ -17,6 +17,8 @@ class TripsManagerImpl implements TripsManager {
   private static final String MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP = "com.mapbox.navigationsdk.accounts.trips.time";
   private static final int ROUTE_REQUEST_COUNT_THRESHOLD = 5;
   private static final int TRIPS_TIMER_EXPIRE_THRESHOLD = 2;
+  private static final int DEFAULT_REQUEST_COUNT = 0;
+  private static final long DEFAULT_TOKEN_TIMER = 0L;
   private static final long TRIPS_TIMER_EXPIRE_AFTER = (DateUtils.HOUR_IN_MILLIS / 1000) * TRIPS_TIMER_EXPIRE_THRESHOLD;
   private RotateTripSku rotateSku = RotateTripSku.INVALID;
   private AccountsPreference accountsPreference;
@@ -34,12 +36,12 @@ class TripsManagerImpl implements TripsManager {
       case ROTATE_ON_TIMER_EXPIRE:
         requestCount = getRouteRequestCountThreshold();
         requestCount++;
-        setTimerExpiry();
+        setTimerExpiry(getNow());
         persistTripsSkuToken();
         break;
       case ROTATE_ON_REQUEST_COUNT_EXPIRE:
         requestCount = 0;
-        setTimerExpiry();
+        setTimerExpiry(getNow());
         persistTripsSkuToken();
         break;
       default:
@@ -78,7 +80,7 @@ class TripsManagerImpl implements TripsManager {
   }
 
   private int getRouteRequestCountThreshold() {
-    return accountsPreference.getPreferenceManager().get(MAPBOX_NAV_PREFERENCE_ROUTE_REQ_COUNT, 0);
+    return accountsPreference.getPreferenceManager().get(MAPBOX_NAV_PREFERENCE_ROUTE_REQ_COUNT, DEFAULT_REQUEST_COUNT);
   }
 
   private void persistTripsSkuToken() {
@@ -94,12 +96,12 @@ class TripsManagerImpl implements TripsManager {
     return MapboxAccounts.obtainNavigationSkuSessionToken();
   }
 
-  private void setTimerExpiry() {
-    accountsPreference.getPreferenceManager().set(MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP, getNow());
+  private void setTimerExpiry(long then) {
+    accountsPreference.getPreferenceManager().set(MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP, then);
   }
 
   private long getTimerExpiry() {
-    return accountsPreference.getPreferenceManager().get(MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP, 0L);
+    return accountsPreference.getPreferenceManager().get(MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP, DEFAULT_TOKEN_TIMER);
   }
 
   private boolean isTwoHoursExpired(long then) {
@@ -119,5 +121,11 @@ class TripsManagerImpl implements TripsManager {
   public String obtainSkuToken() {
     refreshSkuToken();
     return retrieveTripsSkuToken();
+  }
+
+  @Override
+  public void onEndNavigation() {
+    setRouteRequestCountThreshold(DEFAULT_REQUEST_COUNT);
+    setTimerExpiry(DEFAULT_TOKEN_TIMER);
   }
 }

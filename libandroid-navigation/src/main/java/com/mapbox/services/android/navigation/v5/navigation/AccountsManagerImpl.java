@@ -60,7 +60,11 @@ class AccountsManagerImpl {
     }*/
   }
 
-  static String obtainSku() {
+  String obtainSku() {
     return accountsManager.obtainSkuToken();
+  }
+
+  void endNavigation() {
+    accountsManager.onEndNavigation();
   }
 }

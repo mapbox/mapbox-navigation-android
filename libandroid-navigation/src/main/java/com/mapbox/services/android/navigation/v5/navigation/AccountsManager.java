@@ -5,4 +5,6 @@ import androidx.annotation.NonNull;
 public interface AccountsManager {
   @NonNull
   String obtainSkuToken();
+
+  void onEndNavigation();
 }

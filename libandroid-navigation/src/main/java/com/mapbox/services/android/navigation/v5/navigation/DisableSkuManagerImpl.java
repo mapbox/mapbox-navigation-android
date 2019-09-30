@@ -9,4 +9,9 @@ class DisableSkuManagerImpl implements DisableSkuManager {
   public String obtainSkuToken() {
     return "";
   }
+
+  @Override
+  public void onEndNavigation() {
+
+  }
 }

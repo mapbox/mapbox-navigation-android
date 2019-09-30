@@ -9,7 +9,7 @@ class AccountsPreference {
   private final PreferenceManager preferenceManager;
 
   AccountsPreference(WeakReference<Context> context) {
-    this.preferenceManager = new PreferenceManager(context.get(), ACCOUNTS);
+    this.preferenceManager = new PreferenceManager(context, ACCOUNTS);
   }
 
   PreferenceManager getPreferenceManager() {

@@ -69,13 +69,12 @@ public final class NavigationRoute {
   }
 
   static Builder builder(Context context, LocaleUtils localeUtils) {
-    AccountsManagerImpl accountsManager = AccountsManagerImpl.getInstance(context);
     return new Builder()
       .annotations(DirectionsCriteria.ANNOTATION_CONGESTION, DirectionsCriteria.ANNOTATION_DISTANCE)
       .language(context, localeUtils)
       .voiceUnits(context, localeUtils)
       .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-      .interceptor(new SkuInterceptor(accountsManager))
+      .interceptor(new SkuInterceptor(context))
       .continueStraight(true);
   }
 
