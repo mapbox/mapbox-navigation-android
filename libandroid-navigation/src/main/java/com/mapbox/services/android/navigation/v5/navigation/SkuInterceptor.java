@@ -20,7 +20,7 @@ class SkuInterceptor implements Interceptor {
   @Override
   public Response intercept(Chain chain) throws IOException {
     Request request = chain.request();
-    String skuToken = AccountsManagerImpl.getInstance(context).obtainSku();
+    String skuToken = AccountsManager.getInstance(context).obtainSku();
     HttpUrl url = request.url().newBuilder().addQueryParameter(SKU_KEY, skuToken).build();
     request = request.newBuilder().url(url).build();
     return chain.proceed(request);
