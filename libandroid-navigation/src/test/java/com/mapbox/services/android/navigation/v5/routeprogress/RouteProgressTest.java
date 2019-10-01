@@ -245,7 +245,7 @@ public class RouteProgressTest extends BaseTest {
     DirectionsRoute multiLegRoute = buildMultipleLegRoute();
     RouteProgress routeProgress = buildBeginningOfLegRouteProgress(multiLegRoute);
 
-    assertEquals(2, routeProgress.remainingWaypointsCount());
+    assertEquals(2, routeProgress.remainingWaypoints());
   }
 
   private DirectionsRoute buildMultipleLegRoute() throws Exception {

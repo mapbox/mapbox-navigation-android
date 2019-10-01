@@ -81,7 +81,7 @@ public class RouteFetcher {
    * Calculates a new {@link com.mapbox.api.directions.v5.models.DirectionsRoute} given
    * the current {@link Location} and {@link RouteProgress} along the route.
    * <p>
-   * Uses {@link RouteOptions#coordinates()} and {@link RouteProgress#remainingWaypointsCount()}
+   * Uses {@link RouteOptions#coordinates()} and {@link RouteProgress#remainingWaypoints()}
    * to determine the amount of remaining waypoints there are along the given route.
    *
    * @param location      current location of the device
@@ -97,7 +97,7 @@ public class RouteFetcher {
   /**
    * Build a route request given the passed {@link Location} and {@link RouteProgress}.
    * <p>
-   * Uses {@link RouteOptions#coordinates()} and {@link RouteProgress#remainingWaypointsCount()}
+   * Uses {@link RouteOptions#coordinates()} and {@link RouteProgress#remainingWaypoints()}
    * to determine the amount of remaining waypoints there are along the given route.
    *
    * @param location      current location of the device
@@ -120,7 +120,7 @@ public class RouteFetcher {
       builder.routeOptions(options);
     }
     List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress);
-    if (remainingWaypoints == null) {
+    if (remainingWaypoints.isEmpty()) {
       Timber.e("An error occurred fetching a new route");
       return null;
     }
@@ -175,23 +175,17 @@ public class RouteFetcher {
 
   private void addWaypointIndices(RouteProgress routeProgress, NavigationRoute.Builder builder) {
     Integer[] waypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
-    if (waypointIndices != null && waypointIndices.length != 0) {
-      builder.addWaypointIndices(waypointIndices);
-    }
+    builder.addWaypointIndices(waypointIndices);
   }
 
   private void addWaypointNames(RouteProgress progress, NavigationRoute.Builder builder) {
     String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(progress);
-    if (remainingWaypointNames != null) {
-      builder.addWaypointNames(remainingWaypointNames);
-    }
+    builder.addWaypointNames(remainingWaypointNames);
   }
 
   private void addApproaches(RouteProgress progress, NavigationRoute.Builder builder) {
     String[] remainingApproaches = routeUtils.calculateRemainingApproaches(progress);
-    if (remainingApproaches != null) {
-      builder.addApproaches(remainingApproaches);
-    }
+    builder.addApproaches(remainingApproaches);
   }
 
   private boolean invalid(Context context, Location location, RouteProgress routeProgress) {

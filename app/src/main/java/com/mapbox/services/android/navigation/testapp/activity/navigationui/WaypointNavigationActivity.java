@@ -194,7 +194,7 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
         @Override
         public void onResponse(@NotNull Call<DirectionsResponse> call, @NotNull Response<DirectionsResponse> response) {
           DirectionsResponse directionsResponse = response.body();
-          if (directionsResponse != null) {
+          if (directionsResponse != null && !directionsResponse.routes().isEmpty()) {
             startNavigation(directionsResponse.routes().get(0));
           }
         }
