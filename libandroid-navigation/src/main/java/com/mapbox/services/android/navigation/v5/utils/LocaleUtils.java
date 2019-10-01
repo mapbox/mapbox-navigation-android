@@ -36,6 +36,7 @@ public class LocaleUtils {
    * @param context to check configuration
    * @return language of device
    */
+  @NonNull
   public String inferDeviceLanguage(Context context) {
     return inferDeviceLocale(context).getLanguage();
   }
@@ -46,6 +47,7 @@ public class LocaleUtils {
    * @param context to check configuration
    * @return locale of device
    */
+  @NonNull
   public Locale inferDeviceLocale(Context context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
       return context.getResources().getConfiguration().getLocales().get(0);
