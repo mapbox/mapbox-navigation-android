@@ -19,7 +19,6 @@ import com.mapbox.api.directions.v5.DirectionsCriteria.IMPERIAL
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.services.android.navigation.R
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.*
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter
@@ -75,7 +74,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
     override fun getNotification() = notification
 
     override fun getNotificationId(): Int {
-        return NAVIGATION_NOTIFICATION_ID
+        return NavigationConstants.NAVIGATION_NOTIFICATION_ID
     }
 
     override fun updateNotification(routeProgress: RouteProgress) {
@@ -169,7 +168,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
     private fun createNotificationChannel(applicationContext: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
-                NAVIGATION_NOTIFICATION_CHANNEL, applicationContext.getString(R.string.channel_name),
+                    NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL, applicationContext.getString(R.string.channel_name),
                 NotificationManager.IMPORTANCE_LOW
             )
             notificationManager?.createNotificationChannel(notificationChannel)
@@ -177,7 +176,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
     }
 
     private fun buildNotification(applicationContext: Context): Notification {
-        val channelId = NAVIGATION_NOTIFICATION_CHANNEL
+        val channelId = NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL
         val builder = NotificationCompat.Builder(applicationContext, channelId)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setPriority(NotificationCompat.PRIORITY_MAX)
@@ -230,12 +229,12 @@ internal class MapboxNavigationNotification : NavigationNotification {
 
     private fun rebuildNotification() {
         notification = buildNotification(applicationContext)
-        notificationManager?.notify(NAVIGATION_NOTIFICATION_ID, notification)
+        notificationManager?.notify(NavigationConstants.NAVIGATION_NOTIFICATION_ID, notification)
     }
 
     private fun unregisterReceiver(applicationContext: Context?) {
         applicationContext?.unregisterReceiver(endNavigationBtnReceiver)
-        notificationManager?.cancel(NAVIGATION_NOTIFICATION_ID)
+        notificationManager?.cancel(NavigationConstants.NAVIGATION_NOTIFICATION_ID)
     }
 
     private fun updateInstructionText(bannerInstruction: BannerInstruction?) {
@@ -300,62 +299,62 @@ internal class MapboxNavigationNotification : NavigationNotification {
 
     private fun obtainManeuverResourceFrom(maneuver: String?): Int {
         when (maneuver) {
-            STEP_MANEUVER_TYPE_TURN + STEP_MANEUVER_MODIFIER_UTURN, STEP_MANEUVER_TYPE_CONTINUE + STEP_MANEUVER_MODIFIER_UTURN -> return R.drawable.ic_maneuver_turn_180
-            STEP_MANEUVER_TYPE_TURN + STEP_MANEUVER_MODIFIER_UTURN + STEP_MANEUVER_MODIFIER_LEFT, STEP_MANEUVER_TYPE_CONTINUE + STEP_MANEUVER_MODIFIER_UTURN + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_turn_180_left_driving_side
+            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN, NavigationConstants.STEP_MANEUVER_TYPE_CONTINUE + NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN -> return R.drawable.ic_maneuver_turn_180
+            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_CONTINUE + NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_turn_180_left_driving_side
 
-            STEP_MANEUVER_TYPE_ARRIVE + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_arrive_left
-            STEP_MANEUVER_TYPE_ARRIVE + STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_arrive_right
-            STEP_MANEUVER_TYPE_ARRIVE -> return R.drawable.ic_maneuver_arrive
+            NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_arrive_left
+            NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_arrive_right
+            NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE -> return R.drawable.ic_maneuver_arrive
 
-            STEP_MANEUVER_TYPE_DEPART + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_depart_left
-            STEP_MANEUVER_TYPE_DEPART + STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_depart_right
-            STEP_MANEUVER_TYPE_DEPART -> return R.drawable.ic_maneuver_depart
+            NavigationConstants.STEP_MANEUVER_TYPE_DEPART + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_depart_left
+            NavigationConstants.STEP_MANEUVER_TYPE_DEPART + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_depart_right
+            NavigationConstants.STEP_MANEUVER_TYPE_DEPART -> return R.drawable.ic_maneuver_depart
 
-            STEP_MANEUVER_TYPE_TURN + STEP_MANEUVER_MODIFIER_SHARP_RIGHT, STEP_MANEUVER_TYPE_ON_RAMP + STEP_MANEUVER_MODIFIER_SHARP_RIGHT, STEP_MANEUVER_TYPE_NOTIFICATION + STEP_MANEUVER_MODIFIER_SHARP_RIGHT -> return R.drawable.ic_maneuver_turn_75
-            STEP_MANEUVER_TYPE_TURN + STEP_MANEUVER_MODIFIER_RIGHT, STEP_MANEUVER_TYPE_ON_RAMP + STEP_MANEUVER_MODIFIER_RIGHT, STEP_MANEUVER_TYPE_ROUNDABOUT_TURN + STEP_MANEUVER_MODIFIER_RIGHT, STEP_MANEUVER_TYPE_NOTIFICATION + STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_turn_45
-            STEP_MANEUVER_TYPE_TURN + STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT, STEP_MANEUVER_TYPE_ON_RAMP + STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT, STEP_MANEUVER_TYPE_NOTIFICATION + STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_turn_30
+            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ON_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_NOTIFICATION + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT -> return R.drawable.ic_maneuver_turn_75
+            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ON_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_NOTIFICATION + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_turn_45
+            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ON_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_NOTIFICATION + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_turn_30
 
-            STEP_MANEUVER_TYPE_TURN + STEP_MANEUVER_MODIFIER_SHARP_LEFT, STEP_MANEUVER_TYPE_ON_RAMP + STEP_MANEUVER_MODIFIER_SHARP_LEFT, STEP_MANEUVER_TYPE_NOTIFICATION + STEP_MANEUVER_MODIFIER_SHARP_LEFT -> return R.drawable.ic_maneuver_turn_75_left
-            STEP_MANEUVER_TYPE_TURN + STEP_MANEUVER_MODIFIER_LEFT, STEP_MANEUVER_TYPE_ON_RAMP + STEP_MANEUVER_MODIFIER_LEFT, STEP_MANEUVER_TYPE_NOTIFICATION + STEP_MANEUVER_MODIFIER_LEFT, STEP_MANEUVER_TYPE_ROUNDABOUT_TURN + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_turn_45_left
-            STEP_MANEUVER_TYPE_TURN + STEP_MANEUVER_MODIFIER_SLIGHT_LEFT, STEP_MANEUVER_TYPE_ON_RAMP + STEP_MANEUVER_MODIFIER_SLIGHT_LEFT, STEP_MANEUVER_TYPE_NOTIFICATION + STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_turn_30_left
+            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ON_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_NOTIFICATION + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT -> return R.drawable.ic_maneuver_turn_75_left
+            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ON_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_NOTIFICATION + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_turn_45_left
+            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ON_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_NOTIFICATION + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_turn_30_left
 
-            STEP_MANEUVER_TYPE_MERGE + STEP_MANEUVER_MODIFIER_LEFT, STEP_MANEUVER_TYPE_MERGE + STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_merge_left
-            STEP_MANEUVER_TYPE_MERGE + STEP_MANEUVER_MODIFIER_RIGHT, STEP_MANEUVER_TYPE_MERGE + STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_merge_right
+            NavigationConstants.STEP_MANEUVER_TYPE_MERGE + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_MERGE + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_merge_left
+            NavigationConstants.STEP_MANEUVER_TYPE_MERGE + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_MERGE + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_merge_right
 
-            STEP_MANEUVER_TYPE_OFF_RAMP + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_off_ramp_left
-            STEP_MANEUVER_TYPE_OFF_RAMP + STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_off_ramp_slight_left
+            NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_off_ramp_left
+            NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_off_ramp_slight_left
 
-            STEP_MANEUVER_TYPE_OFF_RAMP + STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_off_ramp_right
-            STEP_MANEUVER_TYPE_OFF_RAMP + STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_off_ramp_slight_right
+            NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_off_ramp_right
+            NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_off_ramp_slight_right
 
-            STEP_MANEUVER_TYPE_FORK + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_fork_left
-            STEP_MANEUVER_TYPE_FORK + STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_fork_slight_left
-            STEP_MANEUVER_TYPE_FORK + STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_fork_right
-            STEP_MANEUVER_TYPE_FORK + STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_fork_slight_right
-            STEP_MANEUVER_TYPE_FORK + STEP_MANEUVER_MODIFIER_STRAIGHT -> return R.drawable.ic_maneuver_fork_straight
-            STEP_MANEUVER_TYPE_FORK -> return R.drawable.ic_maneuver_fork
+            NavigationConstants.STEP_MANEUVER_TYPE_FORK + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_fork_left
+            NavigationConstants.STEP_MANEUVER_TYPE_FORK + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_fork_slight_left
+            NavigationConstants.STEP_MANEUVER_TYPE_FORK + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_fork_right
+            NavigationConstants.STEP_MANEUVER_TYPE_FORK + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_fork_slight_right
+            NavigationConstants.STEP_MANEUVER_TYPE_FORK + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT -> return R.drawable.ic_maneuver_fork_straight
+            NavigationConstants.STEP_MANEUVER_TYPE_FORK -> return R.drawable.ic_maneuver_fork
 
-            STEP_MANEUVER_TYPE_END_OF_ROAD + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_end_of_road_left
-            STEP_MANEUVER_TYPE_END_OF_ROAD + STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_end_of_road_right
+            NavigationConstants.STEP_MANEUVER_TYPE_END_OF_ROAD + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_end_of_road_left
+            NavigationConstants.STEP_MANEUVER_TYPE_END_OF_ROAD + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_end_of_road_right
 
-            STEP_MANEUVER_TYPE_ROUNDABOUT + STEP_MANEUVER_MODIFIER_LEFT, STEP_MANEUVER_TYPE_ROTARY + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_left
-            STEP_MANEUVER_TYPE_ROUNDABOUT + STEP_MANEUVER_MODIFIER_SHARP_LEFT, STEP_MANEUVER_TYPE_ROTARY + STEP_MANEUVER_MODIFIER_SHARP_LEFT -> return R.drawable.ic_maneuver_roundabout_sharp_left
-            STEP_MANEUVER_TYPE_ROUNDABOUT + STEP_MANEUVER_MODIFIER_SLIGHT_LEFT, STEP_MANEUVER_TYPE_ROTARY + STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_roundabout_slight_left
-            STEP_MANEUVER_TYPE_ROUNDABOUT + STEP_MANEUVER_MODIFIER_RIGHT, STEP_MANEUVER_TYPE_ROTARY + STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_roundabout_right
-            STEP_MANEUVER_TYPE_ROUNDABOUT + STEP_MANEUVER_MODIFIER_SHARP_RIGHT, STEP_MANEUVER_TYPE_ROTARY + STEP_MANEUVER_MODIFIER_SHARP_RIGHT -> return R.drawable.ic_maneuver_roundabout_sharp_right
-            STEP_MANEUVER_TYPE_ROUNDABOUT + STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT, STEP_MANEUVER_TYPE_ROTARY + STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_roundabout_slight_right
-            STEP_MANEUVER_TYPE_ROUNDABOUT + STEP_MANEUVER_MODIFIER_STRAIGHT, STEP_MANEUVER_TYPE_ROTARY + STEP_MANEUVER_MODIFIER_STRAIGHT -> return R.drawable.ic_maneuver_roundabout_straight
-            STEP_MANEUVER_TYPE_ROUNDABOUT, STEP_MANEUVER_TYPE_ROTARY -> return R.drawable.ic_maneuver_roundabout
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_left
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT -> return R.drawable.ic_maneuver_roundabout_sharp_left
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_roundabout_slight_left
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_roundabout_right
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT -> return R.drawable.ic_maneuver_roundabout_sharp_right
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_roundabout_slight_right
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT -> return R.drawable.ic_maneuver_roundabout_straight
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY -> return R.drawable.ic_maneuver_roundabout
 
-            STEP_MANEUVER_TYPE_ROUNDABOUT + STEP_MANEUVER_MODIFIER_LEFT + STEP_MANEUVER_MODIFIER_LEFT, STEP_MANEUVER_TYPE_ROTARY + STEP_MANEUVER_MODIFIER_LEFT + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_left_left_driving_side
-            STEP_MANEUVER_TYPE_ROUNDABOUT + STEP_MANEUVER_MODIFIER_SHARP_LEFT + STEP_MANEUVER_MODIFIER_LEFT, STEP_MANEUVER_TYPE_ROTARY + STEP_MANEUVER_MODIFIER_SHARP_LEFT + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_sharp_left_left_driving_side
-            STEP_MANEUVER_TYPE_ROUNDABOUT + STEP_MANEUVER_MODIFIER_SLIGHT_LEFT + STEP_MANEUVER_MODIFIER_LEFT, STEP_MANEUVER_TYPE_ROTARY + STEP_MANEUVER_MODIFIER_SLIGHT_LEFT + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_slight_left_left_driving_side
-            STEP_MANEUVER_TYPE_ROUNDABOUT + STEP_MANEUVER_MODIFIER_RIGHT + STEP_MANEUVER_MODIFIER_LEFT, STEP_MANEUVER_TYPE_ROTARY + STEP_MANEUVER_MODIFIER_RIGHT + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_right_left_driving_side
-            STEP_MANEUVER_TYPE_ROUNDABOUT + STEP_MANEUVER_MODIFIER_SHARP_RIGHT + STEP_MANEUVER_MODIFIER_LEFT, STEP_MANEUVER_TYPE_ROTARY + STEP_MANEUVER_MODIFIER_SHARP_RIGHT + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_sharp_right_left_driving_side
-            STEP_MANEUVER_TYPE_ROUNDABOUT + STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT + STEP_MANEUVER_MODIFIER_LEFT, STEP_MANEUVER_TYPE_ROTARY + STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_slight_right_left_driving_side
-            STEP_MANEUVER_TYPE_ROUNDABOUT + STEP_MANEUVER_MODIFIER_STRAIGHT + STEP_MANEUVER_MODIFIER_LEFT, STEP_MANEUVER_TYPE_ROTARY + STEP_MANEUVER_MODIFIER_STRAIGHT + STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_straight_left_driving_side
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_left_left_driving_side
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_sharp_left_left_driving_side
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_slight_left_left_driving_side
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_right_left_driving_side
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_sharp_right_left_driving_side
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_slight_right_left_driving_side
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_straight_left_driving_side
 
-            STEP_MANEUVER_TYPE_MERGE + STEP_MANEUVER_MODIFIER_STRAIGHT, STEP_MANEUVER_TYPE_NOTIFICATION + STEP_MANEUVER_MODIFIER_STRAIGHT, STEP_MANEUVER_TYPE_CONTINUE + STEP_MANEUVER_MODIFIER_STRAIGHT, STEP_MANEUVER_TYPE_NEW_NAME + STEP_MANEUVER_MODIFIER_STRAIGHT -> return R.drawable.ic_maneuver_turn_0
+            NavigationConstants.STEP_MANEUVER_TYPE_MERGE + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT, NavigationConstants.STEP_MANEUVER_TYPE_NOTIFICATION + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT, NavigationConstants.STEP_MANEUVER_TYPE_CONTINUE + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT, NavigationConstants.STEP_MANEUVER_TYPE_NEW_NAME + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT -> return R.drawable.ic_maneuver_turn_0
             else -> return R.drawable.ic_maneuver_turn_0
         }
     }
@@ -365,9 +364,9 @@ internal class MapboxNavigationNotification : NavigationNotification {
         maneuverModifier: String?,
         drivingSide: String?
     ): Boolean {
-        return STEP_MANEUVER_MODIFIER_LEFT == drivingSide && (
-            STEP_MANEUVER_TYPE_ROUNDABOUT == maneuverType ||
-                STEP_MANEUVER_TYPE_ROTARY == maneuverType || STEP_MANEUVER_MODIFIER_UTURN == maneuverModifier
+        return NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT == drivingSide && (
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT == maneuverType ||
+                NavigationConstants.STEP_MANEUVER_TYPE_ROTARY == maneuverType || NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN == maneuverModifier
             )
     }
 
