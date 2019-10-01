@@ -5,6 +5,7 @@ import com.mapbox.geojson.BoundingBox;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.navigation.plugin.OfflinePlugin;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.navigator.TileEndpointConfiguration;
 import com.mapbox.turf.TurfMeasurement;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class MapboxNavigationOffline {
      */
     public long configure(@NonNull String tileSetPath) {
         synchronized (this) {
-            return navigator.configureRouter(tileSetPath, null, null);
+            return navigator.configureRouter(tileSetPath, null, null, new TileEndpointConfiguration("https://api-routing-tiles-staging.tilestream.net", "2019_04_13-00_00_11", "pk.eyJ1IjoieWhhaG4tMTU2Mjc3MDA0MzEzMSIsImEiOiJjanh4Y3lod2IwMGp4M2NrNTVpNTN2bjY5In0.FIRXnGfQ3cb5Cga0wdECCw", ""));
         }
     }
 
