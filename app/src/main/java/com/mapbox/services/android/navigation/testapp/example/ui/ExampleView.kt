@@ -16,68 +16,68 @@ import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
-interface ExampleView: PermissionsListener, OnMapReadyCallback,
+interface ExampleView : PermissionsListener, OnMapReadyCallback,
     OnFeatureClickListener, OnRouteSelectionChangeListener {
 
-  fun initialize()
+    fun initialize()
 
-  fun showSoftKeyboard()
+    fun showSoftKeyboard()
 
-  fun hideSoftKeyboard()
+    fun hideSoftKeyboard()
 
-  fun showPermissionDialog()
+    fun showPermissionDialog()
 
-  fun updateMapCamera(cameraUpdate: CameraUpdate, duration: Int)
+    fun updateMapCamera(cameraUpdate: CameraUpdate, duration: Int)
 
-  fun updateMapCameraFor(bounds: LatLngBounds, padding: IntArray, duration: Int)
+    fun updateMapCameraFor(bounds: LatLngBounds, padding: IntArray, duration: Int)
 
-  fun updateMapLocation(location: Location?)
+    fun updateMapLocation(location: Location?)
 
-  fun updateRoutes(routes: List<DirectionsRoute>)
+    fun updateRoutes(routes: List<DirectionsRoute>)
 
-  fun updateDestinationMarker(destination: Point)
+    fun updateDestinationMarker(destination: Point)
 
-  fun updateAutocompleteBottomSheetState(state: Int)
+    fun updateAutocompleteBottomSheetState(state: Int)
 
-  fun updateAutocompleteProximity(location: Location?)
+    fun updateAutocompleteProximity(location: Location?)
 
-  fun selectAllAutocompleteText()
+    fun selectAllAutocompleteText()
 
-  fun updateLocationFabVisibility(visibility: Int)
+    fun updateLocationFabVisibility(visibility: Int)
 
-  fun updateNavigationFabVisibility(visibility: Int)
+    fun updateNavigationFabVisibility(visibility: Int)
 
-  fun updateCancelFabVisibility(visibility: Int)
+    fun updateCancelFabVisibility(visibility: Int)
 
-  fun updateSettingsFabVisibility(visibility: Int)
+    fun updateSettingsFabVisibility(visibility: Int)
 
-  fun updateInstructionViewVisibility(visibility: Int)
+    fun updateInstructionViewVisibility(visibility: Int)
 
-  fun updateInstructionViewWith(progress: RouteProgress)
+    fun updateInstructionViewWith(progress: RouteProgress)
 
-  fun updateInstructionViewWith(milestone: Milestone)
+    fun updateInstructionViewWith(milestone: Milestone)
 
-  fun addMapProgressChangeListener(navigation: MapboxNavigation)
+    fun addMapProgressChangeListener(navigation: MapboxNavigation)
 
-  fun removeRoute()
+    fun removeRoute()
 
-  fun clearMarkers()
+    fun clearMarkers()
 
-  fun makeToast(message: String)
+    fun makeToast(message: String)
 
-  fun transition()
+    fun transition()
 
-  fun showSettings()
+    fun showSettings()
 
-  fun adjustMapPaddingForNavigation()
+    fun adjustMapPaddingForNavigation()
 
-  fun resetMapPadding()
+    fun resetMapPadding()
 
-  fun showAttributionDialog(attributionView: View)
+    fun showAttributionDialog(attributionView: View)
 
-  fun showAlternativeRoutes(alternativesVisible: Boolean)
+    fun showAlternativeRoutes(alternativesVisible: Boolean)
 
-  fun updateLocationRenderMode(@RenderMode.Mode renderMode: Int)
+    fun updateLocationRenderMode(@RenderMode.Mode renderMode: Int)
 
-  fun updateCameraTrackingMode(@NavigationCamera.TrackingMode trackingMode: Int)
+    fun updateCameraTrackingMode(@NavigationCamera.TrackingMode trackingMode: Int)
 }

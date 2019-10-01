@@ -12,31 +12,31 @@ import com.mapbox.services.android.navigation.testapp.R
 
 class ExampleAutocompleteAdapter(private val context: Context) : AutocompleteAdapter(context) {
 
-  override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-    val view = inflateView(convertView, parent)
-    val feature = getItem(position)
-    return updateViewData(view, feature)
-  }
-
-  private fun inflateView(convertView: View?, parent: ViewGroup?): View {
-    return if (convertView == null) {
-      val inflater = LayoutInflater.from(context)
-      inflater.inflate(R.layout.example_autocomplete_list_item, parent, false)
-    } else {
-      convertView
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+        val view = inflateView(convertView, parent)
+        val feature = getItem(position)
+        return updateViewData(view, feature)
     }
-  }
 
-  private fun updateViewData(view: View, feature: CarmenFeature): View {
-    val text = view.findViewById<TextView>(R.id.listItemText)
-    text.text = feature.text()
-
-    val address = view.findViewById<TextView>(R.id.listItemAddress)
-    if (feature.address().isNullOrEmpty()) {
-      address.visibility = GONE
-    } else {
-      address.text = feature.address()
+    private fun inflateView(convertView: View?, parent: ViewGroup?): View {
+        return if (convertView == null) {
+            val inflater = LayoutInflater.from(context)
+            inflater.inflate(R.layout.example_autocomplete_list_item, parent, false)
+        } else {
+            convertView
+        }
     }
-    return view
-  }
+
+    private fun updateViewData(view: View, feature: CarmenFeature): View {
+        val text = view.findViewById<TextView>(R.id.listItemText)
+        text.text = feature.text()
+
+        val address = view.findViewById<TextView>(R.id.listItemAddress)
+        if (feature.address().isNullOrEmpty()) {
+            address.visibility = GONE
+        } else {
+            address.text = feature.address()
+        }
+        return view
+    }
 }

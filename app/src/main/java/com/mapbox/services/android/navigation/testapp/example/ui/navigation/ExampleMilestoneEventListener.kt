@@ -8,20 +8,26 @@ import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListene
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
-class ExampleMilestoneEventListener(private val milestone: MutableLiveData<Milestone>,
-                                    private val speechPlayer: NavigationSpeechPlayer) : MilestoneEventListener {
+class ExampleMilestoneEventListener(
+    private val milestone: MutableLiveData<Milestone>,
+    private val speechPlayer: NavigationSpeechPlayer
+) : MilestoneEventListener {
 
-  override fun onMilestoneEvent(routeProgress: RouteProgress, instruction: String, milestone: Milestone) {
-    this.milestone.value = milestone
-    if (milestone is VoiceInstructionMilestone) {
-      play(milestone)
+    override fun onMilestoneEvent(
+        routeProgress: RouteProgress,
+        instruction: String,
+        milestone: Milestone
+    ) {
+        this.milestone.value = milestone
+        if (milestone is VoiceInstructionMilestone) {
+            play(milestone)
+        }
     }
-  }
 
-  private fun play(milestone: VoiceInstructionMilestone) {
-    val announcement = SpeechAnnouncement.builder()
-        .voiceInstructionMilestone(milestone)
-        .build()
-    speechPlayer.play(announcement)
-  }
+    private fun play(milestone: VoiceInstructionMilestone) {
+        val announcement = SpeechAnnouncement.builder()
+            .voiceInstructionMilestone(milestone)
+            .build()
+        speechPlayer.play(announcement)
+    }
 }
