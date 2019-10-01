@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.mapbox.services.android.navigation.v5.navigation.SkuInterceptor;
 import okhttp3.Cache;
 import okhttp3.CacheControl;
 import okhttp3.Interceptor;
@@ -86,6 +87,7 @@ public class VoiceInstructionLoader {
     if (mapboxSpeechBuilder == null) {
       mapboxSpeechBuilder = MapboxSpeech.builder()
         .accessToken(accessToken)
+        .interceptor(new SkuInterceptor(context))
         .language(language)
         .cache(cache)
         .interceptor(provideOfflineCacheInterceptor());

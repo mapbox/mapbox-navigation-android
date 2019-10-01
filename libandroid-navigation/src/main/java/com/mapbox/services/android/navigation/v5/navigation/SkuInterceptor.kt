@@ -6,7 +6,7 @@ import java.io.IOException
 import okhttp3.Interceptor
 import okhttp3.Response
 
-internal class SkuInterceptor(private val context: Context) : Interceptor {
+class SkuInterceptor(private val context: Context) : Interceptor {
 
     private val SKU_KEY = "sku"
 
