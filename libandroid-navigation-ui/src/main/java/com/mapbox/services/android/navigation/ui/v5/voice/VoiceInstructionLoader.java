@@ -27,19 +27,22 @@ public class VoiceInstructionLoader {
   private final String accessToken;
   private List<String> urlsCached;
   private final Cache cache;
+  private final Context context;
   private MapboxSpeech.Builder mapboxSpeechBuilder = null;
 
   public VoiceInstructionLoader(Context context, String accessToken, Cache cache) {
     this.connectivityStatus = new ConnectivityStatusProvider(context);
     this.accessToken = accessToken;
+    this.context = context;
     this.urlsCached = new ArrayList<>();
     this.cache = cache;
   }
 
   // Package private (no modifier) for testing purposes
-  VoiceInstructionLoader(String accessToken, Cache cache, MapboxSpeech.Builder mapboxSpeechBuilder,
+  VoiceInstructionLoader(Context context, String accessToken, Cache cache, MapboxSpeech.Builder mapboxSpeechBuilder,
                          ConnectivityStatusProvider connectivityStatus) {
     this.accessToken = accessToken;
+    this.context = context;
     this.urlsCached = new ArrayList<>();
     this.cache = cache;
     this.mapboxSpeechBuilder = mapboxSpeechBuilder;

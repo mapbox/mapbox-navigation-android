@@ -53,7 +53,8 @@ public class VoiceInstructionLoaderTest extends BaseTest {
     MapboxSpeech aSpeech = mock(MapboxSpeech.class);
     when(aSpeechBuilder.build()).thenReturn(aSpeech);
     ConnectivityStatusProvider connectivityStatus = mock(ConnectivityStatusProvider.class);
-    VoiceInstructionLoader theVoiceInstructionLoader = new VoiceInstructionLoader("any_access_token",
+    Context context = mock(Context.class);
+    VoiceInstructionLoader theVoiceInstructionLoader = new VoiceInstructionLoader(context, "any_access_token",
       anyCache, aSpeechBuilder, connectivityStatus);
     Callback aCallback = mock(Callback.class);
 
@@ -69,7 +70,8 @@ public class VoiceInstructionLoaderTest extends BaseTest {
     MapboxSpeech.Builder anySpeechBuilder = mock(MapboxSpeech.Builder.class);
     MapboxSpeech aSpeech = mock(MapboxSpeech.class);
     ConnectivityStatusProvider connectivityStatus = mock(ConnectivityStatusProvider.class);
-    VoiceInstructionLoader theVoiceInstructionLoader = new VoiceInstructionLoader("any_access_token",
+    Context context = mock(Context.class);
+    VoiceInstructionLoader theVoiceInstructionLoader = new VoiceInstructionLoader(context, "any_access_token",
       anyCache, anySpeechBuilder, connectivityStatus);
     Callback aCallback = mock(Callback.class);
 
@@ -85,7 +87,8 @@ public class VoiceInstructionLoaderTest extends BaseTest {
     MapboxSpeech.Builder nullSpeechBuilder = null;
     MapboxSpeech aSpeech = mock(MapboxSpeech.class);
     ConnectivityStatusProvider connectivityStatus = mock(ConnectivityStatusProvider.class);
-    VoiceInstructionLoader theVoiceInstructionLoader = new VoiceInstructionLoader("any_access_token",
+    Context context = mock(Context.class);
+    VoiceInstructionLoader theVoiceInstructionLoader = new VoiceInstructionLoader(context, "any_access_token",
       anyCache, nullSpeechBuilder, connectivityStatus);
     Callback aCallback = mock(Callback.class);
 
