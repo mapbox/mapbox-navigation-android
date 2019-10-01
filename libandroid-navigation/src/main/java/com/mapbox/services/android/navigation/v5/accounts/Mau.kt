@@ -14,7 +14,7 @@ private const val MAU_TIMER_EXPIRE_THRESHOLD = 1
 private const val DEFAULT_TOKEN_TIMER = 0L
 private const val MAU_TIMER_EXPIRE_AFTER = DateUtils.HOUR_IN_MILLIS / 1000 * MAU_TIMER_EXPIRE_THRESHOLD
 
-internal class Mau(@NonNull private val preferences: SharedPreferences): TokenGenerator {
+internal class Mau(@NonNull private val preferences: SharedPreferences) : TokenGenerator {
 
     private fun refreshSkuToken() {
         if (!shouldRefreshSku()) {

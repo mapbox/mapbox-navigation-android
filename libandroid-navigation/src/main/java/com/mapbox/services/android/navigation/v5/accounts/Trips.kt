@@ -15,7 +15,7 @@ private const val DEFAULT_REQUEST_COUNT = 0
 private const val DEFAULT_TOKEN_TIMER = 0L
 private const val TRIPS_TIMER_EXPIRE_AFTER = DateUtils.HOUR_IN_MILLIS / 1000 * TRIPS_TIMER_EXPIRE_THRESHOLD
 
-internal class Trips(@NonNull private val preferences: SharedPreferences): TokenGenerator {
+internal class Trips(@NonNull private val preferences: SharedPreferences) : TokenGenerator {
 
     enum class RotateTripsType {
         INVALID,
