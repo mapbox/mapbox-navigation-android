@@ -12,26 +12,31 @@ import timber.log.Timber
 
 private const val BEARING_TOLERANCE = 90.0
 
-class ExampleRouteFinder(private val accessToken: String,
-                         var profile: String,
-                         private val callback: OnRoutesFoundCallback): Callback<DirectionsResponse> {
+class ExampleRouteFinder(
+    private val accessToken: String,
+    var profile: String,
+    private val callback: OnRoutesFoundCallback
+) : Callback<DirectionsResponse> {
 
-  fun findRoute(location: Location, destination: Point) {
-    find(location, destination)
-  }
+    fun findRoute(location: Location, destination: Point) {
+        find(location, destination)
+    }
 
-  override fun onResponse(call: Call<DirectionsResponse>, response: Response<DirectionsResponse>) {
-    handle(response.body())
-  }
+    override fun onResponse(
+        call: Call<DirectionsResponse>,
+        response: Response<DirectionsResponse>
+    ) {
+        handle(response.body())
+    }
 
-  override fun onFailure(call: Call<DirectionsResponse>, throwable: Throwable) {
-    Timber.e(throwable)
-  }
+    override fun onFailure(call: Call<DirectionsResponse>, throwable: Throwable) {
+        Timber.e(throwable)
+    }
 
-  private fun find(location: Location, destination: Point) {
-    val origin = Point.fromLngLat(location.longitude, location.latitude)
-    val bearing = location.bearing.toDouble()
-    NavigationRoute.builder(NavigationApplication.instance)
+    private fun find(location: Location, destination: Point) {
+        val origin = Point.fromLngLat(location.longitude, location.latitude)
+        val bearing = location.bearing.toDouble()
+        NavigationRoute.builder(NavigationApplication.instance)
             .accessToken(accessToken)
             .origin(origin, bearing, BEARING_TOLERANCE)
             .profile(profile)
@@ -39,13 +44,13 @@ class ExampleRouteFinder(private val accessToken: String,
             .alternatives(true)
             .build()
             .getRoute(this)
-  }
-
-  private fun handle(directionsResponse: DirectionsResponse?) {
-    directionsResponse?.routes()?.let {
-      if (it.isNotEmpty()) {
-        callback.onRoutesFound(it)
-      }
     }
-  }
+
+    private fun handle(directionsResponse: DirectionsResponse?) {
+        directionsResponse?.routes()?.let {
+            if (it.isNotEmpty()) {
+                callback.onRoutesFound(it)
+            }
+        }
+    }
 }

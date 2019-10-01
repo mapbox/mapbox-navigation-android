@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.github.triplet.play'
 apply from: "${rootDir}/gradle/script-git-version.gradle"
+apply from: "${rootDir}/gradle/ktlint.gradle"
 
 android {
   compileSdkVersion androidVersions.compileSdkVersion
@@ -83,6 +84,9 @@ android {
 }
 
 dependencies {
+  //ktlint
+  ktlint dependenciesList.ktlint
+
   // Kotlin support
   implementation dependenciesList.kotlinStdLib
   implementation dependenciesList.ankoCommon

@@ -36,6 +36,7 @@ ext {
       picasso                : '2.71828',
       gmsLocation            : '16.0.0',
       kotlinStdLib           : '1.2.61',
+      ktlint                 : '0.34.2',
       ankoCommon             : '0.10.0',
       firebaseCore           : '16.0.7',
       crashlytics            : '2.9.9',
@@ -58,6 +59,9 @@ ext {
       // Kotlin
       kotlinStdLib           : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${version.kotlinStdLib}",
       ankoCommon             : "org.jetbrains.anko:anko-common:${version.ankoCommon}",
+
+      // code style
+      ktlint                 : "com.pinterest:ktlint:${version.ktlint}",
 
       // AutoValue
       autoValue              : "com.google.auto.value:auto-value:${version.autoValue}",

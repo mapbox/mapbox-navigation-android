@@ -7,10 +7,10 @@ import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 
 fun Activity.showKeyboard() {
-  window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+    window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
 }
 
 fun Activity.hideKeyboard() {
-  val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-  imm.hideSoftInputFromWindow(findViewById<View>(android.R.id.content).windowToken, 0)
+    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(findViewById<View>(android.R.id.content).windowToken, 0)
 }

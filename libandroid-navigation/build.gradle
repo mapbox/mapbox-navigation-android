@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.jaredsburrows.license'
+apply from: "${rootDir}/gradle/ktlint.gradle"
 
 android {
   compileSdkVersion androidVersions.compileSdkVersion
@@ -58,6 +59,9 @@ dependencies {
   api (dependenciesList.mapboxEvents) {
     exclude group: "com.mapbox.mapboxsdk", module: "mapbox-android-core"
   }
+
+  //ktlint
+  ktlint dependenciesList.ktlint
 
   // Navigator
   implementation dependenciesList.mapboxNavigator

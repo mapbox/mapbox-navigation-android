@@ -9,15 +9,19 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 class AutocompleteBottomSheetBehavior<V : View> : BottomSheetBehavior<V> {
 
-  constructor() : super()
+    constructor() : super()
 
-  constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-  override fun onInterceptTouchEvent(parent: CoordinatorLayout, child: V, event: MotionEvent): Boolean {
-    return false
-  }
+    override fun onInterceptTouchEvent(
+        parent: CoordinatorLayout,
+        child: V,
+        event: MotionEvent
+    ): Boolean {
+        return false
+    }
 
-  override fun onTouchEvent(parent: CoordinatorLayout, child: V, event: MotionEvent): Boolean {
-    return false
-  }
+    override fun onTouchEvent(parent: CoordinatorLayout, child: V, event: MotionEvent): Boolean {
+        return false
+    }
 }
