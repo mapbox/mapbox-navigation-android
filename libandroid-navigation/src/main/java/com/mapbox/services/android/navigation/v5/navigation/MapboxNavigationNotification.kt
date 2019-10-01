@@ -24,7 +24,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils
 import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter.formatTime
-import java.util.*
+import java.util.Calendar
 
 /**
  * This is in charge of creating the persistent navigation session notification and updating it.
