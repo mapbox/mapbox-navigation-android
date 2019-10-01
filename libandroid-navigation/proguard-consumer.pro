@@ -8,6 +8,7 @@
 
 # --- Java ---
 -dontwarn java.awt.Color
+-dontwarn com.sun.istack.internal.NotNull
 
 # --- AutoValue ---
 # AutoValue annotations are retained but dependency is compileOnly.
