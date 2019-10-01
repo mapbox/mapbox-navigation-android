@@ -2,7 +2,7 @@ apply plugin: 'com.github.kt3k.coveralls'
 apply plugin: 'jacoco'
 
 buildscript {
-    apply from: "${rootDir}/gradle/dependencies.gradle"
+  apply from: "${rootDir}/gradle/dependencies.gradle"
 
   repositories {
     google()
