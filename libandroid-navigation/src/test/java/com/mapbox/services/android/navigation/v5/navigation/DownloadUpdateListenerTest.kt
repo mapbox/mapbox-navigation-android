@@ -1,9 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation
 
-import org.junit.Test
-
 import java.io.File
-
+import org.junit.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
