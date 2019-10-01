@@ -41,6 +41,9 @@ jobs:
           name: Check Java code style
           command: make checkstyle
       - run:
+          name: Check Kotlin code style
+          command: ./gradlew ktlint
+      - run:
           name: Run unit-test, generate Jacoco test report and Post code coverage report to Codecov.io
           command: |
             ./gradlew testDebugUnitTestCoverage
