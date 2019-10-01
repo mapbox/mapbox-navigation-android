@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation
 
 import android.os.AsyncTask
-
 import com.mapbox.navigator.Navigator
 
 internal class ConfigureRouterTask(
@@ -12,7 +11,6 @@ internal class ConfigureRouterTask(
 
     @Synchronized override fun doInBackground(vararg paramsUnused: Void): Long =
         navigator.configureRouter(tilePath)
-
 
     override fun onPostExecute(numberOfTiles: Long) {
         if (numberOfTiles > 0) {
