@@ -562,13 +562,8 @@ class NavigationTelemetry implements NavigationMetricListener {
     BatteryMonitor batteryMonitor = new BatteryMonitor(currentSdkVersionChecker);
     float batteryPercentage = batteryMonitor.obtainPercentage(context);
     boolean isPluggedIn = batteryMonitor.isPluggedIn(context);
-    String sessionId = navigationSessionState.sessionIdentifier();
-    if (sessionId != null) {
-      return null;
-    } else {
-      return new BatteryEvent(navigationSessionState.sessionIdentifier(), batteryPercentage,
+    return new BatteryEvent(navigationSessionState.sessionIdentifier(), batteryPercentage,
               isPluggedIn, performanceMetadata);
-    }
   }
 
   private void resetDepartFactory() {
