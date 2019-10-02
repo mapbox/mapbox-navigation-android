@@ -16,7 +16,7 @@ public class BatteryChargeReporterTest {
     Timer aTimer = mock(Timer.class);
     TimerTask anyTask = null;
     BatteryChargeReporter theBatteryChargeReporter = new BatteryChargeReporter(aTimer, anyTask);
-    long anyPeriodInMilloseconds = 1 * 60 * 1000;
+    long anyPeriodInMilloseconds = 60 * 1000;
 
     theBatteryChargeReporter.scheduleAt(anyPeriodInMilloseconds);
 
