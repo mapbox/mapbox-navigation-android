@@ -55,6 +55,8 @@ public class TarFetchedCallbackTest {
     Call call = mock(Call.class);
     Throwable throwable = mock(Throwable.class);
 
+    when(throwable.getMessage()).thenReturn("Exception");
+
     callback.onFailure(call, throwable);
 
     verify(downloader).onError(any(OfflineError.class));
