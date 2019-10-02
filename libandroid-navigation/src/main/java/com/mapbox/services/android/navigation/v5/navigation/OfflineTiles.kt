@@ -23,7 +23,8 @@ class OfflineTiles private constructor(
      *
      * @param callback for retrofit
      */
-    internal fun fetchRouteTiles(callback: Callback<ResponseBody>) {
+    // FIXME make internal after kotlin migration
+    protected fun fetchRouteTiles(callback: Callback<ResponseBody>) {
         mapboxRouteTiles.enqueueCall(callback)
     }
 

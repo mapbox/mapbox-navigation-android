@@ -25,8 +25,7 @@ class RouteTileDownloader {
   void startDownload(final OfflineTiles offlineTiles) {
     String version = offlineTiles.version();
     TarFetchedCallback tarFetchedCallback = buildTarFetchedCallback(version);
-    // FIXME when convert to kotlin
-    offlineTiles.fetchRouteTiles$libandroid_navigation_debug(tarFetchedCallback);
+    offlineTiles.fetchRouteTiles(tarFetchedCallback);
   }
 
   void onError(OfflineError error) {
