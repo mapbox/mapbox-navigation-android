@@ -4,10 +4,10 @@ import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
 import androidx.core.os.ConfigurationCompat
-import timber.log.Timber
 import java.io.IOException
 import java.io.RandomAccessFile
 import java.util.regex.Pattern
+import timber.log.Timber
 
 internal class MetadataBuilder {
 
