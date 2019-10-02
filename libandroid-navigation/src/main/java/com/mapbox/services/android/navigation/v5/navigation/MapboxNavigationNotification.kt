@@ -185,7 +185,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
             .setCustomBigContentView(expandedNotificationRemoteViews)
             .setOngoing(true)
 
-        if (pendingOpenIntent != null) {
+        pendingOpenIntent?.let { pendingOpenIntent ->
             builder.setContentIntent(pendingOpenIntent)
         }
         return builder.build()
