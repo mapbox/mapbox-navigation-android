@@ -5,7 +5,7 @@ import java.util.TimerTask
 
 internal class BatteryChargeReporter(
     private val timer: Timer,
-    private val task: TimerTask?
+    private val task: TimerTask
 ) {
 
     companion object {

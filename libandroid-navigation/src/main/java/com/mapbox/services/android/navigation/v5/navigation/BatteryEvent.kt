@@ -5,7 +5,7 @@ import android.os.Parcelable
 
 @SuppressLint("ParcelCreator")
 internal data class BatteryEvent(
-    private val sessionId: String?,
+    private val sessionId: String,
     private val batteryPercentage: Float,
     private val isPluggedIn: Boolean,
     private val metadata: NavigationPerformanceMetadata?
