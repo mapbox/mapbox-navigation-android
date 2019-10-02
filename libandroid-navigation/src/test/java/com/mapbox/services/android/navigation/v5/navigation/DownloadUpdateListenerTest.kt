@@ -10,8 +10,8 @@ class DownloadUpdateListenerTest {
 
     @Test
     fun onFinishedDownloading_tarIsUnpacked() {
-        val tileUnpacker = mock<TileUnpacker>(TileUnpacker::class.java)
-        val file = mock<File>(File::class.java)
+        val tileUnpacker = mock(TileUnpacker::class.java)
+        val file = mock(File::class.java)
         val downloadUpdateListener = buildDownloadUpdateListener(tileUnpacker)
 
         downloadUpdateListener.onFinishedDownloading(file)
@@ -19,13 +19,13 @@ class DownloadUpdateListenerTest {
         verify(tileUnpacker).unpack(
             any(File::class.java),
             any(String::class.java),
-            any<UnpackProgressUpdateListener>(UnpackProgressUpdateListener::class.java)
+            any(UnpackProgressUpdateListener::class.java)
         )
     }
 
     @Test
     fun onErrorDownloading_offlineErrorIsSent() {
-        val downloader = mock<RouteTileDownloader>(RouteTileDownloader::class.java)
+        val downloader = mock(RouteTileDownloader::class.java)
         val downloadUpdateListener = buildDownloadUpdateListener(downloader)
 
         downloadUpdateListener.onErrorDownloading()
@@ -34,20 +34,20 @@ class DownloadUpdateListenerTest {
     }
 
     private fun buildDownloadUpdateListener(tileUnpacker: TileUnpacker): DownloadUpdateListener {
-        val downloader = mock<RouteTileDownloader>(RouteTileDownloader::class.java)
+        val downloader = mock(RouteTileDownloader::class.java)
         val tilePath = "some/path/"
         val tileVersion = "some-version"
-        val listener = mock<RouteTileDownloadListener>(RouteTileDownloadListener::class.java)
+        val listener = mock(RouteTileDownloadListener::class.java)
         return DownloadUpdateListener(
             downloader, tileUnpacker, tilePath, tileVersion, listener
         )
     }
 
     private fun buildDownloadUpdateListener(downloader: RouteTileDownloader): DownloadUpdateListener {
-        val tileUnpacker = mock<TileUnpacker>(TileUnpacker::class.java)
+        val tileUnpacker = mock(TileUnpacker::class.java)
         val tilePath = "some/path/"
         val tileVersion = "some-version"
-        val listener = mock<RouteTileDownloadListener>(RouteTileDownloadListener::class.java)
+        val listener = mock(RouteTileDownloadListener::class.java)
         return DownloadUpdateListener(
             downloader, tileUnpacker, tilePath, tileVersion, listener
         )
