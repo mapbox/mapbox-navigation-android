@@ -5,10 +5,10 @@ import android.os.Parcelable
 
 @SuppressLint("ParcelCreator")
 internal data class BatteryEvent(
-    private val sessionId: String,
+    private val sessionId: String?,
     private val batteryPercentage: Float,
     private val isPluggedIn: Boolean,
-    private val metadata: NavigationPerformanceMetadata
+    private val metadata: NavigationPerformanceMetadata?
 ) : NavigationPerformanceEvent(sessionId, BATTERY_EVENT_NAME, metadata), Parcelable {
 
     companion object {
