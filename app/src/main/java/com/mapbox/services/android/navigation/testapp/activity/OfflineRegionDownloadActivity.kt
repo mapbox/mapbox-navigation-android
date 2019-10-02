@@ -274,8 +274,10 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     }
 
     private fun downloadSelectedRegion() {
-        val builder = OfflineTiles.builder()
-            .accessToken(Mapbox.getAccessToken())
+        val token = Mapbox.getAccessToken() ?: return
+
+        val builder = OfflineTiles.Builder()
+            .accessToken(token)
             .version(versionSpinner.selectedItem as String)
             .boundingBox(boundingBox)
 
