@@ -127,6 +127,7 @@ dependencies {
   // Unit Testing
   testImplementation dependenciesList.junit
   testImplementation dependenciesList.mockito
+  testImplementation dependenciesList.mockk
 
   // Instrumentation testing
   androidTestImplementation dependenciesList.testRules
