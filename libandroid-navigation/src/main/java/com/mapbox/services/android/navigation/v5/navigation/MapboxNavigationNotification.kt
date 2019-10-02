@@ -103,14 +103,6 @@ internal class MapboxNavigationNotification : NavigationNotification {
         updateDistanceText(routeProgress)
         val time = Calendar.getInstance()
 
-        /* Original code
-          LegStep step = routeProgress.currentLegProgress().upComingStep() != null
-          ? routeProgress.currentLegProgress().upComingStep()
-          : routeProgress.currentLegProgress().currentStep();
-          updateManeuverImage(step)
-        * */
-
-        // *** Converted code
         generateArrivalTime(routeProgress, time)?.let { formattedTime ->
             updateViewsWithArrival(formattedTime)
             routeProgress.currentLegProgress().upComingStep()?.let { step ->
