@@ -9,6 +9,7 @@ import com.mapbox.core.utils.TextUtils
 private const val MAPBOX_NAV_PREFERENCE_MAU_SKU = "com.mapbox.navigationsdk.accounts.mau.sku"
 private const val MAPBOX_NAV_PREFERENCES_USER_ID = "com.mapbox.navigationsdk.accounts.mau.userid"
 private const val MAPBOX_NAV_PREFERENCE_MAU_TIMESTAMP = "com.mapbox.navigationsdk.accounts.trips.time"
+private const val MAPBOX_MAP_PREFERENCE_SKU = "com.mapbox.mapboxsdk.accounts.skutoken"
 private const val DEFAULT_TOKEN_TIMER = 0L
 
 internal class Mau(
@@ -22,6 +23,7 @@ internal class Mau(
         }
         setTimerExpiry(getNow())
         persistMauSkuToken()
+        persistMapsSkuToken()
     }
 
     private fun shouldRefreshSku(): Boolean {
@@ -50,6 +52,11 @@ internal class Mau(
         return preferences.getString(MAPBOX_NAV_PREFERENCE_MAU_SKU, "")!!
     }
 
+    private fun persistMapsSkuToken() {
+        val mapsSkuToken = generateMapsSkuToken()
+        preferences.edit().putString(MAPBOX_MAP_PREFERENCE_SKU, mapsSkuToken).apply()
+    }
+
     private fun persistMauUserId(userId: String) {
         preferences.edit().putString(MAPBOX_NAV_PREFERENCES_USER_ID, userId).apply()
     }
@@ -58,17 +65,25 @@ internal class Mau(
         return preferences.getString(MAPBOX_NAV_PREFERENCES_USER_ID, "")!!
     }
 
-    private fun generateUserId(): String {
-        return MapboxAccounts.obtainEndUserId()
-    }
-
-    private fun generateMauSkuToken(): String {
+    private fun getUserId(): String {
         var userId = retrieveUserId()
         if (TextUtils.isEmpty(userId)) {
             userId = generateUserId()
             persistMauUserId(userId)
         }
-        return MapboxAccounts.obtainNavigationSkuUserToken(userId)
+        return userId
+    }
+
+    private fun generateUserId(): String {
+        return MapboxAccounts.obtainEndUserId()
+    }
+
+    private fun generateMauSkuToken(): String {
+        return MapboxAccounts.obtainNavigationSkuUserToken(getUserId())
+    }
+
+    private fun generateMapsSkuToken(): String {
+        return MapboxAccounts.obtainMapsSkuUserToken(getUserId())
     }
 
     private fun isOneHoursExpired(then: Long): Boolean {

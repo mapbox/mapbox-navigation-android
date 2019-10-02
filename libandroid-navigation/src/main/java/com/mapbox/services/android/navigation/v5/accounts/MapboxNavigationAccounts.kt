@@ -4,12 +4,12 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.text.format.DateUtils
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MAPBOX_SHARED_PREFERENCES
 import timber.log.Timber
 
 private const val ENABLE_MAU = "EnableMAU"
 private const val META_DATA = "com.mapbox.services.android.navigation.v5"
 private const val ENABLE_MAU_META_DATA = META_DATA + ENABLE_MAU
-private const val MAPBOX_NAV_PREFERENCES = "mapbox.navigation.preferences"
 
 const val MAU_TIMER_EXPIRE_THRESHOLD = 1
 const val TRIPS_TIMER_EXPIRE_THRESHOLD = 2
@@ -52,7 +52,7 @@ class MapboxNavigationAccounts private constructor() {
         }
 
         private fun init(context: Context) {
-            val preferences = context.getSharedPreferences(MAPBOX_NAV_PREFERENCES, Context.MODE_PRIVATE)
+            val preferences = context.getSharedPreferences(MAPBOX_SHARED_PREFERENCES, Context.MODE_PRIVATE)
             /*tokenGenerator = when (isMauBillingEnabled(context)) {
                 true -> Mau(preferences, TIMER_EXPIRE_AFTER * MAU_TIMER_EXPIRE_THRESHOLD)
                 else -> Trips(preferences, TIMER_EXPIRE_AFTER * TRIPS_TIMER_EXPIRE_THRESHOLD, TRIPS_REQUEST_COUNT_THRESHOLD)
