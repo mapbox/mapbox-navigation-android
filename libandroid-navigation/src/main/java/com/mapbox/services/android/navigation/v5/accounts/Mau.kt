@@ -2,7 +2,6 @@ package com.mapbox.services.android.navigation.v5.accounts
 
 import android.content.SharedPreferences
 import android.os.SystemClock
-import android.text.format.DateUtils
 import androidx.annotation.NonNull
 import com.mapbox.android.accounts.v1.MapboxAccounts
 import com.mapbox.core.utils.TextUtils
@@ -10,11 +9,12 @@ import com.mapbox.core.utils.TextUtils
 private const val MAPBOX_NAV_PREFERENCE_MAU_SKU = "com.mapbox.navigationsdk.accounts.mau.sku"
 private const val MAPBOX_NAV_PREFERENCES_USER_ID = "com.mapbox.navigationsdk.accounts.mau.userid"
 private const val MAPBOX_NAV_PREFERENCE_MAU_TIMESTAMP = "com.mapbox.navigationsdk.accounts.trips.time"
-private const val MAU_TIMER_EXPIRE_THRESHOLD = 1
 private const val DEFAULT_TOKEN_TIMER = 0L
-private const val MAU_TIMER_EXPIRE_AFTER = DateUtils.HOUR_IN_MILLIS / 1000 * MAU_TIMER_EXPIRE_THRESHOLD
 
-internal class Mau(@NonNull private val preferences: SharedPreferences) : TokenGenerator {
+internal class Mau(
+    @NonNull private val preferences: SharedPreferences,
+    private val timerExpireAfter: Long
+) : TokenGenerator {
 
     private fun refreshSkuToken() {
         if (!shouldRefreshSku()) {
@@ -80,7 +80,7 @@ internal class Mau(@NonNull private val preferences: SharedPreferences) : TokenG
     }
 
     private fun isExpired(now: Long, then: Long): Boolean {
-        return now - then > MAU_TIMER_EXPIRE_AFTER
+        return now - then > timerExpireAfter
     }
 
     override fun obtainSkuToken(): String {

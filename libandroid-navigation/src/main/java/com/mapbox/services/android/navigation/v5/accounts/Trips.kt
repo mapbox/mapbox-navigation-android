@@ -2,20 +2,20 @@ package com.mapbox.services.android.navigation.v5.accounts
 
 import android.content.SharedPreferences
 import android.os.SystemClock
-import android.text.format.DateUtils
 import androidx.annotation.NonNull
 import com.mapbox.android.accounts.v1.MapboxAccounts
 
-private const val MAPBOX_NAV_PREFERENCE_TRIPS_SKU = "com.mapbox.navigationsdk.accounts.trips.sku"
-private const val MAPBOX_NAV_PREFERENCE_ROUTE_REQ_COUNT = "com.mapbox.navigationsdk.accounts.trips.count"
-private const val MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP = "com.mapbox.navigationsdk.accounts.trips.time"
-private const val ROUTE_REQUEST_COUNT_THRESHOLD = 5
-private const val TRIPS_TIMER_EXPIRE_THRESHOLD = 2
-private const val DEFAULT_REQUEST_COUNT = 0
-private const val DEFAULT_TOKEN_TIMER = 0L
-private const val TRIPS_TIMER_EXPIRE_AFTER = DateUtils.HOUR_IN_MILLIS / 1000 * TRIPS_TIMER_EXPIRE_THRESHOLD
+const val MAPBOX_NAV_PREFERENCE_TRIPS_SKU = "com.mapbox.navigationsdk.accounts.trips.sku"
+const val MAPBOX_NAV_PREFERENCE_ROUTE_REQ_COUNT = "com.mapbox.navigationsdk.accounts.trips.count"
+const val MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP = "com.mapbox.navigationsdk.accounts.trips.time"
+const val DEFAULT_TRIP_REQUEST_COUNT = 0
+const val DEFAULT_TRIP_TOKEN_TIMER = 0L
 
-internal class Trips(@NonNull private val preferences: SharedPreferences) : TokenGenerator {
+internal class Trips(
+    @NonNull private val preferences: SharedPreferences,
+    private val timerExpireAfter: Long,
+    private val routeRequestThreshold: Int
+) : TokenGenerator {
 
     enum class RotateTripsType {
         INVALID,
@@ -68,7 +68,7 @@ internal class Trips(@NonNull private val preferences: SharedPreferences) : Toke
 
     private fun validateRouteRequestCountExpiry(): Boolean {
         val routeRequestCount = getRouteRequestCountThreshold()
-        return routeRequestCount > ROUTE_REQUEST_COUNT_THRESHOLD
+        return routeRequestCount > routeRequestThreshold
     }
 
     private fun setRouteRequestCountThreshold(count: Int) {
@@ -76,7 +76,7 @@ internal class Trips(@NonNull private val preferences: SharedPreferences) : Toke
     }
 
     private fun getRouteRequestCountThreshold(): Int {
-        return preferences.getInt(MAPBOX_NAV_PREFERENCE_ROUTE_REQ_COUNT, DEFAULT_REQUEST_COUNT)
+        return preferences.getInt(MAPBOX_NAV_PREFERENCE_ROUTE_REQ_COUNT, DEFAULT_TRIP_REQUEST_COUNT)
     }
 
     private fun persistTripsSkuToken() {
@@ -97,7 +97,7 @@ internal class Trips(@NonNull private val preferences: SharedPreferences) : Toke
     }
 
     private fun getTimerExpiry(): Long {
-        return preferences.getLong(MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP, DEFAULT_TOKEN_TIMER)
+        return preferences.getLong(MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP, DEFAULT_TRIP_TOKEN_TIMER)
     }
 
     private fun isTwoHoursExpired(then: Long): Boolean {
@@ -109,7 +109,7 @@ internal class Trips(@NonNull private val preferences: SharedPreferences) : Toke
     }
 
     private fun isExpired(now: Long, then: Long): Boolean {
-        return now - then > TRIPS_TIMER_EXPIRE_AFTER
+        return now - then > timerExpireAfter
     }
 
     override fun obtainSkuToken(): String {
@@ -118,7 +118,7 @@ internal class Trips(@NonNull private val preferences: SharedPreferences) : Toke
     }
 
     override fun onNavigationEnd() {
-        setRouteRequestCountThreshold(DEFAULT_REQUEST_COUNT)
-        setTimerExpiry(DEFAULT_TOKEN_TIMER)
+        setRouteRequestCountThreshold(DEFAULT_TRIP_REQUEST_COUNT)
+        setTimerExpiry(DEFAULT_TRIP_TOKEN_TIMER)
     }
 }
