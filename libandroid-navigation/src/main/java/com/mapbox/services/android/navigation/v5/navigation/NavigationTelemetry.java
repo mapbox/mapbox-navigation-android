@@ -548,9 +548,7 @@ class NavigationTelemetry implements NavigationMetricListener {
       @Override
       public void run() {
         BatteryEvent batteryEvent = buildBatteryEvent();
-        if (batteryEvent != null) {
-            NavigationMetricsWrapper.push(batteryEvent);
-        }
+        NavigationMetricsWrapper.push(batteryEvent);
       }
     };
     batteryChargeReporter = new BatteryChargeReporter(batteryTimer, batteryTask);
@@ -563,7 +561,7 @@ class NavigationTelemetry implements NavigationMetricListener {
     float batteryPercentage = batteryMonitor.obtainPercentage(context);
     boolean isPluggedIn = batteryMonitor.isPluggedIn(context);
     return new BatteryEvent(navigationSessionState.sessionIdentifier(), batteryPercentage,
-              isPluggedIn, performanceMetadata);
+      isPluggedIn, performanceMetadata);
   }
 
   private void resetDepartFactory() {
