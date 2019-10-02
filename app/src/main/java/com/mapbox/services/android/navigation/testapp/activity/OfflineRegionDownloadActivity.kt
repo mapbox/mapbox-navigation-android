@@ -121,8 +121,9 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     }
 
     fun setupSpinner() {
+        val token = Mapbox.getAccessToken() ?: return
         mapboxOfflineRouter
-            .fetchAvailableTileVersions(Mapbox.getAccessToken(),
+            .fetchAvailableTileVersions(token,
                 object : OnTileVersionsFoundCallback {
                     override fun onVersionsFound(availableVersions: MutableList<String>) {
                         setupSpinner(availableVersions)
