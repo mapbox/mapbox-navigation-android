@@ -100,7 +100,6 @@ class OfflineTiles private constructor(
             }
             return OfflineTiles(mapboxRouteTilesBuilder.build(), _version)
         }
-
     }
 
     companion object {
@@ -113,10 +112,8 @@ class OfflineTiles private constructor(
         @JvmStatic
         fun builder(): Builder = Builder()
 
-
         @JvmStatic
         // internal constructor for tests
         internal fun builder(mapboxRouteTilesBuilder: MapboxRouteTiles.Builder): Builder = Builder(mapboxRouteTilesBuilder)
-
     }
 }
