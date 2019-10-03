@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation
 
 import android.os.AsyncTask
-
 import java.io.File
 
 internal class TileUnpacker(private val offlineNavigator: OfflineNavigator) {
