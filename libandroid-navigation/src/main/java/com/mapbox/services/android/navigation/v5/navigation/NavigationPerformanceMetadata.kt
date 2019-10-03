@@ -15,9 +15,9 @@ internal data class NavigationPerformanceMetadata(
 
     companion object {
         @JvmStatic
-        fun builder() = Builder()
+        internal fun builder() = Builder()
 
-        class Builder {
+        class Builder internal constructor() {
             private var version = ""
             private var screenSize = ""
             private var country = ""
