@@ -10,7 +10,7 @@ class OfflineTilesTest {
     fun checkOfflineTilesBuildIfNoVersionThrowException() {
         val mockMapboxRouteTilesBuilder = mock(MapboxRouteTiles.Builder::class.java)
 
-        val builder = OfflineTiles.Builder(mockMapboxRouteTilesBuilder).accessToken("")
+        val builder = OfflineTiles.builder(mockMapboxRouteTilesBuilder).accessToken("")
         builder.build()
     }
 }

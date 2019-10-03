@@ -41,7 +41,7 @@ class OfflineTiles private constructor(
      * This builder is used to create a new request to the Mapbox Route Tiles API. A request and
      * therefore a builder must include a version, access token, and a [BoundingBox].
      */
-    class Builder constructor() {
+    class Builder internal constructor() {
         private var mapboxRouteTilesBuilder: MapboxRouteTiles.Builder = MapboxRouteTiles.builder()
         private lateinit var _version: String
 
@@ -100,5 +100,23 @@ class OfflineTiles private constructor(
             }
             return OfflineTiles(mapboxRouteTilesBuilder.build(), _version)
         }
+
+    }
+
+    companion object {
+
+        /**
+         * Gets a new Builder to build an [OfflineTiles] object
+         *
+         * @return a new builder
+         */
+        @JvmStatic
+        fun builder(): Builder = Builder()
+
+
+        @JvmStatic
+        // internal constructor for tests
+        internal fun builder(mapboxRouteTilesBuilder: MapboxRouteTiles.Builder): Builder = Builder(mapboxRouteTilesBuilder)
+
     }
 }
