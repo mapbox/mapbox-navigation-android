@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation
+package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.annotation.SuppressLint
 import android.location.Location
@@ -17,7 +17,10 @@ internal class LocationUpdater(
     private var request: LocationEngineRequest
 ) {
 
-    private val callback = CurrentLocationEngineCallback(this)
+    private val callback =
+        CurrentLocationEngineCallback(
+            this
+        )
 
     init {
         requestInitialLocationUpdates(locationEngine, request)

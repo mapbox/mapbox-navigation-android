@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation
+package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.annotation.SuppressLint
 import android.os.Parcelable
@@ -9,7 +9,8 @@ internal data class BatteryEvent(
     private val batteryPercentage: Float,
     private val isPluggedIn: Boolean,
     private val metadata: NavigationPerformanceMetadata?
-) : NavigationPerformanceEvent(sessionId, BATTERY_EVENT_NAME, metadata), Parcelable {
+) : NavigationPerformanceEvent(sessionId,
+    BATTERY_EVENT_NAME, metadata), Parcelable {
 
     companion object {
         private const val BATTERY_PERCENTAGE_KEY = "battery_percentage"
@@ -18,7 +19,17 @@ internal data class BatteryEvent(
     }
 
     init {
-        addCounter(FloatCounter(BATTERY_PERCENTAGE_KEY, batteryPercentage))
-        addAttribute(Attribute(IS_PLUGGED_IN_KEY, isPluggedIn.toString()))
+        addCounter(
+            FloatCounter(
+                BATTERY_PERCENTAGE_KEY,
+                batteryPercentage
+            )
+        )
+        addAttribute(
+            Attribute(
+                IS_PLUGGED_IN_KEY,
+                isPluggedIn.toString()
+            )
+        )
     }
 }

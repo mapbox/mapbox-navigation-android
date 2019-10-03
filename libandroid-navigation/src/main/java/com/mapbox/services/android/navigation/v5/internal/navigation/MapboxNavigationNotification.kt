@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation
+package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -19,6 +19,8 @@ import com.mapbox.api.directions.v5.DirectionsCriteria.IMPERIAL
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.services.android.navigation.R
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter
@@ -160,7 +162,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
     private fun createNotificationChannel(applicationContext: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
-                    NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL, applicationContext.getString(R.string.channel_name),
+                NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL, applicationContext.getString(R.string.channel_name),
                 NotificationManager.IMPORTANCE_LOW
             )
             notificationManager?.createNotificationChannel(notificationChannel)
@@ -168,7 +170,8 @@ internal class MapboxNavigationNotification : NavigationNotification {
     }
 
     private fun buildNotification(applicationContext: Context): Notification {
-        val channelId = NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL
+        val channelId =
+            NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL
         val builder = NotificationCompat.Builder(applicationContext, channelId)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setPriority(NotificationCompat.PRIORITY_MAX)

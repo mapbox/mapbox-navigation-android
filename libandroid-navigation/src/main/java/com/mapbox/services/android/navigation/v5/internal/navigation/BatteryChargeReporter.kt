@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation
+package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import java.util.Timer
 import java.util.TimerTask
@@ -13,7 +13,8 @@ internal class BatteryChargeReporter(
     }
 
     fun scheduleAt(periodInMilliseconds: Long) {
-        timer.scheduleAtFixedRate(task, NO_DELAY, periodInMilliseconds)
+        timer.scheduleAtFixedRate(task,
+            NO_DELAY, periodInMilliseconds)
     }
 
     fun stop() {

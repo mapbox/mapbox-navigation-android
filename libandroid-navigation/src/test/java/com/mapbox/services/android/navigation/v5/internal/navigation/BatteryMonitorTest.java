@@ -6,9 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 
-import com.mapbox.services.android.navigation.v5.internal.navigation.BatteryMonitor;
-import com.mapbox.services.android.navigation.v5.internal.navigation.SdkVersionChecker;
-
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

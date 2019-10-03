@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation
+package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.content.Context
 import android.content.Intent
@@ -18,8 +18,12 @@ internal class BatteryMonitor(private val currentVersionChecker: SdkVersionCheck
 
     fun obtainPercentage(context: Context): Float {
         val batteryStatus = registerBatteryUpdates(context) ?: return UNAVAILABLE_BATTERY_LEVEL
-        val level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, DEFAULT_BATTERY_LEVEL)
-        val scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, DEFAULT_SCALE)
+        val level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL,
+            DEFAULT_BATTERY_LEVEL
+        )
+        val scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE,
+            DEFAULT_SCALE
+        )
         return level / scale.toFloat() * PERCENT_SCALE
     }
 
@@ -27,7 +31,9 @@ internal class BatteryMonitor(private val currentVersionChecker: SdkVersionCheck
         val batteryStatus = registerBatteryUpdates(context) ?: return false
 
         val chargePlug =
-            batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, DEFAULT_PLUGGED_SOURCE)
+            batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED,
+                DEFAULT_PLUGGED_SOURCE
+            )
         val pluggedUsb = chargePlug == BatteryManager.BATTERY_PLUGGED_USB
         val pluggedAc = chargePlug == BatteryManager.BATTERY_PLUGGED_AC
         var pluggedWireless = false

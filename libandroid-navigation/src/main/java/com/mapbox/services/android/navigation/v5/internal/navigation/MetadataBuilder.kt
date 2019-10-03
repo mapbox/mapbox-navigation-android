@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation
+package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.app.ActivityManager
 import android.content.Context
@@ -66,7 +66,10 @@ internal class MetadataBuilder {
         val reader: RandomAccessFile
         val load: String
         return try {
-            reader = RandomAccessFile(RANDOM_ACCESS_FILE_NAME, READ_MODE)
+            reader = RandomAccessFile(
+                RANDOM_ACCESS_FILE_NAME,
+                READ_MODE
+            )
             load = reader.readLine()
             val pattern = Pattern.compile("(\\d+)")
             val matcher = pattern.matcher(load)
