@@ -54,6 +54,7 @@ public class TarFetchedCallbackTest {
     TarFetchedCallback callback = buildCallback(downloader);
     Call call = mock(Call.class);
     Throwable throwable = mock(Throwable.class);
+    when(throwable.getMessage()).thenReturn("Exception");
 
     callback.onFailure(call, throwable);
 
