@@ -36,6 +36,7 @@ android {
     unitTests.returnDefaultValues = true
     unitTests.includeAndroidResources = true
     unitTests.all {
+      maxHeapSize = "1024m"
       jacoco {
         includeNoLocationClasses = true
       }
