@@ -28,6 +28,8 @@ public class NavigationRouteCallbackTest {
   public void onResponse_callbackIsCalled() {
     NavigationTelemetry telemetry = mock(NavigationTelemetry.class);
     NavigationRouteEventListener listener = mock(NavigationRouteEventListener.class);
+    ElapsedTime elapsedTime = mock(ElapsedTime.class);
+    when(listener.getTime()).thenReturn(elapsedTime);
     Callback<DirectionsResponse> callback = mock(Callback.class);
     Call call = mock(Call.class);
     String uuid = "some_uuid";
