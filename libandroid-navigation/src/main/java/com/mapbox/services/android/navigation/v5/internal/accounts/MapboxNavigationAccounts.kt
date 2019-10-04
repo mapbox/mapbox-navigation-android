@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.accounts
+package com.mapbox.services.android.navigation.v5.internal.accounts
 
 import android.content.Context
 import android.text.format.DateUtils
@@ -19,7 +19,8 @@ class MapboxNavigationAccounts private constructor() {
                 INSTANCE ?: synchronized(this) {
                     INSTANCE ?: MapboxNavigationAccounts().also { mapboxNavigationAccount ->
                         INSTANCE = mapboxNavigationAccount
-                        init(context)
+                        // TODO uncomment when ready to release as a part of 1.0
+                        // init(context)
                     }
                 }
 

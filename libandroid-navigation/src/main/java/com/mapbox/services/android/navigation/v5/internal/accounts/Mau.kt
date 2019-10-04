@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.accounts
+package com.mapbox.services.android.navigation.v5.internal.accounts
 
 import android.content.SharedPreferences
 import android.os.SystemClock

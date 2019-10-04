@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation
 
+import android.content.Context
 import com.mapbox.api.routetiles.v1.MapboxRouteTiles
 import com.mapbox.core.exceptions.ServicesException
 import com.mapbox.geojson.BoundingBox
@@ -40,12 +41,12 @@ class OfflineTiles private constructor(
      * This builder is used to create a new request to the Mapbox Route Tiles API. A request and
      * therefore a builder must include a version, access token, and a [BoundingBox].
      */
-    class Builder internal constructor() {
-        private var mapboxRouteTilesBuilder: MapboxRouteTiles.Builder = MapboxRouteTiles.builder()
+    class Builder internal constructor(context: Context) {
+        private var mapboxRouteTilesBuilder: MapboxRouteTiles.Builder = MapboxRouteTiles.builder().interceptor(SkuInterceptor(context))
         private lateinit var _version: String
 
         // internal constructor for tests
-        internal constructor(mapboxRouteTilesBuilder: MapboxRouteTiles.Builder) : this() {
+        internal constructor(mapboxRouteTilesBuilder: MapboxRouteTiles.Builder, context: Context) : this(context) {
             this.mapboxRouteTilesBuilder = mapboxRouteTilesBuilder
         }
 
@@ -109,10 +110,10 @@ class OfflineTiles private constructor(
          * @return a new builder
          */
         @JvmStatic
-        fun builder(): Builder = Builder()
+        fun builder(context: Context): Builder = Builder(context)
 
         @JvmStatic
         // internal constructor for tests
-        internal fun builder(mapboxRouteTilesBuilder: MapboxRouteTiles.Builder): Builder = Builder(mapboxRouteTilesBuilder)
+        internal fun builder(mapboxRouteTilesBuilder: MapboxRouteTiles.Builder, context: Context): Builder = Builder(mapboxRouteTilesBuilder, context)
     }
 }

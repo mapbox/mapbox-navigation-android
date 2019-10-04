@@ -6,8 +6,8 @@ import android.content.Context
 import android.content.pm.ProviderInfo
 import android.database.Cursor
 import android.net.Uri
-import com.mapbox.services.android.navigation.v5.accounts.Billing
-import com.mapbox.services.android.navigation.v5.accounts.MapboxNavigationAccounts
+import com.mapbox.services.android.navigation.v5.internal.accounts.Billing
+import com.mapbox.services.android.navigation.v5.internal.accounts.MapboxNavigationAccounts
 import timber.log.Timber
 
 class MapboxNavigationProvider : ContentProvider() {

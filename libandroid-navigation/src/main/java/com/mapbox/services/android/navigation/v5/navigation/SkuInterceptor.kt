@@ -1,7 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation
 
 import android.content.Context
-import com.mapbox.services.android.navigation.v5.accounts.MapboxNavigationAccounts
+import com.mapbox.services.android.navigation.v5.internal.accounts.MapboxNavigationAccounts
 import java.io.IOException
 import okhttp3.Interceptor
 import okhttp3.Response
