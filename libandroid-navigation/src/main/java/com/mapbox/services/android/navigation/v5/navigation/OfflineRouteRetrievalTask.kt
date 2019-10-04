@@ -46,13 +46,10 @@ internal class OfflineRouteRetrievalTask(
     }
 
     private fun generateErrorMessage(): String {
-        val jsonResponse = routerResult.json
-        val gson = Gson()
-        val (_, _, error, errorCode) = gson.fromJson(jsonResponse, OfflineRouteError::class.java)
-        val errorMessage = String.format(
-            "Error occurred fetching offline route: %s - Code: %d", error,
-            errorCode
-        )
+        val (_, _, error, errorCode) = Gson().fromJson(routerResult.json, OfflineRouteError::class.java)
+
+        val errorMessage = "Error occurred fetching offline route: $error - Code: $errorCode"
+
         Timber.e(errorMessage)
         return errorMessage
     }
