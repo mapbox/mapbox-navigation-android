@@ -1,0 +1,17 @@
+package com.mapbox.services.android.navigation.v5.internal.navigation.metrics;
+
+import android.annotation.SuppressLint;
+
+@SuppressLint("ParcelCreator")
+class NavigationDepartEvent extends NavigationEvent {
+  private static final String NAVIGATION_DEPART = "navigation.depart";
+
+  NavigationDepartEvent(PhoneState phoneState) {
+    super(phoneState);
+  }
+
+  @Override
+  protected String getEventName() {
+    return NAVIGATION_DEPART;
+  }
+}

@@ -15,6 +15,13 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator;
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEngineFactory;
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEventDispatcher;
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationService;
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationTelemetry;
+import com.mapbox.services.android.navigation.v5.internal.navigation.RouteRefresher;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.location.RawLocationListener;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -22,7 +29,6 @@ import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListene
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
 import com.mapbox.services.android.navigation.v5.navigation.camera.SimpleCamera;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
@@ -140,6 +146,20 @@ public class MapboxNavigation implements ServiceConnection {
     initialize();
   }
 
+  // TODO public?
+  // Package private (no modifier) for testing purposes
+  public MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
+                          NavigationTelemetry navigationTelemetry, LocationEngine locationEngine,
+                          MapboxNavigator mapboxNavigator) {
+    initializeContext(context);
+    this.accessToken = accessToken;
+    this.options = MapboxNavigationOptions.builder().build();
+    this.navigationTelemetry = navigationTelemetry;
+    this.locationEngine = locationEngine;
+    this.mapboxNavigator = mapboxNavigator;
+    initializeForTest();
+  }
+
   // Package private (no modifier) for testing purposes
   MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
                    @NonNull MapboxNavigationOptions options, NavigationTelemetry navigationTelemetry,
@@ -149,18 +169,6 @@ public class MapboxNavigation implements ServiceConnection {
     this.options = options;
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
-    initializeForTest();
-  }
-
-  // Package private (no modifier) for testing purposes
-  MapboxNavigation(@NonNull Context context, @NonNull String accessToken, NavigationTelemetry navigationTelemetry,
-                   LocationEngine locationEngine, MapboxNavigator mapboxNavigator) {
-    initializeContext(context);
-    this.accessToken = accessToken;
-    this.options = MapboxNavigationOptions.builder().build();
-    this.navigationTelemetry = navigationTelemetry;
-    this.locationEngine = locationEngine;
-    this.mapboxNavigator = mapboxNavigator;
     initializeForTest();
   }
 
@@ -818,41 +826,50 @@ public class MapboxNavigation implements ServiceConnection {
     isBound = false;
   }
 
-  String obtainAccessToken() {
+  // TODO public?
+  public String obtainAccessToken() {
     return accessToken;
   }
 
-  DirectionsRoute getRoute() {
+  // TODO public?
+  public DirectionsRoute getRoute() {
     return directionsRoute;
   }
 
-  List<Milestone> getMilestones() {
+  // TODO public?
+  public List<Milestone> getMilestones() {
     return new ArrayList<>(milestones);
   }
 
-  MapboxNavigationOptions options() {
+  // TODO public?
+  public MapboxNavigationOptions options() {
     return options;
   }
 
-  NavigationEventDispatcher getEventDispatcher() {
+  // TODO public?
+  public NavigationEventDispatcher getEventDispatcher() {
     return navigationEventDispatcher;
   }
 
-  NavigationEngineFactory retrieveEngineFactory() {
+  // TODO public?
+  public NavigationEngineFactory retrieveEngineFactory() {
     return navigationEngineFactory;
   }
 
-  MapboxNavigator retrieveMapboxNavigator() {
+  // TODO public?
+  public MapboxNavigator retrieveMapboxNavigator() {
     return mapboxNavigator;
   }
 
+  // TODO public?
   @NonNull
-  LocationEngineRequest retrieveLocationEngineRequest() {
+  public LocationEngineRequest retrieveLocationEngineRequest() {
     return locationEngineRequest;
   }
 
+  // TODO public?
   @Nullable
-  RouteRefresher retrieveRouteRefresher() {
+  public RouteRefresher retrieveRouteRefresher() {
     return routeRefresher;
   }
 
