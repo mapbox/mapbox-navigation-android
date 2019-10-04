@@ -87,8 +87,9 @@ final class NavigationMetricsWrapper {
     push(new RouteRetrievalEvent(elapsedTime, routeUuid, sessionId, metadata));
   }
 
-  static void sendInitialGpsEvent(double elapsedTime, String sessionId) {
-    push(new InitialGpsEvent(elapsedTime, sessionId));
+  static void sendInitialGpsEvent(double elapsedTime, String sessionId,
+                                  NavigationPerformanceMetadata metadata) {
+    push(new InitialGpsEvent(elapsedTime, sessionId, metadata));
   }
 
   static Event turnstileEvent() {

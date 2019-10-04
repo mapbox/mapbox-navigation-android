@@ -214,7 +214,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
   }
 
   public void updateLocation(Location location) {
-    gpsEventFactory.gpsReceived();
+    gpsEventFactory.gpsReceived(performanceMetadata);
     metricLocation = new MetricsLocation(location);
     locationBuffer.addLast(location);
     checkRerouteQueue();
