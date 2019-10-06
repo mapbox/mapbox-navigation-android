@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation
+package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import retrofit2.Call
