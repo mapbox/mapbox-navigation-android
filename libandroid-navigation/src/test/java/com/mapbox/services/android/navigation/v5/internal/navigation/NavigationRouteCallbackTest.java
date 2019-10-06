@@ -4,10 +4,6 @@ import androidx.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.v5.internal.navigation.ElapsedTime;
-import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationRouteCallback;
-import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationRouteEventListener;
-import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationTelemetry;
 
 import org.junit.Test;
 

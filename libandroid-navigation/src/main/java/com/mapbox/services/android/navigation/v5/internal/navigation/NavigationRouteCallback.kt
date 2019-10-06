@@ -5,20 +5,11 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-internal class NavigationRouteCallback(
-    private val telemetry: NavigationTelemetry,
+internal class NavigationRouteCallback @JvmOverloads constructor(
+    private val telemetry: NavigationTelemetry = NavigationTelemetry.getInstance(),
     private val listener: NavigationRouteEventListener,
     private val callback: Callback<DirectionsResponse>
 ) : Callback<DirectionsResponse> {
-
-    constructor(
-        listener: NavigationRouteEventListener,
-        callback: Callback<DirectionsResponse>
-    ) : this(
-        NavigationTelemetry.getInstance(),
-        listener,
-        callback
-    )
 
     override fun onResponse(
         call: Call<DirectionsResponse>,
