@@ -1,9 +1,13 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException
+import com.mapbox.services.android.navigation.v5.internal.utils.TimeProvider
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import kotlin.math.roundToLong
 
-internal class ElapsedTime {
+internal class ElapsedTime @JvmOverloads constructor(
+    private val timeProvider: TimeProvider = TimeProvider.SystemTime
+) {
     var start: Long? = null
         private set
     var end: Long? = null
@@ -16,22 +20,21 @@ internal class ElapsedTime {
 
     val elapsedTime: Double
         get() {
-            if (start == null || end == null) {
-                throw NavigationException("Must call start() and end() before calling getElapsedTime()")
-            }
-            val elapsedTimeInNanoseconds = end!! - start!!
-            val elapsedTimeInSeconds = elapsedTimeInNanoseconds / ELAPSED_TIME_DENOMINATOR
-            return (elapsedTimeInSeconds * PRECISION).roundToLong() / PRECISION
+            return ifNonNull(start, end) { startTime, endTime ->
+                val elapsedTimeInNanoseconds = endTime - startTime
+                val elapsedTimeInSeconds = elapsedTimeInNanoseconds / ELAPSED_TIME_DENOMINATOR
+                (elapsedTimeInSeconds * PRECISION).roundToLong() / PRECISION
+            } ?: throw NavigationException("Must call start() and end() before calling getElapsedTime()")
         }
 
     fun start() {
-        start = System.nanoTime()
+        start = timeProvider.nanoTime()
     }
 
     fun end() {
         if (start == null) {
             throw NavigationException("Must call start() before calling end()")
         }
-        end = System.nanoTime()
+        end = timeProvider.nanoTime()
     }
 }
