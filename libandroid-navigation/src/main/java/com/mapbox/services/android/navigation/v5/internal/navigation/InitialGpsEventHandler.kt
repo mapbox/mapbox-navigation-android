@@ -1,6 +1,6 @@
-package com.mapbox.services.android.navigation.v5.navigation
+package com.mapbox.services.android.navigation.v5.internal.navigation
 
-import com.mapbox.services.android.navigation.v5.navigation.NavigationMetricsWrapper.sendInitialGpsEvent
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationMetricsWrapper.sendInitialGpsEvent
 
 internal class InitialGpsEventHandler {
 

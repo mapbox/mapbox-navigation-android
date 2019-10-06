@@ -1,8 +1,5 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation;
 
-import com.mapbox.services.android.navigation.v5.internal.navigation.InitialGpsEventFactory;
-import com.mapbox.services.android.navigation.v5.internal.navigation.InitialGpsEventHandler;
-
 import org.junit.Test;
 
 import static org.mockito.ArgumentMatchers.anyDouble;
