@@ -1,12 +1,12 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException
-import com.mapbox.services.android.navigation.v5.internal.utils.TimeProvider
+import com.mapbox.services.android.navigation.v5.internal.utils.Time
 import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import kotlin.math.roundToLong
 
-internal class ElapsedTime @JvmOverloads constructor(
-    private val timeProvider: TimeProvider = TimeProvider.SystemTime
+internal class ElapsedTime(
+    private val timeProvider: Time = Time.SystemImpl
 ) {
     var start: Long? = null
         private set

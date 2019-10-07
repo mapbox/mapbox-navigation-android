@@ -1,10 +1,10 @@
 package com.mapbox.services.android.navigation.v5.internal.utils
 
-interface TimeProvider {
+interface Time {
     fun nanoTime(): Long
     fun millis(): Long
 
-    object SystemTime : TimeProvider {
+    object SystemImpl : Time {
         override fun nanoTime(): Long = System.nanoTime()
 
         override fun millis(): Long = System.currentTimeMillis()
