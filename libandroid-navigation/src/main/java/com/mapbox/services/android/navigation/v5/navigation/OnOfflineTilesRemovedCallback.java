@@ -4,7 +4,7 @@ import com.mapbox.geojson.BoundingBox;
 
 /**
  * Listener that needs to be added to
- * {@link MapboxOfflineRouter#removeTiles(String, BoundingBox, OnOfflineTilesRemovedCallback)} to know when the routing
+ * <tt>MapboxOfflineRouter#removeTiles(String, BoundingBox, OnOfflineTilesRemovedCallback)</tt> to know when the routing
  * tiles within the provided {@link BoundingBox} have been removed
  */
 public interface OnOfflineTilesRemovedCallback {
