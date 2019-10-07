@@ -19,11 +19,21 @@ internal class TripsSku(
     private var rotateTripsType: RotateTripsType = RotateTripsType.INVALID
 
     companion object {
-        const val MAPBOX_NAV_PREFERENCE_TRIPS_SKU = "com.mapbox.navigationsdk.accounts.trips.sku"
-        const val MAPBOX_NAV_PREFERENCE_ROUTE_REQ_COUNT = "com.mapbox.navigationsdk.accounts.trips.count"
-        const val MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP = "com.mapbox.navigationsdk.accounts.trips.time"
-        const val DEFAULT_TRIP_REQUEST_COUNT = 0
-        const val DEFAULT_TRIP_TOKEN_TIMER = 0L
+        private const val MAPBOX_NAV_PREFERENCE_TRIPS_SKU = "com.mapbox.navigationsdk.accounts.trips.sku"
+        private const val MAPBOX_NAV_PREFERENCE_ROUTE_REQ_COUNT = "com.mapbox.navigationsdk.accounts.trips.count"
+        private const val MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP = "com.mapbox.navigationsdk.accounts.trips.time"
+        private const val DEFAULT_TRIP_REQUEST_COUNT = 0
+        private const val DEFAULT_TRIP_TOKEN_TIMER = 0L
+    }
+
+    override fun generateSkuToken(): String {
+        refreshSkuToken()
+        return retrieveTripsSkuToken()
+    }
+
+    override fun onNavigationEnd() {
+        setRouteRequestCountThreshold(DEFAULT_TRIP_REQUEST_COUNT)
+        setTimerExpiry(DEFAULT_TRIP_TOKEN_TIMER)
     }
 
     private fun refreshSkuToken() {
@@ -111,15 +121,5 @@ internal class TripsSku(
 
     private fun isExpired(now: Long, then: Long): Boolean {
         return now - then > timerExpireAfter
-    }
-
-    override fun generateSkuToken(): String {
-        refreshSkuToken()
-        return retrieveTripsSkuToken()
-    }
-
-    override fun onNavigationEnd() {
-        setRouteRequestCountThreshold(DEFAULT_TRIP_REQUEST_COUNT)
-        setTimerExpiry(DEFAULT_TRIP_TOKEN_TIMER)
     }
 }

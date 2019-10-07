@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.provider
+package com.mapbox.services.android.navigation.v5.internal.provider
 
 import android.content.ContentProvider
 import android.content.ContentValues
@@ -14,7 +14,7 @@ class MapboxNavigationProvider : ContentProvider() {
 
     companion object {
         private const val TAG = "MapboxNavigationProvider"
-        private const val EMPTY_APPLICATION_ID_PROVIDER_AUTHORITY = "com.mapbox.services.android.navigation.v5.provider.mapboxnavigationinitprovider"
+        private const val EMPTY_APPLICATION_ID_PROVIDER_AUTHORITY = "com.mapbox.services.android.navigation.v5.internal.provider.mapboxnavigationinitprovider"
     }
 
     override fun onCreate(): Boolean {
