@@ -26,9 +26,9 @@ class MapboxNavigationAccounts private constructor() {
 
         private fun init(context: Context) {
             val preferences = context.getSharedPreferences(MAPBOX_SHARED_PREFERENCES, Context.MODE_PRIVATE)
-            skuGenerator = when (Billing.getInstance(context).getBillingType() == Billing.BillingModel.MAU) {
-                true -> MauSku(preferences, TIMER_EXPIRE_AFTER * MAU_TIMER_EXPIRE_THRESHOLD)
-                else -> TripsSku(preferences, TIMER_EXPIRE_AFTER * TRIPS_TIMER_EXPIRE_THRESHOLD, TRIPS_REQUEST_COUNT_THRESHOLD)
+            skuGenerator = when (Billing.getInstance(context).getBillingType()) {
+                Billing.BillingModel.MAU -> MauSku(preferences, TIMER_EXPIRE_AFTER * MAU_TIMER_EXPIRE_THRESHOLD)
+                Billing.BillingModel.TRIPS -> TripsSku(preferences, TIMER_EXPIRE_AFTER * TRIPS_TIMER_EXPIRE_THRESHOLD, TRIPS_REQUEST_COUNT_THRESHOLD)
             }
         }
     }

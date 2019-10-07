@@ -13,9 +13,10 @@ class Billing private constructor() {
     }
 
     companion object {
-        private const val ENABLE_MAU = "EnableMAU"
-        private const val META_DATA = "com.mapbox.services.android.navigation.v5"
-        private const val ENABLE_MAU_META_DATA = META_DATA + ENABLE_MAU
+        // TODO uncomment when ready to release
+        // private const val ENABLE_MAU = "EnableMAU"
+        // private const val META_DATA = "com.mapbox.services.android.navigation.v5"
+        private const val ENABLE_MAU_META_DATA = "com.mapbox.ManageSkuToken"
         private var INSTANCE: Billing? = null
         private var billingType = BillingModel.TRIPS
 
