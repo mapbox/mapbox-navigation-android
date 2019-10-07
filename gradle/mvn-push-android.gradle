@@ -109,6 +109,8 @@ afterEvaluate { project ->
 
   task androidJavadocs(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
+    options.addBooleanOption('Xdoclint:none', true)
+    excludes = ['**/*.kt']
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
   }
 
