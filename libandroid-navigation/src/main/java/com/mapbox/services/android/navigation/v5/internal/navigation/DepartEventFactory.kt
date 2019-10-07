@@ -43,9 +43,8 @@ internal class DepartEventFactory(private val departEventHandler: DepartEventHan
             sessionState
         }
 
-    private fun shouldResetDepartureDate(routeProgress: MetricsRouteProgress): Boolean {
-        return currentLegIndex != routeProgress.legIndex
-    }
+    private fun shouldResetDepartureDate(routeProgress: MetricsRouteProgress): Boolean =
+        currentLegIndex != routeProgress.legIndex
 
     private fun isValidDeparture(
         sessionState: SessionState,
