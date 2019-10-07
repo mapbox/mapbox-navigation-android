@@ -2,20 +2,13 @@ package com.mapbox.services.android.navigation.v5.internal.accounts
 
 import android.content.SharedPreferences
 import android.os.SystemClock
-import androidx.annotation.NonNull
 import com.mapbox.android.accounts.v1.MapboxAccounts
 
-const val MAPBOX_NAV_PREFERENCE_TRIPS_SKU = "com.mapbox.navigationsdk.accounts.trips.sku"
-const val MAPBOX_NAV_PREFERENCE_ROUTE_REQ_COUNT = "com.mapbox.navigationsdk.accounts.trips.count"
-const val MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP = "com.mapbox.navigationsdk.accounts.trips.time"
-const val DEFAULT_TRIP_REQUEST_COUNT = 0
-const val DEFAULT_TRIP_TOKEN_TIMER = 0L
-
-internal class Trips(
-    @NonNull private val preferences: SharedPreferences,
+internal class TripsSku(
+    private val preferences: SharedPreferences,
     private val timerExpireAfter: Long,
     private val routeRequestThreshold: Int
-) : TokenGenerator {
+) : SkuGenerator {
 
     enum class RotateTripsType {
         INVALID,
@@ -24,6 +17,14 @@ internal class Trips(
     }
 
     private var rotateTripsType: RotateTripsType = RotateTripsType.INVALID
+
+    companion object {
+        const val MAPBOX_NAV_PREFERENCE_TRIPS_SKU = "com.mapbox.navigationsdk.accounts.trips.sku"
+        const val MAPBOX_NAV_PREFERENCE_ROUTE_REQ_COUNT = "com.mapbox.navigationsdk.accounts.trips.count"
+        const val MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP = "com.mapbox.navigationsdk.accounts.trips.time"
+        const val DEFAULT_TRIP_REQUEST_COUNT = 0
+        const val DEFAULT_TRIP_TOKEN_TIMER = 0L
+    }
 
     private fun refreshSkuToken() {
         if (!shouldRefreshSku()) {
@@ -112,7 +113,7 @@ internal class Trips(
         return now - then > timerExpireAfter
     }
 
-    override fun obtainSkuToken(): String {
+    override fun generateSkuToken(): String {
         refreshSkuToken()
         return retrieveTripsSkuToken()
     }

@@ -8,7 +8,9 @@ import okhttp3.Response
 
 class SkuInterceptor(private val context: Context) : Interceptor {
 
-    private val SKU_KEY = "sku"
+    companion object {
+        private const val SKU_KEY = "sku"
+    }
 
     @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {

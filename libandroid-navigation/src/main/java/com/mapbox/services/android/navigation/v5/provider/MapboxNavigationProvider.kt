@@ -12,8 +12,10 @@ import timber.log.Timber
 
 class MapboxNavigationProvider : ContentProvider() {
 
-    private val TAG = "MbxNavInitProvider"
-    private val EMPTY_APPLICATION_ID_PROVIDER_AUTHORITY = "com.mapbox.services.android.navigation.v5.provider.mapboxnavigationinitprovider"
+    companion object {
+        private const val TAG = "MapboxNavigationProvider"
+        private const val EMPTY_APPLICATION_ID_PROVIDER_AUTHORITY = "com.mapbox.services.android.navigation.v5.provider.mapboxnavigationinitprovider"
+    }
 
     override fun onCreate(): Boolean {
         try {
@@ -54,10 +56,8 @@ class MapboxNavigationProvider : ContentProvider() {
     }
 
     private fun checkContentProviderAuthority(info: ProviderInfo?) {
-        if (info == null) {
-            throw IllegalStateException("MapboxNavigationInitProvider: ProviderInfo cannot be null.")
-        }
-        if (EMPTY_APPLICATION_ID_PROVIDER_AUTHORITY == info.authority) {
+        checkNotNull(info) { throw IllegalStateException("$TAG: ProviderInfo cannot be null.") }
+        check(EMPTY_APPLICATION_ID_PROVIDER_AUTHORITY == info.authority) {
             throw IllegalStateException(
                     "Incorrect provider authority in manifest. Most likely due to a missing " + "applicationId variable in application's build.gradle.")
         }

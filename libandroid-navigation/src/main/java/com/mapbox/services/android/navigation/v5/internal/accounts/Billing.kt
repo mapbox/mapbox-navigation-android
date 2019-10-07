@@ -5,10 +5,6 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import timber.log.Timber
 
-private const val ENABLE_MAU = "EnableMAU"
-private const val META_DATA = "com.mapbox.services.android.navigation.v5"
-private const val ENABLE_MAU_META_DATA = META_DATA + ENABLE_MAU
-
 class Billing private constructor() {
 
     enum class BillingModel {
@@ -17,13 +13,15 @@ class Billing private constructor() {
     }
 
     companion object {
+        private const val ENABLE_MAU = "EnableMAU"
+        private const val META_DATA = "com.mapbox.services.android.navigation.v5"
+        private const val ENABLE_MAU_META_DATA = META_DATA + ENABLE_MAU
         private var INSTANCE: Billing? = null
         private var billingType = BillingModel.TRIPS
 
-        @JvmStatic
         fun getInstance(context: Context): Billing =
                 INSTANCE ?: synchronized(this) {
-                    INSTANCE ?: Billing().also { billing ->
+                    Billing().also { billing ->
                         INSTANCE = billing
                         init(context)
                     }

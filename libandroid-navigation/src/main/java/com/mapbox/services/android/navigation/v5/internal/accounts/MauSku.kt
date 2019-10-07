@@ -2,20 +2,21 @@ package com.mapbox.services.android.navigation.v5.internal.accounts
 
 import android.content.SharedPreferences
 import android.os.SystemClock
-import androidx.annotation.NonNull
 import com.mapbox.android.accounts.v1.MapboxAccounts
 import com.mapbox.core.utils.TextUtils
 
-private const val MAPBOX_NAV_PREFERENCE_MAU_SKU = "com.mapbox.navigationsdk.accounts.mau.sku"
-private const val MAPBOX_NAV_PREFERENCES_USER_ID = "com.mapbox.navigationsdk.accounts.mau.userid"
-private const val MAPBOX_NAV_PREFERENCE_MAU_TIMESTAMP = "com.mapbox.navigationsdk.accounts.trips.time"
-private const val MAPBOX_MAP_PREFERENCE_SKU = "com.mapbox.mapboxsdk.accounts.skutoken"
-private const val DEFAULT_TOKEN_TIMER = 0L
-
-internal class Mau(
-    @NonNull private val preferences: SharedPreferences,
+internal class MauSku(
+    private val preferences: SharedPreferences,
     private val timerExpireAfter: Long
-) : TokenGenerator {
+) : SkuGenerator {
+
+    companion object {
+        private const val MAPBOX_NAV_PREFERENCE_MAU_SKU = "com.mapbox.navigationsdk.accounts.mau.sku"
+        private const val MAPBOX_NAV_PREFERENCES_USER_ID = "com.mapbox.navigationsdk.accounts.mau.userid"
+        private const val MAPBOX_NAV_PREFERENCE_MAU_TIMESTAMP = "com.mapbox.navigationsdk.accounts.trips.time"
+        private const val MAPBOX_MAP_PREFERENCE_SKU = "com.mapbox.mapboxsdk.accounts.skutoken"
+        private const val DEFAULT_TOKEN_TIMER = 0L
+    }
 
     private fun refreshSkuToken() {
         if (!shouldRefreshSku()) {
@@ -98,7 +99,7 @@ internal class Mau(
         return now - then > timerExpireAfter
     }
 
-    override fun obtainSkuToken(): String {
+    override fun generateSkuToken(): String {
         refreshSkuToken()
         return retrieveMauSkuToken()
     }
