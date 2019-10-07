@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
+// Fixme: Remove Builder and add default values to constructor when
+// Fixme: NavigationTelemetry and NavigationMetricsWrapper converted to Kotlin
 internal data class NavigationPerformanceMetadata(
     val version: String,
     val screenSize: String,
