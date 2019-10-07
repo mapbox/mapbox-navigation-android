@@ -24,6 +24,8 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationR
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationRouteEventListener;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -87,7 +89,7 @@ public final class NavigationRoute {
    * @param callback a RetroFit callback which contains an onResponse and onFailure
    * @since 0.5.0
    */
-  public void getRoute(final Callback<DirectionsResponse> callback) {
+  public void getRoute(@NotNull final Callback<DirectionsResponse> callback) {
     mapboxDirections.enqueueCall(new NavigationRouteCallback(EVENT_LISTENER, callback));
   }
 
