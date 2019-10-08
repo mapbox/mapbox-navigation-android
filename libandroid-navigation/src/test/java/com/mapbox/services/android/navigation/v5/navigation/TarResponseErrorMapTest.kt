@@ -16,8 +16,8 @@ class TarResponseErrorMapTest {
         val errorCodes = HashMap<Int, String>()
         val response = mockk<Response<ResponseBody>>()
         every { response.code() } returns 402
-
         val errorMap = TarResponseErrorMap(errorCodes)
+
         val errorMessage = errorMap.buildErrorMessageWith(response)
 
         assertTrue(errorMessage.contains("Please contact us at support@mapbox.com"))
@@ -29,8 +29,8 @@ class TarResponseErrorMapTest {
         val response = mockk<Response<ResponseBody>>()
         every { response.code() } returns 100
         every { response.message() } returns "Some error message"
-
         val errorMap = TarResponseErrorMap(errorCodes)
+
         val errorMessage = errorMap.buildErrorMessageWith(response)
 
         assertEquals("Error code 100: Some error message", errorMessage)
