@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.utils;
+package com.mapbox.services.android.navigation.v5.internal.utils;
 
 import static junit.framework.Assert.assertEquals;
 
