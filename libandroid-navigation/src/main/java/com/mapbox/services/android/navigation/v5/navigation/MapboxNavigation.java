@@ -77,7 +77,7 @@ public class MapboxNavigation implements ServiceConnection {
   private RouteRefresher routeRefresher;
 
   static {
-    NavigationLibraryLoader.load();
+    NavigationLibraryLoader.Companion.load();
   }
 
   /**
