@@ -15,7 +15,6 @@ class TarResponseErrorMapTest {
     fun buildErrorMessage_402messageIsCreated() {
         val errorCodes = HashMap<Int, String>()
         val response = mockk<Response<ResponseBody>>()
-
         every { response.code() } returns 402
 
         val errorMap = TarResponseErrorMap(errorCodes)
@@ -28,7 +27,6 @@ class TarResponseErrorMapTest {
     fun buildErrorMessage_messageIsCreatedForCodeNotFound() {
         val errorCodes = HashMap<Int, String>()
         val response = mockk<Response<ResponseBody>>()
-
         every { response.code() } returns 100
         every { response.message() } returns "Some error message"
 
