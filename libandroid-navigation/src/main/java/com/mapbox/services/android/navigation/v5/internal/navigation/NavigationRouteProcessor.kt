@@ -7,7 +7,6 @@ import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.RouteState
-import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.*
 import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressStateMap
@@ -60,11 +59,11 @@ internal class NavigationRouteProcessor {
             updateStepPoints(route, legIndex, stepIndex, upcomingStepIndex)
 
             val legDistanceRemaining = status.remainingLegDistance.toDouble()
-            val routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, legIndex, route)
+            val routeDistanceRemaining = NavigationHelper.routeDistanceRemaining(legDistanceRemaining, legIndex, route)
             val stepDistanceRemaining = status.remainingStepDistance.toDouble()
             val legDurationRemaining = status.remainingLegDuration / ONE_SECOND_IN_MILLISECONDS
 
-            currentLegAnnotation = createCurrentAnnotation(currentLegAnnotation, currentLeg, legDistanceRemaining)
+            currentLegAnnotation = NavigationHelper.createCurrentAnnotation(currentLegAnnotation, currentLeg, legDistanceRemaining)
             val routeState = status.routeState
             val currentRouteState = progressStateMap[routeState]
 
@@ -107,13 +106,13 @@ internal class NavigationRouteProcessor {
     }
 
     private fun updateStepPoints(route: DirectionsRoute, legIndex: Int, stepIndex: Int, upcomingStepIndex: Int) {
-        currentStepPoints = decodeStepPoints(route, currentStepPoints, legIndex, stepIndex)
-        upcomingStepPoints = decodeStepPoints(route, null, legIndex, upcomingStepIndex)
+        currentStepPoints = NavigationHelper.decodeStepPoints(route, currentStepPoints, legIndex, stepIndex)
+        upcomingStepPoints = NavigationHelper.decodeStepPoints(route, null, legIndex, upcomingStepIndex)
     }
 
     private fun addUpcomingStepPoints(progressBuilder: RouteProgress.Builder) {
         upcomingStepPoints?.let { upcomingStepPoints ->
-            if (!upcomingStepPoints.isEmpty()) {
+            if (upcomingStepPoints.isNotEmpty()) {
                 progressBuilder.upcomingStepPoints(upcomingStepPoints)
             }
         }
