@@ -1,10 +1,9 @@
 package com.mapbox.services.android.navigation.v5.navigation
 
-import java.util.HashMap
 import okhttp3.ResponseBody
 import retrofit2.Response
 
-internal class TarResponseErrorMap(private val errorCodes: HashMap<Int, String>) {
+internal class TarResponseErrorMap(private val errorCodes: HashMap<Int, String> = HashMap()) {
 
     companion object {
         private const val TILES_ACCESS_TOKEN_ERROR_CODE = 402
@@ -13,7 +12,6 @@ internal class TarResponseErrorMap(private val errorCodes: HashMap<Int, String>)
             "Unable to fetch tiles: Before you can fetch " + "routing tiles you must obtain an enterprise access token. Please contact us at support@mapbox.com"
         private const val BOUNDING_BOX_ERROR_MESSAGE =
             "Unable to fetch tiles: The bounding box you have " + "specified is too large. Please select a smaller box and try again."
-        private const val ERROR_MESSAGE_FORMAT = "Error code %s: %s"
     }
 
     init {
