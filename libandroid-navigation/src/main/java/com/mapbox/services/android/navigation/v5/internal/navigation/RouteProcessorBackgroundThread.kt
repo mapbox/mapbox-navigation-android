@@ -8,9 +8,11 @@ import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
-class RouteProcessorBackgroundThread(private val navigation: MapboxNavigation,
-                                     private val responseHandler: Handler,
-                                     private val listener: Listener): HandlerThread(MAPBOX_NAVIGATION_THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND) {
+class RouteProcessorBackgroundThread(
+    private val navigation: MapboxNavigation,
+    private val responseHandler: Handler,
+    private val listener: Listener
+) : HandlerThread(MAPBOX_NAVIGATION_THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND) {
 
     companion object {
         private const val MAPBOX_NAVIGATION_THREAD_NAME = "mapbox_navigation_thread"
@@ -59,4 +61,3 @@ class RouteProcessorBackgroundThread(private val navigation: MapboxNavigation,
         fun onCheckFasterRoute(location: Location, routeProgress: RouteProgress, checkFasterRoute: Boolean)
     }
 }
-
