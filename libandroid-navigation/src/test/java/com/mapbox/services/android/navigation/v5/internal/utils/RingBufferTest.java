@@ -1,9 +1,10 @@
-package com.mapbox.services.android.navigation.v5.utils;
+package com.mapbox.services.android.navigation.v5.internal.utils;
 
 import static junit.framework.Assert.assertEquals;
 
 import com.google.common.collect.Lists;
 import com.mapbox.services.android.navigation.v5.BaseTest;
+import com.mapbox.services.android.navigation.v5.internal.utils.RingBuffer;
 
 import org.junit.Test;
 
