@@ -4,6 +4,7 @@ Mapbox welcomes participation and contributions from everyone.
 
 ### v0.43.0 -
 
+* Fix Javadoc Kotlin issues [#2103](https://github.com/mapbox/mapbox-navigation-android/pull/2103)
 * Fix intermittent memory issues in CI [#2096](https://github.com/mapbox/mapbox-navigation-android/pull/2096)
 
 ### v0.42.0 - September 20, 2019

@@ -8,7 +8,7 @@ internal data class BatteryEvent(
     private val sessionId: String,
     private val batteryPercentage: Float,
     private val isPluggedIn: Boolean,
-    private val metadata: NavigationPerformanceMetadata
+    override var metadata: NavigationPerformanceMetadata
 ) : NavigationPerformanceEvent(sessionId, BATTERY_EVENT_NAME, metadata), Parcelable {
 
     companion object {

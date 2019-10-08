@@ -121,7 +121,7 @@ public abstract class MapboxNavigationOptions {
       .isFromNavigationUi(false)
       .isDebugLoggingEnabled(false)
       .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
-      .timeFormatType(NavigationTimeFormat.NONE_SPECIFIED)
+      .timeFormatType(NavigationTimeFormat.getNONE_SPECIFIED())
       .navigationLocationEngineIntervalLagInMilliseconds(NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG)
       .defaultNotificationColorId(R.color.mapboxNotificationBlue);
   }
