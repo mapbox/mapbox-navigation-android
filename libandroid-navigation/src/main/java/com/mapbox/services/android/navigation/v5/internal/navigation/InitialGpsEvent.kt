@@ -7,7 +7,7 @@ import android.os.Parcelable
 internal data class InitialGpsEvent(
     private val elapsedTime: Double,
     private val sessionId: String,
-    private val metadata: NavigationPerformanceMetadata?
+    private val metadata: NavigationPerformanceMetadata
 ) : NavigationPerformanceEvent(sessionId, INITIAL_GPS_EVENT_NAME, metadata), Parcelable {
 
     companion object {

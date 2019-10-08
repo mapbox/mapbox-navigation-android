@@ -8,7 +8,7 @@ internal data class RouteRetrievalEvent(
     private val elapsedTime: Double,
     private val routeUuid: String,
     private val sessionId: String,
-    private val metadata: NavigationPerformanceMetadata?
+    private val metadata: NavigationPerformanceMetadata
 ) : NavigationPerformanceEvent(sessionId, ROUTE_RETRIEVAL_EVENT_NAME, metadata), Parcelable {
 
     companion object {

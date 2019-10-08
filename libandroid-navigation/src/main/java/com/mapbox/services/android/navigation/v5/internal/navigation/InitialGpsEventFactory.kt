@@ -13,7 +13,7 @@ internal class InitialGpsEventFactory @JvmOverloads constructor(
         time.start()
     }
 
-    fun gpsReceived(metadata: NavigationPerformanceMetadata?) {
+    fun gpsReceived(metadata: NavigationPerformanceMetadata) {
         if (time.start == null) {
             return
         }
@@ -26,7 +26,7 @@ internal class InitialGpsEventFactory @JvmOverloads constructor(
         hasSent = false
     }
 
-    private fun send(time: ElapsedTime, metadata: NavigationPerformanceMetadata?) {
+    private fun send(time: ElapsedTime, metadata: NavigationPerformanceMetadata) {
         if (!hasSent && sessionId.isNotEmpty()) {
             val elapsedTime = time.elapsedTime
             handler.send(elapsedTime, sessionId, metadata)

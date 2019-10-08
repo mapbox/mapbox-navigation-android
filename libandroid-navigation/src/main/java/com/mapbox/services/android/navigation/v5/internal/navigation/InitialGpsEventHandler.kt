@@ -7,7 +7,7 @@ internal class InitialGpsEventHandler {
     fun send(
         elapsedTime: Double,
         sessionId: String,
-        metadata: NavigationPerformanceMetadata?
+        metadata: NavigationPerformanceMetadata
     ) {
         sendInitialGpsEvent(elapsedTime, sessionId, metadata)
     }
