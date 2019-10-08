@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ class RouteProcessorThreadListener implements RouteProcessorBackgroundThread.Lis
    * to the navigation event dispatcher.
    */
   @Override
-  public void onNewRouteProgress(Location location, RouteProgress routeProgress) {
+  public void onNewRouteProgress(@NotNull Location location, @NotNull RouteProgress routeProgress) {
     notificationProvider.updateNavigationNotification(routeProgress);
     eventDispatcher.onProgressChange(location, routeProgress);
   }
@@ -40,7 +41,7 @@ class RouteProcessorThreadListener implements RouteProcessorBackgroundThread.Lis
    * or not, the navigation event dispatcher will be called to notify the developer.
    */
   @Override
-  public void onMilestoneTrigger(List<Milestone> triggeredMilestones, RouteProgress routeProgress) {
+  public void onMilestoneTrigger(@NotNull List<? extends Milestone> triggeredMilestones, @NotNull RouteProgress routeProgress) {
     for (Milestone milestone : triggeredMilestones) {
       String instruction = buildInstructionString(routeProgress, milestone);
       eventDispatcher.onMilestoneEvent(routeProgress, instruction, milestone);
@@ -52,7 +53,7 @@ class RouteProcessorThreadListener implements RouteProcessorBackgroundThread.Lis
    * whether or not the user is off route, the event dispatcher gets called.
    */
   @Override
-  public void onUserOffRoute(Location location, boolean userOffRoute) {
+  public void onUserOffRoute(@NotNull Location location, boolean userOffRoute) {
     if (userOffRoute) {
       eventDispatcher.onUserOffRoute(location);
     }
@@ -67,7 +68,7 @@ class RouteProcessorThreadListener implements RouteProcessorBackgroundThread.Lis
    * @param checkFasterRoute true if should check for faster route, false otherwise
    */
   @Override
-  public void onCheckFasterRoute(Location location, RouteProgress routeProgress, boolean checkFasterRoute) {
+  public void onCheckFasterRoute(@NotNull Location location, @NotNull RouteProgress routeProgress, boolean checkFasterRoute) {
     if (checkFasterRoute) {
       routeFetcher.findRouteFromRouteProgress(location, routeProgress);
     }
