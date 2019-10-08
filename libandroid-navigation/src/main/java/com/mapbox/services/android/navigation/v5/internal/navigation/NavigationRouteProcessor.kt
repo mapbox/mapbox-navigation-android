@@ -7,15 +7,16 @@ import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.RouteState
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.*
 import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressStateMap
 
-import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.createCurrentAnnotation
-import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.decodeStepPoints
-import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.routeDistanceRemaining
-
 internal class NavigationRouteProcessor {
+    private val ONE_INDEX = 1
+    private val ONE_SECOND_IN_MILLISECONDS = 1000.0
+    private val FIRST_BANNER_INSTRUCTION = 0
+
     private val progressStateMap = RouteProgressStateMap()
     private var previousRouteProgress: RouteProgress? = null
     private var previousStatus: NavigationStatus? = null
@@ -27,7 +28,7 @@ internal class NavigationRouteProcessor {
     private var currentLegAnnotation: CurrentLegAnnotation? = null
     private var routeGeometryWithBuffer: Geometry? = null
 
-    fun buildNewRouteProgress(navigator: MapboxNavigator, status: NavigationStatus, route: DirectionsRoute): RouteProgress {
+    fun buildNewRouteProgress(navigator: MapboxNavigator, status: NavigationStatus, route: DirectionsRoute): RouteProgress? {
         previousStatus = status
         updateRoute(route, navigator)
         return buildRouteProgressFrom(status, navigator)
@@ -37,13 +38,11 @@ internal class NavigationRouteProcessor {
         previousRouteProgress = routeProgress
     }
 
-    fun retrievePreviousRouteProgress(): RouteProgress? {
-        return previousRouteProgress
-    }
+    fun retrievePreviousRouteProgress() =
+            previousRouteProgress
 
-    fun retrievePreviousStatus(): NavigationStatus? {
-        return previousStatus
-    }
+    fun retrievePreviousStatus() =
+            previousStatus
 
     private fun updateRoute(route: DirectionsRoute, navigator: MapboxNavigator) {
         if (this.route == null || this.route != route) {
@@ -52,53 +51,58 @@ internal class NavigationRouteProcessor {
         }
     }
 
-    private fun buildRouteProgressFrom(status: NavigationStatus, navigator: MapboxNavigator): RouteProgress {
+    private fun buildRouteProgressFrom(status: NavigationStatus, navigator: MapboxNavigator): RouteProgress? {
         val legIndex = status.legIndex
         val stepIndex = status.stepIndex
         val upcomingStepIndex = stepIndex + ONE_INDEX
         route?.let { route ->
             updateSteps(route, legIndex, stepIndex)
             updateStepPoints(route, legIndex, stepIndex, upcomingStepIndex)
+
+            val legDistanceRemaining = status.remainingLegDistance.toDouble()
+            val routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, legIndex, route)
+            val stepDistanceRemaining = status.remainingStepDistance.toDouble()
+            val legDurationRemaining = status.remainingLegDuration / ONE_SECOND_IN_MILLISECONDS
+
+            currentLegAnnotation = createCurrentAnnotation(currentLegAnnotation, currentLeg, legDistanceRemaining)
+            val routeState = status.routeState
+            val currentRouteState = progressStateMap[routeState]
+
+            val progressBuilder = RouteProgress.builder()
+                    .distanceRemaining(routeDistanceRemaining)
+                    .legDistanceRemaining(legDistanceRemaining)
+                    .legDurationRemaining(legDurationRemaining)
+                    .stepDistanceRemaining(stepDistanceRemaining)
+                    .directionsRoute(route)
+                    .currentStep(currentStep)
+                    .currentStepPoints(currentStepPoints)
+                    .upcomingStepPoints(upcomingStepPoints)
+                    .stepIndex(stepIndex)
+                    .legIndex(legIndex)
+                    .inTunnel(status.inTunnel)
+                    .currentState(currentRouteState)
+
+            addRouteGeometries(progressBuilder)
+            addVoiceInstructions(status, progressBuilder)
+            addBannerInstructions(status, navigator, progressBuilder)
+            addUpcomingStepPoints(progressBuilder)
+            return progressBuilder.build()
         }
-
-        val legDistanceRemaining = status.remainingLegDistance.toDouble()
-        val routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, legIndex, route!!)
-        val stepDistanceRemaining = status.remainingStepDistance.toDouble()
-        val legDurationRemaining = status.remainingLegDuration / ONE_SECOND_IN_MILLISECONDS
-
-        currentLegAnnotation = createCurrentAnnotation(currentLegAnnotation, currentLeg!!, legDistanceRemaining)
-        val routeState = status.routeState
-        val currentRouteState = progressStateMap[routeState]
-
-        val progressBuilder = RouteProgress.builder()
-                .distanceRemaining(routeDistanceRemaining)
-                .legDistanceRemaining(legDistanceRemaining)
-                .legDurationRemaining(legDurationRemaining)
-                .stepDistanceRemaining(stepDistanceRemaining)
-                .directionsRoute(route)
-                .currentStep(currentStep)
-                .currentStepPoints(currentStepPoints)
-                .upcomingStepPoints(upcomingStepPoints)
-                .stepIndex(stepIndex)
-                .legIndex(legIndex)
-                .inTunnel(status.inTunnel)
-                .currentState(currentRouteState)
-
-        addRouteGeometries(progressBuilder)
-        addVoiceInstructions(status, progressBuilder)
-        addBannerInstructions(status, navigator, progressBuilder)
-        addUpcomingStepPoints(progressBuilder)
-        return progressBuilder.build()
+        return null
     }
 
     private fun updateSteps(route: DirectionsRoute, legIndex: Int, stepIndex: Int) {
-        val legs = route.legs()
-        if (legIndex < legs!!.size) {
-            currentLeg = legs[legIndex]
-        }
-        val steps = currentLeg!!.steps()
-        if (stepIndex < steps!!.size) {
-            currentStep = steps[stepIndex]
+        route.legs()?.let { legs ->
+            if (legIndex < legs.size) {
+                currentLeg = legs[legIndex]
+            }
+            currentLeg?.let { currentLeg ->
+                currentLeg.steps()?.let { steps ->
+                    if (stepIndex < steps.size) {
+                        currentStep = steps[stepIndex]
+                    }
+                }
+            }
         }
     }
 
@@ -108,8 +112,10 @@ internal class NavigationRouteProcessor {
     }
 
     private fun addUpcomingStepPoints(progressBuilder: RouteProgress.Builder) {
-        if (upcomingStepPoints != null && !upcomingStepPoints!!.isEmpty()) {
-            progressBuilder.upcomingStepPoints(upcomingStepPoints)
+        upcomingStepPoints?.let { upcomingStepPoints ->
+            if (!upcomingStepPoints.isEmpty()) {
+                progressBuilder.upcomingStepPoints(upcomingStepPoints)
+            }
         }
     }
 
@@ -132,12 +138,5 @@ internal class NavigationRouteProcessor {
             bannerInstruction = navigator.retrieveBannerInstruction(FIRST_BANNER_INSTRUCTION)
         }
         progressBuilder.bannerInstruction(bannerInstruction)
-    }
-
-    companion object {
-
-        private val ONE_INDEX = 1
-        private val ONE_SECOND_IN_MILLISECONDS = 1000.0
-        private val FIRST_BANNER_INSTRUCTION = 0
     }
 }
