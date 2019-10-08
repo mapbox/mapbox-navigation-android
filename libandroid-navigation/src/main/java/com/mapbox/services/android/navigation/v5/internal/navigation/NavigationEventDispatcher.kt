@@ -15,7 +15,7 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils
 import java.util.concurrent.CopyOnWriteArrayList
 import timber.log.Timber
 
-class NavigationEventDispatcher {
+internal class NavigationEventDispatcher {
 
     private val navigationEventListeners: CopyOnWriteArrayList<NavigationEventListener>
     private val milestoneEventListeners: CopyOnWriteArrayList<MilestoneEventListener>
