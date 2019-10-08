@@ -10,13 +10,10 @@ class RouteTileDownloaderTest {
     @Test
     fun startDownload_fetchRouteTilesIsCalled() {
         val tilePath = "some/path/"
-        val offlineNavigator = mockk<OfflineNavigator>()
-        val listener = mockk<RouteTileDownloadListener>()
         val offlineTiles = mockk<OfflineTiles>(relaxed = true)
-
         every { offlineTiles.version() } returns "some-version"
+        val downloader = RouteTileDownloader(mockk(), tilePath, mockk())
 
-        val downloader = RouteTileDownloader(offlineNavigator, tilePath, listener)
         downloader.startDownload(offlineTiles)
 
         verify { offlineTiles.fetchRouteTiles(any()) }
@@ -25,10 +22,9 @@ class RouteTileDownloaderTest {
     @Test
     fun onError_downloadListenerErrorTriggered() {
         val tilePath = "some/path/"
-        val offlineNavigator = mockk<OfflineNavigator>()
         val listener = mockk<RouteTileDownloadListener>(relaxed = true)
         val offlineError = mockk<OfflineError>()
-        val downloader = RouteTileDownloader(offlineNavigator, tilePath, listener)
+        val downloader = RouteTileDownloader(mockk(), tilePath, listener)
 
         downloader.onError(offlineError)
 
