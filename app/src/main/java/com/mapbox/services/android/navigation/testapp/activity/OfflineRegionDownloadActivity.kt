@@ -125,14 +125,15 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         mapboxOfflineRouter
             .fetchAvailableTileVersions(token,
                 object : OnTileVersionsFoundCallback {
-                    override fun onVersionsFound(availableVersions: MutableList<String>) {
+                    override fun onVersionsFound(availableVersions: List<String>) {
                         setupSpinner(availableVersions)
                     }
 
                     override fun onError(error: OfflineError) {
                         onVersionFetchFailed()
                     }
-                })
+                }
+            )
     }
 
     fun onVersionFetchFailed() {
@@ -146,7 +147,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         }
     }
 
-    fun setupSpinner(versions: MutableList<String>) {
+    fun setupSpinner(versions: List<String>) {
         restartVersionFetchButton.visibility = GONE
         versionSpinnerContainer.visibility = VISIBLE
 
