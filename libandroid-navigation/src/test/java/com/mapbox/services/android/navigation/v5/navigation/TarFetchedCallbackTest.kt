@@ -22,7 +22,6 @@ class TarFetchedCallbackTest {
         val call = mockk<Call<ResponseBody>>()
         val response = mockk<Response<ResponseBody>>()
         val responseBody = mockk<ResponseBody>()
-
         every { response.body() } returns responseBody
         every { response.isSuccessful } returns true
 
@@ -37,7 +36,6 @@ class TarFetchedCallbackTest {
         val callback = buildCallback(downloader)
         val call = mockk<Call<ResponseBody>>()
         val response = mockk<Response<ResponseBody>>(relaxed = true)
-
         every { response.isSuccessful } returns false
 
         callback.onResponse(call, response)
@@ -51,7 +49,6 @@ class TarFetchedCallbackTest {
         val callback = buildCallback(downloader)
         val call = mockk<Call<ResponseBody>>()
         val throwable = mockk<Throwable>()
-
         every { throwable.message } returns "Exception"
 
         callback.onFailure(call, throwable)

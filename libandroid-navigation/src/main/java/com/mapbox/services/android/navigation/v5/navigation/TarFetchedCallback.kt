@@ -20,6 +20,7 @@ internal class TarFetchedCallback(
         if (response.isSuccessful) {
             downloadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, response.body())
         } else {
+            // FIXME remove after kotlin migration, use default value param
             val errorCodes = HashMap<Int, String>()
             val errorMap = TarResponseErrorMap(errorCodes)
             val error = OfflineError(errorMap.buildErrorMessageWith(response))
@@ -28,7 +29,7 @@ internal class TarFetchedCallback(
     }
 
     override fun onFailure(call: Call<ResponseBody>, throwable: Throwable) {
-        val error = OfflineError(throwable.message ?: "Unspecified error")
+        val error = OfflineError(throwable.message ?: "Tar fetching error")
         downloader.onError(error)
     }
 }
