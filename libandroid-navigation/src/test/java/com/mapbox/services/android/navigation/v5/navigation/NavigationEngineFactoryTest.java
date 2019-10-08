@@ -35,40 +35,4 @@ public class NavigationEngineFactoryTest {
 
     assertNotNull(provider.retrieveFasterRouteEngine());
   }
-
-  @Test
-  public void updateFasterRouteEngine_ignoresNull() {
-    NavigationEngineFactory provider = new NavigationEngineFactory();
-
-    provider.updateFasterRouteEngine(null);
-
-    assertNotNull(provider.retrieveFasterRouteEngine());
-  }
-
-  @Test
-  public void updateOffRouteEngine_ignoresNull() {
-    NavigationEngineFactory provider = new NavigationEngineFactory();
-
-    provider.updateOffRouteEngine(null);
-
-    assertNotNull(provider.retrieveOffRouteEngine());
-  }
-
-  @Test
-  public void updateCameraEngine_ignoresNull() {
-    NavigationEngineFactory provider = new NavigationEngineFactory();
-
-    provider.updateCameraEngine(null);
-
-    assertNotNull(provider.retrieveCameraEngine());
-  }
-
-  @Test
-  public void updateSnapEngine_ignoresNull() {
-    NavigationEngineFactory provider = new NavigationEngineFactory();
-
-    provider.updateSnapEngine(null);
-
-    assertNotNull(provider.retrieveSnapEngine());
-  }
 }
