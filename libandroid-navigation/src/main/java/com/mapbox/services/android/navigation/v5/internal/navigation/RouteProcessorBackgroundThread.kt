@@ -8,10 +8,10 @@ import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
-class RouteProcessorBackgroundThread(
+internal class RouteProcessorBackgroundThread(
     private val navigation: MapboxNavigation,
-    private val responseHandler: Handler,
-    private val listener: Listener
+    responseHandler: Handler,
+    listener: Listener
 ) : HandlerThread(MAPBOX_NAVIGATION_THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND) {
 
     companion object {
