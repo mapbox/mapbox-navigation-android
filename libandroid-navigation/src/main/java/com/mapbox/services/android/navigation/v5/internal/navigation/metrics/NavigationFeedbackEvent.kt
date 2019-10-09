@@ -24,7 +24,5 @@ internal class NavigationFeedbackEvent(
     var locationsAfter: Array<Location>? = null
     var screenshot: String? = null
 
-    override fun getEventName(): String {
-        return NAVIGATION_FEEDBACK
-    }
+    override fun getEventName(): String = NAVIGATION_FEEDBACK
 }
