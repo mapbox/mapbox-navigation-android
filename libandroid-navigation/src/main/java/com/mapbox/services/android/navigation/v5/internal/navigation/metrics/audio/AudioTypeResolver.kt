@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.v5.internal.navigation.metrics.au
 import android.content.Context
 import android.media.AudioManager
 import android.os.Build
-import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException
 
 internal sealed class AudioTypeResolver {
 
