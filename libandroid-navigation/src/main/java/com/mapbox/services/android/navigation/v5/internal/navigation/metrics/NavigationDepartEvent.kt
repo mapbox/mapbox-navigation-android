@@ -11,7 +11,5 @@ internal class NavigationDepartEvent(
         private const val NAVIGATION_DEPART = "navigation.depart"
     }
 
-    override fun getEventName(): String {
-        return NAVIGATION_DEPART
-    }
+    override fun getEventName(): String = NAVIGATION_DEPART
 }

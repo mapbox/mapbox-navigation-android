@@ -11,7 +11,7 @@ internal class NavigationCancelEvent(
         private const val NAVIGATION_CANCEL = "navigation.cancel"
     }
 
-    /**
+    /*
      * Don't remove any fields, cause they are should match with
      * the schema downloaded from S3. Look at {@link SchemaTest}
      */
@@ -19,7 +19,5 @@ internal class NavigationCancelEvent(
     var rating: Int = 0
     var comment: String = ""
 
-    override fun getEventName(): String {
-        return NAVIGATION_CANCEL
-    }
+    override fun getEventName(): String = NAVIGATION_CANCEL
 }
