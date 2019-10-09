@@ -4,8 +4,6 @@ object OfflineCriteria {
 
     /**
      * BicycleType parameter in the Directions API.
-     *
-     * @property type String - name of
      */
     enum class BicycleType(val type: String) {
         /**
@@ -36,8 +34,6 @@ object OfflineCriteria {
 
     /**
      * WaypointType parameter in the Directions API.
-     *
-     * @property type String
      */
     enum class WaypointType(val type: String) {
         /**
