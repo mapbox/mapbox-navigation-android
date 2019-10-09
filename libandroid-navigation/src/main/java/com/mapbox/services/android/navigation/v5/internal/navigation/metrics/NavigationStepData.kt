@@ -5,7 +5,7 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogre
 /**
  * Class that contains step meta data
  */
-internal class NavigationStepData(metricsRouteProgress: MetricsRouteProgress) {
+internal data class NavigationStepData(val metricsRouteProgress: MetricsRouteProgress) {
     val upcomingInstruction: String = metricsRouteProgress.upcomingStepInstruction
     val upcomingModifier: String = metricsRouteProgress.upcomingStepModifier
     val upcomingName: String = metricsRouteProgress.upcomingStepName
