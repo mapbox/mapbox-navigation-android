@@ -15,10 +15,10 @@ class AudioTypeResolverTest {
     val thrown: ExpectedException = ExpectedException.none()
 
     @Test
-    fun checkSpeakersAudioTypeThrowsExceptionWhenChainSsNull() {
+    fun checksSpeakersAudioTypeThrowsExceptionWhenChainIsNull() {
         thrown.expect(NavigationException::class.java)
-        thrown.expectMessage("Invalid chain for AudioType: next element for SpeakerAudioType didn't set")
-        val speakerAudioType = SpeakerAudioType()
+        thrown.expectMessage("Invalid chain for AudioType: next element for Speaker didn't set")
+        val speakerAudioType = AudioTypeResolver.Speaker()
         val audioManager = mockk<AudioManager>(relaxed = true)
         val context = mockk<Context>(relaxed = true) {
             every {
@@ -30,10 +30,10 @@ class AudioTypeResolverTest {
     }
 
     @Test
-    fun checkHeadphonesAudioTypeThrowsExceptionWhenChainSsNull() {
+    fun checksHeadphonesAudioTypeThrowsExceptionWhenChainIsNull() {
         thrown.expect(NavigationException::class.java)
-        thrown.expectMessage("Invalid chain for AudioType: next element for HeadphonesAudioType didn't set")
-        val headphonesAudioType = HeadphonesAudioType()
+        thrown.expectMessage("Invalid chain for AudioType: next element for Headphones didn't set")
+        val headphonesAudioType = AudioTypeResolver.Headphones()
         val audioManager = mockk<AudioManager>(relaxed = true)
         val context = mockk<Context>(relaxed = true) {
             every {
@@ -45,10 +45,10 @@ class AudioTypeResolverTest {
     }
 
     @Test
-    fun checkBluetoothAudioTypeThrowsExceptionWhenChainSsNull() {
+    fun checksBluetoothAudioTypeThrowsExceptionWhenChainIsNull() {
         thrown.expect(NavigationException::class.java)
-        thrown.expectMessage("Invalid chain for AudioType: next element for BluetoothAudioType didn't set")
-        val bluetoothAudioType = BluetoothAudioType()
+        thrown.expectMessage("Invalid chain for AudioType: next element for Bluetooth didn't set")
+        val bluetoothAudioType = AudioTypeResolver.Bluetooth()
         val audioManager = mockk<AudioManager>(relaxed = true)
         val context = mockk<Context>(relaxed = true) {
             every {
