@@ -14,7 +14,7 @@ internal sealed class AudioTypeResolver {
         const val UNKNOWN = "unknown"
     }
 
-    var chain: AudioTypeResolver? = null
+    internal lateinit var chain: AudioTypeResolver
 
     open fun nextChain(chain: AudioTypeResolver) {
         this.chain = chain
@@ -29,10 +29,7 @@ internal sealed class AudioTypeResolver {
             return if (audioManager.isBluetoothScoOn) {
                 BLUETOOTH
             } else {
-                chain?.obtainAudioType(context)
-                    ?: throw NavigationException(
-                        "Invalid chain for AudioType: next element for Bluetooth didn't set"
-                    )
+                chain.obtainAudioType(context)
             }
         }
     }
@@ -50,10 +47,7 @@ internal sealed class AudioTypeResolver {
             return if (isHeadphonesOn) {
                 HEADPHONES
             } else {
-                chain?.obtainAudioType(context)
-                    ?: throw NavigationException(
-                        "Invalid chain for AudioType: next element for Headphones didn't set"
-                    )
+                chain.obtainAudioType(context)
             }
         }
     }
@@ -65,10 +59,7 @@ internal sealed class AudioTypeResolver {
             return if (audioManager.isSpeakerphoneOn) {
                 SPEAKER
             } else {
-                chain?.obtainAudioType(context)
-                    ?: throw NavigationException(
-                        "Invalid chain for AudioType: next element for Speaker didn't set"
-                    )
+                chain.obtainAudioType(context)
             }
         }
     }
