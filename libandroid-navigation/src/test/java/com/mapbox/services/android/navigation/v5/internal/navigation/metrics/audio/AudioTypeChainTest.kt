@@ -7,12 +7,12 @@ import org.junit.Test
 class AudioTypeChainTest {
 
     @Test
-    fun checkChainIsCorrectWhenSetupCalled() {
+    fun checksChainIsCorrectWhenSetupCalled() {
         val audioTypeChain = AudioTypeChain()
-        val unknownAudioType = mockk<UnknownAudioType>(relaxed = true)
-        val speakerAudioType = mockk<SpeakerAudioType>(relaxed = true)
-        val headphonesAudioType = mockk<HeadphonesAudioType>(relaxed = true)
-        val bluetoothAudioType = mockk<BluetoothAudioType>(relaxed = true)
+        val unknownAudioType = mockk<AudioTypeResolver.Unknown>(relaxed = true)
+        val speakerAudioType = mockk<AudioTypeResolver.Speaker>(relaxed = true)
+        val headphonesAudioType = mockk<AudioTypeResolver.Headphones>(relaxed = true)
+        val bluetoothAudioType = mockk<AudioTypeResolver.Bluetooth>(relaxed = true)
 
         audioTypeChain.setup(
             unknownAudioType,
