@@ -20,6 +20,7 @@ class RouteHandler {
       String routeJson = route.toJson();
       // TODO route_index (Which route to follow) and leg_index (Which leg to follow) are hardcoded for now
       mapboxNavigator.setRoute(routeJson, INDEX_FIRST_ROUTE, INDEX_FIRST_LEG);
+      mapboxNavigator.cacheLastRoute(); // CALL ME IN BACKGROUND
     } else {
       List<RouteLeg> legs = route.legs();
       for (int i = 0; i < legs.size(); i++) {

@@ -37,6 +37,10 @@ class MapboxNavigator {
     return navigator.setRoute(routeJson, routeIndex, legIndex);
   }
 
+  synchronized void cacheLastRoute() {
+    navigator.cacheLastRoute();
+  }
+
   synchronized boolean updateAnnotations(@NonNull String legAnnotationJson, int routeIndex, int legIndex) {
     return navigator.updateAnnotations(legAnnotationJson, routeIndex, legIndex);
   }
