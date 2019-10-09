@@ -11,7 +11,5 @@ internal class NavigationArriveEvent(
         private const val NAVIGATION_ARRIVE = "navigation.arrive"
     }
 
-    override fun getEventName(): String {
-        return NAVIGATION_ARRIVE
-    }
+    override fun getEventName(): String = NAVIGATION_ARRIVE
 }
