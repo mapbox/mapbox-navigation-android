@@ -10,8 +10,8 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
 internal class RouteProcessorBackgroundThread(
     private val navigation: MapboxNavigation,
-    responseHandler: Handler,
-    listener: Listener
+    private val responseHandler: Handler,
+    private val listener: Listener
 ) : HandlerThread(MAPBOX_NAVIGATION_THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND) {
 
     companion object {
@@ -19,16 +19,20 @@ internal class RouteProcessorBackgroundThread(
     }
 
     private val routeProcessor = NavigationRouteProcessor()
-    private val workerHandler = Handler(looper)
-    private val runnable = RouteProcessorRunnable(routeProcessor, navigation, workerHandler, responseHandler, listener)
+    private lateinit var workerHandler: Handler
+    private lateinit var runnable: RouteProcessorRunnable
 
     override fun start() {
         super.start()
+        if (!::workerHandler.isInitialized) {
+            workerHandler = Handler(looper)
+        }
+        runnable = RouteProcessorRunnable(routeProcessor, navigation, workerHandler, responseHandler, listener)
         workerHandler.post(runnable)
     }
 
     override fun quit(): Boolean {
-        if (isAlive) {
+        if (isAlive && ::workerHandler.isInitialized && ::runnable.isInitialized) {
             workerHandler.removeCallbacks(runnable)
         }
         return super.quit()
