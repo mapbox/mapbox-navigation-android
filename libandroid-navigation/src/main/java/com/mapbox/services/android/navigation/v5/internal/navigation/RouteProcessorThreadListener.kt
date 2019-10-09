@@ -1,13 +1,11 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.location.Location
-
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.buildInstructionString
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.route.RouteFetcher
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
-
-import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.buildInstructionString
 
 internal class RouteProcessorThreadListener(
     private val eventDispatcher: NavigationEventDispatcher,
@@ -45,7 +43,8 @@ internal class RouteProcessorThreadListener(
             true -> {
                 eventDispatcher.onUserOffRoute(location)
             }
-            false -> {}
+            false -> {
+            }
         }
     }
 
@@ -62,7 +61,8 @@ internal class RouteProcessorThreadListener(
             true -> {
                 routeFetcher.findRouteFromRouteProgress(location, routeProgress)
             }
-            false -> {}
+            false -> {
+            }
         }
     }
 }
