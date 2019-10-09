@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -14,6 +15,7 @@ import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.internal.location.replay.ReplayLocationDispatcher;
 
 import java.util.ArrayList;
 import java.util.List;
