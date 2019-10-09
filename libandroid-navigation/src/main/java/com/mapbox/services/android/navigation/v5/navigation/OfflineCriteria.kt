@@ -1,55 +1,73 @@
 package com.mapbox.services.android.navigation.v5.navigation
 
-import androidx.annotation.StringDef
-
 object OfflineCriteria {
 
     /**
-     * Bicycle type for road bike.
+     * BicycleType parameter in the Directions API.
+     *
+     * @property type String - name of
      */
-    const val ROAD = "Road"
+    enum class BicycleType(val type: String) {
+        /**
+         * Bicycle type for road bike.
+         */
+        ROAD("Road"),
+
+        /**
+         * Bicycle type for hybrid bike.
+         */
+        HYBRID("Hybrid"),
+
+        /**
+         * Bicycle type for city bike.
+         */
+        CITY("City"),
+
+        /**
+         * Bicycle type for cross bike.
+         */
+        CROSS("Cross"),
+
+        /**
+         * Bicycle type for mountain bike.
+         */
+        MOUNTAIN("Mountain");
+    }
 
     /**
-     * Bicycle type for hybrid bike.
+     * WaypointType parameter in the Directions API.
+     *
+     * @property type String
      */
-    const val HYBRID = "Hybrid"
+    enum class WaypointType(val type: String) {
+        /**
+         * Break waypoint type.
+         */
+        BREAK("break"),
 
-    /**
-     * Bicycle type for city bike.
-     */
-    const val CITY = "City"
+        /**
+         * Through waypoint type.
+         */
+        THROUGH("through")
+    }
+    // /**
+    //  * Retention policy for the bicycle type parameter in the Directions API.
+    //  */
+    // @Retention(AnnotationRetention.SOURCE)
+    // @StringDef(ROAD, HYBRID, CITY, CROSS, MOUNTAIN)
+    // annotation class BicycleType
 
-    /**
-     * Bicycle type for cross bike.
-     */
-    const val CROSS = "Cross"
-
-    /**
-     * Bicycle type for mountain bike.
-     */
-    const val MOUNTAIN = "Mountain"
-
-    /**
-     * Break waypoint type.
-     */
-    const val BREAK = "break"
-
-    /**
-     * Through waypoint type.
-     */
-    const val THROUGH = "through"
-
-    /**
-     * Retention policy for the bicycle type parameter in the Directions API.
-     */
-    @Retention(AnnotationRetention.SOURCE)
-    @StringDef(ROAD, HYBRID, CITY, CROSS, MOUNTAIN)
-    annotation class BicycleType
+    // fun isBicycleType(vararg types: String): Boolean =
+    //     types.find { it != ROAD || it != HYBRID || it != CITY || it != CROSS || it != MOUNTAIN } == null
 
     /**
      * Retention policy for the waypoint type parameter in the Directions API.
      */
-    @Retention(AnnotationRetention.SOURCE)
-    @StringDef(BREAK, THROUGH)
-    annotation class WaypointType
+    // @Target(AnnotationTarget.TYPE, AnnotationTarget.VALUE_PARAMETER)
+    // @Retention(AnnotationRetention.SOURCE)
+    // @StringDef(BREAK, THROUGH)
+    // annotation class WaypointType
+
+    // fun isWaypointType(vararg types: String): Boolean =
+    //     types.find { it != BREAK || it != THROUGH } == null
 }
