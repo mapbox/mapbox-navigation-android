@@ -14,7 +14,6 @@ internal class NavigationFeedbackEvent(
         private const val NAVIGATION_FEEDBACK = "navigation.feedback"
     }
 
-
     /*
      * Don't remove any fields, cause they are should match with
      * the schema downloaded from S3. Look at {@link SchemaTest}
