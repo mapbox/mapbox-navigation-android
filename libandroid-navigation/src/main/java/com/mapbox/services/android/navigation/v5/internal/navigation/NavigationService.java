@@ -123,7 +123,7 @@ public class NavigationService extends Service {
     LocationEngine locationEngine = mapboxNavigation.getLocationEngine();
     LocationEngineRequest locationEngineRequest = mapboxNavigation.retrieveLocationEngineRequest();
     NavigationEventDispatcher dispatcher = mapboxNavigation.getEventDispatcher();
-    locationUpdater = new LocationUpdater(thread, dispatcher, locationEngine, locationEngineRequest);
+    locationUpdater = new LocationUpdater(getApplicationContext(), thread, dispatcher, locationEngine, locationEngineRequest);
   }
 
   private void startForegroundNotification(NavigationNotification navigationNotification) {
