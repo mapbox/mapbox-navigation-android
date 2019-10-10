@@ -24,8 +24,10 @@ internal object MetadataBuilder {
     }
     private val VERSION = Build.VERSION.SDK_INT.toString()
 
-    fun constructMetadata(context: Context): NavigationPerformanceMetadata {
-        return NavigationPerformanceMetadata.builder()
+    private var metadata: NavigationPerformanceMetadata? = null
+
+    fun getMetadata(context: Context): NavigationPerformanceMetadata =
+        metadata ?: NavigationPerformanceMetadata.builder()
             .version(VERSION)
             .screenSize(getScreenSize(context))
             .country(getCountry(context))
@@ -37,7 +39,7 @@ internal object MetadataBuilder {
             .gpu("")
             .manufacturer(MANUFACTURER)
             .build()
-    }
+            .also { metadata = it }
 
     private fun getTotalMemory(context: Context): String {
         val memoryInfo = ActivityManager.MemoryInfo()

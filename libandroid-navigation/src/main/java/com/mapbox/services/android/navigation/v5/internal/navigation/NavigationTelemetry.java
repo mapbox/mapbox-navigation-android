@@ -134,7 +134,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
       // TODO Check if we are sending two turnstile events (Maps and Nav) and if so, do we want to track them
       // separately?
       NavigationMetricsWrapper.push(navTurnstileEvent);
-      performanceMetadata = MetadataBuilder.INSTANCE.constructMetadata(context);
+      performanceMetadata = MetadataBuilder.INSTANCE.getMetadata(context);
       isInitialized = true;
     }
     initEventDispatcherListeners(navigation);
@@ -215,9 +215,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
   }
 
   public void updateLocation(Context context, Location location) {
-    if (performanceMetadata == null) {
-      performanceMetadata = MetadataBuilder.INSTANCE.constructMetadata(context);
-    }
+    performanceMetadata = MetadataBuilder.INSTANCE.getMetadata(context);
     gpsEventFactory.gpsReceived(performanceMetadata);
     metricLocation = new MetricsLocation(location);
     locationBuffer.addLast(location);

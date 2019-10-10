@@ -7,8 +7,8 @@ import android.os.Parcelable
 internal data class RouteRetrievalEvent(
     private val elapsedTime: Double,
     private val routeUuid: String,
-    private val sessionId: String,
-    override var metadata: NavigationPerformanceMetadata
+    @Transient private val sessionId: String,
+    @Transient override var metadata: NavigationPerformanceMetadata
 ) : NavigationPerformanceEvent(sessionId, ROUTE_RETRIEVAL_EVENT_NAME, metadata), Parcelable {
 
     companion object {

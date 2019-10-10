@@ -6,8 +6,8 @@ import android.os.Parcelable
 @SuppressLint("ParcelCreator")
 internal data class InitialGpsEvent(
     private val elapsedTime: Double,
-    private val sessionId: String,
-    override var metadata: NavigationPerformanceMetadata
+    @Transient private val sessionId: String,
+    @Transient override var metadata: NavigationPerformanceMetadata
 ) : NavigationPerformanceEvent(sessionId, INITIAL_GPS_EVENT_NAME, metadata), Parcelable {
 
     companion object {
