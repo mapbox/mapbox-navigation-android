@@ -59,10 +59,10 @@ public class NavigationEventFactory {
     NavigationRerouteEvent navigationRerouteEvent =
       new NavigationRerouteEvent(phoneState, rerouteEvent, metricProgress);
     setEvent(sessionState, metricProgress, location, sdkIdentifier, navigationRerouteEvent);
-    List<Location> locationList = sessionState.beforeEventLocations();
+    List<Location> locationList = sessionState.getBeforeEventLocations();
     navigationRerouteEvent.setLocationsBefore(convertToArray(locationList));
-    navigationRerouteEvent.setLocationsAfter(convertToArray(sessionState.afterEventLocations()));
-    navigationRerouteEvent.setSecondsSinceLastReroute(sessionState.secondsSinceLastReroute());
+    navigationRerouteEvent.setLocationsAfter(convertToArray(sessionState.getAfterEventLocations()));
+    navigationRerouteEvent.setSecondsSinceLastReroute(sessionState.getSecondsSinceLastReroute());
     return navigationRerouteEvent;
   }
 
@@ -76,8 +76,8 @@ public class NavigationEventFactory {
                                                                      String screenshot, String feedbackSource) {
     NavigationFeedbackEvent navigationFeedbackEvent = new NavigationFeedbackEvent(phoneState, metricProgress);
     setEvent(sessionState, metricProgress, location, sdkIdentifier, navigationFeedbackEvent);
-    navigationFeedbackEvent.setLocationsBefore(convertToArray(sessionState.beforeEventLocations()));
-    navigationFeedbackEvent.setLocationsAfter(convertToArray(sessionState.afterEventLocations()));
+    navigationFeedbackEvent.setLocationsBefore(convertToArray(sessionState.getBeforeEventLocations()));
+    navigationFeedbackEvent.setLocationsAfter(convertToArray(sessionState.getAfterEventLocations()));
     navigationFeedbackEvent.setDescription(description);
     navigationFeedbackEvent.setFeedbackType(feedbackType);
     navigationFeedbackEvent.setScreenshot(screenshot);
@@ -89,8 +89,7 @@ public class NavigationEventFactory {
                                String sdkIdentifier, NavigationEvent navigationEvent) {
     navigationEvent
       .setAbsoluteDistanceToDestination(DistanceFormatter.calculateAbsoluteDistance(location, metricProgress));
-    navigationEvent
-      .setDistanceCompleted((int) (sessionState.eventRouteDistanceCompleted() + metricProgress.getDistanceTraveled()));
+    navigationEvent.setDistanceCompleted((int) (sessionState.getEventRouteDistanceCompleted() + metricProgress.getDistanceTraveled()));
     navigationEvent.setDistanceRemaining(metricProgress.getDistanceRemaining());
     navigationEvent.setDurationRemaining(metricProgress.getDurationRemaining());
     navigationEvent.setProfile(metricProgress.getDirectionsRouteProfile());
@@ -103,41 +102,41 @@ public class NavigationEventFactory {
     navigationEvent.setStartTimestamp(obtainStartTimestamp(sessionState));
     navigationEvent.setEventVersion(EVENT_VERSION);
     navigationEvent.setSdkIdentifier(sdkIdentifier);
-    navigationEvent.setSessionIdentifier(sessionState.sessionIdentifier());
+    navigationEvent.setSessionIdentifier(sessionState.getSessionIdentifier());
     navigationEvent.setLat(location.getLatitude());
     navigationEvent.setLng(location.getLongitude());
     navigationEvent.setGeometry(sessionState.currentGeometry());
-    navigationEvent.setSimulation(sessionState.mockLocation());
-    navigationEvent.setLocationEngine(sessionState.locationEngineName());
-    navigationEvent.setTripIdentifier(sessionState.tripIdentifier());
-    navigationEvent.setRerouteCount(sessionState.rerouteCount());
-    navigationEvent.setOriginalRequestIdentifier(sessionState.originalRequestIdentifier());
-    navigationEvent.setRequestIdentifier(sessionState.requestIdentifier());
+    navigationEvent.setSimulation(sessionState.getMockLocation());
+    navigationEvent.setLocationEngine(sessionState.getLocationEngineName());
+    navigationEvent.setTripIdentifier(sessionState.getTripIdentifier());
+    navigationEvent.setRerouteCount(sessionState.getRerouteCount());
+    navigationEvent.setOriginalRequestIdentifier(sessionState.getOriginalRequestIdentifier());
+    navigationEvent.setRequestIdentifier(sessionState.getRequestIdentifier());
     navigationEvent.setOriginalGeometry(sessionState.originalGeometry());
     navigationEvent.setOriginalEstimatedDistance(sessionState.originalDistance());
     navigationEvent.setOriginalEstimatedDuration(sessionState.originalDuration());
     navigationEvent.setOriginalStepCount(sessionState.originalStepCount());
-    navigationEvent.setPercentTimeInForeground(sessionState.percentInForeground());
-    navigationEvent.setPercentTimeInPortrait(sessionState.percentInPortrait());
+    navigationEvent.setPercentTimeInForeground(sessionState.getPercentInForeground());
+    navigationEvent.setPercentTimeInPortrait(sessionState.getPercentInPortrait());
     navigationEvent.setTotalStepCount(sessionState.currentStepCount());
   }
 
   private static String obtainStartTimestamp(SessionState sessionState) {
     Date date;
-    if (sessionState.startTimestamp() == null) {
+    if (sessionState.getStartTimestamp() == null) {
       date = new Date();
     } else {
-      date = sessionState.startTimestamp();
+      date = sessionState.getStartTimestamp();
     }
     return TelemetryUtils.generateCreateDateFormatted(date);
   }
 
   private static String obtainArriveTimestamp(SessionState sessionState) {
     Date date;
-    if (sessionState.arrivalTimestamp() == null) {
+    if (sessionState.getArrivalTimestamp() == null) {
       date = new Date();
     } else {
-      date = sessionState.arrivalTimestamp();
+      date = sessionState.getArrivalTimestamp();
     }
     return TelemetryUtils.generateCreateDateFormatted(date);
   }

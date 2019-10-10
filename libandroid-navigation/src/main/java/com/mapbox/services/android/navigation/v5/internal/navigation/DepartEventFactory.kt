@@ -36,9 +36,8 @@ internal class DepartEventFactory(private val departEventHandler: DepartEventHan
         routeProgress: MetricsRouteProgress
     ): SessionState =
         if (shouldResetDepartureDate(routeProgress)) {
-            sessionState.toBuilder()
-                .startTimestamp(null)
-                .build()
+            sessionState.startTimestamp = null
+            sessionState
         } else {
             sessionState
         }
@@ -50,17 +49,15 @@ internal class DepartEventFactory(private val departEventHandler: DepartEventHan
         sessionState: SessionState,
         routeProgress: MetricsRouteProgress
     ): Boolean =
-        sessionState.startTimestamp() == null && routeProgress.distanceTraveled > 0
+        sessionState.startTimestamp == null && routeProgress.distanceTraveled > 0
 
     private fun sendToHandler(
         sessionState: SessionState,
         routeProgress: MetricsRouteProgress,
         location: MetricsLocation
     ): SessionState {
-        val updatedSessionState = sessionState.toBuilder()
-            .startTimestamp(Date())
-            .build()
-        departEventHandler.send(updatedSessionState, routeProgress, location)
-        return updatedSessionState
+        sessionState.startTimestamp = Date()
+        departEventHandler.send(sessionState, routeProgress, location)
+        return sessionState
     }
 }
