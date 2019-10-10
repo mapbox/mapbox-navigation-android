@@ -455,8 +455,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
 
   private void sendRerouteEvent(RerouteEvent rerouteEvent) {
     // If there isn't an updated geometry, don't send
-    if (rerouteEvent.getNewRouteGeometry() == null
-      || rerouteEvent.getSessionState().startTimestamp() == null) {
+    if (rerouteEvent.getSessionState().startTimestamp() == null) {
       return;
     }
     // Create arrays with locations from before / after the reroute occurred
@@ -468,7 +467,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
       .afterEventLocations(afterLocations)
       .build();
     // Set the updated session state
-    rerouteEvent.setRerouteSessionState(rerouteSessionState);
+    rerouteEvent.setSessionState(rerouteSessionState);
 
     NavigationMetricsWrapper.rerouteEvent(rerouteEvent, metricProgress,
       rerouteEvent.getSessionState().eventLocation(), context);
