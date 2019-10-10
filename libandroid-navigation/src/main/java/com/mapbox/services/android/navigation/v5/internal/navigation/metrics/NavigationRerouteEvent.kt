@@ -22,7 +22,7 @@ internal class NavigationRerouteEvent(
     val newDistanceRemaining: Int = rerouteEvent.newDistanceRemaining
     val newDurationRemaining: Int = rerouteEvent.newDurationRemaining
     val feedbackId: String = phoneState.feedbackId
-    val newGeometry: String? = rerouteEvent.newRouteGeometry
+    val newGeometry: String = rerouteEvent.newRouteGeometry
     val step: NavigationStepData = NavigationStepData(metricsRouteProgress)
     var secondsSinceLastReroute: Int = 0
     var locationsBefore: Array<Location>? = null
