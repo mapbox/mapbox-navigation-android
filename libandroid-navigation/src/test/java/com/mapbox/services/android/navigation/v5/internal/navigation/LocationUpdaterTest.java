@@ -34,7 +34,7 @@ public class LocationUpdaterTest {
     MetadataBuilder metadataBuilder = mock(MetadataBuilder.class);
     LocationUpdater locationUpdater = new LocationUpdater(context, thread, mock(NavigationEventDispatcher.class),
       locationEngine, locationEngineRequest);
-    when(metadataBuilder.constructMetadata(context)).thenReturn(metadata);
+    when(metadataBuilder.getMetadata(context)).thenReturn(metadata);
 
     locationUpdater.updateLocationEngine(mock(LocationEngine.class));
 
@@ -51,7 +51,7 @@ public class LocationUpdaterTest {
     MetadataBuilder metadataBuilder = mock(MetadataBuilder.class);
     LocationUpdater locationUpdater = new LocationUpdater(context, thread, mock(NavigationEventDispatcher.class),
       locationEngine, locationEngineRequest);
-    when(metadataBuilder.constructMetadata(context)).thenReturn(metadata);
+    when(metadataBuilder.getMetadata(context)).thenReturn(metadata);
 
     locationUpdater.updateLocationEngineRequest(mock(LocationEngineRequest.class));
 
@@ -68,7 +68,7 @@ public class LocationUpdaterTest {
     MetadataBuilder metadataBuilder = mock(MetadataBuilder.class);
     LocationUpdater locationUpdater = new LocationUpdater(context, thread, mock(NavigationEventDispatcher.class),
       locationEngine, locationEngineRequest);
-    when(metadataBuilder.constructMetadata(context)).thenReturn(metadata);
+    when(metadataBuilder.getMetadata(context)).thenReturn(metadata);
 
     locationUpdater.removeLocationUpdates();
 
@@ -85,7 +85,7 @@ public class LocationUpdaterTest {
     MetadataBuilder metadataBuilder = mock(MetadataBuilder.class);
     LocationUpdater locationUpdater = new LocationUpdater(context, thread, mock(NavigationEventDispatcher.class),
       locationEngine, locationEngineRequest);
-    when(metadataBuilder.constructMetadata(context)).thenReturn(metadata);
+    when(metadataBuilder.getMetadata(context)).thenReturn(metadata);
 
     locationUpdater.updateLocationEngine(mock(LocationEngine.class));
 
@@ -103,7 +103,7 @@ public class LocationUpdaterTest {
     MetadataBuilder metadataBuilder = mock(MetadataBuilder.class);
     LocationUpdater locationUpdater = new LocationUpdater(context, thread, mock(NavigationEventDispatcher.class),
       locationEngine, locationEngineRequest);
-    when(metadataBuilder.constructMetadata(context)).thenReturn(metadata);
+    when(metadataBuilder.getMetadata(context)).thenReturn(metadata);
 
     locationUpdater.updateLocationEngineRequest(mock(LocationEngineRequest.class));
 
@@ -138,7 +138,7 @@ public class LocationUpdaterTest {
     MetadataBuilder metadataBuilder = mock(MetadataBuilder.class);
     LocationUpdater locationUpdater = new LocationUpdater(context, thread, dispatcher,
             locationEngine, locationEngineRequest);
-    when(metadataBuilder.constructMetadata(context)).thenReturn(metadata);
+    when(metadataBuilder.getMetadata(context)).thenReturn(metadata);
 
     locationUpdater.onLocationChanged(location);
 
