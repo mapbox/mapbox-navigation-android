@@ -47,7 +47,7 @@ public abstract class MapboxNavigationOptions {
   @NavigationConstants.RoundingIncrement
   public abstract int roundingIncrement();
 
-  @NavigationTimeFormat.Type
+  @TimeFormatType
   public abstract int timeFormatType();
 
   public abstract int navigationLocationEngineIntervalLagInMilliseconds();
@@ -96,7 +96,7 @@ public abstract class MapboxNavigationOptions {
 
     public abstract Builder roundingIncrement(@NavigationConstants.RoundingIncrement int roundingIncrement);
 
-    public abstract Builder timeFormatType(@NavigationTimeFormat.Type int type);
+    public abstract Builder timeFormatType(@TimeFormatType int type);
 
     public abstract Builder navigationLocationEngineIntervalLagInMilliseconds(int lagInMilliseconds);
 
@@ -121,7 +121,7 @@ public abstract class MapboxNavigationOptions {
       .isFromNavigationUi(false)
       .isDebugLoggingEnabled(false)
       .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
-      .timeFormatType(NavigationTimeFormat.getNONE_SPECIFIED())
+      .timeFormatType(NavigationTimeFormatKt.NONE_SPECIFIED)
       .navigationLocationEngineIntervalLagInMilliseconds(NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG)
       .defaultNotificationColorId(R.color.mapboxNotificationBlue);
   }

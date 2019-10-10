@@ -41,7 +41,7 @@ import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLoca
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
+import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
@@ -683,7 +683,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   private void establishTimeFormat(NavigationViewOptions options) {
-    @NavigationTimeFormat.Type
+    @TimeFormatType
     int timeFormatType = options.navigationOptions().timeFormatType();
     summaryBottomSheet.setTimeFormat(timeFormatType);
   }
