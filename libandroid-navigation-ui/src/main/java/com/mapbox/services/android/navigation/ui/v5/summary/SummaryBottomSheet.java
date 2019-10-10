@@ -19,7 +19,7 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
+import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
@@ -44,7 +44,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   private TextView arrivalTimeText;
   private ProgressBar rerouteProgressBar;
   private boolean isRerouting;
-  @NavigationTimeFormat.Type
+  @TimeFormatType
   private int timeFormatType;
   private DistanceFormatter distanceFormatter;
   private NavigationViewModel navigationViewModel;
@@ -170,7 +170,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
    *
    * @param type to use
    */
-  public void setTimeFormat(@NavigationTimeFormat.Type int type) {
+  public void setTimeFormat(@TimeFormatType int type) {
     this.timeFormatType = type;
   }
 

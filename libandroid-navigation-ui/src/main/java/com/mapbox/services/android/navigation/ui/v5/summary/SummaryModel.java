@@ -4,14 +4,12 @@ import android.content.Context;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 
-import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
+import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
+import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter;
 
 import java.util.Calendar;
-
-import static com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter.formatTime;
-import static com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter.formatTimeRemaining;
 
 public class SummaryModel {
 
@@ -20,13 +18,13 @@ public class SummaryModel {
   private final String arrivalTime;
 
   public SummaryModel(Context context, DistanceFormatter distanceFormatter, RouteProgress progress,
-                      @NavigationTimeFormat.Type int timeFormatType) {
+                      @TimeFormatType int timeFormatType) {
     distanceRemaining = distanceFormatter.formatDistance(progress.distanceRemaining()).toString();
     double legDurationRemaining = progress.currentLegProgress().durationRemaining();
-    timeRemaining = formatTimeRemaining(context, legDurationRemaining);
+    timeRemaining = TimeFormatter.formatTimeRemaining(context, legDurationRemaining);
     Calendar time = Calendar.getInstance();
     boolean isTwentyFourHourFormat = DateFormat.is24HourFormat(context);
-    arrivalTime = formatTime(time, legDurationRemaining, timeFormatType, isTwentyFourHourFormat);
+    arrivalTime = TimeFormatter.formatTime(time, legDurationRemaining, timeFormatType, isTwentyFourHourFormat);
   }
 
   String getDistanceRemaining() {

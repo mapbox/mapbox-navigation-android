@@ -115,7 +115,8 @@ public class NavigationTelemetry implements NavigationMetricListener {
       .build();
     updateLifecyclePercentages();
     // Send arrival event
-    NavigationMetricsWrapper.arriveEvent(navigationSessionState, routeProgress, metricLocation.getLocation(), context);
+    NavigationMetricsWrapper.arriveEvent(navigationSessionState,
+      routeProgress, metricLocation.getLocation(), context);
   }
 
   public void initialize(@NonNull Context context, @NonNull String accessToken, MapboxNavigation navigation) {
@@ -124,10 +125,9 @@ public class NavigationTelemetry implements NavigationMetricListener {
       DepartEventHandler departEventHandler = new DepartEventHandler(context);
       departEventFactory = new DepartEventFactory(departEventHandler);
       this.context = context;
-      NavigationMetricsWrapper.init(context, accessToken, BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT);
       MapboxNavigationOptions options = navigation.options();
-      String sdkIdentifier = obtainSdkIdentifier(options);
-      NavigationMetricsWrapper.sdkIdentifier = sdkIdentifier;
+      NavigationMetricsWrapper.init(context, accessToken, BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT,
+        obtainSdkIdentifier(options));
       NavigationMetricsWrapper.toggleLogging(options.isDebugLoggingEnabled());
       Event navTurnstileEvent = NavigationMetricsWrapper.turnstileEvent();
       // TODO Check if we are sending two turnstile events (Maps and Nav) and if so, do we want to track them

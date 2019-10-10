@@ -35,7 +35,7 @@ import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMiles
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
+import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
 import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
@@ -83,7 +83,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private LocaleUtils localeUtils;
   private DistanceFormatter distanceFormatter;
   private String accessToken;
-  @NavigationTimeFormat.Type
+  @TimeFormatType
   private int timeFormatType;
   private boolean isRunning;
   private boolean isChangingConfigurations;
