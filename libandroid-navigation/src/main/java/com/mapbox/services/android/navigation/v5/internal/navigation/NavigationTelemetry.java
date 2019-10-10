@@ -116,7 +116,8 @@ public class NavigationTelemetry implements NavigationMetricListener {
       .build();
     updateLifecyclePercentages();
     // Send arrival event
-    NavigationMetricsWrapper.INSTANCE.arriveEvent(navigationSessionState, routeProgress, metricLocation.getLocation(), context);
+    NavigationMetricsWrapper.INSTANCE.arriveEvent(navigationSessionState,
+      routeProgress, metricLocation.getLocation(), context);
   }
 
   public void initialize(@NonNull Context context, @NonNull String accessToken, MapboxNavigation navigation) {
