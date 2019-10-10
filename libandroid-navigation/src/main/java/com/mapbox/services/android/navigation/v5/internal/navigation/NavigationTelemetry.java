@@ -69,7 +69,6 @@ public class NavigationTelemetry implements NavigationMetricListener {
   private BatteryChargeReporter batteryChargeReporter;
   private DepartEventFactory departEventFactory;
   private InitialGpsEventFactory gpsEventFactory = new InitialGpsEventFactory();
-  private NavigationPerformanceMetadata performanceMetadata;
 
   private NavigationTelemetry() {
     locationBuffer = new RingBuffer<>(LOCATION_BUFFER_MAX_SIZE);
@@ -134,7 +133,6 @@ public class NavigationTelemetry implements NavigationMetricListener {
       // TODO Check if we are sending two turnstile events (Maps and Nav) and if so, do we want to track them
       // separately?
       NavigationMetricsWrapper.push(navTurnstileEvent);
-      performanceMetadata = MetadataBuilder.INSTANCE.getMetadata(context);
       isInitialized = true;
     }
     initEventDispatcherListeners(navigation);
@@ -215,8 +213,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
   }
 
   public void updateLocation(Context context, Location location) {
-    performanceMetadata = MetadataBuilder.INSTANCE.getMetadata(context);
-    gpsEventFactory.gpsReceived(performanceMetadata);
+    gpsEventFactory.gpsReceived(MetadataBuilder.INSTANCE.getMetadata(context));
     metricLocation = new MetricsLocation(location);
     locationBuffer.addLast(location);
     checkRerouteQueue();
@@ -296,7 +293,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
     if (navigationSessionState != null && !navigationSessionState.sessionIdentifier().isEmpty()) {
       double time = elapsedTime.getElapsedTime();
       NavigationMetricsWrapper.routeRetrievalEvent(time, routeUuid,
-        navigationSessionState.sessionIdentifier(), performanceMetadata);
+        navigationSessionState.sessionIdentifier(), MetadataBuilder.INSTANCE.getMetadata(context));
     } else {
       routeRetrievalElapsedTime = elapsedTime;
       routeRetrievalUuid = routeUuid;
@@ -565,7 +562,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
     float batteryPercentage = batteryMonitor.obtainPercentage(context);
     boolean isPluggedIn = batteryMonitor.isPluggedIn(context);
     return new BatteryEvent(navigationSessionState.sessionIdentifier(), batteryPercentage,
-      isPluggedIn, performanceMetadata);
+      isPluggedIn, MetadataBuilder.INSTANCE.getMetadata(context));
   }
 
   private void resetDepartFactory() {
