@@ -2,17 +2,19 @@ package com.mapbox.services.android.navigation.v5.internal.location
 
 import android.location.Location
 
-class MetricsLocation(internal val location: Location?) {
+class MetricsLocation(private val _location: Location?) {
 
-    fun getLocation(): Location {
-        if (location != null) {
-            return location
+        val location: Location
+        get() {
+            if (_location != null) {
+                return _location
+            }
+
+            val metricLocation = Location("MetricsLocation")
+            metricLocation.latitude = 0.0
+            metricLocation.longitude = 0.0
+
+            return metricLocation
         }
 
-        val metricLocation = Location("MetricsLocation")
-        metricLocation.latitude = 0.0
-        metricLocation.longitude = 0.0
-
-        return metricLocation
-    }
 }
