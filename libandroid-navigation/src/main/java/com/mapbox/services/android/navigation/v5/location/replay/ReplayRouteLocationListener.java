@@ -4,6 +4,7 @@ import android.location.Location;
 
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineResult;
+import com.mapbox.services.android.navigation.v5.internal.location.replay.ReplayLocationListener;
 
 class ReplayRouteLocationListener implements ReplayLocationListener {
 

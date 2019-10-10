@@ -257,24 +257,6 @@ public class MapboxNavigationTest extends BaseTest {
   }
 
   @Test
-  public void getCameraEngine_returnsNonNullEngine() throws Exception {
-    MapboxNavigation navigation = buildMapboxNavigation();
-
-    navigation.setOffRouteEngine(null);
-
-    assertNotNull(navigation.getCameraEngine());
-  }
-
-  @Test
-  public void getCameraEngine_returnsSimpleCameraWhenNull() throws Exception {
-    MapboxNavigation navigation = buildMapboxNavigation();
-
-    navigation.setCameraEngine(null);
-
-    assertTrue(navigation.getCameraEngine() instanceof SimpleCamera);
-  }
-
-  @Test
   public void updateRouteLegIndex_negativeIndexIsIgnored() throws IOException {
     MapboxNavigator navigator = mock(MapboxNavigator.class);
     MapboxNavigation navigation = buildMapboxNavigationWith(navigator);

@@ -27,7 +27,7 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogre
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
+import com.mapbox.services.android.navigation.v5.internal.utils.RingBuffer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,6 +51,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
     + ".ReplayRouteLocationEngine";
   private static final int TWENTY_SECOND_INTERVAL = 20;
   private static final int ONE_MINUTE_IN_MILLISECONDS = 1 * 60 * 1000;
+  private static final int LOCATION_BUFFER_MAX_SIZE = 40;
 
   private final List<RerouteEvent> queuedRerouteEvents = new ArrayList<>();
   private final List<FeedbackEvent> queuedFeedbackEvents = new ArrayList<>();
@@ -71,7 +72,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
   private NavigationPerformanceMetadata performanceMetadata;
 
   private NavigationTelemetry() {
-    locationBuffer = new RingBuffer<>(40);
+    locationBuffer = new RingBuffer<>(LOCATION_BUFFER_MAX_SIZE);
     metricLocation = new MetricsLocation(null);
     metricProgress = new MetricsRouteProgress(null);
     navigationSessionState = SessionState.builder().build();
