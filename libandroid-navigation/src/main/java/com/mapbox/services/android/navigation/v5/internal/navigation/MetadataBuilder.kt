@@ -13,7 +13,7 @@ internal object MetadataBuilder {
 
     private const val RANDOM_ACCESS_FILE_NAME = "/proc/meminfo"
     private const val READ_MODE = "r"
-    private val OPERATING_SYSTEM = "Android - " + Build.VERSION.RELEASE
+    private val OPERATING_SYSTEM = "Android - ${Build.VERSION.RELEASE}"
     private val DEVICE = Build.DEVICE
     private val MANUFACTURER = Build.MANUFACTURER
     private val BRAND = Build.BRAND
