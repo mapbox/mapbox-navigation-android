@@ -17,7 +17,7 @@ internal abstract class NavigationEvent(
     }
 
     val operatingSystem: String = OPERATING_SYSTEM
-    val device: String = Build.MODEL
+    val device: String? = Build.MODEL
     val sdkVersion: String = BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME
     val created: String = phoneState.created
     val volumeLevel: Int = phoneState.volumeLevel
