@@ -149,4 +149,4 @@ internal object NavigationMetricsWrapper {
     fun turnstileEvent(): Event {
         return AppUserTurnstile(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
     }
-} // Empty private constructor for preventing initialization of this class.
+}
