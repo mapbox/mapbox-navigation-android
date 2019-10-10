@@ -102,8 +102,11 @@ internal class NavigationService : Service() {
         initializeLocationUpdater(mapboxNavigation)
     }
 
-    private fun initializeRouteFetcher(dispatcher: NavigationEventDispatcher, accessToken: String,
-                                       engineProvider: NavigationEngineFactory) {
+    private fun initializeRouteFetcher(
+        dispatcher: NavigationEventDispatcher,
+        accessToken: String,
+        engineProvider: NavigationEngineFactory
+    ) {
         val fasterRouteEngine = engineProvider.retrieveFasterRouteEngine()
         val listener = NavigationFasterRouteListener(dispatcher, fasterRouteEngine)
         routeFetcher = RouteFetcher(application, accessToken)
@@ -114,10 +117,12 @@ internal class NavigationService : Service() {
         notificationProvider = NavigationNotificationProvider(application, mapboxNavigation)
     }
 
-    private fun initializeRouteProcessorThread(mapboxNavigation: MapboxNavigation,
-                                               dispatcher: NavigationEventDispatcher,
-                                               routeFetcher: RouteFetcher,
-                                               notificationProvider: NavigationNotificationProvider) {
+    private fun initializeRouteProcessorThread(
+        mapboxNavigation: MapboxNavigation,
+        dispatcher: NavigationEventDispatcher,
+        routeFetcher: RouteFetcher,
+        notificationProvider: NavigationNotificationProvider
+    ) {
         val listener = RouteProcessorThreadListener(dispatcher, routeFetcher, notificationProvider)
         thread = RouteProcessorBackgroundThread(mapboxNavigation, Handler(), listener)
     }
