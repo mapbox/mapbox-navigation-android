@@ -157,7 +157,7 @@ public class SchemaTest {
       }
 
       JsonObject thisSchema = findSchema(schema, field);
-      assertNotNull(thisSchema);
+      assertNotNull(field, thisSchema);
 
       if (thisSchema.has("type")) {
         typesMatch(thisSchema, type);

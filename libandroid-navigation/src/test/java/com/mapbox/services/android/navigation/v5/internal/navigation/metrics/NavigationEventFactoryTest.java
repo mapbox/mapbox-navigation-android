@@ -78,7 +78,8 @@ public class NavigationEventFactoryTest {
   private PhoneState phoneState;
   private SessionState sessionState;
   private MetricsRouteProgress metricsRouteProgress;
-  private Location locationBefore, locationAfter;
+  private Location locationBefore;
+  private Location locationAfter;
 
   @Before
   public void setUp() {
@@ -261,7 +262,7 @@ public class NavigationEventFactoryTest {
     assertEquals(GEOMETRY, event.getGeometry());
     assertEquals(LOCATION_ENGINE, event.getLocationEngine());
     assertEquals(ORIG_GEO, event.getOriginalGeometry());
-    assertEquals(BATTER_PLUGGEDIN, event.isBatteryPluggedIn());
+    assertEquals(BATTER_PLUGGEDIN, event.getBatteryPluggedIn());
     assertEquals(VOLUME_LEVEL, event.getVolumeLevel(), 0);
     assertEquals(SCREEN_BRIGHTESS, event.getScreenBrightness(), 0);
     assertEquals(BATTERY_LEVEL, event.getBatteryLevel(), 0);
@@ -276,7 +277,7 @@ public class NavigationEventFactoryTest {
     assertEquals(TRIP_ID, event.getTripIdentifier());
     assertEquals(LATITUDE_BEFORE, event.getLat(), .0);
     assertEquals(LONGITUDE_BEFORE, event.getLng(), 0);
-    assertEquals(IS_MOCK, event.isSimulation());
+    assertEquals(IS_MOCK, event.getSimulation());
     assertEquals(DistanceFormatter.calculateAbsoluteDistance(locationBefore, metricsRouteProgress),
       event.getAbsoluteDistanceToDestination());
     assertEquals(PERCENT_IN_PORTRAIT, event.getPercentTimeInPortrait(), 0);
