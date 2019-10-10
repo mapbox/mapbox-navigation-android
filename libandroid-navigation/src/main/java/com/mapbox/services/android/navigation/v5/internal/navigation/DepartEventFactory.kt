@@ -34,13 +34,12 @@ internal class DepartEventFactory(private val departEventHandler: DepartEventHan
     private fun checkResetForNewLeg(
         sessionState: SessionState,
         routeProgress: MetricsRouteProgress
-    ): SessionState =
+    ): SessionState {
         if (shouldResetDepartureDate(routeProgress)) {
             sessionState.startTimestamp = null
-            sessionState
-        } else {
-            sessionState
         }
+        return sessionState
+    }
 
     private fun shouldResetDepartureDate(routeProgress: MetricsRouteProgress): Boolean =
         currentLegIndex != routeProgress.legIndex
