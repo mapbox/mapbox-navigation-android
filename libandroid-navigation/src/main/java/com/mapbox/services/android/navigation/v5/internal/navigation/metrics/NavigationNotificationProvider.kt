@@ -8,23 +8,22 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
 internal class NavigationNotificationProvider(applicationContext: Context, mapboxNavigation: MapboxNavigation) {
 
-    private var navigationNotification: NavigationNotification? = buildNotificationFrom(applicationContext, mapboxNavigation)
+    private val navigationNotification: NavigationNotification = buildNotificationFrom(applicationContext, mapboxNavigation)
 
     private var shouldUpdate: Boolean = true
 
-    fun retrieveNotification(): NavigationNotification? {
+    fun retrieveNotification(): NavigationNotification {
         return navigationNotification
     }
 
     fun updateNavigationNotification(routeProgress: RouteProgress) {
         if (shouldUpdate) {
-            navigationNotification?.updateNotification(routeProgress)
+            navigationNotification.updateNotification(routeProgress)
         }
     }
 
     fun shutdown(applicationContext: Context) {
-        navigationNotification?.onNavigationStopped(applicationContext)
-        navigationNotification = null
+        navigationNotification.onNavigationStopped(applicationContext)
         shouldUpdate = false
     }
 
