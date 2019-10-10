@@ -2,7 +2,6 @@ package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 
 import android.os.Build
 import android.os.Parcel
-
 import com.mapbox.android.telemetry.Event
 import com.mapbox.services.android.navigation.BuildConfig
 
