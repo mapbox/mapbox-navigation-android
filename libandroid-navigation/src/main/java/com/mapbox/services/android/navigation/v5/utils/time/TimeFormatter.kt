@@ -45,7 +45,7 @@ object TimeFormatter {
         seconds -= TimeUnit.DAYS.toSeconds(days)
         val hours = TimeUnit.SECONDS.toHours(seconds)
         seconds -= TimeUnit.HOURS.toSeconds(hours)
-        val minutes = TimeUnit.SECONDS.toMinutes(seconds + TimeUnit.MINUTES.toSeconds(1)/2) // round it to next minute if seconds is more or equal than 30
+        val minutes = TimeUnit.SECONDS.toMinutes(seconds + TimeUnit.MINUTES.toSeconds(1) / 2) // round it to next minute if seconds is more or equal than 30
 
         val textSpanItems = ArrayList<SpanItem>()
         val resources = context.resources
