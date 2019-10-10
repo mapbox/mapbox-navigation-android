@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.annotation.SuppressLint
 import android.os.Parcelable
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationPerformanceEvent
 
 @SuppressLint("ParcelCreator")
 internal data class BatteryEvent(

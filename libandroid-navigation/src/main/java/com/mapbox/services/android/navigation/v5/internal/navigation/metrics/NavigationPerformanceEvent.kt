@@ -1,9 +1,12 @@
-package com.mapbox.services.android.navigation.v5.internal.navigation
+package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 
 import android.annotation.SuppressLint
 import android.os.Parcel
 import android.os.Parcelable
 import com.mapbox.android.telemetry.Event
+import com.mapbox.services.android.navigation.v5.internal.navigation.Attribute
+import com.mapbox.services.android.navigation.v5.internal.navigation.Counter
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationPerformanceMetadata
 import java.text.SimpleDateFormat
 import java.util.ArrayList
 import java.util.Date

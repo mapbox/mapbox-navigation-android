@@ -1,6 +1,7 @@
-package com.mapbox.services.android.navigation.v5.internal.navigation
+package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 
 import android.content.Context
+import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigationNotification
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress

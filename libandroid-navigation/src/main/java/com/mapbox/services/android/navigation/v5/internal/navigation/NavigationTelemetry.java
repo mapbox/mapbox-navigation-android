@@ -116,7 +116,8 @@ public class NavigationTelemetry implements NavigationMetricListener {
       .build();
     updateLifecyclePercentages();
     // Send arrival event
-    NavigationMetricsWrapper.arriveEvent(navigationSessionState, routeProgress, metricLocation.getLocation(), context);
+    NavigationMetricsWrapper.INSTANCE.arriveEvent(navigationSessionState,
+      routeProgress, metricLocation.getLocation(), context);
   }
 
   public void initialize(@NonNull Context context, @NonNull String accessToken, MapboxNavigation navigation) {
@@ -125,15 +126,14 @@ public class NavigationTelemetry implements NavigationMetricListener {
       DepartEventHandler departEventHandler = new DepartEventHandler(context);
       departEventFactory = new DepartEventFactory(departEventHandler);
       this.context = context;
-      NavigationMetricsWrapper.init(context, accessToken, BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT);
       MapboxNavigationOptions options = navigation.options();
-      String sdkIdentifier = obtainSdkIdentifier(options);
-      NavigationMetricsWrapper.sdkIdentifier = sdkIdentifier;
-      NavigationMetricsWrapper.toggleLogging(options.isDebugLoggingEnabled());
-      Event navTurnstileEvent = NavigationMetricsWrapper.turnstileEvent();
+      NavigationMetricsWrapper.INSTANCE.init(context, accessToken, BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT,
+        obtainSdkIdentifier(options));
+      NavigationMetricsWrapper.INSTANCE.toggleLogging(options.isDebugLoggingEnabled());
+      Event navTurnstileEvent = NavigationMetricsWrapper.INSTANCE.turnstileEvent();
       // TODO Check if we are sending two turnstile events (Maps and Nav) and if so, do we want to track them
       // separately?
-      NavigationMetricsWrapper.push(navTurnstileEvent);
+      NavigationMetricsWrapper.INSTANCE.push(navTurnstileEvent);
       performanceMetadata = new MetadataBuilder().constructMetadata(context);
       isInitialized = true;
     }
@@ -286,7 +286,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
   void endSession() {
     flushEventQueues();
     lifecycleMonitor = null;
-    NavigationMetricsWrapper.disable();
+    NavigationMetricsWrapper.INSTANCE.disable();
     isInitialized = false;
     cancelBatteryScheduler();
   }
@@ -294,7 +294,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
   void routeRetrievalEvent(ElapsedTime elapsedTime, String routeUuid) {
     if (navigationSessionState != null && !navigationSessionState.sessionIdentifier().isEmpty()) {
       double time = elapsedTime.getElapsedTime();
-      NavigationMetricsWrapper.routeRetrievalEvent(time, routeUuid,
+      NavigationMetricsWrapper.INSTANCE.routeRetrievalEvent(time, routeUuid,
         navigationSessionState.sessionIdentifier(), performanceMetadata);
     } else {
       routeRetrievalElapsedTime = elapsedTime;
@@ -334,7 +334,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
 
   private void sendCancelEvent() {
     if (navigationSessionState.startTimestamp() != null) {
-      NavigationMetricsWrapper.cancelEvent(
+      NavigationMetricsWrapper.INSTANCE.cancelEvent(
         navigationSessionState, metricProgress, metricLocation.getLocation(), context
       );
     }
@@ -472,7 +472,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
     // Set the updated session state
     rerouteEvent.setRerouteSessionState(rerouteSessionState);
 
-    NavigationMetricsWrapper.rerouteEvent(rerouteEvent, metricProgress,
+    NavigationMetricsWrapper.INSTANCE.rerouteEvent(rerouteEvent, metricProgress,
       rerouteEvent.getSessionState().eventLocation(), context);
   }
 
@@ -489,7 +489,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
       .afterEventLocations(afterLocations)
       .build();
 
-    NavigationMetricsWrapper.feedbackEvent(feedbackSessionState, metricProgress,
+    NavigationMetricsWrapper.INSTANCE.feedbackEvent(feedbackSessionState, metricProgress,
       feedbackEvent.getSessionState().eventLocation(), feedbackEvent.getDescription(),
       feedbackEvent.getFeedbackType(), feedbackEvent.getScreenshot(), feedbackEvent.getFeedbackSource(), context);
   }
@@ -551,7 +551,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
       @Override
       public void run() {
         BatteryEvent batteryEvent = buildBatteryEvent();
-        NavigationMetricsWrapper.push(batteryEvent);
+        NavigationMetricsWrapper.INSTANCE.push(batteryEvent);
       }
     };
     batteryChargeReporter = new BatteryChargeReporter(batteryTimer, batteryTask);
