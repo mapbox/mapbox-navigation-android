@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationNotificationProvider;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
@@ -123,7 +124,8 @@ public class NavigationService extends Service {
     LocationEngine locationEngine = mapboxNavigation.getLocationEngine();
     LocationEngineRequest locationEngineRequest = mapboxNavigation.retrieveLocationEngineRequest();
     NavigationEventDispatcher dispatcher = mapboxNavigation.getEventDispatcher();
-    locationUpdater = new LocationUpdater(thread, dispatcher, locationEngine, locationEngineRequest);
+    locationUpdater = new LocationUpdater(getApplicationContext(), thread, dispatcher,
+            locationEngine, locationEngineRequest);
   }
 
   private void startForegroundNotification(NavigationNotification navigationNotification) {

@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
@@ -11,6 +12,7 @@ import timber.log.Timber
 
 @SuppressLint("MissingPermission")
 internal class LocationUpdater(
+    private val context: Context,
     private val thread: RouteProcessorBackgroundThread,
     private val dispatcher: NavigationEventDispatcher,
     private var locationEngine: LocationEngine,
@@ -40,7 +42,7 @@ internal class LocationUpdater(
         location?.let { currentLocation ->
             thread.updateLocation(currentLocation)
             dispatcher.onLocationUpdate(currentLocation)
-            NavigationTelemetry.getInstance().updateLocation(currentLocation)
+            NavigationTelemetry.getInstance().updateLocation(context, currentLocation)
         }
     }
 

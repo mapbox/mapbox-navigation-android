@@ -105,7 +105,7 @@ internal object NavigationEventFactory {
         navigationEvent.lat = location.latitude
         navigationEvent.lng = location.longitude
         navigationEvent.geometry = sessionState.currentGeometry()
-        navigationEvent.isSimulation = sessionState.mockLocation()
+        navigationEvent.simulation = sessionState.mockLocation()
         navigationEvent.locationEngine = sessionState.locationEngineName()
         navigationEvent.tripIdentifier = sessionState.tripIdentifier()
         navigationEvent.rerouteCount = sessionState.rerouteCount()
