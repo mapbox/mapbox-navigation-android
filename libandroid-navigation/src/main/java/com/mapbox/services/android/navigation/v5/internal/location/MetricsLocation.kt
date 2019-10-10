@@ -16,5 +16,4 @@ class MetricsLocation(private val _location: Location?) {
 
             return metricLocation
         }
-
 }
