@@ -46,21 +46,21 @@ final class NavigationMetricsWrapper {
 
   static void arriveEvent(SessionState sessionState, RouteProgress routeProgress, Location location, Context context) {
     MetricsRouteProgress metricsRouteProgress = new MetricsRouteProgress(routeProgress);
-    Event arriveEvent = NavigationEventFactory
+    Event arriveEvent = NavigationEventFactory.INSTANCE
       .buildNavigationArriveEvent(new PhoneState(context), sessionState, metricsRouteProgress, location, sdkIdentifier);
     mapboxTelemetry.push(arriveEvent);
   }
 
   static void cancelEvent(SessionState sessionState, MetricsRouteProgress metricProgress, Location location,
                           Context context) {
-    Event cancelEvent = NavigationEventFactory
+    Event cancelEvent = NavigationEventFactory.INSTANCE
       .buildNavigationCancelEvent(new PhoneState(context), sessionState, metricProgress, location, sdkIdentifier);
     mapboxTelemetry.push(cancelEvent);
   }
 
   static void departEvent(SessionState sessionState, MetricsRouteProgress metricsRouteProgress, Location location,
                           Context context) {
-    Event departEvent = NavigationEventFactory
+    Event departEvent = NavigationEventFactory.INSTANCE
       .buildNavigationDepartEvent(new PhoneState(context), sessionState, metricsRouteProgress, location, sdkIdentifier);
     mapboxTelemetry.push(departEvent);
   }
@@ -68,7 +68,7 @@ final class NavigationMetricsWrapper {
   static void rerouteEvent(RerouteEvent rerouteEvent, MetricsRouteProgress metricProgress,
                            Location location, Context context) {
     SessionState sessionState = rerouteEvent.getSessionState();
-    NavigationRerouteEvent navRerouteEvent = NavigationEventFactory.buildNavigationRerouteEvent(
+    NavigationRerouteEvent navRerouteEvent = NavigationEventFactory.INSTANCE.buildNavigationRerouteEvent(
       new PhoneState(context), sessionState, metricProgress, location, sdkIdentifier, rerouteEvent);
     mapboxTelemetry.push(navRerouteEvent);
   }
@@ -76,7 +76,7 @@ final class NavigationMetricsWrapper {
   static void feedbackEvent(SessionState sessionState, MetricsRouteProgress metricProgress, Location location,
                             String description, String feedbackType, String screenshot, String feedbackSource,
                             Context context) {
-    Event feedbackEvent = NavigationEventFactory.buildNavigationFeedbackEvent(
+    Event feedbackEvent = NavigationEventFactory.INSTANCE.buildNavigationFeedbackEvent(
       new PhoneState(context), sessionState, metricProgress, location, sdkIdentifier, description, feedbackType,
       screenshot, feedbackSource);
     mapboxTelemetry.push(feedbackEvent);
