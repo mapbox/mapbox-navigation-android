@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
 
@@ -14,6 +15,7 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator;
@@ -39,7 +41,9 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.internal.utils.ValidationUtils;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -70,6 +74,7 @@ public class MapboxNavigation implements ServiceConnection {
   private NavigationTelemetry navigationTelemetry = null;
   private NavigationService navigationService;
   private MapboxNavigator mapboxNavigator;
+  private OfflineNavigator offlineNavigator;
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
   private LocationEngine locationEngine;
@@ -79,6 +84,7 @@ public class MapboxNavigation implements ServiceConnection {
   private Context applicationContext;
   private boolean isBound;
   private RouteRefresher routeRefresher;
+  private EnhancedLocationUpdater enhancedLocationUpdater;
 
   static {
     NavigationLibraryLoader.Companion.load();
@@ -387,6 +393,9 @@ public class MapboxNavigation implements ServiceConnection {
    */
   public void stopNavigation() {
     Timber.d("MapboxNavigation stopNavigation called");
+    if (enhancedLocationUpdater.isActive()) {
+      enhancedLocationUpdater.removeLocationUpdates();
+    }
     if (isServiceAvailable()) {
       navigationTelemetry.stopSession();
       applicationContext.unbindService(this);
@@ -904,11 +913,37 @@ public class MapboxNavigation implements ServiceConnection {
    */
   private void initialize() {
     // Initialize event dispatcher and add internal listeners
-    mapboxNavigator = new MapboxNavigator(new Navigator());
+    Navigator navigator = new Navigator();
+    mapboxNavigator = new MapboxNavigator(navigator);
+    offlineNavigator = new OfflineNavigator(navigator);
+    offlineNavigator.configure(new File(new File(applicationContext.getFilesDir(), "tiles"), "2019_04_13-00_00_11").getAbsolutePath(), new OnOfflineTilesConfiguredCallback() {
+      @Override
+      public void onConfigured(int numberOfTiles) {
+        Timber.d("DEBUG: onConfigured %d", numberOfTiles);
+        enhancedLocationUpdater.requestLocationUpdates();
+      }
+
+      @Override
+      public void onConfigurationError(@NonNull OfflineError error) {
+        Timber.d("DEBUG: onConfigurationError %s", error.getMessage());
+      }
+    });
     navigationEventDispatcher = new NavigationEventDispatcher();
     navigationEngineFactory = new NavigationEngineFactory();
     locationEngine = obtainLocationEngine();
     locationEngineRequest = obtainLocationEngineRequest();
+    enhancedLocationUpdater = new EnhancedLocationUpdater(locationEngine, locationEngineRequest, new EnhancedLocationMediator() {
+      @Override
+      public void updateRawLocation(Location location) {
+        mapboxNavigator.updateLocation(location);
+      }
+
+      @Override
+      public Location getLocation(Date date, long lagMillis, Location fallbackLocation) {
+        NavigationStatus status = mapboxNavigator.retrieveStatus(date, lagMillis);
+        return mapboxNavigator.getSnappedLocation(status, fallbackLocation);
+      }
+    });
     initializeTelemetry(applicationContext);
 
     // Create and add default milestones if enabled.
@@ -970,7 +1005,10 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute, DirectionsRouteType routeType) {
-    ValidationUtils.validDirectionsRoute(directionsRoute, options.getDefaultMilestonesEnabled());
+    if (enhancedLocationUpdater.isActive()) {
+      enhancedLocationUpdater.removeLocationUpdates();
+    }
+    ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
     routeRefresher = new RouteRefresher(this, new RouteRefresh(accessToken));
     mapboxNavigator.updateRoute(directionsRoute, routeType);
