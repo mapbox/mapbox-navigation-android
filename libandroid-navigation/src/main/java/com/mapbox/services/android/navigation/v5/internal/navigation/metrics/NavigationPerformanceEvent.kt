@@ -16,7 +16,7 @@ import java.util.Locale
 internal open class NavigationPerformanceEvent(
     private val sessionId: String,
     eventName: String,
-    open var metadata: NavigationPerformanceMetadata?
+    open var metadata: NavigationPerformanceMetadata
 ) : Event(), Parcelable {
 
     companion object {

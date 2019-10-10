@@ -18,6 +18,7 @@ internal object NavigationMetricsWrapper {
     // TODO Where are we going to create MapboxTelemetry instance? Which class is going to hold it?
     private lateinit var mapboxTelemetry: MapboxTelemetry
 
+    @JvmStatic
     fun init(
         context: Context,
         accessToken: String,
@@ -29,18 +30,22 @@ internal object NavigationMetricsWrapper {
         this.mapboxTelemetry.enable()
     }
 
+    @JvmStatic
     fun toggleLogging(isDebugLoggingEnabled: Boolean) {
         mapboxTelemetry.updateDebugLoggingEnabled(isDebugLoggingEnabled)
     }
 
+    @JvmStatic
     fun disable() {
         mapboxTelemetry.disable()
     }
 
+    @JvmStatic
     fun push(event: Event) {
         mapboxTelemetry.push(event)
     }
 
+    @JvmStatic
     fun arriveEvent(
         sessionState: SessionState,
         routeProgress: RouteProgress,
@@ -59,6 +64,7 @@ internal object NavigationMetricsWrapper {
         mapboxTelemetry.push(arriveEvent)
     }
 
+    @JvmStatic
     fun cancelEvent(
         sessionState: SessionState,
         metricProgress: MetricsRouteProgress,
@@ -93,6 +99,7 @@ internal object NavigationMetricsWrapper {
         mapboxTelemetry.push(departEvent)
     }
 
+    @JvmStatic
     fun rerouteEvent(
         rerouteEvent: RerouteEvent,
         metricProgress: MetricsRouteProgress,
@@ -106,6 +113,7 @@ internal object NavigationMetricsWrapper {
         mapboxTelemetry.push(navRerouteEvent)
     }
 
+    @JvmStatic
     fun feedbackEvent(
         sessionState: SessionState,
         metricProgress: MetricsRouteProgress,
@@ -130,6 +138,7 @@ internal object NavigationMetricsWrapper {
         mapboxTelemetry.push(feedbackEvent)
     }
 
+    @JvmStatic
     fun routeRetrievalEvent(
         elapsedTime: Double,
         routeUuid: String,
@@ -139,13 +148,16 @@ internal object NavigationMetricsWrapper {
         push(RouteRetrievalEvent(elapsedTime, routeUuid, sessionId, metadata))
     }
 
+    @JvmStatic
     fun sendInitialGpsEvent(
         elapsedTime: Double,
-        sessionId: String
+        sessionId: String,
+        metadata: NavigationPerformanceMetadata
     ) {
-        push(InitialGpsEvent(elapsedTime, sessionId))
+        push(InitialGpsEvent(elapsedTime, sessionId, metadata))
     }
 
+    @JvmStatic
     fun turnstileEvent(): Event {
         return AppUserTurnstile(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
     }
