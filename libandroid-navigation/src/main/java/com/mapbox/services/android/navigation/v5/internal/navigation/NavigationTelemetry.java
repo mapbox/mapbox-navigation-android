@@ -470,7 +470,7 @@ public class NavigationTelemetry implements NavigationMetricListener {
       .afterEventLocations(afterLocations)
       .build();
     // Set the updated session state
-    rerouteEvent.setRerouteSessionState(rerouteSessionState);
+    rerouteEvent.setSessionState(rerouteSessionState);
 
     NavigationMetricsWrapper.rerouteEvent(rerouteEvent, metricProgress,
       rerouteEvent.getSessionState().eventLocation(), context);
