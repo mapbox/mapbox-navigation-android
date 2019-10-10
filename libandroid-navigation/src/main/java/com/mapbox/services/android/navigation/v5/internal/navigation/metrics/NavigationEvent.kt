@@ -13,11 +13,11 @@ internal abstract class NavigationEvent(
 ) : Event() {
 
     companion object {
-        private val OPERATING_SYSTEM = "Android - " + Build.VERSION.RELEASE
+        private val OPERATING_SYSTEM = "Android - ${Build.VERSION.RELEASE}"
     }
 
     val operatingSystem: String = OPERATING_SYSTEM
-    val device: String? = Build.MODEL
+    val device: String = Build.MODEL
     val sdkVersion: String = BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME
     val created: String = phoneState.created
     val volumeLevel: Int = phoneState.volumeLevel
