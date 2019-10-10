@@ -1,0 +1,25 @@
+package com.mapbox.services.android.navigation.v5.navigation
+
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import java.util.ArrayList
+
+class RouteAnnotationUpdater {
+
+    fun update(
+        oldRoute: DirectionsRoute,
+        annotationHolder: DirectionsRoute,
+        currentLegIndex: Int
+    ): DirectionsRoute {
+
+        val legs = ArrayList(oldRoute.legs()!!)
+
+        for (i in currentLegIndex until legs.size) {
+            val updatedAnnotation = annotationHolder.legs()!![i - currentLegIndex].annotation()
+            legs[i] = legs[i].toBuilder().annotation(updatedAnnotation).build()
+        }
+
+        return oldRoute.toBuilder()
+                .legs(legs)
+                .build()
+    }
+}
