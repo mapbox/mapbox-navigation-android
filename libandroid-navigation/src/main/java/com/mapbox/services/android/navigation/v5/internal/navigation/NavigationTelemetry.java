@@ -183,7 +183,8 @@ public class NavigationTelemetry implements NavigationMetricListener {
       // If we are off-route, update the reroute count
       navigationSessionState.setRerouteCount(navigationSessionState.getRerouteCount() + 1);
       boolean hasRouteOptions = directionsRoute.routeOptions() != null;
-      navigationSessionState.setRequestIdentifier(hasRouteOptions ? directionsRoute.routeOptions().requestUuid() : null);
+      navigationSessionState.setRequestIdentifier(
+              hasRouteOptions ? directionsRoute.routeOptions().requestUuid() : null);
       updateLastRerouteEvent(directionsRoute);
       lastRerouteDate = new Date();
       isOffRoute = false;

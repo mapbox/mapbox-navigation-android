@@ -89,7 +89,8 @@ public class NavigationEventFactory {
                                String sdkIdentifier, NavigationEvent navigationEvent) {
     navigationEvent
       .setAbsoluteDistanceToDestination(DistanceFormatter.calculateAbsoluteDistance(location, metricProgress));
-    navigationEvent.setDistanceCompleted((int) (sessionState.getEventRouteDistanceCompleted() + metricProgress.getDistanceTraveled()));
+    navigationEvent.setDistanceCompleted(
+            (int) (sessionState.getEventRouteDistanceCompleted() + metricProgress.getDistanceTraveled()));
     navigationEvent.setDistanceRemaining(metricProgress.getDistanceRemaining());
     navigationEvent.setDurationRemaining(metricProgress.getDurationRemaining());
     navigationEvent.setProfile(metricProgress.getDirectionsRouteProfile());
