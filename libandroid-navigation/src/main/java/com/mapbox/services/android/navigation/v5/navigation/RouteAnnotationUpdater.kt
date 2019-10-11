@@ -7,14 +7,14 @@ class RouteAnnotationUpdater {
 
     fun update(
         oldRoute: DirectionsRoute,
-        annotationHolder: DirectionsRoute?,
+        annotationHolder: DirectionsRoute,
         currentLegIndex: Int
     ): DirectionsRoute {
-        oldRoute.legs()?.let { routeLegList ->
-            val legs = ArrayList(routeLegList)
+        oldRoute.legs()?.let { oldRouteLegsList ->
+            val legs = ArrayList(oldRouteLegsList)
             for (i in currentLegIndex until legs.size) {
-                annotationHolder?.legs().let { routeLegs ->
-                    routeLegs?.let { routeLegs ->
+                annotationHolder.legs().let { annotationHolderRouteLegsList ->
+                    annotationHolderRouteLegsList?.let { routeLegs ->
                         val updatedAnnotation = routeLegs[i - currentLegIndex].annotation()
                         legs[i] = legs[i].toBuilder().annotation(updatedAnnotation).build()
                     }
