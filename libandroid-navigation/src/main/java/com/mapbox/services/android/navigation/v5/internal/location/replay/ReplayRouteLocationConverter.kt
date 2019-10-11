@@ -34,8 +34,6 @@ internal class ReplayRouteLocationConverter(
     }
 
     init {
-        currentLeg = 0
-        currentStep = 0
         update(route)
         distance = calculateDistancePerSec()
     }
