@@ -51,7 +51,7 @@ public class NavigationRouteCallbackTest {
 
     routeCallback.onResponse(call, response);
 
-    verify(telemetry).routeRetrievalEvent(eq(elapsedTime), eq(uuid));
+    verify(telemetry).routeRetrievalEvent$libandroid_navigation_debug(eq(elapsedTime), eq(uuid));
   }
 
   @Test
