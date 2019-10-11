@@ -13,7 +13,8 @@ import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationRouteCallback
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationRouteEventListener
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute.Builder
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils
+import com.mapbox.services.android.navigation.v5.utils.extensions.getUnitTypeForLocale
+import com.mapbox.services.android.navigation.v5.utils.extensions.inferDeviceLocale
 import okhttp3.EventListener
 import okhttp3.Interceptor
 import retrofit2.Call
@@ -26,23 +27,38 @@ import retrofit2.Callback
  * [MapboxNavigation.startNavigation], using this class will ensure your
  * request includes all the proper information needed for the navigation session to begin.
  *
- *
- *
- *
  * Developer Note: MapboxDirections cannot be directly extended since it is an AutoValue class.
  *
  * 0.5.0
  */
-private val EVENT_LISTENER = NavigationRouteEventListener()
 
 class NavigationRoute
-/**
- * Package private constructor used for the [Builder.build] method.
- *
- * @param mapboxDirections a new instance of a [MapboxDirections] class
- * @since 0.5.0
- */
-internal constructor(private val mapboxDirections: MapboxDirections) {
+internal constructor(
+    private val mapboxDirections: MapboxDirections
+) {
+
+    companion object {
+        private val EVENT_LISTENER = NavigationRouteEventListener()
+
+        /**
+         * Build a new [NavigationRoute] object with the proper navigation parameters already setup.
+         *
+         * @return a [Builder] object for creating this object
+         * @since 0.5.0
+         */
+        @JvmStatic
+        fun builder(context: Context): Builder {
+            return Builder()
+                .annotations(
+                    DirectionsCriteria.ANNOTATION_CONGESTION,
+                    DirectionsCriteria.ANNOTATION_DISTANCE
+                )
+                .language(context)
+                .voiceUnits(context)
+                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .continueStraight(true)
+        }
+    }
 
     /**
      * Wrapper method for Retrofit's [Call.clone] call, useful for getting call information
@@ -286,8 +302,8 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
             return this
         }
 
-        internal fun language(context: Context, localeUtils: LocaleUtils): Builder {
-            directionsBuilder.language(localeUtils.inferDeviceLocale(context))
+        internal fun language(context: Context): Builder {
+            directionsBuilder.language(context.inferDeviceLocale())
             return this
         }
 
@@ -351,9 +367,11 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
          * @return this builder for chaining options together
          * @since 0.5.0
          */
-        @Deprecated("use the bearing paired with {@link Builder#origin(Point, Double, Double)},\n" +
+        @Deprecated(
+            "use the bearing paired with {@link Builder#origin(Point, Double, Double)},\n" +
                 "      {@link Builder#destination(Point, Double, Double)},\n" +
-                "      or {@link Builder#addWaypoint(Point, Double, Double)} instead.")
+                "      or {@link Builder#addWaypoint(Point, Double, Double)} instead."
+        )
         fun addBearing(
             @FloatRange(from = 0.0, to = 360.0) angle: Double?,
             @FloatRange(from = 0.0, to = 360.0) tolerance: Double?
@@ -395,8 +413,8 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
             return this
         }
 
-        internal fun voiceUnits(context: Context, localeUtils: LocaleUtils): Builder {
-            directionsBuilder.voiceUnits(localeUtils.getUnitTypeForDeviceLocale(context))
+        internal fun voiceUnits(context: Context): Builder {
+            directionsBuilder.voiceUnits(context.inferDeviceLocale().getUnitTypeForLocale())
             return this
         }
 
@@ -522,7 +540,7 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
          * @return this builder for chaining options together
          * @since 0.26.0
          */
-        fun addWaypointTargets(vararg waypointTargets: Point): Builder {
+        fun addWaypointTargets(vararg waypointTargets: Point?): Builder {
             directionsBuilder.addWaypointTargets(*waypointTargets)
             return this
         }
@@ -640,7 +658,9 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
 
             options.approaches()?.let { approaches ->
                 if (approaches.isNotEmpty()) {
-                    val result = approaches.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                    val result =
+                        approaches.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }
+                            .toTypedArray()
                     directionsBuilder.addApproaches(*result)
                 }
             }
@@ -654,7 +674,9 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
 
             options.waypointNames()?.let { waypointNames ->
                 if (waypointNames.isNotEmpty()) {
-                    val names = waypointNames.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                    val names =
+                        waypointNames.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }
+                            .toTypedArray()
                     directionsBuilder.addWaypointNames(*names)
                 }
             }
@@ -685,19 +707,21 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
             // Set the default values which the user cannot alter.
             assembleWaypoints()
             directionsBuilder
-                    .steps(true)
-                    .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
-                    .overview(DirectionsCriteria.OVERVIEW_FULL)
-                    .voiceInstructions(true)
-                    .bannerInstructions(true)
-                    .roundaboutExits(true)
-                    .eventListener(eventListener)
-                    .enableRefresh(true)
+                .steps(true)
+                .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
+                .overview(DirectionsCriteria.OVERVIEW_FULL)
+                .voiceInstructions(true)
+                .bannerInstructions(true)
+                .roundaboutExits(true)
+                .eventListener(eventListener)
+                .enableRefresh(true)
             return NavigationRoute(directionsBuilder.build())
         }
 
         private fun parseWaypointIndices(waypointIndices: String): Array<Int> {
-            val splitWaypointIndices = waypointIndices.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            val splitWaypointIndices =
+                waypointIndices.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }
+                    .toTypedArray()
             val indices = Array(splitWaypointIndices.size, { 0 })
             var index = 0
             for (waypointIndex in splitWaypointIndices) {
@@ -708,11 +732,14 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
         }
 
         private fun parseWaypointTargets(waypointTargets: String): Array<Point?> {
-            val splitWaypointTargets = waypointTargets.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            val splitWaypointTargets =
+                waypointTargets.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }
+                    .toTypedArray()
             val waypoints = arrayOfNulls<Point>(splitWaypointTargets.size)
             var index = 0
             for (waypointTarget in splitWaypointTargets) {
-                val point = waypointTarget.split(COMMA.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                val point = waypointTarget.split(COMMA.toRegex()).dropLastWhile { it.isEmpty() }
+                    .toTypedArray()
                 if (waypointTarget.isEmpty()) {
                     waypoints[index++] = null
                 } else {
@@ -739,30 +766,6 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
                 directionsBuilder.destination(destination.waypoint)
                 directionsBuilder.addBearing(destination.bearingAngle, destination.tolerance)
             }
-        }
-    }
-
-    companion object {
-
-        /**
-         * Build a new [NavigationRoute] object with the proper navigation parameters already setup.
-         *
-         * @return a [Builder] object for creating this object
-         * @since 0.5.0
-         */
-        @JvmStatic
-        fun builder(context: Context): Builder {
-            return builder(context, LocaleUtils())
-        }
-
-        @JvmStatic
-        fun builder(context: Context, localeUtils: LocaleUtils): Builder {
-            return Builder()
-                    .annotations(DirectionsCriteria.ANNOTATION_CONGESTION, DirectionsCriteria.ANNOTATION_DISTANCE)
-                    .language(context, localeUtils)
-                    .voiceUnits(context, localeUtils)
-                    .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                    .continueStraight(true)
         }
     }
 }
