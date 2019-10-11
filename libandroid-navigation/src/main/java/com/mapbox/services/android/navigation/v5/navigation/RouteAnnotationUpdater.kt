@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.util.ArrayList
 
 class RouteAnnotationUpdater {
