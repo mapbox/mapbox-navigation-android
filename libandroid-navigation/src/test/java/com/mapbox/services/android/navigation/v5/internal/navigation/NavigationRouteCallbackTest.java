@@ -30,7 +30,7 @@ public class NavigationRouteCallbackTest {
     Call call = mock(Call.class);
     String uuid = "some_uuid";
     Response response = buildMockResponse(uuid);
-    NavigationRouteCallback routeCallback = new NavigationRouteCallback(telemetry, listener, callback);
+    NavigationRouteCallback routeCallback = new NavigationRouteCallback(listener, callback, telemetry);
 
     routeCallback.onResponse(call, response);
 
@@ -47,7 +47,7 @@ public class NavigationRouteCallbackTest {
     Call call = mock(Call.class);
     String uuid = "some_uuid";
     Response response = buildMockResponse(uuid);
-    NavigationRouteCallback routeCallback = new NavigationRouteCallback(telemetry, listener, callback);
+    NavigationRouteCallback routeCallback = new NavigationRouteCallback(listener, callback, telemetry);
 
     routeCallback.onResponse(call, response);
 
@@ -61,7 +61,7 @@ public class NavigationRouteCallbackTest {
     Callback<DirectionsResponse> callback = mock(Callback.class);
     Call call = mock(Call.class);
     Throwable throwable = mock(Throwable.class);
-    NavigationRouteCallback routeCallback = new NavigationRouteCallback(telemetry, listener, callback);
+    NavigationRouteCallback routeCallback = new NavigationRouteCallback(listener, callback, telemetry);
 
     routeCallback.onFailure(call, throwable);
 

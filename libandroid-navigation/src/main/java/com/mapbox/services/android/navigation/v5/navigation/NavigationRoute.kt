@@ -756,7 +756,7 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
         }
 
         @JvmStatic
-        internal fun builder(context: Context, localeUtils: LocaleUtils): Builder {
+        fun builder(context: Context, localeUtils: LocaleUtils): Builder {
             return Builder()
                     .annotations(DirectionsCriteria.ANNOTATION_CONGESTION, DirectionsCriteria.ANNOTATION_DISTANCE)
                     .language(context, localeUtils)
