@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.location.replay
+package com.mapbox.services.android.navigation.v5.internal.location.replay
 
 import com.google.gson.annotations.SerializedName
 
