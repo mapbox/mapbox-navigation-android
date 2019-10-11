@@ -8,7 +8,10 @@ import com.mapbox.services.android.navigation.v5.navigation.RefreshError
 import java.util.Date
 import timber.log.Timber
 
-internal class RouteRefresherCallback(private val mapboxNavigation: MapboxNavigation, private val routeRefresher: RouteRefresher) : RefreshCallback {
+internal class RouteRefresherCallback(
+    private val mapboxNavigation: MapboxNavigation,
+    private val routeRefresher: RouteRefresher
+) : RefreshCallback {
 
     override fun onRefresh(directionsRoute: DirectionsRoute) {
         mapboxNavigation.startNavigation(directionsRoute, DirectionsRouteType.FRESH_ROUTE)
