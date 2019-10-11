@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.annotation.FloatRange
 import androidx.annotation.IntRange
 import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.DirectionsCriteria.*
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -19,7 +18,6 @@ import okhttp3.EventListener
 import okhttp3.Interceptor
 import retrofit2.Call
 import retrofit2.Callback
-import java.util.*
 
 /**
  * The NavigationRoute class wraps the [MapboxDirections] class with parameters which
@@ -130,7 +128,7 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
          * @return this builder for chaining options together
          * @since 0.5.0
          */
-        fun profile(@ProfileCriteria profile: String): Builder {
+        fun profile(@DirectionsCriteria.ProfileCriteria profile: String): Builder {
             directionsBuilder.profile(profile)
             return this
         }
@@ -283,7 +281,7 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
          *
          * @since 0.5.0
          */
-        fun language(language: Locale): Builder {
+        fun language(language: java.util.Locale): Builder {
             directionsBuilder.language(language)
             return this
         }
@@ -314,7 +312,7 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
          *
          * @since 0.5.0
          */
-        fun annotations(@AnnotationCriteria vararg annotations: String): Builder {
+        fun annotations(@DirectionsCriteria.AnnotationCriteria vararg annotations: String): Builder {
             directionsBuilder.annotations(*annotations)
             return this
         }
@@ -392,7 +390,7 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
          * @return this builder for chaining options together
          * @since 0.8.0
          */
-        fun voiceUnits(@VoiceUnitCriteria voiceUnits: String): Builder {
+        fun voiceUnits(@DirectionsCriteria.VoiceUnitCriteria voiceUnits: String): Builder {
             directionsBuilder.voiceUnits(voiceUnits)
             return this
         }
@@ -409,7 +407,7 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
          * @return this builder for chaining options together
          * @since 0.8.0
          */
-        fun exclude(@ExcludeCriteria exclude: String?): Builder {
+        fun exclude(@DirectionsCriteria.ExcludeCriteria exclude: String?): Builder {
             directionsBuilder.exclude(exclude)
             return this
         }
@@ -609,7 +607,7 @@ internal constructor(private val mapboxDirections: MapboxDirections) {
             }
 
             if (!TextUtils.isEmpty(options.language())) {
-                directionsBuilder.language(Locale(options.language()))
+                directionsBuilder.language(java.util.Locale(options.language()))
             }
 
             if (options.alternatives() != null) {
