@@ -114,7 +114,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_mock_navigation);
     ButterKnife.bind(this);
-    routeRefresh = new RouteRefresh(Mapbox.getAccessToken(), this);
+    routeRefresh = new RouteRefresh(Mapbox.getAccessToken());
 
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
@@ -294,7 +294,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     mapboxMap.getLocationComponent().forceLocationUpdate(location);
     if (!isRefreshing) {
       isRefreshing = true;
-      routeRefresh.refresh(routeProgress);
+      routeRefresh.refresh(routeProgress, this);
     }
     Timber.d("onProgressChange: fraction of route traveled: %f", routeProgress.fractionTraveled());
   }
