@@ -47,8 +47,15 @@ constructor(
         }
 
         try {
-            val file =
-                File(destDirectory + File.separator + fileName + retrieveUniqueId() + "." + extension)
+            val filePath = StringBuilder().append(destDirectory)
+                .append(File.separator)
+                .append(fileName)
+                .append(retrieveUniqueId())
+                .append(".")
+                .append(extension)
+                .toString()
+
+            val file = File(filePath)
             var inputStream: InputStream? = null
             var outputStream: OutputStream? = null
 
