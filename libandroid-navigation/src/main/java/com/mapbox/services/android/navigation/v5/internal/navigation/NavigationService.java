@@ -51,7 +51,7 @@ public class NavigationService extends Service {
    */
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
-    NavigationTelemetry.getInstance().initializeLifecycleMonitor(getApplication());
+    NavigationTelemetry.INSTANCE.initializeLifecycleMonitor(getApplication());
     return START_STICKY;
   }
 
@@ -74,7 +74,7 @@ public class NavigationService extends Service {
    * Removes the location / route listeners and  quits the thread.
    */
   public void endNavigation() {
-    NavigationTelemetry.getInstance().endSession();
+    NavigationTelemetry.INSTANCE.endSession();
     routeFetcher.clearListeners();
     locationUpdater.removeLocationUpdates();
     notificationProvider.shutdown(getApplication());

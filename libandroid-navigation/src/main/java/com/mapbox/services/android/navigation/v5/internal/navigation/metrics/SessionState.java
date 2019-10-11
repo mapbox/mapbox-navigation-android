@@ -1,6 +1,8 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation.metrics;
 
 import android.location.Location;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.text.TextUtils;
 
@@ -84,7 +86,7 @@ public abstract class SessionState {
 
   public abstract MetricsRouteProgress eventRouteProgress();
 
-  @Nullable
+  @NonNull
   public abstract Location eventLocation();
 
   @Nullable
