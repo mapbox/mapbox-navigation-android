@@ -4,6 +4,10 @@ import android.location.Location
 
 class MetricsLocation(private val _location: Location?) {
 
+    companion object {
+        const val PROVIDER = "MetricsLocation"
+    }
+
     val location: Location by lazy {
         _location ?: Location("MetricsLocation").also { location ->
             location.latitude = 0.0

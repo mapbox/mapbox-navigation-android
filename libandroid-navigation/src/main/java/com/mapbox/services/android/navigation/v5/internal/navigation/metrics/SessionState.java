@@ -12,7 +12,10 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
+import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation;
 import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.List;
@@ -86,7 +89,7 @@ public abstract class SessionState {
 
   public abstract MetricsRouteProgress eventRouteProgress();
 
-  @NonNull
+  @NotNull
   public abstract Location eventLocation();
 
   @Nullable
@@ -135,7 +138,11 @@ public abstract class SessionState {
   public abstract Builder toBuilder();
 
   public static Builder builder() {
+    Location eventLocation = new Location(MetricsLocation.PROVIDER);
+    eventLocation.setLatitude(0);
+    eventLocation.setLongitude(0);
     return new AutoValue_SessionState.Builder()
+      .eventLocation(eventLocation)
       .eventRouteDistanceCompleted(0d)
       .sessionIdentifier("")
       .tripIdentifier("")
@@ -153,7 +160,7 @@ public abstract class SessionState {
 
     public abstract Builder eventRouteProgress(MetricsRouteProgress routeProgress);
 
-    public abstract Builder eventLocation(@Nullable Location eventLocation);
+    public abstract Builder eventLocation(@NotNull Location eventLocation);
 
     public abstract Builder eventDate(@Nullable Date eventDate);
 
