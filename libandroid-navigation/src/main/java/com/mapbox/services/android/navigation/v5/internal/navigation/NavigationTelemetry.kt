@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.v5.internal.navigation
 import android.app.Application
 import android.content.Context
 import android.location.Location
-
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -19,11 +18,10 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.Rer
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.SessionState
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.TelemetryEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress
+import com.mapbox.services.android.navigation.v5.internal.utils.RingBuffer
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
-import com.mapbox.services.android.navigation.v5.internal.utils.RingBuffer
-
 import java.util.ArrayList
 import java.util.Arrays
 import java.util.Date
@@ -203,8 +201,8 @@ internal object NavigationTelemetry : NavigationMetricListener {
      * Creates a new [FeedbackEvent] and adds it to the queue
      * of events to be sent.
      *
-     * @param feedbackType   defined in FeedbackEvent
-     * @param description    optional String describing event
+     * @param feedbackType defined in FeedbackEvent
+     * @param description optional String describing event
      * @param feedbackSource from either reroute or UI
      * @return String feedbackId to identify the event created if needed
      */
@@ -224,10 +222,10 @@ internal object NavigationTelemetry : NavigationMetricListener {
      *
      * Uses a feedback ID to find the correct event and then adjusts the feedbackType and description.
      *
-     * @param feedbackId   generated from [MapboxNavigation.recordFeedback]
+     * @param feedbackId generated from [MapboxNavigation.recordFeedback]
      * @param feedbackType from list of set feedback types
-     * @param description  an optional description to provide more detail about the feedback
-     * @param screenshot   an optional encoded screenshot to provide more detail about the feedback
+     * @param description an optional description to provide more detail about the feedback
+     * @param screenshot an optional encoded screenshot to provide more detail about the feedback
      */
     fun updateFeedbackEvent(
         feedbackId: String,

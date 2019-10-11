@@ -6,7 +6,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 internal class NavigationRouteCallback @JvmOverloads constructor(
-    private val telemetry: NavigationTelemetry = NavigationTelemetry.getInstance(),
+    private val telemetry: NavigationTelemetry = NavigationTelemetry,
     private val listener: NavigationRouteEventListener,
     private val callback: Callback<DirectionsResponse>
 ) : Callback<DirectionsResponse> {

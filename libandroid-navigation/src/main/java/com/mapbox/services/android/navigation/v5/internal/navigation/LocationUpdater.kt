@@ -42,7 +42,7 @@ internal class LocationUpdater(
         location?.let { currentLocation ->
             thread.updateLocation(currentLocation)
             dispatcher.onLocationUpdate(currentLocation)
-            NavigationTelemetry.getInstance().updateLocation(context, currentLocation)
+            NavigationTelemetry.updateLocation(context, currentLocation)
         }
     }
 
