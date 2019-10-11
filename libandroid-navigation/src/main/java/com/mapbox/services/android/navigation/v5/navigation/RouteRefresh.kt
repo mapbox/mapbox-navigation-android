@@ -7,14 +7,12 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 /**
  * This class allows the developer to interact with the Directions Refresh API, receiving updated
  * annotations for a route previously requested with the enableRefresh flag.
- */
-class RouteRefresh
-/**
+ *
  * Creates a [RouteRefresh] object.
  *
  * @param accessToken mapbox access token
  */
-    (private val accessToken: String) {
+class RouteRefresh(private val accessToken: String) {
 
     companion object {
         private const val INVALID_DIRECTIONS_ROUTE =
