@@ -5,7 +5,7 @@ import android.location.Location
 class MetricsLocation(private val _location: Location?) {
 
     val location: Location by lazy {
-        _location ?: Location("MetricsLocation").also { location ->
+        _location ?: Location("MetricsLocation").apply {
             location.latitude = 0.0
             location.longitude = 0.0
         }
