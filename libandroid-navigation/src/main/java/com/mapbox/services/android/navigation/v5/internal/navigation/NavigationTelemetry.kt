@@ -21,6 +21,7 @@ import com.mapbox.services.android.navigation.v5.internal.utils.RingBuffer
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.util.ArrayList
 import java.util.Date
 import java.util.Locale
@@ -323,7 +324,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
     }
 
     private fun sendCancelEvent() {
-        if (navigationSessionState.startTimestamp() != null) {
+        ifNonNull(navigationSessionState.startTimestamp()) {
             NavigationMetricsWrapper.cancelEvent(
                 navigationSessionState,
                 metricProgress,
