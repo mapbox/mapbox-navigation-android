@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.v5.utils
 
-import com.mapbox.core.utils.TextUtils
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressState
@@ -83,7 +82,7 @@ class RouteUtils {
     fun calculateRemainingWaypointNames(routeProgress: RouteProgress): Array<String?>? {
         val routeOptions = routeProgress.directionsRoute().routeOptions() ?: return null
         val allWaypointNames = routeOptions.waypointNames()
-        if (allWaypointNames == null || TextUtils.isEmpty(allWaypointNames)) {
+        if (allWaypointNames.isNullOrEmpty()) {
             return null
         }
         val names = allWaypointNames.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()

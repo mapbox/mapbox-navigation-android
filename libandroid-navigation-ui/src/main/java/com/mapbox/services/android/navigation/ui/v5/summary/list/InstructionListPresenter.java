@@ -168,7 +168,7 @@ class InstructionListPresenter {
    * @since 0.13.0
    */
   @Nullable
-  BannerInstructions findCurrentBannerInstructions(LegStep currentStep, double stepDistanceRemaining) {
+  BannerInstructions findCurrentBannerInstructions(@Nullable LegStep currentStep, double stepDistanceRemaining) {
     if (currentStep == null) {
       return null;
     }
