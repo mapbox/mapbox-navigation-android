@@ -925,7 +925,7 @@ public class MapboxNavigation implements ServiceConnection {
 
   private NavigationTelemetry obtainTelemetry() {
     if (navigationTelemetry == null) {
-      return NavigationTelemetry.getInstance();
+      return NavigationTelemetry.INSTANCE;
     }
     return navigationTelemetry;
   }

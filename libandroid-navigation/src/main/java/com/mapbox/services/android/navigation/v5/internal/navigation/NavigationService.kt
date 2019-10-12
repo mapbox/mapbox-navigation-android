@@ -39,7 +39,7 @@ internal class NavigationService : Service() {
      * session ends.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        NavigationTelemetry.getInstance().initializeLifecycleMonitor(application)
+        NavigationTelemetry.initializeLifecycleMonitor(application)
         return START_STICKY
     }
 
@@ -63,7 +63,7 @@ internal class NavigationService : Service() {
      * Removes the location / route listeners and  quits the thread.
      */
     fun endNavigation() {
-        NavigationTelemetry.getInstance().endSession()
+        NavigationTelemetry.endSession()
         if (::routeFetcher.isInitialized) {
             routeFetcher.clearListeners()
         }
