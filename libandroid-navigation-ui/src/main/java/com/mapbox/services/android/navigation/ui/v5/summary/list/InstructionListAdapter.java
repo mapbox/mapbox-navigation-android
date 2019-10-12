@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 public class InstructionListAdapter extends RecyclerView.Adapter<InstructionViewHolder> {
 
