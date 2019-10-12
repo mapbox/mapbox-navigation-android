@@ -1,10 +1,7 @@
-package com.mapbox.services.android.navigation.v5.location.replay;
+package com.mapbox.services.android.navigation.v5.internal.location.replay;
 
 import android.location.Location;
 import android.os.Handler;
-
-import com.mapbox.services.android.navigation.v5.internal.location.replay.ReplayLocationDispatcher;
-import com.mapbox.services.android.navigation.v5.internal.location.replay.ReplayLocationListener;
 
 import org.junit.Test;
 
