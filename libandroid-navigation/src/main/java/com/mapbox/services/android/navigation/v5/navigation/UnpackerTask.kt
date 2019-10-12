@@ -13,8 +13,13 @@ import java.io.File
 internal class UnpackerTask(private val offlineNavigator: OfflineNavigator) :
     AsyncTask<String, Int, File>() {
 
+    companion object {
+        private const val TAR_PATH_POSITION = 0
+        private const val DESTINATION_PATH_POSITION = 1
+    }
+
     override fun doInBackground(vararg strings: String): File {
-        offlineNavigator.unpackTiles(strings[0], strings[1])
+        offlineNavigator.unpackTiles(strings[TAR_PATH_POSITION], strings[DESTINATION_PATH_POSITION])
 
         return File(strings[0])
     }

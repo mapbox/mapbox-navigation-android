@@ -7,25 +7,31 @@ import java.io.File
  * This class is an [AsyncTask] which monitors the unpacking of a TAR file and updates a
  * listener so that the view can show the unpacking progress. It monitors the unpacking by
  * periodically checking the file size, because as it's unpacked, the file size will decrease.
- */
-internal class UnpackUpdateTask
-/**
+ *
  * Creates a new UnpackUpdateTask to update the view via a passed [ProgressUpdateListener].
  *
  * @param progressUpdateListener listener to update
  */
-    (private val progressUpdateListener: ProgressUpdateListener?) : AsyncTask<File, Long, File>() {
+internal class UnpackUpdateTask(private val progressUpdateListener: ProgressUpdateListener?) :
+    AsyncTask<File, Long, File>() {
+
+    companion object {
+        private const val FIRST_POSITION: Int = 0
+        private const val ONE_HUNDRED: Double = 100.0
+        private const val BY_ONE_INCREMENT: Double = 1.0
+        private const val FULL_PERCENTAGE: Long = 100L
+    }
 
     override fun doInBackground(vararg files: File): File {
         // As the data is unpacked from the file, the file is truncated
         // We are finished unpacking the data when the file is fully 0 bytes
-        val tilePack = files[0]
+        val tilePack = files[FIRST_POSITION]
         val size = tilePack.length().toDouble()
         var progress: Long
         do {
-            progress = (100.0 * (1.0 - tilePack.length() / size)).toLong()
+            progress = (ONE_HUNDRED * (BY_ONE_INCREMENT - tilePack.length() / size)).toLong()
             publishProgress(progress)
-        } while (progress < 100L)
+        } while (progress < FULL_PERCENTAGE)
 
         return tilePack
     }
