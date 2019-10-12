@@ -10,11 +10,10 @@ import com.mapbox.turf.TurfMeasurement
 import java.util.ArrayList
 
 internal class ReplayRouteLocationConverter(
-    route: DirectionsRoute,
+    private var route: DirectionsRoute,
     private var speed: Int,
     private var delay: Int
 ) {
-    private lateinit var route: DirectionsRoute
     private val distance: Double
     private var currentLeg: Int = 0
     private var currentStep: Int = 0
@@ -34,7 +33,6 @@ internal class ReplayRouteLocationConverter(
     }
 
     init {
-        update(route)
         distance = calculateDistancePerSec()
     }
 
@@ -94,10 +92,6 @@ internal class ReplayRouteLocationConverter(
         }
 
         return mockedLocations
-    }
-
-    private fun update(route: DirectionsRoute) {
-        this.route = route
     }
 
     /**
