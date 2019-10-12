@@ -15,8 +15,6 @@ import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation;
 import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Date;
 import java.util.List;
 
@@ -89,7 +87,7 @@ public abstract class SessionState {
 
   public abstract MetricsRouteProgress eventRouteProgress();
 
-  @NotNull
+  @NonNull
   public abstract Location eventLocation();
 
   @Nullable
@@ -160,7 +158,7 @@ public abstract class SessionState {
 
     public abstract Builder eventRouteProgress(MetricsRouteProgress routeProgress);
 
-    public abstract Builder eventLocation(@NotNull Location eventLocation);
+    public abstract Builder eventLocation(@NonNull Location eventLocation);
 
     public abstract Builder eventDate(@Nullable Date eventDate);
 
