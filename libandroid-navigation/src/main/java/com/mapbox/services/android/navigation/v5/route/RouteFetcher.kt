@@ -11,7 +11,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils
 import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.lang.ref.WeakReference
-import java.util.Arrays
 import java.util.concurrent.CopyOnWriteArrayList
 import retrofit2.Call
 import retrofit2.Callback
@@ -128,22 +127,22 @@ class RouteFetcher {
         }
         val origin = Point.fromLngLat(location.longitude, location.latitude)
         val bearing = if (location.hasBearing()) java.lang.Float.valueOf(location.bearing).toDouble() else null
-        val options = routeProgress.directionsRoute().routeOptions()
+        val options = routeProgress.directionsRoute()?.routeOptions()
         var navigationRouteBuilder: NavigationRoute.Builder? = null
-        options?.let { options ->
+        options?.let { routeOptions ->
             navigationRouteBuilder = NavigationRoute.builder(context!!)
                     .accessToken(accessToken)
                     .origin(origin, bearing, BEARING_TOLERANCE)
-                    .routeOptions(options)
+                    .routeOptions(routeOptions)
         }
         val remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress)
         if (remainingWaypoints == null) {
             Timber.e("An error occurred fetching a new route")
             return null
         }
-        navigationRouteBuilder?.let { builder ->
-            addDestination(remainingWaypoints.toMutableList(), builder)
-            addWaypoints(remainingWaypoints, builder)
+        ifNonNull(routeUtils.calculateRemainingWaypoints(routeProgress), navigationRouteBuilder) { waypoints, builder ->
+            addDestination(waypoints.toMutableList(), builder)
+            addWaypoints(waypoints, builder)
             addWaypointNames(routeProgress, builder)
             addApproaches(routeProgress, builder)
         }
@@ -210,21 +209,24 @@ class RouteFetcher {
         }
     }
 
-    private fun calculateRemainingApproaches(routeProgress: RouteProgress): Array<String?>? {
-        val routeOptions = routeProgress.directionsRoute().routeOptions()
-        if (routeOptions == null || TextUtils.isEmpty(routeOptions.approaches())) {
-            return null
-        }
-        val allApproaches = routeOptions.approaches()
-        val splitApproaches = allApproaches!!.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        val coordinatesSize = routeOptions.coordinates().size
-        val remainingApproaches = Arrays.copyOfRange(splitApproaches,
-                coordinatesSize - routeProgress.remainingWaypoints(), coordinatesSize)
-        val approaches = arrayOfNulls<String>(remainingApproaches.size + ORIGIN_APPROACH_THRESHOLD)
-        approaches[ORIGIN_APPROACH] = splitApproaches[ORIGIN_APPROACH]
-        System.arraycopy(remainingApproaches, FIRST_POSITION, approaches, SECOND_POSITION, remainingApproaches.size)
-        return approaches
-    }
+    private fun calculateRemainingApproaches(routeProgress: RouteProgress): Array<String?>? =
+            ifNonNull(routeProgress.directionsRoute()?.routeOptions(), routeProgress.remainingWaypoints()) { routeOptions, remainingWaypoints ->
+                when (!TextUtils.isEmpty(routeOptions.approaches())) {
+                    true -> {
+                        val allApproaches = routeOptions.approaches()
+                        val splitApproaches = allApproaches!!.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                        val coordinatesSize = routeOptions.coordinates().size
+                        val remainingApproaches = splitApproaches.copyOfRange(coordinatesSize - remainingWaypoints, coordinatesSize)
+                        val approaches = arrayOfNulls<String>(remainingApproaches.size + ORIGIN_APPROACH_THRESHOLD)
+                        approaches[ORIGIN_APPROACH] = splitApproaches[ORIGIN_APPROACH]
+                        System.arraycopy(remainingApproaches, FIRST_POSITION, approaches, SECOND_POSITION, remainingApproaches.size)
+                        approaches
+                    }
+                    false -> {
+                        null
+                    }
+                }
+            }
 
     private fun invalid(context: Context?, location: Location?, routeProgress: RouteProgress?): Boolean {
         return context == null || location == null || routeProgress == null

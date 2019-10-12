@@ -6,6 +6,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -30,7 +31,7 @@ class TestRouteProgressBuilder {
     LegStep currentStep = steps.get(stepIndex);
     List<Point> currentStepPoints = buildCurrentStepPoints(currentStep);
     int upcomingStepIndex = stepIndex + 1;
-    List<Point> upcomingStepPoints = null;
+    List<Point> upcomingStepPoints = new ArrayList<>();
     LegStep upcomingStep = null;
     if (upcomingStepIndex < steps.size()) {
       upcomingStep = steps.get(upcomingStepIndex);
@@ -38,7 +39,7 @@ class TestRouteProgressBuilder {
       upcomingStepPoints = buildStepPointsFromGeometry(upcomingStepGeometry);
     }
 
-    return RouteProgress.builder()
+    return new RouteProgress.Builder()
       .stepDistanceRemaining(stepDistanceRemaining)
       .legDistanceRemaining(legDistanceRemaining)
       .legDurationRemaining(legDurationRemaining)

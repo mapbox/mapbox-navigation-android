@@ -3,7 +3,7 @@ package com.mapbox.services.android.navigation.v5.utils
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressState
-import java.util.ArrayList
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.util.Arrays
 
 class RouteUtils {
@@ -38,7 +38,7 @@ class RouteUtils {
      * @since 0.8.0
      */
     fun isLastLeg(routeProgress: RouteProgress): Boolean {
-        val legs = routeProgress.directionsRoute().legs()
+        val legs = routeProgress.directionsRoute()?.legs()
         val currentLeg = routeProgress.currentLeg()
         return legs?.let { legsList ->
             currentLeg == legsList[legsList.size - 1]
@@ -58,13 +58,14 @@ class RouteUtils {
      * @since 0.10.0
      */
     fun calculateRemainingWaypoints(routeProgress: RouteProgress): List<Point>? {
-        val routeOptions = routeProgress.directionsRoute().routeOptions() ?: return null
+        val routeOptions = routeProgress.directionsRoute()?.routeOptions() ?: return null
         val coordinates = ArrayList(routeOptions.coordinates())
         val coordinatesSize = coordinates.size
-        val remainingWaypoints = routeProgress.remainingWaypoints()
-        return when (coordinatesSize < remainingWaypoints) {
-            true -> null
-            false -> coordinates.subList(coordinatesSize - remainingWaypoints, coordinatesSize)
+        return ifNonNull(routeProgress.remainingWaypoints()) { remainingWaypoints ->
+            when (coordinatesSize < remainingWaypoints) {
+                true -> null
+                false -> coordinates.subList(coordinatesSize - remainingWaypoints, coordinatesSize)
+            }
         }
     }
 
@@ -80,19 +81,21 @@ class RouteUtils {
      * @since 0.19.0
      */
     fun calculateRemainingWaypointNames(routeProgress: RouteProgress): Array<String?>? {
-        val routeOptions = routeProgress.directionsRoute().routeOptions() ?: return null
+        val routeOptions = routeProgress.directionsRoute()?.routeOptions() ?: return null
         val allWaypointNames = routeOptions.waypointNames()
         if (allWaypointNames.isNullOrEmpty()) {
             return null
         }
         val names = allWaypointNames.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        var waypointNames = arrayOfNulls<String>(1)
         val coordinatesSize = routeOptions.coordinates().size
-        val remainingWaypointNames = Arrays.copyOfRange(names,
-                coordinatesSize - routeProgress.remainingWaypoints(), coordinatesSize)
-        val waypointNames = arrayOfNulls<String>(remainingWaypointNames.size + ORIGIN_WAYPOINT_NAME_THRESHOLD)
-        waypointNames[ORIGIN_WAYPOINT_NAME] = names[ORIGIN_WAYPOINT_NAME]
-        System.arraycopy(remainingWaypointNames, FIRST_POSITION, waypointNames, SECOND_POSITION,
-                remainingWaypointNames.size)
+        ifNonNull(routeProgress.remainingWaypoints()) { wayPointNames ->
+            val remainingWaypointNames = Arrays.copyOfRange(names, coordinatesSize - wayPointNames, coordinatesSize)
+            waypointNames = arrayOfNulls(remainingWaypointNames.size + ORIGIN_WAYPOINT_NAME_THRESHOLD)
+            waypointNames[ORIGIN_WAYPOINT_NAME] = names[ORIGIN_WAYPOINT_NAME]
+            System.arraycopy(remainingWaypointNames, FIRST_POSITION, waypointNames, SECOND_POSITION,
+                    remainingWaypointNames.size)
+        }
         return waypointNames
     }
 }
