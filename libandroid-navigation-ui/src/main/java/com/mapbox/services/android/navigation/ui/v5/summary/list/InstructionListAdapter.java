@@ -16,8 +16,8 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
 
   private final InstructionListPresenter presenter;
 
-  public InstructionListAdapter(RouteUtils routeUtils, DistanceFormatter distanceFormatter) {
-    presenter = new InstructionListPresenter(routeUtils, distanceFormatter);
+  public InstructionListAdapter(DistanceFormatter distanceFormatter) {
+    presenter = new InstructionListPresenter(distanceFormatter);
   }
 
   @NonNull

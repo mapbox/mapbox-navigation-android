@@ -490,8 +490,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
   private void initializeInstructionListRecyclerView() {
-    RouteUtils routeUtils = new RouteUtils();
-    instructionListAdapter = new InstructionListAdapter(routeUtils, distanceFormatter);
+    instructionListAdapter = new InstructionListAdapter(distanceFormatter);
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
     rvInstructions.setLayoutManager(new LinearLayoutManager(getContext()));

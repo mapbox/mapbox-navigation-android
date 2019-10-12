@@ -1,10 +1,10 @@
-package com.mapbox.services.android.navigation.v5.utils
+package com.mapbox.services.android.navigation.v5.internal.utils
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import java.util.MissingFormatArgumentException
 
-class ValidationUtils {
+internal class ValidationUtils {
     companion object {
         @JvmStatic
         fun validDirectionsRoute(
@@ -27,16 +27,16 @@ class ValidationUtils {
 
         private fun checkInvalidVoiceInstructions(routeOptions: RouteOptions) {
             val instructions = routeOptions.voiceInstructions()
-            val invalidVoiceInstructions = instructions == null || !instructions
-            check(!invalidVoiceInstructions) {
+            val isValidVoiceInstructions = instructions != null && instructions
+            check(isValidVoiceInstructions) {
                 throw MissingFormatArgumentException("Using the default milestones requires the " + "directions route to be requested with voice instructions enabled.")
             }
         }
 
         private fun checkInvalidBannerInstructions(routeOptions: RouteOptions) {
             val instructions = routeOptions.bannerInstructions()
-            val invalidBannerInstructions = instructions == null || !instructions
-            check(!invalidBannerInstructions) {
+            val isValidBannerInstructions = instructions != null && instructions
+            check(isValidBannerInstructions) {
                 throw MissingFormatArgumentException("Using the default milestones requires the " + "directions route to be requested with banner instructions enabled.")
             }
         }

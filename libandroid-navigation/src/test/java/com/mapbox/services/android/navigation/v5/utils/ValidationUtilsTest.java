@@ -6,6 +6,7 @@ import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 
+import com.mapbox.services.android.navigation.v5.internal.utils.ValidationUtils;
 import org.junit.Test;
 
 import java.io.IOException;

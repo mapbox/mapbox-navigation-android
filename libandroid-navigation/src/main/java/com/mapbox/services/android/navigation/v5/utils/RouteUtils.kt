@@ -1,16 +1,22 @@
 package com.mapbox.services.android.navigation.v5.utils
 
-import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.core.utils.TextUtils
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressState
 import java.util.ArrayList
 import java.util.Arrays
-import java.util.Comparator
 
 class RouteUtils {
+
+    companion object {
+        private const val FIRST_INSTRUCTION = 0
+        private const val ORIGIN_WAYPOINT_NAME_THRESHOLD = 1
+        private const val ORIGIN_WAYPOINT_NAME = 0
+        private const val FIRST_POSITION = 0
+        private const val SECOND_POSITION = 1
+        private const val SEMICOLON = ";"
+    }
 
     /**
      * Looks at the current [RouteProgressState] and returns if
@@ -35,9 +41,9 @@ class RouteUtils {
     fun isLastLeg(routeProgress: RouteProgress): Boolean {
         val legs = routeProgress.directionsRoute().legs()
         val currentLeg = routeProgress.currentLeg()
-        legs?.let { legsList ->
-            return currentLeg == legsList[legsList.size - 1]
-        } ?: return false
+        return legs?.let { legsList ->
+            currentLeg == legsList[legsList.size - 1]
+        } ?: false
     }
 
     /**
@@ -89,54 +95,5 @@ class RouteUtils {
         System.arraycopy(remainingWaypointNames, FIRST_POSITION, waypointNames, SECOND_POSITION,
                 remainingWaypointNames.size)
         return waypointNames
-    }
-
-    /**
-     * Given the current step / current step distance remaining, this function will
-     * find the current instructions to be shown.
-     *
-     * @param currentStep holding the current banner instructions
-     * @param stepDistanceRemaining to determine progress along the currentStep
-     * @return the current banner instructions based on the current distance along the step
-     * @since 0.13.0
-     */
-    fun findCurrentBannerInstructions(currentStep: LegStep?, stepDistanceRemaining: Double): BannerInstructions? {
-        currentStep?.let { currStep ->
-            val instructions = currStep.bannerInstructions()
-            instructions?.let { instructionList ->
-                when (instructionList.isEmpty()) {
-                    true -> return null
-                    false -> {
-                        val sortedInstructions = sortBannerInstructions(instructionList)
-                        for (instruction in sortedInstructions) {
-                            val distanceAlongGeometry = instruction.distanceAlongGeometry().toInt()
-                            if (distanceAlongGeometry >= stepDistanceRemaining.toInt()) {
-                                return instruction
-                            }
-                        }
-                        return instructions[FIRST_INSTRUCTION]
-                    }
-                }
-            } ?: return null
-        } ?: return null
-    }
-
-    private fun sortBannerInstructions(instructions: List<BannerInstructions>): List<BannerInstructions> {
-        val sortedInstructions = ArrayList(instructions)
-        sortedInstructions.sortWith(Comparator { instruction, nextInstructions ->
-            java.lang.Double.compare(instruction.distanceAlongGeometry(),
-                    nextInstructions.distanceAlongGeometry()
-            )
-        })
-        return sortedInstructions
-    }
-
-    companion object {
-        private const val FIRST_INSTRUCTION = 0
-        private const val ORIGIN_WAYPOINT_NAME_THRESHOLD = 1
-        private const val ORIGIN_WAYPOINT_NAME = 0
-        private const val FIRST_POSITION = 0
-        private const val SECOND_POSITION = 1
-        private const val SEMICOLON = ";"
     }
 }

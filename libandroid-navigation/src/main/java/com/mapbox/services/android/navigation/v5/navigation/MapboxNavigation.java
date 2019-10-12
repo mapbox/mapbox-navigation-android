@@ -35,7 +35,7 @@ import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
-import com.mapbox.services.android.navigation.v5.utils.ValidationUtils;
+import com.mapbox.services.android.navigation.v5.internal.utils.ValidationUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;

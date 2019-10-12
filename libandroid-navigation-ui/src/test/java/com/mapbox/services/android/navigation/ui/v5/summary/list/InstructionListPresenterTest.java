@@ -20,6 +20,7 @@ import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
@@ -100,9 +101,8 @@ public class InstructionListPresenterTest extends BaseTest {
   @Test
   public void retrieveBannerInstructionListSize_returnsCorrectListSize() throws Exception {
     RouteProgress routeProgress = buildRouteProgress();
-    RouteUtils routeUtils = buildRouteUtils(routeProgress);
     DistanceFormatter distanceFormatter = mock(DistanceFormatter.class);
-    InstructionListPresenter presenter = new InstructionListPresenter(routeUtils, distanceFormatter);
+    InstructionListPresenter presenter = new InstructionListPresenter(distanceFormatter);
 
     presenter.updateBannerListWith(routeProgress);
 
@@ -113,9 +113,8 @@ public class InstructionListPresenterTest extends BaseTest {
   @Test
   public void updateBannerListWith_instructionListIsPopulated() throws Exception {
     RouteProgress routeProgress = buildRouteProgress();
-    RouteUtils routeUtils = buildRouteUtils(routeProgress);
     DistanceFormatter distanceFormatter = mock(DistanceFormatter.class);
-    InstructionListPresenter presenter = new InstructionListPresenter(routeUtils, distanceFormatter);
+    InstructionListPresenter presenter = new InstructionListPresenter(distanceFormatter);
 
     boolean didUpdate = presenter.updateBannerListWith(routeProgress);
 
@@ -125,10 +124,9 @@ public class InstructionListPresenterTest extends BaseTest {
   @Test
   public void updateBannerListWith_emptyInstructionsReturnFalse() throws Exception {
     RouteProgress routeProgress = buildRouteProgress();
-    RouteUtils routeUtils = buildRouteUtils(routeProgress);
     clearInstructions(routeProgress);
     DistanceFormatter distanceFormatter = mock(DistanceFormatter.class);
-    InstructionListPresenter presenter = new InstructionListPresenter(routeUtils, distanceFormatter);
+    InstructionListPresenter presenter = new InstructionListPresenter(distanceFormatter);
 
     boolean didUpdate = presenter.updateBannerListWith(routeProgress);
 
@@ -164,6 +162,85 @@ public class InstructionListPresenterTest extends BaseTest {
     verify(distanceFormatter).formatDistance(anyDouble());
   }
 
+  @Test
+  public void findCurrentBannerInstructions_returnsNullWithNullCurrentStep() throws Exception {
+    LegStep currentStep = null;
+    double stepDistanceRemaining = 0;
+    SpannableString spannableString = mock(SpannableString.class);
+    RouteProgress routeProgress = buildRouteProgress();
+    InstructionListPresenter presenter = buildPresenter(spannableString, routeProgress);
+    BannerInstructions currentBannerInstructions = presenter.findCurrentBannerInstructions(
+      currentStep,
+      stepDistanceRemaining
+    );
+    assertNull(currentBannerInstructions);
+  }
+
+  @Test
+  public void findCurrentBannerInstructions_returnsNullWithCurrentStepEmptyInstructions() throws Exception {
+    SpannableString spannableString = mock(SpannableString.class);
+    RouteProgress routeProgress = buildRouteProgress();
+    InstructionListPresenter presenter = buildPresenter(spannableString, routeProgress);
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    List<BannerInstructions> currentInstructions = currentStep.bannerInstructions();
+    currentInstructions.clear();
+    BannerInstructions currentBannerInstructions = presenter.findCurrentBannerInstructions(
+      currentStep,
+      stepDistanceRemaining
+    );
+    assertNull(currentBannerInstructions);
+  }
+
+  @Test
+  public void findCurrentBannerInstructions_returnsCorrectCurrentInstruction() throws Exception {
+    SpannableString spannableString = mock(SpannableString.class);
+    RouteProgress routeProgress = buildRouteProgress();
+    InstructionListPresenter presenter = buildPresenter(spannableString, routeProgress);
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    BannerInstructions currentBannerInstructions = presenter.findCurrentBannerInstructions(
+      currentStep,
+      stepDistanceRemaining
+    );
+    assertEquals(currentStep.bannerInstructions().get(0), currentBannerInstructions);
+  }
+
+  @Test
+  public void findCurrentBannerInstructions_adjustedDistanceRemainingReturnsCorrectInstruction() throws Exception {
+    SpannableString spannableString = mock(SpannableString.class);
+    RouteProgress routeProgress = buildRouteProgress();
+    InstructionListPresenter presenter = buildPresenter(spannableString, routeProgress);
+    routeProgress = routeProgress.toBuilder()
+      .stepDistanceRemaining(50)
+      .build();
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    BannerInstructions currentBannerInstructions = presenter.findCurrentBannerInstructions(
+      currentStep,
+      stepDistanceRemaining
+    );
+    assertEquals(currentStep.bannerInstructions().get(0), currentBannerInstructions);
+  }
+
+  @Test
+  public void findCurrentBannerInstructions_adjustedDistanceRemainingRemovesCorrectInstructions() throws Exception {
+    SpannableString spannableString = mock(SpannableString.class);
+    RouteProgress routeProgress = buildRouteProgress();
+    InstructionListPresenter presenter = buildPresenter(spannableString, routeProgress);
+    routeProgress = routeProgress.toBuilder()
+      .stepIndex(1)
+      .stepDistanceRemaining(500)
+      .build();
+    LegStep currentStep = routeProgress.currentLegProgress().currentStep();
+    double stepDistanceRemaining = routeProgress.currentLegProgress().currentStepProgress().distanceRemaining();
+    BannerInstructions currentBannerInstructions = presenter.findCurrentBannerInstructions(
+      currentStep,
+      stepDistanceRemaining
+    );
+    assertEquals(currentStep.bannerInstructions().get(0), currentBannerInstructions);
+  }
+
 
   @NonNull
   private RouteProgress buildRouteProgress() throws Exception {
@@ -173,24 +250,14 @@ public class InstructionListPresenterTest extends BaseTest {
 
   @NonNull
   private InstructionListPresenter buildPresenter(SpannableString spannableString, RouteProgress routeProgress) {
-    RouteUtils routeUtils = buildRouteUtils(routeProgress);
     DistanceFormatter distanceFormatter = mock(DistanceFormatter.class);
     when(distanceFormatter.formatDistance(anyDouble())).thenReturn(spannableString);
-    return new InstructionListPresenter(routeUtils, distanceFormatter);
+    return new InstructionListPresenter(distanceFormatter);
   }
 
   @NonNull
   private InstructionListPresenter buildPresenter(RouteProgress routeProgress, DistanceFormatter distanceFormatter) {
-    RouteUtils routeUtils = buildRouteUtils(routeProgress);
-    return new InstructionListPresenter(routeUtils, distanceFormatter);
-  }
-
-  @NonNull
-  private RouteUtils buildRouteUtils(RouteProgress routeProgress) {
-    RouteUtils routeUtils = mock(RouteUtils.class);
-    BannerInstructions instructions = routeProgress.currentLegProgress().currentStep().bannerInstructions().get(FIRST);
-    when(routeUtils.findCurrentBannerInstructions(any(LegStep.class), anyDouble())).thenReturn(instructions);
-    return routeUtils;
+    return new InstructionListPresenter(distanceFormatter);
   }
 
   @NonNull
