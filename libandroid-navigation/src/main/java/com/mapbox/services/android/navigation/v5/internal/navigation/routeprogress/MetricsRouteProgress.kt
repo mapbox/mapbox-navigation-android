@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 
 class MetricsRouteProgress(routeProgress: RouteProgress?) {
 
@@ -64,20 +65,20 @@ class MetricsRouteProgress(routeProgress: RouteProgress?) {
         private set
 
     init {
-        if (routeProgress != null) {
-            obtainRouteData(routeProgress.directionsRoute())
-            obtainLegData(routeProgress.currentLegProgress())
-            obtainStepData(routeProgress)
-            this.distanceRemaining = routeProgress.distanceRemaining().toInt()
-            this.durationRemaining = routeProgress.durationRemaining().toInt()
-            this.distanceTraveled = routeProgress.distanceTraveled().toInt()
-            this.legIndex = routeProgress.legIndex()
-            this.legCount = routeProgress.directionsRoute().legs()?.size ?: 0
-            this.stepIndex = routeProgress.currentLegProgress().stepIndex()
-            this.stepCount = routeProgress.currentLeg().steps()?.size ?: 0
-        } else {
-            initDefaultValues()
-        }
+        ifNonNull(routeProgress, routeProgress?.directionsRoute(),
+                routeProgress?.currentLegProgress(),
+                routeProgress?.distanceRemaining(), routeProgress?.durationRemaining()) { _routeProgress, _directionsRoute, _currentLegProgress, _distanceRemaining, _durationRemaining ->
+            obtainRouteData(_directionsRoute)
+            obtainLegData(_currentLegProgress)
+            obtainStepData(_routeProgress)
+            distanceRemaining = _distanceRemaining.toInt()
+            durationRemaining = _durationRemaining.toInt()
+            distanceTraveled = _routeProgress.distanceTraveled()?.toInt() ?: 0
+            legIndex = _routeProgress.legIndex() ?: 0
+            legCount = _directionsRoute.legs()?.size ?: 0
+            stepIndex = _currentLegProgress.stepIndex()
+            stepCount = _routeProgress.currentLeg()?.steps()?.size ?: 0
+        } ?: initDefaultValues()
     }
 
     private fun initDefaultValues() {
@@ -111,7 +112,7 @@ class MetricsRouteProgress(routeProgress: RouteProgress?) {
 
     private fun obtainStepData(routeProgress: RouteProgress) {
         val legProgress = routeProgress.currentLegProgress()
-        legProgress.upComingStep()?.let { upcomingStep ->
+        legProgress?.upComingStep()?.let { upcomingStep ->
             upcomingStepName = upcomingStep.name()
             upcomingStep.maneuver().let {
                 upcomingStepInstruction = it.instruction()
@@ -119,15 +120,15 @@ class MetricsRouteProgress(routeProgress: RouteProgress?) {
                 upcomingStepModifier = it.modifier()
             }
         }
-        legProgress.currentStep().maneuver().let {
-            previousStepInstruction = it.instruction()
-            previousStepType = it.type()
-            previousStepModifier = it.modifier()
+        legProgress?.currentStep()?.maneuver().let { stepManeuver ->
+            previousStepInstruction = stepManeuver?.instruction()
+            previousStepType = stepManeuver?.type()
+            previousStepModifier = stepManeuver?.modifier()
         }
         previousStepName = currentStepName
     }
 
     private fun retrieveRouteDestination(route: DirectionsRoute): Point =
-        route.legs()?.lastOrNull()?.steps()?.lastOrNull()?.maneuver()?.location()
-            ?: DEFAULT_POINT
+            route.legs()?.lastOrNull()?.steps()?.lastOrNull()?.maneuver()?.location()
+                    ?: DEFAULT_POINT
 }

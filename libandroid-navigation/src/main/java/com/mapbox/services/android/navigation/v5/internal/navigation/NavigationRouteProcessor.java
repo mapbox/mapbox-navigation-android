@@ -80,7 +80,7 @@ class NavigationRouteProcessor {
     RouteState routeState = status.getRouteState();
     RouteProgressState currentRouteState = progressStateMap.get(routeState);
 
-    RouteProgress.Builder progressBuilder = RouteProgress.builder()
+    RouteProgress.Builder progressBuilder = new RouteProgress.Builder()
       .distanceRemaining(routeDistanceRemaining)
       .legDistanceRemaining(legDistanceRemaining)
       .legDurationRemaining(legDurationRemaining)

@@ -8,15 +8,13 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_CHECK_FASTER_ROUTE_INTERVAL
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MEDIUM_ALERT_DURATION
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
 class FasterRouteDetector : FasterRoute() {
 
-    companion object {
-        private const val VALID_ROUTE_DURATION_REMAINING = 600
-    }
-
+    val VALID_ROUTE_DURATION_REMAINING = 600
     private var lastCheckedLocation: Location? = null
 
     override fun shouldCheckFasterRoute(location: Location, routeProgress: RouteProgress): Boolean {
@@ -35,30 +33,31 @@ class FasterRouteDetector : FasterRoute() {
 
     override fun isFasterRoute(response: DirectionsResponse, routeProgress: RouteProgress): Boolean {
         if (validRouteResponse(response)) {
-            val currentDurationRemaining = routeProgress.durationRemaining()
-            val newRoute = response.routes()[0]
+            ifNonNull(routeProgress.durationRemaining()) { currentDurationRemaining ->
+                val newRoute = response.routes()[0]
 
-            if (hasLegs(newRoute)) {
-                // Extract the first leg
-                newRoute.legs()?.let { routeLegList ->
-                    val routeLeg = routeLegList[0]
-                    if (hasAtLeastTwoSteps(routeLeg)) {
-                        routeLeg.steps()?.let { stepList ->
-                            // Extract the first two steps
-                            val firstStep = stepList[0]
-                            val secondStep = stepList[1]
-                            // Check for valid first and second steps of the new route
-                            if (!validFirstStep(firstStep) || !validSecondStep(secondStep, routeProgress)) {
-                                return false
+                if (hasLegs(newRoute)) {
+                    // Extract the first leg
+                    newRoute.legs()?.let { routeLegList ->
+                        val routeLeg = routeLegList[0]
+                        if (hasAtLeastTwoSteps(routeLeg)) {
+                            routeLeg.steps()?.let { stepList ->
+                                // Extract the first two steps
+                                val firstStep = stepList[0]
+                                val secondStep = stepList[1]
+                                // Check for valid first and second steps of the new route
+                                if (!validFirstStep(firstStep) || !validSecondStep(secondStep, routeProgress)) {
+                                    return false
+                                }
                             }
                         }
                     }
                 }
-            }
-            newRoute.duration()?.let { duration ->
-                // New route must be at least 10% faster
-                if (duration <= (0.9 * currentDurationRemaining)) {
-                    return true
+                newRoute.duration()?.let { duration ->
+                    // New route must be at least 10% faster
+                    if (duration <= (0.9 * currentDurationRemaining)) {
+                        return true
+                    }
                 }
             }
         }
@@ -84,7 +83,7 @@ class FasterRouteDetector : FasterRoute() {
      * @return true if valid, false if not
      */
     private fun validSecondStep(secondStep: LegStep, routeProgress: RouteProgress): Boolean {
-        return routeProgress.currentLegProgress().upComingStep()?.let { legStep ->
+        return routeProgress.currentLegProgress()?.upComingStep()?.let { legStep ->
             legStep == secondStep
         } ?: false
     }
@@ -111,18 +110,17 @@ class FasterRouteDetector : FasterRoute() {
         return response?.routes()?.isNotEmpty() ?: false
     }
 
-    private fun validRouteDurationRemaining(routeProgress: RouteProgress): Boolean {
-        // Total route duration remaining in seconds
-        val routeDurationRemaining = routeProgress.durationRemaining().toInt()
-        return routeDurationRemaining > VALID_ROUTE_DURATION_REMAINING
-    }
+    private fun validRouteDurationRemaining(routeProgress: RouteProgress) =
+            // Total route duration remaining in seconds
+            ifNonNull(routeProgress.durationRemaining()) { durationRemaining ->
+                durationRemaining.toInt() > VALID_ROUTE_DURATION_REMAINING
+            } ?: false
 
-    private fun validStepDurationRemaining(routeProgress: RouteProgress): Boolean {
-        val currentStepProgress = routeProgress.currentLegProgress().currentStepProgress()
+    private fun validStepDurationRemaining(routeProgress: RouteProgress) =
         // Current step duration remaining in seconds
-        val currentStepDurationRemaining = currentStepProgress.durationRemaining().toInt()
-        return currentStepDurationRemaining > NAVIGATION_MEDIUM_ALERT_DURATION
-    }
+        ifNonNull(routeProgress.currentLegProgress()?.currentStepProgress()?.durationRemaining()) { currentStepDurationRemaining ->
+            currentStepDurationRemaining > NAVIGATION_MEDIUM_ALERT_DURATION
+        } ?: false
 
     private fun secondsSinceLastCheck(location: Location): Long {
         return lastCheckedLocation?.let { loc ->

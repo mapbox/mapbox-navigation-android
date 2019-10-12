@@ -38,8 +38,8 @@ open class SimpleCamera : Camera() {
     private fun buildRouteCoordinatesFromRouteData(routeInformation: RouteInformation) {
         ifNonNull(routeInformation.route) { route ->
             setupLineStringAndBearing(route)
-        } ?: ifNonNull(routeInformation.routeProgress) { routeProgress ->
-            setupLineStringAndBearing(routeProgress.directionsRoute())
+        } ?: ifNonNull(routeInformation.routeProgress?.directionsRoute()) { directionsRoute ->
+            setupLineStringAndBearing(directionsRoute)
         }
     }
 

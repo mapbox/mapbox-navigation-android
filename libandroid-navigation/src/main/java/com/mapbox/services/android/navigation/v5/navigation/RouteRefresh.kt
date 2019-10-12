@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directionsrefresh.v1.MapboxDirectionsRefresh
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 
 /**
  * This class allows the developer to interact with the Directions Refresh API, receiving updated
@@ -30,7 +31,9 @@ class RouteRefresh(private val accessToken: String) {
      * @param refreshCallback to call with updated routes
      */
     fun refresh(routeProgress: RouteProgress, refreshCallback: RefreshCallback) {
-        refresh(routeProgress.directionsRoute(), routeProgress.legIndex(), refreshCallback)
+        ifNonNull(routeProgress.directionsRoute(), routeProgress.legIndex()) { directionsRoute, legIndex ->
+            refresh(directionsRoute, legIndex, refreshCallback)
+        }
     }
 
     private fun refresh(
