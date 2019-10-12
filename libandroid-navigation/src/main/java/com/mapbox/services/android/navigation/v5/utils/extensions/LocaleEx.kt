@@ -12,8 +12,8 @@ import java.util.Locale
  * @return unit type for specified locale
  */
 @DirectionsCriteria.VoiceUnitCriteria
-fun Locale.getUnitTypeForLocale(): String {
-    return when (this.country) {
+fun Locale.getUnitTypeForLocale(): String =
+    when (this.country) {
         "US", // US
         "LR", // Liberia
         "MM" -> // Burma
@@ -21,4 +21,3 @@ fun Locale.getUnitTypeForLocale(): String {
         else ->
             DirectionsCriteria.METRIC
     }
-}

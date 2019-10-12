@@ -12,7 +12,6 @@ import com.mapbox.core.utils.TextUtils
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationRouteCallback
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationRouteEventListener
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute.Builder
 import com.mapbox.services.android.navigation.v5.utils.extensions.getUnitTypeForLocale
 import com.mapbox.services.android.navigation.v5.utils.extensions.inferDeviceLocale
 import okhttp3.EventListener
@@ -47,8 +46,8 @@ internal constructor(
          * @since 0.5.0
          */
         @JvmStatic
-        fun builder(context: Context): Builder {
-            return Builder()
+        fun builder(context: Context): Builder =
+            Builder()
                 .annotations(
                     DirectionsCriteria.ANNOTATION_CONGESTION,
                     DirectionsCriteria.ANNOTATION_DISTANCE
@@ -57,7 +56,6 @@ internal constructor(
                 .voiceUnits(context)
                 .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                 .continueStraight(true)
-        }
     }
 
     /**
@@ -328,7 +326,7 @@ internal constructor(
          *
          * @since 0.5.0
          */
-        fun annotations(@DirectionsCriteria.AnnotationCriteria vararg annotations: String): Builder {
+        fun annotations(@DirectionsCriteria.AnnotationCriteria vararg annotations: String?): Builder {
             directionsBuilder.annotations(*annotations)
             return this
         }
@@ -483,7 +481,7 @@ internal constructor(
          * @return this builder for chaining options together
          * @since 0.15.0
          */
-        fun addApproaches(vararg approaches: String): Builder {
+        fun addApproaches(vararg approaches: String?): Builder {
             directionsBuilder.addApproaches(*approaches)
             return this
         }
@@ -501,10 +499,10 @@ internal constructor(
          * @return this builder for chaining options together
          */
         fun addWaypointIndices(@IntRange(from = 0) vararg indices: Int): Builder {
-            val result = Array(indices.size, { 0 })
+            val result = Array(indices.size) { 0 }
             var index = 0
             for (i in indices) {
-                result.set(index++, i)
+                result[index++] = i
             }
             directionsBuilder.addWaypointIndices(*result)
             return this
