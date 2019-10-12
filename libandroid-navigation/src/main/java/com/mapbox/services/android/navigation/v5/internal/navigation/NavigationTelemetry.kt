@@ -281,7 +281,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
         isInitialized = false
     }
 
-    internal fun routeRetrievalEvent(
+    fun routeRetrievalEvent(
         elapsedTime: ElapsedTime,
         routeUuid: String
     ) {

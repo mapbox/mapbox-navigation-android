@@ -5,8 +5,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-internal class NavigationRouteCallback @JvmOverloads constructor(
-    private val telemetry: NavigationTelemetry = NavigationTelemetry,
+internal class NavigationRouteCallback(
     private val listener: NavigationRouteEventListener,
     private val callback: Callback<DirectionsResponse>
 ) : Callback<DirectionsResponse> {
@@ -32,6 +31,6 @@ internal class NavigationRouteCallback @JvmOverloads constructor(
     }
 
     private fun sendEventWith(time: ElapsedTime, uuid: String) {
-        telemetry.routeRetrievalEvent(time, uuid)
+        NavigationTelemetry.routeRetrievalEvent(time, uuid)
     }
 }
