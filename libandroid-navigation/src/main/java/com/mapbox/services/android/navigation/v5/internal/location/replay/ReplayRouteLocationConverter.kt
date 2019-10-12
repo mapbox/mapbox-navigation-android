@@ -51,7 +51,7 @@ internal class ReplayRouteLocationConverter(
     }
 
     fun initializeTime() {
-        time = System.currentTimeMillis()
+        this.time = System.currentTimeMillis()
     }
 
     /**
