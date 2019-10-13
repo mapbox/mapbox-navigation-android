@@ -20,7 +20,7 @@ class MapboxNavigationAccounts private constructor() {
                     MapboxNavigationAccounts().also { mapboxNavigationAccount ->
                         INSTANCE = mapboxNavigationAccount
                         // TODO uncomment when ready to release as a part of 1.0
-                        // init(context)
+                        init(context)
                     }
                 }
 
