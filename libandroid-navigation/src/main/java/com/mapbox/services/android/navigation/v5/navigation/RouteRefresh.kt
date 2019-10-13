@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation
 
+import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directionsrefresh.v1.MapboxDirectionsRefresh
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
@@ -13,7 +14,7 @@ import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
  *
  * @param accessToken mapbox access token
  */
-class RouteRefresh(private val accessToken: String) {
+class RouteRefresh(private val accessToken: String, private val context: Context) {
 
     companion object {
         private const val INVALID_DIRECTIONS_ROUTE =
@@ -51,6 +52,7 @@ class RouteRefresh(private val accessToken: String) {
         }
         builder.legIndex(legIndex)
             .accessToken(accessToken)
+                .interceptor(SkuInterceptor(context))
             .build().enqueueCall(RouteRefreshCallback(directionsRoute, legIndex, refreshCallback))
     }
 
