@@ -136,9 +136,9 @@ internal class MapboxNavigationNotification : NavigationNotification {
         etaFormat = applicationContext.getString(R.string.eta_format)
         initializeDistanceFormatter(applicationContext, mapboxNavigation)
         applicationContext.getSystemService(Context.NOTIFICATION_SERVICE)
-            ?.let { notificationService ->
-                notificationManager = notificationService as NotificationManager
-            }
+                ?.let { notificationService ->
+                    notificationManager = notificationService as NotificationManager
+                }
         isTwentyFourHourFormat = DateFormat.is24HourFormat(applicationContext)
 
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
@@ -167,7 +167,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
         val roundingIncrement = mapboxNavigationOptions.roundingIncrement()
 
         distanceFormatter =
-            DistanceFormatter(applicationContext, language, unitType, roundingIncrement)
+                DistanceFormatter(applicationContext, language, unitType, roundingIncrement)
     }
 
     private fun createNotificationChannel(applicationContext: Context) {
@@ -232,8 +232,8 @@ internal class MapboxNavigationNotification : NavigationNotification {
 
     private fun registerReceiver(applicationContext: Context?) {
         applicationContext?.registerReceiver(
-            endNavigationBtnReceiver,
-            IntentFilter(END_NAVIGATION_ACTION)
+                endNavigationBtnReceiver,
+                IntentFilter(END_NAVIGATION_ACTION)
         )
     }
 
@@ -249,8 +249,8 @@ internal class MapboxNavigationNotification : NavigationNotification {
 
     private fun updateInstructionText(bannerInstruction: BannerInstruction?) {
         if (bannerInstruction != null && (instructionText == null || newInstructionText(
-                bannerInstruction
-            ))
+                        bannerInstruction
+                ))
         ) {
             updateViewsWithInstruction(bannerInstruction.primary.text)
             instructionText = bannerInstruction.primary.text
@@ -275,12 +275,12 @@ internal class MapboxNavigationNotification : NavigationNotification {
                 distanceFormatter.formatDistance(routeLegProgress.currentStepProgress().distanceRemaining())
             }
             collapsedNotificationRemoteViews?.setTextViewText(
-                R.id.notificationDistanceText,
-                currentDistanceText
+                    R.id.notificationDistanceText,
+                    currentDistanceText
             )
             expandedNotificationRemoteViews?.setTextViewText(
-                R.id.notificationDistanceText,
-                currentDistanceText
+                    R.id.notificationDistanceText,
+                    currentDistanceText
             )
         }
     }
@@ -311,12 +311,12 @@ internal class MapboxNavigationNotification : NavigationNotification {
         if (currentManeuverId != maneuverResource) {
             currentManeuverId = maneuverResource
             collapsedNotificationRemoteViews?.setImageViewResource(
-                R.id.maneuverImage,
-                maneuverResource
+                    R.id.maneuverImage,
+                    maneuverResource
             )
             expandedNotificationRemoteViews?.setImageViewResource(
-                R.id.maneuverImage,
-                maneuverResource
+                    R.id.maneuverImage,
+                    maneuverResource
             )
         }
     }
@@ -328,10 +328,10 @@ internal class MapboxNavigationNotification : NavigationNotification {
         if (!TextUtils.isEmpty(maneuverModifier)) {
             val drivingSide = step.drivingSide()
             return if (isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(
-                    maneuverType,
-                    maneuverModifier,
-                    drivingSide
-                )
+                            maneuverType,
+                            maneuverModifier,
+                            drivingSide
+                    )
             ) {
                 obtainManeuverResourceFrom(maneuverType + maneuverModifier + drivingSide)
             } else obtainManeuverResourceFrom(maneuverType + maneuverModifier)
