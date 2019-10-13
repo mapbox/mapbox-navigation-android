@@ -2,7 +2,7 @@ package com.mapbox.services.android.navigation.v5.testsupport
 
 import io.mockk.mockkStatic
 
-internal inline fun mockStaticSupport(vararg extension: Extensions) {
+internal inline fun mockkStaticSupport(vararg extension: Extensions) {
     mockkStatic(*extension.map { it.path }.toTypedArray())
 }
 

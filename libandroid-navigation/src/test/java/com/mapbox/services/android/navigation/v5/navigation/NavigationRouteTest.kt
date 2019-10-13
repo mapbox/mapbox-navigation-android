@@ -8,12 +8,13 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.v5.BaseTest
+import com.mapbox.services.android.navigation.v5.testsupport.Extensions
+import com.mapbox.services.android.navigation.v5.testsupport.mockkStaticSupport
 import com.mapbox.services.android.navigation.v5.utils.extensions.inferDeviceLocale
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.verify
 import java.util.ArrayList
 import java.util.Locale
@@ -33,7 +34,7 @@ class NavigationRouteTest : BaseTest() {
         @BeforeClass
         @JvmStatic
         fun init() {
-            mockkStatic("com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx")
+            mockkStaticSupport(Extensions.ContextEx)
         }
     }
 

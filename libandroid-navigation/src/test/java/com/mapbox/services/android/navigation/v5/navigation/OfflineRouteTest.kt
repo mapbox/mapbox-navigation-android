@@ -4,7 +4,7 @@ import android.content.Context
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.v5.testsupport.Extensions
-import com.mapbox.services.android.navigation.v5.testsupport.mockStaticSupport
+import com.mapbox.services.android.navigation.v5.testsupport.mockkStaticSupport
 import com.mapbox.services.android.navigation.v5.utils.extensions.inferDeviceLocale
 import io.mockk.every
 import io.mockk.mockk
@@ -22,7 +22,7 @@ class OfflineRouteTest {
         @BeforeClass
         @JvmStatic
         fun initialize() {
-            mockStaticSupport(Extensions.ContextEx)
+            mockkStaticSupport(Extensions.ContextEx)
         }
     }
 
