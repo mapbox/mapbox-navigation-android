@@ -158,23 +158,21 @@ internal object NavigationTelemetry : NavigationMetricListener {
      * @param directionsRoute new route passed to [MapboxNavigation]
      */
     fun updateSessionRoute(directionsRoute: DirectionsRoute) {
-        navigationSessionState.let {
-            it.tripIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier()
-            it.currentDirectionRoute = directionsRoute
-            eventDispatcher.addMetricEventListeners(this)
-            if (isOffRoute) {
-                // If we are off-route, update the reroute count
-                it.rerouteCount = it.rerouteCount + 1
-                it.requestIdentifier =
-                    if (directionsRoute.routeOptions() != null) {
-                        directionsRoute.routeOptions()?.requestUuid()
-                    } else {
-                        null
-                    }
-                updateLastRerouteEvent(directionsRoute)
-                lastRerouteDate = Date()
-                isOffRoute = false
-            }
+        navigationSessionState.tripIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier()
+        navigationSessionState.currentDirectionRoute = directionsRoute
+        eventDispatcher.addMetricEventListeners(this)
+        if (isOffRoute) {
+            // If we are off-route, update the reroute count
+            navigationSessionState.rerouteCount = navigationSessionState.rerouteCount + 1
+            navigationSessionState.requestIdentifier =
+                if (directionsRoute.routeOptions() != null) {
+                    directionsRoute.routeOptions()?.requestUuid()
+                } else {
+                    null
+                }
+            updateLastRerouteEvent(directionsRoute)
+            lastRerouteDate = Date()
+            isOffRoute = false
         }
     }
 
@@ -451,16 +449,14 @@ internal object NavigationTelemetry : NavigationMetricListener {
             return
         }
         // Update session state with locations from before / after the reroute occurred
-        rerouteSessionState.let {
-            it.beforeEventLocations = createLocationListBeforeEvent(it.eventDate)
-            it.afterEventLocations = createLocationListAfterEvent(it.eventDate)
-            NavigationMetricsWrapper.rerouteEvent(
-                rerouteEvent,
-                metricProgress,
-                it.eventLocation,
-                context
-            )
-        }
+        rerouteSessionState.beforeEventLocations = createLocationListBeforeEvent(rerouteSessionState.eventDate)
+        rerouteSessionState.afterEventLocations = createLocationListAfterEvent(rerouteSessionState.eventDate)
+        NavigationMetricsWrapper.rerouteEvent(
+            rerouteEvent,
+            metricProgress,
+            rerouteSessionState.eventLocation,
+            context
+        )
     }
 
     private fun sendFeedbackEvent(feedbackEvent: FeedbackEvent) {
@@ -469,20 +465,18 @@ internal object NavigationTelemetry : NavigationMetricListener {
             return
         }
         // Update sessions state with locations from before / after feedback
-        feedbackSessionState.let {
-            it.beforeEventLocations = createLocationListBeforeEvent(it.eventDate)
-            it.afterEventLocations = createLocationListAfterEvent(it.eventDate)
-            NavigationMetricsWrapper.feedbackEvent(
-                feedbackSessionState,
-                metricProgress,
-                it.eventLocation,
-                feedbackEvent.description ?: "",
-                feedbackEvent.feedbackType,
-                feedbackEvent.screenshot,
-                feedbackEvent.feedbackSource,
-                context
-            )
-        }
+        feedbackSessionState.beforeEventLocations = createLocationListBeforeEvent(feedbackSessionState.eventDate)
+        feedbackSessionState.afterEventLocations = createLocationListAfterEvent(feedbackSessionState.eventDate)
+        NavigationMetricsWrapper.feedbackEvent(
+            feedbackSessionState,
+            metricProgress,
+            feedbackSessionState.eventLocation,
+            feedbackEvent.description ?: "",
+            feedbackEvent.feedbackType,
+            feedbackEvent.screenshot,
+            feedbackEvent.feedbackSource,
+            context
+        )
     }
 
     private fun dateDiff(
