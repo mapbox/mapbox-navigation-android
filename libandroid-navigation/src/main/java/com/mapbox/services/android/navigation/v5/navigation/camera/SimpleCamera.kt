@@ -52,12 +52,9 @@ open class SimpleCamera : Camera() {
         routeCoordinates = generateRouteCoordinates(route)
     }
 
-    private fun generateRouteCoordinates(route: DirectionsRoute?): List<Point> {
-        return route?.let { route ->
-            route.geometry()?.let { geometry ->
-                val lineString = LineString.fromPolyline(geometry, Constants.PRECISION_6)
-                lineString.coordinates()
-            }
+    private fun generateRouteCoordinates(route: DirectionsRoute?): List<Point> =
+        route?.geometry()?.let { geometry ->
+            val lineString = LineString.fromPolyline(geometry, Constants.PRECISION_6)
+            lineString.coordinates()
         } ?: emptyList()
-    }
 }

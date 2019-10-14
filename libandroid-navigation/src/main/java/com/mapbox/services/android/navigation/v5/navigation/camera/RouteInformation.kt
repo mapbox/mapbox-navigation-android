@@ -9,7 +9,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
  * also provides useful information (screen configuration and target distance) which can be used to
  * make additional configuration changes to the map's camera.
  *
- * @since 0.10.0
  */
 data class RouteInformation(
     /**
@@ -33,16 +32,4 @@ data class RouteInformation(
      * @since 0.10.0
      */
     val routeProgress: RouteProgress?
-) {
-
-    companion object {
-        @JvmStatic
-        fun create(
-            route: DirectionsRoute?,
-            location: Location?,
-            routeProgress: RouteProgress?
-        ): RouteInformation {
-            return RouteInformation(route, location, routeProgress)
-        }
-    }
-}
+)

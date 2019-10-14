@@ -70,7 +70,7 @@ public class DynamicCamera extends SimpleCamera {
    * Called when the zoom level should force update on the next usage
    * of {@link DynamicCamera#zoom(RouteInformation)}.
    */
-  void forceResetZoomLevel() {
+  public void forceResetZoomLevel() {
     forceUpdateZoom = true;
   }
 
