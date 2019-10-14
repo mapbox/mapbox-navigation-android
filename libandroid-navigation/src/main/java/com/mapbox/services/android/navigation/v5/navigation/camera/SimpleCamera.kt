@@ -8,8 +8,6 @@ import java.util.ArrayList
 
 /**
  * The default camera used by [com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation].
- *
- * @since 0.10.0
  */
 open class SimpleCamera : Camera() {
 
