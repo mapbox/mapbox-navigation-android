@@ -42,8 +42,9 @@ import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
+import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
+import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 
 import org.jetbrains.annotations.TestOnly;
 
@@ -80,7 +81,6 @@ public class NavigationViewModel extends AndroidViewModel {
   private String screenshot;
   private String language;
   private RouteUtils routeUtils;
-  private LocaleUtils localeUtils;
   private DistanceFormatter distanceFormatter;
   private String accessToken;
   @TimeFormatType
@@ -96,7 +96,6 @@ public class NavigationViewModel extends AndroidViewModel {
     initializeLocationEngine();
     initializeRouter();
     this.routeUtils = new RouteUtils();
-    this.localeUtils = new LocaleUtils();
     this.connectivityController = new MapConnectivityController();
   }
 
@@ -315,7 +314,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
   private void initializeLanguage(NavigationUiOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
-    language = localeUtils.inferDeviceLanguage(getApplication());
+    language = ContextEx.inferDeviceLanguage(getApplication());
     if (routeOptions != null) {
       language = routeOptions.language();
     }
@@ -323,7 +322,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
   private String initializeUnitType(NavigationUiOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
-    String unitType = localeUtils.getUnitTypeForDeviceLocale(getApplication());
+    String unitType = LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getApplication()));
     if (routeOptions != null) {
       unitType = routeOptions.voiceUnits();
     }

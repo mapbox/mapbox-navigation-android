@@ -3,16 +3,28 @@ package com.mapbox.services.android.navigation.v5.navigation
 import android.content.Context
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.geojson.Point
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils
+import com.mapbox.services.android.navigation.v5.testsupport.Extensions
+import com.mapbox.services.android.navigation.v5.testsupport.mockkStaticSupport
+import com.mapbox.services.android.navigation.v5.utils.extensions.inferDeviceLocale
 import io.mockk.every
 import io.mockk.mockk
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import java.util.Locale
 import org.junit.Assert.assertTrue
+import org.junit.BeforeClass
 import org.junit.Test
 
 class OfflineRouteTest {
+
+    companion object {
+
+        @BeforeClass
+        @JvmStatic
+        fun initialize() {
+            mockkStaticSupport(Extensions.ContextEx)
+        }
+    }
 
     @Test
     fun addBicycleTypeIncludedInRequest() {
@@ -101,10 +113,8 @@ class OfflineRouteTest {
 
     private fun provideOnlineRouteBuilder(): NavigationRoute.Builder {
         val context = mockk<Context>()
-        val localeUtils = mockk<LocaleUtils>()
-        every { localeUtils.inferDeviceLocale(context) } returns Locale.getDefault()
-        every { localeUtils.getUnitTypeForDeviceLocale(context) } returns DirectionsCriteria.IMPERIAL
-        return NavigationRoute.builder(context, localeUtils)
+        every { context.inferDeviceLocale() } returns Locale.US
+        return NavigationRoute.builder(context)
             .accessToken("pk.XXX")
             .origin(Point.fromLngLat(1.0, 2.0))
             .addWaypoint(Point.fromLngLat(3.0, 2.0))

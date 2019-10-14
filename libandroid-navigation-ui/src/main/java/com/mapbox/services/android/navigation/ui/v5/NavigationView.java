@@ -43,7 +43,8 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOpti
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
+import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
+import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 
 /**
  * View that creates the drop-in UI.
@@ -652,14 +653,13 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   private void establish(NavigationViewOptions options) {
-    LocaleUtils localeUtils = new LocaleUtils();
-    establishDistanceFormatter(localeUtils, options);
+    establishDistanceFormatter(options);
     establishTimeFormat(options);
   }
 
-  private void establishDistanceFormatter(LocaleUtils localeUtils, NavigationViewOptions options) {
-    String unitType = establishUnitType(localeUtils, options);
-    String language = establishLanguage(localeUtils, options);
+  private void establishDistanceFormatter(NavigationViewOptions options) {
+    String unitType = establishUnitType(options);
+    String language = establishLanguage(options);
     int roundingIncrement = establishRoundingIncrement(options);
     DistanceFormatter distanceFormatter = new DistanceFormatter(getContext(), language, unitType, roundingIncrement);
 
@@ -672,14 +672,15 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     return mapboxNavigationOptions.roundingIncrement();
   }
 
-  private String establishLanguage(LocaleUtils localeUtils, NavigationViewOptions options) {
-    return localeUtils.getNonEmptyLanguage(getContext(), options.directionsRoute().voiceLanguage());
+  private String establishLanguage(NavigationViewOptions options) {
+    String voiceLanguage = options.directionsRoute().voiceLanguage();
+    return voiceLanguage != null ? voiceLanguage : ContextEx.inferDeviceLanguage(getContext());
   }
 
-  private String establishUnitType(LocaleUtils localeUtils, NavigationViewOptions options) {
+  private String establishUnitType(NavigationViewOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     String voiceUnits = routeOptions == null ? null : routeOptions.voiceUnits();
-    return localeUtils.retrieveNonNullUnitType(getContext(), voiceUnits);
+    return voiceUnits != null ? voiceUnits : LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
   }
 
   private void establishTimeFormat(NavigationViewOptions options) {
