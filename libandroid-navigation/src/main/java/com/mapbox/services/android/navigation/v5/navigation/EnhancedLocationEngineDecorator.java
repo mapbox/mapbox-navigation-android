@@ -4,8 +4,9 @@ import android.app.PendingIntent;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
@@ -16,7 +17,6 @@ import com.mapbox.navigator.NavigationStatus;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.Date;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -24,50 +24,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import timber.log.Timber;
 
-class EnhancedLocationEngineDecorator implements LocationEngine {
+import static com.mapbox.services.android.navigation.v5.navigation.MapboxNavigator.getSnappedLocation;
 
+class EnhancedLocationEngineDecorator implements LocationEngine {
     private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
     private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 500;
     private final LocationEngine locationEngine;
-    private final EnhancedLocationMediator mediator;
     private final MapboxNavigator mapboxNavigator;
     private final LocationEngineCallback<LocationEngineResult> callback = new CurrentLocationEngineCallback(this);
     private ScheduledFuture future;
-    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService executorService;
     private Location rawLocation;
     private Location enhancedLocation;
     private AtomicBoolean isActive = new AtomicBoolean(false);
 
-    EnhancedLocationEngineDecorator(LocationEngine locationEngine, final MapboxNavigator mapboxNavigator) {
+    EnhancedLocationEngineDecorator(@NonNull LocationEngine locationEngine,
+                                    @NonNull MapboxNavigator mapboxNavigator,
+                                    @NonNull ScheduledExecutorService executorService) {
         this.locationEngine = locationEngine;
         this.mapboxNavigator = mapboxNavigator;
-        this.mediator = new EnhancedLocationMediator() {
-            @Override
-            public void updateRawLocation(Location location) {
-               mapboxNavigator.updateLocation(location);
-            }
-
-            @Override
-            public Location getLocation(Date date, long lagMillis, Location fallbackLocation) {
-                NavigationStatus status = mapboxNavigator.retrieveStatus(date, 0);
-                return isActive.get() ? mapboxNavigator.getSnappedLocation(status, fallbackLocation) : fallbackLocation;
-            }
-        };
-    }
-
-    void onNavigationStarted() {
-        isActive.getAndSet(true);
-    }
-
-    void onNavigationStopped() {
-        isActive.getAndSet(false);
-    }
-
-    private void onLocationChanged(Location location) {
-        if (location != null) {
-            rawLocation = location;
-            mediator.updateRawLocation(location);
-        }
+        this.executorService = executorService;
     }
 
     @Override
@@ -76,14 +52,21 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
     }
 
     @Override
-    public void requestLocationUpdates(@NonNull LocationEngineRequest request, @NonNull final LocationEngineCallback<LocationEngineResult> callback, @Nullable Looper looper) throws SecurityException {
+    public void requestLocationUpdates(@NonNull LocationEngineRequest request,
+                                       @NonNull final LocationEngineCallback<LocationEngineResult> callback,
+                                       @Nullable Looper looper) throws SecurityException {
         locationEngine.requestLocationUpdates(request, callback, null);
+        if (isActive.get()) {
+            /// Don't start free drive in active mode
+            return;
+        }
+
         final Handler handler = new Handler(Looper.getMainLooper());
         future = executorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 if (rawLocation != null) {
-                    enhancedLocation = mediator.getLocation(new Date(), 1500, rawLocation);
+                    enhancedLocation = getLocation(new Date(), 1500, rawLocation);
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -96,13 +79,18 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
     }
 
     @Override
-    public void requestLocationUpdates(@NonNull LocationEngineRequest request, PendingIntent pendingIntent) throws SecurityException {
+    public void requestLocationUpdates(@NonNull LocationEngineRequest request,
+                                       PendingIntent pendingIntent) throws SecurityException {
         locationEngine.requestLocationUpdates(request, pendingIntent);
     }
 
     @Override
     public void removeLocationUpdates(@NonNull LocationEngineCallback<LocationEngineResult> callback) {
         locationEngine.removeLocationUpdates(callback);
+        if (isActive.get()) {
+            /// Don't stop free drive in active mode
+            return;
+        }
         future.cancel(false);
     }
 
@@ -111,7 +99,19 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
         locationEngine.removeLocationUpdates(pendingIntent);
     }
 
-    void configure(File path, String version) {
+    void onNavigationStarted() {
+        if (isActive.compareAndSet(false, true)) {
+            removeLocationUpdates(callback);
+        }
+    }
+
+    void onNavigationStopped() {
+        if (isActive.compareAndSet(true, false)) {
+            requestLocationUpdates(obtainLocationEngineRequest(), callback, null);
+        }
+    }
+
+    void configure(@NonNull File path, @NonNull String version) {
         OfflineNavigator offlineNavigator = new OfflineNavigator(mapboxNavigator.getNavigator());
         String tilePath = new File(path, version).getAbsolutePath();
         offlineNavigator.configure(tilePath, new OnOfflineTilesConfiguredCallback() {
@@ -128,10 +128,6 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
         });
     }
 
-    LocationEngineCallback<LocationEngineResult> getCallback() {
-        return callback;
-    }
-
     @NonNull
     private static LocationEngineRequest obtainLocationEngineRequest() {
         return new LocationEngineRequest.Builder(UPDATE_INTERVAL_IN_MILLISECONDS)
@@ -140,21 +136,29 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
                 .build();
     }
 
-    static class CurrentLocationEngineCallback implements LocationEngineCallback<LocationEngineResult> {
+    private void onLocationChanged(Location location) {
+        if (location != null) {
+            rawLocation = location;
+            mapboxNavigator.updateLocation(location);
+        }
+    }
 
-        private final WeakReference<EnhancedLocationEngineDecorator> updaterWeakReference;
+    private Location getLocation(Date date, long lagMillis, Location fallbackLocation) {
+        NavigationStatus status = mapboxNavigator.retrieveStatus(date, 0);
+        return isActive.get() ? getSnappedLocation(status, fallbackLocation) : fallbackLocation;
+    }
 
-        CurrentLocationEngineCallback(EnhancedLocationEngineDecorator locationUpdater) {
-            this.updaterWeakReference = new WeakReference<>(locationUpdater);
+    private static final class CurrentLocationEngineCallback implements LocationEngineCallback<LocationEngineResult> {
+        private final EnhancedLocationEngineDecorator locationEngine;
+
+        CurrentLocationEngineCallback(@NonNull EnhancedLocationEngineDecorator locationEngine) {
+            this.locationEngine = locationEngine;
         }
 
         @Override
         public void onSuccess(LocationEngineResult result) {
-            EnhancedLocationEngineDecorator locationUpdater = updaterWeakReference.get();
-            if (locationUpdater != null) {
-                Location location = result.getLastLocation();
-                locationUpdater.onLocationChanged(location);
-            }
+            Location location = result.getLastLocation();
+            locationEngine.onLocationChanged(location);
         }
 
         @Override
