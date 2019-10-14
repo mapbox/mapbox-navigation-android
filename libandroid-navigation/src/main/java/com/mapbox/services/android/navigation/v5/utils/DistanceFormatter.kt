@@ -12,6 +12,8 @@ import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.R
 import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
+import com.mapbox.services.android.navigation.v5.utils.extensions.getUnitTypeForLocale
+import com.mapbox.services.android.navigation.v5.utils.extensions.inferDeviceLocale
 import com.mapbox.turf.TurfConstants.UNIT_FEET
 import com.mapbox.turf.TurfConstants.UNIT_KILOMETERS
 import com.mapbox.turf.TurfConstants.UNIT_METERS
@@ -67,15 +69,13 @@ class DistanceFormatter(
     }
 
     init {
-        val localeUtils = LocaleUtils()
-
         unitStrings[UNIT_KILOMETERS] = context.getString(R.string.kilometers)
         unitStrings[UNIT_METERS] = context.getString(R.string.meters)
         unitStrings[UNIT_MILES] = context.getString(R.string.miles)
         unitStrings[UNIT_FEET] = context.getString(R.string.feet)
 
         val locale = if (language == null) {
-            localeUtils.inferDeviceLocale(context)
+            context.inferDeviceLocale()
         } else {
             Locale(language)
         }
@@ -84,7 +84,7 @@ class DistanceFormatter(
 
         this.unitType =
             if (DirectionsCriteria.IMPERIAL != unitType && DirectionsCriteria.METRIC != unitType) {
-                localeUtils.getUnitTypeForDeviceLocale(context)
+                context.inferDeviceLocale().getUnitTypeForLocale()
             } else {
                 unitType
             }

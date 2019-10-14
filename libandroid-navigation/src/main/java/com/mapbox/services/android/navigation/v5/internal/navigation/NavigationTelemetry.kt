@@ -235,7 +235,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
         feedbackId: String,
         @FeedbackEvent.FeedbackType feedbackType: String,
         description: String,
-        screenshot: String
+        screenshot: String?
     ) {
         // Find the event and send
         findQueuedFeedbackEvent(feedbackId)?.let {
@@ -473,7 +473,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
             feedbackSessionState.eventLocation,
             feedbackEvent.description ?: "",
             feedbackEvent.feedbackType,
-            feedbackEvent.screenshot,
+            feedbackEvent.screenshot ?: "",
             feedbackEvent.feedbackSource,
             context
         )
