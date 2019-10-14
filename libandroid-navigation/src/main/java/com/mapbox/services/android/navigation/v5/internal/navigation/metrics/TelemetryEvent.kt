@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 
-interface TelemetryEvent {
+internal interface TelemetryEvent {
 
     val eventId: String
 

@@ -44,7 +44,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
     private val queuedFeedbackEvents = ArrayList<FeedbackEvent>()
     private val locationBuffer: RingBuffer<Location> = RingBuffer(LOCATION_BUFFER_MAX_SIZE)
     private var metricProgress: MetricsRouteProgress = MetricsRouteProgress(null)
-    private var navigationSessionState: SessionState = SessionState.builder().build()
+    private var navigationSessionState: SessionState = SessionState()
     private var metricLocation: MetricsLocation = MetricsLocation(null)
     private val gpsEventFactory = InitialGpsEventFactory()
     private var isOffRoute: Boolean = false
@@ -103,10 +103,10 @@ internal object NavigationTelemetry : NavigationMetricListener {
 
     override fun onArrival(routeProgress: RouteProgress) {
         // Update arrival time stamp
-        navigationSessionState = navigationSessionState.toBuilder()
-            .arrivalTimestamp(Date())
-            .tripIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier())
-            .build()
+        navigationSessionState.apply {
+            arrivalTimestamp = Date()
+            tripIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier()
+        }
         updateLifecyclePercentages()
         // Send arrival event
         NavigationMetricsWrapper.arriveEvent(
@@ -128,18 +128,18 @@ internal object NavigationTelemetry : NavigationMetricListener {
         locationEngineName: LocationEngine
     ) {
         updateLocationEngineNameAndSimulation(locationEngineName)
-        navigationSessionState = navigationSessionState.toBuilder()
-            .sessionIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier())
-            .tripIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier())
-            .originalDirectionRoute(directionsRoute)
-            .originalRequestIdentifier(directionsRoute.routeOptions()?.requestUuid())
-            .requestIdentifier(directionsRoute.routeOptions()?.requestUuid())
-            .currentDirectionRoute(directionsRoute)
-            .eventRouteDistanceCompleted(0.0)
-            .rerouteCount(0)
-            .build()
+        navigationSessionState.apply {
+            sessionIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier()
+            tripIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier()
+            originalDirectionRoute = directionsRoute
+            originalRequestIdentifier = directionsRoute.routeOptions()?.requestUuid()
+            requestIdentifier = directionsRoute.routeOptions()?.requestUuid()
+            currentDirectionRoute = directionsRoute
+            eventRouteDistanceCompleted = 0.0
+            rerouteCount = 0
+        }
         sendRouteRetrievalEventIfExists()
-        gpsEventFactory.navigationStarted(navigationSessionState.sessionIdentifier())
+        gpsEventFactory.navigationStarted(navigationSessionState.sessionIdentifier)
     }
 
     fun stopSession() {
@@ -158,29 +158,23 @@ internal object NavigationTelemetry : NavigationMetricListener {
      * @param directionsRoute new route passed to [MapboxNavigation]
      */
     fun updateSessionRoute(directionsRoute: DirectionsRoute) {
-        val navigationBuilder = navigationSessionState.toBuilder()
-            .tripIdentifier(TelemetryUtils.obtainUniversalUniqueIdentifier())
-        navigationBuilder.currentDirectionRoute(directionsRoute)
-        eventDispatcher.addMetricEventListeners(this)
-
-        if (isOffRoute) {
-            // If we are off-route, update the reroute count
-            navigationBuilder.rerouteCount(navigationSessionState.rerouteCount() + 1)
-            val hasRouteOptions = directionsRoute.routeOptions() != null
-            navigationBuilder.requestIdentifier(
-                if (hasRouteOptions) {
-                    directionsRoute.routeOptions()?.requestUuid()
-                } else {
-                    null
-                }
-            )
-            navigationSessionState = navigationBuilder.build()
-            updateLastRerouteEvent(directionsRoute)
-            lastRerouteDate = Date()
-            isOffRoute = false
-        } else {
-            // Not current off-route - update the session
-            navigationSessionState = navigationBuilder.build()
+        navigationSessionState.let {
+            it.tripIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier()
+            it.currentDirectionRoute = directionsRoute
+            eventDispatcher.addMetricEventListeners(this)
+            if (isOffRoute) {
+                // If we are off-route, update the reroute count
+                it.rerouteCount = it.rerouteCount + 1
+                it.requestIdentifier =
+                    if (directionsRoute.routeOptions() != null) {
+                        directionsRoute.routeOptions()?.requestUuid()
+                    } else {
+                        null
+                    }
+                updateLastRerouteEvent(directionsRoute)
+                lastRerouteDate = Date()
+                isOffRoute = false
+            }
         }
     }
 
@@ -192,13 +186,11 @@ internal object NavigationTelemetry : NavigationMetricListener {
         if (locationEngine == null) {
             return
         }
-
-        val locationEngineName = locationEngine.javaClass.name
-        val isSimulationEnabled = locationEngineName == MOCK_PROVIDER
-        navigationSessionState = navigationSessionState.toBuilder()
-            .locationEngineName(locationEngineName)
-            .mockLocation(isSimulationEnabled)
-            .build()
+        val engineName = locationEngine.javaClass.name
+        navigationSessionState.apply {
+            locationEngineName = engineName
+            mockLocation = engineName == MOCK_PROVIDER
+        }
     }
 
     fun updateLocation(context: Context, location: Location) {
@@ -223,7 +215,11 @@ internal object NavigationTelemetry : NavigationMetricListener {
         description: String,
         @FeedbackEvent.FeedbackSource feedbackSource: String
     ): String {
-        val feedbackEvent = queueFeedbackEvent(feedbackType, description, feedbackSource)
+        val feedbackEvent = queueFeedbackEvent(
+            feedbackType,
+            description,
+            feedbackSource
+        )
         return feedbackEvent.eventId
     }
 
@@ -286,11 +282,11 @@ internal object NavigationTelemetry : NavigationMetricListener {
         elapsedTime: ElapsedTime,
         routeUuid: String
     ) {
-        if (navigationSessionState.sessionIdentifier().isNotEmpty()) {
+        if (navigationSessionState.sessionIdentifier.isNotEmpty()) {
             NavigationMetricsWrapper.routeRetrievalEvent(
                 elapsedTime.elapsedTime,
                 routeUuid,
-                navigationSessionState.sessionIdentifier(),
+                navigationSessionState.sessionIdentifier,
                 MetadataBuilder.getMetadata(context)
             )
         } else {
@@ -324,7 +320,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
     }
 
     private fun sendCancelEvent() {
-        ifNonNull(navigationSessionState.startTimestamp()) {
+        ifNonNull(navigationSessionState.startTimestamp) {
             NavigationMetricsWrapper.cancelEvent(
                 navigationSessionState,
                 metricProgress,
@@ -361,12 +357,8 @@ internal object NavigationTelemetry : NavigationMetricListener {
         }
     }
 
-    private fun shouldSendEvent(sessionState: SessionState): Boolean {
-        return dateDiff(
-            sessionState.eventDate(),
-            Date()
-        ) > TWENTY_SECOND_INTERVAL
-    }
+    private fun shouldSendEvent(sessionState: SessionState): Boolean =
+        dateDiff(sessionState.eventDate, Date()) > TWENTY_SECOND_INTERVAL
 
     private fun createLocationListBeforeEvent(eventDate: Date?): List<Location>? {
         if (eventDate == null) {
@@ -407,24 +399,22 @@ internal object NavigationTelemetry : NavigationMetricListener {
     }
 
     private fun updateDistanceCompleted() {
-        val currentDistanceCompleted =
-            navigationSessionState.eventRouteDistanceCompleted() + metricProgress.distanceTraveled
-        navigationSessionState = navigationSessionState.toBuilder()
-            .eventRouteDistanceCompleted(currentDistanceCompleted)
-            .build()
+        navigationSessionState.eventRouteDistanceCompleted =
+            navigationSessionState.eventRouteDistanceCompleted + metricProgress.distanceTraveled
     }
 
     private fun queueRerouteEvent() {
         updateLifecyclePercentages()
         // Create a new session state given the current navigation session
-        val eventDate = Date()
-        val rerouteEventSessionState = navigationSessionState.toBuilder()
-            .eventDate(eventDate)
-            .eventRouteProgress(metricProgress)
-            .eventLocation(metricLocation.location)
-            .secondsSinceLastReroute(getSecondsSinceLastReroute(eventDate))
-            .build()
-
+        val currentDate = Date()
+        // TODO: Need to test is copy correct
+        val rerouteEventSessionState = navigationSessionState.copy()
+        rerouteEventSessionState.apply {
+            eventDate = currentDate
+            eventRouteProgress = metricProgress
+            eventLocation = metricLocation.location
+            secondsSinceLastReroute = getSecondsSinceLastReroute(currentDate)
+        }
         val rerouteEvent = RerouteEvent(rerouteEventSessionState)
         queuedRerouteEvents.add(rerouteEvent)
     }
@@ -437,16 +427,16 @@ internal object NavigationTelemetry : NavigationMetricListener {
         updateLifecyclePercentages()
         // Distance completed = previous distance completed + current RouteProgress distance traveled
         val distanceCompleted =
-            navigationSessionState.eventRouteDistanceCompleted() + metricProgress.distanceTraveled
+            navigationSessionState.eventRouteDistanceCompleted + metricProgress.distanceTraveled
 
         // Create a new session state given the current navigation session
-        val feedbackEventSessionState = navigationSessionState.toBuilder()
-            .eventDate(Date())
-            .eventRouteProgress(metricProgress)
-            .eventRouteDistanceCompleted(distanceCompleted)
-            .eventLocation(metricLocation.location)
-            .build()
-
+        val feedbackEventSessionState = navigationSessionState.copy()
+        feedbackEventSessionState.apply {
+            eventDate = Date()
+            eventRouteProgress = metricProgress
+            eventRouteDistanceCompleted = distanceCompleted
+            eventLocation = metricLocation.location
+        }
         val feedbackEvent = FeedbackEvent(feedbackEventSessionState, feedbackSource)
         feedbackEvent.description = description
         feedbackEvent.feedbackType = feedbackType
@@ -455,53 +445,44 @@ internal object NavigationTelemetry : NavigationMetricListener {
     }
 
     private fun sendRerouteEvent(rerouteEvent: RerouteEvent) {
+        val rerouteSessionState = rerouteEvent.sessionState
         // If there isn't an updated geometry, don't send
-        if (rerouteEvent.sessionState.startTimestamp() == null) {
+        if (rerouteSessionState.startTimestamp == null) {
             return
         }
-        // Create arrays with locations from before / after the reroute occurred
-        val beforeLocations = createLocationListBeforeEvent(rerouteEvent.sessionState.eventDate())
-        val afterLocations = createLocationListAfterEvent(rerouteEvent.sessionState.eventDate())
-        // Update session state with locations after feedback
-        val rerouteSessionState = rerouteEvent.sessionState.toBuilder()
-            .beforeEventLocations(beforeLocations)
-            .afterEventLocations(afterLocations)
-            .build()
-        // Set the updated session state
-        rerouteEvent.sessionState = rerouteSessionState
-
-        NavigationMetricsWrapper.rerouteEvent(
-            rerouteEvent,
-            metricProgress,
-            rerouteEvent.sessionState.eventLocation(),
-            context
-        )
+        // Update session state with locations from before / after the reroute occurred
+        rerouteSessionState.let {
+            it.beforeEventLocations = createLocationListBeforeEvent(it.eventDate)
+            it.afterEventLocations = createLocationListAfterEvent(it.eventDate)
+            NavigationMetricsWrapper.rerouteEvent(
+                rerouteEvent,
+                metricProgress,
+                it.eventLocation,
+                context
+            )
+        }
     }
 
     private fun sendFeedbackEvent(feedbackEvent: FeedbackEvent) {
-        if (feedbackEvent.sessionState.startTimestamp() == null) {
+        val feedbackSessionState = feedbackEvent.sessionState
+        if (feedbackEvent.sessionState.startTimestamp == null) {
             return
         }
-        // Create arrays with locations from before / after the reroute occurred
-        val beforeLocations =
-            createLocationListBeforeEvent(feedbackEvent.sessionState.eventDate())
-        val afterLocations = createLocationListAfterEvent(feedbackEvent.sessionState.eventDate())
-        // Update session state with locations after feedback
-        val feedbackSessionState = feedbackEvent.sessionState.toBuilder()
-            .beforeEventLocations(beforeLocations)
-            .afterEventLocations(afterLocations)
-            .build()
-
-        NavigationMetricsWrapper.feedbackEvent(
-            feedbackSessionState,
-            metricProgress,
-            feedbackEvent.sessionState.eventLocation(),
-            feedbackEvent.description ?: "",
-            feedbackEvent.feedbackType,
-            feedbackEvent.screenshot ?: "",
-            feedbackEvent.feedbackSource,
-            context
-        )
+        // Update sessions state with locations from before / after feedback
+        feedbackSessionState.let {
+            it.beforeEventLocations = createLocationListBeforeEvent(it.eventDate)
+            it.afterEventLocations = createLocationListAfterEvent(it.eventDate)
+            NavigationMetricsWrapper.feedbackEvent(
+                feedbackSessionState,
+                metricProgress,
+                it.eventLocation,
+                feedbackEvent.description ?: "",
+                feedbackEvent.feedbackType,
+                feedbackEvent.screenshot ?: "",
+                feedbackEvent.feedbackSource,
+                context
+            )
+        }
     }
 
     private fun dateDiff(
@@ -526,10 +507,8 @@ internal object NavigationTelemetry : NavigationMetricListener {
 
     private fun updateLifecyclePercentages() {
         lifecycleMonitor?.let {
-            navigationSessionState = navigationSessionState.toBuilder()
-                .percentInForeground(it.obtainForegroundPercentage())
-                .percentInPortrait(it.obtainPortraitPercentage())
-                .build()
+            navigationSessionState.percentInForeground = it.obtainForegroundPercentage()
+            navigationSessionState.percentInPortrait = it.obtainPortraitPercentage()
         }
     }
 
@@ -537,18 +516,19 @@ internal object NavigationTelemetry : NavigationMetricListener {
         if (queuedRerouteEvents.isEmpty()) {
             return
         }
-        val rerouteEvent = queuedRerouteEvents.last()
         val geometryPositions = PolylineUtils.decode(
             newDirectionsRoute.geometry() ?: "",
             Constants.PRECISION_6
         )
         PolylineUtils.encode(geometryPositions, Constants.PRECISION_5)
-        rerouteEvent.newRouteGeometry = PolylineUtils.encode(
-            geometryPositions,
-            Constants.PRECISION_5
-        )
-        rerouteEvent.newDistanceRemaining = newDirectionsRoute.distance()?.toInt() ?: 0
-        rerouteEvent.newDurationRemaining = newDirectionsRoute.duration()?.toInt() ?: 0
+        queuedRerouteEvents.last().apply {
+            newRouteGeometry = PolylineUtils.encode(
+                geometryPositions,
+                Constants.PRECISION_5
+            )
+            newDistanceRemaining = newDirectionsRoute.distance()?.toInt() ?: 0
+            newDurationRemaining = newDirectionsRoute.duration()?.toInt() ?: 0
+        }
     }
 
     private fun getSecondsSinceLastReroute(eventDate: Date): Int =
