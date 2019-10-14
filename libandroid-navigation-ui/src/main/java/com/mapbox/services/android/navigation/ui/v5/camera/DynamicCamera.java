@@ -107,11 +107,7 @@ public class DynamicCamera extends SimpleCamera {
    * @return zoom within set min / max bounds
    */
   private double createZoom(RouteInformation routeInformation) {
-    CameraPosition position = null;
-    RouteProgress routeProgress = routeInformation.getRouteProgress();
-    if (routeProgress != null) {
-      position = createCameraPosition(routeInformation.getLocation(), routeInformation.getRouteProgress());
-    }
+    CameraPosition position = createCameraPosition(routeInformation.getLocation(), routeInformation.getRouteProgress());
     if (position == null) {
       return DEFAULT_ZOOM;
     }
@@ -193,9 +189,6 @@ public class DynamicCamera extends SimpleCamera {
 
   private boolean shouldUpdateZoom(RouteInformation routeInformation) {
     RouteProgress progress = routeInformation.getRouteProgress();
-    if (progress == null) {
-      return false;
-    }
     return isForceUpdate()
       || isNewStep(progress)
       || isLowAlert(progress)
