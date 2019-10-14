@@ -405,7 +405,6 @@ internal object NavigationTelemetry : NavigationMetricListener {
         updateLifecyclePercentages()
         // Create a new session state given the current navigation session
         val currentDate = Date()
-        // TODO: Need to test is copy correct
         val rerouteEventSessionState = navigationSessionState.copy()
         rerouteEventSessionState.apply {
             eventDate = currentDate
