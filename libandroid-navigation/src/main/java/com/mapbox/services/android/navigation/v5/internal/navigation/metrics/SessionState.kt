@@ -3,17 +3,20 @@ package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 import android.location.Location
 import android.text.TextUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation
 import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress
 import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.util.Date
 
-internal data class SessionState @JvmOverloads constructor(
+data class SessionState(
     var secondsSinceLastReroute: Int = -1,
     var eventRouteProgress: MetricsRouteProgress = MetricsRouteProgress(null),
-    var eventLocation: Location? = null,
+    var eventLocation: Location = Location(MetricsLocation.PROVIDER).apply {
+        latitude = 0.0
+        longitude = 0.0
+    },
     var eventDate: Date? = null,
     var eventRouteDistanceCompleted: Double = 0.0,
     var afterEventLocations: List<Location>? = null,
@@ -36,48 +39,36 @@ internal data class SessionState @JvmOverloads constructor(
     /*
     * Original route values
     */
-    fun originalGeometry(): String =
-        ifNonNull(originalDirectionRoute, originalDirectionRoute?.geometry()) { _, geometry ->
-            calculateGeometry(geometry)
-        } ?: ""
+    fun originalStepCount(): Int = obtainStepCount(originalDirectionRoute)
 
-    fun originalDistance(): Int =
-        originalDirectionRoute?.distance()?.toInt() ?: 0
+    fun originalGeometry(): String = obtainGeometry(originalDirectionRoute)
 
-    fun originalStepCount(): Int =
-        ifNonNull(originalDirectionRoute, originalDirectionRoute?.legs()) { _, legs ->
-            calculateStepCount(legs)
-        } ?: 0
+    fun originalDistance(): Int = originalDirectionRoute?.distance()?.toInt() ?: 0
 
-    fun originalDuration(): Int =
-        originalDirectionRoute?.duration()?.toInt() ?: 0
+    fun originalDuration(): Int = originalDirectionRoute?.duration()?.toInt() ?: 0
 
     /*
     * Current route values
     */
-    fun currentStepCount(): Int =
-        ifNonNull(currentDirectionRoute, currentDirectionRoute?.legs()) { _, legs ->
-            calculateStepCount(legs)
-        } ?: 0
+    fun currentStepCount(): Int = obtainStepCount(currentDirectionRoute)
 
-    fun currentGeometry(): String =
-        ifNonNull(currentDirectionRoute, currentDirectionRoute?.geometry()) { _, geometry ->
-            calculateGeometry(geometry)
+    fun currentGeometry(): String = obtainGeometry(currentDirectionRoute)
+
+    private fun obtainGeometry(directionsRoute: DirectionsRoute?): String =
+        ifNonNull(directionsRoute, directionsRoute?.geometry()) { _, geometry ->
+            if (TextUtils.isEmpty(geometry)) {
+                return@ifNonNull ""
+            }
+            val positions = PolylineUtils.decode(geometry, Constants.PRECISION_6)
+            return@ifNonNull PolylineUtils.encode(positions, Constants.PRECISION_5)
         } ?: ""
 
-    private fun calculateStepCount(legs: List<RouteLeg>): Int {
-        var stepCount = 0
-        for (leg in legs) {
-            stepCount += leg.steps()?.size ?: 0
-        }
-        return stepCount
-    }
-
-    private fun calculateGeometry(geometry: String): String {
-        if (TextUtils.isEmpty(geometry)) {
-            return ""
-        }
-        val positions = PolylineUtils.decode(geometry, Constants.PRECISION_6)
-        return PolylineUtils.encode(positions, Constants.PRECISION_5)
-    }
+    private fun obtainStepCount(directionsRoute: DirectionsRoute?): Int =
+        ifNonNull(directionsRoute, directionsRoute?.legs()) { _, legs ->
+            var stepCount = 0
+            for (leg in legs) {
+                stepCount += leg.steps()?.size ?: 0
+            }
+            return@ifNonNull stepCount
+        } ?: 0
 }

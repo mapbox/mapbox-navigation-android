@@ -78,7 +78,8 @@ public class NavigationEventFactoryTest {
   private PhoneState phoneState;
   private SessionState sessionState;
   private MetricsRouteProgress metricsRouteProgress;
-  private Location locationBefore, locationAfter;
+  private Location locationBefore;
+  private Location locationAfter;
 
   @Before
   public void setUp() {
@@ -158,7 +159,7 @@ public class NavigationEventFactoryTest {
 
   @Test
   public void testCancelEvent() {
-    NavigationCancelEvent cancelEvent = NavigationEventFactory
+    NavigationCancelEvent cancelEvent = NavigationEventFactory.INSTANCE
       .buildNavigationCancelEvent(phoneState, sessionState, metricsRouteProgress, locationBefore, SDK_ID);
     checkNavigationEvent(cancelEvent);
     assertEquals(TelemetryUtils.generateCreateDateFormatted(date), cancelEvent.getArrivalTimestamp());
@@ -168,7 +169,7 @@ public class NavigationEventFactoryTest {
 
   @Test
   public void testArriveEvent() {
-    NavigationArriveEvent arriveEvent = NavigationEventFactory
+    NavigationArriveEvent arriveEvent = NavigationEventFactory.INSTANCE
       .buildNavigationArriveEvent(phoneState, sessionState, metricsRouteProgress, locationBefore, SDK_ID);
     checkNavigationEvent(arriveEvent);
     String s = new Gson().toJson(arriveEvent);
@@ -185,7 +186,7 @@ public class NavigationEventFactoryTest {
     String newRouteGeo = "new route geo";
     when(rerouteEvent.getNewRouteGeometry()).thenReturn(newRouteGeo);
 
-    NavigationRerouteEvent navigationRerouteEvent = NavigationEventFactory
+    NavigationRerouteEvent navigationRerouteEvent = NavigationEventFactory.INSTANCE
       .buildNavigationRerouteEvent(phoneState, sessionState, metricsRouteProgress, locationBefore, SDK_ID,
         rerouteEvent);
     checkNavigationEvent(navigationRerouteEvent);
@@ -213,7 +214,7 @@ public class NavigationEventFactoryTest {
     String feedbackType = "feed back type";
     String screenshot = "screenshot";
     String feedbackSource = "source";
-    NavigationFeedbackEvent navigationFeedbackEvent = NavigationEventFactory
+    NavigationFeedbackEvent navigationFeedbackEvent = NavigationEventFactory.INSTANCE
       .buildNavigationFeedbackEvent(phoneState, sessionState, metricsRouteProgress, locationBefore, SDK_ID,
         description, feedbackType, screenshot, feedbackSource);
 
@@ -261,7 +262,7 @@ public class NavigationEventFactoryTest {
     assertEquals(GEOMETRY, event.getGeometry());
     assertEquals(LOCATION_ENGINE, event.getLocationEngine());
     assertEquals(ORIG_GEO, event.getOriginalGeometry());
-    assertEquals(BATTER_PLUGGEDIN, event.isBatteryPluggedIn());
+    assertEquals(BATTER_PLUGGEDIN, event.getBatteryPluggedIn());
     assertEquals(VOLUME_LEVEL, event.getVolumeLevel(), 0);
     assertEquals(SCREEN_BRIGHTESS, event.getScreenBrightness(), 0);
     assertEquals(BATTERY_LEVEL, event.getBatteryLevel(), 0);
@@ -276,14 +277,14 @@ public class NavigationEventFactoryTest {
     assertEquals(TRIP_ID, event.getTripIdentifier());
     assertEquals(LATITUDE_BEFORE, event.getLat(), .0);
     assertEquals(LONGITUDE_BEFORE, event.getLng(), 0);
-    assertEquals(IS_MOCK, event.isSimulation());
+    assertEquals(IS_MOCK, event.getSimulation());
     assertEquals(DistanceFormatter.calculateAbsoluteDistance(locationBefore, metricsRouteProgress),
       event.getAbsoluteDistanceToDestination());
     assertEquals(PERCENT_IN_PORTRAIT, event.getPercentTimeInPortrait(), 0);
     assertEquals(PERCENT_IN_FOREGROUND, event.getPercentTimeInForeground(), 0);
     assertEquals(ROUTE_COMPLETED + DISTANCE_TRAVELED, event.getDistanceCompleted(), 0);
     assertEquals(DISTANCE_REMAINING, event.getDistanceRemaining(), 0);
-    assertEquals(NavigationEventFactory.EVENT_VERSION, event.getEventVersion());
+    assertEquals(NavigationEventFactory.INSTANCE.EVENT_VERSION, event.getEventVersion());
     assertEquals(DIRECTION_DISTANCE, event.getEstimatedDistance(), 0);
     assertEquals(DIRECTION_DURATION, event.getEstimatedDuration(), 0);
     assertEquals(REROUTE_COUNT, event.getRerouteCount(), 0);

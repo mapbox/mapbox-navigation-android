@@ -9,25 +9,25 @@ import java.io.RandomAccessFile
 import java.util.regex.Pattern
 import timber.log.Timber
 
-internal class MetadataBuilder {
+internal object MetadataBuilder {
 
-    companion object {
-        private const val RANDOM_ACCESS_FILE_NAME = "/proc/meminfo"
-        private const val READ_MODE = "r"
-        private val OPERATING_SYSTEM = "Android - " + Build.VERSION.RELEASE
-        private val DEVICE = Build.DEVICE
-        private val MANUFACTURER = Build.MANUFACTURER
-        private val BRAND = Build.BRAND
-        private val ABI = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Build.SUPPORTED_ABIS[0]
-        } else {
-            Build.CPU_ABI
-        }
-        private val VERSION = Build.VERSION.SDK_INT.toString()
+    private const val RANDOM_ACCESS_FILE_NAME = "/proc/meminfo"
+    private const val READ_MODE = "r"
+    private val OPERATING_SYSTEM = "Android - ${Build.VERSION.RELEASE}"
+    private val DEVICE = Build.DEVICE
+    private val MANUFACTURER = Build.MANUFACTURER
+    private val BRAND = Build.BRAND
+    private val ABI = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        Build.SUPPORTED_ABIS[0]
+    } else {
+        Build.CPU_ABI
     }
+    private val VERSION = Build.VERSION.SDK_INT.toString()
 
-    fun constructMetadata(context: Context): NavigationPerformanceMetadata {
-        return NavigationPerformanceMetadata.builder()
+    private var metadata: NavigationPerformanceMetadata? = null
+
+    fun getMetadata(context: Context): NavigationPerformanceMetadata =
+        metadata ?: NavigationPerformanceMetadata.builder()
             .version(VERSION)
             .screenSize(getScreenSize(context))
             .country(getCountry(context))
@@ -39,7 +39,7 @@ internal class MetadataBuilder {
             .gpu("")
             .manufacturer(MANUFACTURER)
             .build()
-    }
+            .also { metadata = it }
 
     private fun getTotalMemory(context: Context): String {
         val memoryInfo = ActivityManager.MemoryInfo()
