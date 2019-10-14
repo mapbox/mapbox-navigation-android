@@ -16,7 +16,7 @@ import java.util.ArrayList
  * This contains several single purpose methods that help out when a new location update occurs and
  * calculations need to be performed on it.
  */
-object NavigationHelper {
+internal object NavigationHelper {
 
     private const val INDEX_ZERO = 0
     private const val EMPTY_STRING = ""
@@ -28,11 +28,10 @@ object NavigationHelper {
     fun buildInstructionString(
         routeProgress: RouteProgress,
         milestone: Milestone
-    ): String {
-        return milestone.instruction?.let {
+    ): String =
+        milestone.instruction?.let {
             milestone.instruction.buildInstruction(routeProgress)
         } ?: EMPTY_STRING
-    }
 
     /**
      * Takes in the leg distance remaining value already calculated and if additional legs need to be
@@ -46,28 +45,26 @@ object NavigationHelper {
         legIndex: Int,
         directionsRoute: DirectionsRoute
     ): Double {
-        var legDistanceRemaining = legDistanceRemaining
+        var distanceRemaining = legDistanceRemaining
         directionsRoute.legs()?.let { legs ->
             val legsSize = legs.size
             if (legsSize < 2) {
-                return legDistanceRemaining
+                return distanceRemaining
             }
 
             for (i in legIndex + 1 until legsSize) {
-                legDistanceRemaining += legs[i].distance() ?: 0.0
+                distanceRemaining += legs[i].distance() ?: 0.0
             }
         }
-        return legDistanceRemaining
+        return distanceRemaining
     }
 
     /**
      * Given the current [DirectionsRoute] and leg / step index,
      * return a list of [Point] representing the current step.
      *
-     *
      * This method is only used on a per-step basis as [PolylineUtils.decode]
      * can be a heavy operation based on the length of the step.
-     *
      *
      * Returns null if index is invalid.
      *
@@ -98,7 +95,7 @@ object NavigationHelper {
                     stepGeometry?.let {
                         return PolylineUtils.decode(stepGeometry, PRECISION_6)
                     }
-                } ?: return currentPoints
+                }
             }
         }
         return currentPoints
@@ -119,34 +116,36 @@ object NavigationHelper {
         leg: RouteLeg,
         legDistanceRemaining: Double
     ): CurrentLegAnnotation? {
-        leg.annotation()?.let { legAnnotation ->
-            legAnnotation.distance()?.let { distanceList ->
-                if (distanceList.isEmpty()) return null
+        leg.annotation()?.distance()?.let { distanceList ->
+            if (distanceList.isEmpty()) return null
 
-                val annotationBuilder = CurrentLegAnnotation.builder()
-                val annotationIndex = findAnnotationIndex(
-                    currentLegAnnotation, annotationBuilder, leg, legDistanceRemaining, distanceList
-                )
-                annotationBuilder.distance(distanceList[annotationIndex])
-                val durationList = legAnnotation.duration()
-                durationList?.let {
-                    annotationBuilder.duration(durationList[annotationIndex])
-                }
-                val speedList = legAnnotation.speed()
-                speedList?.let {
-                    annotationBuilder.speed(speedList[annotationIndex])
-                }
-                val maxspeedList = legAnnotation.maxspeed()
-                maxspeedList?.let {
-                    annotationBuilder.maxspeed(maxspeedList[annotationIndex])
-                }
-                val congestionList = legAnnotation.congestion()
-                congestionList?.let {
-                    annotationBuilder.congestion(congestionList[annotationIndex])
-                }
-                annotationBuilder.index(annotationIndex)
-                return annotationBuilder.build()
-            } ?: return null
+            val annotationBuilder = CurrentLegAnnotation.builder()
+            val annotationIndex = findAnnotationIndex(
+                currentLegAnnotation,
+                annotationBuilder,
+                leg,
+                legDistanceRemaining,
+                distanceList
+            )
+            annotationBuilder.distance(distanceList[annotationIndex])
+            val durationList = leg.annotation()?.duration()
+            durationList?.let {
+                annotationBuilder.duration(durationList[annotationIndex])
+            }
+            val speedList = leg.annotation()?.speed()
+            speedList?.let {
+                annotationBuilder.speed(speedList[annotationIndex])
+            }
+            val maxSpeedList = leg.annotation()?.maxspeed()
+            maxSpeedList?.let {
+                annotationBuilder.maxspeed(maxSpeedList[annotationIndex])
+            }
+            val congestionList = leg.annotation()?.congestion()
+            congestionList?.let {
+                annotationBuilder.congestion(congestionList[annotationIndex])
+            }
+            annotationBuilder.index(annotationIndex)
+            return annotationBuilder.build()
         } ?: return null
     }
 
@@ -155,7 +154,7 @@ object NavigationHelper {
         annotationBuilder: CurrentLegAnnotation.Builder,
         leg: RouteLeg,
         legDistanceRemaining: Double,
-        distanceAnnotationList: List<Double>
+        distanceAnnotationList: List<Double?>
     ): Int {
         val legDistances = ArrayList(distanceAnnotationList)
         val totalLegDistance = leg.distance()
@@ -169,10 +168,10 @@ object NavigationHelper {
             }
             for (i in distanceIndex until legDistances.size) {
                 val distance = legDistances[i]
-                distance.let {
-                    annotationDistancesTraveled += distance
+                distance?.let {
+                    annotationDistancesTraveled += it
                     if (annotationDistancesTraveled > distanceTraveled) {
-                        val distanceToAnnotation = annotationDistancesTraveled - distance
+                        val distanceToAnnotation = annotationDistancesTraveled - it
                         annotationBuilder.distanceToAnnotation(distanceToAnnotation)
                         return i
                     }
