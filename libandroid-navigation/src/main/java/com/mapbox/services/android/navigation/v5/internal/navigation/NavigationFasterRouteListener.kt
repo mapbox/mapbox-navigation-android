@@ -15,7 +15,7 @@ internal class NavigationFasterRouteListener(
         private const val FIRST_ROUTE = 0
     }
 
-    override fun onResponseReceived(response: DirectionsResponse, routeProgress: RouteProgress?) {
+    override fun onResponseReceived(response: DirectionsResponse, routeProgress: RouteProgress) {
         if (fasterRouteEngine.isFasterRoute(response, routeProgress)) {
             navigationEventDispatcher.onFasterRouteEvent(response.routes()[FIRST_ROUTE])
         }
