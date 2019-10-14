@@ -25,7 +25,7 @@ class FeedbackEvent(
 
     @FeedbackType
     var feedbackType: String = FEEDBACK_TYPE_GENERAL_ISSUE
-    var screenshot: String = ""
+    var screenshot: String? = ""
     override val eventId: String = TelemetryUtils.obtainUniversalUniqueIdentifier()
     var description: String? = null
 
