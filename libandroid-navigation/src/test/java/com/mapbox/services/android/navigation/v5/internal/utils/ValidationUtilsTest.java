@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.utils;
+package com.mapbox.services.android.navigation.v5.internal.utils;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
@@ -6,6 +6,7 @@ import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 
+import com.mapbox.services.android.navigation.v5.internal.utils.ValidationUtils;
 import org.junit.Test;
 
 import java.io.IOException;

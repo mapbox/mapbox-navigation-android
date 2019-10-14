@@ -57,7 +57,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
-import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import timber.log.Timber;
 
@@ -490,8 +489,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
   private void initializeInstructionListRecyclerView() {
-    RouteUtils routeUtils = new RouteUtils();
-    instructionListAdapter = new InstructionListAdapter(routeUtils, distanceFormatter);
+    instructionListAdapter = new InstructionListAdapter(distanceFormatter);
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
     rvInstructions.setLayoutManager(new LinearLayoutManager(getContext()));
