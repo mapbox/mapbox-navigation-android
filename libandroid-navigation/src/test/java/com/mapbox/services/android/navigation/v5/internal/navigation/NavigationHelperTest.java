@@ -30,7 +30,7 @@ public class NavigationHelperTest extends BaseTest {
 
   @Test
   public void createCurrentAnnotation_nullAnnotationReturnsNull() {
-    CurrentLegAnnotation currentLegAnnotation = NavigationHelper.createCurrentAnnotation(
+    CurrentLegAnnotation currentLegAnnotation = NavigationHelper.INSTANCE.createCurrentAnnotation(
       null, mock(RouteLeg.class), 0
     );
 
@@ -42,7 +42,7 @@ public class NavigationHelperTest extends BaseTest {
     CurrentLegAnnotation currentLegAnnotation = buildCurrentAnnotation();
     RouteLeg routeLeg = buildRouteLegWithAnnotation();
 
-    CurrentLegAnnotation newLegAnnotation = NavigationHelper.createCurrentAnnotation(
+    CurrentLegAnnotation newLegAnnotation = NavigationHelper.INSTANCE.createCurrentAnnotation(
       currentLegAnnotation, routeLeg, 0
     );
 
@@ -54,7 +54,7 @@ public class NavigationHelperTest extends BaseTest {
     RouteProgress routeProgress = buildDistanceCongestionAnnotationRouteProgress(0, 0, 0, 0, 0);
     Double legDistanceRemaining = routeProgress.currentLeg().distance();
 
-    CurrentLegAnnotation newLegAnnotation = NavigationHelper.createCurrentAnnotation(
+    CurrentLegAnnotation newLegAnnotation = NavigationHelper.INSTANCE.createCurrentAnnotation(
       null, routeProgress.currentLeg(), legDistanceRemaining
     );
 
@@ -66,7 +66,7 @@ public class NavigationHelperTest extends BaseTest {
     RouteProgress routeProgress = buildDistanceCongestionAnnotationRouteProgress(0, 0, 0, 0, 0);
     Double legDistanceRemaining = routeProgress.currentLeg().distance() / 2;
 
-    CurrentLegAnnotation newLegAnnotation = NavigationHelper.createCurrentAnnotation(
+    CurrentLegAnnotation newLegAnnotation = NavigationHelper.INSTANCE.createCurrentAnnotation(
       null, routeProgress.currentLeg(), legDistanceRemaining
     );
 
@@ -85,7 +85,7 @@ public class NavigationHelperTest extends BaseTest {
       .index(0)
       .build();
 
-    CurrentLegAnnotation newLegAnnotation = NavigationHelper.createCurrentAnnotation(
+    CurrentLegAnnotation newLegAnnotation = NavigationHelper.INSTANCE.createCurrentAnnotation(
       currentLegAnnotation, routeProgress.currentLeg(), legDistanceRemaining
     );
 

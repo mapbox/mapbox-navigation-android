@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation;
 
+import androidx.annotation.Nullable;
+
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
@@ -15,12 +17,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressStat
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressStateMap;
 
 import java.util.List;
-
-import androidx.annotation.Nullable;
-
-import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.createCurrentAnnotation;
-import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.decodeStepPoints;
-import static com.mapbox.services.android.navigation.v5.internal.navigation.NavigationHelper.routeDistanceRemaining;
 
 class NavigationRouteProcessor {
 
@@ -38,7 +34,8 @@ class NavigationRouteProcessor {
   private CurrentLegAnnotation currentLegAnnotation;
   private Geometry routeGeometryWithBuffer;
 
-  RouteProgress buildNewRouteProgress(MapboxNavigator navigator, NavigationStatus status, DirectionsRoute route) {
+  RouteProgress buildNewRouteProgress(MapboxNavigator navigator, NavigationStatus status,
+                                      DirectionsRoute route) {
     previousStatus = status;
     updateRoute(route, navigator);
     return buildRouteProgressFrom(status, navigator);
@@ -73,11 +70,13 @@ class NavigationRouteProcessor {
     updateStepPoints(route, legIndex, stepIndex, upcomingStepIndex);
 
     double legDistanceRemaining = status.getRemainingLegDistance();
-    double routeDistanceRemaining = routeDistanceRemaining(legDistanceRemaining, legIndex, route);
+    double routeDistanceRemaining = NavigationHelper.routeDistanceRemaining(legDistanceRemaining,
+            legIndex, route);
     double stepDistanceRemaining = status.getRemainingStepDistance();
     double legDurationRemaining = status.getRemainingLegDuration() / ONE_SECOND_IN_MILLISECONDS;
 
-    currentLegAnnotation = createCurrentAnnotation(currentLegAnnotation, currentLeg, legDistanceRemaining);
+    currentLegAnnotation = NavigationHelper.createCurrentAnnotation(currentLegAnnotation,
+            currentLeg, legDistanceRemaining);
     RouteState routeState = status.getRouteState();
     RouteProgressState currentRouteState = progressStateMap.get(routeState);
 
@@ -113,9 +112,12 @@ class NavigationRouteProcessor {
     }
   }
 
-  private void updateStepPoints(DirectionsRoute route, int legIndex, int stepIndex, int upcomingStepIndex) {
-    currentStepPoints = decodeStepPoints(route, currentStepPoints, legIndex, stepIndex);
-    upcomingStepPoints = decodeStepPoints(route, null, legIndex, upcomingStepIndex);
+  private void updateStepPoints(DirectionsRoute route, int legIndex, int stepIndex,
+                                int upcomingStepIndex) {
+    currentStepPoints = NavigationHelper.decodeStepPoints(route, currentStepPoints,
+            legIndex, stepIndex);
+    upcomingStepPoints = NavigationHelper.decodeStepPoints(route, null,
+            legIndex, upcomingStepIndex);
   }
 
   private void addUpcomingStepPoints(RouteProgress.Builder progressBuilder) {
@@ -128,7 +130,8 @@ class NavigationRouteProcessor {
     progressBuilder.routeGeometryWithBuffer(routeGeometryWithBuffer);
   }
 
-  private void addVoiceInstructions(NavigationStatus status, RouteProgress.Builder progressBuilder) {
+  private void addVoiceInstructions(NavigationStatus status,
+                                    RouteProgress.Builder progressBuilder) {
     VoiceInstruction voiceInstruction = status.getVoiceInstruction();
     progressBuilder.voiceInstruction(voiceInstruction);
   }
