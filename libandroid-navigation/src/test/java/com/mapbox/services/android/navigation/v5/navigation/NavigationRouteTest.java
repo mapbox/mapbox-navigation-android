@@ -48,7 +48,7 @@ public class NavigationRouteTest extends BaseTest {
 
   @Test
   public void sanityTest() throws Exception {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+    NavigationRoute navigationRoute = NavigationRoute.builder(context)
       .accessToken(ACCESS_TOKEN)
       .origin(Point.fromLngLat(1.0, 2.0))
       .destination(Point.fromLngLat(1.0, 5.0))
@@ -58,7 +58,7 @@ public class NavigationRouteTest extends BaseTest {
 
   @Test
   public void changingDefaultValueToCustomWorksProperly() throws Exception {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+    NavigationRoute navigationRoute = NavigationRoute.builder(context)
       .accessToken(ACCESS_TOKEN)
       .origin(Point.fromLngLat(1.0, 2.0))
       .destination(Point.fromLngLat(1.0, 5.0))
@@ -71,7 +71,7 @@ public class NavigationRouteTest extends BaseTest {
 
   @Test
   public void addApproachesIncludedInRequest() {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+    NavigationRoute navigationRoute = NavigationRoute.builder(context)
       .accessToken(ACCESS_TOKEN)
       .origin(Point.fromLngLat(1.0, 2.0))
       .destination(Point.fromLngLat(1.0, 5.0))
@@ -85,7 +85,7 @@ public class NavigationRouteTest extends BaseTest {
 
   @Test
   public void checksWaypointIndicesIncludedInRequest() {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+    NavigationRoute navigationRoute = NavigationRoute.builder(context)
       .accessToken(ACCESS_TOKEN)
       .origin(Point.fromLngLat(1.0, 2.0))
       .addWaypoint(Point.fromLngLat(1.0, 3.0))
@@ -100,7 +100,7 @@ public class NavigationRouteTest extends BaseTest {
 
   @Test
   public void addWaypointNamesIncludedInRequest() {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+    NavigationRoute navigationRoute = NavigationRoute.builder(context)
       .accessToken(ACCESS_TOKEN)
       .origin(Point.fromLngLat(1.0, 2.0))
       .destination(Point.fromLngLat(1.0, 5.0))
@@ -114,7 +114,7 @@ public class NavigationRouteTest extends BaseTest {
 
   @Test
   public void addWaypointTargetsIncludedInRequest() {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+    NavigationRoute navigationRoute = NavigationRoute.builder(context)
       .accessToken(ACCESS_TOKEN)
       .origin(Point.fromLngLat(1.0, 2.0))
       .destination(Point.fromLngLat(1.0, 5.0))
@@ -127,7 +127,7 @@ public class NavigationRouteTest extends BaseTest {
 
   @Test
   public void reverseOriginDestination_bearingsAreFormattedCorrectly() {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+    NavigationRoute navigationRoute = NavigationRoute.builder(context)
       .accessToken(ACCESS_TOKEN)
       .destination(Point.fromLngLat(1.0, 5.0), 1d, 5d)
       .origin(Point.fromLngLat(1.0, 2.0), 90d, 90d)
@@ -140,7 +140,7 @@ public class NavigationRouteTest extends BaseTest {
 
   @Test
   public void addWaypointsThenOriginDestination_bearingsAreFormattedCorrectly() {
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+    NavigationRoute navigationRoute = NavigationRoute.builder(context)
       .accessToken(ACCESS_TOKEN)
       .addWaypoint(Point.fromLngLat(3.0, 4.0), 20d, 20d)
       .addWaypoint(Point.fromLngLat(5.0, 6.0), 30d, 30d)
@@ -178,7 +178,7 @@ public class NavigationRouteTest extends BaseTest {
       .walkingOptions(WalkingOptions.builder().alleyBias(0.6).walkwayBias(0.7).walkingSpeed(1.0).build())
       .build();
 
-    NavigationRoute navigationRoute = NavigationRoute.builder(context, localeUtils)
+    NavigationRoute navigationRoute = NavigationRoute.builder(context)
       .origin(coordinates.get(0))
       .addWaypoint(coordinates.get(1))
       .destination(coordinates.get(2))

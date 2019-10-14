@@ -45,6 +45,8 @@ import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
+import com.mapbox.services.android.navigation.v5.internal.utils.ValidationUtils;
+import timber.log.Timber;
 
 import org.jetbrains.annotations.NotNull;
 
