@@ -16,20 +16,17 @@ data class RouteInformation(
      * and it will be null if the [RouteInformation] is generated from an update to route
      * progress or from an orientation change.
      * @return current route
-     * @since 0.10.0
      */
     val route: DirectionsRoute?,
     /**
      * The user's current location along the route. This value will update when orientation changes
      * occur as well as when progress along a route changes.
      * @return current location
-     * @since 0.10.0
      */
     val location: Location?,
     /**
      * The user's current progress along the route.
      * @return current progress along the route.
-     * @since 0.10.0
      */
     val routeProgress: RouteProgress?
 )
