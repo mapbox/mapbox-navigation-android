@@ -10,7 +10,6 @@ enum class DirectionsRouteType {
      * [MapboxNavigation.startNavigation].  This value
      * should be used in off-route scenarios or any other scenario when you need a completely new route object.
      *
-     *
      * Please note, this is the default value for [MapboxNavigation.startNavigation].
      */
     NEW_ROUTE,
