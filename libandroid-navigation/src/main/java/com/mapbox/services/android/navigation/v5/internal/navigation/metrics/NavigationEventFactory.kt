@@ -52,9 +52,9 @@ internal object NavigationEventFactory {
     ): NavigationRerouteEvent =
         NavigationRerouteEvent(phoneState, rerouteEvent, metricProgress).apply {
             setEvent(sessionState, metricProgress, location, sdkIdentifier, this)
-            locationsBefore = convertToArray(sessionState.beforeEventLocations())
-            locationsAfter = convertToArray(sessionState.afterEventLocations())
-            secondsSinceLastReroute = sessionState.secondsSinceLastReroute()
+            locationsBefore = convertToArray(sessionState.beforeEventLocations)
+            locationsAfter = convertToArray(sessionState.afterEventLocations)
+            secondsSinceLastReroute = sessionState.secondsSinceLastReroute
         }
 
     fun buildNavigationFeedbackEvent(
@@ -70,8 +70,8 @@ internal object NavigationEventFactory {
     ): NavigationFeedbackEvent =
         NavigationFeedbackEvent(phoneState, metricProgress).apply {
             setEvent(sessionState, metricProgress, location, sdkIdentifier, this)
-            locationsBefore = convertToArray(sessionState.beforeEventLocations())
-            locationsAfter = convertToArray(sessionState.afterEventLocations())
+            locationsBefore = convertToArray(sessionState.beforeEventLocations)
+            locationsAfter = convertToArray(sessionState.afterEventLocations)
             description = feedbackDescription
             feedbackType = type
             screenshot = feedbackScreenshot
@@ -88,7 +88,7 @@ internal object NavigationEventFactory {
         navigationEvent.absoluteDistanceToDestination =
             DistanceFormatter.calculateAbsoluteDistance(location, metricProgress)
         navigationEvent.distanceCompleted =
-            (sessionState.eventRouteDistanceCompleted() + metricProgress.distanceTraveled).toInt()
+            (sessionState.eventRouteDistanceCompleted + metricProgress.distanceTraveled).toInt()
         navigationEvent.distanceRemaining = metricProgress.distanceRemaining
         navigationEvent.durationRemaining = metricProgress.durationRemaining
         navigationEvent.profile = metricProgress.directionsRouteProfile
@@ -101,35 +101,35 @@ internal object NavigationEventFactory {
         navigationEvent.startTimestamp = obtainStartTimestamp(sessionState)
         navigationEvent.eventVersion = EVENT_VERSION
         navigationEvent.sdkIdentifier = sdkIdentifier
-        navigationEvent.sessionIdentifier = sessionState.sessionIdentifier()
+        navigationEvent.sessionIdentifier = sessionState.sessionIdentifier
         navigationEvent.lat = location.latitude
         navigationEvent.lng = location.longitude
         navigationEvent.geometry = sessionState.currentGeometry()
-        navigationEvent.simulation = sessionState.mockLocation()
-        navigationEvent.locationEngine = sessionState.locationEngineName()
-        navigationEvent.tripIdentifier = sessionState.tripIdentifier()
-        navigationEvent.rerouteCount = sessionState.rerouteCount()
-        navigationEvent.originalRequestIdentifier = sessionState.originalRequestIdentifier()
-        navigationEvent.requestIdentifier = sessionState.requestIdentifier()
+        navigationEvent.simulation = sessionState.mockLocation
+        navigationEvent.locationEngine = sessionState.locationEngineName
+        navigationEvent.tripIdentifier = sessionState.tripIdentifier
+        navigationEvent.rerouteCount = sessionState.rerouteCount
+        navigationEvent.originalRequestIdentifier = sessionState.originalRequestIdentifier
+        navigationEvent.requestIdentifier = sessionState.requestIdentifier
         navigationEvent.originalGeometry = sessionState.originalGeometry()
         navigationEvent.originalEstimatedDistance = sessionState.originalDistance()
         navigationEvent.originalEstimatedDuration = sessionState.originalDuration()
         navigationEvent.originalStepCount = sessionState.originalStepCount()
-        navigationEvent.percentTimeInForeground = sessionState.percentInForeground()
-        navigationEvent.percentTimeInPortrait = sessionState.percentInPortrait()
+        navigationEvent.percentTimeInForeground = sessionState.percentInForeground
+        navigationEvent.percentTimeInPortrait = sessionState.percentInPortrait
         navigationEvent.totalStepCount = sessionState.currentStepCount()
     }
 
     private fun obtainStartTimestamp(sessionState: SessionState): String {
-        val date: Date = ifNonNull(sessionState.startTimestamp()) {
-            sessionState.startTimestamp()
+        val date: Date = ifNonNull(sessionState.startTimestamp) {
+            sessionState.startTimestamp
         } ?: Date()
         return TelemetryUtils.generateCreateDateFormatted(date)
     }
 
     private fun obtainArriveTimestamp(sessionState: SessionState): String {
-        val date: Date = ifNonNull(sessionState.arrivalTimestamp()) {
-            sessionState.arrivalTimestamp()
+        val date: Date = ifNonNull(sessionState.arrivalTimestamp) {
+            sessionState.arrivalTimestamp
         } ?: Date()
         return TelemetryUtils.generateCreateDateFormatted(date)
     }
