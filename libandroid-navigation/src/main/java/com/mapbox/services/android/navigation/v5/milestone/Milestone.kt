@@ -8,9 +8,8 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
  *
  * @since 0.4.0
  */
-abstract class Milestone
 // Public exposed for creation of milestone classes outside SDK
-constructor(private val builder: Builder) {
+abstract class Milestone(private val builder: Builder) {
 
     /**
      * Milestone specific identifier as an `int` value, useful for deciphering which milestone
