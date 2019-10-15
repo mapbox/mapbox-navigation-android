@@ -110,7 +110,7 @@ internal class RouteProcessorRunnable(
     private fun isUserOffRoute(
         options: MapboxNavigationOptions,
         status: NavigationStatus,
-        rawLocation: Location?,
+        rawLocation: Location,
         routeProgress: RouteProgress,
         engineFactory: NavigationEngineFactory
     ): Boolean {
