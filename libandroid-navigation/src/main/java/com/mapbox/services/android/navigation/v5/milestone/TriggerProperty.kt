@@ -80,10 +80,6 @@ object TriggerProperty {
                 arrayOf(routeProgress.currentLegProgress().currentStep().distance())
             )
             put(
-                STEP_DISTANCE_TOTAL_METERS,
-                arrayOf(routeProgress.currentLegProgress().currentStep().distance())
-            )
-            put(
                 STEP_DURATION_TOTAL_SECONDS,
                 arrayOf(routeProgress.currentLegProgress().currentStep().duration())
             )

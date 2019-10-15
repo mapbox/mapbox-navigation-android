@@ -29,9 +29,7 @@ internal object NavigationHelper {
         routeProgress: RouteProgress,
         milestone: Milestone
     ): String =
-        milestone.instruction?.let {
-            milestone.instruction.buildInstruction(routeProgress)
-        } ?: EMPTY_STRING
+        milestone.instruction?.buildInstruction(routeProgress) ?: EMPTY_STRING
 
     /**
      * Takes in the leg distance remaining value already calculated and if additional legs need to be
