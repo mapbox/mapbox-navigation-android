@@ -26,6 +26,7 @@ public class VoiceInstructionMilestoneTest {
   public void onSameInstructionOccurring_milestoneDoesNotTriggerTwice() {
     RouteProgress firstProgress = mock(RouteProgress.class);
     VoiceInstruction voiceInstruction = mock(VoiceInstruction.class);
+    when(voiceInstruction.getSsmlAnnouncement()).thenReturn("current SSML announcement");
     when(firstProgress.voiceInstruction()).thenReturn(voiceInstruction, null);
     when(voiceInstruction.getAnnouncement()).thenReturn("instruction");
     when(firstProgress.directionsRoute()).thenReturn(mock(DirectionsRoute.class));
