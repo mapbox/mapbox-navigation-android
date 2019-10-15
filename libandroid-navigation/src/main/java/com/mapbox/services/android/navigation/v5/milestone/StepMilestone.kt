@@ -10,7 +10,8 @@ import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
  *
  * @since 0.4.0
  */
-class StepMilestone private constructor(
+class StepMilestone
+private constructor(
     private val builder: Builder
 ) : Milestone(builder) {
 

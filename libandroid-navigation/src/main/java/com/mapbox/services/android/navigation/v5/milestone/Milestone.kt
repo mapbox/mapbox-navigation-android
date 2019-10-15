@@ -59,8 +59,6 @@ constructor(private val builder: Builder) {
         private var identifier: Int = 0
         private var instruction: Instruction? = null
 
-        // internal abstract val trigger: Trigger.Statement?
-
         /**
          * Milestone specific identifier as an `int` value, useful for deciphering which milestone
          * invoked [MilestoneEventListener.onMilestoneEvent].

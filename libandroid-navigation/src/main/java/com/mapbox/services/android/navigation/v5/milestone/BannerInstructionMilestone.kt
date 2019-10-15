@@ -15,7 +15,8 @@ import java.util.ArrayList
  * Please note, this milestone has a custom trigger based on location progress along a route.  If you
  * set custom triggers, they will be ignored in favor of this logic.
  */
-class BannerInstructionMilestone private constructor(
+class BannerInstructionMilestone
+private constructor(
     builder: Builder
 ) : Milestone(builder) {
 
