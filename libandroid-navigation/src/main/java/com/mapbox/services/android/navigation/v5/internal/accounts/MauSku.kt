@@ -13,7 +13,7 @@ internal class MauSku(
     companion object {
         private const val MAPBOX_NAV_PREFERENCE_MAU_SKU = "com.mapbox.navigationsdk.accounts.mau.sku"
         private const val MAPBOX_NAV_PREFERENCES_USER_ID = "com.mapbox.navigationsdk.accounts.mau.userid"
-        private const val MAPBOX_NAV_PREFERENCE_MAU_TIMESTAMP = "com.mapbox.navigationsdk.accounts.trips.time"
+        private const val MAPBOX_NAV_PREFERENCE_MAU_TIMESTAMP = "com.mapbox.navigationsdk.accounts.mau.time"
         private const val MAPBOX_MAP_PREFERENCE_SKU = "com.mapbox.mapboxsdk.accounts.skutoken"
         private const val DEFAULT_TOKEN_TIMER = 0L
     }
